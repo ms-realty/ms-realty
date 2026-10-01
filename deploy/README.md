@@ -56,10 +56,13 @@ checks platform and OCI revision, and records Dockerfile/dependency/artifact pin
 that immutable subject. No production promotion may rebuild or substitute a tag. The signed
 controller acceptance must pin that provenance and the exact route/media/input artifacts.
 
-Migration persists a digest-bound receipt before starting and uses the existing database advisory
-lock. Only normal exit with code 0 produces a passed receipt. Running, failed or unknown
-operations require operator reconciliation; they are not blindly replayed. Queue/web start only
-after that digest's migration passed. Queue activity is renewed and a scheduled event restarts it
+Migration persists a source/build-nonce/operation receipt before starting and uses the existing
+database advisory lock. Only explicit process completion matching all three identities produces
+a completed receipt. A Container stop, including SDK-synthesized exit 0, is not completion proof.
+The configured image digest remains labelled unqualified until separate provider observation
+verifies the actual three image/rollout/actor identities. Running, failed or unknown operations
+require operator reconciliation; they are not blindly replayed. Queue/web start only after that
+migration completes. Queue activity is renewed and a scheduled event restarts it
 after an exit. Real dequeued heartbeat, crash recovery, delivery and capacity remain qualification
 work; startup or `/api/health` proves less. Bootstrap is a separate reviewed operation.
 
@@ -89,9 +92,12 @@ contain its own hash; an existing different source pin is rejected.
   require review; the preflight does not mutate existing routes.
 - Actual legacy PostgreSQL is **16.14**, privately bound inside Docker on the existing host.
   No staging database exists; port 5432 is not public. Supply a separate staging database,
-  three distinct reviewed roles, private host/TLS route and pinned successful connectivity
-  evidence **from Cloudflare Containers**, with `verify-full` and no public Postgres. This
-  repository does not invent a Hyperdrive, tunnel, D1 or database architecture.
+  three distinct reviewed roles and a private host/TLS route. The prepared
+  [Access TCP profile](cloudflare-private-postgres.md) uses a separate TLS staging service and
+  origin Tunnel connector, plus the pinned client companion in every role image. It requires
+  a separately pinned actual origin isolation inspection. The first deployment remains in a
+  protected connectivity-only phase until actual SQL/TLS measurements **from Cloudflare
+  Containers** pass; no bootstrap PASS is supplied by the builder.
   Workers Hyperdrive/VPC bindings cannot be consumed directly by the native Node PostgreSQL
   client inside a Container; binding access via outbound interception covers HTTP. The
   permitted Containers fallback therefore still needs independently proven private database
@@ -117,10 +123,12 @@ contain its own hash; an existing different source pin is rejected.
   independently recorded `STAGING_CLOUDFLARE_TOKEN_SHA256` variable and environment-only
   `STAGING_ENVIRONMENT_TOKEN_SENTINEL` secret. The guard rejects a different fallback token.
 
-The connectivity report is JSON with `status: PASS`, `database`, `engineVersion: 16.14`,
+The measured connectivity report is JSON with `status: PASS`, `database`, `engineVersion: 16.14`,
 `tlsVerification: verify-full`, `from: cloudflare-containers`, and `exposesPublicPostgres: false`.
-Its bytes are pinned. These are actual operator measurement requirements, not a template that a
-builder may fill with an invented PASS. Runtime independently checks reviewed database name,
+Its bytes, source, image, role sessions and independent origin-inspection hash are pinned.
+`staging-connectivity.mjs` obtains the real protected measurements after the diagnostic deploy.
+A socket listener, configured image digest, local fixture or operator-entered PASS is insufficient.
+Runtime independently checks reviewed database name,
 host and role before connecting. Role privileges and credential scope need actual operator review.
 
 ## Gateway, origin and public media
@@ -194,8 +202,11 @@ its environment it requires repository flags `STAGING_ENVIRONMENT_CONFIGURED=tru
 `STAGING_REVIEWED_RUNTIME=containers`. No flags are enabled here. That SHA must already have
 integrated source/runtime checks, PG16.14 qualification and controller review. The workflow
 validates inputs and fresh read-only provider preconditions before writes, builds once,
-pins/attests D, rechecks prerequisites, deploys only staging routes, supplies isolated secrets
-and starts digest-bound migration. Candidate/provenance artifacts do not imply parity PASS.
+pins/attests D, rechecks prerequisites and deploys only staging routes in diagnostic mode. It
+supplies isolated secrets, observes the actual three role images and measures both SQL drivers
+for every prepared role. Only then does it release the same D and explicitly migrate. Errors
+leave the adapter held; available candidate/provenance/connectivity evidence is retained even
+on Actions failure. These artifacts do not imply independent parity PASS.
 
 The workflow uses canonical `vars.CLOUDFLARE_ACCOUNT_ID` and `secrets.CLOUDFLARE_API_TOKEN` from
 the protected staging environment. Its token fingerprint/sentinel guard runs before provider

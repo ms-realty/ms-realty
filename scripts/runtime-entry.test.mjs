@@ -17,6 +17,39 @@ const image = {
   buildNonce: "12345678-1234-4321-9876-123456789abc",
 };
 const operationId = "12345678-5678-4321-9876-123456789abc";
+test("private database diagnostics cannot import or start any runtime role", async (t) => {
+  let executions = 0,
+    probes = 0;
+  const runtime = roleRuntime("web", image, async () => {
+    executions++;
+  });
+  const server = identityServer(runtime, "web", async () => {
+    probes++;
+    return { status: "PASS" };
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(
+    () =>
+      new Promise((resolve) => {
+        server.closeAllConnections();
+        server.close(resolve);
+      }),
+  );
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/connectivity`, {
+    method: "POST",
+  });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).state, "prepared");
+  assert.equal(probes, 1);
+  assert.equal(executions, 0);
+  runtime.fail();
+  assert.equal(
+    (await fetch(`http://127.0.0.1:${server.address().port}/connectivity`, { method: "POST" }))
+      .status,
+    503,
+  );
+  assert.equal(probes, 1);
+});
 test("Worker configuration cannot replace the fixed image identity", () => {
   assert.equal(
     imageIdentity(JSON.stringify(image), image.sourceCommit).sourceCommit,

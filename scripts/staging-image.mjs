@@ -6,7 +6,8 @@ import { accountId, readStagingInputs, sha256, validateStaging } from "./staging
 const [path, tag, output] = process.argv.slice(2);
 try {
   const { input, artifacts } = await readStagingInputs(path);
-  validateStaging(input, artifacts, undefined, { imageRequired: false });
+  const connectivityProbe = process.argv.includes("--connectivity-probe");
+  validateStaging(input, artifacts, undefined, { imageRequired: false, connectivityProbe });
   const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   if (head !== input.sourceCommit || tag !== `ms-realty-staging:${head}`)
     throw new Error("Image tag/source commit mismatch");
@@ -25,7 +26,7 @@ try {
   )
     throw new Error("Pushed immutable image/revision/platform could not be verified");
   input.image = image;
-  validateStaging(input, artifacts);
+  validateStaging(input, artifacts, undefined, { connectivityProbe });
   await writeFile(output, `${JSON.stringify(input, null, 2)}\n`);
   const provenance = {
     purpose: input.purpose,

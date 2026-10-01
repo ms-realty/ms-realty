@@ -2,21 +2,24 @@ import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import {
   readStagingInputs,
-  requiredSecrets,
   stagingConfig,
+  stagingRequiredSecrets,
   validateStaging,
 } from "./staging-config.mjs";
 
 try {
   const [inputPath, configPath] = process.argv.slice(2);
   const { input, artifacts } = await readStagingInputs(inputPath);
-  validateStaging(input, artifacts, process.env);
+  const connectivityProbe = process.argv.includes("--connectivity-probe");
+  validateStaging(input, artifacts, process.env, { connectivityProbe });
   if (
     JSON.stringify(JSON.parse(await readFile(configPath, "utf8"))) !==
-    JSON.stringify(stagingConfig(input, artifacts))
+    JSON.stringify(stagingConfig(input, artifacts, { connectivityProbe }))
   )
     throw new Error("Secret target differs from the validated staging-only config");
-  const supplied = Object.fromEntries(requiredSecrets.map((name) => [name, process.env[name]]));
+  const supplied = Object.fromEntries(
+    stagingRequiredSecrets(input).map((name) => [name, process.env[name]]),
+  );
   const result = spawnSync(
     "gateway/node_modules/.bin/wrangler",
     ["secret", "bulk", "--config", configPath],

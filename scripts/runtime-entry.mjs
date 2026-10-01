@@ -136,7 +136,7 @@ export function roleRuntime(role, image, execute) {
   };
 }
 
-export function identityServer(runtime, role) {
+export function identityServer(runtime, role, probeDatabase) {
   return createServer(async (request, response) => {
     response.setHeader("Content-Type", "application/json");
     response.setHeader("Cache-Control", "no-store");
@@ -146,7 +146,16 @@ export function identityServer(runtime, role) {
     };
     if (request.method === "GET" && request.url === "/identity")
       return reply(200, runtime.identity());
-    if (request.method !== "POST" || request.url !== "/start" || role === "web")
+    if (request.method === "POST" && request.url === "/connectivity") {
+      if (!probeDatabase || runtime.identity().state === "failed")
+        return reply(503, { code: "connectivity_unavailable" });
+      try {
+        return reply(200, { ...runtime.identity(), connection: await probeDatabase() });
+      } catch {
+        return reply(503, { code: "connectivity_unverified" });
+      }
+    }
+    if (request.method !== "POST" || request.url !== "/start")
       return reply(405, { code: "method_not_allowed" });
     try {
       let bytes = 0;
@@ -214,7 +223,11 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     if (startup.signal.aborted) throw new Error("Staging role startup interrupted");
     delete process.env.TUNNEL_SERVICE_TOKEN_ID;
     delete process.env.TUNNEL_SERVICE_TOKEN_SECRET;
+    const { probeStagingDatabase } = await import(
+      pathToFileURL("/app/dist-runtime/connectivity.mjs").href
+    );
     runtime = roleRuntime(role, image, async () => {
+      await probeStagingDatabase(process.env);
       if (role === "web") await import(pathToFileURL("/app/server.js").href);
       else if (role === "worker") await import(pathToFileURL("/app/dist-runtime/worker.mjs").href);
       else {
@@ -223,9 +236,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
         await runMigrations(process.env.DATABASE_URL);
       }
     });
-    server = identityServer(runtime, role);
+    server = identityServer(runtime, role, () => probeStagingDatabase(process.env));
     server.listen(3001, "0.0.0.0");
-    if (role === "web") await runtime.start();
+    if (role === "web" && process.env.RUNTIME_DEFER_WEB_START !== "true") await runtime.start();
   } catch {
     terminate();
     console.error("Runtime identity/startup unavailable; source qualification remains closed");

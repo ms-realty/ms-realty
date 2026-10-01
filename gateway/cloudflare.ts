@@ -12,6 +12,7 @@ import {
   runtimeProof,
 } from "./runtime-proof";
 import { stagingArtifacts } from "./staging-artifacts.generated";
+import { stagingWorkAllowed } from "./staging-phase";
 import { type GatewayEnv, gateway } from "./worker";
 
 interface StagingEnv
@@ -33,6 +34,16 @@ class StagingRoleContainer extends Container<StagingEnv> {
   async identity() {
     await this.startAndWaitForPorts([3001]);
     return { ...(await this.readIdentity()), actorId: this.ctx.id.toString() };
+  }
+  async connectivity() {
+    const identity = await this.identity();
+    const response = await this.containerFetch(
+      "http://runtime/connectivity",
+      { method: "POST" },
+      3001,
+    );
+    if (!response.ok) throw new Error("Actual private TLS connectivity is unavailable");
+    return { identity, proof: await response.json() };
   }
   protected async readIdentity() {
     const response = await this.containerFetch("http://runtime/identity", { method: "GET" }, 3001);
@@ -58,6 +69,12 @@ export class MsRealtyContainer extends StagingRoleContainer {
   sleepAfter = "20m";
   envVars = runtimeEnvironment(this.env, "web");
   entrypoint = ["node", "runtime-entry.mjs", "web"];
+  async startWeb() {
+    const proof = await this.identity();
+    if (proof.state !== "prepared" && proof.state !== "running")
+      throw new Error("Web process requires reconciliation");
+    await this.startRole();
+  }
 }
 export class MsRealtyWorkerContainer extends StagingRoleContainer {
   protected role: RuntimeRole = "worker";
@@ -176,6 +193,21 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
     url.origin !== env.STAFF_ORIGIN
   )
     return new Response(null, { status: 404 });
+  if (url.pathname === "/__staging/connectivity") {
+    if (!(await authenticated(request, env.STAGING_CONTROL_SECRET)))
+      return new Response(null, { status: 403 });
+    if (request.method !== "POST") return new Response(null, { status: 405 });
+    if (env.STAGING_CONNECTIVITY_ONLY !== "true") return new Response(null, { status: 409 });
+    const [web, worker, migration] = await Promise.all([
+      env.MS_REALTY.getByName("web").connectivity(),
+      env.MS_REALTY_WORKER.getByName("queue").connectivity(),
+      migrator(env).connectivity(),
+    ]);
+    return Response.json({ schemaVersion: 1, roles: { web, worker, migrator: migration } });
+  }
+  // During the first deploy only the authenticated, read-only diagnostic controls exist.
+  if (!stagingWorkAllowed(env.STAGING_CONNECTIVITY_ONLY) && url.pathname !== "/__staging/runtime")
+    return new Response(null, { status: 503 });
   if (url.pathname === "/__staging/email") {
     if (!(await authenticated(request, env.EMAIL_RELAY_SECRET)))
       return new Response(null, { status: 403 });
@@ -209,6 +241,7 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
   }
   if (!(await migrated(env))) return new Response(null, { status: 503 });
   await env.MS_REALTY_WORKER.getByName("queue").startQueue();
+  await env.MS_REALTY.getByName("web").startWeb();
   return gateway(
     request,
     {
@@ -234,6 +267,7 @@ export default {
   async scheduled(_event: ScheduledController, env: StagingEnv) {
     if (
       env.STAGING === "true" &&
+      stagingWorkAllowed(env.STAGING_CONNECTIVITY_ONLY) &&
       !stagingArtifacts.fixture &&
       stagingArtifacts.sourceCommit === env.BUILD_SHA &&
       (await migrated(env))

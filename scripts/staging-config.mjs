@@ -1,7 +1,8 @@
-import { createHash } from "node:crypto";
+import { createHash, X509Certificate } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateConnectionProof } from "./staging-connection-proof.mjs";
 
 export const launchBase = "e23d17b1ce71fce694e823643ea94a7440dd4912";
 export const accountId = "921d0224dcd595c87b7928d2b3c479d1";
@@ -33,11 +34,17 @@ export const requiredSecrets = [
   "R2_SECRET_ACCESS_KEY",
 ];
 
+export function stagingRequiredSecrets(input) {
+  return input.database?.transport === "cloudflared-access-tcp"
+    ? [...requiredSecrets, "DATABASE_TLS_CA_PEM", "TUNNEL_SERVICE_TOKEN_SECRET"]
+    : requiredSecrets;
+}
+
 export function validateStaging(
   input,
   artifacts,
   runtime = undefined,
-  { imageRequired = true } = {},
+  { imageRequired = true, connectivityProbe = false } = {},
 ) {
   demand(
     input?.schemaVersion === 1 && input.environment === "staging" && input.runtime === "containers",
@@ -105,20 +112,66 @@ export function validateStaging(
     "three reviewed staging database roles",
   );
   demand(
-    pin(input.database.privateConnectivitySha256) &&
-      sha256(artifacts.connectivity ?? "") === input.database.privateConnectivitySha256,
-    "private database connectivity evidence",
+    ["direct", "cloudflared-access-tcp"].includes(input.database.transport),
+    "explicit reviewed database transport",
   );
-  const network = JSON.parse(artifacts.connectivity);
+  if (input.database.transport === "cloudflared-access-tcp")
+    demand(
+      /(?:^|\.)(?:stage|staging)(?:\.|$)/.test(input.database.stagingHost) &&
+        !knownHosts.includes(input.database.stagingHost) &&
+        id(input.database.access?.applicationId) &&
+        pin(input.database.access?.audience) &&
+        id(input.database.access?.serviceTokenId) &&
+        typeof input.database.access?.serviceClientId === "string" &&
+        /^[A-Za-z0-9_-]+\.access$/.test(input.database.access.serviceClientId) &&
+        input.database.access.serviceTokenId !== input.access.serviceTokenId &&
+        input.database.access.serviceClientId !== input.access.serviceClientId,
+      "separate staging database Access application and service token",
+    );
   demand(
-    network.status === "PASS" &&
-      network.database === input.database.stagingName &&
-      network.engineVersion === "16.14" &&
-      network.tlsVerification === "verify-full" &&
-      network.from === "cloudflare-containers" &&
-      network.exposesPublicPostgres === false,
-    "actual private TLS connection from Containers",
+    pin(input.database.originIsolationSha256) &&
+      sha256(artifacts.isolation ?? "") === input.database.originIsolationSha256,
+    "pinned origin isolation inspection",
   );
+  const isolation = JSON.parse(artifacts.isolation);
+  demand(
+    isolation.status === "PASS" &&
+      isolation.from === "origin-read-only-inspection" &&
+      isolation.environment === "staging" &&
+      isolation.database === input.database.stagingName &&
+      isolation.engineVersion === "16.14" &&
+      isolation.exposesPublicPostgres === false &&
+      isolation.productionChanged === false &&
+      typeof isolation.inspectedAt === "string" &&
+      Number.isFinite(Date.parse(isolation.inspectedAt)),
+    "actual isolated PostgreSQL origin inspection",
+  );
+  if (!connectivityProbe) {
+    demand(
+      pin(input.database.privateConnectivitySha256) &&
+        sha256(artifacts.connectivity ?? "") === input.database.privateConnectivitySha256,
+      "private database connectivity evidence",
+    );
+    const network = JSON.parse(artifacts.connectivity);
+    demand(
+      network.status === "PASS" &&
+        network.database === input.database.stagingName &&
+        network.engineVersion === "16.14" &&
+        network.transport === input.database.transport &&
+        network.tlsVerification === "verify-full" &&
+        network.from === "cloudflare-containers" &&
+        network.exposesPublicPostgres === false,
+      "actual private TLS connection from Containers",
+    );
+    demand(
+      network.schemaVersion === 2 &&
+        network.sourceCommit === input.sourceCommit &&
+        network.image === input.image &&
+        network.originIsolationSha256 === input.database.originIsolationSha256,
+      "connection proof bound to source, immutable image and origin isolation",
+    );
+    validateConnectionProof(input, network.runtime, network.connections);
+  }
   const buckets = input.buckets;
   demand(
     buckets?.productionMedia === "ms-realty-media" &&
@@ -292,7 +345,7 @@ export function validateStaging(
     "untouched WordPress rollback retained for 90 days",
   );
   if (runtime) {
-    for (const name of requiredSecrets)
+    for (const name of stagingRequiredSecrets(input))
       demand(
         typeof runtime[name] === "string" &&
           runtime[name].length > 0 &&
@@ -307,6 +360,24 @@ export function validateStaging(
       "ACCESS_SERVICE_CLIENT_SECRET",
     ])
       demand(runtime[name].length >= 32, `${name} strength`);
+    if (input.database.transport === "cloudflared-access-tcp") {
+      demand(runtime.TUNNEL_SERVICE_TOKEN_SECRET.length >= 32, "database Access token strength");
+      try {
+        const pem = runtime.DATABASE_TLS_CA_PEM.trim();
+        demand(
+          /^-----BEGIN CERTIFICATE-----[\s\S]+-----END CERTIFICATE-----$/.test(pem) &&
+            (pem.match(/-----BEGIN CERTIFICATE-----/g) ?? []).length === 1,
+          "one staging database CA certificate",
+        );
+        const ca = new X509Certificate(pem);
+        demand(
+          ca.ca && Date.parse(ca.validFrom) <= Date.now() && Date.parse(ca.validTo) > Date.now(),
+          "valid staging database CA certificate",
+        );
+      } catch {
+        fail("valid staging database CA certificate");
+      }
+    }
     const roles = ["WEB_DATABASE_URL", "WORKER_DATABASE_URL", "MIGRATOR_DATABASE_URL"].map(
       (name, index) => {
         let url;
@@ -320,6 +391,9 @@ export function validateStaging(
             url.pathname.slice(1) === input.database.stagingName &&
             url.hostname === input.database.stagingHost &&
             url.searchParams.get("sslmode") === "verify-full" &&
+            (input.database.transport !== "cloudflared-access-tcp" ||
+              (url.searchParams.getAll("sslmode").length === 1 &&
+                [...url.searchParams.keys()].every((key) => key === "sslmode"))) &&
             url.username === input.database.roles[["web", "worker", "migrator"][index]] &&
             url.password,
           name,
@@ -336,8 +410,8 @@ export function validateStaging(
   return input;
 }
 
-export function stagingConfig(input, artifacts) {
-  validateStaging(input, artifacts);
+export function stagingConfig(input, artifacts, { connectivityProbe = false } = {}) {
+  validateStaging(input, artifacts, undefined, { connectivityProbe });
   const imageDigest = input.image.split("@")[1];
   const config = {
     $schema: "../gateway/node_modules/wrangler/config-schema.json",
@@ -391,10 +465,19 @@ export function stagingConfig(input, artifacts) {
     ],
     vars: {
       STAGING: "true",
+      STAGING_CONNECTIVITY_ONLY: connectivityProbe ? "true" : "false",
       IMAGE_DIGEST: imageDigest,
       BUILD_SHA: input.sourceCommit,
       STAGING_DATABASE_NAME: input.database.stagingName,
       STAGING_DATABASE_HOST: input.database.stagingHost,
+      DATABASE_TRANSPORT: input.database.transport,
+      ...(input.database.transport === "cloudflared-access-tcp"
+        ? {
+            TUNNEL_SERVICE_HOSTNAME: input.database.stagingHost,
+            TUNNEL_SERVICE_URL: "127.0.0.1:15432",
+            TUNNEL_SERVICE_TOKEN_ID: input.database.access.serviceClientId,
+          }
+        : {}),
       STAGING_WEB_DATABASE_ROLE: input.database.roles.web,
       STAGING_WORKER_DATABASE_ROLE: input.database.roles.worker,
       STAGING_MIGRATOR_DATABASE_ROLE: input.database.roles.migrator,
@@ -442,13 +525,16 @@ export async function readStagingInputs(path, root = process.cwd()) {
     );
     return readFile(resolve(root, name), "utf8");
   };
-  const [routes, manifest, media, connectivity] = await Promise.all([
+  const [routes, manifest, media, connectivity, isolation] = await Promise.all([
     local(input.artifacts?.routes),
     local(input.artifacts?.routeManifest),
     local(input.artifacts?.media),
-    local(input.database?.privateConnectivityReport),
+    input.database?.privateConnectivityReport == null
+      ? ""
+      : local(input.database.privateConnectivityReport),
+    local(input.database?.originIsolationReport),
   ]);
-  return { input, artifacts: { routes, manifest, media, connectivity } };
+  return { input, artifacts: { routes, manifest, media, connectivity, isolation } };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
@@ -457,7 +543,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       input,
       artifacts,
       process.argv.includes("--require-secrets") ? process.env : undefined,
-      { imageRequired: !process.argv.includes("--before-image") },
+      {
+        imageRequired: !process.argv.includes("--before-image"),
+        connectivityProbe: process.argv.includes("--connectivity-probe"),
+      },
     );
     const output = process.argv[3];
     if (output && !output.startsWith("--")) {
@@ -465,7 +554,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         dirname(resolve(output)) === resolve("deploy") && output.endsWith(".generated.json"),
         "generated config destination",
       );
-      await writeFile(output, `${JSON.stringify(stagingConfig(input, artifacts), null, 2)}\n`);
+      await writeFile(
+        output,
+        `${JSON.stringify(stagingConfig(input, artifacts, { connectivityProbe: process.argv.includes("--connectivity-probe") }), null, 2)}\n`,
+      );
       // Workers limits each variable to 5 KB. Preserve large artifact bytes in the bundled
       // immutable module instead; the corresponding SHA bindings still validate every read.
       const payload = {

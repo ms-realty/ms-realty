@@ -8,11 +8,17 @@ import {
   launchBase,
   sha256,
   stagingConfig,
+  stagingRequiredSecrets,
   validateStaging,
 } from "./staging-config.mjs";
 import { stagingEnvironment } from "./staging-environment.mjs";
 import { bindStagingInputs } from "./staging-inputs.mjs";
-import { cloudflareReader, validateAccess, validateRoutes } from "./staging-preflight.mjs";
+import {
+  cloudflareReader,
+  validateAccess,
+  validateDatabaseAccess,
+  validateRoutes,
+} from "./staging-preflight.mjs";
 
 // These generated identities and fixture reports are local negative-test inputs, never launch evidence.
 test("canonical Cloudflare token cannot fall back without the independent staging custody guard", () => {
@@ -59,12 +65,13 @@ function fixture() {
       key: "makler-realty.com/wp-content/uploads/a.jpg",
     },
   ]);
-  const connectivity = JSON.stringify({
+  let connectivity = JSON.stringify({
     status: "PASS",
     database: "msr_stage_fixture",
     engineVersion: "16.14",
     tlsVerification: "verify-full",
     from: "cloudflare-containers",
+    transport: "direct",
     exposesPublicPostgres: false,
   });
   const input = {
@@ -98,6 +105,7 @@ function fixture() {
       productionName: "ms_realty_payload",
       stagingName: "msr_stage_fixture",
       stagingHost: "db.fixture.invalid",
+      transport: "direct",
       roles: { web: "web", worker: "worker", migrator: "migration" },
       privateConnectivitySha256: sha256(connectivity),
     },
@@ -122,6 +130,63 @@ function fixture() {
       evidenceSha256: "e".repeat(64),
     },
   };
+  const isolation = JSON.stringify({
+    status: "PASS",
+    from: "origin-read-only-inspection",
+    environment: "staging",
+    database: input.database.stagingName,
+    engineVersion: "16.14",
+    exposesPublicPostgres: false,
+    productionChanged: false,
+    inspectedAt: new Date().toISOString(),
+  });
+  input.database.originIsolationSha256 = sha256(isolation);
+  const runtime = { schemaVersion: 1, roles: {} },
+    connections = { roles: {} };
+  const nonce = "12345678-1234-4321-9876-123456789abc";
+  for (const [index, role] of ["web", "worker", "migrator"].entries()) {
+    const identity = {
+      schemaVersion: 1,
+      role,
+      sourceCommit: input.sourceCommit,
+      buildNonce: nonce,
+      state: "prepared",
+      actorId: String(index + 1).repeat(64),
+    };
+    const session = {
+      database: input.database.stagingName,
+      role: input.database.roles[role],
+      engineVersion: "16.14",
+      ssl: true,
+      tlsVersion: "TLSv1.3",
+      cipher: "fixture",
+    };
+    runtime.roles[role] = identity;
+    connections.roles[role] = {
+      identity,
+      proof: {
+        ...identity,
+        connection: {
+          schemaVersion: 1,
+          status: "PASS",
+          measuredAt: new Date().toISOString(),
+          transport: input.database.transport,
+          tlsVerification: "verify-full",
+          drivers: { "postgres-js": session, pg: session },
+        },
+      },
+    };
+  }
+  connectivity = JSON.stringify({
+    ...JSON.parse(connectivity),
+    schemaVersion: 2,
+    sourceCommit: input.sourceCommit,
+    image: input.image,
+    originIsolationSha256: input.database.originIsolationSha256,
+    runtime,
+    connections,
+  });
+  input.database.privateConnectivitySha256 = sha256(connectivity);
   const manifest = JSON.stringify({
     status: "ready",
     uniqueSources: 1,
@@ -129,7 +194,7 @@ function fixture() {
     blockers: [],
   });
   input.artifacts.routeManifestSha256 = sha256(manifest);
-  return { input, artifacts: { routes, media, manifest, connectivity } };
+  return { input, artifacts: { routes, media, manifest, connectivity, isolation } };
 }
 test("partial preview requires explicit scope, denied production and exact manifest/exclusions pins", () => {
   const { input, artifacts } = fixture();
@@ -162,6 +227,139 @@ test("partial preview requires explicit scope, denied production and exact manif
   artifacts.manifest = JSON.stringify(manifest);
   input.artifacts.routeManifestSha256 = sha256(artifacts.manifest);
   assert.throws(() => validateStaging(input, artifacts));
+});
+
+function privateFixture() {
+  const { input, artifacts } = fixture();
+  input.database.transport = "cloudflared-access-tcp";
+  input.database.stagingHost = "db.staging.makler-realty.com";
+  input.database.access = {
+    applicationId: "4".repeat(36),
+    audience: "5".repeat(64),
+    serviceTokenId: "6".repeat(36),
+    serviceClientId: "database-fixture.access",
+  };
+  const network = JSON.parse(artifacts.connectivity);
+  network.transport = input.database.transport;
+  for (const role of ["web", "worker", "migrator"])
+    network.connections.roles[role].proof.connection.transport = input.database.transport;
+  artifacts.connectivity = JSON.stringify(network);
+  input.database.privateConnectivitySha256 = sha256(artifacts.connectivity);
+  return { input, artifacts };
+}
+
+test("bootstrap config can measure connectivity but cannot release app work without actual proof", () => {
+  const { input, artifacts } = privateFixture();
+  input.database.privateConnectivitySha256 = null;
+  artifacts.connectivity = "";
+  const probe = stagingConfig(input, artifacts, { connectivityProbe: true });
+  assert.equal(probe.vars.STAGING_CONNECTIVITY_ONLY, "true");
+  assert.throws(() => stagingConfig(input, artifacts), /connectivity evidence/);
+  assert.throws(
+    () => stagingConfig(input, { ...artifacts, isolation: "" }, { connectivityProbe: true }),
+    /origin isolation/,
+  );
+  const exposed = JSON.stringify({
+    ...JSON.parse(artifacts.isolation),
+    exposesPublicPostgres: true,
+  });
+  input.database.originIsolationSha256 = sha256(exposed);
+  assert.throws(
+    () => stagingConfig(input, { ...artifacts, isolation: exposed }, { connectivityProbe: true }),
+    /origin inspection/,
+  );
+});
+
+test("private transport needs distinct reviewed Access identity and matching observed connectivity", () => {
+  const { input, artifacts } = privateFixture();
+  const config = stagingConfig(input, artifacts);
+  assert.equal(config.vars.DATABASE_TRANSPORT, "cloudflared-access-tcp");
+  assert.equal(config.vars.TUNNEL_SERVICE_URL, "127.0.0.1:15432");
+  assert.equal(config.vars.TUNNEL_SERVICE_HOSTNAME, input.database.stagingHost);
+  assert.equal(config.vars.TUNNEL_SERVICE_TOKEN_ID, input.database.access.serviceClientId);
+  assert.equal(config.vars.TUNNEL_SERVICE_TOKEN_SECRET, undefined);
+  assert(stagingRequiredSecrets(input).includes("DATABASE_TLS_CA_PEM"));
+  assert(stagingRequiredSecrets(input).includes("TUNNEL_SERVICE_TOKEN_SECRET"));
+  assert(!stagingRequiredSecrets(fixture().input).includes("TUNNEL_SERVICE_TOKEN_SECRET"));
+  for (const mutate of [
+    (x) => {
+      x.database.stagingHost = "db.makler-realty.com";
+    },
+    (x) => {
+      x.database.access.serviceTokenId = x.access.serviceTokenId;
+    },
+    (x) => {
+      x.database.access.serviceClientId = null;
+    },
+    (x) => {
+      x.database.transport = "unknown";
+    },
+  ]) {
+    const changed = structuredClone(input);
+    mutate(changed);
+    assert.throws(() => validateStaging(changed, artifacts));
+  }
+  const wrong = {
+    ...artifacts,
+    connectivity: JSON.stringify({
+      ...JSON.parse(artifacts.connectivity),
+      transport: "direct",
+    }),
+  };
+  input.database.privateConnectivitySha256 = sha256(wrong.connectivity);
+  assert.throws(() => validateStaging(input, wrong), /actual private TLS connection/);
+});
+
+test("database Access denies human allow, bypass, foreign tokens, broad apps and Worker override", () => {
+  const { input } = privateFixture();
+  const app = {
+    id: input.database.access.applicationId,
+    aud: input.database.access.audience,
+    type: "self_hosted",
+    domain: input.database.stagingHost,
+  };
+  const policy = {
+    decision: "non_identity",
+    include: [{ service_token: { token_id: input.database.access.serviceTokenId } }],
+  };
+  validateDatabaseAccess(input, app, [policy], [app]);
+  for (const changed of [
+    { decision: "bypass", include: [{ everyone: {} }] },
+    { decision: "allow", include: [{ email: { email: input.access.ownerEmail } }] },
+    {
+      decision: "non_identity",
+      include: [{ service_token: { token_id: input.access.serviceTokenId } }],
+    },
+  ])
+    assert.throws(() => validateDatabaseAccess(input, app, [changed], [app]));
+  assert.throws(() => validateDatabaseAccess(input, app, [], [app]));
+  assert.throws(() =>
+    validateDatabaseAccess(
+      input,
+      app,
+      [policy],
+      [
+        app,
+        {
+          id: "foreign",
+          domain: "*.staging.makler-realty.com",
+        },
+      ],
+    ),
+  );
+  assert.throws(() =>
+    validateDatabaseAccess(input, { ...app, domain: "*.makler-realty.com" }, [policy], [app]),
+  );
+  assert.throws(
+    () =>
+      validateRoutes(input, [
+        {
+          pattern: `${input.database.stagingHost}/*`,
+          script: "foreign-worker",
+        },
+      ]),
+    /database TCP hostname/,
+  );
 });
 test("the independently prepared public projection satisfies the protected-preview artifact contract only", () => {
   const { input, artifacts } = fixture();

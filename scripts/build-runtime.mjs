@@ -8,6 +8,7 @@ await build({
     migrate: "src/db/migrate.ts",
     bootstrap: "scripts/bootstrap-staff.ts",
     transport: "src/db/transport.ts",
+    connectivity: "src/db/connectivity.ts",
   },
   outdir: "dist-runtime",
   outExtension: { ".js": ".mjs" },

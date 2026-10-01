@@ -29,11 +29,54 @@ export function validateRoutes(input, routes) {
         route.script === input.workerName && hosts.some((host) => route.pattern === `${host}/*`),
         "no competing or bypass route on any staging host",
       );
+    if (input.database?.transport === "cloudflared-access-tcp")
+      demand(
+        !hostPattern.test(input.database.stagingHost),
+        "database TCP hostname has no Worker route",
+      );
     if (route.script === input.workerName)
       demand(
         hosts.some((host) => route.pattern === `${host}/*`),
         "staging Worker has no production route",
       );
+  }
+}
+
+export function validateDatabaseAccess(input, app, policies, otherApps) {
+  const expected = input.database.access;
+  const host = input.database.stagingHost;
+  const domains = [...new Set([app.domain, ...(app.self_hosted_domains ?? [])].filter(Boolean))];
+  demand(
+    app.id === expected.applicationId &&
+      app.type === "self_hosted" &&
+      app.aud === expected.audience &&
+      domains.length === 1 &&
+      domains[0] === host,
+    "database Access protects its exact isolated hostname",
+  );
+  demand(Array.isArray(policies) && policies.length > 0, "database Access policies present");
+  let service = false;
+  for (const policy of policies) {
+    if (policy.decision === "deny") continue;
+    demand(
+      policy.decision === "non_identity" &&
+        Array.isArray(policy.include) &&
+        policy.include.length === 1 &&
+        oneKey(policy.include[0], "service_token") &&
+        policy.include[0].service_token?.token_id === expected.serviceTokenId,
+      "database Access allows only its reviewed service token",
+    );
+    service = true;
+  }
+  demand(service, "database Service Auth policy present");
+  for (const other of otherApps) {
+    if (other.id === expected.applicationId) continue;
+    for (const domain of [other.domain, ...(other.self_hosted_domains ?? [])].filter(Boolean)) {
+      const selector = domain.split("/")[0];
+      demand(/^[a-z0-9*.-]+$/i.test(selector), "known Access hostname selector");
+      const matcher = new RegExp(`^${selector.replaceAll(".", "\\.").replaceAll("*", ".*")}$`, "i");
+      demand(!matcher.test(host), "no overlapping database Access application");
+    }
   }
 }
 
@@ -119,8 +162,8 @@ export async function providerPreflight(input, api) {
   const account = `/accounts/${input.accountId}`,
     zone = `/zones/${input.zoneId}`,
     access = `${account}/access`;
-  const [zoneData, app, policies, group, otherApps, routes, bucketResults, dns] = await Promise.all(
-    [
+  const [zoneData, app, policies, group, otherApps, routes, bucketResults, dns, databaseAccess] =
+    await Promise.all([
       api(zone),
       api(`${access}/apps/${input.access.applicationId}`),
       api(`${access}/apps/${input.access.applicationId}/policies`, true),
@@ -137,8 +180,14 @@ export async function providerPreflight(input, api) {
       Promise.all(
         hosts.map((host) => api(`${zone}/dns_records?name=${encodeURIComponent(host)}`, true)),
       ),
-    ],
-  );
+      input.database.transport === "cloudflared-access-tcp"
+        ? Promise.all([
+            api(`${access}/apps/${input.database.access.applicationId}`),
+            api(`${access}/apps/${input.database.access.applicationId}/policies`, true),
+            api(`${zone}/dns_records?name=${encodeURIComponent(input.database.stagingHost)}`, true),
+          ])
+        : null,
+    ]);
   demand(
     zoneData.status === "active" &&
       zoneData.name === "makler-realty.com" &&
@@ -146,6 +195,18 @@ export async function providerPreflight(input, api) {
     "active correct staging zone/account",
   );
   validateAccess(input, app, policies, group, otherApps);
+  if (databaseAccess) {
+    validateDatabaseAccess(input, databaseAccess[0], databaseAccess[1], otherApps);
+    demand(
+      databaseAccess[2].some(
+        (x) =>
+          x.name === input.database.stagingHost &&
+          x.proxied === true &&
+          ["A", "AAAA", "CNAME"].includes(x.type),
+      ),
+      "existing proxied database Tunnel DNS",
+    );
+  }
   for (const [i, records] of dns.entries())
     demand(
       records.some(
@@ -169,6 +230,7 @@ export async function providerPreflight(input, api) {
     sourceCommit: input.sourceCommit,
     inputsSha256: sha256(JSON.stringify(input)),
     protectedHosts: hosts,
+    databaseTransport: input.database.transport,
     noProductionMutation: true,
   };
 }
@@ -205,7 +267,10 @@ export function cloudflareReader(token, transport = fetch) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const { input, artifacts } = await readStagingInputs(process.argv[2]);
-    validateStaging(input, artifacts, undefined, { imageRequired: false });
+    validateStaging(input, artifacts, undefined, {
+      imageRequired: false,
+      connectivityProbe: process.argv.includes("--connectivity-probe"),
+    });
     const report = await providerPreflight(
       input,
       cloudflareReader(process.env.STAGING_CLOUDFLARE_READ_TOKEN),

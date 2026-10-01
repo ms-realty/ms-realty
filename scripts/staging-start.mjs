@@ -28,7 +28,9 @@ try {
   // Preparing identities does not start queue jobs or migrations. Config/env pins cannot
   // authorize a migration until the provider actually reports the exact running images.
   const prepared = await call("runtime", "POST");
-  await observeRuntimeRollout(input, prepared, process.env.STAGING_CLOUDFLARE_READ_TOKEN);
+  await observeRuntimeRollout(input, prepared, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {
+    allowPreparedWeb: true,
+  });
   await call("migrate", "POST");
   const deadline = Date.now() + 600000;
   let completed;

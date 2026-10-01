@@ -14,6 +14,15 @@ export function bindStagingInputs(serialized, sourceCommit) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const input = bindStagingInputs(process.env.STAGING_INPUTS_JSON, process.env.GITHUB_SHA);
+    if (
+      input.database?.originIsolationReport !== "deploy/staging-isolation.generated.json" ||
+      !process.env.STAGING_DATABASE_ISOLATION_JSON
+    )
+      throw new Error("Reviewed origin isolation report is required");
+    await writeFile(
+      input.database.originIsolationReport,
+      process.env.STAGING_DATABASE_ISOLATION_JSON,
+    );
     await writeFile("deploy/staging-inputs.generated.json", `${JSON.stringify(input, null, 2)}\n`);
     console.log("Environment-owned nonsecret staging inputs bound to exact qualified source.");
   } catch (error) {

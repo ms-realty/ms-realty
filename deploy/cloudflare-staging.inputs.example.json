@@ -35,7 +35,16 @@
       "migrator": null
     },
     "privateConnectivityReport": null,
-    "privateConnectivitySha256": null
+    "privateConnectivitySha256": null,
+    "transport": "cloudflared-access-tcp",
+    "access": {
+      "applicationId": null,
+      "audience": null,
+      "serviceTokenId": null,
+      "serviceClientId": null
+    },
+    "originIsolationReport": "deploy/staging-isolation.generated.json",
+    "originIsolationSha256": null
   },
   "buckets": {
     "productionMedia": "ms-realty-media",

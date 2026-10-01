@@ -22,7 +22,7 @@ const timestamp = (value, now) =>
   Date.parse(value) <= now &&
   new Date(value).toISOString().slice(0, 19) === value.slice(0, 19);
 
-export function validateRuntimeIdentity(input, runtime) {
+export function validateRuntimeIdentity(input, runtime, { allowPreparedWeb = false } = {}) {
   demand(
     object(input) && hex(32).test(input.accountId ?? "") && identifier(input.workerName),
     "account and Worker identity",
@@ -44,7 +44,8 @@ export function validateRuntimeIdentity(input, runtime) {
       object(evidence) &&
         evidence.schemaVersion === 1 &&
         evidence.role === role &&
-        statesByRole[role].includes(evidence.state) &&
+        (statesByRole[role].includes(evidence.state) ||
+          (role === "web" && allowPreparedWeb && evidence.state === "prepared")) &&
         evidence.sourceCommit === input.sourceCommit &&
         hex(64).test(evidence.actorId ?? ""),
       `${role} immutable source and actor identity`,
@@ -66,8 +67,14 @@ export function validateRuntimeIdentity(input, runtime) {
 }
 
 /** Only fixed-origin provider GETs create observations; caller labels never attest a deployment. */
-export async function observeRuntimeRollout(input, runtime, token, transport = fetch) {
-  validateRuntimeIdentity(input, runtime);
+export async function observeRuntimeRollout(
+  input,
+  runtime,
+  token,
+  transport = fetch,
+  options = {},
+) {
+  validateRuntimeIdentity(input, runtime, options);
   demand(
     typeof token === "string" && token.length > 0 && !/[\r\n]/.test(token),
     "provider credential available",
