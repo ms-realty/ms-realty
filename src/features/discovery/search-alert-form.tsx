@@ -73,7 +73,7 @@ export function SearchAlertForm({
             ).map(([name, label, options]) => {
               const field = form.field(name);
               return (
-                <div key={name} className="grid gap-2">
+                <div key={name} className="grid min-w-0 grid-cols-1 gap-2">
                   <label htmlFor={field.id}>{label}</label>
                   <select
                     id={field.id}

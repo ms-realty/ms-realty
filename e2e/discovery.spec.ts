@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { inquiryReviewCopy } from "../src/features/discovery/inquiry-review-copy";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -392,9 +393,7 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
   await page.getByRole("checkbox").check();
   fixture("withdraw", data.published.reference);
   await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
-  await expect(
-    page.getByText("The listing changed. Review the current version before continuing."),
-  ).toBeVisible();
+  await expect(page.getByText(inquiryReviewCopy("en").sourcesChanged).first()).toBeVisible();
   await expect(page.getByLabel(/^Your inquiry/)).toHaveValue(
     "Synthetic viewing preference to retain",
   );

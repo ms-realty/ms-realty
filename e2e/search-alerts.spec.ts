@@ -134,6 +134,43 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByLabel(p.frequency, { exact: true }).selectOption("weekly");
       await page.getByLabel(p.timezone, { exact: true }).fill("Europe/Sofia");
       await page.getByRole("checkbox", { name: c.consent, exact: true }).check();
+      await info.attach("account-width-320", {
+        body: Buffer.from(
+          JSON.stringify(
+            await page.evaluate(() =>
+              Array.from(document.querySelectorAll("body *"))
+                .map((element) => {
+                  const rect = element.getBoundingClientRect();
+                  return {
+                    tag: element.tagName,
+                    class: element.getAttribute("class"),
+                    left: rect.left,
+                    right: rect.right,
+                    width: rect.width,
+                    scrollWidth: element.scrollWidth,
+                    clientWidth: element.clientWidth,
+                    text: element.textContent?.slice(0, 50),
+                    display: getComputedStyle(element).display,
+                  };
+                })
+                .filter(
+                  (rect) =>
+                    rect.right > 320 ||
+                    rect.left < 0 ||
+                    (rect.width > 0 && rect.scrollWidth > rect.clientWidth + 1),
+                )
+                .slice(0, 20),
+            ),
+            null,
+            2,
+          ),
+        ),
+        contentType: "application/json",
+      });
+      await page.screenshot({
+        path: info.outputPath(`search-alert-account-before-width-${javaScriptEnabled}.png`),
+        fullPage: true,
+      });
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         320,
       );

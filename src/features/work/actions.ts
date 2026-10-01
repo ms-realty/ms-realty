@@ -27,6 +27,11 @@ export type ContactValues = {
   promisedToClient: string;
   reviewed: string;
 };
+export type ContactMethodView = { id: string; version: number; kind: string; value: string };
+export type ContactState = FormState<ContactValues> & {
+  currentContact?: ContactMethodView | null;
+  previousContact?: ContactMethodView | null;
+};
 type Kind = "accept" | "triage" | "contact" | "task" | "handover";
 const localInstant = (value: string) =>
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?$/.test(value)
@@ -265,9 +270,10 @@ export async function triageAction(
 export async function contactAction(
   locale: string,
   id: string,
-  _previous: FormState<ContactValues>,
+  _previous: ContactState,
   data: FormData,
 ) {
+  let currentContact = _previous.currentContact;
   const state = await perform<ContactValues>(
     locale,
     id,
@@ -310,6 +316,7 @@ export async function contactAction(
       if (!ctx.session) throw new AppError("unauthenticated");
       const current = await readInquiry(ctx.db, ctx.session, id);
       const latest = current.activity.find((entry) => entry.contact)?.contact;
+      currentContact = current.contactMethod;
       return {
         revision: current.inquiry.version,
         values: {
@@ -329,7 +336,11 @@ export async function contactAction(
   );
   if (state.outcome.kind === "confirmed" && state.reconciliation)
     redirect(state.reconciliation.href);
-  return state;
+  return {
+    ...state,
+    currentContact,
+    previousContact: _previous.previousContact ?? _previous.currentContact,
+  };
 }
 
 export async function taskAction(

@@ -59,6 +59,8 @@ export type ActionFormProps<V extends FormValues> = {
   pendingReferenceCookie?: string;
   copy: FormCopy;
   labels: Record<keyof V, string>;
+  /** Human-facing representations of opaque choices in a reviewed conflict comparison. */
+  formatValue?: (name: string, value: string, state: FormState<V>) => string;
   submitLabel: string | ((state: FormState<V>) => string);
   children: (form: FormController<V>) => ReactNode;
 };
@@ -146,6 +148,7 @@ function FormSession<V extends FormValues>({
   pendingReferenceCookie,
   copy,
   labels,
+  formatValue,
   submitLabel,
   children,
   snapshot,
@@ -326,10 +329,13 @@ function FormSession<V extends FormValues>({
                     <dl key={name} className="border-t border-border pt-2">
                       <dt className="font-semibold">{labels[name]}</dt>
                       <dd className="whitespace-pre-wrap break-words">
-                        {copy.yourValue}: {values[name]}
+                        {copy.yourValue}:{" "}
+                        {formatValue?.(name, values[name] ?? "", state) ?? values[name]}
                       </dd>
                       <dd className="whitespace-pre-wrap break-words">
-                        {copy.latestValue}: {conflict.latest?.values[name]}
+                        {copy.latestValue}:{" "}
+                        {formatValue?.(name, conflict.latest?.values[name] ?? "", state) ??
+                          conflict.latest?.values[name]}
                       </dd>
                     </dl>
                   ))}

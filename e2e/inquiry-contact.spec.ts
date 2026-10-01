@@ -77,7 +77,7 @@ for (const locale of ["bg", "ru", "en"] as const) {
           .fill(new Date(Date.now() + 7200000).toISOString().slice(0, 16));
         await page.getByRole("button", { name: copy.submit, exact: true }).click();
         await expect(
-          page.getByRole("alert").filter({ hasText: work.validation }).first(),
+          page.getByRole("region", { name: work.form.errorSummary, exact: true }),
         ).toBeVisible();
         await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(attemptNote);
         await page.getByLabel(copy.confirm, { exact: true }).check();

@@ -465,7 +465,7 @@ export async function InquiryScreen({
   const listing = snapshot.success ? snapshot.data.listing : null;
   return (
     <Page title={inquiry.reference} locale={locale}>
-      <nav className="flex flex-wrap gap-5" aria-label={copy.details}>
+      <nav className="flex flex-wrap gap-5" aria-label={`${copy.details}: ${inquiry.reference}`}>
         {detail.canAssist ? (
           <a className={link} href={`/${locale}/operations/assistance?source=${inquiry.id}`}>
             {locale === "bg"
