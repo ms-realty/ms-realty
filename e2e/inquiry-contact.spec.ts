@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { discoveryCopy } from "../src/features/discovery/copy";
 import { contactCopy } from "../src/features/work/contact-copy";
 import { workCopy } from "../src/features/work/copy";
 import { hostUrl, origins } from "./hosts";
@@ -173,6 +174,138 @@ for (const locale of ["bg", "ru", "en"] as const) {
 }
 
 for (const javaScriptEnabled of [true, false]) {
+  test(`AT14 joined: public review to broker responsibility to useful human contact ${javaScriptEnabled ? "hydrated" : "native"}`, async ({
+    browser,
+  }, info) => {
+    const broker = seed();
+    const listing = JSON.parse(
+      execFileSync(
+        process.execPath,
+        [
+          "--conditions=react-server",
+          "--import",
+          "tsx",
+          "src/features/discovery/testing/seed.ts",
+          "create",
+        ],
+        {
+          encoding: "utf8",
+          env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
+        },
+      ),
+    ).published as { reference: string; title: string };
+    const context = await browser.newContext({
+      javaScriptEnabled,
+      viewport: { width: 320, height: 844 },
+    });
+    const page = await context.newPage();
+    const marker = `Synthetic joined public inquiry ${randomUUID()}`;
+    const email = `joined-${randomUUID()}@example.test`;
+    const work = workCopy("en"),
+      copy = contactCopy("en");
+    try {
+      await context.setExtraHTTPHeaders({
+        "cf-connecting-ip": `2001:db8::${Math.floor(Math.random() * 65535).toString(16)}`,
+      });
+      await page.goto(hostUrl("public", `/en/properties?q=${listing.reference}`));
+      await page.getByRole("link", { name: listing.title, exact: true }).click();
+      await page.getByRole("link", { name: discoveryCopy("en").ask, exact: true }).click();
+      await page.getByLabel("Your inquiry", { exact: true }).fill(marker);
+      await page.getByLabel("Email", { exact: true }).fill(email);
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      await expect(
+        page.getByRole("region", { name: "Review your inquiry", exact: true }),
+      ).toContainText(listing.reference);
+      expect(
+        await db.select().from(schema.inquiries).where(eq(schema.inquiries.message, marker)),
+      ).toHaveLength(0);
+      await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Inquiry received", exact: true }),
+      ).toBeVisible();
+      const [received] = await db
+        .select()
+        .from(schema.inquiries)
+        .where(eq(schema.inquiries.message, marker));
+      if (!received) throw new Error("No durable public inquiry");
+      expect(received).toMatchObject({ state: "received", ownerId: null, firstResponseAt: null });
+      expect(received.coverageQueue).toBeTruthy();
+      expect(received.context).toMatchObject({
+        listing: { reference: listing.reference, title: listing.title },
+      });
+      await signIn(context, broker.token);
+      await page.goto(hostUrl("staff", "/en/inquiries?view=unassigned"));
+      await expect(page.locator(`[data-inquiry-id="${received.id}"]`)).toContainText(
+        received.reference,
+      );
+      await page.getByRole("link", { name: received.reference, exact: true }).click();
+      await page
+        .getByLabel(work.nextAction, { exact: true })
+        .fill("Review and answer this specific inquiry");
+      await page
+        .getByLabel(work.dueAt, { exact: true })
+        .fill(new Date(Date.now() + 3600000).toISOString().slice(0, 16));
+      await page.getByRole("button", { name: work.accept, exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: work.changeSaved, exact: true }),
+      ).toBeVisible();
+      await page.reload();
+      await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+      await expect(page.getByTestId("inquiry-first-response")).toHaveText(copy.noResponse);
+      await expect(
+        page.getByRole("option", { name: `email · ${email}`, exact: true }),
+      ).toBeAttached();
+      await page.getByLabel(copy.result, { exact: true }).selectOption("useful_response");
+      await expect.poll(() => Date.now()).toBeGreaterThan(received.createdAt.getTime() + 1500);
+      const observedAt = new Date(Date.now() - 500).toISOString().slice(0, 19);
+      await page.getByLabel(copy.contactedAt, { exact: true }).fill(observedAt.replace(/:00$/, ""));
+      await page
+        .getByLabel(copy.note, { exact: true })
+        .fill("Synthetic human explanation of the requested service and next steps");
+      await page
+        .getByLabel(copy.nextAction, { exact: true })
+        .fill("Human review of the agreed details");
+      await page
+        .getByLabel(copy.dueAt, { exact: true })
+        .fill(new Date(Date.now() + 7200000).toISOString().slice(0, 16));
+      await page.getByLabel(copy.promise, { exact: true }).check();
+      await page.getByLabel(copy.confirm, { exact: true }).check();
+      await page.getByRole("button", { name: copy.submit, exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: work.changeSaved, exact: true }),
+      ).toBeVisible();
+      await page.reload();
+      await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+      const [responded] = await db
+        .select()
+        .from(schema.inquiries)
+        .where(eq(schema.inquiries.id, received.id));
+      expect(responded?.firstResponseAt?.toISOString()).toBe(`${observedAt}.000Z`);
+      expect(responded?.ownerId).toBe(broker.brokerId);
+      const followUps = await db
+        .select()
+        .from(schema.tasks)
+        .where(eq(schema.tasks.inquiryId, received.id));
+      expect(followUps).toHaveLength(2);
+      expect(
+        followUps.every((task) => task.ownerId === broker.brokerId && task.state === "open"),
+      ).toBe(true);
+      expect(followUps.filter((task) => task.promisedToClient)).toHaveLength(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        320,
+      );
+      if (javaScriptEnabled)
+        expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      await info.attach("joined-public-to-human-response-320", {
+        body: await page.screenshot({ fullPage: true }),
+        contentType: "image/png",
+      });
+    } finally {
+      await context.close();
+    }
+  });
+
   test(`O03: ${javaScriptEnabled ? "hydrated" : "native"} stale contact retains the note and requires current contact review`, async ({
     browser,
   }) => {
