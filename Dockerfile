@@ -12,7 +12,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 BUILD_STANDALONE=1
 # Gateway's scoped production dependencies are needed by the repository-wide Next type check.
 # This build-only install does not place Wrangler or gateway tooling in the runtime image.
 RUN npm ci --prefix gateway --omit=dev --ignore-scripts --no-audit --no-fund \
-    && npm run build && node scripts/build-runtime.mjs
+    && NODE_OPTIONS=--max-old-space-size=8192 npm run build && node scripts/build-runtime.mjs
 
 FROM dependencies AS production-dependencies
 RUN npm prune --omit=dev --no-audit --no-fund
