@@ -11,6 +11,9 @@ node_modules
 gateway/cloudflare-runtime.generated.d.ts
 gateway/staging-artifacts.generated.ts
 .next*
+.open-next
+.wrangler
+gateway/.wrangler
 coverage
 test-results
 playwright-report
