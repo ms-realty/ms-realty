@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { getEnv } from "../src/server/config/env";
+import { CloudflareMessageProvider } from "../src/server/jobs/cloudflare-email";
 import { TestMessageProvider } from "../src/server/jobs/provider";
 import { JobQueue, registerWorkers } from "../src/server/jobs/queue";
 import { ResendMessageProvider } from "../src/server/jobs/resend";
@@ -21,10 +22,24 @@ const provider = env.testOutbox
         from: env.email.from,
         hosts: env.hosts,
       })
-    : null;
+    : env.email.provider === "cloudflare" &&
+        env.email.from &&
+        process.env.EMAIL_RELAY_URL &&
+        process.env.EMAIL_RELAY_SECRET &&
+        process.env.EMAIL_ACCESS_CLIENT_ID &&
+        process.env.EMAIL_ACCESS_CLIENT_SECRET
+      ? new CloudflareMessageProvider({
+          relayUrl: process.env.EMAIL_RELAY_URL,
+          relaySecret: process.env.EMAIL_RELAY_SECRET,
+          accessClientId: process.env.EMAIL_ACCESS_CLIENT_ID,
+          accessClientSecret: process.env.EMAIL_ACCESS_CLIENT_SECRET,
+          from: env.email.from,
+          hosts: env.hosts,
+        })
+      : null;
 if (!provider)
   throw new Error(
-    "Set EMAIL_PROVIDER=resend, EMAIL_FROM and RESEND_API_KEY, or enable the loopback-only test outbox",
+    "Set EMAIL_PROVIDER=resend with EMAIL_FROM and RESEND_API_KEY; or EMAIL_PROVIDER=cloudflare with EMAIL_FROM, EMAIL_RELAY_URL, EMAIL_RELAY_SECRET, EMAIL_ACCESS_CLIENT_ID and EMAIL_ACCESS_CLIENT_SECRET; or enable the loopback-only test outbox",
   );
 const receiving =
   process.env.CASE_INBOUND_ENABLED === "1"

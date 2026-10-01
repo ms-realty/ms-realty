@@ -90,6 +90,19 @@ function authEmail(message: OutboundMessage, hosts: HostOrigins, now: Date) {
   };
 }
 
+/** Shared reviewed content boundary; each transport keeps its own delivery semantics. */
+export function renderReviewedEmail(
+  message: OutboundMessage,
+  config: { from: string; hosts: HostOrigins },
+  now = new Date(),
+) {
+  return (
+    authEmail(message, config.hosts, now) ??
+    renderSearchAlert(message, config.hosts) ??
+    renderCaseEmail(message, caseEmailConfig()?.from === config.from ? caseEmailConfig() : null)
+  );
+}
+
 export class ResendMessageProvider implements MessageProvider {
   readonly name = "resend";
   constructor(
@@ -100,13 +113,7 @@ export class ResendMessageProvider implements MessageProvider {
       throw new Error("Invalid Resend configuration");
   }
   async send(message: OutboundMessage): Promise<ProviderResult> {
-    const email =
-      authEmail(message, this.config.hosts, new Date()) ??
-      renderSearchAlert(message, this.config.hosts) ??
-      renderCaseEmail(
-        message,
-        caseEmailConfig()?.from === this.config.from ? caseEmailConfig() : null,
-      );
+    const email = renderReviewedEmail(message, this.config);
     if (!email || !message.idempotencyKey || message.idempotencyKey.length > 256)
       return { status: "rejected", code: "unsupported_or_expired_message", retryable: false };
     // There is deliberately no network retry here. A timeout or ambiguous server response
