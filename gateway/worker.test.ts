@@ -5,7 +5,8 @@ import { type GatewayEnv, gateway, type LegacyRoute } from "./worker";
 const config = (rules: LegacyRoute[] = []): GatewayEnv => {
   const json = JSON.stringify(rules);
   return {
-    ORIGIN_URL: "https://candidate.ondigitalocean.app",
+    STAGING: "false",
+    ORIGIN_URL: "https://origin.invalid",
     PUBLIC_ORIGIN: "https://makler-realty.com",
     CLIENT_ORIGIN: "https://my.makler-realty.com",
     STAFF_ORIGIN: "https://app.makler-realty.com",
@@ -15,10 +16,180 @@ const config = (rules: LegacyRoute[] = []): GatewayEnv => {
   };
 };
 describe("Candidate gateway", () => {
+  it("matches decoded legacy Unicode identity without changing the original public spelling or query", async () => {
+    const env = config([
+      {
+        host: "makler-realty.ru",
+        path: "/покупка",
+        query: "?x=%2F",
+        status: 200,
+        targetHost: "makler-realty.com",
+        targetPath: "/ru/legacy/content",
+      },
+    ]);
+    const fetcher = vi.fn<typeof fetch>(async (input) => {
+      expect((input as Request).headers.get("x-msr-rendered-path")).toBe(
+        "/%D0%BF%D0%BE%D0%BA%D1%83%D0%BF%D0%BA%D0%B0?x=%2F",
+      );
+      return new Response("retained");
+    });
+    const path = `/${encodeURIComponent("покупка")}?x=%2F`;
+    expect(
+      (await gateway(new Request(`https://makler-realty.ru${path}`), env, fetcher)).status,
+    ).toBe(200);
+    expect(
+      (await gateway(new Request("https://makler-realty.ru/%2Fпокупка?x=%2F"), env, fetcher))
+        .status,
+    ).toBe(404);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+  it("computes one final 301 for http/www before mapping and preserves exact query bytes", async () => {
+    const env = config([
+      {
+        host: "makler-realty.ru",
+        path: "/old",
+        query: "?a=1&a=2&x=%2F",
+        status: 301,
+        targetHost: "makler-realty.com",
+        targetPath: "/bg/equivalent?x=%2F&a=1&a=2",
+      },
+      {
+        host: "makler-realty.ru",
+        path: "/retained",
+        query: "?a=1&a=2",
+        status: 200,
+        targetHost: "makler-realty.com",
+        targetPath: "/ru/legacy/content",
+      },
+    ]);
+    const fetcher = vi.fn<typeof fetch>(async () => new Response("retained"));
+    for (const scheme of ["http", "https"])
+      for (const alias of ["", "www."]) {
+        const redirect = await gateway(
+          new Request(`${scheme}://${alias}makler-realty.ru/old?a=1&a=2&x=%2F`),
+          env,
+          fetcher,
+        );
+        expect(redirect.status).toBe(301);
+        expect(redirect.headers.get("location")).toBe(
+          "https://makler-realty.com/bg/equivalent?x=%2F&a=1&a=2",
+        );
+      }
+    expect(fetcher).not.toHaveBeenCalled();
+    const retained = await gateway(
+      new Request("http://www.makler-realty.ru/retained?a=1&a=2"),
+      env,
+      fetcher,
+    );
+    expect(retained.headers.get("location")).toBe("https://makler-realty.ru/retained?a=1&a=2");
+    expect(
+      (await gateway(new Request("https://makler-realty.ru/old?a=2&a=1&x=%2F"), env, fetcher))
+        .status,
+    ).toBe(404);
+    expect(
+      (await gateway(new Request(retained.headers.get("location") as string), env, fetcher)).status,
+    ).toBe(200);
+  });
+  it("refuses historical terminal removals and redirect chains", async () => {
+    const fetcher = vi.fn<typeof fetch>();
+    for (const rows of [
+      [{ host: "makler-realty.ru", path: "/old", query: "", status: 410 as const }],
+      [
+        {
+          host: "makler-realty.ru",
+          path: "/old",
+          query: "",
+          status: 301 as const,
+          targetHost: "makler-realty.com",
+          targetPath: "/chain",
+        },
+        {
+          host: "makler-realty.com",
+          path: "/chain",
+          query: "",
+          status: 301 as const,
+          targetHost: "makler-realty.com",
+          targetPath: "/bg/end",
+        },
+      ],
+    ])
+      expect(
+        (await gateway(new Request("https://makler-realty.ru/old"), config(rows), fetcher)).status,
+      ).toBe(503);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+  it("requires Access before the staging source adapter and strips the verified transport identity", async () => {
+    const env = {
+      ...config([
+        {
+          host: "makler-realty.ru",
+          path: "/original",
+          query: "?cursor=a%2Bb",
+          status: 200,
+          targetHost: "makler-realty.com",
+          targetPath: "/ru/legacy/content",
+        },
+      ]),
+      STAGING: "true" as const,
+      PUBLIC_ORIGIN: "https://staging.makler-realty.com",
+      CLIENT_ORIGIN: "https://my.staging.makler-realty.com",
+      STAFF_ORIGIN: "https://app.staging.makler-realty.com",
+      LEGACY_TARGET_HOST: "makler-realty.com",
+    };
+    const request = new Request(`${env.PUBLIC_ORIGIN}/original?cursor=a%2Bb`, {
+      headers: {
+        "x-msr-legacy-host": "makler-realty.ru",
+        "cf-access-jwt-assertion": "fixture",
+        "cf-access-client-secret": "fixture",
+        "x-msr-rendered-path": "/forged",
+      },
+    });
+    const fetcher = vi.fn<typeof fetch>(async (input) => {
+      const outbound = input as Request;
+      expect(outbound.url).toBe("https://origin.invalid/ru/legacy/content");
+      expect(outbound.headers.get("x-msr-rendered-path")).toBe("/original?cursor=a%2Bb");
+      for (const header of [
+        "x-msr-legacy-host",
+        "cf-access-jwt-assertion",
+        "cf-access-client-secret",
+      ])
+        expect(outbound.headers.has(header)).toBe(false);
+      return new Response("page");
+    });
+    const rejected = await gateway(request, env, fetcher, async () => false);
+    expect(rejected.status).toBe(403);
+    expect(rejected.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    expect(fetcher).not.toHaveBeenCalled();
+    const accepted = await gateway(request, env, fetcher, async () => true);
+    expect(accepted.status).toBe(200);
+    expect(accepted.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    const www = await gateway(
+      new Request(request.url, { headers: { "x-msr-legacy-host": "www.makler-realty.ru" } }),
+      env,
+      fetcher,
+      async () => true,
+    );
+    expect(www.status).toBe(301);
+    expect(www.headers.get("location")).toBe(`${env.PUBLIC_ORIGIN}/original?cursor=a%2Bb`);
+    expect(www.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    const redirect = await gateway(
+      new Request(`${env.PUBLIC_ORIGIN}/original?cursor=a%2Bb`, {
+        headers: {
+          "x-msr-legacy-host": "attacker.invalid",
+        },
+      }),
+      env,
+      fetcher,
+      async () => true,
+    );
+    expect(redirect.status).toBe(400);
+    expect((await gateway(request, { ...env, STAGING: "false" }, fetcher)).status).toBe(400);
+  });
   it("treats doubled-slash paths as paths and never sends gateway credentials to their named host", async () => {
     const fetcher = vi.fn<typeof fetch>(async (request) => {
       const r = request as Request;
-      expect(new URL(r.url).origin).toBe("https://candidate.ondigitalocean.app");
+      expect(new URL(r.url).origin).toBe("https://origin.invalid");
       expect(await r.text()).toBe("private test payload");
       return new Response(null, { status: 404 });
     });
@@ -47,7 +218,7 @@ describe("Candidate gateway", () => {
     const env = config(),
       fetcher = vi.fn<typeof fetch>(async (request) => {
         const r = request as Request;
-        expect(r.url).toBe("https://candidate.ondigitalocean.app/en/access/confirm");
+        expect(r.url).toBe("https://origin.invalid/en/access/confirm");
         expect(r.headers.get("x-msr-public-host")).toBe("my.makler-realty.com");
         expect(r.headers.get("x-msr-origin-token")).toBe(env.ORIGIN_VERIFY_SECRET);
         expect(r.headers.has("x-middleware-subrequest")).toBe(false);
@@ -73,7 +244,7 @@ describe("Candidate gateway", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
   });
-  it("retains exact reviewed legacy 200s, 301s and terminal outcomes without domain-wide redirect assumptions", async () => {
+  it("retains exact reviewed legacy 200s and 301s without domain-wide redirect assumptions", async () => {
     const env = config([
       {
         host: "makler-realty.ru",
@@ -91,10 +262,10 @@ describe("Candidate gateway", () => {
         targetPath: "/bg/properties/MS-00004",
         targetHost: "makler-realty.com",
       },
-      { host: "makler-realty.com", path: "/gone", query: "", status: 410 },
     ]);
     const fetcher = vi.fn<typeof fetch>(async (request) => {
-      expect((request as Request).url).toBe("https://candidate.ondigitalocean.app/ru");
+      expect((request as Request).url).toBe("https://origin.invalid/ru");
+      expect((request as Request).headers.get("x-msr-rendered-path")).toBe("/");
       return new Response("retained", { status: 200 });
     });
     expect((await gateway(new Request("https://makler-realty.ru/"), env, fetcher)).status).toBe(
@@ -105,9 +276,6 @@ describe("Candidate gateway", () => {
         "location",
       ),
     ).toBe("https://makler-realty.com/bg/properties/MS-00004");
-    expect(
-      (await gateway(new Request("https://makler-realty.com/gone"), env, fetcher)).status,
-    ).toBe(410);
     expect(
       (await gateway(new Request("https://makler-realty.ru/unmapped"), env, fetcher)).status,
     ).toBe(404);

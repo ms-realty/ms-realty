@@ -1,7 +1,9 @@
 // Transport registry and its OpenAPI artifact (architecture §19.3, §5.1).
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
+import { NextRequest } from "next/server";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import type { z } from "zod";
 import { config as proxyConfig } from "../../../proxy";
 import { hostContexts, servesApi } from "../config/hosts";
@@ -55,11 +57,11 @@ describe("transport registry", () => {
     }
   });
 
-  it("mounts each endpoint on its own host only (proxy API families)", () => {
+  it("mounts each endpoint on its registered host while protecting host-neutral health transport", () => {
     for (const entry of registered) {
       if (entry.host === "any") {
-        // Host-neutral: excluded from the proxy, so it answers on every host.
-        expect(proxyConfig.matcher[0]).toContain(`${entry.path.slice(1)}$`);
+        expect(entry.path).toBe("/api/health");
+        expect(unstable_doesMiddlewareMatch({ config: proxyConfig, url: entry.path })).toBe(true);
         continue;
       }
       for (const context of hostContexts) {
@@ -67,6 +69,40 @@ describe("transport registry", () => {
           entry.host === "private" ? context !== "public" : context === entry.host,
         );
       }
+    }
+  });
+
+  it("serves health on all three authenticated hosts and denies direct-origin health access", async () => {
+    const hosts = ["makler-realty.com", "my.makler-realty.com", "app.makler-realty.com"];
+    const proof = crypto.randomUUID();
+    try {
+      vi.stubEnv("PUBLIC_ORIGIN", `https://${hosts[0]}`);
+      vi.stubEnv("CLIENT_ORIGIN", `https://${hosts[1]}`);
+      vi.stubEnv("STAFF_ORIGIN", `https://${hosts[2]}`);
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("STAGING", "false");
+      vi.stubEnv("ORIGIN_VERIFY_SECRET", proof);
+      // Host configuration is cached on first use. Exercise a fresh production process.
+      vi.resetModules();
+      const { proxy } = await import("../../../proxy");
+      for (const host of hosts) {
+        expect(
+          proxy(new NextRequest(`https://${host}/api/health`, { headers: { host } })).status,
+        ).toBe(404);
+        const response = proxy(
+          new NextRequest("https://origin.invalid/api/health", {
+            headers: {
+              host: "origin.invalid",
+              "x-msr-public-host": host,
+              "x-msr-origin-token": proof,
+            },
+          }),
+        );
+        expect(response.status, host).toBe(200);
+        expect(response.headers.get("x-middleware-next"), host).toBe("1");
+      }
+    } finally {
+      vi.unstubAllEnvs();
     }
   });
 

@@ -7,7 +7,7 @@ import {
   unstable_doesMiddlewareMatch,
 } from "next/experimental/testing/server";
 import { NextRequest } from "next/server";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { config, proxy } from "./proxy";
 
 const hosts = {
@@ -16,6 +16,11 @@ const hosts = {
   staff: "app.makler-realty.com",
 } as const;
 type Context = keyof typeof hosts;
+afterEach(() => {
+  vi.stubEnv("STAGING", "false");
+  vi.stubEnv("NODE_ENV", "test");
+  vi.stubEnv("GTM_CONTAINER_ID", "");
+});
 
 beforeAll(() => {
   // Read once on the proxy's first request.
@@ -143,14 +148,77 @@ describe("host routing (§11.1)", () => {
     expect(response.headers.get("x-middleware-request-x-app-locale")).toBe("bg");
   });
 
-  it("checks origin transport on assets and crawl routes, exempting only minimal health", () => {
+  it("checks origin transport on every route including health", () => {
     const matches = (url: string) => unstable_doesMiddlewareMatch({ config, nextConfig: {}, url });
     expect(matches("/bg")).toBe(true);
     expect(matches("/api/inquiries")).toBe(true);
     expect(matches("/api/healthz")).toBe(true);
-    expect(matches("/api/health")).toBe(false);
+    expect(matches("/api/health")).toBe(true);
     expect(matches("/_next/static/chunk.js")).toBe(true);
     expect(matches("/brand/favicon.svg")).toBe(true);
     expect(matches("/robots.txt")).toBe(true);
+  });
+});
+
+describe("staging and direct-origin boundary", () => {
+  it("allows exact public upload paths for local preparation while staging requires its isolated media", () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const policy = () => run(hosts.public, "/bg").headers.get("content-security-policy") ?? "";
+    expect(policy()).toContain(
+      "https://makler-realty.com/wp-content/uploads/ https://makler-realty.ru/wp-content/uploads/",
+    );
+    vi.stubEnv("STAGING", "true");
+    expect(policy()).not.toContain("/wp-content/uploads/");
+  });
+  it("permits Google origins only with valid configuration and explicit public analytics consent", () => {
+    vi.stubEnv("GTM_CONTAINER_ID", "GTM-TEST1");
+    const policy = (host: string, cookie: string) =>
+      run(host, "/bg", { cookie }).headers.get("content-security-policy") ?? "";
+    for (const cookie of [
+      "",
+      "msr_analytics_consent=v1.denied",
+      "msr_analytics_consent=v1.granted; msr_analytics_consent=v1.denied",
+    ])
+      expect(policy(hosts.public, cookie)).not.toContain("https://www.googletagmanager.com");
+    const allowed = policy(hosts.public, "msr_analytics_consent=v1.granted");
+    expect(allowed).toContain("https://www.googletagmanager.com");
+    expect(allowed).toContain(
+      "https://www.google-analytics.com https://region1.google-analytics.com",
+    );
+    expect(policy(hosts.staff, "msr_analytics_consent=v1.granted")).not.toContain("google");
+    vi.stubEnv("GTM_CONTAINER_ID", "GTM-invalid/script");
+    expect(policy(hosts.public, "msr_analytics_consent=v1.granted")).not.toContain("google");
+  });
+  it("marks redirects, rewrites, static/crawl/API and denied responses noindex", () => {
+    vi.stubEnv("STAGING", "true");
+    for (const [host, path] of [
+      [hosts.public, "/bg"],
+      [hosts.public, "/"],
+      [hosts.public, "/robots.txt"],
+      [hosts.public, "/sitemap.xml"],
+      [hosts.public, "/llms.txt"],
+      [hosts.public, "/_next/static/a.js"],
+      [hosts.public, "/api/health"],
+      [hosts.public, "/api/auth"],
+      [hosts.client, "/en/access"],
+      ["unknown.invalid", "/bg"],
+    ] as const) {
+      expect(run(host, path).headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    }
+  });
+  it("fails closed on a misspelled staging flag and rejects direct health access on real hosts", () => {
+    vi.stubEnv("STAGING", "TRUE");
+    expect(run(hosts.public, "/bg").status).toBe(503);
+    vi.stubEnv("STAGING", "true");
+    vi.stubEnv("NODE_ENV", "production");
+    const transportProof = crypto.randomUUID() + crypto.randomUUID();
+    vi.stubEnv("ORIGIN_VERIFY_SECRET", transportProof);
+    expect(run(hosts.public, "/api/health").status).toBe(404);
+    expect(
+      run("origin.invalid", "/api/health", {
+        "x-msr-public-host": hosts.public,
+        "x-msr-origin-token": transportProof,
+      }).headers.get("x-middleware-next"),
+    ).toBe("1");
   });
 });

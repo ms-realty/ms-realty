@@ -9,6 +9,32 @@ const origins = {
 const secret = "test-only-origin-secret-0123456789abcdef";
 const env = { NODE_ENV: "production", ORIGIN_VERIFY_SECRET: secret };
 describe("Origin transport boundary", () => {
+  it("retains canonical path context only after gateway authentication", () => {
+    const headers = new Headers({
+      host: "provider.example",
+      "x-msr-public-host": "makler-realty.com",
+      "x-msr-origin-token": secret,
+      "x-msr-rendered-path": "/original?x=%2F",
+    });
+    expect(originHeaders(headers, origins, env)?.get("x-msr-rendered-path")).toBe(
+      "/original?x=%2F",
+    );
+    headers.set("host", "makler-realty.com");
+    expect(
+      originHeaders(headers, origins, { NODE_ENV: "development" })?.has("x-msr-rendered-path"),
+    ).toBe(false);
+    const loopback = {
+      public: "http://localhost:3100",
+      client: "http://my.localhost:3100",
+      staff: "http://app.localhost:3100",
+    };
+    headers.set("host", "localhost:3100");
+    expect(
+      originHeaders(headers, loopback, { NODE_ENV: "production" })?.has("x-msr-rendered-path"),
+    ).toBe(false);
+    headers.delete("x-msr-origin-token");
+    expect(originHeaders(headers, origins, env)).toBeNull();
+  });
   it("rejects direct origin, forged host/internal headers and unavailable secrets", () => {
     const attempts: Array<Record<string, string>> = [
       { host: "app.makler-realty.com" },

@@ -12,7 +12,8 @@ import {
 } from "@/i18n/config";
 import { explicitLocaleChoice } from "@/i18n/locale-choice";
 import { negotiateLocale } from "@/i18n/negotiate";
-import { requestHost } from "@/i18n/seo";
+import { requestHost, stagingEnabled } from "@/i18n/seo";
+import { analyticsConsent, validGtmContainerId } from "@/i18n/tracking";
 import {
   type HostContext,
   homePaths,
@@ -38,17 +39,21 @@ import { originHeaders } from "@/server/config/origin";
 // dynamically for this to work (the root layouts call `connection()`).
 // `upgrade-insecure-requests` is left out on purpose: HSTS covers production, and the
 // directive would break plain-http local and e2e servers.
-function contentSecurityPolicy(nonce: string): string {
+function contentSecurityPolicy(
+  nonce: string,
+  analytics: boolean,
+  legacyPreparation: boolean,
+): string {
   const isDev = process.env.NODE_ENV === "development";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}${analytics ? " https://www.googletagmanager.com" : ""}`,
     `style-src 'self' 'nonce-${nonce}'`,
     // React Aria and Next position elements with style attributes, which a nonce cannot cover.
     "style-src-attr 'unsafe-inline'",
-    "img-src 'self' blob: data:",
+    `img-src 'self' blob: data:${legacyPreparation ? " https://makler-realty.com/wp-content/uploads/ https://makler-realty.ru/wp-content/uploads/" : ""}${analytics ? " https://www.google-analytics.com https://region1.google-analytics.com" : ""}`,
     "font-src 'self'",
-    "connect-src 'self'",
+    `connect-src 'self'${analytics ? " https://www.google-analytics.com https://region1.google-analytics.com" : ""}`,
     "worker-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
@@ -94,7 +99,7 @@ function localeRedirect(request: NextRequest, pathname: string, origin: string):
   return response;
 }
 
-export function proxy(request: NextRequest) {
+function route(request: NextRequest) {
   const origins = hostOrigins();
   const trustedHeaders = originHeaders(request.headers, origins);
   if (!trustedHeaders)
@@ -104,6 +109,8 @@ export function proxy(request: NextRequest) {
     });
   const host = requestHost(trustedHeaders);
   const { pathname, search } = request.nextUrl;
+  if (pathname === "/api/health")
+    return NextResponse.next({ request: { headers: trustedHeaders } });
 
   // ponytail: www → apex is the only host redirect; the legacy URL decisions record none for
   // www. Legacy .com/.ru path decisions are applied by the migration stage, not here.
@@ -132,7 +139,7 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/__nextjs") ||
     pathname.startsWith("/brand/") ||
     pathname.startsWith("/fonts/") ||
-    ["/favicon.ico", "/robots.txt", "/sitemap.xml"].includes(pathname)
+    ["/favicon.ico", "/robots.txt", "/sitemap.xml", "/llms.txt"].includes(pathname)
   )
     return NextResponse.next({ request: { headers: trustedHeaders } });
 
@@ -162,7 +169,19 @@ export function proxy(request: NextRequest) {
   if (chosen) request.cookies.set(contextLocaleCookie(context), chosen);
 
   const nonce = btoa(crypto.randomUUID());
-  const csp = contentSecurityPolicy(nonce);
+  const analytics =
+    context === "public" &&
+    Boolean(validGtmContainerId(process.env.GTM_CONTAINER_ID)) &&
+    analyticsConsent(request.headers.get("cookie"));
+  const localOrigins = Object.values(origins).every((value) => {
+    const hostname = new URL(value).hostname;
+    return hostname === "localhost" || hostname.endsWith(".localhost");
+  });
+  const legacyPreparation =
+    context === "public" &&
+    !stagingEnabled() &&
+    (process.env.NODE_ENV === "development" || localOrigins);
+  const csp = contentSecurityPolicy(nonce, analytics, legacyPreparation);
   const requestHeaders = new Headers(trustedHeaders);
   requestHeaders.set("x-forwarded-host", host ?? "");
   requestHeaders.set("x-nonce", nonce);
@@ -192,6 +211,24 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Even static/crawl paths authenticate origin transport; only minimal health is exempt.
-  matcher: ["/((?!api/health$).*)"],
+  // Every response authenticates origin transport and receives the staging crawl policy.
+  matcher: ["/:path*"],
 };
+
+export function proxy(request: NextRequest) {
+  let staging: boolean;
+  try {
+    staging = stagingEnabled();
+  } catch {
+    return new NextResponse(null, {
+      status: 503,
+      headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow" },
+    });
+  }
+  const response = route(request);
+  if (staging) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("Cache-Control", "private, no-store");
+  }
+  return response;
+}

@@ -41,6 +41,8 @@ export function originHeaders(
       return null;
   }
   const result = new Headers(headers);
+  // Only the authenticated gateway may supply the external path used for canonical metadata.
+  if (!required) result.delete("x-msr-rendered-path");
   for (const name of [...result.keys()])
     if (
       name.startsWith("x-middleware-") ||

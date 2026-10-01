@@ -7,6 +7,9 @@
 .env.*
 !.env.example
 node_modules
+**/node_modules
+gateway/cloudflare-runtime.generated.d.ts
+gateway/staging-artifacts.generated.ts
 .next*
 coverage
 test-results
@@ -19,8 +22,18 @@ e2e/**
 docs
 graft
 *.tsbuildinfo
-# Legacy import sources are used by the one-time import job, not the runtime image.
+# Include only reviewed public runtime projections. Raw captures and operator/private import
+# evidence remain outside the image; parent exceptions permit only the named files below.
 data/legacy
+!data/legacy/
+data/legacy/*
+!data/legacy/content.json
+!data/legacy/migration/
+data/legacy/migration/*
+!data/legacy/migration/source-pages.json
+!data/legacy/migration/public-media.json
+!data/legacy/migration/staging-legacy-routes.json
+!data/legacy/migration/staging-route-manifest.json
 dist-runtime
 storybook-static
 .storybook

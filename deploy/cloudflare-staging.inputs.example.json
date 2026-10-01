@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "environment": "staging",
+  "runtime": "containers",
+  "purpose": "protected_partial_preview",
+  "accountId": "921d0224dcd595c87b7928d2b3c479d1",
+  "zoneId": null,
+  "workerName": "ms-realty-staging",
+  "baseCommit": "e23d17b1ce71fce694e823643ea94a7440dd4912",
+  "sourceCommit": null,
+  "image": null,
+  "origins": {
+    "public": "https://staging.makler-realty.com",
+    "client": "https://my.staging.makler-realty.com",
+    "staff": "https://app.staging.makler-realty.com"
+  },
+  "access": {
+    "applicationId": null,
+    "teamDomain": null,
+    "audience": null,
+    "ownerEmail": null,
+    "controllerEmails": [],
+    "controllerGroupId": null,
+    "serviceTokenId": null,
+    "serviceClientId": null
+  },
+  "database": {
+    "engineVersion": "16.14",
+    "productionName": "ms_realty_payload",
+    "stagingName": null,
+    "stagingHost": null,
+    "roles": {
+      "web": null,
+      "worker": null,
+      "migrator": null
+    },
+    "privateConnectivityReport": null,
+    "privateConnectivitySha256": null
+  },
+  "buckets": {
+    "productionMedia": "ms-realty-media",
+    "productionCache": "ms-realty-production-opennext-cache",
+    "stagingMedia": null,
+    "stagingCache": null
+  },
+  "email": {
+    "from": null,
+    "allowedRecipients": [],
+    "replyDomain": null
+  },
+  "artifacts": {
+    "routes": "data/legacy/migration/staging-legacy-routes.json",
+    "routesSha256": "80efd2c458429e8dc07b7f27a06d5a8454d235b63b43c63351121eaf0b95a164",
+    "routeManifest": "data/legacy/migration/staging-route-manifest.json",
+    "routeManifestSha256": "f5bef2f02671244442e15c69a9e989cd0040b154e6693aab7fa1079579de091b",
+    "exclusionsSha256": "623caad10fae3aeed6818dd87aa6ab56acd9e6b2201630910f7c59a38b7ef394",
+    "media": "data/legacy/migration/public-media.json",
+    "mediaSha256": "1b8e3f73f375af0a8c1b125133bbd5f6b70da89f48fda7fda82028a7a6adb362"
+  },
+  "runtimeVars": {
+    "WEBAUTHN_RP_NAME": "MS Realty staging",
+    "CLAMAV_HOST": null,
+    "CLAMAV_PORT": "3310",
+    "CLAMAV_MAX_SIGNATURE_AGE_HOURS": "24"
+  },
+  "rollback": {
+    "legacyOrigin": null,
+    "retainDays": 90,
+    "evidenceSha256": null
+  }
+}

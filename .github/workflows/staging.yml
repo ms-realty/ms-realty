@@ -1,0 +1,132 @@
+name: Staging (explicit reviewed runtime)
+on:
+  workflow_dispatch:
+    inputs:
+      runtime:
+        type: choice
+        description: Containers selected for measured Sharp blocker; OpenNext requires separate qualification
+        options: [containers, opennext]
+        required: true
+  push:
+    branches: [codex/msr-staging]
+permissions:
+  contents: read
+concurrency:
+  group: ms-realty-staging
+  cancel-in-progress: false
+jobs:
+  prerequisites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hold until administrators configure staging and qualify this exact source
+        env:
+          ENVIRONMENT_CONFIGURED: ${{ vars.STAGING_ENVIRONMENT_CONFIGURED }}
+          DEPLOY_ENABLED: ${{ vars.STAGING_DEPLOY_ENABLED }}
+          QUALIFIED_SHA: ${{ vars.STAGING_SOURCE_QUALIFIED_SHA }}
+          REVIEWED_RUNTIME: ${{ vars.STAGING_REVIEWED_RUNTIME }}
+          REQUESTED_RUNTIME: ${{ inputs.runtime || vars.STAGING_REVIEWED_RUNTIME }}
+          ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/codex/msr-staging
+          test "$ACCOUNT_ID" = 921d0224dcd595c87b7928d2b3c479d1
+          test "$ENVIRONMENT_CONFIGURED" = true
+          test "$DEPLOY_ENABLED" = true
+          test "$QUALIFIED_SHA" = "$GITHUB_SHA"
+          test "$REQUESTED_RUNTIME" = "$REVIEWED_RUNTIME"
+          if [ "$REQUESTED_RUNTIME" != containers ]; then
+            echo 'OpenNext web/queue/migrator artifacts require coordinated qualification; no automatic fallback.' >&2
+            exit 1
+          fi
+  staging:
+    needs: prerequisites
+    # The prior job must succeed before GitHub resolves this environment. Do not auto-create
+    # an absent, unprotected environment. The canonical CF token must be freshly installed
+    # in staging; an independent fingerprint and staging-only sentinel reject silent fallback.
+    environment: staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      WRANGLER_SEND_METRICS: "false"
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      STAGING_CLOUDFLARE_TOKEN_SHA256: ${{ vars.STAGING_CLOUDFLARE_TOKEN_SHA256 }}
+      STAGING_ENVIRONMENT_TOKEN_SENTINEL: ${{ secrets.STAGING_ENVIRONMENT_TOKEN_SENTINEL }}
+      STAGING_INPUTS_JSON: ${{ vars.STAGING_INPUTS_JSON }}
+      STAGING_CLOUDFLARE_READ_TOKEN: ${{ secrets.STAGING_CLOUDFLARE_READ_TOKEN }}
+      WEB_DATABASE_URL: ${{ secrets.STAGING_WEB_DATABASE_URL }}
+      WORKER_DATABASE_URL: ${{ secrets.STAGING_WORKER_DATABASE_URL }}
+      MIGRATOR_DATABASE_URL: ${{ secrets.STAGING_MIGRATOR_DATABASE_URL }}
+      AUTH_SECRET: ${{ secrets.STAGING_AUTH_SECRET }}
+      ORIGIN_VERIFY_SECRET: ${{ secrets.STAGING_ORIGIN_VERIFY_SECRET }}
+      EMAIL_RELAY_SECRET: ${{ secrets.STAGING_EMAIL_RELAY_SECRET }}
+      STAGING_CONTROL_SECRET: ${{ secrets.STAGING_CONTROL_SECRET }}
+      ACCESS_SERVICE_CLIENT_SECRET: ${{ secrets.STAGING_ACCESS_SERVICE_CLIENT_SECRET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.STAGING_R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.STAGING_R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Validate exact source, isolated inputs and live Access/buckets/DNS before any write
+        run: |
+          set -euo pipefail
+          node scripts/staging-environment.mjs
+          git merge-base --is-ancestor e23d17b1ce71fce694e823643ea94a7440dd4912 HEAD
+          node scripts/staging-inputs.mjs
+          node scripts/staging-config.mjs deploy/staging-inputs.generated.json --before-image --require-secrets
+          node scripts/staging-preflight.mjs deploy/staging-inputs.generated.json deploy/staging-provider.generated.json
+      - name: Install locked local toolchains and check the deployment package
+        run: |
+          npm ci --no-audit --no-fund
+          npm ci --prefix gateway --ignore-scripts --no-audit --no-fund
+          node scripts/staging-types.mjs
+          npm run test:unit -- gateway/worker.test.ts gateway/access.test.ts gateway/legacy-media.test.ts gateway/runtime-env.test.ts proxy.test.ts src/server/config/origin.test.ts src/server/jobs/cloudflare-email.test.ts
+          node --test scripts/staging-contract.test.mjs
+        env:
+          CI: ""
+      - name: Build once and push staging image
+        run: |
+          set -euo pipefail
+          docker build --platform linux/amd64 --build-arg BUILD_SHA="$GITHUB_SHA" -t "ms-realty-staging:$GITHUB_SHA" .
+          gateway/node_modules/.bin/wrangler containers push "ms-realty-staging:$GITHUB_SHA"
+      - name: Pin the actual pushed digest and source provenance
+        id: image
+        run: node scripts/staging-image.mjs deploy/staging-inputs.generated.json "ms-realty-staging:$GITHUB_SHA" deploy/staging-candidate.generated.json
+      - name: Attest the immutable image subject
+        uses: actions/attest@c32b4b8b198b65d0bd9d63490e847ff7b53989d4 # v4.0.0
+        with:
+          subject-name: ${{ steps.image.outputs.subject_name }}
+          subject-digest: ${{ steps.image.outputs.digest }}
+          push-to-registry: false
+      - name: Revalidate prerequisites and generate only the three staging routes
+        run: |
+          node scripts/staging-preflight.mjs deploy/staging-candidate.generated.json deploy/staging-provider.generated.json
+          node scripts/staging-config.mjs deploy/staging-candidate.generated.json deploy/staging-containers.generated.json --require-secrets
+          gateway/node_modules/.bin/wrangler deploy --dry-run --config deploy/staging-containers.generated.json
+      - name: Deploy staging adapter and isolated role secrets
+        run: |
+          gateway/node_modules/.bin/wrangler deploy --config deploy/staging-containers.generated.json
+          node scripts/staging-secrets.mjs deploy/staging-candidate.generated.json deploy/staging-containers.generated.json
+          node scripts/staging-start.mjs deploy/staging-candidate.generated.json
+      - name: Save exact staging candidate for the independent controller checker
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: staging-candidate-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            deploy/staging-candidate.generated.json
+            deploy/staging-provenance.generated.json
+            deploy/staging-provider.generated.json
+          if-no-files-found: error
+          retention-days: 90
+          overwrite: false

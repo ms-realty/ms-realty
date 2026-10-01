@@ -1,38 +1,19 @@
 {
+  // Local gateway/map fixture only; never use this file for a release deploy.
+  // The measured Sharp 0.35.4 workerd failure selects Containers for the current candidate.
+  // After isolated inputs, Access and the exact image digest are validated, generate:
+  // node scripts/staging-config.mjs deploy/staging-candidate.generated.json deploy/staging-containers.generated.json --require-secrets
+  // Release tooling must select --config deploy/staging-containers.generated.json explicitly.
+  // That staging-only contract binds web/queue/migrator to one immutable image; see deploy/README.md.
   "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
-  "name": "ms-realty-staging",
-  "main": "opennext-worker.mjs",
-  "account_id": "921d0224dcd595c87b7928d2b3c479d1",
-  "compatibility_date": "2026-10-01",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "name": "ms-realty-gateway-local",
+  "main": "worker.ts",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
   "preview_urls": false,
   "observability": { "enabled": true, "head_sampling_rate": 1 },
-  // No routes/DNS are attached by this template. The reviewed staging generator supplies
-  // exact staging routes only after Access, existing DNS and separate DB are verified.
-  "routes": [],
-  "assets": { "directory": "../.open-next/assets", "binding": "ASSETS", "run_worker_first": true },
-  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "ms-realty-staging" }],
-  "r2_buckets": [
-    { "binding": "MEDIA", "bucket_name": "ms-realty-staging-media" },
-    { "binding": "MAP_ASSETS", "bucket_name": "ms-realty-staging-media" },
-    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "ms-realty-staging-opennext-cache" }
-  ],
-  "vars": {
-    "STAGING": "true",
-    "NODE_ENV": "production",
-    "DATABASE_RUNTIME": "cloudflare",
-    "DATABASE_ENGINE_MAJOR": "16",
-    "DATABASE_URL": "postgres://hyperdrive.invalid/msr_staging",
-    "APP_ORIGIN": "https://staging.makler-realty.com",
-    "CANONICAL_ORIGIN": "https://staging.makler-realty.com",
-    "PUBLIC_ORIGIN": "https://staging.makler-realty.com",
-    "CLIENT_ORIGIN": "https://my.staging.makler-realty.com",
-    "STAFF_ORIGIN": "https://app.staging.makler-realty.com",
-    "ORIGIN_URL": "https://msr-internal.invalid",
-    "MEDIA_PUBLIC_BASE_URL": "https://staging.makler-realty.com/media",
-    "MAP_RELEASE_ID": "",
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
-  }
+  // Local development configuration only. Release tooling must supply agency-owned bindings.
+  "r2_buckets": [{ "binding": "MAP_ASSETS", "bucket_name": "ms-realty-local-map-fixtures" }],
+  "vars": { "MAP_RELEASE_ID": "" }
 }
