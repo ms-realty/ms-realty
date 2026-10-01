@@ -5,7 +5,7 @@ import { firstPartyIssuers } from "../domain/records";
 import * as s from "./schema";
 import { createTestDatabase, type TestDatabase } from "./test-utils";
 
-// Architecture §4 records on PostgreSQL 18. All data here is fictional; the only phone number
+// Architecture §4 records on provider-pinned PostgreSQL 16.14. All data here is fictional; the only phone number
 // allowed in the repository is the brand line.
 let t: TestDatabase;
 
@@ -98,7 +98,7 @@ describe("database schema (architecture §4)", () => {
     );
     const [version] = await t.sql<{ major: number }[]>`
       select current_setting('server_version_num')::int / 10000 as major`;
-    expect(version?.major).toBeGreaterThanOrEqual(16);
+    expect(version?.major).toBe(16);
   });
 
   it("has no retired scope: reservations, statements, service dispatch, short stays, partner feed", async () => {
