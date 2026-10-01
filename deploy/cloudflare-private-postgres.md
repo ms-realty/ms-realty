@@ -92,3 +92,10 @@ therefore remains unqualified until these actual lifecycle checks pass.
 
 The launch parity checker and production promotion remain separate, held gates. This path
 does not change production routes, DNS, buckets, customer records or PR state.
+
+The operator's source `import:legacy` CLI also uses the same verified transport helper. It is
+not silently run by the deployment workflow or packaged as a public control. The existing
+dry-run/classification, reviewed apply batch, fresh legacy delta, listing/content review and
+isolated media import remain separate migration steps. Raw historical URL dispositions are
+provenance; the pinned zero-loss route artifact controls serving. No import report approves
+the revoked 410s or proves complete content/media parity.
