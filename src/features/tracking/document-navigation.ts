@@ -7,6 +7,10 @@ export function installAnalyticsDocumentNavigation(
   navigate: (url: string) => void = (url) => location.assign(url),
   reload: () => void = discardAnalyticsDocument,
 ) {
+  // Fragment moves (skip links, in-page anchors) stay inside this same page, so they
+  // keep native scrolling and focus instead of discarding the document.
+  const address = () => `${location.pathname}${location.search}`;
+  const documentAddress = address();
   const click = (event: MouseEvent) => {
     if (
       event.defaultPrevented ||
@@ -22,12 +26,14 @@ export function installAnalyticsDocumentNavigation(
     if (!link || link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
     const destination = new URL(link.href, location.href);
     if (destination.origin !== location.origin || !/^https?:$/.test(destination.protocol)) return;
-    if (destination.href === location.href) return;
+    if (destination.pathname === location.pathname && destination.search === location.search)
+      return;
     event.preventDefault();
     event.stopImmediatePropagation();
     navigate(destination.href);
   };
   const historyNavigation = (event: Event) => {
+    if (address() === documentAddress) return;
     // Capture runs before the router's bubble listener, so it cannot restore a
     // sensitive React page inside the analytics-bearing document.
     event.stopImmediatePropagation();
