@@ -58,6 +58,9 @@ export default defineConfig({
       FILE_STORAGE: "local",
       FILE_STORAGE_ROOT: process.env.E2E_FILE_STORAGE_ROOT,
       E2E_PORT: String(port),
+      // Synthetic browser runs use the explicit launch-gate staging policy. Hostname
+      // differences alone must never suppress production crawling or SEO metadata.
+      STAGING: "true",
       APP_ORIGIN: origins.public,
       CANONICAL_ORIGIN: "https://makler-realty.com",
       PUBLIC_ORIGIN: origins.public,
