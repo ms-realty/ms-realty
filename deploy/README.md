@@ -142,9 +142,10 @@ contain its own hash; an existing different source pin is rejected.
   was sent by local checks. Do not guess a sender or claim acceptance is delivery.
 - Supply a private ClamAV endpoint with current signatures. `GTM_CONTAINER_ID` and
   `SITE_GOOGLE_VERIFICATION` are nonsecret reviewed configuration, not invented tracking IDs.
-- GitHub environment `staging` was not created: the controller's attempt returned **403 admin
-  rights required**. An administrator must create it with deployment protection and its own
-  staging secrets. Install a fresh environment-owned canonical `CLOUDFLARE_API_TOKEN`, an
+- GitHub Environment `staging` was created on 2 October through the owner-corrected `ms-realty`
+  account, restricted to `codex/msr-staging`. Earlier403 responses came from the superseded
+  identity. Install its own staging secrets using [the owner credential steps](staging-owner-credentials.md):
+  a fresh environment-owned canonical `CLOUDFLARE_API_TOKEN`, an
   independently recorded `STAGING_CLOUDFLARE_TOKEN_SHA256` variable and environment-only
   `STAGING_ENVIRONMENT_TOKEN_SENTINEL` secret. The guard rejects a different fallback token.
 
