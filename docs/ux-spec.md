@@ -284,26 +284,26 @@ Use “Request received” only after commit; “Viewing requested” until conf
 
 ### 06.1 Fixed visual direction
 
-The commissioned implementation now follows the saved 27 September Figma visual system, including the current [O01 source](https://www.figma.com/design/PxfBJ2tdrj9A923fpgqzDn?node-id=10-203). This visual binding supersedes the earlier warm palette and title typography in architecture §11.3; it does not change domain, authority, locale approval or release requirements. `design/tokens.json` generates the shared CSS and Figma export. The light foundation is shared across public, client and agency surfaces; browser acceptance is recorded separately.
+Owner decision 2026-10-02 (palette B): this section is the architecture §11.3 foundation, and the 30 September neutral/Manrope binding is withdrawn. `design/tokens.json` generates the shared CSS and the Figma variables; the canonical Figma file `PxfBJ2tdrj9A923fpgqzDn` uses the same role names (`radius/control`, `radius/panel`, `MSR / title · semibold`, …).
 
-Property photography, useful facts and human service are the visual content. Public pages are spacious enough to evaluate; operational pages are denser and quieter. Do not introduce a different dashboard theme, decorative gradients, full-screen introduction, artificial scarcity, autoplay hero or floating chatbot over the task.
+Use the architecture's light, grounded agency identity. Property photography, useful facts and human service are the visual content. Public pages are spacious enough to evaluate; operational pages are denser and quieter. Do not introduce a different dashboard theme, decorative gradients, full-screen introduction, artificial scarcity, autoplay hero or floating chatbot over the task.
 
 | Token role | Baseline | Usage constraint |
 |---|---|---|
-| Canvas / surface / subtle | `#FFFFFF` / `#FFFFFF` / `#F3F5F7` | White reading canvas and quieter navigation/context hierarchy |
-| Primary / secondary text | `#1E2832` / `#566473` | Essential facts and supporting context; never make required data faint |
-| Subtle border | `#E1E5E9` | Separation only; not the sole essential input/focus boundary |
-| Primary action / inverse | `#172029` / `#FFFFFF` | Deliberate action; hover `#303D49`, pressed `#0C141B` |
-| Brand / selection | `#245B48` / `#EDF4F0` | Human agency identity and selected context, separate from action ink |
-| Interactive outline | `#7E8A98` | At least 3:1 on the actual white, fog and selection surfaces |
-| Assistance / focus | `#315BA6`, 3 px focus outline, 2 px offset | Assistance tint `#EDF2FC`; focus remains visible in forced colors |
-| Error / warning / success text | `#AF3035` / `#895A13` / `#245B48` | Always paired with words/icon; test actual backgrounds and states |
+| Canvas / surface | `#F8F7F3` / `#FFFFFF` | Reading background and actual surface hierarchy |
+| Primary / secondary text | `#192E27` / `#52625A` | Essential facts and supporting context; never make required data faint |
+| Subtle border | `#D9DFD8` | Separation only; not the sole essential input/focus boundary |
+| Primary action / inverse | `#214F3C` / `#FFFFFF` | Primary action and deliberate selection, not every badge |
+| Interactive outline | `#687A6F` baseline | Validate non-text contrast on actual surrounding surfaces |
+| Focus | `#174EA6`, 3 px outline, 2 px offset baseline | Remains visible on every surface and in forced colors |
+| Butler (assistance) | `#5B45A0` | Marks Butler's work, verdicts and receipts; never the primary action color |
+| Error / warning / success text | `#A12A25` / `#775000` / `#21603C` baseline | Always paired with words/icon; test actual backgrounds and states |
 
-Use self-hosted licensed Manrope for titles, Noto Sans for body/UI, and Noto Sans Hebrew first for Hebrew text. Font sources, subsets, hashes and licenses are retained in `public/fonts/README.md`. Public/client body is 16 px or larger with 26 px baseline leading. Staff supporting data may be 14/22; inputs and essential messages remain comfortably readable. Use tabular figures for aligned amounts/times; do not force identifiers into a decorative mono style. Body copy stays around 60–75 characters per line.
+Use self-hosted licensed Noto Sans and Noto Sans Hebrew. Public/client body is 16 px or larger, 1.5–1.65 line height. Staff supporting data may be 14 px; inputs and essential messages remain comfortably readable. Use tabular figures for aligned amounts/times; do not force identifiers into a decorative mono style. Body copy stays around 60–75 characters per line.
 
-Use the saved 4 px spacing scale. Controls use 8 px baseline corners, panels 12 px where grouping is useful; status text does not require a pill around every word. One coherent licensed outline-icon family, typically 20/24 px, supports text. Original Figma static assets remain unchanged at their effective source geometry. Icon-only buttons have accessible names and large hit regions. No emoji status system or fake property images.
+Use a restrained 4 px spacing scale: 4, 8, 12, 16, 24, 32, 48, 64. Controls use 6 px baseline corners, panels 8 px where grouping is genuinely useful; status text does not require a pill around every word. One coherent licensed outline-icon family, typically 20/24 px, supports text. Icon-only buttons have accessible names and large hit regions. No emoji status system or fake property images.
 
-Headings establish page/section/group hierarchy. Title/page roles use Manrope 32/42 with -2% tracking; sections use Noto 20/30, group headings 18/26, and ordinary labels/body 16/26. Hebrew titles use the complete Hebrew face. Permit wrapping and zoom growth; these are not fixed-height boxes.
+Headings establish page/section/group hierarchy, not a display-font spectacle. Use approximately 32/40 for public primary headings, 28/36 for app page headings, 22/30 for sections, 18/26 for group headings and 16/24 for ordinary labels. Permit wrapping and zoom growth; these are not fixed-height boxes.
 
 ### 06.2 Layout ranges and density
 
