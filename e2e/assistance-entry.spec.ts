@@ -1,4 +1,4 @@
-// Native global Hermes entry. Uses source authorization only; no draft job or provider call.
+// Native global Butler entry. Uses source authorization only; no draft job or provider call.
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { and, eq, inArray } from "drizzle-orm";
@@ -11,7 +11,7 @@ import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
-  throw new Error("Hermes entry tests require the disposable browser database");
+  throw new Error("Butler entry tests require the disposable browser database");
 const connection = postgres(url, { max: 2 });
 const db = drizzle(connection, { schema });
 test.afterAll(async () => connection.end());
@@ -93,7 +93,7 @@ async function cleanup(data: Fixture) {
 }
 
 for (const javaScriptEnabled of [true, false]) {
-  test.describe(`Hermes entry with JavaScript ${javaScriptEnabled}`, () => {
+  test.describe(`Butler entry with JavaScript ${javaScriptEnabled}`, () => {
     test.use({ javaScriptEnabled });
     test("native picker preserves scoped pagination, current source and manual recovery", async ({
       context,
@@ -126,7 +126,7 @@ for (const javaScriptEnabled of [true, false]) {
           await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
         ).toBe(true);
         await page.screenshot({
-          path: testInfo.outputPath(`hermes-entry-${javaScriptEnabled ? 320 : 390}.png`),
+          path: testInfo.outputPath(`butler-entry-${javaScriptEnabled ? 320 : 390}.png`),
           fullPage: true,
         });
 
@@ -272,7 +272,7 @@ for (const javaScriptEnabled of [true, false]) {
           "/en/operations/assistance/intake",
         );
         await page.screenshot({
-          path: testInfo.outputPath("hermes-content-editor-entry.png"),
+          path: testInfo.outputPath("butler-content-editor-entry.png"),
           fullPage: true,
         });
         const inventory = page.getByRole("link", { name: entryCopy("en").inventory });

@@ -36,7 +36,7 @@ const navIcons: Partial<Record<WorkspaceNavLabel, string>> = {
   calendar: "/brand/workspace/calendar.svg",
   inventory: "/brand/workspace/inventory.svg",
   tasks: "/brand/workspace/tasks.svg",
-  hermes: "/brand/workspace/hermes.svg",
+  butler: "/brand/workspace/butler.svg",
   moreTools: "/brand/workspace/more-tools.svg",
 };
 const tabLinkClass =

@@ -36,7 +36,7 @@ function fixture(assessment = false) {
 for (const javaScriptEnabled of [true, false]) {
   test.describe(`typed assessment with JavaScript ${javaScriptEnabled}`, () => {
     test.use({ javaScriptEnabled });
-    test("O32: Jev uncertainty remains visible and human review retains authority at 320px", async ({
+    test("O32: assessment uncertainty remains visible and human review retains authority at 320px", async ({
       context,
       page,
     }, testInfo) => {

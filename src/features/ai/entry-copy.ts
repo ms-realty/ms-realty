@@ -1,9 +1,9 @@
 // Staff-only copy. BG and RU remain drafts for human language review.
 const en = {
-  title: "Hermes · Choose a task",
+  title: "Butler · Choose a task",
   lead: "Choose a source you can access, review the included text, then request a draft.",
   boundary:
-    "Hermes produces drafts for human review. Sending, publishing and other actions stay in their original workspace and require separate human decisions.",
+    "Butler produces drafts for human review. Sending, publishing and other actions stay in their original workspace and require separate human decisions.",
   unavailable:
     "No draft tasks are available for your current access. Continue in a manual workspace you can access.",
   manualOnly:
@@ -37,10 +37,10 @@ const en = {
 };
 type Copy = typeof en;
 const bg: Copy = {
-  title: "Hermes · Изберете задача",
+  title: "Butler · Изберете задача",
   lead: "Изберете източник, до който имате достъп, прегледайте включения текст и след това поискайте чернова.",
   boundary:
-    "Hermes подготвя чернови за човешки преглед. Изпращането, публикуването и другите действия остават в първоначалното работно пространство и изискват отделни човешки решения.",
+    "Butler подготвя чернови за човешки преглед. Изпращането, публикуването и другите действия остават в първоначалното работно пространство и изискват отделни човешки решения.",
   unavailable:
     "Няма задачи за чернови, достъпни с текущите ви права. Продължете в ръчно работно пространство, до което имате достъп.",
   manualOnly:
@@ -75,10 +75,10 @@ const bg: Copy = {
   },
 };
 const ru: Copy = {
-  title: "Hermes · Выберите задачу",
+  title: "Butler · Выберите задачу",
   lead: "Выберите доступный вам источник, проверьте включённый текст и затем запросите черновик.",
   boundary:
-    "Hermes готовит черновики для проверки человеком. Отправка, публикация и другие действия остаются в исходном рабочем пространстве и требуют отдельных решений человека.",
+    "Butler готовит черновики для проверки человеком. Отправка, публикация и другие действия остаются в исходном рабочем пространстве и требуют отдельных решений человека.",
   unavailable:
     "С текущими правами нет доступных задач для черновиков. Продолжите в доступном вам рабочем пространстве вручную.",
   manualOnly: "Черновики обращений недоступны с текущими правами. Продолжите во входящих.",

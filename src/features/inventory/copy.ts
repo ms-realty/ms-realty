@@ -51,7 +51,7 @@ const en = {
     title: "Bulgarian title",
     description: "Bulgarian description",
     brokerNote:
-      "Private broker intake note (optional; never published or sent to Hermes automatically)",
+      "Private broker intake note (optional; never published or sent to Butler automatically)",
     priceState: "Price status",
     price: "Price in EUR",
     areaState: "Area status",
@@ -129,7 +129,7 @@ const bg: Copy = {
     title: "Заглавие на български",
     description: "Описание на български",
     brokerNote:
-      "Частна бележка за въвеждане (по избор; не се публикува или изпраща автоматично към Hermes)",
+      "Частна бележка за въвеждане (по избор; не се публикува или изпраща автоматично към Butler)",
     priceState: "Състояние на цената",
     price: "Цена в EUR",
     areaState: "Състояние на площта",
@@ -205,7 +205,7 @@ const ru: Copy = {
     title: "Заголовок на болгарском",
     description: "Описание на болгарском",
     brokerNote:
-      "Частная заметка для ввода (необязательно; не публикуется и не передаётся Hermes автоматически)",
+      "Частная заметка для ввода (необязательно; не публикуется и не передаётся Butler автоматически)",
     priceState: "Статус цены",
     price: "Цена в EUR",
     areaState: "Статус площади",

@@ -48,11 +48,11 @@ export function AssistanceEntry({
       {!entry.access.inquiryDrafts && !tasks.length ? <p>{copy.unavailable}</p> : null}
       {entry.access.inquiryDrafts ? (
         <section
-          aria-labelledby="hermes-inquiry-task"
+          aria-labelledby="butler-inquiry-task"
           className="space-y-5 rounded-card border border-border bg-surface p-4 sm:p-6"
         >
           <div className="space-y-2">
-            <h2 id="hermes-inquiry-task" className="text-subheading font-semibold">
+            <h2 id="butler-inquiry-task" className="text-subheading font-semibold">
               {copy.inquiry}
             </h2>
             <p>{copy.inquiryHelp}</p>
@@ -72,15 +72,15 @@ export function AssistanceEntry({
           {entry.choices.length ? (
             <form action={path} method="get" className="flex min-w-0 flex-col items-start gap-4">
               <div className="w-full max-w-reading space-y-2">
-                <label htmlFor="hermes-inquiry-source" className="block font-semibold">
+                <label htmlFor="butler-inquiry-source" className="block font-semibold">
                   {copy.source}
                 </label>
                 <select
-                  id="hermes-inquiry-source"
+                  id="butler-inquiry-source"
                   name="source"
                   required
                   defaultValue=""
-                  aria-describedby="hermes-source-help"
+                  aria-describedby="butler-source-help"
                   className={`${controlClass} min-w-0 max-w-full`}
                 >
                   <option value="" disabled>
@@ -93,7 +93,7 @@ export function AssistanceEntry({
                     </option>
                   ))}
                 </select>
-                <p id="hermes-source-help" className="text-compact text-text-muted">
+                <p id="butler-source-help" className="text-compact text-text-muted">
                   {copy.sourceHelp}
                 </p>
               </div>
@@ -135,8 +135,8 @@ export function AssistanceEntry({
         </div>
       ) : null}
       {tasks.length ? (
-        <section aria-labelledby="hermes-other-tasks" className="space-y-5">
-          <h2 id="hermes-other-tasks" className="text-subheading font-semibold">
+        <section aria-labelledby="butler-other-tasks" className="space-y-5">
+          <h2 id="butler-other-tasks" className="text-subheading font-semibold">
             {copy.other}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">

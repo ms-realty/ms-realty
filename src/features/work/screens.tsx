@@ -469,10 +469,10 @@ export async function InquiryScreen({
         {detail.canAssist ? (
           <a className={link} href={`/${locale}/operations/assistance?source=${inquiry.id}`}>
             {locale === "bg"
-              ? "Преглед с Hermes"
+              ? "Преглед с Butler"
               : locale === "ru"
-                ? "Проверка с Hermes"
-                : "Review with Hermes"}
+                ? "Проверка с Butler"
+                : "Review with Butler"}
           </a>
         ) : null}
         {inquiry.caseId ? (
