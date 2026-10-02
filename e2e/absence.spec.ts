@@ -4,6 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { findCoverageRecord } from "./coverage-helpers";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -226,7 +227,7 @@ for (const javaScriptEnabled of [true, false])
         fullPage: true,
       });
       await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
-      await expect(page.getByRole("link", { name: task.title, exact: true })).toBeVisible();
+      expect(await findCoverageRecord(page, `/en/tasks/${task.id}`)).toBe(true);
       expect(
         (await db.select().from(schema.keySets).where(eq(schema.keySets.id, f.keyId)))[0],
       ).toMatchObject({ holderId: f.brokerId, state: "checked_out" });
@@ -251,7 +252,7 @@ for (const javaScriptEnabled of [true, false])
         task,
       ]);
       await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
-      await expect(page.getByRole("link", { name: task.title, exact: true })).toHaveCount(0);
+      expect(await findCoverageRecord(page, `/en/tasks/${task.id}`)).toBe(false);
     } finally {
       await context.close();
     }

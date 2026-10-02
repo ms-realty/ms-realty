@@ -31,7 +31,7 @@ it("runs the real standalone queue worker against an isolated database and shuts
         CLIENT_ORIGIN: "http://my.localhost:3195",
         STAFF_ORIGIN: "http://app.localhost:3195",
         WORKER_HEARTBEAT_URL: "",
-        HERMES_ENABLED: "0",
+        BUTLER_ENABLED: "0",
       },
       stdio: ["ignore", "pipe", "pipe"],
     },

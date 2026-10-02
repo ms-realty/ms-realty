@@ -86,7 +86,7 @@ export const grants = pgTable(
   {
     ...mutable(),
     principalId: uuid("principal_id").references(() => principals.id),
-    /** Non-human principal such as the Hermes draft service. */
+    /** Non-human principal such as the Butler draft service. */
     serviceName: text("service_name"),
     role: roleEnum("role"),
     capability: capabilityEnum("capability"),
@@ -102,7 +102,7 @@ export const grants = pgTable(
   (t) => [
     check("grants_one_grantee", sql`num_nonnulls(${t.principalId}, ${t.serviceName}) = 1`),
     check("grants_role_or_capability", sql`num_nonnulls(${t.role}, ${t.capability}) = 1`),
-    // AT52: a service principal (Hermes) can only ever hold drafting capabilities.
+    // AT52: a service principal (Butler) can only ever hold drafting capabilities.
     check(
       "grants_service_drafts_only",
       // Written NULL-safe: a check that evaluates to NULL would pass.

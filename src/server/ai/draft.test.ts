@@ -18,16 +18,16 @@ describe("AT51–AT54 bounded assistance", () => {
   it("requires both operator activation and processing approval with an explicit model/rate card", () => {
     expect(assistanceConfig({}).enabled).toBe(false);
     const env = {
-      HERMES_PROVIDER: "openai",
-      HERMES_ENABLED: "1",
+      BUTLER_PROVIDER: "openai",
+      BUTLER_ENABLED: "1",
       OPENAI_API_KEY: "test-only",
-      HERMES_MODEL: "operator-test-model",
-      HERMES_INPUT_USD_MICROS_PER_TOKEN: "1",
-      HERMES_OUTPUT_USD_MICROS_PER_TOKEN: "2",
-      HERMES_DAILY_LIMIT_USD_MICROS: "100000",
+      BUTLER_MODEL: "operator-test-model",
+      BUTLER_INPUT_USD_MICROS_PER_TOKEN: "1",
+      BUTLER_OUTPUT_USD_MICROS_PER_TOKEN: "2",
+      BUTLER_DAILY_LIMIT_USD_MICROS: "100000",
     };
     expect(assistanceConfig(env).enabled).toBe(false);
-    const config = assistanceConfig({ ...env, HERMES_PROCESSING_APPROVED: "1" });
+    const config = assistanceConfig({ ...env, BUTLER_PROCESSING_APPROVED: "1" });
     expect(config.enabled).toBe(true);
     expect(JSON.stringify(assistanceAvailability(config))).not.toContain("test-only");
   });

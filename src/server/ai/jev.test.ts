@@ -64,10 +64,10 @@ describe("typed Jev assessment over OpenRouter", () => {
   });
   it("does not silently omit requested but unqualified decisions", () => {
     const env = {
-      HERMES_ENABLED: "1",
-      HERMES_PROCESSING_APPROVED: "1",
-      HERMES_ROUTING_QUALIFIED: "1",
-      HERMES_ROUTING_POLICY: JSON.stringify({
+      BUTLER_ENABLED: "1",
+      BUTLER_PROCESSING_APPROVED: "1",
+      BUTLER_ROUTING_QUALIFIED: "1",
+      BUTLER_ROUTING_POLICY: JSON.stringify({
         router: "typesafe/jev-router",
         models: ["test/a", "test/b"],
         providers: ["test"],
@@ -75,31 +75,31 @@ describe("typed Jev assessment over OpenRouter", () => {
         guardrailRevision: "fixture",
       }),
       OPENROUTER_API_KEY: "test-only",
-      HERMES_INPUT_USD_MICROS_PER_TOKEN: "1",
-      HERMES_OUTPUT_USD_MICROS_PER_TOKEN: "2",
-      HERMES_DAILY_LIMIT_USD_MICROS: "100000",
-      HERMES_JEV_ENABLED: "1",
-      HERMES_JEV_POLICY: JSON.stringify(syntheticJevPolicy),
+      BUTLER_INPUT_USD_MICROS_PER_TOKEN: "1",
+      BUTLER_OUTPUT_USD_MICROS_PER_TOKEN: "2",
+      BUTLER_DAILY_LIMIT_USD_MICROS: "100000",
+      BUTLER_JEV_ENABLED: "1",
+      BUTLER_JEV_POLICY: JSON.stringify(syntheticJevPolicy),
     };
     expect(assistanceConfig(env).enabled).toBe(false);
     expect(
       readJevPolicy({
         ...env,
-        HERMES_JEV_POLICY: JSON.stringify({
+        BUTLER_JEV_POLICY: JSON.stringify({
           ...syntheticJevPolicy,
           snapshots: ["typesafe/jev-1.13"],
         }),
       }),
     ).toBeUndefined();
-    expect(assistanceConfig({ ...env, HERMES_JEV_QUALIFIED: "1" }).enabled).toBe(true);
+    expect(assistanceConfig({ ...env, BUTLER_JEV_QUALIFIED: "1" }).enabled).toBe(true);
     expect(
       readJevPolicy({
         ...env,
-        HERMES_JEV_POLICY: JSON.stringify({ ...syntheticJevPolicy, maxCostMicros: 1 }),
+        BUTLER_JEV_POLICY: JSON.stringify({ ...syntheticJevPolicy, maxCostMicros: 1 }),
       }),
     ).toBeUndefined();
     expect(
-      assistanceConfig({ ...env, HERMES_JEV_QUALIFIED: "1", HERMES_JEV_POLICY: "{" }).enabled,
+      assistanceConfig({ ...env, BUTLER_JEV_QUALIFIED: "1", BUTLER_JEV_POLICY: "{" }).enabled,
     ).toBe(false);
   });
   it.each([

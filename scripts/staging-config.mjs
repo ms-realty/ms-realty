@@ -74,8 +74,8 @@ export function validateStaging(
     demand(input.origins?.[surface] === `https://${knownHosts[i]}`, `${surface} isolated origin`);
   const access = input.access;
   demand(
-    id(access?.applicationId) && id(access?.controllerGroupId) && id(access?.serviceTokenId),
-    "Access application/group/service identities",
+    id(access?.applicationId) && id(access?.serviceTokenId),
+    "Access application/service identities",
   );
   demand(
     address(access.ownerEmail) &&
@@ -85,9 +85,12 @@ export function validateStaging(
   );
   demand(
     Array.isArray(access.controllerEmails) &&
-      access.controllerEmails.length > 0 &&
-      access.controllerEmails.every(address),
-    "reviewed controller Access identities",
+      (access.controllerGroupId == null
+        ? access.controllerEmails.length === 0
+        : id(access.controllerGroupId) &&
+          access.controllerEmails.length > 0 &&
+          access.controllerEmails.every(address)),
+    "optional controller human group has explicit reviewed identities",
   );
   demand(
     /^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(access.teamDomain ?? ""),

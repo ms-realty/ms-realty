@@ -200,7 +200,7 @@ tracking parity remain separate proof.
 The staging email relay allows only reviewed sender/inbox/plaintext and validated opaque Case
 reply address. Attachments/arbitrary shapes are rejected before send. Durable receipts persist
 uncertainty before the binding call; duplicates cannot blindly resend. Acceptance is not delivery.
-Case email/inbound/Hermes remain disabled in this adapter pending qualification.
+Case email/inbound/Butler remain disabled in this adapter pending qualification.
 
 The staging inquiry consumer is disabled by default. To exercise the notification gate, the
 operator must set `email.inquiryCoverageNoticeEnabled: true` and

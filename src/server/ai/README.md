@@ -1,4 +1,4 @@
-# Hermes bounded assistance
+# Butler bounded assistance
 
 The durable `ai.draft` job uses one bounded generation request and, when qualified, one typed
 assessment request. Neither receives provider tools. There are no
@@ -27,9 +27,14 @@ human review. It never writes property facts, posts/sends messages, creates task
 access, approves claims or publishes. Manual source/inventory/translation workbenches remain
 available with provider activation disabled.
 
-OpenRouter is the default transport. Activation requires `HERMES_ENABLED=1`,
-`HERMES_PROCESSING_APPROVED=1`, `OPENROUTER_API_KEY`, `HERMES_ROUTING_QUALIFIED=1`,
-and valid JSON in `HERMES_ROUTING_POLICY`:
+The canonical settings are `BUTLER_*`. During deployment migration, each setting also reads
+its corresponding legacy `HERMES_*` name only when the Butler setting is absent. An explicit
+Butler value (including `0`, an empty value or invalid JSON) never falls back to the old value.
+Stored service-principal IDs and the daily-budget advisory lock remain unchanged across versions.
+
+OpenRouter is the default transport. Activation requires `BUTLER_ENABLED=1`,
+`BUTLER_PROCESSING_APPROVED=1`, `OPENROUTER_API_KEY`, `BUTLER_ROUTING_QUALIFIED=1`,
+and valid JSON in `BUTLER_ROUTING_POLICY`:
 
 ```json
 {
@@ -58,8 +63,8 @@ fallback behavior, reasoning-token limits, strict schema support, billing and th
 An operator must verify that Jev Router honors these restrictions; the model page alone is
 not sufficient evidence. Empty/unavailable allowed routes must not relax the policy.
 
-Explicit `HERMES_INPUT_USD_MICROS_PER_TOKEN`, `HERMES_OUTPUT_USD_MICROS_PER_TOKEN` and
-`HERMES_DAILY_LIMIT_USD_MICROS` remain mandatory. The first two are approved **upper bounds**
+Explicit `BUTLER_INPUT_USD_MICROS_PER_TOKEN`, `BUTLER_OUTPUT_USD_MICROS_PER_TOKEN` and
+`BUTLER_DAILY_LIMIT_USD_MICROS` remain mandatory. The first two are approved **upper bounds**
 for reservation and endpoint selection, not a guessed price for every selected model.
 One micro-USD per token equals one USD per million tokens (`provider.max_price`). Completed
 OpenRouter runs account `usage.cost`, rounded up to micro-units; absent cost keeps the full
@@ -69,8 +74,8 @@ Bounded routing metadata records the actual model, provider when reported, gener
 policy digest and attempts. Cache hits may omit router metadata. Raw metadata, reasoning and
 provider error bodies are not persisted.
 
-The legacy Responses adapter requires explicit `HERMES_PROVIDER=openai`, `OPENAI_API_KEY`
-and `HERMES_MODEL`. It is not a fallback. Existing internal injected test configurations without
+The legacy Responses adapter requires explicit `BUTLER_PROVIDER=openai`, `OPENAI_API_KEY`
+and `BUTLER_MODEL`. It is not a fallback. Existing internal injected test configurations without
 a provider field preserve their legacy behavior; environment configuration defaults to OpenRouter.
 
 Tests use synthetic sources and in-process generators or mocked transport. They establish
@@ -80,9 +85,9 @@ evaluation and release evidence.
 
 ## Typed Jev assessment
 
-`HERMES_JEV_ENABLED=1` requests semantic assessment after deterministic draft validation,
+`BUTLER_JEV_ENABLED=1` requests semantic assessment after deterministic draft validation,
 for inquiry, translation and broker-note extraction proposals. It additionally requires
-`HERMES_JEV_QUALIFIED=1` and valid `HERMES_JEV_POLICY` JSON. Requested but unqualified
+`BUTLER_JEV_QUALIFIED=1` and valid `BUTLER_JEV_POLICY` JSON. Requested but unqualified
 assessment disables generation as well; it is never silently omitted.
 
 ```json

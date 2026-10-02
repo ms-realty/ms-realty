@@ -368,6 +368,7 @@ export async function requestAssistance(
       if (!config.enabled || !config.model)
         throw new AppError("unavailable", { fieldErrors: { form: ["assistance_disabled"] } });
       // One global reservation lock enforces the provider-wide UTC daily ceiling under concurrency.
+      // Keep the persisted legacy namespace while old and Butler deployments can coexist.
       await ctx.tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended('hermes:daily-budget', 0))`,
       );

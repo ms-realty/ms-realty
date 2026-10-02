@@ -58,7 +58,7 @@ export async function routedGeneration(
       Authorization: `Bearer ${config.apiKey}`,
       "Content-Type": "application/json",
       "X-OpenRouter-Metadata": "enabled",
-      "X-OpenRouter-Title": "MS Realty Hermes",
+      "X-OpenRouter-Title": "MS Realty Butler",
     },
     body: JSON.stringify({
       ...routingRequest(policy, config.inputCostMicros, config.outputCostMicros),

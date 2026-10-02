@@ -83,7 +83,7 @@ const generate: DraftGenerator = async () => ({
   outputTokens: 60,
 });
 
-describe("source-bound Hermes drafts on PostgreSQL", () => {
+describe("source-bound Butler drafts on PostgreSQL", () => {
   const judged = { ...config, jev: syntheticJevPolicy };
   it("reserves both calls, retains uncertain judgments for human review and charges both actual costs", async () => {
     const f = await fixture();

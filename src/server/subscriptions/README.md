@@ -1,6 +1,6 @@
 # Saved-search alerts (F05 / AT44)
 
-This is an optional email service under exact subscriber consent. It never creates consent, sends marketing, or asks Hermes to generate copy. The source of matches is the same parameterized PostgreSQL public search and approved current publication used by discovery.
+This is an optional email service under exact subscriber consent. It never creates consent, sends marketing, or asks Butler to generate copy. The source of matches is the same parameterized PostgreSQL public search and approved current publication used by discovery.
 
 `planSearchAlerts(pool, subscriptionId, {now?, rule?})` records an immutable `externalActions` email effect. Its payload pins the exact normalized criteria, subscriber version, verified contact/version, approved consent policy, human rule approval/hash, local calendar period and approved listing/revision/manifest/title/reference/link. A subscription row lock serializes competing planners. Empty matches create no email. Daily is the preference default; weekly uses a Monday-starting local calendar week. DST does not create extra periods. There is no promised delivery hour.
 

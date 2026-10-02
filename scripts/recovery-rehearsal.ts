@@ -100,7 +100,7 @@ async function webStartup(url: string, shouldOpen: boolean) {
         APP_ORIGIN: `http://localhost:${port}`,
         CLIENT_ORIGIN: `http://my.localhost:${port}`,
         STAFF_ORIGIN: `http://app.localhost:${port}`,
-        HERMES_ENABLED: "0",
+        BUTLER_ENABLED: "0",
         CASE_INBOUND_ENABLED: "0",
         ENABLE_TEST_OUTBOX: "1",
       },

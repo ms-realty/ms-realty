@@ -32,7 +32,7 @@ const originSecret = randomBytes(32).toString("hex");
 const common = {
   DATABASE_URL: containerDatabase.toString(),
   AUTH_SECRET: randomBytes(32).toString("hex"),
-  HERMES_ENABLED: "0",
+  BUTLER_ENABLED: "0",
   WORKER_HEARTBEAT_URL: "",
 };
 const docker = (...args) =>

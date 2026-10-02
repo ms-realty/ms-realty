@@ -104,8 +104,12 @@ for (const javaScriptEnabled of [true, false])
       await page.getByRole("button", { name: "End staff access", exact: true }).click();
       await expect(page.getByText("Staff membership ended", { exact: true })).toBeVisible();
       await page.goto(hostUrl("staff", "/en/today"));
+      await page.getByRole("button", { name: "More", exact: true }).click();
+      await page.getByRole("link", { name: "More tools", exact: true }).click();
+      await expect(page).toHaveURL(hostUrl("staff", "/en/operations"));
+      await expect(page.getByRole("heading", { name: "Operations", exact: true })).toBeVisible();
       await page
-        .getByRole("navigation", { name: "Details", exact: true })
+        .getByRole("main")
         .getByRole("link", { name: "Agency coverage", exact: true })
         .click();
       for (const [locale, heading] of [
@@ -121,9 +125,15 @@ for (const javaScriptEnabled of [true, false])
         expect(await findPaginatedRecord(page, href, { locale, viewportWidth: 320 })).toBe(true);
         const targetPage = Number(new URL(page.url()).searchParams.get("page"));
         expect(targetPage).toBeGreaterThan(1);
-        expect(await moveQueuePage(page, "previous", { locale, viewportWidth: 320 })).toBe(true);
+        // Other journeys create/remove their own earlier padding rows concurrently. Only
+        // page one is guaranteed to exclude this task by our 26 retained earlier records.
+        // Exercise the real previous links back to that stable boundary, then search the
+        // actual next pages instead of assuming the record keeps the same numeric offset.
+        for (let previous = targetPage - 1; previous >= 1; previous--)
+          expect(await moveQueuePage(page, "previous", { locale, viewportWidth: 320 })).toBe(true);
         await expect(page.locator(`a[href="${href}"]`)).toHaveCount(0);
         expect(await moveQueuePage(page, "next", { locale, viewportWidth: 320 })).toBe(true);
+        expect(await findPaginatedRecord(page, href, { locale, viewportWidth: 320 })).toBe(true);
         await expect(page.locator(`a[href="${href}"]`)).toBeVisible();
       }
       await expect(
@@ -193,15 +203,18 @@ for (const javaScriptEnabled of [true, false])
       expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(true);
       expect(await findCoverageRecord(page, `/en/operations/keys/${f.keyId}`)).toBe(true);
     } finally {
-      await context.close();
-      // These unmodified padding records belong only to this test; the runner owns the rest
-      // of the synthetic database. Do not accumulate extra pages for unrelated scenarios.
-      await db.delete(schema.tasks).where(
-        inArray(
-          schema.tasks.id,
-          retained.map((row) => row.id),
-        ),
-      );
+      try {
+        // Delete this test's exact padding rows before browser teardown can reject or delay
+        // close and leave extra queue pages for the next journey.
+        await db.delete(schema.tasks).where(
+          inArray(
+            schema.tasks.id,
+            retained.map((row) => row.id),
+          ),
+        );
+      } finally {
+        await context.close();
+      }
     }
   });
 

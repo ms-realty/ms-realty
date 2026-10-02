@@ -4,7 +4,7 @@
 //
 // Every command is a recorded human decision by a staff member holding its capability,
 // idempotent through its operation id, guarded by an expected revision, and commits its audit,
-// activity and outbox event with the change. Hermes and system jobs can take none of them.
+// activity and outbox event with the change. Butler and system jobs can take none of them.
 //
 // Activation switches the one CurrentPublication pointer for the listing, locale and destination
 // in the same transaction that re-validates the manifest against current approvals and checks
@@ -85,7 +85,7 @@ export interface CommandEnvelope {
 type ListingRow = typeof listings.$inferSelect;
 
 function requireStaff(actor: Actor): void {
-  // Publishing and approving are human decisions (§7.2); Hermes never receives them (AT52).
+  // Publishing and approving are human decisions (§7.2); Butler never receives them (AT52).
   if (actor.kind !== "staff") throw new AppError("forbidden");
 }
 

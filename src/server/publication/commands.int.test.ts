@@ -590,10 +590,10 @@ describe("publication commands (§7.2–§7.3)", () => {
     expect(await loadPublishedListings(t.db, { ids: [f.listingId] }, "bg")).toEqual([]);
   });
 
-  it("AT26/AT52: Hermes and staff without publishing authority cannot take a publication step", async () => {
+  it("AT26/AT52: Butler and staff without publishing authority cannot take a publication step", async () => {
     const f = await fixture();
     await reviewAndApprove(f);
-    const asHermes = await rejection(
+    const asButler = await rejection(
       prepareManifest(t.db, {
         actor: hermes,
         operationId: newOperationId(),
@@ -602,7 +602,7 @@ describe("publication commands (§7.2–§7.3)", () => {
         locale: "bg",
       }),
     );
-    expect(asHermes.code).toBe("forbidden");
+    expect(asButler.code).toBe("forbidden");
     const asEditor = await rejection(
       prepareManifest(t.db, {
         actor: editor.actor,

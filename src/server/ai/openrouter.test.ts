@@ -60,16 +60,16 @@ afterEach(() => vi.unstubAllGlobals());
 describe("hosted Jev routing contract", () => {
   it("requires approval, qualification and a valid multi-model policy; never exposes credentials", () => {
     const env = {
-      HERMES_ENABLED: "1",
-      HERMES_PROCESSING_APPROVED: "1",
+      BUTLER_ENABLED: "1",
+      BUTLER_PROCESSING_APPROVED: "1",
       OPENROUTER_API_KEY: "test-only",
-      HERMES_INPUT_USD_MICROS_PER_TOKEN: "1",
-      HERMES_OUTPUT_USD_MICROS_PER_TOKEN: "2",
-      HERMES_DAILY_LIMIT_USD_MICROS: "100000",
-      HERMES_ROUTING_POLICY: JSON.stringify(policy),
+      BUTLER_INPUT_USD_MICROS_PER_TOKEN: "1",
+      BUTLER_OUTPUT_USD_MICROS_PER_TOKEN: "2",
+      BUTLER_DAILY_LIMIT_USD_MICROS: "100000",
+      BUTLER_ROUTING_POLICY: JSON.stringify(policy),
     };
     expect(assistanceConfig(env).enabled).toBe(false);
-    const qualified = { ...env, HERMES_ROUTING_QUALIFIED: "1" };
+    const qualified = { ...env, BUTLER_ROUTING_QUALIFIED: "1" };
     expect(assistanceConfig(qualified)).toMatchObject({
       enabled: true,
       provider: "openrouter",
@@ -78,15 +78,15 @@ describe("hosted Jev routing contract", () => {
     expect(JSON.stringify(assistanceAvailability(assistanceConfig(qualified)))).not.toContain(
       "test-only",
     );
-    expect(assistanceConfig({ ...qualified, HERMES_PROVIDER: "unknown" }).enabled).toBe(false);
+    expect(assistanceConfig({ ...qualified, BUTLER_PROVIDER: "unknown" }).enabled).toBe(false);
     for (const bad of [
       "{",
       JSON.stringify({ ...policy, models: ["test/fast"] }),
       JSON.stringify({ ...policy, models: ["test/fast", "test/fast"] }),
       JSON.stringify({ ...policy, costTier: "max" }),
     ]) {
-      expect(readRoutingPolicy({ HERMES_ROUTING_POLICY: bad })).toBeNull();
-      expect(assistanceConfig({ ...qualified, HERMES_ROUTING_POLICY: bad }).enabled).toBe(false);
+      expect(readRoutingPolicy({ BUTLER_ROUTING_POLICY: bad })).toBeNull();
+      expect(assistanceConfig({ ...qualified, BUTLER_ROUTING_POLICY: bad }).enabled).toBe(false);
     }
   });
   it("lets the hosted router select different models and records actual billing without forcing reasoning", async () => {
@@ -114,7 +114,10 @@ describe("hosted Jev routing contract", () => {
       for (const key of ["tools", "reasoning", "plugins"]) expect(body).not.toHaveProperty(key);
       expect(body.messages[0].content).not.toContain(source.fields.message);
       expect(body.messages[1].content).toContain(source.fields.message);
-      expect(init.headers).toMatchObject({ "X-OpenRouter-Metadata": "enabled" });
+      expect(init.headers).toMatchObject({
+        "X-OpenRouter-Metadata": "enabled",
+        "X-OpenRouter-Title": "MS Realty Butler",
+      });
       expect(result).toMatchObject({
         actualCostMicros: 7,
         routing: { model, policyDigest: routingDigest(policy) },

@@ -92,18 +92,27 @@ export function validateAccess(input, app, policies, group, otherApps) {
       JSON.stringify(domains) === JSON.stringify([...hosts].sort()),
     "Access protects all three exact hosts",
   );
-  const members = group.include?.map((rule) => (oneKey(rule, "email") ? rule.email.email : null));
-  demand(
-    Array.isArray(members) &&
-      members.length > 0 &&
-      members.every((email) => configured.controllerEmails.includes(email)) &&
-      configured.controllerEmails.every((email) => members.includes(email)),
-    "controller group has only reviewed identities",
-  );
-  demand(
-    (group.require ?? []).length === 0 && (group.exclude ?? []).length === 0,
-    "explicit controller group shape",
-  );
+  const controllerGroupRequired = configured.controllerGroupId != null;
+  if (controllerGroupRequired) {
+    const members = group?.include?.map((rule) =>
+      oneKey(rule, "email") ? rule.email.email : null,
+    );
+    demand(
+      Array.isArray(members) &&
+        members.length > 0 &&
+        members.every((email) => configured.controllerEmails.includes(email)) &&
+        configured.controllerEmails.every((email) => members.includes(email)),
+      "controller group has only reviewed identities",
+    );
+    demand(
+      (group.require ?? []).length === 0 && (group.exclude ?? []).length === 0,
+      "explicit controller group shape",
+    );
+  } else
+    demand(
+      group == null && configured.controllerEmails.length === 0,
+      "controller automation uses only the named checker service token",
+    );
   demand(Array.isArray(policies) && policies.length > 0, "Access policies present");
   let owner = false,
     controller = false,
@@ -124,6 +133,7 @@ export function validateAccess(input, app, policies, group, otherApps) {
         owner = true;
       else if (
         policy.decision === "allow" &&
+        controllerGroupRequired &&
         oneKey(rule, "group") &&
         rule.group?.id === configured.controllerGroupId
       )
@@ -137,7 +147,10 @@ export function validateAccess(input, app, policies, group, otherApps) {
       else demand(false, "only owner, controller group and named service token may enter staging");
     }
   }
-  demand(owner && controller && service, "owner/controller/checker policies");
+  demand(
+    owner && (!controllerGroupRequired || controller) && service,
+    "owner/controller/checker policies",
+  );
   for (const other of otherApps) {
     if (other.id === configured.applicationId) continue;
     const candidates = [
@@ -167,7 +180,9 @@ export async function providerPreflight(input, api) {
       api(zone),
       api(`${access}/apps/${input.access.applicationId}`),
       api(`${access}/apps/${input.access.applicationId}/policies`, true),
-      api(`${access}/groups/${input.access.controllerGroupId}`),
+      input.access.controllerGroupId == null
+        ? null
+        : api(`${access}/groups/${input.access.controllerGroupId}`),
       api(`${access}/apps`, true),
       api(`${zone}/workers/routes`, true),
       Promise.all(

@@ -1,4 +1,5 @@
 import "server-only";
+import { butlerSetting } from "./env";
 import { readJevPolicy } from "./jev";
 import type { JevPolicy } from "./jev-contract";
 import { type RoutingPolicy, readRoutingPolicy } from "./routing";
@@ -26,29 +27,33 @@ const positive = (raw: string | undefined, maximum: number) => {
 export function assistanceConfig(
   env: Record<string, string | undefined> = process.env,
 ): AssistanceConfig {
-  const provider = env.HERMES_PROVIDER ?? "openrouter";
+  const provider = butlerSetting(env, "PROVIDER") ?? "openrouter";
   const routing = readRoutingPolicy(env);
   const jev = readJevPolicy(env);
   const jevReady =
-    env.HERMES_JEV_ENABLED !== "1" ||
-    (provider === "openrouter" && jev && env.HERMES_JEV_QUALIFIED === "1");
+    butlerSetting(env, "JEV_ENABLED") !== "1" ||
+    (provider === "openrouter" && jev && butlerSetting(env, "JEV_QUALIFIED") === "1");
   const model =
-    provider === "openrouter" ? (routing?.router ?? null) : env.HERMES_MODEL?.trim() || null;
+    provider === "openrouter"
+      ? (routing?.router ?? null)
+      : butlerSetting(env, "MODEL")?.trim() || null;
   const apiKey = env.OPENAI_API_KEY?.trim() || null;
-  const inputCostMicros = positive(env.HERMES_INPUT_USD_MICROS_PER_TOKEN, 100_000);
-  const outputCostMicros = positive(env.HERMES_OUTPUT_USD_MICROS_PER_TOKEN, 100_000);
-  const dailyLimitMicros = Math.floor(positive(env.HERMES_DAILY_LIMIT_USD_MICROS, 1_000_000_000));
+  const inputCostMicros = positive(butlerSetting(env, "INPUT_USD_MICROS_PER_TOKEN"), 100_000);
+  const outputCostMicros = positive(butlerSetting(env, "OUTPUT_USD_MICROS_PER_TOKEN"), 100_000);
+  const dailyLimitMicros = Math.floor(
+    positive(butlerSetting(env, "DAILY_LIMIT_USD_MICROS"), 1_000_000_000),
+  );
   const credential = provider === "openrouter" ? env.OPENROUTER_API_KEY?.trim() : apiKey;
   const transportReady =
     provider === "openai" ||
-    (provider === "openrouter" && routing && env.HERMES_ROUTING_QUALIFIED === "1");
+    (provider === "openrouter" && routing && butlerSetting(env, "ROUTING_QUALIFIED") === "1");
   return {
     provider: provider === "openai" ? "openai" : "openrouter",
     routing: provider === "openrouter" ? (routing ?? undefined) : undefined,
     jev,
     enabled: Boolean(
-      env.HERMES_ENABLED === "1" &&
-        env.HERMES_PROCESSING_APPROVED === "1" &&
+      butlerSetting(env, "ENABLED") === "1" &&
+        butlerSetting(env, "PROCESSING_APPROVED") === "1" &&
         model &&
         credential &&
         transportReady &&

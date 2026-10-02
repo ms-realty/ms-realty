@@ -81,7 +81,7 @@ it("denies direct mail, case mail, digests, AI and the standalone worker before 
         STAFF_ORIGIN: "http://app.localhost:3195",
         CASE_INBOUND_ENABLED: "0",
         WORKER_HEARTBEAT_URL: "",
-        HERMES_ENABLED: "0",
+        BUTLER_ENABLED: "0",
       },
     },
   ).then(

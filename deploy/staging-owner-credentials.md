@@ -61,7 +61,29 @@ print('Five local secret files prepared; provider credentials and reviewed JSON 
 PY
 ```
 
-## 2. Supply ten external credential files and the reviewed inputs
+## 2. Codex prepares the origin; the owner supplies Cloudflare credentials
+
+Origin provisioning is operator work. On 2 October Codex provisioned a separate
+PostgreSQL 16.14 container, private network, volume, TLS and three roles on the
+existing MS Realty origin, with no published database port. All roles passed
+actual verify-full TLS sessions; cleartext, wrong hostname and other-database
+connections were rejected. Production review container IDs/start times/config
+hashes were unchanged; another Docker network could not reach the staging DB.
+
+Codex has already written `STAGING_WEB_DATABASE_URL`, `STAGING_WORKER_DATABASE_URL`,
+`STAGING_MIGRATOR_DATABASE_URL`, `STAGING_DATABASE_TLS_CA_PEM` and the measured
+`STAGING_DATABASE_ISOLATION_JSON.json` to the private directory with mode 600. The
+CA private key stays on origin outside container mounts. The five local app
+secrets also exist. The owner does not provision PostgreSQL or generate these
+values. Existing credentials must not be rotated by rerunning preparation.
+
+Exact dashboard clicks, current permissions, secure file-entry helper and JSON
+ID fields are in [OWNER-CLOUDFLARE-CHECKLIST.md](/Users/ivan/Code/Mindburn-Labs/output/msr-launch/OWNER-CLOUDFLARE-CHECKLIST.md).
+Access applications/policies, staging DNS and the origin Tunnel are created by
+the controller in the MS Realty dashboard. Neither workflow API token receives
+Access or DNS write permissions. The origin Tunnel token stays outside GitHub app
+secrets; Codex installs the connector after the controller supplies it.
+Six Cloudflare workflow secret values are owner inputs, as below.
 
 Save each value in `/Users/ivan/.config/ms-realty/staging/` using exactly the
 filename below, as plain UTF-8 without shell quotes. Use the MS Realty Cloudflare
@@ -73,10 +95,6 @@ is an input. Do not paste values into chat, lane JSON, commits or evidence repor
 | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Fresh staging deploy token from the MS Realty account. It must authorize the prepared Workers/Containers image push and staging Worker/secret deployment, with zone Workers Routes write limited to `makler-realty.com`. Start from Cloudflare's Workers edit template and review resource scope. No DNS write, Access edit or production-bucket object write is needed by this deployment job. Provider authorization still needs actual qualification. |
 | `STAGING_CLOUDFLARE_READ_TOKEN` | Separate read-only token: MS Realty account Workers/Containers observations, R2 bucket configuration, Access applications/policies/groups; `makler-realty.com` zone read, DNS read and Workers Routes read. No write permission. |
-| `STAGING_WEB_DATABASE_URL` | A dedicated web-role URL for the isolated staging PostgreSQL16.14 service/database. |
-| `STAGING_WORKER_DATABASE_URL` | The same staging host/database with a distinct worker role. |
-| `STAGING_MIGRATOR_DATABASE_URL` | The same staging host/database with a third migrator role. |
-| `STAGING_DATABASE_TLS_CA_PEM` | One current CA certificate for that staging PostgreSQL server, with a valid server certificate for the reviewed database hostname. This is the CA certificate, not its private key. |
 | `STAGING_DATABASE_ACCESS_CLIENT_SECRET` | Database-only Cloudflare Access Service Auth token secret. Its Access Client ID and resource IDs go in `database.access` in the JSON. Distinct from the web token below. |
 | `STAGING_ACCESS_SERVICE_CLIENT_SECRET` | Web/controller Access service-token secret for the exact three staging hosts. Client ID and resource IDs go in `access` in the JSON. |
 | `STAGING_R2_ACCESS_KEY_ID` | Access Key ID from a new R2 Object Read & Write token restricted to the separate staging media/cache buckets. |
@@ -91,11 +109,17 @@ its separate TLS service/volume, with no host-published5432. See
 
 The origin Tunnel connector token belongs only on the separate staging origin
 connector. It is **not** one of the GitHub application secrets and must not be
-substituted for either Access service-token secret. Owner/operator provisioning
-also supplies the isolated PostgreSQL service, roles and certificate, Tunnel,
-database Service Auth app, and private ClamAV endpoint.
+substituted for either Access service-token secret. Codex supplies and measures
+PostgreSQL, roles/certificates, the origin connector, database Service Auth and
+private ClamAV. The connector is prepared and stopped pending its fresh token.
+ClamAV is configured but stopped pending approved RAM and private transport
+qualification from Containers. Never fill `CLAMAV_HOST` with an origin-only
+Docker name that deployed Containers cannot resolve.
 
-Complete `STAGING_INPUTS_JSON.json` with actual values:
+Codex completes `STAGING_INPUTS_JSON.json` from actual resources, with the owner's
+approved Access identities and test recipient. Account/zone, origins, database
+name/hostname/roles/version, isolation pin, intended buckets and artifact hashes
+are already filled. Planned buckets still need provider confirmation. Inputs:
 
 - `.com` zone ID `f0ac7af0721419e8129e5d10ff547372` and the exact three HTTPS origins
   already in the template: `staging.`, `my.staging.`, `app.staging.makler-realty.com`;

@@ -530,6 +530,42 @@ test("route preflight rejects foreign subpaths, bypasses and wildcard staging ov
   assert.throws(() => validateRoutes(input, undefined), /known Worker route inventory/);
 });
 
+test("Access accepts the owner's human identity plus the named controller service token without inventing a human group", () => {
+  const { input, artifacts } = fixture();
+  input.access.controllerGroupId = null;
+  input.access.controllerEmails = [];
+  validateStaging(input, artifacts);
+  const app = {
+    id: input.access.applicationId,
+    type: "self_hosted",
+    aud: input.access.audience,
+    domain: "staging.makler-realty.com",
+    self_hosted_domains: ["my.staging.makler-realty.com", "app.staging.makler-realty.com"],
+  };
+  const policies = [
+    { decision: "allow", include: [{ email: { email: input.access.ownerEmail } }] },
+    {
+      decision: "non_identity",
+      include: [{ service_token: { token_id: input.access.serviceTokenId } }],
+    },
+  ];
+  validateAccess(input, app, policies, null, [app]);
+  assert.throws(() => validateAccess(input, app, policies.slice(0, 1), null, [app]));
+  assert.throws(() => validateAccess(input, app, policies.slice(1), null, [app]));
+  assert.throws(() =>
+    validateAccess(
+      input,
+      app,
+      [...policies, { decision: "allow", include: [{ group: { id: "2".repeat(36) } }] }],
+      null,
+      [app],
+    ),
+  );
+  input.access.controllerEmails = ["unapproved@example.invalid"];
+  assert.throws(() => validateStaging(input, artifacts));
+  assert.throws(() => validateAccess(input, app, policies, null, [app]));
+});
+
 test("Access preflight denies bypass, everyone, foreign controllers and more-specific app overrides", () => {
   const { input } = fixture();
   const app = {

@@ -104,7 +104,7 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
       EMAIL_ACCESS_CLIENT_SECRET: value(env, "ACCESS_SERVICE_CLIENT_SECRET"),
       CASE_EMAIL_ENABLED: "0",
       CASE_INBOUND_ENABLED: "0",
-      HERMES_ENABLED: "0",
+      BUTLER_ENABLED: "0",
     });
     if (value(env, "INQUIRY_COVERAGE_NOTICE_ENABLED") === "1") {
       const inbox = value(env, "INQUIRY_COVERAGE_TEST_INBOX");

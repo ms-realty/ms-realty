@@ -26,9 +26,14 @@ const connection = postgres(url, { max: 1, onnotice: () => {} });
 const db = drizzle(connection, { schema });
 try {
   const result = await db.transaction(async (tx) => {
+    const inquiryId = randomUUID();
     const reviewer = await createStaff(tx, {
-      roles: ["assigned_broker", "content_editor", "publishing_approver"],
-      grants: [{ capability: "document.review" }],
+      roles: ["content_editor", "publishing_approver"],
+      grants: [
+        { capability: "document.review" },
+        { capability: "document.read_restricted" },
+        { capability: "inquiry.read", recordType: "inquiry", recordId: inquiryId },
+      ],
       email: `publication-${randomUUID()}@example.test`,
     });
     // Valid-session entry fixture, not browser authentication evidence. The separate identity
@@ -52,7 +57,10 @@ try {
       })
       .returning();
     if (!seller) throw new Error("Missing synthetic seller");
+    // This reviewer needs only this seller's inquiry. An agency-wide broker grant made the
+    // fixture depend on where its seller sorted among other concurrently created contacts.
     await tx.insert(schema.inquiries).values({
+      id: inquiryId,
       reference: `INQ-PUB-${randomUUID()}`,
       purpose: "seller_consultation",
       source: "walk_in",

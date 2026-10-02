@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { hashRequest } from "../crypto";
+import { butlerSetting } from "./env";
 
 const modelId = z.string().regex(/^[a-z0-9-]+\/[a-zA-Z0-9._-]+$/);
 const policyFields = z
@@ -30,7 +31,9 @@ export const routingPolicy = z.discriminatedUnion("router", [
 export type RoutingPolicy = z.infer<typeof routingPolicy>;
 export function readRoutingPolicy(env: Record<string, string | undefined>): RoutingPolicy | null {
   try {
-    const parsed = routingPolicy.safeParse(JSON.parse(env.HERMES_ROUTING_POLICY ?? "null"));
+    const parsed = routingPolicy.safeParse(
+      JSON.parse(butlerSetting(env, "ROUTING_POLICY") ?? "null"),
+    );
     return parsed.success ? parsed.data : null;
   } catch {
     return null;

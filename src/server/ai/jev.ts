@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { hashRequest } from "../crypto";
 import type { AssistanceConfig } from "./config";
+import { butlerSetting } from "./env";
 import {
   type JevAssessment,
   type JevPolicy,
@@ -15,9 +16,9 @@ import {
 import { providerJson } from "./response";
 
 export function readJevPolicy(env: Record<string, string | undefined>): JevPolicy | undefined {
-  if (env.HERMES_JEV_ENABLED !== "1") return undefined;
+  if (butlerSetting(env, "JEV_ENABLED") !== "1") return undefined;
   try {
-    return jevPolicySchema.parse(JSON.parse(env.HERMES_JEV_POLICY ?? "null"));
+    return jevPolicySchema.parse(JSON.parse(butlerSetting(env, "JEV_POLICY") ?? "null"));
   } catch {
     return undefined;
   }
