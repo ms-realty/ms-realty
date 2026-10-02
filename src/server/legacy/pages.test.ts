@@ -3,7 +3,10 @@ import { legacySnapshotPages, selectLegacyPage } from "./pages";
 
 it("all staged snapshots have verified body hashes and keep source locale without invented translations", () => {
   const pages = legacySnapshotPages();
-  expect(pages.filter((page) => page.provenance.kind === "archived").length).toBe(267);
+  // The recovered live delta keeps all 591 previous identities and adds 517;
+  // 109 archived snapshots now have captured live source evidence.
+  expect(pages).toHaveLength(1108);
+  expect(pages.filter((page) => page.provenance.kind === "archived").length).toBe(158);
   const page = pages[0];
   expect(page).toBeDefined();
   if (!page) return;
@@ -18,7 +21,8 @@ it("archived listings remain actual source pages without a fabricated sold statu
   const listings = legacySnapshotPages().filter(
     (page) => page.listing && page.provenance.kind === "archived",
   );
-  expect(listings.length).toBe(160);
+  // Of the 109 recovered snapshots, 95 are listing pages; their identities remain live.
+  expect(listings.length).toBe(65);
   expect(listings.some((page) => page.listing?.lifecycleAtFreeze.state === "archived")).toBe(true);
   expect(listings.every((page) => page.listing?.sold === null && page.media.length > 0)).toBe(true);
 });

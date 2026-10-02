@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "incremental": false,
+    "plugins": []
+  },
+  "include": ["*.test.ts", "worker-configuration.d.ts"],
+  "exclude": ["node_modules"]
+}

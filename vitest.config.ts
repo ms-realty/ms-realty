@@ -56,6 +56,9 @@ export default defineConfig({
         test: {
           name: "integration",
           environment: "node",
+          // Each file migrates a whole database; keep within Postgres's shared lock budget.
+          maxWorkers: 2,
+          sequence: { groupOrder: 1 },
           include: databaseUrl ? ["src/**/*.int.test.ts"] : [],
         },
       },

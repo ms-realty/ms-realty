@@ -39,7 +39,6 @@ jobs:
       # Under CI, playwright.config.ts starts the server without building;
       # `make check` has just built it.
       extra-commands: |
-        node scripts/staging-types.mjs
         npx playwright install --with-deps chromium webkit
         npm run tokens:check
         npm run openapi:generate

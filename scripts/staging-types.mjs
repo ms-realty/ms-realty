@@ -24,6 +24,7 @@ for (const [command, args] of [
     ],
   ],
   ["node_modules/.bin/tsc", ["--project", "gateway/tsconfig.json"]],
+  ["node_modules/.bin/tsc", ["--project", "gateway/tsconfig.test.json"]],
 ]) {
   const result = spawnSync(command, args, {
     cwd: root,

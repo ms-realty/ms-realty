@@ -11,5 +11,6 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["cloudflare.ts", "cloudflare-runtime.generated.d.ts"]
+  "include": ["*.ts"],
+  "exclude": ["*.test.ts", "worker-configuration.d.ts"]
 }
