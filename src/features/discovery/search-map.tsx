@@ -119,7 +119,7 @@ export function SearchMap({
             ref={container}
             aria-label={copy.title}
             aria-busy={state === "loading"}
-            className="h-[min(65vh,34rem)] min-h-64 w-full overflow-hidden rounded-lg border border-border"
+            className="h-[min(65vh,34rem)] min-h-64 w-full overflow-hidden rounded-panel border border-border"
           />
         </div>
       )}

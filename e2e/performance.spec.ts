@@ -27,23 +27,8 @@ test("S1b public initial JavaScript stays below 250 KiB gzip", async ({ page, re
 
 test("S1b self-hosted fonts resolve and preload only the page's scripts", async ({ page }) => {
   for (const [locale, expectedFiles] of [
-    [
-      "bg",
-      [
-        "/fonts/noto-sans-latin.woff2",
-        "/fonts/manrope-latin.woff2",
-        "/fonts/noto-sans-cyrillic.woff2",
-        "/fonts/manrope-cyrillic.woff2",
-      ],
-    ],
-    [
-      "he",
-      [
-        "/fonts/noto-sans-latin.woff2",
-        "/fonts/manrope-latin.woff2",
-        "/fonts/noto-sans-hebrew.woff2",
-      ],
-    ],
+    ["bg", ["/fonts/noto-sans-latin.woff2", "/fonts/noto-sans-cyrillic.woff2"]],
+    ["he", ["/fonts/noto-sans-latin.woff2", "/fonts/noto-sans-hebrew.woff2"]],
   ] as const) {
     await page.goto(`/${locale}`);
     await page.evaluate(() => document.fonts.ready);

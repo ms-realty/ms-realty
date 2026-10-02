@@ -148,17 +148,17 @@ test("saved light foundation loads real heading and body faces, including Hebrew
     await page.goto(`/${locale}`);
     const heading = page.getByRole("heading", { level: 1 });
     const family = await heading.evaluate((element) => getComputedStyle(element).fontFamily);
-    expect(family.split(",")[0]).toContain(locale === "he" ? "Noto Sans Hebrew" : "Manrope");
+    expect(family.split(",")[0]).toContain(locale === "he" ? "Noto Sans Hebrew" : "Noto Sans");
     await page.evaluate(() => document.fonts.ready);
     expect(
       await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor),
-    ).toBe("rgb(255, 255, 255)");
+    ).toBe("rgb(248, 247, 243)");
     const loaded = await page.evaluate(() =>
       [...document.fonts]
         .filter((face) => face.status === "loaded")
         .map((face) => face.family.replaceAll('"', "")),
     );
-    expect(loaded).toContain(locale === "he" ? "Noto Sans Hebrew" : "Manrope");
+    expect(loaded).toContain(locale === "he" ? "Noto Sans Hebrew" : "Noto Sans");
     expect(loaded).toContain("Noto Sans");
   }
 });

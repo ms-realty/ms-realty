@@ -140,10 +140,11 @@ describe("design tokens (spec §16.2)", () => {
   it("keeps a 44px default control height and a 4px spacing base", () => {
     expect(css).toMatch(/--spacing-control:\s*2\.75rem/);
     expect(css).toMatch(/--spacing:\s*0\.25rem/);
-    expect(css).toContain("--radius-control: 0.5rem;");
+    expect(css).toContain("--radius-control: 0.375rem;");
+    expect(css).toContain("--radius-panel: 0.5rem;");
   });
 
-  it("uses the saved light foundation while separating action, brand and assistance", () => {
+  it("uses the owner-approved palette B (architecture §11.3) with a distinct assistance colour", () => {
     expect(
       Object.fromEntries(
         ["canvas", "subtle", "text", "action", "brand", "assist", "border"].map((role) => [
@@ -152,13 +153,13 @@ describe("design tokens (spec §16.2)", () => {
         ]),
       ),
     ).toEqual({
-      canvas: "#ffffff",
-      subtle: "#f3f5f7",
-      text: "#1e2832",
-      action: "#172029",
-      brand: "#245b48",
-      assist: "#315ba6",
-      border: "#7e8a98",
+      canvas: "#f8f7f3",
+      subtle: "#eef1ec",
+      text: "#192e27",
+      action: "#214f3c",
+      brand: "#214f3c",
+      assist: "#5b45a0",
+      border: "#687a6f",
     });
     expect(contrast(color("border"), color("subtle"))).toBeGreaterThanOrEqual(3);
     expect(contrast(color("border"), color("selected"))).toBeGreaterThanOrEqual(3);
@@ -168,9 +169,9 @@ describe("design tokens (spec §16.2)", () => {
     const roles = {
       body: ["1rem", "1.625rem"],
       compact: ["1rem", "1.5rem"],
-      operational: ["0.875rem", "1.375rem"],
-      dense: ["0.875rem", "1.375rem"],
-      caption: ["0.875rem", "1.375rem"],
+      operational: ["0.9375rem", "1.375rem"],
+      dense: ["0.875rem", "1.25rem"],
+      caption: ["0.875rem", "1.25rem"],
     };
     for (const [role, [size, leading]] of Object.entries(roles)) {
       expect(css).toContain(`--text-${role}: ${size};`);
@@ -178,13 +179,14 @@ describe("design tokens (spec §16.2)", () => {
     }
   });
 
-  it("keeps Manrope titles, Noto body and Hebrew-first fallback independent", async () => {
+  it("sets titles and body in Noto Sans with a Hebrew-first fallback (palette B, no Manrope)", async () => {
     expect(css).toContain("--text-title: 2rem;");
-    expect(css).toContain("--text-title--line-height: 2.625rem;");
+    expect(css).toContain("--text-title--line-height: 2.5rem;");
     expect(css).toContain('--font-sans: "Noto Sans", "Noto Sans Hebrew"');
-    expect(css).toMatch(/--font-display:\s*"Manrope", "Noto Sans"/);
+    expect(css).toMatch(/--font-display:\s*"Noto Sans", "Noto Sans Hebrew"/);
+    expect(css).not.toContain("Manrope");
     expect(base).toMatch(/:lang\(he\)\s*\{\s*--font-sans: "Noto Sans Hebrew"/);
-    expect(base).toMatch(/--font-display:\s*"Noto Sans Hebrew", "Manrope"/);
+    expect(base).toMatch(/--font-display:\s*"Noto Sans Hebrew", "Noto Sans"/);
     expect(css).toContain("--focus-width: 3px;");
     const compiled = await compile(`${css}\n@tailwind utilities;`);
     const output = parse(
@@ -200,10 +202,9 @@ describe("design tokens (spec §16.2)", () => {
     });
     for (const selector of [".text-title", ".sm\\:text-title"]) {
       expect(rules[selector]).toMatchObject({
-        "font-family": "var(--font-display)",
+        "font-family": "var(--font-sans)",
         "font-size": "var(--text-title)",
         "line-height": "var(--tw-leading, var(--text-title--line-height))",
-        "letter-spacing": "var(--tw-tracking, var(--text-title--letter-spacing))",
       });
     }
     for (const selector of [".text-heading", ".text-body"])
@@ -211,19 +212,11 @@ describe("design tokens (spec §16.2)", () => {
   });
 
   it("preloads only the title/body subsets needed by each locale from local WOFF2 assets", () => {
-    const latin = ["/fonts/noto-sans-latin.woff2", "/fonts/manrope-latin.woff2"];
+    const latin = ["/fonts/noto-sans-latin.woff2"];
     for (const locale of ["en", "de", "nl"] as const) expect(fontFilesFor(locale)).toEqual(latin);
     for (const locale of ["bg", "ru"] as const)
-      expect(fontFilesFor(locale)).toEqual([
-        ...latin,
-        "/fonts/noto-sans-cyrillic.woff2",
-        "/fonts/manrope-cyrillic.woff2",
-      ]);
-    expect(fontFilesFor("el")).toEqual([
-      ...latin,
-      "/fonts/noto-sans-greek.woff2",
-      "/fonts/manrope-greek.woff2",
-    ]);
+      expect(fontFilesFor(locale)).toEqual([...latin, "/fonts/noto-sans-cyrillic.woff2"]);
+    expect(fontFilesFor("el")).toEqual([...latin, "/fonts/noto-sans-greek.woff2"]);
     expect(fontFilesFor("he")).toEqual([...latin, "/fonts/noto-sans-hebrew.woff2"]);
     for (const locale of ["bg", "ru", "en", "de", "nl", "el", "he"] as const) {
       for (const path of fontFilesFor(locale)) {
