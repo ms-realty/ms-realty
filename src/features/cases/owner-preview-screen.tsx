@@ -102,7 +102,7 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
               <img
                 src={`/${props.locale}/properties/${props.id}/preview/media/${image.id}?listing=${encodeURIComponent(view.reference)}&digest=${view.hash}`}
                 alt={image.alt}
-                className="h-auto w-full rounded-sm"
+                className="h-auto w-full rounded-control"
               />
               <figcaption>
                 {image.caption}
