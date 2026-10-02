@@ -36,8 +36,12 @@ const historicalCaptures = raw
   .map((line) => ({ ...JSON.parse(line), provenance: "archived" }));
 const livePath = "data/legacy/migration/live-delta.json";
 const liveDelta = existsSync(livePath) ? JSON.parse(readFileSync(livePath, "utf8")) : null;
-const liveCaptures = (liveDelta?.captures ?? []).map((capture) => {
-  if (!capture.response_artifact) return capture;
+const liveCaptures = [];
+for (const capture of liveDelta?.captures ?? []) {
+  if (!capture.response_artifact) {
+    liveCaptures.push(capture);
+    continue;
+  }
   if (
     !/^data\/legacy\/migration\/live-source-html\/[a-f0-9]{64}\.html\.gz$/u.test(
       capture.response_artifact,
@@ -54,13 +58,16 @@ const liveCaptures = (liveDelta?.captures ?? []).map((capture) => {
     throw new Error("Recorded live main text hash mismatch");
   // Re-extraction from immutable source bytes uses the current explicit selector version.
   // Original capture hashes remain provenance; selector improvements are never an equivalence approval.
-  return {
+  liveCaptures.push({
     ...capture,
     ...extracted,
-    source_extractor: "legacy-main-v4",
+    source_extractor: "legacy-main-v5",
     recorded_body_hash: capture.text_sha256,
-  };
-});
+  });
+  // Let jsdom's queued document lifecycle work drain between bounded batches.
+  // This does not change source order, hashes or migration decisions.
+  if (liveCaptures.length % 25 === 0) await new Promise((resolve) => setImmediate(resolve));
+}
 const captures = [...historicalCaptures, ...liveCaptures].sort((a, b) =>
   b.captured_at_utc.localeCompare(a.captured_at_utc),
 );

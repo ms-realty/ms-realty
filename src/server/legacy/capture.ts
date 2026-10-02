@@ -1,16 +1,31 @@
 import { createRequire } from "node:module";
 import { sha256, sourceIdentity } from "./manifest";
 
-// A narrow bridge to jsdom's public constructor and standard DOM document only.
-// No scripts/resources or jsdom-specific window APIs are enabled or consumed.
+// Use only the public constructor, standard DOM and explicit window teardown.
+// No scripts or network resources are enabled.
 const { JSDOM } = createRequire(import.meta.url)("jsdom") as {
-  JSDOM: new (html: string, options: { url: string }) => { window: { document: Document } };
+  JSDOM: new (
+    html: string,
+    options: { url: string },
+  ) => {
+    window: { document: Document; close(): void };
+  };
 };
 
 /** Source-only extraction: never execute scripts, submit forms, translate or infer sold from archives. */
 export function extractLiveSource(html: string, url: string) {
   sourceIdentity(url);
-  const document = new JSDOM(html, { url }).window.document;
+  const dom = new JSDOM(html, { url });
+  try {
+    return extractDocument(dom.window.document, url);
+  } finally {
+    // Large immutable source inventories must not retain each browsing context.
+    // The result contains only primitive facts, never DOM nodes or a Window.
+    dom.window.close();
+  }
+}
+
+function extractDocument(document: Document, url: string) {
   const title = document.title;
   const parked =
     /Срок регистрации домена истек|domain registration has expired|domain is expired/i.test(title);
@@ -25,11 +40,22 @@ export function extractLiveSource(html: string, url: string) {
   const articleColumn = article?.parentElement?.parentElement?.classList.contains("col-lg-9")
     ? article.parentElement
     : null;
+  const sitemapHeaders = [...document.querySelectorAll("#content > table th")].map((header) =>
+    header.textContent?.trim(),
+  );
+  const sitemapMain =
+    /^\/sitemap-[a-z0-9_-]+\.html$/u.test(sourceIdentity(url).path) &&
+    title.trim() === "XML Sitemap" &&
+    document.querySelector("#intro > h1")?.textContent?.trim() === "XML Sitemap" &&
+    sitemapHeaders.join("|") === "URL|Priority|Change frequency|Last modified (GMT)"
+      ? document.body
+      : null;
   const primary = parked
     ? null
     : (document.querySelector(".post_content, .post_content_default") ??
       archiveColumn ??
-      articleColumn);
+      articleColumn ??
+      sitemapMain);
   primary?.querySelectorAll("script,style,noscript").forEach((element) => {
     element.remove();
   });
@@ -52,7 +78,9 @@ export function extractLiveSource(html: string, url: string) {
         ? "column:archive_main"
         : primary === articleColumn && primary
           ? "column:articles_main"
-          : "missing_main_content";
+          : primary === sitemapMain && primary
+            ? "column:sitemap_main"
+            : "missing_main_content";
   const links = [...document.querySelectorAll<HTMLAnchorElement>("a[href]")].flatMap((link) => {
     try {
       const identity = sourceIdentity(link.href);

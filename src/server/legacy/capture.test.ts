@@ -1,6 +1,33 @@
 import { expect, it } from "vitest";
 import { extractLiveSource } from "./capture";
 
+it("retains the recorded WordPress sitemap HTML and its source URLs without executing content", () => {
+  const html =
+    '<title>XML Sitemap</title><div id="intro"><h1>XML Sitemap</h1><p>Original source explanation</p></div><div id="content"><table><tr><th>URL</th><th>Priority</th><th>Change frequency</th><th>Last modified (GMT)</th></tr><tr><td><a href="/original-page/">https://makler-realty.com/original-page/</a></td><td>60%</td><td>Weekly</td><td>2026-10-01 06:47</td></tr></table></div><div id="footer">Source attribution</div><script>throw Error("executed")</script>';
+  const source = extractLiveSource(html, "https://makler-realty.com/sitemap-misc.html");
+  expect(source.content_scope).toBe("column:sitemap_main");
+  expect(source.extracted_body_text).toBe(
+    "XML Sitemap Original source explanation URL Priority Change frequency Last modified (GMT) https://makler-realty.com/original-page/ 60% Weekly 2026-10-01 06:47 Source attribution",
+  );
+  expect(source.content_links).toEqual([
+    {
+      url: "https://makler-realty.com/original-page/",
+      text: "https://makler-realty.com/original-page/",
+    },
+  ]);
+  expect(source.sold).toBeNull();
+  expect(source.extracted_body_text).not.toContain("executed");
+  expect(extractLiveSource(html, "https://makler-realty.com/unknown-page/").content_scope).toBe(
+    "missing_main_content",
+  );
+  expect(
+    extractLiveSource(
+      html.replace("Priority", "Unknown column"),
+      "https://makler-realty.com/sitemap-misc.html",
+    ).content_scope,
+  ).toBe("missing_main_content");
+});
+
 it("retains the source article archive while excluding navigation, sidebar and executable chrome", () => {
   const source = extractLiveSource(
     '<html lang="bg"><title>Published news</title><nav>Navigation</nav><div class="row"><div class="col-lg-9"><div><div class="post category_articles"><div class="title"><h2><a href="/original-news/">Original article</a></h2></div><div class="entry"><p>Original summary and facts.</p></div></div><form>Search control</form><script>unsafe()</script></div></div><aside>Sidebar</aside></div></html>',

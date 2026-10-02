@@ -6,6 +6,7 @@ export const primaryScopes = [
   "class:post_content_default",
   "column:archive_main",
   "column:articles_main",
+  "column:sitemap_main",
 ] as const;
 export const sha256 = (value: string | Uint8Array) =>
   createHash("sha256").update(value).digest("hex");

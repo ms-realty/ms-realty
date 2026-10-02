@@ -4,7 +4,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { gzipSync } from "node:zlib";
 import { extractLiveSource } from "../src/server/legacy/capture.ts";
-import { sha256, sourceIdentity } from "../src/server/legacy/manifest.ts";
+import { sha256, sourceIdentity, verifiedPrimaryCapture } from "../src/server/legacy/manifest.ts";
 
 const { values } = parseArgs({
   options: {
@@ -69,7 +69,7 @@ for (const requested of requestedUrls) {
       response_sha256: responseHash,
       response_artifact: html.trim() && !extracted.parked ? artifact : null,
       provenance: "live",
-      extractor: "legacy-main-v4",
+      extractor: "legacy-main-v5",
       transport: "python_urllib_public_get",
       response_encoding: response.charset,
       redirects: response.redirects,
@@ -110,13 +110,7 @@ const output = {
   independentCheckerBaseline: false,
   requestedSources: captures.length,
   capturedSources: captures.filter((capture) => !capture.error).length,
-  verifiedPrimarySources: captures.filter(
-    (capture) =>
-      capture.extracted_body_text &&
-      ["class:post_content", "class:post_content_default", "column:archive_main"].includes(
-        capture.content_scope,
-      ),
-  ).length,
+  verifiedPrimarySources: captures.filter(verifiedPrimaryCapture).length,
   parkedSources: captures.filter((capture) => capture.parked).length,
   completeSiteDelta: false,
   captures,
