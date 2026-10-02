@@ -90,6 +90,9 @@
     "wrangler": "4.143.0"
   },
   "overrides": {
+    "miniflare": {
+      "undici": "7.29.1"
+    },
     "@esbuild-kit/core-utils": {
       "esbuild": "0.25.12"
     }

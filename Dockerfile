@@ -9,7 +9,7 @@ RUN npm ci --no-audit --no-fund
 FROM dependencies AS build
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1 BUILD_STANDALONE=1
-# Gateway's scoped production dependencies are needed by the repository-wide Next type check.
+# Scoped gateway dependencies stay build-only; Worker types are checked separately in CI.
 # This build-only install does not place Wrangler or gateway tooling in the runtime image.
 RUN npm ci --prefix gateway --omit=dev --ignore-scripts --no-audit --no-fund \
     && NODE_OPTIONS=--max-old-space-size=8192 npm run build && node scripts/build-runtime.mjs
