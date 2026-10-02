@@ -47,6 +47,12 @@ const definitions = {
     retryable: false,
     outcome: "not_applied",
   },
+  butler_approval_required: {
+    status: 409,
+    message: "Human approval is required for this action.",
+    retryable: false,
+    outcome: "not_applied",
+  },
   // An unauthorized read of a private record uses this too, so existence is never revealed.
   not_found: {
     status: 404,
