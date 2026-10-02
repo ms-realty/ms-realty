@@ -58,7 +58,7 @@ async function operator(context: BrowserContext) {
 for (const javaScriptEnabled of [true, false]) {
   test.describe(`complete staff navigation with JavaScript ${javaScriptEnabled}`, () => {
     test.use({ javaScriptEnabled });
-    test("Tasks, Hermes and tools retain identity, locale and native navigation at every range", async ({
+    test("Tasks, Butler and tools retain identity, locale and native navigation at every range", async ({
       context,
       page,
       browserName,
@@ -102,10 +102,10 @@ for (const javaScriptEnabled of [true, false]) {
         "aria-current",
         "page",
       );
-      const hermes = page.getByRole("banner").locator('nav a[href="/ru/operations/assistance"]');
-      await hermes.click();
+      const butler = page.getByRole("banner").locator('nav a[href="/ru/operations/assistance"]');
+      await butler.click();
       await expect(page.getByRole("main")).toBeVisible();
-      await expect(hermes).toHaveAttribute("aria-current", "page");
+      await expect(butler).toHaveAttribute("aria-current", "page");
       await expect(
         page.getByRole("banner").locator('nav a[href="/ru/operations"]'),
       ).not.toHaveAttribute("aria-current", "page");

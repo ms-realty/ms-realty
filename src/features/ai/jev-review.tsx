@@ -3,7 +3,7 @@ import { jevAssessmentSchema } from "@/server/ai/jev-contract";
 const en = {
   title: "Automated draft assessment",
   boundary:
-    "Jev provides an estimate, not factual approval. Check the source and all uncertain claims before recording your review.",
+    "This assessment is an estimate, not factual approval. Check the source and all uncertain claims before recording your review.",
   grounding: "Support from the source",
   supported: "Appears supported",
   conflicting: "Possible contradiction",
@@ -19,7 +19,7 @@ const en = {
 const bg: typeof en = {
   title: "Автоматична оценка на черновата",
   boundary:
-    "Jev дава оценка, а не одобрение на фактите. Проверете източника и всички несигурни твърдения, преди да запишете прегледа.",
+    "Тази оценка е приблизителна и не одобрява фактите. Проверете източника и всички несигурни твърдения, преди да запишете прегледа.",
   grounding: "Подкрепа от източника",
   supported: "Изглежда подкрепено",
   conflicting: "Възможно противоречие",
@@ -35,7 +35,7 @@ const bg: typeof en = {
 const ru: typeof en = {
   title: "Автоматическая оценка черновика",
   boundary:
-    "Jev даёт оценку, а не подтверждение фактов. Проверьте источник и все неопределённые утверждения перед записью своего решения.",
+    "Эта оценка приблизительна и не подтверждает факты. Проверьте источник и все неопределённые утверждения перед записью своего решения.",
   grounding: "Подтверждение источником",
   supported: "Вероятно подтверждено",
   conflicting: "Возможно противоречие",

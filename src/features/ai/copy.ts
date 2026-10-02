@@ -1,6 +1,6 @@
 // Staff interface drafts; BG is primary. No public language/indexing approval is implied.
 const en = {
-  title: "Hermes draft assistance",
+  title: "Butler draft assistance",
   source: "Included source",
   evidence: "Generation details",
   excluded:
@@ -63,7 +63,7 @@ const en = {
   operationMissing: "No completed request was found. Inspect recent requests before retrying.",
 };
 const bg: Record<keyof typeof en, string> = {
-  title: "Чернови с Hermes",
+  title: "Чернови с Butler",
   source: "Включен източник",
   evidence: "Данни за генерирането",
   excluded:
@@ -126,7 +126,7 @@ const bg: Record<keyof typeof en, string> = {
   operationMissing: "Няма завършена заявка. Проверете последните заявки преди нов опит.",
 };
 const ru: Record<keyof typeof en, string> = {
-  title: "Черновики Hermes",
+  title: "Черновики Butler",
   source: "Включённый источник",
   evidence: "Сведения о генерации",
   excluded:

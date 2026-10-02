@@ -63,7 +63,7 @@ export const journeyHelpNav: NavItem<JourneyNavLabel> = {
   path: null,
 };
 
-/** Saved Figma O01 rail: everyday work stays primary; Hermes and tools stay secondary.
+/** Saved Figma O01 rail: everyday work stays primary; Butler and tools stay secondary.
  * The route registry preserves working native destinations and leaves unbuilt pages out. */
 export const workspacePrimaryNav: readonly WorkspaceNavItem[] = [
   { label: "today", screen: "O01", path: "/today", mobilePrimary: true },
@@ -75,7 +75,7 @@ export const workspacePrimaryNav: readonly WorkspaceNavItem[] = [
 ];
 
 export const workspaceSecondaryNav: readonly WorkspaceNavItem[] = [
-  { label: "hermes", screen: "XHERMES", path: "/operations/assistance" },
+  { label: "butler", screen: "XBUTLER", path: "/operations/assistance" },
   { label: "moreTools", screen: "X02", path: "/operations" },
 ];
 

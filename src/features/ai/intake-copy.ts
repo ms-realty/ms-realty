@@ -1,7 +1,7 @@
 const en = {
   title: "Broker-note extraction proposal",
   boundary:
-    "Select a saved private broker note. Hermes proposes typed candidates with exact note quotes; accepting records review only. PDF/document extraction is unavailable. Facts, units, uncertainty and conflicts must be reviewed in the ordinary workbench.",
+    "Select a saved private broker note. Butler proposes typed candidates with exact note quotes; accepting records review only. PDF/document extraction is unavailable. Facts, units, uncertainty and conflicts must be reviewed in the ordinary workbench.",
   manual: "Open inventory workbench",
   empty:
     "No bounded broker note is available. Save a private broker intake note and freeze the draft before selecting it here.",
@@ -20,7 +20,7 @@ type Copy = Record<keyof typeof en, string>;
 const bg: Copy = {
   title: "Предложение за извличане от бележка",
   boundary:
-    "Изберете запазена частна брокерска бележка. Hermes предлага стойности с точни цитати; приемането записва само преглед. PDF/документи не се обработват. Факти, единици, несигурност и противоречия се преглеждат в обичайния редактор.",
+    "Изберете запазена частна брокерска бележка. Butler предлага стойности с точни цитати; приемането записва само преглед. PDF/документи не се обработват. Факти, единици, несигурност и противоречия се преглеждат в обичайния редактор.",
   manual: "Към редактора на обявата",
   empty:
     "Няма подходяща запазена бележка. Запишете частна бележка и създайте неизменяема версия преди избор тук.",
@@ -37,7 +37,7 @@ const bg: Copy = {
 const ru: Copy = {
   title: "Предложение извлечения из заметки",
   boundary:
-    "Выберите сохранённую частную заметку брокера. Hermes предлагает значения с точными цитатами; принятие записывает только проверку. Обработка PDF/документов недоступна. Факты, единицы, неопределённость и противоречия проверяются в обычном редакторе.",
+    "Выберите сохранённую частную заметку брокера. Butler предлагает значения с точными цитатами; принятие записывает только проверку. Обработка PDF/документов недоступна. Факты, единицы, неопределённость и противоречия проверяются в обычном редакторе.",
   manual: "Открыть редактор объявления",
   empty:
     "Нет подходящей сохранённой заметки. Сохраните частную заметку и создайте неизменяемую версию перед выбором здесь.",

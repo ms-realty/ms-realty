@@ -87,7 +87,7 @@ describe("navigation registry (§06)", () => {
       "calendar",
       "tasks",
     ]);
-    expect(workspaceSecondaryNav.map((item) => item.label)).toEqual(["hermes", "moreTools"]);
+    expect(workspaceSecondaryNav.map((item) => item.label)).toEqual(["butler", "moreTools"]);
   });
 
   it("keeps Today, Inquiries and Calendar primary on phones", () => {
