@@ -1,10 +1,26 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { inventory, markdown } from "./cloudflare-inventory.mjs";
+import { accountId } from "./staging-config.mjs";
 
-const accountId = "a".repeat(32);
 const privateValue = "SECRET_MUST_NOT_APPEAR";
 const response = (result) => Response.json({ success: true, result });
+
+test("a different Cloudflare account is rejected before using the credential", async () => {
+  let requested = false;
+  await assert.rejects(
+    inventory({
+      accountId: "a".repeat(32),
+      token: privateValue,
+      fetcher: () => {
+        requested = true;
+        throw new Error("A foreign account must never be contacted");
+      },
+    }),
+    /MS Realty Cloudflare account/,
+  );
+  assert.equal(requested, false);
+});
 function fetcher(url, options) {
   assert.equal(options.method, undefined); // GET only
   assert.equal(url.origin, "https://api.cloudflare.com");

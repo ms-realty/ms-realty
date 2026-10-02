@@ -42,6 +42,10 @@ the latter was repaired from the existing lockfile without package changes.
 The previously qualified local Containers image is tied to source `a3db2ec0` and
 does not contain this expanded migration checkpoint. A future staging candidate
 must package the final source and data once, publish an immutable provider digest,
-and pass the independent staging checker. GitHub write/admin403 and actual isolated
-Postgres/Tunnel/Access/R2/HTTPS inputs still prevent staging deployment. No production
-routes, DNS, buckets, UI or Figma assets changed in this checkpoint.
+and pass the independent staging checker. On 2 October, the owner corrected the
+GitHub identity to `ms-realty`. The source checkpoint was pushed successfully and
+Environment `staging` was created with a branch policy for `codex/msr-staging`.
+The earlier write/admin403 responses came from the superseded identity and do
+not establish an MS Realty access problem. Fresh staging-only secrets and actual
+isolated Postgres/Tunnel/Access/R2/HTTPS inputs still prevent staging deployment.
+No production routes, DNS, buckets, UI or Figma assets changed in this checkpoint.

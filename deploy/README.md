@@ -7,6 +7,31 @@ launch-authority inputs in `production/data/` remain applicable; blocked gates r
 `app-spec.template.json` is retained as an inactive historical reference. DigitalOcean App
 Platform and its former PostgreSQL 18 assumption are not the selected deployment contract.
 
+## MS Realty account boundary
+
+Owner correction, 2 October: all MS Realty operations use MS Realty identities and
+credentials. GitHub writes authenticate as `ms-realty` against `ms-realty/ms-realty`.
+Retrieve that account's keyring token explicitly with
+`gh auth token --hostname github.com --user ms-realty` and pass it as `GH_TOKEN` only
+to the intended command. Verify `gh api user --jq .login` returns `ms-realty` before
+a write. Remove an inherited `GH_TOKEN`/`GITHUB_TOKEN` before the keyring lookup.
+Git HTTPS writes also need an explicit per-command `gh auth git-credential` helper
+using that token; the desktop's globally active login is not project authority.
+Never fall back to another account when an MS Realty credential is unavailable.
+
+GitHub Actions credentials and environment secrets belong to this repository.
+Environment `staging` is restricted to branch `codex/msr-staging`; its credentials
+must be fresh and staging-only. The earlier 403 reports came from a superseded
+GitHub identity and are not evidence that `ms-realty` lacks access.
+
+Cloudflare uses **Ms.realty.bg@gmail.com's Account**, account ID
+`921d0224dcd595c87b7928d2b3c479d1`. Inventory, preflight and deployment must use
+that exact account and its scoped credentials. A different account is rejected;
+an unverified or missing MS Realty token blocks the operation. Database, R2,
+Email, Access, AI/provider billing and any future connected services must remain
+within the owner-approved MS Realty account boundary. This does not grant
+production promotion or change the independent parity/signoff gate.
+
 ## Selected runtime and measured OpenNext blocker
 
 The owner's first preference is **Next.js on Workers through OpenNext**. The #280 owner measured

@@ -2,6 +2,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { accountId as msRealtyAccountId } from "./staging-config.mjs";
 
 const api = "https://api.cloudflare.com/client/v4";
 const historical = [
@@ -25,6 +26,8 @@ const pick = (item, keys) =>
 export async function inventory({ accountId, token, fetcher = fetch }) {
   if (!/^[a-f0-9]{32}$/i.test(accountId ?? "") || !token)
     throw new Error("CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN are required");
+  if (accountId !== msRealtyAccountId)
+    throw new Error("Only the owner-approved MS Realty Cloudflare account is allowed");
   const sections = [];
   async function read(name, path, select) {
     const rows = [];
