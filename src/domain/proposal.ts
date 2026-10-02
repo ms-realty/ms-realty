@@ -1,7 +1,9 @@
-// Proposals (spec §07.6, F16, A39, A40). Changing amount, conditions, parties or deadline
-// invalidates prior approval; a counterproposal is a new version.
+// ProposalRevisions (architecture §6.5, AT34). Changing parties, amount, currency, conditions or
+// deadline creates a new revision and invalidates prior approval; a counterproposal is a new
+// revision and never overwrites the one it answers.
 import { canonicalJson } from "./approval";
 import type { Actor } from "./capabilities";
+import type { PricePeriod } from "./facts";
 import type { CurrencyCode } from "./ids";
 import { allowed, type Decision, defineMachine, denied, firstDenial, need } from "./state-machine";
 import type { TransitionSpec } from "./transition";
@@ -24,7 +26,7 @@ export const proposalMachine = defineMachine<ProposalState>(proposalStates, {
   reviewed: ["draft", "submitted", "withdrawn"],
   submitted: ["awaiting_response", "withdrawn"],
   awaiting_response: ["countered", "declined", "withdrawn", "expired", "agreed_for_next_step"],
-  // Terminal for this version; a counterproposal continues as a new version.
+  // Terminal for this revision; a counterproposal continues as a new revision.
   countered: [],
   declined: [],
   withdrawn: [],
@@ -36,6 +38,8 @@ export const proposalMachine = defineMachine<ProposalState>(proposalStates, {
 export interface ProposalTerms {
   readonly amountMinor: number;
   readonly currency: CurrencyCode;
+  /** A purchase price is a total; a rent offer is per month. */
+  readonly period: PricePeriod;
   readonly paymentBasis: string;
   readonly conditions: readonly string[];
   readonly inclusions: readonly string[];
@@ -49,6 +53,7 @@ export interface ProposalTerms {
 export const materialProposalFields = [
   "amountMinor",
   "currency",
+  "period",
   "conditions",
   "partyIds",
   "deadlineAt",
@@ -67,11 +72,11 @@ export function proposalApprovalContent(terms: ProposalTerms): string {
 }
 
 export interface ProposalEvidence {
-  /** Canonical content of the version now (proposalApprovalContent). */
+  /** Canonical content of the revision now (proposalApprovalContent). */
   readonly currentContent?: string;
   /** Canonical content the approval was bound to. */
   readonly approvedContent?: string;
-  /** True when a newer version of this proposal exists. */
+  /** True when a newer revision of this proposal exists. */
   readonly superseded?: boolean;
   readonly deadlineAt?: string;
   /** ISO 8601 instant of the action. */
@@ -80,7 +85,7 @@ export interface ProposalEvidence {
   readonly reason?: string;
 }
 
-/** A client submits their own approved proposal or responds to one (F16); the rest is staff work. */
+/** A client submits their own approved proposal or responds to one; the rest is staff work. */
 const clientProposalTargets: readonly ProposalState[] = [
   "submitted",
   "countered",

@@ -1,4 +1,6 @@
-// Approvals bound to an exact subject version (spec §19.2, F12, F24, F29, A31).
+// Approvals bound to an exact subject revision by its digest (architecture §4.1, §7.2). Each
+// kind is its own authority: a language approval is never factual, legal or publishing
+// approval, and same-person editing and review are recorded as separate decisions.
 import type { Actor, Capability } from "./capabilities";
 import { type Decision, defineMachine, denied, firstDenial, need } from "./state-machine";
 
@@ -7,50 +9,52 @@ export const approvalStates = [
   "approved",
   "rejected",
   "invalidated",
+  "expired",
   "withdrawn",
 ] as const;
 export type ApprovalState = (typeof approvalStates)[number];
 
 export const approvalMachine = defineMachine<ApprovalState>(approvalStates, {
   pending: ["approved", "rejected", "withdrawn"],
-  approved: ["invalidated"],
+  approved: ["invalidated", "expired"],
   rejected: [],
   invalidated: [],
+  expired: [],
   withdrawn: [],
 });
 
-/** Each kind is its own authority: a language approval is never factual or legal approval. */
 export const approvalKinds = [
   "factual",
+  "editorial",
   "language",
   "legal_process_claim",
-  "owner_instruction",
+  "owner_acknowledgment",
   "publication",
   "message_send",
   "proposal_terms",
-  "spending",
   "locale_indexability",
   "import_apply",
-  // Approvals given in the legacy system, recorded with their evidence during the one-time
-  // import (F32). They document history; the release flow decides what they are worth.
-  "legacy_owner_publication_approval",
+  // Recorded by the one-time import as evidence of legacy decisions. The source-as-is
+  // exception covers source-locale publication only: it is not factual review, translation
+  // approval, indexability or media review (§18.2, §21.2).
+  "legacy_source_as_is",
   "legacy_content_approval",
 ] as const;
 export type ApprovalKind = (typeof approvalKinds)[number];
 
 export const approvalCapability: Record<ApprovalKind, Capability> = {
   factual: "listing.review_facts",
+  editorial: "listing.review_facts",
   language: "translation.review",
   legal_process_claim: "claim.approve",
-  owner_instruction: "portal.listing.approve",
+  owner_acknowledgment: "portal.listing.acknowledge",
   publication: "publication.release",
   message_send: "message.send_external",
   proposal_terms: "proposal.manage",
-  spending: "spending.approve",
   locale_indexability: "settings.manage",
   import_apply: "import.run",
-  legacy_owner_publication_approval: "publication.release",
-  legacy_content_approval: "publication.release",
+  legacy_source_as_is: "import.run",
+  legacy_content_approval: "import.run",
 };
 
 export interface ApprovalSubject {
@@ -96,8 +100,16 @@ export function guardApprovalDecision(
   );
 }
 
-export function isApprovalValid(approval: Approval, currentHash: string): boolean {
-  return approval.state === "approved" && approval.subject.hash === currentHash;
+export function isApprovalValid(
+  approval: Approval & { readonly expiresAt?: string },
+  currentHash: string,
+  now?: string,
+): boolean {
+  if (approval.state !== "approved" || approval.subject.hash !== currentHash) return false;
+  // Fails closed: an expiring approval needs a clock to be honoured.
+  return (
+    !approval.expiresAt || (now !== undefined && Date.parse(now) < Date.parse(approval.expiresAt))
+  );
 }
 
 /** Invalidates an approval whose subject changed; any other approval is returned as is. */

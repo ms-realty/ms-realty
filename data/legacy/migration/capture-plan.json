@@ -1,0 +1,62 @@
+{
+  "authority": "2026-10-01 owner zero-loss public GET",
+  "status": "completed_bounded_requests",
+  "completeCurrentCrawl": false,
+  "totalPlanned": 200,
+  "batches": [
+    {
+      "path": "data/legacy/migration/capture-batch-1.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/capture-batch-2.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/capture-batch-3.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/capture-batch-4.json",
+      "sourceCount": 40
+    },
+    {
+      "path": "data/legacy/migration/capture-batch-5.json",
+      "sourceCount": 16,
+      "originalSourceCount": 40
+    }
+  ],
+  "plannedHtmlPages": 170,
+  "nonHtmlSourceResources": [
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-1-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-10-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-9-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-2-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-3-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-6-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-7-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-8-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-5-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/962-4-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-6-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-1-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-2-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-3-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-4-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-5-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-7-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-8-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/961-9-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-6-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-4-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-7-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-1-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-2-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-3-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-12-510x680.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-8-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-11-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-10-680x510.jpg",
+    "https://makler-realty.com/wp-content/uploads/2026/09/958-9-680x510.jpg"
+  ]
+}

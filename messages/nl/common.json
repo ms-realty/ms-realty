@@ -1,0 +1,14 @@
+{
+  "brand": "MS Realty",
+  "agencyKind": "Vastgoedkantoor",
+  "homeHeading": "MS Realty",
+  "homeIntro": "Vastgoed kopen, huren, verkopen of verhuren met het team van MS Realty.",
+  "clientAccessHeading": "Inloggen bij Mijn traject",
+  "staffAccessHeading": "Aanmelden voor medewerkers",
+  "languageSuggestion": {
+    "label": "Taalsuggestie",
+    "message": "Deze pagina is ook in het Nederlands beschikbaar.",
+    "switch": "Verder in het Nederlands",
+    "dismiss": "Suggestie verbergen"
+  }
+}

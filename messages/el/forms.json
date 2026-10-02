@@ -1,0 +1,9 @@
+{
+  "required": "Υποχρεωτικό",
+  "optional": "Προαιρετικό",
+  "errorSummary": "{count, plural, one {# απάντηση χρειάζεται} other {# απαντήσεις χρειάζονται}} διόρθωση",
+  "charactersLeft": "{count, plural, one {Απομένει # χαρακτήρας} other {Απομένουν # χαρακτήρες}}",
+  "choose": "Επιλέξτε…",
+  "saveDraft": "Αποθήκευση πρόχειρου",
+  "cancel": "Ακύρωση"
+}

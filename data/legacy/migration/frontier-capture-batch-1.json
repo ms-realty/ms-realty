@@ -1,0 +1,1620 @@
+{
+  "schemaVersion": 1,
+  "requestMethod": "GET",
+  "authority": "2026-10-01 owner zero-loss migration",
+  "status": "partial_delta_not_reconciled",
+  "independentCheckerBaseline": false,
+  "requestedSources": 40,
+  "capturedSources": 40,
+  "verifiedPrimarySources": 0,
+  "parkedSources": 0,
+  "completeSiteDelta": false,
+  "captures": [
+    {
+      "url": "https://makler-realty.com/sitemap-misc.html",
+      "final_url": "https://makler-realty.com/sitemap-misc.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:22.425Z",
+      "response_sha256": "5e4b812e84421ed63667cd3a28aa0b21f714b076e458af7ee98d08b93ca46ac6",
+      "response_artifact": "data/legacy/migration/live-source-html/5e4b812e84421ed63667cd3a28aa0b21f714b076e458af7ee98d08b93ca46ac6.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/",
+          "id": "3c8edaf9291d59f466bc4654"
+        },
+        {
+          "url": "https://makler-realty.com/sitemap.html",
+          "id": "7b0c9ee2a5434b3884e8878b"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-tax-category_type.html",
+      "final_url": "https://makler-realty.com/sitemap-tax-category_type.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:23.316Z",
+      "response_sha256": "237c39e6c42cbd03249b6bf2cb5e8802caf1a88141fb5d827ac40b8f4b31f1a0",
+      "response_artifact": "data/legacy/migration/live-source-html/237c39e6c42cbd03249b6bf2cb5e8802caf1a88141fb5d827ac40b8f4b31f1a0.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/category-type/villa/",
+          "id": "127bc43837aaec75ece7984e"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/dom/",
+          "id": "5b8907dc6a900b807e49517b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/apartment/",
+          "id": "5cc21cd7d2026c5cb6a32aef"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/commercial-area/",
+          "id": "d10ddba4ba369b7bd8efbd48"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/hotel/",
+          "id": "605325a645e0a1dfd8a5e4ac"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office/",
+          "id": "c58cce18a45b0cccb7851c95"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office-building/",
+          "id": "4fbae5a16043f1b361fb0f89"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/industrial-building/",
+          "id": "c89230c979cf580139a5cbdd"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "898942a41516f65ec57e49e2"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/studio/",
+          "id": "1bb9d6aabfb4978e2c33a89b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "b50cf774b868111cfafc92d5"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d0%b5lite-realtor/",
+          "id": "8419286037593fd02b03ec38"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/house-floor/",
+          "id": "973c5f9b31d3b5c4ba035d8d"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-tax-resort.html",
+      "final_url": "https://makler-realty.com/sitemap-tax-resort.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:24.673Z",
+      "response_sha256": "ebe9a0b5c511554b4c69e8026f6878370c5bb006aa41722165ddbcdc29449a89",
+      "response_artifact": "data/legacy/migration/live-source-html/ebe9a0b5c511554b4c69e8026f6878370c5bb006aa41722165ddbcdc29449a89.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/resort/other/",
+          "id": "a0fff18fd3385150b42f4818"
+        },
+        {
+          "url": "https://makler-realty.com/resort/blagoevgrad/",
+          "id": "f2ae67c68dccc7e10566dd27"
+        },
+        {
+          "url": "https://makler-realty.com/resort/loggari/",
+          "id": "d88d0b8cfeb235bc214aa1a9"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
+          "id": "9ca2270b4223e30b62f8d676"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%b8%d0%b5-%d0%ba%d1%83%d1%80%d0%be%d1%80%d1%82%d1%8b-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8/",
+          "id": "7e673dcc7048b2301daeae1b"
+        },
+        {
+          "url": "https://makler-realty.com/resort/nafplio/",
+          "id": "cfefe5e8879ecc3016b2b385"
+        },
+        {
+          "url": "https://makler-realty.com/resort/petrich/",
+          "id": "e4c5b14966a7161fe7a564d5"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "15fcd80b0e22d1ceb900df55"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "c44f6bcf754350140bb068f9"
+        },
+        {
+          "url": "https://makler-realty.com/resort/thessaloniki/",
+          "id": "165cf5863b11af54ed372e63"
+        },
+        {
+          "url": "https://makler-realty.com/resort/spa-resorts/",
+          "id": "04e17c4292046590e60771d4"
+        },
+        {
+          "url": "https://makler-realty.com/resort/halkidiki/",
+          "id": "0adffb1d56af845953e0d301"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-tax-location.html",
+      "final_url": "https://makler-realty.com/sitemap-tax-location.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:27.059Z",
+      "response_sha256": "921ca7d5f6a06df5ad34d1d8cdbf17f62facc658a8b981efc8abc38d116acdf8",
+      "response_artifact": "data/legacy/migration/live-source-html/921ca7d5f6a06df5ad34d1d8cdbf17f62facc658a8b981efc8abc38d116acdf8.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/location/bulgaria/",
+          "id": "502992149d46ba5f66ce0875"
+        },
+        {
+          "url": "https://makler-realty.com/location/%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
+          "id": "7a62ae9e4a621b876f51dea1"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-tax-property.html",
+      "final_url": "https://makler-realty.com/sitemap-tax-property.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:27.934Z",
+      "response_sha256": "2a56a180a88132d198fb0512f5014543a99797cb360e081bb826db95f7d9b2b2",
+      "response_artifact": "data/legacy/migration/live-source-html/2a56a180a88132d198fb0512f5014543a99797cb360e081bb826db95f7d9b2b2.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/property/rent/",
+          "id": "c01437d5b89fe97856651b17"
+        },
+        {
+          "url": "https://makler-realty.com/property/sell/",
+          "id": "4419cae8e9a6aec9261d8095"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-tax-category.html",
+      "final_url": "https://makler-realty.com/sitemap-tax-category.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:28.857Z",
+      "response_sha256": "d158f4d747a8cb2447c9e9148645dba74b2cf4694e58004c088e7f75fceac612",
+      "response_artifact": "data/legacy/migration/live-source-html/d158f4d747a8cb2447c9e9148645dba74b2cf4694e58004c088e7f75fceac612.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+          "id": "32ce31baf0b90cd908c941b4"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2026-09.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2026-09.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:29.687Z",
+      "response_sha256": "7129405b672a901eb52c6744cf644b978f4a0e7d0f7ca732ef5ef126d7ba5fd5",
+      "response_artifact": "data/legacy/migration/live-source-html/7129405b672a901eb52c6744cf644b978f4a0e7d0f7ca732ef5ef126d7ba5fd5.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b4%d0%b2%d0%b5-%d1%81%d0%bf%d0%b0%d0%bb%d0%bd%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "e127281dccb7cd1e3d5ad52e"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bd%d0%b0%d0%b5%d0%bc/",
+          "id": "3b8489ce14433f4831171e44"
+        },
+        {
+          "url": "https://makler-realty.com/listing/new-2-bedrooms-apartment-with-parking-in-sandanski-for-rent/",
+          "id": "0aa8ff21cfcc402bc1a3b374"
+        },
+        {
+          "url": "https://makler-realty.com/listing/nov-dvustaen-apartament-parking-sandanski/",
+          "id": "1ed6269dec8613d0d7a03dd1"
+        },
+        {
+          "url": "https://makler-realty.com/listing/house-for-sale-near-sandanski/",
+          "id": "901a150dea1e6913b3c5ce48"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2026-08.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2026-08.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:30.416Z",
+      "response_sha256": "b8c5a3c8180617b39ddf05c22e427c07c27c0f2ff0557965a329ecac444d8edb",
+      "response_artifact": "data/legacy/migration/live-source-html/b8c5a3c8180617b39ddf05c22e427c07c27c0f2ff0557965a329ecac444d8edb.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/dvustaen-apartament-sandanski/",
+          "id": "7179e72a16fa2696094f69fc"
+        },
+        {
+          "url": "https://makler-realty.com/listing/authentic-house-with-yard-for-sale-in-the-picturesque-village-of-palat-strumyani-municipality/",
+          "id": "2637aef68a1e1d38554affa9"
+        },
+        {
+          "url": "https://makler-realty.com/listing/tristaen-apartament-sandanski-center/",
+          "id": "ef952901ffc9361d23a6124a"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2026-07.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2026-07.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:31.117Z",
+      "response_sha256": "ba49864566d721f44618ae53cacb6bc5e2c6bda55ae7e00bd8fbc2aa7e021e04",
+      "response_artifact": "data/legacy/migration/live-source-html/ba49864566d721f44618ae53cacb6bc5e2c6bda55ae7e00bd8fbc2aa7e021e04.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
+          "id": "97fac2d034a5b5aa44db91c3"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
+          "id": "a3fd6ce48145fa909b0cc152"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2026-06.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2026-06.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:31.856Z",
+      "response_sha256": "4c09dc51069d216991aa621643dd7a9d64dfd1f5aa5f2ed72347aa53a813cc5f",
+      "response_artifact": "data/legacy/migration/live-source-html/4c09dc51069d216991aa621643dd7a9d64dfd1f5aa5f2ed72347aa53a813cc5f.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba/",
+          "id": "3e82b996a2dbdf044c9ae07e"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d0%b5-%d0%b2%d0%b8%d0%bb%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%b3%d1%80%d0%b0%d0%bb%d0%b8%d1%89%d0%b5-%d0%bc%d0%b0%d0%bb%d0%b5%d1%88%d0%b5%d0%b2%d0%be/",
+          "id": "e8e59dc78b58b26f20109175"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
+          "id": "a30d01fb1c74f34c84884732"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba%d0%b0-%d0%bd/",
+          "id": "512dcc01f172021d5965719a"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
+          "id": "f019a7456ee4ff642b971fd7"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
+          "id": "01ee45952a336c385c9a118b"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2026-05.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2026-05.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:32.581Z",
+      "response_sha256": "c310bdcee707ffa0922c158fe4d43522f9f081559e1bcd6f907004c0dd90d2b8",
+      "response_artifact": "data/legacy/migration/live-source-html/c310bdcee707ffa0922c158fe4d43522f9f081559e1bcd6f907004c0dd90d2b8.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b3%d0%b0%d1%80%d0%b0/",
+          "id": "882e87fa309a53404bfc9925"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2026-04.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2026-04.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:33.316Z",
+      "response_sha256": "888fdf90986a563b0db85db9de64aaf0597213e21ff714adac5ef460f834a349",
+      "response_artifact": "data/legacy/migration/live-source-html/888fdf90986a563b0db85db9de64aaf0597213e21ff714adac5ef460f834a349.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
+          "id": "ac7a7af3c07fe523d276bf93"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
+          "id": "80e9aa8a3ed60455ec715205"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2026-03.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2026-03.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:34.185Z",
+      "response_sha256": "2eb2f1a247cfb58c5161f57f109d14ce1138f4d581dca44f546c7cad1eeb0d8b",
+      "response_artifact": "data/legacy/migration/live-source-html/2eb2f1a247cfb58c5161f57f109d14ce1138f4d581dca44f546c7cad1eeb0d8b.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
+          "id": "ebd72db569e52d7b77067fac"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "f9b3f7a837f21879608b227f"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-11.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-11.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:34.941Z",
+      "response_sha256": "acbc240611ec57af73bfa9422fbbfd352dadd4881c21e8d7037c3601155c25ad",
+      "response_artifact": "data/legacy/migration/live-source-html/acbc240611ec57af73bfa9422fbbfd352dadd4881c21e8d7037c3601155c25ad.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/two-bedroom-apartment-in-the-complex-arena-1-st-vlas-for-sale/",
+          "id": "64666d2ba646a03a87493743"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "abe0c314e439964815112b2a"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bb%d0%be%d0%b3%d0%b0%d1%80%d0%b8-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
+          "id": "db04e0526c94c676bbb11bfa"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
+          "id": "d30717f8560b802555c9ca62"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-10.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-10.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:35.628Z",
+      "response_sha256": "176db6425f44f015c62f05675e1617e94331605691c825329be2bc08bd98ef64",
+      "response_artifact": "data/legacy/migration/live-source-html/176db6425f44f015c62f05675e1617e94331605691c825329be2bc08bd98ef64.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
+          "id": "fc3a96a84019a529ef5bf85a"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba/",
+          "id": "033fa785bf34cdc2b26d152e"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-09.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-09.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:36.274Z",
+      "response_sha256": "798144adc3963b3afe8b62a8a20b9cffe6d8d33bde79152da4f305be7eea25bb",
+      "response_artifact": "data/legacy/migration/live-source-html/798144adc3963b3afe8b62a8a20b9cffe6d8d33bde79152da4f305be7eea25bb.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "28628be52fbeb2cda103e4b2"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd/",
+          "id": "2f78fdbd5906312e989e2e22"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-08.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-08.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:36.939Z",
+      "response_sha256": "ddc19276dee172d1e0868368835bea1c5073c3e4009f7e9fa268e3996208b994",
+      "response_artifact": "data/legacy/migration/live-source-html/ddc19276dee172d1e0868368835bea1c5073c3e4009f7e9fa268e3996208b994.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%bf%d0%b0%d1%80%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%ba%d0%be%d0%bc%d0%bf%d0%bb%d0%b5%d0%ba%d1%81/",
+          "id": "17da5e7755188b1fd56690df"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "80a3626cd967960204ea9342"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%b0-2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9b5523ca71dc3b19c30afde9"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d0%b4%d0%bd%d0%be%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%81%d1%82%d1%83%d0%b4%d0%b8%d0%be/",
+          "id": "866bb4af63579902245866c4"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80/",
+          "id": "af9a0b2a8d61d86f5df459f5"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-07.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-07.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:37.613Z",
+      "response_sha256": "363d0222fdacab744dc161e5b4b3a885a1243bd07deb270a8c8e93b980aacc16",
+      "response_artifact": "data/legacy/migration/live-source-html/363d0222fdacab744dc161e5b4b3a885a1243bd07deb270a8c8e93b980aacc16.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "1fba13f5e1387324bd9dbcc0"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bc%d0%b8%d0%ba%d1%80%d0%b5%d0%b2%d0%be/",
+          "id": "e514b87095f89e6fe859c6dc"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-06.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-06.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:38.295Z",
+      "response_sha256": "300060c65654148badcfa154a7097c51eeed6a631ce7fe6cb876177e6ce5e8c5",
+      "response_artifact": "data/legacy/migration/live-source-html/300060c65654148badcfa154a7097c51eeed6a631ce7fe6cb876177e6ce5e8c5.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "adf357948a63732af5b03758"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "0514bc7768568f9126f2b47b"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d0%b5%d0%b4%d0%b5%d0%bb%d1%81%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
+          "id": "80a4a391c4eb498d13c1a35f"
+        },
+        {
+          "url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "cda6f966bd12045de410d890"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%b8%d0%bd%d0%b2%d0%b5%d1%81%d1%82%d0%b8%d1%86%d0%b8%d0%be%d0%bd%d0%b5%d0%bd-%d0%bf%d1%80%d0%be%d0%b5%d0%ba%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "e4397ba5a294e43b2aa015d5"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-05.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-05.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:39.002Z",
+      "response_sha256": "c9600d8d227ce168f13412ea49be5bd4c7aa78e6f48e25056666fe226f5796b9",
+      "response_artifact": "data/legacy/migration/live-source-html/c9600d8d227ce168f13412ea49be5bd4c7aa78e6f48e25056666fe226f5796b9.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d0%b8%d1%88%d0%bb%d0%b5%d0%bd%d0%b8-%d1%85%d0%b0%d0%bb%d0%b5%d1%82%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4/",
+          "id": "c5da155f99cd25b46af012dc"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-04.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-04.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:40.302Z",
+      "response_sha256": "fa7b6b53f8c9127d2d92d451bffd37aa29c4b09f95dd9730128e8cb55357be4d",
+      "response_artifact": "data/legacy/migration/live-source-html/fa7b6b53f8c9127d2d92d451bffd37aa29c4b09f95dd9730128e8cb55357be4d.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d1%84%d0%b8%d0%bb%d0%b0%d0%ba%d1%82%d0%b8%d0%ba%d0%b0-%d1%80%d0%b5%d1%85%d0%b0%d0%b1%d0%b8%d0%bb%d0%b8%d1%82%d0%b0%d1%86%d0%b8/",
+          "id": "e2d71ba0252f17af7c29173a"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-03.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-03.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:41.821Z",
+      "response_sha256": "c2cb250ff7df45d7280c2fc1a4c095e5d784a1f85474c8766a5caa5a56aa7e89",
+      "response_artifact": "data/legacy/migration/live-source-html/c2cb250ff7df45d7280c2fc1a4c095e5d784a1f85474c8766a5caa5a56aa7e89.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/villa-for-sale-in-the-mountains-near-sandanski/",
+          "id": "9f333ac0b062c01204948893"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "edb9d2c386f4e2b80a9f86a6"
+        },
+        {
+          "url": "https://makler-realty.com/listing/one-bedroom-apartment-in-the-park-of-sandanski/",
+          "id": "aa830e6156c57c8f2408775f"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-02.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-02.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:42.484Z",
+      "response_sha256": "fd393c273babe122e6e5e5aecb5707f696a7bde0b3d22494b1db25e963196869",
+      "response_artifact": "data/legacy/migration/live-source-html/fd393c273babe122e6e5e5aecb5707f696a7bde0b3d22494b1db25e963196869.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "028a1b164f650cd01c8177e4"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2025-01.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2025-01.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:43.293Z",
+      "response_sha256": "5108ad710fabd99cff291438ad48786eb68c4c254b4e30eb533361d7db2aaad4",
+      "response_artifact": "data/legacy/migration/live-source-html/5108ad710fabd99cff291438ad48786eb68c4c254b4e30eb533361d7db2aaad4.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/studio-for-rent-in-sandanski/",
+          "id": "c3019f2f0c9500f535d68d0f"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "4c082aad9ebc89dfcc1cde98"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%be%d0%b1%d1%89%d0%b8%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "6a89503390c6666826c80914"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-12.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-12.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:44.249Z",
+      "response_sha256": "515d8e240076173c6498f635fafc69426d07e392c3eab3de402076364926afcc",
+      "response_artifact": "data/legacy/migration/live-source-html/515d8e240076173c6498f635fafc69426d07e392c3eab3de402076364926afcc.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
+          "id": "efa1d3b8037fc9b088a10d8c"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%be%d0%b1%d0%be%d1%80%d1%83%d0%b4%d0%b2%d0%b0%d0%bd%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "279ff0e95dd0403974039f67"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81%d0%b8%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd%d0%b8-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "d8a29a5de2cbb420bf90be66"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-10.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-10.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:44.893Z",
+      "response_sha256": "66f7771ebdea8d58fa941766d93d86dd7c561f43b284c36dcafdaef23ab92e5e",
+      "response_artifact": "data/legacy/migration/live-source-html/66f7771ebdea8d58fa941766d93d86dd7c561f43b284c36dcafdaef23ab92e5e.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d1%81%d1%82%d0%b0%d1%80%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
+          "id": "cd6182b2d88dde8e64897c09"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-09.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-09.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:45.603Z",
+      "response_sha256": "e52839916bb5e65c9384812e4e7bd276c413b26ddf6cae617e16abb021ac9705",
+      "response_artifact": "data/legacy/migration/live-source-html/e52839916bb5e65c9384812e4e7bd276c413b26ddf6cae617e16abb021ac9705.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/house-for-sale-in-the-village-of-leshnitsa/",
+          "id": "17bd2ec0146416768bdaf721"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%88%d0%b8%d1%80%d0%be%d0%ba%d0%b8%d1%8f-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80-%d0%bd/",
+          "id": "517097f8393a7c5f0b5dde45"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-05.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-05.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:46.288Z",
+      "response_sha256": "3e37896260f7a000311e777157c8bd0faddc07b9a4216a361f95eebe7c04d16e",
+      "response_artifact": "data/legacy/migration/live-source-html/3e37896260f7a000311e777157c8bd0faddc07b9a4216a361f95eebe7c04d16e.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0/",
+          "id": "adbb43f289f78599d224f27d"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-04.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-04.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:46.883Z",
+      "response_sha256": "70b6c7faae4efb601cd09f964896e982b484fb4d3884ed1bc52f6162020a09de",
+      "response_artifact": "data/legacy/migration/live-source-html/70b6c7faae4efb601cd09f964896e982b484fb4d3884ed1bc52f6162020a09de.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/front-compartment-in-pasalimani-piraeus-in-6th-floor/",
+          "id": "3e3f4c56d49dcd7211d55402"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f-%d0%b5%d1%80%d0%b5%d1%82%d1%80%d0%b8%d1%8f-%d0%ba%d0%be%d1%82%d1%80%d0%be%d0%bd%d0%b8/",
+          "id": "72b8b859683db6b64f96e73a"
+        },
+        {
+          "url": "https://makler-realty.com/listing/real-estate-for-sale-in-nafplio-greece/",
+          "id": "99f50516b64121138118e646"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-03.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-03.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:47.538Z",
+      "response_sha256": "7595276896212260ca602645c99b698405b53830235108f82996c47718b446d8",
+      "response_artifact": "data/legacy/migration/live-source-html/7595276896212260ca602645c99b698405b53830235108f82996c47718b446d8.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%81-%d0%bb%d0%b0%d1%81%d0%ba%d0%b0%d1%80%d0%b5%d0%b2%d0%be/",
+          "id": "5679ae17f8966d09bb4f9549"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "c3a84563ad0d34ae7b62ea6b"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-02.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-02.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:48.248Z",
+      "response_sha256": "01ef7958dffe49d6b0ad24937a40e58d02c6e5215e4f72dff759b2795cf52e18",
+      "response_artifact": "data/legacy/migration/live-source-html/01ef7958dffe49d6b0ad24937a40e58d02c6e5215e4f72dff759b2795cf52e18.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%ba%d1%83%d0%bb%d0%b0%d1%82%d0%b0/",
+          "id": "b95f81b2e0e2760dafde1511"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b7%d0%b0-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4/",
+          "id": "f302ed319a8b05fcaecc4417"
+        },
+        {
+          "url": "https://makler-realty.com/listing/prodava-mezonet-ul-pirin-sandanski/",
+          "id": "d4fdf878291e278248185bd2"
+        },
+        {
+          "url": "https://makler-realty.com/listing/working-business-for-sale-pellet-production/",
+          "id": "cda40580ba373bf88385955f"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2024-01.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2024-01.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:48.874Z",
+      "response_sha256": "353f4d5e9acb1742a2f954149a9d67029dff0b1155541d8b95c00ce455dcc815",
+      "response_artifact": "data/legacy/migration/live-source-html/353f4d5e9acb1742a2f954149a9d67029dff0b1155541d8b95c00ce455dcc815.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/",
+          "id": "b9f070dfadb07aa6f40f4160"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bc%d0%b5%d0%b7%d0%be%d0%bd%d0%b5%d1%82-%d0%b2-%d1%85%d0%b0%d0%bb%d0%ba%d0%b8%d0%b4%d0%b8%d0%ba%d0%b8-%d1%80-%d0%bd-%d0%b5%d0%bb%d0%b0%d0%bd%d0%b8-%d1%81/",
+          "id": "cd373a8451223783353a2685"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2023-11.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2023-11.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:49.607Z",
+      "response_sha256": "10d82f1b12be7b922dc6a80fb3ce23029c5a4af39fd387f618769ead1284144c",
+      "response_artifact": "data/legacy/migration/live-source-html/10d82f1b12be7b922dc6a80fb3ce23029c5a4af39fd387f618769ead1284144c.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "5e7377d1c2c17dcbf1c5279c"
+        },
+        {
+          "url": "https://makler-realty.com/listing/haus-zum-verkauf-im-dorf-vinogradi-3-km-von-melnik-entfernt/",
+          "id": "1a627204ba33ebab5212766f"
+        },
+        {
+          "url": "https://makler-realty.com/listing/2-bedrooms-apartment-for-sale-in-sandanski/",
+          "id": "2e3ab3291bc7032332cf4eed"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2023-09.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2023-09.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:50.254Z",
+      "response_sha256": "3ab0af49a9ff7b62a46d78fde68ed4a157568aa2a483dd296e045682fbff58ab",
+      "response_artifact": "data/legacy/migration/live-source-html/3ab0af49a9ff7b62a46d78fde68ed4a157568aa2a483dd296e045682fbff58ab.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
+          "id": "94ca8fb8ef41d7552b0e8725"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2023-06.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2023-06.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:50.927Z",
+      "response_sha256": "eec3c464ae23e45e37557df9a4ef346c441a68d6f13d08cc032faa5df60134a1",
+      "response_artifact": "data/legacy/migration/live-source-html/eec3c464ae23e45e37557df9a4ef346c441a68d6f13d08cc032faa5df60134a1.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b4%d1%8a%d0%bb%d0%b3%d0%be%d1%81%d1%80%d0%be%d1%87%d0%b5%d0%bd-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d1%85%d0%be%d1%82%d0%b5%d0%bb-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d0%b3%d1%80/",
+          "id": "9d35df355b73057ed8120b6c"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2023-03.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2023-03.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:51.589Z",
+      "response_sha256": "4a0774023ecfb36b66005b5afcc565da2f2e06e4e36d2401c11b5ba4e96929f2",
+      "response_artifact": "data/legacy/migration/live-source-html/4a0774023ecfb36b66005b5afcc565da2f2e06e4e36d2401c11b5ba4e96929f2.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bc%d0%b0%d0%b3%d0%b0%d0%b7%d0%b8%d0%bd-%d0%b2-%d0%b3%d1%80-%d0%b1%d0%bb%d0%b0%d0%b3%d0%be%d0%b5%d0%b2%d0%b3%d1%80%d0%b0%d0%b4/",
+          "id": "e5a45382468d64348c95e6f3"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2021-08.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2021-08.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:52.304Z",
+      "response_sha256": "55548dfd330738e735507b98bab5be0f3d5eb47775f6bdc0fe6079b1ca3be37f",
+      "response_artifact": "data/legacy/migration/live-source-html/55548dfd330738e735507b98bab5be0f3d5eb47775f6bdc0fe6079b1ca3be37f.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%bd%d0%b0-%d0%b3%d0%bb-%d0%bf%d1%8a%d1%82-%d0%b579-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "ab3d5c38e086608a43fddb04"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2021-07.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2021-07.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:52.980Z",
+      "response_sha256": "d52f3c986d054efec7505191b5780ae8a829857ab41a740c28f90a2fae7b3e34",
+      "response_artifact": "data/legacy/migration/live-source-html/d52f3c986d054efec7505191b5780ae8a829857ab41a740c28f90a2fae7b3e34.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bd%d0%be%d0%b2%d0%be%d1%81%d1%82%d1%80%d0%be%d1%8f%d1%89%d0%b8-%d1%81%d0%b5-%d0%ba%d1%8a%d1%89%d0%b8-%d0%b2-%d1%81-%d0%b4%d0%b6%d0%b8%d0%b3%d1%83%d1%80%d0%be%d0%b2%d0%be/",
+          "id": "a70370cfc78b99c326234907"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2021-03.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2021-03.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:53.662Z",
+      "response_sha256": "d034bed42c8d4d918dbd321f34eb43ef3edd6190ac8bab68057599ef097b38cc",
+      "response_artifact": "data/legacy/migration/live-source-html/d034bed42c8d4d918dbd321f34eb43ef3edd6190ac8bab68057599ef097b38cc.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/big-plot-of-land-and-buildings-for-sale-near-sandanski/",
+          "id": "21bf6eb83f0df2940b6336b8"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2021-02.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2021-02.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:54.480Z",
+      "response_sha256": "ab7a9a3f579002ba3efa5702ddac16d6cc5e2a2a8911bcc14951de7f493cb0aa",
+      "response_artifact": "data/legacy/migration/live-source-html/ab7a9a3f579002ba3efa5702ddac16d6cc5e2a2a8911bcc14951de7f493cb0aa.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be%d0%b2%d0%be/",
+          "id": "57a1c86c7d2b699d6282c395"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    }
+  ],
+  "discoveredOutsideFrozenUrls": [
+    {
+      "url": "https://makler-realty.com/sitemap.html",
+      "id": "7b0c9ee2a5434b3884e8878b"
+    },
+    {
+      "url": "https://makler-realty.com/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b4%d0%b2%d0%b5-%d1%81%d0%bf%d0%b0%d0%bb%d0%bd%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "e127281dccb7cd1e3d5ad52e"
+    },
+    {
+      "url": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bd%d0%b0%d0%b5%d0%bc/",
+      "id": "3b8489ce14433f4831171e44"
+    },
+    {
+      "url": "https://makler-realty.com/listing/new-2-bedrooms-apartment-with-parking-in-sandanski-for-rent/",
+      "id": "0aa8ff21cfcc402bc1a3b374"
+    },
+    {
+      "url": "https://makler-realty.com/listing/nov-dvustaen-apartament-parking-sandanski/",
+      "id": "1ed6269dec8613d0d7a03dd1"
+    },
+    {
+      "url": "https://makler-realty.com/listing/house-for-sale-near-sandanski/",
+      "id": "901a150dea1e6913b3c5ce48"
+    },
+    {
+      "url": "https://makler-realty.com/listing/dvustaen-apartament-sandanski/",
+      "id": "7179e72a16fa2696094f69fc"
+    },
+    {
+      "url": "https://makler-realty.com/listing/authentic-house-with-yard-for-sale-in-the-picturesque-village-of-palat-strumyani-municipality/",
+      "id": "2637aef68a1e1d38554affa9"
+    },
+    {
+      "url": "https://makler-realty.com/listing/tristaen-apartament-sandanski-center/",
+      "id": "ef952901ffc9361d23a6124a"
+    },
+    {
+      "url": "https://makler-realty.com/listing/%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%bf%d0%b0%d0%bd%d0%be%d1%80%d0%b0%d0%bc%d0%b5%d0%bd-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82/",
+      "id": "97fac2d034a5b5aa44db91c3"
+    },
+    {
+      "url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
+      "id": "a3fd6ce48145fa909b0cc152"
+    }
+  ]
+}

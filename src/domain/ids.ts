@@ -1,36 +1,36 @@
-// Identifiers, human references, locales and currencies (spec §04.1, §18.2).
+// Identifiers, human references, locales and currencies (architecture §4, §4.2, §3.2).
 
 declare const brand: unique symbol;
 export type Brand<T, B extends string> = T & { readonly [brand]: B };
 
 export const entityKinds = [
-  "staff_account",
-  "client_account",
-  "person",
-  "organization",
+  "principal",
+  "party",
   "property",
+  "property_fact_revision",
   "listing",
-  "listing_version",
+  "listing_revision",
+  "localized_revision",
+  "publication_manifest",
   "media_asset",
+  "media_relation",
   "inquiry",
   "case",
-  "match",
-  "shortlist",
-  "saved_search",
+  "brief_revision",
+  "interest",
   "appointment",
+  "proposal",
   "message",
   "document",
-  "proposal",
   "task",
   "approval",
-  "publication_release",
-  "translation",
+  "seller_instruction",
+  "subscription",
   "content_page",
-  "service_agreement",
-  "service_request",
-  "reservation",
+  "privacy_request",
   "import_batch",
   "operation",
+  "external_action",
 ] as const;
 export type EntityKind = (typeof entityKinds)[number];
 
@@ -41,9 +41,8 @@ export type ListingId = Id<"listing">;
 export type PropertyId = Id<"property">;
 export type CaseId = Id<"case">;
 export type InquiryId = Id<"inquiry">;
-export type StaffAccountId = Id<"staff_account">;
-export type ClientAccountId = Id<"client_account">;
-export type PersonId = Id<"person">;
+export type PrincipalId = Id<"principal">;
+export type PartyId = Id<"party">;
 export type OperationId = Id<"operation">;
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -67,10 +66,10 @@ export const referencePrefixes = {
   appointment: "AP",
   proposal: "PP",
   document: "DC",
-  publication_release: "RL",
-  service_agreement: "SA",
-  service_request: "SR",
-  reservation: "RS",
+  seller_instruction: "SI",
+  privacy_request: "PQ",
+  complaint: "CM",
+  key_set: "KY",
   import_batch: "IM",
 } as const;
 export type ReferenceKind = keyof typeof referencePrefixes;

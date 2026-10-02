@@ -3,7 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { localeDirection, type PublicLocale, suggestionDismissedCookie } from "@/i18n/config";
-import { Banner, Button, ButtonLink } from "@/ui";
+import { buttonClass } from "@/ui/button-class";
+import { Banner } from "@/ui/notice";
 import { switchLocalePath, useQueryAndHash } from "./language-switcher";
 
 const halfYear = 60 * 60 * 24 * 182;
@@ -16,7 +17,7 @@ export interface SuggestionCopy {
 }
 
 /**
- * Offers the browser's preferred language without leaving the page (F01, A02). Written in
+ * Offers the browser's preferred language without leaving the page (F01, AT03). Written in
  * the suggested language so the visitor can read it; dismissing is remembered.
  */
 export function LanguageSuggestion({
@@ -45,12 +46,16 @@ export function LanguageSuggestion({
         tone="info"
         action={
           <>
-            <ButtonLink href={switchLocalePath(pathname, suggested, suffix)} hrefLang={suggested}>
+            <a
+              href={switchLocalePath(pathname, suggested, suffix)}
+              hrefLang={suggested}
+              className={buttonClass("primary")}
+            >
               {copy.switchLabel}
-            </ButtonLink>
-            <Button variant="tertiary" onPress={dismiss}>
+            </a>
+            <button type="button" onClick={dismiss} className={buttonClass("tertiary")}>
               {copy.dismiss}
-            </Button>
+            </button>
           </>
         }
       >

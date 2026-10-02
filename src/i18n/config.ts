@@ -30,6 +30,26 @@ export function localeDirection(locale: PublicLocale): "ltr" | "rtl" {
   return locale === "he" ? "rtl" : "ltr";
 }
 
+/**
+ * The regional tag each route locale formats with: dates, numbers and money in
+ * src/i18n/format.ts and React Aria's built-in strings (src/ui/locale-provider.tsx). A bare
+ * language would leave the region to the runtime (en means US dates, he may lack Israeli
+ * conventions); the agency's audience is European and Israeli.
+ */
+export const displayLocales: Record<PublicLocale, string> = {
+  bg: "bg-BG",
+  en: "en-GB",
+  ru: "ru-RU",
+  de: "de-DE",
+  nl: "nl-NL",
+  el: "el-GR",
+  he: "he-IL",
+};
+
+export function displayLocale(locale: PublicLocale): string {
+  return displayLocales[locale];
+}
+
 /** Each language named in itself, so a visitor can find their own in any interface language. */
 export const localeEndonyms: Record<PublicLocale, string> = {
   bg: "Български",

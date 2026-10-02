@@ -1,0 +1,11 @@
+{
+  "label": "Πληροφορίες γραφείου",
+  "agencyName": "MS Realty",
+  "agencyKind": "Μεσιτικό γραφείο",
+  "callLabel": "Καλέστε μας",
+  "call": "Κλήση στο {phone}",
+  "help": "Βοήθεια",
+  "privacy": "Απόρρητο",
+  "accessibility": "Προσβασιμότητα",
+  "copyright": "© {year} MS Realty"
+}

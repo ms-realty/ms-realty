@@ -1,5 +1,8 @@
-// Legacy URL decisions and the import pipeline (spec F09, F32, §20.4, A71, A72).
+// Legacy URL decisions, staged imports and reversible merges (architecture §13, §18, AT55,
+// AT56, AT57).
+import { sql } from "drizzle-orm";
 import {
+  check,
   index,
   integer,
   jsonb,
@@ -9,8 +12,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { staffAccounts } from "./accounts";
-import { instant, mutable, reference } from "./columns";
+import { createdAt, id, instant, mutable, reference } from "./columns";
 import {
   importBatchModeEnum,
   importBatchStateEnum,
@@ -18,8 +20,10 @@ import {
   importRowOutcomeEnum,
   legacyDomainEnum,
   legacyUrlDecisionEnum,
+  mergeSubjectEnum,
 } from "./enums";
-import { listings } from "./properties";
+import { principals } from "./identity";
+import { listings } from "./inventory";
 
 /** Evidence-based outcome per legacy URL (data/legacy/url-decisions.json); never guessed. */
 export const legacyUrlDecisions = pgTable(
@@ -51,7 +55,7 @@ export const importBatches = pgTable("import_batches", {
   sourceSha256: text("source_sha256"),
   fieldMapping: jsonb("field_mapping").notNull().default({}),
   rowCount: integer("row_count").notNull().default(0),
-  createdByStaffId: uuid("created_by_staff_id").references(() => staffAccounts.id),
+  createdById: uuid("created_by_id").references(() => principals.id),
   startedAt: instant("started_at"),
   finishedAt: instant("finished_at"),
 });
@@ -78,5 +82,32 @@ export const importRows = pgTable(
   (t) => [
     uniqueIndex("import_rows_batch_row_idx").on(t.batchId, t.rowNumber),
     index("import_rows_classification_idx").on(t.batchId, t.classification),
+  ],
+);
+
+/**
+ * An approved duplicate merge of two parties or properties. The merged record stays as an
+ * alias; the merge never widens anyone's access and can be reversed or split (AT56).
+ */
+export const mergeRecords = pgTable(
+  "merge_records",
+  {
+    id: id(),
+    subject: mergeSubjectEnum("subject").notNull(),
+    survivorId: uuid("survivor_id").notNull(),
+    mergedId: uuid("merged_id").notNull(),
+    reason: text("reason").notNull(),
+    /** Private relationships and permission implications reviewed before the merge. */
+    review: jsonb("review").notNull().default({}),
+    decidedById: uuid("decided_by_id")
+      .notNull()
+      .references(() => principals.id),
+    createdAt: createdAt(),
+    reversedAt: instant("reversed_at"),
+    reversedById: uuid("reversed_by_id").references(() => principals.id),
+  },
+  (t) => [
+    check("merge_records_distinct", sql`${t.survivorId} <> ${t.mergedId}`),
+    index("merge_records_merged_idx").on(t.subject, t.mergedId),
   ],
 );

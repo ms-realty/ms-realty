@@ -1,0 +1,14 @@
+{
+  "brand": "MS Realty",
+  "agencyKind": "Immobilienagentur",
+  "homeHeading": "MS Realty",
+  "homeIntro": "Immobilien kaufen, mieten, verkaufen oder vermieten mit dem Team von MS Realty.",
+  "clientAccessHeading": "Anmelden bei „Mein Vorgang“",
+  "staffAccessHeading": "Anmeldung für Mitarbeitende",
+  "languageSuggestion": {
+    "label": "Sprachvorschlag",
+    "message": "Diese Seite gibt es auch auf Deutsch.",
+    "switch": "Auf Deutsch weiter",
+    "dismiss": "Vorschlag ausblenden"
+  }
+}

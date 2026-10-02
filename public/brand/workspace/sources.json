@@ -1,0 +1,62 @@
+{
+  "fileKey": "PxfBJ2tdrj9A923fpgqzDn",
+  "nodeId": "10:203",
+  "assets": [
+    {
+      "file": "today.svg",
+      "source": "https://www.figma.com/api/mcp/asset/deaee7e2-0d39-4aae-836f-08539fed79a7.svg",
+      "sha256": "c5b72b5b44ccc2991c385f0395c64b3e91ae6ccc4b8580d1f3c241f54121fc59",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "inquiries.svg",
+      "source": "https://www.figma.com/api/mcp/asset/ddd9bdbd-f253-42b7-b6f7-29249774dc19.svg",
+      "sha256": "acb639f1e7e9f0db4232beaf2f076b8d3f64646cd04baca2305b0be6a64400bb",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "cases.svg",
+      "source": "https://www.figma.com/api/mcp/asset/eb1f7a89-ad8b-461a-afe8-74caefabc854.svg",
+      "sha256": "bb5d095e1078e3f6900ca8846aa31040f0b99f535349cd058424d4dd07249fe0",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "inventory.svg",
+      "source": "https://www.figma.com/api/mcp/asset/b839d795-1acc-44dd-b486-c349452d4b56.svg",
+      "sha256": "a015b1c29c822717c189829be424ac7e8b6859a6877514f997f15db8b9e96bc9",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "calendar.svg",
+      "source": "https://www.figma.com/api/mcp/asset/624af83b-5d3a-4317-84fd-f267b6136267.svg",
+      "sha256": "28f5963e102ac4a3f5330ce2f92293c45b512ceeaec57797c6ddd557eca47794",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "tasks.svg",
+      "source": "https://www.figma.com/api/mcp/asset/d5d3b45b-45ca-496b-ab91-f0c6aa21f4f4.svg",
+      "sha256": "bbf104476f271f3f548bd57a2175e4bd38b3606321f3c6aa0bdc4e75942c6cca",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "butler.svg",
+      "source": "https://www.figma.com/api/mcp/asset/22e73b46-c072-4281-a010-32312c048f42.svg",
+      "sha256": "a52641fc6cf11dffb1edefcb550f66f8f71ec3072208f10c72d893f9d1306329",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "more-tools.svg",
+      "source": "https://www.figma.com/api/mcp/asset/832e5ef4-30fb-40d0-8a9f-9400ea6912ff.svg",
+      "sha256": "8f98ee8f44da3ab2a8e210903f344bdc3aaf20c09e2d0524e87b849231de2e10",
+      "width": 20,
+      "height": 20
+    }
+  ]
+}

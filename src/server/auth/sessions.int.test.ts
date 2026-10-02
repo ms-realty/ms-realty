@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { sessions, staffAccounts } from "@/db/schema";
+import { principals, sessions, staffMemberships } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { sha256Hex } from "../crypto";
 import { createClient, createStaff } from "../testing";
@@ -59,10 +59,18 @@ describe("sessions", () => {
   it("stops working for a suspended account", async () => {
     const staff = await createStaff(t.db);
     const { token } = await createSession(t.db, { kind: "staff", id: staff.id });
+    await t.db.update(principals).set({ status: "suspended" }).where(eq(principals.id, staff.id));
+    expect(await readSession(t.db, token)).toBeNull();
+  });
+
+  it("AT36: stops working for staff whose membership ended", async () => {
+    const staff = await createStaff(t.db);
+    const { token } = await createSession(t.db, { kind: "staff", id: staff.id });
+    expect(await readSession(t.db, token)).not.toBeNull();
     await t.db
-      .update(staffAccounts)
-      .set({ status: "suspended" })
-      .where(eq(staffAccounts.id, staff.id));
+      .update(staffMemberships)
+      .set({ state: "ended", endedAt: new Date() })
+      .where(eq(staffMemberships.principalId, staff.id));
     expect(await readSession(t.db, token)).toBeNull();
   });
 
@@ -98,7 +106,7 @@ describe("sessions", () => {
     const start = new Date();
     const issued = await createSession(t.db, { kind: "staff", id: staff.id }, start);
     expect(() => requireFreshAuth(issued.session, at(start, 60_000))).not.toThrow();
-    const later = at(start, sessionPolicy.stepUpMaxAgeMs + 1);
+    const later = at(start, sessionPolicy.staff.stepUpMs + 1);
     expect(() => requireFreshAuth(issued.session, later)).toThrow(
       expect.objectContaining({ code: "step_up_required" }),
     );

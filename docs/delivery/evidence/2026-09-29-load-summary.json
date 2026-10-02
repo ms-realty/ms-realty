@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "scope": "local-synthetic-closed-loop",
+  "recordedAt": "2026-09-29T13:05:58.053Z",
+  "source": {
+    "revision": "ed65d2c3c8797430be576d019400525ca351224e",
+    "dirty": true,
+    "provenance": "local-git"
+  },
+  "environment": {
+    "platform": "darwin",
+    "cpus": 16,
+    "memoryBytes": 137438953472,
+    "node": "v22.22.2",
+    "nextDist": ".next-load"
+  },
+  "dataset": {
+    "listings": 10000,
+    "projections": 18571,
+    "largeMediaBytes": 747392,
+    "largeMediaSamples": 100,
+    "scanEvidence": "synthetic fixture, not real ClamAV"
+  },
+  "measurements": {
+    "staff-today-html": {
+      "count": 161,
+      "p50": 913.41,
+      "p95": 1279.4,
+      "p99": 1342.76,
+      "max": 1392.07,
+      "budgetMs": 500
+    },
+    "public-search-html": {
+      "count": 1469,
+      "p50": 1360.25,
+      "p95": 1797.29,
+      "p99": 1957.81,
+      "max": 2196.99,
+      "budgetMs": 500
+    },
+    "staff-task-html": {
+      "count": 161,
+      "p50": 883.13,
+      "p95": 1282.8,
+      "p99": 1354.09,
+      "max": 1359.39,
+      "budgetMs": 500
+    },
+    "public-detail-html": {
+      "count": 1469,
+      "p50": 461.49,
+      "p95": 888.42,
+      "p99": 1081.39,
+      "max": 1295.38,
+      "budgetMs": 500
+    },
+    "public-media": {
+      "count": 1469,
+      "p50": 192.02,
+      "p95": 377.5,
+      "p99": 460.83,
+      "max": 493.39,
+      "budgetMs": null
+    },
+    "staff-command-post": {
+      "count": 161,
+      "p50": 1818.54,
+      "p95": 2017.99,
+      "p99": 2154.53,
+      "max": 2160.2,
+      "budgetMs": 800
+    }
+  },
+  "warmup": [
+    {
+      "route": "/bg/properties?purpose=sale&q=%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82",
+      "durationMs": 743.6147500000079
+    },
+    {
+      "route": "/en/properties?purpose=sale&q=apartment",
+      "durationMs": 164.29583400004776
+    },
+    {
+      "route": "/ru/properties?purpose=sale&q=%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0",
+      "durationMs": 164.39387500000885
+    },
+    {
+      "route": "/de/properties?purpose=sale&q=Wohnung",
+      "durationMs": 156.1397500000312
+    },
+    {
+      "route": "/nl/properties?purpose=sale&q=appartement",
+      "durationMs": 153.40574999997625
+    },
+    {
+      "route": "/el/properties?purpose=sale&q=%CE%B4%CE%B9%CE%B1%CE%BC%CE%AD%CF%81%CE%B9%CF%83%CE%BC%CE%B1",
+      "durationMs": 149.60637500003213
+    },
+    {
+      "route": "/he/properties?purpose=sale&q=%D7%93%D7%99%D7%A8%D7%94",
+      "durationMs": 160.9568749999744
+    }
+  ],
+  "failures": [],
+  "qualification": {
+    "performanceBudgetsPassed": false,
+    "minimumInventory": true,
+    "minimumDuration": true,
+    "everySessionCompleted": true,
+    "frozenLaunchInventory": false,
+    "queueStarvation": false,
+    "liveInfrastructure": false,
+    "fieldWebVitals": false,
+    "releaseGatePass": false
+  },
+  "workload": {
+    "publicSessions": 50,
+    "staffSessions": 10,
+    "intendedSeconds": 60,
+    "elapsedMs": 61459.212457999995,
+    "peakMeasuredRequests": 60
+  },
+  "completedCycles": {
+    "public": {
+      "total": 1469,
+      "minPerSession": 29,
+      "maxPerSession": 30
+    },
+    "staff": {
+      "total": 161,
+      "minPerSession": 16,
+      "maxPerSession": 17
+    }
+  },
+  "provenance": {
+    "recordedAt": "2026-09-29T12:59:26.429058+00:00",
+    "revision": "ed65d2c3c8797430be576d019400525ca351224e",
+    "dirty": true,
+    "buildId": "iKuXw7heNS2hOCL5BSaGn",
+    "loadRun": "8a4d5c6e1f324fa0b57984e1dbe836c2",
+    "sourceHashes": {
+      "load/agency-load.spec.ts": "773ce489a674cb2d57a6919f2b536598c08c62ef941fc8d5cd3bc62ed27a96f0",
+      "scripts/load-seed.ts": "9a881b1d07cc037d3a5e5a5aaf9439eda0536ade4964f432325ffadc49ac3b9d",
+      "playwright.load.config.ts": "019fc0daad47b82958ec4c95958f0ad35c690abdda741506abe3aee50e34a78c",
+      "playwright.config.ts": "258ae8b6cb5856a9902c50ce595201c99d050773adbf35753c8e4d454171cead",
+      "db/migrations/0017_publication_read_indexes.sql": "9d11c8665721df6ba7b98ff5165bf3c8cb82f822c3770876bf39bdbd9af0d934"
+    },
+    "hostLoad": "15:59  up  3:17, 1 user, load averages: 40.87 31.89 26.13",
+    "scope": "local native runtime; shared host; not release qualification"
+  },
+  "databaseDiagnostics": {
+    "searchMs": 562.2142919999897,
+    "bareEligibilityCountMs": 90446.347,
+    "note": "Bare diagnostic count has a different plan from the actual search queries."
+  },
+  "evidenceDirectory": "/Users/ivan/Code/.artifacts/ms-realty/recovery/20260929"
+}

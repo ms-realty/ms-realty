@@ -1,0 +1,105 @@
+/* Document defaults on top of the generated tokens (src/ui/tokens.css). Import once, last. */
+
+@layer base {
+  html {
+    background-color: var(--color-canvas);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 100%;
+    line-height: var(--text-body--line-height);
+    -webkit-text-size-adjust: 100%;
+    font-synthesis-weight: none;
+  }
+
+  /* Hebrew text reaches Noto Sans Hebrew first: the metric fallback (local Arial) has Hebrew
+     glyphs and would otherwise be used for Hebrew while Noto Sans, which has none, loads. */
+  :lang(he) {
+    --font-sans: "Noto Sans Hebrew", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    --font-display: "Noto Sans Hebrew", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    font-family: var(--font-sans);
+  }
+
+  /* Aligned amounts, times and counts use tabular figures (§11.3). */
+  table,
+  time,
+  data {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background-color: var(--color-selected);
+    color: var(--color-text);
+  }
+
+  /* 3 px focus ring, offset 2 px (ux-spec §06.1): it sits on the surrounding surface, never on
+     the control's own fill. */
+  :focus-visible {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  .bg-ink :focus-visible {
+    outline-color: var(--color-focus-inverse);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-action);
+  }
+
+  /* WebKit's preformatted option text can expand the document beyond a bounded select.
+     Keep native selection and the full option label, without page-wide clipping. */
+  select {
+    white-space: normal;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  /* Disclosures (details/summary) are the no-JavaScript baseline for menus and pickers. */
+  summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must override component transitions. */
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    /* biome-ignore-end lint/complexity/noImportantStyles: reduced motion must override component transitions. */
+  }
+
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline-color: Highlight;
+    }
+  }
+}

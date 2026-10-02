@@ -31,7 +31,7 @@ export function Checkbox({ children, className, ...props }: CheckboxProps) {
           <span
             aria-hidden="true"
             className={cx(
-              "flex size-6 shrink-0 items-center justify-center rounded-[4px] border-2 border-border bg-surface text-text-inverse",
+              "flex size-6 shrink-0 items-center justify-center rounded-control border-2 border-border bg-surface text-text-inverse",
               "group-data-hovered/checkbox:border-text",
               "group-data-focus-visible/checkbox:outline-2 group-data-focus-visible/checkbox:outline-offset-2 group-data-focus-visible/checkbox:outline-focus",
               "group-data-selected/checkbox:border-action group-data-selected/checkbox:bg-action",

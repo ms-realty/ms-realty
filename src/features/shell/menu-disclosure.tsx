@@ -1,49 +1,40 @@
-"use client";
+import type { ReactNode } from "react";
+import { cx } from "@/ui/cx";
+import { MenuIcon } from "@/ui/icons";
 
-import { usePathname } from "next/navigation";
-import { type ReactNode, useEffect, useState } from "react";
-import { Disclosure, DisclosurePanel } from "react-aria-components";
-import { Button, cx, icons } from "@/ui";
-
-/** Compact-width navigation: a disclosure that pushes content down and closes on navigation. */
+/** Native disclosure remains operable before hydration and with JavaScript disabled. */
 export function MenuDisclosure({
   label,
   children,
   className,
   panelClassName,
-  quiet = false,
 }: {
-  label: ReactNode;
+  label: string;
   children: ReactNode;
   className?: string;
   panelClassName?: string;
-  /** A full-width, borderless trigger for preferences inside a sidebar. */
-  quiet?: boolean;
 }) {
-  const pathname = usePathname();
-  const [expanded, setExpanded] = useState(false);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: closes whenever the route changes.
-  useEffect(() => setExpanded(false), [pathname]);
-
   return (
-    <Disclosure
-      isExpanded={expanded}
-      onExpandedChange={setExpanded}
-      className={cx("contents", className)}
+    <details
+      data-dismissible=""
+      className={cx("group/menu relative [&:not([open])>div]:hidden", className)}
     >
-      <Button
-        slot="trigger"
-        variant={quiet ? "tertiary" : "secondary"}
-        className={quiet ? "w-full justify-between px-2.5 text-start text-text" : "px-3"}
+      {/* biome-ignore lint/a11y/useSemanticElements: summary is the native no-JS disclosure control; explicit role fixes its observed generic accessibility mapping. */}
+      <summary
+        role="button"
+        className="inline-flex min-h-control items-center gap-2 rounded-control px-3 text-compact font-semibold text-text hover:bg-subtle group-open/menu:bg-selected"
       >
+        <MenuIcon />
         {label}
-        <icons.ChevronDownIcon
-          className={cx("size-4 transition-transform", expanded && "rotate-180")}
-        />
-      </Button>
-      <DisclosurePanel className={cx("order-last basis-full", panelClassName)}>
+      </summary>
+      <div
+        className={cx(
+          "absolute end-0 z-20 w-56 max-w-[calc(100vw-2rem)] rounded-control border border-divider bg-surface p-3",
+          panelClassName,
+        )}
+      >
         {children}
-      </DisclosurePanel>
-    </Disclosure>
+      </div>
+    </details>
   );
 }

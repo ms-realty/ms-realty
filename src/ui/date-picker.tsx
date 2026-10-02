@@ -66,7 +66,7 @@ function Segments(props: Omit<DateInputProps, "children">) {
           segment={segment}
           className={cx(
             // Editable segments keep a 28px target; literals ("/", ".") stay tight.
-            "inline-flex min-h-8 min-w-7 items-center justify-center rounded-[3px] px-0.5 outline-none",
+            "inline-flex min-h-8 min-w-7 items-center justify-center rounded-control px-0.5 outline-none",
             "data-placeholder:text-text-muted data-[type=literal]:min-w-0 data-[type=literal]:px-0",
             "data-focused:bg-action data-focused:text-text-inverse",
             "forced-colors:data-focused:bg-[Highlight] forced-colors:data-focused:text-[HighlightText]",

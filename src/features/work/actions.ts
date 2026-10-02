@@ -1,0 +1,421 @@
+"use server";
+
+import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
+import { isStaffLocale } from "@/i18n/config";
+import { requireAuthHost } from "@/server/auth/pages";
+import { AppError } from "@/server/errors";
+import { action, type HandlerContext } from "@/server/http/next";
+import { acceptInquiry, changeTask, triageInquiry } from "@/server/work/commands";
+import { recordInquiryContact } from "@/server/work/contact";
+import { handoverTask } from "@/server/work/handover";
+import { readInquiry, readTask } from "@/server/work/queries";
+import type { FormState, FormValues } from "@/ui/form/contract";
+import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { workCopy } from "./copy";
+
+export type AcceptValues = { nextAction: string; dueAt: string };
+export type TriageValues = { state: string; reason: string; duplicateOfInquiryId: string };
+export type TaskValues = { state: string; note: string; followUpAt: string };
+export type ContactValues = {
+  contactChoice: string;
+  result: string;
+  contactedAt: string;
+  note: string;
+  nextAction: string;
+  dueAt: string;
+  promisedToClient: string;
+  reviewed: string;
+};
+export type ContactMethodView = { id: string; version: number; kind: string; value: string };
+export type ContactState = FormState<ContactValues> & {
+  currentContact?: ContactMethodView | null;
+  previousContact?: ContactMethodView | null;
+};
+type Kind = "accept" | "triage" | "contact" | "task" | "handover";
+const localInstant = (value: string) =>
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?$/.test(value)
+    ? `${value}${value.length === 16 ? ":00" : ""}Z`
+    : value;
+const inputInstant = (value: Date | null) => value?.toISOString().slice(0, 16) ?? "";
+const scopeFor = (kind: Kind, id: string) => `work.${kind}.${id}`;
+const recordPath = (locale: string, kind: Kind, id: string) =>
+  `/${locale}/${kind === "task" || kind === "handover" ? "tasks" : "inquiries"}/${id}`;
+
+async function perform<V extends FormValues>(
+  locale: string,
+  id: string,
+  kind: Kind,
+  data: FormData,
+  fields: readonly (keyof V)[],
+  execute: (
+    ctx: HandlerContext,
+    envelope: { operationId: string; expectedVersion: number },
+    values: V,
+  ) => Promise<{ recordedAt: string; reference?: string }>,
+  latest: (ctx: HandlerContext) => Promise<{ revision: number; values: V }>,
+): Promise<FormState<V>> {
+  const copy = workCopy(locale);
+  const scope = scopeFor(kind, id);
+  const values = readFormValues<V>(data, fields);
+  const envelope = readFormEnvelope(data, scope);
+  const path = recordPath(locale, kind, id);
+  const key = envelope?.operationId ?? issueFormOperation(scope);
+  const status = {
+    href: `${path}/operations?type=${kind}&key=${encodeURIComponent(key)}`,
+    label: copy.statusLink,
+  };
+  const state: FormState<V> = {
+    operationId: key,
+    expectedRevision: envelope?.expectedRevision ?? null,
+    reconciliation: status,
+    values: kind === "handover" || kind === "contact" ? { ...values, reviewed: "" } : values,
+    responseId: randomUUID(),
+    outcome: { kind: "idle" },
+  };
+  const result = await action(
+    async (ctx) => {
+      await requireAuthHost("staff");
+      if (!isStaffLocale(locale)) throw new AppError("not_found");
+      if (!ctx.session) throw new AppError("unauthenticated");
+      if (!envelope?.expectedRevision) throw new AppError("validation_failed");
+      return execute(
+        ctx,
+        { operationId: envelope.operationId, expectedVersion: envelope.expectedRevision },
+        values,
+      );
+    },
+    { requireSession: true },
+  );
+  if (result.ok)
+    return {
+      ...state,
+      outcome: {
+        kind: "confirmed",
+        receipt: {
+          title: copy.changeSaved,
+          reference: result.data.reference ?? id,
+          recordedAt: {
+            dateTime: result.data.recordedAt,
+            label: `${new Intl.DateTimeFormat(locale, {
+              dateStyle: "medium",
+              timeStyle: "short",
+              timeZone: "UTC",
+            }).format(new Date(result.data.recordedAt))} UTC`,
+          },
+          nextStep: copy.nextStep,
+          destination: { href: path, label: copy.openRecord },
+        },
+      },
+    };
+  const error = result.error;
+  if (error.code === "REVISION_CONFLICT") {
+    const current = await action(
+      async (ctx) => {
+        await requireAuthHost("staff");
+        return latest(ctx);
+      },
+      { requireSession: true },
+    );
+    if (current.ok) {
+      const reapplyKey = issueFormOperation(scope);
+      return {
+        ...state,
+        outcome: {
+          kind: "conflict",
+          code: "REVISION_CONFLICT",
+          message: copy.conflict,
+          latest: current.data,
+          reapply: {
+            operationId: reapplyKey,
+            expectedRevision: current.data.revision,
+            status: {
+              href: `${path}/operations?type=${kind}&key=${encodeURIComponent(reapplyKey)}`,
+              label: copy.statusLink,
+            },
+          },
+        },
+      };
+    }
+  }
+  if (error.outcome === "unknown")
+    return {
+      ...state,
+      outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: copy.unknown, status },
+    };
+  const correctedKey = issueFormOperation(scope);
+  const correctedState = {
+    ...state,
+    operationId: correctedKey,
+    reconciliation: {
+      href: `${path}/operations?type=${kind}&key=${encodeURIComponent(correctedKey)}`,
+      label: copy.statusLink,
+    },
+  };
+  if (error.code === "VALIDATION_FAILED")
+    return {
+      ...correctedState,
+      outcome: {
+        kind: "validation",
+        code: "VALIDATION_FAILED",
+        message: copy.validation,
+        fieldErrors: Object.fromEntries(
+          fields
+            .filter((field) => error.fieldErrors?.[String(field)])
+            .map((field) => [field, [copy.invalid]]),
+        ) as Partial<Record<keyof V, string[]>>,
+      },
+    };
+  const message =
+    error.code === "UNAUTHENTICATED"
+      ? copy.sessionEnded
+      : error.code === "NOT_AUTHORIZED" || error.code === "NOT_FOUND"
+        ? copy.denied
+        : error.fieldErrors?.form?.includes("open_commitments")
+          ? copy.commitments
+          : copy.unavailable;
+  // A known rejected operation is settled; a corrected intent needs a fresh identity.
+  return {
+    ...correctedState,
+    outcome: {
+      kind: "rejected",
+      code: error.code,
+      message,
+      retryable: false,
+      recovery: { href: path, label: copy.openRecord },
+    },
+  };
+}
+
+export async function acceptAction(
+  locale: string,
+  id: string,
+  _previous: FormState<AcceptValues>,
+  data: FormData,
+) {
+  const state = await perform<AcceptValues>(
+    locale,
+    id,
+    "accept",
+    data,
+    ["nextAction", "dueAt"],
+    async (ctx, envelope, values) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      return (
+        await acceptInquiry(ctx.db, ctx.session, {
+          id,
+          ...envelope,
+          ...values,
+          dueAt: localInstant(values.dueAt),
+        })
+      ).outcome;
+    },
+    async (ctx) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const current = await readInquiry(ctx.db, ctx.session, id);
+      const task = current.tasks.at(-1)?.task;
+      return {
+        revision: current.inquiry.version,
+        values: { nextAction: task?.title ?? "", dueAt: inputInstant(current.inquiry.followUpAt) },
+      };
+    },
+  );
+  // The accepted inquiry no longer offers this form on a native POST response.
+  if (state.outcome.kind === "confirmed" && state.reconciliation)
+    redirect(state.reconciliation.href);
+  return state;
+}
+
+export async function triageAction(
+  locale: string,
+  id: string,
+  _previous: FormState<TriageValues>,
+  data: FormData,
+) {
+  return perform<TriageValues>(
+    locale,
+    id,
+    "triage",
+    data,
+    ["state", "reason", "duplicateOfInquiryId"],
+    async (ctx, envelope, values) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      return (
+        await triageInquiry(ctx.db, ctx.session, {
+          id,
+          ...envelope,
+          state: values.state as Parameters<typeof triageInquiry>[2]["state"],
+          reason: values.reason,
+          ...(values.duplicateOfInquiryId
+            ? { duplicateOfInquiryId: values.duplicateOfInquiryId }
+            : {}),
+        })
+      ).outcome;
+    },
+    async (ctx) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const { inquiry } = await readInquiry(ctx.db, ctx.session, id);
+      return {
+        revision: inquiry.version,
+        values: {
+          state: inquiry.state,
+          reason: inquiry.dispositionReason ?? "",
+          duplicateOfInquiryId: inquiry.duplicateOfInquiryId ?? "",
+        },
+      };
+    },
+  );
+}
+
+export async function contactAction(
+  locale: string,
+  id: string,
+  _previous: ContactState,
+  data: FormData,
+) {
+  let currentContact = _previous.currentContact;
+  const state = await perform<ContactValues>(
+    locale,
+    id,
+    "contact",
+    data,
+    [
+      "contactChoice",
+      "result",
+      "contactedAt",
+      "note",
+      "nextAction",
+      "dueAt",
+      "promisedToClient",
+      "reviewed",
+    ],
+    async (ctx, envelope, values) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const [contactMethodId, revision] = values.contactChoice.split(":");
+      if (!contactMethodId || !revision || values.contactChoice.split(":").length !== 2)
+        throw new AppError("validation_failed", {
+          fieldErrors: { contactChoice: ["Review the current contact."] },
+        });
+      return (
+        await recordInquiryContact(ctx.db, ctx.session, {
+          id,
+          ...envelope,
+          contactMethodId,
+          expectedContactVersion: Number(revision),
+          result: values.result as "unanswered" | "useful_response",
+          contactedAt: localInstant(values.contactedAt),
+          note: values.note,
+          nextAction: values.nextAction,
+          dueAt: localInstant(values.dueAt),
+          promisedToClient: values.promisedToClient === "yes",
+          reviewed: values.reviewed === "yes",
+        })
+      ).outcome;
+    },
+    async (ctx) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const current = await readInquiry(ctx.db, ctx.session, id);
+      const latest = current.activity.find((entry) => entry.contact)?.contact;
+      currentContact = current.contactMethod;
+      return {
+        revision: current.inquiry.version,
+        values: {
+          contactChoice: current.contactMethod
+            ? `${current.contactMethod.kind} · ${current.contactMethod.value}`
+            : "—",
+          result: latest?.result ?? "unanswered",
+          contactedAt: latest?.contactedAt ?? "",
+          note: latest?.note ?? "",
+          nextAction: latest?.nextAction ?? "",
+          dueAt: latest?.dueAt ?? "",
+          promisedToClient: latest?.promisedToClient ? "yes" : "",
+          reviewed: "",
+        },
+      };
+    },
+  );
+  if (state.outcome.kind === "confirmed" && state.reconciliation)
+    redirect(state.reconciliation.href);
+  return {
+    ...state,
+    currentContact,
+    previousContact: _previous.previousContact ?? _previous.currentContact,
+  };
+}
+
+export async function taskAction(
+  locale: string,
+  id: string,
+  _previous: FormState<TaskValues>,
+  data: FormData,
+) {
+  return perform<TaskValues>(
+    locale,
+    id,
+    "task",
+    data,
+    ["state", "note", "followUpAt"],
+    async (ctx, envelope, values) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      return (
+        await changeTask(ctx.db, ctx.session, {
+          id,
+          ...envelope,
+          state: values.state as Parameters<typeof changeTask>[2]["state"],
+          note: values.note,
+          ...(values.followUpAt ? { followUpAt: localInstant(values.followUpAt) } : {}),
+        })
+      ).outcome;
+    },
+    async (ctx) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const { task } = await readTask(ctx.db, ctx.session, id);
+      return {
+        revision: task.version,
+        values: {
+          state: task.state,
+          note: task.outcomeNote ?? task.waitingOn ?? task.cancelReason ?? "",
+          followUpAt: inputInstant(task.followUpAt),
+        },
+      };
+    },
+  );
+}
+
+export async function taskHandoverAction(
+  locale: string,
+  id: string,
+  _previous: FormState<FormValues>,
+  data: FormData,
+) {
+  const state = await perform<FormValues>(
+    locale,
+    id,
+    "handover",
+    data,
+    ["action", "receiverId", "reason", "reviewed"],
+    async (ctx, envelope, values) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      return (
+        await handoverTask(ctx.db, ctx.session, {
+          id,
+          ...envelope,
+          action: values.action,
+          receiverId: values.receiverId,
+          reason: values.reason,
+          reviewed: values.reviewed === "true",
+        })
+      ).outcome;
+    },
+    async (ctx) => {
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const { task } = await readTask(ctx.db, ctx.session, id);
+      return { revision: task.version, values: { receiverId: task.pendingOwnerId ?? "" } };
+    },
+  );
+  // A successful request/acceptance changes which forms exist. A receipt GET remains
+  // stable for native POSTs even when the original form is no longer rendered.
+  if (state.outcome.kind === "confirmed" && state.reconciliation)
+    redirect(state.reconciliation.href);
+  return state;
+}

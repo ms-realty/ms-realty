@@ -694,7 +694,7 @@ Prefer a short controlled write freeze for the final delta over improvised bidir
 
 Import the final delta, reconcile, seal the pre-cutover recovery point, disable old consequential workers, and switch the approved routing. Test public detail/search, inquiry/receipt, staff access, client access, media, mail and legacy routes immediately. Record exact artifact, schema, policy and infrastructure versions. Keep the old deployment read-only for investigation and rollback compatibility; do not let its delayed jobs send or republish.
 
-Search Console, Yandex Webmaster, backlinks and crawl baselines remain required evidence under the current instructions. Collect pre-cutover ownership/baseline evidence where feasible, then post-cutover routing, sitemap/submission and observed coverage evidence at the appropriate stage. No claim of immediate indexing, ranking recovery or backlink transfer is permitted. Explicitly distinguish candidate acceptance, authorized cutover, and verified public operation.
+Search Console, Yandex Webmaster and backlink exports are optional historical analytics at every lifecycle stage (owner decision, 2026-09-24). They never block readiness, cutover or acceptance. Exact historical URL dispositions, crawl parity on both domains, sitemap correctness and deployed routing checks remain required. No claim of immediate indexing, ranking recovery or backlink transfer is permitted. Distinguish candidate acceptance, authorized cutover, and verified public operation.
 
 Map existing staff identities and authorized client relationships into the new authentication model through an approved migration table. Preserve business IDs and grants; do not auto-promote a newly authenticated user because an email resembles a former administrator's address. Staff must complete the new invitation/MFA flow before cutover. Old sessions and old privileged endpoints are revoked/disabled at the ownership transition.
 
@@ -879,7 +879,7 @@ Every evidence artifact records schema version, environment, release SHA/image/g
 | AT65 | Application rollback preserves inquiries and commitments accepted after deployment |
 | AT66 | Provider account custody, budgets, secrets rotation, access revocation and operational runbooks are usable by the agency |
 | AT67 | Readiness JSON, checklist and signed evidence views agree on one release/policy/scope; any blocked gate prevents a pass |
-| AT68 | Post-cutover host/certificate/mail-DNS/search/intake/auth/media checks and required external SEO observations are recorded |
+| AT68 | Post-cutover host/certificate/mail-DNS/search/intake/auth/media and exact URL/crawl checks are recorded; historical SEO analytics are optional |
 
 Cross-cut this portfolio by representative desktop/mobile widths (including 320 px), the three staff languages, seven public/client locales, guest/client/collaborator/staff role contexts, and success/failure/recovery. Do not run every cosmetic combination mechanically; cover every authority/behavior distinction and every advertised complete journey.
 
@@ -925,7 +925,7 @@ Before using a new release verdict, the agency's accountable owner and technical
 
 1. Names the selected architecture and maps every old gate to its retained obligation, explicit replacement proof, or explicitly approved retirement.
 2. Resolves the Typesense/Meilisearch-versus-PostgreSQL evidence conflict. PostgreSQL is the final runtime design; the existing external-report requirement is not silently satisfied or waived by a PostgreSQL report. Until an explicit authority amendment exists, the conflicting required proof remains outstanding.
-3. Retains Search Console, Yandex, backlinks and crawl evidence, assigns feasible pre/post-cutover stages, and documents any later requested change explicitly.
+3. Retains mandatory historical URL/crawl parity and deployed routing evidence. Records Search Console, Yandex Webmaster and backlink exports as optional at every stage, per the owner decision of 2026-09-24.
 4. Reconciles media counts/units and evaluates coverage from the same actual release and object manifest.
 5. Distinguishes source-as-is authorization, factual review, media rights review, translation approval and current availability. Records one valid human-review disposition for every in-scope listing row.
 6. Maps old Payload identity/runtime and Hermes service checks to actual new runtime/identity/task evidence. A renamed component or a stub endpoint is not replacement proof.
@@ -940,7 +940,7 @@ The manifest must contain product/spec version; Git SHA; web/worker/migration/ga
 
 Critical deployed-path checks, provider connectivity and monitoring/rollback evidence must be no older than 24 hours at candidate attestation; repeat the actual routing/auth/intake/media checks at cutover. Recovery-point age follows §17's stricter limit. Human approvals are revision/scope-bound rather than merely “recent”; availability review follows its own policy. Evidence freshness cannot be refreshed by copying a timestamp.
 
-Keep the required human listing review CSV, redacted live search/worker/runtime reports, R2 coverage, recovery report, SEO evidence and release attestations. Preserve the current requirement for operator-authorized Ed25519-signed recovery evidence until a specifically approved successor policy replaces it. The private signing key stays outside committed files and ordinary application runtime. A valid signature establishes the signer and unchanged artifact, not the truth of invented test data.
+Keep the required human listing review CSV, redacted live search/worker/runtime reports, R2 coverage, recovery report, URL/crawl evidence and release attestations. Historical Search Console, Yandex Webmaster and backlink exports remain optional. Preserve the current requirement for operator-authorized Ed25519-signed recovery evidence until a specifically approved successor policy replaces it. The private signing key stays outside committed files and ordinary application runtime. A valid signature establishes the signer and unchanged artifact, not the truth of invented test data.
 
 ### 21.4 Inputs required from the operating business
 

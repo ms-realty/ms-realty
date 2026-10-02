@@ -1,5 +1,5 @@
 // Which facts a listing needs before it can enter editorial review, and which unknowns a
-// visitor should be told to confirm (spec §18.1, §07.4 "needs facts", F03 "What to confirm").
+// visitor should be told to confirm (architecture §7.1 "needs_facts", §10 detail; F03).
 // Unknown stays unknown: it blocks review only where publishing it would mislead (price,
 // location). A decided value carried over from the legacy import needs a person to confirm it.
 import type { FactState, PropertyType, SourceClass } from "./facts";
@@ -29,7 +29,7 @@ export const decidedFactStates: readonly FactState[] = ["known", "not_applicable
 
 const residential: readonly PropertyType[] = ["apartment", "house"];
 
-/** The facts §18.1 requires a public listing to state (possibly as unknown). */
+/** The facts a public listing must state, possibly as unknown (architecture §10 detail). */
 export function requiredFactKeys(propertyType: PropertyType): readonly string[] {
   return ["price", "location", "area", ...(residential.includes(propertyType) ? ["bedrooms"] : [])];
 }

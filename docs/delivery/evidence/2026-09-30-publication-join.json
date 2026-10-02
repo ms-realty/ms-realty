@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "baselineSource": "f4be6db2",
+  "candidate": "Manifest-bound current consent via INNER JOIN LATERAL with LIMIT 1; exactly one possible seller instruction ID; unchanged evidence predicate.",
+  "scope": "3500 synthetic Listings with BG plus rotating approved translations; native PG18 service-only, no HTTP qualification",
+  "seedMs": 90426.4275,
+  "baselineSearchMs": 78.87083299999358,
+  "measurements": [
+    {
+      "variant": "baseline",
+      "eligibleIds": 3500,
+      "eligibleIdsSha256": "6e5d937c2feeaced4e79bfa68436f07cc5e654b2dc55034da6c3b1f3223eb73f",
+      "readMs": 4925.366332999998,
+      "explainExecutionMs": 6188.012
+    },
+    {
+      "variant": "authority-subquery-offset-zero",
+      "eligibleIds": 3500,
+      "eligibleIdsSha256": "6e5d937c2feeaced4e79bfa68436f07cc5e654b2dc55034da6c3b1f3223eb73f",
+      "readMs": 4997.574207999991,
+      "explainExecutionMs": 5872.532
+    },
+    {
+      "variant": "lateral-current-consent",
+      "eligibleIds": 3500,
+      "eligibleIdsSha256": "6e5d937c2feeaced4e79bfa68436f07cc5e654b2dc55034da6c3b1f3223eb73f",
+      "readMs": 44.432832999998936,
+      "explainExecutionMs": 46.364
+    },
+    {
+      "variant": "baseline-after",
+      "eligibleIds": 3500,
+      "eligibleIdsSha256": "6e5d937c2feeaced4e79bfa68436f07cc5e654b2dc55034da6c3b1f3223eb73f",
+      "readMs": 4770.484041000003,
+      "explainExecutionMs": 5911.992
+    }
+  ],
+  "artifacts": {
+    "root": "/Users/ivan/Code/.artifacts/ms-realty/recovery/20260930",
+    "probe": "publication-join-probe.mts",
+    "fullPlans": "publication-join-probe.json",
+    "log": "publication-join-probe.log",
+    "failedPrototype": "publication-join-probe-offset-omitted.log"
+  },
+  "limits": [
+    "Single observations on 3500 multilingual synthetic Listings; no HTTP/concurrency qualification.",
+    "Authority-subquery OFFSET 0 alone did not improve timings.",
+    "Initial LATERAL prototype failed a compilation assertion because Drizzle omits numeric OFFSET 0; database/files were removed and a LIMIT 1 prototype then completed.",
+    "R08 remains failed until representative runtime qualification; no consent, media, translation or release approval is waived."
+  ]
+}

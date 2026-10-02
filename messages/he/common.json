@@ -1,0 +1,14 @@
+{
+  "brand": "MS Realty",
+  "agencyKind": "משרד תיווך נדל״ן",
+  "homeHeading": "MS Realty",
+  "homeIntro": "קנייה, שכירות, מכירה או השכרה של נכס עם הצוות של MS Realty.",
+  "clientAccessHeading": "כניסה אל „התהליך שלי”",
+  "staffAccessHeading": "כניסת צוות",
+  "languageSuggestion": {
+    "label": "הצעת שפה",
+    "message": "הדף הזה זמין גם בעברית.",
+    "switch": "להמשיך בעברית",
+    "dismiss": "להסתיר את ההצעה"
+  }
+}

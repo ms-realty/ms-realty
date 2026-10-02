@@ -1,8 +1,7 @@
-// Publication releases with per-destination outcomes, translations per locale per source
-// version, and versioned content pages (spec §07.4, §18.2, F24, AD3, AD9).
+// Publication manifests, current publication pointers, destination deliveries, editorial
+// content pages and public shares (architecture §7.2–§7.4, §8.3, §10).
 import { sql } from "drizzle-orm";
 import {
-  boolean,
   check,
   index,
   integer,
@@ -12,21 +11,138 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { staffAccounts } from "./accounts";
-import { approvals } from "./approvals";
-import { createdAt, id, instant, mutable, reference } from "./columns";
+import { createdAt, id, instant, mutable } from "./columns";
 import {
   contentPageKindEnum,
-  destinationOutcomeEnum,
-  distributionStateEnum,
+  deliveryKindEnum,
+  deliveryStateEnum,
   editorialStateEnum,
+  pointerStateEnum,
   publicationDestinationEnum,
+  publicationStateEnum,
   publicLocaleEnum,
-  releaseKindEnum,
-  translationStateEnum,
 } from "./enums";
 import { geographyPlaces } from "./geography";
+import { principals } from "./identity";
+import { listingRevisions, listings, localizedRevisions, propertyFactRevisions } from "./inventory";
+import { externalActions } from "./records";
 
+/**
+ * Immutable (trigger) binding of everything one public presentation shows: revisions, media
+ * relations/derivatives/rights, disclosure, availability basis, policy revision, decisions
+ * and digests, for one locale and destination under one publication generation.
+ */
+export const publicationManifests = pgTable(
+  "publication_manifests",
+  {
+    id: id(),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => listings.id),
+    locale: publicLocaleEnum("locale").notNull(),
+    destination: publicationDestinationEnum("destination").notNull(),
+    /** The listing's publication generation when the manifest was prepared. */
+    generation: integer("generation").notNull(),
+    listingRevisionId: uuid("listing_revision_id")
+      .notNull()
+      .references(() => listingRevisions.id),
+    factRevisionId: uuid("fact_revision_id")
+      .notNull()
+      .references(() => propertyFactRevisions.id),
+    /** Null only for the source locale, which needs no localized revision. */
+    localizedRevisionId: uuid("localized_revision_id").references(() => localizedRevisions.id),
+    /** [{ relationId, assetId, position, derivativeKey, rightsReference }]. */
+    media: jsonb("media").notNull(),
+    disclosure: jsonb("disclosure").notNull(),
+    availabilityBasis: jsonb("availability_basis").notNull(),
+    policyRevision: text("policy_revision").notNull(),
+    /** Approval ids by kind: factual, editorial, language, legal/process, publication. */
+    decisions: jsonb("decisions").notNull(),
+    contentDigest: text("content_digest").notNull(),
+    createdById: uuid("created_by_id")
+      .notNull()
+      .references(() => principals.id),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check(
+      "publication_manifests_locale_copy",
+      sql`(${t.locale} = 'bg') = (${t.localizedRevisionId} is null)`,
+    ),
+    index("publication_manifests_listing_idx").on(t.listingId, t.locale, t.destination),
+  ],
+);
+
+/**
+ * The one authoritative publication pointer per listing, locale and destination. Switching it
+ * happens in one transaction with the generation check, search projection and audit (§7.3).
+ */
+export const currentPublications = pgTable(
+  "current_publications",
+  {
+    ...mutable(),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => listings.id),
+    locale: publicLocaleEnum("locale").notNull(),
+    destination: publicationDestinationEnum("destination").notNull(),
+    manifestId: uuid("manifest_id")
+      .notNull()
+      .references(() => publicationManifests.id),
+    state: pointerStateEnum("state").notNull(),
+    /** The generation the manifest was activated under. */
+    generation: integer("generation").notNull(),
+    activatedAt: instant("activated_at").notNull(),
+    activatedById: uuid("activated_by_id")
+      .notNull()
+      .references(() => principals.id),
+    restrictedAt: instant("restricted_at"),
+    withdrawnAt: instant("withdrawn_at"),
+    reason: text("reason"),
+  },
+  (t) => [
+    uniqueIndex("current_publications_pointer_idx").on(t.listingId, t.locale, t.destination),
+    index("current_publications_manifest_idx").on(t.manifestId),
+    check("current_publications_reason", sql`${t.state} = 'active' or ${t.reason} is not null`),
+  ],
+);
+
+/** Outcome of one publish or withdraw at one destination; the website is one of them. */
+export const destinationDeliveries = pgTable(
+  "destination_deliveries",
+  {
+    ...mutable(),
+    manifestId: uuid("manifest_id")
+      .notNull()
+      .references(() => publicationManifests.id),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => listings.id),
+    locale: publicLocaleEnum("locale").notNull(),
+    destination: publicationDestinationEnum("destination").notNull(),
+    kind: deliveryKindEnum("kind").notNull(),
+    /** Generation the work was created under; obsolete generations are cancelled. */
+    generation: integer("generation").notNull(),
+    state: deliveryStateEnum("state").notNull().default("queued"),
+    externalActionId: uuid("external_action_id").references(() => externalActions.id),
+    acknowledgedAt: instant("acknowledged_at"),
+    /** Read-back or recorded human verification that the destination shows the manifest. */
+    verifiedAt: instant("verified_at"),
+    failedAt: instant("failed_at"),
+    errorCode: text("error_code"),
+    /** Manual destinations: the recorded evidence of the manual action. */
+    evidence: jsonb("evidence"),
+  },
+  (t) => [
+    check(
+      "destination_deliveries_verified_evidence",
+      sql`${t.state} not in ('verified', 'withdrawn') or ${t.verifiedAt} is not null`,
+    ),
+    index("destination_deliveries_listing_idx").on(t.listingId, t.state),
+  ],
+);
+
+/** Approved area, guide, service and help content with the same approval rules. */
 export const contentPages = pgTable(
   "content_pages",
   {
@@ -35,7 +151,7 @@ export const contentPages = pgTable(
     slug: text("slug").notNull(),
     placeId: uuid("place_id").references(() => geographyPlaces.id),
     editorialState: editorialStateEnum("editorial_state").notNull().default("draft"),
-    distributionState: distributionStateEnum("distribution_state")
+    publicationState: publicationStateEnum("publication_state")
       .notNull()
       .default("never_published"),
     currentVersionNumber: integer("current_version_number").notNull().default(0),
@@ -44,7 +160,7 @@ export const contentPages = pgTable(
   (t) => [uniqueIndex("content_pages_slug_idx").on(t.kind, t.slug)],
 );
 
-/** Immutable; a trigger rejects updates. Guides record jurisdiction, reviewer and review date. */
+/** Immutable (trigger). Guides record jurisdiction, review scope and review date. */
 export const contentPageVersions = pgTable(
   "content_page_versions",
   {
@@ -59,91 +175,21 @@ export const contentPageVersions = pgTable(
     jurisdiction: text("jurisdiction"),
     reviewScope: text("review_scope"),
     reviewedAt: instant("reviewed_at"),
-    createdByStaffId: uuid("created_by_staff_id").references(() => staffAccounts.id),
+    createdById: uuid("created_by_id").references(() => principals.id),
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex("content_page_versions_number_idx").on(t.contentPageId, t.versionNumber)],
 );
 
-/** One row per subject, locale and source version: a new source version starts a new row. */
-export const translations = pgTable(
-  "translations",
-  {
-    ...mutable(),
-    /** listing or content_page. */
-    subjectType: text("subject_type").notNull(),
-    subjectId: uuid("subject_id").notNull(),
-    locale: publicLocaleEnum("locale").notNull(),
-    sourceVersion: integer("source_version").notNull(),
-    state: translationStateEnum("state").notNull().default("missing"),
-    title: text("title"),
-    body: jsonb("body"),
-    draftedByAi: boolean("drafted_by_ai").notNull().default(false),
-    unresolvedTerminology: jsonb("unresolved_terminology"),
-    reviewedByStaffId: uuid("reviewed_by_staff_id").references(() => staffAccounts.id),
-    reviewedAt: instant("reviewed_at"),
-    approvalId: uuid("approval_id").references(() => approvals.id),
-    rejectionReason: text("rejection_reason"),
-  },
-  (t) => [
-    uniqueIndex("translations_subject_locale_version_idx").on(
-      t.subjectType,
-      t.subjectId,
-      t.locale,
-      t.sourceVersion,
-    ),
-    check("translations_not_source_locale", sql`${t.locale} <> 'bg'`),
-    check(
-      "translations_approved_by_human",
-      sql`${t.state} <> 'approved' or (${t.reviewedByStaffId} is not null and ${t.approvalId} is not null)`,
-    ),
-  ],
-);
-
-export const publicationReleases = pgTable(
-  "publication_releases",
-  {
-    ...mutable(),
-    reference: reference(),
-    kind: releaseKindEnum("kind").notNull(),
-    /** listing or content_page, and the exact immutable version released. */
-    subjectType: text("subject_type").notNull(),
-    subjectId: uuid("subject_id").notNull(),
-    subjectVersionNumber: integer("subject_version_number").notNull(),
-    locales: publicLocaleEnum("locales").array().notNull(),
-    /** Derived from destination outcomes; never set by a button click alone. */
-    state: distributionStateEnum("state").notNull().default("scheduled"),
-    urgent: boolean("urgent").notNull().default(false),
-    scheduledAt: instant("scheduled_at"),
-    confirmedByStaffId: uuid("confirmed_by_staff_id")
-      .notNull()
-      .references(() => staffAccounts.id),
-    approvalId: uuid("approval_id")
-      .notNull()
-      .references(() => approvals.id),
-    /** The pinned translation versions included, per locale. */
-    translationIds: jsonb("translation_ids").notNull().default({}),
-  },
-  (t) => [index("publication_releases_subject_idx").on(t.subjectType, t.subjectId)],
-);
-
-export const publicationDestinationOutcomes = pgTable(
-  "publication_destination_outcomes",
-  {
-    ...mutable(),
-    releaseId: uuid("release_id")
-      .notNull()
-      .references(() => publicationReleases.id),
-    destination: publicationDestinationEnum("destination").notNull(),
-    locale: publicLocaleEnum("locale").notNull(),
-    state: destinationOutcomeEnum("state").notNull().default("pending"),
-    attempt: integer("attempt").notNull().default(0),
-    requestedAt: instant("requested_at"),
-    acknowledgedAt: instant("acknowledged_at"),
-    /** Read-back check proving the destination serves the released version. */
-    verifiedAt: instant("verified_at"),
-    failedAt: instant("failed_at"),
-    errorCode: text("error_code"),
-  },
-  (t) => [uniqueIndex("publication_outcomes_idx").on(t.releaseId, t.destination, t.locale)],
-);
+/**
+ * Public shortlist shares: an unguessable revocable token over public listing references
+ * only. No participant, note, budget, contact data or case link is stored here (§8.3, AT09).
+ */
+export const publicShares = pgTable("public_shares", {
+  id: id(),
+  tokenHash: text("token_hash").notNull().unique(),
+  listingReferences: text("listing_references").array().notNull(),
+  createdAt: createdAt(),
+  expiresAt: instant("expires_at"),
+  revokedAt: instant("revoked_at"),
+});

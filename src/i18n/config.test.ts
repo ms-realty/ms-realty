@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { pageFirstSegments } from "../../next.config";
 import {
   type CatalogReview,
   catalogReviews,
@@ -101,11 +100,5 @@ describe("indexability (§20.4, A55)", () => {
     ]) {
       expect(localePolicy("en", [candidate], reviews).indexable).toBe(false);
     }
-  });
-});
-
-describe("next.config page segments", () => {
-  it("lists every public locale and the workspace, so no page URL is sent to the 404", () => {
-    expect(pageFirstSegments).toEqual([...publicLocales, "workspace"]);
   });
 });

@@ -38,7 +38,7 @@ export default defineConfig({
         test: {
           name: "unit",
           environment: "node",
-          include: ["src/**/*.test.ts"],
+          include: ["src/**/*.test.ts", "gateway/**/*.test.ts", "load/*.test.ts", "proxy.test.ts"],
           exclude: ["src/**/*.int.test.ts"],
         },
       },
@@ -56,6 +56,9 @@ export default defineConfig({
         test: {
           name: "integration",
           environment: "node",
+          // Each file migrates a whole database; keep within Postgres's shared lock budget.
+          maxWorkers: 2,
+          sequence: { groupOrder: 1 },
           include: databaseUrl ? ["src/**/*.int.test.ts"] : [],
         },
       },

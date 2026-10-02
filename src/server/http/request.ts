@@ -4,9 +4,13 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import type { Actor } from "@/domain/capabilities";
+import { requestHost } from "@/i18n/seo";
+import { staffAccess } from "../auth/access";
 import { readCookie, sessionCookieName } from "../auth/cookies";
 import { readSession, type Session } from "../auth/sessions";
 import type { ServerEnv } from "../config/env";
+import { type HostContext, hostContextFor } from "../config/hosts";
+import { originHeaders } from "../config/origin";
 import type { Executor } from "../db";
 import { AppError, errorStatus, isAppError, toErrorBody } from "../errors";
 
@@ -38,6 +42,19 @@ export function assertSameOrigin(headers: Headers, appOrigin: string): void {
   if (origin ? origin !== appOrigin : !site) throw new AppError("cross_origin_request");
 }
 
+/** The host context (public, client or staff) a request is addressed to; null for any other. */
+export function hostContextOf(headers: Headers, env: ServerEnv): HostContext | null {
+  const trusted = originHeaders(headers, env.hosts, { ...process.env, NODE_ENV: env.nodeEnv });
+  return trusted ? hostContextFor(requestHost(trusted), env.hosts) : null;
+}
+
+/** The origin a same-origin mutation must come from: that of the addressed host context. */
+export function expectedOrigin(headers: Headers, env: ServerEnv): string {
+  const context = hostContextOf(headers, env);
+  if (!context) throw new AppError("cross_origin_request");
+  return env.hosts[context];
+}
+
 /**
  * Client IP for rate limiting. Behind the Cloudflare edge this is `cf-connecting-ip`; the
  * origin must not be reachable directly or the header could be forged.
@@ -57,14 +74,31 @@ export interface RequestIdentity {
   readonly sessionToken: string | undefined;
 }
 
-/** The signed-in actor behind the request's session cookie, if any. */
+/**
+ * The signed-in actor behind the session cookie of the addressed private host, if any. The
+ * public host has no session; a session only authenticates the context it was issued for, so
+ * a client token never authenticates the staff interface (§8.1, AT36). A staff session also
+ * needs an active membership and two enrolled passkeys.
+ */
 export async function identify(
   db: Executor,
   headers: Headers,
   env: ServerEnv,
 ): Promise<RequestIdentity> {
-  const token = readCookie(headers.get("cookie"), sessionCookieName(env));
-  const session = token ? await readSession(db, token) : null;
+  const context = hostContextOf(headers, env);
+  if (context !== "client" && context !== "staff") {
+    return { session: null, actor: null, sessionToken: undefined };
+  }
+  const token = readCookie(headers.get("cookie"), sessionCookieName(env, context));
+  let session: Session | null = null;
+  if (context === "staff") {
+    // A staff session acts only once its member holds two passkeys (enrolment is its own path).
+    const access = await staffAccess(db, token);
+    session = access.state === "ready" ? access.session : null;
+  } else {
+    const found = token ? await readSession(db, token) : null;
+    session = found?.account.kind === "client" ? found : null;
+  }
   return { session, actor: session?.actor ?? null, sessionToken: session ? token : undefined };
 }
 

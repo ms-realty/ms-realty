@@ -1,5 +1,7 @@
-// Tasks and commitments (spec §07.6, F19, A45). Waiting names what is awaited and when to
-// follow up; completion records what happened and is never manufactured in bulk.
+// Tasks and commitments (architecture §6.6). Waiting names what is awaited and when to follow
+// up; completion needs the declared evidence or a recorded outcome and is never manufactured
+// in bulk. A commitment promised to a client is flagged as such; a count of activities is not
+// completion evidence.
 import { allowed, type Decision, defineMachine, firstDenial, need } from "./state-machine";
 import type { TransitionSpec } from "./transition";
 
@@ -21,17 +23,13 @@ export const taskTypes = [
 ] as const;
 export type TaskType = (typeof taskTypes)[number];
 
-/** Excluded from any generic "complete all" (§07.6). */
+/** Excluded from any generic "complete all" (§11.2). */
 export const highImpactTaskTypes = [
   "publishing",
   "communication",
   "access_grant",
   "approval",
 ] as const satisfies readonly TaskType[];
-
-/** An internal suggestion differs from a promise made to a client. */
-export const commitmentKinds = ["internal", "client_promise"] as const;
-export type CommitmentKind = (typeof commitmentKinds)[number];
 
 export const taskMachine = defineMachine<TaskState>(taskStates, {
   open: ["in_progress", "waiting", "done", "cancelled"],

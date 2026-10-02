@@ -1,0 +1,25 @@
+{
+  "$schema": "./schemas/release-manifest.schema.json",
+  "schemaVersion": 1,
+  "product": "ms-realty",
+  "specVersion": "architecture-1.0",
+  "releaseSha": "0000000000000000000000000000000000000000",
+  "environment": "local",
+  "artifacts": { "web": null, "worker": null, "migration": null, "gateway": null },
+  "revisions": { "dependencies": null, "model": null, "prompts": null, "schemas": null },
+  "providerAccounts": {},
+  "database": { "schemaDigest": null, "lastMigration": null },
+  "manifests": { "domains": null, "redirects": null, "media": null, "dataImport": null },
+  "scope": { "services": [], "regions": [], "locales": [], "channels": [] },
+  "policies": {
+    "policyRevision": "architecture-1.0/release-policy-draft-2",
+    "roles": null,
+    "retention": null,
+    "templates": null
+  },
+  "evidenceIds": [],
+  "evidenceDigests": {},
+  "approvals": [],
+  "recoveryPoint": null,
+  "procedures": { "cutover": null, "rollback": null }
+}

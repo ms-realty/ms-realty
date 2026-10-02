@@ -1,0 +1,27 @@
+{
+  "primaryLabel": "Κύρια πλοήγηση",
+  "utilitiesLabel": "Εργαλεία",
+  "home": "Αρχική σελίδα της MS Realty",
+  "buy": "Αγορά",
+  "rent": "Ενοικίαση",
+  "sellLet": "Πώληση / Εκμίσθωση",
+  "areas": "Περιοχές",
+  "aboutContact": "Σχετικά & επικοινωνία",
+  "saved": "Αποθηκευμένα",
+  "language": "Γλώσσα",
+  "contact": "Επικοινωνία",
+  "myJourney": "Η πορεία μου",
+  "menu": "Μενού",
+  "journey": {
+    "label": "Η πορεία μου",
+    "overview": "Επισκόπηση",
+    "properties": "Ακίνητα",
+    "appointments": "Ραντεβού",
+    "messages": "Μηνύματα",
+    "documents": "Έγγραφα",
+    "caseSwitcher": "Υπόθεση",
+    "help": "Βοήθεια",
+    "broker": "Ο μεσίτης σας",
+    "team": "Η ομάδα της MS Realty"
+  }
+}

@@ -1,4 +1,4 @@
-// One-time legacy import (spec F32). DATABASE_URL names the target database.
+// One-time legacy import (architecture §18.2, AT55). DATABASE_URL names the target database.
 //
 //   npm run import:legacy -- --dry-run --out <dir>
 //   npm run import:legacy -- --apply [--rows <sourceKey,...>] [--batch IM-YYYY-NNNNNN] [--out <dir>]
@@ -10,6 +10,7 @@ import { parseArgs } from "node:util";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../schema";
+import { databaseTransport } from "../transport";
 import { applyBatch, stageBatch } from "./pipeline";
 import { writeReport } from "./report";
 import { loadLegacySources } from "./sources";
@@ -36,7 +37,11 @@ if (values["dry-run"] && (values.rows || values.batch)) fail("--rows/--batch app
 const url = process.env.DATABASE_URL;
 if (!url) fail("DATABASE_URL is required.");
 
-const client = postgres(url, { max: 2, onnotice: () => {} });
+const client = postgres(url, {
+  ...databaseTransport(url).postgresOptions,
+  max: 2,
+  onnotice: () => {},
+});
 const db = drizzle(client, { schema });
 try {
   const sources = await loadLegacySources(values.source);

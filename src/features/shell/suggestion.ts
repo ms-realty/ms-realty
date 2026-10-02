@@ -12,7 +12,7 @@ import type { SuggestionCopy } from "./language-suggestion";
 /**
  * A language to suggest on this page, or null. Suggested only when the browser prefers
  * another routable language, the visitor has not chosen this one explicitly, and has not
- * dismissed suggestions. Never a redirect (F01, A02).
+ * dismissed suggestions. Never a redirect (F01, AT03).
  */
 export async function languageSuggestionFor(
   locale: PublicLocale,

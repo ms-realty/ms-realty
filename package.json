@@ -9,9 +9,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "worker": "node --conditions=react-server --import tsx scripts/worker.ts",
     "lint": "biome check .",
     "format": "biome check --write .",
     "typecheck": "next typegen && tsc --noEmit",
+    "typecheck:gateway": "node scripts/staging-types.mjs",
     "test": "vitest run",
     "test:unit": "vitest run --project 'unit*'",
     "test:integration": "vitest run --project integration",
@@ -19,30 +21,53 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "import:legacy": "tsx src/db/import/cli.ts",
-    "staff:create": "tsx --conditions=react-server src/server/staff/cli.ts",
-    "listings:publish": "tsx --conditions=react-server src/server/listings/cli.ts",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run e2e"
+    "check": "make check && make e2e",
+    "tokens:build": "node scripts/tokens-build.mjs",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "storybook:build": "storybook build",
+    "test:visual": "playwright test --config playwright.visual.config.ts",
+    "test:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots",
+    "openapi:generate": "tsx --conditions=react-server scripts/openapi.mjs",
+    "release:schemas": "tsx scripts/release-schemas.mjs",
+    "release:evaluate": "tsx scripts/release-evaluate.mjs",
+    "recovery:rehearse": "tsx --conditions=react-server scripts/recovery-rehearsal.ts",
+    "auth:bootstrap": "tsx --conditions=react-server scripts/bootstrap-staff.ts",
+    "tokens:check": "node scripts/tokens-build.mjs --check",
+    "test:visual:docker": "bash scripts/visual-docker.sh check",
+    "test:visual:docker:update": "bash scripts/visual-docker.sh update",
+    "prebuild": "node scripts/map-runtime.mjs",
+    "predev": "node scripts/map-runtime.mjs",
+    "test:load": "playwright test --config playwright.load.config.ts",
+    "build:cloudflare": "CLOUDFLARE_BUILD=1 opennextjs-cloudflare build --config gateway/wrangler.opennext-qualification.jsonc",
+    "preview:cloudflare": "opennextjs-cloudflare preview --config gateway/wrangler.opennext-qualification.jsonc"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1141.0",
     "@internationalized/date": "3.12.4",
+    "@protomaps/basemaps": "5.7.2",
     "@simplewebauthn/browser": "14.0.0",
     "@simplewebauthn/server": "14.0.2",
     "drizzle-orm": "0.45.3",
+    "maplibre-gl": "6.11.2",
     "next": "16.3.6",
     "next-intl": "4.14.6",
     "pg-boss": "12.33.7",
+    "pmtiles": "4.5.0",
     "postgres": "3.4.9",
     "react": "19.3.0",
     "react-aria-components": "1.21.1",
     "react-dom": "19.3.0",
     "server-only": "0.0.1",
     "sharp": "0.35.4",
-    "zod": "4.6.5"
+    "svix": "2.5.0",
+    "zod": "4.6.5",
+    "pg-cloudflare": "1.4.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@biomejs/biome": "2.5.14",
     "@playwright/test": "1.63.0",
+    "@storybook/nextjs-vite": "10.6.0",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",
@@ -52,12 +77,25 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "drizzle-kit": "0.31.11",
+    "esbuild": "0.28.2",
     "jsdom": "30.1.1",
+    "playwright": "1.63.0",
     "postcss": "8.5.28",
+    "storybook": "10.6.0",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vite": "8.3.0",
-    "vitest": "5.0.1"
+    "vitest": "5.0.1",
+    "@opennextjs/cloudflare": "1.20.7",
+    "wrangler": "4.143.0"
+  },
+  "overrides": {
+    "miniflare": {
+      "undici": "7.29.1"
+    },
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
   }
 }

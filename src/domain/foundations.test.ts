@@ -7,7 +7,7 @@ import {
   rolePresets,
   roles,
 } from "./capabilities";
-import { isKnown, known, money } from "./facts";
+import { isKnown, known, listingPurposes, money, presentInEuro, pricePeriods } from "./facts";
 import {
   formatListingReference,
   formatReference,
@@ -15,7 +15,7 @@ import {
   publicLocales,
   staffLocales,
 } from "./ids";
-import { isMediaPublishable } from "./media";
+import { isMediaPublishable, moveRelation } from "./media";
 import { decideReplay } from "./operation-receipt";
 
 describe("ids and references", () => {
@@ -42,7 +42,7 @@ describe("facts", () => {
     expect(isKnown(fact)).toBe(true);
   });
 
-  it("money is integer minor units in a supported currency", () => {
+  it("money is integer minor units in a supported currency with a purpose period", () => {
     expect(() => money(10.5, "EUR", "total")).toThrow();
     expect(() => money(100, "XYZ", "total")).toThrow();
     expect(money(9_500_000, "EUR", "total")).toEqual({
@@ -51,19 +51,37 @@ describe("facts", () => {
       period: "total",
       basis: "asking",
     });
+    // Short stays are not a listing purpose; night/week periods are retired (§3.2).
+    expect(pricePeriods).toEqual(["total", "month"]);
+    expect(listingPurposes).toEqual(["sale", "long_term_rent"]);
+  });
+
+  it("presents historical BGN amounts in euro without rewriting the original", () => {
+    // 195 583.00 BGN is exactly 100 000.00 EUR at the fixed rate.
+    expect(presentInEuro({ amountMinor: 19_558_300, currency: "BGN" })).toEqual({
+      amountMinor: 10_000_000,
+      currency: "EUR",
+      original: { amountMinor: 19_558_300, currency: "BGN" },
+    });
+    // Half-up to the cent: 1.00 BGN = 0.5113 EUR -> 0.51 EUR.
+    expect(presentInEuro({ amountMinor: 100, currency: "BGN" }).amountMinor).toBe(51);
+    expect(presentInEuro({ amountMinor: 9_500_000, currency: "EUR" })).toMatchObject({
+      amountMinor: 9_500_000,
+      currency: "EUR",
+    });
   });
 });
 
-describe("capabilities (§03)", () => {
+describe("capabilities (architecture §8.2)", () => {
   it("has a preset for every role", () => {
     expect(Object.keys(rolePresets).sort()).toEqual([...roles].sort());
   });
 
-  it("A66: the AI service preset holds drafting capabilities only", () => {
+  it("AT52: the AI service preset holds drafting capabilities only", () => {
     expect([...rolePresets.ai_service].sort()).toEqual([...draftOnlyCapabilities].sort());
   });
 
-  it("A66: grants presented for the AI service cannot confer consequential authority", () => {
+  it("AT52: grants presented for the AI service cannot confer consequential authority", () => {
     const hermes = { kind: "ai_service", id: "hermes" } as const;
     const everything = grantsForRoles([...roles]);
     for (const capability of [
@@ -117,22 +135,50 @@ describe("capabilities (§03)", () => {
 });
 
 describe("media eligibility", () => {
-  it("A54: media is not publishable until rights are cleared and review passed; modifications are disclosed", () => {
-    const cleared = { rights: "cleared", review: "approved", modification: "none" } as const;
-    expect(isMediaPublishable(cleared)).toBe(true);
-    expect(isMediaPublishable({ ...cleared, rights: "pending" })).toBe(false);
-    expect(isMediaPublishable({ ...cleared, modification: "virtually_staged" })).toBe(false);
+  it("AT28: media is publishable only when sealed, clean, processed, cleared, reviewed and disclosed", () => {
+    const eligible = {
+      audience: "public_candidate",
+      sealedSha256: "sha256-sealed",
+      scan: "clean",
+      processing: "ready",
+      rights: "cleared",
+      review: "approved",
+      modification: "none",
+    } as const;
+    expect(isMediaPublishable(eligible)).toBe(true);
+    expect(isMediaPublishable({ ...eligible, rights: "unknown" })).toBe(false);
+    expect(isMediaPublishable({ ...eligible, sealedSha256: null })).toBe(false);
+    expect(isMediaPublishable({ ...eligible, scan: "failed" })).toBe(false);
+    expect(isMediaPublishable({ ...eligible, audience: "private" })).toBe(false);
+    expect(isMediaPublishable({ ...eligible, modification: "virtually_staged" })).toBe(false);
     expect(
       isMediaPublishable({
-        ...cleared,
+        ...eligible,
         modification: "virtually_staged",
         modificationDisclosure: "Virtually staged",
       }),
     ).toBe(true);
   });
+
+  it("AT20: a move keeps hidden relations and duplicate placements in their relative order", () => {
+    const gallery = ["a", "hidden", "b", "a-again", "c"].map((relationId, position) => ({
+      relationId,
+      position,
+    }));
+    expect(moveRelation(gallery, "c", { before: "a" }).map((p) => p.relationId)).toEqual([
+      "c",
+      "a",
+      "hidden",
+      "b",
+      "a-again",
+    ]);
+    expect(moveRelation(gallery, "a", { after: "a-again" }).map((p) => p.position)).toEqual([
+      0, 1, 2, 3, 4,
+    ]);
+  });
 });
 
-describe("operation receipts", () => {
+describe("operations (§5.1)", () => {
   const receipt = {
     idempotencyKey: "k",
     operationType: "inquiry.submit",
@@ -140,12 +186,12 @@ describe("operation receipts", () => {
     status: "succeeded",
   } as const;
 
-  it("A18: a repeated submission replays the one logical receipt", () => {
+  it("AT10: a repeated submission replays the one logical receipt", () => {
     expect(decideReplay(null, "h1")).toEqual({ action: "execute" });
     expect(decideReplay(receipt, "h1")).toEqual({ action: "replay", receipt });
   });
 
-  it("A40: an unknown outcome is reconciled, never re-executed; a reused key with other content is rejected", () => {
+  it("AT11: an unknown outcome is reconciled, never re-executed; a reused key with other content is rejected", () => {
     expect(decideReplay({ ...receipt, status: "outcome_unknown" }, "h1").action).toBe("reconcile");
     expect(decideReplay(receipt, "h2")).toEqual({
       action: "reject",

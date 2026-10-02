@@ -3,7 +3,7 @@
 // account, and are rotated whenever the holder's privileges change.
 import "server-only";
 import { and, eq, isNull, ne } from "drizzle-orm";
-import { clientAccounts, sessions, staffAccounts } from "@/db/schema";
+import { principals, sessions, staffMemberships } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { randomToken, sha256Hex } from "../crypto";
 import type { Executor } from "../db";
@@ -20,11 +20,15 @@ const minute = 60_000;
 const hour = 60 * minute;
 const day = 24 * hour;
 
+/**
+ * Session limits (§8.1), enforced locally on every request: staff 12 h absolute / 30 min idle,
+ * clients 7 d absolute / 24 h idle. Step-up: sensitive staff actions (access grants, exports,
+ * production controls) need a verification at most 5 minutes old, client document actions at
+ * most 15 minutes.
+ */
 export const sessionPolicy = {
-  staff: { idleMs: 2 * hour, absoluteMs: 12 * hour },
-  client: { idleMs: 7 * day, absoluteMs: 30 * day },
-  /** High-risk actions need a verification (sign-in or step-up) at most this old. */
-  stepUpMaxAgeMs: 10 * minute,
+  staff: { idleMs: 30 * minute, absoluteMs: 12 * hour, stepUpMs: 5 * minute },
+  client: { idleMs: 24 * hour, absoluteMs: 7 * day, stepUpMs: 15 * minute },
   /** last_seen_at is refreshed at most this often, to keep reads cheap. */
   touchIntervalMs: minute,
 } as const;
@@ -49,8 +53,8 @@ export interface IssuedSession {
 type SessionRow = typeof sessions.$inferSelect;
 
 function toSession(row: SessionRow): Session {
-  const kind = row.accountKind;
-  const id = (kind === "staff" ? row.staffAccountId : row.clientAccountId) as string;
+  const kind = row.principalKind;
+  const id = row.principalId;
   return {
     id: row.id,
     account: { kind, id },
@@ -74,9 +78,8 @@ async function insertSession(
     .insert(sessions)
     .values({
       tokenHash: sha256Hex(token),
-      accountKind: account.kind,
-      staffAccountId: account.kind === "staff" ? account.id : null,
-      clientAccountId: account.kind === "client" ? account.id : null,
+      principalKind: account.kind,
+      principalId: account.id,
       createdAt: now,
       expiresAt,
       lastSeenAt: now,
@@ -97,13 +100,23 @@ export function createSession(
   return insertSession(db, account, now, expiresAt, now);
 }
 
+/**
+ * Whether the principal may use its context now: an active principal of that kind, and for
+ * staff an active membership (§8.1). Checked on every request, so a local suspension or an
+ * ended membership applies to the next one.
+ */
 async function accountIsActive(db: Executor, account: AccountRef): Promise<boolean> {
-  const table = account.kind === "staff" ? staffAccounts : clientAccounts;
   const [row] = await db
-    .select({ status: table.status })
-    .from(table)
-    .where(eq(table.id, account.id));
-  return row?.status === "active";
+    .select({
+      kind: principals.kind,
+      status: principals.status,
+      membership: staffMemberships.state,
+    })
+    .from(principals)
+    .leftJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
+    .where(eq(principals.id, account.id));
+  if (row?.status !== "active" || row.kind !== account.kind) return false;
+  return account.kind === "client" || row.membership === "active";
 }
 
 async function findLiveRow(db: Executor, token: string, now: Date): Promise<SessionRow | null> {
@@ -112,9 +125,63 @@ async function findLiveRow(db: Executor, token: string, now: Date): Promise<Sess
     .from(sessions)
     .where(and(eq(sessions.tokenHash, sha256Hex(token)), isNull(sessions.revokedAt)));
   if (!row) return null;
-  const idleMs = sessionPolicy[row.accountKind].idleMs;
+  const idleMs = sessionPolicy[row.principalKind].idleMs;
   if (now >= row.expiresAt || now.getTime() - row.lastSeenAt.getTime() >= idleMs) return null;
   return row;
+}
+
+/** Re-read a server-derived session before a consequential operation; stale objects grant nothing. */
+export async function requireLiveSession(
+  db: Executor,
+  session: Session,
+  now: Date = new Date(),
+): Promise<Session> {
+  const [row] = await db
+    .select()
+    .from(sessions)
+    .where(
+      and(
+        eq(sessions.id, session.id),
+        eq(sessions.principalId, session.account.id),
+        eq(sessions.principalKind, session.account.kind),
+        isNull(sessions.revokedAt),
+      ),
+    );
+  if (
+    !row ||
+    now >= row.expiresAt ||
+    now.getTime() - row.lastSeenAt.getTime() >= sessionPolicy[row.principalKind].idleMs ||
+    !(await accountIsActive(db, session.account))
+  )
+    throw new AppError("unauthenticated");
+  return toSession(row);
+}
+
+export interface ResolvedSession {
+  readonly session: Session;
+  /** `denied`: signed in, but the principal is inactive or (staff) has no active membership. */
+  readonly access: "active" | "denied";
+}
+
+/**
+ * The live session behind a cookie token, whether or not its principal may use the context.
+ * Only an `active` one is ever touched (idle timer) or used as an actor; a `denied` one exists
+ * so the staff host can show the access-denied screen instead of a sign-in loop.
+ */
+export async function resolveSession(
+  db: Executor,
+  token: string,
+  now: Date = new Date(),
+): Promise<ResolvedSession | null> {
+  const row = await findLiveRow(db, token, now);
+  if (!row) return null;
+  const session = toSession(row);
+  if (!(await accountIsActive(db, session.account))) return { session, access: "denied" };
+  if (now.getTime() - row.lastSeenAt.getTime() >= sessionPolicy.touchIntervalMs) {
+    await db.update(sessions).set({ lastSeenAt: now }).where(eq(sessions.id, row.id));
+    return { session: { ...session, lastSeenAt: now }, access: "active" };
+  }
+  return { session, access: "active" };
 }
 
 /** The session for a cookie token, or null when unknown, ended or the account is inactive. */
@@ -123,15 +190,8 @@ export async function readSession(
   token: string,
   now: Date = new Date(),
 ): Promise<Session | null> {
-  const row = await findLiveRow(db, token, now);
-  if (!row) return null;
-  const session = toSession(row);
-  if (!(await accountIsActive(db, session.account))) return null;
-  if (now.getTime() - row.lastSeenAt.getTime() >= sessionPolicy.touchIntervalMs) {
-    await db.update(sessions).set({ lastSeenAt: now }).where(eq(sessions.id, row.id));
-    return { ...session, lastSeenAt: now };
-  }
-  return session;
+  const resolved = await resolveSession(db, token, now);
+  return resolved?.access === "active" ? resolved.session : null;
 }
 
 /**
@@ -148,6 +208,7 @@ export async function rotateSession(
   return db.transaction(async (tx) => {
     const row = await findLiveRow(tx, token, now);
     if (!row) return null;
+    if (!(await accountIsActive(tx, toSession(row).account))) return null;
     const revoked = await tx
       .update(sessions)
       .set({ revokedAt: now })
@@ -184,14 +245,12 @@ export async function revokeAllSessions(
   account: AccountRef,
   options: { exceptSessionId?: string; now?: Date } = {},
 ): Promise<number> {
-  const accountColumn =
-    account.kind === "staff" ? sessions.staffAccountId : sessions.clientAccountId;
   const rows = await db
     .update(sessions)
     .set({ revokedAt: options.now ?? new Date() })
     .where(
       and(
-        eq(accountColumn, account.id),
+        eq(sessions.principalId, account.id),
         isNull(sessions.revokedAt),
         ...(options.exceptSessionId ? [ne(sessions.id, options.exceptSessionId)] : []),
       ),
@@ -200,13 +259,29 @@ export async function revokeAllSessions(
   return rows.length;
 }
 
-/** Throws `step_up_required` unless the session verified recently enough for a risky action. */
+/** Whether the session's last verification is recent enough for a sensitive action. */
+export function isFresh(
+  session: Session,
+  now: Date = new Date(),
+  maxAgeMs: number = sessionPolicy[session.account.kind].stepUpMs,
+): boolean {
+  return Boolean(
+    session.reverifiedAt &&
+      now < session.expiresAt &&
+      now.getTime() >= session.reverifiedAt.getTime() &&
+      now.getTime() - session.reverifiedAt.getTime() <= maxAgeMs,
+  );
+}
+
+/**
+ * Throws `step_up_required` unless the session verified within its context's step-up window
+ * (staff 5 min, client 15 min). After reauthentication the caller shows the action again; it
+ * is never replayed automatically (§11.4).
+ */
 export function requireFreshAuth(
   session: Session,
   now: Date = new Date(),
-  maxAgeMs: number = sessionPolicy.stepUpMaxAgeMs,
+  maxAgeMs: number = sessionPolicy[session.account.kind].stepUpMs,
 ): void {
-  if (!session.reverifiedAt || now.getTime() - session.reverifiedAt.getTime() > maxAgeMs) {
-    throw new AppError("step_up_required");
-  }
+  if (!isFresh(session, now, maxAgeMs)) throw new AppError("step_up_required");
 }

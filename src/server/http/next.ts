@@ -8,12 +8,14 @@ import type { Actor } from "@/domain/capabilities";
 import { sessionCookieName, sessionCookieOptions } from "../auth/cookies";
 import type { Session } from "../auth/sessions";
 import { getEnv } from "../config/env";
+import type { PrivateHostContext } from "../config/hosts";
 import type { Database } from "../db";
 import { AppError, type ErrorBody, isAppError, toErrorBody } from "../errors";
 import {
   assertSameOrigin,
   correlationIdFrom,
   errorResponse,
+  expectedOrigin,
   identify,
   isUnsafeMethod,
   type RequestIdentity,
@@ -43,7 +45,7 @@ async function context(
   const identity: RequestIdentity = await identify(db, requestHeaders, env);
   // Cookie-authenticated mutations must come from this site (CSRF defence in depth).
   if (isUnsafeMethod(method) && (identity.sessionToken || options.requireSession)) {
-    assertSameOrigin(requestHeaders, env.appOrigin);
+    assertSameOrigin(requestHeaders, expectedOrigin(requestHeaders, env));
   }
   if (options.requireSession && !identity.session) {
     throw new AppError("unauthenticated");
@@ -81,7 +83,7 @@ export async function action<T>(
   const requestHeaders = await headers();
   const correlationId = correlationIdFrom(requestHeaders);
   try {
-    assertSameOrigin(requestHeaders, getEnv().appOrigin);
+    assertSameOrigin(requestHeaders, expectedOrigin(requestHeaders, getEnv()));
     const ctx = await context(requestHeaders, "POST", correlationId, options);
     return { ok: true, data: await fn(ctx) };
   } catch (error) {
@@ -90,13 +92,25 @@ export async function action<T>(
   }
 }
 
-/** Stores a newly issued session token (server actions and route handlers). */
-export async function setSessionCookie(token: string, expires: Date): Promise<void> {
+/** Stores a newly issued session token on its host context (server actions, route handlers). */
+export async function setSessionCookie(
+  context: PrivateHostContext,
+  token: string,
+  expires: Date,
+): Promise<void> {
   const env = getEnv();
-  (await cookies()).set(sessionCookieName(env), token, sessionCookieOptions(env, expires));
+  (await cookies()).set(
+    sessionCookieName(env, context),
+    token,
+    sessionCookieOptions(env, context, expires),
+  );
 }
 
-export async function clearSessionCookie(): Promise<void> {
+export async function clearSessionCookie(context: PrivateHostContext): Promise<void> {
   const env = getEnv();
-  (await cookies()).set(sessionCookieName(env), "", sessionCookieOptions(env, new Date(0)));
+  (await cookies()).set(
+    sessionCookieName(env, context),
+    "",
+    sessionCookieOptions(env, context, new Date(0)),
+  );
 }

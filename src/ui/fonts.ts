@@ -1,44 +1,32 @@
-import {
-  Noto_Sans,
-  Noto_Sans_Hebrew,
-  Noto_Serif_Display,
-  Noto_Serif_Hebrew,
-} from "next/font/google";
+import { preload } from "react-dom";
+import type { PublicLocale } from "@/i18n/config";
 
-// Self-hosted at build time by next/font (CSP font-src 'self'). Hebrew text lists the Hebrew
-// family first (tokens.css, :lang(he)): the Latin families have no Hebrew glyphs and their
-// generated fallback faces are local fonts that do. Hebrew faces are not preloaded because
-// only Hebrew pages need them.
-const notoSans = Noto_Sans({
-  subsets: ["latin", "latin-ext", "cyrillic", "greek"],
-  variable: "--font-noto-sans",
-  display: "swap",
-});
+// Self-hosted font subsets (public/fonts, declared in src/ui/fonts.css). Every page shows Latin
+// (brand, digits, references), so Latin is always preloaded; a locale adds only its own script.
+// Latin Extended and the other scripts still load on demand through unicode-range.
+const scriptFiles = {
+  cyrillic: ["/fonts/noto-sans-cyrillic.woff2"],
+  greek: ["/fonts/noto-sans-greek.woff2"],
+  hebrew: ["/fonts/noto-sans-hebrew.woff2"],
+} as const;
 
-const notoSansHebrew = Noto_Sans_Hebrew({
-  subsets: ["hebrew"],
-  variable: "--font-noto-sans-hebrew",
-  display: "swap",
-  preload: false,
-});
+const localeScripts: Record<PublicLocale, readonly (keyof typeof scriptFiles)[]> = {
+  bg: ["cyrillic"],
+  ru: ["cyrillic"],
+  en: [],
+  de: [],
+  nl: [],
+  el: ["greek"],
+  he: ["hebrew"],
+};
 
-// Public display face (headings on public pages only, tokens.css --font-display).
-const notoSerifDisplay = Noto_Serif_Display({
-  subsets: ["latin", "latin-ext", "cyrillic", "greek"],
-  weight: ["400"],
-  variable: "--font-noto-serif-display",
-  display: "swap",
-});
+export function fontFilesFor(locale: PublicLocale): string[] {
+  return ["/fonts/noto-sans-latin.woff2", ...localeScripts[locale].flatMap((s) => scriptFiles[s])];
+}
 
-const notoSerifHebrew = Noto_Serif_Hebrew({
-  subsets: ["hebrew"],
-  weight: ["400"],
-  variable: "--font-noto-serif-hebrew",
-  display: "swap",
-  preload: false,
-});
-
-/** Put on <html> so tokens.css can resolve `--font-sans` and `--font-display`. */
-export const fontVariables = [notoSans, notoSansHebrew, notoSerifDisplay, notoSerifHebrew]
-  .map((font) => font.variable)
-  .join(" ");
+/** Call from a root layout: emits `<link rel="preload">` for the locale's font files. */
+export function preloadFonts(locale: PublicLocale): void {
+  for (const href of fontFilesFor(locale)) {
+    preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  }
+}

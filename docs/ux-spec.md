@@ -284,6 +284,8 @@ Use “Request received” only after commit; “Viewing requested” until conf
 
 ### 06.1 Fixed visual direction
 
+Owner decision 2026-10-02 (palette B): this section is the architecture §11.3 foundation, and the 30 September neutral/Manrope binding is withdrawn. `design/tokens.json` generates the shared CSS and the Figma variables; the canonical Figma file `PxfBJ2tdrj9A923fpgqzDn` uses the same role names (`radius/control`, `radius/panel`, `MSR / title · semibold`, …).
+
 Use the architecture's light, grounded agency identity. Property photography, useful facts and human service are the visual content. Public pages are spacious enough to evaluate; operational pages are denser and quieter. Do not introduce a different dashboard theme, decorative gradients, full-screen introduction, artificial scarcity, autoplay hero or floating chatbot over the task.
 
 | Token role | Baseline | Usage constraint |
@@ -294,6 +296,7 @@ Use the architecture's light, grounded agency identity. Property photography, us
 | Primary action / inverse | `#214F3C` / `#FFFFFF` | Primary action and deliberate selection, not every badge |
 | Interactive outline | `#687A6F` baseline | Validate non-text contrast on actual surrounding surfaces |
 | Focus | `#174EA6`, 3 px outline, 2 px offset baseline | Remains visible on every surface and in forced colors |
+| Butler (assistance) | `#5B45A0` | Marks Butler's work, verdicts and receipts; never the primary action color |
 | Error / warning / success text | `#A12A25` / `#775000` / `#21603C` baseline | Always paired with words/icon; test actual backgrounds and states |
 
 Use self-hosted licensed Noto Sans and Noto Sans Hebrew. Public/client body is 16 px or larger, 1.5–1.65 line height. Staff supporting data may be 14 px; inputs and essential messages remain comfortably readable. Use tabular figures for aligned amounts/times; do not force identifiers into a decorative mono style. Body copy stays around 60–75 characters per line.
@@ -2092,7 +2095,7 @@ These slices define dependency and proof, not a calendar or permission to ship a
 | R11 Cutover verification | Actual hosts/login/intake/media/mail/legacy/SEO observations recorded | Local browser preview or build success |
 | R12 Operating acceptance | Complete staffed cycle including scheduled overnight/backup work, support handoff and no unresolved release-severity incident | Launch-day screenshot or elapsed time without evidence |
 
-The architecture's authority-reconciliation requirement remains: PostgreSQL is the selected runtime search, but the existing Typesense/Meilisearch report obligation is not silently waived. Search Console, Yandex, backlinks, human listing review, live Hermes/Payload evidence and signed recovery obligations retain their required authority until explicitly reconciled. This document does not change those files or claim the current live system passed.
+The architecture's authority-reconciliation requirement remains: PostgreSQL is the selected runtime search, but the existing Typesense/Meilisearch report obligation is not silently waived. Search Console, Yandex Webmaster and backlink exports are optional at every lifecycle stage by the owner decision of 2026-09-24. Human listing review, live service/runtime evidence, crawl parity and signed recovery obligations retain their required authority until explicitly reconciled. This document does not change those files or claim the current live system passed.
 
 ### 24.3 Operational usability is part of release
 

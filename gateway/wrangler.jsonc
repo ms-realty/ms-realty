@@ -1,0 +1,19 @@
+{
+  // Local gateway/map fixture only; never use this file for a release deploy.
+  // The measured Sharp 0.35.4 workerd failure selects Containers for the current candidate.
+  // After isolated inputs, Access and the exact image digest are validated, generate:
+  // node scripts/staging-config.mjs deploy/staging-candidate.generated.json deploy/staging-containers.generated.json --require-secrets
+  // Release tooling must select --config deploy/staging-containers.generated.json explicitly.
+  // That staging-only contract binds web/queue/migrator to one immutable image; see deploy/README.md.
+  "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
+  "name": "ms-realty-gateway-local",
+  "main": "worker.ts",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  // Local development configuration only. Release tooling must supply agency-owned bindings.
+  "r2_buckets": [{ "binding": "MAP_ASSETS", "bucket_name": "ms-realty-local-map-fixtures" }],
+  "vars": { "MAP_RELEASE_ID": "" }
+}

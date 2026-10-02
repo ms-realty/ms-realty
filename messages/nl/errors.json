@@ -1,0 +1,13 @@
+{
+  "notFound": {
+    "title": "Pagina niet gevonden",
+    "body": "Het adres is mogelijk verkeerd getypt of de pagina is verplaatst.",
+    "home": "Naar de startpagina"
+  },
+  "generic": {
+    "title": "Deze pagina kan niet worden getoond",
+    "body": "Probeer het opnieuw. Blijft het gebeuren, bel ons dan en noem de referentie.",
+    "reference": "Referentie: {reference}",
+    "retry": "Opnieuw proberen"
+  }
+}

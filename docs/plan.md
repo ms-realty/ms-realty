@@ -1,6 +1,8 @@
 # MS Realty rebuild plan
 
-Status: active · Started 2026-09-23 · Realigned 2026-09-26
+Status: active, not release-qualified · Started 2026-09-23 · Realigned 2026-09-26 · Recovery audited 2026-09-27
+
+The current execution record is [delivery/2026-09-27-recovery.md](delivery/2026-09-27-recovery.md). The interrupted workflow status is not acceptance evidence.
 
 Authority, in order: [`docs/architecture.md`](architecture.md) (final architecture v1.0,
 normative), [`docs/adr/0002-implementation-deviations.md`](adr/0002-implementation-deviations.md)
@@ -35,18 +37,23 @@ reviewers, real approvals and the cutover decision (§21.4, §8 below). The rebu
 everything up to those inputs, keeps each missing input visible as a blocked gate with its
 safe default, and never reports a gate as passed on local or synthetic evidence.
 
-## 3. Current state (2026-09-26)
+## 3. Current state (2026-09-27)
+
+The recovered implementation is tracked in the delivery record above. The legacy deployment
+description below is the 26 September baseline, not a fresh live-service observation.
 
 | Area | State |
 |---|---|
 | Legacy site | `makler-realty.com` serves the legacy WordPress site (Worker routes removed out-of-band on 2026-09-17); `makler-realty.ru` registration expired. The old Next/Payload app still runs on workers.dev and the origin at `a51827be`, watched by the legacy monitoring workflows pinned to tag `legacy-app-final` |
 | Merged | S0 deploy freeze (#260); S1 scaffold and legacy extraction (#261); S1 foundations (#263): domain model, schema, server core, UI kit, i18n shells, staged legacy import; CI v2 (`ci / gate`, #265/#272) |
 | Legacy data | `data/legacy/`: 165 listings (30 active at freeze), 457 exact URL decisions (179×301, 268×410, 10×200), 1725 R2 media objects, 31 places, approved guide content; verified by `data/legacy/verify.mjs` |
-| Known gaps vs architecture | Found by the 2026-09-24 review: no staff MFA; publication pointer/generation missing; retired scope still in the schema; one host instead of three; tokens from the superseded palette; 340 KB gzip JS on an empty public page; no shared form/mutation pattern; message catalogs not split for parallel work |
+| Recovered foundation | Three-host routing, mandatory two-passkey staff identity, revisioned publication/generation, split catalogs, architecture tokens, native forms and release evaluator implemented; production image, migrator and worker have local smoke evidence |
+| Delivery work | Inventory/publication, discovery/intake, case continuity, private files, process controls, draft assistance and opt-in alert rule implemented with scoped database/browser evidence. Integrated verification and review fixes in progress; remaining software and external inputs are enumerated in the delivery record |
+| Launch authority | Original `production/data/launch-readiness.json` and `launch-input-checklist.md` preserved; R00 and live qualification remain blocked |
 
 ## 4. Implementation decisions
 
-Architecture §2 as amended by ADR 0002. In practice:
+Architecture §2 as amended by ADR 0002 and [ADR 0003](adr/0003-openrouter-jev.md). In practice:
 
 | Concern | Choice |
 |---|---|
@@ -58,7 +65,7 @@ Architecture §2 as amended by ADR 0002. In practice:
 | i18n | next-intl; public/client `bg en ru de nl el he`, staff `bg en ru`; per-namespace catalogs; locale published only when its content is approved |
 | Rendering | Mutable public pages render per request from PostgreSQL (architecture §7.5); only static assets and approved media derivatives are cached |
 | Media | R2 EU jurisdiction: quarantine, private, public buckets via the S3 API; seal → scan (ClamAV) → derivatives; private downloads through the app |
-| Providers | Resend (mail), OpenAI Responses (Hermes adapter), Protomaps + MapLibre (maps), Better Stack (monitoring), AWS S3 Object Lock (independent archive); local fakes until accounts exist |
+| Providers | Resend (mail), OpenRouter hosted Jev Router + typed Jev Decisions (Hermes; ADR 0003), Protomaps + MapLibre (maps), Better Stack (monitoring), AWS S3 Object Lock (independent archive); synthetic checks until live qualification |
 | Tests | Vitest (unit, jsdom, integration on real PostgreSQL), Playwright (Chromium desktop/mobile + WebKit mobile) with axe and screenshot baselines in the pinned Playwright image |
 | Hosting | DigitalOcean App Platform Frankfurt: ≥2 web, 1 worker, PRE_DEPLOY migration job; HA Managed PostgreSQL 18; Cloudflare gateway Worker |
 
@@ -91,24 +98,24 @@ Order follows architecture §22.1. Each slice ends merged with green CI and a sl
    adversarially verified before fixing.
 7. **Merge** with a PR that lists the IDs covered and what remains blocked.
 
-All subagents run on Opus 5.5.
+Use the model and effort selected for the active delivery session. Assign one owner per write surface, cap independent work to available capacity, and verify the integrated result. Historical Claude workflow model selections do not change the active session settings.
 
 ## 7. Additions beyond the architecture
 
-Items the 2026-09-24 review found missing from the architecture. Legal items are recorded as
-obligations to support, never as legal conclusions by the software; each is confirmed
-against primary sources before its slice starts.
+Found missing by the 2026-09-24/26 review and checked against primary sources (articles,
+links and unverified points: [`docs/research/agency-obligations.md`](research/agency-obligations.md)).
+The software records, reminds and blocks; it never decides a legal question. Lawyers and an
+accountant confirm the content.
 
-- **AML/CFT record-keeping** for real-estate intermediaries (Bulgarian ZMIP): customer and
-  beneficial-owner identification, PEP/sanctions check result, risk note, retention and a
-  suspicion escalation path, as a checklist on the Case that blocks proposal submission until
-  complete. S4.
-- **Records of processing and retention classes** feeding the §8.4 policy. S5.
-- **Brokerage agreement evidence** (representation scope, exclusivity, commission terms) as
-  part of SellerInstruction. S2/S4.
-- **Portal destinations** stay manual named destinations with evidence (§15); an xe.gr
-  adapter is the first candidate after launch.
-- **Keys and property access** as appointment access prerequisites. S4.
+| Addition | Basis | Minimal product support | Slice |
+|---|---|---|---|
+| AML/CFT customer due diligence | ZMIP art. 4 item 18 makes real-estate intermediaries obliged entities (lettings only from EUR 10 000 monthly rent); CDD at relationship start, one-off ≥ EUR 15 000 or cash ≥ EUR 5 000 (art. 10–11); ID copy (art. 53), representatives (art. 65), PEP (art. 36), sanctions, source of funds (art. 66), 5-year retention (art. 67), report to SANS FID before execution (art. 72); EU AMLR 2024/1624 from 10 July 2027 adds both-party checks | Restricted `ComplianceCheck` per party on a Case/Proposal, triggered at `agreed_for_next_step` or cash ≥ EUR 5 000; its own document class with 5-year retention that blocks erasure; compliance-only suspicion register; Hermes excluded; operator inputs: AML officer, internal rules, risk assessment | S4 |
+| Service agreement and withdrawal right | Consumer Rights Directive art. 7(3), 8(8), 9, 14(4)(a) for distance/off-premises agreements; Greece: written brokerage agreement with tax numbers | `ServiceAgreement` for sellers and buyers/tenants: channel, withdrawal information and express-start request timestamps, computed deadline, signed copy, commission basis and payer; services cannot start before the recorded request; commission record with external invoice reference | S2 (seller), S4 (buyer/tenant) |
+| GDPR operations | GDPR art. 12(3) (one month, extendable), 28, 30, 33 (72 h); cookies under the Electronic Commerce Act art. 4a (the receipt cookie is strictly necessary) | Processing register, processor/transfer register, breach log with a 72 h timer, default DSR due date, consent banner only if analytics/embeds are added | S5 |
+| Country transaction checklists | BG: preliminary contract, deposit, notarial deed, tax assessment; non-EU land restrictions (Constitution art. 22); GR: AFM, notary, cadastre, ENFIA; border-area permits (Law 1892/1990) | Versioned checklist templates by country × sale/let × EU/non-EU buyer; human-completed items with owner, professional, evidence and due date | S4 |
+| Complaints and reviews | UCPD art. 7(6) and Annex I 23b–c on reviews; ADR information | Complaint record (receipt, owner, due, outcome); review-consent event on completed Cases; reviews shown only with a verification statement | S5 |
+| Agency operations | Good practice | Key register with check-out and due-back; photography as a property-work appointment tied to media rights; periodic owner report approved by a human; partner/referral records with fee terms; staff offboarding checklist; portal name and reference on manually entered inquiries | S2–S5 |
+| European Accessibility Act | Directive 2019/882 art. 4(5): microenterprise service providers exempt | WCAG 2.2 AA stays the target; the annual microenterprise test is recorded in release evidence | S6 |
 
 ## 8. Operator inputs (architecture §21.4)
 
@@ -124,8 +131,10 @@ Blocked gates stay blocked until these exist; the safe default applies meanwhile
 | Retention, deletion, contact-purpose and vendor-processing policy | No production personal-data capture | R00/R05 |
 | Provider accounts owned by the agency: DigitalOcean (App Platform, HA PostgreSQL), Cloudflare R2 EU buckets, Resend, OpenAI, Better Stack, AWS (S3 Object Lock) | Local fakes and synthetic tests only | R01/R08 |
 | DNS for `my.` and `app.` hosts, the reply subdomain and cutover; renewal of `makler-realty.ru` | No cutover, no mail-DNS change | R07/R10 |
-| SEO evidence decision (Search Console, Yandex, backlinks) under R00 | Evidence required | R00/R11 |
+| Historical SEO analytics (Search Console, Yandex, backlinks) | Optional at every lifecycle stage by owner decision of 2026-09-24; never a release blocker | — |
 | Recovery custody, Ed25519 signing key holder, incident contacts | No release | R08/R10 |
+| AML officer, internal AML rules and risk assessment (ZMIP art. 98, 101) | Proposal steps that need due diligence stay blocked | R04 |
+| Accountant decision on VAT for commission on Greek properties | Commission recorded without tax treatment | R04 |
 | Cloudflare audit-log answer for the 2026-09-17 route removal | Treat routes as unowned; cutover re-asserts them deliberately | R10 |
 
 ## 9. Progress log
