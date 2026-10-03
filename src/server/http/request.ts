@@ -5,7 +5,6 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import type { Actor } from "@/domain/capabilities";
 import { requestHost } from "@/i18n/seo";
-import { staffAccess } from "../auth/access";
 import { readCookie, sessionCookieName } from "../auth/cookies";
 import { readSession, type Session } from "../auth/sessions";
 import type { ServerEnv } from "../config/env";
@@ -75,8 +74,7 @@ export interface RequestIdentity {
 /**
  * The signed-in actor behind the session cookie of the addressed private host, if any. The
  * public host has no session; a session only authenticates the context it was issued for, so
- * a client token never authenticates the staff interface (§8.1, AT36). A staff session also
- * needs an active membership and two enrolled passkeys.
+ * a client token never authenticates the staff interface (§8.1).
  */
 export async function identify(
   db: Executor,
@@ -88,15 +86,8 @@ export async function identify(
     return { session: null, actor: null, sessionToken: undefined };
   }
   const token = readCookie(headers.get("cookie"), sessionCookieName(env, context));
-  let session: Session | null = null;
-  if (context === "staff") {
-    // A staff session acts only once its member holds two passkeys (enrolment is its own path).
-    const access = await staffAccess(db, token);
-    session = access.state === "ready" ? access.session : null;
-  } else {
-    const found = token ? await readSession(db, token) : null;
-    session = found?.account.kind === "client" ? found : null;
-  }
+  const found = token ? await readSession(db, token) : null;
+  const session = found?.account.kind === context ? found : null;
   return { session, actor: session?.actor ?? null, sessionToken: session ? token : undefined };
 }
 

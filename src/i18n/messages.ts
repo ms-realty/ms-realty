@@ -61,6 +61,9 @@ async function loadStaff(locale: PublicLocale) {
 
 /** Server-only: catalogs are never sent to the browser as a whole. */
 export async function loadMessages(locale: PublicLocale): Promise<Messages> {
-  const [publicMessages, staffMessages] = await Promise.all([loadPublic(locale), loadStaff(locale)]);
+  const [publicMessages, staffMessages] = await Promise.all([
+    loadPublic(locale),
+    loadStaff(locale),
+  ]);
   return { ...publicMessages, ...staffMessages } as Messages;
 }

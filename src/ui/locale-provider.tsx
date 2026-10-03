@@ -10,6 +10,12 @@ import { displayLocale, type PublicLocale } from "@/i18n/config";
  * labels follow the page, exactly like server-side formatting (ux-spec §19.3). Time zones are
  * never implied: date components receive zoned values from their callers.
  */
-export function LocaleProvider({ locale, children }: { locale: PublicLocale; children: ReactNode }) {
+export function LocaleProvider({
+  locale,
+  children,
+}: {
+  locale: PublicLocale;
+  children: ReactNode;
+}) {
   return <I18nProvider locale={displayLocale(locale)}>{children}</I18nProvider>;
 }

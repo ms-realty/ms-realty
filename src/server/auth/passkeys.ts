@@ -1,9 +1,6 @@
-// WebAuthn passkeys (ADR 0002) via @simplewebauthn/server. Each private host is its own relying
-// party: the staff host's rpID and origin are the staff origin, the client host's the client
-// origin, so a credential made for one context can never answer the other (§8.1, AT36). Staff
-// sign in only with a passkey and must hold two; for clients a passkey is optional. Challenges
-// are stored server-side, expire after five minutes and are consumed by the first verification
-// attempt, successful or not.
+// WebAuthn passkeys for staff (AD7) via @simplewebauthn/server. The relying party id and the
+// expected origin come from configuration; challenges are stored server-side, expire after
+// five minutes and are consumed by the first verification attempt, successful or not.
 import "server-only";
 import {
   type AuthenticationResponseJSON,
@@ -15,38 +12,23 @@ import {
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
-import { and, count, eq, gt, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { passkeys, principals, webauthnChallenges } from "@/db/schema";
 import { recordAudit } from "../audit";
-import { getEnv, type ServerEnv } from "../config/env";
+import { getEnv } from "../config/env";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
-import { enforceRateLimit } from "../rate-limit";
 import {
-  type AccountKind,
   createSession,
   type IssuedSession,
-  isFresh,
+  requireFreshAuth,
   revokeSession,
   type Session,
 } from "./sessions";
 
 export const challengeTtlMs = 5 * 60_000;
-/** A staff member enrols a primary and a backup passkey before any staff route opens. */
-export const staffPasskeyMinimum = 2;
-/**
- * How long after redeeming an enrolment or recovery invitation the staff member may register
- * the missing passkeys without a further verification. Past it, a manager reissues.
- */
-export const enrolmentWindowMs = 15 * 60_000;
 
 type ChallengePurpose = "registration" | "authentication";
-
-/** The WebAuthn relying party of a private host context. */
-export function relyingParty(context: AccountKind, env: ServerEnv = getEnv()) {
-  const origin = env.hosts[context];
-  return { id: new URL(origin).hostname, origin, name: env.webauthn.rpName };
-}
 
 async function storeChallenge(
   db: Executor,
@@ -88,61 +70,40 @@ async function consumeChallenge(
   return rows.length === 1;
 }
 
-/** Passkeys the principal can still sign in with. */
-export async function countActivePasskeys(db: Executor, principalId: string): Promise<number> {
-  const [row] = await db
-    .select({ n: count() })
-    .from(passkeys)
-    .where(and(eq(passkeys.principalId, principalId), isNull(passkeys.revokedAt)));
-  return row?.n ?? 0;
+function requireStaff(session: Session): string {
+  if (session.account.kind !== "staff") throw new AppError("forbidden");
+  return session.account.id;
 }
 
-/**
- * Adding a passkey is a sensitive action: the session must have verified within its step-up
- * window, except that a staff member still short of two passkeys may finish enrolling within
- * `enrolmentWindowMs` of redeeming the invitation.
- */
-async function assertMayRegister(db: Executor, session: Session, now: Date): Promise<void> {
-  if (isFresh(session, now)) return;
-  if (
-    session.account.kind === "staff" &&
-    isFresh(session, now, enrolmentWindowMs) &&
-    (await countActivePasskeys(db, session.account.id)) < staffPasskeyMinimum
-  ) {
-    return;
-  }
-  throw new AppError("step_up_required");
-}
-
-/** Options for adding a passkey to the signed-in account, in the session's own context. */
+/** Options for adding a passkey to the signed-in staff account (needs a fresh verification). */
 export async function startPasskeyRegistration(
   db: Executor,
   session: Session,
   now: Date = new Date(),
 ): Promise<PublicKeyCredentialCreationOptionsJSON> {
-  await assertMayRegister(db, session, now);
-  const principalId = session.account.id;
-  const rp = relyingParty(session.account.kind);
+  const staffId = requireStaff(session);
+  requireFreshAuth(session, now);
+  const env = getEnv();
   const [account] = await db
     .select({ email: principals.email, displayName: principals.displayName })
     .from(principals)
-    .where(eq(principals.id, principalId));
+    .where(eq(principals.id, staffId));
   if (!account) throw new AppError("unauthenticated");
   const existing = await db
     .select({ id: passkeys.credentialId, transports: passkeys.transports })
     .from(passkeys)
-    .where(and(eq(passkeys.principalId, principalId), isNull(passkeys.revokedAt)));
+    .where(and(eq(passkeys.principalId, staffId), isNull(passkeys.revokedAt)));
   const options = await generateRegistrationOptions({
-    rpName: rp.name,
-    rpID: rp.id,
+    rpName: env.webauthn.rpName,
+    rpID: env.webauthn.rpId,
     userName: account.email,
     userDisplayName: account.displayName,
-    userID: new TextEncoder().encode(principalId),
+    userID: new TextEncoder().encode(staffId),
     attestationType: "none",
     excludeCredentials: existing,
     authenticatorSelection: { residentKey: "required", userVerification: "required" },
   });
-  await storeChallenge(db, options.challenge, "registration", now, principalId);
+  await storeChallenge(db, options.challenge, "registration", now, staffId);
   return options;
 }
 
@@ -152,19 +113,19 @@ export async function finishPasskeyRegistration(
   session: Session,
   response: RegistrationResponseJSON,
   options: { label?: string; now?: Date; correlationId?: string } = {},
-): Promise<{ readonly passkeyId: string; readonly activePasskeys: number }> {
+): Promise<{ readonly passkeyId: string }> {
+  const staffId = requireStaff(session);
   const now = options.now ?? new Date();
-  await assertMayRegister(db, session, now);
-  const principalId = session.account.id;
-  const rp = relyingParty(session.account.kind);
+  requireFreshAuth(session, now);
+  const env = getEnv();
   let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
   try {
     verification = await verifyRegistrationResponse({
       response,
       expectedChallenge: (challenge) =>
-        consumeChallenge(db, challenge, "registration", now, principalId),
-      expectedOrigin: rp.origin,
-      expectedRPID: rp.id,
+        consumeChallenge(db, challenge, "registration", now, staffId),
+      expectedOrigin: env.appOrigin,
+      expectedRPID: env.webauthn.rpId,
       requireUserVerification: true,
     });
   } catch (error) {
@@ -177,14 +138,14 @@ export async function finishPasskeyRegistration(
     const [row] = await tx
       .insert(passkeys)
       .values({
-        principalId,
+        principalId: staffId,
         credentialId: info.credential.id,
         publicKey: info.credential.publicKey,
         signCount: info.credential.counter,
         transports: info.credential.transports ?? [],
         deviceType: info.credentialDeviceType,
         backedUp: info.credentialBackedUp,
-        label: options.label?.trim().slice(0, 80) || null,
+        label: options.label,
         createdAt: now,
       })
       .returning({ id: passkeys.id });
@@ -193,52 +154,39 @@ export async function finishPasskeyRegistration(
       action: "passkey.register",
       actor: session.actor,
       recordType: "principal",
-      recordId: principalId,
+      recordId: staffId,
       ...(options.correlationId ? { correlationId: options.correlationId } : {}),
       payload: { passkeyId: row.id, deviceType: info.credentialDeviceType },
       at: now,
     });
-    return { passkeyId: row.id, activePasskeys: await countActivePasskeys(tx, principalId) };
+    return { passkeyId: row.id };
   });
 }
 
-/** Options for signing in to a context with any of its discoverable passkeys. */
+/** Options for signing in with any discoverable staff passkey. */
 export async function startPasskeyAuthentication(
   db: Executor,
-  context: AccountKind,
-  options: { clientIp: string; now?: Date },
+  now: Date = new Date(),
 ): Promise<PublicKeyCredentialRequestOptionsJSON> {
-  const now = options.now ?? new Date();
-  await enforceRateLimit(db, "passkey.ip", options.clientIp, { now });
-  const authentication = await generateAuthenticationOptions({
-    rpID: relyingParty(context).id,
+  const options = await generateAuthenticationOptions({
+    rpID: getEnv().webauthn.rpId,
     userVerification: "required",
   });
-  await storeChallenge(db, authentication.challenge, "authentication", now);
-  return authentication;
-}
-
-export interface PasskeyAuthenticationOptions {
-  readonly now?: Date;
-  /** The browser's current session on this host; it is ended, never carried over. */
-  readonly currentSessionToken?: string;
-  /** Step-up: the passkey must belong to this session's principal. */
-  readonly reauthenticate?: Session;
-  readonly correlationId?: string;
+  await storeChallenge(db, options.challenge, "authentication", now);
+  return options;
 }
 
 /**
- * Verifies a passkey assertion for `context` and starts a session there. With `reauthenticate`
- * it is the step-up verification: the same principal only, and the new session is fresh.
+ * Verifies a passkey assertion and starts a staff session. Passing the current session token
+ * replaces that session, which makes this the step-up verification for high-risk actions.
  */
 export async function finishPasskeyAuthentication(
   db: Executor,
-  context: AccountKind,
   response: AuthenticationResponseJSON,
-  options: PasskeyAuthenticationOptions = {},
+  options: { now?: Date; currentSessionToken?: string; correlationId?: string } = {},
 ): Promise<IssuedSession> {
   const now = options.now ?? new Date();
-  const rp = relyingParty(context);
+  const env = getEnv();
   const [passkey] = await db
     .select({
       id: passkeys.id,
@@ -253,22 +201,19 @@ export async function finishPasskeyAuthentication(
     .from(passkeys)
     .innerJoin(principals, eq(principals.id, passkeys.principalId))
     .where(and(eq(passkeys.credentialId, response.id), isNull(passkeys.revokedAt)));
-  // One answer for unknown, revoked, other-context and inactive credentials alike.
-  if (passkey?.kind !== context || passkey.status !== "active") {
+  // One answer for unknown, revoked and inactive credentials alike.
+  if (passkey?.kind !== "staff" || passkey.status !== "active") {
     throw new AppError("passkey_failed");
   }
-  if (options.reauthenticate && options.reauthenticate.account.id !== passkey.principalId) {
-    throw new AppError("passkey_failed");
-  }
-  const principalId = passkey.principalId;
+  const staffId = passkey.principalId;
 
   let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
   try {
     verification = await verifyAuthenticationResponse({
       response,
       expectedChallenge: (challenge) => consumeChallenge(db, challenge, "authentication", now),
-      expectedOrigin: rp.origin,
-      expectedRPID: rp.id,
+      expectedOrigin: env.appOrigin,
+      expectedRPID: env.webauthn.rpId,
       credential: {
         id: passkey.credentialId,
         publicKey: new Uint8Array(passkey.publicKey),
@@ -288,12 +233,12 @@ export async function finishPasskeyAuthentication(
       .set({ signCount: verification.authenticationInfo.newCounter, lastUsedAt: now })
       .where(eq(passkeys.id, passkey.id));
     if (options.currentSessionToken) await revokeSession(tx, options.currentSessionToken, now);
-    const issued = await createSession(tx, { kind: context, id: principalId }, now);
+    const issued = await createSession(tx, { kind: "staff", id: staffId }, now);
     await recordAudit(tx, {
-      action: options.reauthenticate ? "session.reauthenticate" : "session.sign_in",
+      action: "session.sign_in",
       actor: issued.session.actor,
       recordType: "principal",
-      recordId: principalId,
+      recordId: staffId,
       ...(options.correlationId ? { correlationId: options.correlationId } : {}),
       payload: { method: "passkey", passkeyId: passkey.id, sessionId: issued.session.id },
       at: now,

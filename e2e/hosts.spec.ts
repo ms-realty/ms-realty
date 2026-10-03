@@ -102,7 +102,7 @@ test.describe("cross-host isolation (§11.1, §8.1)", () => {
 
   test("a locale choice stays on the host where it was made", async ({ page, context }) => {
     await page.goto(hostUrl("public", "/bg"));
-    await page.getByRole("button", { name: /Език/ }).click();
+    await page.locator("summary", { hasText: /Език/ }).click();
     await page.getByRole("link", { name: "English", exact: true }).click();
     await expect(page).toHaveURL(hostUrl("public", "/en"));
     const choice = (await context.cookies(origins.public)).find(

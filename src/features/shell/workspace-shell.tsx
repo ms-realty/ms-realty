@@ -7,6 +7,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx, icons, SkipLink } from "@/ui";
+import { DisclosureBehavior } from "./disclosure-behavior";
 import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
 import { NavLink } from "./nav-link";
@@ -55,7 +56,7 @@ export async function WorkspaceShell({
   account?: { name: string; detail?: string };
   children: ReactNode;
 }) {
-  const t = await getTranslations({ locale, namespace: "nav.workspace" });
+  const t = await getTranslations({ locale, namespace: "workspace" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
   const common = await getTranslations({ locale, namespace: "common" });
   const primary = linked(workspacePrimaryNav, locale);
@@ -95,6 +96,7 @@ export async function WorkspaceShell({
   return (
     <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
       <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>
+      <DisclosureBehavior />
 
       {/* Wide screens: persistent side navigation on a quiet subtle surface. */}
       <header className="hidden border-e border-divider bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-5 lg:overflow-y-auto lg:px-3 lg:py-4">

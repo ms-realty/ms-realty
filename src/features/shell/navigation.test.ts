@@ -67,7 +67,7 @@ describe("navigation registry (§06)", () => {
       "rent",
       "sellLet",
       "areas",
-      "howWeHelp",
+      "aboutContact",
     ]);
     expect(publicUtilityNav.map((item) => item.label)).toEqual(["saved", "contact"]);
     expect(journeyNav.map((item) => item.label)).toEqual([

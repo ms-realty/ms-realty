@@ -9,17 +9,17 @@ export async function generateMetadata({
 }: PageProps<"/staff/[locale]/today">): Promise<Metadata> {
   const { locale } = await params;
   if (!isStaffLocale(locale)) return {};
-  const t = await getTranslations({ locale, namespace: "common" });
-  return { title: t("workspaceHeading") };
+  const t = await getTranslations({ locale, namespace: "workspace" });
+  return { title: t("todayHeading") };
 }
 
 export default async function TodayPage({ params }: PageProps<"/staff/[locale]/today">) {
   const { locale } = await params;
   if (!isStaffLocale(locale)) notFound();
-  const t = await getTranslations({ locale, namespace: "common" });
+  const t = await getTranslations({ locale, namespace: "workspace" });
   return (
     <div className="flex flex-col gap-3 px-gutter py-8 lg:px-8">
-      <h1 className="text-heading font-semibold">{t("workspaceHeading")}</h1>
+      <h1 className="text-heading font-semibold">{t("todayHeading")}</h1>
     </div>
   );
 }

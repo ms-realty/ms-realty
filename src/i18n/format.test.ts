@@ -49,7 +49,8 @@ describe("formatting (ux-spec §19.3)", () => {
     expect(formatDate("en", "2026-03-04T12:00:00Z", { dateStyle: "short" })).toBe("04/03/2026");
     expect(formatDate("he", "2026-03-04T12:00:00Z", { dateStyle: "short" })).toBe("4.3.2026");
     expect(displayLocale("he")).toBe("he-IL");
-    for (const locale of publicLocales) expect(displayLocales[locale]).toMatch(/^[a-z]{2}-[A-Z]{2}$/);
+    for (const locale of publicLocales)
+      expect(displayLocales[locale]).toMatch(/^[a-z]{2}-[A-Z]{2}$/);
   });
 
   it("rejects invalid instants instead of printing 'Invalid Date'", () => {

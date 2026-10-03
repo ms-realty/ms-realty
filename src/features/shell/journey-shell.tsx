@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { homePaths } from "@/server/config/hosts";
 import { SkipLink } from "@/ui";
+import { DisclosureBehavior } from "./disclosure-behavior";
 import { LocaleSwitcher } from "./language-switcher";
 import { NavLink } from "./nav-link";
 import { journeyHelpNav, journeyNav, linked } from "./navigation";
@@ -34,6 +35,7 @@ export async function JourneyShell({
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <SkipLink targetId={journeyMainId}>{a11y("skipToContent")}</SkipLink>
+      <DisclosureBehavior />
       <header className="border-b border-divider bg-surface">
         <div className="mx-auto flex max-w-page flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2 lg:px-gutter-wide">
           <Link

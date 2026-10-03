@@ -8,6 +8,7 @@ import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { agencyYear } from "@/i18n/format";
 import { ButtonLink, icons, SkipLink } from "@/ui";
 import { brandPhone } from "./agency";
+import { DisclosureBehavior } from "./disclosure-behavior";
 import { LanguageSuggestion } from "./language-suggestion";
 import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
@@ -50,6 +51,7 @@ export async function PublicShell({
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <SkipLink targetId={mainId}>{a11y("skipToContent")}</SkipLink>
+      <DisclosureBehavior />
       {suggestion ? (
         <LanguageSuggestion suggested={suggestion.locale} copy={suggestion.copy} />
       ) : null}

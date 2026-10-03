@@ -81,22 +81,32 @@ Next.js 16 app on PostgreSQL 18. The legacy app was removed from `main`; tag
 | `5d2c87e2` WIP | #278 services ported onto the new schema (green per stage report: 586 tests, build). Three-host routing started |
 | `6bab7df5` WIP | Three-host routing finished (`app/public`, `app/client`, `app/staff`; `proxy.ts` adds the host prefix; `src/server/config/hosts.ts`; 146/146 Playwright on its own build). Plus **unfinished** work from four stages cut off by the session limit (see §6) |
 
-### Current failures (verified 2026-10-03)
+### State after the CI fix (2026-10-03)
 
-- `npm ci` fails. `@storybook/addon-vitest@10.6.0` expects `@vitest/browser` ^3 or ^4, but the
-  repo uses vitest 5.0.1. The `overrides` block added to `package.json` does not resolve it.
-  Fix options: drop `addon-vitest` and keep Storybook + Playwright screenshots; pin vitest 4;
-  or use a Storybook release that supports vitest 5.
-- `npm run typecheck`: 62 errors. Hotspots:
-  - `src/server/auth/passkeys.int.test.ts` (16) and `email-link.int.test.ts` (11): tests do not
-    match the half-finished identity changes;
-  - `src/features/shell/*` (navigation, public/workspace/journey shells, ~28): the message
-    catalogs were split into `messages/<locale>/<ns>.json` and `messages/staff/`, and the
-    message keys and `NavItem` typing are not yet updated;
-  - `@/ui/fonts` has no export `fontVariables` (layouts in all three trees and
-    `app/global-not-found.tsx`);
-  - `app/staff/[locale]/(workspace)/today/page.tsx` uses message key `workspaceHeading`.
-- `npm run lint`: red, mostly formatting in the same files.
+The branch is green locally:
+- lint and typecheck pass;
+- 670/670 Vitest tests (unit, jsdom, integration on PostgreSQL 18);
+- the production build passes;
+- 146/146 Playwright.
+
+To get there, the CI fix:
+- **Removed the unfinished identity stage from the PR.** It had changed the auth APIs without
+  updating their tests. Removed: invitations, access/pages modules, the staff access action,
+  `src/features/identity/` and migration `0004_invitations`. `src/server/auth/*` and
+  `src/server/http/request.ts` were restored to the pre-identity state. The work stays
+  readable in commit `6bab7df5` (`git show 6bab7df5 -- src/server/auth src/features/identity
+  db/migrations`).
+- **Removed the unfinished Storybook / visual-test tooling.** `@storybook/addon-vitest` does
+  not support vitest 5. Also in `6bab7df5`.
+- **Finished the half-done frontend refactor so it builds:**
+  - per-namespace message types;
+  - native `<details>` menu disclosure plus `DisclosureBehavior` in every shell;
+  - `preloadFonts` in place of `fontVariables`;
+  - `/fonts/*` excluded from host rewriting in `proxy.ts`;
+  - token tests updated to the architecture §11.3 type scale and single sans family.
+- **Test PostgreSQL now runs with `-c max_locks_per_transaction=256`.** Parallel migrations of
+  the 66-table baseline exhausted the default lock table ("out of shared memory").
+- **Added scripts:** `tokens:build`, `openapi`, `release:evaluate`.
 
 ## 6. What each interrupted stage was doing
 
@@ -141,7 +151,7 @@ requirements precisely:
      verification;
    - `app/api/ops/`, `src/server/ops/`.
 
-Not started for S1b: integration, design review, the five-lens review, and fixes.
+Not started for S1b: the identity stage (redo it from `6bab7df5` against the current tests), Storybook/visual tests, design review, and the five-lens review. Transport and release tooling are in the PR but unreviewed.
 
 ## 7. Ownership — check before you edit
 

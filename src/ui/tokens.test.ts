@@ -133,9 +133,13 @@ describe("design tokens (spec §16.2)", () => {
     expect(css).toMatch(/--spacing:\s*0\.25rem/);
   });
 
-  it("defines the type roles from spec §16.1", () => {
+  it("defines the type roles (architecture §11.3: 16 px body; ux-spec §06 heading scale)", () => {
     const roles = {
-      body: ["1.125rem", "1.75rem"],
+      title: ["2rem", "2.5rem"],
+      page: ["1.75rem", "2.25rem"],
+      heading: ["1.375rem", "1.875rem"],
+      subheading: ["1.125rem", "1.625rem"],
+      body: ["1rem", "1.625rem"],
       compact: ["1rem", "1.5rem"],
       operational: ["0.9375rem", "1.375rem"],
       dense: ["0.875rem", "1.25rem"],
@@ -147,16 +151,14 @@ describe("design tokens (spec §16.2)", () => {
     }
   });
 
-  it("defines the public display roles and the display face", () => {
-    expect(css).toContain("--text-display: 3.5rem;");
-    expect(css).toContain("--text-title: 2.25rem;");
-    expect(css).toMatch(/--font-display:/);
-    // Hebrew display text must reach the Hebrew face before any Latin fallback.
-    expect(css).toMatch(/:lang\(he\) \.font-display/);
+  it("uses one sans family with a Hebrew face and no display face (architecture §11.3)", () => {
+    expect(css).toMatch(/--font-sans: "Noto Sans", "Noto Sans Hebrew"/);
+    expect(css).not.toMatch(/--font-display:/);
   });
 
   it("honours reduced motion and forced colours", () => {
-    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
-    expect(css).toMatch(/@media \(forced-colors: active\)/);
+    const base = readFileSync(new URL("./base.css", import.meta.url), "utf8");
+    expect(base).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
+    expect(base).toMatch(/@media \(forced-colors: active\)/);
   });
 });

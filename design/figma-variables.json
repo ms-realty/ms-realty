@@ -60,11 +60,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Page background (§11.3).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-canvas)"
       }
@@ -76,11 +72,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Cards, panels, header and controls (§11.3).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-surface)"
       }
@@ -92,11 +84,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Quiet fills: hover, placeholders, staff navigation rail.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-subtle)"
       }
@@ -108,11 +96,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Inverse band for tooltips only. Focusable content on it uses focus-inverse.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-ink)"
       }
@@ -124,11 +108,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Primary text: essential facts (§11.3).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text)"
       }
@@ -140,11 +120,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Secondary text: supporting context, never required data (§11.3).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text-muted)"
       }
@@ -156,11 +132,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Text on the primary action and on ink (§11.3).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text-inverse)"
       }
@@ -172,11 +144,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Secondary text on ink.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-text-on-ink-muted)"
       }
@@ -188,11 +156,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Subtle border: separates content only, never the sole control or focus boundary (§11.3).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-divider)"
       }
@@ -204,11 +168,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Interactive outline: bounds inputs and controls at 3:1 or better (ux-spec §06.1).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-border)"
       }
@@ -220,11 +180,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Focus indicator, independent of the palette (§11.3, ux-spec §06.1).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-focus)"
       }
@@ -236,11 +192,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Focus indicator on ink.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-focus-inverse)"
       }
@@ -252,11 +204,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Primary action and deliberate selection, not every badge (§11.3).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-action)"
       }
@@ -267,11 +215,7 @@
       "name": "color/action-hover",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-action-hover)"
       }
@@ -282,11 +226,7 @@
       "name": "color/action-pressed",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-action-pressed)"
       }
@@ -298,11 +238,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Links are underlined; colour is not their only cue.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-link)"
       }
@@ -313,11 +249,7 @@
       "name": "color/link-visited",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-link-visited)"
       }
@@ -329,11 +261,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Background of a selected or current item; paired with a text or shape change.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-selected)"
       }
@@ -345,11 +273,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Disabled fill. Disabled is a colour pair with a stated reason, never opacity alone.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-disabled)"
       }
@@ -360,11 +284,7 @@
       "name": "color/disabled-text",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-disabled-text)"
       }
@@ -376,11 +296,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Success text and icons; always with words (ux-spec §06.1).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-success)"
       }
@@ -391,11 +307,7 @@
       "name": "color/success-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-success-soft)"
       }
@@ -407,11 +319,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Warning text and icons; always with words (ux-spec §06.1).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-warning)"
       }
@@ -422,11 +330,7 @@
       "name": "color/warning-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-warning-soft)"
       }
@@ -438,11 +342,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Error and destructive only; always with words (ux-spec §06.1).",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error)"
       }
@@ -453,11 +353,7 @@
       "name": "color/error-hover",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error-hover)"
       }
@@ -468,11 +364,7 @@
       "name": "color/error-pressed",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error-pressed)"
       }
@@ -483,11 +375,7 @@
       "name": "color/error-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-error-soft)"
       }
@@ -499,11 +387,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Neutral information and pending states; always with words.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-info)"
       }
@@ -514,11 +398,7 @@
       "name": "color/info-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-info-soft)"
       }
@@ -530,11 +410,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Interpreted criteria and AI drafts a person still has to review (F01, F29). Never an action colour.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-assist)"
       }
@@ -545,11 +421,7 @@
       "name": "color/assist-soft",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-assist-soft)"
       }
@@ -560,11 +432,7 @@
       "name": "color/assist-line",
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-assist-line)"
       }
@@ -576,11 +444,7 @@
       "variableCollectionId": "collection:color",
       "resolvedType": "COLOR",
       "description": "Scrim behind modal sheets and dialogs.",
-      "scopes": [
-        "ALL_FILLS",
-        "STROKE_COLOR",
-        "EFFECT_COLOR"
-      ],
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
       "codeSyntax": {
         "WEB": "var(--color-overlay)"
       }
@@ -592,9 +456,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "STRING",
       "description": "Self-hosted Noto Sans (latin, latin-ext, cyrillic, greek) with Noto Sans Hebrew (§11.3). Hebrew pages put Noto Sans Hebrew first (src/ui/base.css).",
-      "scopes": [
-        "FONT_FAMILY"
-      ]
+      "scopes": ["FONT_FAMILY"]
     },
     {
       "action": "CREATE",
@@ -602,9 +464,7 @@
       "name": "font/weight/regular",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -612,9 +472,7 @@
       "name": "font/weight/medium",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -622,9 +480,7 @@
       "name": "font/weight/semibold",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -632,9 +488,7 @@
       "name": "font/weight/bold",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -643,9 +497,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Public primary heading, 32/40.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -653,9 +505,7 @@
       "name": "typography/title/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -663,9 +513,7 @@
       "name": "typography/title/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -674,9 +522,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Client and staff page heading, 28/36.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -684,9 +530,7 @@
       "name": "typography/page/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -694,9 +538,7 @@
       "name": "typography/page/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -705,9 +547,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Section heading, 22/30.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -715,9 +555,7 @@
       "name": "typography/heading/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -725,9 +563,7 @@
       "name": "typography/heading/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -736,9 +572,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Group heading, 18/26.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -746,9 +580,7 @@
       "name": "typography/subheading/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -756,9 +588,7 @@
       "name": "typography/subheading/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -767,9 +597,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Amount on a property card; always tabular figures.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -777,9 +605,7 @@
       "name": "typography/price/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -787,9 +613,7 @@
       "name": "typography/price/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -798,9 +622,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Public and client reading text, 16/26.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -808,9 +630,7 @@
       "name": "typography/body/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -818,9 +638,7 @@
       "name": "typography/body/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -829,9 +647,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Labels, controls and navigation, 16/24.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -839,9 +655,7 @@
       "name": "typography/compact/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -849,9 +663,7 @@
       "name": "typography/compact/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -860,9 +672,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Staff rows and navigation: denser, still readable at zoom, 15/22.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -870,9 +680,7 @@
       "name": "typography/operational/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -880,9 +688,7 @@
       "name": "typography/operational/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -891,9 +697,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Staff secondary data only, 14/20.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -901,9 +705,7 @@
       "name": "typography/dense/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -911,9 +713,7 @@
       "name": "typography/dense/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -922,9 +722,7 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "description": "Hints, metadata and references, 14/20.",
-      "scopes": [
-        "FONT_SIZE"
-      ]
+      "scopes": ["FONT_SIZE"]
     },
     {
       "action": "CREATE",
@@ -932,9 +730,7 @@
       "name": "typography/caption/line-height",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "LINE_HEIGHT"
-      ]
+      "scopes": ["LINE_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -942,9 +738,7 @@
       "name": "typography/caption/weight",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "FONT_WEIGHT"
-      ]
+      "scopes": ["FONT_WEIGHT"]
     },
     {
       "action": "CREATE",
@@ -952,10 +746,7 @@
       "name": "spacing/base",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "GAP",
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -964,10 +755,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Comfort target for primary touch controls (§11.3).",
-      "scopes": [
-        "GAP",
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -976,10 +764,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Compact page gutter (ux-spec §06.2).",
-      "scopes": [
-        "GAP",
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -988,10 +773,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Medium and desktop page gutter.",
-      "scopes": [
-        "GAP",
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1000,10 +782,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Desktop and wide page gutter.",
-      "scopes": [
-        "GAP",
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1012,9 +791,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Maximum content width (§11.3).",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1022,9 +799,7 @@
       "name": "container/form",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1033,9 +808,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Staff navigation rail (ux-spec §06.2).",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1043,9 +816,7 @@
       "name": "container/filter-rail",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1053,9 +824,7 @@
       "name": "container/inspector",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1063,9 +832,7 @@
       "name": "breakpoint/sm",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1073,9 +840,7 @@
       "name": "breakpoint/lg",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1083,9 +848,7 @@
       "name": "breakpoint/xl",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "WIDTH_HEIGHT"
-      ]
+      "scopes": ["WIDTH_HEIGHT"]
     },
     {
       "action": "CREATE",
@@ -1094,9 +857,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Controls (ux-spec §06.1).",
-      "scopes": [
-        "CORNER_RADIUS"
-      ]
+      "scopes": ["CORNER_RADIUS"]
     },
     {
       "action": "CREATE",
@@ -1105,9 +866,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Cards and panels where grouping is useful (ux-spec §06.1).",
-      "scopes": [
-        "CORNER_RADIUS"
-      ]
+      "scopes": ["CORNER_RADIUS"]
     },
     {
       "action": "CREATE",
@@ -1116,9 +875,7 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "ux-spec §06.1.",
-      "scopes": [
-        "STROKE_FLOAT"
-      ]
+      "scopes": ["STROKE_FLOAT"]
     },
     {
       "action": "CREATE",
@@ -1126,9 +883,7 @@
       "name": "focus/offset",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "scopes": [
-        "STROKE_FLOAT"
-      ]
+      "scopes": ["STROKE_FLOAT"]
     },
     {
       "action": "CREATE",

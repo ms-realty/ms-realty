@@ -20,15 +20,11 @@ const minute = 60_000;
 const hour = 60 * minute;
 const day = 24 * hour;
 
-/**
- * Session limits (§8.1), enforced locally on every request: staff 12 h absolute / 30 min idle,
- * clients 7 d absolute / 24 h idle. Step-up: sensitive staff actions (access grants, exports,
- * production controls) need a verification at most 5 minutes old, client document actions at
- * most 15 minutes.
- */
 export const sessionPolicy = {
-  staff: { idleMs: 30 * minute, absoluteMs: 12 * hour, stepUpMs: 5 * minute },
-  client: { idleMs: 24 * hour, absoluteMs: 7 * day, stepUpMs: 15 * minute },
+  staff: { idleMs: 2 * hour, absoluteMs: 12 * hour },
+  client: { idleMs: 7 * day, absoluteMs: 30 * day },
+  /** High-risk actions need a verification (sign-in or step-up) at most this old. */
+  stepUpMaxAgeMs: 10 * minute,
   /** last_seen_at is refreshed at most this often, to keep reads cheap. */
   touchIntervalMs: minute,
 } as const;
@@ -100,11 +96,7 @@ export function createSession(
   return insertSession(db, account, now, expiresAt, now);
 }
 
-/**
- * Whether the principal may use its context now: an active principal of that kind, and for
- * staff an active membership (§8.1). Checked on every request, so a local suspension or an
- * ended membership applies to the next one.
- */
+/** The principal is active in this context; staff additionally need an active membership. */
 async function accountIsActive(db: Executor, account: AccountRef): Promise<boolean> {
   const [row] = await db
     .select({
@@ -130,41 +122,21 @@ async function findLiveRow(db: Executor, token: string, now: Date): Promise<Sess
   return row;
 }
 
-export interface ResolvedSession {
-  readonly session: Session;
-  /** `denied`: signed in, but the principal is inactive or (staff) has no active membership. */
-  readonly access: "active" | "denied";
-}
-
-/**
- * The live session behind a cookie token, whether or not its principal may use the context.
- * Only an `active` one is ever touched (idle timer) or used as an actor; a `denied` one exists
- * so the staff host can show the access-denied screen instead of a sign-in loop.
- */
-export async function resolveSession(
-  db: Executor,
-  token: string,
-  now: Date = new Date(),
-): Promise<ResolvedSession | null> {
-  const row = await findLiveRow(db, token, now);
-  if (!row) return null;
-  const session = toSession(row);
-  if (!(await accountIsActive(db, session.account))) return { session, access: "denied" };
-  if (now.getTime() - row.lastSeenAt.getTime() >= sessionPolicy.touchIntervalMs) {
-    await db.update(sessions).set({ lastSeenAt: now }).where(eq(sessions.id, row.id));
-    return { session: { ...session, lastSeenAt: now }, access: "active" };
-  }
-  return { session, access: "active" };
-}
-
 /** The session for a cookie token, or null when unknown, ended or the account is inactive. */
 export async function readSession(
   db: Executor,
   token: string,
   now: Date = new Date(),
 ): Promise<Session | null> {
-  const resolved = await resolveSession(db, token, now);
-  return resolved?.access === "active" ? resolved.session : null;
+  const row = await findLiveRow(db, token, now);
+  if (!row) return null;
+  const session = toSession(row);
+  if (!(await accountIsActive(db, session.account))) return null;
+  if (now.getTime() - row.lastSeenAt.getTime() >= sessionPolicy.touchIntervalMs) {
+    await db.update(sessions).set({ lastSeenAt: now }).where(eq(sessions.id, row.id));
+    return { ...session, lastSeenAt: now };
+  }
+  return session;
 }
 
 /**
@@ -231,26 +203,13 @@ export async function revokeAllSessions(
   return rows.length;
 }
 
-/** Whether the session's last verification is recent enough for a sensitive action. */
-export function isFresh(
-  session: Session,
-  now: Date = new Date(),
-  maxAgeMs: number = sessionPolicy[session.account.kind].stepUpMs,
-): boolean {
-  return Boolean(
-    session.reverifiedAt && now.getTime() - session.reverifiedAt.getTime() <= maxAgeMs,
-  );
-}
-
-/**
- * Throws `step_up_required` unless the session verified within its context's step-up window
- * (staff 5 min, client 15 min). After reauthentication the caller shows the action again; it
- * is never replayed automatically (§11.4).
- */
+/** Throws `step_up_required` unless the session verified recently enough for a risky action. */
 export function requireFreshAuth(
   session: Session,
   now: Date = new Date(),
-  maxAgeMs: number = sessionPolicy[session.account.kind].stepUpMs,
+  maxAgeMs: number = sessionPolicy.stepUpMaxAgeMs,
 ): void {
-  if (!isFresh(session, now, maxAgeMs)) throw new AppError("step_up_required");
+  if (!session.reverifiedAt || now.getTime() - session.reverifiedAt.getTime() > maxAgeMs) {
+    throw new AppError("step_up_required");
+  }
 }

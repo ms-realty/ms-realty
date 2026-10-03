@@ -119,7 +119,7 @@ test.describe("locale negotiation suggests and never forces (F01, AT03)", () => 
     }) => {
       await page.goto("/bg");
       await expect(page.getByRole("region", { name: "Предложение за език" })).toHaveCount(0);
-      await page.getByRole("button", { name: /Език/ }).click();
+      await page.locator("summary", { hasText: /Език/ }).click();
       await page.getByRole("link", { name: "English", exact: true }).click();
       await expect(page).toHaveURL(/\/en$/);
       await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -165,7 +165,7 @@ test.describe("locale negotiation suggests and never forces (F01, AT03)", () => 
 
   test("switching language keeps the query and the fragment", async ({ page }) => {
     await page.goto("/bg?utm_source=x#contact");
-    await page.getByRole("button", { name: /Език/ }).click();
+    await page.locator("summary", { hasText: /Език/ }).click();
     await expect(page.getByRole("link", { name: "English", exact: true })).toHaveAttribute(
       "href",
       "/en?utm_source=x#contact",
@@ -216,7 +216,7 @@ test.describe("keyboard and accessibility (AT61)", () => {
     page,
   }) => {
     await page.goto("/he");
-    const trigger = page.getByRole("button", { name: /שפה/ });
+    const trigger = page.locator("summary", { hasText: /שפה/ });
     await trigger.click();
     const current = page.getByRole("link", { name: "עברית" });
     await expect(current).toHaveAttribute("aria-current", "true");
@@ -348,7 +348,7 @@ test.describe("workspace shell (§03.1)", () => {
   test("changing the interface language keeps the page", async ({ page }) => {
     await page.goto(hostUrl("staff", "/bg/today"));
     await page
-      .getByRole("button", { name: /Език на интерфейса/ })
+      .locator("summary", { hasText: /Език на интерфейса/ })
       .filter({ visible: true })
       .first()
       .click();

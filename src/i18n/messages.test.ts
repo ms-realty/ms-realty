@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
 import catalogStatus from "../../messages/_status.json";
-import { defaultLocale as sourceLocale, publicLocales, staffLocales } from "./config";
+import { publicLocales, defaultLocale as sourceLocale, staffLocales } from "./config";
 import { publicNamespaces, staffNamespaces } from "./messages";
 
 type Tree = { [key: string]: string | Tree };
@@ -103,17 +103,20 @@ describe("message catalogs (ux-spec §19.1)", () => {
         }
       });
 
-      it.each([...set.locales])("%s plural messages cover the locale's plural categories", (locale) => {
-        const categories = new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
-        for (const [key, message] of Object.entries(flatten(catalog(set.dir(locale))))) {
-          if (!message.includes(", plural,")) continue;
-          for (const category of categories) {
-            expect(message, `${locale}:${key} lacks "${category}"`).toMatch(
-              new RegExp(`\\b${category}\\s*\\{`),
-            );
+      it.each([...set.locales])(
+        "%s plural messages cover the locale's plural categories",
+        (locale) => {
+          const categories = new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
+          for (const [key, message] of Object.entries(flatten(catalog(set.dir(locale))))) {
+            if (!message.includes(", plural,")) continue;
+            for (const category of categories) {
+              expect(message, `${locale}:${key} lacks "${category}"`).toMatch(
+                new RegExp(`\\b${category}\\s*\\{`),
+              );
+            }
           }
-        }
-      });
+        },
+      );
 
       it.each([...set.locales])("%s formats every message without ICU errors", (locale) => {
         const errors: string[] = [];

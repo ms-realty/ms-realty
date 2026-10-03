@@ -6,7 +6,7 @@ import { setRequestLocale } from "next-intl/server";
 import { isStaffLocale } from "@/i18n/config";
 import { privateRobots } from "@/i18n/seo";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
-import { fontVariables } from "@/ui/fonts";
+import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
 
 // Root layout of the staff host (app.makler-realty.com, §11.1): staff locales bg/en/ru from
@@ -24,8 +24,9 @@ export default async function StaffLayout({ children, params }: LayoutProps<"/st
   const { locale } = await params;
   if (!isStaffLocale(locale)) notFound();
   setRequestLocale(locale);
+  preloadFonts(locale);
   return (
-    <html lang={locale} dir="ltr" className={fontVariables}>
+    <html lang={locale} dir="ltr">
       <body>
         <CspNonceMeta />
         <LocaleProvider locale={locale}>{children}</LocaleProvider>

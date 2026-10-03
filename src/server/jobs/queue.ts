@@ -6,6 +6,7 @@ import { sql } from "drizzle-orm";
 import { fromDrizzle, PgBoss } from "pg-boss";
 import type { PublicLocale } from "@/domain/ids";
 import { issueEmailLink } from "../auth/email-link";
+import type { AccountKind } from "../auth/sessions";
 import type { Executor } from "../db";
 import { pruneRateLimits } from "../rate-limit";
 import { dispatchMessage, dispatchQueued } from "./outbox";
@@ -14,6 +15,7 @@ import type { MessageProvider } from "./provider";
 export interface JobPayloads {
   "auth.email_link": {
     email: string;
+    accountKind: AccountKind;
     returnTo: string | null;
     locale: PublicLocale;
   };

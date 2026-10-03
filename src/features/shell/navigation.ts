@@ -4,10 +4,11 @@
 // left out: no dead-end teasers.
 import type { PublicLocale } from "@/i18n/config";
 
-type Nav = typeof import("../../../messages/en.json")["nav"];
-export type PublicNavLabel = Exclude<keyof Nav, "journey" | "workspace">;
+type Nav = typeof import("../../../messages/bg/nav.json");
+type Workspace = typeof import("../../../messages/staff/bg/workspace.json");
+export type PublicNavLabel = Exclude<keyof Nav, "journey">;
 export type JourneyNavLabel = keyof Nav["journey"];
-export type WorkspaceNavLabel = keyof Nav["workspace"];
+export type WorkspaceNavLabel = keyof Workspace;
 export type FooterLabel = "help" | "privacy" | "accessibility";
 
 export interface NavItem<Label extends string> {
@@ -28,7 +29,7 @@ export const publicPrimaryNav: readonly NavItem<PublicNavLabel>[] = [
   { label: "rent", screen: "P02", path: null },
   { label: "sellLet", screen: "P17", path: null },
   { label: "areas", screen: "P15", path: null },
-  { label: "howWeHelp", screen: "P16", path: null },
+  { label: "aboutContact", screen: "P20", path: null },
 ];
 
 export const publicUtilityNav: readonly NavItem<PublicNavLabel>[] = [

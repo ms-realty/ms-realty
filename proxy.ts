@@ -173,5 +173,7 @@ export const config = {
   // Router prefetches pass through too: without the rewrite they would address no route.
   // Next's own assets and dev endpoints (`/_next/*`, `/__nextjs*`), static brand files, the
   // per-host robots/sitemap answers and the health check are host-neutral.
-  matcher: ["/((?!api/health$|_next/|__nextjs|brand/|favicon.ico|robots.txt|sitemap.xml).*)"],
+  matcher: [
+    "/((?!api/health$|_next/|__nextjs|brand/|fonts/|favicon.ico|robots.txt|sitemap.xml).*)",
+  ],
 };

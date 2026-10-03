@@ -19,7 +19,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "import:legacy": "tsx src/db/import/cli.ts",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run e2e"
+    "check": "npm run lint && npm run typecheck && npm test && npm run build && npm run e2e",
+    "tokens:build": "node scripts/tokens-build.mjs",
+    "openapi": "tsx --conditions=react-server scripts/openapi.mjs",
+    "release:evaluate": "tsx scripts/release-evaluate.mjs"
   },
   "dependencies": {
     "@internationalized/date": "3.12.4",
@@ -41,8 +44,6 @@
     "@axe-core/playwright": "4.13.0",
     "@biomejs/biome": "2.5.14",
     "@playwright/test": "1.63.0",
-    "@storybook/addon-vitest": "10.6.0",
-    "@storybook/nextjs-vite": "10.6.0",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",
@@ -51,22 +52,13 @@
     "@types/node": "24.13.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@vitest/browser-playwright": "5.0.1",
     "drizzle-kit": "0.31.11",
     "jsdom": "30.1.1",
-    "playwright": "1.63.0",
     "postcss": "8.5.28",
-    "storybook": "10.6.0",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "5.9.3",
     "vite": "8.3.0",
     "vitest": "5.0.1"
-  },
-  "overrides": {
-    "@storybook/addon-vitest": {
-      "vitest": "5.0.1",
-      "@vitest/browser-playwright": "5.0.1"
-    }
   }
 }

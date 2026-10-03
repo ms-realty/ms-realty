@@ -19,7 +19,7 @@ import { requestLocale } from "@/i18n/request-locale";
 import { privateRobots } from "@/i18n/seo";
 import { type HostContext, homePaths } from "@/server/config/hosts";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
-import { fontVariables } from "@/ui/fonts";
+import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
 
 // Every unknown URL lands here: proxy.ts rewrites a path whose first segment is not a locale
@@ -56,8 +56,9 @@ export default async function GlobalNotFound() {
   } else {
     page = <PublicShell locale={locale}>{content}</PublicShell>;
   }
+  preloadFonts(locale);
   return (
-    <html lang={locale} dir={localeDirection(locale)} className={fontVariables}>
+    <html lang={locale} dir={localeDirection(locale)}>
       <body>
         <CspNonceMeta />
         <LocaleProvider locale={locale}>{page}</LocaleProvider>

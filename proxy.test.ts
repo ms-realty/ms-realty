@@ -120,6 +120,7 @@ describe("host routing (§11.1)", () => {
     expect(matches("/api/health")).toBe(false);
     expect(matches("/_next/static/chunk.js")).toBe(false);
     expect(matches("/brand/favicon.svg")).toBe(false);
+    expect(matches("/fonts/noto-sans-latin.woff2")).toBe(false);
     expect(matches("/robots.txt")).toBe(false);
   });
 });

@@ -66,7 +66,9 @@ export function formatDate(
     dateStyle?: Intl.DateTimeFormatOptions["dateStyle"];
   } = {},
 ): string {
-  return new Intl.DateTimeFormat(displayLocale(locale), { dateStyle, timeZone }).format(toDate(instant));
+  return new Intl.DateTimeFormat(displayLocale(locale), { dateStyle, timeZone }).format(
+    toDate(instant),
+  );
 }
 
 export function formatTime(
@@ -74,7 +76,9 @@ export function formatTime(
   instant: Instant,
   { timeZone = agencyTimeZone }: ZonedOptions = {},
 ): string {
-  return new Intl.DateTimeFormat(displayLocale(locale), { timeStyle: "short", timeZone }).format(toDate(instant));
+  return new Intl.DateTimeFormat(displayLocale(locale), { timeStyle: "short", timeZone }).format(
+    toDate(instant),
+  );
 }
 
 /** Date and time with the zone named, for appointments and deadlines people act on. */

@@ -6,7 +6,7 @@ import { setRequestLocale } from "next-intl/server";
 import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { privateRobots } from "@/i18n/seo";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
-import { fontVariables } from "@/ui/fonts";
+import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
 
 // Root layout of the client host (my.makler-realty.com, §11.1): the seven public locales,
@@ -25,8 +25,10 @@ export default async function ClientLayout({ children, params }: LayoutProps<"/c
   if (!isRoutableLocale(locale)) notFound();
   setRequestLocale(locale);
 
+  preloadFonts(locale);
+
   return (
-    <html lang={locale} dir={localeDirection(locale)} className={fontVariables}>
+    <html lang={locale} dir={localeDirection(locale)}>
       <body>
         <CspNonceMeta />
         <LocaleProvider locale={locale}>{children}</LocaleProvider>
