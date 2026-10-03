@@ -23,7 +23,7 @@ jobs:
     env:
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
