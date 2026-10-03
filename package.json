@@ -27,17 +27,17 @@
   "dependencies": {
     "@internationalized/date": "3.12.4",
     "@simplewebauthn/browser": "14.0.0",
-    "@simplewebauthn/server": "14.0.2",
+    "@simplewebauthn/server": "14.0.3",
     "drizzle-orm": "0.45.3",
-    "next": "16.3.6",
-    "next-intl": "4.14.6",
-    "pg-boss": "12.33.7",
+    "next": "16.3.7",
+    "next-intl": "4.14.8",
+    "pg-boss": "12.35.0",
     "postgres": "3.4.9",
     "react": "19.3.0",
     "react-aria-components": "1.21.1",
     "react-dom": "19.3.0",
     "server-only": "0.0.1",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "zod": "4.6.5"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "5.9.3",
-    "vite": "8.3.0",
-    "vitest": "5.0.1"
+    "vite": "8.3.1",
+    "vitest": "5.0.3"
   }
 }
