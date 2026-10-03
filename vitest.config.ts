@@ -38,7 +38,7 @@ export default defineConfig({
         test: {
           name: "unit",
           environment: "node",
-          include: ["src/**/*.test.ts"],
+          include: ["src/**/*.test.ts", "proxy.test.ts"],
           exclude: ["src/**/*.int.test.ts"],
         },
       },

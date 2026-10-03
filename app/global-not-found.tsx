@@ -3,34 +3,37 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { ReactNode } from "react";
+import { JourneyShell } from "@/features/shell/journey-shell";
 import { NotFoundContent } from "@/features/shell/not-found-content";
 import { PublicShell } from "@/features/shell/public-shell";
 import { WorkspaceShell } from "@/features/shell/workspace-shell";
 import {
   appSurfaceHeader,
+  defaultStaffLocale,
+  isStaffLocale,
   localeDirection,
   type PublicLocale,
-  type StaffLocale,
 } from "@/i18n/config";
 import { requestLocale } from "@/i18n/request-locale";
 import { privateRobots } from "@/i18n/seo";
-import { currentStaffLocale } from "@/i18n/staff-locale";
+import { type HostContext, homePaths } from "@/server/config/hosts";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
-import { fontVariables } from "@/ui/fonts";
+import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
 
-// Every unknown URL lands here (app/[locale] only matches routable locales and no surface has
-// a catch-all). Unlike a notFound() thrown during rendering, this is served as a complete
-// server-rendered document: lang/dir, the surface shell and the localized message (§17.1).
+// Every unknown URL lands here: proxy.ts rewrites a path whose first segment is not a locale
+// of its host to Next's not-found route, and an unknown path under a locale matches no route
+// of app/{public,client,staff}/[locale]. Unlike a notFound() thrown during rendering, this is
+// served as a complete server-rendered document: lang/dir, the host's shell and the localized
+// message (§11.4).
 
-type Surface =
-  | { readonly workspace: true; readonly locale: StaffLocale }
-  | { readonly workspace: false; readonly locale: PublicLocale };
-
-async function notFoundSurface(): Promise<Surface> {
-  return (await headers()).get(appSurfaceHeader) === "workspace"
-    ? { workspace: true, locale: await currentStaffLocale() }
-    : { workspace: false, locale: await requestLocale() };
+async function notFoundSurface(): Promise<{ context: HostContext; locale: PublicLocale }> {
+  const surface = (await headers()).get(appSurfaceHeader);
+  const context: HostContext = surface === "client" || surface === "staff" ? surface : "public";
+  const locale = await requestLocale();
+  if (context === "staff" && !isStaffLocale(locale)) return { context, locale: defaultStaffLocale };
+  return { context, locale };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -42,28 +45,23 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function GlobalNotFound() {
   // Dynamic rendering is required for the per-request CSP nonce.
   await connection();
-  const surface = await notFoundSurface();
-  const { locale } = surface;
+  const { context, locale } = await notFoundSurface();
   setRequestLocale(locale);
+  const content = <NotFoundContent locale={locale} homeHref={`/${locale}${homePaths[context]}`} />;
+  let page: ReactNode;
+  if (context === "staff" && isStaffLocale(locale)) {
+    page = <WorkspaceShell locale={locale}>{content}</WorkspaceShell>;
+  } else if (context === "client") {
+    page = <JourneyShell locale={locale}>{content}</JourneyShell>;
+  } else {
+    page = <PublicShell locale={locale}>{content}</PublicShell>;
+  }
+  preloadFonts(locale);
   return (
-    <html
-      lang={locale}
-      dir={surface.workspace ? "ltr" : localeDirection(locale)}
-      className={fontVariables}
-    >
+    <html lang={locale} dir={localeDirection(locale)}>
       <body>
         <CspNonceMeta />
-        <LocaleProvider locale={locale}>
-          {surface.workspace ? (
-            <WorkspaceShell locale={surface.locale}>
-              <NotFoundContent locale={locale} homeHref="/workspace" />
-            </WorkspaceShell>
-          ) : (
-            <PublicShell locale={surface.locale}>
-              <NotFoundContent locale={locale} homeHref={`/${locale}`} />
-            </PublicShell>
-          )}
-        </LocaleProvider>
+        <LocaleProvider locale={locale}>{page}</LocaleProvider>
       </body>
     </html>
   );

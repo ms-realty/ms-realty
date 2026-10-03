@@ -10,7 +10,7 @@
 import "server-only";
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { clientAccounts, emailSignInTokens, staffAccounts } from "@/db/schema";
+import { emailSignInTokens, principals } from "@/db/schema";
 import type { PublicLocale } from "@/domain/ids";
 import { recordAudit } from "../audit";
 import { getEnv } from "../config/env";
@@ -60,6 +60,25 @@ export interface EmailLinkRequest {
 
 export type EmailLinkJob = JobPayloads["auth.email_link"];
 
+/** The active principal of this context with this sign-in address, if any. */
+async function findActivePrincipal(
+  db: Executor,
+  kind: AccountKind,
+  email: string,
+): Promise<{ id: string } | undefined> {
+  const [principal] = await db
+    .select({ id: principals.id })
+    .from(principals)
+    .where(
+      and(
+        eq(principals.kind, kind),
+        eq(sql`lower(${principals.email})`, email),
+        eq(principals.status, "active"),
+      ),
+    );
+  return principal;
+}
+
 /** Always resolves to `{ status: "sent" }` unless the input is malformed or rate-limited. */
 export async function requestEmailLink(
   db: Executor,
@@ -101,11 +120,7 @@ export async function issueEmailLink(
   const env = getEnv();
   const { email } = job;
   await db.transaction(async (tx) => {
-    const table = job.accountKind === "staff" ? staffAccounts : clientAccounts;
-    const [account] = await tx
-      .select({ id: table.id })
-      .from(table)
-      .where(and(eq(sql`lower(${table.email})`, email), eq(table.status, "active")));
+    const account = await findActivePrincipal(tx, job.accountKind, email);
     if (!account) return;
 
     const token = randomToken();
@@ -115,7 +130,7 @@ export async function issueEmailLink(
       .values({
         tokenHash: sha256Hex(token),
         purpose: "sign_in",
-        accountKind: job.accountKind,
+        principalKind: job.accountKind,
         email,
         returnTo: safeReturnPath(job.returnTo, env.appOrigin),
         createdAt: now,
@@ -162,7 +177,7 @@ export async function inspectEmailLink(
   if (row.revokedAt) return { state: "revoked" };
   if (row.consumedAt) return { state: "consumed" };
   if (now >= row.expiresAt) return { state: "expired" };
-  return { state: "valid", accountKind: row.accountKind, returnTo: row.returnTo };
+  return { state: "valid", accountKind: row.principalKind, returnTo: row.returnTo };
 }
 
 const linkErrors = {
@@ -202,21 +217,15 @@ export async function consumeEmailLink(
       .returning();
     if (!row) return null;
 
-    const table = row.accountKind === "staff" ? staffAccounts : clientAccounts;
-    const [account] = await tx
-      .select({ id: table.id })
-      .from(table)
-      .where(
-        and(eq(sql`lower(${table.email})`, row.email.toLowerCase()), eq(table.status, "active")),
-      );
+    const account = await findActivePrincipal(tx, row.principalKind, row.email.toLowerCase());
     if (!account) throw new AppError("link_invalid");
 
     if (options.currentSessionToken) await revokeSession(tx, options.currentSessionToken, now);
-    const issued = await createSession(tx, { kind: row.accountKind, id: account.id }, now);
+    const issued = await createSession(tx, { kind: row.principalKind, id: account.id }, now);
     await recordAudit(tx, {
       action: "session.sign_in",
       actor: issued.session.actor,
-      recordType: `${row.accountKind}_account`,
+      recordType: "principal",
       recordId: account.id,
       ...(options.correlationId ? { correlationId: options.correlationId } : {}),
       payload: { method: "email_link", sessionId: issued.session.id },

@@ -2,17 +2,19 @@
 // real people.
 import { randomUUID } from "node:crypto";
 import {
-  capabilityGrants,
+  caseParticipants,
   cases,
-  clientAccounts,
-  partyRelationships,
-  persons,
+  grants,
+  parties,
+  principals,
   properties,
-  staffAccounts,
+  propertyRelationships,
+  staffMemberships,
 } from "@/db/schema";
 import type { Actor, Capability, Role } from "@/domain/capabilities";
 import type { PublicLocale } from "@/domain/ids";
-import type { AuthorityState, PartyRelationshipRole } from "@/domain/parties";
+import type { AuthorityState, ParticipantRole } from "@/domain/parties";
+import { firstPartyIssuers } from "@/domain/records";
 import type { Executor } from "./db";
 
 let sequence = 0;
@@ -30,13 +32,36 @@ export interface GrantSpec {
   readonly expiresAt?: Date;
 }
 
-async function person(db: Executor, name: string): Promise<string> {
+async function party(db: Executor, name: string): Promise<string> {
   const [row] = await db
-    .insert(persons)
-    .values({ displayName: name })
-    .returning({ id: persons.id });
-  if (!row) throw new Error("person insert failed");
+    .insert(parties)
+    .values({ kind: "person", displayName: name })
+    .returning({ id: parties.id });
+  if (!row) throw new Error("party insert failed");
   return row.id;
+}
+
+async function principal(
+  db: Executor,
+  kind: "staff" | "client",
+  email: string,
+  status: "active" | "suspended",
+): Promise<{ id: string; partyId: string }> {
+  const partyId = await party(db, kind === "staff" ? "Test Staff" : "Test Client");
+  const [row] = await db
+    .insert(principals)
+    .values({
+      kind,
+      issuer: firstPartyIssuers[kind],
+      subject: randomUUID(),
+      partyId,
+      email,
+      displayName: kind === "staff" ? "Test Staff" : "Test Client",
+      status,
+    })
+    .returning({ id: principals.id });
+  if (!row) throw new Error("principal insert failed");
+  return { id: row.id, partyId };
 }
 
 export async function createStaff(
@@ -46,26 +71,21 @@ export async function createStaff(
     grants?: GrantSpec[];
     email?: string;
     status?: "active" | "suspended";
+    membership?: "active" | "suspended" | "ended";
   } = {},
 ): Promise<{ id: string; email: string; actor: Actor }> {
   const email = options.email ?? `staff-${next()}@example.test`;
-  const [row] = await db
-    .insert(staffAccounts)
-    .values({
-      personId: await person(db, "Test Staff"),
-      email,
-      displayName: "Test Staff",
-      status: options.status ?? "active",
-    })
-    .returning({ id: staffAccounts.id });
-  if (!row) throw new Error("staff insert failed");
-  const grants: GrantSpec[] = [
+  const { id } = await principal(db, "staff", email, options.status ?? "active");
+  await db
+    .insert(staffMemberships)
+    .values({ principalId: id, state: options.membership ?? "active" });
+  const specs: GrantSpec[] = [
     ...(options.roles ?? []).map((role) => ({ role })),
     ...(options.grants ?? []),
   ];
-  for (const grant of grants) {
-    await db.insert(capabilityGrants).values({
-      staffAccountId: row.id,
+  for (const grant of specs) {
+    await db.insert(grants).values({
+      principalId: id,
       role: grant.role,
       capability: grant.capability,
       recordType: grant.recordType,
@@ -75,25 +95,20 @@ export async function createStaff(
       reason: "test fixture",
     });
   }
-  return { id: row.id, email, actor: { kind: "staff", id: row.id } };
+  return { id, email, actor: { kind: "staff", id } };
 }
 
 export async function createClient(
   db: Executor,
   options: { email?: string; status?: "active" | "suspended" } = {},
-): Promise<{ id: string; personId: string; email: string; actor: Actor }> {
+): Promise<{ id: string; partyId: string; email: string; actor: Actor }> {
   const email = options.email ?? `client-${next()}@example.test`;
-  const personId = await person(db, "Test Client");
-  const [row] = await db
-    .insert(clientAccounts)
-    .values({ personId, email, status: options.status ?? "active" })
-    .returning({ id: clientAccounts.id });
-  if (!row) throw new Error("client insert failed");
-  return { id: row.id, personId, email, actor: { kind: "client", id: row.id } };
+  const { id, partyId } = await principal(db, "client", email, options.status ?? "active");
+  return { id, partyId, email, actor: { kind: "client", id } };
 }
 
 export async function grantService(db: Executor, serviceName: string, grant: GrantSpec) {
-  await db.insert(capabilityGrants).values({
+  await db.insert(grants).values({
     serviceName,
     role: grant.role,
     capability: grant.capability,
@@ -101,7 +116,9 @@ export async function grantService(db: Executor, serviceName: string, grant: Gra
   });
 }
 
-export async function createCase(db: Executor, ownerStaffId?: string): Promise<string> {
+/** An active buyer case; every active case has an accountable owner and a next action. */
+export async function createCase(db: Executor, ownerId?: string): Promise<string> {
+  const owner = ownerId ?? (await createStaff(db, { roles: ["assigned_broker"] })).id;
   const [row] = await db
     .insert(cases)
     .values({
@@ -109,7 +126,8 @@ export async function createCase(db: Executor, ownerStaffId?: string): Promise<s
       kind: "buyer",
       stage: "needs_agreed",
       title: "Test buyer case",
-      ownerStaffId,
+      ownerId: owner,
+      nextAction: "Agree the brief",
     })
     .returning({ id: cases.id });
   if (!row) throw new Error("case insert failed");
@@ -131,11 +149,12 @@ export async function createProperty(db: Executor): Promise<string> {
   return row.id;
 }
 
+/** Relates a party to a case (CaseParticipant) or to a property (PropertyRelationship). */
 export async function relate(
   db: Executor,
   options: {
-    personId: string;
-    role: PartyRelationshipRole;
+    partyId: string;
+    role: ParticipantRole;
     caseId?: string;
     propertyId?: string;
     authority?: AuthorityState;
@@ -146,21 +165,32 @@ export async function relate(
   },
 ): Promise<string> {
   const reviewed = options.authority === "reviewed";
+  const common = {
+    partyId: options.partyId,
+    role: options.role,
+    authorityReviewedById: reviewed ? options.reviewedBy : undefined,
+    authorityReviewedAt: reviewed ? new Date() : undefined,
+    scope: options.scope ?? {},
+    expiresAt: options.expiresAt,
+    revokedAt: options.revokedAt,
+  };
+  if (options.caseId) {
+    const [row] = await db
+      .insert(caseParticipants)
+      .values({ ...common, caseId: options.caseId, authority: options.authority ?? "not_claimed" })
+      .returning({ id: caseParticipants.id });
+    if (!row) throw new Error("participant insert failed");
+    return row.id;
+  }
+  if (!options.propertyId) throw new Error("relate needs a caseId or a propertyId");
   const [row] = await db
-    .insert(partyRelationships)
+    .insert(propertyRelationships)
     .values({
-      personId: options.personId,
-      role: options.role,
-      caseId: options.caseId,
+      ...common,
       propertyId: options.propertyId,
-      authority: options.authority ?? "not_claimed",
-      authorityReviewedByStaffId: reviewed ? options.reviewedBy : undefined,
-      authorityReviewedAt: reviewed ? new Date() : undefined,
-      scope: options.scope ?? {},
-      expiresAt: options.expiresAt,
-      revokedAt: options.revokedAt,
+      authority: options.authority ?? "self_declared",
     })
-    .returning({ id: partyRelationships.id });
+    .returning({ id: propertyRelationships.id });
   if (!row) throw new Error("relationship insert failed");
   return row.id;
 }

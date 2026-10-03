@@ -43,8 +43,15 @@ export interface SendOptions {
 export class JobQueue {
   readonly #boss: PgBoss;
 
-  constructor(connectionString: string) {
-    this.#boss = new PgBoss({ connectionString });
+  /**
+   * `producer` only enqueues (the web process): no supervision or cron in that process. The
+   * worker process omits it.
+   */
+  constructor(connectionString: string, options: { producer?: boolean } = {}) {
+    this.#boss = new PgBoss({
+      connectionString,
+      ...(options.producer ? { supervise: false, schedule: false } : {}),
+    });
     this.#boss.on("error", (error) => console.error("[jobs]", error));
   }
 

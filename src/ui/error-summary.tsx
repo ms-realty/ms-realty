@@ -35,7 +35,7 @@ export function ErrorSummary({ title, errors }: ErrorSummaryProps) {
       ref={ref}
       tabIndex={-1}
       aria-labelledby={titleId}
-      className="flex flex-col gap-3 rounded-card border-2 border-error bg-surface p-5 focus-visible:outline-offset-4"
+      className="flex flex-col gap-3 rounded-panel border-2 border-error bg-surface p-5 focus-visible:outline-offset-4"
     >
       <h2 id={titleId} className="flex items-center gap-2 text-subheading font-semibold text-text">
         <ErrorIcon className="text-error" />

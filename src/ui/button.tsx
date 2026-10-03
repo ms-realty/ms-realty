@@ -2,50 +2,60 @@
 
 import { type ReactNode, useId } from "react";
 import { Button as RACButton, type ButtonProps as RACButtonProps } from "react-aria-components";
+import { announce } from "./announce";
+import { type ButtonVariant, buttonClass } from "./button-class";
 import { cx } from "./cx";
 import { Spinner } from "./icons";
 
-export type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive";
-
-const variants: Record<ButtonVariant, string> = {
-  // Filled variants keep a transparent border so the outline survives forced-colors mode.
-  primary: cx(
-    "border-transparent bg-action text-text-inverse data-hovered:bg-action-hover data-pressed:bg-action-pressed",
-  ),
-  // Neutral edge at rest; the action colour arrives on hover so one primary stays dominant.
-  secondary: cx(
-    "border-border bg-surface text-action data-hovered:border-action data-hovered:bg-selected",
-    "data-pressed:border-action-pressed data-pressed:bg-selected data-pressed:text-action-pressed",
-  ),
-  tertiary: cx(
-    "border-transparent bg-transparent text-action",
-    "data-hovered:bg-subtle data-pressed:bg-divider",
-  ),
-  destructive: cx(
-    "border-transparent bg-error text-text-inverse data-hovered:bg-error-hover data-pressed:bg-error-pressed",
-  ),
-};
-
-export const buttonClass = (variant: ButtonVariant = "primary", className?: string) =>
-  cx(
-    "inline-flex min-h-control min-w-control select-none items-center justify-center gap-2 rounded-control border px-5 py-2",
-    "text-compact font-semibold transition-[color,background-color,border-color,box-shadow] duration-(--duration-fast) ease-(--ease-out) cursor-pointer",
-    variants[variant],
-    "data-pending:cursor-wait",
-    "data-disabled:cursor-not-allowed data-disabled:border-disabled data-disabled:bg-disabled data-disabled:text-disabled-text data-disabled:no-underline",
-    "forced-colors:data-disabled:border-[GrayText] forced-colors:data-disabled:text-[GrayText]",
-    className,
-  );
+export { type ButtonVariant, buttonClass };
 
 export type ButtonProps = Omit<RACButtonProps, "children" | "className"> & {
   variant?: ButtonVariant;
   children: ReactNode;
   /** Replaces the label while `isPending`, e.g. "Sending question…". */
   pendingLabel?: string;
-  /** Why the action is unavailable. Disables the button and shows the reason beside it. */
+  /**
+   * Why the action is unavailable. The button stays focusable (aria-disabled), does nothing
+   * when activated, and its description and an announcement on activation give the reason.
+   */
   disabledReason?: string;
   className?: string;
 };
+
+// The button keeps its width while pending (spec §17 UI05). A pending label shares one grid
+// cell with the label, so the button is as wide as the longer of the two in either state;
+// without one, the spinner covers the label, which stays the accessible name.
+const stack = "col-start-1 row-start-1 flex items-center justify-center gap-2";
+
+function Label({
+  children,
+  pendingLabel,
+  isPending,
+}: {
+  children: ReactNode;
+  pendingLabel: string | undefined;
+  isPending: boolean;
+}) {
+  if (!pendingLabel) {
+    return (
+      <span className="relative flex items-center justify-center">
+        <span className={cx("flex items-center gap-2", isPending && "opacity-0")}>{children}</span>
+        {isPending ? <Spinner className="absolute" /> : null}
+      </span>
+    );
+  }
+  return (
+    <span className="grid">
+      <span className={cx(stack, isPending && "invisible")} aria-hidden={isPending || undefined}>
+        {children}
+      </span>
+      <span className={cx(stack, !isPending && "invisible")} aria-hidden={!isPending || undefined}>
+        <Spinner />
+        <span>{pendingLabel}</span>
+      </span>
+    </span>
+  );
+}
 
 export function Button({
   variant = "primary",
@@ -58,30 +68,43 @@ export function Button({
   ...props
 }: ButtonProps) {
   const reasonId = useId();
-  const button = (
-    <RACButton
-      {...props}
-      isPending={isPending}
-      isDisabled={isDisabled || Boolean(disabledReason)}
-      aria-describedby={
-        cx(props["aria-describedby"], disabledReason ? reasonId : undefined) || undefined
-      }
-      className={buttonClass(variant, className)}
-    >
-      {isPending ? (
-        <>
-          <Spinner />
-          <span>{pendingLabel ?? children}</span>
-        </>
-      ) : (
-        children
-      )}
-    </RACButton>
-  );
-  if (!disabledReason) return button;
+  const describedBy = cx(props["aria-describedby"], disabledReason ? reasonId : undefined);
+
+  if (!disabledReason) {
+    return (
+      <RACButton
+        {...props}
+        isPending={isPending}
+        isDisabled={isDisabled}
+        aria-describedby={describedBy || undefined}
+        className={buttonClass(variant, className)}
+      >
+        <Label pendingLabel={pendingLabel} isPending={Boolean(isPending)}>
+          {children}
+        </Label>
+      </RACButton>
+    );
+  }
+
+  // Not RAC's isDisabled, which removes the button from the tab order and hides the reason
+  // from keyboard and screen-reader users. A plain button keeps focus and never submits.
   return (
     <span className="inline-flex flex-col items-start gap-1">
-      {button}
+      <button
+        type="button"
+        id={props.id}
+        aria-label={props["aria-label"]}
+        aria-disabled="true"
+        aria-describedby={describedBy}
+        data-disabled="true"
+        onClick={(event) => {
+          event.preventDefault();
+          announce(disabledReason);
+        }}
+        className={buttonClass(variant, className)}
+      >
+        {children}
+      </button>
       <span id={reasonId} className="text-caption text-text-muted">
         {disabledReason}
       </span>

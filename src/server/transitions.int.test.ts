@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { activityEvents, auditLog, inquiries } from "@/db/schema";
+import { activityEvents, auditEvents, inquiries } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { type InquiryState, inquiryTransitions } from "@/domain/inquiry";
 import { hashRequest } from "./crypto";
@@ -9,8 +9,8 @@ import { runOperation } from "./operations";
 import { createStaff } from "./testing";
 import { executeTransition, tableStore } from "./transitions";
 
-// Universal transition contract on the server (spec §07.7): capability, version, evidence,
-// activity + audit in one transaction.
+// Universal transition contract on the server (architecture §5.1): capability, revision,
+// evidence, activity + audit in one transaction.
 let t: TestDatabase;
 beforeAll(async () => {
   t = await createTestDatabase();
@@ -28,7 +28,7 @@ const store = tableStore<InquiryState>(inquiries, {
 });
 
 let counter = 0;
-async function inquiry(ownerStaffId: string) {
+async function inquiry(ownerId: string) {
   counter += 1;
   const [row] = await t.db
     .insert(inquiries)
@@ -36,8 +36,11 @@ async function inquiry(ownerStaffId: string) {
       reference: `RQ-2026-${String(counter).padStart(6, "0")}`,
       purpose: "question",
       source: "website",
-      submissionId: `submission-${counter}-${Date.now()}`,
-      ownerStaffId,
+      submissionKey: `submission-${counter}-${Date.now()}`,
+      payloadDigest: `digest-${counter}`,
+      // New work is owned by the coverage queue until a named broker accepts it.
+      coverageQueue: "duty",
+      ownerId,
     })
     .returning({ id: inquiries.id, version: inquiries.version });
   if (!row) throw new Error("inquiry insert failed");
@@ -46,7 +49,7 @@ async function inquiry(ownerStaffId: string) {
 
 const history = async (recordId: string) => ({
   activity: await t.db.select().from(activityEvents).where(eq(activityEvents.recordId, recordId)),
-  audit: await t.db.select().from(auditLog).where(eq(auditLog.recordId, recordId)),
+  audit: await t.db.select().from(auditEvents).where(eq(auditEvents.recordId, recordId)),
 });
 
 describe("executeTransition", () => {
@@ -124,7 +127,7 @@ describe("executeTransition", () => {
     expect((await history(record.id)).audit).toHaveLength(0);
   });
 
-  it("denies the AI service even for a transition it could otherwise describe (A66)", async () => {
+  it("denies the AI service even for a transition it could otherwise describe (AT52)", async () => {
     const owner = await createStaff(t.db, { roles: ["assigned_broker"] });
     const record = await inquiry(owner.id);
     const result = await executeTransition(t.db, inquiryTransitions, store, {

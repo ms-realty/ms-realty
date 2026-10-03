@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { displayLocale, displayLocales, publicLocales } from "./config";
 import {
   agencyYear,
   formatArea,
@@ -12,7 +13,7 @@ import {
 // Intl output uses no-break and narrow no-break spaces; compare with plain spaces.
 const plain = (value: string) => value.replace(/[  ]/g, " ");
 
-describe("formatting (§18.2)", () => {
+describe("formatting (ux-spec §19.3)", () => {
   it("formats integer minor units in the source currency without converting", () => {
     expect(plain(formatMoney("en", 9_500_000, "EUR"))).toBe("€95,000");
     expect(plain(formatMoney("de", 9_500_050, "EUR"))).toBe("95.000,50 €");
@@ -29,15 +30,27 @@ describe("formatting (§18.2)", () => {
   it("formats instants in the agency time zone, not the server's", () => {
     // 22:30 UTC on 31 Dec is already 1 Jan in Sofia (UTC+2).
     const instant = "2026-12-31T22:30:00Z";
-    expect(formatDate("en", instant, { dateStyle: "long" })).toBe("January 1, 2027");
-    expect(plain(formatTime("en", instant))).toBe("12:30 AM");
+    expect(formatDate("en", instant, { dateStyle: "long" })).toBe("1 January 2027");
+    expect(plain(formatTime("en", instant))).toBe("00:30");
     expect(formatDate("en", instant, { dateStyle: "long", timeZone: "UTC" })).toBe(
-      "December 31, 2026",
+      "31 December 2026",
     );
   });
 
   it("names the zone when showing a date and time people act on", () => {
-    expect(plain(formatDateTime("en", "2026-07-01T09:00:00Z"))).toBe("Jul 1, 2026, 12:00 PM GMT+3");
+    expect(plain(formatDateTime("en", "2026-07-01T09:00:00Z"))).toBe("1 Jul 2026, 12:00 EEST");
+    expect(formatDateTime("en", "2026-07-01T09:00:00Z", { timeZone: "Asia/Jerusalem" })).toMatch(
+      /12:00 GMT\+3|12:00 IDT/,
+    );
+  });
+
+  it("formats with the route locale's regional tag, not the bare language", () => {
+    // en is en-GB: day before month and a 24-hour clock, not US conventions.
+    expect(formatDate("en", "2026-03-04T12:00:00Z", { dateStyle: "short" })).toBe("04/03/2026");
+    expect(formatDate("he", "2026-03-04T12:00:00Z", { dateStyle: "short" })).toBe("4.3.2026");
+    expect(displayLocale("he")).toBe("he-IL");
+    for (const locale of publicLocales)
+      expect(displayLocales[locale]).toMatch(/^[a-z]{2}-[A-Z]{2}$/);
   });
 
   it("rejects invalid instants instead of printing 'Invalid Date'", () => {

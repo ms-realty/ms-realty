@@ -24,6 +24,8 @@ export const instant = (name: string) => timestamp(name, { withTimezone: true })
 export const reference = () => text("reference").notNull().unique();
 
 export const tsvector = customType<{ data: string }>({ dataType: () => "tsvector" });
+/** Instant interval; appointment resources use it with an exclusion constraint. */
+export const tstzrange = customType<{ data: string }>({ dataType: () => "tstzrange" });
 export const bytea = customType<{ data: Uint8Array; driverData: Uint8Array }>({
   dataType: () => "bytea",
   // postgres.js returns a Buffer; expose a plain Uint8Array.

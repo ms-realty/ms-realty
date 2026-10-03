@@ -2,12 +2,12 @@
 
 import { type ReactNode, useId } from "react";
 import { Link as RACLink, type LinkProps as RACLinkProps } from "react-aria-components";
-import { type ButtonVariant, buttonClass } from "./button";
+import { type ButtonVariant, buttonClass } from "./button-class";
 import { cx } from "./cx";
 import { ExternalIcon } from "./icons";
 
 const linkBase = cx(
-  "rounded-[2px] decoration-1 underline-offset-[0.2em] data-hovered:decoration-2",
+  "rounded-control decoration-1 underline-offset-[0.2em] data-hovered:decoration-2",
   "data-disabled:cursor-not-allowed data-disabled:text-disabled-text data-disabled:no-underline",
 );
 

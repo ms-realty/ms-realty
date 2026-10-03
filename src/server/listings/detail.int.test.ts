@@ -1,212 +1,194 @@
+import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
-import { approvals, translations } from "@/db/schema";
+import { listingRevisions, listings, mediaAssets } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { Actor } from "@/domain/capabilities";
-import { refreshSearchDocument } from "../search/projection";
-import { createStaff } from "../testing";
-import { getPublicListing } from "./detail";
+import { withdrawPublication } from "../publication/commands";
 import {
-  addMedia,
   createListingFixture,
   createPlaces,
-  defaultConfirm,
+  eur,
   type ListingFixture,
+  newOperationId,
   type PlaceFixture,
   publishForTest,
-  setCommercialState,
-} from "./testing";
+} from "../publication/testing";
+import { createStaff } from "../testing";
+import { getPublicListing } from "./detail";
 
-// P05/P06 listing detail and P21 unavailable listing (spec F03, F09, §18.1, §19.2, §20.3).
+// P05/P06 public listing detail from the active manifest only (§7.3, §10; AT04, AT05, AT28).
 let t: TestDatabase;
-let staff: Actor;
-let place: PlaceFixture;
-let main: ListingFixture;
-let sold: ListingFixture;
-const alternatives: string[] = [];
+let staff: { id: string; actor: Actor };
+let places: PlaceFixture;
+let live: ListingFixture;
+const now = new Date();
 
 beforeAll(async () => {
-  process.env.MEDIA_PUBLIC_BASE_URL = "https://media.example.test";
   t = await createTestDatabase();
-  staff = (await createStaff(t.db, { roles: ["content_editor", "publishing_approver"] })).actor;
-  place = await createPlaces(t.db);
-  main = await createListingFixture(t.db, {
-    placeId: place.settlementId,
-    exactAddress: "ul. Hidden 12, ap. 4",
-    availabilityCheckedAt: new Date("2026-08-13T14:41:21Z"),
+  staff = await createStaff(t.db, { roles: ["content_editor", "publishing_approver"] });
+  places = await createPlaces(t.db);
+  live = await createListingFixture(t.db, {
+    reviewerId: staff.id,
+    placeId: places.settlementId,
+    photos: 2,
+    price: { state: "known", value: eur(95_000) },
+    translations: { en: { title: "Bright apartment", description: "In inland Sandanski." } },
   });
-  await addMedia(t.db, main, { public: true, position: 0, altText: "Facade" });
-  await addMedia(t.db, main, { public: false, position: 1 });
-  await publishForTest(t.db, staff, main.reference, defaultConfirm);
-
-  sold = await createListingFixture(t.db, { placeId: place.settlementId });
-  await publishForTest(t.db, staff, sold.reference, defaultConfirm);
-  await setCommercialState(t.db, sold.listingId, "sold");
-  await refreshSearchDocument(t.db, sold.listingId);
-  for (let i = 0; i < 4; i += 1) {
-    const other = await createListingFixture(t.db, { placeId: place.settlementId });
-    await publishForTest(t.db, staff, other.reference, defaultConfirm);
-    alternatives.push(other.reference);
-  }
+  await publishForTest(t.db, staff.actor, live, ["bg", "en"]);
 });
 afterAll(async () => {
   await t?.drop();
 });
 
 describe("getPublicListing", () => {
-  it("P05: presents the released version with fact states, provenance and what to confirm", async () => {
-    const result = await getPublicListing(t.db, {
-      reference: main.reference.toLowerCase(),
-      locale: "en",
-    });
-    if (result.status !== "available") throw new Error(`unexpected ${result.status}`);
+  it("shows the manifest's facts, copy, media and live availability, and nothing private", async () => {
+    const result = await getPublicListing(t.db, { reference: live.reference, locale: "en", now });
+    expect(result.status).toBe("listing");
+    if (result.status !== "listing") return;
     const { listing } = result;
     expect(listing).toMatchObject({
-      reference: main.reference,
-      slug: main.reference.toLowerCase(),
-      version: 1,
-      purpose: "sale",
-      propertyType: "apartment",
-      titleLocale: "bg",
+      reference: live.reference,
+      locale: "en",
+      title: "Bright apartment",
+      description: "In inland Sandanski.",
       price: {
         state: "known",
-        value: { amountMinor: 10_000_000, period: "total", basis: "asking" },
+        value: { amountMinor: 9_500_000, currency: "EUR", period: "total" },
       },
-      commercial: {
-        state: "availability_unconfirmed",
-        availability: "needs_confirmation",
-        primaryAction: "ask_question",
-        availabilityCheckedAt: "2026-08-13T14:41:21.000Z",
-      },
-      description: {
-        source: { locale: "bg", text: "Описание на имота." },
-        translation: null,
-        translationApproved: false,
-      },
-      place: {
-        country: "BG",
-        settlement: { id: place.settlementId, name: "Sandanski" },
-        municipality: { id: place.municipalityId },
-        neighborhood: null,
-        precision: "settlement",
+      place: { country: "BG", precision: "settlement", neighborhood: null },
+      availability: {
+        presented: "available",
+        freshness: "current_under_policy",
+        primaryAction: "request_viewing",
       },
       responsibleTeam: { label: "MS Realty" },
-      servedInLocale: false,
     });
-    const facts = Object.fromEntries(listing.facts.map((f) => [f.key, f]));
-    expect(Object.keys(facts)).toEqual([
-      "price",
-      "area.built",
-      "bedrooms",
-      "rooms",
-      "feature.condition",
-    ]);
-    expect(facts.price).toMatchObject({ verification: "imported", reviewed: true, group: "price" });
-    expect(facts.rooms).toMatchObject({ fact: { state: "unknown" }, reviewed: false });
-    expect(listing.toConfirm.map((c) => c.key)).toEqual([
-      "rooms",
-      "feature.condition",
-      "feature.floor_number",
-      "feature.total_floors",
-      "feature.parking_kind",
-      "feature.construction_status",
-    ]);
-    expect(listing.media).toEqual([
-      expect.objectContaining({
-        alt: "Facade",
-        url: expect.stringMatching(/^https:\/\/media\.example\.test\/public\//),
-      }),
+    expect(listing.place.settlement?.name).toBe("Sandanski");
+    expect(listing.media.map((m) => m.position)).toEqual([0, 1]);
+    // AT04: an unknown decision fact stays unknown and becomes a question, never a false.
+    expect(listing.toConfirm).toContainEqual({
+      key: "feature.condition",
+      group: "condition",
+      state: "unknown",
+    });
+    expect(listing.toConfirm.map((i) => i.key)).not.toContain("bedrooms");
+    expect(listing.facts.find((f) => f.key === "feature.lift")?.fact).toMatchObject({
+      state: "known",
+      value: true,
+    });
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain("Fixture street");
+    expect(serialized).not.toContain("41.5667");
+    expect(serialized).not.toContain(staff.id);
+  });
+
+  it("AT05: serves no other locale's copy: a locale without an active manifest is not found", async () => {
+    expect(await getPublicListing(t.db, { reference: live.reference, locale: "de", now })).toEqual({
+      status: "not_found",
+    });
+    expect(await getPublicListing(t.db, { reference: "MS-99999", locale: "bg", now })).toEqual({
+      status: "not_found",
+    });
+  });
+
+  it("AT05: a newer unapproved revision never leaks into the public page", async () => {
+    const [current] = await t.db
+      .select()
+      .from(listingRevisions)
+      .where(eq(listingRevisions.id, live.revisionId));
+    if (!current) throw new Error("revision missing");
+    await t.db.insert(listingRevisions).values({
+      listingId: live.listingId,
+      revisionNumber: 2,
+      factRevisionId: current.factRevisionId,
+      terms: { purpose: "sale", facts: { price: { state: "known", value: eur(1) } } },
+      sourceCopy: { locale: "bg", text: { title: "Draft title", description: "Draft" } },
+      disclosure: current.disclosure,
+      contentDigest: "draft-digest",
+      createdByKind: "staff",
+      createdById: staff.id,
+    });
+    const result = await getPublicListing(t.db, { reference: live.reference, locale: "bg", now });
+    expect(result.status === "listing" && result.listing.price).toMatchObject({
+      value: { amountMinor: 9_500_000 },
+    });
+    expect(JSON.stringify(result)).not.toContain("Draft title");
+  });
+
+  it("presents an expired availability confirmation as confirmation required", async () => {
+    const later = new Date(now.getTime() + 20 * 86_400_000);
+    const result = await getPublicListing(t.db, {
+      reference: live.reference,
+      locale: "bg",
+      now: later,
+    });
+    expect(result.status === "listing" && result.listing.availability).toMatchObject({
+      presented: "confirmation_required",
+      freshness: "review_due",
+      primaryAction: "ask_question",
+    });
+  });
+
+  it("AT28: an asset that loses clearance disappears from the page at once", async () => {
+    await t.db
+      .update(mediaAssets)
+      .set({ review: "rejected" })
+      .where(eq(mediaAssets.id, live.assetIds[1] ?? ""));
+    const result = await getPublicListing(t.db, { reference: live.reference, locale: "bg", now });
+    expect(result.status === "listing" && result.listing.media.map((m) => m.assetId)).toEqual([
+      live.assetIds[0],
     ]);
   });
 
-  it("§20.3: never exposes the exact address, internal notes, staff ids or staging media", async () => {
-    const result = await getPublicListing(t.db, { reference: main.reference, locale: "bg" });
-    const json = JSON.stringify(result);
-    for (const secret of [
-      "Hidden 12",
-      "internal note",
-      staff.id,
-      "staging/",
-      "legacy:test",
-      "Test neighborhood",
-    ]) {
-      expect(json).not.toContain(secret);
-    }
-    // The source locale is served and indexable; an unapproved locale is neither.
+  it("shows a sold listing as sold, with offered alternatives instead of an offer", async () => {
+    const other = await createListingFixture(t.db, {
+      reviewerId: staff.id,
+      placeId: places.settlementId,
+    });
+    await publishForTest(t.db, staff.actor, other);
+    const sold = await createListingFixture(t.db, {
+      reviewerId: staff.id,
+      placeId: places.settlementId,
+    });
+    await publishForTest(t.db, staff.actor, sold);
+    await t.db
+      .update(listings)
+      .set({ commercialState: "sold" })
+      .where(eq(listings.id, sold.listingId));
+    const result = await getPublicListing(t.db, { reference: sold.reference, locale: "bg", now });
+    expect(result.status).toBe("listing");
+    if (result.status !== "listing") return;
+    expect(result.listing.availability).toMatchObject({
+      presented: "sold",
+      primaryAction: "view_similar",
+    });
+    const alternatives = result.alternatives.map((a) => a.reference);
+    expect(alternatives).toContain(other.reference);
+    expect(alternatives).not.toContain(sold.reference);
+  });
+
+  it("keeps a truthful unavailable surface after withdrawal with only reference and purpose", async () => {
+    const gone = await createListingFixture(t.db, {
+      reviewerId: staff.id,
+      placeId: places.settlementId,
+    });
+    await publishForTest(t.db, staff.actor, gone);
+    await withdrawPublication(t.db, {
+      actor: staff.actor,
+      operationId: newOperationId(),
+      expectedRevision: 0,
+      reference: gone.reference,
+      reason: "Owner withdrew",
+    });
+    const result = await getPublicListing(t.db, { reference: gone.reference, locale: "bg", now });
     expect(result).toMatchObject({
-      status: "available",
-      listing: { servedInLocale: true, indexable: true },
-    });
-    const english = await getPublicListing(t.db, { reference: main.reference, locale: "en" });
-    expect(english).toMatchObject({ listing: { servedInLocale: false, indexable: false } });
-  });
-
-  it("serves an approved translation of the released version in its locale", async () => {
-    const [approval] = await t.db
-      .insert(approvals)
-      .values({
-        kind: "language",
-        state: "approved",
-        subjectType: "translation",
-        subjectId: main.versionId,
-        subjectVersion: 1,
-        subjectHash: "h",
-        requestedByKind: "staff",
-        requestedById: staff.id,
-        decidedByKind: "staff",
-        decidedById: staff.id,
-        decidedAt: new Date(),
-      })
-      .returning({ id: approvals.id });
-    await t.db.insert(translations).values({
-      subjectType: "listing",
-      subjectId: main.listingId,
-      locale: "de",
-      sourceVersion: 1,
-      state: "approved",
-      title: "Wohnung",
-      body: { description: "Beschreibung." },
-      reviewedByStaffId: staff.id,
-      reviewedAt: new Date(),
-      approvalId: approval?.id,
-    });
-    const result = await getPublicListing(t.db, { reference: main.reference, locale: "de" });
-    expect(result).toMatchObject({
-      status: "available",
-      listing: {
-        title: "Wohnung",
-        titleLocale: "de",
-        description: {
-          translation: { locale: "de", text: "Beschreibung." },
-          translationApproved: true,
-        },
-        servedInLocale: true,
-      },
-    });
-  });
-
-  it("P21: a sold listing says so and offers up to three offered alternatives in the same place", async () => {
-    const result = await getPublicListing(t.db, { reference: sold.reference, locale: "en" });
-    if (result.status !== "unavailable") throw new Error(`unexpected ${result.status}`);
-    expect(result.listing).toMatchObject({
-      reason: "sold",
+      status: "unavailable",
+      reference: gone.reference,
       purpose: "sale",
-      alternativesCriteria: { purpose: "sale", place: { id: place.settlementId } },
     });
-    expect(result.listing.alternatives).toHaveLength(3);
-    const offered = [...alternatives, main.reference];
-    for (const card of result.listing.alternatives) expect(offered).toContain(card.reference);
-  });
-
-  it("is not_found for a listing never published and for anything that is not a listing reference", async () => {
-    const draft = await createListingFixture(t.db, { placeId: place.settlementId });
-    expect(await getPublicListing(t.db, { reference: draft.reference, locale: "en" })).toEqual({
-      status: "not_found",
-    });
-    expect(await getPublicListing(t.db, { reference: "RQ-2026-000001", locale: "en" })).toEqual({
-      status: "not_found",
-    });
-    expect(await getPublicListing(t.db, { reference: "../etc", locale: "en" })).toEqual({
+    expect(JSON.stringify(result)).not.toContain(`Апартамент ${gone.reference}`);
+    // Never published in English: not found there, not "unavailable".
+    expect(await getPublicListing(t.db, { reference: gone.reference, locale: "en", now })).toEqual({
       status: "not_found",
     });
   });

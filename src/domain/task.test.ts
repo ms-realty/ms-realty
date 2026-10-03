@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { guardTaskTransition, partitionBulkCompletion } from "./task";
 
-describe("tasks (§07.6, F19)", () => {
+describe("tasks and commitments (architecture §6.6)", () => {
   it("waiting names a dependency and a follow-up date", () => {
     expect(guardTaskTransition("open", "waiting", { waitingOn: "Owner: floor plan" })).toEqual({
       outcome: "denied",
@@ -15,7 +15,7 @@ describe("tasks (§07.6, F19)", () => {
     ).toBe("allowed");
   });
 
-  it("A45: completion records what happened, with evidence when required", () => {
+  it("AT35: completion records what happened, with evidence when required", () => {
     expect(guardTaskTransition("in_progress", "done", {})).toEqual({
       outcome: "denied",
       code: "outcome_required",

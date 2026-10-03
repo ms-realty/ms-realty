@@ -3,7 +3,7 @@
 // account, and are rotated whenever the holder's privileges change.
 import "server-only";
 import { and, eq, isNull, ne } from "drizzle-orm";
-import { clientAccounts, sessions, staffAccounts } from "@/db/schema";
+import { principals, sessions, staffMemberships } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { randomToken, sha256Hex } from "../crypto";
 import type { Executor } from "../db";
@@ -49,8 +49,8 @@ export interface IssuedSession {
 type SessionRow = typeof sessions.$inferSelect;
 
 function toSession(row: SessionRow): Session {
-  const kind = row.accountKind;
-  const id = (kind === "staff" ? row.staffAccountId : row.clientAccountId) as string;
+  const kind = row.principalKind;
+  const id = row.principalId;
   return {
     id: row.id,
     account: { kind, id },
@@ -74,9 +74,8 @@ async function insertSession(
     .insert(sessions)
     .values({
       tokenHash: sha256Hex(token),
-      accountKind: account.kind,
-      staffAccountId: account.kind === "staff" ? account.id : null,
-      clientAccountId: account.kind === "client" ? account.id : null,
+      principalKind: account.kind,
+      principalId: account.id,
       createdAt: now,
       expiresAt,
       lastSeenAt: now,
@@ -97,13 +96,19 @@ export function createSession(
   return insertSession(db, account, now, expiresAt, now);
 }
 
+/** The principal is active in this context; staff additionally need an active membership. */
 async function accountIsActive(db: Executor, account: AccountRef): Promise<boolean> {
-  const table = account.kind === "staff" ? staffAccounts : clientAccounts;
   const [row] = await db
-    .select({ status: table.status })
-    .from(table)
-    .where(eq(table.id, account.id));
-  return row?.status === "active";
+    .select({
+      kind: principals.kind,
+      status: principals.status,
+      membership: staffMemberships.state,
+    })
+    .from(principals)
+    .leftJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
+    .where(eq(principals.id, account.id));
+  if (row?.status !== "active" || row.kind !== account.kind) return false;
+  return account.kind === "client" || row.membership === "active";
 }
 
 async function findLiveRow(db: Executor, token: string, now: Date): Promise<SessionRow | null> {
@@ -112,7 +117,7 @@ async function findLiveRow(db: Executor, token: string, now: Date): Promise<Sess
     .from(sessions)
     .where(and(eq(sessions.tokenHash, sha256Hex(token)), isNull(sessions.revokedAt)));
   if (!row) return null;
-  const idleMs = sessionPolicy[row.accountKind].idleMs;
+  const idleMs = sessionPolicy[row.principalKind].idleMs;
   if (now >= row.expiresAt || now.getTime() - row.lastSeenAt.getTime() >= idleMs) return null;
   return row;
 }
@@ -184,14 +189,12 @@ export async function revokeAllSessions(
   account: AccountRef,
   options: { exceptSessionId?: string; now?: Date } = {},
 ): Promise<number> {
-  const accountColumn =
-    account.kind === "staff" ? sessions.staffAccountId : sessions.clientAccountId;
   const rows = await db
     .update(sessions)
     .set({ revokedAt: options.now ?? new Date() })
     .where(
       and(
-        eq(accountColumn, account.id),
+        eq(sessions.principalId, account.id),
         isNull(sessions.revokedAt),
         ...(options.exceptSessionId ? [ne(sessions.id, options.exceptSessionId)] : []),
       ),

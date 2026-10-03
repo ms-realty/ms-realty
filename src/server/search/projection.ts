@@ -1,13 +1,12 @@
-// The search projection (F02, AD10): one typed row per listing live on the website, built from
-// its released version so search never sees unreleased edits. Publication writes it,
-// withdrawal removes it; any later change to a live listing's commercial state must refresh it.
+// The search projection (architecture §10): one typed row per listing and locale, built from
+// the read-back of the active manifest so search never sees an unapproved revision. Activation
+// writes it and restriction or withdrawal removes it, in the same transaction as the pointer
+// change. Availability is not projected: search reads it live from the listing.
 import "server-only";
-import { eq } from "drizzle-orm";
 import { listingSearchDocuments } from "@/db/schema";
 import type { Area, AreaBasis, Fact, FactState, Money } from "@/domain/facts";
-import { sourceLocale } from "@/domain/ids";
 import type { Executor } from "../db";
-import { loadPublishedListings, type PublishedListing } from "../listings/published";
+import type { PublishedListing } from "../publication/presentation";
 
 type SearchDocument = typeof listingSearchDocuments.$inferInsert;
 
@@ -15,7 +14,7 @@ function factAt<T>(listing: PublishedListing, key: string): Fact<T> | undefined 
   return listing.facts.get(key)?.fact as Fact<T> | undefined;
 }
 
-// A basis with no recorded fact is unknown, which filters treat exactly like a missing one.
+// A fact never recorded is unknown, which filters treat exactly like a recorded unknown.
 const unrecorded: FactState = "unknown";
 
 function numberState(fact: Fact<number> | undefined): { state: FactState; value: number | null } {
@@ -47,19 +46,20 @@ function featureStates(listing: PublishedListing): Record<string, string> {
 
 export function buildSearchDocument(listing: PublishedListing): SearchDocument {
   const price = factAt<Money>(listing, "price");
+  const knownPrice = price?.state === "known" ? price.value : null;
   const bedrooms = numberState(factAt<number>(listing, "bedrooms"));
   const rooms = numberState(factAt<number>(listing, "rooms"));
   const living = areaState(listing, "living");
   const built = areaState(listing, "built");
   const total = areaState(listing, "total");
   const land = areaState(listing, "land");
-  const knownPrice = price?.state === "known" ? price.value : null;
   return {
     listingId: listing.listingId,
+    locale: listing.locale,
+    manifestId: listing.manifestId,
     reference: listing.reference,
     purpose: listing.purpose,
     propertyType: listing.propertyType,
-    commercialState: listing.commercialState,
     placeIds: listing.placeChain.map((p) => p.id),
     priceState: price?.state ?? unrecorded,
     priceAmountMinor: knownPrice?.amountMinor ?? null,
@@ -79,10 +79,12 @@ export function buildSearchDocument(listing: PublishedListing): SearchDocument {
     landAreaState: land.state,
     landArea: land.value,
     features: featureStates(listing),
+    // Approved place names and aliases (Cyrillic, Latin, local and legacy spellings, AT07).
     searchText: [
       listing.reference,
       ...listing.placeChain.flatMap((p) => [p.nameNative, p.nameLatin]),
-      listing.sourceText?.title ?? "",
+      ...listing.placeAliases,
+      listing.title ?? "",
     ]
       .filter(Boolean)
       .join(" "),
@@ -90,25 +92,15 @@ export function buildSearchDocument(listing: PublishedListing): SearchDocument {
   };
 }
 
-/**
- * Writes the listing's search document when it is live on the website, removes it otherwise.
- * Call it in the transaction that changes what is live (publication, withdrawal, commercial
- * state of a live listing).
- */
-export async function refreshSearchDocument(
-  db: Executor,
-  listingId: string,
-): Promise<"written" | "removed"> {
-  const [listing] = await loadPublishedListings(db, { ids: [listingId] }, sourceLocale);
-  if (!listing) {
-    await db.delete(listingSearchDocuments).where(eq(listingSearchDocuments.listingId, listingId));
-    return "removed";
-  }
+/** Writes the listing's row for the published listing's locale and manifest. */
+export async function writeSearchDocument(db: Executor, listing: PublishedListing): Promise<void> {
   const document = buildSearchDocument(listing);
-  const { listingId: _key, ...changes } = document;
+  const { listingId: _listing, locale: _locale, ...changes } = document;
   await db
     .insert(listingSearchDocuments)
     .values(document)
-    .onConflictDoUpdate({ target: listingSearchDocuments.listingId, set: changes });
-  return "written";
+    .onConflictDoUpdate({
+      target: [listingSearchDocuments.listingId, listingSearchDocuments.locale],
+      set: changes,
+    });
 }

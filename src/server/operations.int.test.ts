@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { operationReceipts, persons } from "@/db/schema";
+import { operations, parties } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { Actor } from "@/domain/capabilities";
 import { hashRequest } from "./crypto";
 import { AppError } from "./errors";
 import { findOperation, reconcileOperation, runOperation } from "./operations";
 
-// AD6 operation receipts: A18 (double submit, timeout, reload), A40, A72.
+// AD6 operation receipts: AT10 (double submit, timeout, reload), AT11, AT50.
 let t: TestDatabase;
 beforeAll(async () => {
   t = await createTestDatabase();
@@ -28,15 +28,15 @@ const key = () => {
 function createPerson(name: string) {
   return async ({ tx }: { tx: Parameters<Parameters<typeof t.db.transaction>[0]>[0] }) => {
     const [row] = await tx
-      .insert(persons)
-      .values({ displayName: name })
-      .returning({ id: persons.id });
+      .insert(parties)
+      .values({ kind: "person", displayName: name })
+      .returning({ id: parties.id });
     return { personId: row?.id };
   };
 }
 
 const countPeople = async (name: string) =>
-  (await t.db.select().from(persons).where(eq(persons.displayName, name))).length;
+  (await t.db.select().from(parties).where(eq(parties.displayName, name))).length;
 
 describe("runOperation", () => {
   it("double submit: both calls converge on one execution and one outcome", async () => {
@@ -243,8 +243,8 @@ describe("runOperation", () => {
     expect(await countPeople("crash")).toBe(0);
     const rows = await t.db
       .select()
-      .from(operationReceipts)
-      .where(eq(operationReceipts.idempotencyKey, input.idempotencyKey));
+      .from(operations)
+      .where(eq(operations.idempotencyKey, input.idempotencyKey));
     expect(rows).toHaveLength(0);
   });
 });

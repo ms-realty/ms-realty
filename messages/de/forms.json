@@ -1,0 +1,9 @@
+{
+  "required": "Pflichtfeld",
+  "optional": "Optional",
+  "errorSummary": "{count, plural, one {# Angabe muss} other {# Angaben müssen}} korrigiert werden",
+  "charactersLeft": "{count, plural, one {Noch # Zeichen} other {Noch # Zeichen}}",
+  "choose": "Auswählen…",
+  "saveDraft": "Entwurf speichern",
+  "cancel": "Abbrechen"
+}

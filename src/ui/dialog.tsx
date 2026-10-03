@@ -34,7 +34,7 @@ export function Dialog({ title, closeLabel, children, role = "dialog", ...state 
       isDismissable={role === "dialog"}
       className={cx(overlayClass, "flex items-center justify-center p-4")}
     >
-      <Modal className="flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-card bg-surface shadow-overlay forced-colors:border">
+      <Modal className="flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-panel bg-surface shadow-overlay forced-colors:border">
         <RACDialog role={role} className="flex min-h-0 flex-col outline-none">
           {({ close }) => (
             <>

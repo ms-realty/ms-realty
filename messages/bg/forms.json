@@ -1,0 +1,9 @@
+{
+  "required": "Задължително",
+  "optional": "По избор",
+  "errorSummary": "{count, plural, one {# отговор трябва да бъде поправен} other {# отговора трябва да бъдат поправени}}",
+  "charactersLeft": "{count, plural, one {Остава # знак} other {Остават # знака}}",
+  "choose": "Изберете…",
+  "saveDraft": "Запазете черновата",
+  "cancel": "Отказ"
+}

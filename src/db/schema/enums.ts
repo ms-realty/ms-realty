@@ -3,19 +3,26 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 import {
   appointmentFormats,
+  appointmentResourceKinds,
   appointmentStates,
   propertyAccessStates,
 } from "../../domain/appointment";
 import { approvalKinds, approvalStates } from "../../domain/approval";
 import { actorKinds, capabilities, roles } from "../../domain/capabilities";
-import { caseKinds } from "../../domain/case-disposition";
+import { caseDispositions, caseKinds, serviceIntakeTopics } from "../../domain/case";
 import {
   documentClassifications,
   documentReviewTypes,
   documentStates,
   professionalValidationStates,
-  scanStates,
 } from "../../domain/document";
+import {
+  externalActionKinds,
+  externalActionStates,
+  inboxEventStates,
+  outboxEventStates,
+} from "../../domain/external-action";
+import { materialChangeClasses } from "../../domain/fact-revision";
 import {
   factStates,
   listingPurposes,
@@ -27,13 +34,18 @@ import {
 } from "../../domain/facts";
 import { currencyCodes, publicLocales, staffLocales } from "../../domain/ids";
 import { inquiryPurposes, inquiryStates } from "../../domain/inquiry";
+import { interestStates } from "../../domain/interest";
 import { commercialStates, editorialStates, freshnessStates } from "../../domain/listing";
+import { localeStates } from "../../domain/localized-revision";
 import {
+  mediaAudiences,
   mediaKinds,
   mediaModifications,
+  mediaPurposes,
   mediaReviewStates,
   mediaRightsStates,
-  mediaStorageAreas,
+  processingStates,
+  scanStates,
 } from "../../domain/media";
 import {
   messageChannels,
@@ -43,125 +55,112 @@ import {
 } from "../../domain/message";
 import { operationStatuses } from "../../domain/operation-receipt";
 import {
-  accountStatuses,
   audiences,
   authorityStates,
-  consentPurposes,
-  consentStates,
   contactMethodKinds,
   contactVerificationStates,
-  partyRelationshipRoles,
+  participantRoles,
+  partyKinds,
 } from "../../domain/parties";
+import { privacyRequestKinds, privacyRequestStates } from "../../domain/privacy";
 import { proposalStates } from "../../domain/proposal";
 import {
-  destinationOutcomeStates,
-  distributionStates,
+  deliveryKinds,
+  deliveryStates,
+  pointerStates,
   publicationDestinations,
-  releaseKinds,
+  publicationStates,
 } from "../../domain/publication";
 import {
-  accountKinds,
-  alertFrequencies,
-  alertSubscriptionStates,
   contentPageKinds,
   importBatchModes,
   importBatchStates,
   importRowClassifications,
   importRowOutcomes,
   inquirySources,
+  invitationKinds,
   legacyDomains,
   legacyUrlDecisions,
-  matchGroups,
-  matchStates,
+  mergeSubjects,
   placeAliasKinds,
   placeLevels,
-  requirementItemKinds,
-  requirementOrigins,
-  shortlistOpinions,
-  shortlistParticipantRoles,
+  principalKinds,
+  principalStatuses,
   signInTokenPurposes,
+  staffMembershipStates,
 } from "../../domain/records";
-import { paymentStates, reservationStates } from "../../domain/reservation";
+import { evidenceEnvironments, redactionStatuses } from "../../domain/release-evidence";
 import {
-  serviceAgreementStates,
-  serviceRequestStates,
-  serviceRequestUrgencies,
-  statementLineStates,
-} from "../../domain/service-request";
-import { commitmentKinds, taskStates, taskTypes } from "../../domain/task";
-import { translationStates } from "../../domain/translation";
+  exclusivityKinds,
+  representationScopes,
+  sellerInstructionStates,
+} from "../../domain/seller-instruction";
+import {
+  alertFrequencies,
+  consentEventKinds,
+  subscriptionPurposes,
+  subscriptionStates,
+} from "../../domain/subscription";
+import { taskStates, taskTypes } from "../../domain/task";
 
 // Identity and access.
-export const accountKindEnum = pgEnum("account_kind", accountKinds);
-export const accountStatusEnum = pgEnum("account_status", accountStatuses);
+export const principalKindEnum = pgEnum("principal_kind", principalKinds);
+export const principalStatusEnum = pgEnum("principal_status", principalStatuses);
+export const staffMembershipStateEnum = pgEnum("staff_membership_state", staffMembershipStates);
 export const actorKindEnum = pgEnum("actor_kind", actorKinds);
 export const capabilityEnum = pgEnum("capability", capabilities);
 export const roleEnum = pgEnum("role", roles);
 export const signInTokenPurposeEnum = pgEnum("sign_in_token_purpose", signInTokenPurposes);
+export const invitationKindEnum = pgEnum("invitation_kind", invitationKinds);
 export const publicLocaleEnum = pgEnum("public_locale", publicLocales);
 export const staffLocaleEnum = pgEnum("staff_locale", staffLocales);
 export const currencyEnum = pgEnum("currency", currencyCodes);
 
-// Parties.
+// Parties and contact eligibility.
+export const partyKindEnum = pgEnum("party_kind", partyKinds);
 export const contactMethodKindEnum = pgEnum("contact_method_kind", contactMethodKinds);
 export const contactVerificationEnum = pgEnum(
   "contact_verification_state",
   contactVerificationStates,
 );
-export const consentPurposeEnum = pgEnum("consent_purpose", consentPurposes);
-export const consentStateEnum = pgEnum("consent_state", consentStates);
-export const partyRoleEnum = pgEnum("party_relationship_role", partyRelationshipRoles);
+export const participantRoleEnum = pgEnum("participant_role", participantRoles);
 export const authorityStateEnum = pgEnum("authority_state", authorityStates);
 export const audienceEnum = pgEnum("audience", audiences);
+export const subscriptionPurposeEnum = pgEnum("subscription_purpose", subscriptionPurposes);
+export const subscriptionStateEnum = pgEnum("subscription_state", subscriptionStates);
+export const consentEventKindEnum = pgEnum("consent_event_kind", consentEventKinds);
+export const alertFrequencyEnum = pgEnum("alert_frequency", alertFrequencies);
 
-// Properties, listings, facts, media.
+// Inventory.
 export const propertyTypeEnum = pgEnum("property_type", propertyTypes);
 export const listingPurposeEnum = pgEnum("listing_purpose", listingPurposes);
 export const locationPrecisionEnum = pgEnum("location_precision", locationPrecisions);
 export const factStateEnum = pgEnum("fact_state", factStates);
 export const sourceClassEnum = pgEnum("source_class", sourceClasses);
+export const materialChangeEnum = pgEnum("material_change", materialChangeClasses);
 export const pricePeriodEnum = pgEnum("price_period", pricePeriods);
 export const priceBasisEnum = pgEnum("price_basis", priceBases);
 export const commercialStateEnum = pgEnum("commercial_state", commercialStates);
 export const editorialStateEnum = pgEnum("editorial_state", editorialStates);
-export const distributionStateEnum = pgEnum("distribution_state", distributionStates);
 export const freshnessStateEnum = pgEnum("freshness_state", freshnessStates);
+export const localeStateEnum = pgEnum("locale_state", localeStates);
+export const sellerInstructionStateEnum = pgEnum(
+  "seller_instruction_state",
+  sellerInstructionStates,
+);
+export const representationScopeEnum = pgEnum("representation_scope", representationScopes);
+export const exclusivityEnum = pgEnum("exclusivity", exclusivityKinds);
+
+// Media and documents.
 export const mediaKindEnum = pgEnum("media_kind", mediaKinds);
+export const mediaPurposeEnum = pgEnum("media_purpose", mediaPurposes);
 export const mediaRightsEnum = pgEnum("media_rights_state", mediaRightsStates);
 export const mediaModificationEnum = pgEnum("media_modification", mediaModifications);
-export const mediaStorageAreaEnum = pgEnum("media_storage_area", mediaStorageAreas);
 export const mediaReviewEnum = pgEnum("media_review_state", mediaReviewStates);
-
-// Demand and work.
-export const inquiryStateEnum = pgEnum("inquiry_state", inquiryStates);
-export const inquiryPurposeEnum = pgEnum("inquiry_purpose", inquiryPurposes);
-export const inquirySourceEnum = pgEnum("inquiry_source", inquirySources);
-export const caseKindEnum = pgEnum("case_kind", caseKinds);
-export const requirementItemKindEnum = pgEnum("requirement_item_kind", requirementItemKinds);
-export const requirementOriginEnum = pgEnum("requirement_origin", requirementOrigins);
-export const matchGroupEnum = pgEnum("match_group", matchGroups);
-export const matchStateEnum = pgEnum("match_state", matchStates);
-export const taskStateEnum = pgEnum("task_state", taskStates);
-export const taskTypeEnum = pgEnum("task_type", taskTypes);
-export const commitmentKindEnum = pgEnum("commitment_kind", commitmentKinds);
-export const shortlistOpinionEnum = pgEnum("shortlist_opinion", shortlistOpinions);
-export const shortlistRoleEnum = pgEnum("shortlist_participant_role", shortlistParticipantRoles);
-export const alertFrequencyEnum = pgEnum("alert_frequency", alertFrequencies);
-export const alertSubscriptionStateEnum = pgEnum(
-  "alert_subscription_state",
-  alertSubscriptionStates,
-);
-
-// Coordination.
-export const appointmentStateEnum = pgEnum("appointment_state", appointmentStates);
-export const appointmentFormatEnum = pgEnum("appointment_format", appointmentFormats);
-export const propertyAccessEnum = pgEnum("property_access_state", propertyAccessStates);
-export const messageStateEnum = pgEnum("message_state", messageStates);
-export const messageKindEnum = pgEnum("message_kind", messageKinds);
-export const messageDirectionEnum = pgEnum("message_direction", messageDirections);
-export const messageChannelEnum = pgEnum("message_channel", messageChannels);
-export const documentStateEnum = pgEnum("document_state", documentStates);
+export const mediaAudienceEnum = pgEnum("media_audience", mediaAudiences);
 export const scanStateEnum = pgEnum("scan_state", scanStates);
+export const processingStateEnum = pgEnum("processing_state", processingStates);
+export const documentStateEnum = pgEnum("document_state", documentStates);
 export const documentReviewTypeEnum = pgEnum("document_review_type", documentReviewTypes);
 export const professionalValidationEnum = pgEnum(
   "professional_validation_state",
@@ -171,30 +170,57 @@ export const documentClassificationEnum = pgEnum(
   "document_classification",
   documentClassifications,
 );
-export const proposalStateEnum = pgEnum("proposal_state", proposalStates);
 
-// Approval, publication, translation, content.
-export const approvalStateEnum = pgEnum("approval_state", approvalStates);
-export const approvalKindEnum = pgEnum("approval_kind", approvalKinds);
-export const releaseKindEnum = pgEnum("release_kind", releaseKinds);
+// Publication.
+export const publicationStateEnum = pgEnum("publication_state", publicationStates);
+export const pointerStateEnum = pgEnum("publication_pointer_state", pointerStates);
 export const publicationDestinationEnum = pgEnum(
   "publication_destination",
   publicationDestinations,
 );
-export const destinationOutcomeEnum = pgEnum("destination_outcome_state", destinationOutcomeStates);
-export const translationStateEnum = pgEnum("translation_state", translationStates);
+export const deliveryKindEnum = pgEnum("delivery_kind", deliveryKinds);
+export const deliveryStateEnum = pgEnum("delivery_state", deliveryStates);
 export const contentPageKindEnum = pgEnum("content_page_kind", contentPageKinds);
 
-// Records.
-export const operationStatusEnum = pgEnum("operation_status", operationStatuses);
+// Agency work.
+export const inquiryStateEnum = pgEnum("inquiry_state", inquiryStates);
+export const inquiryPurposeEnum = pgEnum("inquiry_purpose", inquiryPurposes);
+export const inquirySourceEnum = pgEnum("inquiry_source", inquirySources);
+export const caseKindEnum = pgEnum("case_kind", caseKinds);
+export const caseDispositionEnum = pgEnum("case_disposition", caseDispositions);
+export const serviceIntakeTopicEnum = pgEnum("service_intake_topic", serviceIntakeTopics);
+export const interestStateEnum = pgEnum("interest_state", interestStates);
+export const taskStateEnum = pgEnum("task_state", taskStates);
+export const taskTypeEnum = pgEnum("task_type", taskTypes);
 
-// Adjacent services.
-export const serviceAgreementStateEnum = pgEnum("service_agreement_state", serviceAgreementStates);
-export const serviceRequestStateEnum = pgEnum("service_request_state", serviceRequestStates);
-export const serviceRequestUrgencyEnum = pgEnum("service_request_urgency", serviceRequestUrgencies);
-export const statementLineStateEnum = pgEnum("statement_line_state", statementLineStates);
-export const reservationStateEnum = pgEnum("reservation_state", reservationStates);
-export const paymentStateEnum = pgEnum("payment_state", paymentStates);
+// Scheduling, proposals and communication.
+export const appointmentStateEnum = pgEnum("appointment_state", appointmentStates);
+export const appointmentFormatEnum = pgEnum("appointment_format", appointmentFormats);
+export const appointmentResourceKindEnum = pgEnum(
+  "appointment_resource_kind",
+  appointmentResourceKinds,
+);
+export const propertyAccessEnum = pgEnum("property_access_state", propertyAccessStates);
+export const proposalStateEnum = pgEnum("proposal_state", proposalStates);
+export const messageStateEnum = pgEnum("message_state", messageStates);
+export const messageKindEnum = pgEnum("message_kind", messageKinds);
+export const messageDirectionEnum = pgEnum("message_direction", messageDirections);
+export const messageChannelEnum = pgEnum("message_channel", messageChannels);
+
+// Approvals, operations and durable work.
+export const approvalStateEnum = pgEnum("approval_state", approvalStates);
+export const approvalKindEnum = pgEnum("approval_kind", approvalKinds);
+export const operationStatusEnum = pgEnum("operation_status", operationStatuses);
+export const outboxEventStateEnum = pgEnum("outbox_event_state", outboxEventStates);
+export const externalActionKindEnum = pgEnum("external_action_kind", externalActionKinds);
+export const externalActionStateEnum = pgEnum("external_action_state", externalActionStates);
+export const inboxEventStateEnum = pgEnum("inbox_event_state", inboxEventStates);
+
+// Privacy and release evidence.
+export const privacyRequestKindEnum = pgEnum("privacy_request_kind", privacyRequestKinds);
+export const privacyRequestStateEnum = pgEnum("privacy_request_state", privacyRequestStates);
+export const evidenceEnvironmentEnum = pgEnum("evidence_environment", evidenceEnvironments);
+export const redactionStatusEnum = pgEnum("redaction_status", redactionStatuses);
 
 // Geography, legacy and import.
 export const placeLevelEnum = pgEnum("place_level", placeLevels);
@@ -208,3 +234,4 @@ export const importRowClassificationEnum = pgEnum(
   importRowClassifications,
 );
 export const importRowOutcomeEnum = pgEnum("import_row_outcome", importRowOutcomes);
+export const mergeSubjectEnum = pgEnum("merge_subject", mergeSubjects);

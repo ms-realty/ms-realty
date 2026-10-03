@@ -95,20 +95,20 @@ All subagents run on Opus 5.5.
 
 ## 7. Additions beyond the architecture
 
-Items the 2026-09-24 review found missing from the architecture. Legal items are recorded as
-obligations to support, never as legal conclusions by the software; each is confirmed
-against primary sources before its slice starts.
+Found missing by the 2026-09-24/26 review and checked against primary sources (articles,
+links and unverified points: [`docs/research/agency-obligations.md`](research/agency-obligations.md)).
+The software records, reminds and blocks; it never decides a legal question. Lawyers and an
+accountant confirm the content.
 
-- **AML/CFT record-keeping** for real-estate intermediaries (Bulgarian ZMIP): customer and
-  beneficial-owner identification, PEP/sanctions check result, risk note, retention and a
-  suspicion escalation path, as a checklist on the Case that blocks proposal submission until
-  complete. S4.
-- **Records of processing and retention classes** feeding the §8.4 policy. S5.
-- **Brokerage agreement evidence** (representation scope, exclusivity, commission terms) as
-  part of SellerInstruction. S2/S4.
-- **Portal destinations** stay manual named destinations with evidence (§15); an xe.gr
-  adapter is the first candidate after launch.
-- **Keys and property access** as appointment access prerequisites. S4.
+| Addition | Basis | Minimal product support | Slice |
+|---|---|---|---|
+| AML/CFT customer due diligence | ZMIP art. 4 item 18 makes real-estate intermediaries obliged entities (lettings only from EUR 10 000 monthly rent); CDD at relationship start, one-off ≥ EUR 15 000 or cash ≥ EUR 5 000 (art. 10–11); ID copy (art. 53), representatives (art. 65), PEP (art. 36), sanctions, source of funds (art. 66), 5-year retention (art. 67), report to SANS FID before execution (art. 72); EU AMLR 2024/1624 from 10 July 2027 adds both-party checks | Restricted `ComplianceCheck` per party on a Case/Proposal, triggered at `agreed_for_next_step` or cash ≥ EUR 5 000; its own document class with 5-year retention that blocks erasure; compliance-only suspicion register; Hermes excluded; operator inputs: AML officer, internal rules, risk assessment | S4 |
+| Service agreement and withdrawal right | Consumer Rights Directive art. 7(3), 8(8), 9, 14(4)(a) for distance/off-premises agreements; Greece: written brokerage agreement with tax numbers | `ServiceAgreement` for sellers and buyers/tenants: channel, withdrawal information and express-start request timestamps, computed deadline, signed copy, commission basis and payer; services cannot start before the recorded request; commission record with external invoice reference | S2 (seller), S4 (buyer/tenant) |
+| GDPR operations | GDPR art. 12(3) (one month, extendable), 28, 30, 33 (72 h); cookies under the Electronic Commerce Act art. 4a (the receipt cookie is strictly necessary) | Processing register, processor/transfer register, breach log with a 72 h timer, default DSR due date, consent banner only if analytics/embeds are added | S5 |
+| Country transaction checklists | BG: preliminary contract, deposit, notarial deed, tax assessment; non-EU land restrictions (Constitution art. 22); GR: AFM, notary, cadastre, ENFIA; border-area permits (Law 1892/1990) | Versioned checklist templates by country × sale/let × EU/non-EU buyer; human-completed items with owner, professional, evidence and due date | S4 |
+| Complaints and reviews | UCPD art. 7(6) and Annex I 23b–c on reviews; ADR information | Complaint record (receipt, owner, due, outcome); review-consent event on completed Cases; reviews shown only with a verification statement | S5 |
+| Agency operations | Good practice | Key register with check-out and due-back; photography as a property-work appointment tied to media rights; periodic owner report approved by a human; partner/referral records with fee terms; staff offboarding checklist; portal name and reference on manually entered inquiries | S2–S5 |
+| European Accessibility Act | Directive 2019/882 art. 4(5): microenterprise service providers exempt | WCAG 2.2 AA stays the target; the annual microenterprise test is recorded in release evidence | S6 |
 
 ## 8. Operator inputs (architecture §21.4)
 
@@ -126,6 +126,8 @@ Blocked gates stay blocked until these exist; the safe default applies meanwhile
 | DNS for `my.` and `app.` hosts, the reply subdomain and cutover; renewal of `makler-realty.ru` | No cutover, no mail-DNS change | R07/R10 |
 | SEO evidence decision (Search Console, Yandex, backlinks) under R00 | Evidence required | R00/R11 |
 | Recovery custody, Ed25519 signing key holder, incident contacts | No release | R08/R10 |
+| AML officer, internal AML rules and risk assessment (ZMIP art. 98, 101) | Proposal steps that need due diligence stay blocked | R04 |
+| Accountant decision on VAT for commission on Greek properties | Commission recorded without tax treatment | R04 |
 | Cloudflare audit-log answer for the 2026-09-17 route removal | Treat routes as unowned; cutover re-asserts them deliberately | R10 |
 
 ## 9. Progress log

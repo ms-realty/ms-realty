@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { outboxMessages } from "@/db/schema";
+import { externalActions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import {
   dispatchMessage,
@@ -13,7 +13,8 @@ import {
 import { TestMessageProvider } from "./provider";
 import { JobQueue, registerWorkers } from "./queue";
 
-// Outbox delivery states (spec §07.5): accepted is not delivered, unknown is never re-sent.
+// Email delivery on the external-action ledger (architecture §9, §15): provider acceptance
+// (acknowledged) is not delivery (verified), and an unknown outcome is never re-sent (AT46, AT47).
 let t: TestDatabase;
 beforeAll(async () => {
   t = await createTestDatabase();
@@ -35,10 +36,10 @@ const message = (overrides: Partial<Parameters<typeof enqueueMessage>[1]> = {}) 
   };
 };
 const stateOf = async (id: string) =>
-  (await t.db.select().from(outboxMessages).where(eq(outboxMessages.id, id)))[0];
+  (await t.db.select().from(externalActions).where(eq(externalActions.id, id)))[0];
 
 describe("outbox", () => {
-  it("enqueueing the same logical message twice yields one message", async () => {
+  it("AT46: enqueueing the same logical send twice yields one external action", async () => {
     const input = message();
     const a = await enqueueMessage(t.db, input);
     const b = await enqueueMessage(t.db, input);
@@ -51,29 +52,29 @@ describe("outbox", () => {
       t.db,
       message({ secretParams: { url: "https://x/secret" } }),
     );
-    expect(await dispatchMessage(t.db, provider, id)).toBe("provider_accepted");
+    expect(await dispatchMessage(t.db, provider, id)).toBe("acknowledged");
     expect(provider.sent[0]).toMatchObject({
       outboxId: id,
       secretParams: { url: "https://x/secret" },
     });
     const accepted = await stateOf(id);
-    expect(accepted).toMatchObject({ state: "provider_accepted", attempts: 1, secretParams: null });
-    expect(accepted?.deliveredAt).toBeNull();
+    expect(accepted).toMatchObject({ state: "acknowledged", attempts: 1, secretPayload: null });
+    expect(accepted?.verifiedAt).toBeNull();
 
     expect(
       await recordDeliveryReport(t.db, {
         provider: "test",
-        providerMessageId: accepted?.providerMessageId ?? "",
+        providerMessageId: accepted?.providerReference ?? "",
         status: "delivered",
       }),
     ).toBe(true);
-    expect((await stateOf(id))?.state).toBe("delivered");
-    // Dispatching again is a no-op: one logical message, one send.
-    expect(await dispatchMessage(t.db, provider, id)).toBe("delivered");
+    expect((await stateOf(id))?.state).toBe("verified");
+    // Dispatching again is a no-op: one logical send, one provider call.
+    expect(await dispatchMessage(t.db, provider, id)).toBe("verified");
     expect(provider.sent).toHaveLength(1);
   });
 
-  it("parks a timed-out send as outcome_unknown and never re-sends it", async () => {
+  it("AT47: parks a timed-out send as outcome_unknown and never re-sends it", async () => {
     const provider = new TestMessageProvider();
     provider.script("throw");
     const { id } = await enqueueMessage(t.db, message());
@@ -83,12 +84,12 @@ describe("outbox", () => {
     expect(provider.sent.filter((m) => m.outboxId === id)).toHaveLength(1);
     expect(await stateOf(id)).toMatchObject({
       lastErrorCode: "provider_unreachable",
-      secretParams: null,
+      secretPayload: null,
     });
 
     expect(await reconcileMessage(t.db, id, { state: "failed", code: "not_received" })).toBe(true);
     expect((await stateOf(id))?.state).toBe("failed");
-    expect(await reconcileMessage(t.db, id, { state: "delivered" })).toBe(false);
+    expect(await reconcileMessage(t.db, id, { state: "verified" })).toBe(false);
   });
 
   it("requeues a definite transient rejection, keeping its secret, up to the attempt limit", async () => {
@@ -97,7 +98,7 @@ describe("outbox", () => {
     provider.script(rejected, rejected, rejected);
     const { id } = await enqueueMessage(t.db, message({ secretParams: { url: "https://x/s" } }));
     expect(await dispatchMessage(t.db, provider, id)).toBe("queued");
-    expect((await stateOf(id))?.secretParams).toEqual({ url: "https://x/s" });
+    expect((await stateOf(id))?.secretPayload).toEqual({ url: "https://x/s" });
     expect(await dispatchMessage(t.db, provider, id)).toBe("queued");
     expect(await dispatchMessage(t.db, provider, id)).toBe("failed");
     expect(await stateOf(id)).toMatchObject({ attempts: 3, lastErrorCode: "throttled" });
@@ -125,7 +126,7 @@ describe("outbox", () => {
 
       const { id } = await t.db.transaction((tx) => enqueueMessage(tx, message(), queue));
       await registerWorkers(queue, { db: t.db, provider });
-      await vi.waitFor(async () => expect((await stateOf(id))?.state).toBe("provider_accepted"), {
+      await vi.waitFor(async () => expect((await stateOf(id))?.state).toBe("acknowledged"), {
         timeout: 15_000,
         interval: 200,
       });

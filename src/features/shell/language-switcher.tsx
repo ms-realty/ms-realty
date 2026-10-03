@@ -3,7 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { localeEndonyms, type PublicLocale } from "@/i18n/config";
-import { LanguageSwitcher } from "@/ui";
+import { LanguageSwitcher, type LanguageSwitcherProps } from "@/ui/language-switcher";
 
 /**
  * Same page in another language: replaces only the leading locale segment and keeps the
@@ -28,23 +28,25 @@ export function useQueryAndHash(): string {
 }
 
 /**
- * The design-system language switcher bound to the current page. Links are full
- * navigations, so html lang/dir and every catalog change together; proxy.ts records the
- * choice.
+ * The design-system language switcher bound to the current page. Server-rendered links, so it
+ * works before and without JavaScript; each is a full navigation, so html lang/dir and every
+ * catalog change together, and proxy.ts records the choice.
  */
 export function LocaleSwitcher({
   locale,
   locales,
   label,
+  ...layout
 }: {
   locale: PublicLocale;
   locales: readonly PublicLocale[];
   label: string;
-}) {
+} & Pick<LanguageSwitcherProps, "wide" | "align" | "className">) {
   const pathname = usePathname();
   const suffix = useQueryAndHash();
   return (
     <LanguageSwitcher
+      {...layout}
       label={label}
       current={locale}
       options={locales.map((target) => ({

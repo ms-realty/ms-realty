@@ -1,7 +1,8 @@
-// Inquiries, cases with stage history, party relationships, requirement briefs, matches and
-// tasks (spec §04, §07.1–§07.3, §07.6, F18–F21).
+// Inquiries, cases, participants, brief revisions, interests, tasks and seller instructions
+// (architecture §4.1, §6.1–§6.3, §6.6).
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   index,
@@ -13,30 +14,29 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { buyerCaseStages } from "../../domain/buyer-case";
-import { rentalCaseStages } from "../../domain/rental-case";
-import { sellerCaseStages } from "../../domain/seller-case";
-import { clientAccounts, staffAccounts } from "./accounts";
+import { demandStages, serviceIntakeStages, supplyStages } from "../../domain/case";
 import { createdAt, id, instant, mutable, reference, sqlList } from "./columns";
 import {
   actorKindEnum,
   authorityStateEnum,
+  caseDispositionEnum,
   caseKindEnum,
-  commitmentKindEnum,
+  exclusivityEnum,
   inquiryPurposeEnum,
   inquirySourceEnum,
   inquiryStateEnum,
-  matchGroupEnum,
-  matchStateEnum,
-  partyRoleEnum,
+  interestStateEnum,
+  participantRoleEnum,
   publicLocaleEnum,
-  requirementItemKindEnum,
-  requirementOriginEnum,
+  representationScopeEnum,
+  sellerInstructionStateEnum,
+  serviceIntakeTopicEnum,
   taskStateEnum,
   taskTypeEnum,
 } from "./enums";
-import { contactMethods, organizations, persons } from "./parties";
-import { listings, listingVersions, properties } from "./properties";
+import { principals } from "./identity";
+import { listingRevisions, listings, properties } from "./inventory";
+import { contactMethods, parties } from "./parties";
 
 export const cases = pgTable(
   "cases",
@@ -44,34 +44,57 @@ export const cases = pgTable(
     ...mutable(),
     reference: reference(),
     kind: caseKindEnum("kind").notNull(),
-    /** Stage names come from the domain pipeline for the case kind (checked below). */
+    /** Stage names come from the pipeline of the case kind (checked below). */
     stage: text("stage").notNull(),
+    disposition: caseDispositionEnum("disposition").notNull().default("active"),
+    /** Service intake only: what the consultation is about. */
+    serviceTopic: serviceIntakeTopicEnum("service_topic"),
     title: text("title").notNull(),
     propertyId: uuid("property_id").references(() => properties.id),
-    ownerStaffId: uuid("owner_staff_id").references(() => staffAccounts.id),
-    /** Paused/closed disposition: reason, remaining obligations and optional resume point. */
-    dispositionReason: text("disposition_reason"),
-    outstandingObligations: jsonb("outstanding_obligations"),
-    resumeStage: text("resume_stage"),
-    nextActionSummary: text("next_action_summary"),
+    /** The one accountable broker. */
+    ownerId: uuid("owner_id").references(() => principals.id),
+    /** A handover stays with the current owner until the receiver accepts. */
+    pendingOwnerId: uuid("pending_owner_id").references(() => principals.id),
+    nextAction: text("next_action"),
     nextActionDueAt: instant("next_action_due_at"),
+    /** An explicit waiting dependency and its review date, instead of a next action. */
+    waitingOn: text("waiting_on"),
+    reviewAt: instant("review_at"),
+    dispositionReason: text("disposition_reason"),
+    closureOutcome: text("closure_outcome"),
+    /** Closure: the disposition recorded for every commitment open at closing. */
+    commitmentDispositions: jsonb("commitment_dispositions"),
+    /** Curated, client-visible summary; never a raw internal note. */
+    clientSummary: text("client_summary"),
   },
   (t) => [
     check(
       "cases_stage_matches_kind",
-      sql`(${t.kind} = 'buyer' and ${t.stage} in (${sqlList(buyerCaseStages)}))
-        or (${t.kind} = 'seller' and ${t.stage} in (${sqlList(sellerCaseStages)}))
-        or (${t.kind} = 'rental' and ${t.stage} in (${sqlList(rentalCaseStages)}))`,
+      sql`(${t.kind} in ('buyer', 'tenant') and ${t.stage} in (${sqlList(demandStages)}))
+        or (${t.kind} in ('seller', 'landlord') and ${t.stage} in (${sqlList(supplyStages)}))
+        or (${t.kind} = 'service_intake' and ${t.stage} in (${sqlList(serviceIntakeStages)}))`,
     ),
     check(
-      "cases_disposition_reason",
-      sql`${t.stage} not in ('paused', 'closed') or (${t.dispositionReason} is not null and ${t.outstandingObligations} is not null)`,
+      "cases_service_topic",
+      sql`(${t.kind} = 'service_intake') = (${t.serviceTopic} is not null)`,
     ),
-    index("cases_owner_idx").on(t.ownerStaffId, t.stage),
+    check(
+      "cases_active_owned",
+      sql`${t.disposition} <> 'active' or (${t.ownerId} is not null and (${t.nextAction} is not null or (${t.waitingOn} is not null and ${t.reviewAt} is not null)))`,
+    ),
+    check(
+      "cases_paused_dependency",
+      sql`${t.disposition} <> 'paused' or (${t.dispositionReason} is not null and ${t.waitingOn} is not null and ${t.reviewAt} is not null)`,
+    ),
+    check(
+      "cases_closed_outcome",
+      sql`${t.disposition} <> 'closed' or (${t.closureOutcome} is not null and ${t.commitmentDispositions} is not null)`,
+    ),
+    index("cases_owner_idx").on(t.ownerId, t.disposition),
   ],
 );
 
-/** Append-only; reopening a case adds a row and never rewrites the closeout. */
+/** Append-only; reopening adds a row and never rewrites the closeout. */
 export const caseStageHistory = pgTable(
   "case_stage_history",
   {
@@ -92,47 +115,41 @@ export const caseStageHistory = pgTable(
 );
 
 /**
- * A party's scoped, revocable role in a case or property. Authority to act is recorded
- * here and is never implied by contact verification.
+ * A party's explicitly scoped role in a Case. Authority to act is recorded here and is never
+ * implied by contact verification; invited collaborators get exactly their scope.
  */
-export const partyRelationships = pgTable(
-  "party_relationships",
+export const caseParticipants = pgTable(
+  "case_participants",
   {
     ...mutable(),
-    personId: uuid("person_id").references(() => persons.id),
-    organizationId: uuid("organization_id").references(() => organizations.id),
-    role: partyRoleEnum("role").notNull(),
-    caseId: uuid("case_id").references(() => cases.id),
-    propertyId: uuid("property_id").references(() => properties.id),
+    caseId: uuid("case_id")
+      .notNull()
+      .references(() => cases.id),
+    partyId: uuid("party_id")
+      .notNull()
+      .references(() => parties.id),
+    role: participantRoleEnum("role").notNull(),
     authority: authorityStateEnum("authority").notNull().default("not_claimed"),
-    authorityReviewedByStaffId: uuid("authority_reviewed_by_staff_id").references(
-      () => staffAccounts.id,
-    ),
+    authorityReviewedById: uuid("authority_reviewed_by_id").references(() => principals.id),
     authorityReviewedAt: instant("authority_reviewed_at"),
-    /** Resources and actions granted by invitation (collaborators get exactly these). */
+    /** Resources and portal actions granted by invitation. */
     scope: jsonb("scope").notNull().default({}),
-    // Stamped by the application: authz compares it with the application clock, and a database
-    // clock running ahead would make a just-granted relationship "not yet valid".
+    // Stamped by the application: authz compares it with the application clock.
     validFrom: instant("valid_from")
       .notNull()
       .defaultNow()
       .$defaultFn(() => new Date()),
     expiresAt: instant("expires_at"),
     revokedAt: instant("revoked_at"),
-    revokedByStaffId: uuid("revoked_by_staff_id").references(() => staffAccounts.id),
+    revokedById: uuid("revoked_by_id").references(() => principals.id),
   },
   (t) => [
     check(
-      "party_relationships_one_party",
-      sql`num_nonnulls(${t.personId}, ${t.organizationId}) = 1`,
+      "case_participants_reviewed_authority",
+      sql`${t.authority} <> 'reviewed' or (${t.authorityReviewedById} is not null and ${t.authorityReviewedAt} is not null)`,
     ),
-    check("party_relationships_target", sql`num_nonnulls(${t.caseId}, ${t.propertyId}) >= 1`),
-    check(
-      "party_relationships_reviewed_authority",
-      sql`${t.authority} <> 'reviewed' or (${t.authorityReviewedByStaffId} is not null and ${t.authorityReviewedAt} is not null)`,
-    ),
-    index("party_relationships_case_idx").on(t.caseId),
-    index("party_relationships_person_idx").on(t.personId),
+    index("case_participants_case_idx").on(t.caseId),
+    index("case_participants_party_idx").on(t.partyId),
   ],
 );
 
@@ -144,70 +161,80 @@ export const inquiries = pgTable(
     state: inquiryStateEnum("state").notNull().default("received"),
     purpose: inquiryPurposeEnum("purpose").notNull(),
     source: inquirySourceEnum("source").notNull(),
-    /** Client-generated submission id: a retried submission reconciles to the same inquiry (A18). */
-    submissionId: text("submission_id").notNull().unique(),
+    /** High-entropy logical submission key: a retried submission reconciles to one inquiry. */
+    submissionKey: text("submission_key").notNull().unique(),
+    /** Digest of the submitted payload; the same key with another payload is refused. */
+    payloadDigest: text("payload_digest").notNull(),
+    /** Hash of the anonymous receipt-session capability held in the host-only cookie. */
+    receiptSessionHash: text("receipt_session_hash"),
     listingId: uuid("listing_id").references(() => listings.id),
-    /** Context the visitor submitted from (page, fact, comparison), as shown on the receipt. */
+    listingRevisionId: uuid("listing_revision_id").references(() => listingRevisions.id),
+    /** Property or criteria snapshot the visitor submitted from, as shown on the receipt. */
     context: jsonb("context").notNull().default({}),
     preferredName: text("preferred_name"),
     contactMethodId: uuid("contact_method_id").references(() => contactMethods.id),
-    personId: uuid("person_id").references(() => persons.id),
+    partyId: uuid("party_id").references(() => parties.id),
     preferredLocale: publicLocaleEnum("preferred_locale"),
+    preferredChannel: text("preferred_channel"),
     callbackWindow: text("callback_window"),
     message: text("message"),
-    /** Separate and unchecked by default (A16). */
+    /** Separate and unchecked by default. */
     marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
-    ownerStaffId: uuid("owner_staff_id").references(() => staffAccounts.id),
+    ownerId: uuid("owner_id").references(() => principals.id),
+    /** The coverage queue owns new work until a named broker accepts it. */
     coverageQueue: text("coverage_queue"),
     acknowledgedAt: instant("acknowledged_at"),
     firstResponseAt: instant("first_response_at"),
     followUpAt: instant("follow_up_at"),
     caseId: uuid("case_id").references(() => cases.id),
-    duplicateOfInquiryId: uuid("duplicate_of_inquiry_id"),
+    duplicateOfInquiryId: uuid("duplicate_of_inquiry_id").references(
+      (): AnyPgColumn => inquiries.id,
+    ),
     dispositionReason: text("disposition_reason"),
   },
   (t) => [
+    check("inquiries_owned", sql`num_nonnulls(${t.ownerId}, ${t.coverageQueue}) >= 1`),
+    check("inquiries_linked_case", sql`${t.state} <> 'linked_to_case' or ${t.caseId} is not null`),
     check(
-      "inquiries_owned_after_received",
-      sql`${t.state} in ('received', 'suspected_duplicate', 'discarded') or ${t.ownerStaffId} is not null or ${t.coverageQueue} is not null`,
+      "inquiries_duplicate_of",
+      sql`${t.state} <> 'duplicate_candidate' or ${t.duplicateOfInquiryId} is not null`,
     ),
-    check("inquiries_case_linked", sql`${t.state} <> 'case_linked' or ${t.caseId} is not null`),
     index("inquiries_state_idx").on(t.state, t.createdAt),
-    index("inquiries_owner_idx").on(t.ownerStaffId, t.state),
+    index("inquiries_owner_idx").on(t.ownerId, t.state),
   ],
 );
 
-export const requirementBriefs = pgTable("requirement_briefs", {
-  ...mutable(),
-  caseId: uuid("case_id")
-    .notNull()
-    .references(() => cases.id),
-  /** Structured criteria in the shape of SearchCriteria (src/domain/search/filters.ts). */
-  criteria: jsonb("criteria").notNull().default({}),
-  acknowledgedByStaffId: uuid("acknowledged_by_staff_id").references(() => staffAccounts.id),
-  acknowledgedAt: instant("acknowledged_at"),
-  /** Set when the client changed a material item; the broker acknowledges before it drives work. */
-  pendingClientChangeAt: instant("pending_client_change_at"),
-});
-
-export const requirementBriefItems = pgTable(
-  "requirement_brief_items",
+/**
+ * Case requirements at one revision: hard constraints, preferences, unknowns and timing, each
+ * marked client-stated or broker interpretation. A client change is a new revision that the
+ * broker acknowledges; it never silently alters an active proposal.
+ */
+export const briefRevisions = pgTable(
+  "brief_revisions",
   {
-    ...mutable(),
-    briefId: uuid("brief_id")
+    id: id(),
+    caseId: uuid("case_id")
       .notNull()
-      .references(() => requirementBriefs.id),
-    kind: requirementItemKindEnum("kind").notNull(),
-    origin: requirementOriginEnum("origin").notNull(),
-    text: text("text").notNull(),
-    criterion: jsonb("criterion"),
-    position: integer("position").notNull().default(0),
+      .references(() => cases.id),
+    revisionNumber: integer("revision_number").notNull(),
+    /** [{ kind, origin, text, criterion? }] with kind in briefItemKinds. */
+    items: jsonb("items").notNull(),
+    /** Structured criteria in the shape of SearchCriteria (src/domain/search/filters.ts). */
+    criteria: jsonb("criteria").notNull().default({}),
+    authorKind: actorKindEnum("author_kind").notNull(),
+    authorId: text("author_id").notNull(),
+    createdAt: createdAt(),
+    clientAcknowledgedAt: instant("client_acknowledged_at"),
+    clientAcknowledgedById: uuid("client_acknowledged_by_id").references(() => principals.id),
+    brokerAcknowledgedAt: instant("broker_acknowledged_at"),
+    brokerAcknowledgedById: uuid("broker_acknowledged_by_id").references(() => principals.id),
   },
-  (t) => [index("requirement_brief_items_brief_idx").on(t.briefId, t.position)],
+  (t) => [uniqueIndex("brief_revisions_number_idx").on(t.caseId, t.revisionNumber)],
 );
 
-export const matches = pgTable(
-  "matches",
+/** The unique current relationship between a Case and a Listing (§6.2). */
+export const interests = pgTable(
+  "interests",
   {
     ...mutable(),
     caseId: uuid("case_id")
@@ -216,16 +243,40 @@ export const matches = pgTable(
     listingId: uuid("listing_id")
       .notNull()
       .references(() => listings.id),
-    listingVersionId: uuid("listing_version_id").references(() => listingVersions.id),
-    /** A listing that breaks a hard constraint is an alternative, never an exact match. */
-    group: matchGroupEnum("group").notNull(),
-    state: matchStateEnum("state").notNull().default("proposed"),
-    /** Constraint satisfaction, preferences and unknowns, each with its reason. */
-    fitReasons: jsonb("fit_reasons").notNull().default([]),
-    brokerRationale: text("broker_rationale"),
-    feedback: jsonb("feedback"),
+    state: interestStateEnum("state").notNull().default("suggested"),
+    /** Known match reasons and unresolved criteria; no opaque score. */
+    fitExplanation: jsonb("fit_explanation").notNull().default([]),
+    questions: jsonb("questions").notNull().default([]),
+    /** The listing revision the fit and feedback were judged against. */
+    listingRevisionId: uuid("listing_revision_id").references(() => listingRevisions.id),
+    reason: text("reason"),
   },
-  (t) => [uniqueIndex("matches_case_listing_idx").on(t.caseId, t.listingId)],
+  (t) => [
+    uniqueIndex("interests_case_listing_idx").on(t.caseId, t.listingId),
+    check(
+      "interests_declined_reason",
+      sql`${t.state} not in ('declined', 'unavailable') or ${t.reason} is not null`,
+    ),
+  ],
+);
+
+/** Revisioned feedback on an Interest; earlier feedback is never rewritten. */
+export const interestFeedback = pgTable(
+  "interest_feedback",
+  {
+    id: id(),
+    interestId: uuid("interest_id")
+      .notNull()
+      .references(() => interests.id),
+    revisionNumber: integer("revision_number").notNull(),
+    feedback: text("feedback").notNull(),
+    reasons: jsonb("reasons").notNull().default([]),
+    listingRevisionId: uuid("listing_revision_id").references(() => listingRevisions.id),
+    authorKind: actorKindEnum("author_kind").notNull(),
+    authorId: text("author_id").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("interest_feedback_number_idx").on(t.interestId, t.revisionNumber)],
 );
 
 export const tasks = pgTable(
@@ -235,26 +286,27 @@ export const tasks = pgTable(
     title: text("title").notNull(),
     purpose: text("purpose"),
     type: taskTypeEnum("type").notNull().default("general"),
-    commitment: commitmentKindEnum("commitment").notNull().default("internal"),
     state: taskStateEnum("state").notNull().default("open"),
-    ownerStaffId: uuid("owner_staff_id").references(() => staffAccounts.id),
-    /** Handoffs stay with the previous owner until the receiver accepts (§05.3). */
-    pendingOwnerStaffId: uuid("pending_owner_staff_id").references(() => staffAccounts.id),
+    ownerId: uuid("owner_id").references(() => principals.id),
+    /** A handover stays with the previous owner until the receiver accepts. */
+    pendingOwnerId: uuid("pending_owner_id").references(() => principals.id),
     dueAt: instant("due_at"),
     dueTimezone: text("due_timezone"),
+    dependsOnTaskId: uuid("depends_on_task_id").references((): AnyPgColumn => tasks.id),
     waitingOn: text("waiting_on"),
     followUpAt: instant("follow_up_at"),
+    /** A promise made to a client, distinct from internal work. */
+    promisedToClient: boolean("promised_to_client").notNull().default(false),
     evidenceRequired: boolean("evidence_required").notNull().default(false),
     outcomeNote: text("outcome_note"),
     evidenceIds: jsonb("evidence_ids"),
     completedAt: instant("completed_at"),
-    completedByStaffId: uuid("completed_by_staff_id").references(() => staffAccounts.id),
+    completedById: uuid("completed_by_id").references(() => principals.id),
     cancelReason: text("cancel_reason"),
     caseId: uuid("case_id").references(() => cases.id),
     inquiryId: uuid("inquiry_id").references(() => inquiries.id),
+    propertyId: uuid("property_id").references(() => properties.id),
     listingId: uuid("listing_id").references(() => listings.id),
-    /** Client who was promised this, for client_promise commitments. */
-    promisedToClientId: uuid("promised_to_client_id").references(() => clientAccounts.id),
   },
   (t) => [
     check(
@@ -265,8 +317,59 @@ export const tasks = pgTable(
       "tasks_done_records_outcome",
       sql`${t.state} <> 'done' or (${t.outcomeNote} is not null and ${t.completedAt} is not null)`,
     ),
-    index("tasks_owner_idx").on(t.ownerStaffId, t.state, t.dueAt),
+    check(
+      "tasks_done_evidence",
+      sql`${t.state} <> 'done' or not ${t.evidenceRequired} or ${t.evidenceIds} is not null`,
+    ),
+    check(
+      "tasks_promise_has_client_context",
+      sql`not ${t.promisedToClient} or num_nonnulls(${t.caseId}, ${t.inquiryId}) >= 1`,
+    ),
+    index("tasks_owner_idx").on(t.ownerId, t.state, t.dueAt),
     index("tasks_case_idx").on(t.caseId),
+  ],
+);
+
+/**
+ * The seller's or landlord's instruction at a defined revision (§6.3): commercial terms,
+ * disclosure, media usage rights, representation scope, exclusivity, commission terms and
+ * publication permission, as recorded evidence of the brokerage agreement.
+ */
+export const sellerInstructions = pgTable(
+  "seller_instructions",
+  {
+    ...mutable(),
+    reference: reference(),
+    propertyId: uuid("property_id")
+      .notNull()
+      .references(() => properties.id),
+    listingId: uuid("listing_id").references(() => listings.id),
+    caseId: uuid("case_id").references(() => cases.id),
+    revisionNumber: integer("revision_number").notNull(),
+    supersedesId: uuid("supersedes_id").references((): AnyPgColumn => sellerInstructions.id),
+    state: sellerInstructionStateEnum("state").notNull().default("draft"),
+    commercialTerms: jsonb("commercial_terms").notNull(),
+    disclosure: jsonb("disclosure").notNull(),
+    mediaUsageRights: jsonb("media_usage_rights").notNull(),
+    representationScope: representationScopeEnum("representation_scope").notNull(),
+    exclusivity: exclusivityEnum("exclusivity").notNull().default("not_recorded"),
+    commissionTerms: text("commission_terms"),
+    publicationPermission: boolean("publication_permission").notNull().default(false),
+    /** Digest of the instruction content; acknowledgments and approvals bind to it. */
+    contentDigest: text("content_digest").notNull(),
+    evidenceDocumentIds: jsonb("evidence_document_ids").notNull().default([]),
+    agreedAt: instant("agreed_at"),
+    recordedById: uuid("recorded_by_id").references(() => principals.id),
+    expiresAt: instant("expires_at"),
+    invalidatedAt: instant("invalidated_at"),
+    invalidationReason: text("invalidation_reason"),
+  },
+  (t) => [
+    uniqueIndex("seller_instructions_revision_idx").on(t.propertyId, t.revisionNumber),
+    check(
+      "seller_instructions_agreed_evidence",
+      sql`${t.state} <> 'agreed' or (${t.agreedAt} is not null and ${t.recordedById} is not null and ${t.commissionTerms} is not null and jsonb_array_length(${t.evidenceDocumentIds}) > 0)`,
+    ),
   ],
 );
 

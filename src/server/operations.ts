@@ -1,4 +1,4 @@
-// Operation receipts (AD6, spec §19.4, A18, A40, A72). A consequential command runs at most
+// Operations (architecture §5.1, AT10, AT11). A consequential command runs at most
 // once per (actor, type, idempotency key): the first call executes in a transaction that also
 // stores its outcome; an identical retry gets that stored outcome back; the same key with a
 // different request is a conflict; a duplicate arriving while the first is still running is
@@ -6,7 +6,7 @@
 // outcome_unknown for reconciliation instead of being re-run.
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
-import { operationReceipts } from "@/db/schema";
+import { operations } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { decideReplay, type OperationStatus } from "@/domain/operation-receipt";
 import type { Executor, Transaction } from "./db";
@@ -83,13 +83,13 @@ export async function runOperation<T>(
 
     const [existing] = await tx
       .select()
-      .from(operationReceipts)
+      .from(operations)
       .where(
         and(
-          eq(operationReceipts.actorKind, actor.kind),
-          eq(operationReceipts.actorId, actor.id),
-          eq(operationReceipts.operationType, type),
-          eq(operationReceipts.idempotencyKey, idempotencyKey),
+          eq(operations.actorKind, actor.kind),
+          eq(operations.actorId, actor.id),
+          eq(operations.operationType, type),
+          eq(operations.idempotencyKey, idempotencyKey),
         ),
       );
     const decision = decideReplay(
@@ -116,29 +116,30 @@ export async function runOperation<T>(
     }
 
     const [receipt] = await tx
-      .insert(operationReceipts)
+      .insert(operations)
       .values({
         actorKind: actor.kind,
         actorId: actor.id,
         operationType: type,
         idempotencyKey,
         requestHash,
+        expectedRevision: input.expectedVersion ?? null,
         status: "in_progress",
       })
-      .returning({ id: operationReceipts.id });
+      .returning({ id: operations.id });
     if (!receipt) throw new Error("Operation receipt insert returned no row.");
     const operationId = receipt.id;
 
     const settle = (status: OperationStatus, outcome: unknown) =>
       tx
-        .update(operationReceipts)
+        .update(operations)
         .set({
           status,
           outcome,
           completedAt: new Date(),
-          version: sql`${operationReceipts.version} + 1`,
+          version: sql`${operations.version} + 1`,
         })
-        .where(eq(operationReceipts.id, operationId));
+        .where(eq(operations.id, operationId));
 
     try {
       const result = toJson(
@@ -181,7 +182,7 @@ export interface OperationView {
   readonly outcome: unknown;
 }
 
-/** Looks up a command by its key, for "did my timed-out submission go through?" (A18). */
+/** Looks up a command by its key, for "did my timed-out submission go through?" (AT10). */
 export async function findOperation(
   db: Executor,
   actor: Actor,
@@ -190,17 +191,17 @@ export async function findOperation(
 ): Promise<OperationView | null> {
   const [row] = await db
     .select({
-      operationId: operationReceipts.id,
-      status: operationReceipts.status,
-      outcome: operationReceipts.outcome,
+      operationId: operations.id,
+      status: operations.status,
+      outcome: operations.outcome,
     })
-    .from(operationReceipts)
+    .from(operations)
     .where(
       and(
-        eq(operationReceipts.actorKind, actor.kind),
-        eq(operationReceipts.actorId, actor.id),
-        eq(operationReceipts.operationType, type),
-        eq(operationReceipts.idempotencyKey, idempotencyKey),
+        eq(operations.actorKind, actor.kind),
+        eq(operations.actorId, actor.id),
+        eq(operations.operationType, type),
+        eq(operations.idempotencyKey, idempotencyKey),
       ),
     );
   return row ?? null;
@@ -218,16 +219,14 @@ export async function reconcileOperation(
   const outcome =
     settlement.status === "succeeded" ? toJson(settlement.outcome) : { code: settlement.code };
   const rows = await db
-    .update(operationReceipts)
+    .update(operations)
     .set({
       status: settlement.status,
       outcome,
       completedAt: new Date(),
-      version: sql`${operationReceipts.version} + 1`,
+      version: sql`${operations.version} + 1`,
     })
-    .where(
-      and(eq(operationReceipts.id, operationId), eq(operationReceipts.status, "outcome_unknown")),
-    )
-    .returning({ id: operationReceipts.id });
+    .where(and(eq(operations.id, operationId), eq(operations.status, "outcome_unknown")))
+    .returning({ id: operations.id });
   return rows.length === 1;
 }

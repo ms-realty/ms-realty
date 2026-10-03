@@ -1,0 +1,14 @@
+{
+  "brand": "MS Realty",
+  "agencyKind": "Real estate agency",
+  "homeHeading": "MS Realty",
+  "homeIntro": "Buy, rent, sell or let property with the MS Realty team.",
+  "clientAccessHeading": "Sign in to My journey",
+  "staffAccessHeading": "Staff sign-in",
+  "languageSuggestion": {
+    "label": "Language suggestion",
+    "message": "This page is also available in English.",
+    "switch": "Continue in English",
+    "dismiss": "Hide this suggestion"
+  }
+}

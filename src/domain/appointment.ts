@@ -1,5 +1,6 @@
-// Appointments (spec §07.5, F07, F22). A time suggestion is not a confirmation, and a new
-// proposal keeps the confirmed arrangement until the replacement is agreed.
+// Appointments (architecture §6.4). A requested window or a tentative proposal is not a
+// confirmation, and a reschedule keeps the confirmed arrangement until the replacement is
+// accepted. Confirmation occupies exclusive resource intervals (broker, property access).
 import type { Actor } from "./capabilities";
 import { allowed, type Decision, defineMachine, denied, firstDenial, need } from "./state-machine";
 import type { TransitionSpec } from "./transition";
@@ -21,6 +22,10 @@ export type AppointmentFormat = (typeof appointmentFormats)[number];
 
 export const propertyAccessStates = ["unknown", "requested", "confirmed", "unavailable"] as const;
 export type PropertyAccessState = (typeof propertyAccessStates)[number];
+
+/** Resources a confirmed appointment occupies exclusively for its interval (AT30). */
+export const appointmentResourceKinds = ["broker", "property_access"] as const;
+export type AppointmentResourceKind = (typeof appointmentResourceKinds)[number];
 
 export const appointmentMachine = defineMachine<AppointmentState>(appointmentStates, {
   requested: ["proposed", "confirmed", "declined", "cancelled"],
@@ -46,15 +51,21 @@ export interface AppointmentEvidence {
   readonly slot?: Slot;
   readonly hostAvailable?: boolean;
   readonly propertyAccess?: PropertyAccessState;
-  /** False when the external calendar sync is stale: no instant confirmation claims (A51). */
-  readonly calendarSyncCurrent?: boolean;
+  /** At least one client participant besides the host. */
+  readonly participantCount?: number;
+  /** The explicit manual step: external busy periods entered or the external calendar checked. */
+  readonly externalBusyChecked?: boolean;
+  /** No internal resource conflict for the interval, travel buffers included. */
+  readonly resourcesFree?: boolean;
+  /** The listing's availability is confirmed under policy (§7.1), not merely published. */
+  readonly availabilityConfirmed?: boolean;
   readonly attendanceRecorded?: boolean;
   /** No-show handling starts with a factual check, not an automated penalty. */
   readonly factualCheckNote?: string;
   readonly reason?: string;
 }
 
-/** What a client may do through the same record (F07 step 6); everything else is staff work. */
+/** What a client may do through the same record; everything else is staff work. */
 const clientAppointmentTargets: readonly AppointmentState[] = ["cancelled", "reschedule_requested"];
 
 export function guardAppointmentTransition(
@@ -82,7 +93,10 @@ export function guardAppointmentTransition(
         need(evidence.slot?.timezone, "timezone_required"),
         need(evidence.hostAvailable, "host_unavailable"),
         need(evidence.propertyAccess === "confirmed", "property_access_unconfirmed"),
-        need(evidence.calendarSyncCurrent !== false, "calendar_sync_stale"),
+        need((evidence.participantCount ?? 0) > 0, "participants_required"),
+        need(evidence.externalBusyChecked, "external_busy_check_required"),
+        need(evidence.resourcesFree, "appointment_conflict"),
+        need(evidence.availabilityConfirmed, "availability_reconfirmation_required"),
       );
     case "completed":
       return need(evidence.attendanceRecorded, "attendance_required");
@@ -112,7 +126,7 @@ export interface AppointmentArrangement {
 }
 
 /**
- * The arrangement participants should rely on now (A21): while a reschedule is pending, the
+ * The arrangement participants should rely on now (AT32): while a reschedule is pending, the
  * previously confirmed slot stays in force; a proposal alone never replaces it.
  */
 export function effectiveSlot(appointment: AppointmentArrangement): Slot | null {

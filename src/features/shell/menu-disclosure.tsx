@@ -1,49 +1,34 @@
-"use client";
+import type { ReactNode } from "react";
+import { cx } from "@/ui/cx";
+import { ChevronDownIcon } from "@/ui/icons";
 
-import { usePathname } from "next/navigation";
-import { type ReactNode, useEffect, useState } from "react";
-import { Disclosure, DisclosurePanel } from "react-aria-components";
-import { Button, cx, icons } from "@/ui";
-
-/** Compact-width navigation: a disclosure that pushes content down and closes on navigation. */
+/**
+ * Compact-width navigation as a native disclosure: it opens and closes without JavaScript, and
+ * the shell's DisclosureBehavior adds Escape, outside-click and close-on-navigation.
+ */
 export function MenuDisclosure({
   label,
   children,
   className,
   panelClassName,
-  quiet = false,
 }: {
   label: ReactNode;
   children: ReactNode;
   className?: string;
   panelClassName?: string;
-  /** A full-width, borderless trigger for preferences inside a sidebar. */
-  quiet?: boolean;
 }) {
-  const pathname = usePathname();
-  const [expanded, setExpanded] = useState(false);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: closes whenever the route changes.
-  useEffect(() => setExpanded(false), [pathname]);
-
   return (
-    <Disclosure
-      isExpanded={expanded}
-      onExpandedChange={setExpanded}
-      className={cx("contents", className)}
-    >
-      <Button
-        slot="trigger"
-        variant={quiet ? "tertiary" : "secondary"}
-        className={quiet ? "w-full justify-between px-2.5 text-start text-text" : "px-3"}
+    <details data-dismissible="" className={cx("group/menu contents", className)}>
+      <summary
+        className={cx(
+          "inline-flex min-h-control cursor-pointer items-center gap-1.5 rounded-control border border-border bg-surface px-3 text-compact font-semibold text-action",
+          "transition-colors duration-(--duration-fast) hover:bg-selected group-open/menu:bg-selected",
+        )}
       >
         {label}
-        <icons.ChevronDownIcon
-          className={cx("size-4 transition-transform", expanded && "rotate-180")}
-        />
-      </Button>
-      <DisclosurePanel className={cx("order-last basis-full", panelClassName)}>
-        {children}
-      </DisclosurePanel>
-    </Disclosure>
+        <ChevronDownIcon className="size-4 transition-transform duration-(--duration-fast) group-open/menu:rotate-180" />
+      </summary>
+      <div className={cx("order-last basis-full", panelClassName)}>{children}</div>
+    </details>
   );
 }

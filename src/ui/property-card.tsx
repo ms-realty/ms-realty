@@ -73,7 +73,7 @@ export function PropertyCard({
       aria-labelledby={titleId}
       data-compared={isCompared || undefined}
       className={cx(
-        "group relative flex flex-col overflow-hidden rounded-card border border-divider bg-surface shadow-raised",
+        "group relative flex flex-col overflow-hidden rounded-panel border border-divider bg-surface shadow-raised",
         "transition-[box-shadow,border-color] duration-(--duration-base) ease-(--ease-out)",
         "has-[a:hover]:shadow-hover",
         "data-compared:border-action data-compared:ring-1 data-compared:ring-action",
@@ -88,7 +88,7 @@ export function PropertyCard({
           </div>
         )}
         {availability ? (
-          <div className="absolute start-3 top-3 rounded-md bg-surface/95 shadow-raised">
+          <div className="absolute start-3 top-3 rounded-control bg-surface/95 shadow-raised">
             {availability}
           </div>
         ) : null}
@@ -145,7 +145,7 @@ export function PropertyCard({
             {highlights.map((highlight) => (
               <li
                 key={highlight}
-                className="rounded-md bg-subtle px-2 py-0.5 text-caption text-text"
+                className="rounded-control bg-subtle px-2 py-0.5 text-caption text-text"
               >
                 {highlight}
               </li>
@@ -165,7 +165,7 @@ export function PropertyCard({
         >
           <span
             aria-hidden="true"
-            className="inline-flex size-[1.125rem] items-center justify-center rounded-[4px] border-[1.5px] border-border bg-surface text-text-inverse group-data-selected/compare:border-action group-data-selected/compare:bg-action"
+            className="inline-flex size-[1.125rem] items-center justify-center rounded-control border-[1.5px] border-border bg-surface text-text-inverse group-data-selected/compare:border-action group-data-selected/compare:bg-action"
           >
             {isCompared ? <CheckIcon className="size-3.5" /> : null}
           </span>

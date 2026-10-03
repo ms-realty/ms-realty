@@ -1,4 +1,4 @@
-// One-time legacy import (spec F32). DATABASE_URL names the target database.
+// One-time legacy import (architecture §18.2, AT55). DATABASE_URL names the target database.
 //
 //   npm run import:legacy -- --dry-run --out <dir>
 //   npm run import:legacy -- --apply [--rows <sourceKey,...>] [--batch IM-YYYY-NNNNNN] [--out <dir>]

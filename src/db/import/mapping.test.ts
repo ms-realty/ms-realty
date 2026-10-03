@@ -1,5 +1,5 @@
-// F32 mapping over the real frozen extraction: unknown stays unknown, nothing is approved,
-// published or made indexable by the import.
+// AT21/AT55 mapping over the real frozen extraction: unknown stays unknown, protected facts
+// survive exactly, and nothing is approved, published or made indexable by the import.
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   buildImportItems,
@@ -18,17 +18,24 @@ const ofType = <T extends ImportItem>(type: T["type"]) =>
   items.filter((i): i is T => i.type === type);
 const listing = (reference: string) =>
   ofType<ListingItem>("listing").find((l) => l.reference === reference) as ListingItem;
-const factOf = (l: ListingItem, key: string) => l.facts.find((f) => f.fieldKey === key);
+type Recorded = Record<string, { state: string; value: unknown }>;
+const termFacts = (l: ListingItem) => l.revision.terms.facts as Recorded;
+/** A property fact of revision 1, or a commercial term fact of listing revision 1. */
+const factOf = (l: ListingItem, key: string) =>
+  l.propertyFacts.find((f) => f.fieldKey === key) ?? termFacts(l)[key];
 /** Every fact the legacy record gave, including a merged duplicate's evidence-only ones. */
-const recorded = (l: ListingItem) =>
-  l.version.snapshot.facts as Record<string, { state: string; value: unknown }>;
+const recorded = (l: ListingItem): Recorded => ({
+  ...((l.listing.legacyIdentity.propertyFactsAsRecorded as Recorded | undefined) ??
+    Object.fromEntries(l.propertyFacts.map((f) => [f.fieldKey, f]))),
+  ...termFacts(l),
+});
 
 beforeAll(async () => {
   sources = await loadLegacySources();
   items = buildImportItems(sources);
 });
 
-describe("legacy import mapping (F32)", () => {
+describe("legacy import mapping (AT21, AT55)", () => {
   it("maps every legacy record to one item with a unique source key", () => {
     expect(ofType("listing")).toHaveLength(165);
     expect(ofType("media")).toHaveLength(1725);
@@ -55,8 +62,8 @@ describe("legacy import mapping (F32)", () => {
 
   it("never turns an unrecorded value into zero or false", () => {
     for (const l of ofType<ListingItem>("listing")) {
-      for (const f of l.facts) {
-        if (f.state !== "known") expect(f.value, `${l.reference} ${f.fieldKey}`).toBeNull();
+      for (const [key, f] of Object.entries(recorded(l))) {
+        if (f.state !== "known") expect(f.value, `${l.reference} ${key}`).toBeNull();
       }
       expect(recorded(l).rooms?.state).toBe("unknown");
     }
@@ -120,8 +127,11 @@ describe("legacy import mapping (F32)", () => {
   it("a merged duplicate joins its survivor's property and brings no property facts", () => {
     const duplicates = ofType<ListingItem>("listing").filter((l) => l.mergedInto);
     expect(duplicates).toHaveLength(38);
+    const byReference = new Map(ofType<ListingItem>("listing").map((l) => [l.reference, l]));
     for (const d of duplicates) {
-      expect(d.facts.every((f) => f.subject === "listing")).toBe(true);
+      expect(d.propertyFacts).toEqual([]);
+      // Its listing revision binds the survivor's fact revision.
+      expect(d.factDigest).toBe(byReference.get(d.mergedInto as string)?.factDigest);
     }
     const dup = listing("MS-CRAWL-0144");
     expect(dup.mergedInto).toBe("MS-00749");
@@ -176,28 +186,41 @@ describe("legacy import mapping (F32)", () => {
 
   it("records commercial availability at the freeze, never as available", () => {
     const states = ofType<ListingItem>("listing").map((l) => l.listing.commercialState);
-    expect(states.filter((s) => s === "availability_unconfirmed")).toHaveLength(30);
+    expect(states.filter((s) => s === "confirmation_required")).toHaveLength(30);
     expect(states.filter((s) => s === "withdrawn")).toHaveLength(135);
     for (const l of ofType<ListingItem>("listing")) {
-      expect(l.version.snapshot.commercial).toHaveProperty("reason");
-      expect(l.listing.availabilityCheckedAt !== null).toBe(
-        l.listing.commercialState === "availability_unconfirmed",
-      );
+      expect(l.listing.availabilityBasis).toMatch(/launch freeze MSR-LAUNCH-FREEZE-1/);
+      expect(l.revision.terms.availability).toMatchObject({ state: l.listing.commercialState });
     }
   });
 
-  it("drafts every legacy translation and binds the owner approval to version 1", () => {
+  it("binds each listing revision digest to its content and fact revision", () => {
+    const l = listing("MS-00815");
+    expect(l.revision.contentDigest).toMatch(/^[0-9a-f]{64}$/);
+    const other = listing("MS-00101");
+    expect(other.revision.contentDigest).not.toBe(l.revision.contentDigest);
+    expect(l.revision.media.map((m) => m.position)).toEqual(l.mediaKeys.map((_, i) => i));
+  });
+
+  it("drafts every legacy translation; the owner approval is source-as-is evidence only", () => {
     const listings = ofType<ListingItem>("listing");
     const translations = listings.flatMap((l) => l.translations);
     expect(translations).toHaveLength(990);
     expect(translations.some((t) => t.locale === "bg")).toBe(false);
     for (const l of listings) {
       expect(l.approval).toMatchObject({
-        kind: "legacy_owner_publication_approval",
-        scope: { evidenceReference: "MSR-LISTING-PUBLICATION-1" },
+        kind: "legacy_source_as_is",
+        evidence: { evidenceReference: "MSR-LISTING-PUBLICATION-1" },
+        scope: { decision: "publish_source_as_is" },
       });
+      // Not factual review, not translation approval, not indexability, not media review.
       expect(l.approval?.scope.doesNotCover).toEqual(
-        expect.arrayContaining(["translation approval", "translation indexability"]),
+        expect.arrayContaining([
+          "listing fact verification",
+          "translation approval",
+          "translation indexability",
+          "media review",
+        ]),
       );
     }
     const ruSource = listings.filter((l) =>
@@ -205,8 +228,8 @@ describe("legacy import mapping (F32)", () => {
     );
     expect(ruSource).toHaveLength(52);
     for (const l of ruSource) {
-      expect(l.version.snapshot.text).toMatchObject({ humanReviewed: false });
-      expect(l.version.snapshot.legacySource).toMatchObject({ locale: "ru" });
+      expect(l.revision.sourceCopy.text).toMatchObject({ humanReviewed: false });
+      expect(l.revision.sourceCopy.legacySource).toMatchObject({ locale: "ru" });
     }
   });
 

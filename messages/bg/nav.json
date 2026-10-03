@@ -1,0 +1,27 @@
+{
+  "primaryLabel": "Основна навигация",
+  "utilitiesLabel": "Инструменти",
+  "home": "Начална страница на MS Realty",
+  "buy": "Купуване",
+  "rent": "Наемане",
+  "sellLet": "Продажба / Отдаване",
+  "areas": "Райони",
+  "aboutContact": "За нас и контакт",
+  "saved": "Запазени",
+  "language": "Език",
+  "contact": "Контакт",
+  "myJourney": "Моят път",
+  "menu": "Меню",
+  "journey": {
+    "label": "Моят път",
+    "overview": "Преглед",
+    "properties": "Имоти",
+    "appointments": "Срещи",
+    "messages": "Съобщения",
+    "documents": "Документи",
+    "caseSwitcher": "Случай",
+    "help": "Помощ",
+    "broker": "Вашият брокер",
+    "team": "Екипът на MS Realty"
+  }
+}

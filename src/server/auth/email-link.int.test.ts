@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { emailSignInTokens, outboxMessages, rateLimitBuckets } from "@/db/schema";
+import { emailSignInTokens, externalActions, rateLimitBuckets } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { dispatchMessage } from "../jobs/outbox";
 import { TestMessageProvider } from "../jobs/provider";
@@ -18,7 +18,7 @@ import {
 } from "./email-link";
 import { createSession, readSession } from "./sessions";
 
-// F13 / A33 / A34: enumeration-safe, rate-limited, single-use and scanner-safe sign-in links.
+// AT38 (local): enumeration-safe, rate-limited, single-use and scanner-safe sign-in links.
 let t: TestDatabase;
 beforeAll(async () => {
   t = await createTestDatabase();
@@ -56,7 +56,7 @@ async function linkFor(email: string, kind: "staff" | "client", returnTo?: strin
   await requestEmailLink(t.db, { email, accountKind: kind, clientIp: ip(), returnTo, queue });
   await runJobs();
   const provider = new TestMessageProvider();
-  const rows = await t.db.select().from(outboxMessages).where(eq(outboxMessages.state, "queued"));
+  const rows = await t.db.select().from(externalActions).where(eq(externalActions.state, "queued"));
   for (const row of rows) await dispatchMessage(t.db, provider, row.id);
   const sent = provider.sent.find((m) => m.recipient === email.toLowerCase());
   const url = new URL(String(sent?.secretParams?.url));
@@ -97,8 +97,10 @@ describe("requesting a link", () => {
     await runJobs();
     const after = await t.db.select().from(emailSignInTokens);
     expect(after.length - before.length).toBe(1);
-    const outbox = await t.db.select().from(outboxMessages);
-    expect(outbox.map((m) => m.recipient)).not.toContain("nobody@example.test");
+    const outbox = await t.db.select().from(externalActions);
+    expect(outbox.map((m) => (m.payload as { recipient: string }).recipient)).not.toContain(
+      "nobody@example.test",
+    );
   });
 
   it("stores only the token hash and puts the link in a secret that dispatch clears", async () => {
@@ -106,7 +108,7 @@ describe("requesting a link", () => {
     const { token } = await linkFor(client.email, "client");
     const rows = await t.db.select().from(emailSignInTokens);
     expect(JSON.stringify(rows)).not.toContain(token);
-    const outbox = await t.db.select().from(outboxMessages);
+    const outbox = await t.db.select().from(externalActions);
     expect(JSON.stringify(outbox)).not.toContain(token);
   });
 

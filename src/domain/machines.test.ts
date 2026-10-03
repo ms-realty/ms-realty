@@ -1,40 +1,44 @@
 import { describe, expect, it } from "vitest";
 import { appointmentMachine } from "./appointment";
 import { approvalMachine } from "./approval";
-import { buyerCaseMachine } from "./buyer-case";
+import { demandMachine, dispositionMachine, serviceIntakeMachine, supplyMachine } from "./case";
 import { documentMachine } from "./document";
+import { externalActionMachine } from "./external-action";
 import { inquiryMachine } from "./inquiry";
-import { commercialMachine, editorialMachine, freshnessMachine } from "./listing";
+import { interestMachine } from "./interest";
+import { commercialMachine, editorialMachine } from "./listing";
+import { localeMachine } from "./localized-revision";
 import { messageMachine } from "./message";
+import { privacyRequestMachine } from "./privacy";
 import { proposalMachine } from "./proposal";
-import { destinationOutcomeMachine, distributionMachine } from "./publication";
-import { rentalCaseMachine } from "./rental-case";
-import { reservationMachine } from "./reservation";
-import { sellerCaseMachine } from "./seller-case";
-import { serviceRequestMachine } from "./service-request";
+import { deliveryMachine, publicationMachine } from "./publication";
+import { sellerInstructionMachine } from "./seller-instruction";
 import type { Machine } from "./state-machine";
+import { subscriptionMachine } from "./subscription";
 import { taskMachine } from "./task";
-import { translationMachine } from "./translation";
 
 const machines: Record<string, Machine<string>> = {
   inquiry: inquiryMachine,
-  buyerCase: buyerCaseMachine,
-  sellerCase: sellerCaseMachine,
-  rentalCase: rentalCaseMachine,
+  demandCase: demandMachine,
+  supplyCase: supplyMachine,
+  serviceIntakeCase: serviceIntakeMachine,
+  caseDisposition: dispositionMachine,
+  interest: interestMachine,
   commercial: commercialMachine,
   editorial: editorialMachine,
-  distribution: distributionMachine,
-  freshness: freshnessMachine,
-  translation: translationMachine,
+  locale: localeMachine,
+  publication: publicationMachine,
+  delivery: deliveryMachine,
   appointment: appointmentMachine,
   message: messageMachine,
   document: documentMachine,
   proposal: proposalMachine,
   task: taskMachine,
   approval: approvalMachine,
-  destinationOutcome: destinationOutcomeMachine,
-  serviceRequest: serviceRequestMachine,
-  reservation: reservationMachine,
+  sellerInstruction: sellerInstructionMachine,
+  subscription: subscriptionMachine,
+  externalAction: externalActionMachine,
+  privacyRequest: privacyRequestMachine,
 };
 
 describe("every transition table", () => {

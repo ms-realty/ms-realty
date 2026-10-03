@@ -1,4 +1,4 @@
-// Human-readable (markdown) and machine-readable (JSON) report of an import batch (F32).
+// Human-readable (markdown) and machine-readable (JSON) report of an import batch (AT55).
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
@@ -118,8 +118,8 @@ export function renderMarkdown(r: ImportReport): string {
   );
   if (b.mode === "dry_run") {
     lines.push(
-      "A dry run writes only the import tables. No property, listing, fact, media, approval,",
-      "translation, URL decision, place or content record was created or changed.",
+      "A dry run writes only the import tables. No property, fact revision, listing, listing revision,",
+      "media, approval, localized revision, URL decision, place or content record was created or changed.",
       "",
     );
   }
@@ -192,9 +192,12 @@ export function renderMarkdown(r: ImportReport): string {
 
   lines.push("## What the import never does", "");
   lines.push(
-    "- Publishes nothing: every listing and content page stays `never_published`.",
-    "- Approves no translation: legacy translations are drafts; none is indexable.",
-    "- Clears no media: rights `unknown`, review `pending`, storage `staging` (A54).",
+    "- Publishes nothing: no publication manifest or current publication exists; every content page stays `never_published`.",
+    "- Confirms no availability: listings are `confirmation_required` or `withdrawn`, never `available`.",
+    "- Reviews no fact: fact revision 1 is unreviewed and no property has an approved fact revision.",
+    "- Approves no translation: localized revisions are drafts; none is indexable.",
+    "- Treats MSR-LISTING-PUBLICATION-1 as source-as-is evidence only, not factual review or translation approval.",
+    "- Clears no media: not sealed, scan pending, rights `unknown`, audience private, review `pending` (AT28).",
     "- Overwrites no existing record: differences are update proposals for a reviewer.",
     "",
   );

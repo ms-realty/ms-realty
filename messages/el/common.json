@@ -1,0 +1,14 @@
+{
+  "brand": "MS Realty",
+  "agencyKind": "Μεσιτικό γραφείο",
+  "homeHeading": "MS Realty",
+  "homeIntro": "Αγοράστε, νοικιάστε, πουλήστε ή εκμισθώστε ακίνητο με την ομάδα της MS Realty.",
+  "clientAccessHeading": "Σύνδεση στην «Η πορεία μου»",
+  "staffAccessHeading": "Σύνδεση προσωπικού",
+  "languageSuggestion": {
+    "label": "Πρόταση γλώσσας",
+    "message": "Αυτή η σελίδα είναι διαθέσιμη και στα ελληνικά.",
+    "switch": "Συνέχεια στα ελληνικά",
+    "dismiss": "Απόκρυψη πρότασης"
+  }
+}

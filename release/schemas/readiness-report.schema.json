@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "snapshotId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "evaluatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "releaseSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "environment": {
+          "type": "string",
+          "enum": ["local", "ci", "staging", "production"]
+        },
+        "specVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "manifestDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["releaseSha", "environment", "specVersion", "manifestDigest", "gaps"],
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "policyRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "policyDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "required": ["policyRevision", "policyDigest"],
+      "additionalProperties": false
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["pass", "blocked"]
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "R00",
+              "R01",
+              "R02",
+              "R03",
+              "R04",
+              "R05",
+              "R06",
+              "R07",
+              "R08",
+              "R09",
+              "R10",
+              "R11",
+              "R12"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "stage": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pass", "blocked"]
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "title", "stage", "status", "blockers", "evidenceIds"],
+        "additionalProperties": false
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "id": {
+            "type": ["string", "null"]
+          },
+          "type": {
+            "type": ["string", "null"]
+          },
+          "gate": {
+            "type": ["string", "null"]
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "counted": {
+            "type": "boolean"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["file", "id", "type", "gate", "digest", "counted", "reasons"],
+        "additionalProperties": false
+      }
+    },
+    "legacyGates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "crawl_inventory",
+              "redirect_reviews",
+              "localized_sitemap",
+              "structured_data",
+              "listing_quality_review",
+              "runtime_smoke",
+              "production_app_layer",
+              "live_services",
+              "monitoring_rollback",
+              "payload_runtime",
+              "r2_media_coverage",
+              "production_recovery"
+            ]
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "R00",
+                "R01",
+                "R02",
+                "R03",
+                "R04",
+                "R05",
+                "R06",
+                "R07",
+                "R08",
+                "R09",
+                "R10",
+                "R11",
+                "R12"
+              ]
+            }
+          },
+          "approved": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "disposition", "gates", "approved"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "snapshotId",
+    "evaluatedAt",
+    "release",
+    "policy",
+    "verdict",
+    "gates",
+    "evidence",
+    "legacyGates"
+  ],
+  "additionalProperties": false,
+  "$id": "readiness-report.schema.json",
+  "title": "ReadinessReport"
+}

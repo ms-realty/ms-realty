@@ -46,7 +46,7 @@ export function EmptyState({
     <div
       data-kind={kind}
       className={cx(
-        "flex flex-col items-start gap-3 rounded-card border border-dashed border-border bg-surface p-6",
+        "flex flex-col items-start gap-3 rounded-panel border border-dashed border-border bg-surface p-6",
         className,
       )}
     >

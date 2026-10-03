@@ -46,7 +46,7 @@ export function Receipt({
   return (
     <section
       aria-labelledby={titleId}
-      className="flex flex-col gap-4 rounded-card border border-success bg-surface p-5 sm:p-6"
+      className="flex flex-col gap-4 rounded-panel border border-success bg-surface p-5 sm:p-6"
     >
       <div className="flex items-start gap-3">
         <SuccessIcon className="mt-1 size-7 text-success" />

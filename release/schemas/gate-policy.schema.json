@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "policyRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "specVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "trustedKeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "keyId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "publicKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidenceTypes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+            }
+          }
+        },
+        "required": ["keyId", "owner", "publicKey", "evidenceTypes"],
+        "additionalProperties": false
+      }
+    },
+    "evidenceTypes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "environments": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["local", "ci", "staging", "production", "release"]
+            }
+          },
+          "maxAgeMinutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "signatureRequired": {
+            "type": "boolean"
+          },
+          "reviewerRequired": {
+            "type": "boolean"
+          },
+          "bindsArtifacts": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "environments",
+          "maxAgeMinutes",
+          "signatureRequired",
+          "reviewerRequired",
+          "bindsArtifacts"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "R00",
+              "R01",
+              "R02",
+              "R03",
+              "R04",
+              "R05",
+              "R06",
+              "R07",
+              "R08",
+              "R09",
+              "R10",
+              "R11",
+              "R12"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "stage": {
+            "type": "string",
+            "enum": ["pre_cutover", "cutover", "post_cutover"]
+          },
+          "exitEvidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "R00",
+                "R01",
+                "R02",
+                "R03",
+                "R04",
+                "R05",
+                "R06",
+                "R07",
+                "R08",
+                "R09",
+                "R10",
+                "R11",
+                "R12"
+              ]
+            }
+          },
+          "requiredEvidence": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+            }
+          },
+          "requiredAssertions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^AT(0[1-9]|[1-5]\\d|6[0-8])$"
+            }
+          },
+          "requiresCompleteManifest": {
+            "type": "boolean"
+          },
+          "requiresLegacyMapping": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "stage",
+          "exitEvidence",
+          "dependsOn",
+          "requiredEvidence",
+          "requiredAssertions",
+          "requiresCompleteManifest",
+          "requiresLegacyMapping"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "legacyGates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "crawl_inventory",
+              "redirect_reviews",
+              "localized_sitemap",
+              "structured_data",
+              "listing_quality_review",
+              "runtime_smoke",
+              "production_app_layer",
+              "live_services",
+              "monitoring_rollback",
+              "payload_runtime",
+              "r2_media_coverage",
+              "production_recovery"
+            ]
+          },
+          "disposition": {
+            "type": "string",
+            "enum": ["retained_obligation", "replacement_proof", "retirement"]
+          },
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "R00",
+                "R01",
+                "R02",
+                "R03",
+                "R04",
+                "R05",
+                "R06",
+                "R07",
+                "R08",
+                "R09",
+                "R10",
+                "R11",
+                "R12"
+              ]
+            }
+          },
+          "evidenceTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+            }
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approval": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "approvedBy": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "approvedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                  },
+                  "evidenceId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+                  }
+                },
+                "required": ["approvedBy", "approvedAt", "evidenceId"],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["id", "disposition", "gates", "evidenceTypes", "note", "approval"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyRevision",
+    "specVersion",
+    "trustedKeys",
+    "evidenceTypes",
+    "gates",
+    "legacyGates"
+  ],
+  "additionalProperties": false,
+  "$id": "gate-policy.schema.json",
+  "title": "GatePolicy"
+}

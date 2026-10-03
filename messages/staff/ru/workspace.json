@@ -1,0 +1,19 @@
+{
+  "label": "Рабочее пространство",
+  "secondaryLabel": "Управление",
+  "today": "Сегодня",
+  "inquiries": "Запросы",
+  "cases": "Дела",
+  "calendar": "Календарь",
+  "inventory": "Объекты",
+  "reviews": "Проверки",
+  "content": "Контент",
+  "operations": "Операции",
+  "settings": "Настройки",
+  "more": "Ещё",
+  "search": "Поиск по записям",
+  "interfaceLanguage": "Язык интерфейса",
+  "todayHeading": "Сегодня",
+  "account": "Учётная запись",
+  "session": "Сеанс"
+}

@@ -19,6 +19,10 @@ cp .env.example .env.local        # then fill in local values
 npm run dev                       # http://localhost:3000/bg
 ```
 
+One app serves three hosts (architecture §11.1): public `http://localhost:3000/bg`, client
+`http://my.localhost:3000/bg/access` and staff `http://app.localhost:3000/bg/today`. Browsers
+resolve `*.localhost` to loopback; any other host (`127.0.0.1` too) answers only `/api/health`.
+
 ## Commands
 
 | Command | What it does |
@@ -38,7 +42,7 @@ Integration tests need a disposable Postgres; without `TEST_DATABASE_URL` they a
 locally (CI always runs them):
 
 ```sh
-docker run -d --rm --name ms-realty-test-pg -e POSTGRES_PASSWORD=pg -p 55432:5432 postgres:17-alpine
+docker run -d --rm --name ms-realty-test-pg -e POSTGRES_PASSWORD=pg -p 55432:5432 postgres:18-alpine -c max_locks_per_transaction=256
 TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/postgres npm run test:integration
 docker stop ms-realty-test-pg
 ```

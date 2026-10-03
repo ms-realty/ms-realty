@@ -1,4 +1,4 @@
-// Stage -> classify -> apply for the one-time legacy import (spec F32, A71, A72).
+// Stage -> classify -> apply for the one-time legacy import (architecture §13, §18.2, AT55).
 //
 // Staging writes only import_batches and import_rows. Every row is classified against the
 // live records: create | update_proposal | no_change | blocked | needs_review. Apply writes
@@ -6,15 +6,17 @@
 // re-run converges on no_change, a partial failure leaves every other row intact and a
 // resumed batch never writes twice. A difference from an existing record is only ever
 // proposed (update_proposal), never written.
-import { and, eq, inArray, like, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, like, sql } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { canonicalJson } from "../../domain/approval";
 import { formatReference, referencePrefixes } from "../../domain/ids";
 import type { importRowClassifications, importRowOutcomes } from "../../domain/records";
 import * as s from "../schema";
 import {
+  type ApprovalInput,
   buildImportItems,
   type ContentItem,
+  factRevisionDigest,
   type ImportItem,
   type Issue,
   importActor,
@@ -54,24 +56,24 @@ export const fieldMapping = {
   "listing.property":
     "location -> properties (country, region, settlement, neighborhood); place via registry id; public precision settlement (region for municipality-only places, and for unreviewed default-mapped area labels, which are placed in the municipality); an archived duplicate joins its survivor's property and writes no property facts",
   "listing.purpose": "sale -> sale; rent -> long_term_rent (term never recorded, warned)",
-  "listing.price":
-    "sale amount -> facts.price Money EUR minor units, period total, basis asking; price_on_request -> facts.price withheld; rent amount, or a sale record whose headline advertises a rental -> facts.price unknown + facts.price.amount_without_period",
   "listing.facts":
-    "rooms, bedrooms (a 0 needs the property record; listing/property disagreement -> unknown), area.<basis> (legacy human area decisions only), location, feature.* -> facts, source_class legacy_import, source_reference = legacy listing URL, observed_at = crawl capture",
+    "rooms, bedrooms (a 0 needs the property record; listing/property disagreement -> unknown), area.<basis> (legacy human area decisions only), location, feature.* -> property_fact_revisions revision 1 (material_change initial) + property_facts, source_class legacy_import, source_reference = legacy listing URL, observed_at = crawl capture, never reviewed; the property has no approved fact revision",
+  "listing.terms":
+    "sale amount -> listing revision terms price Money EUR minor units, period total, basis asking; price_on_request -> price withheld; rent amount, or a sale record whose headline advertises a rental -> price unknown + price.amount_without_period",
   "listing.commercial":
-    "active at freeze -> availability_unconfirmed (checked at freeze); archived -> withdrawn (reason in version + activity)",
-  "listing.version":
-    "version 1 snapshot with Bulgarian text (legacy source, or an unreviewed draft when the source was Russian) and the legacy source text",
+    "active at freeze -> confirmation_required; archived -> withdrawn; basis in availability_basis; never available, availability never confirmed; freshness unknown",
+  "listing.revision":
+    "listing_revisions revision 1: binds fact revision 1 (the survivor's for a duplicate), terms, Bulgarian source copy (legacy source, or an unreviewed draft when the source was Russian, with the original kept), disclosure and the ordered media manifest; immutable; legacy ids, lifecycle, URLs and provenance -> listings.legacy_identity",
   "listing.approval":
-    "MSR-LISTING-PUBLICATION-1 -> approvals legacy_owner_publication_approval bound to version 1 hash; distribution stays never_published",
+    "MSR-LISTING-PUBLICATION-1 -> approvals legacy_source_as_is bound to revision 1 digest: source-as-is publication evidence only, not factual review, translation approval, indexability or media review; nothing is published (no manifest, no current publication, generation 0)",
   "listing.translations":
-    "non-bg legacy translations -> translations state draft, source version 1; never approved, never indexable",
+    "non-bg legacy translations -> localized_revisions state draft bound to revision 1; never approved_for_source, never indexable",
   media:
-    "R2 objects -> media_assets in staging, rights unknown, review pending (not publication-eligible, A54); size/hash/dimensions unknown",
+    "R2 objects -> media_assets (original key = legacy R2 key; not sealed, scan and processing pending, rights unknown, audience private, review pending: not publication-eligible) + media_relations in legacy gallery order + listing_revision_media of revision 1; size/hash/dimensions unknown",
   url_decision:
     "url-decisions.json -> legacy_url_decisions keyed by domain + decoded path; spellings of one key (encoding case, bare-host slash) fold into one row with every spelling in evidence",
   content_page:
-    "approved area guides and guide documents -> content_pages + version 1 + legacy_content_approval; a municipality guide binds to the municipality place",
+    "approved area guides and guide documents -> content_pages + version 1 + legacy_content_approval; a municipality guide binds to the municipality place; never published",
 } as const;
 
 class DependencyMissing extends Error {
@@ -115,16 +117,27 @@ async function findListing(db: Executor, reference: string) {
   return row;
 }
 
-async function findVersion(db: Executor, listingId: string, versionNumber = 1) {
+async function findRevision(db: Executor, listingId: string, revisionNumber = 1) {
   const [row] = await db
     .select()
-    .from(s.listingVersions)
+    .from(s.listingRevisions)
     .where(
       and(
-        eq(s.listingVersions.listingId, listingId),
-        eq(s.listingVersions.versionNumber, versionNumber),
+        eq(s.listingRevisions.listingId, listingId),
+        eq(s.listingRevisions.revisionNumber, revisionNumber),
       ),
     );
+  return row;
+}
+
+/** The newest fact revision of a property: what a re-run is compared against. */
+async function latestFactRevision(db: Executor, propertyId: string) {
+  const [row] = await db
+    .select()
+    .from(s.propertyFactRevisions)
+    .where(eq(s.propertyFactRevisions.propertyId, propertyId))
+    .orderBy(desc(s.propertyFactRevisions.revisionNumber))
+    .limit(1);
   return row;
 }
 
@@ -197,16 +210,6 @@ async function compareListing(db: Executor, item: ListingItem) {
     .select()
     .from(s.properties)
     .where(eq(s.properties.id, listing.propertyId));
-  const facts = await db
-    .select()
-    .from(s.facts)
-    .where(
-      sql`${s.facts.propertyId} = ${listing.propertyId} or ${s.facts.listingId} = ${listing.id}`,
-    );
-  const factKey = (subject: string, fieldKey: string) => `${subject}:${fieldKey}`;
-  const current = new Map(
-    facts.map((f) => [factKey(f.listingId ? "listing" : "property", f.fieldKey), f]),
-  );
   const diffs: FieldDiff[] = diffFields([
     ["purpose", listing.purpose, item.listing.purpose],
     // A merged duplicate shares its survivor's property and never writes to it.
@@ -220,58 +223,71 @@ async function compareListing(db: Executor, item: ListingItem) {
           ],
         ]),
   ]);
-  for (const f of item.facts) {
-    const c = current.get(factKey(f.subject, f.fieldKey));
-    const incoming = { state: f.state, value: f.value, unit: f.unit, basis: f.basis };
-    const now = c ? { state: c.state, value: c.value, unit: c.unit, basis: c.basis } : null;
-    if (!same(now, incoming)) {
-      diffs.push({
-        field: `fact.${f.fieldKey}`,
-        current: c ? { ...now, sourceClass: c.sourceClass, reviewedAt: c.reviewedAt } : null,
-        incoming,
-        humanVerified: c?.reviewedByStaffId != null,
-      });
+  if (!item.mergedInto) {
+    const revision = await latestFactRevision(db, listing.propertyId);
+    const facts = revision
+      ? await db
+          .select()
+          .from(s.propertyFacts)
+          .where(eq(s.propertyFacts.factRevisionId, revision.id))
+      : [];
+    const current = new Map(facts.map((f) => [f.fieldKey, f]));
+    for (const f of item.propertyFacts) {
+      const c = current.get(f.fieldKey);
+      const incoming = { state: f.state, value: f.value, unit: f.unit, basis: f.basis };
+      const now = c ? { state: c.state, value: c.value, unit: c.unit, basis: c.basis } : null;
+      if (!same(now, incoming)) {
+        diffs.push({
+          field: `fact.${f.fieldKey}`,
+          current: c
+            ? {
+                ...now,
+                sourceClass: c.sourceClass,
+                reviewedAt: c.reviewedAt,
+                revision: revision?.revisionNumber,
+              }
+            : null,
+          incoming,
+          humanVerified: c?.reviewedById != null,
+        });
+      }
     }
   }
-  const version = await findVersion(db, listing.id);
-  if (version?.contentHash !== item.version.contentHash) {
+  const revision = await findRevision(db, listing.id);
+  if (revision?.contentDigest !== item.revision.contentDigest) {
     diffs.push({
-      field: "version.1",
-      current: version?.contentHash ?? null,
-      incoming: item.version.contentHash,
+      field: "revision.1",
+      current: revision?.contentDigest ?? null,
+      incoming: item.revision.contentDigest,
       humanVerified: false,
     });
   }
-  const translations = await db
-    .select()
-    .from(s.translations)
-    .where(
-      and(
-        eq(s.translations.subjectType, "listing"),
-        eq(s.translations.subjectId, listing.id),
-        eq(s.translations.sourceVersion, 1),
-      ),
-    );
-  for (const t of item.translations) {
-    const c = translations.find((r) => r.locale === t.locale);
-    if (!c || !same({ title: c.title, body: c.body }, { title: t.title, body: t.body })) {
-      diffs.push({
-        field: `translation.${t.locale}`,
-        current: c ? { state: c.state, title: c.title } : null,
-        incoming: { state: "draft", title: t.title },
-        humanVerified: c?.reviewedByStaffId != null,
-      });
+  if (revision) {
+    const localized = await db
+      .select()
+      .from(s.localizedRevisions)
+      .where(eq(s.localizedRevisions.sourceRevisionId, revision.id));
+    for (const t of item.translations) {
+      const c = localized.find((r) => r.locale === t.locale);
+      if (!c || !same({ title: c.title, body: c.body }, { title: t.title, body: t.body })) {
+        diffs.push({
+          field: `localized.${t.locale}`,
+          current: c ? { state: c.state, title: c.title } : null,
+          incoming: { state: "draft", title: t.title },
+          humanVerified: c?.reviewedById != null,
+        });
+      }
     }
-  }
-  if (item.approval && version) {
-    const approval = await findApproval(db, item.approval.kind, "listing_version", version.id);
-    if (!approval) {
-      diffs.push({
-        field: "approval",
-        current: null,
-        incoming: item.approval.kind,
-        humanVerified: false,
-      });
+    if (item.approval) {
+      const approval = await findApproval(db, item.approval.kind, "listing_revision", revision.id);
+      if (!approval) {
+        diffs.push({
+          field: "approval",
+          current: null,
+          incoming: item.approval.kind,
+          humanVerified: false,
+        });
+      }
     }
   }
   return { targetId: listing.id, diffs };
@@ -281,7 +297,7 @@ async function compareMedia(db: Executor, item: MediaItem) {
   const [row] = await db
     .select()
     .from(s.mediaAssets)
-    .where(eq(s.mediaAssets.r2Key, item.asset.r2Key));
+    .where(eq(s.mediaAssets.originalKey, item.asset.r2Key));
   if (!row) return null;
   const owner = item.ownerListingRef ? await findListing(db, item.ownerListingRef) : undefined;
   return {
@@ -396,21 +412,22 @@ async function nextSequence(tx: Tx, kind: string, year: number): Promise<number>
 }
 
 function legacyApproval(
-  approval: NonNullable<ListingItem["approval"]>,
+  approval: ApprovalInput,
   subjectType: string,
   subjectId: string,
   subjectHash: string,
 ): typeof s.approvals.$inferInsert {
   return {
     kind: approval.kind,
-    // Recorded as the decision the legacy system holds evidence for, by its legacy role; no
-    // staff account of the new system is claimed.
+    // The decision the legacy system holds evidence for, by its legacy role; no principal of
+    // the new system is claimed, and its scope says exactly what it does not cover.
     state: "approved",
     subjectType,
     subjectId,
     subjectVersion: 1,
     subjectHash,
     scope: approval.scope,
+    evidence: approval.evidence,
     requestedByKind: importActor.kind,
     requestedById: importActor.id,
     decidedByKind: "staff",
@@ -433,6 +450,48 @@ async function applyPlace(tx: Tx, item: PlaceItem): Promise<string> {
   return place.id;
 }
 
+/**
+ * Places an asset in a listing's gallery and in its revision 1 manifest, once: a resumed or
+ * re-run apply finds the existing relation instead of adding a second one.
+ */
+async function placeMedia(
+  tx: Tx,
+  listingId: string,
+  revisionId: string,
+  assetId: string,
+  position: number,
+): Promise<void> {
+  const [existing] = await tx
+    .select({ id: s.mediaRelations.id })
+    .from(s.mediaRelations)
+    .where(
+      and(
+        eq(s.mediaRelations.listingId, listingId),
+        eq(s.mediaRelations.mediaAssetId, assetId),
+        eq(s.mediaRelations.position, position),
+        isNull(s.mediaRelations.removedAt),
+      ),
+    );
+  const relationId =
+    existing?.id ??
+    (
+      await tx
+        .insert(s.mediaRelations)
+        .values({ listingId, mediaAssetId: assetId, position })
+        .returning({ id: s.mediaRelations.id })
+    )[0]?.id;
+  if (!relationId) throw new Error("Media relation insert returned no row.");
+  await tx
+    .insert(s.listingRevisionMedia)
+    .values({
+      listingRevisionId: revisionId,
+      mediaRelationId: relationId,
+      mediaAssetId: assetId,
+      position,
+    })
+    .onConflictDoNothing();
+}
+
 async function applyListing(tx: Tx, item: ListingItem, now: Date): Promise<string> {
   const place = item.placeKey ? await requirePlace(tx, item.placeKey) : undefined;
   if (item.lotNumber !== null) {
@@ -446,76 +505,111 @@ async function applyListing(tx: Tx, item: ListingItem, now: Date): Promise<strin
       });
   }
   // One physical property: an archived duplicate joins the property of the listing it was
-  // merged into instead of creating a second record (F32 duplicate candidates).
-  const [property] = item.mergedInto
-    ? [{ id: (await requireListing(tx, item.mergedInto)).propertyId }]
-    : await tx
-        .insert(s.properties)
-        .values({
-          reference: formatReference(
-            "property",
-            now.getUTCFullYear(),
-            await nextSequence(tx, "property", now.getUTCFullYear()),
-          ),
-          ...item.property,
-          placeId: place?.id ?? null,
-        })
-        .returning({ id: s.properties.id });
-  if (!property) throw new Error("Property insert returned no row.");
-  const { availabilityCheckedAt, ...listingValues } = item.listing;
+  // merged into, and binds that property's fact revision, instead of creating a second record.
+  let propertyId: string;
+  let factRevisionId: string;
+  if (item.mergedInto) {
+    propertyId = (await requireListing(tx, item.mergedInto)).propertyId;
+    const [factRevision] = await tx
+      .select({ id: s.propertyFactRevisions.id })
+      .from(s.propertyFactRevisions)
+      .where(
+        and(
+          eq(s.propertyFactRevisions.propertyId, propertyId),
+          eq(s.propertyFactRevisions.revisionNumber, 1),
+        ),
+      );
+    if (!factRevision) throw new DependencyMissing(`listing:${item.mergedInto}`);
+    factRevisionId = factRevision.id;
+  } else {
+    const [property] = await tx
+      .insert(s.properties)
+      .values({
+        reference: formatReference(
+          "property",
+          now.getUTCFullYear(),
+          await nextSequence(tx, "property", now.getUTCFullYear()),
+        ),
+        ...item.property,
+        placeId: place?.id ?? null,
+      })
+      .returning({ id: s.properties.id });
+    if (!property) throw new Error("Property insert returned no row.");
+    propertyId = property.id;
+    const [factRevision] = await tx
+      .insert(s.propertyFactRevisions)
+      .values({
+        propertyId,
+        revisionNumber: 1,
+        contentDigest: factRevisionDigest(item.propertyFacts),
+        materialChange: "initial",
+        createdByKind: importActor.kind,
+        createdById: importActor.id,
+        note: legacySystemSource,
+      })
+      .returning({ id: s.propertyFactRevisions.id });
+    if (!factRevision) throw new Error("Fact revision insert returned no row.");
+    factRevisionId = factRevision.id;
+    const observedAt = new Date(item.observedAt);
+    await tx.insert(s.propertyFacts).values(
+      item.propertyFacts.map((f) => ({
+        factRevisionId,
+        fieldKey: f.fieldKey,
+        state: f.state,
+        value: f.value,
+        unit: f.unit,
+        basis: f.basis,
+        note: f.note,
+        sourceClass: "legacy_import" as const,
+        sourceReference: item.sourceUrl,
+        observedAt,
+      })),
+    );
+  }
+  const { availabilityBasis, commercialState, editorialState, legacyIdentity, purpose } =
+    item.listing;
   const [listing] = await tx
     .insert(s.listings)
     .values({
       reference: item.reference,
-      propertyId: property.id,
-      ...listingValues,
-      availabilityCheckedAt: availabilityCheckedAt ? new Date(availabilityCheckedAt) : null,
-      distributionState: "never_published",
-      currentVersionNumber: 1,
+      propertyId,
+      purpose,
+      commercialState,
+      availabilityBasis,
+      editorialState,
+      legacyIdentity,
+      freshnessState: "unknown",
+      latestRevisionNumber: 1,
     })
     .returning({ id: s.listings.id });
   if (!listing) throw new Error("Listing insert returned no row.");
-  const [version] = await tx
-    .insert(s.listingVersions)
+  const { terms, sourceCopy, disclosure, contentDigest } = item.revision;
+  const [revision] = await tx
+    .insert(s.listingRevisions)
     .values({
       listingId: listing.id,
-      versionNumber: 1,
-      contentHash: item.version.contentHash,
-      sourceLocale: "bg",
-      snapshot: item.version.snapshot,
+      revisionNumber: 1,
+      factRevisionId,
+      terms,
+      sourceCopy,
+      disclosure,
+      contentDigest,
+      createdByKind: importActor.kind,
+      createdById: importActor.id,
     })
-    .returning({ id: s.listingVersions.id });
-  if (!version) throw new Error("Version insert returned no row.");
-  const observedAt = new Date(item.observedAt);
-  await tx.insert(s.facts).values(
-    item.facts.map((f) => ({
-      propertyId: f.subject === "property" ? property.id : null,
-      listingId: f.subject === "listing" ? listing.id : null,
-      fieldKey: f.fieldKey,
-      state: f.state,
-      value: f.value,
-      unit: f.unit,
-      basis: f.basis,
-      note: f.note,
-      sourceClass: "legacy_import" as const,
-      sourceReference: item.sourceUrl,
-      observedAt,
-    })),
-  );
+    .returning({ id: s.listingRevisions.id });
+  if (!revision) throw new Error("Listing revision insert returned no row.");
   if (item.approval) {
     await tx
       .insert(s.approvals)
-      .values(
-        legacyApproval(item.approval, "listing_version", version.id, item.version.contentHash),
-      );
+      .values(legacyApproval(item.approval, "listing_revision", revision.id, contentDigest));
   }
   if (item.translations.length) {
-    await tx.insert(s.translations).values(
+    await tx.insert(s.localizedRevisions).values(
       item.translations.map((t) => ({
-        subjectType: "listing",
-        subjectId: listing.id,
+        listingId: listing.id,
+        sourceRevisionId: revision.id,
         locale: t.locale,
-        sourceVersion: 1,
         state: "draft" as const,
         title: t.title,
         body: t.body,
@@ -523,22 +617,14 @@ async function applyListing(tx: Tx, item: ListingItem, now: Date): Promise<strin
       })),
     );
   }
+  // Assets applied earlier (a resumed batch) are placed now; the rest when their row applies.
   if (item.mediaKeys.length) {
     const assets = await tx
-      .select({ id: s.mediaAssets.id, r2Key: s.mediaAssets.r2Key })
+      .select({ id: s.mediaAssets.id, originalKey: s.mediaAssets.originalKey })
       .from(s.mediaAssets)
-      .where(inArray(s.mediaAssets.r2Key, item.mediaKeys));
-    if (assets.length) {
-      await tx
-        .insert(s.listingVersionMedia)
-        .values(
-          assets.map((a) => ({
-            listingVersionId: version.id,
-            mediaAssetId: a.id,
-            position: item.mediaKeys.indexOf(a.r2Key),
-          })),
-        )
-        .onConflictDoNothing();
+      .where(inArray(s.mediaAssets.originalKey, item.mediaKeys));
+    for (const a of assets) {
+      await placeMedia(tx, listing.id, revision.id, a.id, item.mediaKeys.indexOf(a.originalKey));
     }
   }
   await tx.insert(s.activityEvents).values({
@@ -546,7 +632,7 @@ async function applyListing(tx: Tx, item: ListingItem, now: Date): Promise<strin
     recordId: listing.id,
     reference: item.reference,
     messageKey: "listing.imported_from_legacy",
-    params: { commercialState: item.listing.commercialState },
+    params: { commercialState },
     summary: item.summary,
     actorKind: importActor.kind,
     actorId: importActor.id,
@@ -557,33 +643,34 @@ async function applyListing(tx: Tx, item: ListingItem, now: Date): Promise<strin
 async function applyMedia(tx: Tx, item: MediaItem): Promise<string> {
   if (!item.ownerListingRef) throw new Error("Media without an owning listing cannot be applied.");
   const owner = await requireListing(tx, item.ownerListingRef);
-  const position = item.shownIn.find((r) => r.reference === item.ownerListingRef)?.position ?? 0;
-  const [asset] = await tx
+  const { r2Key, ...asset } = item.asset;
+  const [row] = await tx
     .insert(s.mediaAssets)
     .values({
       propertyId: owner.propertyId,
-      listingId: owner.id,
-      ...item.asset,
-      storageArea: "staging",
-      byteSize: null,
+      purpose: asset.kind === "floor_plan" ? "floor_plan" : "listing_gallery",
+      ...asset,
+      originalKey: r2Key,
+      // Nothing was sealed, scanned, processed or cleared: not publication-eligible (AT28).
+      sealedKey: null,
       sha256: null,
+      byteSize: null,
+      scan: "pending",
+      processing: "pending",
       rights: "unknown",
+      audience: "private",
       review: "pending",
       modification: "none",
-      sortOrder: position,
     })
     .returning({ id: s.mediaAssets.id });
-  if (!asset) throw new Error("Media insert returned no row.");
+  if (!row) throw new Error("Media insert returned no row.");
   for (const shown of item.shownIn) {
     const listing = await findListing(tx, shown.reference);
-    const version = listing ? await findVersion(tx, listing.id) : undefined;
-    if (!version) continue;
-    await tx
-      .insert(s.listingVersionMedia)
-      .values({ listingVersionId: version.id, mediaAssetId: asset.id, position: shown.position })
-      .onConflictDoNothing();
+    const revision = listing ? await findRevision(tx, listing.id) : undefined;
+    if (!listing || !revision) continue;
+    await placeMedia(tx, listing.id, revision.id, row.id, shown.position);
   }
-  return asset.id;
+  return row.id;
 }
 
 async function applyUrlDecision(tx: Tx, item: UrlDecisionItem): Promise<string> {
@@ -672,7 +759,7 @@ export interface StagedBatch {
   readonly reference: string;
 }
 
-/** Stages and classifies every legacy item. Writes only the import tables (A71). */
+/** Stages and classifies every legacy item. Writes only the import tables (AT55). */
 export async function stageBatch(
   db: ImportDb,
   sources: LegacySources,
@@ -690,7 +777,7 @@ export async function stageBatch(
         reference,
         source: legacySystemSource,
         scope:
-          "geography, listings (property, facts, version 1, approval, translations), media, legacy URL decisions, content pages",
+          "geography, listings (property, fact revision 1, listing revision 1, source-as-is evidence, localized drafts), media, legacy URL decisions, content pages",
         mode: options.mode,
         state: "validated",
         sourceSha256: sources.sha256,
@@ -741,7 +828,7 @@ export async function findBatch(db: ImportDb, reference: string) {
   return batch;
 }
 
-/** Applies the selected rows of an apply batch, one transaction per row (A72). */
+/** Applies the selected rows of an apply batch, one transaction per row (AT55). */
 export async function applyBatch(
   db: ImportDb,
   sources: LegacySources,
@@ -800,7 +887,7 @@ export async function applyBatch(
           };
         }
         const id = await applyItem(tx, item, now);
-        await tx.insert(s.auditLog).values({
+        await tx.insert(s.auditEvents).values({
           action: "import.row_applied",
           operationId: `${reference}#${row.rowNumber}`,
           actorKind: importActor.kind,
