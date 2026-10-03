@@ -6,7 +6,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isRoutableLocale } from "@/i18n/config";
 import { localizedMetadata, requestHost } from "@/i18n/seo";
 
-export async function generateMetadata({ params }: PageProps<"/public/[locale]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/public/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   if (!isRoutableLocale(locale)) return {};
   return localizedMetadata({ locale, path: "/", host: requestHost(await headers()) });

@@ -109,7 +109,8 @@ export function normalizePhone(value: string): string | null {
   return e164Pattern.test(phone) ? phone : null;
 }
 
-const inquirySchema = z
+/** The inquiry payload; the transport registry (src/server/transport) publishes it as is. */
+export const inquirySchema = z
   .object({
     submissionKey: z.string("required").trim().refine(isIssuedSubmissionKey, "invalid"),
     purpose: z.enum(inquiryPurposes, "required"),

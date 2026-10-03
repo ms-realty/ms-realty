@@ -625,7 +625,7 @@ export function Specimen({ locale }: { locale: PublicLocale }) {
           <div className={grid}>
             <Cell label="Skeleton">
               <SkeletonRegion label={copy.loading.skeleton}>
-                <Skeleton className="aspect-[4/3] w-full rounded-card" />
+                <Skeleton className="aspect-[4/3] w-full rounded-panel" />
                 <Skeleton className="h-6 w-1/2" />
                 <Skeleton className="h-4 w-3/4" />
               </SkeletonRegion>

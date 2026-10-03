@@ -1,0 +1,27 @@
+{
+  "primaryLabel": "Hoofdnavigatie",
+  "utilitiesLabel": "Hulpmiddelen",
+  "home": "Startpagina van MS Realty",
+  "buy": "Kopen",
+  "rent": "Huren",
+  "sellLet": "Verkopen / Verhuren",
+  "areas": "Gebieden",
+  "aboutContact": "Over ons & contact",
+  "saved": "Bewaard",
+  "language": "Taal",
+  "contact": "Contact",
+  "myJourney": "Mijn traject",
+  "menu": "Menu",
+  "journey": {
+    "label": "Mijn traject",
+    "overview": "Overzicht",
+    "properties": "Woningen",
+    "appointments": "Afspraken",
+    "messages": "Berichten",
+    "documents": "Documenten",
+    "caseSwitcher": "Dossier",
+    "help": "Hulp",
+    "broker": "Uw makelaar",
+    "team": "Het team van MS Realty"
+  }
+}

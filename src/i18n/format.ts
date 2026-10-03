@@ -1,7 +1,8 @@
-// Locale formatting (spec §18.2). Display formats follow the locale; the source fact never
-// changes. Dates are instants shown in an explicit time zone (agency default Europe/Sofia).
+// Locale formatting (ux-spec §19.3). Display formats follow the route locale's regional tag
+// (displayLocales); the source fact never changes. Dates are instants shown in an explicit time
+// zone (agency default Europe/Sofia), never the server's or the browser's.
 import { type CurrencyCode, currencyMinorDigits, type PublicLocale } from "@/domain/ids";
-import { agencyTimeZone } from "./config";
+import { agencyTimeZone, displayLocale } from "./config";
 
 type Instant = Date | string | number;
 
@@ -22,7 +23,7 @@ export function formatMoney(
   }
   const digits = currencyMinorDigits[currency];
   const whole = amountMinor % 10 ** digits === 0;
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(displayLocale(locale), {
     style: "currency",
     currency,
     minimumFractionDigits: whole ? 0 : digits,
@@ -42,7 +43,7 @@ export function formatNumber(
   value: number,
   options?: Intl.NumberFormatOptions,
 ): string {
-  return new Intl.NumberFormat(locale, options).format(value);
+  return new Intl.NumberFormat(displayLocale(locale), options).format(value);
 }
 
 /** Square metres; the unit symbol is the same in every supported locale. */
@@ -65,7 +66,7 @@ export function formatDate(
     dateStyle?: Intl.DateTimeFormatOptions["dateStyle"];
   } = {},
 ): string {
-  return new Intl.DateTimeFormat(locale, { dateStyle, timeZone }).format(toDate(instant));
+  return new Intl.DateTimeFormat(displayLocale(locale), { dateStyle, timeZone }).format(toDate(instant));
 }
 
 export function formatTime(
@@ -73,7 +74,7 @@ export function formatTime(
   instant: Instant,
   { timeZone = agencyTimeZone }: ZonedOptions = {},
 ): string {
-  return new Intl.DateTimeFormat(locale, { timeStyle: "short", timeZone }).format(toDate(instant));
+  return new Intl.DateTimeFormat(displayLocale(locale), { timeStyle: "short", timeZone }).format(toDate(instant));
 }
 
 /** Date and time with the zone named, for appointments and deadlines people act on. */
@@ -82,7 +83,7 @@ export function formatDateTime(
   instant: Instant,
   { timeZone = agencyTimeZone }: ZonedOptions = {},
 ): string {
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(displayLocale(locale), {
     year: "numeric",
     month: "short",
     day: "numeric",

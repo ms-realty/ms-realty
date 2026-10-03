@@ -1,0 +1,9 @@
+{
+  "required": "Verplicht",
+  "optional": "Optioneel",
+  "errorSummary": "{count, plural, one {# antwoord moet} other {# antwoorden moeten}} worden gecorrigeerd",
+  "charactersLeft": "{count, plural, one {Nog # teken} other {Nog # tekens}}",
+  "choose": "Kies…",
+  "saveDraft": "Concept opslaan",
+  "cancel": "Annuleren"
+}

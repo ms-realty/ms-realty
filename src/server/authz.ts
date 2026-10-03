@@ -70,7 +70,7 @@ const invitedRolePresets: Partial<Record<ParticipantRole, readonly Capability[]>
 };
 
 /** Capabilities a party relationship confers on its case or property. */
-function relationshipCapabilities(
+export function relationshipCapabilities(
   role: ParticipantRole,
   authorityReviewed: boolean,
   invited: readonly Capability[],

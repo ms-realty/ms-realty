@@ -6,7 +6,6 @@ import { sql } from "drizzle-orm";
 import { fromDrizzle, PgBoss } from "pg-boss";
 import type { PublicLocale } from "@/domain/ids";
 import { issueEmailLink } from "../auth/email-link";
-import type { AccountKind } from "../auth/sessions";
 import type { Executor } from "../db";
 import { pruneRateLimits } from "../rate-limit";
 import { dispatchMessage, dispatchQueued } from "./outbox";
@@ -15,7 +14,6 @@ import type { MessageProvider } from "./provider";
 export interface JobPayloads {
   "auth.email_link": {
     email: string;
-    accountKind: AccountKind;
     returnTo: string | null;
     locale: PublicLocale;
   };
@@ -43,8 +41,15 @@ export interface SendOptions {
 export class JobQueue {
   readonly #boss: PgBoss;
 
-  constructor(connectionString: string) {
-    this.#boss = new PgBoss({ connectionString });
+  /**
+   * `producer` only enqueues (the web process): no supervision or cron in that process. The
+   * worker process omits it.
+   */
+  constructor(connectionString: string, options: { producer?: boolean } = {}) {
+    this.#boss = new PgBoss({
+      connectionString,
+      ...(options.producer ? { supervise: false, schedule: false } : {}),
+    });
     this.#boss.on("error", (error) => console.error("[jobs]", error));
   }
 

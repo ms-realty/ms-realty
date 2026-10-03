@@ -1,0 +1,11 @@
+{
+  "label": "Информация об агентстве",
+  "agencyName": "MS Realty",
+  "agencyKind": "Агентство недвижимости",
+  "callLabel": "Позвоните нам",
+  "call": "Позвонить по номеру {phone}",
+  "help": "Помощь",
+  "privacy": "Конфиденциальность",
+  "accessibility": "Доступность",
+  "copyright": "© {year} MS Realty"
+}

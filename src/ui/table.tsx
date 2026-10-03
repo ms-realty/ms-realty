@@ -48,7 +48,7 @@ export function Table({
       aria-labelledby={captionId}
       // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-scrollable.
       tabIndex={0}
-      className="max-w-full overflow-x-auto rounded-card border border-divider bg-surface"
+      className="max-w-full overflow-x-auto rounded-panel border border-divider bg-surface"
     >
       <table className="w-full min-w-max border-collapse text-start text-operational">
         <caption

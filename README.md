@@ -19,6 +19,10 @@ cp .env.example .env.local        # then fill in local values
 npm run dev                       # http://localhost:3000/bg
 ```
 
+One app serves three hosts (architecture §11.1): public `http://localhost:3000/bg`, client
+`http://my.localhost:3000/bg/access` and staff `http://app.localhost:3000/bg/today`. Browsers
+resolve `*.localhost` to loopback; any other host (`127.0.0.1` too) answers only `/api/health`.
+
 ## Commands
 
 | Command | What it does |

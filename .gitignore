@@ -18,3 +18,10 @@ playwright-report/
 /migration/
 /search/
 __pycache__/
+
+# Release readiness views are generated per release by `npm run release:evaluate`.
+/release/readiness.json
+/release/readiness.md
+
+# Storybook build output (npm run storybook:build).
+/storybook-static/

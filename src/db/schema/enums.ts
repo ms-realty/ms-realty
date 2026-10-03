@@ -78,6 +78,7 @@ import {
   importRowClassifications,
   importRowOutcomes,
   inquirySources,
+  invitationKinds,
   legacyDomains,
   legacyUrlDecisions,
   mergeSubjects,
@@ -110,6 +111,7 @@ export const actorKindEnum = pgEnum("actor_kind", actorKinds);
 export const capabilityEnum = pgEnum("capability", capabilities);
 export const roleEnum = pgEnum("role", roles);
 export const signInTokenPurposeEnum = pgEnum("sign_in_token_purpose", signInTokenPurposes);
+export const invitationKindEnum = pgEnum("invitation_kind", invitationKinds);
 export const publicLocaleEnum = pgEnum("public_locale", publicLocales);
 export const staffLocaleEnum = pgEnum("staff_locale", staffLocales);
 export const currencyEnum = pgEnum("currency", currencyCodes);

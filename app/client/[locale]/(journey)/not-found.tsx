@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { NotFoundContent } from "@/features/shell/not-found-content";
-import { homePaths } from "@/server/config/hosts";
 import { requestLocale } from "@/i18n/request-locale";
+import { homePaths } from "@/server/config/hosts";
 
 export default async function ClientNotFound() {
   const locale = await requestLocale();

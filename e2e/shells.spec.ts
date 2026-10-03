@@ -1,7 +1,9 @@
-// Locale routing and the three surface shells (spec §06, §18.2, §20.1, §20.4; F01, A01, A02;
-// plan AD9, AD15). The chromium-mobile and chromium-desktop projects run every test.
+// Locale routing and the three surface shells (ux-spec §03, §06; F01, AT03, AT61). The
+// chromium-mobile and chromium-desktop projects run every test. Host routing and cross-host
+// isolation are in hosts.spec.ts.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { hostUrl } from "./hosts";
 
 const wcag22aa = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
@@ -33,7 +35,7 @@ async function expectNoAxeViolations(page: Page) {
   expect(violations).toEqual([]);
 }
 
-test.describe("public locales (§18.2)", () => {
+test.describe("public locales (AT03)", () => {
   for (const { locale, dir, skip } of publicLocales) {
     test(`${locale} renders with lang=${locale} dir=${dir} and the shell landmarks`, async ({
       page,
@@ -83,7 +85,7 @@ test.describe("public locales (§18.2)", () => {
 });
 
 // Browser language preferences come from each context's locale (its Accept-Language).
-test.describe("locale negotiation suggests and never forces (F01, A02)", () => {
+test.describe("locale negotiation suggests and never forces (F01, AT03)", () => {
   test.describe("with a Bulgarian browser", () => {
     test.use({ locale: "bg-BG" });
 
@@ -185,7 +187,7 @@ test.describe("locale negotiation suggests and never forces (F01, A02)", () => {
   });
 });
 
-test.describe("keyboard and accessibility (§20.1)", () => {
+test.describe("keyboard and accessibility (AT61)", () => {
   test("the skip link is the first stop and moves focus to main", async ({ page }) => {
     await page.goto("/bg");
     await page.keyboard.press("Tab");
@@ -196,9 +198,16 @@ test.describe("keyboard and accessibility (§20.1)", () => {
     await expect(page.getByRole("main")).toBeFocused();
   });
 
-  for (const path of ["/bg", "/he", "/en/no-such-page", "/workspace"]) {
-    test(`${path} has no WCAG 2.2 AA violations`, async ({ page }) => {
-      await page.goto(path);
+  for (const url of [
+    "/bg",
+    "/he",
+    "/en/no-such-page",
+    hostUrl("client", "/he/access"),
+    hostUrl("staff", "/bg/today"),
+    hostUrl("staff", "/en/access"),
+  ]) {
+    test(`${url} has no WCAG 2.2 AA violations`, async ({ page }) => {
+      await page.goto(url);
       await expectNoAxeViolations(page);
     });
   }
@@ -281,7 +290,7 @@ test.describe("not found without JavaScript (§17.1, WCAG 3.1.1)", () => {
       title: "Страница не найдена",
     },
     {
-      path: "/workspace/nope",
+      path: hostUrl("staff", "/bg/nope"),
       lang: "bg",
       dir: "ltr",
       heading: "Страницата не е намерена",
@@ -322,40 +331,33 @@ test.describe("crawl policy (§20.4)", () => {
   });
 });
 
-test.describe("workspace shell (§06.3)", () => {
-  // The browser prefers English; the workspace still follows the staff preference.
-  test("uses the staff language from the preference cookie, never the URL", async ({ page }) => {
-    let response = await page.goto("/workspace");
+test.describe("workspace shell (§03.1)", () => {
+  test("staff URLs carry the interface language; / remembers the last choice", async ({ page }) => {
+    // The browser prefers English; the staff host opens its default until a choice is made.
+    const response = await page.goto(hostUrl("staff", "/"));
     expect(response?.status()).toBe(200);
-    expect(new URL(page.url()).pathname).toBe("/workspace");
+    expect(page.url()).toBe(hostUrl("staff", "/bg/today"));
     await expect(page.locator("html")).toHaveAttribute("lang", "bg");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-    await expect(page.getByRole("link", { name: "Днес" })).toHaveAttribute("aria-current", "page");
 
-    await page.context().addCookies([{ name: "staff_locale", value: "ru", url: page.url() }]);
-    response = await page.goto("/workspace");
-    expect(new URL(page.url()).pathname).toBe("/workspace");
+    await page.goto(hostUrl("staff", "/ru/today"));
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Сегодня");
   });
 
-  test("changing the interface language keeps the address", async ({ page }) => {
-    await page.goto("/workspace");
-    // Phones keep the preference under More; wide screens keep it under the account.
-    const more = page.getByRole("button", { name: "Още" });
-    if (await more.isVisible()) await more.click();
-    else
-      await page
-        .getByRole("button", { name: /Език на интерфейса/ })
-        .filter({ visible: true })
-        .first()
-        .click();
-    const form = page.locator("form:visible");
-    await form.getByRole("button", { name: /Език на интерфейса/ }).click();
-    await page.getByRole("option", { name: "English" }).click();
-    await form.getByRole("button", { name: "Приложи" }).click();
+  test("changing the interface language keeps the page", async ({ page }) => {
+    await page.goto(hostUrl("staff", "/bg/today"));
+    await page
+      .getByRole("button", { name: /Език на интерфейса/ })
+      .filter({ visible: true })
+      .first()
+      .click();
+    await page.getByRole("link", { name: "English", exact: true }).click();
+    await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Today");
-    expect(new URL(page.url()).pathname).toBe("/workspace");
+
+    await page.goto(hostUrl("staff", "/"));
+    expect(page.url()).toBe(hostUrl("staff", "/en/today"));
   });
 });

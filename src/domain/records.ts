@@ -63,6 +63,11 @@ export const principalKinds = ["staff", "client"] as const;
 export const principalStatuses = ["active", "suspended", "deactivated"] as const;
 export const staffMembershipStates = ["active", "suspended", "ended"] as const;
 export const signInTokenPurposes = ["sign_in", "invitation"] as const;
+/**
+ * Invitations (§8.3): staff enrolment and audited staff recovery are redeemed with the emailed
+ * token; a client invitation is redeemed only by the signed-in recipient.
+ */
+export const invitationKinds = ["staff_enrolment", "staff_recovery", "client_access"] as const;
 
 /**
  * The issuer of first-party identities (ADR 0002): principals are still keyed by an immutable

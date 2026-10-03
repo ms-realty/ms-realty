@@ -1,0 +1,27 @@
+{
+  "primaryLabel": "Hauptnavigation",
+  "utilitiesLabel": "Werkzeuge",
+  "home": "Startseite von MS Realty",
+  "buy": "Kaufen",
+  "rent": "Mieten",
+  "sellLet": "Verkaufen / Vermieten",
+  "areas": "Regionen",
+  "aboutContact": "Über uns & Kontakt",
+  "saved": "Gemerkt",
+  "language": "Sprache",
+  "contact": "Kontakt",
+  "myJourney": "Mein Vorgang",
+  "menu": "Menü",
+  "journey": {
+    "label": "Mein Vorgang",
+    "overview": "Übersicht",
+    "properties": "Immobilien",
+    "appointments": "Termine",
+    "messages": "Nachrichten",
+    "documents": "Dokumente",
+    "caseSwitcher": "Vorgang",
+    "help": "Hilfe",
+    "broker": "Ihr Makler",
+    "team": "Das Team von MS Realty"
+  }
+}

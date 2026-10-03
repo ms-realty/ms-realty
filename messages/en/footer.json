@@ -1,0 +1,11 @@
+{
+  "label": "Agency information",
+  "agencyName": "MS Realty",
+  "agencyKind": "Real estate agency",
+  "callLabel": "Call us",
+  "call": "Call {phone}",
+  "help": "Help",
+  "privacy": "Privacy",
+  "accessibility": "Accessibility",
+  "copyright": "© {year} MS Realty"
+}

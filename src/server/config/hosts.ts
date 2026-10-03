@@ -82,6 +82,22 @@ export function hostContextFor(
   return hostContexts.find((context) => new URL(origins[context]).host === normalized) ?? null;
 }
 
+/**
+ * The host context that serves each API family (`/api/<family>/…`). Route handlers live in
+ * app/api, outside the host trees, so proxy.ts answers any family not listed for the
+ * addressed host with 404. `/api/health` is host-neutral and never reaches the proxy.
+ */
+const apiFamilies: Readonly<Record<string, HostContext>> = {
+  inquiries: "public",
+  ops: "staff",
+};
+
+/** Whether the API path (`/api/…`) is served on this host context. */
+export function servesApi(context: HostContext, pathname: string): boolean {
+  const family = pathname.split("/")[2] ?? "";
+  return Object.hasOwn(apiFamilies, family) && apiFamilies[family] === context;
+}
+
 /** `www.` in front of the public host: answered by a permanent redirect to the apex. */
 export function isPublicWwwHost(host: string | null | undefined, origins = hostOrigins()): boolean {
   return Boolean(host) && host?.trim().toLowerCase() === `www.${new URL(origins.public).host}`;

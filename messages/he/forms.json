@@ -1,0 +1,9 @@
+{
+  "required": "חובה",
+  "optional": "רשות",
+  "errorSummary": "{count, plural, one {תשובה אחת דורשת} two {שתי תשובות דורשות} other {# תשובות דורשות}} תיקון",
+  "charactersLeft": "{count, plural, one {נותר תו אחד} two {נותרו שני תווים} other {נותרו # תווים}}",
+  "choose": "בחרו…",
+  "saveDraft": "לשמור טיוטה",
+  "cancel": "ביטול"
+}

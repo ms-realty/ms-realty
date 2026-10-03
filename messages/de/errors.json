@@ -1,0 +1,13 @@
+{
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "body": "Die Adresse ist vielleicht falsch geschrieben oder die Seite wurde verschoben.",
+    "home": "Zur Startseite"
+  },
+  "generic": {
+    "title": "Diese Seite konnte nicht angezeigt werden",
+    "body": "Versuchen Sie es erneut. Wenn es wieder passiert, rufen Sie uns an und nennen Sie die Referenz.",
+    "reference": "Referenz: {reference}",
+    "retry": "Erneut versuchen"
+  }
+}

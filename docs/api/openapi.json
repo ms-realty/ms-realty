@@ -1,0 +1,983 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MS Realty application transport",
+    "version": "0.1.0",
+    "description": "Generated from src/server/transport/registry.ts by scripts/openapi.mjs; do not edit. Application endpoints only (architecture §19.3), never raw collections. Mutations follow the §5.1 envelope: server-derived Principal, logical operation identity, expected revision where applicable, and one of the §5.1 results."
+  },
+  "servers": [
+    {
+      "url": "https://makler-realty.com",
+      "description": "Public host"
+    },
+    {
+      "url": "https://my.makler-realty.com",
+      "description": "Client host"
+    },
+    {
+      "url": "https://app.makler-realty.com",
+      "description": "Staff host"
+    }
+  ],
+  "tags": [
+    {
+      "name": "operations"
+    },
+    {
+      "name": "public_submission"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "operations.health",
+        "summary": "Minimal health check",
+        "description": "Answers on every host without a session. It reveals no dependency or secret.",
+        "tags": ["operations"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "The process answers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "const": "ok"
+                    },
+                    "build": {
+                      "type": "string",
+                      "description": "Commit SHA of the running build, or `dev`"
+                    }
+                  },
+                  "required": ["status", "build"],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "status": "ok",
+                  "build": "dev"
+                }
+              }
+            }
+          }
+        },
+        "x-host-context": "any",
+        "x-authorization": {
+          "class": "public"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": []
+      }
+    },
+    "/api/ops/readiness": {
+      "get": {
+        "operationId": "operations.readiness",
+        "summary": "Release readiness for the running build",
+        "description": "Release identity and the R00–R12 gate summary from the readiness snapshot evaluated for this exact build. A missing snapshot, or one for another release, reports every gate blocked. No secret, evidence content or personal data is returned.",
+        "tags": ["operations"],
+        "servers": [
+          {
+            "url": "https://app.makler-realty.com",
+            "description": "Staff host"
+          }
+        ],
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gate summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "release": {
+                      "type": "object",
+                      "properties": {
+                        "sha": {
+                          "description": "BUILD_SHA of the running process; null when unset",
+                          "type": ["string", "null"]
+                        }
+                      },
+                      "required": ["sha"],
+                      "additionalProperties": false
+                    },
+                    "snapshotState": {
+                      "type": "string",
+                      "enum": ["current", "missing", "other_release", "invalid"],
+                      "description": "`current` only when the readiness snapshot was evaluated for this exact build"
+                    },
+                    "snapshot": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "snapshotId": {
+                              "type": "string"
+                            },
+                            "evaluatedAt": {
+                              "type": "string"
+                            },
+                            "releaseSha": {
+                              "type": "string"
+                            },
+                            "environment": {
+                              "type": "string"
+                            },
+                            "policyRevision": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "snapshotId",
+                            "evaluatedAt",
+                            "releaseSha",
+                            "environment",
+                            "policyRevision"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "verdict": {
+                      "type": "string",
+                      "enum": ["pass", "blocked"]
+                    },
+                    "gates": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "enum": [
+                              "R00",
+                              "R01",
+                              "R02",
+                              "R03",
+                              "R04",
+                              "R05",
+                              "R06",
+                              "R07",
+                              "R08",
+                              "R09",
+                              "R10",
+                              "R11",
+                              "R12"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["pass", "blocked"]
+                          },
+                          "blockers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": ["id", "status", "blockers"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["release", "snapshotState", "snapshot", "verdict", "gates"],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "release": {
+                    "sha": null
+                  },
+                  "snapshotState": "missing",
+                  "snapshot": null,
+                  "verdict": "blocked",
+                  "gates": [
+                    {
+                      "id": "R00",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R01",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R02",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R03",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R04",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R05",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R06",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R07",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R08",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R09",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R10",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R11",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    },
+                    {
+                      "id": "R12",
+                      "status": "blocked",
+                      "blockers": ["no_snapshot"]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["UNAUTHENTICATED"]
+          },
+          "403": {
+            "description": "NOT_AUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["NOT_AUTHORIZED"]
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["INTERNAL_ERROR"]
+          }
+        },
+        "x-host-context": "staff",
+        "x-authorization": {
+          "class": "staff_session",
+          "capability": "report.read"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT67"]
+      }
+    },
+    "/api/inquiries": {
+      "get": {
+        "operationId": "inquiries.issueSubmissionKey",
+        "summary": "Issue a logical submission key for an inquiry form",
+        "description": "Returns a server-issued key (256 random bits plus a MAC) and makes sure the browser holds a receipt-session cookie.",
+        "tags": ["public_submission"],
+        "servers": [
+          {
+            "url": "https://makler-realty.com",
+            "description": "Public host"
+          }
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "A fresh submission key",
+            "headers": {
+              "set-cookie": {
+                "description": "Receipt-session cookie, when the browser has none",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "submissionKey": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["submissionKey"],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "submissionKey": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.00000000000000000000000000000000"
+                }
+              }
+            }
+          }
+        },
+        "x-host-context": "public",
+        "x-authorization": {
+          "class": "public"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT10"]
+      },
+      "post": {
+        "operationId": "inquiries.submit",
+        "summary": "Receive one inquiry",
+        "description": "One logical submission per key: the same key and payload return the same receipt (200), another payload under the key is refused. JSON clients get the receipt; a form post is answered 303 to the receipt page, or back to the form with only the key and error code.",
+        "tags": ["public_submission"],
+        "servers": [
+          {
+            "url": "https://makler-realty.com",
+            "description": "Public host"
+          }
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "submissionKey": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "enum": [
+                      "question",
+                      "callback",
+                      "viewing_request",
+                      "seller_consultation",
+                      "landlord_consultation",
+                      "service_consultation"
+                    ]
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 120
+                  },
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": ["email", "phone"]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 254
+                      }
+                    },
+                    "required": ["kind", "value"]
+                  },
+                  "message": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "listingReference": {
+                    "type": "string",
+                    "maxLength": 20
+                  },
+                  "criteria": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "callbackWindow": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "privacyNotice": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "marketingOptIn": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "website": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": ["submissionKey", "purpose", "locale", "contact", "privacyNotice"]
+              },
+              "example": {
+                "submissionKey": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.00000000000000000000000000000000",
+                "purpose": "question",
+                "locale": "bg",
+                "contact": {
+                  "kind": "email",
+                  "value": "visitor@example.test"
+                },
+                "message": "Is the apartment still offered?",
+                "privacyNotice": true
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "submissionKey": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "enum": [
+                      "question",
+                      "callback",
+                      "viewing_request",
+                      "seller_consultation",
+                      "landlord_consultation",
+                      "service_consultation"
+                    ]
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "contactKind": {
+                    "type": "string",
+                    "enum": ["email", "phone"]
+                  },
+                  "contactValue": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "listingReference": {
+                    "type": "string"
+                  },
+                  "callbackWindow": {
+                    "type": "string"
+                  },
+                  "privacyNotice": {
+                    "type": "string",
+                    "const": "on"
+                  },
+                  "marketingOptIn": {
+                    "type": "string",
+                    "const": "on"
+                  },
+                  "website": {
+                    "description": "Honeypot; people leave it empty",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "submissionKey",
+                  "purpose",
+                  "locale",
+                  "contactKind",
+                  "contactValue",
+                  "privacyNotice"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A retry of an accepted submission: the original receipt (JSON)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "receipt": {
+                      "type": "object",
+                      "properties": {
+                        "receiptId": {
+                          "type": "string",
+                          "description": "The logical submission key"
+                        },
+                        "status": {
+                          "type": "string",
+                          "const": "accepted"
+                        },
+                        "reference": {
+                          "type": "string",
+                          "description": "Human reference, e.g. RQ-2026-000042"
+                        },
+                        "acceptedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "purpose": {
+                          "type": "string",
+                          "enum": [
+                            "question",
+                            "callback",
+                            "viewing_request",
+                            "seller_consultation",
+                            "landlord_consultation",
+                            "service_consultation"
+                          ]
+                        },
+                        "locale": {
+                          "type": "string",
+                          "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                        },
+                        "listingReference": {
+                          "type": ["string", "null"]
+                        }
+                      },
+                      "required": [
+                        "receiptId",
+                        "status",
+                        "reference",
+                        "acceptedAt",
+                        "purpose",
+                        "locale",
+                        "listingReference"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "operationId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["receipt", "operationId"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Accepted (JSON)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "receipt": {
+                      "type": "object",
+                      "properties": {
+                        "receiptId": {
+                          "type": "string",
+                          "description": "The logical submission key"
+                        },
+                        "status": {
+                          "type": "string",
+                          "const": "accepted"
+                        },
+                        "reference": {
+                          "type": "string",
+                          "description": "Human reference, e.g. RQ-2026-000042"
+                        },
+                        "acceptedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "purpose": {
+                          "type": "string",
+                          "enum": [
+                            "question",
+                            "callback",
+                            "viewing_request",
+                            "seller_consultation",
+                            "landlord_consultation",
+                            "service_consultation"
+                          ]
+                        },
+                        "locale": {
+                          "type": "string",
+                          "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                        },
+                        "listingReference": {
+                          "type": ["string", "null"]
+                        }
+                      },
+                      "required": [
+                        "receiptId",
+                        "status",
+                        "reference",
+                        "acceptedAt",
+                        "purpose",
+                        "locale",
+                        "listingReference"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "operationId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["receipt", "operationId"],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "receipt": {
+                    "receiptId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.00000000000000000000000000000000",
+                    "status": "accepted",
+                    "reference": "RQ-2026-000042",
+                    "acceptedAt": "2026-09-27T09:30:00.000Z",
+                    "purpose": "question",
+                    "locale": "bg",
+                    "listingReference": null
+                  },
+                  "operationId": "8a7c2f7e-3f0d-4c1e-9d6a-2b1f0e5c4d3a"
+                }
+              }
+            }
+          },
+          "303": {
+            "description": "Form post: to the receipt page, or back to the form with the error code",
+            "headers": {
+              "location": {
+                "description": "/{locale}/requests/{key} or /{locale}/inquire?submission=…&error=…",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "CROSS_ORIGIN_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["CROSS_ORIGIN_REQUEST"]
+          },
+          "409": {
+            "description": "IDEMPOTENCY_KEY_REUSED, OPERATION_PENDING, OUTCOME_UNKNOWN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["IDEMPOTENCY_KEY_REUSED", "OPERATION_PENDING", "OUTCOME_UNKNOWN"]
+          },
+          "422": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["VALIDATION_FAILED"]
+          },
+          "429": {
+            "description": "RATE_LIMITED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["RATE_LIMITED"]
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["INTERNAL_ERROR"]
+          }
+        },
+        "x-host-context": "public",
+        "x-authorization": {
+          "class": "public"
+        },
+        "x-idempotency": "submission_key",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT01", "AT10", "AT11", "AT12", "AT13"]
+      }
+    },
+    "/api/inquiries/{submission}": {
+      "get": {
+        "operationId": "inquiries.receipt",
+        "summary": "Reconcile an inquiry receipt",
+        "description": "Acceptance state only, never contact details or the message. Needs the receipt session that submitted it; otherwise the same not-found as a submission that never arrived.",
+        "tags": ["public_submission"],
+        "servers": [
+          {
+            "url": "https://makler-realty.com",
+            "description": "Public host"
+          }
+        ],
+        "security": [
+          {
+            "receiptSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "submission",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The submission key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "receipt": {
+                      "type": "object",
+                      "properties": {
+                        "receiptId": {
+                          "type": "string",
+                          "description": "The logical submission key"
+                        },
+                        "status": {
+                          "type": "string",
+                          "const": "accepted"
+                        },
+                        "reference": {
+                          "type": "string",
+                          "description": "Human reference, e.g. RQ-2026-000042"
+                        },
+                        "acceptedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "purpose": {
+                          "type": "string",
+                          "enum": [
+                            "question",
+                            "callback",
+                            "viewing_request",
+                            "seller_consultation",
+                            "landlord_consultation",
+                            "service_consultation"
+                          ]
+                        },
+                        "locale": {
+                          "type": "string",
+                          "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                        },
+                        "listingReference": {
+                          "type": ["string", "null"]
+                        }
+                      },
+                      "required": [
+                        "receiptId",
+                        "status",
+                        "reference",
+                        "acceptedAt",
+                        "purpose",
+                        "locale",
+                        "listingReference"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["receipt"],
+                  "additionalProperties": false
+                },
+                "example": {
+                  "receipt": {
+                    "receiptId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.00000000000000000000000000000000",
+                    "status": "accepted",
+                    "reference": "RQ-2026-000042",
+                    "acceptedAt": "2026-09-27T09:30:00.000Z",
+                    "purpose": "question",
+                    "locale": "bg",
+                    "listingReference": null
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["NOT_FOUND"]
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "x-error-codes": ["INTERNAL_ERROR"]
+          }
+        },
+        "x-host-context": "public",
+        "x-authorization": {
+          "class": "receipt_session"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT10", "AT11"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorEnvelope": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "§5.1 standard code, e.g. VALIDATION_FAILED, REVISION_CONFLICT"
+              },
+              "message": {
+                "type": "string",
+                "description": "Safe English fallback; clients localize by code"
+              },
+              "fieldErrors": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "retryAfterSeconds": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "correlationId": {
+                "type": "string"
+              },
+              "outcome": {
+                "type": "string",
+                "enum": ["not_applied", "applied", "unknown"]
+              },
+              "current": {
+                "description": "Latest authorized state, on revision conflicts"
+              }
+            },
+            "required": ["code", "message", "retryable", "correlationId", "outcome"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["error"],
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "staffSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-msr_staff_session"
+      },
+      "clientSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-msr_client_session"
+      },
+      "receiptSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-msr_receipt"
+      }
+    }
+  },
+  "x-authorization-classes": {
+    "public": "Anyone. No session is read.",
+    "receipt_session": "An anonymous visitor holding the receipt-session cookie that made the submission.",
+    "client_session": "A signed-in client on the client host; record and field audience checks apply per record.",
+    "staff_session": "A signed-in staff member with an active membership on the staff host, holding the named capability.",
+    "provider_signature": "A provider webhook whose signature and account are verified."
+  }
+}

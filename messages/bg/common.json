@@ -1,0 +1,14 @@
+{
+  "brand": "MS Realty",
+  "agencyKind": "Агенция за недвижими имоти",
+  "homeHeading": "MS Realty",
+  "homeIntro": "Купете, наемете, продайте или отдайте под наем имот с екипа на MS Realty.",
+  "clientAccessHeading": "Вход към „Моят път“",
+  "staffAccessHeading": "Вход за служители",
+  "languageSuggestion": {
+    "label": "Предложение за език",
+    "message": "Тази страница е достъпна и на български.",
+    "switch": "Продължете на български",
+    "dismiss": "Скрийте предложението"
+  }
+}

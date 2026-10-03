@@ -1,0 +1,27 @@
+{
+  "primaryLabel": "ניווט ראשי",
+  "utilitiesLabel": "כלים",
+  "home": "דף הבית של MS Realty",
+  "buy": "קנייה",
+  "rent": "שכירות",
+  "sellLet": "מכירה / השכרה",
+  "areas": "אזורים",
+  "aboutContact": "אודות ויצירת קשר",
+  "saved": "שמורים",
+  "language": "שפה",
+  "contact": "יצירת קשר",
+  "myJourney": "התהליך שלי",
+  "menu": "תפריט",
+  "journey": {
+    "label": "התהליך שלי",
+    "overview": "סקירה",
+    "properties": "נכסים",
+    "appointments": "פגישות",
+    "messages": "הודעות",
+    "documents": "מסמכים",
+    "caseSwitcher": "תיק",
+    "help": "עזרה",
+    "broker": "המתווך שלכם",
+    "team": "הצוות של MS Realty"
+  }
+}

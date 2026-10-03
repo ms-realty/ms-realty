@@ -50,8 +50,10 @@ const schema = z
     STAFF_ORIGIN: origin,
     /** Secret for keyed hashes of rate-limit identifiers (IP addresses, emails). */
     AUTH_SECRET: optional,
-    WEBAUTHN_RP_ID: optional,
+    /** Display name of the WebAuthn relying parties; their ids are the private hosts. */
     WEBAUTHN_RP_NAME: optional,
+    /** "1" serves captured outgoing email at /api/test-outbox; loopback hosts only. */
+    ENABLE_TEST_OUTBOX: optional,
     EMAIL_FROM: optional,
     EMAIL_PROVIDER: optional,
     R2_ACCOUNT_ID: optional,
@@ -77,7 +79,8 @@ const schema = z
       }
       for (const key of ["APP_ORIGIN", "PUBLIC_ORIGIN", "CLIENT_ORIGIN", "STAFF_ORIGIN"] as const) {
         const value = env[key];
-        if (value && !value.startsWith("https://")) {
+        // A production build served on loopback names (the e2e server) cannot hold https.
+        if (value && !value.startsWith("https://") && !isLoopbackOrigin(value)) {
           ctx.addIssue({ code: "custom", path: [key], message: "must be https" });
         }
       }
@@ -100,7 +103,13 @@ export interface ServerEnv {
   /** Origin of each host context; private session cookies and Origin checks bind to them. */
   readonly hosts: HostOrigins;
   readonly authSecret: string;
-  readonly webauthn: { readonly rpId: string; readonly rpName: string };
+  readonly webauthn: { readonly rpName: string };
+  /**
+   * Captured outgoing email is readable at /api/test-outbox and delivered by an in-process
+   * worker. Only when asked for and every host is a loopback name, so a deployment on real
+   * hosts can never expose it.
+   */
+  readonly testOutbox: boolean;
   readonly email: { readonly from: string | undefined; readonly provider: string | undefined };
   readonly r2:
     | {
@@ -112,6 +121,12 @@ export interface ServerEnv {
     | undefined;
   /** Unset outside production: media then has no public URL and is not shown. */
   readonly mediaPublicBaseUrl: string | undefined;
+}
+
+/** `localhost` and `*.localhost` always resolve to this machine (RFC 6761). */
+export function isLoopbackOrigin(value: string): boolean {
+  const { hostname } = new URL(value);
+  return hostname === "localhost" || hostname.endsWith(".localhost");
 }
 
 const devOrigin = "http://localhost:3000";
@@ -127,18 +142,18 @@ export function parseEnv(source: Record<string, string | undefined>): ServerEnv 
   }
   const env = result.data;
   const appOrigin = env.APP_ORIGIN ?? devOrigin;
+  const hosts = parseHostOrigins(source);
   return {
     nodeEnv: env.NODE_ENV,
     production: env.NODE_ENV === "production",
     databaseUrl: env.DATABASE_URL,
     appOrigin,
     canonicalOrigin: env.CANONICAL_ORIGIN ?? appOrigin,
-    hosts: parseHostOrigins(source),
+    hosts,
     authSecret: env.AUTH_SECRET ?? devSecret,
-    webauthn: {
-      rpId: env.WEBAUTHN_RP_ID ?? new URL(appOrigin).hostname,
-      rpName: env.WEBAUTHN_RP_NAME ?? "MS Realty",
-    },
+    webauthn: { rpName: env.WEBAUTHN_RP_NAME ?? "MS Realty" },
+    testOutbox:
+      env.ENABLE_TEST_OUTBOX === "1" && Object.values(hosts).every((o) => isLoopbackOrigin(o)),
     email: { from: env.EMAIL_FROM, provider: env.EMAIL_PROVIDER },
     r2:
       env.R2_ACCOUNT_ID && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY && env.R2_BUCKET
