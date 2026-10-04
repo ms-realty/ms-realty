@@ -8,6 +8,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { openUnassignedQueueAt } from "./inquiry-queue";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
 if (!databaseUrl || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(databaseUrl).pathname))
@@ -102,7 +103,7 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await expect(page.getByText(inquiry.reference, { exact: true })).toBeVisible();
 
   const broker = await staffSession(context);
-  await page.goto(hostUrl("staff", "/en/inquiries?view=unassigned"));
+  await openUnassignedQueueAt(page, inquiry.id);
   await expect(page.locator(`[data-inquiry-id="${inquiry.id}"]`)).toContainText(inquiry.reference);
   await page.getByRole("link", { name: inquiry.reference, exact: true }).click();
   await expect(page.getByRole("heading", { name: inquiry.reference, exact: true })).toBeVisible();

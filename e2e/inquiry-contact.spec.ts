@@ -10,6 +10,7 @@ import { discoveryCopy } from "../src/features/discovery/copy";
 import { contactCopy } from "../src/features/work/contact-copy";
 import { workCopy } from "../src/features/work/copy";
 import { hostUrl, origins } from "./hosts";
+import { openUnassignedQueueAt } from "./inquiry-queue";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -235,7 +236,7 @@ for (const javaScriptEnabled of [true, false]) {
         listing: { reference: listing.reference, title: listing.title },
       });
       await signIn(context, broker.token);
-      await page.goto(hostUrl("staff", "/en/inquiries?view=unassigned"));
+      await openUnassignedQueueAt(page, received.id);
       await expect(page.locator(`[data-inquiry-id="${received.id}"]`)).toContainText(
         received.reference,
       );

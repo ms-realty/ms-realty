@@ -169,9 +169,12 @@ test("AT01/AT05/AT27: published search, local save/compare and withdrawal rechec
   await page.goto("/he/properties");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  // CSS-pixel scale: Linux WebKit refuses full-page captures over 32767 device pixels, and the
+  // Hebrew catalogue grows with listings that earlier browser projects publish.
   await page.screenshot({
     path: testInfo.outputPath("synthetic-he-discovery.png"),
     fullPage: true,
+    scale: "css",
   });
 });
 
