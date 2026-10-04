@@ -33,7 +33,7 @@ jobs:
     with:
       setup-commands: |
         npm ci --prefix gateway --ignore-scripts --no-audit --no-fund
-        docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:16.14-alpine
+        docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:16.14-alpine -c max_locks_per_transaction=256
         until docker exec ci-postgres pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
         echo "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:5432/postgres" >>"${GITHUB_ENV}"
       # Under CI, playwright.config.ts starts the server without building;
