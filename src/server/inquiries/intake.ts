@@ -265,20 +265,32 @@ export interface SubmittedInquiry {
   readonly operationId: string;
 }
 
-// Older saved contexts can lack a name or source locale. Keep the reference, but do not
-// invent a title, substitute another locale, or consult a now-changed public listing.
-const savedListingReceiptSchema = inquiryListingReceiptSchema.extend({
+// Older saved contexts can lack a name, locale or URL. Keep their reference without
+// substituting a current title or accepting an arbitrary stored link.
+const savedListingReceiptSchema = z.object({
+  reference: inquiryListingReceiptSchema.shape.reference,
   title: inquiryListingReceiptSchema.shape.title.optional().catch(null),
   locale: inquiryListingReceiptSchema.shape.locale.optional().catch(null),
+  sourceUrl: z.string().optional().catch(undefined),
 });
 
 function receiptListing(value: unknown): InquiryListingReceipt | null {
   const parsed = savedListingReceiptSchema.safeParse(value);
   if (!parsed.success) return null;
+  const reference = parsed.data.reference;
+  const canonical = parseReference(reference);
+  if (canonical?.kind !== "listing" || canonical.reference !== reference)
+    return { reference, title: null, locale: null, sourceUrl: null, publicNow: null };
+  const locale = parsed.data.locale ?? null;
+  const expectedUrl = locale
+    ? `${getEnv().canonicalOrigin}/${locale}/properties/${reference}/${listingSlug(reference)}`
+    : null;
   return {
-    reference: parsed.data.reference,
+    reference,
     title: parsed.data.title ?? null,
-    locale: parsed.data.locale ?? null,
+    locale,
+    sourceUrl: parsed.data.sourceUrl === expectedUrl ? expectedUrl : null,
+    publicNow: null,
   };
 }
 
@@ -311,6 +323,40 @@ function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
     listingReference: listing?.reference ?? null,
     selectedListingReferences: selectedListings.map((item) => item.reference),
     comparisonReferences: context?.comparisonReferences ?? [],
+  };
+}
+
+/** Recheck publication without refreshing any saved title, locale or source URL. */
+async function withCurrentPublication(
+  db: Executor,
+  receipt: InquiryReceipt,
+): Promise<InquiryReceipt> {
+  const byLocale = new Map<PublicLocale, string[]>();
+  for (const item of [receipt.listing, ...receipt.selectedListings]) {
+    if (!item?.locale) continue;
+    const parsed = parseReference(item.reference);
+    if (parsed?.kind !== "listing" || parsed.reference !== item.reference) continue;
+    byLocale.set(item.locale, [...(byLocale.get(item.locale) ?? []), item.reference]);
+  }
+  const publicReferences = new Set<string>();
+  for (const [locale, references] of byLocale) {
+    const rows = await loadPublishedListings(db, { references }, locale);
+    for (const row of rows) publicReferences.add(`${locale}:${row.reference}`);
+  }
+  const marked = (item: InquiryListingReceipt): InquiryListingReceipt => {
+    const parsed = parseReference(item.reference);
+    const known = Boolean(
+      item.locale && parsed?.kind === "listing" && parsed.reference === item.reference,
+    );
+    return {
+      ...item,
+      publicNow: known ? publicReferences.has(`${item.locale}:${item.reference}`) : null,
+    };
+  };
+  return {
+    ...receipt,
+    listing: receipt.listing ? marked(receipt.listing) : null,
+    selectedListings: receipt.selectedListings.map(marked),
   };
 }
 
@@ -610,5 +656,5 @@ export async function readInquiryReceipt(
       ),
     );
   if (!row) throw new AppError("not_found");
-  return toReceipt(row);
+  return withCurrentPublication(db, toReceipt(row));
 }
