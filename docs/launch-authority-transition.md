@@ -4,7 +4,7 @@
 
 The selected rebuild is the one application, PostgreSQL search, first-party staff workspace and identity, pg-boss worker, Cloudflare gateway/Containers, R2, and Butler (formerly Hermes) under [ADR 0002](adr/0002-implementation-deviations.md), [ADR 0003](adr/0003-openrouter-jev.md) and [ADR 0004](adr/0004-cloudflare-staging.md). The old launch report describes a different application. R00 must preserve each product obligation while binding its proof to the exact released rebuild.
 
-The current root `AGENTS.md`, also supplied directly by Ivan, limits Hermes to drafts and prohibits customer messages. A separate redesign-lineage `AGENTS.md` proposes bounded autonomous Butler actions for routine steps with receipts. Those rules conflict for customer communication. The current direct instruction governs execution: autonomous customer messages remain disabled. R00 must record any explicit owner change to that boundary before autonomous behavior can become release scope; a lineage document alone cannot authorize it.
+Ivan's direct instruction in this controller chat limits Hermes to drafts and prohibits customer messages. The candidate branch's `AGENTS.md` proposes bounded autonomous Butler actions for routine steps with receipts. Those rules conflict for customer communication. The direct instruction governs execution: autonomous customer messages remain disabled. R00 must record any explicit owner change to that boundary before autonomous behavior can become release scope; the candidate document alone cannot authorize it.
 
 | Existing launch gate | Proposed successor proof | Current disposition |
 | --- | --- | --- |
