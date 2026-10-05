@@ -40,7 +40,7 @@ describe("P12 receipt listings", () => {
     expect(unknown).toMatchObject({
       name: "Property No. MS-00912",
       nameNote: "The property's name was not saved with this inquiry.",
-      status: "We cannot check right now whether this listing is still published.",
+      status: "We can't check whether this listing is active",
       link: { href: "/en/properties?q=MS-00912", label: "Search for property No. MS-00912" },
     });
     expect(unknown?.href).toBeUndefined();

@@ -21,21 +21,24 @@ export function ReceiptListings({
             key={item.reference}
             className="min-w-0 space-y-2 rounded-panel border border-divider p-4 wrap-anywhere"
           >
-            <p className="font-semibold">
-              {item.href ? (
+            {item.href ? (
+              <p className="font-semibold">
                 <a className="text-action underline" href={item.href} lang={item.nameLang}>
                   <bdi>{item.name}</bdi>
                 </a>
-              ) : (
+              </p>
+            ) : (
+              // Only a verifiably public listing looks like a link (contract G-24).
+              <p className="text-compact text-text-muted">
                 <bdi lang={item.nameLang}>{item.name}</bdi>
-              )}
-            </p>
+              </p>
+            )}
             <p className="text-dense text-text-muted">
               <span dir="ltr">{item.referenceLabel}</span>
             </p>
             {item.nameNote ? <p className="text-dense text-text-muted">{item.nameNote}</p> : null}
             {item.warning ? <Notice tone="warning" title={item.warning} /> : null}
-            {item.status ? <p className="text-dense text-text-muted">{item.status}</p> : null}
+            {item.status ? <Notice tone="info" title={item.status} /> : null}
             <a className={buttonClass("tertiary", "max-w-full px-0")} href={item.link.href}>
               {item.link.label}
             </a>
