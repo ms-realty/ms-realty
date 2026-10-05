@@ -9,6 +9,7 @@ import { action, type HandlerContext } from "@/server/http/next";
 import { acceptInquiry, changeTask, triageInquiry } from "@/server/work/commands";
 import { recordInquiryContact } from "@/server/work/contact";
 import { handoverTask } from "@/server/work/handover";
+import { handoverReviewInput, handoverReviewInstant } from "@/server/work/handover-time";
 import { readInquiry, readTask } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
@@ -403,7 +404,7 @@ export async function taskHandoverAction(
           action: values.action,
           receiverId: values.receiverId,
           ...(values.action === "accept"
-            ? { nextAction: values.nextAction, dueAt: localInstant(values.dueAt ?? "") }
+            ? { nextAction: values.nextAction, dueAt: handoverReviewInstant(values.dueAt ?? "") }
             : values.action === "request"
               ? { reason: values.reason, reviewed: values.reviewed === "true" }
               : { reason: values.reason }),
@@ -421,7 +422,7 @@ export async function taskHandoverAction(
           reason: "",
           reviewed: "",
           nextAction: task.title,
-          dueAt: inputInstant(task.followUpAt),
+          dueAt: handoverReviewInput(task.followUpAt),
         },
       };
     },
