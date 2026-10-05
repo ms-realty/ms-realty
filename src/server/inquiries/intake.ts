@@ -27,6 +27,7 @@ import {
   selectedListingsSchema,
 } from "@/domain/inquiry-selection";
 import { ownerInquiryReceipt, ownerInquirySchema } from "@/domain/owner-inquiry";
+import { pastViewingWindows, viewingPreferencesSchema } from "@/domain/viewing-preferences";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
 import { type CookieOptions, serializeCookie } from "../auth/cookies";
@@ -143,6 +144,7 @@ export const inquirySchema = z
     /** A bounded return destination, never additional inquiry subjects. */
     comparisonReferences: comparisonReferencesSchema.optional(),
     ownerInput: ownerInquirySchema.optional(),
+    viewingPreferences: viewingPreferencesSchema.optional(),
     contentReference: contentReferenceSchema.optional(),
     /** The approved page the visitor actually reviewed. Optional for older/general clients. */
     observedManifestId: z.preprocess(blankAsUnset, z.uuid().optional()),
@@ -195,6 +197,9 @@ export const inquirySchema = z
     if (input.observedManifestId && !input.listingReference) {
       issue(["listingReference"], "required");
     }
+    if (input.viewingPreferences && input.purpose !== "viewing_request") {
+      issue(["viewingPreferences"], "viewing_purpose_required");
+    }
     if (input.ownerInput) {
       if (!["seller_consultation", "landlord_consultation"].includes(input.purpose))
         issue(["ownerInput"], "owner_purpose_required");
@@ -225,12 +230,30 @@ function fieldErrorsOf(error: z.ZodError): Record<string, string[]> {
   return errors;
 }
 
-export function parseInquiry(input: unknown): ParsedInquiry {
+/** Structural identity stays stable so elapsed preferences cannot invalidate an accepted replay. */
+function parseInquiryIntent(input: unknown): ParsedInquiry {
   const result = inquirySchema.safeParse(input);
   if (!result.success) {
     throw new AppError("validation_failed", { fieldErrors: fieldErrorsOf(result.error) });
   }
   return result.data;
+}
+
+function requireFutureViewingPreferences(input: ParsedInquiry, now = Date.now()) {
+  const past = input.viewingPreferences ? pastViewingWindows(input.viewingPreferences, now) : [];
+  if (past.length)
+    throw new AppError("validation_failed", {
+      fieldErrors: Object.fromEntries(
+        past.map((index) => [`viewingPreferences.windows.${index}.startsAtLocal`, ["past_time"]]),
+      ),
+    });
+}
+
+/** Review uses the current clock; accepted submission replay uses structural intent. */
+export function parseInquiry(input: unknown): ParsedInquiry {
+  const parsed = parseInquiryIntent(input);
+  requireFutureViewingPreferences(parsed);
+  return parsed;
 }
 
 // Receipt.
@@ -388,7 +411,7 @@ export async function submitInquiry(
   rawInput: unknown,
   context: IntakeContext,
 ): Promise<SubmittedInquiry> {
-  const input = parseInquiry(rawInput);
+  const input = parseInquiryIntent(rawInput);
   const criteria = input.criteria
     ? (() => {
         const { cursor: _cursor, ...normalized } = normalizeSearch({
@@ -404,6 +427,7 @@ export async function submitInquiry(
 
   // A retry of an accepted submission is answered from its receipt, never rate limited.
   if (!(await findOperation(db, actor, operationType, submissionKey))) {
+    requireFutureViewingPreferences(input, context.now?.getTime());
     await enforceRateLimit(db, "inquiry.ip", context.ip);
     // Checked before the operation starts so a correctable mistake is not stored as its outcome.
     if (input.listingReference && !input.observedManifestId) {
@@ -411,15 +435,17 @@ export async function submitInquiry(
     }
   }
 
-  // Source conflicts are correctable before acceptance. Roll back their attempted operation
-  // too, so an explicit refreshed review can use this same key. All other settled outcomes
-  // retain the shared operation contract, including failed, pending and unknown results.
+  // Source conflicts and elapsed preferences are correctable before acceptance. Roll back
+  // their attempted operation so the same key can be used after an explicit fresh review.
+  // Other settled outcomes retain the shared failed, pending and unknown contract.
   const settled = await db.transaction(async (outer) => {
     try {
       const result = await runOperation(
         outer,
         { actor, type: operationType, idempotencyKey: submissionKey, requestHash },
         async ({ tx, operationId }) => {
+          // A successful replay never enters this callback; a new execution rechecks the clock.
+          requireFutureViewingPreferences(input, context.now?.getTime());
           const now = context.now ?? new Date();
           const content = input.contentReference
             ? await readInquiryContent(tx, input.contentReference, input.locale)
@@ -555,6 +581,9 @@ export async function submitInquiry(
                 criteria,
                 ...(content ? { content } : {}),
                 ...(input.ownerInput ? { ownerInput: input.ownerInput } : {}),
+                ...(input.viewingPreferences
+                  ? { viewingPreferences: input.viewingPreferences }
+                  : {}),
               },
               preferredName: input.name ?? null,
               contactMethodId: method.id,
@@ -620,7 +649,15 @@ export async function submitInquiry(
       );
       return { kind: "success" as const, result };
     } catch (error) {
-      if (isAppError(error) && error.code === "version_conflict") throw error;
+      if (
+        isAppError(error) &&
+        (error.code === "version_conflict" ||
+          (error.code === "validation_failed" &&
+            Object.keys(error.fieldErrors ?? {}).some((field) =>
+              field.startsWith("viewingPreferences.windows."),
+            )))
+      )
+        throw error;
       return { kind: "error" as const, error };
     }
   });

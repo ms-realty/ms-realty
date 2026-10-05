@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { getEnv } from "../config/env";
 import { AppError } from "../errors";
 import {
+  inquirySchema,
   isIssuedSubmissionKey,
   issueSubmissionKey,
   normalizePhone,
@@ -19,6 +20,44 @@ const valid = () => ({
   contact: { kind: "email", value: "visitor@example.test" },
   message: "Is the price negotiable?",
   privacyNotice: true,
+});
+
+describe("viewing preferences", () => {
+  const viewingPreferences = {
+    version: 1,
+    provenance: "self_declared",
+    timezone: "Europe/Sofia",
+    windows: [],
+    accessNeeds: "Private synthetic access need",
+  };
+
+  it("accepts bounded self-declaration only with a viewing request", () => {
+    expect(
+      parseInquiry({
+        ...valid(),
+        purpose: "viewing_request",
+        listingReference: "MS-00001",
+        viewingPreferences,
+      }).viewingPreferences,
+    ).toEqual(viewingPreferences);
+    expect(fieldErrors({ ...valid(), viewingPreferences })).toHaveProperty("viewingPreferences");
+  });
+
+  it("keeps elapsed intent structurally readable while a new review rejects it", () => {
+    const input = {
+      ...valid(),
+      purpose: "viewing_request",
+      listingReference: "MS-00001",
+      viewingPreferences: {
+        ...viewingPreferences,
+        windows: [{ startsAtLocal: "2020-01-01T10:00", endsAtLocal: "2020-01-01T11:00" }],
+      },
+    };
+    expect(inquirySchema.safeParse(input).success).toBe(true);
+    expect(fieldErrors(input)).toMatchObject({
+      "viewingPreferences.windows.0.startsAtLocal": ["past_time"],
+    });
+  });
 });
 
 function fieldErrors(input: unknown) {

@@ -143,6 +143,30 @@ describe("transport registry", () => {
     expectTypeOf<InquiryReceipt>().toExtend<z.infer<typeof inquiryReceiptSchema>>();
   });
 
+  it("describes the bounded native viewing preference field accepted by inquiry intake", () => {
+    const inquiry = registered.find((entry) => entry.id === "inquiries.submit");
+    const native = inquiry?.body?.schemas["application/x-www-form-urlencoded"];
+    expect(native).toBeDefined();
+    const values = {
+      submissionKey: "issued-by-server",
+      purpose: "viewing_request",
+      locale: "bg",
+      contactKind: "email",
+      contactValue: "visitor@example.test",
+      privacyNotice: "on",
+      viewingPreferences: JSON.stringify({
+        version: 1,
+        provenance: "self_declared",
+        timezone: "Europe/Sofia",
+        windows: [],
+      }),
+    };
+    expect(native?.safeParse(values).success).toBe(true);
+    expect(native?.safeParse({ ...values, viewingPreferences: "x".repeat(4097) }).success).toBe(
+      false,
+    );
+  });
+
   it("docs/api/openapi.json is current (regenerate: tsx --conditions=react-server scripts/openapi.mjs)", () => {
     const committed = JSON.parse(readFileSync("docs/api/openapi.json", "utf8"));
     expect(committed).toEqual(JSON.parse(JSON.stringify(buildOpenApiDocument())));
