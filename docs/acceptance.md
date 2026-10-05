@@ -38,7 +38,7 @@ No production transition is authorized by this record. Source and local checks m
 | Closed PR #277 | Its deterministic interpretation is adapted in `src/server/ai/intent.ts` with native reviewed search chips and tests. The old optional model assistance is outside the current launch contract and remains disabled pending a separate evaluation. | Verify discovery on the release candidate, then retire the branch only after peer review confirms no unique required behavior. |
 | P12 receipt | `233a53c1` persists and projects the selected listing identity and source locale, including a receipt after withdrawal. The visible `inquiryReceiptView` still renders references alone. | Claude owns the visible saved-name and unavailable-listing presentation; Codex checks the backend contract on a real database and reviews the rendered result. |
 
-Focused local checks on this preserved branch: `src/server/ai/intent.test.ts` and `src/features/discovery/inquiry-form.test.tsx` passed, 167 tests total. Database integration checks were skipped because no disposable `TEST_DATABASE_URL` is configured in this checkout. These checks do not verify a deployed journey.
+Focused local checks on this preserved branch: intent and inquiry-form tests passed (167); staging/runtime/files tests passed (13) and the staging contract script passed (20). Inquiry intake, file workflow, work commands and handover passed on disposable PostgreSQL 16.14 (45 passed; the real ClamAV case was skipped because no scanner endpoint was provided). These checks do not verify a deployed journey or a live provider.
 
 ## Complete acceptance coverage
 
@@ -70,6 +70,15 @@ Every W01–W14 journey is open. W01–W03 cover public discovery and inquiry ow
 | R10 | BLOCKED | One immutable candidate with all earlier gates and named operator sign-off. |
 | R11–R12 | NOT STARTED | Actual cutover verification, then a staffed operating cycle and joint handoff on the same released revision. |
 
+### R00 decisions that remain open
+
+| Subject | Current evidence | Required resolution |
+| --- | --- | --- |
+| Runtime and active documents | ADR 0004 selects Cloudflare Containers and PostgreSQL 16.14 for staging after the OpenNext media blocker. `docs/architecture.md` and `docs/plan.md` still describe DigitalOcean App Platform and PostgreSQL 18 as active choices; ADR 0002 also retains that old choice. | Reconcile the active architecture/plan/ADR text with the owner-directed provider decision, qualify the actual runtime and approve the release policy. |
+| Search and legacy launch gates | The legacy launch JSON and checklist both say blocked and disagree about media coverage. The rebuild uses PostgreSQL search, while the supplied `AGENTS.md` still requires live Typesense/Meilisearch reports. | Keep the external-report requirement open until Ivan explicitly amends it, or produce genuine reports from the required live services; regenerate a coherent policy/evidence verdict. |
+| Identity, queue and assistance | The legacy gate asks for Payload runtime and Hermes worker proof. The rebuild uses first-party identity, Drizzle/pg-boss and bounded Butler tasks; ADR 0002/0003 record the design changes. | Map each old obligation to real replacement evidence with accountable approval; obtain actual provider/worker proof. A renamed component is not a passing report. |
+| Legacy inventory and recovery | The earlier 410 route approvals have been revoked for zero-loss parity. The partial route/media profile cannot pass R07. Source-as-is publication approval does not equal factual, media, locale or availability review. Monitoring and production recovery reports remain absent. | Reconcile both legacy domains and all in-scope rows/media, obtain independent parity and human reviews, then prove monitoring and isolated recovery on one candidate. |
+
 ## Owned next outcomes
 
 | ID | Owner and reserved surface | Finish condition |
@@ -77,6 +86,7 @@ Every W01–W14 journey is open. W01–W03 cover public discovery and inquiry ow
 | C-01 | MSR-CODEX: this record, requirements and decisions | Claude acknowledges the same scope revision; every open gate and valid commitment has an owner and evidence boundary. |
 | C-02 | MSR-CODEX: source/PR reconciliation only; no Figma, JSX or approved copy | Preserve and classify the local delivery commits and the unique #275/#277 work. Integrate each valid change or record exact supersession evidence; verify the resulting source and obtain Claude review before consequential integration. |
 | C-03 | MSR-CODEX: backend/server seams after the W03 contract is accepted | Complete the W03 receiver decision and real-database verification of the existing P12 saved-property receipt DTO; focused browser checks after Claude's presentation lands, then Claude review. |
+| C-04 | MSR-CODEX: R00 policy map and active architecture/plan docs | Remove provider/runtime drift under the existing owner decision; preserve blocked launch obligations, obtain Claude review and the accountable operator's policy acceptance before a new release verdict. |
 | U-01 | MSR-CLAUDE, requested: Figma W03 and its UI/copy contract, then exact review of C-02 | Return saved node/version references, explicit receiver accept/decline and review-time states, P12 saved-name/withdrawn-listing presentation, G1–G4 evidence and bounded defects. No complete-journey pass from a design frame alone. |
 | O-01 | Integration/release owner to acknowledge; operator resources and staging | Bind the accepted source to one image digest, private database/R2/Access/scanner/email proof and independent checker before protected rollout. The current partial staging profile may only be called a partial preview. |
 
