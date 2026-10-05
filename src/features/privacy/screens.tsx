@@ -431,7 +431,8 @@ export async function StaffPrivacyScreen({
             className="grid gap-4 rounded-panel border border-divider bg-surface p-5"
           >
             <h2 className="text-section font-semibold">
-              <bdi>{record.reference}</bdi> · {partyName}
+              <bdi>{record.reference}</bdi>
+              {partyName ? ` · ${partyName}` : null}
             </h2>
             <p>
               {privacyLabel(locale, record.kind)} · {privacyLabel(locale, record.state)}
