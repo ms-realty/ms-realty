@@ -45,8 +45,8 @@ export const inquiryListingReceiptSchema = z.object({
   title: z.string().min(1).nullable(),
   locale: z.enum(publicLocales).nullable(),
   sourceUrl: z.url().nullable(),
-  /** Current public projection only; the saved identity above never changes. */
-  publicNow: z.boolean(),
+  /** Current public projection; null when the old reference or locale cannot be checked. */
+  publicNow: z.boolean().nullable(),
 });
 export type InquiryListingReceipt = z.infer<typeof inquiryListingReceiptSchema>;
 

@@ -280,7 +280,7 @@ function receiptListing(value: unknown): InquiryListingReceipt | null {
   const reference = parsed.data.reference;
   const canonical = parseReference(reference);
   if (canonical?.kind !== "listing" || canonical.reference !== reference)
-    return { reference, title: null, locale: null, sourceUrl: null, publicNow: false };
+    return { reference, title: null, locale: null, sourceUrl: null, publicNow: null };
   const locale = parsed.data.locale ?? null;
   const expectedUrl = locale
     ? `${getEnv().canonicalOrigin}/${locale}/properties/${reference}/${listingSlug(reference)}`
@@ -290,7 +290,7 @@ function receiptListing(value: unknown): InquiryListingReceipt | null {
     title: parsed.data.title ?? null,
     locale,
     sourceUrl: parsed.data.sourceUrl === expectedUrl ? expectedUrl : null,
-    publicNow: false,
+    publicNow: null,
   };
 }
 
@@ -343,10 +343,16 @@ async function withCurrentPublication(
     const rows = await loadPublishedListings(db, { references }, locale);
     for (const row of rows) publicReferences.add(`${locale}:${row.reference}`);
   }
-  const marked = (item: InquiryListingReceipt): InquiryListingReceipt => ({
-    ...item,
-    publicNow: Boolean(item.locale && publicReferences.has(`${item.locale}:${item.reference}`)),
-  });
+  const marked = (item: InquiryListingReceipt): InquiryListingReceipt => {
+    const parsed = parseReference(item.reference);
+    const known = Boolean(
+      item.locale && parsed?.kind === "listing" && parsed.reference === item.reference,
+    );
+    return {
+      ...item,
+      publicNow: known ? publicReferences.has(`${item.locale}:${item.reference}`) : null,
+    };
+  };
   return {
     ...receipt,
     listing: receipt.listing ? marked(receipt.listing) : null,

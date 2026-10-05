@@ -266,7 +266,7 @@ describe("submitInquiry", () => {
       title: null,
       locale: null,
       sourceUrl: null,
-      publicNow: false,
+      publicNow: null,
     });
     expect(historical.listingReference).toBe(live.reference);
     expect(JSON.stringify(historical)).not.toMatch(/private.example|manifestId/);
@@ -284,7 +284,7 @@ describe("submitInquiry", () => {
         title: null,
         locale: null,
         sourceUrl: null,
-        publicNow: false,
+        publicNow: null,
       },
     ]);
     expect(older.selectedListingReferences).toEqual(["LEGACY-001"]);

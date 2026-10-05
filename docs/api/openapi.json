@@ -1431,7 +1431,7 @@
                                   ]
                                 },
                                 "publicNow": {
-                                  "type": "boolean"
+                                  "type": ["boolean", "null"]
                                 }
                               },
                               "required": [
@@ -1491,7 +1491,7 @@
                                 ]
                               },
                               "publicNow": {
-                                "type": "boolean"
+                                "type": ["boolean", "null"]
                               }
                             },
                             "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
@@ -1696,7 +1696,7 @@
                                   ]
                                 },
                                 "publicNow": {
-                                  "type": "boolean"
+                                  "type": ["boolean", "null"]
                                 }
                               },
                               "required": [
@@ -1756,7 +1756,7 @@
                                 ]
                               },
                               "publicNow": {
-                                "type": "boolean"
+                                "type": ["boolean", "null"]
                               }
                             },
                             "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
@@ -2170,7 +2170,7 @@
                                   ]
                                 },
                                 "publicNow": {
-                                  "type": "boolean"
+                                  "type": ["boolean", "null"]
                                 }
                               },
                               "required": [
@@ -2230,7 +2230,7 @@
                                 ]
                               },
                               "publicNow": {
-                                "type": "boolean"
+                                "type": ["boolean", "null"]
                               }
                             },
                             "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
