@@ -89,6 +89,9 @@ describe("host resolution", () => {
   it("serves each API family on its own host only", () => {
     expect(servesApi("public", "/api/inquiries")).toBe(true);
     expect(servesApi("public", "/api/inquiries/abc")).toBe(true);
+    expect(servesApi("public", "/api/public-shares/creator-session")).toBe(true);
+    expect(servesApi("client", "/api/public-shares/creator-session")).toBe(false);
+    expect(servesApi("staff", "/api/public-shares/creator-session")).toBe(false);
     expect(servesApi("client", "/api/inquiries")).toBe(false);
     expect(servesApi("staff", "/api/inquiries/abc")).toBe(false);
     expect(servesApi("public", "/api/unknown")).toBe(false);
