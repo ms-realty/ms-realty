@@ -53,6 +53,38 @@ const unknown: Fact<never> = { state: "unknown" };
 const publicFact = <T>(listing: PublishedListing, key: string): Fact<T> =>
   (listing.facts.get(key)?.fact as Fact<T> | undefined) ?? unknown;
 
+/** Only applied hard checks may appear under the workbench's "confirmed" heading. */
+function appliedCriteriaKeys(criteria: SearchCriteria): string[] {
+  return [
+    "purpose",
+    ...(criteria.propertyTypes?.length ? ["propertyType"] : []),
+    ...(criteria.placeIds?.length ? ["place"] : []),
+    "availability",
+    ...(criteria.price ? ["price"] : []),
+    ...(criteria.bedrooms ? ["bedrooms"] : []),
+    ...(criteria.rooms ? ["rooms"] : []),
+    ...(criteria.area ? [`area.${criteria.area.basis}`] : []),
+    ...(criteria.mustHave ?? []).map((key) => `feature.${key}`),
+  ];
+}
+
+function reviewedAssessment(
+  criteria: SearchCriteria,
+  base: ReturnType<typeof evaluateListing>,
+  availability: PublishedListing["commercialState"],
+) {
+  // A known hard failure ends the fit claim; the other facts were not fully assessed.
+  if (base.violated.length) return { ...base, confirmedCriteria: [] as string[] };
+  const unconfirmed = new Set(base.unconfirmed);
+  if (availability === "confirmation_required") unconfirmed.add("availability");
+  return {
+    result: unconfirmed.size ? ("needs_confirmation" as const) : ("match" as const),
+    violated: base.violated,
+    unconfirmed: [...unconfirmed],
+    confirmedCriteria: appliedCriteriaKeys(criteria).filter((key) => !unconfirmed.has(key)),
+  };
+}
+
 /** Assess one currently public listing against the same hard-filter semantics as public search. */
 export function assessPublishedCandidate(
   listing: PublishedListing,
@@ -82,7 +114,11 @@ export function assessPublishedCandidate(
     areas,
     features,
   };
-  return evaluateListing(view, { ...criteria, availability: offeredStates });
+  return reviewedAssessment(
+    criteria,
+    evaluateListing(view, { ...criteria, availability: offeredStates }),
+    view.commercial,
+  );
 }
 
 /** Candidate status is bound to one Brief revision and one current search response. */
@@ -152,10 +188,21 @@ export async function readCaseMatches(
         )
     : [];
   const interestByReference = new Map(existing.map((item) => [item.reference, item.id]));
-  const matches = result.items.map((item) => ({
-    ...item,
-    existingInterestId: interestByReference.get(item.reference) ?? null,
-  }));
+  const matches = result.items.map((item) => {
+    const unconfirmed = new Set(item.unconfirmed);
+    if (item.availability.presented === "confirmation_required") unconfirmed.add("availability");
+    const needsConfirmation = item.match === "needs_confirmation" || unconfirmed.size > 0;
+    return {
+      ...item,
+      match: needsConfirmation ? ("needs_confirmation" as const) : ("match" as const),
+      unconfirmed: [...unconfirmed],
+      confirmedCriteria:
+        needsConfirmation && unconfirmed.size === 0
+          ? []
+          : appliedCriteriaKeys(result.criteria).filter((key) => !unconfirmed.has(key)),
+      existingInterestId: interestByReference.get(item.reference) ?? null,
+    };
+  });
   return {
     status: "ready" as const,
     caseId: row.id,
@@ -223,6 +270,7 @@ export async function readCaseCandidate(
     match: assessment.result,
     violated: assessment.violated,
     unconfirmed: assessment.unconfirmed,
+    confirmedCriteria: assessment.confirmedCriteria,
     existingInterestId: existing?.id ?? null,
     sourceTimestamp: now.toISOString(),
   };

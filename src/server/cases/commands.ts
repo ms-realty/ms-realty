@@ -70,6 +70,7 @@ const interestSchema = z.object({
     .trim()
     .regex(/^MS-\d{5,}$/i),
   explanation: z.string().trim().min(3).max(1500),
+  alternativeDecision: z.literal("propose_despite_mismatch").optional(),
   matchReview: z
     .object({
       briefRevision: z.number().int().min(1),
@@ -389,6 +390,7 @@ export async function addInterest(
             match: "match" | "needs_confirmation" | "no_match";
             violated: readonly string[];
             unconfirmed: readonly string[];
+            alternativeDecision?: "propose_despite_mismatch";
           }
         | undefined;
       if (purpose) {
@@ -437,6 +439,18 @@ export async function addInterest(
                 unconfirmed: assessment.unconfirmed,
               },
             });
+          if (assessment.unconfirmed.length > 0)
+            throw new AppError("validation_failed", {
+              fieldErrors: { matchReview: ["unconfirmed_facts"] },
+            });
+          if (assessment.violated.length > 0 && !input.alternativeDecision)
+            throw new AppError("validation_failed", {
+              fieldErrors: { alternativeDecision: ["required_for_hard_mismatch"] },
+            });
+          if (assessment.violated.length === 0 && input.alternativeDecision)
+            throw new AppError("validation_failed", {
+              fieldErrors: { alternativeDecision: ["no_hard_mismatch"] },
+            });
           if (assessment.violated.length > 0 && input.explanation.length < 20)
             throw new AppError("validation_failed", {
               fieldErrors: { explanation: ["alternative_reason_required"] },
@@ -447,15 +461,22 @@ export async function addInterest(
             match: assessment.result,
             violated: assessment.violated,
             unconfirmed: assessment.unconfirmed,
+            ...(input.alternativeDecision
+              ? { alternativeDecision: input.alternativeDecision }
+              : {}),
           };
-        } else if (input.matchReview)
+        } else if (input.matchReview || input.alternativeDecision) {
           throw new AppError("validation_failed", {
-            fieldErrors: { matchReview: ["criteria_required"] },
+            fieldErrors: {
+              [input.matchReview ? "matchReview" : "alternativeDecision"]: ["criteria_required"],
+            },
           });
-      } else if (input.matchReview)
+        }
+      } else if (input.matchReview || input.alternativeDecision) {
         throw new AppError("validation_failed", {
           fieldErrors: { matchReview: ["case_kind_mismatch"] },
         });
+      }
       const [interest] = await ctx.tx
         .insert(interests)
         .values({

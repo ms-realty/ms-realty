@@ -40,18 +40,23 @@ current Brief revision to eligible public search results, separating confirmed f
 facts needing confirmation; it never treats an unknown as a hard match or searches historical
 offers. A continued page must name the Brief revision it started from and conflicts after a
 revision change. The read model returns client acknowledgment so a draft Brief remains visible.
-Each result includes `existingInterestId` for that Case–Listing relation, or null, from the
-current result page; the idempotent Interest command remains the final duplicate guard.
+Each result includes only applied, verified hard keys in `confirmedCriteria[]`; `unconfirmed[]`
+names unknown keys, including `availability` when the presented state requires confirmation.
+It also includes `existingInterestId` for that Case–Listing relation, or null, from the current
+result page; the idempotent Interest command remains the final duplicate guard.
 Staff-only `readCaseCandidate` inspects one currently public reference against a required Brief
-revision and returns its public card, known hard violations and facts needing confirmation.
+revision and returns its public card, confirmed keys, known hard violations and facts needing
+confirmation. A known hard violation ends the fit claim; `confirmedCriteria[]` and
+`unconfirmed[]` are then empty because other facts were not fully assessed.
 It cannot turn an unpublished or stale candidate into an Interest or a public recommendation.
 For a new Interest on a structured buyer/tenant Brief, `addInterest` requires `matchReview` with
 the reviewed Brief revision, public manifest, presented availability, exact violation/unknown keys
 and explicit review.
 The command recomputes that assessment inside its idempotent operation and rejects changed
-snapshots, non-offered listings and a different transaction purpose. A hard-violating alternative
-also needs a broker explanation of at least 20 characters; the recorded Case event retains the
-assessment. Human review of the explanation remains a staff responsibility.
+snapshots, unknown facts, non-offered listings and a different transaction purpose. A
+hard-violating alternative requires `alternativeDecision: "propose_despite_mismatch"` and a
+broker explanation of at least 20 characters; the recorded Case event retains the assessment
+and explicit decision. Human review of the explanation remains a staff responsibility.
 The staff workbench still has to bind this read model and explain any proposed alternative
 before O07 can pass journey acceptance.
 Staff messages intended for clients require an explicit human review bound to the exact
