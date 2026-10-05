@@ -416,8 +416,10 @@ export const endpoints = [
     summary: "Receive one inquiry",
     description:
       "One logical submission per key: the same key and payload return the same receipt (200), " +
-      "another payload under the key is refused. JSON clients get the receipt; a form post is " +
-      "answered 303 to the receipt page, or back to the form with only the key and error code.",
+      "another payload under the key is refused. JSON clients get the receipt. A form post " +
+      "returns 303 to the receipt page on success. A correctable failure returns 303 to a fresh " +
+      "form with only the key, error code and validated public context; private entries are not " +
+      "retained and must be entered again. Uncertain outcomes go to receipt reconciliation.",
     group: "public_submission",
     method: "POST",
     path: "/api/inquiries",
@@ -455,7 +457,8 @@ export const endpoints = [
       },
       {
         status: 303,
-        description: "Form post: to the receipt page, or back to the form with the error code",
+        description:
+          "Form post: receipt or reconciliation page; correctable failure returns to a fresh form without private entries",
         headers: { location: "/{locale}/requests/{key} or /{locale}/inquire?submission=…&error=…" },
       },
     ],

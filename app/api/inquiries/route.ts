@@ -4,7 +4,9 @@
 // receipt session. POST receives one inquiry: JSON from the enhanced client (201, or 200 for a
 // reconciled retry, with the receipt), or an ordinary form post without JavaScript, answered
 // with POST/Redirect/GET to the receipt page P12. No contact detail or free text ever enters a
-// URL; a failed form post returns only the submission key, safe public selection and a §5.1 error code.
+// URL. A correctable failed form post redirects to a fresh form with only the submission key,
+// validated public context and a §5.1 error code. Private entries are not retained by this
+// transport and must be entered again. The primary /inquire Server Action has its own form state.
 
 import { getDb } from "@/db/client";
 import { isPublicLocale, isUuid, parseReference, sourceLocale } from "@/domain/ids";
@@ -182,6 +184,8 @@ export async function POST(request: Request): Promise<Response> {
     ) {
       return seeOther(`/${locale}/requests/${key}`, headers);
     }
+    // This stateless redirect keeps no private draft. The destination must ask the visitor to
+    // check and send again; it cannot claim that contact details or free text were retained.
     const query = new URLSearchParams({ submission: key, error: wireCode(error.code) });
     const rawSelection = single("selectedListings");
     const rawContent = single("contentReference");

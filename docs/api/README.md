@@ -28,6 +28,14 @@ revision and do not paginate; future revision/cursor endpoints must add those sc
 implemented. Common JSON errors carry code, message, field errors where applicable, retryability,
 correlation ID, outcome, and authorized current state on revision conflicts.
 
+For `application/x-www-form-urlencoded`, a successful post redirects to the receipt page. A
+correctable failure redirects to a fresh inquiry form with a validation notice, the submission
+key and validated public selection context. This transport has no private draft:
+name, contact, message and access needs are absent from the URL and must be entered again. An
+uncertain outcome or conflicting key redirects to receipt reconciliation so the visitor can check
+the original operation before another attempt. The primary `/inquire` Server Action form has its
+own validation state; its input-retention behavior is a separate UI contract.
+
 Registry tests compare registered method/path pairs to actual route files and enforce host
 isolation, examples and generated-artifact consistency. Unimplemented groups in architecture
 §19.3 are not advertised as working APIs. Client and staff server actions remain ordinary shared
