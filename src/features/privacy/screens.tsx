@@ -21,8 +21,9 @@ import { Area, Check, Envelope, Submit, TextField } from "./forms";
 
 type Query = { error?: string; receipt?: string; after?: string; before?: string };
 function Frame({ title, lead, children }: { title: string; lead: string; children: ReactNode }) {
+  // A minmax(0, 1fr) column: a native select's longest option must not widen the page.
   return (
-    <div className="mx-auto grid max-w-4xl gap-6 px-gutter py-8">
+    <div className="mx-auto grid w-full min-w-0 max-w-4xl grid-cols-1 gap-6 px-gutter py-8">
       <h1 className="text-title font-semibold">{title}</h1>
       <p>{lead}</p>
       {children}
@@ -428,7 +429,7 @@ export async function StaffPrivacyScreen({
         return (
           <section
             key={record.id}
-            className="grid gap-4 rounded-panel border border-divider bg-surface p-5"
+            className="grid min-w-0 grid-cols-1 gap-4 rounded-panel border border-divider bg-surface p-5 wrap-anywhere"
           >
             <h2 className="text-section font-semibold">
               <bdi>{record.reference}</bdi>
@@ -445,7 +446,7 @@ export async function StaffPrivacyScreen({
               {record.dueAt ? `${c.due}: ${record.dueAt.toISOString().slice(0, 10)}` : c.awaiting}
             </p>
             {next.length ? (
-              <form method="post" action={submitPath} className="grid gap-4">
+              <form method="post" action={submitPath} className="grid min-w-0 grid-cols-1 gap-4">
                 <Envelope intent="review" id={record.id} version={record.version} />
                 {/* A wrapping label would add the chosen option to the select's accessible name. */}
                 <div className="grid gap-1">

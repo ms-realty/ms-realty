@@ -211,7 +211,12 @@ test("P05/F06/AT27: phone contact works without JavaScript and records the exact
     await expect(
       page.getByRole("heading", { name: "Inquiry received", exact: true }),
     ).toBeVisible();
-    await expect(page.getByText(listing.reference, { exact: true })).toBeVisible();
+    // P12: the receipt names the exact saved property by its reference.
+    await expect(
+      page
+        .getByRole("region", { name: "The property in this inquiry", exact: true })
+        .getByText(`No. ${listing.reference}`, { exact: true }),
+    ).toBeVisible();
     const rows = await db
       .select()
       .from(schema.inquiries)
