@@ -418,9 +418,12 @@ export async function addInterest(
               },
             });
           const assessment = assessPublishedCandidate(published, parsed.data, now);
-          const same = (received: readonly string[], current: readonly string[]) =>
-            received.length === current.length &&
-            received.every((value, index) => value === current[index]);
+          const same = (received: readonly string[], current: readonly string[]) => {
+            if (received.length !== current.length) return false;
+            const reviewed = [...received].sort();
+            const assessed = [...current].sort();
+            return reviewed.every((value, index) => value === assessed[index]);
+          };
           if (
             !same(review.violated, assessment.violated) ||
             !same(review.unconfirmed, assessment.unconfirmed)
