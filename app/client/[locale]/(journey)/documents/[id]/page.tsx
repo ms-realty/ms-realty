@@ -6,6 +6,6 @@ export default async function Page({
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale, id } = await params;
-  const session = await requireClientPage(locale);
+  const session = await requireClientPage(locale, `/${locale}/documents/${encodeURIComponent(id)}`);
   return <ClientDocumentsScreen locale={locale} session={session} id={id} />;
 }
