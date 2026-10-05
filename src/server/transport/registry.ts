@@ -9,6 +9,7 @@ import type { Capability } from "@/domain/capabilities";
 import { publicLocales } from "@/domain/ids";
 import { inquiryPurposes } from "@/domain/inquiry";
 import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
+import { inquiryListingReceiptSchema } from "@/domain/inquiry-selection";
 import { ownerInquiryReceiptSchema } from "@/domain/owner-inquiry";
 import { gateIds, gateStatuses, readinessReportSchema } from "@/release/schemas";
 import type { HostContext } from "../config/hosts";
@@ -180,6 +181,8 @@ export const inquiryReceiptSchema = z.object({
   acceptedAt: z.iso.datetime(),
   purpose: z.enum(inquiryPurposes),
   locale: z.enum(publicLocales),
+  listing: inquiryListingReceiptSchema.nullable(),
+  selectedListings: z.array(inquiryListingReceiptSchema),
   listingReference: z.string().nullable(),
   selectedListingReferences: z.array(z.string()),
   comparisonReferences: z.array(z.string()),
@@ -230,6 +233,8 @@ const receiptExample = {
   acceptedAt: "2026-09-27T09:30:00.000Z",
   purpose: "question",
   locale: "bg",
+  listing: null,
+  selectedListings: [],
   listingReference: null,
   selectedListingReferences: [],
   comparisonReferences: [],

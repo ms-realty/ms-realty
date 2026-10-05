@@ -1388,6 +1388,82 @@
                           "type": "string",
                           "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
                         },
+                        "listing": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "reference": {
+                                  "type": "string",
+                                  "maxLength": 20
+                                },
+                                "title": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "locale": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": ["reference", "title", "locale"],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "selectedListings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reference": {
+                                "type": "string",
+                                "maxLength": 20
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "locale": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": ["reference", "title", "locale"],
+                            "additionalProperties": false
+                          }
+                        },
                         "listingReference": {
                           "type": ["string", "null"]
                         },
@@ -1411,6 +1487,8 @@
                         "acceptedAt",
                         "purpose",
                         "locale",
+                        "listing",
+                        "selectedListings",
                         "listingReference",
                         "selectedListingReferences",
                         "comparisonReferences"
@@ -1541,6 +1619,82 @@
                           "type": "string",
                           "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
                         },
+                        "listing": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "reference": {
+                                  "type": "string",
+                                  "maxLength": 20
+                                },
+                                "title": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "locale": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": ["reference", "title", "locale"],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "selectedListings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reference": {
+                                "type": "string",
+                                "maxLength": 20
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "locale": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": ["reference", "title", "locale"],
+                            "additionalProperties": false
+                          }
+                        },
                         "listingReference": {
                           "type": ["string", "null"]
                         },
@@ -1564,6 +1718,8 @@
                         "acceptedAt",
                         "purpose",
                         "locale",
+                        "listing",
+                        "selectedListings",
                         "listingReference",
                         "selectedListingReferences",
                         "comparisonReferences"
@@ -1585,6 +1741,8 @@
                     "acceptedAt": "2026-09-27T09:30:00.000Z",
                     "purpose": "question",
                     "locale": "bg",
+                    "listing": null,
+                    "selectedListings": [],
                     "listingReference": null,
                     "selectedListingReferences": [],
                     "comparisonReferences": []
@@ -1901,6 +2059,82 @@
                           "type": "string",
                           "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
                         },
+                        "listing": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "reference": {
+                                  "type": "string",
+                                  "maxLength": 20
+                                },
+                                "title": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "locale": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": ["reference", "title", "locale"],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "selectedListings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reference": {
+                                "type": "string",
+                                "maxLength": 20
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "locale": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": ["reference", "title", "locale"],
+                            "additionalProperties": false
+                          }
+                        },
                         "listingReference": {
                           "type": ["string", "null"]
                         },
@@ -1924,6 +2158,8 @@
                         "acceptedAt",
                         "purpose",
                         "locale",
+                        "listing",
+                        "selectedListings",
                         "listingReference",
                         "selectedListingReferences",
                         "comparisonReferences"
@@ -1942,6 +2178,8 @@
                     "acceptedAt": "2026-09-27T09:30:00.000Z",
                     "purpose": "question",
                     "locale": "bg",
+                    "listing": null,
+                    "selectedListings": [],
                     "listingReference": null,
                     "selectedListingReferences": [],
                     "comparisonReferences": []

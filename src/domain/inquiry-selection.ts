@@ -1,6 +1,6 @@
 // The ordered public context of one comparison inquiry. No selection is ever silently reduced.
 import { z } from "zod";
-import { type PublicLocale, parseReference } from "./ids";
+import { type PublicLocale, parseReference, publicLocales } from "./ids";
 
 export const selectionJsonLimit = 1000;
 const listingReferenceSchema = z
@@ -37,6 +37,14 @@ export const selectedListingsSchema = z
     "duplicate_reference",
   );
 export type SelectedListing = z.infer<typeof selectedListingsSchema>[number];
+
+/** Public identity saved at submission; never refreshed from a later publication. */
+export const inquiryListingReceiptSchema = z.object({
+  reference: listingReferenceSchema,
+  title: z.string().min(1).nullable(),
+  locale: z.enum(publicLocales).nullable(),
+});
+export type InquiryListingReceipt = z.infer<typeof inquiryListingReceiptSchema>;
 
 /** Invalid or empty JSON is distinct from an absent optional selection. */
 export function parseSelectedListingsJson(value: string) {

@@ -20,7 +20,12 @@ import { type PublicLocale, parseReference, publicLocales } from "@/domain/ids";
 import { type InquiryPurpose, inquiryPurposes } from "@/domain/inquiry";
 import { contentReferenceSchema } from "@/domain/inquiry-content";
 import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
-import { comparisonReferencesSchema, selectedListingsSchema } from "@/domain/inquiry-selection";
+import {
+  comparisonReferencesSchema,
+  type InquiryListingReceipt,
+  inquiryListingReceiptSchema,
+  selectedListingsSchema,
+} from "@/domain/inquiry-selection";
 import { ownerInquiryReceipt, ownerInquirySchema } from "@/domain/owner-inquiry";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
@@ -244,6 +249,8 @@ export interface InquiryReceipt {
   readonly purpose: InquiryPurpose;
   readonly locale: PublicLocale;
   /** The public listing the request is about, if any. */
+  readonly listing: InquiryListingReceipt | null;
+  readonly selectedListings: InquiryListingReceipt[];
   readonly listingReference: string | null;
   readonly selectedListingReferences: string[];
   /** Navigation only; does not broaden the subject represented by listingReference. */
@@ -258,15 +265,35 @@ export interface SubmittedInquiry {
   readonly operationId: string;
 }
 
+// Older saved contexts can lack a name or source locale. Keep the reference, but do not
+// invent a title, substitute another locale, or consult a now-changed public listing.
+const savedListingReceiptSchema = inquiryListingReceiptSchema.extend({
+  title: inquiryListingReceiptSchema.shape.title.optional().catch(null),
+  locale: inquiryListingReceiptSchema.shape.locale.optional().catch(null),
+});
+
+function receiptListing(value: unknown): InquiryListingReceipt | null {
+  const parsed = savedListingReceiptSchema.safeParse(value);
+  if (!parsed.success) return null;
+  return {
+    reference: parsed.data.reference,
+    title: parsed.data.title ?? null,
+    locale: parsed.data.locale ?? null,
+  };
+}
+
 function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
   const context = row.context as {
-    listing?: { reference?: unknown };
+    listing?: unknown;
     ownerInput?: unknown;
     content?: unknown;
-    selection?: { reference: string }[];
+    selection?: unknown;
     comparisonReferences?: string[];
   } | null;
-  const listing = context?.listing;
+  const listing = receiptListing(context?.listing);
+  const selectedListings = Array.isArray(context?.selection)
+    ? context.selection.map(receiptListing).filter((item) => item !== null)
+    : [];
   const content = inquiryContentSnapshotSchema.safeParse(context?.content);
   return {
     ...(content.success ? { content: content.data } : {}),
@@ -279,8 +306,10 @@ function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
     acceptedAt: row.createdAt.toISOString(),
     purpose: row.purpose,
     locale: row.preferredLocale ?? "bg",
-    listingReference: typeof listing?.reference === "string" ? listing.reference : null,
-    selectedListingReferences: context?.selection?.map((item) => item.reference) ?? [],
+    listing,
+    selectedListings,
+    listingReference: listing?.reference ?? null,
+    selectedListingReferences: selectedListings.map((item) => item.reference),
     comparisonReferences: context?.comparisonReferences ?? [],
   };
 }

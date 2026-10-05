@@ -233,6 +233,37 @@ describe("submitInquiry", () => {
     }
   });
 
+  it("P12: reads only the saved public identity and keeps unknown historical titles explicit", async () => {
+    const input = question();
+    const session = newReceiptSession();
+    const publicResult = await getPublicListing(t.db, { reference: live.reference, locale: "bg" });
+    if (publicResult.status !== "listing") throw new Error("Missing public title fixture");
+    const { receipt } = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    expect(receipt.listing).toEqual({
+      reference: live.reference,
+      title: publicResult.listing.title,
+      locale: publicResult.listing.locale,
+    });
+    expect(receipt.selectedListings).toEqual([]);
+    const [row] = await inquiriesFor(input.submissionKey);
+    expect(row).toBeDefined();
+    await t.db
+      .update(inquiries)
+      .set({
+        context: {
+          listing: { reference: live.reference, locale: "unknown", sourceUrl: "private.example" },
+        },
+      })
+      .where(eq(inquiries.submissionKey, input.submissionKey));
+    const historical = await readInquiryReceipt(t.db, {
+      submissionKey: input.submissionKey,
+      receiptSession: session,
+    });
+    expect(historical.listing).toEqual({ reference: live.reference, title: null, locale: null });
+    expect(historical.listingReference).toBe(live.reference);
+    expect(JSON.stringify(historical)).not.toMatch(/sourceUrl|private.example|manifestId/);
+  });
+
   it("AT12: commits the Inquiry with its coverage-queue owner and outbox event, no provider call", async () => {
     const input = question();
     const { receipt } = await submitInquiry(t.db, input, {
@@ -487,6 +518,10 @@ describe("P07 collective inquiry", () => {
     expect(accepted.receipt.selectedListingReferences).toEqual(
       selectedListings.map((item) => item.reference),
     );
+    expect(accepted.receipt.selectedListings).toEqual(
+      details.map(({ reference, title, locale }) => ({ reference, title, locale })),
+    );
+    expect(accepted.receipt.listing).toBeNull();
     expect(accepted.receipt.listingReference).toBeNull();
     expect(
       await readInquiryReceipt(t.db, {
@@ -552,7 +587,10 @@ describe("P07 collective inquiry", () => {
   });
 
   it("keeps a successful same-session receipt after withdrawal while denying another session and new intent", async () => {
-    const withdrawn = await createListingFixture(t.db, { reviewerId: publisher.id });
+    const withdrawn = await createListingFixture(t.db, {
+      reviewerId: publisher.id,
+      title: "Saved property name",
+    });
     await publishForTest(t.db, publisher.actor, withdrawn);
     const { selectedListings } = await selectedContext([
       requiredFixture(collective, 0),
@@ -562,6 +600,11 @@ describe("P07 collective inquiry", () => {
     const input = question({ listingReference: undefined, selectedListings });
     const session = newReceiptSession();
     const original = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    expect(original.receipt.selectedListings).toContainEqual({
+      reference: withdrawn.reference,
+      title: "Saved property name",
+      locale: "bg",
+    });
     await withdrawPublication(t.db, {
       actor: publisher.actor,
       operationId: newOperationId(),
@@ -569,6 +612,17 @@ describe("P07 collective inquiry", () => {
       reference: withdrawn.reference,
       reason: "Fixture publication withdrawn",
     });
+    expect(
+      await getPublicListing(t.db, { reference: withdrawn.reference, locale: "bg" }),
+    ).toMatchObject({
+      status: "unavailable",
+    });
+    expect(
+      await readInquiryReceipt(t.db, {
+        submissionKey: input.submissionKey,
+        receiptSession: session,
+      }),
+    ).toEqual(original.receipt);
     expect(
       (await submitInquiry(t.db, input, { ip: ip(), receiptSession: session })).receipt,
     ).toEqual(original.receipt);
@@ -674,7 +728,7 @@ describe("P07 collective inquiry", () => {
 
 describe("P07 individual inquiry with comparison return", () => {
   it("stores one subject and a separate ordered navigation set through receipt and replay", async () => {
-    const { selectedListings } = await selectedContext();
+    const { selectedListings, details } = await selectedContext();
     const subject = selectedListings[1];
     if (!subject) throw new Error("Missing individual subject fixture");
     const comparisonReferences = selectedListings.map((item) => item.reference);
@@ -694,6 +748,12 @@ describe("P07 individual inquiry with comparison return", () => {
     expect(row?.context).not.toHaveProperty("selection");
     expect(accepted.receipt).toMatchObject({
       listingReference: subject.reference,
+      listing: {
+        reference: subject.reference,
+        title: details[1]?.title,
+        locale: details[1]?.locale,
+      },
+      selectedListings: [],
       selectedListingReferences: [],
       comparisonReferences,
     });
