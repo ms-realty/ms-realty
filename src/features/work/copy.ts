@@ -72,6 +72,11 @@ const en = {
     "The action has not reached a confirmed outcome. Keep this reference and check again before retrying.",
   validation: "Review the highlighted details.",
   invalid: "Check this value.",
+  // Stable server reason keys (server.validation.work.handover.dueAt.*).
+  reasons: {
+    future_required: "Choose a time in the future.",
+    after_deadline: "This time is after the deadline promised to the client. Choose an earlier time.",
+  } as Record<string, string>,
   conflict:
     "This record changed. Compare the latest version with your draft before applying it again.",
   denied: "Your current access does not allow this action.",
@@ -199,6 +204,10 @@ const bg: Copy = {
     "Резултатът още не е потвърден. Запазете номера и проверете отново преди повторен опит.",
   validation: "Прегледайте отбелязаните полета.",
   invalid: "Проверете тази стойност.",
+  reasons: {
+    future_required: "Изберете час в бъдещето.",
+    after_deadline: "Този час е след срока, обещан на клиента. Изберете по-ранен час.",
+  } as Record<string, string>,
   conflict: "Записът е променен. Сравнете новата версия с черновата преди повторно прилагане.",
   denied: "Текущият ви достъп не позволява това действие.",
   unavailable: "Действието не е налично в текущото състояние.",
@@ -320,6 +329,10 @@ const ru: Copy = {
     "Результат ещё не подтверждён. Сохраните номер и проверьте ещё раз перед повтором.",
   validation: "Проверьте выделенные поля.",
   invalid: "Проверьте это значение.",
+  reasons: {
+    future_required: "Выберите время в будущем.",
+    after_deadline: "Это время позже срока, обещанного клиенту. Выберите более раннее время.",
+  } as Record<string, string>,
   conflict:
     "Запись изменилась. Сравните последнюю версию с черновиком перед повторным применением.",
   denied: "Ваш текущий доступ не позволяет это действие.",
