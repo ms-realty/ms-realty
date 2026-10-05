@@ -106,12 +106,35 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
       exact: true,
     }),
   ).toBeVisible();
-  await page.getByLabel("Listing reference", { exact: true }).fill(f.listingReference);
-  await page
-    .getByLabel("Fit and known trade-offs (visible to participants)", { exact: true })
-    .fill("Access must be checked at the viewing; the approved location matches your preference.");
-  await page.getByRole("button", { name: "Suggest a property", exact: true }).click();
-  await recorded(page);
+  // O05 has no raw reference form: a new buyer suggestion goes through the O07 workbench and
+  // its reviewed check. The S4 journey seeds that reviewed suggestion through the real command.
+  await expect(page.getByLabel("Listing reference", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "See matching properties", exact: true }).first(),
+  ).toHaveAttribute("href", `/en/cases/${caseId}/matching`);
+  const { interestId } = JSON.parse(
+    execFileSync(
+      process.execPath,
+      ["--conditions=react-server", "--import", "tsx", "e2e/support/case-interest-seed.ts"],
+      {
+        env: {
+          ...process.env,
+          AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+          DATABASE_URL: url,
+          CASE_INTEREST_SEED: JSON.stringify({
+            caseId,
+            staffToken: f.staffToken,
+            reference: f.listingReference,
+            explanation:
+              "Access must be checked at the viewing; the approved location matches your preference.",
+          }),
+        },
+        encoding: "utf8",
+      },
+    ),
+  ) as { interestId: string };
+  await page.reload();
+  await expect(page.locator(`#interest-${interestId}`)).toContainText(f.listingReference);
 
   const clientContext = await browser.newContext({ ...testInfo.project.use });
   try {
