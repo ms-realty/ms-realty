@@ -4,7 +4,7 @@ import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createListingFixture, defaultFacts, publishForTest } from "../publication/testing";
 import { caseMatchCriteriaInput } from "../search/search";
 import { addInterest, reviseBrief } from "./commands";
-import { readCaseMatches } from "./matching";
+import { readCaseCandidate, readCaseMatches } from "./matching";
 import { caseFixture } from "./testing";
 
 let t: TestDatabase;
@@ -88,6 +88,46 @@ describe("O07 Case matching", () => {
     ).not.toContain(unpublished.reference);
     expect(matches.confirmed[0]?.existingInterestId).toBeNull();
 
+    expect(
+      await readCaseCandidate(t.db, f.staff.session, {
+        id: f.record.id,
+        briefRevision: 2,
+        reference: exact.reference,
+      }),
+    ).toMatchObject({ match: "match", violated: [], existingInterestId: null });
+    expect(
+      await readCaseCandidate(t.db, f.staff.session, {
+        id: f.record.id,
+        briefRevision: 2,
+        reference: unknown.reference,
+      }),
+    ).toMatchObject({
+      match: "needs_confirmation",
+      violated: [],
+      unconfirmed: ["feature.step_free_access"],
+    });
+    expect(
+      await readCaseCandidate(t.db, f.staff.session, {
+        id: f.record.id,
+        briefRevision: 2,
+        reference: wrongType.reference,
+      }),
+    ).toMatchObject({ match: "no_match", violated: ["propertyType"] });
+    await expect(
+      readCaseCandidate(t.db, f.staff.session, {
+        id: f.record.id,
+        briefRevision: 2,
+        reference: unpublished.reference,
+      }),
+    ).rejects.toMatchObject({ code: "listing_unavailable" });
+    await expect(
+      readCaseCandidate(t.db, f.client.session, {
+        id: f.record.id,
+        briefRevision: 2,
+        reference: wrongType.reference,
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+
     const saved = await addInterest(t.db, f.staff.session, {
       id: f.record.id,
       operationId: randomUUID(),
@@ -100,6 +140,13 @@ describe("O07 Case matching", () => {
     if (withSavedInterest.status !== "ready") throw new Error("Expected current Brief matches");
     expect(withSavedInterest.confirmed[0]?.existingInterestId).toBe(saved.outcome.interestId);
     expect(withSavedInterest.needsConfirmation[0]?.existingInterestId).toBeNull();
+    expect(
+      await readCaseCandidate(t.db, f.staff.session, {
+        id: f.record.id,
+        briefRevision: 2,
+        reference: exact.reference,
+      }),
+    ).toMatchObject({ existingInterestId: saved.outcome.interestId });
 
     const firstPage = await readCaseMatches(t.db, f.staff.session, {
       id: f.record.id,
@@ -146,6 +193,13 @@ describe("O07 Case matching", () => {
         pageSize: 1,
         cursor: firstPage.nextCursor,
         briefRevision: 2,
+      }),
+    ).rejects.toMatchObject({ code: "version_conflict" });
+    await expect(
+      readCaseCandidate(t.db, f.staff.session, {
+        id: f.record.id,
+        briefRevision: 2,
+        reference: wrongType.reference,
       }),
     ).rejects.toMatchObject({ code: "version_conflict" });
   });
