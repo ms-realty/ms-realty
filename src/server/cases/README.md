@@ -38,7 +38,8 @@ For buyer/tenant Cases, `reviseBrief` may save validated structured hard filters
 the prose. A prose-only revision clears older filters. Staff-only `readCaseMatches` binds the
 current Brief revision to eligible public search results, separating confirmed facts from
 facts needing confirmation; it never treats an unknown as a hard match or searches historical
-offers. It returns the client acknowledgment state so a draft Brief is visible as a draft.
+offers. A continued page must name the Brief revision it started from and conflicts after a
+revision change. The read model returns client acknowledgment so a draft Brief remains visible.
 The staff workbench still has to bind this read model and explain any proposed alternative
 before O07 can pass journey acceptance.
 Staff messages intended for clients require an explicit human review bound to the exact

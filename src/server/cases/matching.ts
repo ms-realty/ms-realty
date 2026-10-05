@@ -12,12 +12,18 @@ import { caseMatchCriteriaInput, searchListings } from "../search/search";
 import { parseInput } from "../work/shared";
 import { caseFor } from "./shared";
 
-const requestSchema = z.object({
-  id: z.uuid(),
-  locale: z.enum(publicLocales).default("bg"),
-  pageSize: z.number().int().min(1).max(60).default(24),
-  cursor: z.string().max(512).optional(),
-});
+const requestSchema = z
+  .object({
+    id: z.uuid(),
+    locale: z.enum(publicLocales).default("bg"),
+    pageSize: z.number().int().min(1).max(60).default(24),
+    cursor: z.string().max(512).optional(),
+    briefRevision: z.number().int().min(1).optional(),
+  })
+  .refine((input) => !input.cursor || input.briefRevision !== undefined, {
+    path: ["briefRevision"],
+    message: "required_for_cursor",
+  });
 
 /** Candidate status is bound to one Brief revision and one current search response. */
 export async function readCaseMatches(
@@ -41,6 +47,10 @@ export async function readCaseMatches(
     .where(eq(briefRevisions.caseId, row.id))
     .orderBy(desc(briefRevisions.revisionNumber))
     .limit(1);
+  if (input.briefRevision && input.briefRevision !== brief?.revision)
+    throw new AppError("version_conflict", {
+      current: { briefRevision: brief?.revision ?? null },
+    });
   const parsed = caseMatchCriteriaInput.safeParse(brief?.criteria);
   const purpose = row.kind === "buyer" ? "sale" : "long_term_rent";
   if (!brief || !parsed.success || parsed.data.purpose !== purpose)

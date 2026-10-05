@@ -87,6 +87,34 @@ describe("O07 Case matching", () => {
       [...matches.confirmed, ...matches.needsConfirmation].map((item) => item.reference),
     ).not.toContain(unpublished.reference);
 
+    const firstPage = await readCaseMatches(t.db, f.staff.session, {
+      id: f.record.id,
+      pageSize: 1,
+    });
+    if (firstPage.status !== "ready" || !firstPage.nextCursor)
+      throw new Error("Expected a second match page");
+    await expect(
+      readCaseMatches(t.db, f.staff.session, { id: f.record.id, cursor: firstPage.nextCursor }),
+    ).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { briefRevision: ["required_for_cursor"] },
+    });
+    await expect(
+      readCaseMatches(t.db, f.staff.session, {
+        id: f.record.id,
+        cursor: firstPage.nextCursor,
+        briefRevision: 1,
+      }),
+    ).rejects.toMatchObject({ code: "version_conflict" });
+    expect(
+      await readCaseMatches(t.db, f.staff.session, {
+        id: f.record.id,
+        pageSize: 1,
+        cursor: firstPage.nextCursor,
+        briefRevision: 2,
+      }),
+    ).toMatchObject({ status: "ready", brief: { revision: 2 } });
+
     await reviseBrief(t.db, f.staff.session, {
       id: f.record.id,
       operationId: randomUUID(),
@@ -98,5 +126,13 @@ describe("O07 Case matching", () => {
       status: "criteria_required",
       brief: { revision: 3 },
     });
+    await expect(
+      readCaseMatches(t.db, f.staff.session, {
+        id: f.record.id,
+        pageSize: 1,
+        cursor: firstPage.nextCursor,
+        briefRevision: 2,
+      }),
+    ).rejects.toMatchObject({ code: "version_conflict" });
   });
 });
