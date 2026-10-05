@@ -66,10 +66,10 @@ Every W01–W14 journey is open. W01–W03 cover public discovery and inquiry ow
 | --- | --- | --- |
 | R00 | BLOCKED | Reconcile legacy launch files with the rebuild, selected hosting/database/search contract, owner policy and final scope. |
 | R01–R06 | OPEN | Exact-head behavior and authority checks; real identity, communication and assistance provider paths; manual fallback. |
-| R07 | BLOCKED | Complete reviewed two-domain URL/content/listing/media map and fresh delta, with independent zero-loss parity. The current staging artifact is partial. |
+| R07 | BLOCKED | Complete reviewed two-domain URL/content/listing/media map and fresh delta, with independent zero-loss parity. The pinned partial staging manifest has 1,108 unique routes and 243 explicit exclusions, `completeCurrentDelta: false`, `productionAllowed: false`; local legacy verification passes 54/54 checks but cannot clear parity. |
 | R08 | BLOCKED | Full load budgets, live alerts, isolated restore, independent safety replay and rollback proof. The latest recorded full local load missed its unchanged latency budgets. |
 | R09 | BLOCKED | Accepted W01–W14 interactions, seven-locale public/client copy and RTL, accessibility, rendered design parity and measured performance. |
-| R10 | BLOCKED | One immutable candidate with all earlier gates and named operator sign-off. |
+| R10 | BLOCKED | One immutable candidate with all earlier gates and named operator sign-off. The staging workflow exists only on the delivery branch, so GitHub Actions has no registered default-branch staging workflow or rollout receipt for this candidate. |
 | R11–R12 | NOT STARTED | Actual cutover verification, then a staffed operating cycle and joint handoff on the same released revision. |
 
 ### R00 decisions that remain open
