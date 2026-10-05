@@ -80,7 +80,7 @@ export class LocalFileStorage implements FileStorage {
   }
 }
 
-/** EU jurisdiction is encoded in the endpoint, not merely a location hint. */
+/** Jurisdiction is encoded in the endpoint, not merely a location hint. */
 export class R2FileStorage implements FileStorage {
   private readonly client: S3Client;
   private readonly bucket: string;
@@ -89,10 +89,11 @@ export class R2FileStorage implements FileStorage {
     accessKeyId: string;
     secretAccessKey: string;
     bucket: string;
+    jurisdiction?: "eu" | "default";
   }) {
     this.bucket = config.bucket;
     this.client = new S3Client({
-      endpoint: `https://${config.accountId}.eu.r2.cloudflarestorage.com`,
+      endpoint: `https://${config.accountId}${config.jurisdiction === "default" ? "" : ".eu"}.r2.cloudflarestorage.com`,
       region: "auto",
       credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey },
       maxAttempts: 2,

@@ -21,6 +21,8 @@ describe("Staging image role isolation", () => {
       EMAIL_RELAY_SECRET: ephemeral(),
       ORIGIN_VERIFY_SECRET: ephemeral(),
       ACCESS_SERVICE_CLIENT_SECRET: ephemeral(),
+      FILE_SCAN_MODE: "staging-unverified",
+      R2_JURISDICTION: "default",
     };
     const web = runtimeEnvironment(env, "web"),
       worker = runtimeEnvironment(env, "worker"),
@@ -28,6 +30,10 @@ describe("Staging image role isolation", () => {
     expect(web.DATABASE_URL).toBe(env.WEB_DATABASE_URL);
     expect(worker.DATABASE_URL).toBe(env.WORKER_DATABASE_URL);
     expect(migrator.DATABASE_URL).toBe(env.MIGRATOR_DATABASE_URL);
+    for (const role of [web, worker]) {
+      expect(role.FILE_SCAN_MODE).toBe("staging-unverified");
+      expect(role.R2_JURISDICTION).toBe("default");
+    }
     for (const role of [web, worker, migrator])
       for (const name of ["WEB_DATABASE_URL", "WORKER_DATABASE_URL", "MIGRATOR_DATABASE_URL"])
         expect(role).not.toHaveProperty(name);

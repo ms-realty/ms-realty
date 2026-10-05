@@ -52,6 +52,18 @@ async function process(
       (kind === "document" || ("processing" in file && file.processing === "ready"))
     )
       return { state: "clean" as const, id };
+    if (!services.scanner) {
+      // Seal/receipt is not scan evidence. Keep quarantine and all download/review
+      // gates intact, and acknowledge the staging job without repeated offline scans.
+      await recordAudit(tx, {
+        actor,
+        action: "file.scan.deferred",
+        recordType: kind,
+        recordId: id,
+        payload: { reason: "staging_scanner_disabled", sha256: file.sha256 },
+      });
+      return { state: "unverified" as const, id };
+    }
     let scanState: "clean" | "infected" | "failed" = "failed";
     let scannerVersion: string | null = null;
     let scannedAt: Date | null = null;

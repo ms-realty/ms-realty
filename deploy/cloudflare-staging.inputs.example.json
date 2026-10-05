@@ -70,9 +70,8 @@
   },
   "runtimeVars": {
     "WEBAUTHN_RP_NAME": "MS Realty staging",
-    "CLAMAV_HOST": null,
-    "CLAMAV_PORT": "3310",
-    "CLAMAV_MAX_SIGNATURE_AGE_HOURS": "24"
+    "FILE_SCAN_MODE": "staging-unverified",
+    "R2_JURISDICTION": "default"
   },
   "rollback": {
     "legacyOrigin": null,

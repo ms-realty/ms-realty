@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
+  auditEvents,
   currentPublications,
   documents,
   documentVersions,
@@ -142,6 +143,107 @@ const mediaReview = {
 };
 
 describe("AT28/AT42 real storage workflow", () => {
+  it("W10 unverified staging acknowledges receipt without a scan, review, download or publication grant", async () => {
+    const unverified: FileServices = { storage: store, scanner: null };
+    const uploaded = await media();
+    await finalizeUpload(t.db, unverified, session, uploaded.uploadId);
+    const read = vi.spyOn(store, "read");
+    try {
+      await expect(
+        processFileWorker(
+          t.db,
+          unverified,
+          { kind: "system", id: "file-scanner" },
+          "media",
+          uploaded.assetId,
+        ),
+      ).resolves.toEqual({ state: "unverified", id: uploaded.assetId });
+      expect(read).not.toHaveBeenCalled();
+    } finally {
+      read.mockRestore();
+    }
+    const [asset] = await t.db
+      .select()
+      .from(mediaAssets)
+      .where(eq(mediaAssets.id, uploaded.assetId));
+    expect(asset).toMatchObject({
+      scan: "pending",
+      scannedAt: null,
+      scannerVersion: null,
+      scannedSha256: null,
+      processing: "pending",
+      derivativeKey: null,
+      review: "pending",
+      reviewedById: null,
+    });
+    expect(mediaAssetEligible(asset!)).toBe(false);
+    await expect(
+      reviewMedia(t.db, {
+        session,
+        operationId: randomUUID(),
+        expectedRevision: asset!.version,
+        id: asset!.id,
+        input: mediaReview,
+      }),
+    ).rejects.toMatchObject({ code: "transition_denied" });
+    await expect(privateDownload(t.db, store, session, "media", asset!.id)).rejects.toMatchObject({
+      code: "not_found",
+    });
+    const audit = await t.db
+      .select()
+      .from(auditEvents)
+      .where(eq(auditEvents.recordId, uploaded.assetId));
+    expect(audit.some((row) => row.action === "file.scan.completed")).toBe(false);
+    expect(audit.find((row) => row.action === "file.scan.deferred")?.payload).toEqual({
+      reason: "staging_scanner_disabled",
+      sha256: digestOf(image),
+    });
+
+    const received = await document();
+    await expect(
+      processFile(t.db, unverified, session, "document", received.versionId),
+    ).resolves.toEqual({ state: "unverified", id: received.versionId });
+    const [file] = await t.db
+      .select()
+      .from(documentVersions)
+      .where(eq(documentVersions.id, received.versionId));
+    expect(file).toMatchObject({
+      scan: "pending",
+      scannerVersion: null,
+      scannedAt: null,
+      scannedSha256: null,
+      reviewedById: null,
+      reviewType: null,
+    });
+    await expect(
+      reviewDocument(t.db, {
+        session,
+        operationId: randomUUID(),
+        expectedRevision: file!.version,
+        versionId: file!.id,
+        input: {
+          reviewType: "accepted_for_purpose",
+          confirmed: true,
+          note: "Synthetic review",
+          expiresAt: null,
+        },
+      }),
+    ).rejects.toMatchObject({ code: "transition_denied" });
+    await expect(privateDownload(t.db, store, session, "document", file!.id)).rejects.toMatchObject(
+      {
+        code: "not_found",
+      },
+    );
+    await expect(
+      processFileWorker(
+        t.db,
+        unverified,
+        { kind: "system", id: "message-outbox" },
+        "document",
+        file!.id,
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
   it("case agreement intake requires scoped compliance authority throughout scan, review, private download and replay", async () => {
     const person = await createStaff(t.db, {
       grants: [{ capability: "document.read_restricted" }, { capability: "document.review" }],

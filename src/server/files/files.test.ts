@@ -96,6 +96,31 @@ describe("AT42 immutable bytes and bounded inspection", () => {
         .storage,
     ).toBeInstanceOf(LocalFileStorage);
   });
+  it("keeps scanning required by default and permits unverified files only on explicit staging", () => {
+    const local = { FILE_STORAGE: "local", FILE_STORAGE_ROOT: "/tmp/msr-explicit" };
+    expect(fileServices(local, parseEnv({})).scanner).toBeInstanceOf(ClamAvScanner);
+    for (const staging of [undefined, "false", "1"]) {
+      expect(() =>
+        fileServices(
+          { ...local, FILE_SCAN_MODE: "staging-unverified", STAGING: staging },
+          parseEnv({}),
+        ),
+      ).toThrow();
+    }
+    expect(
+      fileServices(
+        { ...local, FILE_SCAN_MODE: "staging-unverified", STAGING: "true" },
+        parseEnv({}),
+      ).scanner,
+    ).toBeNull();
+    expect(() =>
+      fileServices({ ...local, FILE_SCAN_MODE: "skip", STAGING: "true" }, parseEnv({})),
+    ).toThrow();
+    expect(() => fileServices({ ...local, R2_JURISDICTION: "default" }, parseEnv({}))).toThrow();
+    expect(() =>
+      fileServices({ ...local, R2_JURISDICTION: "foreign", STAGING: "true" }, parseEnv({})),
+    ).toThrow();
+  });
   it("single ranges retain private no-store and attachment policy, malformed ranges fail", async () => {
     const file = {
       bytes: Buffer.from("0123456789"),

@@ -29,9 +29,22 @@ if (result.state !== "clean") process.exitCode = 1;
 
 The worker consumes `files.process`. The explicit loopback test-outbox environment also starts workers in the web process. Normal environments need the separate worker command.
 
+## Protected staging without a scanner
+
+`STAGING=true FILE_SCAN_MODE=staging-unverified` explicitly receives and seals uploads without
+claiming a scan. The worker records `file.scan.deferred`, returns `unverified` and keeps the
+file quarantined: no scan timestamp/version, derivative, download, review or publication grant.
+It does not repeatedly retry a deliberately absent scanner. This profile is accepted only for
+`protected_partial_preview`; it cannot qualify complete parity or production scanning. The
+default remains `FILE_SCAN_MODE=clamav`; the unverified profile fails without explicit staging.
+
 ## R2
 
 Set `FILE_STORAGE=r2` with existing `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_BUCKET`. The adapter addresses the EU-jurisdiction S3 endpoint. The bucket must remain private with no public/custom-domain access. Only the application's manifest-authorized derivative route may serve public images. Account permissions, bucket jurisdiction, availability and recovery need actual operator/provider validation; local tests do not prove them.
+
+The existing staging buckets have default jurisdiction with an EEUR location hint, which is
+not an EU jurisdiction guarantee. `STAGING=true R2_JURISDICTION=default` selects their standard
+S3 endpoint. It fails without explicit staging; the production default remains EU.
 
 Uploads write `staging/` only. Finalization copies measured bytes to a new `sealed/` key and verifies the stored digest. Immutable writes use local exclusive creation or R2 conditional creation. A scan binds to the exact sealed digest. Derivatives use per-asset content-addressed keys and strip image metadata. Image decoding is limited to 40 million pixels; raster uploads are at most 25 MB and documents at most 20 MB. Supported files are JPEG, PNG, WebP and PDF (documents only). PDFs are attachments under a sandbox policy, never public derivatives.
 

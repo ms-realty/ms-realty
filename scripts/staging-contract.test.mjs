@@ -123,7 +123,11 @@ function fixture() {
       testInboxReviewed: false,
     },
     artifacts: { routesSha256: sha256(routes), mediaSha256: sha256(media) },
-    runtimeVars: { CLAMAV_HOST: "scan.fixture.invalid", CLAMAV_PORT: "3310" },
+    runtimeVars: {
+      CLAMAV_HOST: "scan.fixture.invalid",
+      CLAMAV_PORT: "3310",
+      R2_JURISDICTION: "default",
+    },
     rollback: {
       retainDays: 90,
       legacyOrigin: "https://wordpress.example.invalid",
@@ -196,6 +200,52 @@ function fixture() {
   input.artifacts.routeManifestSha256 = sha256(manifest);
   return { input, artifacts: { routes, media, manifest, connectivity, isolation } };
 }
+test("unverified uploads are explicit, quarantined staging only, and cannot qualify complete parity", () => {
+  const { input, artifacts } = fixture();
+  const manifest = {
+    ...JSON.parse(artifacts.manifest),
+    status: "ready_partial",
+    scope: "staging_only",
+    productionAllowed: false,
+    exclusions: [],
+  };
+  artifacts.manifest = JSON.stringify(manifest);
+  input.purpose = "protected_partial_preview";
+  input.artifacts.routeManifestSha256 = sha256(artifacts.manifest);
+  input.artifacts.exclusionsSha256 = sha256(JSON.stringify(manifest.exclusions));
+  input.runtimeVars = { FILE_SCAN_MODE: "staging-unverified", R2_JURISDICTION: "default" };
+  validateStaging(input, artifacts);
+  const config = stagingConfig(input, artifacts);
+  assert.equal(config.vars.STAGING, "true");
+  assert.equal(config.vars.FILE_SCAN_MODE, "staging-unverified");
+  assert.equal(config.vars.R2_JURISDICTION, "default");
+  assert.equal(config.vars.CLAMAV_HOST, undefined);
+  assert.throws(() =>
+    validateStaging(
+      { ...input, runtimeVars: { ...input.runtimeVars, CLAMAV_HOST: "invented.invalid" } },
+      artifacts,
+    ),
+  );
+  assert.throws(() =>
+    validateStaging(
+      { ...input, runtimeVars: { ...input.runtimeVars, FILE_SCAN_MODE: "skip" } },
+      artifacts,
+    ),
+  );
+  assert.throws(() =>
+    validateStaging(
+      { ...input, runtimeVars: { ...input.runtimeVars, R2_JURISDICTION: "invented" } },
+      artifacts,
+    ),
+  );
+  manifest.status = "ready";
+  artifacts.manifest = JSON.stringify(manifest);
+  input.artifacts.routeManifestSha256 = sha256(artifacts.manifest);
+  assert.throws(
+    () => validateStaging({ ...input, purpose: "complete_parity" }, artifacts),
+    /unverified uploads are restricted/,
+  );
+});
 test("partial preview requires explicit scope, denied production and exact manifest/exclusions pins", () => {
   const { input, artifacts } = fixture();
   const manifest = {

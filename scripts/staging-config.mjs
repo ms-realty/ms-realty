@@ -315,6 +315,8 @@ export function validateStaging(
       Object.keys(input.runtimeVars).every((k) =>
         [
           "WEBAUTHN_RP_NAME",
+          "FILE_SCAN_MODE",
+          "R2_JURISDICTION",
           "CLAMAV_HOST",
           "CLAMAV_PORT",
           "CLAMAV_MAX_SIGNATURE_AGE_HOURS",
@@ -323,6 +325,10 @@ export function validateStaging(
         ].includes(k),
       ),
     "allowlisted runtime variables",
+  );
+  demand(
+    input.runtimeVars.R2_JURISDICTION === "default",
+    "reviewed staging buckets use explicit default R2 jurisdiction",
   );
   demand(
     input.runtimeVars.GTM_CONTAINER_ID === undefined ||
@@ -334,12 +340,24 @@ export function validateStaging(
       /^[A-Za-z0-9_-]{20,128}$/.test(input.runtimeVars.SITE_GOOGLE_VERIFICATION),
     "nonsecret Search Console verification token",
   );
-  demand(
-    typeof input.runtimeVars?.CLAMAV_HOST === "string" &&
-      /^[a-z0-9.-]+$/.test(input.runtimeVars.CLAMAV_HOST) &&
-      /^[0-9]+$/.test(input.runtimeVars.CLAMAV_PORT ?? ""),
-    "isolated private ClamAV endpoint",
-  );
+  const scanMode = input.runtimeVars.FILE_SCAN_MODE ?? "clamav";
+  demand(["clamav", "staging-unverified"].includes(scanMode), "explicit file scan mode");
+  if (scanMode === "staging-unverified") {
+    demand(partial, "unverified uploads are restricted to protected partial preview");
+    demand(
+      input.runtimeVars.CLAMAV_HOST === undefined &&
+        input.runtimeVars.CLAMAV_PORT === undefined &&
+        input.runtimeVars.CLAMAV_MAX_SIGNATURE_AGE_HOURS === undefined,
+      "unverified uploads must not claim a scanner endpoint",
+    );
+  } else {
+    demand(
+      typeof input.runtimeVars?.CLAMAV_HOST === "string" &&
+        /^[a-z0-9.-]+$/.test(input.runtimeVars.CLAMAV_HOST) &&
+        /^[0-9]+$/.test(input.runtimeVars.CLAMAV_PORT ?? ""),
+      "isolated private ClamAV endpoint",
+    );
+  }
   demand(
     input.rollback?.retainDays >= 90 &&
       pin(input.rollback.evidenceSha256) &&
