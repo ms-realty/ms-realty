@@ -12,6 +12,8 @@ import {
   inquiryReceiptView,
   inquiryStatus,
 } from "@/features/discovery/inquiry-state";
+import { viewingCopy } from "@/features/discovery/viewing-copy";
+import { viewingErrorField } from "@/features/discovery/viewing-fields";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
 import { isAppError } from "@/server/errors";
@@ -127,6 +129,7 @@ export async function sendInquiry(
           token: issueInquiryReview(key, locale, receiptSession, values),
           listings,
           ownerInput: payload.ownerInput,
+          viewingPreferences: payload.viewingPreferences,
           content,
         },
       };
@@ -155,8 +158,9 @@ export async function sendInquiry(
     if (isAppError(error) && error.code === "validation_failed") {
       const fields: Partial<Record<keyof InquiryValues, string[]>> = {};
       for (const name of Object.keys(error.fieldErrors ?? {})) {
-        const field =
-          name === "contact.kind"
+        const field = name.startsWith("viewingPreferences")
+          ? viewingErrorField(name)
+          : name === "contact.kind"
             ? "contactKind"
             : name === "contact.value"
               ? "contactValue"
@@ -179,7 +183,12 @@ export async function sendInquiry(
                     : name.startsWith("comparisonReferences")
                       ? "comparisonReferences"
                       : (name as keyof InquiryValues);
-        if (field in emptyInquiry) fields[field] = [copy.invalid];
+        if (field in emptyInquiry)
+          fields[field] = [
+            name.startsWith("viewingPreferences.windows")
+              ? viewingCopy(locale).invalidTime
+              : copy.invalid,
+          ];
       }
       return {
         ...state,
