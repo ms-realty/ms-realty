@@ -32,6 +32,7 @@ try {
       reference: `${prefix}-${i}`,
       kind: "correction" as const,
       responsibleId: operator.id,
+      createdAt: stamp,
       updatedAt: stamp,
       scope: { description: `Synthetic unresolved privacy request ${i}` },
     })),

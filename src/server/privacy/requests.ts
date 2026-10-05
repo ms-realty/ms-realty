@@ -139,7 +139,7 @@ export async function clientPrivacyRequests(db: Executor, session: Session) {
 }
 
 export const privacyQueuePageSize = 25;
-const cursorValue = z.object({ updatedAt: z.iso.datetime(), id: z.uuid() }).strict();
+const cursorValue = z.object({ createdAt: z.iso.datetime(), id: z.uuid() }).strict();
 const cursor = z
   .string()
   .min(1)
@@ -166,9 +166,9 @@ export function privacyQueuePath(locale: string, query: PrivacyQueueQuery = {}) 
   return `/${locale}/operations/privacy${position.size ? `?${position}` : ""}`;
 }
 
-/** A queue cursor keeps PostgreSQL microseconds: a JS Date would lose boundary precision. */
+/** A queue cursor uses immutable creation time and keeps PostgreSQL microseconds. */
 const queueCursor = (row: { record: { id: string }; position: string }) =>
-  Buffer.from(JSON.stringify({ updatedAt: row.position, id: row.record.id })).toString("base64url");
+  Buffer.from(JSON.stringify({ createdAt: row.position, id: row.record.id })).toString("base64url");
 
 export async function listStaffPrivacyRequests(
   db: Executor,
@@ -185,7 +185,7 @@ export async function listStaffPrivacyRequests(
       record: privacyRequests,
       partyName: parties.displayName,
       ownerName: principals.displayName,
-      position: sql<string>`to_char(${privacyRequests.updatedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+      position: sql<string>`to_char(${privacyRequests.createdAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
     })
     .from(privacyRequests)
     .leftJoin(parties, eq(parties.id, privacyRequests.partyId))
@@ -193,12 +193,12 @@ export async function listStaffPrivacyRequests(
     .where(
       boundary
         ? backwards
-          ? sql`(${privacyRequests.updatedAt}, ${privacyRequests.id}) > (${boundary.updatedAt}::timestamptz, ${boundary.id}::uuid)`
-          : sql`(${privacyRequests.updatedAt}, ${privacyRequests.id}) < (${boundary.updatedAt}::timestamptz, ${boundary.id}::uuid)`
+          ? sql`(${privacyRequests.createdAt}, ${privacyRequests.id}) > (${boundary.createdAt}::timestamptz, ${boundary.id}::uuid)`
+          : sql`(${privacyRequests.createdAt}, ${privacyRequests.id}) < (${boundary.createdAt}::timestamptz, ${boundary.id}::uuid)`
         : undefined,
     )
     .orderBy(
-      backwards ? asc(privacyRequests.updatedAt) : desc(privacyRequests.updatedAt),
+      backwards ? asc(privacyRequests.createdAt) : desc(privacyRequests.createdAt),
       backwards ? asc(privacyRequests.id) : desc(privacyRequests.id),
     )
     .limit(privacyQueuePageSize + 1);

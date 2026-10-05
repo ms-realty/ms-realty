@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import { privacyQueuePath, privacyQueueQuery } from "./requests";
 
 const value = {
-  updatedAt: "2026-09-30T10:00:00.123456Z",
+  createdAt: "2026-09-30T10:00:00.123456Z",
   id: "00000000-0000-4000-8000-000000000001",
 };
 const token = Buffer.from(JSON.stringify(value)).toString("base64url");

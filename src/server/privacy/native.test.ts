@@ -19,7 +19,7 @@ vi.mock("./requests", async (original) => ({
 
 const operationId = "00000000-0000-4000-8000-000000000001";
 const token = Buffer.from(
-  JSON.stringify({ updatedAt: "2026-09-30T10:00:00.123456Z", id: operationId }),
+  JSON.stringify({ createdAt: "2026-09-30T10:00:00.123456Z", id: operationId }),
 ).toString("base64url");
 const post = privacyFormRoute("operations/privacy");
 beforeEach(() => {

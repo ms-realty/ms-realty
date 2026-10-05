@@ -44,7 +44,7 @@ it("reaches every request beyond 100, preserves timestamp ties including microse
       responsibleId: operator.id,
       scope: { description: `Synthetic unresolved request ${i}` },
       // Boundary precision is deliberately beyond the JS Date millisecond precision.
-      updatedAt: sql`'2026-09-30T10:00:00.123456Z'::timestamptz`,
+      createdAt: sql`'2026-09-30T10:00:00.123456Z'::timestamptz`,
     })),
   );
   const seen: string[] = [];
@@ -73,6 +73,8 @@ it("reaches every request beyond 100, preserves timestamp ties including microse
     .update(privacyRequests)
     .set({ updatedAt: new Date() })
     .where(eq(privacyRequests.id, updatedId));
+  const samePage = await listStaffPrivacyRequests(t.db, operator.session);
+  expect(samePage.rows.map(({ record }) => record.id)).toEqual(firstPageIds);
   const next = await listStaffPrivacyRequests(t.db, operator.session, { after: first.next });
   expect(next.rows.map(({ record }) => record.id)).toEqual([...ids].reverse().slice(25, 50));
 });
