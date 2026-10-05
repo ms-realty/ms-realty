@@ -6,9 +6,9 @@ The evaluator is independent of the designer. Run every step below in a fresh co
 
 ## Images
 
-Folder: `/Users/ivan/Code/Mindburn-Labs/output/msr-launch/visual/2026-10-05/w03/` — 80 PNGs exported at scale 0.5 (Desktop 720 px wide, Mobile 195 px wide), named `<screen>-<state>-<viewport>.png`. The names reveal states, so **testers never see them**: for each run, copy the start screen to `s01.png` and the other images of the batch, in the order listed, to `s02.png`, `s03.png` … (skip the start screen when it appears in the list). Keep the mapping in the run record.
+Folder: `/Users/ivan/Code/Mindburn-Labs/output/msr-launch/visual/w03-gate-packet/` — 90 PNGs exported from Figma on 2026-10-05 (about 17:15 EEST), after Phase B (copy, DEMO markers, links) and Phase C1b (next-step lines, visible links, states, RTL icon). Desktop 1440 frames at scale 0.5 (720 px wide), Mobile 390 frames at scale 1 (390 px wide), named `<screen>-<state>-<viewport>.png`. Node ids per image are in the key's coverage table. The names reveal states, so **testers never see them**: for each run, copy the start screen to `s01.png` and the other images of the batch, in the order listed, to `s02.png`, `s03.png` … (skip the start screen when it appears in the list). Keep the mapping in the run record.
 
-If a tier cannot read the 195 px Mobile images, re-export those frames at scale 1 under the same names, record that in the run, and rerun the whole Mobile batch for both tiers.
+If a tier cannot read the 720 px Desktop images, re-export those frames at scale 1 under the same names, record that in the run, and rerun the whole Desktop batch for both tiers.
 
 ### Batch VD — visitor, Desktop 1440 (10 images) · tasks T1, T3, T5
 
@@ -99,7 +99,7 @@ If a tier cannot read the 195 px Mobile images, re-export those frames at scale 
 | T9 | | | | `O03-default-desktop.png` | `O03-default-mobile.png` |
 | T10 | | | | `O23-default-desktop.png` | `O23-default-mobile.png` |
 
-16 runs per tier, 32 in total. The other exported images (variants not on any expected path) are reference for the judge and the G2 re-scan.
+16 runs per tier, 32 in total. The other 31 exported images are not in any batch: variants not on an expected path (for example `O03-assign-recorded-*`, `O05-wait-*`, `O06-default-*`, `O02-unclaimed-*`), the O01 states added in Phase C1b (`O01-loading-*`, `O01-empty-*`, `O01-error-*`, `O01-offline-*`) and the revoke state (`O23-revoke-staff-access-*`). They are reference for the judge and the G2 / G3 re-scan.
 
 ## Tester prompt template
 
@@ -141,8 +141,8 @@ For each run, with the key open:
    - **FAIL:** STUCK; the wrong end screen; a wrong irreversible step (sending a second inquiry in T2 or T5, retyping the message in T3, accepting without choosing a review time in T7, merging in T8); or a RESULT that contradicts the screen (for example «it was read» or «they will reply by tomorrow» in T1).
    - **COVERAGE GAP:** the tester's sensible path needs a screen the key marks as missing. Report it and do not count it as a pass.
 5. **Per tier**, report: covered-task success rate (pass needs ≥ 90%), tasks failed in both tiers (pass needs none), and the median actions per task against expert + 1.
-6. **G2:** re-scan the visible text of every image's frame (node ids in the key) against the GATE G2 list. Pass needs 0 hits on primary surfaces; the key lists the hits at build time.
-7. **G3:** confirm or overturn each row of the key's G3 checklist from the images; items 9 and 10 need the PR-preview evidence and stay open in the Figma stage.
+6. **G2:** re-scan the visible text of every image's frame (node ids in the key) against the GATE G2 list. Pass needs 0 hits on primary surfaces; the key lists the result of its last re-run (2026-10-05, 90 frames: 4 real hits on O05 plus the open decision on the staff noun «Случай»).
+7. **G3:** confirm or overturn each row of the key's G3 checklist and its two extra checks (a next-step line on each screen, no past dates) from the images; items 9 and 10 need the PR-preview evidence and stay open in the Figma stage.
 8. **G4:** for each job in GATE G4, write better / equal / worse against the named leaders with a one-line reason and the public page or help article used. Use public pages only: no accounts, no sign-in, no inquiries sent to a leader. One «worse» fails the gate.
 
 Write the record to `/Users/ivan/Code/Mindburn-Labs/output/msr-launch/zero-learning/W03-figma-<run timestamp>.md`: the run mapping, each tester's raw answer per tier, the per-run verdict with the reason, the G1 to G4 results, and the coverage gaps. Self-certification by the designer does not count.
