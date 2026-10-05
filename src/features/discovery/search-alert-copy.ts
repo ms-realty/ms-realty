@@ -1,6 +1,5 @@
 const en = {
   title: "Alerts for this search",
-  entry: "Get alerts for this search",
   criteria: "Search to save",
   edit: "Review or edit these filters",
   lead: "Review the search first. Then choose a verified email and give separate permission for search alerts in your account.",
@@ -35,7 +34,6 @@ const en = {
 };
 const bg: typeof en = {
   title: "Известия за това търсене",
-  entry: "Известия за това търсене",
   criteria: "Търсене за запазване",
   edit: "Преглед или промяна на филтрите",
   lead: "Първо прегледайте търсенето. След това изберете потвърден имейл и дайте отделно съгласие за известия в профила си.",

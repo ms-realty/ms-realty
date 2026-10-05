@@ -1,137 +1,15 @@
 import type { PublicLocale } from "@/i18n/config";
+import { catalogCopy } from "@/i18n/copy";
+import bg from "../../../messages/bg/intent.json";
+import de from "../../../messages/de/intent.json";
+import el from "../../../messages/el/intent.json";
+import en from "../../../messages/en/intent.json";
+import he from "../../../messages/he/intent.json";
+import nl from "../../../messages/nl/intent.json";
+import ru from "../../../messages/ru/intent.json";
 
-const locales = ["bg", "en", "ru", "de", "nl", "el", "he"] as const;
-type Row = readonly [string, string, string, string, string, string, string];
-const rows = {
-  title: [
-    "Опишете търсенето",
-    "Describe your search",
-    "Опишите поиск",
-    "Beschreiben Sie Ihre Suche",
-    "Beschrijf uw zoekopdracht",
-    "Περιγράψτε την αναζήτηση",
-    "תארו את החיפוש",
-  ],
-  lead: [
-    "Извличаме предложения по правила. Прегледайте и изберете само желаните филтри. Не въвеждайте лични данни.",
-    "Rules suggest filters. Review and select only the filters you want. Do not include personal details.",
-    "Правила предлагают фильтры. Проверьте и выберите нужные. Не вводите личные данные.",
-    "Regeln schlagen Filter vor. Prüfen und wählen Sie nur gewünschte Filter. Keine persönlichen Daten eingeben.",
-    "Regels stellen filters voor. Controleer en selecteer de gewenste filters. Voer geen persoonsgegevens in.",
-    "Οι κανόνες προτείνουν φίλτρα. Ελέγξτε και επιλέξτε όσα θέλετε. Μην εισάγετε προσωπικά στοιχεία.",
-    "כללים מציעים מסננים. בדקו ובחרו רק את המסננים הרצויים. אין לכלול פרטים אישיים.",
-  ],
-  review: [
-    "Преглед на предложенията",
-    "Review suggestions",
-    "Проверить предложения",
-    "Vorschläge prüfen",
-    "Voorstellen bekijken",
-    "Έλεγχος προτάσεων",
-    "סקירת ההצעות",
-  ],
-  apply: [
-    "Търсене с избраните филтри",
-    "Search with selected filters",
-    "Искать с выбранными фильтрами",
-    "Mit gewählten Filtern suchen",
-    "Zoeken met gekozen filters",
-    "Αναζήτηση με επιλεγμένα φίλτρα",
-    "חיפוש במסננים שנבחרו",
-  ],
-  notApplied: [
-    "Не се прилага автоматично",
-    "Not applied automatically",
-    "Не применяется автоматически",
-    "Nicht automatisch angewendet",
-    "Niet automatisch toegepast",
-    "Δεν εφαρμόζεται αυτόματα",
-    "לא מוחל אוטומטית",
-  ],
-  check: [
-    "Уточнете избора; противоречиви филтри не се прилагат.",
-    "Check your choices; conflicting filters are not applied.",
-    "Уточните выбор; конфликтующие фильтры не применяются.",
-    "Auswahl prüfen; widersprüchliche Filter werden nicht angewendet.",
-    "Controleer uw keuze; tegenstrijdige filters worden niet toegepast.",
-    "Ελέγξτε τις επιλογές· αντικρουόμενα φίλτρα δεν εφαρμόζονται.",
-    "בדקו את הבחירות; מסננים סותרים לא יוחלו.",
-  ],
-  near: [
-    "Филтърът е в това място, не радиус около него.",
-    "This filter means in this place, not a radius around it.",
-    "Фильтр означает в этом месте, а не в радиусе вокруг.",
-    "Der Filter meint in diesem Ort, keinen Umkreis.",
-    "Dit filter betekent in deze plaats, geen straal eromheen.",
-    "Το φίλτρο σημαίνει μέσα σε αυτόν τον τόπο, όχι ακτίνα γύρω του.",
-    "המסנן מתייחס למקום עצמו, לא לרדיוס סביבו.",
-  ],
-  choose: ["Изберете", "Choose", "Выберите", "Wählen", "Kies", "Επιλέξτε", "בחירה"],
-  rooms: ["Стаи", "Rooms", "Комнаты", "Zimmer", "Kamers", "Δωμάτια", "חדרים"],
-  minRooms: [
-    "Минимум стаи",
-    "Minimum rooms",
-    "Минимум комнат",
-    "Minimale Zimmerzahl",
-    "Minimum kamers",
-    "Ελάχιστα δωμάτια",
-    "מינימום חדרים",
-  ],
-  maxRooms: [
-    "Максимум стаи",
-    "Maximum rooms",
-    "Максимум комнат",
-    "Maximale Zimmerzahl",
-    "Maximum kamers",
-    "Μέγιστα δωμάτια",
-    "מקסימום חדרים",
-  ],
-  maxBeds: [
-    "Максимум спални",
-    "Maximum bedrooms",
-    "Максимум спален",
-    "Maximale Schlafzimmerzahl",
-    "Maximum slaapkamers",
-    "Μέγιστα υπνοδωμάτια",
-    "מקסימום חדרי שינה",
-  ],
-  locations: [
-    "Местоположение",
-    "Locations",
-    "Местоположение",
-    "Orte",
-    "Locaties",
-    "Τοποθεσίες",
-    "מיקומים",
-  ],
-  features: [
-    "Задължителни характеристики",
-    "Required features",
-    "Обязательные характеристики",
-    "Erforderliche Merkmale",
-    "Vereiste kenmerken",
-    "Απαραίτητα χαρακτηριστικά",
-    "מאפיינים נדרשים",
-  ],
-  parking: ["Паркиране", "Parking", "Парковка", "Parkplatz", "Parkeren", "Στάθμευση", "חניה"],
-  garden: ["Градина", "Garden", "Сад", "Garten", "Tuin", "Κήπος", "גינה"],
-  pool: ["Басейн", "Pool", "Бассейн", "Pool", "Zwembad", "Πισίνα", "בריכה"],
-  furnished: [
-    "Обзаведен",
-    "Furnished",
-    "Меблированный",
-    "Möbliert",
-    "Gemeubileerd",
-    "Επιπλωμένο",
-    "מרוהט",
-  ],
-  lift: ["Асансьор", "Lift", "Лифт", "Aufzug", "Lift", "Ανελκυστήρας", "מעלית"],
-  currency: ["Валута", "Currency", "Валюта", "Währung", "Valuta", "Νόμισμα", "מטבע"],
-  minimum: ["Минимум", "Minimum", "Минимум", "Minimum", "Minimum", "Ελάχιστο", "מינימום"],
-  maximum: ["Максимум", "Maximum", "Максимум", "Maximum", "Maximum", "Μέγιστο", "מקסימום"],
-  amount: ["Цена", "Price", "Цена", "Preis", "Prijs", "Τιμή", "מחיר"],
-} as const satisfies Record<string, Row>;
-export const intentCopy = (locale: PublicLocale) =>
-  Object.fromEntries(
-    Object.entries(rows).map(([key, values]) => [key, values[locales.indexOf(locale)]]),
-  ) as Record<keyof typeof rows, string>;
+// Reviewed-intent search and advanced filter labels (messages/<locale>/intent.json).
+const catalog = catalogCopy<typeof bg>({ bg, en, ru, de, nl, el, he });
+
+export type IntentCopy = Readonly<typeof bg>;
+export const intentCopy = (locale: PublicLocale): IntentCopy => catalog(locale);

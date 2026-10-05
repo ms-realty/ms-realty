@@ -1,0 +1,18 @@
+{
+  "show": "Karte anzeigen",
+  "hide": "Karte ausblenden",
+  "loading": "Karte wird geladen…",
+  "error": "Die Karte ist nicht verfügbar. Nutzen Sie die Liste oder versuchen Sie es erneut.",
+  "retry": "Erneut versuchen",
+  "precision": "Markierungen zeigen Gebiets- oder Ortszentren, keine Immobilienadressen. Die Karte umfasst nur diese Ergebnisseite.",
+  "title": "Karte der Ergebnisse",
+  "empty": "Keine veröffentlichten Kartenpositionen auf dieser Seite.",
+  "noScript": "Die Karte benötigt JavaScript. Alle Immobilien sind in der Liste verfügbar.",
+  "list": "Zur Liste",
+  "open": "Immobilie öffnen",
+  "zoomIn": "Vergrößern",
+  "zoomOut": "Verkleinern",
+  "close": "Schließen",
+  "listingTitle": "Lagegebiet",
+  "listingPrecision": "Die Markierung zeigt das Gebiets- oder Ortszentrum, nicht die Immobilienadresse."
+}

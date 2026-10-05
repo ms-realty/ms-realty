@@ -1,6 +1,13 @@
 {
-  "$comment": "Messages whose value is deliberately the same word as in bg or en (shared vocabulary such as Menu or Минимум), keyed <namespace>.<key> per locale. messages.test.ts rejects any other value copied from bg or en, and any entry here whose value has since changed. Awaiting the translation reviewers' sign-off (design/i18n-uncatalogued-copy-plan.md §3.7, item 3).",
+  "$comment": "Messages whose value is deliberately the same word as in bg or en (shared vocabulary such as Menu or Минимум), keyed <namespace>.<key> per locale. messages.test.ts rejects any other value copied from bg or en, and any entry here whose value has since changed; a listed value may also keep the other locale's script (el Email). Awaiting the translation reviewers' sign-off (design/i18n-uncatalogued-copy-plan.md §3.7, item 3).",
   "ru": [
+    "discovery.development",
+    "discovery.reference",
+    "discovery.unknown",
+    "intent.amount",
+    "intent.locations",
+    "intent.maximum",
+    "intent.minimum",
     "nav.menu",
     "states.success.title",
     "workspace.operations",
@@ -8,6 +15,24 @@
     "workspace.settings",
     "workspace.tasks"
   ],
-  "de": ["forms.optional"],
-  "nl": ["footer.privacy", "nav.contact", "nav.menu"]
+  "de": [
+    "discovery.hotel",
+    "discovery.name",
+    "discovery.optional",
+    "forms.optional",
+    "intent.maximum",
+    "intent.minimum",
+    "intent.pool"
+  ],
+  "nl": [
+    "discovery.filters",
+    "discovery.hotel",
+    "footer.privacy",
+    "intent.lift",
+    "intent.maximum",
+    "intent.minimum",
+    "nav.contact",
+    "nav.menu"
+  ],
+  "el": ["discovery.email"]
 }

@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { discoveryCopy } from "../src/features/discovery/copy";
 import { searchAlertCopy } from "../src/features/discovery/search-alert-copy";
 import { privacyCopy } from "../src/features/privacy/copy";
 import { hostUrl, origins } from "./hosts";
@@ -41,7 +42,7 @@ for (const javaScriptEnabled of [true, false]) {
     }, info) => {
       const c = searchAlertCopy("en");
       await page.goto(hostUrl("public", `/en/properties?${filters}`));
-      await page.getByRole("link", { name: c.entry, exact: true }).click();
+      await page.getByRole("link", { name: discoveryCopy("en").alertEntry, exact: true }).click();
       await expect(page.getByRole("heading", { name: c.title, exact: true })).toBeVisible();
       const publicUrl = new URL(page.url());
       expect(publicUrl.searchParams.get("minArea")).toBe("74.51");

@@ -16,7 +16,11 @@ const listed: Record<string, number> = baseline.files;
 const read = (path: string) => readFileSync(join(repoRoot, path), "utf8");
 
 /** Screens whose whole render path reads the catalogs; each migration phase adds its screens. */
-const migratedScreens: string[] = [];
+const migratedScreens = [
+  "app/public/[locale]/(site)/page.tsx", // P01 home
+  "app/public/[locale]/(site)/properties/page.tsx", // P02 catalogue and filters
+  "app/public/[locale]/(site)/properties/[reference]/[slug]/page.tsx", // P05 property detail
+];
 
 describe("copy guard rules", () => {
   const rulesOf = (path: string, source: string) =>

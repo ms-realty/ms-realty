@@ -13,7 +13,6 @@ import {
   readFilters,
   searchInput,
 } from "@/features/discovery/query";
-import { searchAlertCopy, searchAlertCopyLocale } from "@/features/discovery/search-alert-copy";
 import { alertSearch } from "@/features/discovery/search-alert-state";
 import { SearchForm } from "@/features/discovery/search-form";
 import { SearchMap } from "@/features/discovery/search-map";
@@ -73,10 +72,8 @@ export default async function PropertiesPage({
         <a
           className={buttonClass("secondary", "self-start")}
           href={alertSearch(locale, values).publicHref}
-          lang={searchAlertCopyLocale(locale)}
-          dir="ltr"
         >
-          {searchAlertCopy(locale).entry}
+          {copy.alertEntry}
         </a>
       ) : null}
       {result ? (

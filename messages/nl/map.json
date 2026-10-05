@@ -1,0 +1,18 @@
+{
+  "show": "Kaart tonen",
+  "hide": "Kaart verbergen",
+  "loading": "Kaart laden…",
+  "error": "De kaart is niet beschikbaar. Gebruik de lijst of probeer het opnieuw.",
+  "retry": "Opnieuw proberen",
+  "precision": "Markeringen tonen gebieds- of plaatscentra, geen adressen van woningen. De kaart omvat alleen deze resultatenpagina.",
+  "title": "Kaart met resultaten",
+  "empty": "Geen gepubliceerde kaartlocaties op deze pagina.",
+  "noScript": "De kaart vereist JavaScript. Alle woningen staan in de lijst.",
+  "list": "Naar de lijst",
+  "open": "Woning openen",
+  "zoomIn": "Inzoomen",
+  "zoomOut": "Uitzoomen",
+  "close": "Sluiten",
+  "listingTitle": "Omgeving van de woning",
+  "listingPrecision": "De markering toont het gebieds- of plaatscentrum, niet het adres van de woning."
+}

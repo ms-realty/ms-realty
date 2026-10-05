@@ -211,8 +211,9 @@ describe("message catalogs (ux-spec §19.1)", () => {
 
       it.each([...set.locales])("%s writes every message in its own script", (locale) => {
         const script = localeScripts[locale];
+        const cognate = allowedCognates[locale] ?? [];
         const wrong = Object.entries(flatten(catalog(set.dir(locale))))
-          .filter(([, message]) => hasWords(message))
+          .filter(([key, message]) => hasWords(message) && !cognate.includes(key))
           .filter(([, message]) =>
             script ? !script.test(visibleText(message)) : nonLatinScript.test(visibleText(message)),
           )

@@ -1,0 +1,18 @@
+{
+  "show": "Show map",
+  "hide": "Hide map",
+  "loading": "Loading map…",
+  "error": "The map is unavailable. Use the list or try again.",
+  "retry": "Try again",
+  "precision": "Markers show area or settlement centres, not property addresses. The map covers only this page of results.",
+  "title": "Map of results",
+  "empty": "No published map locations on this page.",
+  "noScript": "The map needs JavaScript. All properties are available in the list.",
+  "list": "Go to list",
+  "open": "Open property",
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom out",
+  "close": "Close",
+  "listingTitle": "Property area",
+  "listingPrecision": "The marker shows the area or settlement centre, not the property address."
+}

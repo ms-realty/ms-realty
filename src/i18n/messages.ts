@@ -5,9 +5,12 @@
 //   messages/staff/<locale>/<namespace>.json  staff host only, bg/en/ru
 import type a11y from "../../messages/bg/a11y.json";
 import type common from "../../messages/bg/common.json";
+import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
 import type footer from "../../messages/bg/footer.json";
 import type forms from "../../messages/bg/forms.json";
+import type intent from "../../messages/bg/intent.json";
+import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
 import type states from "../../messages/bg/states.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
@@ -16,9 +19,12 @@ import { isStaffLocale, type PublicLocale } from "./config";
 export const publicNamespaces = [
   "a11y",
   "common",
+  "discovery",
   "errors",
   "footer",
   "forms",
+  "intent",
+  "map",
   "nav",
   "states",
 ] as const;
@@ -27,9 +33,12 @@ export const staffNamespaces = ["workspace"] as const;
 export interface PublicMessages {
   a11y: typeof a11y;
   common: typeof common;
+  discovery: typeof discovery;
   errors: typeof errors;
   footer: typeof footer;
   forms: typeof forms;
+  intent: typeof intent;
+  map: typeof map;
   nav: typeof nav;
   states: typeof states;
 }

@@ -13,5 +13,35 @@
     "bg": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
     "en": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
     "ru": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null }
+  },
+  "namespaces": {
+    "$comment": "Public namespaces added after the locale entries above, each reviewed per locale on its own; a locale above cannot be approved while one of its namespaces here is a draft (src/i18n/messages.test.ts). discovery, intent and map hold the copy moved unchanged from src/features/discovery/{copy,intent-copy,map-copy}.ts; discovery.alertEntry in ru, de, nl, el and he is a Butler draft.",
+    "discovery": {
+      "bg": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "en": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "ru": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "de": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "nl": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "el": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "he": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null }
+    },
+    "intent": {
+      "bg": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "en": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "ru": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "de": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "nl": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "el": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "he": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null }
+    },
+    "map": {
+      "bg": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "en": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "ru": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "de": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "nl": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "el": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null },
+      "he": { "status": "draft_unreviewed", "reviewer": null, "reviewedAt": null }
+    }
   }
 }
