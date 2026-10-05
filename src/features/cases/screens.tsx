@@ -12,6 +12,7 @@ import { caseFor } from "@/server/cases/shared";
 import { getEnv } from "@/server/config/env";
 import { findOperation } from "@/server/operations";
 import { listTasks, readInquiry } from "@/server/work/queries";
+import { buttonClass } from "@/ui/button-class";
 import type { FormReceipt } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { caseAccessCopy } from "../case-access/copy";
@@ -30,6 +31,7 @@ import { caseCopy } from "./copy";
 import { caseEmailCopy } from "./email-copy";
 import { type WorkflowField, WorkflowForm } from "./form";
 import { lifecycleCopy } from "./lifecycle-copy";
+import { matchingCopy } from "./matching-copy";
 import { ownerPreviewCopy } from "./owner-preview-copy";
 
 export const workflowLink = "font-semibold text-accent underline underline-offset-4";
@@ -504,6 +506,10 @@ export async function CaseScreen(
   const thread = await readCaseMessages(getDb(), props.session, row.id);
   const agenda = await listAppointments(getDb(), props.session, row.id);
   const commitments = staff ? await listTasks(getDb(), props.session, { caseId: row.id }) : null;
+  const matching =
+    staff && view.canAddInterest && ["buyer", "tenant"].includes(row.kind)
+      ? `/${props.locale}/cases/${row.id}/matching`
+      : null;
   const showOverview = staff || !props.pane || props.pane === "overview";
   const showProperties = staff || props.pane === "properties" || showOverview;
   const showMessages = staff || props.pane === "messages" || showOverview;
@@ -663,6 +669,11 @@ export async function CaseScreen(
       {showOverview ? (
         <>
           <WorkflowSection title={c.brief} id="case-brief">
+            {matching ? (
+              <a className={buttonClass("secondary", "max-w-full text-center")} href={matching}>
+                {matchingCopy(props.locale).entry}
+              </a>
+            ) : null}
             <p>{brief?.clientAcknowledgedAt ? c.agreedBrief : c.draftBrief}</p>
             <p>Revision {brief?.revision ?? "—"}</p>
             <ul className="space-y-3">
@@ -749,7 +760,11 @@ export async function CaseScreen(
           {view.interests.length ? (
             <ul className="space-y-7">
               {view.interests.map((interest) => (
-                <li key={interest.id} className="space-y-3 border-b border-border pb-5">
+                <li
+                  key={interest.id}
+                  id={`interest-${interest.id}`}
+                  className="scroll-mt-6 space-y-3 border-b border-border pb-5"
+                >
                   <a
                     className={workflowLink}
                     href={`${getEnv().hosts.public}/bg/properties/${interest.reference}/${interest.reference.toLowerCase()}`}
@@ -847,19 +862,10 @@ export async function CaseScreen(
           ) : (
             <p>{c.noInterests}</p>
           )}
-          {view.canAddInterest ? (
-            <BoundWorkflowForm
-              {...props}
-              command="interest"
-              id={row.id}
-              revision={row.version}
-              path={path}
-              fields={[
-                { name: "reference", label: c.reference, required: true },
-                { name: "explanation", label: c.explanation, type: "textarea", required: true },
-              ]}
-              submit={c.addInterest}
-            />
+          {matching ? (
+            <a className={buttonClass("secondary", "max-w-full text-center")} href={matching}>
+              {matchingCopy(props.locale).entry}
+            </a>
           ) : null}
         </WorkflowSection>
       ) : null}

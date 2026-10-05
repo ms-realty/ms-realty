@@ -53,7 +53,8 @@ export const workflowFields: Record<WorkflowCommand, readonly string[]> = {
     "dueAt",
   ],
   handover: ["action", "receiverId", "reason", "reviewed", "snapshotHash"],
-  interest: ["reference", "explanation"],
+  // O07: `matchReview` is the reviewed property as one JSON string (see matching-review.ts).
+  interest: ["reference", "explanation", "matchReview"],
   feedback: ["state", "reason"],
   message: ["body", "reviewed"],
   note: ["body"],

@@ -18,6 +18,7 @@ import {
 import { initialStage } from "@/domain/case";
 import { guardInquiryTransition, inquiryMachine } from "@/domain/inquiry";
 import { guardInterestTransition, interestMachine } from "@/domain/interest";
+import { commercialStates } from "@/domain/listing";
 import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
@@ -25,8 +26,9 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
-import { loadPublishedListings } from "../publication/presentation";
+import { loadPublishedListings, presentationOf } from "../publication/presentation";
 import { nextReference } from "../references";
+import { caseMatchCriteriaInput, offeredStates } from "../search/search";
 import {
   allow,
   commandEnvelope,
@@ -36,6 +38,7 @@ import {
   taskResource,
   version,
 } from "../work/shared";
+import { assessPublishedCandidate } from "./matching";
 import { bumpCase, caseEvent, caseFor, liveParticipation } from "./shared";
 
 const createSchema = z.object({
@@ -58,6 +61,7 @@ const briefSchema = z.object({
   ...commandEnvelope,
   requirements: z.string().trim().min(3).max(4000),
   preferences: z.string().trim().max(4000),
+  criteria: caseMatchCriteriaInput.optional(),
 });
 const interestSchema = z.object({
   ...commandEnvelope,
@@ -66,6 +70,18 @@ const interestSchema = z.object({
     .trim()
     .regex(/^MS-\d{5,}$/i),
   explanation: z.string().trim().min(3).max(1500),
+  alternativeDecision: z.literal("propose_despite_mismatch").optional(),
+  matchReview: z
+    .object({
+      briefRevision: z.number().int().min(1),
+      manifestId: z.uuid(),
+      availability: z.enum(commercialStates),
+      violated: z.array(z.string().min(1).max(80)).max(32),
+      unconfirmed: z.array(z.string().min(1).max(80)).max(32),
+      reviewed: z.literal(true),
+    })
+    .strict()
+    .optional(),
 });
 const respondSchema = z.object({
   ...commandEnvelope,
@@ -264,6 +280,14 @@ export async function reviseBrief(
       const { row } = await caseFor(ctx.tx, session, input.id, "case.transition", true);
       version(row, input.expectedVersion);
       if (row.disposition !== "active") throw new AppError("transition_denied");
+      if (input.criteria) {
+        const purpose =
+          row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
+        if (!purpose || input.criteria.purpose !== purpose)
+          throw new AppError("validation_failed", {
+            fieldErrors: { "criteria.purpose": ["case_kind_mismatch"] },
+          });
+      }
       const [previous] = await ctx.tx
         .select()
         .from(briefRevisions)
@@ -274,6 +298,8 @@ export async function reviseBrief(
         caseId: row.id,
         revisionNumber: (previous?.revisionNumber ?? 0) + 1,
         items: items(input.requirements, input.preferences),
+        // An old filter must never survive a prose-only Brief revision as a false claim of fit.
+        criteria: input.criteria ?? {},
         authorKind: live.actor.kind,
         authorId: live.actor.id,
         brokerAcknowledgedAt: new Date(),
@@ -346,8 +372,105 @@ export async function addInterest(
           reference: row.reference,
           interestId: existing.id,
           version: row.version,
-          recordedAt: new Date().toISOString(),
+          recordedAt: existing.createdAt.toISOString(),
         };
+      const now = new Date();
+      const availability = presentationOf(published, now).availability;
+      if (!offeredStates.includes(availability)) throw new AppError("listing_unavailable");
+      const purpose =
+        row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
+      if (purpose && published.purpose !== purpose)
+        throw new AppError("validation_failed", {
+          fieldErrors: { reference: ["case_kind_mismatch"] },
+        });
+      let matchContext:
+        | {
+            briefRevision: number;
+            manifestId: string;
+            match: "match" | "needs_confirmation" | "no_match";
+            violated: readonly string[];
+            unconfirmed: readonly string[];
+            alternativeDecision?: "propose_despite_mismatch";
+          }
+        | undefined;
+      if (purpose) {
+        const [brief] = await ctx.tx
+          .select({ revision: briefRevisions.revisionNumber, criteria: briefRevisions.criteria })
+          .from(briefRevisions)
+          .where(eq(briefRevisions.caseId, row.id))
+          .orderBy(desc(briefRevisions.revisionNumber))
+          .limit(1);
+        const parsed = caseMatchCriteriaInput.safeParse(brief?.criteria);
+        if (!brief || !parsed.success || parsed.data.purpose !== purpose)
+          throw new AppError("validation_failed", {
+            fieldErrors: { matchReview: ["criteria_required"] },
+          });
+        const review = input.matchReview;
+        if (!review)
+          throw new AppError("validation_failed", {
+            fieldErrors: { matchReview: ["required_for_structured_brief"] },
+          });
+        if (
+          review.briefRevision !== brief.revision ||
+          review.manifestId !== published.manifestId ||
+          review.availability !== availability
+        )
+          throw new AppError("version_conflict", {
+            current: {
+              briefRevision: brief.revision,
+              manifestId: published.manifestId,
+              availability,
+            },
+          });
+        const assessment = assessPublishedCandidate(published, parsed.data, now);
+        const same = (received: readonly string[], current: readonly string[]) => {
+          if (received.length !== current.length) return false;
+          const reviewed = [...received].sort();
+          const assessed = [...current].sort();
+          return reviewed.every((value, index) => value === assessed[index]);
+        };
+        if (
+          !same(review.violated, assessment.violated) ||
+          !same(review.unconfirmed, assessment.unconfirmed)
+        )
+          throw new AppError("version_conflict", {
+            current: {
+              briefRevision: brief.revision,
+              manifestId: published.manifestId,
+              availability,
+              violated: assessment.violated,
+              unconfirmed: assessment.unconfirmed,
+            },
+          });
+        if (assessment.unconfirmed.length > 0)
+          throw new AppError("validation_failed", {
+            fieldErrors: { matchReview: ["unconfirmed_facts"] },
+          });
+        if (assessment.violated.length > 0 && !input.alternativeDecision)
+          throw new AppError("validation_failed", {
+            fieldErrors: { alternativeDecision: ["required_for_hard_mismatch"] },
+          });
+        if (assessment.violated.length === 0 && input.alternativeDecision)
+          throw new AppError("validation_failed", {
+            fieldErrors: { alternativeDecision: ["no_hard_mismatch"] },
+          });
+        if (assessment.violated.length > 0 && input.explanation.length < 20)
+          throw new AppError("validation_failed", {
+            fieldErrors: { explanation: ["alternative_reason_required"] },
+          });
+        matchContext = {
+          briefRevision: brief.revision,
+          manifestId: published.manifestId,
+          match: assessment.result,
+          violated: assessment.violated,
+          unconfirmed: assessment.unconfirmed,
+          ...(input.alternativeDecision ? { alternativeDecision: input.alternativeDecision } : {}),
+        };
+      } else if (input.matchReview || input.alternativeDecision) {
+        throw new AppError("validation_failed", {
+          fieldErrors: { matchReview: ["case_kind_mismatch"] },
+        });
+      }
       const [interest] = await ctx.tx
         .insert(interests)
         .values({
@@ -365,7 +488,7 @@ export async function addInterest(
         row.id,
         "case.interest_added",
         "interest.manage",
-        { interestId: interest.id },
+        { interestId: interest.id, ...(matchContext ?? {}) },
         "participants",
       );
       return {
@@ -373,7 +496,7 @@ export async function addInterest(
         reference: row.reference,
         interestId: interest.id,
         version: row.version + 1,
-        recordedAt: new Date().toISOString(),
+        recordedAt: interest.createdAt.toISOString(),
       };
     },
   );
