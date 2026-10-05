@@ -18,6 +18,7 @@ import {
 import { initialStage } from "@/domain/case";
 import { guardInquiryTransition, inquiryMachine } from "@/domain/inquiry";
 import { guardInterestTransition, interestMachine } from "@/domain/interest";
+import { commercialStates } from "@/domain/listing";
 import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
@@ -73,6 +74,7 @@ const interestSchema = z.object({
     .object({
       briefRevision: z.number().int().min(1),
       manifestId: z.uuid(),
+      availability: z.enum(commercialStates),
       violated: z.array(z.string().min(1).max(80)).max(32),
       unconfirmed: z.array(z.string().min(1).max(80)).max(32),
       reviewed: z.literal(true),
@@ -372,8 +374,8 @@ export async function addInterest(
           recordedAt: new Date().toISOString(),
         };
       const now = new Date();
-      if (!offeredStates.includes(presentationOf(published, now).availability))
-        throw new AppError("listing_unavailable");
+      const availability = presentationOf(published, now).availability;
+      if (!offeredStates.includes(availability)) throw new AppError("listing_unavailable");
       const purpose =
         row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
       if (purpose && published.purpose !== purpose)
@@ -403,9 +405,17 @@ export async function addInterest(
             throw new AppError("validation_failed", {
               fieldErrors: { matchReview: ["required_for_structured_brief"] },
             });
-          if (review.briefRevision !== brief.revision || review.manifestId !== published.manifestId)
+          if (
+            review.briefRevision !== brief.revision ||
+            review.manifestId !== published.manifestId ||
+            review.availability !== availability
+          )
             throw new AppError("version_conflict", {
-              current: { briefRevision: brief.revision, manifestId: published.manifestId },
+              current: {
+                briefRevision: brief.revision,
+                manifestId: published.manifestId,
+                availability,
+              },
             });
           const assessment = assessPublishedCandidate(published, parsed.data, now);
           const same = (received: readonly string[], current: readonly string[]) =>
@@ -419,6 +429,7 @@ export async function addInterest(
               current: {
                 briefRevision: brief.revision,
                 manifestId: published.manifestId,
+                availability,
                 violated: assessment.violated,
                 unconfirmed: assessment.unconfirmed,
               },

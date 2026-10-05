@@ -46,7 +46,8 @@ Staff-only `readCaseCandidate` inspects one currently public reference against a
 revision and returns its public card, known hard violations and facts needing confirmation.
 It cannot turn an unpublished or stale candidate into an Interest or a public recommendation.
 For a new Interest on a structured buyer/tenant Brief, `addInterest` requires `matchReview` with
-the reviewed Brief revision, public manifest, exact violation/unknown keys and explicit review.
+the reviewed Brief revision, public manifest, presented availability, exact violation/unknown keys
+and explicit review.
 The command recomputes that assessment inside its idempotent operation and rejects changed
 snapshots, non-offered listings and a different transaction purpose. A hard-violating alternative
 also needs a broker explanation of at least 20 characters; the recorded Case event retains the

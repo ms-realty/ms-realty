@@ -140,6 +140,7 @@ describe("O07 Case matching", () => {
       matchReview: {
         briefRevision: 2,
         manifestId: exactCandidate.candidate.manifestId,
+        availability: exactCandidate.candidate.availability.presented,
         violated: [],
         unconfirmed: [],
         reviewed: true as const,
@@ -183,6 +184,7 @@ describe("O07 Case matching", () => {
       matchReview: {
         briefRevision: 2,
         manifestId: alternative.candidate.manifestId,
+        availability: alternative.candidate.availability.presented,
         violated: [...alternative.violated],
         unconfirmed: [...alternative.unconfirmed],
         reviewed: true as const,
@@ -193,6 +195,13 @@ describe("O07 Case matching", () => {
         ...alternativeInput,
         operationId: randomUUID(),
         matchReview: { ...alternativeInput.matchReview, briefRevision: 1 },
+      }),
+    ).rejects.toMatchObject({ code: "version_conflict" });
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...alternativeInput,
+        operationId: randomUUID(),
+        matchReview: { ...alternativeInput.matchReview, availability: "negotiating" },
       }),
     ).rejects.toMatchObject({ code: "version_conflict" });
     await expect(
