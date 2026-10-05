@@ -30,7 +30,8 @@ test.describe("each host serves its own routes (§11.1)", () => {
       await page.goto(hostUrl("public", "/"));
       expect(page.url()).toBe(hostUrl("public", "/he"));
       await page.goto(hostUrl("client", "/"));
-      expect(page.url()).toBe(hostUrl("client", "/he/access"));
+      // C-06: the anonymous client home keeps its return path to the overview.
+      expect(page.url()).toBe(hostUrl("client", "/he/access?returnTo=%2Fhe%2Foverview"));
       // Staff interface languages are BG/EN/RU; the browser's Hebrew is not one of them.
       await page.goto(hostUrl("staff", "/"));
       expect(page.url()).toBe(hostUrl("staff", "/bg/access"));
