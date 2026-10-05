@@ -189,6 +189,9 @@ test("privacy queue reaches and reviews an unresolved request beyond 100 without
     await expect(page).toHaveURL(
       (current) => current.pathname === "/en/operations/privacy" && !current.search,
     );
+    // The queue is ordered by creation, so a reviewed request keeps its page.
+    await expect(target).toHaveCount(0);
+    await page.goto(targetPageUrl);
     await expect(target).toBeVisible();
     await assertNativeGeometry();
   } finally {
