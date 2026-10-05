@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { normalizeSearch } from "@/server/search/search";
 import { readFilters, searchInput } from "./query";
-import { alertSearch } from "./search-alert-state";
+import { alertSearch, savedAlertCriteria } from "./search-alert-state";
 
 it("carries all committed criteria across public, client and edit URLs without a page cursor", () => {
   const query = {
@@ -50,4 +50,21 @@ it.each([
   { includeUnconfirmed: "true" },
 ])("refuses invalid or ambiguous criteria instead of an empty search: %j", (query) => {
   expect(() => alertSearch("en", query)).toThrow();
+});
+
+it("reads complete current stored criteria without taking locale or filters from a status URL", () => {
+  const stored = alertSearch("bg", {
+    purpose: "long_term_rent",
+    q: "Stored search",
+    minPrice: "950.03",
+    minArea: "74.51",
+    areaBasis: "built",
+    includeUnconfirmed: "1",
+    sort: "price_asc",
+  }).normalized;
+  expect(savedAlertCriteria({ ...stored, consentLocale: "bg" })).toEqual(stored);
+  expect(savedAlertCriteria({ ...stored, criteria: null })).toBeNull();
+  expect(
+    savedAlertCriteria({ ...stored, criteria: { ...stored.criteria, purpose: "invalid" } }),
+  ).toBeNull();
 });

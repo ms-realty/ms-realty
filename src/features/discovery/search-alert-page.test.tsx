@@ -39,7 +39,7 @@ it("shows exact money/area precision and explicit unknown policy in review", asy
   render(
     await SearchAlertCriteria({
       locale: "en",
-      search: alertSearch("en", {
+      search: alertSearch("bg", {
         minPrice: "950.03",
         minArea: "74.51",
         areaBasis: "built",
@@ -50,6 +50,7 @@ it("shows exact money/area precision and explicit unknown policy in review", asy
   expect(screen.getByText(/950\.03/)).toBeVisible();
   expect(screen.getByText(/74\.51/)).toBeVisible();
   expect(screen.getByText(/unknown facts do not match/)).toBeVisible();
+  expect(screen.getByText(/Search language:/)).toHaveTextContent("BG");
 });
 it("requires a deliberately chosen verified contact and unchecked alert-only consent", () => {
   render(

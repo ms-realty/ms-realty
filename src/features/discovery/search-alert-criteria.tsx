@@ -10,9 +10,12 @@ import type { AlertSearch } from "./search-alert-state";
 export async function SearchAlertCriteria({
   locale,
   search,
+  title,
 }: {
   locale: PublicLocale;
-  search: AlertSearch;
+  search: Pick<AlertSearch, "normalized">;
+  /** A heading in the page locale; the default heading is bg/en-only copy. */
+  title?: string;
 }) {
   const c = discoveryCopy(locale),
     extra = intentCopy(locale),
@@ -68,11 +71,15 @@ export async function SearchAlertCriteria({
   return (
     <section
       className="min-w-0 space-y-4 rounded-panel bg-subtle p-5 [overflow-wrap:anywhere]"
-      aria-label={copy.criteria}
+      aria-label={title ?? copy.criteria}
     >
-      <h2 className="text-heading font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
-        {copy.criteria}
-      </h2>
+      {title ? (
+        <h2 className="text-heading font-semibold">{title}</h2>
+      ) : (
+        <h2 className="text-heading font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
+          {copy.criteria}
+        </h2>
+      )}
       <dl className="grid gap-3">
         {rows.map(([key, value]) => (
           <div key={key}>
@@ -82,7 +89,7 @@ export async function SearchAlertCriteria({
         ))}
       </dl>
       <p lang={searchAlertCopyLocale(locale)} dir="ltr">
-        {copy.source}: <bdi>{locale.toUpperCase()}</bdi>
+        {copy.source}: <bdi>{search.normalized.locale.toUpperCase()}</bdi>
       </p>
       <p>
         {criteria.includeNeedsConfirmation ? (
