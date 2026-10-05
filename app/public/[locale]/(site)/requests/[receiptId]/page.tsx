@@ -18,6 +18,7 @@ import {
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
 import { Receipt } from "@/ui/receipt";
+import { ReceiptListings } from "@/ui/receipt-listings";
 export const metadata = discoveryMetadata;
 export default async function ReceiptPage({
   params,
@@ -65,20 +66,7 @@ export default async function ReceiptPage({
           recordedAtLabel={copy.received}
         >
           <p>{copy.next}</p>
-          {receipt.selectedListingReferences.length ? (
-            <ol aria-label={copy.compare} className="list-decimal space-y-2 ps-5">
-              {receipt.selectedListingReferences.map((reference) => (
-                <li key={reference}>
-                  <bdi>{reference}</bdi>
-                </li>
-              ))}
-            </ol>
-          ) : null}
-          {receipt.listingReference ? (
-            <p>
-              {copy.reference}: <bdi>{receipt.listingReference}</bdi>
-            </p>
-          ) : null}
+          {view.listings ? <ReceiptListings listings={view.listings} /> : null}
         </Receipt>
       </div>
       <InquiryContent content={receipt.content} locale={locale} />

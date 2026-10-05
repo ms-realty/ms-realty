@@ -3,12 +3,32 @@ export type FormValues = Record<string, string>;
 export type FieldErrors<V extends FormValues> = Partial<Record<keyof V, readonly string[]>>;
 export type RecoveryLink = { href: string; label: string };
 
+/** Saved subjects of a receipt, already worded; the UI only lays them out. */
+export type ReceiptListings = {
+  heading: string;
+  note: string;
+  items: {
+    reference: string;
+    referenceLabel: string;
+    name: string;
+    /** Language of a saved name when it differs from the page. */
+    nameLang?: string;
+    nameNote?: string;
+    /** Present only while the subject is verifiably public; makes the name a link. */
+    href?: string;
+    warning?: string;
+    status?: string;
+    link: RecoveryLink;
+  }[];
+};
+
 export type FormReceipt = {
   title: string;
   reference: string;
   recordedAt: { dateTime: string; label: string };
   nextStep: string;
   destination: RecoveryLink;
+  listings?: ReceiptListings;
 };
 
 export type FormOutcome<V extends FormValues> =

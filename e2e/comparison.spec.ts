@@ -416,10 +416,14 @@ test("P07: native three-property inquiry carries every ordered identity through 
   await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Inquiry received" })).toBeVisible();
   await page.getByRole("link", { name: "Open receipt", exact: true }).click();
-  const selection = page.getByRole("list", { name: "Compare", exact: true });
-  await expect(selection.getByRole("listitem")).toHaveText(references());
+  // P12 names every saved property in the saved order, from the submission snapshot.
+  const selection = page
+    .getByRole("region", { name: "The properties in this inquiry · 3", exact: true })
+    .getByRole("listitem");
+  const savedOrder = references().map((reference) => new RegExp(`No\\. ${reference}`));
+  await expect(selection).toHaveText(savedOrder);
   await page.reload();
-  await expect(selection.getByRole("listitem")).toHaveText(references());
+  await expect(selection).toHaveText(savedOrder);
   await page.screenshot({
     path: testInfo.outputPath("comparison-native-receipt-390.png"),
     fullPage: true,

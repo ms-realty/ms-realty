@@ -143,7 +143,11 @@ describe("P07 collective inquiry retention", () => {
       "en",
       discoveryCopy("en"),
     );
-    expect(receipt.nextStep).toContain("MS-00303, MS-00101, MS-00202");
+    expect(receipt.listings?.items.map((item) => item.reference)).toEqual([
+      "MS-00303",
+      "MS-00101",
+      "MS-00202",
+    ]);
     expect(receipt.destination.href).toBe("/en/requests/key");
   });
 });
@@ -172,6 +176,6 @@ it("identifies only the individual inquiry subject on immediate confirmation, no
     "en",
     discoveryCopy("en"),
   );
-  expect(receipt.nextStep).toContain("MS-00101");
-  expect(receipt.nextStep).not.toMatch(/MS-00303|MS-00202/);
+  expect(receipt.listings?.items.map((item) => item.reference)).toEqual(["MS-00101"]);
+  expect(JSON.stringify(receipt)).not.toMatch(/MS-00303|MS-00202/);
 });

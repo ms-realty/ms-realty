@@ -9,6 +9,7 @@ import type { InquiryReceipt } from "@/server/inquiries/intake";
 import type { ListingCard } from "@/server/listings/view-models";
 import type { FormCopy, FormReceipt, FormState } from "@/ui/form/contract";
 import type { DiscoveryCopy } from "./copy";
+import { receiptListings } from "./receipt-listings";
 export type InquiryValues = {
   purpose: string;
   name: string;
@@ -117,11 +118,17 @@ export function inquiryReceiptView(
     title: copy.received,
     reference: receipt.reference,
     recordedAt: { dateTime: receipt.acceptedAt, label: formatDateTime(locale, receipt.acceptedAt) },
-    nextStep: receipt.selectedListingReferences?.length
-      ? `${copy.reference}: ${receipt.selectedListingReferences.join(", ")}. ${copy.next}`
-      : receipt.listingReference
-        ? `${copy.reference}: ${receipt.listingReference}. ${copy.next}`
-        : copy.next,
+    nextStep: copy.next,
     destination: { href: inquiryStatus(locale, receipt.receiptId), label: copy.receipt },
+    ...withListings(receipt, locale),
   };
+}
+
+function withListings(receipt: InquiryReceipt, locale: PublicLocale) {
+  const listings = receiptListings(
+    receipt.listing ? [receipt.listing] : receipt.selectedListings,
+    locale,
+    receipt.acceptedAt,
+  );
+  return listings ? { listings } : {};
 }

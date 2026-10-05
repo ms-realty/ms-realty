@@ -17,6 +17,7 @@ import { cx } from "../cx";
 import { ErrorSummary } from "../error-summary";
 import { Notice } from "../notice";
 import { Receipt } from "../receipt";
+import { ReceiptListings } from "../receipt-listings";
 import {
   type FieldErrors,
   type FormAction,
@@ -239,6 +240,9 @@ function FormSession<V extends FormValues>({
           </a>
         }
       >
+        {outcome.receipt.listings ? (
+          <ReceiptListings listings={outcome.receipt.listings} headingLevel={3} />
+        ) : null}
         <p>{outcome.receipt.nextStep}</p>
       </Receipt>
     );

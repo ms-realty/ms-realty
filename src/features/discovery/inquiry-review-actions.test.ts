@@ -60,6 +60,8 @@ beforeEach(() => {
       acceptedAt: new Date().toISOString(),
       purpose: payload.purpose,
       locale: payload.locale,
+      listing: null,
+      selectedListings: [],
       listingReference: payload.listingReference ?? null,
       selectedListingReferences: [],
       comparisonReferences: [],
