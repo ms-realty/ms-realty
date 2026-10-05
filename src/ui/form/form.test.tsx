@@ -1,5 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { FormAction, FormState } from "./contract";
 import { ActionForm, nativeFormPermalink } from "./form";
@@ -31,6 +33,80 @@ function mount(action: FormAction<SpecimenValues>, state = initialState) {
 }
 
 describe("UI07 / S11–S17 progressive form", () => {
+  it.each([1, 2])(
+    "adopts a native radio choice before hydration with %i options and keeps checkbox groups",
+    async (count) => {
+      function NativeChoices() {
+        return (
+          <ActionForm
+            action={async (state) => state}
+            initialState={initialState}
+            permalink="/practice"
+            reconciliation={{ href: "/status", label: "Status" }}
+            copy={copy.form}
+            labels={{ subject: "Recipient", note: "Scope" }}
+            submitLabel="Submit"
+          >
+            {(form) => (
+              <>
+                {Array.from({ length: count }, (_, index) => `recipient-${index}`).map(
+                  (recipient) => (
+                    <label key={recipient}>
+                      {recipient}
+                      <input
+                        type="radio"
+                        name="subject"
+                        value={recipient}
+                        checked={form.values.subject === recipient}
+                        onChange={form.field("subject").onChange}
+                      />
+                    </label>
+                  ),
+                )}
+                {["first", "second"].map((scope) => (
+                  <label key={scope}>
+                    Scope {scope}
+                    <input
+                      type="checkbox"
+                      name="note"
+                      value={scope}
+                      checked={form.values.note.split("\n").includes(scope)}
+                      onChange={() => {}}
+                    />
+                  </label>
+                ))}
+              </>
+            )}
+          </ActionForm>
+        );
+      }
+      const container = document.createElement("div");
+      document.body.append(container);
+      container.innerHTML = renderToString(<NativeChoices />);
+      // A visitor chooses before JavaScript arrives; hydration must not drop that choice.
+      const chosen = container.querySelector<HTMLInputElement>(
+        `input[value="recipient-${count - 1}"]`,
+      );
+      if (!chosen) throw new Error("Missing server-rendered radio");
+      chosen.checked = true;
+      for (const checkbox of container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
+        checkbox.checked = true;
+      let root: ReturnType<typeof hydrateRoot> | undefined;
+      try {
+        await act(async () => {
+          root = hydrateRoot(container, <NativeChoices />);
+        });
+        expect(chosen).toBeChecked();
+        const form = container.querySelector("form");
+        if (!form) throw new Error("Missing hydrated form");
+        expect(new FormData(form).get("subject")).toBe(`recipient-${count - 1}`);
+        expect(new FormData(form).getAll("note")).toEqual(["first", "second"]);
+      } finally {
+        await act(async () => root?.unmount());
+        container.remove();
+      }
+    },
+  );
   it("resolves the submit label from the returned review state while preserving the operation", async () => {
     const user = userEvent.setup();
     render(

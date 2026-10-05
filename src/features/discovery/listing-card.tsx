@@ -60,7 +60,10 @@ export function Availability({
       {listing.availability.confirmedAt ? (
         <p className="text-caption text-text-muted">
           {copy.confirmedAt}:{" "}
-          <time dateTime={listing.availability.confirmedAt}>
+          {/* Same instant and zone, but ICU builds word date-times differently (Node "5 Oct
+              2026, 00:48" vs WebKit "5 Oct 2026 at 00:48"). Inside a hydrated client form,
+              keep the server's text instead of failing hydration and re-rendering the form. */}
+          <time dateTime={listing.availability.confirmedAt} suppressHydrationWarning>
             {formatDateTime(locale, listing.availability.confirmedAt)}
           </time>
         </p>

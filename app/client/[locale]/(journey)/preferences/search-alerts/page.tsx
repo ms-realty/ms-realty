@@ -2,13 +2,17 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import type { QueryParams } from "@/features/discovery/query";
-import { searchAlertCopy, searchAlertCopyLocale } from "@/features/discovery/search-alert-copy";
+import {
+  searchAlertCopy,
+  searchAlertCopyLocale,
+  searchAlertStatusCopy,
+} from "@/features/discovery/search-alert-copy";
 import { SearchAlertCriteria } from "@/features/discovery/search-alert-criteria";
 import { SearchAlertForm } from "@/features/discovery/search-alert-form";
 import { initialSearchAlertState } from "@/features/discovery/search-alert-server";
-import { alertSearch } from "@/features/discovery/search-alert-state";
-import { privacyCopy } from "@/features/privacy/copy";
-import { isRoutableLocale } from "@/i18n/config";
+import { alertSearch, savedAlertCriteria } from "@/features/discovery/search-alert-state";
+import { privacyCopy, privacyLabel } from "@/features/privacy/copy";
+import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { currentClientSession } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { getEnv } from "@/server/config/env";
@@ -58,22 +62,59 @@ export default async function Page({
   const operation = operationKey
     ? await findOperation(getDb(), session.actor, "preferences.opt_in", operationKey)
     : null;
+  // The status view names only the actor's own search-alert subscription created by this
+  // operation, read as currently stored; URL criteria are never presented as its receipt.
+  const statusRequested = query.operation !== undefined;
+  const outcome = z.object({ id: z.uuid() }).safeParse(operation?.outcome);
+  const saved =
+    operation?.status === "succeeded" && outcome.success
+      ? data.subscriptions.find(
+          (subscription) =>
+            subscription.id === outcome.data.id && subscription.purpose === "search_alerts",
+        )
+      : undefined;
+  const savedCriteria = saved ? savedAlertCriteria(saved.criteria) : null;
+  const s = searchAlertStatusCopy(locale);
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-gutter py-8">
       <h1 className="text-title font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
-        {c.title}
+        {statusRequested ? c.status : c.title}
       </h1>
-      {search ? (
+      {statusRequested ? null : search ? (
         <SearchAlertCriteria locale={locale} search={search} />
       ) : (
         <Notice tone="warning">{c.invalid}</Notice>
       )}
       <div className="space-y-5" lang={searchAlertCopyLocale(locale)} dir="ltr">
         <Notice tone="info">{configuredAlertRule() ? c.deliveryBoundary : c.deliveryOff}</Notice>
-        {query.operation ? (
-          <Notice tone={operation?.status === "succeeded" ? "success" : "warning"}>
-            {operation?.status === "succeeded" ? c.saved : c.unconfirmed}
-          </Notice>
+        {statusRequested ? (
+          saved ? (
+            <div className="space-y-5" lang={locale} dir={localeDirection(locale)}>
+              <Notice tone="success">{s.recordedRequest}</Notice>
+              <p>{s.historicalNote}</p>
+              <p>
+                {s.currentState}:{" "}
+                <span lang={searchAlertCopyLocale(locale)}>
+                  {privacyLabel(locale, saved.state)}
+                </span>
+              </p>
+              <p lang={searchAlertCopyLocale(locale)} dir="ltr">
+                {p.frequency}: {saved.frequency === "weekly" ? p.weekly : p.daily} · {p.timezone}:{" "}
+                <bdi>{saved.timezone}</bdi>
+              </p>
+              {savedCriteria ? (
+                <SearchAlertCriteria
+                  locale={locale}
+                  title={s.currentPreference}
+                  search={{ normalized: savedCriteria }}
+                />
+              ) : (
+                <Notice tone="warning">{s.savedCriteriaUnavailable}</Notice>
+              )}
+            </div>
+          ) : (
+            <Notice tone="warning">{c.unconfirmed}</Notice>
+          )
         ) : (
           <>
             {!contacts.length ? (
@@ -130,7 +171,7 @@ export default async function Page({
         <a className="block underline" href={`/${locale}/preferences`}>
           {c.preferences}
         </a>
-        {search ? (
+        {!statusRequested && search ? (
           <a
             className="block underline"
             href={new URL(search.searchHref, getEnv().hosts.public).toString()}

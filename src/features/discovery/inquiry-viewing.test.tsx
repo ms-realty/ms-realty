@@ -53,6 +53,34 @@ it("provides native optional windows and exposes retained errors inside the righ
   expect(screen.getByRole("combobox", { name: "Preferred format" })).toHaveTextContent("In person");
   expect(screen.queryByRole("option", { name: /video/i })).not.toBeInTheDocument();
 });
+it("names each repeated-clock choice in the error summary as its visible select does", () => {
+  render(
+    <InquiryForm
+      locale="en"
+      copy={discoveryCopy("en")}
+      initialState={{
+        ...state,
+        outcome: {
+          kind: "validation",
+          code: "VALIDATION_FAILED",
+          message: "Check",
+          fieldErrors: {
+            viewingStartChoice1: ["Choose one"],
+            viewingEndChoice1: ["Choose one"],
+          },
+        },
+      }}
+      action={async (previous) => previous}
+    />,
+  );
+  for (const name of [
+    "From date and time 1 · Repeated-clock choice",
+    "Until date and time 1 · Repeated-clock choice",
+  ]) {
+    expect(screen.getByRole("combobox", { name })).toBeVisible();
+    expect(screen.getByRole("link", { name: `${name}: Choose one` })).toBeVisible();
+  }
+});
 it("reviews the exact zone/windows/access note, then native Edit retains them and the same operation", async () => {
   const user = userEvent.setup();
   render(

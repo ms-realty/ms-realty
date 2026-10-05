@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import PublicPage from "../../../app/public/[locale]/(site)/search-alerts/page";
 import { SearchAlertForm } from "./search-alert-form";
@@ -39,7 +40,7 @@ it("shows exact money/area precision and explicit unknown policy in review", asy
   render(
     await SearchAlertCriteria({
       locale: "en",
-      search: alertSearch("en", {
+      search: alertSearch("bg", {
         minPrice: "950.03",
         minArea: "74.51",
         areaBasis: "built",
@@ -50,13 +51,18 @@ it("shows exact money/area precision and explicit unknown policy in review", asy
   expect(screen.getByText(/950\.03/)).toBeVisible();
   expect(screen.getByText(/74\.51/)).toBeVisible();
   expect(screen.getByText(/unknown facts do not match/)).toBeVisible();
+  expect(screen.getByText(/Search language:/)).toHaveTextContent("BG");
 });
-it("requires a deliberately chosen verified contact and unchecked alert-only consent", () => {
+it("shows complete verified emails with a deliberate native choice and unchecked alert-only consent", () => {
+  const longEmail = `${"synthetic-contact-".repeat(4)}@example.test`;
   render(
     <SearchAlertForm
       locale="en"
       permalink="/en/preferences/search-alerts?purpose=sale"
-      contacts={[{ id: "contact-one", value: "synthetic@example.test" }]}
+      contacts={[
+        { id: "contact-one", value: longEmail },
+        { id: "contact-two", value: "synthetic@example.test" },
+      ]}
       initialState={{
         operationId: "op",
         expectedRevision: null,
@@ -73,8 +79,45 @@ it("requires a deliberately chosen verified contact and unchecked alert-only con
       action={async (state) => state}
     />,
   );
-  expect(screen.getByRole("combobox", { name: "Email" })).toHaveValue("");
+  expect(screen.getByRole("group", { name: "Email" })).toBeVisible();
+  const recipient = screen.getByRole("radio", { name: longEmail });
+  expect(recipient).not.toBeChecked();
+  expect(recipient).toBeRequired();
+  expect(screen.getByRole("radio", { name: "synthetic@example.test" })).not.toBeChecked();
+  expect(screen.getByText(longEmail, { exact: true })).toBeVisible();
+  fireEvent.click(recipient);
+  expect(recipient).toBeChecked();
+  const nativeForm = recipient.closest("form");
+  if (!nativeForm) throw new Error("Missing native alert form");
+  expect(new FormData(nativeForm).get("contactMethodId")).toBe("contact-one");
   expect(screen.getByRole("combobox", { name: "Frequency" })).toHaveValue("daily");
   expect(screen.getByRole("checkbox")).not.toBeChecked();
   expect(screen.getByRole("checkbox")).toHaveAccessibleName(/does not enable marketing/);
+});
+it("announces a concise pending save instead of an unconfirmed-status sentence", async () => {
+  const user = userEvent.setup();
+  render(
+    <SearchAlertForm
+      locale="en"
+      permalink="/en/preferences/search-alerts?purpose=sale"
+      contacts={[{ id: "contact-one", value: "synthetic@example.test" }]}
+      initialState={{
+        operationId: "op",
+        expectedRevision: null,
+        responseId: "render",
+        values: {
+          contactMethodId: "contact-one",
+          confirmed: "yes",
+          frequency: "daily",
+          timezone: "Europe/Sofia",
+          proof: "proof",
+        },
+        outcome: { kind: "idle" },
+      }}
+      action={() => new Promise(() => {})}
+    />,
+  );
+  await user.click(screen.getByRole("button", { name: "Save this search preference" }));
+  expect(await screen.findByRole("status")).toHaveTextContent(/^Saving preference…$/);
+  expect(screen.queryByText(/change is not confirmed/)).not.toBeInTheDocument();
 });

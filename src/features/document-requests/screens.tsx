@@ -85,8 +85,18 @@ export async function DocumentRequestsScreen(
     if (isAppError(error) && error.code === "not_found") notFound();
     throw error;
   });
+  // An upload confirms only a transfer into a file version this screen displays.
   const saved =
-    typeof query.saved === "string" ? await fileReceipt(db, session, query.saved) : null;
+    typeof query.saved === "string"
+      ? await fileReceipt(
+          db,
+          session,
+          query.saved,
+          view.requests.flatMap((request) =>
+            request.file ? [{ kind: "document" as const, id: request.file.id }] : [],
+          ),
+        )
+      : null;
   const command =
     typeof query.command === "string" && ["create", "review", "cancel"].includes(query.command)
       ? query.command

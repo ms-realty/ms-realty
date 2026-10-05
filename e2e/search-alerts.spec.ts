@@ -5,7 +5,10 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
-import { searchAlertCopy } from "../src/features/discovery/search-alert-copy";
+import {
+  searchAlertCopy,
+  searchAlertStatusCopy,
+} from "../src/features/discovery/search-alert-copy";
 import { privacyCopy } from "../src/features/privacy/copy";
 import { hostUrl, origins } from "./hosts";
 
@@ -128,9 +131,17 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(page.getByRole("heading", { name: c.title, exact: true })).toBeVisible();
       await expect(page.getByRole("checkbox", { name: c.consent, exact: true })).not.toBeChecked();
       await expect(
-        page.getByRole("option", { name: fixture.unverifiedEmail, exact: true }),
+        page.getByRole("radio", { name: fixture.unverifiedEmail, exact: true }),
       ).toHaveCount(0);
-      await page.getByLabel(p.email, { exact: true }).selectOption(fixture.contactId);
+      const recipient = page.getByRole("radio", { name: fixture.email, exact: true });
+      await expect(recipient).not.toBeChecked();
+      await expect(recipient).toHaveValue(fixture.contactId);
+      expect(
+        await recipient.locator("..").evaluate((label) => label.getBoundingClientRect().height),
+      ).toBeGreaterThanOrEqual(44);
+      await recipient.focus();
+      await page.keyboard.press("Space");
+      await expect(recipient).toBeChecked();
       await page.getByLabel(p.frequency, { exact: true }).selectOption("weekly");
       await page.getByLabel(p.timezone, { exact: true }).fill("Europe/Sofia");
       await page.getByRole("checkbox", { name: c.consent, exact: true }).check();
@@ -178,6 +189,7 @@ for (const javaScriptEnabled of [true, false]) {
         path: info.outputPath(`search-alert-account-320-${javaScriptEnabled}.png`),
         fullPage: true,
       });
+      const operation = await page.locator('[name="_operationId"]').inputValue();
       await page.getByRole("button", { name: c.save, exact: true }).click();
       await expect(page.getByText(c.saved, { exact: true })).toBeVisible();
       const choices = await db
@@ -220,6 +232,26 @@ for (const javaScriptEnabled of [true, false]) {
         .from(schema.consentEvents)
         .where(eq(schema.consentEvents.subscriptionId, saved.id));
       expect(consent.some((event) => event.kind === "opted_in")).toBe(true);
+      // The status view names the stored subscription, never the criteria in its own URL.
+      const s = searchAlertStatusCopy("bg");
+      const status = new URLSearchParams(filters);
+      status.set("q", "Synthetic URL search B");
+      status.set("operation", operation);
+      await page.goto(hostUrl("client", `/bg/preferences/search-alerts?${status}`));
+      await expect(page.getByRole("heading", { name: c.status, exact: true })).toBeVisible();
+      await expect(page.getByText(s.recordedRequest, { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("region", { name: s.currentPreference, exact: true }),
+      ).toContainText("Synthetic search alerts");
+      await expect(page.getByText("Synthetic URL search B")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: c.save, exact: true })).toHaveCount(0);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        320,
+      );
+      await page.screenshot({
+        path: info.outputPath(`search-alert-status-320-${javaScriptEnabled}.png`),
+        fullPage: true,
+      });
       await page.getByRole("link", { name: c.preferences, exact: true }).first().click();
       const pause = page.getByRole("button", { name: p.pause, exact: true });
       await pause.click();

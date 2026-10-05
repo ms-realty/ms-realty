@@ -7,12 +7,14 @@ import {
   parseSelectedListingsJson,
 } from "@/domain/inquiry-selection";
 import type { PublicLocale } from "@/i18n/config";
+import type { ListingCard } from "@/server/listings/view-models";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass, fieldClass } from "@/ui/field-class";
 import type { FormAction } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { DiscoveryCopy } from "./copy";
+import { InquiryListingSummaries } from "./inquiry-listing-summaries";
 import { OwnerInquiryFields } from "./inquiry-owner";
 import { InquiryReview } from "./inquiry-review";
 import { inquiryReviewCopy } from "./inquiry-review-copy";
@@ -32,17 +34,21 @@ export function InquiryForm({
   initialState,
   locale,
   copy,
+  initialListings = [],
 }: {
   action: FormAction<InquiryValues>;
   initialState: InquiryState;
   locale: PublicLocale;
   copy: DiscoveryCopy;
+  /** Approved cards the page read for the requested subjects; review rechecks them. */
+  initialListings?: readonly ListingCard[];
 }) {
   const contacts = useRef<Record<string, string>>({});
   const reviewCopy = inquiryReviewCopy(locale);
   const viewing = viewingCopy(locale);
   return (
     <ActionForm
+      layout="full"
       action={action}
       initialState={initialState}
       permalink={inquiryPermalink(locale, initialState.operationId, initialState.values)}
@@ -63,7 +69,7 @@ export function InquiryForm({
         observedManifestId: copy.reference,
         selectedListings: copy.compare,
         comparisonReferences: copy.compare,
-        contentReference: copy.source,
+        contentReference: reviewCopy.sourceContext,
         ownerLocality: reviewCopy.locality,
         ownerPropertyType: reviewCopy.propertyType,
         ownerTransaction: reviewCopy.transaction,
@@ -98,6 +104,32 @@ export function InquiryForm({
           contact = form.field("contactKind"),
           privacy = form.field("privacyNotice");
         const selected = parseSelectedListingsJson(form.values.selectedListings);
+        const subjects = form.values.selectedListings
+          ? selected &&
+            !form.values.listingReference &&
+            !form.values.observedManifestId &&
+            !form.values.comparisonReferences
+            ? selected
+            : []
+          : form.values.listingReference
+            ? [
+                {
+                  reference: form.values.listingReference,
+                  observedManifestId: form.values.observedManifestId,
+                },
+              ]
+            : [];
+        // A changed source is never shown as offered; its identity stays in the hidden fields.
+        const entryListings = (form.state as InquiryState).sourcesChanged
+          ? []
+          : subjects.flatMap((subject) => {
+              const listing = initialListings.find(
+                (item) =>
+                  item.reference === subject.reference &&
+                  item.manifestId === subject.observedManifestId,
+              );
+              return listing ? [listing] : [];
+            });
         const selection = form.field("selectedListings");
         const navigation = form.field("comparisonReferences");
         const returnReferences = parseComparisonReferences(form.values.comparisonReferences);
@@ -119,255 +151,272 @@ export function InquiryForm({
           <>
             <input type="hidden" name="inquiryStage" value="review" />
             <input type="hidden" name="contentReference" value={form.values.contentReference} />
-            {content.error || contentReference ? (
-              <section
-                id={content.id}
-                tabIndex={-1}
-                aria-label={copy.source}
-                className="space-y-3 rounded-control border border-divider p-4 wrap-anywhere"
-                aria-describedby={content.error ? `${content.id}-error` : undefined}
-              >
-                {content.error ? (
-                  <p id={`${content.id}-error`} className="text-error">
-                    {content.error}
-                  </p>
-                ) : null}
-                {contentReference ? (
-                  <a className="underline" href={`/${locale}${contentRoute(contentReference)}`}>
-                    {copy.source}
-                  </a>
-                ) : null}
-                {(form.state as InquiryState).sourcesChanged ? (
-                  <button
-                    type="submit"
-                    name="refreshSources"
-                    value="1"
-                    className={buttonClass("secondary")}
-                    disabled={form.pending}
-                  >
-                    {reviewCopy.refreshSources}
-                  </button>
-                ) : null}
+            {entryListings.length ? (
+              <section className="min-w-0 space-y-3" aria-label={reviewCopy.entrySources}>
+                <p className="text-dense text-text-muted">{reviewCopy.entrySources}</p>
+                <InquiryListingSummaries
+                  listings={entryListings}
+                  locale={locale}
+                  copy={copy}
+                  stage="entry"
+                />
               </section>
             ) : null}
-            {form.values.selectedListings || selection.error ? (
-              <section
-                id={selection.id}
-                tabIndex={-1}
-                aria-label={copy.compare}
-                aria-describedby={selection.error ? `${selection.id}-error` : undefined}
-                className="min-w-0 space-y-3 rounded-control border border-divider p-4 wrap-anywhere"
-              >
-                <h2 className="font-semibold">{copy.compare}</h2>
-                <ol className="list-decimal space-y-2 ps-5">
-                  {selected?.map((item) => (
-                    <li key={item.reference}>
-                      <a
-                        className="underline"
-                        href={`/${locale}/properties/${item.reference}/${item.reference.toLowerCase()}`}
-                      >
-                        <bdi>{item.reference}</bdi>
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-                {selected ? (
+            <div className="min-w-0 max-w-reading space-y-5">
+              {content.error || contentReference ? (
+                <section
+                  id={content.id}
+                  tabIndex={-1}
+                  aria-label={reviewCopy.sourceContext}
+                  className="space-y-3 rounded-control border border-divider p-4 wrap-anywhere"
+                  aria-describedby={content.error ? `${content.id}-error` : undefined}
+                >
+                  {content.error ? (
+                    <p id={`${content.id}-error`} className="text-error">
+                      {content.error}
+                    </p>
+                  ) : null}
+                  {contentReference ? (
+                    <a className="underline" href={`/${locale}${contentRoute(contentReference)}`}>
+                      {reviewCopy.sourceContext}
+                    </a>
+                  ) : null}
+                  {(form.state as InquiryState).sourcesChanged ? (
+                    <button
+                      type="submit"
+                      name="refreshSources"
+                      value="1"
+                      className={buttonClass("secondary")}
+                      disabled={form.pending}
+                    >
+                      {reviewCopy.refreshSources}
+                    </button>
+                  ) : null}
+                </section>
+              ) : null}
+              {form.values.selectedListings || selection.error ? (
+                <section
+                  id={selection.id}
+                  tabIndex={-1}
+                  aria-label={copy.compare}
+                  aria-describedby={selection.error ? `${selection.id}-error` : undefined}
+                  className="min-w-0 space-y-3 rounded-control border border-divider p-4 wrap-anywhere"
+                >
+                  <h2 className="font-semibold">{copy.compare}</h2>
+                  <ol className="list-decimal space-y-2 ps-5">
+                    {selected?.map((item) => (
+                      <li key={item.reference}>
+                        <a
+                          className="underline"
+                          href={`/${locale}/properties/${item.reference}/${item.reference.toLowerCase()}`}
+                        >
+                          <bdi>{item.reference}</bdi>
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                  {selected ? (
+                    <a
+                      className="underline"
+                      href={comparisonReturnHref(
+                        locale,
+                        selected.map((item) => item.reference),
+                      )}
+                    >
+                      {copy.compare}
+                    </a>
+                  ) : (
+                    <p>{copy.invalid}</p>
+                  )}
+                  {selection.error ? (
+                    <p id={`${selection.id}-error`} className="text-error">
+                      {selection.error}
+                    </p>
+                  ) : null}
+                </section>
+              ) : null}
+              <input type="hidden" name="selectedListings" value={form.values.selectedListings} />
+              <input
+                type="hidden"
+                name="comparisonReferences"
+                value={form.values.comparisonReferences}
+              />
+              {form.values.comparisonReferences || navigation.error ? (
+                <div
+                  id={navigation.id}
+                  tabIndex={-1}
+                  className="min-w-0 space-y-2"
+                  aria-describedby={navigation.error ? `${navigation.id}-error` : undefined}
+                >
+                  {returnReferences ? (
+                    <a className="underline" href={comparisonReturnHref(locale, returnReferences)}>
+                      {copy.compare}
+                    </a>
+                  ) : (
+                    <p>{copy.invalid}</p>
+                  )}
+                  {navigation.error ? (
+                    <p id={`${navigation.id}-error`} className="text-error">
+                      {navigation.error}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+              {form.values.listingReference ? (
+                <p>
+                  {copy.reference}:{" "}
                   <a
                     className="underline"
-                    href={comparisonReturnHref(
-                      locale,
-                      selected.map((item) => item.reference),
-                    )}
+                    href={`/${locale}/properties/${form.values.listingReference}/${form.values.listingReference.toLowerCase()}`}
                   >
-                    {copy.compare}
+                    <bdi>{form.values.listingReference}</bdi>
                   </a>
-                ) : (
-                  <p>{copy.invalid}</p>
-                )}
-                {selection.error ? (
-                  <p id={`${selection.id}-error`} className="text-error">
-                    {selection.error}
-                  </p>
-                ) : null}
-              </section>
-            ) : null}
-            <input type="hidden" name="selectedListings" value={form.values.selectedListings} />
-            <input
-              type="hidden"
-              name="comparisonReferences"
-              value={form.values.comparisonReferences}
-            />
-            {form.values.comparisonReferences || navigation.error ? (
-              <div
-                id={navigation.id}
-                tabIndex={-1}
-                className="min-w-0 space-y-2"
-                aria-describedby={navigation.error ? `${navigation.id}-error` : undefined}
-              >
-                {returnReferences ? (
-                  <a className="underline" href={comparisonReturnHref(locale, returnReferences)}>
-                    {copy.compare}
-                  </a>
-                ) : (
-                  <p>{copy.invalid}</p>
-                )}
-                {navigation.error ? (
-                  <p id={`${navigation.id}-error`} className="text-error">
-                    {navigation.error}
+                </p>
+              ) : null}
+              <input type="hidden" name="listingReference" value={form.values.listingReference} />
+              <input
+                type="hidden"
+                name="observedManifestId"
+                value={form.values.observedManifestId}
+              />
+              <div className={fieldClass}>
+                <label htmlFor={purpose.id} className="font-semibold">
+                  {copy.purpose}
+                </label>
+                <select
+                  id={purpose.id}
+                  name={purpose.name}
+                  value={purpose.value}
+                  disabled={purpose.readOnly}
+                  aria-invalid={Boolean(purpose.error) || undefined}
+                  aria-describedby={purpose.error ? `${purpose.id}-error` : undefined}
+                  onChange={(event) => {
+                    form.setValue("purpose", event.target.value);
+                    if (event.target.value === "callback") setContact("phone");
+                  }}
+                  className={controlClass}
+                >
+                  {Object.entries(choices).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                {purpose.error ? (
+                  <p id={`${purpose.id}-error`} className="text-error">
+                    {purpose.error}
                   </p>
                 ) : null}
               </div>
-            ) : null}
-            {form.values.listingReference ? (
-              <p>
-                {copy.reference}:{" "}
-                <a
-                  className="underline"
-                  href={`/${locale}/properties/${form.values.listingReference}/${form.values.listingReference.toLowerCase()}`}
-                >
-                  <bdi>{form.values.listingReference}</bdi>
-                </a>
-              </p>
-            ) : null}
-            <input type="hidden" name="listingReference" value={form.values.listingReference} />
-            <input type="hidden" name="observedManifestId" value={form.values.observedManifestId} />
-            <div className={fieldClass}>
-              <label htmlFor={purpose.id} className="font-semibold">
-                {copy.purpose}
-              </label>
-              <select
-                id={purpose.id}
-                name={purpose.name}
-                value={purpose.value}
-                disabled={purpose.readOnly}
-                aria-invalid={Boolean(purpose.error) || undefined}
-                aria-describedby={purpose.error ? `${purpose.id}-error` : undefined}
-                onChange={(event) => {
-                  form.setValue("purpose", event.target.value);
-                  if (event.target.value === "callback") setContact("phone");
-                }}
-                className={controlClass}
-              >
-                {Object.entries(choices).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              {purpose.error ? (
-                <p id={`${purpose.id}-error`} className="text-error">
-                  {purpose.error}
-                </p>
-              ) : null}
-            </div>
-            {["seller_consultation", "landlord_consultation"].includes(form.values.purpose) ? (
-              <OwnerInquiryFields form={form} locale={locale} />
-            ) : (
-              Object.entries(form.values)
-                .filter(([name]) => name.startsWith("owner"))
-                .map(([name, value]) => (
-                  <input type="hidden" key={name} name={name} value={value} />
+              {["seller_consultation", "landlord_consultation"].includes(form.values.purpose) ? (
+                <OwnerInquiryFields form={form} locale={locale} />
+              ) : (
+                Object.entries(form.values)
+                  .filter(([name]) => name.startsWith("owner"))
+                  .map(([name, value]) => (
+                    <input type="hidden" key={name} name={name} value={value} />
+                  ))
+              )}
+              {form.values.purpose === "viewing_request" ? (
+                <>
+                  <ViewingPreferenceFields form={form} locale={locale} />
+                  <FormField
+                    {...form.field("viewingAccessNeeds")}
+                    label={viewing.accessNeeds}
+                    hint={viewing.accessHint}
+                    multiline
+                    maxLength={500}
+                    optionalLabel={copy.optional}
+                  />
+                </>
+              ) : (
+                Object.keys(emptyViewingValues).map((name) => (
+                  <input
+                    type="hidden"
+                    key={name}
+                    name={name}
+                    value={form.values[name as keyof InquiryValues]}
+                  />
                 ))
-            )}
-            {form.values.purpose === "viewing_request" ? (
-              <>
-                <ViewingPreferenceFields form={form} locale={locale} />
-                <FormField
-                  {...form.field("viewingAccessNeeds")}
-                  label={viewing.accessNeeds}
-                  hint={viewing.accessHint}
-                  multiline
-                  maxLength={500}
-                  optionalLabel={copy.optional}
-                />
-              </>
-            ) : (
-              Object.keys(emptyViewingValues).map((name) => (
-                <input
-                  type="hidden"
-                  key={name}
-                  name={name}
-                  value={form.values[name as keyof InquiryValues]}
-                />
-              ))
-            )}
-            <FormField
-              {...form.field("message")}
-              label={copy.message}
-              multiline
-              maxLength={2000}
-              hint={copy.messageHint}
-              required={form.values.purpose === "question"}
-              optionalLabel={form.values.purpose !== "question" ? copy.optional : undefined}
-            />
-            <FormField
-              {...form.field("name")}
-              label={copy.name}
-              optionalLabel={copy.optional}
-              maxLength={120}
-              autoComplete="name"
-            />
-            <div className={fieldClass}>
-              <label htmlFor={contact.id} className="font-semibold">
-                {copy.contactMethod}
-              </label>
-              <select
-                id={contact.id}
-                name={contact.name}
-                value={contact.value}
-                disabled={contact.readOnly}
-                onChange={(event) => setContact(event.target.value)}
-                aria-invalid={Boolean(contact.error) || undefined}
-                aria-describedby={contact.error ? `${contact.id}-error` : undefined}
-                className={controlClass}
-              >
-                <option value="email">{copy.email}</option>
-                <option value="phone">{copy.phone}</option>
-              </select>
-              {contact.error ? (
-                <p id={`${contact.id}-error`} className="text-error">
-                  {contact.error}
-                </p>
-              ) : null}
-            </div>
-            <FormField
-              {...form.field("contactValue")}
-              label={form.values.contactKind === "phone" ? copy.phone : copy.email}
-              type={form.values.contactKind === "phone" ? "tel" : "email"}
-              autoComplete={form.values.contactKind === "phone" ? "tel" : "email"}
-              dir="ltr"
-              maxLength={254}
-              required
-            />
-            <FormField
-              {...form.field("callbackWindow")}
-              label={copy.callbackWindow}
-              optionalLabel={copy.optional}
-              maxLength={200}
-            />
-            <div className={fieldClass}>
-              <label htmlFor={privacy.id} className="flex min-h-11 items-start gap-3">
-                <input
-                  id={privacy.id}
-                  name={privacy.name}
-                  type="checkbox"
-                  value="true"
-                  checked={privacy.value === "true"}
-                  disabled={privacy.readOnly}
-                  onChange={(event) =>
-                    form.setValue("privacyNotice", event.target.checked ? "true" : "")
-                  }
-                  aria-invalid={Boolean(privacy.error) || undefined}
-                  aria-describedby={privacy.error ? `${privacy.id}-error` : undefined}
-                  className="mt-1 size-5 shrink-0 accent-action"
-                />
-                {copy.privacy}
-              </label>
-              {privacy.error ? (
-                <p id={`${privacy.id}-error`} className="text-error">
-                  {privacy.error}
-                </p>
-              ) : null}
+              )}
+              <FormField
+                {...form.field("message")}
+                label={copy.message}
+                multiline
+                maxLength={2000}
+                hint={copy.messageHint}
+                required={form.values.purpose === "question"}
+                optionalLabel={form.values.purpose !== "question" ? copy.optional : undefined}
+              />
+              <FormField
+                {...form.field("name")}
+                label={copy.name}
+                optionalLabel={copy.optional}
+                maxLength={120}
+                autoComplete="name"
+              />
+              <div className={fieldClass}>
+                <label htmlFor={contact.id} className="font-semibold">
+                  {copy.contactMethod}
+                </label>
+                <select
+                  id={contact.id}
+                  name={contact.name}
+                  value={contact.value}
+                  disabled={contact.readOnly}
+                  onChange={(event) => setContact(event.target.value)}
+                  aria-invalid={Boolean(contact.error) || undefined}
+                  aria-describedby={contact.error ? `${contact.id}-error` : undefined}
+                  className={controlClass}
+                >
+                  <option value="email">{copy.email}</option>
+                  <option value="phone">{copy.phone}</option>
+                </select>
+                {contact.error ? (
+                  <p id={`${contact.id}-error`} className="text-error">
+                    {contact.error}
+                  </p>
+                ) : null}
+              </div>
+              <FormField
+                {...form.field("contactValue")}
+                label={form.values.contactKind === "phone" ? copy.phone : copy.email}
+                type={form.values.contactKind === "phone" ? "tel" : "email"}
+                autoComplete={form.values.contactKind === "phone" ? "tel" : "email"}
+                dir="ltr"
+                maxLength={254}
+                required
+              />
+              <FormField
+                {...form.field("callbackWindow")}
+                label={copy.callbackWindow}
+                optionalLabel={copy.optional}
+                maxLength={200}
+              />
+              <div className={fieldClass}>
+                <label htmlFor={privacy.id} className="flex min-h-11 items-start gap-3">
+                  <input
+                    id={privacy.id}
+                    name={privacy.name}
+                    type="checkbox"
+                    value="true"
+                    checked={privacy.value === "true"}
+                    disabled={privacy.readOnly}
+                    onChange={(event) =>
+                      form.setValue("privacyNotice", event.target.checked ? "true" : "")
+                    }
+                    aria-invalid={Boolean(privacy.error) || undefined}
+                    aria-describedby={privacy.error ? `${privacy.id}-error` : undefined}
+                    className="mt-1 size-5 shrink-0 accent-action"
+                  />
+                  {copy.privacy}
+                </label>
+                {privacy.error ? (
+                  <p id={`${privacy.id}-error`} className="text-error">
+                    {privacy.error}
+                  </p>
+                ) : null}
+              </div>
             </div>
           </>
         );

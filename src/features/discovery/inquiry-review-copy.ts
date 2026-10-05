@@ -4,6 +4,24 @@ import type { PublicLocale } from "@/i18n/config";
 const locales = ["bg", "en", "ru", "de", "nl", "el", "he"] as const;
 type Row = readonly [string, string, string, string, string, string, string];
 const rows = {
+  sourceContext: [
+    "Източници на запитването",
+    "Inquiry sources",
+    "Источники запроса",
+    "Quellen der Anfrage",
+    "Bronnen van de aanvraag",
+    "Πηγές του αιτήματος",
+    "מקורות הפנייה",
+  ],
+  entrySources: [
+    "Данни за имотите при зареждане на страницата. Актуалните източници се проверяват отново при прегледа преди изпращане.",
+    "Property context loaded with this page. Current sources are checked again when you review before sending.",
+    "Данные объектов при загрузке страницы. Актуальные источники проверяются повторно при просмотре перед отправкой.",
+    "Immobiliendaten beim Laden dieser Seite. Aktuelle Quellen werden bei der Prüfung vor dem Senden erneut geprüft.",
+    "Woninggegevens bij het laden van deze pagina. Actuele bronnen worden opnieuw gecontroleerd bij de controle vóór verzending.",
+    "Στοιχεία ακινήτων κατά τη φόρτωση της σελίδας. Οι τρέχουσες πηγές ελέγχονται ξανά κατά την εξέταση πριν από την αποστολή.",
+    "פרטי הנכסים בעת טעינת העמוד. המקורות העדכניים ייבדקו שוב בבדיקה שלפני השליחה.",
+  ],
   service: [
     "Консултация за услуга",
     "Service consultation",

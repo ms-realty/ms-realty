@@ -106,8 +106,9 @@ export function viewingFieldLabels(copy: {
   viewingWindowFields.forEach((fields, index) => {
     labels[fields.start] = `${copy.start} ${index + 1}`;
     labels[fields.end] = `${copy.end} ${index + 1}`;
-    labels[fields.startChoice] = `${copy.clockChoice} ${index + 1}`;
-    labels[fields.endChoice] = `${copy.clockChoice} ${index + 1}`;
+    // Same names as the visible selects, so the two choices of one window stay distinct.
+    labels[fields.startChoice] = `${copy.start} ${index + 1} · ${copy.clockChoice}`;
+    labels[fields.endChoice] = `${copy.end} ${index + 1} · ${copy.clockChoice}`;
   });
   return labels;
 }

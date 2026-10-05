@@ -21,7 +21,17 @@ vi.mock("../../../app/client/[locale]/(journey)/preferences/search-alerts/action
   saveSearchAlert: async () => {},
 }));
 vi.mock("./search-alert-criteria", () => ({
-  SearchAlertCriteria: () => <p>Reviewed search criteria</p>,
+  SearchAlertCriteria: ({
+    search,
+    title,
+  }: {
+    search: { normalized: { q: string | null } };
+    title?: string;
+  }) => (
+    <section aria-label={title ?? "Reviewed search criteria"}>
+      <p>{search.normalized.q ?? "Reviewed search criteria"}</p>
+    </section>
+  ),
 }));
 vi.mock("./search-alert-server", () => ({
   initialSearchAlertState: () => ({
@@ -135,8 +145,10 @@ it("keeps the native response form mounted after creation and offers only owned 
   );
   expect(screen.getByText(/search-alert preference already exists/)).toBeVisible();
   expect(screen.getByRole("button", { name: "Save this search preference" })).toBeVisible();
-  expect(screen.getByRole("option", { name: "synthetic@example.test" })).toBeInTheDocument();
-  expect(screen.queryByRole("option", { name: "unverified@example.test" })).not.toBeInTheDocument();
+  const recipient = screen.getByRole("radio", { name: "synthetic@example.test" });
+  expect(recipient).toBeRequired();
+  expect(recipient).not.toBeChecked();
+  expect(screen.queryByRole("radio", { name: "unverified@example.test" })).not.toBeInTheDocument();
 });
 it.each(["contact", "terms"])(
   "blocks opt-in when current %s eligibility is absent",
@@ -179,3 +191,127 @@ it("uses only the current actor's operation result and never opens another submi
     screen.queryByRole("button", { name: "Save this search preference" }),
   ).not.toBeInTheDocument();
 });
+
+it.each(["active", "withdrawn"])(
+  "status shows the stored operation's current %s search, never a different query's criteria",
+  async (state) => {
+    const operation = "45000000-0000-4000-8000-000000000001";
+    const id = "45000000-0000-4000-8000-000000000002";
+    const current = alertSearch("bg", {
+      ...criteria,
+      q: "Stored search A after editing",
+      maxPrice: "1700.09",
+    }).normalized;
+    mocks.findOperation.mockResolvedValue({
+      status: "succeeded",
+      outcome: { id, state: "active" },
+    });
+    mocks.preferences.mockResolvedValue({
+      ...data(),
+      subscriptions: [
+        {
+          id,
+          purpose: "search_alerts",
+          state,
+          frequency: "weekly",
+          timezone: "Europe/Sofia",
+          criteria: current,
+        },
+        {
+          id: "another-subscription",
+          purpose: "search_alerts",
+          state: "active",
+          criteria: alertSearch("en", { ...criteria, q: "Unrelated stored search B" }).normalized,
+        },
+      ],
+    });
+    render(
+      await ClientPage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({ ...criteria, q: "URL search B", operation }),
+      }),
+    );
+    expect(screen.getByText("This search-preference request was recorded.")).toBeVisible();
+    expect(screen.getByRole("region", { name: "Current saved search" })).toHaveTextContent(
+      "Stored search A after editing",
+    );
+    expect(screen.queryByText("URL search B")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unrelated stored search B")).not.toBeInTheDocument();
+    expect(screen.getByText(/not a snapshot of the original request/)).toBeVisible();
+    expect(screen.getByText(/^Current subscription state:/)).toHaveTextContent(
+      `Current subscription state: ${state === "active" ? "Active" : "Unsubscribed"}`,
+    );
+    expect(
+      screen.queryByRole("link", { name: "Review or edit these filters" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Save this search preference" }),
+    ).not.toBeInTheDocument();
+  },
+);
+
+it("states recorded-request copy in the page locale inside the bg/en alert island", async () => {
+  const id = "45000000-0000-4000-8000-000000000002";
+  mocks.findOperation.mockResolvedValue({ status: "succeeded", outcome: { id } });
+  mocks.preferences.mockResolvedValue({
+    ...data(),
+    subscriptions: [
+      {
+        id,
+        purpose: "search_alerts",
+        state: "active",
+        frequency: "daily",
+        timezone: "Asia/Jerusalem",
+        criteria: { unexpected: "shape" },
+      },
+    ],
+  });
+  render(
+    await ClientPage({
+      params: Promise.resolve({ locale: "he" }),
+      searchParams: Promise.resolve({
+        ...criteria,
+        operation: "45000000-0000-4000-8000-000000000001",
+      }),
+    }),
+  );
+  const recorded = screen.getByText("הבקשה להתראות על החיפוש נרשמה.");
+  expect(recorded.closest("[lang]")).toHaveAttribute("lang", "he");
+  expect(recorded.closest("[dir]")).toHaveAttribute("dir", "rtl");
+  // Stored criteria that no longer parse are never replaced by the status URL's criteria.
+  expect(screen.getByText(/פרטי החיפוש השמור אינם זמינים כאן/)).toBeVisible();
+  expect(screen.queryByRole("region", { name: "החיפוש השמור הנוכחי" })).not.toBeInTheDocument();
+});
+
+it.each(["marketing", "missing"])(
+  "does not label an owned %s result as a successful search preference",
+  async (variation) => {
+    const operation = "45000000-0000-4000-8000-000000000001";
+    const id = "45000000-0000-4000-8000-000000000002";
+    mocks.findOperation.mockResolvedValue({
+      status: "succeeded",
+      outcome: { id, state: "active" },
+    });
+    mocks.preferences.mockResolvedValue({
+      ...data(),
+      subscriptions:
+        variation === "missing"
+          ? []
+          : [{ id, purpose: "marketing", state: "active", criteria: null }],
+    });
+    render(
+      await ClientPage({
+        params: Promise.resolve({ locale: "en" }),
+        searchParams: Promise.resolve({ ...criteria, q: "URL search B", operation }),
+      }),
+    );
+    expect(screen.getByText(/change is not confirmed/)).toBeVisible();
+    expect(
+      screen.queryByText("This search-preference request was recorded."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("URL search B")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Save this search preference" }),
+    ).not.toBeInTheDocument();
+  },
+);

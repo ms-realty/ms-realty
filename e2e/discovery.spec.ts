@@ -391,12 +391,20 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
   );
   await page.getByRole("link", { name: "Request a viewing", exact: true }).click();
   const key = await page.locator('[name="_operationId"]').inputValue();
+  const observedManifest = await page.locator('[name="observedManifestId"]').inputValue();
   await page.getByLabel(/^Your inquiry/).fill("Synthetic viewing preference to retain");
   await page.getByLabel("Email", { exact: true }).fill("synthetic-observer@example.test");
   await page.getByRole("checkbox").check();
   fixture("withdraw", data.published.reference);
   await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
-  await expect(page.getByText(inquiryReviewCopy("en").sourcesChanged).first()).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: inquiryReviewCopy("en").sourceContext, exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('[id$="-contentReference-error"]')).toHaveText(
+    inquiryReviewCopy("en").sourcesChanged,
+  );
+  await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+  await expect(page.locator('[name="observedManifestId"]')).toHaveValue(observedManifest);
   await expect(page.getByLabel(/^Your inquiry/)).toHaveValue(
     "Synthetic viewing preference to retain",
   );
@@ -415,6 +423,83 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
     page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }),
   ).toHaveCount(0);
   await expect(page.locator('[name="listingReference"]')).toHaveValue(data.published.reference);
+  await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+  await expect(page.locator('[name="observedManifestId"]')).toHaveValue(observedManifest);
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
+    "synthetic-observer@example.test",
+  );
+  await expect(page.getByRole("checkbox")).toBeChecked();
+  expect(
+    await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
+  ).toHaveLength(0);
+});
+
+test("P11: the approved property summary and review fit 320 px and widen on desktop", async ({
+  browser,
+  baseURL,
+}, info) => {
+  const data = fixture();
+  for (const width of [320, 1440]) {
+    const context = await browser.newContext({
+      baseURL,
+      viewport: { width, height: 900 },
+      extraHTTPHeaders: {
+        "cf-connecting-ip": `2001:db8:${randomUUID().replaceAll("-", "").slice(0, 24).match(/.{4}/g)?.join(":")}`,
+      },
+    });
+    try {
+      const page = await context.newPage();
+      const pageErrors: string[] = [];
+      page.on("pageerror", (error) => pageErrors.push(error.message));
+      await page.goto(
+        `/en/properties/${data.published.reference}/${data.published.reference.toLowerCase()}`,
+      );
+      await page.getByRole("link", { name: "Request a viewing", exact: true }).click();
+      const entry = page.locator(`[data-entry-listing="${data.published.reference}"]`);
+      await expect(entry).toContainText(data.published.title);
+      // The summary's formatted facts and confirmation time hydrate without a mismatch, so the
+      // server-rendered form (and anything typed before JavaScript) is kept, not re-rendered.
+      await page.waitForLoadState("networkidle");
+      expect(pageErrors).toEqual([]);
+      // The summary the page read precedes every entry field.
+      expect(
+        await page.evaluate((reference) => {
+          const summary = document.querySelector(`[data-entry-listing="${reference}"]`);
+          const purpose = document.querySelector('[name="purpose"]');
+          return Boolean(
+            summary &&
+              purpose &&
+              summary.compareDocumentPosition(purpose) & Node.DOCUMENT_POSITION_FOLLOWING,
+          );
+        }, data.published.reference),
+      ).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        width,
+      );
+      await page.screenshot({
+        path: info.outputPath(`inquiry-entry-summary-${width}.png`),
+        fullPage: true,
+      });
+      await page.getByLabel(/^Your inquiry/).fill("Synthetic summary layout question");
+      await page.getByLabel("Email", { exact: true }).fill("synthetic-summary@example.test");
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      const review = page.getByRole("region", { name: "Review your inquiry" });
+      await expect(
+        review.locator(`[data-review-listing="${data.published.reference}"]`),
+      ).toBeVisible();
+      await expect(review).toContainText("Synthetic summary layout question");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        width,
+      );
+      await page.screenshot({
+        path: info.outputPath(`inquiry-review-summary-${width}.png`),
+        fullPage: true,
+      });
+    } finally {
+      await context.close();
+    }
+  }
 });
 
 test("P11: the stateless form transport asks to re-enter private details after a correctable failure", async ({

@@ -220,3 +220,109 @@ it("binds and explicitly refreshes approved content identity without replacing t
   expect(updated.review?.content?.versionId).toBe(nextVersion);
   expect(mocks.submit).toHaveBeenCalledTimes(1);
 });
+
+it("P13 retains ranked viewing preferences through Edit, changed sources, Refresh and final intake", async () => {
+  const state = initial();
+  let manifestId = "12345678-1234-4123-8123-123456789001";
+  state.values = {
+    ...state.values,
+    purpose: "viewing_request",
+    listingReference: "MS-00001",
+    observedManifestId: manifestId,
+    viewingFormat: "in_person",
+    viewingTimezone: "Europe/London",
+    viewingStart1: "2030-10-27T01:15",
+    viewingEnd1: "2030-10-27T01:45",
+    viewingStartChoice1: "earlier",
+    viewingEndChoice1: "later",
+    viewingStart2: "2030-10-26T10:00",
+    viewingEnd2: "2030-10-26T11:00",
+    viewingStart3: "2030-10-28T10:00",
+    viewingEnd3: "2030-10-28T11:00",
+    viewingAccessNeeds: "Synthetic step-free access request",
+  };
+  mocks.source.mockImplementation(async () => ({
+    status: "listing",
+    listing: {
+      reference: state.values.listingReference,
+      manifestId,
+      availability: { primaryAction: "ask_question" },
+    },
+  }));
+  const reviewed = await sendInquiry("en", state, post(state));
+  expect(reviewed.review?.viewingPreferences).toEqual({
+    version: 1,
+    provenance: "self_declared",
+    format: "in_person",
+    timezone: "Europe/London",
+    windows: [
+      {
+        startsAtLocal: state.values.viewingStart1,
+        endsAtLocal: state.values.viewingEnd1,
+        startOccurrence: "earlier",
+        endOccurrence: "later",
+      },
+      { startsAtLocal: state.values.viewingStart2, endsAtLocal: state.values.viewingEnd2 },
+      { startsAtLocal: state.values.viewingStart3, endsAtLocal: state.values.viewingEnd3 },
+    ],
+    accessNeeds: state.values.viewingAccessNeeds,
+  });
+  const edit = post(reviewed, "confirm");
+  edit.set("editInquiry", "1");
+  const edited = await sendInquiry("en", reviewed, edit);
+  expect(edited.values).toEqual(state.values);
+  expect(edited.review).toBeUndefined();
+  expect(mocks.submit).not.toHaveBeenCalled();
+
+  const reviewedAgain = await sendInquiry("en", edited, post(edited));
+  mocks.submit.mockRejectedValueOnce(new AppError("version_conflict"));
+  const changed = await sendInquiry("en", reviewedAgain, post(reviewedAgain, "confirm"));
+  expect(changed.values).toEqual(state.values);
+  manifestId = "12345678-1234-4123-8123-123456789002";
+  const refresh = post(changed);
+  refresh.set("refreshSources", "1");
+  const refreshed = await sendInquiry("en", changed, refresh);
+  expect(refreshed.operationId).toBe(state.operationId);
+  expect(refreshed.values).toEqual({ ...state.values, observedManifestId: manifestId });
+  expect(refreshed.review?.viewingPreferences).toEqual(reviewed.review?.viewingPreferences);
+  const sent = await sendInquiry("en", refreshed, post(refreshed, "confirm"));
+  expect(sent.outcome.kind).toBe("confirmed");
+  expect(mocks.submit.mock.calls[1]?.[1].viewingPreferences).toEqual(
+    reviewed.review?.viewingPreferences,
+  );
+});
+
+it("P13 rechecks future windows at final submission even while the review token is valid", async () => {
+  const clock = vi.spyOn(Date, "now").mockReturnValue(Date.parse("2030-04-01T10:00:00Z"));
+  try {
+    const state = initial();
+    state.values = {
+      ...state.values,
+      purpose: "viewing_request",
+      listingReference: "MS-00001",
+      viewingTimezone: "UTC",
+      viewingStart1: "2030-04-01T10:05",
+      viewingEnd1: "2030-04-01T10:15",
+    };
+    mocks.source.mockResolvedValue({
+      status: "listing",
+      listing: {
+        reference: "MS-00001",
+        manifestId: "12345678-1234-4123-8123-123456789001",
+        availability: { primaryAction: "ask_question" },
+      },
+    });
+    const reviewed = await sendInquiry("en", state, post(state));
+    expect(reviewed.review?.token).toBeTruthy();
+    clock.mockReturnValue(Date.parse("2030-04-01T10:06:00Z"));
+    const result = await sendInquiry("en", reviewed, post(reviewed, "confirm"));
+    expect(result.values).toEqual(reviewed.values);
+    expect(result.outcome).toMatchObject({
+      kind: "validation",
+      fieldErrors: { viewingStart1: [expect.any(String)] },
+    });
+    expect(mocks.submit).not.toHaveBeenCalled();
+  } finally {
+    clock.mockRestore();
+  }
+});

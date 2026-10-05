@@ -63,6 +63,8 @@ export type ActionFormProps<V extends FormValues> = {
   /** Human-facing representations of opaque choices in a reviewed conflict comparison. */
   formatValue?: (name: string, value: string, state: FormState<V>) => string;
   submitLabel: string | ((state: FormState<V>) => string);
+  /** Public source review can use the page width; entry fields retain their reading width. */
+  layout?: "reading" | "full";
   children: (form: FormController<V>) => ReactNode;
 };
 
@@ -151,6 +153,7 @@ function FormSession<V extends FormValues>({
   labels,
   formatValue,
   submitLabel,
+  layout = "reading",
   children,
   snapshot,
 }: ActionFormProps<V> & { snapshot: RefObject<Snapshot> }) {
@@ -178,7 +181,10 @@ function FormSession<V extends FormValues>({
       const control = nativeForm.current.elements.namedItem(name);
       if (control instanceof HTMLInputElement) {
         if (["hidden", "password", "file", "submit", "button"].includes(control.type)) continue;
-        if (control.type === "radio") continue;
+        if (control.type === "radio") {
+          values[name as keyof V] = (control.checked ? control.value : "") as V[keyof V];
+          continue;
+        }
         values[name as keyof V] = (
           control.type === "checkbox" ? (control.checked ? control.value : "") : control.value
         ) as V[keyof V];
@@ -194,6 +200,10 @@ function FormSession<V extends FormValues>({
             )
             .map((item) => item.value)
             .join("\n") as V[keyof V];
+        else if (
+          controls.every((item) => item instanceof HTMLInputElement && item.type === "radio")
+        )
+          values[name as keyof V] = control.value as V[keyof V];
       }
     }
     if (Object.keys(values).some((key) => values[key] !== state.values[key]))
@@ -254,7 +264,10 @@ function FormSession<V extends FormValues>({
       action={formAction}
       noValidate
       aria-busy={pending}
-      className="flex max-w-reading flex-col gap-5"
+      className={cx(
+        "flex min-w-0 flex-col gap-5",
+        layout === "full" ? "max-w-full" : "max-w-reading",
+      )}
       // React resets native controls after an action resolves, including rejected actions.
       // Our controlled draft comes from the response; resetting a select loses that draft.
       onReset={(event) => event.preventDefault()}
