@@ -449,20 +449,30 @@ test("P11: the approved property summary and review fit 320 px and widen on desk
     });
     try {
       const page = await context.newPage();
+      const pageErrors: string[] = [];
+      page.on("pageerror", (error) => pageErrors.push(error.message));
       await page.goto(
         `/en/properties/${data.published.reference}/${data.published.reference.toLowerCase()}`,
       );
       await page.getByRole("link", { name: "Request a viewing", exact: true }).click();
       const entry = page.locator(`[data-entry-listing="${data.published.reference}"]`);
       await expect(entry).toContainText(data.published.title);
+      // The summary's formatted facts and confirmation time hydrate without a mismatch, so the
+      // server-rendered form (and anything typed before JavaScript) is kept, not re-rendered.
+      await page.waitForLoadState("networkidle");
+      expect(pageErrors).toEqual([]);
       // The summary the page read precedes every entry field.
       expect(
-        await entry.evaluate(
-          (node) =>
-            node.compareDocumentPosition(document.querySelector('[name="purpose"]') as Node) &
-            Node.DOCUMENT_POSITION_FOLLOWING,
-        ),
-      ).toBeTruthy();
+        await page.evaluate((reference) => {
+          const summary = document.querySelector(`[data-entry-listing="${reference}"]`);
+          const purpose = document.querySelector('[name="purpose"]');
+          return Boolean(
+            summary &&
+              purpose &&
+              summary.compareDocumentPosition(purpose) & Node.DOCUMENT_POSITION_FOLLOWING,
+          );
+        }, data.published.reference),
+      ).toBe(true);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         width,
       );
