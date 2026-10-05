@@ -5,7 +5,7 @@ import { getDb } from "@/db/client";
 import { isFresh } from "@/server/auth/sessions";
 import { caseAccessWorkbench } from "@/server/cases/access-requests";
 import { findOperation } from "@/server/operations";
-import { initialFormState } from "@/ui/form/server";
+import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import { type WorkflowField, WorkflowForm } from "../cases/form";
 import {
@@ -78,9 +78,22 @@ export async function CaseAccessScreen(
     typeof query.command === "string" && Object.hasOwn(accessFields, query.command)
       ? (query.command as AccessBinding["command"])
       : null;
+  // A status key confirms only an operation issued for this Case, host, command and a target
+  // displayed here; a key from another Case or command never reads as recorded.
+  const receiptTargets =
+    command === "decide" || command === "withdraw"
+      ? view.requests.map((request) => request.id)
+      : command === "revoke"
+        ? view.roster.participants.map((participant) => participant.id)
+        : [undefined];
+  const key = typeof query.key === "string" ? query.key : null;
   const receipt =
-    command && typeof query.key === "string"
-      ? await findOperation(db, session.actor, accessOperationType(command), query.key)
+    command &&
+    key &&
+    receiptTargets.some((targetId) =>
+      isIssuedFormOperation(accessScope({ command, caseId: id, host, targetId }), key),
+    )
+      ? await findOperation(db, session.actor, accessOperationType(command), key)
       : null;
   const base = { caseId: id, host } as const;
   const roleLabel = (role: string) => c.roles[role as keyof typeof c.roles] ?? role;
