@@ -68,7 +68,7 @@ export function InquiryForm({
         observedManifestId: copy.reference,
         selectedListings: copy.compare,
         comparisonReferences: copy.compare,
-        contentReference: copy.source,
+        contentReference: reviewCopy.sourceContext,
         ownerLocality: reviewCopy.locality,
         ownerPropertyType: reviewCopy.propertyType,
         ownerTransaction: reviewCopy.transaction,
@@ -165,7 +165,7 @@ export function InquiryForm({
               <section
                 id={content.id}
                 tabIndex={-1}
-                aria-label={copy.source}
+                aria-label={reviewCopy.sourceContext}
                 className="space-y-3 rounded-control border border-divider p-4 wrap-anywhere"
                 aria-describedby={content.error ? `${content.id}-error` : undefined}
               >
@@ -176,7 +176,7 @@ export function InquiryForm({
                 ) : null}
                 {contentReference ? (
                   <a className="underline" href={`/${locale}${contentRoute(contentReference)}`}>
-                    {copy.source}
+                    {reviewCopy.sourceContext}
                   </a>
                 ) : null}
                 {(form.state as InquiryState).sourcesChanged ? (

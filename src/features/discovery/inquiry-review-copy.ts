@@ -4,6 +4,15 @@ import type { PublicLocale } from "@/i18n/config";
 const locales = ["bg", "en", "ru", "de", "nl", "el", "he"] as const;
 type Row = readonly [string, string, string, string, string, string, string];
 const rows = {
+  sourceContext: [
+    "Източници на запитването",
+    "Inquiry sources",
+    "Источники запроса",
+    "Quellen der Anfrage",
+    "Bronnen van de aanvraag",
+    "Πηγές του αιτήματος",
+    "מקורות הפנייה",
+  ],
   entrySources: [
     "Данни за имотите при зареждане на страницата. Актуалните източници се проверяват отново при прегледа преди изпращане.",
     "Property context loaded with this page. Current sources are checked again when you review before sending.",

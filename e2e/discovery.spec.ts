@@ -391,12 +391,20 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
   );
   await page.getByRole("link", { name: "Request a viewing", exact: true }).click();
   const key = await page.locator('[name="_operationId"]').inputValue();
+  const observedManifest = await page.locator('[name="observedManifestId"]').inputValue();
   await page.getByLabel(/^Your inquiry/).fill("Synthetic viewing preference to retain");
   await page.getByLabel("Email", { exact: true }).fill("synthetic-observer@example.test");
   await page.getByRole("checkbox").check();
   fixture("withdraw", data.published.reference);
   await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
-  await expect(page.getByText(inquiryReviewCopy("en").sourcesChanged).first()).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: inquiryReviewCopy("en").sourceContext, exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('[id$="-contentReference-error"]')).toHaveText(
+    inquiryReviewCopy("en").sourcesChanged,
+  );
+  await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+  await expect(page.locator('[name="observedManifestId"]')).toHaveValue(observedManifest);
   await expect(page.getByLabel(/^Your inquiry/)).toHaveValue(
     "Synthetic viewing preference to retain",
   );
@@ -415,6 +423,15 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
     page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }),
   ).toHaveCount(0);
   await expect(page.locator('[name="listingReference"]')).toHaveValue(data.published.reference);
+  await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+  await expect(page.locator('[name="observedManifestId"]')).toHaveValue(observedManifest);
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
+    "synthetic-observer@example.test",
+  );
+  await expect(page.getByRole("checkbox")).toBeChecked();
+  expect(
+    await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
+  ).toHaveLength(0);
 });
 
 test("P11: the stateless form transport asks to re-enter private details after a correctable failure", async ({
