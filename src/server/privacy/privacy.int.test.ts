@@ -31,8 +31,8 @@ import {
 } from "./preferences";
 import {
   clientPrivacyRequests,
+  listStaffPrivacyRequests,
   reviewPrivacyRequest,
-  staffPrivacyRequests,
   submitPrivacyRequest,
 } from "./requests";
 import { syntheticServiceEmailTerms } from "./testing";
@@ -262,7 +262,7 @@ describe("privacy requests remain owned, scoped human work", () => {
         holdResolved: true,
       }),
     ).rejects.toMatchObject({ code: "transition_denied" });
-    expect(JSON.stringify(await staffPrivacyRequests(t.db, staff.session))).not.toContain(
+    expect(JSON.stringify(await listStaffPrivacyRequests(t.db, staff.session))).not.toContain(
       "RESTRICTED TEST NOTE",
     );
     expect(JSON.stringify(await clientPrivacyRequests(t.db, person.session))).not.toContain(

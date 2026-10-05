@@ -226,22 +226,6 @@ export async function listStaffPrivacyRequests(
   };
 }
 
-/** Existing unpaged staff screen contract; remove after its cursor UI adopts the paged read. */
-export async function staffPrivacyRequests(db: Executor, session: Session) {
-  await privacyOperator(db, session);
-  return db
-    .select({
-      record: privacyRequests,
-      partyName: parties.displayName,
-      ownerName: principals.displayName,
-    })
-    .from(privacyRequests)
-    .leftJoin(parties, eq(parties.id, privacyRequests.partyId))
-    .leftJoin(principals, eq(principals.id, privacyRequests.responsibleId))
-    .orderBy(desc(privacyRequests.updatedAt))
-    .limit(100);
-}
-
 export async function reviewPrivacyRequest(db: Executor, session: Session, input: unknown) {
   const value = parseInput(
     z.object({
