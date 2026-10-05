@@ -57,13 +57,13 @@ Surfaces: P C S unless noted. Parameters: none unless noted. Source: `src/server
 
 | | message | next |
 |---|---|---|
-| bg | Някои данни трябва да се поправят, преди да можем да приемем това. | Поправете отбелязаните полета; останалото, което сте въвели, си остава. |
-| en | Some details need to be corrected before we can accept this. | Correct the marked fields; everything else you entered is kept. |
-| ru | Некоторые данные нужно исправить, прежде чем мы сможем это принять. | Исправьте отмеченные поля — всё остальное, что вы ввели, сохранится. |
-| de | Einige Angaben müssen korrigiert werden, bevor wir das annehmen können. | Korrigieren Sie die markierten Felder; alle anderen Angaben bleiben erhalten. |
-| nl | Sommige gegevens moeten worden verbeterd voordat we dit kunnen aannemen. | Verbeter de gemarkeerde velden; al het andere dat u hebt ingevuld, blijft bewaard. |
-| el | Ορισμένα στοιχεία πρέπει να διορθωθούν για να μπορέσουμε να το δεχτούμε. | Διορθώστε τα επισημασμένα πεδία· όλα τα άλλα που καταχωρίσατε διατηρούνται. |
-| he | צריך לתקן כמה פרטים לפני שנוכל לקבל את זה. | תקנו את השדות המסומנים – כל השאר שהזנתם נשמר. |
+| bg | Някои данни трябва да се поправят, преди да можем да приемем това. | Проверете данните, поправете грешното и изпратете отново. |
+| en | Some details need to be corrected before we can accept this. | Check the details, correct what is wrong and send again. |
+| ru | Некоторые данные нужно исправить, прежде чем мы сможем это принять. | Проверьте данные, исправьте ошибки и отправьте снова. |
+| de | Einige Angaben müssen korrigiert werden, bevor wir das annehmen können. | Prüfen Sie die Angaben, korrigieren Sie, was nicht stimmt, und senden Sie erneut. |
+| nl | Sommige gegevens moeten worden verbeterd voordat we dit kunnen aannemen. | Controleer de gegevens, verbeter wat niet klopt en verstuur opnieuw. |
+| el | Ορισμένα στοιχεία πρέπει να διορθωθούν για να μπορέσουμε να το δεχτούμε. | Ελέγξτε τα στοιχεία, διορθώστε ό,τι είναι λάθος και στείλτε ξανά. |
+| he | צריך לתקן כמה פרטים לפני שנוכל לקבל את זה. | בדקו את הפרטים, תקנו את מה שלא נכון ושלחו שוב. |
 
 ### unauthenticated · not_applied
 
@@ -145,25 +145,25 @@ The response carries `current`; the UI shows it next to the person's kept entrie
 
 | | message | next |
 |---|---|---|
-| bg | Някой е променил това, докато работехте, затова промяната Ви не е запазена. | Прегледайте последната версия тук; въведеното от Вас е съхранено, за да го приложите отново. |
-| en | Someone changed this while you were working, so your change was not saved. | Review the latest version shown here; your entries are kept so you can apply them again. |
-| ru | Кто-то изменил это, пока вы работали, поэтому ваше изменение не сохранено. | Просмотрите последнюю версию здесь — введённое вами сохранено, его можно применить снова. |
-| de | Jemand hat das geändert, während Sie daran gearbeitet haben, daher wurde Ihre Änderung nicht gespeichert. | Prüfen Sie die hier gezeigte neueste Fassung; Ihre Eingaben bleiben erhalten, damit Sie sie erneut übernehmen können. |
-| nl | Iemand heeft dit gewijzigd terwijl u eraan werkte, dus uw wijziging is niet opgeslagen. | Bekijk de nieuwste versie hier; uw invoer blijft bewaard, zodat u die opnieuw kunt toepassen. |
-| el | Κάποιος το άλλαξε ενώ δουλεύατε, οπότε η αλλαγή σας δεν αποθηκεύτηκε. | Δείτε την πιο πρόσφατη εκδοχή εδώ· όσα καταχωρίσατε διατηρούνται για να τα εφαρμόσετε ξανά. |
-| he | מישהו שינה את זה בזמן שעבדתם, ולכן השינוי שלכם לא נשמר. | עברו על הגרסה העדכנית שמוצגת כאן – מה שהזנתם נשמר כדי שתוכלו להחיל אותו שוב. |
+| bg | Някой е променил това, докато работехте, затова промяната Ви не е запазена. | Отворете последната версия, вижте какво е променено и направете промяната отново, ако още е нужна. |
+| en | Someone changed this while you were working, so your change was not saved. | Open the latest version, check what changed, then make your change again if it is still needed. |
+| ru | Кто-то изменил это, пока вы работали, поэтому ваше изменение не сохранено. | Откройте последнюю версию, посмотрите, что изменилось, и внесите изменение снова, если оно ещё нужно. |
+| de | Jemand hat das geändert, während Sie daran gearbeitet haben, daher wurde Ihre Änderung nicht gespeichert. | Öffnen Sie die neueste Fassung, prüfen Sie die Änderungen und nehmen Sie Ihre Änderung erneut vor, falls sie noch nötig ist. |
+| nl | Iemand heeft dit gewijzigd terwijl u eraan werkte, dus uw wijziging is niet opgeslagen. | Open de nieuwste versie, bekijk wat er is veranderd en breng uw wijziging opnieuw aan als die nog nodig is. |
+| el | Κάποιος το άλλαξε ενώ δουλεύατε, οπότε η αλλαγή σας δεν αποθηκεύτηκε. | Ανοίξτε την πιο πρόσφατη εκδοχή, δείτε τι άλλαξε και κάντε ξανά την αλλαγή σας, αν χρειάζεται ακόμη. |
+| he | מישהו שינה את זה בזמן שעבדתם, ולכן השינוי שלכם לא נשמר. | פתחו את הגרסה העדכנית, בדקו מה השתנה ובצעו את השינוי שוב אם הוא עדיין נחוץ. |
 
 ### idempotency_key_reused · not_applied
 
 | | message | next |
 |---|---|---|
-| bg | Този формуляр вече е изпратен веднъж с други данни, затова не го изпратихме отново. | Презаредете страницата, за да видите какво сме получили, и направете промените оттам. |
-| en | This form was already sent once with different details, so we did not send it again. | Reload the page to see what we received, and make any change from there. |
-| ru | Эта форма уже была отправлена с другими данными, поэтому мы не отправили её повторно. | Обновите страницу, чтобы увидеть, что мы получили, и внесите изменения оттуда. |
-| de | Dieses Formular wurde bereits einmal mit anderen Angaben gesendet, daher haben wir es nicht erneut gesendet. | Laden Sie die Seite neu, um zu sehen, was bei uns angekommen ist, und ändern Sie es von dort aus. |
-| nl | Dit formulier is al eens met andere gegevens verzonden, dus we hebben het niet opnieuw verzonden. | Laad de pagina opnieuw om te zien wat we hebben ontvangen, en breng vanaf daar wijzigingen aan. |
-| el | Αυτή η φόρμα έχει ήδη σταλεί μία φορά με άλλα στοιχεία, οπότε δεν τη στείλαμε ξανά. | Ανανεώστε τη σελίδα για να δείτε τι λάβαμε και κάντε τις αλλαγές από εκεί. |
-| he | הטופס הזה כבר נשלח פעם אחת עם פרטים אחרים, ולכן לא שלחנו אותו שוב. | טענו מחדש את הדף כדי לראות מה קיבלנו, ובצעו שינויים משם. |
+| bg | Тази заявка повтаря по-ранен опит, но с други данни, затова не я изпълнихме. | Презаредете страницата, за да проверите текущото състояние, и започнете отначало, ако промяната още е нужна. |
+| en | This request repeats an earlier attempt with different details, so we did not carry it out. | Reload the page to check the current state, then start again if the change is still needed. |
+| ru | Этот запрос повторяет более раннюю попытку, но с другими данными, поэтому мы его не выполнили. | Обновите страницу, чтобы проверить текущее состояние, и начните заново, если изменение ещё нужно. |
+| de | Diese Anfrage wiederholt einen früheren Versuch mit anderen Angaben, daher haben wir sie nicht ausgeführt. | Laden Sie die Seite neu, um den aktuellen Stand zu prüfen, und beginnen Sie neu, falls die Änderung noch nötig ist. |
+| nl | Dit verzoek herhaalt een eerdere poging met andere gegevens, dus we hebben het niet uitgevoerd. | Laad de pagina opnieuw om de huidige stand te controleren en begin opnieuw als de wijziging nog nodig is. |
+| el | Αυτό το αίτημα επαναλαμβάνει μια προηγούμενη προσπάθεια με άλλα στοιχεία, οπότε δεν το εκτελέσαμε. | Ανανεώστε τη σελίδα για να ελέγξετε την τρέχουσα κατάσταση και ξεκινήστε από την αρχή, αν η αλλαγή χρειάζεται ακόμη. |
+| he | הבקשה הזו חוזרת על ניסיון קודם עם פרטים אחרים, ולכן לא ביצענו אותה. | טענו מחדש את הדף כדי לבדוק את המצב הנוכחי, והתחילו מחדש אם השינוי עדיין נחוץ. |
 
 ### operation_pending · unknown
 
