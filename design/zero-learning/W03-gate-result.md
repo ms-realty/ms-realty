@@ -1,6 +1,6 @@
 # W03 · Receive, own and qualify an inquiry — zero-learning gate result (run 2, Figma stage)
 
-Run 3 (after the fix round) follows at the end of this file. Independent evaluator run of `design/zero-learning/GATE.md` on the W03 journey and the new P12 receipt states. The evaluator read the Figma file and exported frames only; nothing in Figma was changed. Key: `design/zero-learning/W03-expected-path-key.md`. Raw material: `/Users/ivan/Code/Mindburn-Labs/output/msr-launch/visual/w03-gate-packet/run-2/` (frames, tester folders, prompts, judge mapping, raw answers).
+Run 3 (after the fix round) and Run 4 (after fix round 3) follow at the end of this file. Independent evaluator run of `design/zero-learning/GATE.md` on the W03 journey and the new P12 receipt states. The evaluator read the Figma file and exported frames only; nothing in Figma was changed. Key: `design/zero-learning/W03-expected-path-key.md`. Raw material: `/Users/ivan/Code/Mindburn-Labs/output/msr-launch/visual/w03-gate-packet/run-2/` (frames, tester folders, prompts, judge mapping, raw answers).
 
 ## Verdict
 
@@ -484,3 +484,165 @@ Sequence for the next design pass (no dates): first G-19, G-01 and G-03 (wiring 
 - Figma: read only (exports, text and reaction reads); nothing edited, nothing committed.
 
 <!-- RUN3-END -->
+
+
+<!-- RUN4-START -->
+
+# Run 4 — W03 + P12 after fix round 3 (Figma stage)
+
+Independent evaluator re-run of `design/zero-learning/GATE.md` on the tasks that failed or exceeded the median in run 3, plus the G2 scan of the run-4 frames and the G3 re-check of items 1, 3, 6, 7 and 8 on the changed frames. Nothing in Figma was changed (exports, text and reaction reads only). Key: `design/zero-learning/W03-expected-path-key.md` (updated before the runs: T5, T7, T9, T14 and T17 notes, section «Run 4 changes»). Raw material: `/Users/ivan/Code/Mindburn-Labs/output/msr-launch/visual/w03-gate-packet/run-4/` (`frames/` 88 PNG at scale 1, `tester/` 14 neutral folders, `judge/mapping.json`, `judge/mapping.md`, `judge/prompts/`, `answers/`).
+
+## Run 4 · version under test and method
+
+- Figma version «W03 fix 3 done» (id 2406992753235358250). The plugin API cannot read a version id; the match was checked by content: the P12U and P12UCHECK headings, the P12UNKNOWN status row, the O03 field «Следваща стъпка по запитването · Проверка на наличността», the Mobile context-bar «Butler» on O03 and O02 · New in queue, XBUTLERWORKING, XBUTLERBLOCKED, PBUTLERWORKING, O03ACCSEND and the O23OFF text all equal `design/acceptance/w03-fix-3-log.md`.
+- Frames: 88 PNG at scale 1 (Desktop 1440 and Mobile 390), neutral names `s01.png …`, one folder per run, start screen first, the rest shuffled with a fixed seed. Batches as in run 3: VD and VM (10, T5), VR (6, T14b to T14d), SD (20, T7 and T9; `O04-default` was replaced by the new `O03-accept-sending` so the automatic sending frame is on the batch), SX (15, T17; run-3 set plus `XBUTLERWORKING`). 14 runs per tier, 28 tester runs.
+- Tiers as in run 3: Haiku through the Agent tool (`model: haiku`, fresh context, the template prompt plus the folder sentence and «Do not read any other file»); GPT through `/Applications/Codex.app/Contents/Resources/codex exec --ephemeral --skip-git-repo-check -s read-only -m gpt-5.6-sol -c model_reasoning_effort=medium -i s01.png,… -o …` from the neutral folder (the `-c` setting is the run-2 and run-3 setting; no shell command was needed by any tester). Raw answers: `answers/haiku-rNN.txt`, `answers/codex-rNN.txt`, logs in `answers/logs/`.
+- Judging: pre-registered rules in the key (T5: unconfirmed or unknown, no resend, 0 to 2 actions; T14c: «cannot tell» or opened by search; T17: plan, manual path, nothing sent, at most 3 actions; accepting the inquiry first fails). Actions replayed through the page 12 / 13 reactions read from the file (section «Run 4 changes and run-4 prototype walk» of the key); counting as in run 2: opening and choosing in one field is one entry, the automatic sending steps are not counted.
+- Combination rule: run-3 verdicts stay for the tasks not re-run (T6, T8, T10 to T13b, T14a, T15, T16a, T16b: 21 runs per tier) and the 5 kept run-2 runs (T1 to T4); the 14 run-4 runs replace T5, T7, T9, T14b, T14c, T14d and T17. 40 runs per tier, as in run 3.
+
+## Run 4 · G1 first-time task success
+
+PASS, FAIL as before; actions in brackets (taps, clicks and field entries). «Expert / limit» is the key's expert path and expert + 1.
+
+| Task | Expert / limit | Desktop · Haiku | Desktop · GPT | Mobile · Haiku | Mobile · GPT | Run 3 (D·H, D·G, M·H, M·G) |
+|---|---|---|---|---|---|---|
+| T5 Did my question arrive? | 1 / 2 | FAIL (1) | PASS (1) | FAIL (1) | PASS (1) | F, F, P, P |
+| T7 Take a new inquiry, set the review time | 3 / 4 | PASS (3) | PASS (3) | PASS (3) | PASS (3) | F, P, P, P |
+| T9 Attach the question to Alex's purchase | 2 / 3 | FAIL (STUCK) | PASS (2) | FAIL (4) | PASS (2) | F, P, F, P |
+| T14b Saved property · not public now (№242) | 1 / 2 | PASS (1) | PASS (1) | PASS (1) | PASS (1) | P, P, F, P |
+| T14c Saved property · availability unknown | 1 / 2 | FAIL (1) | FAIL (1) | PASS (2) | FAIL (1) | F, F, F, F |
+| T14d Saved property · no saved name | 1 / 2 | PASS (1) | PASS (1) | PASS (1) | PASS (1) | F, P, P, P |
+| T17 Broker opens Butler on an inquiry | 2 / 3 | PASS (1) | FAIL (3) | FAIL (5) | PASS (2) | F, F, F, F |
+
+### Run 4 · success rates and medians
+
+| Measure | Haiku (novice proxy) | GPT (second family) | Threshold |
+|---|---|---|---|
+| Run-4 runs | 8 of 14 = 57.1% | 11 of 14 = 78.6% | |
+| Desktop · Mobile (run-4 runs) | 4 of 7 · 4 of 7 | 5 of 7 · 6 of 7 | |
+| Run-3 and run-2 verdicts kept (untouched tasks) | 23 of 26 | 26 of 26 | |
+| **Overall first-try success (40 runs per tier)** | **31 of 40 = 77.5%** | **37 of 40 = 92.5%** | at least 90% in each tier: **Haiku fails, GPT passes** |
+| Runs failing in both tiers | 1: r05 (T14c Desktop) | | none allowed: **fails** |
+| Median actions within expert + 1, every task | yes for all 7 re-run tasks (T9 Haiku: 1 and 4, median 2.5, counting the STUCK run as its one committed action; 4 if its four written steps were counted, which would exceed the limit of 3) | yes (T17: 3 and 2, median 2.5) | every task: **passes** on the stated counting |
+
+Run 3 for comparison (same combination rule): Haiku 27 of 40 = 67.5%, GPT 35 of 40 = 87.5%, five runs failing in both tiers (T5 Desktop, T14c Desktop and Mobile, T17 Desktop and Mobile), two tasks over the median (T7 Haiku, T17 GPT). Now: Haiku +10.0 points, GPT +5.0 points, one both-tier run left, no median over the limit on the main count.
+
+Median actions per re-run task (all runs of the task, failed ones included): T5 1 · 1; T7 3 · 3 (Haiku wrote 4 in both runs: it listed opening and choosing the time as two steps); T9 2.5 · 2; T14b 1 · 1; T14c 1.5 · 1; T14d 1 · 1; T17 3 · 2.5 (Haiku, GPT).
+
+### Run 4 · what the failures say
+
+1. **T5 (Haiku 2 of 2 fail, GPT 2 of 2 pass; was 2 of 4 fail with Desktop in both tiers).** All four testers tap «Проверете същата заявка». Both Haiku runs then pick the committed receipt as the end screen and say the inquiry arrived; both GPT runs say the check cannot confirm it and that nothing was sent again, with the number 024. The new heading «Още не знаем дали запитването е получено» and the reason line are read on the start screen by Haiku (it quotes the heading), but it still predicts a success after the check. No both-tier failure is left on T5.
+2. **T14c (Desktop both tiers fail, Mobile Haiku passes, Mobile GPT fails; was 4 of 4 fail).** Three of four testers tap «Потърсете имот № 202» and then state that the listing «still opens» or «can still be accessed», without tapping a card on the search page; none of them mentions the new status row «Не можем да проверим дали обявата е активна». The one pass (Haiku Mobile) names the missing check («the system could not verify its current active status») and opens the listing through the search page: 2 actions, as the key allows.
+3. **T14b and T14d (8 of 8 pass in both; were 3 of 4 and 3 of 4).** The non-link titles in muted, regular style close G-24: nobody reports an opened listing from a plain title. One GPT Desktop run taps the plain title of №242, stays on the screen and still reports that the listing cannot be opened (PASS, a note). T14b names №242 in 4 of 4 runs.
+4. **T7 (4 of 4 pass; was 3 of 4).** Both tiers, both viewports: accept, choose the review time, accept. Haiku Desktop used the automatic sending frame as the form (it describes the time as «the default shown»), but it picks the time and ends on the accepted frame. Client not notified: stated by Haiku Mobile and GPT Desktop.
+5. **T9 (GPT 2 of 2 pass, Haiku 0 of 2; was 2 of 4).** Both GPT runs give the availability check by Мария Д. (G-07 wording is closed: no tester reads the elevator step from O03 any more). Haiku Desktop names the right control and the right next step but declares STUCK because it cannot see the link button on the tall O03 frame; Haiku Mobile starts with the first primary «Поемете или назначете», goes through the assign path and ends on the deal screen, where it reads the deal's elevator step.
+6. **T17 (3 of 4 reach the preview; was 0 of 4).** The in-page «Подгответе чернова с Butler» now opens the preview: Haiku Desktop and GPT Mobile pass in 1 and 2 actions, with the three steps, «nothing is sent» and «Ще го направя аз» in their results. GPT Desktop first accepts the inquiry (taps «Поемете или назначете», then «Поемете запитването») and then uses the rail «Butler»: plan and manual path are right, the accept makes it a fail by the key. Haiku Mobile never opens Butler, takes «Поемете или назначете» and describes the draft screen as what Butler would do. Nobody used the new Mobile header entry.
+
+### Run 4 · coverage gaps
+
+- None new for the re-run tasks. Still not drawn: a Hebrew working state of the public Butler panel (G-29), an offline state of the staff panel (G-28); the decline and withdraw empty-reason frames are drawn now.
+- Prototype note: the public working state's «Ще го направя аз» has no reaction (G-30).
+
+### Run 4 · per-run verdicts
+
+Raw text: `run-4/answers/`. Mapping: `run-4/judge/mapping.md`.
+
+| Run | Task | Viewport | Haiku (actions) · reason | GPT (actions) · reason |
+|---|---|---|---|---|
+| r01 | T5 | Desktop | FAIL (1) taps the check, ends on «Запитването е получено» and says it was received (replay: not confirmed) | PASS (1) taps the check; the check cannot confirm receipt, nothing sent again, 024 |
+| r02 | T5 | Mobile | FAIL (1) says the question arrived (replay: not confirmed) | PASS (1) unconfirmed, not sent again (the answer starts the line with «STUCK», the content is right; a note) |
+| r03 | T14b | Desktop | PASS (1) «Разгледайте още имоти»; names №242, not active, cannot be opened | PASS (1) taps the plain title (no effect); №242 not active, cannot be opened |
+| r04 | T14b | Mobile | PASS (1) same; №242 not among the active properties | PASS (1) «Вижте подобни имоти»; inactive, similar properties |
+| r05 | T14c | Desktop | FAIL (1) «Потърсете имот № 202»; says the listing can still be accessed and the property is available | FAIL (1) says the listing «still opens successfully» |
+| r06 | T14c | Mobile | PASS (2) «Разглеждайте още имоти», then the №202 card; says the page could not verify the status | FAIL (1) says the listing «can still be opened», no search step |
+| r07 | T14d | Desktop | PASS (1) «Вижте имота»; №202 | PASS (1) same |
+| r08 | T14d | Mobile | PASS (1) same | PASS (1) same |
+| r09 | T7 | Desktop | PASS (3; 4 written) accept, time, accept; used the sending frame as the form, calls the time «default shown» (note) | PASS (3) accept, 6 октомври 10:00, accept; client not notified |
+| r10 | T7 | Mobile | PASS (3; 4 written) accept, time, accept; client not yet notified | PASS (3) same; ends on the accepted frame |
+| r11 | T9 | Desktop | FAIL (STUCK) names «Свържете или създайте сделка» but cannot find the button; result: availability check by Мария Д. | PASS (2) link, record; availability check by Мария Д. |
+| r12 | T9 | Mobile | FAIL (4) «Поемете или назначете», assign, link; ends on the deal screen, next step: the elevator requirement | PASS (2) link, record; «Проверка на наличността преди предложение за оглед» by Мария Д. |
+| r13 | T17 | Desktop | PASS (1) in-page «Подгответе чернова с Butler» → panel; plan, nothing sent; manual path with «Ще го направя аз» (the answer quotes file s14 for the panel button, s11 is the panel; a note) | FAIL (3) «Поемете или назначете», accepted the inquiry, then rail «Butler»; plan and manual path right |
+| r14 | T17 | Mobile | FAIL (5 written) never opens Butler; «Поемете или назначете» and the draft screen O32 described as Butler's plan | PASS (2) in-page «Подгответе чернова с Butler» → panel, then «Ще го направя аз»; plan stated |
+
+<!-- RUN4-G1-END -->
+
+## Run 4 · G2 plain language
+
+Full read of the visible text of 94 distinct frames (the 88 packet frames including the reference frames XBUTLERBLOCKED, PBUTLERWORKING and the two empty-reason forms, plus the O03 accept conflict, offline and unknown frames): 2,269 text nodes visible, 402 hidden skipped. Scanned against the GATE.md G2 table (bg, en, ru), `design/acceptance/g2-terms.md` and the demo fragments.
+
+- **Banned terms on primary surfaces: 0** in every group (case object, disposition, brief, coverage, engagement and mandate, lettered interest, operation and identifier, party candidate, stage / state / purpose field labels, version labels, assumed states, technical jargon, Hermes and Jev, prototype markers).
+- Reviewed and not counted: three prose strings with «версия» (O27 effect line, O01 «Запазена работна версия», O05 «Текущата версия, аудиторията и следващото решение»): none is a numbered version label.
+- Advisory: «Europe/Sofia» in 6 distinct date lines (38 nodes, kept on purpose); the placeholder addresses `alex@example.com` and `alex.other@example.com`. «ключовете за вход» is gone (O23OFF `327:15157` reads «Прекратяват се членството, всички отворени входове, достъпът до приложението, изрично дадените права и чакащите служебни покани.»): G-23 closed.
+- Not re-scanned: the O23OFF family, the Hebrew frames, `design/copy/server-messages.md`, and en, ru, de, nl, el (copy deck only), as in run 3.
+
+**G2 result: PASS; 0 advisory strings besides the named time zone.**
+
+## Run 4 · G3 leader parity (items 1, 3, 6, 7, 8 on the changed frames)
+
+| # | Item | Run 3 | Run 4 | Frames and evidence |
+|---|---|---|---|---|
+| 1 | One Butler entry everywhere | FAIL (partial) | **FAIL (partial, improved)** | **Passes:** every Butler entry on the W03 inquiry frames (rail «Butler», Mobile context-bar «Butler», in-page «Подгответе с Butler» and «Подгответе чернова с Butler» on O02, O02NEW, O03, O03COLLECTIVE) now opens `XBUTLERPANEL`: 88 Desktop and 86 Mobile prototype frames route the rail or header item there (O01 to O05, O18, O23 families and the command states included); the panel says what Butler will do before it starts (three steps, verdict «Чака Вашето одобрение», limit line), «Ще го направя аз» returns to the same screen, «Подгответе черновата» goes through the working state; T17 reaches the preview in 3 of 4 runs (0 of 4 in run 3). **Fails:** (a) the same rail «Butler» on 56 Desktop frames (O06, O06R of this journey, O07 to O33) and the header «Butler» on 15 Mobile frames (O07 states) open the legacy task picker `XBUTLER` (`63:30796` · `66:60456`, «Butler · Изберете задача», no plan, task buttons lead to drafts), so one entry has two destinations (G-26); (b) the public working state's «Ще го направя аз» (D `I618:74692;6:9` · M `I618:74735;6:9`) has no reaction while the same button on PBUTLER leads to P11 (G-30). Keyboard shortcut: annotation `614:58916`, proof in the PR preview. |
+| 3 | Live state and stop | FAIL (partial) | **PASS (Figma stage)** | Both panels have a working state: public PBUTLERWORKING (D `618:74582` · M `618:74622`; verdict «Butler работи», «Butler търси отговора в обява №202…», «Нищо не е изпратено. Ако спрете, въпросът ви остава тук.», one Primary «Спрете» → BACK with the question kept, 3 s → answer) and staff XBUTLERWORKING (D `619:74783` · M `619:75041`; «Какво прави Butler сега», «Butler работи», «Butler чете запитването на Алекс и обява №202…», «Нищо не е изпратено. Черновата ще видите, преди да я изпратите.», «Спрете» → BACK, 3 s → O32). Atomic accept: `O03ACCSEND` (D `614:60438` · M `614:60574`) shows «Изчакайте няколко секунди, докато запишем поемането. Не натискайте отново.» and «Записваме поемането веднъж. Ако връзката прекъсне, изборът ви остава и проверяваме същата заявка, без да я изпращаме отново.», wired 1.5 s → O03ACCEPTED. Live timing of the progress is G3 item 10 (PR preview). The Hebrew working state is missing (G-29, filed under item 8). |
+| 6 | No dead ends | FAIL (partial) | **FAIL (partial, narrowed)** | **Passes:** the empty required reason of decline and withdraw is drawn (O23HRDREASON D `619:76577` · M `619:76767`, O23HPCREASON D `619:76895` · M `619:77085`: error summary «Попълнете причината, за да продължите.», inline «Напишете причината за отказа.» / «…за оттеглянето.», next step «…Работата остава при Мария Д.» / «…при вас.», the primary stays enabled, only the stated field is flagged); the accept server errors (`future_required`, `after_deadline`) keep the entered time; the staff Butler blocked state `XBUTLERBLOCKED` (D `619:75230` · M `619:75485`) says what happened («Butler не успя да прочете запитването… Нищо не е изпратено, а заявката ви е запазена тук.»), what to do («Опитайте отново или напишете отговора сами с «Ще го направя аз»») and offers the retry and the manual path; accept conflict, offline and unknown frames exist. **Fails:** the staff panel has no offline state of its own (the public panel has `PBUTLEROFFLINE`) (G-28). Advisory: O23HRE and O03 · Accept · time required still draw a disabled primary with a hint (logged in the fix log as a mismatch with code). |
+| 7 | Unknown shown as unknown | FAIL | **FAIL** | **Passes:** P12U (heading «Още не знаем дали запитването е получено», Warning alert with the reason, «Не изпращайте отново. Проверете същата заявка…»), P12UCHECK («Още не е потвърдено, че запитването е получено»), the new P12UNKNOWN status row «Не можем да проверим дали обявата е активна» (Info alert with icon and label), the unknown frames of the five command families (e.g. `O03ACCUNKNOWN`: «Още не знаем дали поемането е записано», «Не поемайте отново. Проверете същата заявка.»). **Fails in the field:** T5 Haiku 2 of 2 read the check as «received» (G-01); T14c 3 of 4 read the status row as «open» (G-03). |
+| 8 | Phone parity | FAIL (partial) | **FAIL (partial)** | **Passes:** every new Bulgarian state exists at 390 (PBUTLERWORKING M, XBUTLERWORKING M, XBUTLERBLOCKED M, O03ACCSEND M, the reason frames M); the Mobile header «Butler» opens the panel on 86 Mobile frames; the five Hebrew twins of run 3's list exist (P12MULTI `620:78235`, P12VIEW `620:78169`, PBUTLERNOFACT `620:78331`, PBUTLERERROR `620:78405`, PBUTLEROFFLINE `620:78476`); T7 passes 4 of 4 on Mobile, T14b and T14d 4 of 4. **Fails:** no Hebrew working state of the public panel (G-29); on Mobile T9 Haiku and T17 Haiku still fail (T9 and T17 pass in GPT). |
+| 9, 10 | Keyboard and WCAG 2.2 AA; speed without jumps | open | open | Not part of this re-check; both belong to the PR preview (G-15). |
+
+**G3 result for W03: FAIL.** Item 3 now passes; items 1, 6, 7 and 8 fail in part (1 and 8 on one wiring or frame defect each, 6 on one undrawn state, 7 on tester readings of two receipts); items 2, 4, 5 and checks A and B were not touched; 9 and 10 stay with the PR preview.
+
+## Run 4 · G4
+
+Not re-run (not requested). The run-3 verdict for the Butler panels stands (public better, staff equal; staff becomes better when T17 passes consistently, now 2 of 4).
+
+<!-- RUN4-G2G3-END -->
+
+## Run 4 · defects
+
+### Status of the open and run-3 defects
+
+| ID | Run 4 status | Evidence |
+|---|---|---|
+| G-01 P12U unknown | **open, medium (narrower)** | T5: Haiku 2 of 2 fail (r01, r02), GPT 2 of 2 pass; was 2 of 4 fail with Desktop failing in both tiers. No both-tier failure. |
+| G-03 P12UNKNOWN line | **open, high** | T14c: 3 of 4 fail (r05 both tiers, r06 GPT); the status row `618:73385` · `618:73391` is not read. Still a both-tier failure on Desktop. |
+| G-07 two next steps | **closed for the wording; failures re-filed as G-31** | No tester reads the elevator step from O03; GPT 2 of 2 give the availability check. The Haiku failures are about reaching the link control. |
+| G-15 accessibility | **open (stage rule)** | PR preview. |
+| G-19 staff Butler route | **closed for the W03 inquiry frames** | T17 reaches the preview in 3 of 4 runs (was 0 of 4); residual G-26 for the legacy picker. |
+| G-20 Butler working and Stop | **closed for Bulgarian** | PBUTLERWORKING and XBUTLERWORKING; Hebrew in G-29, a dead button in G-30. |
+| G-21 Hebrew twins | **closed** | The five twins exist. |
+| G-22 decline and withdraw reasons, staff panel blocked | **closed, residual G-28** | O23HRDREASON, O23HPCREASON, XBUTLERBLOCKED drawn; no offline state of the staff panel. |
+| G-23 O23OFF wording | **closed** | Text read in `327:15157` · `327:15231`. |
+| G-24 plain titles | **closed** | T14b and T14d 8 of 8 pass; no tester reports an opened listing from a plain title (one GPT run tapped it and stayed). |
+| G-25 prototype wiring | **partly re-read** | O03 accept and the staff working state are wired (accept → sending → accepted; Stop → back; 3 s → draft); the other command families and the public typed question were not re-walked in this run. |
+
+### New bounded defects (G-26 to G-31)
+
+Severity as in run 2. Node ids Desktop · Mobile.
+
+| ID | Sev | Frame | Node id | What fails | Smallest fix |
+|---|---|---|---|---|---|
+| G-26 | medium | Rail and header «Butler» on staff frames outside the W03 inquiry set, O06 and O06R included | Desktop rail items «Go / XBUTLER / Butler» on 56 frames, e.g. O06 `63:15498` (frame `63:15447`) and O06R `63:15600` (frame `63:15549`) → `63:30796`; Mobile header on 15 frames (the O07 states) → `66:60456` | G3-1: one Butler entry has two destinations. The legacy picker «Butler · Изберете задача» shows no plan before it acts and its buttons lead straight to drafts. | Re-point the 56 Desktop and 15 Mobile «Go / XBUTLER / Butler» items to `XBUTLERPANEL` (D `614:68227` · M `614:70264`); keep the task picker only as a second step behind «Подгответе черновата» or retire it. In W03 scope: O06 and O06R. The in-page Butler buttons of O15 and O19R still lead to drafts according to the fix log (not read in this run). |
+| G-27 | low | O03 accept family: time required, ready, sending, conflict, offline, unknown | field value «Отговор за асансьора и оглед» in `I602:18968;6:61`, `I602:19153;6:61`, `I614:60526;6:72`, `I614:60729;6:61`, `I614:60910;6:61`, `I614:61091;6:72` (Mobile `I602:19029;6:61`, `I602:19210;6:61`, `I614:60596;6:72`, `I614:60788;6:61`, `I614:60969;6:61`, `I614:61162;6:72`) and the prototype copies | The claim path shows a different «Следваща стъпка» than O03 and O03LR («Проверка на наличността»): the G-07 pattern again. | Set the field value to «Проверка на наличността» on the 12 design frames and their prototype copies. |
+| G-28 | low | Staff Butler panel | `XBUTLERPANEL` D `614:58477` · M `614:58731` (pattern: `PBUTLEROFFLINE` D `614:59375` · M `614:59422`) | G3-6: no offline state; the blocked state `XBUTLERBLOCKED` is a reference frame. | Draw `XBUTLEROFFLINE` (connection lost, request kept, «Опитайте отново», «Ще го направя аз») in the pattern of PBUTLEROFFLINE and wire the retry through `XBUTLERWORKING`. |
+| G-29 | medium | Hebrew public Butler panel | `PBUTLERANSWERHE` send `614:72605`, retry of `PBUTLERERROR` HE `620:78405` and `PBUTLEROFFLINE` HE `620:78476` (all go straight to the answer); model: `PBUTLERWORKING` M `618:74622` | G3-3 and G3-8: no Hebrew working state, so Hebrew visitors see no progress and no Stop. | Draw `PBUTLERWORKING HE RTL` (Mobile) with the strings of the deck 7a he («Butler עובד», «עצרו», «לעשות את זה בעצמי») and wire the three Hebrew sends through it. |
+| G-30 | low | Public working state, manual path | `I618:74692;6:9` · `I618:74735;6:9` (named «Go / P11 / UI04 / Button», 0 reactions; the same button on PBUTLER `614:59805` leads to `63:26500`) | G3-1: «Ще го направя аз» does nothing in the working state. | Add ON_CLICK → P11 (D `63:26500` · M prototype P11) to both buttons. |
+| G-31 | medium | O03 default | `18:732` · `16:463`; «Поемете или назначете» D `63:12620` · M `66:45549`; «Свържете или създайте сделка» D `63:12633` · M `66:45564` | T9 and T17: the first primary is the claim button; 3 of 8 runs start there when the goal is another step (r12 Haiku T9 Mobile, r13 GPT T17 Desktop, r14 Haiku T17 Mobile) and one run (r11 Haiku T9 Desktop) cannot find the link button on the 1,734 px frame. | Name the object in the link button («Свържете със сделката на Алекс», the pattern that closed G-06) and put the three actions of the lead sentence in one row directly under it, in its order. |
+
+Sequence for the next design pass (no dates): first G-26, G-30 and G-27 (wiring and one field value), then G-29 and G-28 (new frames), then G-31 and G-03 (copy and layout on O03 and the P12UNKNOWN row), then G-01; then re-run T5, T9, T14c and T17 and the changed batches; G-15 and G3 items 9 and 10 move to the PR preview.
+
+## Run 4 · overall verdict
+
+| Gate | Verdict | Why |
+|---|---|---|
+| G1 first-time task success | **FAIL** | Combined first-try success 77.5% for Haiku (31 of 40) and 92.5% for GPT (37 of 40): Haiku is below 90%, GPT passes. One run fails in both tiers: T14c Desktop (r05). Median actions within expert + 1 for every task on the stated counting. Improvement over run 3: Haiku 67.5% → 77.5%, GPT 87.5% → 92.5%, both-tier runs 5 → 1. |
+| G2 plain language | **PASS** | 0 banned terms in 2,269 visible text nodes of 94 frames; the only advisory string is the named time zone. |
+| G3 leader parity | **FAIL** | Item 3 passes; items 1, 6, 7 and 8 fail in part (G-26, G-30; G-28; G-01, G-03; G-29); items 9 and 10 stay with the PR preview. |
+| G4 side-by-side | **not re-run** | Run-3 verdicts stand (no «worse»). |
+| **W03 overall** | **FAIL, does not go to code** | Not everything else passes: besides the preview-stage items (G-15, G3 items 9 and 10), G1 fails on the Haiku rate and on T14c Desktop, and G3 items 1, 6, 7 and 8 fail. Closed since run 3: G-07 (wording), G-19, G-20 (Bulgarian), G-21, G-22 (reasons and blocked state), G-23, G-24; open: G-01, G-03, G-15; new: G-26 to G-31 (3 medium: G-26, G-29, G-31; 3 low: G-27, G-28, G-30). |
+
+## Run 4 · files
+
+- `design/zero-learning/W03-expected-path-key.md` (updated before the runs: T5, T7, T9, T14, T17 notes and pre-registered judging; sections «Run 4 changes and run-4 prototype walk», G2 and G3 run-4 notes), this file.
+- `/Users/ivan/Code/Mindburn-Labs/output/msr-launch/visual/w03-gate-packet/run-4/`: `frames/` (88 PNG, scale 1; names ending `-desktop.png` and `-mobile.png`, the `REF-` frames are judge-only), `tester/` (14 neutral folders), `judge/` (`mapping.json`, `mapping.md`, `prompts/`), `answers/` (`haiku-rNN.txt`, `codex-rNN.txt`, `logs/`).
+- Figma: read only (exports, text and reaction reads); nothing edited, nothing committed.
+
+<!-- RUN4-END -->

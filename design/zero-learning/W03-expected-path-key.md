@@ -94,6 +94,8 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 **Required states:** unknown outcome (`22:1666` · `24:2203`), status check of the same request (`66:34211` · `66:34251`). Present. Label change since the first key: the check screen's button now says «Към същата заявка» (D `66:34249` · M `66:34289`; it said «Към същата операция» before Phase B1). The second way out on the unknown screen itself is «Свържете се по друг начин» (D `66:36419` · M `66:56359`). **Run 3:** P12U carries a new line under the status, «Проверката не изпраща запитването отново. Резултатът може и да остане непотвърден. Тогава се свържете с екипа по друг начин и кажете номер 024.» (D `614:56673` · M `614:56674`; proto `614:56675` · `614:56676`). The check screen now reads «Проверихме същата заявка, но резултатът още не е потвърден. Не я изпращайте отново: свържете се с екипа по друг начин и кажете номер 024.» (D `66:34228` · M `66:34268`), status row «Още не е потвърдено дали запитването е получено. Номер за проверка: 024.» (D `66:34238` · M `66:34278`) and a warning «Не приемайте, че запитването е получено…» (D `I66:34242;6:408` · M `I66:34282;6:408`). Hebrew Mobile twins: P12U HE `614:71270`, P12UCHECK HE `614:71325`.
 
+**Run 4 (fix round 3, version «W03 fix 3 done», id 2406992753235358250):** P12U now opens with the heading «Още не знаем дали запитването е получено» (D `22:1678` · M `24:2215`), the Warning alert directly under it, «Връзката прекъсна, преди да получим потвърждение. Номер за проверка: 024.» (D `22:1684` · M `24:2221`), the line «Не изпращайте отново. Проверете същата заявка: проверката не създава второ запитване.» and a second line «Ако проверката покаже, че резултатът още не е потвърден, свържете се с екипа по друг начин и кажете номер 024.». The check screen's heading is «Още не е потвърдено, че запитването е получено» (D `66:34223` · M `66:34263`). Pre-registered judging: PASS when the RESULT says the arrival is not confirmed or unknown, keeps 024 and sends nothing again, with 0 to 2 actions (the heading already tells the state; the check is the expert path); FAIL when the RESULT says the inquiry arrived or was received, or any action sends a new inquiry.
+
 ### W03-T6 · Hebrew: send the question (phone, right-to-left)
 
 **Goal (testers, Hebrew):** אתם מתעניינים בדירה №202 בסנדנסקי. הפרטים והשאלה שלכם כבר מולאו בעמוד הזה. שלחו את השאלה לסוכנות וגלו מי יענה לכם ואיך.
@@ -133,6 +135,8 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 **Required states:** new in the owned queue, accept with an empty required future time (no default, button disabled), accept ready. All present.
 
+**Run 4:** the third tap now passes through the automatic sending frame `O03ACCSEND` («Поемане на запитването», «Изчакайте няколко секунди, докато запишем поемането. Не натискайте отново.»; design D `614:60438` · M `614:60574`, prototype D `621:78970` · M `621:82756`) and after 1.5 s lands on `O03ACCEPTED` (not counted as an action). The Mobile context bar carries a «Butler» entry (O02 · New in queue M `618:74262`); the Desktop rail item and the in-page «Подгответе с Butler» (D `602:19845`) lead to the Butler panel, not to the accept form, and are not part of this path. Judging as in run 3: choose the review time, accept, say the client is not notified; accepting without choosing a time, or going to assign, fails.
+
 ### W03-T8 · Check for a duplicate without merging
 
 **Goal (testers):** Before you work on Alex's new question, check whether Alex already exists in the system. Do not combine any records unless you are sure they are the same person.
@@ -166,6 +170,8 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 **Success criterion:** the tester reports that the question is attached and that the next step is the availability check before a viewing proposal, by Мария Д. Evidence: «Запитването е свързано със сделката.» (D `20:1262` · M `25:2295`), «Мария Д. · Проверка на наличността преди предложение за оглед» (D `20:1273` · M `25:2306`). Fail: the tester states another next step (the deal screen O05 reads «Уточнете изискването за асансьор»), or says the attachment happened without tapping «Запишете свързването».
 
 **Required states:** link, link recorded, create after qualifying (`21:2399` · `28:2817`), resolve without a deal with a reason (`20:1288` · `25:2321`). Present. Copy note: the staff noun is «сделка» since Phase C1a (owner decision); «случай», «преписка» and «ангажимент» are gone from the frames.
+
+**Run 4 (G-07):** the O03 inquiry screen now shows only the inquiry's own next step: field «Следваща стъпка по запитването» with the value «Проверка на наличността» (condition «Преди предложение за оглед» kept; D `18:876` · M `16:539`), the same step that O03LR records. The competing button «Отворете следващите стъпки» is now «Към задачите» (D `63:12635` · M `66:45566`, → O18). The elevator clarification stays as the client's question and in the draft, and as a deal step on O05. A RESULT naming the elevator clarification as the next step still fails.
 
 ### W03-T10 · Hand over open work before you are away
 
@@ -283,6 +289,8 @@ One run per data variant and per viewport. Goal and role are the same for every 
 
 **Required states:** a, b, c, d. Present (Desktop and Mobile). Hebrew: a in `P12 · Saved name HE RTL` (T6) and, since run 3, b `614:71390`, c `614:71470` and d `614:71539` (Mobile; no Hebrew G1 run for b to d, frame evidence only).
 
+**Run 4 (G-03, G-24):** c: the muted line is hidden and a status row sits directly under the reference, «Не можем да проверим дали обявата е активна» (UI26 Info alert; D `618:73385` · M `618:73391`, prototype `618:73397` · `618:73403`; Hebrew `618:73409`). Pre-registered judging for c: PASS when the RESULT says the page does not tell whether the listing is open (or the tester opens it by search and reports what P05 shows), FAIL on a flat «it is open» or «it is closed» without that. b, d and the non-link headings (G-24): every saved title that is not a link is now muted, regular weight, no underline, with the reference line directly under it (P12INACTIVE D `613:55594` · M `613:55666`, P12NONAME D `613:55443` · M `613:55514`, P12UNKNOWN D `613:55747` · M `613:55818`); tapping such a title and reporting an opened listing still fails.
+
 ### W03-T15 · Several properties in one question
 
 **Goal (testers):** You asked an estate agency about several apartments in one question and sent it. The page in front of you is what the website showed afterwards. Find out which properties your question was about, and which of them you can still open.
@@ -373,11 +381,47 @@ Butler entries: all 32 Bulgarian public entries and the Hebrew ones lead to the 
 | 1 | `O03` | tap the rail item «Butler» (Mobile: none; the panel is reachable from @INDEX_STAFF only) | D `63:12565` | `XBUTLERPANEL` D design `614:58477` (proto `614:68227`) · M design `614:58731` (proto `614:70264`) |
 | 2 | `XBUTLERPANEL` | tap «Ще го направя аз» | D `614:68476` · M `614:70444` (BACK) | back to `O03` |
 
-**Expected actions:** 2 on Desktop. Median pass limit: 3. **Mobile: COVERAGE GAP by design** (no wired Butler entry that opens the preview from an inquiry screen; the in-page «Подгответе чернова с Butler» leads to the draft screen O32).
+**Expected actions:** 2 on Desktop and, since run 4, 2 on Mobile. Median pass limit: 3. **Run 4 (G-19):** every Butler entry on the inquiry screen now opens the preview, not the draft: the rail item «Butler» (D `63:12565`), the in-page button «Подгответе чернова с Butler» (D `63:12642` · M `66:45573`; renamed «Go / XBUTLERPANEL / UI04 / Button») and the new Mobile context-bar entry «Butler» (M `618:73458`; design `618:73451`), all → `XBUTLERPANEL` (D `614:68227` · M `614:70264`). The panel's «Подгответе черновата» (D `614:68469` · M `614:70437`) now goes to the working state `XBUTLERWORKING` (design D `619:74783` · M `619:75041`, prototype D `619:75671` · M `619:76187`: «Какво прави Butler сега», «Butler работи», progress «Butler чете запитването на Алекс и обява №202…», «Нищо не е изпратено. Черновата ще видите, преди да я изпратите.», «Спрете» → BACK, «Ще го направя аз» → BACK, after 3 s → O32). The blocked state `XBUTLERBLOCKED` (D `619:75230` · M `619:75485`) is drawn and reached only from nothing (reference for G3).
 
 **Success criterion:** the tester opens Butler, reads «Какво ще направи Butler, преди да започне»: «1. Прочита запитването на Алекс и одобрените данни за обява №202.», «2. Пише чернова на отговора на български.», «3. Не изпраща нищо. Вие преглеждате черновата и я изпращате.» (D `614:58714` … `614:58716` · M `614:58899` … `614:58901`), sees the verdict «Чака Вашето одобрение» (D `I614:58717;6:185`) and the limit «Butler не изпраща, не публикува и не променя цени или условия. Всяка стъпка оставя запис.» (D `614:58730`), and says that the reply can be done by hand with «Ще го направя аз» (D `I614:58728;6:6`), which returns to the same screen. Fail: the tester opens the draft screen O32 and calls it the preview, accepts the inquiry first, or says Butler sends the reply.
 
 **Required states:** preview before acting (present), manual path (present). **Not drawn:** Butler working with a Stop, an error or offline state of the staff panel. Shortcut annotation: «⌘ J (Mac) · Ctrl + J (Windows, Linux)» (`614:58916`).
+
+**Run 4 judging (pre-registered):** the expected path is two actions (open the panel through any of the three entries, then «Ще го направя аз»). PASS when the RESULT names what Butler will do first (reads the inquiry and the approved listing data, writes a draft in Bulgarian, sends nothing; the broker reviews and sends), says the reply can be written by hand through «Ще го направя аз» (back to the same screen), and claims nothing was sent, in at most 3 actions. A tester who also taps «Подгответе черновата» and watches the working state (with «Спрете») is one extra action, not a failure by itself; the RESULT must still describe the plan and the manual path and must not say Butler sent anything. FAIL: STUCK; accepts the inquiry first; calls the draft screen O32 the preview or says Butler sends the reply; or no manual path.
+
+## Run 4 changes (W03 fix round 3) and run-4 prototype walk
+
+Version «W03 fix 3 done» (id 2406992753235358250). Log: `design/acceptance/w03-fix-3-log.md`; contract: `design/contracts/w03-p12.md`. Node ids Desktop · Mobile, design frames unless a prototype copy is named; the earlier frames kept their ids.
+
+| Frame | Design D · M | Proto D · M | Used by |
+|---|---|---|---|
+| P12U (new heading, alert under it, reason line) and P12UCHECK (new heading) | `22:1666` · `24:2203`; `66:34211` · `66:34251` | `63:26892` · `66:56337`; `66:36421` · `66:56361` | T5 |
+| P12UNKNOWN status row «Не можем да проверим дали обявата е активна» | `618:73385` · `618:73391` | `618:73397` · `618:73403` | T14c |
+| Non-link saved titles in muted, regular, no underline (P12NONAME, P12INACTIVE, P12UNKNOWN, P12MULTI №200 and №912) | `613:55443` · `613:55514`, `613:55594` · `613:55666`, `613:55747` · `613:55818` | `613:55991` … `613:56318` | T14b, T14c, T14d |
+| O03 next step «Следваща стъпка по запитването · Проверка на наличността»; «Към задачите» | `18:876` · `16:539`; `18:889` · `16:553` | `63:12630` · `66:45560`; `63:12635` · `66:45566` | T9 |
+| O03ACCSEND · accept sending | `614:60438` · `614:60574` | `621:78970` · `621:82756` | T7 (automatic) |
+| O03ACCCONFLICT, O03ACCOFFLINE, O03ACCUNKNOWN | `614:60641`, `614:60822`, `614:61003` · `614:60766`, `614:60947`, `614:61140` | `621:79067` … `621:82870` | G3 items 3, 6, 7 |
+| XBUTLERWORKING · Butler works, with «Спрете» | `619:74783` · `619:75041` | `619:75671` · `619:76187` | T17, G3 item 3 |
+| XBUTLERBLOCKED · Butler could not prepare the draft | `619:75230` · `619:75485` | `619:75932` · `619:76379` | G3 item 6 |
+| PBUTLERWORKING · public Butler works, with «Спрете» | `618:74582` · `618:74622` | `618:74662` · `618:74705` | G3 items 1, 3 |
+| O23HRDREASON, O23HPCREASON (empty required reason, error summary, enabled primary) | `619:76577` · `619:76767`, `619:76895` · `619:77085` | `621:81070` …, `621:81218` … | G3 item 6 |
+| Mobile context-bar entry «Butler» on 152 Mobile staff frames | e.g. O03 M `618:73451` | `618:73458` | T17 Mobile |
+
+Run-4 batches (tester folders `s01.png` …, start screen first, the rest shuffled, Desktop and Mobile at scale 1): VD and VM (10, T5, unchanged set), VR (6 each, T14b to T14d, unchanged set), SD (20, T7 and T9: the run-3 set with `O04-default` replaced by `O03-accept-sending`), SX (15, T17: the run-3 set plus `XBUTLERWORKING`).
+
+Run-4 walk (reactions read from the file for these controls, all reach the expected end frame; the Mobile T17 route has an entry now):
+
+| Task | Walk (control node D · M) | End frame D · M |
+|---|---|---|
+| T5 | P12U «Проверете същата заявка» `66:36418` · `66:56358` → P12UCHECK; «Свържете се по друг начин» `66:36419` · `66:56359` → P20 | `66:36421` · `66:56361` |
+| T7 | O02NEW «Поемете запитването» `602:19843` · `602:20578` → O03ACCEPT; field `602:19958` · `602:20624` → O03ACCEPTREADY; «Поемете запитването» `602:20083` · `602:20681` → O03ACCSEND → after 1.5 s → O03ACCEPTED | `614:68002` · `614:70108` |
+| T9 | O03 «Свържете или създайте сделка» `63:12633` · `66:45564` → O03L; «Запишете свързването» `63:12940` · `66:45671` → O03LR | `63:12943` · `66:45674` |
+| T14b | P12INACTIVE «Вижте подобни имоти» `613:56114` · `613:56181` → P22; «Разгледайте още имоти» `613:56133` · `613:56200` → P02 | `63:28176` · `66:57861` |
+| T14c | P12UNKNOWN «Потърсете имот № 202» `613:56254` · `613:56320` → P02; the №202 card on P02 (`66:36267` · `66:55200`) → P05 | `63:26089` · `66:55737` |
+| T14d | P12NONAME «Вижте имота» `613:55993` · `613:56005` → P05 | `63:26089` · `66:55737` |
+| T17 | O03 rail «Butler» `63:12565`, in-page «Подгответе чернова с Butler» `63:12642` · `66:45573`, Mobile header «Butler» `618:73458` → XBUTLERPANEL; «Ще го направя аз» `614:68476` · `614:70444` → BACK (O03); optional «Подгответе черновата» `614:68469` · `614:70437` → XBUTLERWORKING; «Спрете» `619:75883` · `619:76333` → BACK; after 3 s → O32 | `614:68227` · `614:70264` |
+
+Found in the run-4 walk (details in `W03-gate-result.md`, «Run 4 · defects»): the public working state's «Ще го направя аз» (D `I618:74692;6:9` · M `I618:74735;6:9`, named «Go / P11») has no reaction; the rail «Butler» of 56 Desktop and the header «Butler» of 15 Mobile frames (including O06 `63:15498` and O06R `63:15600` of this journey) still go to the legacy task picker `XBUTLER` (`63:30796` · `66:60456`), not to `XBUTLERPANEL`.
 
 ## Coverage — step × viewport × state → node id
 
@@ -527,6 +571,8 @@ Server-produced text: `design/copy/server-messages.md` section 6 (handover and i
 
 **Run 3 re-run** (200 frames, 4,342 visible nodes, 1,506 hidden skipped; the run-2 set plus the Butler panels, the receiver and sender frames, the 40 command-state frames and 12 Hebrew frames): **0 hits on the letter of GATE.md** (the only regex match is again «…текущия безопасен статус на обявата…», D `18:864` · M `16:526`, prose and not a field). Advisory strings: 23 of the 24 run-2 strings are gone; left are «Europe/Sofia» (17 distinct date lines, 67 nodes, kept as the named zone) and «ключовете за вход» (O23OFF, D `327:15157` · M `327:15231`). Public frames, Hebrew included: 0 hits. Result in `W03-gate-result.md`, section «Run 3 · G2».
 
+**Run 4 re-run** (94 distinct frames of the run-4 packet and the changed state frames, 2,269 visible text nodes, 402 hidden skipped): **0 hits on the letter of GATE.md**; the advisory «ключовете за вход» is gone (G-23 closed, O23OFF `327:15157` read directly); left are «Europe/Sofia» (6 distinct date lines, 38 nodes) and the placeholder addresses. Three prose strings with the word «версия» («Окончателното сливане е блокирано до потвърждение на точен запис, последствия, права и актуална версия.» O27, «Запазена работна версия» O01, «Текущата версия, аудиторията и следващото решение» O05) are not version labels and are not counted. Result in `W03-gate-result.md`, section «Run 4 · G2».
+
 Locale coverage: the frames are Bulgarian (Hebrew for two public frames in run 2, 13 in run 3). English, Russian, German, Dutch and Greek wording is only in the copy deck, not in frames; those locales are not scanned at frame level.
 
 ## G3 checklist — W03 with frame evidence (re-run after Phase C1a)
@@ -556,6 +602,8 @@ Two more checks from the owner's rules (GATE intro «every screen says in one se
 **G3 result for W03: FAIL.** Items 2, 4 and 5 and both extra checks pass; items 1, 3, 6, 7 and 8 fail (partially or fully), item 9 has no frame evidence beyond contrast and target size, item 10 is open.
 
 **Run 3 re-run of items 1, 3, 6, 7, 8, 9 (still FAIL, all improved):** item 1, the public panel (5 states, wired from all 32 Bulgarian entries) and the Desktop staff rail (`XBUTLERPANEL` on 112 prototype frames, shortcut annotated `614:58916`) pass; the in-page staff buttons lead to the draft O32 and Mobile has no entry (T17 fails 4 of 4, G-19). Item 3, the five command families have sending frames; Butler has no working state with a Stop (G-20). Item 6, conflict, offline and unknown frames exist for the five families and the public panel; the empty required reason of the decline and withdraw forms is not drawn (G-22). Item 7, T5 Desktop and T14c still fail (G-01, G-03). Item 8, 13 Hebrew frames; Hebrew P12MULTI, P12VIEW and three Butler states are missing (G-21). Item 9, 105 focus-order annotations, 4,342 text nodes at AA or better, 569 targets of at least 24 × 24 px; the proof stays with the PR preview (G-15). Check A: 85 of 90 new or changed frames carry a layer named «Next step», the other 5 carry the line in another form; check B: pass. Details: `W03-gate-result.md`, section «Run 3 · G3».
+
+**Run 4 re-check of items 1, 3, 6, 7, 8 on the changed frames:** item 1 FAIL (partial): the W03 inquiry frames, O02, O04, O05, O18 and O23 lead every Butler entry (rail, Mobile header, in-page buttons) to the preview and T17 reaches it in 3 of 4 runs, but O06 and O06R and 54 other Desktop and 15 Mobile frames still open the legacy picker `XBUTLER` (G-26) and the public working state's manual-path button has no reaction (G-30); item 3 PASS (both panels have a working state with progress, «Нищо не е изпратено» and one Stop; the accept command has a sending state); item 6 FAIL (partial, narrowed to one undrawn state): the blocked state, the empty-reason errors and the server errors are drawn, the staff panel still has no offline state (G-28; run 3 counted the missing state, so it stays counted); item 7 FAIL (G-01 and G-03 still produce success or «open» readings); item 8 FAIL (partial): no Hebrew working state (G-29). Items 9 and 10 stay with the PR preview.
 
 ### Next-step line per screen (check A)
 
