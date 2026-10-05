@@ -2,7 +2,7 @@
 
 Testers receive only the **Goal (testers)** line of a task, in a fresh context, with the screens of their batch and nothing else (no glossary, no product vocabulary, no frame names). Everything else on this page is for the judge. Gate rules: `design/zero-learning/GATE.md`. Packet (images, prompt, judge steps): `design/zero-learning/W03-packet.md`. Owner zero-learning rules: `design/audit.md` section 7A. Result of the latest gate run: `design/zero-learning/W03-gate-result.md`.
 
-- Source: Figma file "MS Realty — AI-native OS & Website · 2027". First read after the W03 build; re-read after Phase B (copy, DEMO markers, links) and Phase C1b (next-step lines, visible links, states, RTL icon); re-read after Phase C1a, version «After C1a W03+P12» (id 2406915564060113647): staff noun «Сделка» instead of «Случай», the colleague handover on both sides (O23HR … O23HPX), the P12 receipt that names the saved property, the state O27SEPARATE, the O05 field labels, the future scenario dates and the next-step lines on four more screens. Design frames live on pages 03 / 06 (screens), 05 / 08 (Agency OS screens) and 09 (states); prototype copies on page 12 (Desktop) and page 13 (Mobile). Every prototype click below was read back as an ON_CLICK reaction and every path was walked again through those reactions after Phase C1a (section «Prototype walk»). Node ids of earlier frames did not change; frame names, labels and evidence strings below are the current ones. Contract of the new frames: `design/contracts/w03-p12.md`.
+- Source: Figma file "MS Realty — AI-native OS & Website · 2027". First read after the W03 build; re-read after Phase B (copy, DEMO markers, links) and Phase C1b (next-step lines, visible links, states, RTL icon); re-read after Phase C1a, version «After C1a W03+P12» (id 2406915564060113647): staff noun «Сделка» instead of «Случай», the colleague handover on both sides (O23HR … O23HPX), the P12 receipt that names the saved property, the state O27SEPARATE, the O05 field labels, the future scenario dates and the next-step lines on four more screens. Design frames live on pages 03 / 06 (screens), 05 / 08 (Agency OS screens) and 09 (states); prototype copies on page 12 (Desktop) and page 13 (Mobile). Every prototype click below was read back as an ON_CLICK reaction and every path was walked again through those reactions after Phase C1a (section «Prototype walk»). Node ids of earlier frames did not change; frame names, labels and evidence strings below are the current ones. Contract of the new frames: `design/contracts/w03-p12.md`. **Run 3 (W03 fix round):** re-read in the Figma versions «W03 fix public done» (id 2406936889649113691) and «W03 fix staff done» (id 2406943983880794330); node ids of the earlier frames did not change. Tasks T5 to T7 and T10 to T15 are updated in place below, T16a, T16b and T17 are new, and the section «Run 3 changes» lists the new frames. Logs: `design/acceptance/w03-fix-public-log.md`, `design/acceptance/w03-fix-staff-log.md`. Owner decision: a public Butler panel is allowed and is judged like any other screen.
 - Journey screens (binding, `journeys.json`): P11, P12, O01, O02, O03, O06, O23, O18, O04, O05. O27 (duplicate check) is reached from O03 and is part of the duplicates step; its result states O27PENDING and O27SEPARATE are in the coverage table. The receipt variants of P12 (saved property: public now, not public now, unknown, no saved name, several properties, viewing request) and the handover frames of both sides (O23HR, O23HRA, O23HRD, O23HRDR, O23HRX, O23HPD, O23HPX) are part of the journey since Phase C1a. O01 Loading / Empty / Error / Offline and the revoke state O23OFF stay in the coverage table as reference images.
 - Counting rule: one action is a tap or click, or one field entry. Form fields are pre-filled in the frames, so typing counts only where a step lists an entry. Choosing a value in one field (open the field, pick the value) is one entry. The «Изпращаме…» step advances on its own after 1.5 s in the prototype and is not counted.
 - Pass rule per tester run: the end frame is reached (or the success criterion is met in words) without hints, in at most expert actions + 1 (median over runs). A step the screens do not cover is a **COVERAGE GAP**, reported separately and never counted as a pass. A tester's END SCREEN is a prediction (testers see no reactions): the judge replays the actions through the prototype reactions, and the RESULT is judged against the replayed end frame. A RESULT that states the opposite of the replayed frame (for example «it arrived» where the frame says «not confirmed») fails.
@@ -92,7 +92,7 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 **Success criterion:** the tester reports that the result is still not confirmed, keeps the number «Номер за проверка: 024» and does not send again. Evidence: «Резултатът все още не е потвърден» (D `66:34223` · M `66:34263`). Fail: any action that sends a new inquiry, or a RESULT that says the inquiry arrived (the replayed frame says «Резултатът все още не е потвърден»).
 
-**Required states:** unknown outcome (`22:1666` · `24:2203`), status check of the same request (`66:34211` · `66:34251`). Present. Label change since the first key: the check screen's button now says «Към същата заявка» (D `66:34249` · M `66:34289`; it said «Към същата операция» before Phase B1). The second way out on the unknown screen itself is «Свържете се по друг начин» (D `66:36419` · M `66:56359`).
+**Required states:** unknown outcome (`22:1666` · `24:2203`), status check of the same request (`66:34211` · `66:34251`). Present. Label change since the first key: the check screen's button now says «Към същата заявка» (D `66:34249` · M `66:34289`; it said «Към същата операция» before Phase B1). The second way out on the unknown screen itself is «Свържете се по друг начин» (D `66:36419` · M `66:56359`). **Run 3:** P12U carries a new line under the status, «Проверката не изпраща запитването отново. Резултатът може и да остане непотвърден. Тогава се свържете с екипа по друг начин и кажете номер 024.» (D `614:56673` · M `614:56674`; proto `614:56675` · `614:56676`). The check screen now reads «Проверихме същата заявка, но резултатът още не е потвърден. Не я изпращайте отново: свържете се с екипа по друг начин и кажете номер 024.» (D `66:34228` · M `66:34268`), status row «Още не е потвърдено дали запитването е получено. Номер за проверка: 024.» (D `66:34238` · M `66:34278`) and a warning «Не приемайте, че запитването е получено…» (D `I66:34242;6:408` · M `I66:34282;6:408`). Hebrew Mobile twins: P12U HE `614:71270`, P12UCHECK HE `614:71325`.
 
 ### W03-T6 · Hebrew: send the question (phone, right-to-left)
 
@@ -104,13 +104,13 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 | # | From frame | Action | Control (M proto) | To frame |
 |---|---|---|---|---|
-| 1 | `P11 · Filled HE RTL` | tap «שליחת הפנייה» | `602:20926` | `P12 · Saved name HE RTL / הפנייה התקבלה` · design M `613:55827` (page 06, next to the superseded `602:18638`) · prototype `P12NAMEDHE` M `613:56367` |
+| 1 | `P11 · Filled HE RTL` | tap «שליחת הפנייה» | `602:20926` | `P11 · Sending HE RTL` · design M `614:66896` (prototype `P11SENDINGHE` M `614:72131`) → automatic after 1.5 s → `P12 · Saved name HE RTL / הפנייה התקבלה` · design M `613:55827` (page 06, next to the superseded `602:18638`) · prototype `P12NAMEDHE` M `613:56367` |
 
-**Expected actions:** 1. Median pass limit: 2. End frame changed in Phase C1a: the control used to lead to `602:20963`; it now leads to `613:56367`. The packet batch VH takes `613:55827` as the end screen.
+**Expected actions:** 1 (the automatic sending step is not counted). Median pass limit: 2. End frame changed in Phase C1a: the control used to lead to `602:20963`; it now leads (through the Hebrew sending frame since run 3) to `613:56367`. The packet batch VH takes `613:55827` as the end screen.
 
 **Success criterion:** the tester reports that the inquiry was received, that the Sandanski sales team is responsible, and that a broker will write by email in Hebrew with no promised deadline. Evidence: «הפנייה התקבלה» `613:55841`, owner line `613:55844`, next-step row «מה הלאה» `613:55851` → `613:55856`. The saved property is on the receipt: «הנכס בפנייה» `613:55871`, the Bulgarian title in its own isolate `613:55953`, the reference `613:55954` (U+2066…U+2069) and the Quiet button «לצפייה בנכס» `I613:55955;6:9`. The judge also checks that №202, 115,000 €, 76 m², 68.5 m² and alex@example.com read left-to-right inside the Hebrew lines, and that the Cyrillic title keeps its own direction inside the right-aligned row.
 
-**Required states:** filled and committed with the saved property in Hebrew are present; Hebrew sending, invalid, rejected, offline, unknown, and the Hebrew variants of not public now, availability unknown, no saved name and several properties are **COVERAGE GAPs** (Bulgarian only).
+**Required states:** filled, sending, committed with the saved property, and (run 3) the Hebrew default `614:66712`, invalid `614:66799`, rejected `614:67005`, offline `614:67102`, unknown `614:71270`, status check `614:71325`, not public now `614:71390`, availability unknown `614:71470`, no saved name `614:71539` and the Butler answer `614:71849` are present (Mobile 390, Noto Sans Hebrew, mirrored rows, LTR isolates around №, 024, prices, e-mail and time). **Still COVERAGE GAPs** in Hebrew: several properties (P12MULTI), the viewing-request receipt, and the Butler states «no data», «error» and «offline».
 
 ## Staff tasks
 
@@ -124,11 +124,12 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 |---|---|---|---|---|
 | 1 | `O02 · New in queue` | tap «Поемете запитването» (Mobile: «Поемете запитването на Алекс») | `602:19843` · `602:20578` | `O03 · Accept · time required / Поемане на запитването` · D `602:18881` · M `602:19008` |
 | 2 | `O03 · Accept · time required` | choose a future day and time in «Кога ще прегледате отново? *» (one entry; prototype: tap the field) | `602:19958` · `602:20624` | `O03 · Accept · ready` · D `602:19066` · M `602:19189` |
-| 3 | `O03 · Accept · ready` | tap «Поемете запитването» | `602:20083` · `602:20681` | `O03L / Свързване или създаване на сделка` · D `20:1055` · M `25:2228` (prototype D `63:12845` · M `66:45642`) |
+| 3 | `O03 · Accept · ready` | tap «Поемете запитването» | `602:20083` · `602:20681` | `O03ACCEPTED / Запитването е при вас` · D `614:58096` · M `614:58321` (prototype D `614:68002` · M `614:70108`) |
+| (4) | `O03ACCEPTED` | optional: tap «Свържете със сделка» | `614:68130` · `614:70168` | `O03L` · D `20:1055` · M `25:2228` (prototype D `63:12845` · M `66:45642`) |
 
-**Expected actions:** 3 on both viewports. Median pass limit: 4.
+**Expected actions:** 3 on both viewports (the optional fourth tap is not part of the task). Median pass limit: 4.
 
-**Success criterion:** the tester chooses the review time themself, then accepts, and says that the client is not notified. Evidence: rule «Задължително: бъдещ ден и час. Няма час по подразбиране…» (D `602:19000` · M `602:19058`); effect «Записва ви като отговорник с преглед на 6 октомври в 10:00. Клиентът не получава съобщение.» (D `602:19188` · M `602:19242`). Fail: the tester tries to accept with the time empty, or assumes a time was set for them (for example by going straight to the «ready» frame).
+**Success criterion:** the tester chooses the review time themself, then accepts, and says that the client is not notified. Since run 3 the claim has a receipt: `O03ACCEPTED` «Запитването е при вас» (D `614:58168` · M `614:58332`), «Следващ преглед» (`614:58198` · `614:58355`) «6 октомври 2026 · 10:00 · Europe/Sofia» (`614:58199` · `614:58356`), «Клиентът» «Не получава съобщение и не вижда часа за преглед.» (`614:58317` · `614:58473`), «Записано» «Мария Д. · 5 октомври 2026, 10:24 · Europe/Sofia» (`614:58221` · `614:58378`), next-step line «Свържете запитването със сделка или подгответе отговор. Клиентът не е уведомен.» (`614:58176` · `614:58333`). Evidence: rule «Задължително: бъдещ ден и час. Няма час по подразбиране…» (D `602:19000` · M `602:19058`); effect «Записва ви като отговорник с преглед на 6 октомври в 10:00. Клиентът не получава съобщение.» (D `602:19188` · M `602:19242`). Fail: the tester tries to accept with the time empty, or assumes a time was set for them (for example by going straight to the «ready» frame).
 
 **Required states:** new in the owned queue, accept with an empty required future time (no default, button disabled), accept ready. All present.
 
@@ -179,49 +180,49 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 **Expected actions:** 2. Median pass limit: 3.
 
-**Success criterion:** the tester says the handover is proposed and waits for Nikol to accept; until then the work stays with the current owner. Evidence: «Изчаква приемане на работата» (D `21:1032` · M `25:2864`), «Предаването е предложено. Изчаква приемане; дотогава отговаря текущият заместник…» (D `I21:1097;6:408` · M `I25:2931;6:408`). Fail: the tester says Nikol has accepted or that the work already moved (O23HP still shows the primary «Вижте приетото предаване», D `I21:1104;6:3`, which leads to the accepted state O23HD, D `21:1108` · M `25:2942`).
+**Success criterion:** the tester says the handover is proposed and waits for Nikol to accept; until then the work stays with the current owner. Evidence: «Изчаква приемане на работата» (D `21:1032` · M `25:2864`), «Предаването е предложено. Изчаква приемане; дотогава отговаря текущият заместник…» (D `I21:1097;6:408` · M `I25:2931;6:408`). Fail: the tester says Nikol has accepted or that the work already moved. Since run 3 O23HP has no shortcut to the accepted state O23HD (D `21:1108` · M `25:2942`): the one primary is «Към текущото заместване» (D `I21:1106;6:3` · M `I25:2940;6:3` → O23), the alert reads «Предложението чака отговор от Никол. Дотогава работата остава при вас. Ако Никол откаже, тук ще видите причината.» (D `I21:1097;6:408` · M `I25:2931;6:408`) and the next-step line «Изчакайте отговора на Никол. Работата остава при вас, докато тя приеме.» (D `615:73381` · M `615:73382`).
 
-**Required states:** handover proposal, pending acceptance, accepted. Present. Since Phase C1a the pending frame carries two more Quiet buttons: «Оттеглете предложението» (→ O23HPX, task T13b) and «Вижте какво получава Никол» (→ O23HR, tasks T11 and T12). Related state: `O03 · Assign · awaiting acceptance / Чака приемане от Никол` (D `602:21029` · M `602:21140`), entered from O03A «Запишете назначаването» (D `63:12738` · M `66:45603`) through `Prototype / O03ASSIGNWAIT` (D `605:24524` · M `605:24651`).
+**Required states:** handover proposal, pending acceptance, accepted. Present. Since Phase C1a the pending frame carries two more Quiet buttons: «Оттеглете предложението» (→ O23HPC since run 3, then O23HPX, task T13b; D `I606:48742;6:9` · M `I606:48746;6:9`) and «Вижте какво получава Никол» (→ O23HRE since run 3, tasks T11 and T12; D `I606:48744;6:9` · M `I606:48748;6:9`). Related state: `O03 · Assign · awaiting acceptance / Чака приемане от Никол` (D `602:21029` · M `602:21140`), entered from O03A «Запишете назначаването» (D `63:12738` · M `66:45603`) through `Prototype / O03ASSIGNWAIT` (D `605:24524` · M `605:24651`).
 
 ## Colleague handover tasks (new in Phase C1a)
 
-Server truth (`design/contracts/w03-p12.md`, section 1): the receiver accepts with their own next step and review time, or declines with a reason; the work stays with the sender until the accept is read back; the sender can withdraw, which is not a decline; clients receive no message for any handover step. Receiver frames carry the rail user «Никол · Брокер»; sender frames «Мария Д. · Брокер».
+Server truth (`design/contracts/w03-p12.md`, sections 1 and 2, server answers of the W03 fix round): the receiver accepts with their own next step and review time (no default), or declines with a reason; the work stays with the sender until the accept is read back; the sender can withdraw with a reason, which is not a decline, and can then offer the work to another colleague; the readback names the person and the time with the zone, with no receipt number; no staff notification is delivered and no screen claims one; clients receive no message for any handover step. Receiver frames carry the rail user «Никол · Координатор» (the O23 team list wins); sender frames «Мария Д. · Брокер».
 
 ### W03-T11 · Accept a colleague's work with your own plan
 
 **Goal (testers):** Your colleague Maria will be away next week and has offered you her open work. Take it over, with your own plan for what you do first and when you will look at it again.
 
-**Start frame:** `O23HR / Мария Д. ви предлага работата си` — Desktop `606:45687` · Mobile `606:45933` (prototype D `606:48758` · M `606:48981`)
+**Start frame:** `O23HRE / Мария Д. ви предлага работата си (без час)` — Desktop `614:57627` · Mobile `614:57896` (prototype D `614:67733` · M `614:69908`). Run 3: the receiver's first view is the empty state; the filled frame `O23HR` (D `606:45687` · M `606:45933`, prototype D `606:48758` · M `606:48981`) is the «ready» state that either field reaches.
 
-| # | From frame | Action | Control (D design · M design) | To frame (Desktop · Mobile) |
+| # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O23HR` | enter «Вашата следваща стъпка *» (shown filled: «Обадете се на Алекс за асансьора и достъпа»; entry optional, not wired in the prototype) | `I606:45905;6:61` · `I606:46082;6:61` | same frame |
-| 2 | `O23HR` | choose «Кога ще прегледате отново? *» (shown filled: «13 октомври 2026, 10:00 · Europe/Sofia»; entry optional, not wired) | `I606:45909;6:61` · `I606:46086;6:61` | same frame |
-| 3 | `O23HR` | tap «Приемете работата» | prototype `606:48921` · `606:49076` (design `I606:45920;6:3` · `I606:46097;6:3`) | `O23HRA / Работата е при вас` · D design `606:46124` · M design `606:46324` (prototype D `606:49138` · M `606:49326`) |
+| 1 | `O23HRE` | enter «Вашата следваща стъпка *» (empty, placeholder «Напишете какво ще направите първо»; one entry) | `614:67892` · `614:69999` (design `I614:57786;6:56` · `I614:57987;6:56`) | `O23HR` (filled, ready) |
+| 2 | `O23HRE` | choose «Кога ще прегледате отново? *» (empty, placeholder «Изберете ден и час»; one entry) | `614:67893` · `614:70000` (design `I614:57787;6:56` · `I614:57988;6:56`) | `O23HR` |
+| 3 | `O23HR` | tap «Приемете работата» | `606:48921` · `606:49076` | `O23HRSEND / Приемаме работата…` (design D `614:63548` · M `614:63831`; prototype D `614:68481` · M `614:70449`) → automatic after 1.5 s → `O23HRA / Работата е при вас` (design D `606:46124` · M `606:46324`; prototype D `606:49138` · M `606:49326`) |
 
-**Expected actions:** 3 when the broker writes own values (two entries and the tap); 1 when the shown values are accepted. Median pass limit: 4.
+**Expected actions:** 3 (two entries and the tap); the primary of the empty frame is disabled and has no reaction. Median pass limit: 4. In the prototype either field leads to the ready frame.
 
-**Success criterion:** the tester ends on `O23HRA`, says the work is now theirs from this moment, that Мария Д. is notified and that clients receive no message, and names the next step and the review time that were saved. Evidence: «Работата е при вас» (D `606:46203` · M `606:46335`), line «Започнете със стъпката, която записахте. Мария Д. вече е уведомена.» (D `606:46262` · M `606:46393`), «Ваша следваща стъпка» → «Обадете се на Алекс за асансьора и достъпа» (D `606:46275` · M `606:46406`), «Следващ преглед» → «13 октомври 2026, 10:00 · Europe/Sofia» (D `606:46286` · M `606:46417`), «Отговорник от сега» (D `606:46297` · M `606:46428`), receipt «Никол · 5 октомври 2026, 18:05 · потвърждение № 0418» (D `606:46308` · M `606:46439`). Effect line before the tap: «Когато приемете, вие отговаряте за тези три неща от този момент. Мария Д. получава известие; клиентите не получават съобщение.» (D `I606:45913;6:401` · M `I606:46090;6:401`). Fail: the tester says the work was already hers before the tap, or taps «Откажете с причина».
+**Success criterion:** the tester ends on `O23HRA`, says the work is now theirs from this moment and that clients receive no message, and names the next step and the review time that were saved. Evidence: «Работата е при вас» (D `606:46196` · M `606:46335`), «Започнете със задачата, която записахте.» (`606:46262` · `606:46393`), «Ваша задача» (`606:46274` · `606:46405`), «Следващ преглед» (`606:46285` · `606:46416`), «Отговорник от сега» (`606:46296` · `606:46427`), «Записано» «Никол · 5 октомври 2026, 18:05 · Europe/Sofia» (`606:46308` · `606:46439`). Before the tap: rule «Задължително: стъпка и бъдещ ден и час. Няма час по подразбиране…» (D `614:57891` · M `614:58091`), hint «Бутонът се включва, след като напишете стъпката и изберете бъдещ час.» (`614:57893` · `614:58093`), effect «Когато приемете, тези три неща са ваши от този момент. Стъпката става ваша задача, а часът е за вашия преглед. Клиентите не получават съобщение.» (D `I614:57788;6:401` · M `I614:57989;6:401`). Fail: the tester says the work was already theirs before the tap, taps «Откажете с причина», or says Мария Д. gets a notification (no screen claims one any more).
 
-**Required states:** request pending and addressed to me, accepted. Present. **COVERAGE GAP** (design, not a tester failure): there is no «review time required» state like O03 · Accept (empty field, disabled button, rule «Няма час по подразбиране»); O23HR shows both required fields filled, so a tester can accept without writing anything (see key defect K-2). The stale case (`version_conflict`) is not drawn.
+**Required states:** nothing entered (`O23HRE`), ready (`O23HR`), sending (`O23HRSEND`), changed meanwhile (D `614:64045` · M `614:64310`, «Някой е променил това междувременно» → «Заредете предложението отново» → O23HRX), connection lost (D `614:64506` · M `614:64772`, «Опитайте отново» → O23HRSEND), unknown outcome (D `614:64969` · M `614:65252`, «Проверете същата заявка» → O23HRA), accepted. All present.
 
 ### W03-T12 · Turn down a colleague's work and say why
 
 **Goal (testers):** Your colleague Maria will be away next week and has offered you her open work. You cannot take it, because you are away at the same time. Turn it down and say why.
 
-**Start frame:** `O23HR` — Desktop `606:45687` · Mobile `606:45933` (prototype D `606:48758` · M `606:48981`)
+**Start frame:** `O23HRE` — Desktop `614:57627` · Mobile `614:57896` (prototype D `614:67733` · M `614:69908`; the same controls exist on the filled frame `O23HR`).
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O23HR` | tap «Откажете с причина» | `606:48922` · `606:49077` | `O23HRD / Откажете предаването` · D design `606:46469` · M `606:46634` (prototype D `606:49448` · M `606:49593`) |
+| 1 | `O23HRE` | tap «Откажете с причина» | `614:67897` · `614:70004` (filled twin `606:48922` · `606:49077`) | `O23HRD / Откажете предаването` · D design `606:46469` · M `606:46634` (prototype D `606:49448` · M `606:49593`) |
 | 2 | `O23HRD` | enter «Причина за отказа *» (shown filled: «Отсъствам по същото време, от 13 до 15 октомври.»; entry optional, not wired) | `I606:46610;6:83` · `I606:46706;6:83` | same frame |
 | 3 | `O23HRD` | tap «Изпратете отказа» | `606:49533` · `606:49610` | `O23HRDR / Отказът е записан` · D design `606:46744` · M `606:46933` (prototype D `606:49672` · M `606:49849`) |
 
 **Expected actions:** 3 with an own reason; 2 when the shown reason is accepted. Median pass limit: 4.
 
-**Success criterion:** the tester ends on `O23HRDR` and says the refusal and the reason are recorded, the work stays with Мария Д., she will choose another colleague, and nothing moved to them. Evidence: «Отказът е записан» (D `606:46823` · M `606:46944`), «Не е нужно друго от вас. Мария Д. ще избере друг колега.» (D `606:46882` · M `606:47002`), «Отказано от вас» (D `I606:46883;6:179`), «Причина» → «Отсъствам по същото време, от 13 до 15 октомври.» (D `606:46895` · M `606:47015`), «Работата остава при» → «Мария Д.» (D `606:46906` · M `606:47026`), receipt «Никол · 5 октомври 2026, 18:07 · потвърждение № 0419» (D `606:46917` · M `606:47037`). Effect line before the tap: «Мария Д. ще види причината и ще избере друг колега. Нищо не се прехвърля към вас.» (D `I606:46614;6:401` · M `I606:46710;6:401`). Fail: the tester taps «Приемете работата» or says the work is theirs.
+**Success criterion:** the tester ends on `O23HRDR` and says the refusal and the reason are recorded, the work stays with Мария Д., she will choose another colleague, and nothing moved to them. Evidence: «Отказът е записан» (D `606:46816` · M `606:46944`), «Не е нужно друго от вас. Мария Д. ще избере друг колега.» (`606:46882` · `606:47002`), «Отказано от вас» (D `I606:46883;6:179`), «Причина» (`606:46894` · `606:47014`), «Работата остава при» → «Мария Д.» (`606:46905` · `606:47025`), «Записано» «Никол · 5 октомври 2026, 18:07 · Europe/Sofia» (`606:46917` · `606:47037`). Effect line before the tap: «Мария Д. ще види причината и ще избере друг колега. Нищо не се прехвърля към вас.» (D `I606:46614;6:401` · M `I606:46710;6:401`). Fail: the tester taps «Приемете работата» or says the work is theirs.
 
-**Required states:** decline form with a required reason, decline recorded (receiver view), sender view `O23HPD`. Present. Not drawn: decline with an empty reason, connection lost, stale request.
+**Required states:** decline form with a reason, decline recorded (receiver view), sender view `O23HPD`, and (design only, run 3) the command states of the decline: sending D `614:65466` · M `614:65662`, changed meanwhile `614:65789` · `614:65973`, connection lost `614:66088` · `614:66273`, unknown outcome `614:66389` · `614:66585`. **Not drawn:** a decline with an empty reason (the reason is shown filled).
 
 ### W03-T13a · See that the colleague declined and offer the work to someone else
 
@@ -231,13 +232,15 @@ Server truth (`design/contracts/w03-p12.md`, section 1): the receiver accepts wi
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O23HPD` | tap «Предложете на друг колега» | `606:50363` · `606:50472` | `O23H / Предаване на отворена работа` · D `21:788` · M `25:2760` (prototype D `63:21162` · M `66:51858`) |
+| 1 | `O23HPD` | tap «Предложете на друг колега» | `606:50363` · `606:50472` | `O23HC / Предложете работата на друг колега` · D design `614:57059` · M `614:57247` (prototype D `614:67376` · M `614:69689`) |
+| 2 | `O23HC` | (optional) choose a colleague in «Получател *»; Петър К. is preselected | rows `I614:57221;6:172` · `I614:57340;6:172` (not wired) | same frame |
+| 3 | `O23HC` | tap «Предложете на Петър К.» | `614:67510` · `614:69757` | `O23HCP / Изчаква приемане от Петър К.` · D design `614:57366` · M `614:57531` (prototype D `614:67566` · M `614:69810`) |
 
-**Expected actions:** 1. Median pass limit: 2.
+**Expected actions:** 2 (open, then the primary with the preselected receiver); 3 with an explicit choice. Median pass limit: 3.
 
-**Success criterion (words):** the tester says that Никол declined because she is away at the same time (13 to 15 октомври), that the work is still with Мария Д., and that the next step is to offer it to another colleague. Evidence: «Никол отказа предаването» (D `606:47465` · M `606:47586`), «Предложете работата на друг колега или я запазете при себе си.» (D `606:47524` · M `606:47644`), «Отказано от Никол» (D `I606:47525;6:185`), «Причина от Никол» → «Отсъствам по същото време, от 13 до 15 октомври.» (D `606:47537` · M `606:47657`), «Работата е при» → «Вас · Мария Д.» (D `606:47548` · M `606:47668`).
+**Success criterion:** the tester says that Никол declined because she is away at the same time (13 to 15 октомври), that the work is still with Мария Д., and that it is now offered to another colleague (Петър К.) and waits for his answer. Evidence: «Никол отказа предаването» (D `606:47458` · M `606:47586`), «Отказано от Никол» (D `I606:47525;6:185`), «Причина от Никол» → «Отсъствам по същото време, от 13 до 15 октомври.» (`606:47536` · `606:47656`), «Работата е при» → «Вас · Мария Д.» (`606:47547` · `606:47667`); on `O23HC`: «Предложете работата на друг колега» (`614:57131` · `614:57258`), «Никол отказа на 5 октомври и не се показва отново…» (D `I614:57139;6:179` · M `I614:57259;6:179`), rows Петър К. (selected), Ваня Т. («отсъства на 13 и 14 октомври»), Стоян В.; on `O23HCP`: «Изчаква приемане от Петър К.» (`614:57438` · `614:57542`), «Изчакайте отговора на Петър К. Работата остава при вас, докато той приеме.» (`614:57527` · `614:57623`), «Записано» (`I614:57497;6:408` · `I614:57596;6:408`). Fail: the tester says the work already moved to the colleague, or offers it to Никол again.
 
-**COVERAGE GAP:** O23H shows the receiver as a fixed row «Получател · Никол»; no frame lets the sender choose a different colleague (key defect K-4). The second half of the goal («to someone else») cannot be completed on these screens, so T13a is reported as a gap, never as a pass.
+**Required states:** sender sees the refusal, receiver choice (Никол excluded), offer recorded for a second receiver, and (design only) the command states of the offer: sending D `614:61208` · M `614:61390`, changed meanwhile `614:61503` · `614:61665`, connection lost `614:61758` · `614:61925`, unknown outcome `614:62023` · `614:62197`. Closed in run 3 (was a COVERAGE GAP, key defect K-4). **Remaining note:** the primary reads «Предложете на Петър К.» only; the labels for another chosen receiver are not drawn, so a tester who names Ваня Т. or Стоян В. is reported as a note, not a fail.
 
 ### W03-T13b · Take back an offer before the colleague answers
 
@@ -247,13 +250,15 @@ Server truth (`design/contracts/w03-p12.md`, section 1): the receiver accepts wi
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O23HP` | tap «Оттеглете предложението» | `606:48750` · `606:48754` | `O23HPX / Оттеглихте предложението` · D design `606:47709` · M `606:47898` (prototype D `606:50534` · M `606:50711`) |
+| 1 | `O23HP` | tap «Оттеглете предложението» | `606:48750` · `606:48754` | `O23HPC / Оттеглете предложението` · D design `614:56770` · M `614:56949` (prototype D `614:67197` · M `614:69579`) |
+| 2 | `O23HPC` | enter «Причина *» (shown filled: «Плановете ми се промениха: оставам на работа следващата седмица.»; entry optional, not wired) | `I614:56852;6:83` · `I614:56963;6:83` | same frame |
+| 3 | `O23HPC` | tap «Оттеглете предложението» | `614:67282` · `614:69596` | `O23HPX / Оттеглихте предложението` · D design `606:47709` · M `606:47898` (prototype D `606:50534` · M `606:50711`) |
 
-**Expected actions:** 1. Median pass limit: 2.
+**Expected actions:** 2 when the shown reason is accepted; 3 with an own reason. Median pass limit: 3.
 
-**Success criterion:** the tester ends on `O23HPX` and says the offer is withdrawn, the work stays with Мария Д., Никол sees «Предложението е оттеглено» and not a refusal, and the work can be offered to someone else later. Evidence: «Оттеглихте предложението» (D `606:47788` · M `606:47909`), «Работата остава при вас. Можете да я предложите на друг колега, когато сте готови.» (D `606:47847` · M `606:47967`), «Оттеглено от вас» (D `I606:47848;6:179`), «„Предложението е оттеглено“. Не се записва като отказ.» (D `606:47860` · M `606:47980`). The receiver's view is `O23HRX / Предложението е оттеглено` (D design `606:47067` · M `606:47254`; prototype D `606:49960` · M `606:50136`), reached with «Вижте какво вижда Никол» (D `606:50652` · M `606:50761`), «Оттеглено от Мария Д.» (D `I606:47206;6:179`), «Мария Д. оттегли предложението. Това не е ваш отказ и не се записва като такъв.» (D `606:47218` · M `606:47336`). Fail: the tester says Nikol declined or accepted, taps «Вижте приетото предаване» and reports an accepted handover, or opens the decline form O23HRD.
+**Success criterion:** the tester ends on `O23HPX` and says the offer is withdrawn with the reason, the work stays with Мария Д., Никол sees «Предложението е оттеглено» and not a refusal, and the work can be offered to someone else later. Evidence: «Оттеглихте предложението» (D `606:47781` · M `606:47909`), «Работата остава при вас. Можете да я предложите на друг колега, когато сте готови.» (`606:47847` · `606:47967`), «Оттеглено от вас» (D `I606:47848;6:179`), «Вашата причина» (`614:56689` · `614:56700`), «Какво вижда Никол» (`606:47859` · `606:47979`), «Записано» (`606:47882` · `606:48002`). Before the tap, on `O23HPC`: «Работата остава при вас. Никол ще види „Предложението е оттеглено“ и причината.» (D `I614:56853;6:401` · M `I614:56964;6:401`). The receiver's view is `O23HRX / Предложението е оттеглено` (D design `606:47067` · M `606:47254`; prototype D `606:49960` · M `606:50136`), reached with «Вижте какво вижда Никол» (D `606:50652` · M `606:50761`), with «Причина от Мария Д.» (`614:56733` · `614:56744`) and «Не е нужно действие. Мария Д. оттегли предложението, преди да отговорите.» Fail: the tester says Nikol declined or accepted, says the withdrawal is a refusal («you declined»), opens the decline form O23HRD, or reports an accepted handover.
 
-**Required states:** pending with a withdraw control, withdrawn (sender view), withdrawn (receiver view). Present. Not drawn: withdraw after the receiver already answered, connection lost.
+**Required states:** pending with a withdraw control, withdraw with a required reason (run 3), withdrawn (sender view), withdrawn (receiver view), and (design only) the command states of the cancel: sending D `614:62302` · M `614:62498`, changed meanwhile (Никол accepted at 18:04) `614:62625` · `614:62809`, connection lost `614:62924` · `614:63109`, unknown outcome `614:63225` · `614:63421`. **Not drawn:** a withdraw with an empty reason.
 
 ## Saved-property receipt tasks (new in Phase C1a)
 
@@ -267,16 +272,16 @@ One run per data variant and per viewport. Goal and role are the same for every 
 
 | Variant | Start frame (design D · M) | Prototype (D · M) | What the screen says | Control (D proto · M proto) → frame | Right answer |
 |---|---|---|---|---|---|
-| a · public now | `P12 · Committed` `602:18463` · `602:18519` | `P12COMMITTED` `602:19667` · `602:20499` | «Апартамент в центъра на Сандански», «№ 202», button «Вижте имота» | `613:55969` · `613:55981` → `P05` (D `63:26089` · M `66:55737`) | property №202 named; the listing opens (P05) |
-| b · not public now | `P12INACTIVE / Обявата вече не е активна` `613:55523` · `613:55604` | `613:56087` · `613:56157` | name, «№ 202», plain line «Тази обява вече не е активна» (D `613:55596` · M `613:55668`), «Вижте подобни имоти» as the only control about this listing | `613:56114` · `613:56181` → `P22` (D `63:28176` · M `66:57861`) | property №202 named; the listing can **not** be opened; similar properties are offered |
-| c · availability unknown | `P12UNKNOWN / Наличността на обявата не е известна` `613:55676` · `613:55756` | `613:56228` · `613:56297` | name, «№ 202», no availability line, button «Потърсете имот № 202» (D `I613:55749;6:9` · M `I613:55820;6:9`) | `613:56254` · `613:56320` → `P02` (D `63:25688` · M `66:55174`) | property №202 named; the page does not say whether the listing is open; the way on is a search by the number |
+| a · public now | `P12 · Committed` `602:18463` · `602:18519` | `P12COMMITTED` `602:19667` · `602:20499` | «Апартамент в центъра на Сандански», «№ 202», button «Вижте имота» | `613:55969` · `613:55981` → `P05` (D `63:26089` · M `66:55737`); since run 3 the saved title (D `613:55252` · M `613:55264`, proto `613:55967` · `613:55979`) is a link to the same P05 | property №202 named; the listing opens (P05) |
+| b · not public now | `P12INACTIVE / Обявата вече не е активна` `613:55523` · `613:55604` | `613:56087` · `613:56157` | run 3: an archived listing that is on no live public frame: title «Тристаен апартамент в центъра на гр.Сандански» (D `613:55594` · M `613:55666`, plain, no link), «№ 242» (D `613:55595` · M `613:55667`), Warning alert «Тази обява вече не е активна и не може да се отвори.» (D `I614:56620;6:408` · M `I614:56626;6:408`; proto `614:56644` · `614:56661`), «Вижте подобни имоти» (D `I613:55597;6:9` · M `I613:55669;6:9`); the primary «Разгледайте още имоти» (D `I613:55557;6:3`, proto `613:56133` → P02) | `613:56114` · `613:56181` → `P22` (D `63:28176` · M `66:57861`) | property №242 named (run 2 used №202; the fixture was changed so that no live page shows it); the listing can **not** be opened; similar properties are offered |
+| c · availability unknown | `P12UNKNOWN / Наличността на обявата не е известна` `613:55676` · `613:55756` | `613:56228` · `613:56297` | name, «№ 202», run 3: muted line «Сега не можем да проверим дали обявата още е публикувана.» (D `614:56632` · M `614:56633`; proto `614:56650` · `614:56667`), button «Потърсете имот № 202» (D `I613:55749;6:9` · M `I613:55820;6:9`) | `613:56254` · `613:56320` → `P02` (D `63:25688` · M `66:55174`) | property №202 named; the page does not say whether the listing is open; the way on is a search by the number |
 | d · no saved name | `P12NONAME / Запитване без записано име на имота` `613:55372` · `613:55452` | `606:54293` · `606:54343` | «Имот № 202» (D `613:55443` · M `613:55514`), «Името на имота не е записано в това запитване.» (D `613:55444` · M `613:55515`), button «Вижте имота» | `613:55993` · `613:56005` → `P05` | the question was about property №202, the name was not saved; the listing opens (P05) |
 
 **Expected actions:** 1 for each variant (the tap); b may stop at 0 or 1. Median pass limit: 2.
 
-**Success criterion:** the tester names the property (the number, and the name where one is saved) and states the listing status the variant shows, without claiming more. a and d: the listing is opened through «Вижте имота». b: says the listing is no longer active and cannot be opened; any claim that it was opened fails (the property name is not a control; the batch pages P05 and P02 show №202 as live, key defect K-6, so the claim cannot be taken from them). c: says the page does not tell whether it is still open and takes the search by number; a tester who really opens the listing through the search page (P02 → P05) has the answer by experiment and passes, a flat «it is open» or «it is closed» without that fails. Fail on any variant: tapping the property name as if it were a link and reporting a listing that opened.
+**Success criterion:** the tester names the property (the number, and the name where one is saved) and states the listing status the variant shows, without claiming more. a and d: the listing is opened through «Вижте имота». b: says the listing (№242) is no longer active and cannot be opened; any claim that it was opened fails (the property name is a control only where a listing exists, variant a and the №202 row of P12MULTI; since run 3 no live batch page shows №242, closing key defect K-6). c: says the page does not tell whether it is still open and takes the search by number; a tester who really opens the listing through the search page (P02 → P05) has the answer by experiment and passes, a flat «it is open» or «it is closed» without that fails. Fail on any variant: tapping the property name as if it were a link and reporting a listing that opened.
 
-**Required states:** a, b, c, d. Present (Desktop and Mobile). Hebrew: only a, in `P12 · Saved name HE RTL` (T6); b, c, d in Hebrew are **COVERAGE GAPs**.
+**Required states:** a, b, c, d. Present (Desktop and Mobile). Hebrew: a in `P12 · Saved name HE RTL` (T6) and, since run 3, b `614:71390`, c `614:71470` and d `614:71539` (Mobile; no Hebrew G1 run for b to d, frame evidence only).
 
 ### W03-T15 · Several properties in one question
 
@@ -290,9 +295,89 @@ One run per data variant and per viewport. Goal and role are the same for every 
 
 **Expected actions:** 1 (reading the three rows is not an action). Median pass limit: 2.
 
-**Success criterion:** the tester lists the three properties and the status of each: №202 «Апартамент в центъра на Сандански» (D `613:55324` · `613:55325` · M `613:55351` · `613:55352`) can be opened with «Вижте имота» (D `I613:55326;6:9` · M `I613:55353;6:9`); №200 «Тристаен апартамент в центъра на Сандански» (D `613:55331` · `613:55332` · M `613:55358` · `613:55359`) is no longer active, «Тази обява вече не е активна.» (D `613:55333` · M `613:55360`), with «Вижте подобни имоти» (D `I613:55334;6:9` → P22, prototype `613:56049` · `613:56076`); №912 (D `613:55339` · M `613:55366`) has no saved name, «Името на имота не е записано в това запитване.» (D `613:55340` · M `613:55367`), with «Потърсете имот № 912» (D `I613:55341;6:9` → P02, prototype `613:56056` · `613:56083`). Heading «Имотите в запитването · 3» (D `613:55319` · M `613:55346`), caption «Имената са записани при изпращането на 5 октомври 2026, 17:12…» (D `613:55344` · M `613:55371`), next-step line «Запазете номера за проверка. Брокер ще ви пише за трите имота.» (D `606:54960` · M `606:54961`). Fail: the tester merges the rows, omits a property, or says №200 or №912 can be opened.
+**Success criterion:** the tester lists the three properties and the status of each: №202 «Апартамент в центъра на Сандански» (D `613:55324` · `613:55325` · M `613:55351` · `613:55352`) can be opened with «Вижте имота» (D `I613:55326;6:9` · M `I613:55353;6:9`); №200 «Тристаен апартамент в центъра на Сандански» (D `613:55331` · `613:55332` · M `613:55358` · `613:55359`) is no longer active, Warning alert «Тази обява вече не е активна и не може да се отвори.» (run 3: D `I614:56606;6:408` · M `I614:56613;6:408`), with «Вижте подобни имоти» (D `I613:55334;6:9` → P22, prototype `613:56049` · `613:56076`); №912 (D `613:55339` · M `613:55366`) has no saved name, «Името на имота не е записано в това запитване.» (D `613:55340` · M `613:55367`) and, since run 3, the muted line «Сега не можем да проверим дали обявата още е публикувана.» (D `614:56612` · M `614:56619`), with «Потърсете имот № 912» (D `I613:55341;6:9` → P02, prototype `613:56056` · `613:56083`). Heading «Имотите в запитването · 3» (D `613:55319` · M `613:55346`), caption «Имената са записани при изпращането на 5 октомври 2026, 17:12…» (D `613:55344` · M `613:55371`), next-step line «Запазете номера за проверка. Брокер ще ви пише за трите имота.» (D `606:54960` · M `606:54961`). Fail: the tester merges the rows, omits a property, or says №200 or №912 can be opened.
 
-**Required states:** mixed list (public, not public, no saved name and unknown). Present. Reaction note: the primary «Към същото сравнение» (D `606:54515` · M `606:54553`, instance `I606:54055;6:3`) has only an ON_HOVER reaction and no ON_CLICK to P07 (D `63:26243` · M `66:55880`), contrary to the contract (key defect K-1).
+**Required states:** mixed list (public, not public, no saved name and unknown). Present. Reaction note: the primary «Към същото сравнение» (D `606:54515` · M `606:54553`, instance `I606:54055;6:3`) now has ON_CLICK → P07 (D `63:26243` · M `66:55880`) (key defect K-1 closed in the public fix round). The №202 title is a link to P05 (proto `613:56039` · `613:56066`); the №200 and №912 titles are plain.
+
+## Run 3 changes (W03 fix round)
+
+New or changed frames since «After C1a W03+P12»; node ids Desktop · Mobile, design frames unless a prototype copy is named. Full lists: `design/acceptance/w03-fix-public-log.md`, `design/acceptance/w03-fix-staff-log.md`.
+
+| Frame | Design D · M | Proto D · M | Used by |
+|---|---|---|---|
+| O03ACCEPTED · Запитването е при вас | `614:58096` · `614:58321` | `614:68002` · `614:70108` | T7 end |
+| O23HRE · receiver form, nothing entered | `614:57627` · `614:57896` | `614:67733` · `614:69908` | T11, T12 start |
+| O23HRSEND · accept sending | `614:63548` · `614:63831` | `614:68481` · `614:70449` | T11 (automatic) |
+| O23HPC · cancel with reason | `614:56770` · `614:56949` | `614:67197` · `614:69579` | T13b |
+| O23HC · choose another receiver | `614:57059` · `614:57247` | `614:67376` · `614:69689` | T13a |
+| O23HCP · offered to the second receiver | `614:57366` · `614:57531` | `614:67566` · `614:69810` | T13a end |
+| Command states, 5 families × 4 (sending, changed meanwhile, connection lost, unknown) | contract section 1 and 2 (`614:60438` … `614:66585`) | O23HR accept only (`614:68481` … `614:71056`) | G3 items 3, 6, 7 |
+| XBUTLERPANEL · what Butler will do (staff) | `614:58477` · `614:58731` | `614:68227` · `614:70264` | T17 |
+| PBUTLER · first question | `614:58920` · `614:58987` | `614:59777` · `614:59808` | T16 |
+| PBUTLERANSWER · answer with quoted facts | `614:59055` · `614:59128` | `614:59839` · `614:59882` | T16a end |
+| PBUTLERNOFACT · no data, hand-off | `614:59201` · `614:59246` | `614:59925` · `614:59961` | T16b |
+| PBUTLERERROR · blocked | `614:59291` · `614:59333` | `614:59997` · `614:60030` | G3 items 1, 6 |
+| PBUTLEROFFLINE · no connection | `614:59375` · `614:59422` | `614:60063` · `614:60096` | G3 items 1, 6 |
+| P05 entry «Попитайте Butler» | `I614:59749;6:17` · `I614:59756;6:17` | `614:59763` · `614:59770` | T16 start |
+| Hebrew Mobile P11 default, invalid, sending, rejected, offline | `614:66712`, `614:66799`, `614:66896`, `614:67005`, `614:67102` | `614:72025` … `614:72243` | T6, G3 item 8 |
+| Hebrew Mobile P12U, P12UCHECK, not public now, availability unknown, no saved name, Butler answer | `614:71270`, `614:71325`, `614:71390`, `614:71470`, `614:71539`, `614:71849` | `614:72299` … `614:72545` | G3 item 8 |
+| Focus-order annotations (outside the frames) | 105 on pages 03, 05, 06, 08, 09; shortcut note `614:58916` | — | G3 item 9 |
+
+Butler entries: all 32 Bulgarian public entries and the Hebrew ones lead to the panel (`PBUTLER`, `PBUTLERANSWERHE`); the staff rail item «Butler» leads to `XBUTLERPANEL` on 112 Desktop prototype frames; on Mobile the panel is wired from 3 frames only, and the in-page buttons «Подгответе чернова с Butler» (O02, O03; D `I18:901;6:17`, M `I16:565;6:17`) lead to the draft screen O32 (D `18:1610` · M `18:3070`), not to the panel.
+
+### W03-T16a · Ask the website assistant about apartment №202 (answerable question)
+
+**Goal (testers):** You are looking at apartment №202 in Sandanski on an estate agency's website. You want to know how big it is and what it costs, and you would like to ask the website's assistant instead of calling. Ask it, and tell us exactly what it answered.
+
+**Start frame:** `P05 / Обява №202` — Desktop `11:1031` · Mobile `11:8334` (prototype D `63:26089` · M `66:55737`)
+
+| # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
+|---|---|---|---|---|
+| 1 | `P05` | tap «Попитайте Butler» | `614:59763` · `614:59770` | `PBUTLER` D `614:58920` · M `614:58987` (proto `614:59777` · `614:59808`) |
+| 2 | `PBUTLER` | tap a suggested question («Каква е площта?», `614:59800`) or enter a question in «Напишете въпрос за имот №202» and tap «Изпратете въпроса» (`614:59804` · `614:59835`) | see left | `PBUTLERANSWER` D `614:59055` · M `614:59128` (proto `614:59839` · `614:59882`) |
+
+**Expected actions:** 2 with a suggested question; 3 with a typed one. Median pass limit: 3.
+
+**Success criterion:** the tester quotes the answer exactly: «Цена: 115 000 €», «Обща площ: 76 m²», «Застроена площ: 68,5 m²», «Спалня: 1», «Местоположение: Сандански · център» (D `614:59095` … `614:59099` · M `614:59168` … `614:59172`), and says that availability and a viewing are confirmed by a broker (D `614:59114` · M `614:59187`) and that the answer came from the approved listing №202 (source row, `Обява №202 · Апартамент в центъра на Сандански`). Verdict label «Изпълнено автоматично» (D `I614:59090;6:191`). Before the question: limit line «Butler отговаря само с данни от одобрената обява №202 и ги цитира точно. Не резервира оглед и не потвърждава наличност.» (D `614:58935` · M `614:59002`) and «Какво ще направи Butler» (D `614:58957`). Fail: any fact that differs from the listing, or a claim that Butler confirmed availability, booked a viewing or sent anything to a broker.
+
+**Required states:** first question, answer with quoted facts, blocked (`PBUTLERERROR`, «Блокирано», the question kept, «Опитайте отново»), no connection (`PBUTLEROFFLINE`, +359879696870). Present. **Not drawn:** Butler working with a Stop (G3 item 3).
+
+### W03-T16b · Ask the assistant something the listing does not say, and reach a broker
+
+**Goal (testers):** You are looking at apartment №202 in Sandanski on an estate agency's website. You want to know whether there is an elevator to its floor. Ask the website's assistant. If it cannot tell you, make sure your question reaches a person at the agency.
+
+**Start frame:** `P05` as in T16a.
+
+| # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
+|---|---|---|---|---|
+| 1 | `P05` | tap «Попитайте Butler» | `614:59763` · `614:59770` | `PBUTLER` |
+| 2 | `PBUTLER` | enter «Има ли асансьор до етажа?» in «Напишете въпрос за имот №202» | field `I614:58975;6:275` · `I614:59042;6:275` (not wired) | same frame |
+| 3 | `PBUTLER` | tap «Изпратете въпроса» | `614:59804` · `614:59835` | logical target `PBUTLERNOFACT` D `614:59201` · M `614:59246` (proto `614:59925` · `614:59961`); wired: `PBUTLERANSWER`, whose «Изпратете въпроса» (`614:59878` · `614:59921`) leads to `PBUTLERNOFACT` |
+| 4 | `PBUTLERNOFACT` | tap «Попълнете запитването с въпроса ми» | `614:59957` · `614:59993` | `P11 · Filled` D `597:2224` · M `598:18057` (proto `602:19244` · `602:20111`) |
+| 5 | `P11 · Filled` | tap «Изпратете запитването» | `602:19273` · `602:20146` | `P11 · Sending` → `P12 · Committed` D `602:18463` · M `602:18519` |
+
+**Expected actions:** 5 (the typed question counts as one entry). Median pass limit: 6. The manual path «Ще го направя аз» (D `I614:58938;6:9` → P11) is an equal alternative.
+
+**Success criterion:** the tester ends on `P12 · Committed` (or on the filled form after typing the question themselves), says that Butler did not know, citing «Не знам. В одобрената обява №202 няма данни за асансьор…» (D `614:59239` · M `614:59284`), and that the visitor sends the first message to the broker: «Първото съобщение до брокер изпращате вие.» (D `614:59238` · M `614:59283`), «Какво ще направи Butler»: «Ще попълни запитване за имот №202 с вашия въпрос… Без вас нищо не се изпраща.» (`614:59241` · `614:59286`), verdict «Чака Вашето одобрение» (D `I614:59236;6:185`). Fail: the question stays in the Butler panel; the tester says Butler sent it, or invents an elevator answer.
+
+**Required states:** no data with hand-off (present); first contact with a new person stays with a human (the panel says so).
+
+### W03-T17 · Staff: open Butler on an inquiry and see what it would do before it acts
+
+**Goal (testers):** You are a broker at the agency and you have opened a new question from a client. You would like the app's built-in assistant to help with the reply, but before you let it do anything you want to know exactly what it would do. Find that out. Then say whether you can do the reply yourself instead, and how.
+
+**Start frame:** `O03 / Разговор с Алекс` — Desktop `18:732` · Mobile `16:463` (prototype D `63:12514` · M `66:45509`)
+
+| # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
+|---|---|---|---|---|
+| 1 | `O03` | tap the rail item «Butler» (Mobile: none; the panel is reachable from @INDEX_STAFF only) | D `63:12565` | `XBUTLERPANEL` D design `614:58477` (proto `614:68227`) · M design `614:58731` (proto `614:70264`) |
+| 2 | `XBUTLERPANEL` | tap «Ще го направя аз» | D `614:68476` · M `614:70444` (BACK) | back to `O03` |
+
+**Expected actions:** 2 on Desktop. Median pass limit: 3. **Mobile: COVERAGE GAP by design** (no wired Butler entry that opens the preview from an inquiry screen; the in-page «Подгответе чернова с Butler» leads to the draft screen O32).
+
+**Success criterion:** the tester opens Butler, reads «Какво ще направи Butler, преди да започне»: «1. Прочита запитването на Алекс и одобрените данни за обява №202.», «2. Пише чернова на отговора на български.», «3. Не изпраща нищо. Вие преглеждате черновата и я изпращате.» (D `614:58714` … `614:58716` · M `614:58899` … `614:58901`), sees the verdict «Чака Вашето одобрение» (D `I614:58717;6:185`) and the limit «Butler не изпраща, не публикува и не променя цени или условия. Всяка стъпка оставя запис.» (D `614:58730`), and says that the reply can be done by hand with «Ще го направя аз» (D `I614:58728;6:6`), which returns to the same screen. Fail: the tester opens the draft screen O32 and calls it the preview, accepts the inquiry first, or says Butler sends the reply.
+
+**Required states:** preview before acting (present), manual path (present). **Not drawn:** Butler working with a Stop, an error or offline state of the staff panel. Shortcut annotation: «⌘ J (Mac) · Ctrl + J (Windows, Linux)» (`614:58916`).
 
 ## Coverage — step × viewport × state → node id
 
@@ -300,21 +385,21 @@ Design frames. «—» means not required for that viewport; **missing** means r
 
 | Step | State | Desktop 1440 | Mobile 390 | Hebrew RTL 390 |
 |---|---|---|---|---|
-| V1 Review intent, listing, contact route and language (P11) | default | `11:1469` | `11:8704` | **missing** |
+| V1 Review intent, listing, contact route and language (P11) | default | `11:1469` | `11:8704` | `614:66712` |
 | | filled | `597:2224` | `598:18057` | `602:18566` |
-| | validation error | `598:17700` | `602:18134` | **missing** |
-| V2 Send once, keep the reference (P11) | submitting | `598:17787` | `602:18214` | **missing** |
-| | offline / retry | `598:17973` | `602:18386` | **missing** |
+| | validation error | `598:17700` | `602:18134` | `614:66799` |
+| V2 Send once, keep the reference (P11) | submitting | `598:17787` | `602:18214` | `614:66896` |
+| | offline / retry | `598:17973` | `602:18386` | `614:67102` |
 | V3 Result: committed (P12) | committed receipt, saved property public now (a) | `602:18463` | `602:18519` | `613:55827` (superseded `602:18638`) |
-| | no saved name (c) | `613:55372` | `613:55452` | **missing** |
-| | not public now (d) | `613:55523` | `613:55604` | **missing** |
-| | availability unknown (e) | `613:55676` | `613:55756` | **missing** |
+| | no saved name (c) | `613:55372` | `613:55452` | `614:71539` |
+| | not public now (d) | `613:55523` | `613:55604` | `614:71390` |
+| | availability unknown (e) | `613:55676` | `613:55756` | `614:71470` |
 | | several properties, mixed (b) | `606:54028` | `606:54113` | **missing** |
 | | viewing request receipt | `606:53901` | `606:53969` | **missing** |
 | | generic receipt (no listing) | `11:1545` | `11:8773` | — |
-| V4 Result: unknown (P12) | unknown outcome | `22:1666` | `24:2203` | **missing** |
-| | check the same request | `66:34211` | `66:34251` | **missing** |
-| V5 Result: rejected (P11) | rejected, values kept | `598:17886` | `602:18306` | **missing** |
+| V4 Result: unknown (P12) | unknown outcome | `22:1666` | `24:2203` | `614:71270` |
+| | check the same request | `66:34211` | `66:34251` | `614:71325` |
+| V5 Result: rejected (P11) | rejected, values kept | `598:17886` | `602:18306` | `614:67005` |
 | S1 Accepted inquiry in the owned queue (O01 / O02) | Today | `10:203` | `14:4343` | — |
 | | inbox | `11:4257` | `18:2905` | — |
 | | new in queue, no owner | `602:18685` | `602:18828` | — |
@@ -339,7 +424,9 @@ Design frames. «—» means not required for that viewport; **missing** means r
 | | receiver declines, form (O23HRD) | `606:46469` | `606:46634` | — |
 | | receiver declines, recorded (O23HRDR) | `606:46744` | `606:46933` | — |
 | | sender withdrew, receiver view (O23HRX) | `606:47067` | `606:47254` | — |
-| | receiver «accept with an empty required time» | **missing** | **missing** | — |
+| | receiver form, nothing entered (O23HRE) | `614:57627` | `614:57896` | — |
+| | receiver accept sending / changed meanwhile / connection lost / unknown (O23HR) | `614:63548` · `614:64045` · `614:64506` · `614:64969` | `614:63831` · `614:64310` · `614:64772` · `614:65252` | — |
+| | claim receipt (O03ACCEPTED) | `614:58096` | `614:58321` | — |
 | S4 Typed deal, link existing or resolve with reason (O03 / O04) | link | `20:1055` | `25:2228` | — |
 | | link recorded | `20:1175` | `25:2279` | — |
 | | create after qualifying | `21:2399` | `28:2817` | — |
@@ -357,8 +444,16 @@ Design frames. «—» means not required for that viewport; **missing** means r
 | | handover accepted | `21:1108` | `25:2942` | — |
 | | sender sees the refusal (O23HPD) | `606:47386` | `606:47575` | — |
 | | sender withdrew (O23HPX) | `606:47709` | `606:47898` | — |
-| | choose a different receiver | **missing** | **missing** | — |
+| | sender cancel with reason (O23HPC) | `614:56770` | `614:56949` | — |
+| | choose a different receiver (O23HC) | `614:57059` | `614:57247` | — |
+| | offered to the second receiver (O23HCP) | `614:57366` | `614:57531` | — |
 | | revoke staff access | `327:15031` | `327:15174` | — |
+| V6 Butler, visitor (PBUTLER) | first question | `614:58920` | `614:58987` | — |
+| | answer with quoted facts | `614:59055` | `614:59128` | `614:71849` |
+| | no data, hand-off to a broker | `614:59201` | `614:59246` | **missing** |
+| | blocked | `614:59291` | `614:59333` | **missing** |
+| | no connection | `614:59375` | `614:59422` | **missing** |
+| S7 Butler, staff (XBUTLERPANEL) | what Butler will do, manual path | `614:58477` | `614:58731` | — |
 
 Destination frames used by the receipt tasks (design D · M): P05 `11:1031` · `11:8334`, P02 `11:780` · `11:8107`, P22 `11:2217` · `12:734`, P20 `13:857` · `14:4151`, P07 `29:531` · `29:1085`.
 
@@ -366,7 +461,7 @@ Prototype copies — page 12 (Desktop): P11FILLED `602:19244`, P11INVALID `602:1
 
 ## Prototype walk — expected paths through the reactions on pages 12 / 13
 
-Re-walked after Phase C1a: for every task and viewport the start frame was opened, the control was found by its visible text among the visible ON_CLICK reaction-bearing nodes of that frame, and the destination was followed (including the 1.5 s AFTER_TIMEOUT of `P11SENDING`). Every tapped label in the key was compared with the current text of its control: 0 mismatches (the labels «Свържете или създайте сделка» and «Към сделката» replace the earlier «…случай» labels, same control ids). **All paths below reach the expected end frame.** The entry fields of O23HR and O23HRD have no reaction (they are shown filled), and the primaries have an additional ON_HOVER state swap, which is not navigation.
+Re-walked after Phase C1a: for every task and viewport the start frame was opened, the control was found by its visible text among the visible ON_CLICK reaction-bearing nodes of that frame, and the destination was followed (including the 1.5 s AFTER_TIMEOUT of `P11SENDING`). Every tapped label in the key was compared with the current text of its control: 0 mismatches (the labels «Свържете или създайте сделка» and «Към сделката» replace the earlier «…случай» labels, same control ids). Run 3 re-walked T5 to T7 and T10 to T17 after the fix round (the reactions of all 432 Desktop and 446 Mobile prototype frames were re-read). **All paths below reach the expected end frame**, except the Mobile staff Butler route of T17 (no wired entry) and the typed no-data question of T16b (see its row). The entry fields of O23HR and O23HRD have no reaction (they are shown filled), and the primaries have an additional ON_HOVER state swap, which is not navigation.
 
 | Task | Walk (control node D · M) | End frame D · M | Result |
 |---|---|---|---|
@@ -375,20 +470,23 @@ Re-walked after Phase C1a: for every task and viewport the start frame was opene
 | T3 | P11REJECTED entry in the email field, «Изпратете поправеното запитване» `602:19526` · `602:20378` → P11SENDING → P12COMMITTED | `602:19667` · `602:20499` | pass · pass |
 | T4 | P11INVALID entry in the contact field, «Изпратете запитването» `602:19353` · `602:20219` → P11SENDING → P12COMMITTED | `602:19667` · `602:20499` | pass · pass |
 | T5 | P12U «Проверете същата заявка» `66:36418` · `66:56358` → P12UCHECK | `66:36421` · `66:56361` | pass · pass |
-| T6 | Mobile only: P11FILLEDHE «שליחת הפנייה» `602:20926` → P12NAMEDHE (direct; no Hebrew sending frame) | — · `613:56367` | — · pass |
-| T7 | O02NEW «Поемете запитването» `602:19843` · `602:20578` → O03ACCEPT; field «Кога ще прегледате отново? *» `602:19958` · `602:20624` → O03ACCEPTREADY; «Поемете запитването» `602:20083` · `602:20681` → O03L. The accept button of O03ACCEPT is disabled and has no reaction | `63:12845` · `66:45642` | pass · pass |
+| T6 | Mobile only: P11FILLEDHE «שליחת הפנייה» `602:20926` → P11SENDINGHE `614:72131` → after 1.5 s → P12NAMEDHE | — · `613:56367` | — · pass |
+| T7 | O02NEW «Поемете запитването» `602:19843` · `602:20578` → O03ACCEPT; field «Кога ще прегледате отново? *» `602:19958` · `602:20624` → O03ACCEPTREADY; «Поемете запитването» `602:20083` · `602:20681` → O03ACCEPTED (then «Свържете със сделка» `614:68130` · `614:70168` → O03L). The accept button of O03ACCEPT is disabled and has no reaction | `614:68002` · `614:70108` | pass · pass |
 | T8 | O03 «Проверете за дубликат» `63:12621` · `66:45550` → O27; «Отложете за допълнителна проверка» `63:23481` · `66:53473` → O27PENDING. Alternatives: «Запазете като отделни контакти» `63:23482` · `66:53474` → O27SEPARATE → «Към запитването на Алекс» `606:44529` · `606:44583` → O03; «Отказ» `63:23483` · `66:53475` → O03 | `63:23486` · `66:53478` (O27SEPARATE `606:44481` · `606:44535`) | pass · pass |
 | T9 | O03 «Свържете или създайте сделка» `63:12633` · `66:45564` → O03L; «Запишете свързването» `63:12940` · `66:45671` → O03LR (then «Към сделката» `63:13044` · `66:45707` → O05) | `63:12943` · `66:45674` | pass · pass |
-| T10 | O23 «Предайте отворената работа» `63:21010` · `66:51774` → O23H; «Предложете предаване» `63:21298` · `66:51928` → O23HP (then «Вижте приетото предаване» `63:21746` · `66:52074` → O23HD) | `63:21610` · `66:52004` | pass · pass |
-| T11 | O23HR «Приемете работата» `606:48921` · `606:49076` → O23HRA (then «Към моите задачи» `606:49266` · `606:49386` → O18) | `606:49138` · `606:49326` | pass · pass |
-| T12 | O23HR «Откажете с причина» `606:48922` · `606:49077` → O23HRD; «Изпратете отказа» `606:49533` · `606:49610` → O23HRDR (then «Вижте какво вижда Мария Д.» `606:49790` · `606:49899` → O23HPD) | `606:49672` · `606:49849` | pass · pass |
-| T13a | O23HPD «Предложете на друг колега» `606:50363` · `606:50472` → O23H | `63:21162` · `66:51858` | pass · pass (goal half-covered, see gap) |
-| T13b | O23HP «Оттеглете предложението» `606:48750` · `606:48754` → O23HPX (then «Вижте какво вижда Никол» `606:50652` · `606:50761` → O23HRX); O23HP «Вижте какво получава Никол» `606:48752` · `606:48756` → O23HR | `606:50534` · `606:50711` | pass · pass |
+| T10 | O23 «Предайте отворената работа» `63:21010` · `66:51774` → O23H; «Предложете предаване» `63:21298` · `66:51928` → O23HP (the shortcut to O23HD is gone; the primary «Към текущото заместване» `I21:1106;6:3` → O23) | `63:21610` · `66:52004` | pass · pass |
+| T11 | O23HRE field «Вашата следваща стъпка *» `614:67892` · `614:69999` → O23HR; field «Кога ще прегледате отново? *» `614:67893` · `614:70000` → O23HR; O23HR «Приемете работата» `606:48921` · `606:49076` → O23HRSEND → after 1.5 s → O23HRA (then «Към моите задачи» `606:49266` · `606:49386` → O18). Alternatives: O23HRCONFLICT «Заредете предложението отново» → O23HRX; O23HROFFLINE «Опитайте отново» → O23HRSEND; O23HRUNKNOWN «Проверете същата заявка» → O23HRA | `606:49138` · `606:49326` | pass · pass |
+| T12 | O23HRE «Откажете с причина» `614:67897` · `614:70004` → O23HRD; «Изпратете отказа» `606:49533` · `606:49610` → O23HRDR (then «Вижте какво вижда Мария Д.» `606:49790` · `606:49899` → O23HPD) | `606:49672` · `606:49849` | pass · pass |
+| T13a | O23HPD «Предложете на друг колега» `606:50363` · `606:50472` → O23HC; «Предложете на Петър К.» `614:67510` · `614:69757` → O23HCP (then «Към текущото заместване» `614:67701` · `614:69879` → O23). «Назад» → O23HPD | `614:67566` · `614:69810` | pass · pass |
+| T13b | O23HP «Оттеглете предложението» `606:48750` · `606:48754` → O23HPC; «Оттеглете предложението» `614:67282` · `614:69596` → O23HPX (then «Вижте какво вижда Никол» `606:50652` · `606:50761` → O23HRX); «Назад към предложението» → O23HP; O23HP «Вижте какво получава Никол» `606:48752` · `606:48756` → O23HRE | `606:50534` · `606:50711` | pass · pass |
 | T14a | P12COMMITTED «Вижте имота» `613:55969` · `613:55981` → P05 | `63:26089` · `66:55737` | pass · pass |
-| T14b | P12INACTIVE «Вижте подобни имоти» `613:56114` · `613:56181` → P22 | `63:28176` · `66:57861` | pass · pass |
+| T14b | P12INACTIVE «Вижте подобни имоти» `613:56114` · `613:56181` → P22; primary «Разгледайте още имоти» `613:56133` → P02 | `63:28176` · `66:57861` | pass · pass |
 | T14c | P12UNKNOWN «Потърсете имот № 202» `613:56254` · `613:56320` → P02 | `63:25688` · `66:55174` | pass · pass |
 | T14d | P12NONAME «Вижте имота» `613:55993` · `613:56005` → P05 | `63:26089` · `66:55737` | pass · pass |
-| T15 | P12MULTI «Вижте имота» `613:56041` · `613:56068` → P05; «Вижте подобни имоти» `613:56049` · `613:56076` → P22; «Потърсете имот № 912» `613:56056` · `613:56083` → P02; «Към същото сравнение» `606:54515` · `606:54553`: ON_HOVER only, **no click** | `63:26089` · `66:55737` | pass · pass |
+| T15 | P12MULTI «Вижте имота» `613:56041` · `613:56068` and the №202 title `613:56039` · `613:56066` → P05; «Вижте подобни имоти» `613:56049` · `613:56076` → P22; «Потърсете имот № 912» `613:56056` · `613:56083` → P02; «Към същото сравнение» `606:54515` · `606:54553` → P07 (ON_CLICK since run 3) | `63:26089` · `66:55737` | pass · pass |
+| T16a | P05 «Попитайте Butler» `614:59763` · `614:59770` → PBUTLER; suggested question `614:59800` · `614:59831` or «Изпратете въпроса» `614:59804` · `614:59835` → PBUTLERANSWER | `614:59839` · `614:59882` | pass · pass |
+| T16b | P05 → PBUTLER; «Изпратете въпроса» → PBUTLERANSWER (always, the prototype does not route by question); «Изпратете въпроса» `614:59878` · `614:59921` → PBUTLERNOFACT; «Попълнете запитването с въпроса ми» `614:59957` · `614:59993` → P11FILLED; «Изпратете запитването» → P11SENDING → P12COMMITTED. The judged logical path goes from the typed question straight to PBUTLERNOFACT | `602:19667` · `602:20499` | pass (one extra wired send) · pass |
+| T17 | O03 rail «Butler» `63:12565` → XBUTLERPANEL; «Ще го направя аз» `614:68476` → BACK (O03). In-page «Подгответе чернова с Butler» `63:12642` · `66:45573` → O32, not the panel. Mobile: no wired entry to the panel from O03 | `614:68227` · none | pass · **no entry** |
 
 Also checked: P05 «Изпратете запитване» `63:26138` · `66:55780` now leads to P11FILLED (it led to the generic P11 before; W01-T3 changes, see `design/zero-learning/keys/W01.md`); the Hebrew «שליחת הפנייה» leads to `613:56367`; O23HP carries four reaction-bearing buttons (the two older ones and the two new Quiet buttons); O23HRA and O23HRDR each carry «Към моите задачи» → O18 and a second control (to O23 or to O23HPD).
 
@@ -398,22 +496,22 @@ Status of the defects D-1 to D-8 of the previous key after Phase C1a, then the n
 
 | # | Defect | Node ids | Status |
 |---|---|---|---|
-| D-1 | The Butler entry «Попитайте Butler» on public screens has no prototype reaction and no answer screen exists, so «what it will do» and «Ще го направя аз» cannot be shown (the string «Ще го направя аз» appears in no W03 frame) | public Butler instances on every P11 / P12 frame, for example D `I613:55408;6:17` (P12NONAME), `I605:24892;6:17` (P12 committed); not wired | **open** |
+| D-1 | The Butler entry «Попитайте Butler» on public screens has no prototype reaction and no answer screen exists, so «what it will do» and «Ще го направя аз» cannot be shown (the string «Ще го направя аз» appears in no W03 frame) | public Butler instances on every P11 / P12 frame, for example D `I613:55408;6:17` (P12NONAME), `I605:24892;6:17` (P12 committed); not wired in run 2 | **closed for the public panel and the Desktop staff rail in run 3** (wired, preview, «Ще го направя аз»); the in-page buttons and Mobile staff remain open, see G-19 in `W03-gate-result.md` |
 | D-2 | On O27, «Запазете като отделни контакти» and «Отказ» led to the deal list with no confirmation | D `63:23482` → `606:44481`, `63:23483` → `63:12514`; M `66:53474` → `606:44535`, `66:53475` → `66:45509` | **closed** (O27SEPARATE) |
-| D-3 | After accepting (T7 step 3) the prototype lands on O03L; no «accepted» receipt frame exists | D `602:20083` → `63:12845`; M `602:20681` → `66:45642`; effect line D `602:19188` · M `602:19242` | **open**; the handover has the receipts, the claim of an inquiry does not |
+| D-3 | After accepting (T7 step 3) the prototype lands on O03L; no «accepted» receipt frame exists | D `602:20083` → `63:12845`; M `602:20681` → `66:45642`; effect line D `602:19188` · M `602:19242` | **closed** in run 3 (O03ACCEPTED) |
 | D-4 | Past dates in the scenario | O01, O03N, O05W, O05WR | **closed** (dates now 7–9 октомври; the scenario clock is 5 октомври) |
 | D-5 | Model-field labels «Цел» and «Състояние» on O05 | D `I18:1003;6:59` · `I18:1016;6:59` | **closed** («Какво иска клиентът», «Работим ли по покупката?») |
 | D-6 | No next-step line on O03L, O05W, O23HD, O23OFF | `606:44360` · `606:44361`, `606:44362` · `606:44363`, `606:44364` · `606:44365`, `606:44366` · `606:44367` | **closed** |
 | D-7 | No Butler entry on P12U and P12UCHECK | D `606:44304` · `606:44311`; M `606:44318` · `606:44325` | **closed** |
 | D-8 | GATE.md bg column lists «Случай» while audit §9 used it as the staff noun | 113 nodes | **closed** (owner pick «Сделка»; 0 nodes left, G2 scan below). `GATE.md` G2 row «Case object» already names the pick |
-| K-1 | P12MULTI primary «Към същото сравнение» has only ON_HOVER, no click to P07 | D `606:54515` · M `606:54553` (instance `I606:54055;6:3`) | open |
-| K-2 | O23HR shows both required fields filled (next step «Обадете се на Алекс…», review «13 октомври 2026, 10:00»); there is no empty state with a disabled primary like O03 · Accept; the fields have no reaction | D `I606:45905;6:61` · `I606:45909;6:61`; M `I606:46082;6:61` · `I606:46086;6:61` | open |
-| K-3 | O23HP (pending) keeps the primary «Вижте приетото предаване», which leads to the accepted state O23HD | D `I21:1104;6:3` → `63:21301`; M `I25:2938;6:3` → `66:51931` | open |
-| K-4 | After «Предложете на друг колега» (O23HPD → O23H) the form still names «Получател · Никол» as a fixed row; no frame chooses a different colleague | D `I21:881;6:61` · M `I25:2783;6:61` | open |
-| K-5 | The rail user of the receiver frames is «Никол · Брокер» while the team list says «Никол · Координатор» | D `606:45756` (O23HR), D `18:1254` (O23) | open |
-| K-6 | The listing page P05 and the search page P02 still show №202 as a live listing while P12INACTIVE says «Тази обява вече не е активна» (fixture contradiction inside one journey) | P05 D `11:1031`; P02 D `11:780` | open |
+| K-1 | P12MULTI primary «Към същото сравнение» has only ON_HOVER, no click to P07 | D `606:54515` · M `606:54553` (instance `I606:54055;6:3`) | **closed in the public fix round (ON_CLICK → P07)** |
+| K-2 | O23HR shows both required fields filled (next step «Обадете се на Алекс…», review «13 октомври 2026, 10:00»); there is no empty state with a disabled primary like O03 · Accept; the fields have no reaction | D `I606:45905;6:61` · `I606:45909;6:61`; M `I606:46082;6:61` · `I606:46086;6:61` | **closed in run 3 (O23HRE: empty fields, disabled primary, rule line)** |
+| K-3 | O23HP (pending) keeps the primary «Вижте приетото предаване», which leads to the accepted state O23HD | D `I21:1104;6:3` → `63:21301`; M `I25:2938;6:3` → `66:51931` | **closed in run 3 (shortcut hidden; the primary is «Към текущото заместване»)** |
+| K-4 | After «Предложете на друг колега» (O23HPD → O23H) the form still names «Получател · Никол» as a fixed row; no frame chooses a different colleague | D `I21:881;6:61` · M `I25:2783;6:61` | **closed in run 3 (O23HC, O23HCP)** |
+| K-5 | The rail user of the receiver frames is «Никол · Брокер» while the team list says «Никол · Координатор» | D `606:45756` (O23HR), D `18:1254` (O23) | **closed in run 3 (all receiver frames read «Никол · Координатор»)** |
+| K-6 | The listing page P05 and the search page P02 still show №202 as a live listing while P12INACTIVE says «Тази обява вече не е активна» (fixture contradiction inside one journey) | P05 D `11:1031`; P02 D `11:780` | **closed in run 3 (the receipt shows archived №242, on no live frame)** |
 
-Still missing, unchanged: Hebrew right-to-left default, invalid, sending, rejected, offline, unknown and status-check frames; the Hebrew variants of the new P12 receipts; the receiver's accept state with an empty required time; a frame to choose a different receiver; error, conflict and connection-lost states of the handover commands; a prototype branch from «Изпращаме…» to the rejected or unknown result (T3 and T5 start on those screens).
+Still missing after run 3: the Hebrew P12MULTI, the Hebrew viewing-request receipt and the Hebrew Butler states «no data», «error», «offline»; the decline and withdraw forms with an empty reason; a running state of Butler with a Stop (public and staff); an error or offline state of the staff Butler panel; a Mobile entry to the staff Butler panel; a prototype branch from «Изпращаме…» to the rejected or unknown result (T3 and T5 start on those screens). New defects found by the testers and the re-reads are G-19 to G-25 in `W03-gate-result.md`.
 
 ## G2 check — W03 visible copy after Phase C1a
 
@@ -427,7 +525,9 @@ Reviewed and not counted: «…текущия безопасен статус н
 
 Server-produced text: `design/copy/server-messages.md` section 6 (handover and inquiry receipts, bg · en · ru staff, seven locales public) was scanned for the same terms outside code spans: 0 hits; the only matches are the rule that forbids them.
 
-Locale coverage: the frames are Bulgarian (Hebrew for two public frames). English, Russian, German, Dutch and Greek wording is only in the copy deck, not in frames; those locales are not scanned at frame level.
+**Run 3 re-run** (200 frames, 4,342 visible nodes, 1,506 hidden skipped; the run-2 set plus the Butler panels, the receiver and sender frames, the 40 command-state frames and 12 Hebrew frames): **0 hits on the letter of GATE.md** (the only regex match is again «…текущия безопасен статус на обявата…», D `18:864` · M `16:526`, prose and not a field). Advisory strings: 23 of the 24 run-2 strings are gone; left are «Europe/Sofia» (17 distinct date lines, 67 nodes, kept as the named zone) and «ключовете за вход» (O23OFF, D `327:15157` · M `327:15231`). Public frames, Hebrew included: 0 hits. Result in `W03-gate-result.md`, section «Run 3 · G2».
+
+Locale coverage: the frames are Bulgarian (Hebrew for two public frames in run 2, 13 in run 3). English, Russian, German, Dutch and Greek wording is only in the copy deck, not in frames; those locales are not scanned at frame level.
 
 ## G3 checklist — W03 with frame evidence (re-run after Phase C1a)
 
@@ -454,6 +554,8 @@ Two more checks from the owner's rules (GATE intro «every screen says in one se
 | B. No past dates | **PASS** | The scenario clock reads 5 октомври 2026. Forward-looking dates: 6, 7, 8, 9, 13 октомври and «След 2 работни дни»; absence 12 to 16 октомври; the 15 октомври of the sample refusal reason. The only earlier moments are time-stamped records of things that happened (17:12 saved name, 17:40 kept separate, 18:03 to 18:07 handover receipts). |
 
 **G3 result for W03: FAIL.** Items 2, 4 and 5 and both extra checks pass; items 1, 3, 6, 7 and 8 fail (partially or fully), item 9 has no frame evidence beyond contrast and target size, item 10 is open.
+
+**Run 3 re-run of items 1, 3, 6, 7, 8, 9 (still FAIL, all improved):** item 1, the public panel (5 states, wired from all 32 Bulgarian entries) and the Desktop staff rail (`XBUTLERPANEL` on 112 prototype frames, shortcut annotated `614:58916`) pass; the in-page staff buttons lead to the draft O32 and Mobile has no entry (T17 fails 4 of 4, G-19). Item 3, the five command families have sending frames; Butler has no working state with a Stop (G-20). Item 6, conflict, offline and unknown frames exist for the five families and the public panel; the empty required reason of the decline and withdraw forms is not drawn (G-22). Item 7, T5 Desktop and T14c still fail (G-01, G-03). Item 8, 13 Hebrew frames; Hebrew P12MULTI, P12VIEW and three Butler states are missing (G-21). Item 9, 105 focus-order annotations, 4,342 text nodes at AA or better, 569 targets of at least 24 × 24 px; the proof stays with the PR preview (G-15). Check A: 85 of 90 new or changed frames carry a layer named «Next step», the other 5 carry the line in another form; check B: pass. Details: `W03-gate-result.md`, section «Run 3 · G3».
 
 ### Next-step line per screen (check A)
 
@@ -515,6 +617,15 @@ Kinds: lead sentence under the title; labelled row or field («Следваща 
 | `O23-receive-decline` | lead sentence | «Напишете защо отказвате и изпратете. Работата остава при Мария Д.» | `606:46607` · `606:46703` |
 | `O23-receive-decline-recorded` | lead sentence | «Не е нужно друго от вас. Мария Д. ще избере друг колега.» | `606:46882` · `606:47002` |
 | `O23-receive-withdrawn` | lead sentence | «Не е нужно действие. Мария Д. оттегли предложението, преди да отговорите.» | `606:47205` · `606:47323` |
+| `O23-receive-time-required` | lead sentence | «Приемете работата и запишете своята следваща стъпка и кога ще прегледате. Ако не можете, откажете с причина.» | `614:57707` · `614:57908` |
+| `O23-sender-cancel-reason` | lead sentence | «Напишете защо оттегляте и потвърдете. Работата остава при вас.» | `614:56850` · `614:56961` |
+| `O23-sender-choose-receiver` | lead sentence | «Изберете колега, който е на работа, и изпратете предложението. Работата остава при вас, докато някой приеме.» | `614:57217` · `614:57336` |
+| `O23-sender-offered-other` | lead sentence | «Изчакайте отговора на Петър К. Работата остава при вас, докато той приеме.» | `614:57527` · `614:57623` |
+| `O03-accepted` | lead sentence | «Свържете запитването със сделка или подгответе отговор. Клиентът не е уведомен.» | `614:58176` · `614:58333` |
+| `O23-receive-accept-SEND` · `-CONFLICT` · `-OFFLINE` · `-UNKNOWN` | lead sentence | «Изчакайте няколко секунди, докато запишем приемането. Не натискайте отново.» · «Заредете предложението отново, за да видите какво е сега…» · «Свържете се с интернет и опитайте отново. Стъпката и часът са запазени.» · «Не приемайте отново. Проверете същата заявка.» | `614:63628`, `614:64125`, `614:64586`, `614:65049` (Mobile `614:63843`, `614:64322`, `614:64784`, `614:65264`) |
+| `X-Butler-panel` (staff) | sentence in the panel | «Butler може само да подготви черновата. Изпращането до Алекс одобрявате вие.» | `614:58719` · `614:58904` |
+| `PBUTLER` · `-answer` · `-nofact` · `-error` · `-offline` (public) | lead sentence | «Напишете въпроса си или изберете готов въпрос.» · «Попитайте още нещо. За оглед или наличност пишете на брокер.» · «Позволете на Butler да попълни запитването или го напишете сами.» · «Опитайте отново или потърсете отговора сами с «Ще го направя аз».» · «Опитайте отново, когато връзката се върне, или се обадете на +359879696870.» | `614:58955`, `614:59076`, `614:59222`, `614:59312`, `614:59402` (Mobile `614:59022`, `614:59149`, `614:59267`, `614:59354`, `614:59449`) |
+| Hebrew P11 default · invalid · sending · rejected · offline, P12 check, not public, availability unknown, no saved name, Butler answer | lead sentence (Hebrew) | each carries its Hebrew next-step line | Mobile `614:66723`, `614:66810`, `614:66907`, `614:67016`, `614:67113`, `614:71340`, `614:71418`, `614:71498`, `614:71567`, `614:71870` |
 | `O23-sender-declined` | lead sentence | «Предложете работата на друг колега или я запазете при себе си.» | `606:47524` · `606:47644` |
 | `O23-sender-withdrawn` | lead sentence | «Работата остава при вас. Можете да я предложите на друг колега, когато сте готови.» | `606:47847` · `606:47967` |
 | `O27-duplicate-check` | lead sentence | «Не сливайте записи само заради сходно име. Първо потвърдете самоличността и засе…» | `I14:1677;6:408` · `I15:1028;6:408` |
