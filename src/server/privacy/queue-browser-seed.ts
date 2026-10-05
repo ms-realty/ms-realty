@@ -1,5 +1,6 @@
 // Synthetic queue-only browser fixture. No real privacy decisions or provider effects.
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
@@ -13,6 +14,12 @@ const connection = postgres(url, { max: 1, onnotice: () => {} }),
   db = drizzle(connection, { schema });
 try {
   const operator = await createStaff(db, { grants: [{ capability: "privacy.manage" }] });
+  // A long eligible owner name keeps the 320 px layout check deterministic: a native select's
+  // longest option once widened the whole queue page (CI run 37354411950).
+  await db
+    .update(schema.principals)
+    .set({ displayName: `Synthetic privacy owner with a long name ${"x".repeat(120)}` })
+    .where(eq(schema.principals.id, operator.id));
   await db.insert(schema.passkeys).values(
     [0, 1].map(() => ({
       principalId: operator.id,
