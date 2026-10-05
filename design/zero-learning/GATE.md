@@ -61,7 +61,7 @@ Primary surfaces (navigation, headings, body copy, buttons, field labels, alerts
 4. **Consequences before irreversible actions.** Send, accept, assign, merge, publish, revoke and resolve state their effect and their limit in the button or one line next to it, never in a footnote.
 5. **One primary action per empty state.** Every empty state offers exactly one primary next action that starts the work.
 6. **No dead ends.** Every error says what happened and what to do next in plain words, keeps everything the person entered, and asks to correct only the stated fields.
-7. **Unknown shown as unknown.** An unknown outcome is shown as «още не е потвърдено» with «провери същата заявка», never as success, failure, 0 or a guess, and never with a blind resend.
+7. **Unknown shown as unknown.** An unknown outcome is shown as unknown in plain words («още не знаем дали е получено», «още не е потвърдено») with «провери същата заявка», never as success, failure, 0 or a guess, and never with a blind resend.
 8. **Phone parity.** Send an inquiry, respond, accept or assign, and approve all work fully at 390 px, including Hebrew right-to-left.
 9. **Keyboard and WCAG 2.2 AA.** Everything is reachable by keyboard in a logical order, focus is visible (focus colour #174EA6), targets are at least 24 × 24 px, text contrast meets AA in light and dark, and right-to-left layouts mirror reading order and directional icons.
 10. **Speed without jumps.** Visible feedback on any interaction within 100 ms, a skeleton within 200 ms, and no layout shift: the control a person just pressed does not move.
