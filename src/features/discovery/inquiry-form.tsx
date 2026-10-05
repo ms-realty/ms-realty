@@ -7,12 +7,14 @@ import {
   parseSelectedListingsJson,
 } from "@/domain/inquiry-selection";
 import type { PublicLocale } from "@/i18n/config";
+import type { ListingCard } from "@/server/listings/view-models";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass, fieldClass } from "@/ui/field-class";
 import type { FormAction } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { DiscoveryCopy } from "./copy";
+import { InquiryListingSummaries } from "./inquiry-listing-summaries";
 import { OwnerInquiryFields } from "./inquiry-owner";
 import { InquiryReview } from "./inquiry-review";
 import { inquiryReviewCopy } from "./inquiry-review-copy";
@@ -32,11 +34,14 @@ export function InquiryForm({
   initialState,
   locale,
   copy,
+  initialListings = [],
 }: {
   action: FormAction<InquiryValues>;
   initialState: InquiryState;
   locale: PublicLocale;
   copy: DiscoveryCopy;
+  /** Approved cards the page read for the requested subjects; review rechecks them. */
+  initialListings?: readonly ListingCard[];
 }) {
   const contacts = useRef<Record<string, string>>({});
   const reviewCopy = inquiryReviewCopy(locale);
@@ -98,6 +103,32 @@ export function InquiryForm({
           contact = form.field("contactKind"),
           privacy = form.field("privacyNotice");
         const selected = parseSelectedListingsJson(form.values.selectedListings);
+        const subjects = form.values.selectedListings
+          ? selected &&
+            !form.values.listingReference &&
+            !form.values.observedManifestId &&
+            !form.values.comparisonReferences
+            ? selected
+            : []
+          : form.values.listingReference
+            ? [
+                {
+                  reference: form.values.listingReference,
+                  observedManifestId: form.values.observedManifestId,
+                },
+              ]
+            : [];
+        // A changed source is never shown as offered; its identity stays in the hidden fields.
+        const entryListings = (form.state as InquiryState).sourcesChanged
+          ? []
+          : subjects.flatMap((subject) => {
+              const listing = initialListings.find(
+                (item) =>
+                  item.reference === subject.reference &&
+                  item.manifestId === subject.observedManifestId,
+              );
+              return listing ? [listing] : [];
+            });
         const selection = form.field("selectedListings");
         const navigation = form.field("comparisonReferences");
         const returnReferences = parseComparisonReferences(form.values.comparisonReferences);
@@ -119,6 +150,17 @@ export function InquiryForm({
           <>
             <input type="hidden" name="inquiryStage" value="review" />
             <input type="hidden" name="contentReference" value={form.values.contentReference} />
+            {entryListings.length ? (
+              <section className="min-w-0 space-y-3" aria-label={reviewCopy.entrySources}>
+                <p className="text-dense text-text-muted">{reviewCopy.entrySources}</p>
+                <InquiryListingSummaries
+                  listings={entryListings}
+                  locale={locale}
+                  copy={copy}
+                  stage="entry"
+                />
+              </section>
+            ) : null}
             {content.error || contentReference ? (
               <section
                 id={content.id}

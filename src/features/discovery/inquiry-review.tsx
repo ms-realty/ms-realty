@@ -1,13 +1,11 @@
 import { localeEndonyms, type PublicLocale } from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
-import { ApprovedMedia } from "./approved-media";
 import type { DiscoveryCopy } from "./copy";
+import { InquiryListingSummaries } from "./inquiry-listing-summaries";
 import { OwnerInquirySummary } from "./inquiry-owner";
 import { inquiryReviewCopy } from "./inquiry-review-copy";
 import type { InquiryState, InquiryValues } from "./inquiry-state";
 import { ViewingPreferenceSummary } from "./inquiry-viewing";
-import { ListingFacts } from "./listing-card";
-import { listingHref, locality, priceText } from "./presentation";
 
 export function InquiryReview({
   review,
@@ -65,34 +63,12 @@ export function InquiryReview({
           <p className="text-dense text-text-muted">{localeEndonyms[review.content.locale]}</p>
         </section>
       ) : null}
-      {review.listings.length ? (
-        <ol className="space-y-5" aria-label={copy.properties}>
-          {review.listings.map((listing) => (
-            <li
-              key={listing.reference}
-              className="space-y-4 rounded-panel border border-divider p-4"
-              data-review-listing={listing.reference}
-            >
-              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-                <ApprovedMedia media={listing.cover} unavailable={copy.noPhoto} />
-                <div className="min-w-0 space-y-3">
-                  <p className="text-dense text-text-muted">
-                    <bdi>{listing.reference}</bdi>
-                  </p>
-                  <h3 className="font-semibold">
-                    <a className="underline" href={listingHref(listing, locale)}>
-                      {listing.title || listing.reference}
-                    </a>
-                  </h3>
-                  <p>{locality(listing)}</p>
-                  <p className="font-semibold">{priceText(listing.price, locale, copy)}</p>
-                  <ListingFacts listing={listing} locale={locale} copy={copy} />
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
-      ) : null}
+      <InquiryListingSummaries
+        listings={review.listings}
+        locale={locale}
+        copy={copy}
+        stage="review"
+      />
       {review.viewingPreferences ? (
         <ViewingPreferenceSummary input={review.viewingPreferences} locale={locale} />
       ) : null}

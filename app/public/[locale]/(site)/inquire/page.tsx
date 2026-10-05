@@ -12,6 +12,7 @@ import {
 } from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { InquiryForm } from "@/features/discovery/inquiry-form";
+import { inquiryListingSummary } from "@/features/discovery/inquiry-listing-summaries";
 import { inquiryReviewCopy } from "@/features/discovery/inquiry-review-copy";
 import { emptyInquiry, type InquiryState, inquiryStatus } from "@/features/discovery/inquiry-state";
 import { DiscoveryPage } from "@/features/discovery/page";
@@ -25,6 +26,7 @@ import {
   validReceiptSession,
 } from "@/server/inquiries/intake";
 import { getPublicListing } from "@/server/listings/detail";
+import type { ListingCard } from "@/server/listings/view-models";
 import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { Notice } from "@/ui/notice";
 import { sendInquiry } from "./actions";
@@ -132,6 +134,7 @@ export default async function InquiryPage({
     contentReference: content ? JSON.stringify(content) : "",
   };
   let selectionChanged = false;
+  const initialListings: ListingCard[] = [];
   if (
     typeof query.purpose === "string" &&
     [
@@ -157,6 +160,7 @@ export default async function InquiryPage({
         result.listing.availability.primaryAction === "view_similar"
       )
         selectionChanged = true;
+      else initialListings.push(inquiryListingSummary(result.listing));
     }
   }
   if (typeof query.reference === "string") {
@@ -179,6 +183,7 @@ export default async function InquiryPage({
       (typeof query.manifest === "string" && result.listing.manifestId !== query.manifest)
     )
       selectionChanged = true;
+    else initialListings.push(inquiryListingSummary(result.listing));
   }
   const state: InquiryState = {
     sourcesChanged: selectionChanged || query.error === "REVISION_CONFLICT",
@@ -215,6 +220,7 @@ export default async function InquiryPage({
       <InquiryForm
         action={sendInquiry.bind(null, locale)}
         initialState={state}
+        initialListings={initialListings}
         locale={locale}
         copy={copy}
       />
