@@ -132,8 +132,8 @@ describe("Candidate gateway", () => {
       ]),
       STAGING: "true" as const,
       PUBLIC_ORIGIN: "https://staging.makler-realty.com",
-      CLIENT_ORIGIN: "https://my.staging.makler-realty.com",
-      STAFF_ORIGIN: "https://app.staging.makler-realty.com",
+      CLIENT_ORIGIN: "https://staging-my.makler-realty.com",
+      STAFF_ORIGIN: "https://staging-app.makler-realty.com",
       LEGACY_TARGET_HOST: "makler-realty.com",
     };
     const request = new Request(`${env.PUBLIC_ORIGIN}/original?cursor=a%2Bb`, {

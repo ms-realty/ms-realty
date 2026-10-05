@@ -105,7 +105,6 @@ export async function inventory({ accountId, token, fetcher = fetch }) {
   );
   const apps = await read("Access applications", `/accounts/${accountId}/access/apps`, (x) => ({
     ...pick(x, ["id", "name", "domain", "type", "aud"]),
-    self_hosted_domains: x.self_hosted_domains,
     destinations: x.destinations?.map((d) => pick(d, ["type", "uri"])),
   }));
   await read("Access service tokens", `/accounts/${accountId}/access/service_tokens`, (x) =>

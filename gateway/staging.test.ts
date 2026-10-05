@@ -42,14 +42,17 @@ beforeAll(async () => {
 describe("isolated staging boundary", () => {
   it("admits only the three staging hosts, including no workers.dev or production host", () => {
     expect(isStagingHost("staging.makler-realty.com")).toBe(true);
-    expect(isStagingHost("app.staging.makler-realty.com")).toBe(true);
-    expect(isStagingHost("my.staging.makler-realty.com")).toBe(true);
+    expect(isStagingHost("staging-app.makler-realty.com")).toBe(true);
+    expect(isStagingHost("staging-my.makler-realty.com")).toBe(true);
     for (const value of [
       "makler-realty.com",
       "makler-realty.ru",
       "www.makler-realty.com",
       "ms-realty.ms-realty-bg.workers.dev",
       "staging.makler-realty.com.attacker.invalid",
+      "my.staging.makler-realty.com",
+      "app.staging.makler-realty.com",
+      "staging-db.makler-realty.com",
     ])
       expect(isStagingHost(value)).toBe(false);
   });
