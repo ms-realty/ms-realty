@@ -172,6 +172,26 @@ try {
       preferences: "",
       criteria: { ...criteria, placeIds: [nowhere] },
     });
+    const needsPlace = await insertPlace(db, {
+      level: "settlement",
+      parentId: municipality,
+      nameNative: `Непотвърдено ${tag}`,
+      nameLatin: `Unconfirmed ${tag}`,
+    });
+    const needsRef = await listing(staff.id, staff.actor, {
+      placeId: needsPlace,
+      price: { state: "known", value: eur(115_000) },
+      commercialState: "confirmation_required",
+    });
+    const needs = await deal(staff, clientName);
+    await reviseBrief(db, staff.session, {
+      id: needs.record.id,
+      operationId: randomUUID(),
+      expectedVersion: await caseVersion(needs.record.id),
+      requirements: "Synthetic requirements met only by an unconfirmed offer",
+      preferences: "",
+      criteria: { ...criteria, placeIds: [needsPlace] },
+    });
     console.log(
       JSON.stringify({
         staffToken: staff.token,
@@ -180,6 +200,8 @@ try {
         missingCaseId: missing.record.id,
         kindCaseId: kind.record.id,
         emptyCaseId: empty.record.id,
+        needsCaseId: needs.record.id,
+        needsRef,
       }),
     );
   } else {

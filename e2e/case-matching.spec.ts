@@ -35,6 +35,8 @@ type RequirementsSeed = {
   missingCaseId: string;
   kindCaseId: string;
   emptyCaseId: string;
+  needsCaseId: string;
+  needsRef: string;
 };
 
 function seed<T>(mode: "list" | "requirements" | "revise", extra: Record<string, string> = {}) {
@@ -190,6 +192,31 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(
         page.getByRole("link", { name: `Попитайте ${f.clientName} какво да промени`, exact: true }),
       ).toHaveAttribute("href", `/bg/cases/${f.emptyCaseId}#case-conversation`);
+      await noOverflow(page);
+
+      // O07NEEDSCONF: nothing fully confirmed; confirm first, starting with the open property.
+      await page.goto(at(`/bg/cases/${f.needsCaseId}/matching`));
+      await expect(page.getByText("Намерен 1 имот · показани 1", exact)).toBeVisible();
+      await expect(
+        page.getByText(
+          "Няма имот, за който всичко е потвърдено. Този имот може да отговаря, но за него липсват факти.",
+          exact,
+        ),
+      ).toBeVisible();
+      for (const line of [
+        "1. Попитайте продавача или колегата, който води обявата.",
+        "2. Запишете отговора при фактите за имота.",
+        "3. Проверете имота отново тук.",
+        `Потвърдете липсващите факти, преди да предложите имот. Започнете с ${f.needsRef}.`,
+      ])
+        await expect(page.getByText(line, exact)).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Трябва да се потвърди · 1", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: `Проверете ${f.needsRef}`, exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole("heading", { name: /Отговарят на всичко/ })).toHaveCount(0);
       await noOverflow(page);
 
       for (const [locale, heading] of [
@@ -348,6 +375,26 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(page).toHaveURL(at(`/bg/cases/${f.caseId}#interest-${f.onListInterestId}`));
       await expect(page.locator(`#interest-${f.onListInterestId}`)).toBeVisible();
 
+      // O07UNAVAILABLE / O07NOTFOUND: say only what the server said; nothing to add.
+      await page.goto(check("MS-000000000001"));
+      await expect(page.getByText("Не е добавен", exact)).toBeVisible();
+      await expect(
+        page.getByText("Обявата вече не е публикувана. Имотът не е добавен.", exact),
+      ).toBeVisible();
+      await expect(page.getByText("Изберете друг имот от списъка с имоти.", exact)).toBeVisible();
+      await expect(page.getByRole("button", { name: /Добавете/ })).toHaveCount(0);
+      await page.goto(check("NOT-A-LISTING"));
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Имотът не е достъпен");
+      await expect(
+        page.getByText(
+          "Имотът не е достъпен или нямате достъп до него. Нищо не е добавено.",
+          exact,
+        ),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Към списъка с имоти", exact: true }),
+      ).toBeVisible();
+
       // O07CHECKMATCH → add: an empty explanation keeps the form; then only the readback counts.
       await page.goto(at(list));
       await page
@@ -434,6 +481,27 @@ for (const javaScriptEnabled of [true, false]) {
         page.getByRole("heading", { name: "Някой е променил това междувременно" }),
       ).toHaveCount(0);
       await expectTruthfulAdd(page, f.caseId, f.refs.match, explanation);
+
+      // O07STALE: links of the list read before the change offer a refresh, never a snapshot.
+      const loaded = new Date().toISOString();
+      for (const path of [
+        `/bg/cases/${f.caseId}/matching?revision=${f.briefRevision}&at=${loaded}`,
+        `/bg/cases/${f.caseId}/matching?property=${f.refs.needs}&revision=${f.briefRevision}&at=${loaded}`,
+      ]) {
+        await page.goto(at(path));
+        await expect(
+          page.getByText(
+            /^Списъкът е зареден в \d{1,2}:\d{2} · Europe\/Sofia\. Оттогава обявите или това, което търси клиентът, са променени\.$/,
+          ),
+        ).toBeVisible();
+        await expect(
+          page.getByText("Обновете списъка, преди да добавяте имоти. Нищо не е добавено.", exact),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("link", { name: "Обновете списъка", exact: true }),
+        ).toHaveAttribute("href", `/bg/cases/${f.caseId}/matching`);
+        await expect(page.getByRole("button", { name: /Добавете/ })).toHaveCount(0);
+      }
 
       if (javaScriptEnabled) {
         // O07ADDOFFLINE: nothing leaves the browser; the same request goes when back online.
