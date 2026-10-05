@@ -15,7 +15,7 @@ import { hashRequest, keyedHash, randomToken, sha256Hex } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
-import { loadPublishedListings, toCard } from "../publication/presentation";
+import { loadPublishedListings, presentationOf, toCard } from "../publication/presentation";
 import { enforceRateLimit } from "../rate-limit";
 import { parseInput } from "../work/shared";
 
@@ -128,7 +128,10 @@ export async function createPublicShare(
         { references: input.references },
         input.locale,
       );
-      if (published.length !== input.references.length)
+      if (
+        published.length !== input.references.length ||
+        published.some((listing) => presentationOf(listing, now).primaryAction === "view_similar")
+      )
         throw new AppError("validation_failed", {
           fieldErrors: { references: ["selection_unavailable"] },
         });
@@ -261,7 +264,11 @@ export async function readPublicShare(
   if (row.revokedAt) return { status: "revoked" as const };
   if (!row.expiresAt || row.expiresAt <= now) return { status: "expired" as const };
   const published = await loadPublishedListings(db, { references: row.listingReferences }, locale);
-  const byReference = new Map(published.map((listing) => [listing.reference, listing]));
+  const byReference = new Map(
+    published
+      .filter((listing) => presentationOf(listing, now).primaryAction !== "view_similar")
+      .map((listing) => [listing.reference, listing]),
+  );
   return {
     status: "ready" as const,
     expiresAt: row.expiresAt.toISOString(),
