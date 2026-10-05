@@ -6,7 +6,7 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 - Journey screens (binding, `journeys.json`): P11, P12, O01, O02, O03, O06, O23, O18, O04, O05. O27 (duplicate check) is reached from O03 and is part of the duplicates step.
 - Counting rule: one action is a tap or click, or one field entry. Form fields are pre-filled in the frames, so typing counts only where a step lists an entry. The «Изпращаме…» step advances on its own after 1.5 s in the prototype and is not counted.
 - Pass rule per tester run: the end frame is reached (or the success criterion is met in words) without hints, in at most expert actions + 1 (median over runs). A step the screens do not cover is a **COVERAGE GAP**, reported separately and never counted as a pass.
-- Scenario: visitor Алекс asks about property №202 (apartment in the centre of Sandanski, 115 000 €, 76 m² total, 68,5 m² built, 1 bedroom); broker Мария Д. works the inquiry; colleague Никол is the handover receiver. Inquiry number DEMO-Q-024.
+- Scenario: visitor Алекс asks about property №202 (apartment in the centre of Sandanski, 115 000 €, 76 m² total, 68,5 m² built, 1 bedroom); broker Мария Д. works the inquiry; colleague Никол is the handover receiver. Inquiry number «Номер за проверка: 024».
 
 ## Visitor tasks
 
@@ -18,7 +18,7 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `P11 · Filled` | tap «Изпрати запитването» | `602:19273` · `602:20146` | `P11 · Sending / Изпращаме запитването` · D `598:17787` · M `602:18214` |
+| 1 | `P11 · Filled` | tap «Изпратете запитването» | `602:19273` · `602:20146` | `P11 · Sending / Изпращаме запитването` · D `598:17787` · M `602:18214` |
 | – | `P11 · Sending` | none (advances after 1.5 s; frame reaction on D `602:19409` · M `602:20262`) | — | `P12 · Committed / Запитването е получено` · D `602:18463` · M `602:18519` |
 
 **Expected actions:** 1 on both viewports. Median pass limit: 2.
@@ -40,7 +40,7 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 **Expected actions:** 1. Median pass limit: 2.
 
-**Success criterion:** ends on `P12 · Committed` without retyping anything; the tester notes that the same number DEMO-Q-024 is reused so the team receives one inquiry. Fail: the tester retypes the form, or chooses «Друг начин за контакт» believing the question cannot be sent.
+**Success criterion:** ends on `P12 · Committed` without retyping anything; the tester notes that the same number «Номер за проверка: 024» is reused so the team receives one inquiry. Fail: the tester retypes the form, or chooses «Свържете се по друг начин» believing the question cannot be sent.
 
 **Required states:** offline / retry with values kept (`598:17973` · `602:18386`). Present.
 
@@ -53,7 +53,7 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
 | 1 | `P11 · Rejected` | correct «Имейл или телефон» from alex@exmaple.com to a valid address (one entry) | field `602:19519` · `602:20370` (design `598:17907` · `602:18332`) | same frame |
-| 2 | `P11 · Rejected` | tap «Изпрати поправеното запитване» | `602:19526` · `602:20378` | `P11 · Sending` → `P12 · Committed` |
+| 2 | `P11 · Rejected` | tap «Изпратете поправеното запитване» | `602:19526` · `602:20378` | `P11 · Sending` → `P12 · Committed` |
 
 **Expected actions:** 2. Median pass limit: 3.
 
@@ -70,7 +70,7 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 | # | From frame | Action | Control (M proto · D proto) | To frame |
 |---|---|---|---|---|
 | 1 | `P11 · Invalid` | complete «Имейл или телефон» (alex@ → alex@example.com, one entry) | field `602:20211` · `602:19346` (design `602:18160` · `598:17721`) | same frame |
-| 2 | `P11 · Invalid` | tap «Изпрати запитването» | `602:20219` · `602:19353` | `P11 · Sending` → `P12 · Committed` |
+| 2 | `P11 · Invalid` | tap «Изпратете запитването» | `602:20219` · `602:19353` | `P11 · Sending` → `P12 · Committed` |
 
 **Expected actions:** 2. Median pass limit: 3.
 
@@ -86,11 +86,11 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `P12U` | tap «Провери същата заявка» | `66:36418` · `66:56358` | `P12UCHECK / Резултатът все още не е потвърден` · D `66:34211` · M `66:34251` |
+| 1 | `P12U` | tap «Проверете същата заявка» | `66:36418` · `66:56358` | `P12UCHECK / Резултатът все още не е потвърден` · D `66:34211` · M `66:34251` |
 
-**Expected actions:** 1. Median pass limit: 2 (a second tap on «Друг начин за контакт», D `125:9610` · M `129:3518`, is acceptable).
+**Expected actions:** 1. Median pass limit: 2 (a second tap on «Свържете се по друг начин», D `125:9610` · M `129:3518`, is acceptable).
 
-**Success criterion:** the tester reports that the result is still not confirmed, keeps the number DEMO-Q-024 and does not send again. Evidence: «Резултатът все още не е потвърден» (D `66:34223` · M `66:34263`). Fail: any action that sends a new inquiry.
+**Success criterion:** the tester reports that the result is still not confirmed, keeps the number «Номер за проверка: 024» and does not send again. Evidence: «Резултатът все още не е потвърден» (D `66:34223` · M `66:34263`). Fail: any action that sends a new inquiry.
 
 **Required states:** unknown outcome (`22:1666` · `24:2203`), status check of the same request (`66:34211` · `66:34251`). Present. G2 note: the check screen's button says «Към същата операция».
 
@@ -122,9 +122,9 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O02 · New in queue` | tap «Поеми запитването» (Mobile: «Поеми запитването на Алекс») | `602:19843` · `602:20578` | `O03 · Accept · time required / Поемане на запитването` · D `602:18881` · M `602:19008` |
+| 1 | `O02 · New in queue` | tap «Поемете запитването» (Mobile: «Поемете запитването на Алекс») | `602:19843` · `602:20578` | `O03 · Accept · time required / Поемане на запитването` · D `602:18881` · M `602:19008` |
 | 2 | `O03 · Accept · time required` | choose a future day and time in «Кога ще прегледате отново? *» (one entry; prototype: tap the field) | `602:19958` · `602:20624` | `O03 · Accept · ready` · D `602:19066` · M `602:19189` |
-| 3 | `O03 · Accept · ready` | tap «Поеми запитването» | `602:20083` · `602:20681` | `O03L / Свързване или създаване на преписка` · D `20:1055` · M `25:2228` (prototype D `63:12845` · M `66:45642`) |
+| 3 | `O03 · Accept · ready` | tap «Поемете запитването» | `602:20083` · `602:20681` | `O03L / Свързване или създаване на преписка` · D `20:1055` · M `25:2228` (prototype D `63:12845` · M `66:45642`) |
 
 **Expected actions:** 3 on both viewports. Median pass limit: 4.
 
@@ -140,12 +140,12 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O03` | tap «Провери възможен дубликат» | `63:12621` · `66:45550` | `O27 / Проверка за дубликати` · D `14:1592` · M `15:1014` (prototype D `63:23379` · M `66:53439`) |
-| 2 | `O27` | tap «Запази за допълнителна проверка» | `63:23481` · `66:53473` | `O27PENDING / Прегледът е отложен с ангажимент` · D `52:5335` · M `52:5391` |
+| 1 | `O03` | tap «Проверете за дубликат» | `63:12621` · `66:45550` | `O27 / Проверка за дубликати` · D `14:1592` · M `15:1014` (prototype D `63:23379` · M `66:53439`) |
+| 2 | `O27` | tap «Отложете за допълнителна проверка» | `63:23481` · `66:53473` | `O27PENDING / Прегледът е отложен с ангажимент` · D `52:5335` · M `52:5391` |
 
 **Expected actions:** 2. Median pass limit: 3.
 
-**Success criterion:** nothing is merged; the tester says identity is not confirmed, so the two records stay separate until a check. «Запази като отделни контакти» is accepted in words (it has no prototype reaction). Evidence: «Прегледът е отложен с ангажимент» (D `52:5347` · M `52:5403`). Fail: the tester ticks the confirmation and claims a merge.
+**Success criterion:** nothing is merged; the tester says identity is not confirmed, so the two records stay separate until a check. «Запазете като отделни контакти» is accepted in words (it has no prototype reaction). Evidence: «Прегледът е отложен с ангажимент» (D `52:5347` · M `52:5403`). Fail: the tester ticks the confirmation and claims a merge.
 
 **Required states:** duplicate candidates side by side, deferred review. Present. Note: O27PENDING shows the review time «30 септември 2026», earlier than the «6 октомври 2026» used in O03 · Accept; align the scenario dates so the review time reads as future (D05).
 
@@ -157,10 +157,10 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O03` | tap «Свържи или създай преписка» | `63:12633` · `66:45564` | `O03L` · D `20:1055` · M `25:2228` |
-| 2 | `O03L` | tap «Запиши DEMO свързване» | `63:12940` · `66:45671` | `O03LR / Записано свързване · DEMO` · D `20:1175` · M `25:2279` |
+| 1 | `O03` | tap «Свържете или създайте случай» | `63:12633` · `66:45564` | `O03L` · D `20:1055` · M `25:2228` |
+| 2 | `O03L` | tap «Запишете свързването» | `63:12940` · `66:45671` | `O03LR / Записано свързване` · D `20:1175` · M `25:2279` |
 
-**Expected actions:** 2. Median pass limit: 3 (opening the purchase with «Към служебната преписка», D `63:13044` · M `66:45707`, is acceptable).
+**Expected actions:** 2. Median pass limit: 3 (opening the purchase with «Към случая», D `63:13044` · M `66:45707`, is acceptable).
 
 **Success criterion:** the tester reports that the question is attached and that the next step is the availability check before a viewing proposal, by Мария Д. Evidence: «Запитването е свързано с преписката.» (D `20:1262` · M `25:2295`), «Мария Д. · DEMO · Проверка на наличността преди предложение за оглед» (D `20:1273` · M `25:2306`).
 
@@ -174,8 +174,8 @@ Testers receive only the **Goal (testers)** line of a task, in a fresh context, 
 
 | # | From frame | Action | Control (D proto · M proto) | To frame (Desktop · Mobile) |
 |---|---|---|---|---|
-| 1 | `O23` | tap «Предай отворена работа» | `63:21010` · `66:51774` | `O23H / Предаване на отворена работа` · D `21:788` · M `25:2760` (prototype D `63:21162` · M `66:51858`) |
-| 2 | `O23H` | tap «Предложи DEMO предаване» | `63:21298` · `66:51928` | `O23HP / Изчаква приемане на работата` · D `21:948` · M `25:2851` |
+| 1 | `O23` | tap «Предайте отворената работа» | `63:21010` · `66:51774` | `O23H / Предаване на отворена работа` · D `21:788` · M `25:2760` (prototype D `63:21162` · M `66:51858`) |
+| 2 | `O23H` | tap «Предложете предаване» | `63:21298` · `66:51928` | `O23HP / Изчаква приемане на работата` · D `21:948` · M `25:2851` |
 
 **Expected actions:** 2. Median pass limit: 3.
 
@@ -236,6 +236,8 @@ Prototype copies built in this pass — page 12 (Desktop): P11FILLED `602:19244`
 
 ## G2 check — remaining banned terms in W03 visible copy
 
+> Superseded by Phase B (copy pass B1, DEMO markers B2): the final re-scan finds 0 banned or demo terms in visible text on primary surfaces. The counts below are the pre-Phase-B baseline; the gate run recomputes G2 from the re-exported packet.
+
 Scan of every visible text node in the 80 W03 frames exported for the packet (every coverage-table frame except the revoke state `327:15031` · `327:15174`; hidden layers skipped), against the list in `GATE.md` G2. No W03 frame has a technical-details disclosure, so every hit is on a primary surface. **Result: FAIL.** Frames built in this pass carry only the inherited rail item «Преписки» and the prototype DEMO markers.
 
 | Term group | Text nodes | Frames | Distinct strings |
@@ -259,7 +261,7 @@ Scan of every visible text node in the 80 W03 frames exported for the packet (ev
 - «Демо среда · Измислени частни записи» × 52
 - «Демонстрационен профил» × 28
 - «Мария Д. · DEMO» × 18
-- «DEMO-Q-024 · Точен приет контекст» × 16
+- ««Номер за проверка: 024» · Точен приет контекст» × 16
 - «DEMO · Примерни данни. Не се изпраща съобщение до екипа.» × 12
 - «DEMO резултат · Локалното решение е прието. Доставката на съобщение остава отделен резултат.» × 8
 - «Мария Д. · DEMO · Проверка на наличността преди предложение за оглед» × 8
@@ -277,7 +279,7 @@ Scan of every visible text node in the 80 W03 frames exported for the packet (ev
 | Visible text | Where (screen · state · viewport `node id`) |
 |---|---|
 | «Преписки» (staff navigation rail item) | 30 nodes, every staff frame in scope (O01, O02, O03, O04, O05, O06, O18, O23, O27); e.g. O01 · default · D `10:226` |
-| «Свържи или създай преписка» | O03 default D `I18:885;6:3` · O03 default M `I16:549;6:3` |
+| «Свържете или създайте случай» | O03 default D `I18:885;6:3` · O03 default M `I16:549;6:3` |
 | «Приключи без преписка» | O03 default D `I18:887;6:6` · O03 default M `I16:551;6:6` |
 | «Агенция / Свързване или създаване на преписка» | O03 link-or-create D `20:1130` |
 | «Свързване или създаване на преписка» | O03 link-or-create D `20:1139` · O03 link-or-create M `25:2241` |
@@ -286,7 +288,7 @@ Scan of every visible text node in the 80 W03 frames exported for the packet (ev
 | «Няма подходяща преписка — прегледай създаване» | O03 link-or-create D `I20:1162;6:6` · O03 link-or-create M `I25:2266;6:6` |
 | «Съвпадение по имейл не е доказана идентичност. Новата преписка изисква тип, отговорник и следващо действие; свързването » | O03 link-or-create D `I20:1164;6:408` · O03 link-or-create M `I25:2268;6:408` · O03 create-after-qualify D `I21:2514;6:408` · O03 create-after-qualify M `I28:2864;6:408` |
 | «Запитването е свързано с преписката.» | O03 link-recorded D `20:1262` · O03 link-recorded M `25:2295` |
-| «Към служебната преписка» | O03 link-recorded D `I20:1284;6:3` · O03 link-recorded M `I25:2317;6:3` · O03 created D `I21:2634;6:3` · O03 created M `I28:2913;6:3` |
+| «Към случая» | O03 link-recorded D `I20:1284;6:3` · O03 link-recorded M `I25:2317;6:3` · O03 created D `I21:2634;6:3` · O03 created M `I28:2913;6:3` |
 | «Тип преписка» | O03 create-after-qualify D `I21:2488;6:59` · O03 create-after-qualify M `I28:2835;6:59` |
 | «Създай DEMO преписка» | O03 create-after-qualify D `I21:2521;6:3` · O03 create-after-qualify M `I28:2871;6:3` |
 | «Агенция / Преписка е създадена · DEMO» | O03 created D `21:2600` |
@@ -405,7 +407,7 @@ Scan of every visible text node in the 80 W03 frames exported for the packet (ev
 | 3 | Live state and stop | PASS | `P11 · Sending` (`598:17787` · `602:18214`): button in loading state, fields locked, «Изпращаме го веднъж. Ако връзката прекъсне, проверяваме същото запитване, без да създаваме ново.» The send is atomic, so there is no Stop; no long-running W03 job lacks one. |
 | 4 | Consequences before irreversible actions | PASS | Send: «Изпращаме го веднъж. Това не резервира оглед и не потвърждава наличност.» (`597:2224`). Accept: «Записва ви като отговорник… Клиентът не получава съобщение.» (`602:19188`). Merge: «Окончателното сливане е блокирано до потвърждение…» (O27 `14:1592`). Handover: alert on O23H `21:788`. |
 | 5 | One primary action per empty state | **FAIL** | `O02UNCLAIMED` (`66:34531` · `66:34558`): «Няма потвърдени непоети разговори» with two secondary «Провери покритието · …» buttons and no primary action. |
-| 6 | No dead ends | PASS | Invalid, rejected and offline states name the field, keep every value and offer one way on (`598:17700`, `598:17886`, `598:17973` and Mobile twins). Unknown check offers «Друг начин за контакт» (`66:34211`). |
+| 6 | No dead ends | PASS | Invalid, rejected and offline states name the field, keep every value and offer one way on (`598:17700`, `598:17886`, `598:17973` and Mobile twins). Unknown check offers «Свържете се по друг начин» (`66:34211`). |
 | 7 | Unknown shown as unknown | PASS | `P12U` (`22:1666`): «Не изпращайте повторно, докато текущият резултат е неизвестен.» `P12UCHECK` (`66:34223`): «Резултатът все още не е потвърден». Receipt says «Брокер още не го е прочел» (`602:18483`) instead of implying it was read. |
 | 8 | Phone parity | **FAIL** | Bulgarian passes: every W03 state exists at 390 and T1–T5, T7–T10 have the same action count on phone. Hebrew right-to-left has only the filled and committed screens; its error, sending, offline and unknown states are missing. |
 | 9 | Keyboard and WCAG 2.2 AA | **NO EVIDENCE (counts as fail)** | The design system has focus variants (UI04 / UI06 «Focus»), but no W03 frame annotates focus order, and contrast / target size / RTL reading order can only be proven on the PR preview. |
