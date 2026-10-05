@@ -292,8 +292,18 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   const otherPage = await outsider.newPage();
   await otherPage.goto(`/en/requests/${key}`);
   await expect(
-    otherPage.getByRole("heading", { name: "We don't know yet whether the inquiry was received" }),
+    otherPage.getByRole("heading", { name: "We cannot confirm the result in this browser." }),
   ).toBeVisible();
+  // P12: no lookup claims for a browser without the receipt session; the only action is the
+  // brand line, never a new inquiry.
+  await expect(otherPage.getByText(/Checked:|Check result/)).toHaveCount(0);
+  await expect(otherPage.getByRole("link", { name: /Call us:/ })).toHaveAttribute(
+    "href",
+    "tel:+359879696870",
+  );
+  await expect(otherPage.locator('main a[href*="/inquire"], main a[href$="/contact"]')).toHaveCount(
+    0,
+  );
   await expect(otherPage.getByText(reference, { exact: true })).toHaveCount(0);
   await outsider.close();
   await context.close();

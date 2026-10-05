@@ -8,11 +8,13 @@ import { InquiryContent } from "@/features/discovery/inquiry-content";
 import { OwnerInquirySummary } from "@/features/discovery/inquiry-owner";
 import { inquiryReceiptView, inquiryStatus } from "@/features/discovery/inquiry-state";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import { brandPhone } from "@/features/shell/agency";
 import { isRoutableLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { getEnv } from "@/server/config/env";
 import {
   readInquiryReceipt,
+  receiptCheckAttempted,
   receiptCookieName,
   validReceiptSession,
 } from "@/server/inquiries/intake";
@@ -37,7 +39,21 @@ export default async function ReceiptPage({
         (await cookies()).get(receiptCookieName(getEnv()))?.value,
       ),
     });
-  } catch {
+  } catch (error) {
+    // The brand line is the one verified channel that cannot start a duplicate inquiry.
+    const call = (
+      <a className={buttonClass("primary", "self-start")} href={`tel:${brandPhone.e164}`}>
+        {copy.callAgency} <span dir="ltr">{brandPhone.display}</span>
+      </a>
+    );
+    if (!receiptCheckAttempted(error))
+      return (
+        <DiscoveryPage>
+          <h1 className="text-title font-semibold">{copy.notConfirmed}</h1>
+          <p className="max-w-reading">{copy.notShownBody}</p>
+          {call}
+        </DiscoveryPage>
+      );
     const checkedAt = new Date().toISOString();
     return (
       <DiscoveryPage>
@@ -49,9 +65,7 @@ export default async function ReceiptPage({
         </Notice>
         <p className="max-w-reading">{copy.checkUnknownBody}</p>
         <div className="flex flex-wrap gap-3">
-          <a className={buttonClass("primary", "self-start")} href={`/${locale}/contact`}>
-            {copy.contactOtherWay}
-          </a>
+          {call}
           {/* The same check again; it never resends the inquiry. */}
           <a
             className={buttonClass("secondary", "self-start")}

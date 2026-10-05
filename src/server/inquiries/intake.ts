@@ -672,6 +672,12 @@ export async function submitInquiry(
   return { receipt, replayed: result.replayed, operationId: result.operationId };
 }
 
+/** P12: a missing, foreign or mismatched receipt session reads as `not_found` without saying
+ * which, so only another failure means the same-request check was attempted and is unknown. */
+export function receiptCheckAttempted(error: unknown) {
+  return !(error instanceof AppError && error.code === "not_found");
+}
+
 /**
  * The receipt of a submission, readable only by the receipt session that submitted it. Any
  * mismatch is the same not_found: a key or reference alone reveals nothing.
