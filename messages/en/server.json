@@ -2,7 +2,7 @@
   "errors": {
     "validation_failed": {
       "message": "Some details need to be corrected before we can accept this.",
-      "next": "Correct the marked fields; everything else you entered is kept."
+      "next": "Check the details, correct what is wrong and send again."
     },
     "unauthenticated": {
       "message": "You need to sign in to continue.",
@@ -30,11 +30,11 @@
     },
     "version_conflict": {
       "message": "Someone changed this while you were working, so your change was not saved.",
-      "next": "Review the latest version shown here; your entries are kept so you can apply them again."
+      "next": "Open the latest version, check what changed, then make your change again if it is still needed."
     },
     "idempotency_key_reused": {
-      "message": "This form was already sent once with different details, so we did not send it again.",
-      "next": "Reload the page to see what we received, and make any change from there."
+      "message": "This request repeats an earlier attempt with different details, so we did not carry it out.",
+      "next": "Reload the page to check the current state, then start again if the change is still needed."
     },
     "operation_pending": {
       "message": "We are still working on your earlier request, and it is not confirmed yet.",
@@ -94,8 +94,8 @@
     },
     "rate_limited": {
       "message": "There were too many attempts in a short time, so this one was not carried out.",
-      "next": "Wait a little, then try again; what you entered stays on the page.",
-      "nextTimed": "Try again in {minutes, plural, one {# minute} other {# minutes}}; what you entered stays on the page."
+      "next": "Wait a little, then try again.",
+      "nextTimed": "Try again in {minutes, plural, one {# minute} other {# minutes}}."
     },
     "unavailable": {
       "message": "Part of our service is not working right now, so nothing was saved.",

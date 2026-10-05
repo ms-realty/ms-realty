@@ -2,7 +2,7 @@
   "errors": {
     "validation_failed": {
       "message": "Einige Angaben müssen korrigiert werden, bevor wir das annehmen können.",
-      "next": "Korrigieren Sie die markierten Felder; alle anderen Angaben bleiben erhalten."
+      "next": "Prüfen Sie die Angaben, korrigieren Sie, was nicht stimmt, und senden Sie erneut."
     },
     "unauthenticated": {
       "message": "Bitte melden Sie sich an, um fortzufahren.",
@@ -30,11 +30,11 @@
     },
     "version_conflict": {
       "message": "Jemand hat das geändert, während Sie daran gearbeitet haben, daher wurde Ihre Änderung nicht gespeichert.",
-      "next": "Prüfen Sie die hier gezeigte neueste Fassung; Ihre Eingaben bleiben erhalten, damit Sie sie erneut übernehmen können."
+      "next": "Öffnen Sie die neueste Fassung, prüfen Sie die Änderungen und nehmen Sie Ihre Änderung erneut vor, falls sie noch nötig ist."
     },
     "idempotency_key_reused": {
-      "message": "Dieses Formular wurde bereits einmal mit anderen Angaben gesendet, daher haben wir es nicht erneut gesendet.",
-      "next": "Laden Sie die Seite neu, um zu sehen, was bei uns angekommen ist, und ändern Sie es von dort aus."
+      "message": "Diese Anfrage wiederholt einen früheren Versuch mit anderen Angaben, daher haben wir sie nicht ausgeführt.",
+      "next": "Laden Sie die Seite neu, um den aktuellen Stand zu prüfen, und beginnen Sie neu, falls die Änderung noch nötig ist."
     },
     "operation_pending": {
       "message": "Wir bearbeiten Ihre vorherige Anfrage noch; sie ist noch nicht bestätigt.",
@@ -94,8 +94,8 @@
     },
     "rate_limited": {
       "message": "Es gab zu viele Versuche in kurzer Zeit, daher wurde dieser nicht ausgeführt.",
-      "next": "Warten Sie kurz und versuchen Sie es dann erneut; Ihre Eingaben bleiben auf der Seite.",
-      "nextTimed": "Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut; Ihre Eingaben bleiben auf der Seite."
+      "next": "Warten Sie kurz und versuchen Sie es dann erneut.",
+      "nextTimed": "Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut."
     },
     "unavailable": {
       "message": "Ein Teil unseres Dienstes funktioniert gerade nicht, daher wurde nichts gespeichert.",

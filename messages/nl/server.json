@@ -2,7 +2,7 @@
   "errors": {
     "validation_failed": {
       "message": "Sommige gegevens moeten worden verbeterd voordat we dit kunnen aannemen.",
-      "next": "Verbeter de gemarkeerde velden; al het andere dat u hebt ingevuld, blijft bewaard."
+      "next": "Controleer de gegevens, verbeter wat niet klopt en verstuur opnieuw."
     },
     "unauthenticated": {
       "message": "U moet zich aanmelden om verder te gaan.",
@@ -30,11 +30,11 @@
     },
     "version_conflict": {
       "message": "Iemand heeft dit gewijzigd terwijl u eraan werkte, dus uw wijziging is niet opgeslagen.",
-      "next": "Bekijk de nieuwste versie hier; uw invoer blijft bewaard, zodat u die opnieuw kunt toepassen."
+      "next": "Open de nieuwste versie, bekijk wat er is veranderd en breng uw wijziging opnieuw aan als die nog nodig is."
     },
     "idempotency_key_reused": {
-      "message": "Dit formulier is al eens met andere gegevens verzonden, dus we hebben het niet opnieuw verzonden.",
-      "next": "Laad de pagina opnieuw om te zien wat we hebben ontvangen, en breng vanaf daar wijzigingen aan."
+      "message": "Dit verzoek herhaalt een eerdere poging met andere gegevens, dus we hebben het niet uitgevoerd.",
+      "next": "Laad de pagina opnieuw om de huidige stand te controleren en begin opnieuw als de wijziging nog nodig is."
     },
     "operation_pending": {
       "message": "We zijn nog bezig met uw eerdere verzoek; het is nog niet bevestigd.",
@@ -94,8 +94,8 @@
     },
     "rate_limited": {
       "message": "Er waren te veel pogingen in korte tijd, dus deze is niet uitgevoerd.",
-      "next": "Wacht even en probeer het dan opnieuw; wat u hebt ingevuld, blijft op de pagina staan.",
-      "nextTimed": "Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw; wat u hebt ingevuld, blijft op de pagina staan."
+      "next": "Wacht even en probeer het dan opnieuw.",
+      "nextTimed": "Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw."
     },
     "unavailable": {
       "message": "Een deel van onze dienst werkt nu niet, dus er is niets opgeslagen.",
