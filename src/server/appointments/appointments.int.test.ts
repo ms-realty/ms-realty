@@ -13,7 +13,7 @@ import {
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { changeStaffAbsence } from "../auth/absence";
 import { addInterest, respondToInterest } from "../cases/commands";
-import { caseFixture, staffFixture } from "../cases/testing";
+import { caseFixture, reviewedCandidateFixture, staffFixture } from "../cases/testing";
 import { custodyFixture } from "../key-custody/testing";
 import { createListingFixture, publishForTest } from "../publication/testing";
 import {
@@ -47,12 +47,14 @@ async function fixture(
       .set({ freshnessState: "current_under_policy", reviewDueAt: new Date(Date.now() + 86400000) })
       .where(eq(listings.id, property.listingId));
   }
+  const matchReview = await reviewedCandidateFixture(t.db, f, property.reference);
   const interest = await addInterest(t.db, f.staff.session, {
     id: f.record.id,
     operationId: randomUUID(),
     expectedVersion: 1,
     reference: property.reference,
     explanation: "Synthetic reviewed option, pending client feedback",
+    matchReview,
   });
   await respondToInterest(t.db, f.client.session, {
     id: interest.outcome.interestId,

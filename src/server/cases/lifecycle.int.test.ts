@@ -26,7 +26,7 @@ import {
   transitionCaseStage,
 } from "./lifecycle";
 import { readCase } from "./queries";
-import { caseFixture, staffFixture } from "./testing";
+import { caseFixture, reviewedCandidateFixture, staffFixture } from "./testing";
 
 let t: TestDatabase;
 beforeAll(async () => {
@@ -119,6 +119,9 @@ describe("accountable Case lifecycle", () => {
         stage: "evaluating",
       }),
     ).rejects.toMatchObject({ code: "transition_denied" });
+    const listing = await createListingFixture(t.db, { reviewerId: f.staff.id });
+    await publishForTest(t.db, f.staff.actor, listing);
+    const matchReview = await reviewedCandidateFixture(t.db, f, listing.reference);
     const [brief] = await t.db
       .select()
       .from(briefRevisions)
@@ -136,12 +139,11 @@ describe("accountable Case lifecycle", () => {
         stage: "evaluating",
       }),
     ).rejects.toMatchObject({ code: "transition_denied" });
-    const listing = await createListingFixture(t.db, { reviewerId: f.staff.id });
-    await publishForTest(t.db, f.staff.actor, listing);
     await addInterest(t.db, f.staff.session, {
       ...command(f.record.id, 2),
       reference: listing.reference,
       explanation: "Reviewed current source fits the brief",
+      matchReview,
     });
     await transitionCaseStage(t.db, f.staff.session, {
       ...command(f.record.id, 3),

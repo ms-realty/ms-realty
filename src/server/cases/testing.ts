@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { inquiries, passkeys, tasks } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { briefRevisions, inquiries, passkeys, tasks } from "@/db/schema";
 import { createSession } from "../auth/sessions";
 import type { Executor } from "../db";
 import { createClient, createStaff } from "../testing";
 import { createCaseFromInquiry } from "./commands";
+import { readCaseCandidate } from "./matching";
 
 export async function staffFixture(db: Executor) {
   const person = await createStaff(db, {
@@ -59,4 +61,35 @@ export async function caseFixture(db: Executor, broker?: Awaited<ReturnType<type
     preferences: "Near the town centre",
   });
   return { staff, client: { ...client, ...issued }, inquiry, record: created.outcome };
+}
+
+/** Seed the initial fixture Brief, then return the exact public candidate review for a command. */
+export async function reviewedCandidateFixture(
+  db: Executor,
+  f: Awaited<ReturnType<typeof caseFixture>>,
+  reference: string,
+) {
+  const [brief] = await db
+    .select({ id: briefRevisions.id, revision: briefRevisions.revisionNumber })
+    .from(briefRevisions)
+    .where(eq(briefRevisions.caseId, f.record.id));
+  if (!brief) throw new Error("Missing fixture Brief");
+  await db
+    .update(briefRevisions)
+    .set({ criteria: { purpose: "sale" } })
+    .where(eq(briefRevisions.id, brief.id));
+  const candidate = await readCaseCandidate(db, f.staff.session, {
+    id: f.record.id,
+    briefRevision: brief.revision,
+    reference,
+  });
+  if (candidate.match !== "match") throw new Error("Fixture Listing is not a confirmed match");
+  return {
+    briefRevision: candidate.briefRevision,
+    manifestId: candidate.candidate.manifestId,
+    availability: candidate.candidate.availability.presented,
+    violated: [...candidate.violated],
+    unconfirmed: [...candidate.unconfirmed],
+    reviewed: true as const,
+  };
 }

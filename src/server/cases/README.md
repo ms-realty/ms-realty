@@ -49,9 +49,9 @@ revision and returns its public card, confirmed keys, known hard violations and 
 confirmation. A known hard violation ends the fit claim; `confirmedCriteria[]` and
 `unconfirmed[]` are then empty because other facts were not fully assessed.
 It cannot turn an unpublished or stale candidate into an Interest or a public recommendation.
-For a new Interest on a structured buyer/tenant Brief, `addInterest` requires `matchReview` with
-the reviewed Brief revision, public manifest, presented availability, exact violation/unknown keys
-and explicit review.
+For every new buyer/tenant Interest, `addInterest` requires current structured Brief criteria
+and `matchReview` with the reviewed Brief revision, public manifest, presented availability,
+exact violation/unknown keys and explicit review.
 The command recomputes that assessment inside its idempotent operation and rejects changed
 snapshots, unknown facts, non-offered listings and a different transaction purpose. A
 hard-violating alternative requires `alternativeDecision: "propose_despite_mismatch"` and a

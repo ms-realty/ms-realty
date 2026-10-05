@@ -407,6 +407,7 @@ describe("O07 Case matching", () => {
 
   it("does not create a buyer Interest for another purpose or a closed offer", async () => {
     const f = await caseFixture(t.db);
+    const available = await createListingFixture(t.db, { reviewerId: f.staff.id });
     const rental = await createListingFixture(t.db, {
       reviewerId: f.staff.id,
       purpose: "long_term_rent",
@@ -415,6 +416,7 @@ describe("O07 Case matching", () => {
       reviewerId: f.staff.id,
       commercialState: "sold",
     });
+    await publishForTest(t.db, f.staff.actor, available);
     await publishForTest(t.db, f.staff.actor, rental);
     await publishForTest(t.db, f.staff.actor, sold);
     const input = {
@@ -422,6 +424,16 @@ describe("O07 Case matching", () => {
       expectedVersion: 1,
       explanation: "The broker reviewed the currently published listing.",
     };
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...input,
+        operationId: randomUUID(),
+        reference: available.reference,
+      }),
+    ).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { matchReview: ["criteria_required"] },
+    });
     await expect(
       addInterest(t.db, f.staff.session, {
         ...input,

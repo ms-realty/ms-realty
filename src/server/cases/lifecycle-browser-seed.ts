@@ -6,7 +6,7 @@ import postgres from "postgres";
 import * as schema from "@/db/schema";
 import { createListingFixture, publishForTest } from "../publication/testing";
 import { addInterest } from "./commands";
-import { caseFixture, staffFixture } from "./testing";
+import { caseFixture, reviewedCandidateFixture, staffFixture } from "./testing";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -27,12 +27,14 @@ try {
     );
     const listing = await createListingFixture(tx, { reviewerId: f.staff.id });
     await publishForTest(tx, f.staff.actor, listing);
+    const matchReview = await reviewedCandidateFixture(tx, f, listing.reference);
     await addInterest(tx, f.staff.session, {
       id: f.record.id,
       operationId: randomUUID(),
       expectedVersion: 1,
       reference: listing.reference,
       explanation: "Reviewed property suitable for requirements",
+      matchReview,
     });
     await tx
       .update(schema.listings)

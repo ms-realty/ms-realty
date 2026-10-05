@@ -401,77 +401,71 @@ export async function addInterest(
           .orderBy(desc(briefRevisions.revisionNumber))
           .limit(1);
         const parsed = caseMatchCriteriaInput.safeParse(brief?.criteria);
-        if (brief && parsed.success && parsed.data.purpose === purpose) {
-          const review = input.matchReview;
-          if (!review)
-            throw new AppError("validation_failed", {
-              fieldErrors: { matchReview: ["required_for_structured_brief"] },
-            });
-          if (
-            review.briefRevision !== brief.revision ||
-            review.manifestId !== published.manifestId ||
-            review.availability !== availability
-          )
-            throw new AppError("version_conflict", {
-              current: {
-                briefRevision: brief.revision,
-                manifestId: published.manifestId,
-                availability,
-              },
-            });
-          const assessment = assessPublishedCandidate(published, parsed.data, now);
-          const same = (received: readonly string[], current: readonly string[]) => {
-            if (received.length !== current.length) return false;
-            const reviewed = [...received].sort();
-            const assessed = [...current].sort();
-            return reviewed.every((value, index) => value === assessed[index]);
-          };
-          if (
-            !same(review.violated, assessment.violated) ||
-            !same(review.unconfirmed, assessment.unconfirmed)
-          )
-            throw new AppError("version_conflict", {
-              current: {
-                briefRevision: brief.revision,
-                manifestId: published.manifestId,
-                availability,
-                violated: assessment.violated,
-                unconfirmed: assessment.unconfirmed,
-              },
-            });
-          if (assessment.unconfirmed.length > 0)
-            throw new AppError("validation_failed", {
-              fieldErrors: { matchReview: ["unconfirmed_facts"] },
-            });
-          if (assessment.violated.length > 0 && !input.alternativeDecision)
-            throw new AppError("validation_failed", {
-              fieldErrors: { alternativeDecision: ["required_for_hard_mismatch"] },
-            });
-          if (assessment.violated.length === 0 && input.alternativeDecision)
-            throw new AppError("validation_failed", {
-              fieldErrors: { alternativeDecision: ["no_hard_mismatch"] },
-            });
-          if (assessment.violated.length > 0 && input.explanation.length < 20)
-            throw new AppError("validation_failed", {
-              fieldErrors: { explanation: ["alternative_reason_required"] },
-            });
-          matchContext = {
-            briefRevision: brief.revision,
-            manifestId: published.manifestId,
-            match: assessment.result,
-            violated: assessment.violated,
-            unconfirmed: assessment.unconfirmed,
-            ...(input.alternativeDecision
-              ? { alternativeDecision: input.alternativeDecision }
-              : {}),
-          };
-        } else if (input.matchReview || input.alternativeDecision) {
+        if (!brief || !parsed.success || parsed.data.purpose !== purpose)
           throw new AppError("validation_failed", {
-            fieldErrors: {
-              [input.matchReview ? "matchReview" : "alternativeDecision"]: ["criteria_required"],
+            fieldErrors: { matchReview: ["criteria_required"] },
+          });
+        const review = input.matchReview;
+        if (!review)
+          throw new AppError("validation_failed", {
+            fieldErrors: { matchReview: ["required_for_structured_brief"] },
+          });
+        if (
+          review.briefRevision !== brief.revision ||
+          review.manifestId !== published.manifestId ||
+          review.availability !== availability
+        )
+          throw new AppError("version_conflict", {
+            current: {
+              briefRevision: brief.revision,
+              manifestId: published.manifestId,
+              availability,
             },
           });
-        }
+        const assessment = assessPublishedCandidate(published, parsed.data, now);
+        const same = (received: readonly string[], current: readonly string[]) => {
+          if (received.length !== current.length) return false;
+          const reviewed = [...received].sort();
+          const assessed = [...current].sort();
+          return reviewed.every((value, index) => value === assessed[index]);
+        };
+        if (
+          !same(review.violated, assessment.violated) ||
+          !same(review.unconfirmed, assessment.unconfirmed)
+        )
+          throw new AppError("version_conflict", {
+            current: {
+              briefRevision: brief.revision,
+              manifestId: published.manifestId,
+              availability,
+              violated: assessment.violated,
+              unconfirmed: assessment.unconfirmed,
+            },
+          });
+        if (assessment.unconfirmed.length > 0)
+          throw new AppError("validation_failed", {
+            fieldErrors: { matchReview: ["unconfirmed_facts"] },
+          });
+        if (assessment.violated.length > 0 && !input.alternativeDecision)
+          throw new AppError("validation_failed", {
+            fieldErrors: { alternativeDecision: ["required_for_hard_mismatch"] },
+          });
+        if (assessment.violated.length === 0 && input.alternativeDecision)
+          throw new AppError("validation_failed", {
+            fieldErrors: { alternativeDecision: ["no_hard_mismatch"] },
+          });
+        if (assessment.violated.length > 0 && input.explanation.length < 20)
+          throw new AppError("validation_failed", {
+            fieldErrors: { explanation: ["alternative_reason_required"] },
+          });
+        matchContext = {
+          briefRevision: brief.revision,
+          manifestId: published.manifestId,
+          match: assessment.result,
+          violated: assessment.violated,
+          unconfirmed: assessment.unconfirmed,
+          ...(input.alternativeDecision ? { alternativeDecision: input.alternativeDecision } : {}),
+        };
       } else if (input.matchReview || input.alternativeDecision) {
         throw new AppError("validation_failed", {
           fieldErrors: { matchReview: ["case_kind_mismatch"] },

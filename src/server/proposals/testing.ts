@@ -12,7 +12,7 @@ import {
 import { firstPartyIssuers } from "@/domain/records";
 import { createSession } from "../auth/sessions";
 import { addInterest, respondToInterest } from "../cases/commands";
-import { caseFixture } from "../cases/testing";
+import { caseFixture, reviewedCandidateFixture } from "../cases/testing";
 import {
   approveCaseProcess,
   approveProcessPolicy,
@@ -209,12 +209,14 @@ export async function proposalFixture(db: Executor) {
   const f = await caseFixture(db);
   const listing = await createListingFixture(db, { reviewerId: f.staff.id });
   await publishForTest(db, f.staff.actor, listing);
+  const matchReview = await reviewedCandidateFixture(db, f, listing.reference);
   const interest = await addInterest(db, f.staff.session, {
     id: f.record.id,
     operationId: randomUUID(),
     expectedVersion: 1,
     reference: listing.reference,
     explanation: "Synthetic reviewed proposal option",
+    matchReview,
   });
   await respondToInterest(db, f.client.session, {
     id: interest.outcome.interestId,
