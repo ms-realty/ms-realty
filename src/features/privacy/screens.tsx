@@ -3,12 +3,15 @@ import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
 import type { Session } from "@/server/auth/sessions";
+import { wireCode } from "@/server/errors";
 import { privateReceipt } from "@/server/privacy/native";
 import { getPreferences, preferencePurposes } from "@/server/privacy/preferences";
 import {
   clientPrivacyRequests,
+  listStaffPrivacyRequests,
   privacyOwners,
-  staffPrivacyRequests,
+  privacyQueuePath,
+  privacyQueueQuery,
 } from "@/server/privacy/requests";
 import type { NormalizedSearch } from "@/server/search/search";
 import { controlClass } from "@/ui/field-class";
@@ -16,7 +19,7 @@ import { Notice } from "@/ui/notice";
 import { privacyCopy, privacyLabel } from "./copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
 
-type Query = { error?: string; receipt?: string };
+type Query = { error?: string; receipt?: string; after?: string; before?: string };
 function Frame({ title, lead, children }: { title: string; lead: string; children: ReactNode }) {
   return (
     <div className="mx-auto grid max-w-4xl gap-6 px-gutter py-8">
@@ -45,7 +48,9 @@ async function Result({
         </Notice>
       ) : null}
       {query.error ? (
-        <Notice tone="error">{query.error === "VERSION_CONFLICT" ? c.conflict : c.error}</Notice>
+        <Notice tone="error">
+          {query.error === wireCode("version_conflict") ? c.conflict : c.error}
+        </Notice>
       ) : null}
     </>
   );
@@ -389,6 +394,8 @@ export async function PreferencesScreen({
   );
 }
 
+const queueLink = "inline-flex min-h-11 items-center underline";
+
 export async function StaffPrivacyScreen({
   locale,
   session,
@@ -399,7 +406,17 @@ export async function StaffPrivacyScreen({
   query: Query;
 }) {
   const c = privacyCopy(locale);
-  const rows = await staffPrivacyRequests(getDb(), session);
+  const requested = {
+    ...(query.after ? { after: query.after } : {}),
+    ...(query.before ? { before: query.before } : {}),
+  };
+  // A stale or edited position falls back to the newest page instead of a dead end.
+  const position = privacyQueueQuery.safeParse(requested).success ? requested : {};
+  const page = await listStaffPrivacyRequests(getDb(), session, position);
+  const { rows } = page;
+  // The submit route returns to the same page after the review or a reauthentication.
+  const search = privacyQueuePath(locale, position).split("?")[1];
+  const submitPath = `/${locale}/operations/privacy/submit${search ? `?${search}` : ""}`;
   const owners = await privacyOwners(getDb());
   return (
     <Frame title={c.operations} lead={c.staffLead}>
@@ -427,15 +444,13 @@ export async function StaffPrivacyScreen({
               {record.dueAt ? `${c.due}: ${record.dueAt.toISOString().slice(0, 10)}` : c.awaiting}
             </p>
             {next.length ? (
-              <form
-                method="post"
-                action={`/${locale}/operations/privacy/submit`}
-                className="grid gap-4"
-              >
+              <form method="post" action={submitPath} className="grid gap-4">
                 <Envelope intent="review" id={record.id} version={record.version} />
-                <label className="grid gap-1">
-                  {c.state}
+                {/* A wrapping label would add the chosen option to the select's accessible name. */}
+                <div className="grid gap-1">
+                  <label htmlFor={`${record.id}-to`}>{c.state}</label>
                   <select
+                    id={`${record.id}-to`}
                     name="to"
                     className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
                   >
@@ -445,10 +460,11 @@ export async function StaffPrivacyScreen({
                       </option>
                     ))}
                   </select>
-                </label>
-                <label className="grid gap-1">
-                  {c.owner}
+                </div>
+                <div className="grid gap-1">
+                  <label htmlFor={`${record.id}-owner`}>{c.owner}</label>
                   <select
+                    id={`${record.id}-owner`}
                     name="responsibleId"
                     className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
                     defaultValue={record.responsibleId ?? ""}
@@ -459,7 +475,7 @@ export async function StaffPrivacyScreen({
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
                 <TextField name="policyReference" label={c.policy} value={scope.policyReference} />
                 <TextField
                   name="dueAt"
@@ -492,6 +508,25 @@ export async function StaffPrivacyScreen({
           </section>
         );
       })}
+      {page.previous || page.next || search ? (
+        <nav aria-label={c.queueNavigation} className="flex flex-wrap gap-x-6">
+          {search ? (
+            <a className={queueLink} href={privacyQueuePath(locale)}>
+              {c.latest}
+            </a>
+          ) : null}
+          {page.previous ? (
+            <a className={queueLink} href={privacyQueuePath(locale, { before: page.previous })}>
+              {c.previous}
+            </a>
+          ) : null}
+          {page.next ? (
+            <a className={queueLink} href={privacyQueuePath(locale, { after: page.next })}>
+              {c.next}
+            </a>
+          ) : null}
+        </nav>
+      ) : null}
     </Frame>
   );
 }
