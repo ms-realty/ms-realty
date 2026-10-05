@@ -29,6 +29,17 @@ An item is **accepted** only when its behavior is checked on the exact released 
 
 No production transition is authorized by this record. Source and local checks may continue while operator and human inputs are gathered.
 
+### Preserved source reconciliation
+
+| Lineage | Current finding | Remaining decision |
+| --- | --- | --- |
+| Local delivery branch beyond #280 | The unique non-design commits are `1fb7cbc3` (isolated staging R2 and honest upload state), `233a53c1` (saved listing names/source locale in inquiry receipt DTOs), and `5ea6b7d9` (monitoring drill receipt issue closure). `4200c93f` merges the Claude design/copy commits into that lineage. All remain in this preserved branch, outside the remote #280 head. | Review each against the final source, obtain Claude's exact-revision review and integrate. The partial staging profile remains unverified. |
+| Closed PR #275 | The current-schema `src/server/work/` port covers staff Today/Inbox, contact reads, inquiry acceptance/triage, human contact observations and task outcomes. Case creation, email and handover have current services. The old direct assign/multichannel-send implementation is superseded by receiver acceptance and reviewed email/manual channel contracts in F12 and F18–F19. | W03 still lacks a receiver decline and receiver-owned review time. Check full journey and real provider outcomes before retiring the branch. |
+| Closed PR #277 | Its deterministic interpretation is adapted in `src/server/ai/intent.ts` with native reviewed search chips and tests. The old optional model assistance is outside the current launch contract and remains disabled pending a separate evaluation. | Verify discovery on the release candidate, then retire the branch only after peer review confirms no unique required behavior. |
+| P12 receipt | `233a53c1` persists and projects the selected listing identity and source locale, including a receipt after withdrawal. The visible `inquiryReceiptView` still renders references alone. | Claude owns the visible saved-name and unavailable-listing presentation; Codex checks the backend contract on a real database and reviews the rendered result. |
+
+Focused local checks on this preserved branch: `src/server/ai/intent.test.ts` and `src/features/discovery/inquiry-form.test.tsx` passed, 167 tests total. Database integration checks were skipped because no disposable `TEST_DATABASE_URL` is configured in this checkout. These checks do not verify a deployed journey.
+
 ## Complete acceptance coverage
 
 All groups below are **OPEN** at the released-product level. The ranges partition every AT and UX requirement exactly once; the detailed pass condition remains in its source specification. Local implementation evidence in `docs/delivery/` is useful for choosing the next check, not final acceptance.
@@ -65,8 +76,8 @@ Every W01–W14 journey is open. W01–W03 cover public discovery and inquiry ow
 | --- | --- | --- |
 | C-01 | MSR-CODEX: this record, requirements and decisions | Claude acknowledges the same scope revision; every open gate and valid commitment has an owner and evidence boundary. |
 | C-02 | MSR-CODEX: source/PR reconciliation only; no Figma, JSX or approved copy | Preserve and classify the local delivery commits and the unique #275/#277 work. Integrate each valid change or record exact supersession evidence; verify the resulting source and obtain Claude review before consequential integration. |
-| C-03 | MSR-CODEX: backend/server seams after the W03 contract is accepted | Complete the W03 receiver decision and P12 saved-property receipt contracts; focused real database and browser checks, then Claude review. |
-| U-01 | MSR-CLAUDE, requested: Figma W03 and its UI/copy contract, then exact review of C-02 | Return saved node/version references, explicit receiver accept/decline and receipt states, G1–G4 evidence and bounded defects. No complete-journey pass from a design frame alone. |
+| C-03 | MSR-CODEX: backend/server seams after the W03 contract is accepted | Complete the W03 receiver decision and real-database verification of the existing P12 saved-property receipt DTO; focused browser checks after Claude's presentation lands, then Claude review. |
+| U-01 | MSR-CLAUDE, requested: Figma W03 and its UI/copy contract, then exact review of C-02 | Return saved node/version references, explicit receiver accept/decline and review-time states, P12 saved-name/withdrawn-listing presentation, G1–G4 evidence and bounded defects. No complete-journey pass from a design frame alone. |
 | O-01 | Integration/release owner to acknowledge; operator resources and staging | Bind the accepted source to one image digest, private database/R2/Access/scanner/email proof and independent checker before protected rollout. The current partial staging profile may only be called a partial preview. |
 
 Existing coordination names Codex as the #280 integration owner. The attached controller brief proposes Claude as the default integration owner. Neither a proposal nor silence transfers a live checkout; the two controllers must explicitly acknowledge the integration owner and in-flight branches before merging or deploying.
