@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import type { InquiryValues } from "@/features/discovery/inquiry-state";
+import { viewingPreferencesFromFields } from "@/features/discovery/viewing-fields";
 import type { PublicLocale } from "@/i18n/config";
 import { getEnv } from "../config/env";
 import { readApprovedContent } from "../content/public";
@@ -49,6 +50,9 @@ export function inquiryPayload(values: InquiryValues, key: string, locale: Publi
     selectedListings,
     comparisonReferences,
     contentReference,
+    ...(values.purpose === "viewing_request"
+      ? { viewingPreferences: viewingPreferencesFromFields(values) }
+      : {}),
     ...(owner
       ? {
           ownerInput: {
