@@ -2,7 +2,7 @@
 
 **Verdict: OPEN.** No complete released product or final joint acceptance is evidenced. A green source check, design frame, local browser run, or protected staging page does not close a released journey.
 
-This is the single status and ownership index for the MS Realty completion goal. It points to the normative requirements rather than copying them. MSR-CODEX owns updates to this record. MSR-CLAUDE's ownership and review acknowledgement is **pending**. The existing `CODEX-UI-COORDINATION.md` in the Mindburn-Labs MS Realty output folder is the message relay and detailed screen wiring matrix, not a second acceptance verdict.
+This is the single status and ownership index for the MS Realty completion goal. It points to the normative requirements rather than copying them. MSR-CODEX owns updates to this record. MSR-CLAUDE acknowledged its full scope at revision `5525ced8`; later factual amendments remain available for review. The existing `CODEX-UI-COORDINATION.md` in the Mindburn-Labs MS Realty output folder is the message relay and detailed screen wiring matrix, not a second acceptance verdict.
 
 ## Scope and authority
 
@@ -102,7 +102,7 @@ Every W01–W14 journey is open. W01–W03 cover public discovery and inquiry ow
 | C-06 | MSR-CODEX, after a file-boundary ACK: server/transport modules from client-recovery and public-workflows | Reconcile appointment listing context, inquiry source and viewing acceptance, subscriptions and privacy queue readback with current schema; port valid behavior, run focused database/browser checks and obtain Claude's consequential review. |
 | O-01 | Integration/release owner to acknowledge; operator resources and staging | Bind the accepted source to one image digest, private database/R2/Access/scanner/email proof and independent checker before protected rollout. The current partial staging profile may only be called a partial preview. |
 
-Existing coordination names Codex as the #280 integration owner. The attached controller brief proposes Claude as the default integration owner. Neither a proposal nor silence transfers a live checkout; the two controllers must explicitly acknowledge the integration owner and in-flight branches before merging or deploying.
+The controllers exchanged `ACK MSR-HELLO-1` and `RELEASE #280` in the relay. MSR-CLAUDE now owns integration and release of #280/#293 from the preserved `4200c93f` local delivery head. MSR-CODEX retains this acceptance record and separate server/operational branches for review; neither controller may infer deployment readiness from the handover.
 
 ## Reconciliation and final sign-off
 
@@ -112,6 +112,6 @@ Existing coordination names Codex as the #280 integration owner. The attached co
 
 | Sign-off | Scope revision | Released source/image/config | Result |
 | --- | --- | --- | --- |
-| MSR-CODEX | This record, pending peer acknowledgement | Not established | OPEN |
-| MSR-CLAUDE | Pending acknowledgement | Not established | OPEN |
+| MSR-CODEX | This record; peer scope ACK at `5525ced8`, later amendments pending review | Not established | OPEN |
+| MSR-CLAUDE | Scope ACK at `5525ced8`; #280/#293 integration and release ownership accepted | Not established | OPEN |
 | Ivan / required operators | R00 and later release approvals pending | Not established | OPEN |
