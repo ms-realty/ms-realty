@@ -1,4 +1,4 @@
-import { requireClientPage } from "@/features/cases/access";
+import { clientReturnPath, requireClientPage } from "@/features/cases/access";
 import { WorkflowStatusScreen } from "@/features/cases/screens";
 export default async function Page({
   params,
@@ -8,8 +8,11 @@ export default async function Page({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
-  const session = await requireClientPage(locale);
   const query = await searchParams;
+  const session = await requireClientPage(
+    locale,
+    clientReturnPath(`/${locale}/overview/operations`, query, ["command", "id", "key"]),
+  );
   return (
     <WorkflowStatusScreen
       locale={locale}
