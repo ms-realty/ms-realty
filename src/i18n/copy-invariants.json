@@ -1,0 +1,17 @@
+{
+  "$comment": "Text that reads the same in every locale: brand and assistant names, units, time zone, file formats, map attribution. The copy guard (copy-guard.test.ts) does not count it and the catalog checks (messages.test.ts) ignore it. Add an entry only when no locale would translate it.",
+  "strings": [
+    "MS Realty",
+    "Butler",
+    "Europe/Sofia",
+    "m²",
+    "MiB",
+    "SHA-256",
+    "PDF",
+    "JPEG",
+    "PNG",
+    "WebP",
+    "Protomaps",
+    "© OpenStreetMap"
+  ]
+}

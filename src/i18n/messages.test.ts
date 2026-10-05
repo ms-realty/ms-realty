@@ -1,8 +1,10 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { createTranslator } from "next-intl";
 import { describe, expect, it } from "vitest";
+import cognates from "../../messages/_cognates.json";
 import catalogStatus from "../../messages/_status.json";
 import { publicLocales, defaultLocale as sourceLocale, staffLocales } from "./config";
+import invariants from "./copy-invariants.json";
 import { publicNamespaces, staffNamespaces } from "./messages";
 
 type Tree = { [key: string]: string | Tree };
@@ -51,7 +53,53 @@ const sampleValues = {
   reason: "Reason.",
   reference: "RQ-2026-000042",
   language: "English",
+  seconds: 30,
 };
+
+/** What a reader sees: no ICU syntax, placeholders or names that every locale shares. */
+function visibleText(message: string): string {
+  let text = message
+    .replace(/\{\s*\w+\s*,\s*(?:plural|select|selectordinal)\s*,/g, " ")
+    .replace(/(?:^|\s)(?:=\d+|zero|one|two|few|many|other)\s*\{/g, " ")
+    .replace(/\{\s*\w+\s*\}/g, " ")
+    .replace(/[{}#]/g, " ");
+  for (const invariant of invariants.strings) text = text.split(invariant).join(" ");
+  return text;
+}
+const hasWords = (message: string) => /\p{L}/u.test(visibleText(message));
+
+/** Numbers without grouping separators, so 2000, 2,000 and 2.000 compare equal. */
+const numbersIn = (message: string) =>
+  (
+    visibleText(message)
+      .replace(/(\d)[\s.,](?=\d{3}(?!\d))/g, "$1")
+      .match(/\d+/g) ?? []
+  ).sort();
+const urlsIn = (message: string) => (message.match(/https?:\/\/[^\s"'<>]+/g) ?? []).sort();
+
+/** The script a locale's messages are written in; Latin locales may not contain the others. */
+const localeScripts: Record<string, RegExp> = {
+  bg: /\p{Script=Cyrillic}/u,
+  ru: /\p{Script=Cyrillic}/u,
+  el: /\p{Script=Greek}/u,
+  he: /\p{Script=Hebrew}/u,
+};
+const nonLatinScript = /[\p{Script=Cyrillic}\p{Script=Greek}\p{Script=Hebrew}]/u;
+
+// AGENTS.md: Sandanski is inland. No message may place it by the sea, a beach or a coast.
+const sandanski = /Sandanski|Сандански|Σαντάνσκι|סנדנסקי/iu;
+const seaWords: Record<string, RegExp> = {
+  bg: /(?<!\p{L})(?:море|морск|плаж|крайбреж)/iu,
+  ru: /(?<!\p{L})(?:мор[еяю]|морск|пляж|побережь)/iu,
+  en: /(?<!\p{L})(?:sea(?:side|front)?(?!\p{L})|beach|coast)/iu,
+  de: /(?<!\p{L})(?:meer|strand|küste)/iu,
+  nl: /(?<!\p{L})(?:zee(?!r)|strand|kust)/iu,
+  el: /(?<!\p{L})(?:θάλασσ|παραλί|ακτ[ήέ])/iu,
+  he: /(?<!\p{L})[הלבו]?(?:ים|חוף)(?!\p{L})/u,
+};
+
+const allowedCognates = cognates as unknown as Record<string, string[] | undefined>;
+type Review = { status: string; reviewer: string | null; reviewedAt: string | null };
 
 const sets = [
   {
@@ -143,8 +191,127 @@ describe("message catalogs (ux-spec §19.1)", () => {
         ] as Record<string, { status: string }>;
         expect(["draft_unreviewed", "approved"]).toContain(status[locale]?.status);
       });
+
+      // Catalog quality (design/i18n-uncatalogued-copy-plan.md §3.3).
+      const english = flatten(catalog(set.dir("en")));
+
+      it.each([...set.locales])("%s copies no bg or en value except listed cognates", (locale) => {
+        const flat = flatten(catalog(set.dir(locale)));
+        const references = [
+          ...(locale === sourceLocale ? [] : [source]),
+          ...(locale === "en" ? [] : [english]),
+        ];
+        const copied = (key: string) =>
+          hasWords(flat[key] ?? "") && references.some((reference) => reference[key] === flat[key]);
+        const listed = (allowedCognates[locale] ?? []).filter((key) => key in flat);
+        expect(Object.keys(flat).filter((key) => copied(key) && !listed.includes(key))).toEqual([]);
+        // A listed message whose value has changed since is stale: it must not hide a later copy.
+        expect(listed.filter((key) => !copied(key))).toEqual([]);
+      });
+
+      it.each([...set.locales])("%s writes every message in its own script", (locale) => {
+        const script = localeScripts[locale];
+        const wrong = Object.entries(flatten(catalog(set.dir(locale))))
+          .filter(([, message]) => hasWords(message))
+          .filter(([, message]) =>
+            script ? !script.test(visibleText(message)) : nonLatinScript.test(visibleText(message)),
+          )
+          .map(([key]) => key);
+        expect(wrong).toEqual([]);
+      });
+
+      it.each([...set.locales])("%s keeps the source's numbers and links", (locale) => {
+        const flat = flatten(catalog(set.dir(locale)));
+        for (const key of sourceKeys) {
+          const [message, original] = [flat[key] ?? "", source[key] ?? ""];
+          expect(numbersIn(message), `${locale}:${key}`).toEqual(numbersIn(original));
+          expect(urlsIn(message), `${locale}:${key}`).toEqual(urlsIn(original));
+        }
+      });
+
+      it.each([...set.locales])("%s never places Sandanski by the sea", (locale) => {
+        const sea = seaWords[locale] ?? /$^/;
+        const wrong = Object.entries(flatten(catalog(set.dir(locale))))
+          .filter(([, message]) => sandanski.test(message) && sea.test(message))
+          .map(([key]) => key);
+        expect(wrong).toEqual([]);
+      });
     });
   }
+
+  it("lists only cognates that name an existing message", () => {
+    for (const [locale, keys] of Object.entries(allowedCognates)) {
+      if (locale.startsWith("$")) continue;
+      const known = {
+        ...flatten(catalog(`${locale}/`)),
+        ...(staffLocales.some((staff) => staff === locale)
+          ? flatten(catalog(`staff/${locale}/`))
+          : {}),
+      };
+      expect(
+        (keys ?? []).filter((key) => !(key in known)),
+        locale,
+      ).toEqual([]);
+    }
+  });
+
+  it("the catalog checks catch a copied value, a wrong script and a seaside Sandanski", () => {
+    expect(hasWords("© {year} MS Realty")).toBe(false);
+    expect(visibleText("{count, plural, one {# отговор} other {# отговора}}")).toMatch(/отговор/);
+    expect(localeScripts.he?.test(visibleText("Search {reference}"))).toBe(false);
+    expect(numbersIn("Up to 2,000 characters")).toEqual(numbersIn("До 2000 знака"));
+    expect(numbersIn("Choose up to 4")).not.toEqual(numbersIn("Изберете до 3"));
+    expect(sandanski.test("Апартамент в Сандански") && seaWords.bg?.test("близо до морето")).toBe(
+      true,
+    );
+    expect(seaWords.he?.test("קרוב לים")).toBe(true);
+    expect(seaWords.he?.test("מעיינות מים מינרליים")).toBe(false);
+    expect(seaWords.nl?.test("Meer informatie, zeer rustig")).toBe(false);
+  });
+
+  describe("review status (_status.json)", () => {
+    const status = catalogStatus as unknown as {
+      locales: Record<string, Review>;
+      staff: Record<string, Review>;
+      namespaces?: Record<string, Record<string, Review> | string>;
+    };
+    // Reviewed with their locale entry; every namespace added later has entries of its own.
+    const coveredByLocale = ["a11y", "common", "errors", "footer", "forms", "nav", "states"];
+    const namespaceReviews = Object.entries(status.namespaces ?? {}).flatMap(([name, reviews]) =>
+      typeof reviews === "string" ? [] : [[name, reviews] as const],
+    );
+
+    it("approves a catalog only with a named reviewer and a date", () => {
+      const reviews = [
+        ...Object.values(status.locales),
+        ...Object.values(status.staff),
+        ...namespaceReviews.flatMap(([, entries]) => Object.values(entries)),
+      ];
+      for (const review of reviews)
+        expect(
+          review.status === "draft_unreviewed" ||
+            (review.status === "approved" &&
+              Boolean(review.reviewer) &&
+              Boolean(review.reviewedAt)),
+          JSON.stringify(review),
+        ).toBe(true);
+    });
+
+    it("gives every later public namespace a review entry per locale", () => {
+      const later = publicNamespaces.filter((ns) => !coveredByLocale.includes(ns)).sort();
+      expect(namespaceReviews.map(([name]) => name).sort()).toEqual(later);
+      for (const [name, entries] of namespaceReviews)
+        expect(Object.keys(entries).sort(), name).toEqual([...publicLocales].sort());
+    });
+
+    it("keeps a locale unapproved while one of its namespaces is a draft", () => {
+      for (const locale of publicLocales) {
+        if (status.locales[locale]?.status !== "approved") continue;
+        for (const [name, entries] of namespaceReviews)
+          expect(entries[locale]?.status, `${name}:${locale}`).toBe("approved");
+      }
+    });
+  });
 
   it("covers every global state from architecture §11.4", () => {
     const states = Object.keys(catalog("bg/").states as Tree);
