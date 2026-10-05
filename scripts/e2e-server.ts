@@ -2,6 +2,7 @@
 // after the suite; the finally block drops only the generated msr_e2e_* database.
 import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { mkdir, rm } from "node:fs/promises";
+import { request } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import postgres from "postgres";
@@ -113,17 +114,26 @@ async function replicatedNext(): Promise<number> {
       ports.map(async (backend) => {
         const deadline = Date.now() + 120_000;
         while (!stopping && !ended && Date.now() < deadline) {
-          try {
-            // The app accepts the localhost health host; 127.0.0.1 is a different host and
-            // receives the deliberate public-route 404 even after Next has started.
-            const response = await fetch(`http://localhost:${backend}/api/health`, {
-              signal: AbortSignal.timeout(1000),
-            });
-            await response.body?.cancel();
-            if (response.ok) return;
-          } catch {
-            // Still starting; a child exit or bounded deadline fails the whole cohort.
-          }
+          // The balancer preserves the public Host, including its port. A direct backend-port
+          // Host receives the app's deliberate 404, so probe each backend with that public Host.
+          const ready = await new Promise<boolean>((resolve) => {
+            const probe = request(
+              {
+                hostname: "127.0.0.1",
+                port: backend,
+                path: "/api/health",
+                headers: { host: `localhost:${port}` },
+                signal: AbortSignal.timeout(1000),
+              },
+              (response) => {
+                response.resume();
+                resolve(response.statusCode === 200);
+              },
+            );
+            probe.once("error", () => resolve(false));
+            probe.end();
+          });
+          if (ready) return;
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         throw new Error("Load replica did not become ready");
