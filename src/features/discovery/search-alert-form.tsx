@@ -58,9 +58,46 @@ export function SearchAlertForm({
         {(form) => (
           <>
             <input type="hidden" name="proof" value={form.values.proof} />
+            {/* Radios show each complete verified address; a native select clips long ones. */}
+            <fieldset className="min-w-0 w-full space-y-2">
+              <legend>{p.email}</legend>
+              {contacts.map((contact, index) => (
+                <label key={contact.id} className="flex min-h-control min-w-0 items-center gap-3">
+                  <input
+                    id={
+                      index === 0
+                        ? form.field("contactMethodId").id
+                        : `${form.field("contactMethodId").id}-${contact.id}`
+                    }
+                    type="radio"
+                    name="contactMethodId"
+                    value={contact.id}
+                    checked={form.values.contactMethodId === contact.id}
+                    onChange={form.field("contactMethodId").onChange}
+                    disabled={form.field("contactMethodId").readOnly}
+                    required
+                    className="size-5 shrink-0"
+                    aria-invalid={Boolean(form.field("contactMethodId").error)}
+                    aria-describedby={
+                      form.field("contactMethodId").error
+                        ? `${form.field("contactMethodId").id}-error`
+                        : undefined
+                    }
+                  />
+                  <bdi className="min-w-0 [overflow-wrap:anywhere]">{contact.value}</bdi>
+                </label>
+              ))}
+              {form.field("contactMethodId").readOnly ? (
+                <input type="hidden" name="contactMethodId" value={form.values.contactMethodId} />
+              ) : null}
+              {form.field("contactMethodId").error ? (
+                <p id={`${form.field("contactMethodId").id}-error`} className="text-error">
+                  {form.field("contactMethodId").error}
+                </p>
+              ) : null}
+            </fieldset>
             {(
               [
-                ["contactMethodId", p.email, contacts.map((c) => [c.id, c.value])],
                 [
                   "frequency",
                   p.frequency,
@@ -86,7 +123,6 @@ export function SearchAlertForm({
                     aria-invalid={Boolean(field.error)}
                     aria-describedby={field.error ? `${field.id}-error` : undefined}
                   >
-                    {name === "contactMethodId" ? <option value="">{p.email}</option> : null}
                     {options.map(([value, text]) => (
                       <option key={value} value={value}>
                         {text}

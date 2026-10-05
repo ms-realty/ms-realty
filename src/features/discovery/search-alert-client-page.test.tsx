@@ -145,8 +145,10 @@ it("keeps the native response form mounted after creation and offers only owned 
   );
   expect(screen.getByText(/search-alert preference already exists/)).toBeVisible();
   expect(screen.getByRole("button", { name: "Save this search preference" })).toBeVisible();
-  expect(screen.getByRole("option", { name: "synthetic@example.test" })).toBeInTheDocument();
-  expect(screen.queryByRole("option", { name: "unverified@example.test" })).not.toBeInTheDocument();
+  const recipient = screen.getByRole("radio", { name: "synthetic@example.test" });
+  expect(recipient).toBeRequired();
+  expect(recipient).not.toBeChecked();
+  expect(screen.queryByRole("radio", { name: "unverified@example.test" })).not.toBeInTheDocument();
 });
 it.each(["contact", "terms"])(
   "blocks opt-in when current %s eligibility is absent",

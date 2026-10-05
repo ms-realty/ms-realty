@@ -181,7 +181,10 @@ function FormSession<V extends FormValues>({
       const control = nativeForm.current.elements.namedItem(name);
       if (control instanceof HTMLInputElement) {
         if (["hidden", "password", "file", "submit", "button"].includes(control.type)) continue;
-        if (control.type === "radio") continue;
+        if (control.type === "radio") {
+          values[name as keyof V] = (control.checked ? control.value : "") as V[keyof V];
+          continue;
+        }
         values[name as keyof V] = (
           control.type === "checkbox" ? (control.checked ? control.value : "") : control.value
         ) as V[keyof V];
@@ -197,6 +200,10 @@ function FormSession<V extends FormValues>({
             )
             .map((item) => item.value)
             .join("\n") as V[keyof V];
+        else if (
+          controls.every((item) => item instanceof HTMLInputElement && item.type === "radio")
+        )
+          values[name as keyof V] = control.value as V[keyof V];
       }
     }
     if (Object.keys(values).some((key) => values[key] !== state.values[key]))

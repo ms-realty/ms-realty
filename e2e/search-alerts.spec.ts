@@ -128,9 +128,17 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(page.getByRole("heading", { name: c.title, exact: true })).toBeVisible();
       await expect(page.getByRole("checkbox", { name: c.consent, exact: true })).not.toBeChecked();
       await expect(
-        page.getByRole("option", { name: fixture.unverifiedEmail, exact: true }),
+        page.getByRole("radio", { name: fixture.unverifiedEmail, exact: true }),
       ).toHaveCount(0);
-      await page.getByLabel(p.email, { exact: true }).selectOption(fixture.contactId);
+      const recipient = page.getByRole("radio", { name: fixture.email, exact: true });
+      await expect(recipient).not.toBeChecked();
+      await expect(recipient).toHaveValue(fixture.contactId);
+      expect(
+        await recipient.locator("..").evaluate((label) => label.getBoundingClientRect().height),
+      ).toBeGreaterThanOrEqual(44);
+      await recipient.focus();
+      await page.keyboard.press("Space");
+      await expect(recipient).toBeChecked();
       await page.getByLabel(p.frequency, { exact: true }).selectOption("weekly");
       await page.getByLabel(p.timezone, { exact: true }).fill("Europe/Sofia");
       await page.getByRole("checkbox", { name: c.consent, exact: true }).check();
