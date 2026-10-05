@@ -151,7 +151,7 @@ All paths below are under the appropriate host and `/{locale}` unless a legacy m
 | Client Case `/brief`, `/properties`, `/appointments`, `/messages`, `/documents`, `/proposals`, `/listing-preview` | C04–C10, C12 | Contextual private tasks |
 | Client `/preferences`, scoped `/participants`, `/privacy-requests` | C13, C17, C18 | Personal choices and access/data requests |
 | Client supported service Case | C14 | Owned consultation, not maintenance tracking |
-| Staff `/access`, `/access/recovery` | O23 access variant | Staff-only provider handoff, enrollment, challenge, denial and recovery |
+| Staff `/access`, `/access/recovery` | O23 access variant | Staff-only passkey sign-in, two-passkey enrolment, denial and recovery |
 | Staff `/today`, `/inquiries`, `/inquiries/{id}` | O01–O03, O18 | Coverage, triage and commitments |
 | Staff `/cases`, `/cases/{id}`, `/parties/{id}` | O04–O07, O19, O20 | Work and relationship context |
 | Staff `/calendar`, `/appointments/{id}` | O08, O09 | Resource-aware scheduling |
@@ -326,7 +326,7 @@ Target WCAG 2.2 AA across complete tasks, including authentication, errors and d
 
 Motion is limited to orientation and feedback, usually 150–200 ms. Reduced motion removes nonessential movement without delaying state changes. No scroll hijacking, animated counters, auto-advancing carousel or progress animation that invents work completed. Do not show a percentage unless byte/job progress actually supports it.
 
-Authentication must allow paste/autofill/password managers where relevant; verification code entry cannot depend on memorization or manual transcription alone. The chosen provider flow and recovery must be tested, not exempted because it is hosted elsewhere. [Accessible authentication](https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum.html)
+Authentication must not depend on memorization or manual transcription: staff use passkeys, clients use an email link (with an optional passkey), and any typed field allows paste and autofill. Passkey, email-link and staff recovery flows are application-owned and must be tested with real browsers and authenticators. [Accessible authentication](https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum.html)
 
 ## 07. Layout recipes
 
@@ -608,30 +608,30 @@ Each flow names the actor, entry, sequence, durable outcome, branches and proof.
 
 **Actor/entry:** invited client/collaborator from an explicit link or client access route; C01/C02.
 
-1. Enter the client authentication context and verify the intended email through the supported provider flow. Do not reveal private Case details to an unverified/wrong identity.
+1. Enter the client authentication context and request a sign-in link for the intended email. The link is single-use and expires after 15 minutes. Opening it shows a confirm page; access starts only after the explicit confirm POST, so a mail scanner's GET never signs anyone in. A client may later add a passkey as an optional faster sign-in. Do not reveal private Case details to an unverified/wrong identity.
 2. After verification show the valid invitation's safe inviter, purpose, scope, expiry and recipient. A scanner/GET preview never accepts it.
 3. Explicitly accept by POST against the current recipient/scope. Already accepted invitations route to currently permitted work; revoked/expired ones do not grant access.
 4. Land at the permitted Case/next task. On later visits authenticate/refresh grants and restore a safe authorized return destination.
 5. Sign out clears private local state. History restoration and visibility return reauthorize before revealing protected information.
 
-**Branches:** wrong account offers switching without private context; reissue invalidates old invitation; provider outage offers safe agency contact, not a homegrown password bypass. Staff context remains distinct even for the same person. After reauthentication, a pending send/approval requires fresh review, not automatic execution.
+**Branches:** wrong account offers switching without private context; reissue invalidates old invitation; an expired, already used or revoked link says which and offers a new link; a delayed or unknown email delivery says what was requested and when another link can be asked for, with agency contact, never a password bypass. Staff context remains distinct even for the same person. After reauthentication, a pending send/approval requires fresh review, not automatic execution.
 
 **Exit/proof:** correct person, correct application and explicit record grants. AT16, AT36–AT41.
 
 #### Staff variant for F13 — Sign in, recover access and reauthorize
 
-**Actor/entry:** invited or returning staff member, on the staff host; O23 access variant. This is not the client's email-verification journey. Provider pages and application-owned states must both appear in the design flow; do not draw a custom password or MFA implementation.
+**Actor/entry:** invited or returning staff member, on the staff host; O23 access variant. This is not the client's email-link journey. Staff sign in only with a passkey (WebAuthn, ADR 0002); there is no password, one-time code, social or SSO path, so never draw one.
 
-1. Application-owned entry identifies MS Realty staff access, the destination host/environment and a safe return task. Staff invitation previews do not accept membership or expose operational records. Continue enters the dedicated staff WorkOS application; client identity/cookies never substitute.
-2. Provider-hosted authentication uses the configured staff method and requires TOTP. Social/SSO buttons are not enabled at launch. First use includes hosted factor enrollment and a successful challenge; application entry remains blocked until the required assurance, staff organization and active local membership are all verified.
-3. Application-owned invitation acceptance is explicit and recipient-bound; use the architecture's 72-hour invitation expiry, safe wrong-account handling and reissue-invalidates-old rule. An authenticated identity without a valid invitation/current membership receives a non-enumerating access-denied screen with sign-out/switch and verified support, not an empty operational dashboard.
+1. Application-owned entry identifies MS Realty staff access, the destination host/environment and a safe return task. Staff invitation previews do not accept membership or expose operational records. Client identity and cookies never substitute for the staff context.
+2. A returning staff member signs in with a registered passkey through the browser's own passkey prompt. Entry stays blocked until the passkey verifies and an active local membership exists.
+3. An invitation (72-hour expiry, recipient-bound, reissue invalidates the old one) is opened from the work email and accepted explicitly. Accepting opens enrolment: the person registers two passkeys (for example this device and a security key or second device) within 15 minutes, with visible progress "1 of 2". No staff route opens before both exist. An authenticated identity without a valid invitation/current membership receives a non-enumerating access-denied screen with sign-out/switch and verified support, not an empty operational dashboard.
 4. Return to the allowed task with current grants. Enforce staff 12-hour absolute and 30-minute idle limits locally. Warn before a known expiry when possible, preserve only permitted draft state, and never promise the warning will always run in a suspended tab.
-5. Access grants, exports, production controls and other sensitive actions require authentication freshness within five minutes. Show the reason and expected return, complete the supported provider reauthentication, recheck local authority, then show the current action/diff again. The user explicitly recommits; successful login does not replay the pending operation.
-6. “Lost access to your authenticator?” opens an application-owned explanation and verified agency support route, followed only by the configured provider's authorized recovery process. Do not promise recovery codes or a self-service reset unless that actual provider configuration supports and passes them. The operational recovery runbook verifies identity, audits authorized factor reset/re-enrollment, revokes affected sessions and restores access only after MFA and local membership checks; test the actual configured path before release. Recovery remains a visible blocked state until completed, with owned work transferred through normal coverage rather than a login bypass.
+5. Access grants, exports, production controls and other sensitive actions require a passkey check within the last five minutes. Show the reason and expected return, run the passkey prompt, recheck local authority, then show the current action/diff again. The user explicitly recommits; successful sign-in does not replay the pending operation.
+6. "Lost access to your passkeys?" explains that only a manager can restore access and that there are no recovery codes; nobody at MS Realty asks for a passkey, code or password. After confirming who the person is, a manager issues a recovery invitation to the work email. Issuing it revokes the old passkeys and sessions, and accepting it re-runs the two-passkey enrolment. Every step is audited. Recovery remains a visible blocked state until completed, with owned work transferred through normal coverage rather than a sign-in bypass.
 
-**Required branches:** enrollment abandoned/failed, incorrect or expired TOTP with safe retry/rate limit, provider unavailable, expired/revoked invitation, wrong staff organization, client-context callback, missing/suspended/revoked membership, lost factor, session expiry with a draft, cancelled reauthentication, and permission revoked during step-up. Credential/factor errors belong to the hosted provider; application membership, return-context and business-action outcomes belong to MS Realty. The boundary must not duplicate credentials or leak whether another staff account exists.
+**Required branches:** passkey prompt cancelled or failed with safe retry/rate limit, no passkey on this device, enrolment abandoned after one passkey, enrolment window closed, expired/revoked/used invitation, wrong account, client-context session on the staff host, missing/suspended/revoked membership, lost passkeys and recovery pending, session expiry with a draft, cancelled reauthentication, and permission revoked during step-up. Browser and authenticator prompts belong to the platform; membership, return-context and business-action outcomes belong to MS Realty. Errors never reveal whether another staff account exists.
 
-**Exit/proof:** actual invited/returning staff completes the qualified provider flow and local checks; denied/recovering staff cannot enter; sensitive action requires fresh review after reauthentication. AT36–AT41 and O23/O24. Provider integration tests—not mock screens—establish the enrollment/challenge/recovery behavior.
+**Exit/proof:** actual invited/returning staff completes enrolment or sign-in with real authenticators and the local checks; denied/recovering staff cannot enter; sensitive action requires fresh review after reauthentication. AT36–AT41 and O23/O24. Browser tests with real or virtual WebAuthn authenticators and the database, not mock screens, establish enrolment, sign-in, step-up and recovery behavior.
 
 ### F14 — Understand progress and complete the next action
 
@@ -1258,7 +1258,7 @@ Correction, export and deletion/restriction are different tasks. A request recei
 
 ## 16. Staff and operating screen contracts
 
-Staff screens require staff-context identity, dedicated staff organization, active local membership and required capabilities. Staff MFA and sensitive reauthentication are separate from client email verification. Raw Payload collection/admin access must not bypass these contracts.
+Staff screens require staff-context identity, an active local staff membership and required capabilities. Staff passkey sign-in and sensitive reauthentication are separate from client email-link verification. No generated CRUD route or direct database/admin access may bypass these contracts.
 
 ### O01 — Today
 
@@ -1438,11 +1438,11 @@ Prioritize useful human response, Cases with next action, overdue promises, fres
 
 ### O23 — Team, access and coverage
 
-**Layout/flows:** L16/L11 for management; L05 for access/recovery; F13 including its staff variant, F19/F30. **Order after authorization:** memberships/roles → coverage/absence → invitations/MFA enrollment status → access-impact review → attributable grant/revoke result. `/access` and `/access/recovery` are separate unauthenticated task states and never render this management surface.
+**Layout/flows:** L16/L11 for management; L05 for access/recovery; F13 including its staff variant, F19/F30. **Order after authorization:** memberships/roles → coverage/absence → invitations/passkey enrolment status (0, 1 or 2 of 2) → access-impact review → attributable grant/revoke result. `/access` and `/access/recovery` are separate unauthenticated task states and never render this management surface.
 
-Require staff-context identity, active membership and recent reauthentication for sensitive changes. Show open work/receiver acceptance before revoking or moving responsibility. Recovery follows the identity provider's authorized process, not a local bypass.
+Require staff-context identity, active membership and recent reauthentication for sensitive changes. Show open work/receiver acceptance before revoking or moving responsibility. Recovery is a manager-issued, audited recovery invitation that revokes old passkeys and sessions, not a sign-in bypass.
 
-**Draw:** staff entry, hosted-auth handoff, TOTP enrollment/challenge, invalid/expired invitation, wrong context, missing/revoked membership, provider failure, lost-factor explanation/recovery pending, session expiry and sensitive-action reauthentication/return; then management invited, enrollment pending, active, absent, restricted, revoke with open commitments, transfer pending and completed. Staff/client applications and staging environments must never be conflated in labels or links. Hosted provider states are annotated dependencies with real acceptance evidence, not substitute custom credential forms.
+**Draw:** staff entry, passkey prompt, two-passkey enrolment with progress and closed window, invalid/expired invitation, wrong context, missing/revoked membership, prompt cancelled/failed, lost-passkeys explanation/recovery pending, session expiry and sensitive-action reauthentication/return; then management invited, enrollment pending, active, absent, restricted, revoke with open commitments, transfer pending and completed. Staff/client applications and staging environments must never be conflated in labels or links. Browser passkey prompts are platform UI, annotated rather than redrawn; never draw a password or code field.
 
 ### O24 — Service policy and release controls
 
@@ -1712,7 +1712,7 @@ Use synthetic private identities in design files. Real private customer notes, d
 
 ### 20.1 Architecture boundary
 
-Implement within the selected Next.js/React/Payload TypeScript application and shared CSS-token/component system. Use server-rendered public semantic content and normal forms as the dependable baseline; client islands enhance filters, maps, media and task editing. Ordinary browse/search/detail/inquiry must remain usable with delayed or disabled JavaScript. Do not build separate public/client/staff data authorities or a second CSS framework.
+Implement within the selected Next.js/React/Drizzle TypeScript application and shared CSS-token/component system. Use server-rendered public semantic content and normal forms as the dependable baseline; client islands enhance filters, maps, media and task editing. Ordinary browse/search/detail/inquiry must remain usable with delayed or disabled JavaScript. Do not build separate public/client/staff data authorities or a second CSS framework.
 
 Server/domain commands own persistence, authorization, state transitions, exact approvals and external-effect intent. Frontend owns transient interaction, draft presentation and truthful feedback. It consumes authorized projections, never raw internal collections hidden with CSS. Transport schemas are shared/validated; UI validation is not security.
 
@@ -1812,8 +1812,8 @@ Use the architecture's p95 API and load targets, then profile the real complete 
 |---|---|---|---|
 | Database/app unavailable | No false request receipt; truthful maintenance/contact fallback | Incident and frozen consequential work | Preserve/reconcile logical requests; do not assume acceptance |
 | Search unavailable | Retained filters, explicit error/retry/contact | Affected query/runtime evidence | Never display an outage as zero matches |
-| MapTiler blocked/slow | Full list and textual location remain usable | Provider exception where relevant | No exact-private-coordinate fallback |
-| WorkOS unavailable | Safe login/retry/contact; no private exposure | Identity incident, existing sessions governed by policy | No emergency local-password bypass |
+| Map tiles (self-hosted Protomaps) blocked/slow | Full list and textual location remain usable | Map release/asset exception where relevant | No exact-private-coordinate fallback |
+| Sign-in unavailable (database, email link or passkey verification) | Safe sign-in/retry/contact; no private exposure | Identity incident, existing sessions governed by policy | No emergency password or code bypass |
 | Resend delayed/unknown | Committed Inquiry/Case message remains; delivery state truthful | Owned delivery/ingress reconciliation | No blind duplicate send, especially beyond dedupe window |
 | R2/media unavailable | Facts/contact still usable where eligible; missing media explained | Asset/publication coverage exception | Missing required media blocks relevant new publication |
 | Scanner stale/down | Upload remains processing/quarantined | Queue with owner and freshness issue | No unscanned file becomes ready/public |
@@ -1889,7 +1889,7 @@ This table maps every architecture scenario exactly once; the architecture retai
 | AT34 | Proposal revision/expiry/counter prevents obsolete decision; C10/O19 |
 | AT35 | Closeout evidence and remaining obligations without legal overclaim; C16/O05/O19 |
 | AT36 | Correct identity application/token and local membership; C01/O23 and protected-route negative tests |
-| AT37 | Real staff MFA enrollment/challenge, lost-factor recovery and safe step-up return; F13 staff variant, O23/O24 |
+| AT37 | Real staff two-passkey enrolment and sign-in, lost-passkey recovery and safe step-up return; F13 staff variant, O23/O24 |
 | AT38 | Invitation GET/scanner/wrong-recipient/revocation; C01/C02/C17 |
 | AT39 | Subsequent-access revocation, cache clear and history reauthorization; C07–C09/C17, §20.6 |
 | AT40 | Record/field/audience allow-and-deny coverage; §02 and every protected contract |
