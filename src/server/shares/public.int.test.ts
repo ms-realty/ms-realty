@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { publicShares } from "@/db/schema";
+import { listings, publicShares } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession, revokeSession } from "../auth/sessions";
 import { parseEnv } from "../config/env";
@@ -117,6 +117,25 @@ describe("P09 public shortlist share", () => {
     if (changed.status !== "ready") throw new Error("Expected a current public share");
     expect(changed.items.map((item) => item.status)).toEqual(["public", "unavailable"]);
     expect(changed.items[1]).toEqual({ status: "unavailable", reference: second.reference });
+    await t.db
+      .update(listings)
+      .set({ commercialState: "sold" })
+      .where(eq(listings.id, first.listingId));
+    const closed = await readPublicShare(t.db, created.share.token, "bg");
+    expect(closed.status).toBe("ready");
+    if (closed.status !== "ready") throw new Error("Expected a current public share");
+    expect(closed.items).toEqual([
+      { status: "unavailable", reference: first.reference },
+      { status: "unavailable", reference: second.reference },
+    ]);
+    await expect(
+      createPublicShare(
+        t.db,
+        owner,
+        { ...input, operationId: randomUUID(), references: [first.reference] },
+        source,
+      ),
+    ).rejects.toMatchObject({ code: "validation_failed" });
     expect(
       await readPublicShare(t.db, created.share.token, "bg", new Date(Date.now() + 8 * 86_400_000)),
     ).toEqual({ status: "expired" });
