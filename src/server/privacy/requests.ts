@@ -1,7 +1,7 @@
 // Privacy work is a human-reviewed record. No transition deletes data, exports records,
 // overrides legal holds or sends customer content to a provider/model.
 import "server-only";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { parties, principals, privacyRequests, staffMemberships } from "@/db/schema";
 import {
@@ -138,6 +138,95 @@ export async function clientPrivacyRequests(db: Executor, session: Session) {
   }));
 }
 
+export const privacyQueuePageSize = 25;
+const cursorValue = z.object({ updatedAt: z.iso.datetime(), id: z.uuid() }).strict();
+const cursor = z
+  .string()
+  .min(1)
+  .max(256)
+  .transform((value, ctx) => {
+    try {
+      return cursorValue.parse(JSON.parse(Buffer.from(value, "base64url").toString("utf8")));
+    } catch {
+      ctx.addIssue({ code: "custom", message: "Invalid privacy queue position" });
+      return z.NEVER;
+    }
+  });
+export const privacyQueueQuery = z
+  .object({ after: cursor.optional(), before: cursor.optional() })
+  .refine((value) => !(value.after && value.before), "Choose one queue direction");
+export type PrivacyQueueQuery = { after?: string; before?: string };
+
+/** Queue positions are navigation only; they grant no authority and never replay a review. */
+export function privacyQueuePath(locale: string, query: PrivacyQueueQuery = {}) {
+  privacyQueueQuery.parse(query);
+  const position = new URLSearchParams();
+  if (query.after) position.set("after", query.after);
+  if (query.before) position.set("before", query.before);
+  return `/${locale}/operations/privacy${position.size ? `?${position}` : ""}`;
+}
+
+/** A queue cursor keeps PostgreSQL microseconds: a JS Date would lose boundary precision. */
+const queueCursor = (row: { record: { id: string }; position: string }) =>
+  Buffer.from(JSON.stringify({ updatedAt: row.position, id: row.record.id })).toString("base64url");
+
+export async function listStaffPrivacyRequests(
+  db: Executor,
+  session: Session,
+  query: PrivacyQueueQuery = {},
+) {
+  // Check live authority before parsing the position or reading any page.
+  await privacyOperator(db, session);
+  const parsed = parseInput(privacyQueueQuery, query);
+  const boundary = parsed.after ?? parsed.before;
+  const backwards = Boolean(parsed.before);
+  const fetched = await db
+    .select({
+      record: privacyRequests,
+      partyName: parties.displayName,
+      ownerName: principals.displayName,
+      position: sql<string>`to_char(${privacyRequests.updatedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
+    .from(privacyRequests)
+    .leftJoin(parties, eq(parties.id, privacyRequests.partyId))
+    .leftJoin(principals, eq(principals.id, privacyRequests.responsibleId))
+    .where(
+      boundary
+        ? backwards
+          ? sql`(${privacyRequests.updatedAt}, ${privacyRequests.id}) > (${boundary.updatedAt}::timestamptz, ${boundary.id}::uuid)`
+          : sql`(${privacyRequests.updatedAt}, ${privacyRequests.id}) < (${boundary.updatedAt}::timestamptz, ${boundary.id}::uuid)`
+        : undefined,
+    )
+    .orderBy(
+      backwards ? asc(privacyRequests.updatedAt) : desc(privacyRequests.updatedAt),
+      backwards ? asc(privacyRequests.id) : desc(privacyRequests.id),
+    )
+    .limit(privacyQueuePageSize + 1);
+  const hasMore = fetched.length > privacyQueuePageSize;
+  const rows = fetched.slice(0, privacyQueuePageSize);
+  if (backwards) rows.reverse();
+  const first = rows[0],
+    last = rows.at(-1);
+  return {
+    rows,
+    previous: query.after
+      ? first
+        ? queueCursor(first)
+        : query.after
+      : backwards && hasMore && first
+        ? queueCursor(first)
+        : null,
+    next: query.before
+      ? last
+        ? queueCursor(last)
+        : query.before
+      : hasMore && last
+        ? queueCursor(last)
+        : null,
+  };
+}
+
+/** Existing unpaged staff screen contract; remove after its cursor UI adopts the paged read. */
 export async function staffPrivacyRequests(db: Executor, session: Session) {
   await privacyOperator(db, session);
   return db

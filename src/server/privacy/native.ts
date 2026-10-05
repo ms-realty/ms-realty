@@ -6,6 +6,7 @@ import type { PublicLocale } from "@/domain/ids";
 import { nativeAuthRoute } from "../auth/native";
 import { currentClientSession, currentStaffAccess } from "../auth/pages";
 import type { Session } from "../auth/sessions";
+import { getEnv } from "../config/env";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
 import {
@@ -14,7 +15,12 @@ import {
   optIn,
   saveContactPreferences,
 } from "./preferences";
-import { reviewPrivacyRequest, submitPrivacyRequest } from "./requests";
+import {
+  privacyQueuePath,
+  privacyQueueQuery,
+  reviewPrivacyRequest,
+  submitPrivacyRequest,
+} from "./requests";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "");
 const checked = (form: FormData, key: string) => form.get(key) === "yes";
@@ -37,7 +43,7 @@ export async function privateReceipt(db: Executor, session: Session, id: unknown
 
 export function privacyFormRoute(area: "privacy" | "preferences" | "operations/privacy") {
   const staff = area === "operations/privacy";
-  return nativeAuthRoute(
+  const post = nativeAuthRoute(
     staff ? "staff" : "client",
     (locale) => `/${locale}/${area}`,
     async ({ db, form, locale }) => {
@@ -139,4 +145,39 @@ export function privacyFormRoute(area: "privacy" | "preferences" | "operations/p
       return `/${locale}/${area}?receipt=${result.operationId}`;
     },
   );
+  if (!staff) return post;
+  return async (request: Request, context: Parameters<typeof post>[1]) => {
+    const response = await post(request, context);
+    const location = response.headers.get("location");
+    if (response.status !== 303 || !location) return response;
+    const source = new URL(request.url);
+    const after = source.searchParams.getAll("after"),
+      before = source.searchParams.getAll("before");
+    if (after.length > 1 || before.length > 1) return response;
+    const query = {
+      ...(after.length ? { after: after[0] } : {}),
+      ...(before.length ? { before: before[0] } : {}),
+    };
+    if (!privacyQueueQuery.safeParse(query).success || !(query.after || query.before))
+      return response;
+    const { locale = "" } = await context.params;
+    const path = privacyQueuePath(locale);
+    const target = new URL(location);
+    const origin = new URL(getEnv().hosts.staff).origin;
+    if (target.origin !== origin) return response;
+    const position = new URL(privacyQueuePath(locale, query), origin).searchParams;
+    if (target.pathname === path) {
+      for (const [key, value] of position) target.searchParams.set(key, value);
+    } else if (target.pathname === `/${locale}/access/reauth`) {
+      const returnTo = target.searchParams.get("returnTo");
+      if (!returnTo) return response;
+      const destination = new URL(returnTo, origin);
+      if (destination.origin !== origin || destination.pathname !== path) return response;
+      for (const [key, value] of position) destination.searchParams.set(key, value);
+      target.searchParams.set("returnTo", destination.pathname + destination.search);
+    } else return response;
+    const headers = new Headers(response.headers);
+    headers.set("location", target.toString());
+    return new Response(response.body, { status: response.status, headers });
+  };
 }
