@@ -1,12 +1,12 @@
 import type { PublicLocale } from "@/i18n/config";
 import { catalogCopy } from "@/i18n/copy";
-import bg from "../../../messages/bg/map.json";
-import de from "../../../messages/de/map.json";
-import el from "../../../messages/el/map.json";
-import en from "../../../messages/en/map.json";
-import he from "../../../messages/he/map.json";
-import nl from "../../../messages/nl/map.json";
-import ru from "../../../messages/ru/map.json";
+import bg from "../../../messages/bg/map.json" with { type: "json" };
+import de from "../../../messages/de/map.json" with { type: "json" };
+import el from "../../../messages/el/map.json" with { type: "json" };
+import en from "../../../messages/en/map.json" with { type: "json" };
+import he from "../../../messages/he/map.json" with { type: "json" };
+import nl from "../../../messages/nl/map.json" with { type: "json" };
+import ru from "../../../messages/ru/map.json" with { type: "json" };
 
 // Public map labels (messages/<locale>/map.json). A listing page names one property area and
 // says that its marker is the area centre, not the address.

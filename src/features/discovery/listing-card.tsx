@@ -28,7 +28,11 @@ export function ListingFacts({
           {area.state === "known" ? copy[area.value.basis] : copy.area}
         </dt>
         <dd>
-          {area.state === "known" ? formatExactArea(locale, area.value.value) : copy[area.state]}
+          {area.state === "known" ? (
+            <bdi>{formatExactArea(locale, area.value.value)}</bdi>
+          ) : (
+            copy[area.state]
+          )}
         </dd>
       </div>
     </dl>
@@ -92,7 +96,7 @@ export function ListingCard({
             className="underline decoration-border underline-offset-4 hover:decoration-current"
             href={listingHref(listing, locale)}
           >
-            {listing.title || listing.reference}
+            {listing.title || <bdi>{listing.reference}</bdi>}
           </a>
         </h2>
         <p className="mt-1 text-compact text-text-muted">{locality(listing)}</p>

@@ -22,7 +22,7 @@
 .msr-map-attribution {
   position: absolute;
   bottom: 0;
-  right: 0;
+  inset-inline-end: 0;
   max-width: 100%;
   background: var(--color-surface);
   color: var(--color-text);

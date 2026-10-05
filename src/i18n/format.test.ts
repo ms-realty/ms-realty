@@ -89,6 +89,17 @@ describe("formatting (ux-spec §19.3)", () => {
       expect(displayLocales[locale]).toMatch(/^[a-z]{2}-[A-Z]{2}$/);
   });
 
+  it("writes Western digits in every locale, Hebrew included", () => {
+    for (const locale of publicLocales)
+      for (const value of [
+        formatNumber(locale, 1234567.5),
+        formatMoney(locale, 15_000_000, "EUR"),
+        formatExactArea(locale, 85.25),
+        formatDateTime(locale, "2026-07-01T09:00:00Z"),
+      ])
+        expect(value.match(/\p{Nd}/gu)?.join(""), `${locale}: ${value}`).toMatch(/^[0-9]+$/);
+  });
+
   it("rejects invalid instants instead of printing 'Invalid Date'", () => {
     expect(() => formatDate("en", "not a date")).toThrow(RangeError);
   });

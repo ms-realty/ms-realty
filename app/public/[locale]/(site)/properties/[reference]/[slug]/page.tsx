@@ -100,7 +100,7 @@ export default async function PropertyPage({
               <bdi>{listing.reference}</bdi> · {copy[listing.propertyType]}
             </p>
             <h1 className="break-words text-title font-semibold">
-              {listing.title || listing.reference}
+              {listing.title || <bdi>{listing.reference}</bdi>}
             </h1>
             <p>{locality(listing)}</p>
             <p className="text-price font-semibold">

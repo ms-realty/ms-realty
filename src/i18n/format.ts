@@ -6,6 +6,9 @@ import { agencyTimeZone, displayLocale } from "./config";
 
 type Instant = Date | string | number;
 
+/** The display tag with Western digits pinned, whatever a runtime's numbering default (he-IL). */
+const tag = (locale: PublicLocale) => `${displayLocale(locale)}-u-nu-latn`;
+
 // Catalogue cards repeatedly use the same immutable formatter configuration. Cache only
 // formatters, never values or rendered customer data; bound caller-supplied time-zone keys.
 const moneyFormats = new Map<string, Intl.NumberFormat>();
@@ -45,7 +48,7 @@ export function formatMoney(
     moneyFormats,
     JSON.stringify([locale, currency, whole]),
     () =>
-      new Intl.NumberFormat(displayLocale(locale), {
+      new Intl.NumberFormat(tag(locale), {
         style: "currency",
         currency,
         minimumFractionDigits: whole ? 0 : digits,
@@ -66,12 +69,11 @@ export function formatNumber(
 ): string {
   // Explicit caller options retain Intl's complete behavior, including inherited/getter
   // values and validation. Only the fixed application-owned configurations are reused.
-  if (options !== undefined)
-    return new Intl.NumberFormat(displayLocale(locale), options).format(value);
+  if (options !== undefined) return new Intl.NumberFormat(tag(locale), options).format(value);
   return reuse(
     numberFormats,
     JSON.stringify([locale, "number"]),
-    () => new Intl.NumberFormat(displayLocale(locale)),
+    () => new Intl.NumberFormat(tag(locale)),
   ).format(value);
 }
 
@@ -80,7 +82,7 @@ export function formatArea(locale: PublicLocale, squareMetres: number): string {
   const formatted = reuse(
     numberFormats,
     JSON.stringify([locale, "area"]),
-    () => new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 1 }),
+    () => new Intl.NumberFormat(tag(locale), { maximumFractionDigits: 1 }),
   ).format(squareMetres);
   return `${formatted}\u00a0m²`;
 }
@@ -90,7 +92,7 @@ export function formatExactArea(locale: PublicLocale, squareMetres: number): str
   const formatted = reuse(
     numberFormats,
     JSON.stringify([locale, "exact-area"]),
-    () => new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 20 }),
+    () => new Intl.NumberFormat(tag(locale), { maximumFractionDigits: 20 }),
   ).format(squareMetres);
   return `${formatted}\u00a0m²`;
 }
@@ -110,9 +112,7 @@ export function formatDate(
     dateStyle?: Intl.DateTimeFormatOptions["dateStyle"];
   } = {},
 ): string {
-  return new Intl.DateTimeFormat(displayLocale(locale), { dateStyle, timeZone }).format(
-    toDate(instant),
-  );
+  return new Intl.DateTimeFormat(tag(locale), { dateStyle, timeZone }).format(toDate(instant));
 }
 
 export function formatTime(
@@ -120,7 +120,7 @@ export function formatTime(
   instant: Instant,
   { timeZone = agencyTimeZone }: ZonedOptions = {},
 ): string {
-  return new Intl.DateTimeFormat(displayLocale(locale), { timeStyle: "short", timeZone }).format(
+  return new Intl.DateTimeFormat(tag(locale), { timeStyle: "short", timeZone }).format(
     toDate(instant),
   );
 }
@@ -135,7 +135,7 @@ export function formatDateTime(
     dateTimeFormats,
     JSON.stringify([locale, timeZone]),
     () =>
-      new Intl.DateTimeFormat(displayLocale(locale), {
+      new Intl.DateTimeFormat(tag(locale), {
         year: "numeric",
         month: "short",
         day: "numeric",

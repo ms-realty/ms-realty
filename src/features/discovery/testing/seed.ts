@@ -8,6 +8,7 @@ import { publicLocales } from "@/domain/ids";
 import { restrictPublication, withdrawPublication } from "@/server/publication/commands";
 import {
   createListingFixture,
+  defaultFacts,
   insertPlace,
   publishForTest,
   publishLocales,
@@ -26,6 +27,8 @@ try {
   });
   const command = process.argv[2];
   const isMap = command === "map" || command === "map-gr";
+  // Every public locale with known bedrooms and area, for the per-locale screen checks.
+  const allLocales = isMap || command === "locales";
   const country = command === "map-gr" ? "GR" : "BG";
   if (command === "republish") {
     const reference = process.argv[3] ?? "";
@@ -82,16 +85,21 @@ try {
         );
         const fixture = await createListingFixture(tx, {
           country,
-          facts: { location: { state: "known", value: { country } } },
+          facts: {
+            ...(command === "locales" ? defaultFacts : {}),
+            location: { state: "known", value: { country } },
+          },
           reviewerId: staff.id,
           placeId,
           title,
           description: "Synthetic test property. Not a real offer.",
           translations: Object.fromEntries(
-            (isMap ? publicLocales.filter((locale) => locale !== "bg") : ["en"]).map((locale) => [
-              locale,
-              { title, description: "Synthetic test property. Not a real offer." },
-            ]),
+            (allLocales ? publicLocales.filter((locale) => locale !== "bg") : ["en"]).map(
+              (locale) => [
+                locale,
+                { title, description: "Synthetic test property. Not a real offer." },
+              ],
+            ),
           ),
         });
         const number = randomBytes(6).readUIntBE(0, 6).toString();
@@ -110,7 +118,7 @@ try {
           .where(eq(schema.sellerInstructions.listingId, fixture.listingId));
         return { ...fixture, reference };
       });
-      await publishForTest(db, staff.actor, f, isMap ? [...publicLocales] : ["bg", "en"]);
+      await publishForTest(db, staff.actor, f, allLocales ? [...publicLocales] : ["bg", "en"]);
       return { reference: f.reference, title, id: f.listingId };
     };
     const published = await make("published"),
