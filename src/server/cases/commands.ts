@@ -25,9 +25,9 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
-import { loadPublishedListings } from "../publication/presentation";
+import { loadPublishedListings, presentationOf } from "../publication/presentation";
 import { nextReference } from "../references";
-import { caseMatchCriteriaInput } from "../search/search";
+import { caseMatchCriteriaInput, offeredStates } from "../search/search";
 import {
   allow,
   commandEnvelope,
@@ -37,6 +37,7 @@ import {
   taskResource,
   version,
 } from "../work/shared";
+import { assessPublishedCandidate } from "./matching";
 import { bumpCase, caseEvent, caseFor, liveParticipation } from "./shared";
 
 const createSchema = z.object({
@@ -68,6 +69,16 @@ const interestSchema = z.object({
     .trim()
     .regex(/^MS-\d{5,}$/i),
   explanation: z.string().trim().min(3).max(1500),
+  matchReview: z
+    .object({
+      briefRevision: z.number().int().min(1),
+      manifestId: z.uuid(),
+      violated: z.array(z.string().min(1).max(80)).max(32),
+      unconfirmed: z.array(z.string().min(1).max(80)).max(32),
+      reviewed: z.literal(true),
+    })
+    .strict()
+    .optional(),
 });
 const respondSchema = z.object({
   ...commandEnvelope,
@@ -360,6 +371,77 @@ export async function addInterest(
           version: row.version,
           recordedAt: new Date().toISOString(),
         };
+      const now = new Date();
+      if (!offeredStates.includes(presentationOf(published, now).availability))
+        throw new AppError("listing_unavailable");
+      const purpose =
+        row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
+      if (purpose && published.purpose !== purpose)
+        throw new AppError("validation_failed", {
+          fieldErrors: { reference: ["case_kind_mismatch"] },
+        });
+      let matchContext:
+        | {
+            briefRevision: number;
+            manifestId: string;
+            match: "match" | "needs_confirmation" | "no_match";
+            violated: readonly string[];
+            unconfirmed: readonly string[];
+          }
+        | undefined;
+      if (purpose) {
+        const [brief] = await ctx.tx
+          .select({ revision: briefRevisions.revisionNumber, criteria: briefRevisions.criteria })
+          .from(briefRevisions)
+          .where(eq(briefRevisions.caseId, row.id))
+          .orderBy(desc(briefRevisions.revisionNumber))
+          .limit(1);
+        const parsed = caseMatchCriteriaInput.safeParse(brief?.criteria);
+        if (brief && parsed.success && parsed.data.purpose === purpose) {
+          const review = input.matchReview;
+          if (!review)
+            throw new AppError("validation_failed", {
+              fieldErrors: { matchReview: ["required_for_structured_brief"] },
+            });
+          if (review.briefRevision !== brief.revision || review.manifestId !== published.manifestId)
+            throw new AppError("version_conflict", {
+              current: { briefRevision: brief.revision, manifestId: published.manifestId },
+            });
+          const assessment = assessPublishedCandidate(published, parsed.data, now);
+          const same = (received: readonly string[], current: readonly string[]) =>
+            received.length === current.length &&
+            received.every((value, index) => value === current[index]);
+          if (
+            !same(review.violated, assessment.violated) ||
+            !same(review.unconfirmed, assessment.unconfirmed)
+          )
+            throw new AppError("version_conflict", {
+              current: {
+                briefRevision: brief.revision,
+                manifestId: published.manifestId,
+                violated: assessment.violated,
+                unconfirmed: assessment.unconfirmed,
+              },
+            });
+          if (assessment.violated.length > 0 && input.explanation.length < 20)
+            throw new AppError("validation_failed", {
+              fieldErrors: { explanation: ["alternative_reason_required"] },
+            });
+          matchContext = {
+            briefRevision: brief.revision,
+            manifestId: published.manifestId,
+            match: assessment.result,
+            violated: assessment.violated,
+            unconfirmed: assessment.unconfirmed,
+          };
+        } else if (input.matchReview)
+          throw new AppError("validation_failed", {
+            fieldErrors: { matchReview: ["criteria_required"] },
+          });
+      } else if (input.matchReview)
+        throw new AppError("validation_failed", {
+          fieldErrors: { matchReview: ["case_kind_mismatch"] },
+        });
       const [interest] = await ctx.tx
         .insert(interests)
         .values({
@@ -377,7 +459,7 @@ export async function addInterest(
         row.id,
         "case.interest_added",
         "interest.manage",
-        { interestId: interest.id },
+        { interestId: interest.id, ...(matchContext ?? {}) },
         "participants",
       );
       return {

@@ -88,13 +88,16 @@ describe("O07 Case matching", () => {
     ).not.toContain(unpublished.reference);
     expect(matches.confirmed[0]?.existingInterestId).toBeNull();
 
-    expect(
-      await readCaseCandidate(t.db, f.staff.session, {
-        id: f.record.id,
-        briefRevision: 2,
-        reference: exact.reference,
-      }),
-    ).toMatchObject({ match: "match", violated: [], existingInterestId: null });
+    const exactCandidate = await readCaseCandidate(t.db, f.staff.session, {
+      id: f.record.id,
+      briefRevision: 2,
+      reference: exact.reference,
+    });
+    expect(exactCandidate).toMatchObject({
+      match: "match",
+      violated: [],
+      existingInterestId: null,
+    });
     expect(
       await readCaseCandidate(t.db, f.staff.session, {
         id: f.record.id,
@@ -128,13 +131,31 @@ describe("O07 Case matching", () => {
       }),
     ).rejects.toMatchObject({ code: "forbidden" });
 
-    const saved = await addInterest(t.db, f.staff.session, {
+    const exactInput = {
       id: f.record.id,
       operationId: randomUUID(),
       expectedVersion: 2,
       reference: exact.reference,
       explanation: "The reviewed listing matches the structured Brief.",
+      matchReview: {
+        briefRevision: 2,
+        manifestId: exactCandidate.candidate.manifestId,
+        violated: [],
+        unconfirmed: [],
+        reviewed: true as const,
+      },
+    };
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...exactInput,
+        operationId: randomUUID(),
+        matchReview: undefined,
+      }),
+    ).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { matchReview: ["required_for_structured_brief"] },
     });
+    const saved = await addInterest(t.db, f.staff.session, exactInput);
     const withSavedInterest = await readCaseMatches(t.db, f.staff.session, { id: f.record.id });
     expect(withSavedInterest.status).toBe("ready");
     if (withSavedInterest.status !== "ready") throw new Error("Expected current Brief matches");
@@ -147,6 +168,54 @@ describe("O07 Case matching", () => {
         reference: exact.reference,
       }),
     ).toMatchObject({ existingInterestId: saved.outcome.interestId });
+
+    const alternative = await readCaseCandidate(t.db, f.staff.session, {
+      id: f.record.id,
+      briefRevision: 2,
+      reference: wrongType.reference,
+    });
+    const alternativeInput = {
+      id: f.record.id,
+      operationId: randomUUID(),
+      expectedVersion: 3,
+      reference: wrongType.reference,
+      explanation: "A house has more space but differs from the apartment requirement.",
+      matchReview: {
+        briefRevision: 2,
+        manifestId: alternative.candidate.manifestId,
+        violated: [...alternative.violated],
+        unconfirmed: [...alternative.unconfirmed],
+        reviewed: true as const,
+      },
+    };
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...alternativeInput,
+        operationId: randomUUID(),
+        matchReview: { ...alternativeInput.matchReview, briefRevision: 1 },
+      }),
+    ).rejects.toMatchObject({ code: "version_conflict" });
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...alternativeInput,
+        operationId: randomUUID(),
+        matchReview: { ...alternativeInput.matchReview, violated: [] },
+      }),
+    ).rejects.toMatchObject({ code: "version_conflict" });
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...alternativeInput,
+        operationId: randomUUID(),
+        explanation: "Too short",
+      }),
+    ).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { explanation: ["alternative_reason_required"] },
+    });
+    const alternativeInterest = await addInterest(t.db, f.staff.session, alternativeInput);
+    expect((await addInterest(t.db, f.staff.session, alternativeInput)).outcome.interestId).toBe(
+      alternativeInterest.outcome.interestId,
+    );
 
     const firstPage = await readCaseMatches(t.db, f.staff.session, {
       id: f.record.id,
@@ -179,7 +248,7 @@ describe("O07 Case matching", () => {
     await reviseBrief(t.db, f.staff.session, {
       id: f.record.id,
       operationId: randomUUID(),
-      expectedVersion: 3,
+      expectedVersion: 4,
       requirements: "The client revised their requirements",
       preferences: "Near the centre",
     });
@@ -202,5 +271,41 @@ describe("O07 Case matching", () => {
         reference: wrongType.reference,
       }),
     ).rejects.toMatchObject({ code: "version_conflict" });
+  });
+
+  it("does not create a buyer Interest for another purpose or a closed offer", async () => {
+    const f = await caseFixture(t.db);
+    const rental = await createListingFixture(t.db, {
+      reviewerId: f.staff.id,
+      purpose: "long_term_rent",
+    });
+    const sold = await createListingFixture(t.db, {
+      reviewerId: f.staff.id,
+      commercialState: "sold",
+    });
+    await publishForTest(t.db, f.staff.actor, rental);
+    await publishForTest(t.db, f.staff.actor, sold);
+    const input = {
+      id: f.record.id,
+      expectedVersion: 1,
+      explanation: "The broker reviewed the currently published listing.",
+    };
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...input,
+        operationId: randomUUID(),
+        reference: rental.reference,
+      }),
+    ).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { reference: ["case_kind_mismatch"] },
+    });
+    await expect(
+      addInterest(t.db, f.staff.session, {
+        ...input,
+        operationId: randomUUID(),
+        reference: sold.reference,
+      }),
+    ).rejects.toMatchObject({ code: "listing_unavailable" });
   });
 });
