@@ -1,5 +1,6 @@
 import { localeEndonyms, type PublicLocale } from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
+import { cx } from "@/ui/cx";
 import type { DiscoveryCopy } from "./copy";
 import { InquiryListingSummaries } from "./inquiry-listing-summaries";
 import { OwnerInquirySummary } from "./inquiry-owner";
@@ -40,7 +41,7 @@ export function InquiryReview({
     [copy.message, values.message],
   ];
   return (
-    <section className="min-w-0 max-w-reading space-y-6 wrap-anywhere" aria-label={c.reviewTitle}>
+    <section className="min-w-0 space-y-6 wrap-anywhere" aria-label={c.reviewTitle}>
       <header className="space-y-3">
         <h2 className="font-display text-heading font-semibold">{c.reviewTitle}</h2>
         <p>{c.reviewNote}</p>
@@ -73,16 +74,19 @@ export function InquiryReview({
         <ViewingPreferenceSummary input={review.viewingPreferences} locale={locale} />
       ) : null}
       {review.ownerInput ? <OwnerInquirySummary input={review.ownerInput} locale={locale} /> : null}
-      <dl className="space-y-4">
+      <dl className="grid min-w-0 gap-x-8 gap-y-5 sm:grid-cols-2">
         {rows.map(([label, value]) => (
-          <div key={label}>
+          <div
+            key={label}
+            className={cx("min-w-0 space-y-2", label === copy.message && "sm:col-span-2")}
+          >
             <dt className="text-dense text-text-muted">{label}</dt>
             <dd className="whitespace-pre-wrap">{value || c.notProvided}</dd>
           </div>
         ))}
       </dl>
-      <p className="rounded-control bg-subtle p-4">{copy.privacy}</p>
-      <p className="text-dense text-text-muted">{copy.next}</p>
+      <p className="max-w-reading rounded-control bg-subtle p-4">{copy.privacy}</p>
+      <p className="max-w-reading text-dense text-text-muted">{copy.next}</p>
       <button
         type="submit"
         name="editInquiry"

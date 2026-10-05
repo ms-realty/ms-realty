@@ -1,8 +1,9 @@
 import type { PublicLocale } from "@/i18n/config";
 import type { ListingCard } from "@/server/listings/view-models";
+import { cx } from "@/ui/cx";
 import { ApprovedMedia } from "./approved-media";
 import type { DiscoveryCopy } from "./copy";
-import { ListingFacts } from "./listing-card";
+import { Availability, ListingFacts } from "./listing-card";
 import { listingHref, locality, priceText } from "./presentation";
 
 /** Only the approved public card projection crosses the inquiry form's client boundary. */
@@ -37,7 +38,17 @@ export function InquiryListingSummaries({
 }) {
   if (!listings.length) return null;
   return (
-    <ol className="space-y-5" aria-label={copy.properties}>
+    <ol
+      className={cx(
+        "grid min-w-0 items-start gap-4",
+        listings.length > 2
+          ? "lg:grid-cols-3"
+          : listings.length === 2
+            ? "lg:grid-cols-2"
+            : "max-w-reading",
+      )}
+      aria-label={copy.properties}
+    >
       {listings.map((listing) => (
         <li
           key={listing.reference}
@@ -45,22 +56,26 @@ export function InquiryListingSummaries({
           data-review-listing={stage === "review" ? listing.reference : undefined}
           data-entry-listing={stage === "entry" ? listing.reference : undefined}
         >
-          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-[6rem_minmax(0,1fr)] items-start gap-4">
             <ApprovedMedia media={listing.cover} unavailable={copy.noPhoto} />
-            <div className="min-w-0 space-y-3">
+            <div className="min-w-0 space-y-2">
               <p className="text-dense text-text-muted">
                 <bdi>{listing.reference}</bdi>
               </p>
-              <h3 className="font-semibold">
-                <a className="underline" href={listingHref(listing, locale)}>
-                  {listing.title || listing.reference}
-                </a>
-              </h3>
-              <p>{locality(listing)}</p>
-              <p className="font-semibold">{priceText(listing.price, locale, copy)}</p>
-              <ListingFacts listing={listing} locale={locale} copy={copy} />
+              <p className="text-price font-semibold">{priceText(listing.price, locale, copy)}</p>
+              <p className="text-compact">{locality(listing)}</p>
             </div>
           </div>
+          <h3 className="text-compact font-semibold">
+            <a
+              className="text-link underline underline-offset-4"
+              href={listingHref(listing, locale)}
+            >
+              {listing.title || listing.reference}
+            </a>
+          </h3>
+          <ListingFacts listing={listing} locale={locale} copy={copy} />
+          <Availability listing={listing} locale={locale} copy={copy} />
         </li>
       ))}
     </ol>
