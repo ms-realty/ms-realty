@@ -2,7 +2,7 @@
 
 **Verdict: OPEN.** No complete released product or final joint acceptance is evidenced. A green source check, design frame, local browser run, or protected staging page does not close a released journey.
 
-This is the single status and ownership index for the MS Realty completion goal. It points to the normative requirements rather than copying them. MSR-CODEX owns updates to this record. MSR-CLAUDE acknowledged its full scope at revision `5525ced8` and accepted the factual updates `90a00fc6` and `6ac15d61`; later amendments need the same peer readback. The existing `CODEX-UI-COORDINATION.md` in the Mindburn-Labs MS Realty output folder is the message relay and detailed screen wiring matrix, not a second acceptance verdict.
+This is the single status and ownership index for the MS Realty completion goal. It points to the normative requirements rather than copying them. MSR-CODEX owns updates to this record. MSR-CLAUDE acknowledged its full scope at revision `5525ced8` and accepted the factual updates `90a00fc6`, `6ac15d61`, `8f5f8040` and `3a0e5ea3`; later amendments need the same peer readback. The existing `CODEX-UI-COORDINATION.md` in the Mindburn-Labs MS Realty output folder is the message relay and detailed screen wiring matrix, not a second acceptance verdict.
 
 ## Scope and authority
 
@@ -100,7 +100,7 @@ The priority is the shortest path to an honest released verdict. First, settle R
 
 | ID | Owner and reserved surface | Finish condition |
 | --- | --- | --- |
-| C-01 | MSR-CODEX: this record, requirements and decisions | Claude accepted `90a00fc6`. Reconcile the newer source facts here, obtain Claude's readback on material amendments, and keep every open gate and commitment owned. |
+| C-01 | MSR-CODEX: this record, requirements and decisions | Claude accepted the factual chain through `3a0e5ea3` and integrated it in #280. Reconcile newer source facts here, obtain Claude's readback on material amendments, and keep every open gate and commitment owned. |
 | C-02 | MSR-CODEX: source/PR reconciliation only; no Figma, JSX or approved copy | Preserve and classify the local delivery commits and the unique #275/#277 work. Integrate each valid change or record exact supersession evidence; verify the resulting source and obtain Claude review before consequential integration. |
 | C-03 | MSR-CODEX: backend/server receipt and W03 seams | `e082917a` is on #280 with Claude acceptance. Claude accepted corrected `f64e49a7` receiver decision, stable review-time reasons and readback; U-01 is binding matching staff UI. P12 source is pushed and has local browser evidence; exact CI and released proof stay open. |
 | C-04 | MSR-CODEX: R00 policy map and active architecture/plan docs | Remove provider/runtime drift under the existing owner decision; preserve blocked launch obligations, obtain Claude review and the accountable operator's policy acceptance before a new release verdict. |
@@ -123,6 +123,6 @@ The controllers exchanged `ACK MSR-HELLO-1` and `RELEASE #280` in the relay. MSR
 
 | Sign-off | Scope revision | Released source/image/config | Result |
 | --- | --- | --- | --- |
-| MSR-CODEX | This record; peer scope ACK at `5525ced8`, `90a00fc6` and `6ac15d61`, newer source update pending review | Not established | OPEN |
-| MSR-CLAUDE | Scope ACK at `5525ced8`, `90a00fc6` and `6ac15d61`; #280/#293 integration and release ownership accepted | Not established | OPEN |
+| MSR-CODEX | This record; peer scope ACK at `5525ced8`, `90a00fc6`, `6ac15d61`, `8f5f8040` and `3a0e5ea3`; newer updates pending review | Not established | OPEN |
+| MSR-CLAUDE | Same scope ACK chain through `3a0e5ea3`; #280/#293 integration and release ownership accepted | Not established | OPEN |
 | Ivan / required operators | R00 and later release approvals pending | Not established | OPEN |
