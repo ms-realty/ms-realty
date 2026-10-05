@@ -41,18 +41,25 @@ export default async function ReceiptPage({
     const checkedAt = new Date().toISOString();
     return (
       <DiscoveryPage>
-        <h1 className="text-title font-semibold">{copy.notConfirmed}</h1>
+        <h1 className="text-title font-semibold">{copy.checkUnknownTitle}</h1>
         <Notice tone="warning" title={copy.checkResult}>
           <time dateTime={checkedAt}>
             {copy.checkedAt.replace("{time}", formatDateTime(locale, checkedAt))}
           </time>
         </Notice>
-        <a
-          className={buttonClass("secondary", "self-start")}
-          href={inquiryStatus(locale, receiptId)}
-        >
-          {copy.checkOperation}
-        </a>
+        <p className="max-w-reading">{copy.checkUnknownBody}</p>
+        <div className="flex flex-wrap gap-3">
+          <a className={buttonClass("primary", "self-start")} href={`/${locale}/contact`}>
+            {copy.contactOtherWay}
+          </a>
+          {/* The same check again; it never resends the inquiry. */}
+          <a
+            className={buttonClass("secondary", "self-start")}
+            href={inquiryStatus(locale, receiptId)}
+          >
+            {copy.checkAgain}
+          </a>
+        </div>
       </DiscoveryPage>
     );
   }

@@ -292,7 +292,7 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   const otherPage = await outsider.newPage();
   await otherPage.goto(`/en/requests/${key}`);
   await expect(
-    otherPage.getByRole("heading", { name: "We cannot confirm the result in this browser." }),
+    otherPage.getByRole("heading", { name: "We don't know yet whether the inquiry was received" }),
   ).toBeVisible();
   await expect(otherPage.getByText(reference, { exact: true })).toHaveCount(0);
   await outsider.close();
