@@ -177,6 +177,8 @@ it("requires acknowledgement and current revision, cannot replace a pending rece
   });
   expect(senderView.latestDecision).toMatchObject({
     kind: "cancelled",
+    actorId: f.manager.id,
+    receiverId: f.receiver.id,
     reason: f.input.reason,
   });
   expect(receiverView.latestDecision).toEqual(senderView.latestDecision);
@@ -209,7 +211,12 @@ it("allows only the nominated receiver to decline, then shows the saved reason t
     dueAt: f.task.dueAt,
     followUpAt: f.task.followUpAt,
   });
-  expect(senderView.latestDecision).toMatchObject({ kind: "declined", reason: decline.reason });
+  expect(senderView.latestDecision).toMatchObject({
+    kind: "declined",
+    actorId: f.receiver.id,
+    receiverId: f.receiver.id,
+    reason: decline.reason,
+  });
   expect(receiverView.latestDecision).toEqual(senderView.latestDecision);
   await handoverTask(t.db, f.manager.session, {
     ...f.input,

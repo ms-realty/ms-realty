@@ -100,6 +100,11 @@ export async function readTaskHandover(db: Executor, session: Session, id: strin
   const latestDecision = kind
     ? {
         kind,
+        actorId: event?.actorId ?? null,
+        receiverId:
+          typeof params?.receiverId === "string" && z.uuid().safeParse(params.receiverId).success
+            ? params.receiverId
+            : null,
         actorName: event?.actorName ?? null,
         reason: typeof params?.reason === "string" ? params.reason : "",
         at: event?.at.toISOString() ?? "",
