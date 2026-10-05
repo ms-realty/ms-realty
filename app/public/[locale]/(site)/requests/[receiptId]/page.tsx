@@ -31,29 +31,35 @@ export default async function ReceiptPage({
   const { locale, receiptId } = await params;
   if (!isRoutableLocale(locale)) notFound();
   const copy = discoveryCopy(locale);
+  // The brand line is the one verified channel that cannot start a duplicate inquiry.
+  const call = (
+    <a className={buttonClass("primary", "self-start")} href={`tel:${brandPhone.e164}`}>
+      {copy.callAgency} <span dir="ltr">{brandPhone.display}</span>
+    </a>
+  );
+  const notShown = (
+    <DiscoveryPage>
+      <h1 className="text-title font-semibold">{copy.notConfirmed}</h1>
+      <p className="max-w-reading">{copy.notShownBody}</p>
+      {call}
+    </DiscoveryPage>
+  );
+  // Preparing the lookup is not a check: a failure here must not claim one.
+  let db: ReturnType<typeof getDb>;
+  let receiptSession: ReturnType<typeof validReceiptSession>;
+  // Outside the catch: Next signals dynamic rendering by throwing from cookies().
+  const jar = await cookies();
+  try {
+    db = getDb();
+    receiptSession = validReceiptSession(jar.get(receiptCookieName(getEnv()))?.value);
+  } catch {
+    return notShown;
+  }
   let receipt: Awaited<ReturnType<typeof readInquiryReceipt>>;
   try {
-    receipt = await readInquiryReceipt(getDb(), {
-      submissionKey: receiptId,
-      receiptSession: validReceiptSession(
-        (await cookies()).get(receiptCookieName(getEnv()))?.value,
-      ),
-    });
+    receipt = await readInquiryReceipt(db, { submissionKey: receiptId, receiptSession });
   } catch (error) {
-    // The brand line is the one verified channel that cannot start a duplicate inquiry.
-    const call = (
-      <a className={buttonClass("primary", "self-start")} href={`tel:${brandPhone.e164}`}>
-        {copy.callAgency} <span dir="ltr">{brandPhone.display}</span>
-      </a>
-    );
-    if (!receiptCheckAttempted(error))
-      return (
-        <DiscoveryPage>
-          <h1 className="text-title font-semibold">{copy.notConfirmed}</h1>
-          <p className="max-w-reading">{copy.notShownBody}</p>
-          {call}
-        </DiscoveryPage>
-      );
+    if (!receiptCheckAttempted(error)) return notShown;
     const checkedAt = new Date().toISOString();
     return (
       <DiscoveryPage>
