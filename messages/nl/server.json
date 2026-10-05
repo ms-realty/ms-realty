@@ -94,8 +94,8 @@
     },
     "rate_limited": {
       "message": "Er waren te veel pogingen in korte tijd, dus deze is niet uitgevoerd.",
-      "next": "Wacht even en probeer het dan opnieuw; wat u hebt ingevuld, blijft op de pagina staan.",
-      "nextTimed": "Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw; wat u hebt ingevuld, blijft op de pagina staan."
+      "next": "Wacht even en probeer het dan opnieuw.",
+      "nextTimed": "Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw."
     },
     "unavailable": {
       "message": "Een deel van onze dienst werkt nu niet, dus er is niets opgeslagen.",

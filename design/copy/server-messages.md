@@ -355,13 +355,13 @@ Passkey terms follow the platform wording people already see on their devices: b
 
 | | message | next | nextTimed |
 |---|---|---|---|
-| bg | Имаше твърде много опити за кратко време, затова този не е изпълнен. | Изчакайте малко и опитайте отново; въведеното от Вас остава на страницата. | Опитайте отново след {minutes, plural, one {# минута} other {# минути}}; въведеното от Вас остава на страницата. |
-| en | There were too many attempts in a short time, so this one was not carried out. | Wait a little, then try again; what you entered stays on the page. | Try again in {minutes, plural, one {# minute} other {# minutes}}; what you entered stays on the page. |
-| ru | Слишком много попыток за короткое время, поэтому эта не выполнена. | Подождите немного и попробуйте снова — введённое вами останется на странице. | Попробуйте снова через {minutes, plural, one {# минуту} few {# минуты} many {# минут} other {# минуты}} — введённое вами останется на странице. |
-| de | Es gab zu viele Versuche in kurzer Zeit, daher wurde dieser nicht ausgeführt. | Warten Sie kurz und versuchen Sie es dann erneut; Ihre Eingaben bleiben auf der Seite. | Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut; Ihre Eingaben bleiben auf der Seite. |
-| nl | Er waren te veel pogingen in korte tijd, dus deze is niet uitgevoerd. | Wacht even en probeer het dan opnieuw; wat u hebt ingevuld, blijft op de pagina staan. | Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw; wat u hebt ingevuld, blijft op de pagina staan. |
-| el | Έγιναν πάρα πολλές προσπάθειες σε λίγο χρόνο, οπότε αυτή δεν εκτελέστηκε. | Περιμένετε λίγο και δοκιμάστε ξανά· όσα καταχωρίσατε μένουν στη σελίδα. | Δοκιμάστε ξανά σε {minutes, plural, one {# λεπτό} other {# λεπτά}}· όσα καταχωρίσατε μένουν στη σελίδα. |
-| he | היו יותר מדי ניסיונות בזמן קצר, ולכן הניסיון הזה לא בוצע. | המתינו מעט ונסו שוב – מה שהזנתם נשאר בדף. | נסו שוב בעוד {minutes, plural, one {דקה} two {שתי דקות} other {# דקות}} – מה שהזנתם נשאר בדף. |
+| bg | Имаше твърде много опити за кратко време, затова този не е изпълнен. | Изчакайте малко и опитайте отново. | Опитайте отново след {minutes, plural, one {# минута} other {# минути}}. |
+| en | There were too many attempts in a short time, so this one was not carried out. | Wait a little, then try again. | Try again in {minutes, plural, one {# minute} other {# minutes}}. |
+| ru | Слишком много попыток за короткое время, поэтому эта не выполнена. | Подождите немного и попробуйте снова. | Попробуйте снова через {minutes, plural, one {# минуту} few {# минуты} many {# минут} other {# минуты}}. |
+| de | Es gab zu viele Versuche in kurzer Zeit, daher wurde dieser nicht ausgeführt. | Warten Sie kurz und versuchen Sie es dann erneut. | Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut. |
+| nl | Er waren te veel pogingen in korte tijd, dus deze is niet uitgevoerd. | Wacht even en probeer het dan opnieuw. | Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw. |
+| el | Έγιναν πάρα πολλές προσπάθειες σε λίγο χρόνο, οπότε αυτή δεν εκτελέστηκε. | Περιμένετε λίγο και δοκιμάστε ξανά. | Δοκιμάστε ξανά σε {minutes, plural, one {# λεπτό} other {# λεπτά}}. |
+| he | היו יותר מדי ניסיונות בזמן קצר, ולכן הניסיון הזה לא בוצע. | המתינו מעט ונסו שוב. | נסו שוב בעוד {minutes, plural, one {דקה} two {שתי דקות} other {# דקות}}. |
 
 ### unavailable · not_applied
 

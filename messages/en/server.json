@@ -94,8 +94,8 @@
     },
     "rate_limited": {
       "message": "There were too many attempts in a short time, so this one was not carried out.",
-      "next": "Wait a little, then try again; what you entered stays on the page.",
-      "nextTimed": "Try again in {minutes, plural, one {# minute} other {# minutes}}; what you entered stays on the page."
+      "next": "Wait a little, then try again.",
+      "nextTimed": "Try again in {minutes, plural, one {# minute} other {# minutes}}."
     },
     "unavailable": {
       "message": "Part of our service is not working right now, so nothing was saved.",

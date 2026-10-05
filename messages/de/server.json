@@ -94,8 +94,8 @@
     },
     "rate_limited": {
       "message": "Es gab zu viele Versuche in kurzer Zeit, daher wurde dieser nicht ausgeführt.",
-      "next": "Warten Sie kurz und versuchen Sie es dann erneut; Ihre Eingaben bleiben auf der Seite.",
-      "nextTimed": "Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut; Ihre Eingaben bleiben auf der Seite."
+      "next": "Warten Sie kurz und versuchen Sie es dann erneut.",
+      "nextTimed": "Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut."
     },
     "unavailable": {
       "message": "Ein Teil unseres Dienstes funktioniert gerade nicht, daher wurde nichts gespeichert.",
