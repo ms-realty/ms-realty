@@ -45,7 +45,7 @@ export default async function Page({
       ? query.operation
       : undefined;
   const path = `${search?.clientHref ?? `/${locale}/preferences/search-alerts?context=invalid`}${
-    operationKey ? `&operation=${operationKey}` : ""
+    query.operation !== undefined ? `&operation=${operationKey ?? "invalid"}` : ""
   }`;
   const session = await currentClientSession();
   if (!session) redirect(`/${locale}/access?returnTo=${encodeURIComponent(path)}`);

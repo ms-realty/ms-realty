@@ -110,6 +110,17 @@ it("keeps exact criteria and the same uncertain operation through account recove
   ).rejects.toThrow(`/en/access?returnTo=${encodeURIComponent(path)}`);
   expect(mocks.preferences).not.toHaveBeenCalled();
 });
+it("keeps a malformed operation in the status path through sign-in", async () => {
+  mocks.session.mockResolvedValue(null);
+  const path = `${alertSearch("en", criteria).clientHref}&operation=invalid`;
+  await expect(
+    ClientPage({
+      params: Promise.resolve({ locale: "en" }),
+      searchParams: Promise.resolve({ ...criteria, operation: "malformed" }),
+    }),
+  ).rejects.toThrow(`/en/access?returnTo=${encodeURIComponent(path)}`);
+  expect(mocks.preferences).not.toHaveBeenCalled();
+});
 it("preserves an invalid-context correction across sign-in without silently subscribing to an empty search", async () => {
   mocks.session.mockResolvedValue(null);
   await expect(
