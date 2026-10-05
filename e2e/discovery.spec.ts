@@ -434,6 +434,64 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
   ).toHaveLength(0);
 });
 
+test("P11: the approved property summary and review fit 320 px and widen on desktop", async ({
+  browser,
+  baseURL,
+}, info) => {
+  const data = fixture();
+  for (const width of [320, 1440]) {
+    const context = await browser.newContext({
+      baseURL,
+      viewport: { width, height: 900 },
+      extraHTTPHeaders: {
+        "cf-connecting-ip": `2001:db8:${randomUUID().replaceAll("-", "").slice(0, 24).match(/.{4}/g)?.join(":")}`,
+      },
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(
+        `/en/properties/${data.published.reference}/${data.published.reference.toLowerCase()}`,
+      );
+      await page.getByRole("link", { name: "Request a viewing", exact: true }).click();
+      const entry = page.locator(`[data-entry-listing="${data.published.reference}"]`);
+      await expect(entry).toContainText(data.published.title);
+      // The summary the page read precedes every entry field.
+      expect(
+        await entry.evaluate(
+          (node) =>
+            node.compareDocumentPosition(document.querySelector('[name="purpose"]') as Node) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ),
+      ).toBeTruthy();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        width,
+      );
+      await page.screenshot({
+        path: info.outputPath(`inquiry-entry-summary-${width}.png`),
+        fullPage: true,
+      });
+      await page.getByLabel(/^Your inquiry/).fill("Synthetic summary layout question");
+      await page.getByLabel("Email", { exact: true }).fill("synthetic-summary@example.test");
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      const review = page.getByRole("region", { name: "Review your inquiry" });
+      await expect(
+        review.locator(`[data-review-listing="${data.published.reference}"]`),
+      ).toBeVisible();
+      await expect(review).toContainText("Synthetic summary layout question");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        width,
+      );
+      await page.screenshot({
+        path: info.outputPath(`inquiry-review-summary-${width}.png`),
+        fullPage: true,
+      });
+    } finally {
+      await context.close();
+    }
+  }
+});
+
 test("P11: the stateless form transport asks to re-enter private details after a correctable failure", async ({
   browser,
   baseURL,
