@@ -1,0 +1,11 @@
+# P09 public shortlist service contract
+
+`public.ts` is the server boundary for P08/P09/C05 public-facts links. A link contains 1–12 distinct, currently published Listing references in one approved locale. Creation requires an explicit `reviewed: true` submission and an idempotency key. A link expires seven days after creation. Renewal means a new reviewed creation; revocation never renews a token.
+
+The public-host creator cookie and the recipient viewing token are separate. An anonymous creator must already hold the host-only, HttpOnly creator cookie before `createPublicShare` is called. Issue it on a preceding public-host response; if the browser cannot retain it, explain that link management would be lost and do not create the link. An authenticated client uses its live client-host session instead. Staff do not create client shares. Never treat the share ID or recipient token as management authority.
+
+`createPublicShare` needs the edge-observed `clientIpFrom(headers)` value for rate limiting. Its response, `readCreatorShare`, and `listCreatorShares` include the viewing token only under the creator's authority. Replay `createPublicShare` with the same operation key to reconcile a lost creation acknowledgment; replay `revokePublicShare` with its original key to reconcile a revocation timeout. A lost anonymous creator cookie cannot be recovered from the recipient link. A fresh privacy operator may perform audited emergency revocation without acquiring creator authority.
+
+`readPublicShare` returns `ready` with current approved public cards and an `unavailable` placeholder for each Listing that is no longer public in that locale. Expired, revoked and unknown links have separate safe status values. Recipient requests must call it on every access; respond with `Cache-Control: no-store`, `Referrer-Policy: no-referrer`, and no third-party script or analytics token capture. Creator responses also require `no-store`. Link previews must not mutate or revoke shares.
+
+Migration `0021_public-share-creator.sql` revokes historical unbound rows because their creator cannot be proven. The recoverable viewing token is a public-facts capability only; it is stored for the original creator's Copy link action and must never enter logs, audit payloads, private Case data or analytics.
