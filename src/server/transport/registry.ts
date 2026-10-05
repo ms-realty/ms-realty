@@ -197,6 +197,7 @@ export const inquiryAcceptedSchema = z.object({
 const inquiryFormSchema = z.object({
   contentReference: z.string().max(512).optional(),
   ownerInput: z.string().max(2048).optional(),
+  viewingPreferences: z.string().max(4096).optional(),
   submissionKey: z.string(),
   purpose: z.enum(inquiryPurposes),
   locale: z.enum(publicLocales),

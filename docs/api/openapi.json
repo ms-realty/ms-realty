@@ -1251,6 +1251,10 @@
                     "type": "string",
                     "maxLength": 2048
                   },
+                  "viewingPreferences": {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
                   "submissionKey": {
                     "type": "string"
                   },
