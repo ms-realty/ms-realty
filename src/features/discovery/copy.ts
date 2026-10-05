@@ -737,6 +737,16 @@ const rows = {
     "Ελέγξτε τις απαντήσεις",
     "בדקו את התשובות",
   ],
+  // Only for the stateless POST /api/inquiries redirect: it keeps no private entries.
+  reenter: [
+    "Не успяхме да приемем формуляра. Името, контактите и съобщението не бяха запазени – въведете ги отново и изпратете.",
+    "We could not accept the form. Your name, contact details and message were not kept, so please enter them again and send.",
+    "Мы не смогли принять форму. Имя, контакты и сообщение не сохранились – введите их снова и отправьте.",
+    "Wir konnten das Formular nicht annehmen. Name, Kontaktdaten und Nachricht wurden nicht gespeichert – bitte geben Sie sie erneut ein und senden Sie das Formular.",
+    "We konden het formulier niet aannemen. Uw naam, contactgegevens en bericht zijn niet bewaard; vul ze opnieuw in en verstuur het formulier.",
+    "Δεν μπορέσαμε να δεχτούμε τη φόρμα. Το όνομα, τα στοιχεία επικοινωνίας και το μήνυμα δεν διατηρήθηκαν· καταχωρίστε τα ξανά και στείλτε.",
+    "לא הצלחנו לקבל את הטופס. השם, פרטי הקשר וההודעה לא נשמרו – הזינו אותם שוב ושלחו.",
+  ],
   invalid: [
     "Проверете този отговор и опитайте отново.",
     "Check this answer and try again.",

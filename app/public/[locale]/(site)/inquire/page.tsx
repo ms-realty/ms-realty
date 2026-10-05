@@ -197,10 +197,12 @@ export default async function InquiryPage({
           }
         : typeof query.error === "string"
           ? {
-              kind: "validation",
+              // Only the stateless form transport redirects here with an error code. Nothing
+              // was applied, so the same key stays usable; its private entries are gone.
+              kind: "rejected",
               code: "VALIDATION_FAILED",
-              message: copy.check,
-              fieldErrors: { message: [copy.invalid] },
+              message: copy.reenter,
+              retryable: true,
             }
           : { kind: "idle" },
   };

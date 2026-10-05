@@ -416,3 +416,43 @@ test("AT27: listing withdrawal between reading and submitting keeps the draft wi
   ).toHaveCount(0);
   await expect(page.locator('[name="listingReference"]')).toHaveValue(data.published.reference);
 });
+
+test("P11: the stateless form transport asks to re-enter private details after a correctable failure", async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false });
+  try {
+    const issued = await context.request.get("/api/inquiries");
+    const { submissionKey } = (await issued.json()) as { submissionKey: string };
+    const message = `Synthetic private message ${randomUUID()}`;
+    const response = await context.request.post("/api/inquiries", {
+      headers: { "content-type": "application/x-www-form-urlencoded", origin: baseURL ?? "" },
+      data: new URLSearchParams({
+        submissionKey,
+        locale: "en",
+        purpose: "question",
+        contactKind: "email",
+        contactValue: "invalid",
+        message,
+        privacyNotice: "yes",
+      }).toString(),
+      maxRedirects: 0,
+    });
+    expect(response.status()).toBe(303);
+    const location = response.headers().location ?? "";
+    expect(location).not.toContain("invalid");
+    expect(location).not.toContain(encodeURIComponent(message).slice(0, 20));
+    const page = await context.newPage();
+    await page.goto(location);
+    await expect(
+      page.getByText(
+        "We could not accept the form. Your name, contact details and message were not kept, so please enter them again and send.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue("");
+  } finally {
+    await context.close();
+  }
+});
