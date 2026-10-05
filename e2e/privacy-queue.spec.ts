@@ -175,9 +175,9 @@ test("privacy queue reaches and reviews an unresolved request beyond 100 without
     await form.getByLabel("Next state", { exact: true }).selectOption("verifying");
     await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
     await assertNativeGeometry();
-    await page.screenshot({
+    // The whole queue page can exceed WebKit's 32767 px screenshot limit; keep the reviewed form.
+    await form.screenshot({
       path: testInfo.outputPath("privacy-queue-older-unresolved-native.png"),
-      fullPage: true,
     });
     await form.getByRole("button", { name: "Record human review", exact: true }).click();
     await expect(page).toHaveURL(/\/en\/operations\/privacy\?receipt=/);
