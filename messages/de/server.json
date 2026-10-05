@@ -1,0 +1,109 @@
+{
+  "errors": {
+    "validation_failed": {
+      "message": "Einige Angaben müssen korrigiert werden, bevor wir das annehmen können.",
+      "next": "Korrigieren Sie die markierten Felder; alle anderen Angaben bleiben erhalten."
+    },
+    "unauthenticated": {
+      "message": "Bitte melden Sie sich an, um fortzufahren.",
+      "next": "Melden Sie sich an; danach bringen wir Sie zu dieser Seite zurück."
+    },
+    "step_up_required": {
+      "message": "Für diesen Schritt müssen wir bestätigen, dass Sie es sind.",
+      "next": "Bestätigen Sie, dass Sie es sind, und wiederholen Sie den Schritt; bisher wurde nichts geändert."
+    },
+    "forbidden": {
+      "message": "Sie haben dafür keine Berechtigung, daher wurde nichts geändert.",
+      "next": "Bitten Sie die zuständige Person, Ihnen Zugriff zu geben."
+    },
+    "butler_approval_required": {
+      "message": "Das muss eine Person freigeben, deshalb hat Butler es nicht ausgeführt.",
+      "next": "Prüfen Sie es und geben Sie es frei, oder erledigen Sie es selbst."
+    },
+    "not_found": {
+      "message": "Wir konnten das nicht finden, oder es ist nicht für Sie freigegeben.",
+      "next": "Prüfen Sie den Link oder bitten Sie die Person, die ihn geschickt hat, ihn erneut zu teilen."
+    },
+    "cross_origin_request": {
+      "message": "Zu Ihrer Sicherheit haben wir das nicht angenommen, weil es von einer anderen Seite gesendet wurde.",
+      "next": "Öffnen Sie diese Seite erneut auf unserer Website und senden Sie es von dort."
+    },
+    "version_conflict": {
+      "message": "Jemand hat das geändert, während Sie daran gearbeitet haben, daher wurde Ihre Änderung nicht gespeichert.",
+      "next": "Prüfen Sie die hier gezeigte neueste Fassung; Ihre Eingaben bleiben erhalten, damit Sie sie erneut übernehmen können."
+    },
+    "idempotency_key_reused": {
+      "message": "Dieses Formular wurde bereits einmal mit anderen Angaben gesendet, daher haben wir es nicht erneut gesendet.",
+      "next": "Laden Sie die Seite neu, um zu sehen, was bei uns angekommen ist, und ändern Sie es von dort aus."
+    },
+    "operation_pending": {
+      "message": "Wir bearbeiten Ihre vorherige Anfrage noch; sie ist noch nicht bestätigt.",
+      "next": "Warten Sie kurz und laden Sie die Seite neu, um das Ergebnis zu sehen; senden Sie sie nicht erneut."
+    },
+    "outcome_unknown": {
+      "message": "Wir konnten nicht bestätigen, ob das durchgeführt wurde.",
+      "next": "Laden Sie die Seite neu und prüfen Sie, ob die Änderung da ist, bevor Sie es erneut versuchen."
+    },
+    "approval_stale": {
+      "message": "Das wurde nach der Freigabe geändert, daher gilt die Freigabe nicht mehr.",
+      "next": "Prüfen Sie die aktuelle Fassung und geben Sie sie erneut frei, oder bitten Sie die freigebende Person darum."
+    },
+    "publication_ineligible": {
+      "message": "Dieses Inserat kann noch nicht veröffentlicht werden, weil Freigaben fehlen.",
+      "next": "Öffnen Sie die Checkliste zur Veröffentlichung, um zu sehen, was fehlt und wer es freigeben kann."
+    },
+    "listing_unavailable": {
+      "message": "Diese Immobilie wird derzeit nicht angeboten.",
+      "next": "Sehen Sie sich ähnliche Immobilien an oder fragen Sie uns nach dieser."
+    },
+    "transition_denied": {
+      "message": "Dieser Schritt ist gerade nicht möglich, daher wurde nichts geändert.",
+      "next": "Laden Sie die Seite neu, um den aktuellen Stand zu sehen."
+    },
+    "link_invalid": {
+      "message": "Dieser Anmeldelink funktioniert nicht.",
+      "next": "Fordern Sie einen neuen Anmeldelink an."
+    },
+    "link_expired": {
+      "message": "Dieser Anmeldelink ist abgelaufen; solche Links gelten nur kurz.",
+      "next": "Fordern Sie einen neuen Link an und öffnen Sie ihn bald nach Erhalt."
+    },
+    "link_consumed": {
+      "message": "Dieser Anmeldelink wurde bereits verwendet.",
+      "next": "Wenn Sie nicht angemeldet sind, fordern Sie einen neuen Link an."
+    },
+    "link_revoked": {
+      "message": "Dieser Anmeldelink wurde aufgehoben und funktioniert nicht mehr.",
+      "next": "Fordern Sie einen neuen Anmeldelink an."
+    },
+    "invitation_expired": {
+      "message": "Diese Einladung ist abgelaufen.",
+      "next": "Bitten Sie die Person, die Sie eingeladen hat, um eine neue."
+    },
+    "invitation_used": {
+      "message": "Diese Einladung wurde bereits beantwortet.",
+      "next": "Melden Sie sich an, um zu sehen, worauf Sie Zugriff haben."
+    },
+    "invitation_revoked": {
+      "message": "Diese Einladung gilt nicht mehr; möglicherweise wurde sie durch eine neuere ersetzt.",
+      "next": "Verwenden Sie die neueste Einladung in Ihrem Postfach oder fragen Sie die Person, die Sie eingeladen hat."
+    },
+    "passkey_failed": {
+      "message": "Wir konnten Ihren Passkey nicht bestätigen.",
+      "next": "Versuchen Sie es erneut oder melden Sie sich stattdessen mit einem Link per E-Mail an."
+    },
+    "rate_limited": {
+      "message": "Es gab zu viele Versuche in kurzer Zeit, daher wurde dieser nicht ausgeführt.",
+      "next": "Warten Sie kurz und versuchen Sie es dann erneut; Ihre Eingaben bleiben auf der Seite.",
+      "nextTimed": "Versuchen Sie es in {minutes, plural, one {# Minute} other {# Minuten}} erneut; Ihre Eingaben bleiben auf der Seite."
+    },
+    "unavailable": {
+      "message": "Ein Teil unseres Dienstes funktioniert gerade nicht, daher wurde nichts gespeichert.",
+      "next": "Versuchen Sie es in einigen Minuten erneut; wenn es dringend ist, rufen Sie uns an: +359879696870."
+    },
+    "internal_error": {
+      "message": "Bei uns ist etwas schiefgelaufen, und wir können nicht bestätigen, ob Ihre Änderung gespeichert wurde.",
+      "next": "Laden Sie die Seite neu und prüfen Sie es, bevor Sie es erneut versuchen."
+    }
+  }
+}

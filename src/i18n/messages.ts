@@ -9,7 +9,9 @@ import type errors from "../../messages/bg/errors.json";
 import type footer from "../../messages/bg/footer.json";
 import type forms from "../../messages/bg/forms.json";
 import type nav from "../../messages/bg/nav.json";
+import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
+import type serverStaff from "../../messages/staff/bg/serverStaff.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
 import { isStaffLocale, type PublicLocale } from "./config";
 
@@ -20,9 +22,11 @@ export const publicNamespaces = [
   "footer",
   "forms",
   "nav",
+  "server",
   "states",
 ] as const;
-export const staffNamespaces = ["workspace"] as const;
+/** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
+export const staffNamespaces = ["serverStaff", "workspace"] as const;
 
 export interface PublicMessages {
   a11y: typeof a11y;
@@ -31,9 +35,11 @@ export interface PublicMessages {
   footer: typeof footer;
   forms: typeof forms;
   nav: typeof nav;
+  server: typeof server;
   states: typeof states;
 }
 export interface StaffMessages {
+  serverStaff: typeof serverStaff;
   workspace: typeof workspace;
 }
 /** Staff namespaces are present only for staff locales (bg, en, ru). */

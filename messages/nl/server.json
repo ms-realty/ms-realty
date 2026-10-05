@@ -1,0 +1,109 @@
+{
+  "errors": {
+    "validation_failed": {
+      "message": "Sommige gegevens moeten worden verbeterd voordat we dit kunnen aannemen.",
+      "next": "Verbeter de gemarkeerde velden; al het andere dat u hebt ingevuld, blijft bewaard."
+    },
+    "unauthenticated": {
+      "message": "U moet zich aanmelden om verder te gaan.",
+      "next": "Meld u aan, dan brengen we u terug naar deze pagina."
+    },
+    "step_up_required": {
+      "message": "Voor deze stap moeten we bevestigen dat u het bent.",
+      "next": "Bevestig dat u het bent en herhaal de stap; er is nog niets gewijzigd."
+    },
+    "forbidden": {
+      "message": "U hebt hiervoor geen toestemming, dus er is niets gewijzigd.",
+      "next": "Vraag de beheerder om u toegang te geven."
+    },
+    "butler_approval_required": {
+      "message": "Een persoon moet dit goedkeuren, daarom heeft Butler het niet gedaan.",
+      "next": "Bekijk het en keur het goed, of doe het zelf."
+    },
+    "not_found": {
+      "message": "We konden dit niet vinden, of het is niet met u gedeeld.",
+      "next": "Controleer de link of vraag de afzender om hem opnieuw te delen."
+    },
+    "cross_origin_request": {
+      "message": "Voor uw veiligheid hebben we dit niet aangenomen, omdat het vanaf een andere pagina is verzonden.",
+      "next": "Open deze pagina opnieuw op onze website en verstuur het vanaf daar."
+    },
+    "version_conflict": {
+      "message": "Iemand heeft dit gewijzigd terwijl u eraan werkte, dus uw wijziging is niet opgeslagen.",
+      "next": "Bekijk de nieuwste versie hier; uw invoer blijft bewaard, zodat u die opnieuw kunt toepassen."
+    },
+    "idempotency_key_reused": {
+      "message": "Dit formulier is al eens met andere gegevens verzonden, dus we hebben het niet opnieuw verzonden.",
+      "next": "Laad de pagina opnieuw om te zien wat we hebben ontvangen, en breng vanaf daar wijzigingen aan."
+    },
+    "operation_pending": {
+      "message": "We zijn nog bezig met uw eerdere verzoek; het is nog niet bevestigd.",
+      "next": "Wacht even en laad deze pagina opnieuw om het resultaat te zien; verstuur het niet opnieuw."
+    },
+    "outcome_unknown": {
+      "message": "We konden niet bevestigen of dit is gelukt.",
+      "next": "Laad deze pagina opnieuw en controleer of de wijziging er staat voordat u het opnieuw probeert."
+    },
+    "approval_stale": {
+      "message": "Dit is gewijzigd na de goedkeuring, dus die goedkeuring geldt niet meer.",
+      "next": "Bekijk de huidige versie en keur die opnieuw goed, of vraag het aan degene die goedkeurt."
+    },
+    "publication_ineligible": {
+      "message": "Deze advertentie kan nog niet worden gepubliceerd, omdat er goedkeuringen ontbreken.",
+      "next": "Open de publicatiechecklist om te zien wat ontbreekt en wie het kan goedkeuren."
+    },
+    "listing_unavailable": {
+      "message": "Deze woning wordt op dit moment niet aangeboden.",
+      "next": "Bekijk vergelijkbare woningen of vraag ons naar deze."
+    },
+    "transition_denied": {
+      "message": "Deze stap is nu niet mogelijk, dus er is niets gewijzigd.",
+      "next": "Laad de pagina opnieuw om te zien hoe het er nu voor staat."
+    },
+    "link_invalid": {
+      "message": "Deze aanmeldlink werkt niet.",
+      "next": "Vraag een nieuwe aanmeldlink aan."
+    },
+    "link_expired": {
+      "message": "Deze aanmeldlink is verlopen; zulke links werken maar kort.",
+      "next": "Vraag een nieuwe link aan en open die kort nadat u hem ontvangt."
+    },
+    "link_consumed": {
+      "message": "Deze aanmeldlink is al gebruikt.",
+      "next": "Bent u niet aangemeld, vraag dan een nieuwe link aan."
+    },
+    "link_revoked": {
+      "message": "Deze aanmeldlink is ingetrokken en werkt niet meer.",
+      "next": "Vraag een nieuwe aanmeldlink aan."
+    },
+    "invitation_expired": {
+      "message": "Deze uitnodiging is verlopen.",
+      "next": "Vraag degene die u heeft uitgenodigd om een nieuwe."
+    },
+    "invitation_used": {
+      "message": "Deze uitnodiging is al beantwoord.",
+      "next": "Meld u aan om te zien waartoe u toegang hebt."
+    },
+    "invitation_revoked": {
+      "message": "Deze uitnodiging is niet meer geldig; misschien is ze vervangen door een nieuwere.",
+      "next": "Gebruik de nieuwste uitnodiging in uw e-mail, of vraag het aan degene die u heeft uitgenodigd."
+    },
+    "passkey_failed": {
+      "message": "We konden uw toegangssleutel niet bevestigen.",
+      "next": "Probeer het opnieuw of meld u aan met een link per e-mail."
+    },
+    "rate_limited": {
+      "message": "Er waren te veel pogingen in korte tijd, dus deze is niet uitgevoerd.",
+      "next": "Wacht even en probeer het dan opnieuw; wat u hebt ingevuld, blijft op de pagina staan.",
+      "nextTimed": "Probeer het over {minutes, plural, one {# minuut} other {# minuten}} opnieuw; wat u hebt ingevuld, blijft op de pagina staan."
+    },
+    "unavailable": {
+      "message": "Een deel van onze dienst werkt nu niet, dus er is niets opgeslagen.",
+      "next": "Probeer het over een paar minuten opnieuw; bel ons bij spoed op +359879696870."
+    },
+    "internal_error": {
+      "message": "Er ging bij ons iets mis, en we kunnen niet bevestigen of uw wijziging is opgeslagen.",
+      "next": "Laad de pagina opnieuw en controleer het voordat u het opnieuw probeert."
+    }
+  }
+}

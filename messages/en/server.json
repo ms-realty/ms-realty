@@ -1,0 +1,109 @@
+{
+  "errors": {
+    "validation_failed": {
+      "message": "Some details need to be corrected before we can accept this.",
+      "next": "Correct the marked fields; everything else you entered is kept."
+    },
+    "unauthenticated": {
+      "message": "You need to sign in to continue.",
+      "next": "Sign in and we will bring you back to this page."
+    },
+    "step_up_required": {
+      "message": "For this step we need to confirm it is you.",
+      "next": "Confirm it is you, then repeat the step; nothing has changed yet."
+    },
+    "forbidden": {
+      "message": "You do not have permission to do this, so nothing was changed.",
+      "next": "Ask the person who manages it to give you access."
+    },
+    "butler_approval_required": {
+      "message": "A person needs to approve this, so Butler did not do it.",
+      "next": "Review and approve it, or do it yourself."
+    },
+    "not_found": {
+      "message": "We could not find this, or it is not shared with you.",
+      "next": "Check the link, or ask the person who sent it to share it again."
+    },
+    "cross_origin_request": {
+      "message": "For your safety, we did not accept this because it was sent from another page.",
+      "next": "Open this page again on our website and send it from there."
+    },
+    "version_conflict": {
+      "message": "Someone changed this while you were working, so your change was not saved.",
+      "next": "Review the latest version shown here; your entries are kept so you can apply them again."
+    },
+    "idempotency_key_reused": {
+      "message": "This form was already sent once with different details, so we did not send it again.",
+      "next": "Reload the page to see what we received, and make any change from there."
+    },
+    "operation_pending": {
+      "message": "We are still working on your earlier request, and it is not confirmed yet.",
+      "next": "Wait a moment and reload this page to see the result; do not send it again."
+    },
+    "outcome_unknown": {
+      "message": "We could not confirm whether this went through.",
+      "next": "Reload this page and check whether the change is there before you try again."
+    },
+    "approval_stale": {
+      "message": "This changed after it was approved, so the approval no longer applies.",
+      "next": "Review the current version and approve it again, or ask the person who approves it."
+    },
+    "publication_ineligible": {
+      "message": "This listing cannot be published yet because some approvals are missing.",
+      "next": "Open the publishing checklist to see what is missing and who can approve it."
+    },
+    "listing_unavailable": {
+      "message": "This property is not available at the moment.",
+      "next": "Browse similar properties, or ask us about this one."
+    },
+    "transition_denied": {
+      "message": "This step is not possible right now, so nothing was changed.",
+      "next": "Reload the page to see where things stand now."
+    },
+    "link_invalid": {
+      "message": "This sign-in link does not work.",
+      "next": "Request a new sign-in link."
+    },
+    "link_expired": {
+      "message": "This sign-in link has expired; these links work only for a short time.",
+      "next": "Request a new link and open it soon after it arrives."
+    },
+    "link_consumed": {
+      "message": "This sign-in link has already been used.",
+      "next": "If you are not signed in, request a new link."
+    },
+    "link_revoked": {
+      "message": "This sign-in link has been cancelled and no longer works.",
+      "next": "Request a new sign-in link."
+    },
+    "invitation_expired": {
+      "message": "This invitation has expired.",
+      "next": "Ask the person who invited you to send a new one."
+    },
+    "invitation_used": {
+      "message": "This invitation has already been answered.",
+      "next": "Sign in to see what you have access to."
+    },
+    "invitation_revoked": {
+      "message": "This invitation is no longer valid; a newer one may have replaced it.",
+      "next": "Use the newest invitation in your email, or ask the person who invited you."
+    },
+    "passkey_failed": {
+      "message": "We could not confirm your passkey.",
+      "next": "Try again, or sign in with an email link instead."
+    },
+    "rate_limited": {
+      "message": "There were too many attempts in a short time, so this one was not carried out.",
+      "next": "Wait a little, then try again; what you entered stays on the page.",
+      "nextTimed": "Try again in {minutes, plural, one {# minute} other {# minutes}}; what you entered stays on the page."
+    },
+    "unavailable": {
+      "message": "Part of our service is not working right now, so nothing was saved.",
+      "next": "Try again in a few minutes; if it is urgent, call us on +359879696870."
+    },
+    "internal_error": {
+      "message": "Something went wrong on our side, and we cannot confirm whether your change was saved.",
+      "next": "Reload the page and check before you try again."
+    }
+  }
+}
