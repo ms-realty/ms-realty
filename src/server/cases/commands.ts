@@ -27,6 +27,7 @@ import { AppError } from "../errors";
 import { runOperation } from "../operations";
 import { loadPublishedListings } from "../publication/presentation";
 import { nextReference } from "../references";
+import { caseMatchCriteriaInput } from "../search/search";
 import {
   allow,
   commandEnvelope,
@@ -58,6 +59,7 @@ const briefSchema = z.object({
   ...commandEnvelope,
   requirements: z.string().trim().min(3).max(4000),
   preferences: z.string().trim().max(4000),
+  criteria: caseMatchCriteriaInput.optional(),
 });
 const interestSchema = z.object({
   ...commandEnvelope,
@@ -264,6 +266,14 @@ export async function reviseBrief(
       const { row } = await caseFor(ctx.tx, session, input.id, "case.transition", true);
       version(row, input.expectedVersion);
       if (row.disposition !== "active") throw new AppError("transition_denied");
+      if (input.criteria) {
+        const purpose =
+          row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
+        if (!purpose || input.criteria.purpose !== purpose)
+          throw new AppError("validation_failed", {
+            fieldErrors: { "criteria.purpose": ["case_kind_mismatch"] },
+          });
+      }
       const [previous] = await ctx.tx
         .select()
         .from(briefRevisions)
@@ -274,6 +284,8 @@ export async function reviseBrief(
         caseId: row.id,
         revisionNumber: (previous?.revisionNumber ?? 0) + 1,
         items: items(input.requirements, input.preferences),
+        // An old filter must never survive a prose-only Brief revision as a false claim of fit.
+        criteria: input.criteria ?? {},
         authorKind: live.actor.kind,
         authorId: live.actor.id,
         brokerAcknowledgedAt: new Date(),

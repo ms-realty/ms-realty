@@ -100,6 +100,18 @@ const searchInput = z
   })
   .strict();
 
+/** Case matching persists only explicit hard filters, never query/sort or historical offers. */
+export const caseMatchCriteriaInput = searchInput.pick({
+  purpose: true,
+  propertyTypes: true,
+  placeIds: true,
+  price: true,
+  bedrooms: true,
+  rooms: true,
+  area: true,
+  mustHave: true,
+});
+
 export type SearchInput = z.input<typeof searchInput>;
 
 export interface NormalizedSearch {

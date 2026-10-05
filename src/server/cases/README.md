@@ -34,6 +34,13 @@ changes through the conversation. Internal next actions are restricted by
 
 Interest suggestions use an approved published source revision. Client feedback has its own
 version, retains the assessed listing revision and never changes the Case stage implicitly.
+For buyer/tenant Cases, `reviseBrief` may save validated structured hard filters alongside
+the prose. A prose-only revision clears older filters. Staff-only `readCaseMatches` binds the
+current Brief revision to eligible public search results, separating confirmed facts from
+facts needing confirmation; it never treats an unknown as a hard match or searches historical
+offers. It returns the client acknowledgment state so a draft Brief is visible as a draft.
+The staff workbench still has to bind this read model and explain any proposed alternative
+before O07 can pass journey acceptance.
 Staff messages intended for clients require an explicit human review bound to the exact
 body and recipient snapshot. In-app availability is recorded without claiming email delivery
 or a read receipt. Internal notes are separate. Current case access and original recipient
