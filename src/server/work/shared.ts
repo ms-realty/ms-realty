@@ -20,6 +20,8 @@ export const commandEnvelope = {
   expectedVersion: z.number().int().positive().safe(),
 };
 export const openTaskStates = ["open", "in_progress", "waiting"] as const;
+/** Show the earliest outstanding deadline or internal review without hiding a client promise. */
+export const effectiveTaskDue = sql<Date | null>`least(${tasks.dueAt}, ${tasks.followUpAt})`;
 export const openAppointmentStates = [
   "requested",
   "proposed",

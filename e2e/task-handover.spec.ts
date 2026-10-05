@@ -6,6 +6,21 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { findCoverageRecord, findPaginatedRecord, moveQueuePage } from "./coverage-helpers";
+
+/** A future review time as the native datetime-local value in the agency zone. */
+function reviewInput(offsetMs = 1_800_000) {
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Sofia",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+    .format(new Date(Date.now() + offsetMs))
+    .replace(" ", "T");
+}
+
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -165,15 +180,48 @@ for (const javaScriptEnabled of [true, false])
       await expect(
         page.getByText("This action was recorded successfully.", { exact: true }),
       ).toBeVisible();
+      // W03: the receiver may decline with a reason; the work stays and the decision is shown.
       await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
+      await page.getByRole("link", { name: "Decline with a reason", exact: true }).click();
+      await expect(page).toHaveURL(/[?&]handover=decline/);
+      const decline = page
+        .locator("form")
+        .filter({ has: page.getByRole("button", { name: "Send the decline", exact: true }) });
+      const declineReason = "Not my area; please ask the rental team.";
+      await decline.getByLabel("Reason for declining", { exact: true }).fill(declineReason);
+      await decline.getByRole("button", { name: "Send the decline", exact: true }).click();
+      await expect(
+        page.getByText("This action was recorded successfully.", { exact: true }),
+      ).toBeVisible();
+      await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
+      await expect(page.getByRole("heading", { name: /declined the handover$/ })).toBeVisible();
+      await expect(page.getByText(declineReason, { exact: true })).toBeVisible();
+      expect(
+        (await db.select().from(schema.tasks).where(eq(schema.tasks.id, task.id)))[0],
+      ).toMatchObject({ pendingOwnerId: null, dueAt: task.dueAt });
+      const again = page
+        .locator("form")
+        .filter({ has: page.getByRole("button", { name: "Request task handover", exact: true }) });
+      await again.getByLabel("Receiving colleague", { exact: true }).selectOption(f.managerId);
+      await again
+        .getByLabel("Reason and handover notes", { exact: true })
+        .fill("Manager will take the unchanged client promise.");
+      await again.getByRole("checkbox").check();
+      await again.getByRole("button", { name: "Request task handover", exact: true }).click();
+      await expect(
+        page.getByText("This action was recorded successfully.", { exact: true }),
+      ).toBeVisible();
+      await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
+      // W03: the receiver accepts with their own next step and a future review time.
       const accept = page
         .locator("form")
-        .filter({ has: page.getByRole("button", { name: "Accept task handover", exact: true }) });
+        .filter({ has: page.getByRole("button", { name: "Accept the work", exact: true }) });
+      const reviewAt = reviewInput();
       await accept
-        .getByLabel("Reason and handover notes", { exact: true })
-        .fill("I accept the unchanged client promise and deadline.");
-      await accept.getByRole("checkbox").check();
-      await accept.getByRole("button", { name: "Accept task handover", exact: true }).click();
+        .getByLabel("Your next step", { exact: true })
+        .fill("Call the client about the unchanged promise");
+      await accept.getByLabel("When will you review it again?", { exact: true }).fill(reviewAt);
+      await accept.getByRole("button", { name: "Accept the work", exact: true }).click();
       await expect(
         page.getByText("This action was recorded successfully.", { exact: true }),
       ).toBeVisible();
@@ -182,6 +230,7 @@ for (const javaScriptEnabled of [true, false])
       ).toMatchObject({
         ownerId: f.managerId,
         pendingOwnerId: null,
+        title: "Call the client about the unchanged promise",
         dueAt: task.dueAt,
         promisedToClient: true,
         state: "open",
@@ -310,11 +359,13 @@ for (const javaScriptEnabled of [true, false])
       await page.locator(`a[href="${taskHref}"]`).click();
       const accept = page
         .locator("form")
-        .filter({ has: page.getByRole("button", { name: "Accept task handover", exact: true }) });
+        .filter({ has: page.getByRole("button", { name: "Accept the work", exact: true }) });
       await accept
-        .getByLabel("Reason and handover notes", { exact: true })
-        .fill("I reviewed the promise and accept the unchanged due date.");
-      await accept.getByRole("checkbox").check();
+        .getByLabel("Your next step", { exact: true })
+        .fill("Confirm the promised date with the client");
+      await accept
+        .getByLabel("When will you review it again?", { exact: true })
+        .fill(reviewInput());
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         320,
       );
@@ -322,7 +373,7 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`task-handover-${javaScriptEnabled}.png`),
         fullPage: true,
       });
-      await accept.getByRole("button", { name: "Accept task handover", exact: true }).click();
+      await accept.getByRole("button", { name: "Accept the work", exact: true }).click();
       await expect(
         page.getByText("This action was recorded successfully.", { exact: true }),
       ).toBeVisible();
@@ -361,24 +412,22 @@ for (const javaScriptEnabled of [true, false])
         page.getByText("This action was recorded successfully.", { exact: true }),
       ).toBeVisible();
       await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
+      // W03: withdrawing is its own native step with a required reason.
+      await page.getByRole("link", { name: "Withdraw the offer", exact: true }).click();
+      await expect(page).toHaveURL(/[?&]handover=withdraw/);
       const cancel = page
         .locator("form")
-        .filter({ has: page.getByRole("button", { name: "Cancel task handover", exact: true }) });
-      await cancel.getByLabel("Reason and handover notes", { exact: true }).fill("short");
-      await cancel.getByRole("checkbox").check();
-      await cancel.getByRole("button", { name: "Cancel task handover", exact: true }).click();
+        .filter({ has: page.getByRole("button", { name: "Withdraw the offer", exact: true }) });
+      await cancel.getByLabel("Reason", { exact: true }).fill("short");
+      await cancel.getByRole("button", { name: "Withdraw the offer", exact: true }).click();
       await expect(
         page.getByRole("region", { name: "There is a problem", exact: true }),
       ).toBeVisible();
-      await expect(cancel.getByLabel("Reason and handover notes", { exact: true })).toHaveValue(
-        "short",
-      );
-      await expect(cancel.getByRole("checkbox")).not.toBeChecked();
+      await expect(cancel.getByLabel("Reason", { exact: true })).toHaveValue("short");
       await cancel
-        .getByLabel("Reason and handover notes", { exact: true })
+        .getByLabel("Reason", { exact: true })
         .fill("Cancel the proposal and keep the accepted owner and dates.");
-      await cancel.getByRole("checkbox").check();
-      await cancel.getByRole("button", { name: "Cancel task handover", exact: true }).click();
+      await cancel.getByRole("button", { name: "Withdraw the offer", exact: true }).click();
       await expect(
         page.getByText("This action was recorded successfully.", { exact: true }),
       ).toBeVisible();

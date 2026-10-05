@@ -9,6 +9,7 @@ import { caseVisibility } from "../cases/shared";
 import type { Executor } from "../db";
 import { appointmentCoverageAt, ownerNeedsCoverage } from "./coverage-policy";
 import {
+  effectiveTaskDue,
   liveStaff,
   openAppointmentStates,
   openInquiryStates,
@@ -25,7 +26,7 @@ export async function readCoverage(db: Executor, session: Session, page = 1) {
   const grants = await resolveGrants(db, live.actor);
   page = parseInput(z.number().int().min(1).max(10000), page);
   const offset = (page - 1) * coveragePageSize;
-  const due = sql<Date | null>`case when ${tasks.state} = 'waiting' then ${tasks.followUpAt} else ${tasks.dueAt} end`;
+  const due = effectiveTaskDue;
   const [caseRows, taskRows, inquiryRows, keyRows, appointmentRows] = await Promise.all([
     db
       .select({
