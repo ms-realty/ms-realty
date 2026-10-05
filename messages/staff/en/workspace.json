@@ -1,6 +1,7 @@
 {
   "label": "Workspace",
   "secondaryLabel": "Management",
+  "currentPage": "Current page",
   "today": "Today",
   "inquiries": "Inquiries",
   "cases": "Cases",

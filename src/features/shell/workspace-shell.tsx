@@ -217,7 +217,11 @@ export async function WorkspaceShell({
         </header>
 
         <div className="min-w-0">
-          <div className="hidden min-h-[4.5rem] items-center justify-between gap-4 border-b border-divider px-8 py-3 lg:flex">
+          {/* A named region, so the wide-screen context bar sits inside a landmark like the rest of the page. */}
+          <section
+            aria-label={t("currentPage")}
+            className="hidden min-h-[4.5rem] items-center justify-between gap-4 border-b border-divider px-8 py-3 lg:flex"
+          >
             <WorkspaceContext
               label={t("label")}
               items={[...primary, ...secondary].map((item) => ({
@@ -226,7 +230,7 @@ export async function WorkspaceShell({
               }))}
             />
             {languageSwitcher}
-          </div>
+          </section>
           <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
             {children}
           </main>

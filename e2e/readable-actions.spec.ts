@@ -77,9 +77,11 @@ async function labelContrast(target: Locator) {
 }
 
 async function contrastViolations(page: Page, scope?: string) {
+  // options() replaces the whole run-options object, so it must come before withRules(); the other
+  // order drops runOnly and axe runs every rule.
   const builder = new AxeBuilder({ page })
-    .withRules(["color-contrast"])
-    .options({ iframes: false });
+    .options({ iframes: false })
+    .withRules(["color-contrast"]);
   if (scope) builder.include(scope);
   const result = await Promise.race([
     builder.analyze(),
