@@ -17,11 +17,11 @@ record why here. Each row states the obligation that still has to be proved.
 | D08 WorkOS AuthKit, staff TOTP MFA | First-party passwordless authentication: staff sign in with a passkey (WebAuthn, phishing-resistant, stronger than TOTP) and must enrol two; e-mail link only for first enrolment and audited recovery. Clients sign in by e-mail link with an explicit confirm POST, passkey optional | No passwords or OTP secrets are stored, so the "homegrown password/MFA" risk D08 rejects does not arise; no identity-provider account is needed to operate; separate staff and client contexts are enforced by host-only cookies and separate WebAuthn relying parties | §8.1 session limits (staff 12 h / 30 min idle, client 7 d / 24 h), reauthentication windows (5 min staff sensitive, 15 min client documents), §8.3 invitations, AT36–AT39, an independent security review before R08 |
 | D11 MapTiler tiles | MapLibre with a self-hosted Protomaps PMTiles extract (Bulgaria + Greece) served from the public R2 bucket through the gateway | No third-party tile request from visitors' browsers, no API key to leak or rotate, negligible cost | AT06 (list works without the map), attribution for OpenStreetMap data, approximate-point rules (§4.2) |
 | §11.3 CSS Modules | Tailwind CSS v4 over the same CSS custom-property semantic tokens | One styling system for all three surfaces, as §11.3 requires; Tailwind v4 compiles to plain CSS from the tokens | §11.3 palette, type, spacing, breakpoints and states |
-| §2 PostgreSQL 18 | PostgreSQL 18 from slice S1b (was 17) | Adopted, not a deviation | Driver and migration qualification on 18 |
+| §2 PostgreSQL 18 | PostgreSQL 16.14 is the selected provider contract under [ADR 0004](0004-cloudflare-staging.md) | The observed existing engine and owner-directed staging contract supersede the provisional major target | Driver, migration, search and private provider-path qualification on 16.14 |
 
-Everything else in §2 is adopted as written: Next.js/React/TypeScript modular application
-(D01 minus Payload), PostgreSQL search (D04), DigitalOcean App Platform Frankfurt with HA
-Managed PostgreSQL (D06), Cloudflare gateway and EU-jurisdiction R2 (D07), Resend (D09),
+The remaining product obligations in §2 are adopted as amended by later ADRs: Next.js/React/TypeScript modular application
+(D01 minus Payload), PostgreSQL search (D04), the Cloudflare Containers candidate and PostgreSQL 16.14
+provider contract ([ADR 0004](0004-cloudflare-staging.md)), Cloudflare gateway and EU-jurisdiction R2 (D07), Resend (D09),
 application-owned calendar and ICS (D10), Hermes as draft-only bounded tasks behind one
 adapter (D12's OpenAI-first provider choice is superseded by [ADR 0003](0003-openrouter-jev.md)), shared tokens with isolated contexts (D13), release
 manifest and machine-evaluated gates (D14), Better Stack monitoring (D15) and the
