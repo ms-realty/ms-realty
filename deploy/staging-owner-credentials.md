@@ -100,7 +100,8 @@ is an input. Do not paste values into chat, lane JSON, commits or evidence repor
 | `STAGING_R2_ACCESS_KEY_ID` | Access Key ID from a new R2 Object Read & Write token restricted to the separate staging media/cache buckets. |
 | `STAGING_R2_SECRET_ACCESS_KEY` | The matching S3 Secret Access Key, never the production R2 key. |
 
-The three database URLs must use `postgresql://role:encoded-password@reviewed-stage-host:5432/staging_database?sslmode=verify-full`.
+The reviewed TCP hostname is `staging-db.makler-realty.com`. The three database URLs
+must use `postgresql://role:encoded-password@staging-db.makler-realty.com:5432/staging_database?sslmode=verify-full`.
 Role names, hostname and database must match the reviewed JSON. Credentials must
 be URL-encoded. Do not use the existing `ms_realty_payload` database or add URL SSL
 overrides. The existing origin's production PostgreSQL has SSL off; staging needs
@@ -110,8 +111,9 @@ its separate TLS service/volume, with no host-published5432. See
 The origin Tunnel connector token belongs only on the separate staging origin
 connector. It is **not** one of the GitHub application secrets and must not be
 substituted for either Access service-token secret. Codex supplies and measures
-PostgreSQL, roles/certificates, the origin connector, database Service Auth and
-private ClamAV. The connector is prepared and stopped pending its fresh token.
+PostgreSQL, roles/certificates, the origin connector and private ClamAV. The
+controller creates the database Access application, Service Auth policy and DNS.
+The connector is prepared and stopped pending its fresh token.
 ClamAV is configured but stopped pending approved RAM and private transport
 qualification from Containers. Never fill `CLAMAV_HOST` with an origin-only
 Docker name that deployed Containers cannot resolve.
@@ -122,7 +124,7 @@ name/hostname/roles/version, isolation pin, intended buckets and artifact hashes
 are already filled. Planned buckets still need provider confirmation. Inputs:
 
 - `.com` zone ID `f0ac7af0721419e8129e5d10ff547372` and the exact three HTTPS origins
-  already in the template: `staging.`, `my.staging.`, `app.staging.makler-realty.com`;
+  already in the template: `staging.`, `staging-my.`, `staging-app.makler-realty.com`;
 - web Access application ID/audience/team domain, the MS Realty owner identity,
   controller email group/IDs, and web service-token Client ID/resource ID;
 - distinct staging database name/host/three roles, separate database Access

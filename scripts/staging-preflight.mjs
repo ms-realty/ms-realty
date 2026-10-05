@@ -7,10 +7,66 @@ const demand = (ok, label) => {
 };
 const hosts = [
   "staging.makler-realty.com",
-  "my.staging.makler-realty.com",
-  "app.staging.makler-realty.com",
+  "staging-my.makler-realty.com",
+  "staging-app.makler-realty.com",
 ];
 const oneKey = (value, key) => value && Object.keys(value).length === 1 && key in value;
+
+/** Current Access responses use public destinations; deprecated domains cannot supply coverage. */
+function publicDestinations(app, exact = false) {
+  if (app.destinations != null) {
+    demand(Array.isArray(app.destinations), "known Access destinations");
+    if (app.destinations.length > 0) {
+      const destinations = app.destinations.filter((destination) => {
+        demand(destination && typeof destination === "object", "known Access destination");
+        if (
+          destination.type !== "public" &&
+          !(destination.type == null && typeof destination.uri === "string")
+        ) {
+          demand(!exact, "only public destinations on the reviewed staging application");
+          demand(destination.uri == null, "no unrecognized public Access URI");
+          return false;
+        }
+        demand(
+          typeof destination.uri === "string" && destination.uri.length > 0,
+          "public Access URI",
+        );
+        return true;
+      });
+      if (exact)
+        demand(
+          destinations.every(
+            (destination) =>
+              destination.overrides == null ||
+              (Array.isArray(destination.overrides) && destination.overrides.length === 0),
+          ),
+          "no public Access destination overrides",
+        );
+      return destinations;
+    }
+  }
+  return app.domain ? [{ type: "public", uri: app.domain }] : [];
+}
+
+function applicationDomains(app) {
+  return [...new Set(publicDestinations(app, true).map((destination) => destination.uri))];
+}
+
+function validateAccessOverlap(apps, applicationId, protectedHosts) {
+  demand(Array.isArray(apps), "known Access application inventory");
+  for (const other of apps) {
+    if (other.id === applicationId) continue;
+    for (const { uri } of publicDestinations(other)) {
+      const match = uri.match(/^(?:https?:\/\/)?([a-z0-9*.-]+)(?:\/.*)?$/i);
+      demand(match, "known Access hostname selector");
+      const matcher = new RegExp(`^${match[1].replaceAll(".", "\\.").replaceAll("*", ".*")}$`, "i");
+      demand(
+        !protectedHosts.some((host) => matcher.test(host)),
+        "no overlapping or more-specific Access application override",
+      );
+    }
+  }
+}
 
 /** Even a more-specific foreign route or a no-script bypass can divert protected traffic. */
 export function validateRoutes(input, routes) {
@@ -45,7 +101,7 @@ export function validateRoutes(input, routes) {
 export function validateDatabaseAccess(input, app, policies, otherApps) {
   const expected = input.database.access;
   const host = input.database.stagingHost;
-  const domains = [...new Set([app.domain, ...(app.self_hosted_domains ?? [])].filter(Boolean))];
+  const domains = applicationDomains(app);
   demand(
     app.id === expected.applicationId &&
       app.type === "self_hosted" &&
@@ -69,25 +125,16 @@ export function validateDatabaseAccess(input, app, policies, otherApps) {
     service = true;
   }
   demand(service, "database Service Auth policy present");
-  for (const other of otherApps) {
-    if (other.id === expected.applicationId) continue;
-    for (const domain of [other.domain, ...(other.self_hosted_domains ?? [])].filter(Boolean)) {
-      const selector = domain.split("/")[0];
-      demand(/^[a-z0-9*.-]+$/i.test(selector), "known Access hostname selector");
-      const matcher = new RegExp(`^${selector.replaceAll(".", "\\.").replaceAll("*", ".*")}$`, "i");
-      demand(!matcher.test(host), "no overlapping database Access application");
-    }
-  }
+  validateAccessOverlap(otherApps, expected.applicationId, [host]);
 }
 
 /** Reject broad selectors, bypasses and unreviewed group members. Unknown API shapes fail closed. */
 export function validateAccess(input, app, policies, group, otherApps) {
   const configured = input.access;
-  const domains = [
-    ...new Set([app.domain, ...(app.self_hosted_domains ?? [])].filter(Boolean)),
-  ].sort();
+  const domains = applicationDomains(app).sort();
   demand(
-    app.type === "self_hosted" &&
+    app.id === configured.applicationId &&
+      app.type === "self_hosted" &&
       app.aud === configured.audience &&
       JSON.stringify(domains) === JSON.stringify([...hosts].sort()),
     "Access protects all three exact hosts",
@@ -151,23 +198,7 @@ export function validateAccess(input, app, policies, group, otherApps) {
     owner && (!controllerGroupRequired || controller) && service,
     "owner/controller/checker policies",
   );
-  for (const other of otherApps) {
-    if (other.id === configured.applicationId) continue;
-    const candidates = [
-      other.domain,
-      ...(other.self_hosted_domains ?? []),
-      ...(other.destinations ?? []).map((x) => x.uri),
-    ].filter(Boolean);
-    demand(
-      !candidates.some((domain) =>
-        hosts.some(
-          (host) =>
-            domain === host || domain.startsWith(`${host}/`) || domain.startsWith(`*.${host}`),
-        ),
-      ),
-      "no more-specific Access application override",
-    );
-  }
+  validateAccessOverlap(otherApps, configured.applicationId, hosts);
 }
 
 /** Read-only Cloudflare inventory; this function never creates DNS, routes, policies or buckets. */

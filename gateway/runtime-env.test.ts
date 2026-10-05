@@ -100,20 +100,20 @@ describe("Staging image role isolation", () => {
     const env = {
       STAGING: "true",
       BUILD_SHA: "a".repeat(40),
-      STAGING_DATABASE_HOST: "db.staging.example.invalid",
+      STAGING_DATABASE_HOST: "staging-db.example.invalid",
       STAGING_DATABASE_NAME: "msr_stage",
       STAGING_WEB_DATABASE_ROLE: "web",
       STAGING_WORKER_DATABASE_ROLE: "worker",
       STAGING_MIGRATOR_DATABASE_ROLE: "migration",
       WEB_DATABASE_URL:
-        "postgres://web:fixture@db.staging.example.invalid/msr_stage?sslmode=verify-full",
+        "postgres://web:fixture@staging-db.example.invalid/msr_stage?sslmode=verify-full",
       WORKER_DATABASE_URL:
-        "postgres://worker:fixture@db.staging.example.invalid/msr_stage?sslmode=verify-full",
+        "postgres://worker:fixture@staging-db.example.invalid/msr_stage?sslmode=verify-full",
       MIGRATOR_DATABASE_URL:
-        "postgres://migration:fixture@db.staging.example.invalid/msr_stage?sslmode=verify-full",
+        "postgres://migration:fixture@staging-db.example.invalid/msr_stage?sslmode=verify-full",
       DATABASE_TRANSPORT: "cloudflared-access-tcp",
       DATABASE_TLS_CA_PEM: "reviewed public CA",
-      TUNNEL_SERVICE_HOSTNAME: "db.staging.example.invalid",
+      TUNNEL_SERVICE_HOSTNAME: "staging-db.example.invalid",
       TUNNEL_SERVICE_URL: "127.0.0.1:15432",
       TUNNEL_SERVICE_TOKEN_ID: ephemeral(),
       TUNNEL_SERVICE_TOKEN_SECRET: ephemeral(),

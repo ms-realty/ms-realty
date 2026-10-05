@@ -18,8 +18,8 @@ const id = (value) => typeof value === "string" && /^[a-f0-9-]{36}$/.test(value)
 const address = (value) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const knownHosts = [
   "staging.makler-realty.com",
-  "my.staging.makler-realty.com",
-  "app.staging.makler-realty.com",
+  "staging-my.makler-realty.com",
+  "staging-app.makler-realty.com",
 ];
 export const requiredSecrets = [
   "WEB_DATABASE_URL",
@@ -120,7 +120,7 @@ export function validateStaging(
   );
   if (input.database.transport === "cloudflared-access-tcp")
     demand(
-      /(?:^|\.)(?:stage|staging)(?:\.|$)/.test(input.database.stagingHost) &&
+      input.database.stagingHost === "staging-db.makler-realty.com" &&
         !knownHosts.includes(input.database.stagingHost) &&
         id(input.database.access?.applicationId) &&
         pin(input.database.access?.audience) &&

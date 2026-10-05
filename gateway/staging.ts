@@ -1,7 +1,7 @@
 const stageHosts = new Set([
   "staging.makler-realty.com",
-  "my.staging.makler-realty.com",
-  "app.staging.makler-realty.com",
+  "staging-my.makler-realty.com",
+  "staging-app.makler-realty.com",
 ]);
 
 export function isStagingHost(value: string): boolean {
