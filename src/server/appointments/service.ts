@@ -16,6 +16,7 @@ import {
   servicePolicies,
 } from "@/db/schema";
 import { appointmentMachine, guardAppointmentTransition } from "@/domain/appointment";
+import type { PublicLocale } from "@/i18n/config";
 import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, can, resolveGrants } from "../authz";
@@ -36,6 +37,7 @@ import { nextReference } from "../references";
 import { appointmentCoverageAt, ownerNeedsCoverage } from "../work/coverage-policy";
 import { allow, commandEnvelope, openAppointmentStates, parseInput, version } from "../work/shared";
 import { readHostReceivers } from "./host-receivers";
+import { readAppointmentListing } from "./listing-context";
 import { appointmentTimezone, calendarFile, inServiceHours, sofiaInstant } from "./time";
 
 const requestSchema = z.object({
@@ -555,8 +557,16 @@ export async function respondToAppointment(
   );
 }
 
-export async function readAppointment(db: Executor, session: Session, id: string) {
+export async function readAppointment(
+  db: Executor,
+  session: Session,
+  id: string,
+  locale?: PublicLocale,
+) {
   const { row, live, resource } = await appointmentFor(db, session, id);
+  const listing = locale
+    ? await readAppointmentListing(db, resource.caseId, row.interestId, locale)
+    : null;
   const [reservation] =
     live.actor.kind === "staff"
       ? await db
@@ -618,6 +628,7 @@ export async function readAppointment(db: Executor, session: Session, id: string
       )
     : [];
   return {
+    listing,
     appointment: {
       id: row.id,
       reference: row.reference,

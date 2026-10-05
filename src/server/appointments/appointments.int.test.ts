@@ -1,7 +1,15 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { appointmentResources, caseParticipants, listings, servicePolicies } from "@/db/schema";
+import {
+  appointmentParticipants,
+  appointmentResources,
+  appointments,
+  caseParticipants,
+  interests,
+  listings,
+  servicePolicies,
+} from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { changeStaffAbsence } from "../auth/absence";
 import { addInterest, respondToInterest } from "../cases/commands";
@@ -90,6 +98,54 @@ function confirmation(id: string, expectedVersion = 1) {
 }
 
 describe("appointment requests and exclusive commitments", () => {
+  it("P14 exposes approved locale listing identity only after live Case and appointment participation", async () => {
+    const f = await fixture();
+    const detail = await readAppointment(t.db, f.client.session, f.request.id, "bg");
+    expect(detail.listing).toMatchObject({
+      reference: f.listing.reference,
+      card: { reference: f.listing.reference, locale: "bg" },
+    });
+    expect(detail.listing?.href).toContain(`/bg/properties/${f.listing.reference}/`);
+    const english = await readAppointment(t.db, f.client.session, f.request.id, "en");
+    expect(english.listing).toEqual({ reference: f.listing.reference, card: null, href: null });
+
+    const outsider = await caseFixture(t.db);
+    await expect(
+      readAppointment(t.db, outsider.client.session, f.request.id, "bg"),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await t.db
+      .delete(appointmentParticipants)
+      .where(eq(appointmentParticipants.appointmentId, f.request.id));
+    await expect(readAppointment(t.db, f.client.session, f.request.id, "bg")).rejects.toMatchObject(
+      { code: "not_found" },
+    );
+  });
+
+  it("P14 shows only the associated reference when withdrawn and never projects an Interest from another Case", async () => {
+    const f = await fixture();
+    await t.db
+      .update(listings)
+      .set({ commercialState: "withdrawn" })
+      .where(eq(listings.id, f.listing.listingId));
+    expect((await readAppointment(t.db, f.client.session, f.request.id, "bg")).listing).toEqual({
+      reference: f.listing.reference,
+      card: null,
+      href: null,
+    });
+
+    const other = await fixture();
+    const [otherInterest] = await t.db
+      .select({ id: interests.id })
+      .from(interests)
+      .where(eq(interests.caseId, other.record.id));
+    if (!otherInterest) throw new Error("Missing associated Interest fixture");
+    await t.db
+      .update(appointments)
+      .set({ interestId: otherInterest.id })
+      .where(eq(appointments.id, f.request.id));
+    expect((await readAppointment(t.db, f.client.session, f.request.id, "bg")).listing).toBeNull();
+  });
+
   it("refuses a confirmation whose host has a planned absence during its travel buffer", async () => {
     const f = await fixture(),
       manager = await custodyFixture(t.db);
@@ -230,9 +286,11 @@ describe("appointment requests and exclusive commitments", () => {
       .update(caseParticipants)
       .set({ revokedAt: new Date() })
       .where(eq(caseParticipants.partyId, f.client.partyId));
-    await expect(readAppointment(t.db, f.client.session, f.request.id)).rejects.toMatchObject({
-      code: "not_found",
-    });
+    await expect(readAppointment(t.db, f.client.session, f.request.id, "bg")).rejects.toMatchObject(
+      {
+        code: "not_found",
+      },
+    );
     await expect(respondToAppointment(t.db, f.client.session, input)).rejects.toMatchObject({
       code: "not_found",
     });
