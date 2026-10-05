@@ -426,6 +426,12 @@ jobs:
             };
             fs.writeFileSync("monitoring-alert-receipt.json", `${JSON.stringify(receipt, null, 2)}\n`);
             core.setOutput("issue_url", issue.html_url);
+            await github.rest.issues.update({
+              ...context.repo,
+              issue_number: issue.number,
+              state: "closed",
+              state_reason: "completed",
+            });
 
       - name: Build the current monitoring rollback report
         id: monitoring-report
