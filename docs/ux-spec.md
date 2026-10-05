@@ -151,7 +151,7 @@ All paths below are under the appropriate host and `/{locale}` unless a legacy m
 | Client Case `/brief`, `/properties`, `/appointments`, `/messages`, `/documents`, `/proposals`, `/listing-preview` | C04–C10, C12 | Contextual private tasks |
 | Client `/preferences`, scoped `/participants`, `/privacy-requests` | C13, C17, C18 | Personal choices and access/data requests |
 | Client supported service Case | C14 | Owned consultation, not maintenance tracking |
-| Staff `/access`, `/access/recovery` | O23 access variant | Staff-only provider handoff, enrollment, challenge, denial and recovery |
+| Staff `/access`, `/access/recovery` | O23 access variant | Staff-only passkey sign-in, two-passkey enrolment, denial and recovery |
 | Staff `/today`, `/inquiries`, `/inquiries/{id}` | O01–O03, O18 | Coverage, triage and commitments |
 | Staff `/cases`, `/cases/{id}`, `/parties/{id}` | O04–O07, O19, O20 | Work and relationship context |
 | Staff `/calendar`, `/appointments/{id}` | O08, O09 | Resource-aware scheduling |
@@ -1258,7 +1258,7 @@ Correction, export and deletion/restriction are different tasks. A request recei
 
 ## 16. Staff and operating screen contracts
 
-Staff screens require staff-context identity, dedicated staff organization, active local membership and required capabilities. Staff passkey sign-in and sensitive reauthentication are separate from client email-link verification. No generated CRUD route or direct database/admin access may bypass these contracts.
+Staff screens require staff-context identity, an active local staff membership and required capabilities. Staff passkey sign-in and sensitive reauthentication are separate from client email-link verification. No generated CRUD route or direct database/admin access may bypass these contracts.
 
 ### O01 — Today
 
