@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { count, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  activityEvents,
+  auditEvents,
   contactMethods,
   externalActions,
   inquiries,
@@ -93,6 +95,77 @@ const inquiriesFor = (key: string) =>
   t.db.select().from(inquiries).where(eq(inquiries.submissionKey, key));
 
 describe("submitInquiry", () => {
+  it("keeps viewing preferences private and reconciles the accepted receipt after the proposed time passes", async () => {
+    const future = new Date().getUTCFullYear() + 1;
+    const viewingPreferences = {
+      version: 1 as const,
+      provenance: "self_declared" as const,
+      format: "in_person" as const,
+      timezone: "Europe/Sofia",
+      windows: [
+        { startsAtLocal: `${future}-04-02T10:00`, endsAtLocal: `${future}-04-02T11:00` },
+        { startsAtLocal: `${future}-04-01T10:00`, endsAtLocal: `${future}-04-01T11:00` },
+      ],
+      accessNeeds: "Synthetic private step-free access request",
+    };
+    const input = question({ purpose: "viewing_request", viewingPreferences });
+    const session = newReceiptSession();
+    const accepted = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
+    const [row] = await inquiriesFor(input.submissionKey);
+    if (!row) throw new Error("Missing accepted viewing inquiry");
+    expect(row.context).toMatchObject({ viewingPreferences });
+    const receipt = await readInquiryReceipt(t.db, {
+      submissionKey: input.submissionKey,
+      receiptSession: session,
+    });
+    expect(receipt).toEqual(accepted.receipt);
+    expect(receipt).not.toHaveProperty("viewingPreferences");
+    const outbox = await t.db.select().from(outboxEvents).where(eq(outboxEvents.subjectId, row.id));
+    const audit = await t.db.select().from(auditEvents).where(eq(auditEvents.recordId, row.id));
+    const activity = await t.db
+      .select()
+      .from(activityEvents)
+      .where(eq(activityEvents.recordId, row.id));
+    expect(outbox).toHaveLength(1);
+    expect(audit).toHaveLength(1);
+    expect(activity).toHaveLength(1);
+    for (const projection of [receipt, accepted.receipt, outbox, audit, activity]) {
+      expect(JSON.stringify(projection)).not.toContain(viewingPreferences.accessNeeds);
+    }
+    expect(await t.db.select().from(externalActions)).toEqual([]);
+
+    const late = new Date(`${future}-04-03T12:00:00Z`);
+    const replay = await submitInquiry(t.db, input, {
+      ip: ip(),
+      receiptSession: session,
+      now: late,
+    });
+    expect(replay.replayed).toBe(true);
+    expect(replay.receipt).toEqual(accepted.receipt);
+    await expect(
+      submitInquiry(t.db, input, { ip: ip(), receiptSession: newReceiptSession(), now: late }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await expect(
+      submitInquiry(
+        t.db,
+        {
+          ...input,
+          viewingPreferences: { ...viewingPreferences, accessNeeds: "Changed private note" },
+        },
+        { ip: ip(), receiptSession: session, now: late },
+      ),
+    ).rejects.toMatchObject({ code: "idempotency_key_reused" });
+    const fresh = { ...input, submissionKey: issueSubmissionKey() };
+    await expect(
+      submitInquiry(t.db, fresh, { ip: ip(), receiptSession: session, now: late }),
+    ).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { "viewingPreferences.windows.0.startsAtLocal": ["past_time"] },
+    });
+    expect(await inquiriesFor(fresh.submissionKey)).toEqual([]);
+    expect(await inquiriesFor(input.submissionKey)).toHaveLength(1);
+  });
+
   it("AT27: rolls back a stale source attempt and accepts explicit current review with the same operation and session", async () => {
     const session = newReceiptSession();
     const stale = question({ observedManifestId: randomUUID() });
@@ -434,6 +507,39 @@ describe("/api/inquiries", () => {
     );
     expect(stranger.status).toBe(404);
     expect((await stranger.json()).error.code).toBe("NOT_FOUND");
+  });
+
+  it("accepts bounded native viewing preferences without exposing access needs in the redirect", async () => {
+    process.env.DATABASE_URL = t.url;
+    const future = new Date().getUTCFullYear() + 1;
+    const submissionKey = issueSubmissionKey();
+    const accessNeeds = "Synthetic private access need";
+    const posted = await post(
+      form({
+        submissionKey,
+        purpose: "viewing_request",
+        locale: "bg",
+        listingReference: live.reference,
+        contactKind: "email",
+        contactValue: "native-viewing@example.test",
+        privacyNotice: "on",
+        viewingPreferences: JSON.stringify({
+          version: 1,
+          provenance: "self_declared",
+          timezone: "Europe/Sofia",
+          windows: [
+            { startsAtLocal: `${future}-04-02T10:00`, endsAtLocal: `${future}-04-02T11:00` },
+          ],
+          accessNeeds,
+        }),
+      }),
+      { origin, "content-type": "application/x-www-form-urlencoded", "cf-connecting-ip": ip() },
+    );
+    expect(posted.status).toBe(303);
+    expect(posted.headers.get("location")).toBe(`${origin}/bg/requests/${submissionKey}`);
+    expect(posted.headers.get("location")).not.toContain(accessNeeds);
+    const [row] = await inquiriesFor(submissionKey);
+    expect(row?.context).toMatchObject({ viewingPreferences: { accessNeeds } });
   });
 
   it("sends a failed form back with its key and an error code, never the private fields", async () => {

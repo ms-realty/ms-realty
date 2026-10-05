@@ -11,6 +11,7 @@ import { isPublicLocale, isUuid, parseReference, sourceLocale } from "@/domain/i
 import { parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import { ownerInquirySchema } from "@/domain/owner-inquiry";
+import { viewingPreferencesSchema } from "@/domain/viewing-preferences";
 import { readCookie } from "@/server/auth/cookies";
 import { getEnv } from "@/server/config/env";
 import { AppError, isAppError, wireCode } from "@/server/errors";
@@ -76,6 +77,16 @@ function formInput(form: URLSearchParams): Record<string, unknown> {
       throw new AppError("validation_failed", { fieldErrors: { ownerInput: ["invalid"] } });
     }
   }
+  let viewingPreferences: unknown;
+  const rawViewing = field("viewingPreferences");
+  if (rawViewing) {
+    try {
+      if (rawViewing.length > 4096) throw new Error("too_large");
+      viewingPreferences = viewingPreferencesSchema.parse(JSON.parse(rawViewing));
+    } catch {
+      throw new AppError("validation_failed", { fieldErrors: { viewingPreferences: ["invalid"] } });
+    }
+  }
   const rawSelection = field("selectedListings");
   const selectedListings = rawSelection ? parseSelectedListingsJson(rawSelection) : undefined;
   if (selectedListings === null)
@@ -97,6 +108,7 @@ function formInput(form: URLSearchParams): Record<string, unknown> {
     selectedListings,
     contentReference,
     ownerInput,
+    viewingPreferences,
     comparisonReferences,
     callbackWindow: field("callbackWindow"),
     privacyNotice: checked("privacyNotice"),
