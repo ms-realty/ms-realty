@@ -821,6 +821,15 @@ export async function TaskScreen({
             <When date={task.state === "waiting" ? task.followUpAt : task.dueAt} locale={locale} />
           </dd>
         </div>
+        {task.followUpAt && task.state !== "waiting" ? (
+          // W03 O23HRA: a receiver's own review time, entered and shown in the agency zone.
+          <div>
+            <dt className="font-semibold">{copy.nextReview}</dt>
+            <dd>
+              <When date={task.followUpAt} locale={locale} zone="Europe/Sofia" />
+            </dd>
+          </div>
+        ) : null}
         {task.outcomeNote || task.waitingOn || task.cancelReason ? (
           <div>
             <dt className="font-semibold">{copy.outcome}</dt>

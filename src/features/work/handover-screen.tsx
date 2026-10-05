@@ -63,7 +63,7 @@ export function TaskHandoverScreen({
               name: "dueAt",
               label: c.reviewAt,
               type: "datetime-local",
-              hint: c.acceptRule,
+              hint: `${c.zoneNote} ${c.acceptRule}`,
               required: true,
             },
           ]
@@ -76,7 +76,7 @@ export function TaskHandoverScreen({
                 type: "select",
                 options: [
                   { value: "", label: "—" },
-                  ...receivers.map((r) => ({ value: r.id, label: r.name })),
+                  ...offerable.map((r) => ({ value: r.id, label: r.name })),
                 ],
                 required: true,
               },
@@ -140,7 +140,13 @@ export function TaskHandoverScreen({
     </dl>
   ) : null;
 
-  const mine = task.ownerId === session.actor.id;
+  const me = session.actor.id;
+  const declinedBy =
+    latestDecision?.kind === "declined"
+      ? (latestDecision.actorId ?? latestDecision.receiverId)
+      : null;
+  // O23HC: the colleague who just declined is not offered the same work again.
+  const offerable = receivers.filter((r) => r.id !== declinedBy);
   let body: React.ReactNode;
   if (task.pendingOwnerId === session.actor.id) {
     // O23HR, or O23HRD when the receiver opened the decline step.
@@ -188,7 +194,16 @@ export function TaskHandoverScreen({
           {quiet(stepPath("withdraw"), c.withdrawOpen)}
         </>
       );
-  } else if (latestDecision?.kind === "cancelled" && !mine) {
+  } else if (latestDecision?.kind === "declined" && latestDecision.receiverId === me) {
+    // O23HRDR: the receiver's own saved decline; nothing more to do.
+    body = (
+      <>
+        <h2 className="text-subheading font-semibold">{c.declineRecorded}</h2>
+        {decision}
+        <p>{fill(c.declineRecordedNext, { owner })}</p>
+      </>
+    );
+  } else if (latestDecision?.kind === "cancelled" && latestDecision.receiverId === me) {
     // O23HRX: the receiver's view of a withdrawn offer; nothing to do.
     body = (
       <>
@@ -217,7 +232,8 @@ export function TaskHandoverScreen({
         ) : null}
         <h3 className="font-semibold">{c.offerTitle}</h3>
         <p className="text-text-muted">{c.lead}</p>
-        {receivers.length ? form("request", c.request) : <p>{c.none}</p>}
+        {declinedBy ? <p className="text-text-muted">{fill(c.declinedHidden, { actor })}</p> : null}
+        {offerable.length ? form("request", c.request) : <p>{c.none}</p>}
       </>
     );
   }

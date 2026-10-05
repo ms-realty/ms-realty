@@ -7,8 +7,16 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { findCoverageRecord, findPaginatedRecord, moveQueuePage } from "./coverage-helpers";
 
+/** 03:30 on next year's last Sunday of March: Europe/Sofia skips 03:00–04:00 that night. */
+function springGap() {
+  const year = new Date().getUTCFullYear() + 1;
+  const day = new Date(Date.UTC(year, 2, 31));
+  day.setUTCDate(31 - day.getUTCDay());
+  return `${day.toISOString().slice(0, 10)}T03:30`;
+}
+
 /** A future review time as the native datetime-local value in the agency zone. */
-function reviewInput(offsetMs = 1_800_000) {
+function reviewInput(at = new Date(Date.now() + 1_800_000)) {
   return new Intl.DateTimeFormat("sv-SE", {
     timeZone: "Europe/Sofia",
     year: "numeric",
@@ -17,7 +25,7 @@ function reviewInput(offsetMs = 1_800_000) {
     hour: "2-digit",
     minute: "2-digit",
   })
-    .format(new Date(Date.now() + offsetMs))
+    .format(at)
     .replace(" ", "T");
 }
 
@@ -180,46 +188,22 @@ for (const javaScriptEnabled of [true, false])
       await expect(
         page.getByText("This action was recorded successfully.", { exact: true }),
       ).toBeVisible();
-      // W03: the receiver may decline with a reason; the work stays and the decision is shown.
-      await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
-      await page.getByRole("link", { name: "Decline with a reason", exact: true }).click();
-      await expect(page).toHaveURL(/[?&]handover=decline/);
-      const decline = page
-        .locator("form")
-        .filter({ has: page.getByRole("button", { name: "Send the decline", exact: true }) });
-      const declineReason = "Not my area; please ask the rental team.";
-      await decline.getByLabel("Reason for declining", { exact: true }).fill(declineReason);
-      await decline.getByRole("button", { name: "Send the decline", exact: true }).click();
-      await expect(
-        page.getByText("This action was recorded successfully.", { exact: true }),
-      ).toBeVisible();
-      await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
-      await expect(page.getByRole("heading", { name: /declined the handover$/ })).toBeVisible();
-      await expect(page.getByText(declineReason, { exact: true })).toBeVisible();
-      expect(
-        (await db.select().from(schema.tasks).where(eq(schema.tasks.id, task.id)))[0],
-      ).toMatchObject({ pendingOwnerId: null, dueAt: task.dueAt });
-      const again = page
-        .locator("form")
-        .filter({ has: page.getByRole("button", { name: "Request task handover", exact: true }) });
-      await again.getByLabel("Receiving colleague", { exact: true }).selectOption(f.managerId);
-      await again
-        .getByLabel("Reason and handover notes", { exact: true })
-        .fill("Manager will take the unchanged client promise.");
-      await again.getByRole("checkbox").check();
-      await again.getByRole("button", { name: "Request task handover", exact: true }).click();
-      await expect(
-        page.getByText("This action was recorded successfully.", { exact: true }),
-      ).toBeVisible();
       await page.goto(hostUrl("staff", `/en/tasks/${task.id}`));
       // W03: the receiver accepts with their own next step and a future review time.
       const accept = page
         .locator("form")
         .filter({ has: page.getByRole("button", { name: "Accept the work", exact: true }) });
-      const reviewAt = reviewInput();
       await accept
         .getByLabel("Your next step", { exact: true })
         .fill("Call the client about the unchanged promise");
+      // A wall time inside the spring DST gap does not exist in Europe/Sofia.
+      await accept.getByLabel("When will you review it again?", { exact: true }).fill(springGap());
+      await accept.getByRole("button", { name: "Accept the work", exact: true }).click();
+      await expect(page.getByText(/does not exist in Europe\/Sofia/).first()).toBeVisible();
+      await expect(accept.getByLabel("Your next step", { exact: true })).toHaveValue(
+        "Call the client about the unchanged promise",
+      );
+      const reviewAt = reviewInput();
       await accept.getByLabel("When will you review it again?", { exact: true }).fill(reviewAt);
       await accept.getByRole("button", { name: "Accept the work", exact: true }).click();
       await expect(
@@ -363,9 +347,10 @@ for (const javaScriptEnabled of [true, false])
       await accept
         .getByLabel("Your next step", { exact: true })
         .fill("Confirm the promised date with the client");
+      const reviewAt = new Date(Math.floor((Date.now() + 1_800_000) / 60_000) * 60_000);
       await accept
         .getByLabel("When will you review it again?", { exact: true })
-        .fill(reviewInput());
+        .fill(reviewInput(reviewAt));
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         320,
       );
@@ -382,10 +367,17 @@ for (const javaScriptEnabled of [true, false])
       ).toMatchObject({
         ownerId: receiver.brokerId,
         pendingOwnerId: null,
+        title: "Confirm the promised date with the client",
         dueAt,
+        followUpAt: reviewAt,
         promisedToClient: true,
         state: "open",
       });
+      // O23HRA: the receiver's saved review time is shown in the agency zone.
+      await page.goto(hostUrl("staff", taskHref));
+      const nextReview = page.locator("dt", { hasText: "Next review" }).locator("xpath=..");
+      await expect(nextReview.locator("time")).toHaveAttribute("datetime", reviewAt.toISOString());
+      await expect(nextReview).toContainText("Europe/Sofia");
       await page.goto(hostUrl("staff", "/en/tasks?view=handovers"));
       expect(await findPaginatedRecord(page, taskHref, { viewportWidth: 320 })).toBe(false);
       const lastPending = pending.reduce((last, row) => (row.id > last.id ? row : last));
@@ -453,5 +445,100 @@ for (const javaScriptEnabled of [true, false])
           pending.map((row) => row.id),
         ),
       );
+    }
+  });
+
+for (const javaScriptEnabled of [true, false])
+  test(`W03 a declined handover is recorded for the receiver and shown to the sender, JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+  }, testInfo) => {
+    const f = seed(),
+      receiver = seed();
+    const [task] = await db
+      .insert(schema.tasks)
+      .values({
+        id: randomUUID(),
+        ownerId: f.brokerId,
+        caseId: f.caseId,
+        title: "Synthetic declined handover",
+        promisedToClient: true,
+        dueAt: new Date(Date.now() + 86400000),
+      })
+      .returning();
+    if (!task) throw new Error("Missing synthetic task");
+    const taskUrl = hostUrl("staff", `/en/tasks/${task.id}`);
+    const context = await browser.newContext({
+      ...testInfo.project.use,
+      javaScriptEnabled,
+      viewport: { width: 320, height: 844 },
+    });
+    const cookie = (value: string) => ({
+      name: "msr_staff_session",
+      value,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax" as const,
+    });
+    const reason = "Not my area; please ask the rental team.";
+    try {
+      await context.addCookies([cookie(f.staffToken)]);
+      const page = await context.newPage();
+      await page.goto(taskUrl);
+      const request = page
+        .locator("form")
+        .filter({ has: page.getByRole("button", { name: "Request task handover", exact: true }) });
+      await request
+        .getByLabel("Receiving colleague", { exact: true })
+        .selectOption(receiver.brokerId);
+      await request
+        .getByLabel("Reason and handover notes", { exact: true })
+        .fill("Please take the promised follow-up.");
+      await request.getByRole("checkbox").check();
+      await request.getByRole("button", { name: "Request task handover", exact: true }).click();
+      await expect(
+        page.getByText("This action was recorded successfully.", { exact: true }),
+      ).toBeVisible();
+
+      // O23HRD → O23HRDR: the receiver declines in its own step and reads the saved decline.
+      await context.clearCookies();
+      await context.addCookies([cookie(receiver.brokerToken)]);
+      await page.goto(taskUrl);
+      await page.getByRole("link", { name: "Decline with a reason", exact: true }).click();
+      await expect(page).toHaveURL(/[?&]handover=decline/);
+      const decline = page
+        .locator("form")
+        .filter({ has: page.getByRole("button", { name: "Send the decline", exact: true }) });
+      await decline.getByLabel("Reason for declining", { exact: true }).fill(reason);
+      await decline.getByRole("button", { name: "Send the decline", exact: true }).click();
+      await expect(
+        page.getByText("This action was recorded successfully.", { exact: true }),
+      ).toBeVisible();
+      await page.goto(taskUrl);
+      await expect(
+        page.getByRole("heading", { name: "Decline recorded", exact: true }),
+      ).toBeVisible();
+      await expect(page.getByText(reason, { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Request task handover", exact: true }),
+      ).toHaveCount(0);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        320,
+      );
+
+      // O23HPD → O23HC: the sender reads the decline, and the decliner is not offered again.
+      await context.clearCookies();
+      await context.addCookies([cookie(f.staffToken)]);
+      await page.goto(taskUrl);
+      await expect(page.getByRole("heading", { name: /declined the handover$/ })).toBeVisible();
+      await expect(page.getByText(reason, { exact: true })).toBeVisible();
+      await expect(
+        page.locator(`select[name="receiverId"] option[value="${receiver.brokerId}"]`),
+      ).toHaveCount(0);
+      expect(
+        (await db.select().from(schema.tasks).where(eq(schema.tasks.id, task.id)))[0],
+      ).toMatchObject({ ownerId: f.brokerId, pendingOwnerId: null });
+    } finally {
+      await context.close();
+      await db.delete(schema.tasks).where(eq(schema.tasks.id, task.id));
     }
   });

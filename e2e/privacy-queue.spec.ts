@@ -34,6 +34,7 @@ test("privacy queue reaches and reviews an unresolved request beyond 100 without
     ids: string[];
     targetId: string;
     targetReference: string;
+    ownerName: string;
   };
   const context = await browser.newContext({ ...testInfo.project.use, javaScriptEnabled: false });
   try {
@@ -65,6 +66,10 @@ test("privacy queue reaches and reviews an unresolved request beyond 100 without
       expect(heights.length).toBeGreaterThan(0);
       expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
     };
+    // The long eligible owner must be a rendered option before the 320 px geometry means anything.
+    await expect(
+      page.locator('select[name="responsibleId"] option', { hasText: fixture.ownerName }).first(),
+    ).toBeAttached();
     await assertNativeGeometry();
     const target = page
       .getByRole("heading", { level: 2 })

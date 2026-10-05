@@ -23,6 +23,7 @@ const en = {
   state: "Status",
   received: "Received",
   followUp: "Follow-up",
+  nextReview: "Next review",
   noDate: "No date recorded",
   noOwner: "No named owner",
   reference: "Reference",
@@ -77,6 +78,10 @@ const en = {
     future_required: "Choose a time in the future.",
     after_deadline:
       "This time is after the deadline promised to the client. Choose an earlier time.",
+    invalid_local_time:
+      "This time does not exist in Europe/Sofia (the clocks move forward). Choose another time.",
+    ambiguous_local_time:
+      "This time occurs twice in Europe/Sofia (the clocks move back). Choose another time.",
   } as Record<string, string>,
   conflict:
     "This record changed. Compare the latest version with your draft before applying it again.",
@@ -155,6 +160,7 @@ const bg: Copy = {
   state: "Статус",
   received: "Получено",
   followUp: "Следващо действие",
+  nextReview: "Следващ преглед",
   noDate: "Няма записана дата",
   noOwner: "Няма определен отговорник",
   reference: "Номер",
@@ -208,6 +214,10 @@ const bg: Copy = {
   reasons: {
     future_required: "Изберете час в бъдещето.",
     after_deadline: "Този час е след срока, обещан на клиента. Изберете по-ранен час.",
+    invalid_local_time:
+      "Този час не съществува в Europe/Sofia (часовникът се мести напред). Изберете друг час.",
+    ambiguous_local_time:
+      "Този час се повтаря в Europe/Sofia (часовникът се мести назад). Изберете друг час.",
   } as Record<string, string>,
   conflict: "Записът е променен. Сравнете новата версия с черновата преди повторно прилагане.",
   denied: "Текущият ви достъп не позволява това действие.",
@@ -280,6 +290,7 @@ const ru: Copy = {
   state: "Статус",
   received: "Получено",
   followUp: "Следующее действие",
+  nextReview: "Следующая проверка",
   noDate: "Дата не указана",
   noOwner: "Ответственный не назначен",
   reference: "Номер",
@@ -333,6 +344,10 @@ const ru: Copy = {
   reasons: {
     future_required: "Выберите время в будущем.",
     after_deadline: "Это время позже срока, обещанного клиенту. Выберите более раннее время.",
+    invalid_local_time:
+      "Такого времени нет в Europe/Sofia (часы переводятся вперёд). Выберите другое время.",
+    ambiguous_local_time:
+      "Это время повторяется в Europe/Sofia (часы переводятся назад). Выберите другое время.",
   } as Record<string, string>,
   conflict:
     "Запись изменилась. Сравните последнюю версию с черновиком перед повторным применением.",

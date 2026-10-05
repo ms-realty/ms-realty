@@ -14,11 +14,12 @@ const connection = postgres(url, { max: 1, onnotice: () => {} }),
   db = drizzle(connection, { schema });
 try {
   const operator = await createStaff(db, { grants: [{ capability: "privacy.manage" }] });
+  const ownerName = `Synthetic privacy owner with a long name ${"x".repeat(120)}`;
   // A long eligible owner name keeps the 320 px layout check deterministic: a native select's
   // longest option once widened the whole queue page (CI run 37354411950).
   await db
     .update(schema.principals)
-    .set({ displayName: `Synthetic privacy owner with a long name ${"x".repeat(120)}` })
+    .set({ displayName: ownerName })
     .where(eq(schema.principals.id, operator.id));
   await db.insert(schema.passkeys).values(
     [0, 1].map(() => ({
@@ -51,6 +52,7 @@ try {
       ids,
       targetId: ids[0],
       targetReference: `${prefix}-0`,
+      ownerName,
     }),
   );
 } finally {

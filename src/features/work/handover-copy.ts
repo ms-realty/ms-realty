@@ -72,6 +72,18 @@ export function taskHandoverCopy(locale: string) {
       "Напишите причину отзыва.",
       "Write the reason for withdrawing.",
     ),
+    zoneNote: s("Час по Europe/Sofia.", "Время по Europe/Sofia.", "Time in Europe/Sofia."),
+    declineRecorded: s("Отказът е записан", "Отказ записан", "Decline recorded"),
+    declineRecordedNext: s(
+      "Не е нужно друго от вас. {owner} ще избере друг колега.",
+      "От вас больше ничего не нужно. {owner} выберет другого коллегу.",
+      "Nothing more is needed from you. {owner} will choose another colleague.",
+    ),
+    declinedHidden: s(
+      "{actor} отказа и не се показва отново в списъка.",
+      "{actor} отказался и больше не показывается в списке.",
+      "{actor} declined and is not offered again in the list.",
+    ),
     sendDecline: s("Изпратете отказа", "Отправить отказ", "Send the decline"),
     pendingAlert: s(
       "Предложението чака отговор от {receiver}. Дотогава работата остава при вас. Ако {receiver} откаже, тук ще видите причината.",
