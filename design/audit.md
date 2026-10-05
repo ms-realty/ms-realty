@@ -399,7 +399,7 @@ Internal names stay in code. Labels are drafts in EN and BG; every catalog in `m
 
 | Brief object | Repository equivalent (authority) | Label · EN | Label · BG (draft) | Status |
 |---|---|---|---|---|
-| RealtyCase | Client case — buyer, seller or rental — with Interests, Stage, Disposition (CONTEXT.md; architecture §6.2–6.3) | Client: My purchase / My sale / My rental · Staff: Case | Клиент: Моята покупка / продажба / наем · Екип: Случай | Exists · O05, C03 designed |
+| RealtyCase | Client case — buyer, seller or rental — with Interests, Stage, Disposition (CONTEXT.md; architecture §6.2–6.3) | Client: My purchase / My sale / My rental · Staff: Deal (owner pick) | Клиент: Моята покупка / продажба / наем · Екип: Сделка | Exists · O05, C03 designed |
 | Mandate | Legacy: authority envelope (grantor, effective/expiry, allowed actions and steps, limits, revocation history). `main`: Seller Instructions (spec only), `service_agreements`, party `AuthorityState` | Client: Our agreement · Staff: Mandate | Клиент: Нашето споразумение · Екип: Възлагане | Partial · also bounds what agents may do in autonomous mode |
 | PropertyEvidencePack | Facts with state, source class, review record, freshness; Documents/Evidence; Media rights | Property file | Досие на имота | Exists in spec · O14 not designed |
 | ConditionLedger | No single record: Proposal revision conditions + Tasks/Commitments + country/service checklist with named professional (§6.5) | Path to completion | Път до приключване | Gap · proposed read model |

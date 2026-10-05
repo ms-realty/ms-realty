@@ -35,7 +35,7 @@ Primary surfaces (navigation, headings, body copy, buttons, field labels, alerts
 
 | Internal concept | bg (banned) | en (banned) | ru (banned) | Say instead |
 |---|---|---|---|---|
-| Case object | Случай, Преписка / преписки, `DEMO-CASE-NN` | case, case file | дело, кейс, случай | the person or property plus the next step («Покупката на Алекс») — one noun per object in nav, title, palette and button once the owner picks it |
+| Case object | Случай, Преписка / преписки, `DEMO-CASE-NN` | case, case file | дело, кейс, случай | owner pick: «Сделка / Сделки» (en «Deal / Deals», ru «Сделка / Сделки») in staff nav, titles, search and buttons; titles name the person and the deal («Покупката на Алекс») |
 | Disposition | Разпореждане, диспозиция | disposition | распоряжение, диспозиция | a sentence: «Приключено без сделка, защото …» |
 | Brief | Бриф, Brief vN | brief | бриф | «Какво търси клиентът» |
 | Coverage / queue ownership | Покритие, опашка за покритие | coverage | покрытие | «Още няма отговорник», «екипът в Сандански» |
@@ -55,7 +55,7 @@ Primary surfaces (navigation, headings, body copy, buttons, field labels, alerts
 
 ## G3 Leader parity (binary; every item must pass)
 
-1. **One Butler entry everywhere.** The same Butler entry (rail item and one keyboard shortcut on staff screens, one «Попитайте Butler» entry on public and client screens) accepts plain language in all seven locales, shows what it will do before it does it, and always offers «Ще го направя сам» to the same screen.
+1. **One Butler entry everywhere.** The same Butler entry (rail item and one keyboard shortcut on staff screens, one «Попитайте Butler» entry on public and client screens) accepts plain language in all seven locales, shows what it will do before it does it, and always offers «Ще го направя аз» to the same screen.
 2. **Fast first value.** A visitor sends an inquiry from a listing in at most 3 interactions and 2 minutes; a broker takes a new inquiry from Today or Inbox in at most 3 interactions.
 3. **Live state and stop.** Anything long-running (Butler drafts, imports, bulk publishing) shows live progress and a Stop one step away. An atomic send shows that it is running, that it is sent once, and what happens if the connection drops.
 4. **Consequences before irreversible actions.** Send, accept, assign, merge, publish, revoke and resolve state their effect and their limit in the button or one line next to it, never in a footnote.
