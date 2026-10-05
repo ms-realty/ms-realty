@@ -40,6 +40,7 @@ import {
   workflowTypes,
 } from "./contract";
 import { caseCopy } from "./copy";
+import { matchReviewFromForm } from "./matching-review";
 
 const instant = (value: string) =>
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ? `${value}:00Z` : value;
@@ -252,6 +253,7 @@ export async function workflowAction(
               ...base,
               reference: values.reference ?? "",
               explanation: values.explanation ?? "",
+              matchReview: matchReviewFromForm(values.matchReview),
             })
           ).outcome;
         case "feedback":

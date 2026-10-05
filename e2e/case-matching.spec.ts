@@ -100,11 +100,7 @@ async function saved(caseId: string, reference: string) {
     .where(and(eq(schema.interests.caseId, caseId), eq(schema.listings.reference, reference)));
 }
 
-/**
- * The page may say "added" only when the server recorded the property, once. Until the cases
- * Server Action passes `matchReview` to `addInterest`, the command refuses the add and the page
- * must say that nothing was added.
- */
+/** The page may say "added" only when the server recorded the property, once. */
 async function expectTruthfulAdd(
   page: Page,
   caseId: string,
@@ -420,10 +416,10 @@ for (const javaScriptEnabled of [true, false]) {
       const explanation = "Светъл двустаен апартамент в Сандански, в рамките на бюджета.";
       await page.getByRole("textbox", { name: /Обяснение за клиента/ }).fill(explanation);
       await add.click();
-      if (await expectTruthfulAdd(page, f.caseId, f.refs.match, explanation)) {
-        await page.reload();
-        await expect(page.getByText("Вече е в списъка на клиента", exact)).toBeVisible();
-      }
+      expect(await expectTruthfulAdd(page, f.caseId, f.refs.match, explanation)).toBe(true);
+      // A fresh GET must show the saved Interest, including after the native POST response.
+      await page.goto(check(f.refs.match));
+      await expect(page.getByText("Вече е в списъка на клиента", exact)).toBeVisible();
     } finally {
       await context.close();
     }
