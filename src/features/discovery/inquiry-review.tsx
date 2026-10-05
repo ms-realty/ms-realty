@@ -5,6 +5,7 @@ import type { DiscoveryCopy } from "./copy";
 import { OwnerInquirySummary } from "./inquiry-owner";
 import { inquiryReviewCopy } from "./inquiry-review-copy";
 import type { InquiryState, InquiryValues } from "./inquiry-state";
+import { ViewingPreferenceSummary } from "./inquiry-viewing";
 import { ListingFacts } from "./listing-card";
 import { listingHref, locality, priceText } from "./presentation";
 
@@ -91,6 +92,9 @@ export function InquiryReview({
             </li>
           ))}
         </ol>
+      ) : null}
+      {review.viewingPreferences ? (
+        <ViewingPreferenceSummary input={review.viewingPreferences} locale={locale} />
       ) : null}
       {review.ownerInput ? <OwnerInquirySummary input={review.ownerInput} locale={locale} /> : null}
       <dl className="space-y-4">

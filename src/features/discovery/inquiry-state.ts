@@ -3,13 +3,15 @@ import { inquiryPurposes } from "@/domain/inquiry";
 import { type ContentReference, parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import type { OwnerInquiry } from "@/domain/owner-inquiry";
+import type { ViewingPreferences } from "@/domain/viewing-preferences";
 import type { PublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import type { InquiryReceipt } from "@/server/inquiries/intake";
 import type { ListingCard } from "@/server/listings/view-models";
 import type { FormCopy, FormReceipt, FormState } from "@/ui/form/contract";
 import type { DiscoveryCopy } from "./copy";
-export type InquiryValues = {
+import { emptyViewingValues } from "./viewing-fields";
+export type InquiryValues = typeof emptyViewingValues & {
   purpose: string;
   name: string;
   contactKind: string;
@@ -31,6 +33,7 @@ export type InquiryValues = {
   ownerDocumentSource: string;
 };
 export const emptyInquiry: InquiryValues = {
+  ...emptyViewingValues,
   purpose: "question",
   name: "",
   contactKind: "email",
@@ -57,6 +60,7 @@ export type InquiryState = FormState<InquiryValues> & {
     token: string;
     listings: readonly ListingCard[];
     ownerInput?: OwnerInquiry;
+    viewingPreferences?: ViewingPreferences;
     content?: ContentReference & { title: string; locale: PublicLocale; sourceUrl: string };
   };
 };

@@ -456,3 +456,114 @@ test("P11: the stateless form transport asks to re-enter private details after a
     await context.close();
   }
 });
+
+for (const javaScriptEnabled of [true, false]) {
+  test(`P13 viewing review/edit/confirm retains ranked native windows with JavaScript ${javaScriptEnabled}`, async ({
+    browser,
+    baseURL,
+  }, info) => {
+    const data = fixture();
+    const context = await browser.newContext({
+      baseURL,
+      javaScriptEnabled,
+      viewport: { width: 390, height: 844 },
+      extraHTTPHeaders: {
+        "cf-connecting-ip": `2001:db8:${randomUUID().replaceAll("-", "").slice(0, 24).match(/.{4}/g)?.join(":")}`,
+      },
+    });
+    try {
+      const page = await context.newPage();
+      await page.goto(
+        `/en/properties/${data.published.reference}/${data.published.reference.toLowerCase()}`,
+      );
+      await page.getByRole("link", { name: "Request a viewing", exact: true }).click();
+      const key = await page.locator('[name="_operationId"]').inputValue();
+      const year = new Date().getUTCFullYear() + 1;
+      const fold = new Date(Date.UTC(year, 10, 0));
+      fold.setUTCDate(fold.getUTCDate() - fold.getUTCDay());
+      const date = (offset: number) => {
+        const day = new Date(fold);
+        day.setUTCDate(day.getUTCDate() + offset);
+        return day.toISOString().slice(0, 10);
+      };
+      const windows = [
+        {
+          startsAtLocal: `${date(0)}T01:15`,
+          endsAtLocal: `${date(0)}T01:45`,
+          startOccurrence: "earlier",
+          endOccurrence: "later",
+        },
+        { startsAtLocal: `${date(-1)}T10:00`, endsAtLocal: `${date(-1)}T11:00` },
+        { startsAtLocal: `${date(1)}T10:00`, endsAtLocal: `${date(1)}T11:00` },
+      ];
+      await page.getByLabel("Preferred format", { exact: true }).selectOption("in_person");
+      await page.getByLabel("Timezone for preferred times", { exact: true }).fill("Europe/London");
+      await page.locator('details:has([name="viewingStartChoice1"]) > summary').click();
+      await page.locator('[name="viewingStartChoice1"]').selectOption("earlier");
+      await page.locator('[name="viewingEndChoice1"]').selectOption("later");
+      await page.locator('details:has([name="viewingStart2"]) > summary').click();
+      for (const [index, preferred] of windows.entries()) {
+        await page.locator(`[name="viewingStart${index + 1}"]`).fill(preferred.startsAtLocal);
+        await page.locator(`[name="viewingEnd${index + 1}"]`).fill(preferred.endsAtLocal);
+      }
+      const accessNeeds = "Synthetic private step-free access request";
+      await page.getByLabel(/^Practical access needs/).fill(accessNeeds);
+      await page.getByLabel("Email", { exact: true }).fill("synthetic-viewer@example.test");
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      const summary = page.getByRole("region", { name: "Viewing preferences", exact: true });
+      await expect(summary).toContainText("This is a request, not a booking");
+      await expect(summary).toContainText("Europe/London");
+      await expect(summary).toContainText("First occurrence");
+      await expect(summary).toContainText("Second occurrence");
+      await expect(summary).toContainText(accessNeeds);
+      expect(
+        await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
+      ).toHaveLength(0);
+      await page.getByRole("button", { name: "Edit inquiry", exact: true }).click();
+      await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
+      await expect(page.getByLabel(/^Practical access needs/)).toHaveValue(accessNeeds);
+      for (const [index, preferred] of windows.entries()) {
+        await expect(page.locator(`[name="viewingStart${index + 1}"]`)).toHaveValue(
+          preferred.startsAtLocal,
+        );
+        await expect(page.locator(`[name="viewingEnd${index + 1}"]`)).toHaveValue(
+          preferred.endsAtLocal,
+        );
+      }
+      await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
+      await expect(summary).toBeVisible();
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({
+        path: info.outputPath(`viewing-review-390-${javaScriptEnabled}.png`),
+        fullPage: true,
+      });
+      await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { name: "Inquiry received", exact: true }),
+      ).toBeVisible();
+      const records = await db
+        .select()
+        .from(schema.inquiries)
+        .where(eq(schema.inquiries.submissionKey, key));
+      expect(records).toHaveLength(1);
+      expect(records[0]?.context).toMatchObject({
+        viewingPreferences: {
+          version: 1,
+          provenance: "self_declared",
+          format: "in_person",
+          timezone: "Europe/London",
+          windows,
+          accessNeeds,
+        },
+      });
+      await page.getByRole("link", { name: "Open receipt", exact: true }).click();
+      await expect(page.getByRole("main")).not.toContainText(accessNeeds);
+      await expect(page.getByRole("main")).not.toContainText("synthetic-viewer@example.test");
+      await page.reload();
+      await expect(page.getByRole("main")).not.toContainText(accessNeeds);
+    } finally {
+      await context.close();
+    }
+  });
+}

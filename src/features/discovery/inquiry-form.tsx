@@ -23,6 +23,9 @@ import {
   inquiryPermalink,
   inquiryStatus,
 } from "./inquiry-state";
+import { ViewingPreferenceFields } from "./inquiry-viewing";
+import { viewingCopy } from "./viewing-copy";
+import { emptyViewingValues, viewingFieldLabels } from "./viewing-fields";
 
 export function InquiryForm({
   action,
@@ -37,6 +40,7 @@ export function InquiryForm({
 }) {
   const contacts = useRef<Record<string, string>>({});
   const reviewCopy = inquiryReviewCopy(locale);
+  const viewing = viewingCopy(locale);
   return (
     <ActionForm
       action={action}
@@ -67,6 +71,7 @@ export function InquiryForm({
         ownerRelationship: reviewCopy.relationship,
         ownerPropertyStatus: reviewCopy.propertyStatus,
         ownerDocumentSource: reviewCopy.documentSource,
+        ...viewingFieldLabels(viewing),
       }}
       submitLabel={(state) =>
         (state as InquiryState).review ? reviewCopy.confirmAction : reviewCopy.reviewAction
@@ -263,6 +268,28 @@ export function InquiryForm({
                 .map(([name, value]) => (
                   <input type="hidden" key={name} name={name} value={value} />
                 ))
+            )}
+            {form.values.purpose === "viewing_request" ? (
+              <>
+                <ViewingPreferenceFields form={form} locale={locale} />
+                <FormField
+                  {...form.field("viewingAccessNeeds")}
+                  label={viewing.accessNeeds}
+                  hint={viewing.accessHint}
+                  multiline
+                  maxLength={500}
+                  optionalLabel={copy.optional}
+                />
+              </>
+            ) : (
+              Object.keys(emptyViewingValues).map((name) => (
+                <input
+                  type="hidden"
+                  key={name}
+                  name={name}
+                  value={form.values[name as keyof InquiryValues]}
+                />
+              ))
             )}
             <FormField
               {...form.field("message")}
