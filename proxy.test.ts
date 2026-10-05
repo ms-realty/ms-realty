@@ -123,9 +123,22 @@ describe("host routing (§11.1)", () => {
 
   it("serves each API family only on its own host", () => {
     expect(run(hosts.public, "/api/inquiries").headers.get("x-middleware-next")).toBe("1");
+    expect(
+      run(hosts.public, "/api/public-shares/creator-session").headers.get("x-middleware-next"),
+    ).toBe("1");
+    expect(run(hosts.client, "/api/public-shares/creator-session").status).toBe(404);
     expect(run(hosts.client, "/api/inquiries").status).toBe(404);
     expect(run(hosts.staff, "/api/inquiries/abc").status).toBe(404);
     expect(run(hosts.public, "/api/unknown").status).toBe(404);
+  });
+
+  it("suppresses referrers and caching on recipient pages and share APIs", () => {
+    const recipient = run(hosts.public, "/bg/share/view-token");
+    expect(recipient.headers.get("cache-control")).toBe("private, no-store");
+    expect(recipient.headers.get("referrer-policy")).toBe("no-referrer");
+    const api = run(hosts.public, "/api/public-shares/creator-session");
+    expect(api.headers.get("cache-control")).toBe("private, no-store");
+    expect(api.headers.get("referrer-policy")).toBe("no-referrer");
   });
 
   it("AT41 rejects forwarded-host substitution into a private API", () => {
