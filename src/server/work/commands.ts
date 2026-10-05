@@ -287,7 +287,14 @@ export async function changeTask(db: Executor, session: Session, raw: TaskInput)
         .set({
           state: input.state,
           waitingOn: input.state === "waiting" ? input.note : null,
-          followUpAt: input.state === "waiting" ? new Date(input.followUpAt as string) : null,
+          // A handover receiver's review commitment survives an ordinary open/in-progress
+          // transition. Completion or cancellation closes that obligation explicitly.
+          followUpAt:
+            input.state === "waiting"
+              ? new Date(input.followUpAt as string)
+              : (openTaskStates as readonly string[]).includes(input.state)
+                ? row.followUpAt
+                : null,
           ...(input.state === "done"
             ? { outcomeNote: input.note, completedAt: new Date(), completedById: live.account.id }
             : {}),

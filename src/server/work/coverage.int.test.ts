@@ -94,11 +94,14 @@ it("moves effective responsibility with revocation, preserves records, and clear
   };
   await handoverTask(t.db, f.manager.session, handover);
   expect((await readCoverage(t.db, f.manager.session)).tasks.map((r) => r.id)).toContain(f.task.id);
+  const reviewAt = new Date(Date.now() + 3_600_000);
   await handoverTask(t.db, receiver.session, {
     ...handover,
     action: "accept",
     expectedVersion: 2,
     operationId: randomUUID(),
+    nextAction: "Review the overdue commitment and contact the client",
+    dueAt: reviewAt.toISOString(),
   });
   const after = await readCoverage(t.db, f.manager.session);
   expect(after.tasks.map((r) => r.id)).not.toContain(f.task.id);
@@ -106,7 +109,7 @@ it("moves effective responsibility with revocation, preserves records, and clear
   expect(after.inquiries.map((r) => r.id)).toContain(f.inquiry.id);
   expect(await readTask(t.db, receiver.session, f.task.id)).toMatchObject({
     needsCoverage: false,
-    task: { dueAt: f.task.dueAt, followUpAt: f.task.followUpAt, promisedToClient: true },
+    task: { dueAt: f.task.dueAt, followUpAt: reviewAt, promisedToClient: true },
   });
 });
 

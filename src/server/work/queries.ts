@@ -19,6 +19,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { ownerNeedsCoverage } from "./coverage-policy";
 import {
+  effectiveTaskDue,
   inquiryResource,
   liveStaff,
   openInquiryStates,
@@ -194,7 +195,7 @@ async function tasksQuery(
   options: TaskQueryOptions = {},
 ) {
   const page = parseInput(pageSchema, options.page ?? 1);
-  const effectiveDue = sql<Date>`case when ${tasks.state} = 'waiting' then ${tasks.followUpAt} else ${tasks.dueAt} end`;
+  const effectiveDue = effectiveTaskDue;
   const rows = await db
     .select({
       task: tasks,
