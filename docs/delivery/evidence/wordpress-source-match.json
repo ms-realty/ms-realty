@@ -1,0 +1,2142 @@
+{
+  "schemaVersion": 1,
+  "scope": "Read-only exact source-identity match; not rendered content parity, target equivalence, redirect approval, publication approval or launch readiness.",
+  "productionAllowed": false,
+  "equivalenceReviewed": false,
+  "archiveSha256": "fc0ac4723c942039e1f8390e6f39a2097222489f21aaf4fe20627b85b3c4592a",
+  "databaseMemberSha256": {
+    "mysql/maklerre_newru.sql": "6b7aa4abf133b988589feb550c1e8dce36dfb5c09b1286ef8da37470c62256f5",
+    "mysql/maklerre_newc.sql": "7cb1e32c7544d69e65f68a5e8f15bbd97049d0a56f57d5171c043efc2eaf901d"
+  },
+  "rewriteRuleSha256": {
+    "makler-realty.ru": "e9981789c36e0a4fbecfc452b8868b52c1049c038e44f4945eefc156d0888f74",
+    "makler-realty.com": "4363925bba34c5ccaf302cdb627567b3e4ebb2ca5e529fced3bb245f323bffa9"
+  },
+  "sourceBoundary": "Only published passwordless posts/pages/listings and taxonomy records are matched. Account users, forms, mail, draft records and the separate property database are excluded.",
+  "matchRule": "Match host-specific published passwordless WordPress post/page/listing or taxonomy type and slug after percent-decoding; no fuzzy or cross-host substitution.",
+  "textHashEncoding": "SHA-256 of the database-decoded UTF-8 post_content or taxonomy description; no rendered HTML or card projection.",
+  "localeMarkerScope": "The requested-locale check reads only qTranslate markers in post_content or taxonomy description; null means the text has no such markers.",
+  "counts": {
+    "frozenIdentities": 88,
+    "urlSpellings": 89,
+    "ruExactSourceRecords": 58,
+    "ruNoExactRecord": 3,
+    "comExactSourceRecords": 18,
+    "comNoExactRecord": 9
+  },
+  "rootTemplateObservation": {
+    "host": "makler-realty.ru",
+    "template": "Avenue",
+    "homeMode": "listing",
+    "indexTemplateSha256": "a95ecd610b505103fa4ad49a553f57fdcb696c728608c684041d36f44f04b95b",
+    "listingHomeTemplateSha256": "f0729323f65d7047628be2d42a385c8d18a24e8cb06b063aed9b4f1eccd9dc09",
+    "listingHomeQuery": "published listings, latest ten by post date",
+    "limitation": "Template and query identity do not establish the exact rendered homepage content or authorize a redirect."
+  },
+  "listingArchiveObservation": {
+    "sourceUrl": "https://makler-realty.ru/listing/",
+    "storedRewriteRule": "listing/?$ -> index.php?post_type=listings",
+    "archiveTemplateSha256": "b797aa2c2197e15a71b08b49e8e9ff7e51aceeac0775964aa1bbcff10201d5f2",
+    "limitation": "The route and template are identified, but its exact rendered cards and target equivalence remain unverified."
+  },
+  "identities": [
+    {
+      "id": "f427abbdddcd857eaeb0f1cd",
+      "sourceUrls": [
+        "https://makler-realty.com/category/category/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/category/category/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 25,
+          "recordType": "category",
+          "sourceSlug": "category",
+          "sourceTextBytes": 8,
+          "sourceTextSha256": "292c06f0045a45d044be282b132b7055ae224e18e02b523a451d8ea96fadfd24",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "8f57852140689f707c1da8d9",
+      "sourceUrls": [
+        "https://makler-realty.com/category/uncategorized/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/category/uncategorized/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 1,
+          "recordType": "category",
+          "sourceSlug": "uncategorized",
+          "sourceTextBytes": 75,
+          "sourceTextSha256": "1273b75def8d105ed055ef26f82ade82faaa640efb575593bc83557d9c66b29e",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "8ccff57ae5790cde9de6785d",
+      "sourceUrls": [
+        "https://makler-realty.com/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 146,
+          "recordType": "category",
+          "sourceSlug": "%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8",
+          "sourceTextBytes": 43,
+          "sourceTextSha256": "fe35fab75ea7b68fcea84dd81e434837c352dca6965ddcba2f107927ca5d0c9b",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "0fa55fa2c7790938c737c029",
+      "sourceUrls": [
+        "https://makler-realty.com/de/bulgarien-leben-im-kurort-sandanski/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/de/bulgarien-leben-im-kurort-sandanski/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "a3d9d4affb2cb1cf80ea5ec8",
+      "sourceUrls": [
+        "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 20,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be",
+          "sourceTextBytes": 3806,
+          "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "aefc233e4d0ec603eff52926",
+      "sourceUrls": [
+        "https://makler-realty.com/de/transfer-thessaloniki-bansko/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/de/transfer-thessaloniki-bansko/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "51b42eb18d2f03ba6b9311ad",
+      "sourceUrls": [
+        "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 20,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be",
+          "sourceTextBytes": 3806,
+          "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "f7a6fc7deaa418555adbf355",
+      "sourceUrls": [
+        "https://makler-realty.com/en/transfer-thessaloniki-bansko/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/en/transfer-thessaloniki-bansko/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "350df976a622f397bf22403f",
+      "sourceUrls": [
+        "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "28ac1cff7728b0e7e9aa6b86",
+      "sourceUrls": [
+        "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "8d367794abb7304d98fdb586",
+      "sourceUrls": [
+        "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "2375f307255d9c1be3b9e328",
+      "sourceUrls": [
+        "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "18c0b5691f108c4031cae92c",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/category-type/dom/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/category-type/dom/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 144,
+          "recordType": "category_type",
+          "sourceSlug": "dom",
+          "sourceTextBytes": 293,
+          "sourceTextSha256": "62705dc44a99aad37f94bd8d03fc2f9c6dd2acdd3b1c30d67f0120fb98ea9ec3",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 28,
+          "linkedPublishedListings": 28,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "e7edeae7d8093730f2162771",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/category-type/house-floor/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/category-type/house-floor/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 112,
+          "recordType": "category_type",
+          "sourceSlug": "house-floor",
+          "sourceTextBytes": 250,
+          "sourceTextSha256": "47563e934f2052629fe315a8a4cfd73b1fa4153dac9ace0975fc5a203514f270",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 6,
+          "linkedPublishedListings": 6,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "772f3a0505e284b73a0dc82f",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/category-type/office/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/category-type/office/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 110,
+          "recordType": "category_type",
+          "sourceSlug": "office",
+          "sourceTextBytes": 211,
+          "sourceTextSha256": "fd414cadd0f9ce88ea74f4b88969216a5d9a123219fc70c62e7d24b264576ebc",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 5,
+          "linkedPublishedListings": 5,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "0a97b844445a41e85a7bb879",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/category-type/studio/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/category-type/studio/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 115,
+          "recordType": "category_type",
+          "sourceSlug": "studio",
+          "sourceTextBytes": 205,
+          "sourceTextSha256": "6cd90e6d63b53cdac4f5a0142a2d1b5d8f0c944d86b1f5ca3901bb09d014351b",
+          "requestedLocalePresent": false,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "ru"
+          ],
+          "recordedTermCount": 4,
+          "linkedPublishedListings": 4,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "3bc6064df807891a14cddc3e",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/category-type/villa/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/category-type/villa/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 106,
+          "recordType": "category_type",
+          "sourceSlug": "villa",
+          "sourceTextBytes": 293,
+          "sourceTextSha256": "e115cd3675bdbee637b5be57e53ccd58da30cea0cc9c9404a765ee6958805f24",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 25,
+          "linkedPublishedListings": 25,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "41ed9d7d8ea5f2f343912b87",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 145,
+          "recordType": "category_type",
+          "sourceSlug": "%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f",
+          "sourceTextBytes": 316,
+          "sourceTextSha256": "8a61dccf192f1fae74d0dea597fc54fe04b724bd403f4fd970de16def3270e38",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 10,
+          "linkedPublishedListings": 10,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "26728ca5a959f43c8218a875",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 107,
+          "recordType": "category_type",
+          "sourceSlug": "%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8",
+          "sourceTextBytes": 459,
+          "sourceTextSha256": "afc4b520e55c8387aba79d49235856fc1136af93aad98fdd1996c0162a0dbdf7",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 19,
+          "linkedPublishedListings": 19,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "ec6865e893f8a0d1113fa7d8",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/resort/nafplio/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/resort/nafplio/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 823,
+          "recordType": "resort",
+          "sourceSlug": "nafplio",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "d69b962b23eb6afe9fed5f1c",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 20,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be",
+          "sourceTextBytes": 3806,
+          "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
+          "requestedLocalePresent": true,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "899d93121d3dbd867db12142",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 664,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81",
+          "sourceTextBytes": 1752,
+          "sourceTextSha256": "0b9ef3bd9be4e5dcdb6fa759cdfa6bad0edb3f0640c7267fd5658933371ad985",
+          "requestedLocalePresent": false,
+          "localeMarkers": [
+            "ru"
+          ],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "00762ec63bd43584e5a7871c",
+      "sourceUrls": [
+        "https://makler-realty.com/nl/transfer-thessaloniki-bansko/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/nl/transfer-thessaloniki-bansko/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "c1c9f8607afe3fd2c41a98d1",
+      "sourceUrls": [
+        "https://makler-realty.com/resort/skiing-resort/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/resort/skiing-resort/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 29,
+          "recordType": "resort",
+          "sourceSlug": "skiing-resort",
+          "sourceTextBytes": 273,
+          "sourceTextSha256": "95fdd2a127e664e70e21af3770aaf733f99c5a3cf765a8199d3d9b6d6d734a6e",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "cf0674d7327407791d511e2a",
+      "sourceUrls": [
+        "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 20,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be",
+          "sourceTextBytes": 3806,
+          "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en",
+            "nl",
+            "ru"
+          ],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "df9f0527c9e1b328a05f1c97",
+      "sourceUrls": [
+        "https://makler-realty.com/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newc.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 824,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be",
+          "sourceTextBytes": 452,
+          "sourceTextSha256": "5931b222033a4ebe3e33e1c39d8785c91af2c46400bbc82d7a83b50ea93a878e",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "de",
+            "en"
+          ],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "a3bbc78aa5b5cb8aad66a60e",
+      "sourceUrls": [
+        "https://makler-realty.com/transfer-thessaloniki-bansko/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.com/transfer-thessaloniki-bansko/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "5bcfd16f674cb299f35b417f",
+      "sourceUrls": [
+        "https://makler-realty.ru",
+        "https://makler-realty.ru/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru",
+          "status": "no_exact_record"
+        },
+        {
+          "sourceUrl": "https://makler-realty.ru/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "7ed678dd16b3bd34b62e0bf2",
+      "sourceUrls": [
+        "https://makler-realty.ru/balcon/1/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/balcon/1/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 120,
+          "recordType": "balcon",
+          "sourceSlug": "1",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 7,
+          "linkedPublishedListings": 7,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "b2cf4bf4606de8aeb61554a3",
+      "sourceUrls": [
+        "https://makler-realty.ru/balcon/2/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/balcon/2/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 121,
+          "recordType": "balcon",
+          "sourceSlug": "2",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 5,
+          "linkedPublishedListings": 5,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "0345c324db7a6064ddc81343",
+      "sourceUrls": [
+        "https://makler-realty.ru/balcon/3/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/balcon/3/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 122,
+          "recordType": "balcon",
+          "sourceSlug": "3",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "ec0036927caf6f78b5024204",
+      "sourceUrls": [
+        "https://makler-realty.ru/balcon/4/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/balcon/4/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 123,
+          "recordType": "balcon",
+          "sourceSlug": "4",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 2,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "1f3c4cf367a96f355019ea67",
+      "sourceUrls": [
+        "https://makler-realty.ru/bedroom/1/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/bedroom/1/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 681,
+          "recordType": "bedrooms",
+          "sourceSlug": "1",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 2,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "1544d7d4ce1c16d2f44005d9",
+      "sourceUrls": [
+        "https://makler-realty.ru/bedroom/2/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/bedroom/2/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 683,
+          "recordType": "bedrooms",
+          "sourceSlug": "2",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 7,
+          "linkedPublishedListings": 7,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "8718d8136ef5d1cfd92e3ccf",
+      "sourceUrls": [
+        "https://makler-realty.ru/bedroom/3/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/bedroom/3/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 685,
+          "recordType": "bedrooms",
+          "sourceSlug": "3",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 6,
+          "linkedPublishedListings": 6,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "50e7d6fae38026ab946cb695",
+      "sourceUrls": [
+        "https://makler-realty.ru/bedroom/4/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/bedroom/4/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 687,
+          "recordType": "bedrooms",
+          "sourceSlug": "4",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 2,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "489161f6102e2516f99cc6c9",
+      "sourceUrls": [
+        "https://makler-realty.ru/bedroom/5/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/bedroom/5/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 124,
+          "recordType": "bedrooms",
+          "sourceSlug": "5",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 3,
+          "linkedPublishedListings": 3,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "12fb0238695d0fd61e588469",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/apartment/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/apartment/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 105,
+          "recordType": "category_type",
+          "sourceSlug": "apartment",
+          "sourceTextBytes": 335,
+          "sourceTextSha256": "ecc4bb56e6dafcfc8aacea5d719361f55821f9219330ee7e7702e3a261727f85",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 13,
+          "linkedPublishedListings": 13,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "8a27d493f88e3789cb089b5b",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/commercial-area/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/commercial-area/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 116,
+          "recordType": "category_type",
+          "sourceSlug": "commercial-area",
+          "sourceTextBytes": 218,
+          "sourceTextSha256": "04e05b4c324c97d73415ac4bd0877e900e28ccb8b2bece8584128de61bbbfc27",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 8,
+          "linkedPublishedListings": 8,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "9f06c18dff5931e567afd25f",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/dom/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/dom/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 144,
+          "recordType": "category_type",
+          "sourceSlug": "dom",
+          "sourceTextBytes": 214,
+          "sourceTextSha256": "f36f18ff2c0c21050da7cbb20088424573039ef0e8e0b2740888274571b9516d",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 16,
+          "linkedPublishedListings": 16,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "fd0276c44f9b5137cca268c8",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/elite-realtor/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/elite-realtor/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 117,
+          "recordType": "category_type",
+          "sourceSlug": "elite-realtor",
+          "sourceTextBytes": 151,
+          "sourceTextSha256": "953d1feb9f45cb0a62afee9ff33e9c7e97ed91fc3cb92b78832d5f1e599bcc89",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 6,
+          "linkedPublishedListings": 6,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "f8ab9f5c93f20d5446875e71",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/hotel/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/hotel/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 109,
+          "recordType": "category_type",
+          "sourceSlug": "hotel",
+          "sourceTextBytes": 47,
+          "sourceTextSha256": "d25bd8de5e98b0718e5ae38e385ef0c9abdcace3c2bd78136aa89f682c08536c",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 5,
+          "linkedPublishedListings": 5,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "2b1236ceb793117c3efdbf75",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/house-floor/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/house-floor/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 112,
+          "recordType": "category_type",
+          "sourceSlug": "house-floor",
+          "sourceTextBytes": 51,
+          "sourceTextSha256": "c15198cacf98e83c1a62c7f07c8e681d76be8bfeb2867a28d872cac55f55f0e8",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 2,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "bd9ea3d242273598050f3a4d",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/industrial-building/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/industrial-building/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 113,
+          "recordType": "category_type",
+          "sourceSlug": "industrial-building",
+          "sourceTextBytes": 74,
+          "sourceTextSha256": "6cdd8ccc4b3a0d947d0321a458ae304b9e6246bb57885597f8d87e66dd026b4b",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 5,
+          "linkedPublishedListings": 5,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "3c25c56f221f328a3ab5a367",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/magazin/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/magazin/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 108,
+          "recordType": "category_type",
+          "sourceSlug": "magazin",
+          "sourceTextBytes": 103,
+          "sourceTextSha256": "335c380793c39a70a6734ea48e52464bc6c42e660ca95530ffe6bc51fe0b0cff",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "7ed77a947d3f175fe559c861",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/office-building/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/office-building/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 111,
+          "recordType": "category_type",
+          "sourceSlug": "office-building",
+          "sourceTextBytes": 56,
+          "sourceTextSha256": "85112d8eff0610a18e182da6f98b3d26add9ff74d9e1c6daa29b379e9a49d034",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "4b0b9bfc9cd3456a70db0c7e",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/office/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/office/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 110,
+          "recordType": "category_type",
+          "sourceSlug": "office",
+          "sourceTextBytes": 225,
+          "sourceTextSha256": "302a8e1d999c9437420771b7a8caf5e2c30b2779c338922de7c24b63800801d7",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 2,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "d0137217e2841f29b68e8f9e",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/restaurant/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/restaurant/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 114,
+          "recordType": "category_type",
+          "sourceSlug": "restaurant",
+          "sourceTextBytes": 56,
+          "sourceTextSha256": "ae7bbd5ec4b6f2c05a0a3cf6168914effb8ed8320cf5a909a2bb0a3fa8bbfb9c",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 2,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "17b8b5cc64b8ecbe93ebd850",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/studio/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/studio/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 115,
+          "recordType": "category_type",
+          "sourceSlug": "studio",
+          "sourceTextBytes": 185,
+          "sourceTextSha256": "5f4ca38c659461a9b3a550d8f787347558effbebc0a54d35aed76f48a5a87a08",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "1c7322cec5bc1a157a13e632",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/villa/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/villa/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 106,
+          "recordType": "category_type",
+          "sourceSlug": "villa",
+          "sourceTextBytes": 197,
+          "sourceTextSha256": "36df3d70a0d4b191d0e7cf7406b7ca8786f51f7d7a2020c2f699930541cd1211",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 12,
+          "linkedPublishedListings": 12,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "39735d963fa25555413ee677",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 145,
+          "recordType": "category_type",
+          "sourceSlug": "%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f",
+          "sourceTextBytes": 368,
+          "sourceTextSha256": "27598c3942431aab26e66f26ad5ee85d7abb96a2d9c03a161be11cac3d8324cb",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 6,
+          "linkedPublishedListings": 6,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "ca6e3407498cb284ba699165",
+      "sourceUrls": [
+        "https://makler-realty.ru/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 107,
+          "recordType": "category_type",
+          "sourceSlug": "%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8",
+          "sourceTextBytes": 204,
+          "sourceTextSha256": "e696796554369fbf01bfa08c0d4313ed7762873daa46e9f9b3b7baacf116e98e",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 18,
+          "linkedPublishedListings": 18,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "e0e69e7ab73de5dcd6f2346d",
+      "sourceUrls": [
+        "https://makler-realty.ru/category/uncategorized/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category/uncategorized/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 1,
+          "recordType": "category",
+          "sourceSlug": "uncategorized",
+          "sourceTextBytes": 75,
+          "sourceTextSha256": "1273b75def8d105ed055ef26f82ade82faaa640efb575593bc83557d9c66b29e",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 7,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 7
+        }
+      ]
+    },
+    {
+      "id": "71ff222170a48f174e801cf9",
+      "sourceUrls": [
+        "https://makler-realty.ru/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 147,
+          "recordType": "category",
+          "sourceSlug": "%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8",
+          "sourceTextBytes": 84,
+          "sourceTextSha256": "6ea726f1d7f95b68b26f61ad1523a477b5f4bd4e6a2e7018becd9095863f88d5",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 19,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 19
+        }
+      ]
+    },
+    {
+      "id": "4e9d5cb9d170b36225d617dd",
+      "sourceUrls": [
+        "https://makler-realty.ru/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 146,
+          "recordType": "category",
+          "sourceSlug": "%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8",
+          "sourceTextBytes": 43,
+          "sourceTextSha256": "fe35fab75ea7b68fcea84dd81e434837c352dca6965ddcba2f107927ca5d0c9b",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 11,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 11
+        }
+      ]
+    },
+    {
+      "id": "1057f2897c86269c44ec6192",
+      "sourceUrls": [
+        "https://makler-realty.ru/floors/1/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/floors/1/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 682,
+          "recordType": "floors",
+          "sourceSlug": "1",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 7,
+          "linkedPublishedListings": 7,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "a1ff749b2c36b4247e9c2d78",
+      "sourceUrls": [
+        "https://makler-realty.ru/floors/2/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/floors/2/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 684,
+          "recordType": "floors",
+          "sourceSlug": "2",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 11,
+          "linkedPublishedListings": 11,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "b0dbfc2ee2ff9de98edbad71",
+      "sourceUrls": [
+        "https://makler-realty.ru/floors/3/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/floors/3/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 686,
+          "recordType": "floors",
+          "sourceSlug": "3",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 7,
+          "linkedPublishedListings": 7,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "f0e7a4bd783ee1315b245b37",
+      "sourceUrls": [
+        "https://makler-realty.ru/floors/4/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/floors/4/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 688,
+          "recordType": "floors",
+          "sourceSlug": "4",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 3,
+          "linkedPublishedListings": 3,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "4f7ae5e6948d3d27b5bf92fd",
+      "sourceUrls": [
+        "https://makler-realty.ru/floors/5/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/floors/5/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 689,
+          "recordType": "floors",
+          "sourceSlug": "5",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 3,
+          "linkedPublishedListings": 3,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "41b48e62d2680e90aff9d2a0",
+      "sourceUrls": [
+        "https://makler-realty.ru/listing/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/listing/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "f67a98e21dace5f98af5b574",
+      "sourceUrls": [
+        "https://makler-realty.ru/listing/uchastok-strumiani/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/listing/uchastok-strumiani/",
+          "status": "no_exact_record"
+        }
+      ]
+    },
+    {
+      "id": "bbe07f940adc32609d9c8f9c",
+      "sourceUrls": [
+        "https://makler-realty.ru/location/bulgaria/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/location/bulgaria/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 104,
+          "recordType": "location",
+          "sourceSlug": "bulgaria",
+          "sourceTextBytes": 141,
+          "sourceTextSha256": "af7404cc02da9ff06e7187c68dbcda8ee78367cd50aa1c6dcd47ac9d5754529c",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 50,
+          "linkedPublishedListings": 50,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "1015d860c092a2a849f39c2a",
+      "sourceUrls": [
+        "https://makler-realty.ru/location/greece-property/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/location/greece-property/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 667,
+          "recordType": "location",
+          "sourceSlug": "greece-property",
+          "sourceTextBytes": 98,
+          "sourceTextSha256": "e59d534670ec2e805284c331c603f9871febc28eef1a32a74ba472f299bdf469",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "97d77666c8f9c34473642028",
+      "sourceUrls": [
+        "https://makler-realty.ru/property/rent/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/property/rent/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 118,
+          "recordType": "property",
+          "sourceSlug": "rent",
+          "sourceTextBytes": 462,
+          "sourceTextSha256": "e1804d5cbe1c3d6f1b03bfd5d1489fc2eae159edb5bead036ccc1244708cf57c",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 6,
+          "linkedPublishedListings": 6,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "8ca16435f71ec311c71d0a63",
+      "sourceUrls": [
+        "https://makler-realty.ru/property/sell/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/property/sell/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 119,
+          "recordType": "property",
+          "sourceSlug": "sell",
+          "sourceTextBytes": 204,
+          "sourceTextSha256": "b9d35693f369168e3753b03966f370393319e0de58c2f29f59445b163628c1d0",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 45,
+          "linkedPublishedListings": 45,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "4b5240e7d22ffee75854ac13",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/other/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/other/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 130,
+          "recordType": "resort",
+          "sourceSlug": "other",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "b3e8c5ab367d58355ea26e53",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/skiing-resort/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/skiing-resort/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 29,
+          "recordType": "resort",
+          "sourceSlug": "skiing-resort",
+          "sourceTextBytes": 223,
+          "sourceTextSha256": "36950414c93317e8cf79f4a8859b1cd7ef455530420378519a40f287c4c93bed",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "83ede7d99bd99416e82e28d4",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/spa-resorts/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/spa-resorts/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 28,
+          "recordType": "resort",
+          "sourceSlug": "spa-resorts",
+          "sourceTextBytes": 259,
+          "sourceTextSha256": "f147eadb50288913cb16ac6aac8688579f737625f67d637831aa67e97354cd61",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 48,
+          "linkedPublishedListings": 48,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "78398b5e0b37c8e038018229",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%b8%d0%b5-%d0%ba%d1%83%d1%80%d0%be%d1%80%d1%82%d1%8b-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%b8%d0%b5-%d0%ba%d1%83%d1%80%d0%be%d1%80%d1%82%d1%8b-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 27,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%b8%d0%b5-%d0%ba%d1%83%d1%80%d0%be%d1%80%d1%82%d1%8b-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8",
+          "sourceTextBytes": 44,
+          "sourceTextSha256": "de3e239f88dd06d31e48f8c4a9837125dbece0ae11e19738d597262d673e31fc",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 0,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "7650fe1ec4d3a9b7fbed87f7",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 676,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be",
+          "sourceTextBytes": 2502,
+          "sourceTextSha256": "94df4aa688b472ac5fb9c783833d70b9acc76ed917e1220874f7e33977541f60",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "5a17b9973a49535e7c63c09f",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 134,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba",
+          "sourceTextBytes": 277,
+          "sourceTextSha256": "69950ca3da5bf32f08b919a0dffd2cd082fc4e04d91df0fa7293a4d32e70a234",
+          "requestedLocalePresent": null,
+          "localeMarkers": [
+            "bg",
+            "ru"
+          ],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 2,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "17c41014b0fc7573232166f8",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 671,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8",
+          "sourceTextBytes": 1604,
+          "sourceTextSha256": "bd7af9541e5aa02ed698ef96ba808182657e64cae50479f95c13367c34979313",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 49,
+          "linkedPublishedListings": 49,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "22cc9e5deb7d44fe49fb0677",
+      "sourceUrls": [
+        "https://makler-realty.ru/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 697,
+          "recordType": "resort",
+          "sourceSlug": "%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be",
+          "sourceTextBytes": 175,
+          "sourceTextSha256": "f7760360b7652badefb3366b3ece604934e753e17c4305f01034ee949b9aeca2",
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "ad0d73f24e724d05adcbdbf7",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/657/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/657/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 662,
+          "recordType": "post_tag",
+          "sourceSlug": "657",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 1
+        }
+      ]
+    },
+    {
+      "id": "2a86b1bb0f12dfc31e5dc88b",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/658/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/658/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 660,
+          "recordType": "post_tag",
+          "sourceSlug": "658",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 1
+        }
+      ]
+    },
+    {
+      "id": "1726a1aca726e01e3a7f47c7",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/659/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/659/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 661,
+          "recordType": "post_tag",
+          "sourceSlug": "659",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 1
+        }
+      ]
+    },
+    {
+      "id": "871d534cf39f20eeb7ab79ab",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/%d0%ba%d1%83%d1%80%d1%8c%d0%b5%d1%80%d1%8b/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/%d0%ba%d1%83%d1%80%d1%8c%d0%b5%d1%80%d1%8b/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 316,
+          "recordType": "post_tag",
+          "sourceSlug": "%d0%ba%d1%83%d1%80%d1%8c%d0%b5%d1%80%d1%8b",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 1
+        }
+      ]
+    },
+    {
+      "id": "ae166863ee6412b667235312",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d0%b5/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d0%b5/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 151,
+          "recordType": "post_tag",
+          "sourceSlug": "%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d0%b5",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 1
+        }
+      ]
+    },
+    {
+      "id": "69cb70306d40aba010d63649",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/%d0%bc%d0%b0%d0%ba%d0%b5%d0%b4%d0%be%d0%bd%d0%b8%d1%8f/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/%d0%bc%d0%b0%d0%ba%d0%b5%d0%b4%d0%be%d0%bd%d0%b8%d1%8f/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 271,
+          "recordType": "post_tag",
+          "sourceSlug": "%d0%bc%d0%b0%d0%ba%d0%b5%d0%b4%d0%be%d0%bd%d0%b8%d1%8f",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 2,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 2
+        }
+      ]
+    },
+    {
+      "id": "8ef7236aa3309e146ad78191",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 149,
+          "recordType": "post_tag",
+          "sourceSlug": "%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 3,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 3
+        }
+      ]
+    },
+    {
+      "id": "c4dd31bd64ccac7321667055",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b8%d0%b5/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b8%d0%b5/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 266,
+          "recordType": "post_tag",
+          "sourceSlug": "%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b8%d0%b5",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 1
+        }
+      ]
+    },
+    {
+      "id": "6dde283d843182cf3995e67c",
+      "sourceUrls": [
+        "https://makler-realty.ru/tag/%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/tag/%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 148,
+          "recordType": "post_tag",
+          "sourceSlug": "%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 5,
+          "linkedPublishedListings": 0,
+          "linkedPublishedPosts": 5
+        }
+      ]
+    },
+    {
+      "id": "1fb7da691f180c37d8bce112",
+      "sourceUrls": [
+        "https://makler-realty.ru/type/featured/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/type/featured/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 2,
+          "recordType": "type",
+          "sourceSlug": "featured",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 1,
+          "linkedPublishedListings": 1,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "ec4207c94384fef287fb3642",
+      "sourceUrls": [
+        "https://makler-realty.ru/type/front/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/type/front/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 126,
+          "recordType": "type",
+          "sourceSlug": "front",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 5,
+          "linkedPublishedListings": 5,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "d31e3909ea7242c56b7ce825",
+      "sourceUrls": [
+        "https://makler-realty.ru/type/reduced/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/type/reduced/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 3,
+          "recordType": "type",
+          "sourceSlug": "reduced",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 5,
+          "linkedPublishedListings": 5,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "98a3615ef79c46abb81b4a21",
+      "sourceUrls": [
+        "https://makler-realty.ru/type/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/type/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd/",
+          "status": "exact_taxonomy_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_terms + ms_term_taxonomy",
+          "recordId": 4,
+          "recordType": "type",
+          "sourceSlug": "%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": [],
+          "recordedTermCount": 4,
+          "linkedPublishedListings": 4,
+          "linkedPublishedPosts": 0
+        }
+      ]
+    },
+    {
+      "id": "7c2ede8bdcfa96260c9b0578",
+      "sourceUrls": [
+        "https://makler-realty.ru/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/"
+      ],
+      "observations": [
+        {
+          "sourceUrl": "https://makler-realty.ru/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "status": "exact_published_record",
+          "databaseMember": "mysql/maklerre_newru.sql",
+          "table": "ms_posts",
+          "recordId": 25,
+          "recordType": "page",
+          "sourceSlug": "%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f",
+          "sourceTextBytes": 0,
+          "sourceTextSha256": null,
+          "requestedLocalePresent": null,
+          "localeMarkers": []
+        }
+      ]
+    }
+  ]
+}
