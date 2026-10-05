@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { inquiryCheckCode } from "../src/domain/inquiry-check-code";
 import { inquiryReviewCopy } from "../src/features/discovery/inquiry-review-copy";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -297,6 +298,10 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   // P12: no lookup claims for a browser without the receipt session; the only action is the
   // brand line, never a new inquiry.
   await expect(otherPage.getByText(/Checked:|Check result/)).toHaveCount(0);
+  // The telephone check code names the request without unlocking it.
+  await expect(
+    otherPage.getByText(`call us and give the code ${inquiryCheckCode(key)}.`, { exact: false }),
+  ).toBeVisible();
   await expect(otherPage.getByRole("link", { name: /Call us:/ })).toHaveAttribute(
     "href",
     "tel:+359879696870",

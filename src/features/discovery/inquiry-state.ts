@@ -1,5 +1,6 @@
 import { isUuid, parseReference } from "@/domain/ids";
 import { inquiryPurposes } from "@/domain/inquiry";
+import { inquiryCheckCode } from "@/domain/inquiry-check-code";
 import { type ContentReference, parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import type { OwnerInquiry } from "@/domain/owner-inquiry";
@@ -99,7 +100,15 @@ export function inquiryPermalink(locale: PublicLocale, key: string, values?: Inq
   }
   return `/${locale}/inquire?${query}`;
 }
-export function inquiryFormCopy(copy: DiscoveryCopy): FormCopy {
+/** P12U: the unknown-outcome line carries the telephone check code of this submission. */
+export function inquiryUnknownMessage(copy: DiscoveryCopy, submissionKey: string) {
+  const code = inquiryCheckCode(submissionKey);
+  return code
+    ? `${copy.notConfirmed} ${copy.checkCode.replace("{code}", code)}.`
+    : copy.notConfirmed;
+}
+
+export function inquiryFormCopy(copy: DiscoveryCopy, submissionKey: string): FormCopy {
   return {
     errorSummary: copy.check,
     pending: copy.sending,
@@ -109,7 +118,7 @@ export function inquiryFormCopy(copy: DiscoveryCopy): FormCopy {
     revision: copy.reference,
     reference: copy.reference,
     recordedAt: copy.received,
-    unknown: copy.notConfirmed,
+    unknown: inquiryUnknownMessage(copy, submissionKey),
     draftRetained: copy.retained,
   };
 }

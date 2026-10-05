@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
+import { inquiryCheckCode } from "@/domain/inquiry-check-code";
 import { comparisonReturnHref } from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { InquiryContent } from "@/features/discovery/inquiry-content";
@@ -13,6 +14,7 @@ import { isRoutableLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { getEnv } from "@/server/config/env";
 import {
+  isIssuedSubmissionKey,
   readInquiryReceipt,
   receiptCheckAttempted,
   receiptCookieName,
@@ -37,10 +39,14 @@ export default async function ReceiptPage({
       {copy.callAgency} <span dir="ltr">{brandPhone.display}</span>
     </a>
   );
+  // P12 telephone check code: only for a key this server issued; it never unlocks a receipt.
+  const checkCode = isIssuedSubmissionKey(receiptId) ? inquiryCheckCode(receiptId) : null;
   const notShown = (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.notConfirmed}</h1>
-      <p className="max-w-reading">{copy.notShownBody}</p>
+      <p className="max-w-reading">
+        {checkCode ? copy.notShownBodyCode.replace("{code}", checkCode) : copy.notShownBody}
+      </p>
       {call}
     </DiscoveryPage>
   );
@@ -65,11 +71,14 @@ export default async function ReceiptPage({
       <DiscoveryPage>
         <h1 className="text-title font-semibold">{copy.checkUnknownTitle}</h1>
         <Notice tone="warning" title={copy.checkResult}>
-          <time dateTime={checkedAt}>
-            {copy.checkedAt.replace("{time}", formatDateTime(locale, checkedAt))}
-          </time>
+          {checkCode ? <p>{copy.checkCode.replace("{code}", checkCode)}</p> : null}
+          <p>
+            <time dateTime={checkedAt}>
+              {copy.checkedAt.replace("{time}", formatDateTime(locale, checkedAt))}
+            </time>
+          </p>
         </Notice>
-        <p className="max-w-reading">{copy.checkUnknownBody}</p>
+        <p className="max-w-reading">{copy.checkUnknownBody.replace("{code}", checkCode ?? "")}</p>
         <div className="flex flex-wrap gap-3">
           {call}
           {/* The same check again; it never resends the inquiry. */}

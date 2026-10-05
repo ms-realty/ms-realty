@@ -56,7 +56,7 @@ export function InquiryForm({
         href: inquiryStatus(locale, initialState.operationId),
         label: copy.checkOperation,
       }}
-      copy={inquiryFormCopy(copy)}
+      copy={inquiryFormCopy(copy, initialState.operationId)}
       labels={{
         purpose: copy.purpose,
         name: copy.name,

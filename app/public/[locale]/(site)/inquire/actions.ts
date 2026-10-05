@@ -11,6 +11,7 @@ import {
   inquiryPermalink,
   inquiryReceiptView,
   inquiryStatus,
+  inquiryUnknownMessage,
 } from "@/features/discovery/inquiry-state";
 import { viewingCopy } from "@/features/discovery/viewing-copy";
 import { viewingErrorField } from "@/features/discovery/viewing-fields";
@@ -258,7 +259,12 @@ export async function sendInquiry(
       };
     return {
       ...state,
-      outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: copy.notConfirmed, status },
+      outcome: {
+        kind: "unknown",
+        code: "OUTCOME_UNKNOWN",
+        message: inquiryUnknownMessage(copy, state.operationId),
+        status,
+      },
     };
   }
 }
