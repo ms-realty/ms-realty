@@ -120,12 +120,15 @@ try {
   );
   const port = docker("port", webName, "3000/tcp").split(":").at(-1);
   const base = `http://127.0.0.1:${port}`;
+  // Real hosts accept health only through the origin boundary (proxy.ts); probe it like the gateway.
+  const gateway = { "x-msr-origin-token": originSecret, "x-msr-public-host": "msr-smoke.invalid" };
   await until(
-    async () => (await fetch(`${base}/api/health`)).ok,
+    async () => (await fetch(`${base}/api/health`, { headers: gateway })).ok,
     "Container web did not become healthy",
   );
-  const health = await (await fetch(`${base}/api/health`)).json();
+  const health = await (await fetch(`${base}/api/health`, { headers: gateway })).json();
   assert.equal(health.status, "ok");
+  assert.equal((await fetch(`${base}/api/health`)).status, 404);
   assert.equal((await fetch(`${base}/en`)).status, 404);
   assert.equal(
     (
