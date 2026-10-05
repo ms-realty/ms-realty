@@ -20,10 +20,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.ref }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Capture resources without changing DNS or routes
@@ -36,7 +36,7 @@ jobs:
             --markdown deploy/evidence/CLOUDFLARE-INVENTORY.md
       - name: Preserve the redacted inventory
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ms-realty-cloudflare-inventory-${{ github.run_id }}
           path: deploy/evidence/
