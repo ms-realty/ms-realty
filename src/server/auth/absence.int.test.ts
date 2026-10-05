@@ -75,6 +75,8 @@ it("puts absent staff work in coverage atomically, keeps sign-in and restores on
     action: "accept",
     expectedVersion: 2,
     operationId: randomUUID(),
+    nextAction: "Confirm the retained client promise",
+    dueAt: new Date(Date.now() + 3_600_000).toISOString(),
   });
   await changeStaffAbsence(t.db, manager.session, {
     ...input,
@@ -146,6 +148,8 @@ it("rejects handover acceptance when its proposed receiver becomes absent, retai
       action: "accept",
       expectedVersion: 2,
       operationId: randomUUID(),
+      nextAction: "Confirm the retained client promise",
+      dueAt: new Date(Date.now() + 3_600_000).toISOString(),
     }),
   ).rejects.toMatchObject({ code: "forbidden" });
   expect((await t.db.select().from(tasks).where(eq(tasks.id, task.id)))[0]).toMatchObject({
