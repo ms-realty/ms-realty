@@ -56,6 +56,7 @@ export function taskHandoverCopy(locale: string) {
       "{owner} увидит причину. К вам ничего не переходит, работа остаётся у {owner}.",
       "{owner} will see the reason. Nothing moves to you and the work stays with {owner}.",
     ),
+    backToOffer: s("Назад към предложението", "Назад к предложению", "Back to the offer"),
     sendDecline: s("Изпратете отказа", "Отправить отказ", "Send the decline"),
     pendingAlert: s(
       "Предложението чака отговор от {receiver}. Дотогава работата остава при вас. Ако {receiver} откаже, тук ще видите причината.",

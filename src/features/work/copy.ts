@@ -75,7 +75,8 @@ const en = {
   // Stable server reason keys (server.validation.work.handover.dueAt.*).
   reasons: {
     future_required: "Choose a time in the future.",
-    after_deadline: "This time is after the deadline promised to the client. Choose an earlier time.",
+    after_deadline:
+      "This time is after the deadline promised to the client. Choose an earlier time.",
   } as Record<string, string>,
   conflict:
     "This record changed. Compare the latest version with your draft before applying it again.",

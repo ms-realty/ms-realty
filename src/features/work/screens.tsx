@@ -782,10 +782,12 @@ export async function TaskScreen({
   locale,
   session,
   id,
+  step,
 }: {
   locale: string;
   session: Session;
   id: string;
+  step?: string;
 }) {
   const view = await privateRead(() => readTaskHandover(getDb(), session, id));
   const { task, ownerName, needsCoverage } = view;
@@ -833,7 +835,7 @@ export async function TaskScreen({
       ) : null}
       {guarded ? <p>{copy.guardedTask}</p> : null}
       {!["done", "cancelled"].includes(task.state) ? (
-        <TaskHandoverScreen locale={locale} session={session} id={id} view={view} />
+        <TaskHandoverScreen locale={locale} session={session} id={id} view={view} step={step} />
       ) : null}
       {targets.length ? (
         <section className="max-w-2xl space-y-4 rounded-card border border-border p-5">

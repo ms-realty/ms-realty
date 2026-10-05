@@ -21,11 +21,14 @@ export function TaskHandoverScreen({
   session,
   id,
   view,
+  step,
 }: {
   locale: string;
   session: Session;
   id: string;
   view: Awaited<ReturnType<typeof readTaskHandover>>;
+  /** `decline` (receiver) or `withdraw` (sender) opens that composer as its own native step. */
+  step?: string;
 }) {
   const { task, ownerName, receivers, pendingName, latestDecision } = view;
   const c = taskHandoverCopy(locale),
@@ -35,6 +38,7 @@ export function TaskHandoverScreen({
     actor = latestDecision?.actorName ?? "";
   const when = (instant: string) => formatDateTime(isPublicLocale(locale) ? locale : "bg", instant);
 
+  const stepPath = (name: string) => `${path}?handover=${name}`;
   function form(intent: Intent, label: string) {
     const state = initialFormState(
       `work.handover.${id}`,
@@ -92,7 +96,13 @@ export function TaskHandoverScreen({
     return (
       <WorkflowForm
         locale={locale}
-        path={path}
+        path={
+          intent === "decline"
+            ? stepPath("decline")
+            : intent === "cancel"
+              ? stepPath("withdraw")
+              : path
+        }
         fields={fields}
         initialState={state}
         action={taskHandoverAction.bind(null, locale, id)}
@@ -105,16 +115,11 @@ export function TaskHandoverScreen({
     );
   }
 
-  // A disclosure keeps the second, rarer path one native step away, with or without JavaScript.
-  function step(summary: string, effect: string, body: React.ReactNode) {
-    return (
-      <details className="space-y-3">
-        <summary className={buttonClass("secondary", "w-fit cursor-pointer")}>{summary}</summary>
-        <p className="text-text-muted">{effect}</p>
-        {body}
-      </details>
-    );
-  }
+  const quiet = (href: string, label: string) => (
+    <a className={buttonClass("secondary", "w-fit")} href={href}>
+      {label}
+    </a>
+  );
 
   const decision = latestDecision ? (
     <dl className="grid gap-2">
@@ -138,35 +143,51 @@ export function TaskHandoverScreen({
   const mine = task.ownerId === session.actor.id;
   let body: React.ReactNode;
   if (task.pendingOwnerId === session.actor.id) {
-    // O23HR / O23HRD: the receiver's offer, accept and decline.
-    body = (
-      <>
-        <h2 className="text-subheading font-semibold">{fill(c.receiverTitle, { owner })}</h2>
-        <dl className="grid gap-2">
-          <div>
-            <dt className="font-semibold">{c.from}</dt>
-            <dd>{owner}</dd>
-          </div>
-          <div>
-            <dt className="font-semibold">{c.handedOver}</dt>
-            <dd className="wrap-anywhere">{task.title}</dd>
-          </div>
-        </dl>
-        <p className="text-text-muted">{c.acceptEffect}</p>
-        {form("accept", c.acceptWork)}
-        {step(c.declineOpen, fill(c.declineEffect, { owner }), form("decline", c.sendDecline))}
-      </>
-    );
+    // O23HR, or O23HRD when the receiver opened the decline step.
+    body =
+      step === "decline" ? (
+        <>
+          <h2 className="text-subheading font-semibold">{c.declineOpen}</h2>
+          <p className="text-text-muted">{fill(c.declineEffect, { owner })}</p>
+          {form("decline", c.sendDecline)}
+          {quiet(path, c.backToOffer)}
+        </>
+      ) : (
+        <>
+          <h2 className="text-subheading font-semibold">{fill(c.receiverTitle, { owner })}</h2>
+          <dl className="grid gap-2">
+            <div>
+              <dt className="font-semibold">{c.from}</dt>
+              <dd>{owner}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold">{c.handedOver}</dt>
+              <dd className="wrap-anywhere">{task.title}</dd>
+            </div>
+          </dl>
+          <p className="text-text-muted">{c.acceptEffect}</p>
+          {form("accept", c.acceptWork)}
+          {quiet(stepPath("decline"), c.declineOpen)}
+        </>
+      );
   } else if (task.pendingOwnerId) {
-    // O23HP / O23HPC: the sender waits and may withdraw with a reason (the server lets only the
+    // O23HP, or O23HPC when the sender opened the withdraw step (the server lets only the
     // requester withdraw).
-    body = (
-      <>
-        <h2 className="text-subheading font-semibold">{c.title}</h2>
-        <Notice tone="info" title={fill(c.pendingAlert, { receiver })} />
-        {step(c.withdrawOpen, fill(c.withdrawEffect, { receiver }), form("cancel", c.withdrawOpen))}
-      </>
-    );
+    body =
+      step === "withdraw" ? (
+        <>
+          <h2 className="text-subheading font-semibold">{c.withdrawOpen}</h2>
+          <p className="text-text-muted">{fill(c.withdrawEffect, { receiver })}</p>
+          {form("cancel", c.withdrawOpen)}
+          {quiet(path, c.backToOffer)}
+        </>
+      ) : (
+        <>
+          <h2 className="text-subheading font-semibold">{c.title}</h2>
+          <Notice tone="info" title={fill(c.pendingAlert, { receiver })} />
+          {quiet(stepPath("withdraw"), c.withdrawOpen)}
+        </>
+      );
   } else if (latestDecision?.kind === "cancelled" && !mine) {
     // O23HRX: the receiver's view of a withdrawn offer; nothing to do.
     body = (
