@@ -11,8 +11,8 @@
   "image": null,
   "origins": {
     "public": "https://staging.makler-realty.com",
-    "client": "https://my.staging.makler-realty.com",
-    "staff": "https://app.staging.makler-realty.com"
+    "client": "https://staging-my.makler-realty.com",
+    "staff": "https://staging-app.makler-realty.com"
   },
   "access": {
     "applicationId": null,
@@ -28,7 +28,7 @@
     "engineVersion": "16.14",
     "productionName": "ms_realty_payload",
     "stagingName": null,
-    "stagingHost": null,
+    "stagingHost": "staging-db.makler-realty.com",
     "roles": {
       "web": null,
       "worker": null,

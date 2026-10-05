@@ -107,7 +107,7 @@ variable with `sourceCommit: null`. Only after the exact qualified-SHA guard suc
 contain its own hash; an existing different source pin is rejected.
 
 - Account is `921d0224dcd595c87b7928d2b3c479d1`. The three hosts are `staging.makler-realty.com`,
-  `my.staging.makler-realty.com`, and `app.staging.makler-realty.com`. Existing proxied DNS and
+  `staging-my.makler-realty.com`, and `staging-app.makler-realty.com`. Existing proxied DNS and
   verified Access are prerequisites; these scripts do not create DNS.
 - Fresh inventory records no configured Zero Trust Access. Supply the actual application,
   audience, team, owner, reviewed controller identities/group and named service token. The

@@ -35,9 +35,24 @@ const common = {
   BUTLER_ENABLED: "0",
   WORKER_HEARTBEAT_URL: "",
 };
+const createdContainers = [];
+const redact = (value) => {
+  let result = String(value);
+  for (const secret of [
+    source.toString(),
+    localDatabase.toString(),
+    containerDatabase.toString(),
+    common.AUTH_SECRET,
+    originSecret,
+  ])
+    result = result.replaceAll(secret, "[redacted]");
+  if (source.password.length >= 8) result = result.replaceAll(source.password, "[redacted]");
+  return result;
+};
 const docker = (...args) =>
   execFileSync("docker", args, {
     encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
     timeout: 60_000,
     maxBuffer: 1024 * 1024,
   }).trim();
@@ -118,15 +133,18 @@ try {
     webEnv,
     image,
   );
+  createdContainers.push(webName);
   const port = docker("port", webName, "3000/tcp").split(":").at(-1);
   const base = `http://127.0.0.1:${port}`;
-  // Real hosts accept health only through the origin boundary (proxy.ts); probe it like the gateway.
-  const gateway = { "x-msr-origin-token": originSecret, "x-msr-public-host": "msr-smoke.invalid" };
+  const gatewayHeaders = {
+    "x-msr-origin-token": originSecret,
+    "x-msr-public-host": "msr-smoke.invalid",
+  };
   await until(
-    async () => (await fetch(`${base}/api/health`, { headers: gateway })).ok,
+    async () => (await fetch(`${base}/api/health`, { headers: gatewayHeaders })).ok,
     "Container web did not become healthy",
   );
-  const health = await (await fetch(`${base}/api/health`, { headers: gateway })).json();
+  const health = await (await fetch(`${base}/api/health`, { headers: gatewayHeaders })).json();
   assert.equal(health.status, "ok");
   assert.equal((await fetch(`${base}/api/health`)).status, 404);
   assert.equal((await fetch(`${base}/en`)).status, 404);
@@ -189,6 +207,7 @@ try {
     "--conditions=react-server",
     "dist-runtime/worker.mjs",
   );
+  createdContainers.push(workerName);
   await until(
     async () =>
       Boolean(
@@ -240,8 +259,29 @@ try {
       2,
     ),
   );
+} catch (error) {
+  // Inspect only this run's created containers; never print their environment or credentials.
+  for (const name of createdContainers) {
+    try {
+      console.error(
+        redact(
+          JSON.stringify({
+            kind: "local-container-failure",
+            name,
+            state: JSON.parse(docker("inspect", "--format", "{{json .State}}", name)),
+            log: docker("logs", "--tail", "25", name),
+          }),
+        ),
+      );
+    } catch {
+      console.error(
+        JSON.stringify({ kind: "local-container-failure", name, inspection: "unavailable" }),
+      );
+    }
+  }
+  throw error;
 } finally {
-  for (const name of [workerName, webName]) {
+  for (const name of [...createdContainers].reverse()) {
     try {
       docker("rm", "-f", name);
     } catch {

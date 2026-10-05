@@ -87,8 +87,8 @@ function fixture() {
     image: `registry.cloudflare.com/${accountId}/ms-realty-staging@sha256:${"c".repeat(64)}`,
     origins: {
       public: "https://staging.makler-realty.com",
-      client: "https://my.staging.makler-realty.com",
-      staff: "https://app.staging.makler-realty.com",
+      client: "https://staging-my.makler-realty.com",
+      staff: "https://staging-app.makler-realty.com",
     },
     access: {
       applicationId: "1".repeat(36),
@@ -232,7 +232,7 @@ test("partial preview requires explicit scope, denied production and exact manif
 function privateFixture() {
   const { input, artifacts } = fixture();
   input.database.transport = "cloudflared-access-tcp";
-  input.database.stagingHost = "db.staging.makler-realty.com";
+  input.database.stagingHost = "staging-db.makler-realty.com";
   input.database.access = {
     applicationId: "4".repeat(36),
     audience: "5".repeat(64),
@@ -342,7 +342,7 @@ test("database Access denies human allow, bypass, foreign tokens, broad apps and
         app,
         {
           id: "foreign",
-          domain: "*.staging.makler-realty.com",
+          domain: "*.makler-realty.com",
         },
       ],
     ),
@@ -385,7 +385,12 @@ test("staging config rejects production aliases, nonisolated resources, incomple
   assert.equal(config.containers.length, 3);
   assert(config.containers.every((x) => x.image === input.image));
   assert.equal(config.routes.length, 3);
-  assert(config.routes.every((x) => x.pattern.includes("staging.makler-realty.com")));
+  assert.deepEqual(
+    config.routes.map((route) => route.pattern).sort(),
+    Object.values(input.origins)
+      .map((origin) => `${new URL(origin).host}/*`)
+      .sort(),
+  );
   assert.equal(config.vars.LEGACY_ROUTES_JSON, undefined);
   assert.equal(config.vars.PUBLIC_MEDIA_JSON, undefined);
   assert.deepEqual(config.send_email[0], {
@@ -497,8 +502,8 @@ test("route preflight rejects foreign subpaths, bypasses and wildcard staging ov
   const { input } = fixture();
   const owned = [
     "staging.makler-realty.com",
-    "my.staging.makler-realty.com",
-    "app.staging.makler-realty.com",
+    "staging-my.makler-realty.com",
+    "staging-app.makler-realty.com",
   ].map((host) => ({ pattern: `${host}/*`, script: input.workerName }));
   validateRoutes(input, owned);
   validateRoutes(input, [
@@ -508,8 +513,8 @@ test("route preflight rejects foreign subpaths, bypasses and wildcard staging ov
   for (const pattern of [
     "staging.makler-realty.com/api/*",
     "https://staging.makler-realty.com/api/*",
-    "http://APP.staging.makler-realty.com/login*",
-    "my.staging.makler-realty.com/private/*",
+    "http://STAGING-APP.makler-realty.com/login*",
+    "staging-my.makler-realty.com/private/*",
     "*.makler-realty.com/api/*",
     "*staging.makler-realty.com/*",
   ]) {
@@ -540,7 +545,11 @@ test("Access accepts the owner's human identity plus the named controller servic
     type: "self_hosted",
     aud: input.access.audience,
     domain: "staging.makler-realty.com",
-    self_hosted_domains: ["my.staging.makler-realty.com", "app.staging.makler-realty.com"],
+    destinations: [
+      "staging.makler-realty.com",
+      "staging-my.makler-realty.com",
+      "staging-app.makler-realty.com",
+    ].map((uri) => ({ type: "public", uri })),
   };
   const policies = [
     { decision: "allow", include: [{ email: { email: input.access.ownerEmail } }] },
@@ -573,7 +582,11 @@ test("Access preflight denies bypass, everyone, foreign controllers and more-spe
     type: "self_hosted",
     aud: input.access.audience,
     domain: "staging.makler-realty.com",
-    self_hosted_domains: ["my.staging.makler-realty.com", "app.staging.makler-realty.com"],
+    destinations: [
+      "staging.makler-realty.com",
+      "staging-my.makler-realty.com",
+      "staging-app.makler-realty.com",
+    ].map((uri) => ({ type: "public", uri })),
   };
   const policies = [
     {
@@ -623,9 +636,7 @@ test("Access preflight denies bypass, everyone, foreign controllers and more-spe
       { id: "other", domain: "staging.makler-realty.com/public" },
     ]),
   );
-  assert.throws(() =>
-    validateAccess(input, { ...app, self_hosted_domains: [] }, policies, group, [app]),
-  );
+  assert.throws(() => validateAccess(input, { ...app, destinations: [] }, policies, group, [app]));
 });
 test("Cloudflare inventory reader uses GET only and reads every paginated result", async () => {
   const ephemeral = crypto.randomUUID();
@@ -642,6 +653,152 @@ test("Cloudflare inventory reader uses GET only and reads every paginated result
   });
   assert.deepEqual(await api("/accounts/fixture/access/apps", true), ["1", "2"]);
   assert.equal(calls, 2);
+});
+
+test("Access uses current public destinations and does not fill missing coverage from deprecated domains", () => {
+  const { input } = fixture();
+  input.access.controllerGroupId = null;
+  input.access.controllerEmails = [];
+  const destinations = Object.values(input.origins).map((origin) => ({
+    type: "public",
+    uri: new URL(origin).host,
+  }));
+  const app = {
+    id: input.access.applicationId,
+    type: "self_hosted",
+    aud: input.access.audience,
+    domain: "superseded.example.invalid",
+    destinations,
+    self_hosted_domains: ["deprecated.example.invalid"],
+  };
+  const policies = [
+    { decision: "allow", include: [{ email: { email: input.access.ownerEmail } }] },
+    {
+      decision: "non_identity",
+      include: [{ service_token: { token_id: input.access.serviceTokenId } }],
+    },
+  ];
+  validateAccess(input, app, policies, null, [app]);
+  for (const changed of [
+    { ...app, id: "foreign" },
+    {
+      ...app,
+      destinations: destinations.slice(0, 2),
+      self_hosted_domains: destinations.map((x) => x.uri),
+    },
+    {
+      ...app,
+      destinations: undefined,
+      domain: destinations[0].uri,
+      self_hosted_domains: destinations.map((x) => x.uri),
+    },
+    { ...app, destinations: {} },
+    { ...app, destinations: [{ type: "public" }] },
+    {
+      ...app,
+      destinations: [...destinations, { type: "private", hostname: "private.example.invalid" }],
+    },
+    {
+      ...app,
+      destinations: destinations.map((x) => ({
+        ...x,
+        overrides: [{ behavior: "public", path_pattern: "/api/*" }],
+      })),
+    },
+    { ...app, destinations: destinations.map((x) => ({ ...x, overrides: {} })) },
+  ])
+    assert.throws(() => validateAccess(input, changed, policies, null, [changed]));
+  for (const uri of [
+    "staging-my.makler-realty.com/private/*",
+    "*.makler-realty.com",
+    "STAGING-APP.makler-realty.com/login",
+  ])
+    assert.throws(() =>
+      validateAccess(input, app, policies, null, [
+        app,
+        { id: "foreign", destinations: [{ type: "public", uri }] },
+      ]),
+    );
+  validateAccess(input, app, policies, null, [
+    app,
+    {
+      id: "unrelated",
+      destinations: [{ type: "public", uri: "other.example.invalid" }],
+    },
+  ]);
+});
+
+test("unknown public destination shapes cannot hide an overlapping application", () => {
+  const { input } = privateFixture();
+  const app = {
+    id: input.database.access.applicationId,
+    type: "self_hosted",
+    aud: input.database.access.audience,
+    domain: input.database.stagingHost,
+  };
+  const policies = [
+    {
+      decision: "non_identity",
+      include: [{ service_token: { token_id: input.database.access.serviceTokenId } }],
+    },
+  ];
+  assert.throws(() =>
+    validateDatabaseAccess(input, app, policies, [
+      app,
+      { id: "foreign", destinations: [{ type: "unknown", uri: input.database.stagingHost }] },
+    ]),
+  );
+});
+
+test("database Access reads public destinations with domain fallback and denies destination bypasses", () => {
+  const { input } = privateFixture();
+  const app = {
+    id: input.database.access.applicationId,
+    type: "self_hosted",
+    aud: input.database.access.audience,
+    domain: "superseded.example.invalid",
+    destinations: [{ type: "public", uri: input.database.stagingHost }],
+  };
+  const policies = [
+    {
+      decision: "non_identity",
+      include: [{ service_token: { token_id: input.database.access.serviceTokenId } }],
+    },
+  ];
+  validateDatabaseAccess(input, app, policies, [app]);
+  for (const destinations of [undefined, []])
+    validateDatabaseAccess(
+      input,
+      { ...app, domain: input.database.stagingHost, destinations },
+      policies,
+      [app],
+    );
+  assert.throws(() =>
+    validateDatabaseAccess(
+      input,
+      {
+        ...app,
+        destinations: [
+          {
+            type: "public",
+            uri: input.database.stagingHost,
+            overrides: [{ behavior: "public", path_pattern: "/*" }],
+          },
+        ],
+      },
+      policies,
+      [app],
+    ),
+  );
+  assert.throws(() =>
+    validateDatabaseAccess(input, app, policies, [
+      app,
+      {
+        id: "foreign",
+        destinations: [{ type: "public", uri: `${input.database.stagingHost}/private` }],
+      },
+    ]),
+  );
 });
 test("promotion requires actual independent signatures, all nine gates, exact pins and both signoffs", () => {
   const owner = generateKeyPairSync("ed25519"),
