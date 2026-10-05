@@ -14,6 +14,7 @@ import { readInquiry, readTask } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
 import { workCopy } from "./copy";
+import { taskHandoverCopy } from "./handover-copy";
 
 export type AcceptValues = { nextAction: string; dueAt: string };
 export type TriageValues = { state: string; reason: string; duplicateOfInquiryId: string };
@@ -153,23 +154,37 @@ async function perform<V extends FormValues>(
       label: copy.statusLink,
     },
   };
-  if (error.code === "VALIDATION_FAILED")
+  if (error.code === "VALIDATION_FAILED") {
+    const decisionCopy =
+      kind === "handover" && (values.action === "decline" || values.action === "cancel")
+        ? taskHandoverCopy(locale)
+        : null;
+    const reasonRequired = decisionCopy && error.fieldErrors?.reason?.length;
     return {
       ...correctedState,
       outcome: {
         kind: "validation",
         code: "VALIDATION_FAILED",
-        message: copy.validation,
+        message: reasonRequired ? decisionCopy.reasonSummary : copy.validation,
         fieldErrors: Object.fromEntries(
           fields
             .filter((field) => error.fieldErrors?.[String(field)])
             .map((field) => {
               const reason = error.fieldErrors?.[String(field)]?.[0];
-              return [field, [reason ? (copy.reasons[reason] ?? copy.invalid) : copy.invalid]];
+              const message =
+                field === "reason" && decisionCopy
+                  ? values.action === "decline"
+                    ? decisionCopy.declineReasonRequired
+                    : decisionCopy.withdrawReasonRequired
+                  : reason
+                    ? (copy.reasons[reason] ?? copy.invalid)
+                    : copy.invalid;
+              return [field, [message]];
             }),
         ) as Partial<Record<keyof V, string[]>>,
       },
     };
+  }
   const message =
     error.code === "UNAUTHENTICATED"
       ? copy.sessionEnded
