@@ -155,6 +155,9 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
         await client.request.get(hostUrl("client", `/en/appointments/${appointment.id}/calendar`))
       ).status(),
     ).toBe(404);
+    // P14: the requested viewing names the property it is about.
+    await client.goto(hostUrl("client", `/en/appointments/${appointment.id}`));
+    await expect(client.getByText(f.listingReference, { exact: true })).toBeVisible();
 
     await page.goto(hostUrl("staff", `/en/calendar/${appointment.id}`));
     const arrange = page

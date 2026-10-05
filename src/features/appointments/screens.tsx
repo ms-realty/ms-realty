@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
+import { isPublicLocale } from "@/i18n/config";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import { Notice } from "@/ui/notice";
 import { workflowScope } from "../cases/contract";
@@ -19,6 +20,7 @@ import {
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
 import { hostHandoverCopy } from "./host-copy";
+import { AppointmentListingContext } from "./listing-context";
 export async function CalendarScreen(props: ScreenProps) {
   const c = caseCopy(props.locale);
   const rows = await listAppointments(getDb(), props.session);
@@ -31,7 +33,8 @@ export async function CalendarScreen(props: ScreenProps) {
   );
 }
 export async function AppointmentScreen(props: ScreenProps & { id: string }) {
-  const detail = await privateRead(() => readAppointment(getDb(), props.session, props.id));
+  const locale = isPublicLocale(props.locale) ? props.locale : "bg";
+  const detail = await privateRead(() => readAppointment(getDb(), props.session, props.id, locale));
   const { appointment: row } = detail;
   const c = caseCopy(props.locale);
   const staff = props.session.account.kind === "staff";
@@ -52,6 +55,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       <p data-testid="appointment-state" className="font-semibold">
         {c[row.state]}
       </p>
+      <AppointmentListingContext listing={detail.listing} locale={locale} />
       {staff && detail.needsCoverage ? (
         <Notice tone="warning">
           <a href={`/${props.locale}/coverage`} className={workflowLink}>
