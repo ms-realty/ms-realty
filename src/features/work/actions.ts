@@ -393,7 +393,7 @@ export async function taskHandoverAction(
     id,
     "handover",
     data,
-    ["action", "receiverId", "reason", "reviewed"],
+    ["action", "receiverId", "reason", "reviewed", "nextAction", "dueAt"],
     async (ctx, envelope, values) => {
       if (!ctx.session) throw new AppError("unauthenticated");
       return (
@@ -402,15 +402,28 @@ export async function taskHandoverAction(
           ...envelope,
           action: values.action,
           receiverId: values.receiverId,
-          reason: values.reason,
-          reviewed: values.reviewed === "true",
+          ...(values.action === "accept"
+            ? { nextAction: values.nextAction, dueAt: localInstant(values.dueAt ?? "") }
+            : values.action === "request"
+              ? { reason: values.reason, reviewed: values.reviewed === "true" }
+              : { reason: values.reason }),
         })
       ).outcome;
     },
     async (ctx) => {
       if (!ctx.session) throw new AppError("unauthenticated");
       const { task } = await readTask(ctx.db, ctx.session, id);
-      return { revision: task.version, values: { receiverId: task.pendingOwnerId ?? "" } };
+      return {
+        revision: task.version,
+        values: {
+          action: "",
+          receiverId: task.pendingOwnerId ?? "",
+          reason: "",
+          reviewed: "",
+          nextAction: task.title,
+          dueAt: inputInstant(task.followUpAt),
+        },
+      };
     },
   );
   // A successful request/acceptance changes which forms exist. A receipt GET remains
