@@ -163,7 +163,10 @@ async function perform<V extends FormValues>(
         fieldErrors: Object.fromEntries(
           fields
             .filter((field) => error.fieldErrors?.[String(field)])
-            .map((field) => [field, [copy.invalid]]),
+            .map((field) => {
+              const reason = error.fieldErrors?.[String(field)]?.[0];
+              return [field, [reason ? (copy.reasons[reason] ?? copy.invalid) : copy.invalid]];
+            }),
         ) as Partial<Record<keyof V, string[]>>,
       },
     };
