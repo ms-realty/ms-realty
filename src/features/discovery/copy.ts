@@ -801,6 +801,25 @@ const rows = {
     "Δεν μπορούμε να επιβεβαιώσουμε το αποτέλεσμα σε αυτόν τον περιηγητή.",
     "לא ניתן לאמת את התוצאה בדפדפן זה.",
   ],
+  // P12U: a same-request check that still cannot confirm, distinct from a committed receipt.
+  checkResult: [
+    "Резултат от проверката: още не е потвърдено",
+    "Check result: not confirmed yet",
+    "Результат проверки: пока не подтверждено",
+    "Ergebnis der Prüfung: noch nicht bestätigt",
+    "Resultaat van de controle: nog niet bevestigd",
+    "Αποτέλεσμα ελέγχου: δεν έχει επιβεβαιωθεί ακόμη",
+    "תוצאת הבדיקה: עדיין לא אושר",
+  ],
+  checkedAt: [
+    "Проверено: {time}",
+    "Checked: {time}",
+    "Проверено: {time}",
+    "Geprüft: {time}",
+    "Gecontroleerd: {time}",
+    "Ελέγχθηκε: {time}",
+    "נבדק: {time}",
+  ],
   retained: [
     "Текстът ви е запазен. Проверете резултата, преди да изпратите ново запитване.",
     "Your text is retained. Check the result before sending a new inquiry.",

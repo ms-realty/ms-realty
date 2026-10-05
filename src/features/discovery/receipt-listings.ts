@@ -16,7 +16,7 @@ const copy = {
     unknown: "Не можем да проверим дали обявата е активна",
     view: "Вижте имота",
     similar: "Вижте подобни имоти",
-    search: "Потърсете имот № {reference}",
+    search: "Проверете дали обявата още е активна",
     savedName:
       "Името е записано при изпращането на {submittedAt}. Ако обявата се промени по-късно, тук остава същото.",
     savedReference: "Номерът е записан при изпращането на {submittedAt}.",
@@ -31,7 +31,7 @@ const copy = {
     unknown: "We can't check whether this listing is active",
     view: "View the property",
     similar: "See similar properties",
-    search: "Search for property No. {reference}",
+    search: "Check whether the listing is still active",
     savedName:
       "The name was saved when you sent this on {submittedAt}. If the listing changes later, it stays the same here.",
     savedReference: "The number was saved when you sent this on {submittedAt}.",
@@ -46,7 +46,7 @@ const copy = {
     unknown: "Не можем проверить, активно ли объявление",
     view: "Посмотреть объект",
     similar: "Посмотреть похожие объекты",
-    search: "Найти объект № {reference}",
+    search: "Проверить, активно ли ещё объявление",
     savedName:
       "Название сохранено при отправке {submittedAt}. Если объявление потом изменится, здесь останется прежнее.",
     savedReference: "Номер сохранён при отправке {submittedAt}.",
@@ -61,7 +61,7 @@ const copy = {
     unknown: "Wir können nicht prüfen, ob das Inserat aktiv ist",
     view: "Immobilie ansehen",
     similar: "Ähnliche Immobilien ansehen",
-    search: "Immobilie Nr. {reference} suchen",
+    search: "Prüfen, ob das Inserat noch aktiv ist",
     savedName:
       "Der Name wurde beim Senden am {submittedAt} gespeichert. Ändert sich das Inserat später, bleibt er hier gleich.",
     savedReference: "Die Nummer wurde beim Senden am {submittedAt} gespeichert.",
@@ -76,7 +76,7 @@ const copy = {
     unknown: "We kunnen niet controleren of de advertentie actief is",
     view: "Object bekijken",
     similar: "Vergelijkbare objecten bekijken",
-    search: "Zoek object nr. {reference}",
+    search: "Controleer of de advertentie nog actief is",
     savedName:
       "De naam is opgeslagen bij het verzenden op {submittedAt}. Als de advertentie later verandert, blijft hij hier hetzelfde.",
     savedReference: "Het nummer is opgeslagen bij het verzenden op {submittedAt}.",
@@ -91,7 +91,7 @@ const copy = {
     unknown: "Δεν μπορούμε να ελέγξουμε αν η αγγελία είναι ενεργή",
     view: "Δείτε το ακίνητο",
     similar: "Δείτε παρόμοια ακίνητα",
-    search: "Αναζήτηση ακινήτου αρ. {reference}",
+    search: "Ελέγξτε αν η αγγελία είναι ακόμη ενεργή",
     savedName:
       "Το όνομα αποθηκεύτηκε κατά την αποστολή στις {submittedAt}. Αν η αγγελία αλλάξει αργότερα, εδώ μένει το ίδιο.",
     savedReference: "Ο αριθμός αποθηκεύτηκε κατά την αποστολή στις {submittedAt}.",
@@ -106,7 +106,7 @@ const copy = {
     unknown: "אין לנו אפשרות לבדוק אם המודעה פעילה",
     view: "לצפייה בנכס",
     similar: "לנכסים דומים",
-    search: "חיפוש נכס № {reference}",
+    search: "בדיקה אם המודעה עדיין פעילה",
     savedName:
       "השם נשמר בשליחה ב־{submittedAt}. אם המודעה תשתנה מאוחר יותר, כאן הוא יישאר כפי שהיה.",
     savedReference: "המספר נשמר בשליחה ב־{submittedAt}.",
@@ -150,10 +150,8 @@ export function receiptListings(
               }
             : {
                 status: c.unknown,
-                link: {
-                  href: `/${locale}/properties?q=${encodeURIComponent(reference)}`,
-                  label: fill(c.search, { reference }),
-                },
+                // The detail route answers it: the live page, or its unavailable variant (P21).
+                link: { href, label: c.search },
               }),
       };
     }),

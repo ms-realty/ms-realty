@@ -9,6 +9,7 @@ import { OwnerInquirySummary } from "@/features/discovery/inquiry-owner";
 import { inquiryReceiptView, inquiryStatus } from "@/features/discovery/inquiry-state";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
 import { isRoutableLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { getEnv } from "@/server/config/env";
 import {
   readInquiryReceipt,
@@ -37,10 +38,15 @@ export default async function ReceiptPage({
       ),
     });
   } catch {
+    const checkedAt = new Date().toISOString();
     return (
       <DiscoveryPage>
         <h1 className="text-title font-semibold">{copy.notConfirmed}</h1>
-        <Notice tone="warning" title={copy.checkOperation} />
+        <Notice tone="warning" title={copy.checkResult}>
+          <time dateTime={checkedAt}>
+            {copy.checkedAt.replace("{time}", formatDateTime(locale, checkedAt))}
+          </time>
+        </Notice>
         <a
           className={buttonClass("secondary", "self-start")}
           href={inquiryStatus(locale, receiptId)}
