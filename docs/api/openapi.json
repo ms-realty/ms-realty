@@ -1395,7 +1395,7 @@
                               "properties": {
                                 "reference": {
                                   "type": "string",
-                                  "maxLength": 20
+                                  "minLength": 1
                                 },
                                 "title": {
                                   "anyOf": [
@@ -1418,9 +1418,29 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "sourceUrl": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "publicNow": {
+                                  "type": "boolean"
                                 }
                               },
-                              "required": ["reference", "title", "locale"],
+                              "required": [
+                                "reference",
+                                "title",
+                                "locale",
+                                "sourceUrl",
+                                "publicNow"
+                              ],
                               "additionalProperties": false
                             },
                             {
@@ -1435,7 +1455,7 @@
                             "properties": {
                               "reference": {
                                 "type": "string",
-                                "maxLength": 20
+                                "minLength": 1
                               },
                               "title": {
                                 "anyOf": [
@@ -1458,9 +1478,23 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "sourceUrl": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "publicNow": {
+                                "type": "boolean"
                               }
                             },
-                            "required": ["reference", "title", "locale"],
+                            "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
                             "additionalProperties": false
                           }
                         },
@@ -1626,7 +1660,7 @@
                               "properties": {
                                 "reference": {
                                   "type": "string",
-                                  "maxLength": 20
+                                  "minLength": 1
                                 },
                                 "title": {
                                   "anyOf": [
@@ -1649,9 +1683,29 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "sourceUrl": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "publicNow": {
+                                  "type": "boolean"
                                 }
                               },
-                              "required": ["reference", "title", "locale"],
+                              "required": [
+                                "reference",
+                                "title",
+                                "locale",
+                                "sourceUrl",
+                                "publicNow"
+                              ],
                               "additionalProperties": false
                             },
                             {
@@ -1666,7 +1720,7 @@
                             "properties": {
                               "reference": {
                                 "type": "string",
-                                "maxLength": 20
+                                "minLength": 1
                               },
                               "title": {
                                 "anyOf": [
@@ -1689,9 +1743,23 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "sourceUrl": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "publicNow": {
+                                "type": "boolean"
                               }
                             },
-                            "required": ["reference", "title", "locale"],
+                            "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
                             "additionalProperties": false
                           }
                         },
@@ -2066,7 +2134,7 @@
                               "properties": {
                                 "reference": {
                                   "type": "string",
-                                  "maxLength": 20
+                                  "minLength": 1
                                 },
                                 "title": {
                                   "anyOf": [
@@ -2089,9 +2157,29 @@
                                       "type": "null"
                                     }
                                   ]
+                                },
+                                "sourceUrl": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "publicNow": {
+                                  "type": "boolean"
                                 }
                               },
-                              "required": ["reference", "title", "locale"],
+                              "required": [
+                                "reference",
+                                "title",
+                                "locale",
+                                "sourceUrl",
+                                "publicNow"
+                              ],
                               "additionalProperties": false
                             },
                             {
@@ -2106,7 +2194,7 @@
                             "properties": {
                               "reference": {
                                 "type": "string",
-                                "maxLength": 20
+                                "minLength": 1
                               },
                               "title": {
                                 "anyOf": [
@@ -2129,9 +2217,23 @@
                                     "type": "null"
                                   }
                                 ]
+                              },
+                              "sourceUrl": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "publicNow": {
+                                "type": "boolean"
                               }
                             },
-                            "required": ["reference", "title", "locale"],
+                            "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
                             "additionalProperties": false
                           }
                         },

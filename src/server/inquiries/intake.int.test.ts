@@ -243,6 +243,8 @@ describe("submitInquiry", () => {
       reference: live.reference,
       title: publicResult.listing.title,
       locale: publicResult.listing.locale,
+      sourceUrl: `${getEnv().canonicalOrigin}/bg/properties/${live.reference}/${live.reference.toLowerCase()}`,
+      publicNow: true,
     });
     expect(receipt.selectedListings).toEqual([]);
     const [row] = await inquiriesFor(input.submissionKey);
@@ -259,9 +261,33 @@ describe("submitInquiry", () => {
       submissionKey: input.submissionKey,
       receiptSession: session,
     });
-    expect(historical.listing).toEqual({ reference: live.reference, title: null, locale: null });
+    expect(historical.listing).toEqual({
+      reference: live.reference,
+      title: null,
+      locale: null,
+      sourceUrl: null,
+      publicNow: false,
+    });
     expect(historical.listingReference).toBe(live.reference);
-    expect(JSON.stringify(historical)).not.toMatch(/sourceUrl|private.example|manifestId/);
+    expect(JSON.stringify(historical)).not.toMatch(/private.example|manifestId/);
+    await t.db
+      .update(inquiries)
+      .set({ context: { selection: [{ reference: "LEGACY-001", title: "Unverified title" }] } })
+      .where(eq(inquiries.submissionKey, input.submissionKey));
+    const older = await readInquiryReceipt(t.db, {
+      submissionKey: input.submissionKey,
+      receiptSession: session,
+    });
+    expect(older.selectedListings).toEqual([
+      {
+        reference: "LEGACY-001",
+        title: null,
+        locale: null,
+        sourceUrl: null,
+        publicNow: false,
+      },
+    ]);
+    expect(older.selectedListingReferences).toEqual(["LEGACY-001"]);
   });
 
   it("AT12: commits the Inquiry with its coverage-queue owner and outbox event, no provider call", async () => {
@@ -519,7 +545,13 @@ describe("P07 collective inquiry", () => {
       selectedListings.map((item) => item.reference),
     );
     expect(accepted.receipt.selectedListings).toEqual(
-      details.map(({ reference, title, locale }) => ({ reference, title, locale })),
+      details.map(({ reference, title, locale, slug }) => ({
+        reference,
+        title,
+        locale,
+        sourceUrl: `${getEnv().canonicalOrigin}/${locale}/properties/${reference}/${slug}`,
+        publicNow: true,
+      })),
     );
     expect(accepted.receipt.listing).toBeNull();
     expect(accepted.receipt.listingReference).toBeNull();
@@ -534,7 +566,7 @@ describe("P07 collective inquiry", () => {
     expect(again.replayed).toBe(true);
     expect(await inquiriesFor(input.submissionKey)).toHaveLength(1);
     expect(JSON.stringify(accepted.receipt)).not.toMatch(
-      /example.test|Test Visitor|lift|description|sourceUrl/,
+      /example.test|Test Visitor|lift|description/,
     );
     expect(await t.db.select().from(externalActions)).toEqual([]);
     const reordered = await rejection(
@@ -604,6 +636,8 @@ describe("P07 collective inquiry", () => {
       reference: withdrawn.reference,
       title: "Saved property name",
       locale: "bg",
+      sourceUrl: `${getEnv().canonicalOrigin}/bg/properties/${withdrawn.reference}/${withdrawn.reference.toLowerCase()}`,
+      publicNow: true,
     });
     await withdrawPublication(t.db, {
       actor: publisher.actor,
@@ -617,15 +651,19 @@ describe("P07 collective inquiry", () => {
     ).toMatchObject({
       status: "unavailable",
     });
-    expect(
-      await readInquiryReceipt(t.db, {
-        submissionKey: input.submissionKey,
-        receiptSession: session,
-      }),
-    ).toEqual(original.receipt);
+    const afterWithdrawal = await readInquiryReceipt(t.db, {
+      submissionKey: input.submissionKey,
+      receiptSession: session,
+    });
+    expect(afterWithdrawal.selectedListings).toEqual(
+      original.receipt.selectedListings.map((item) => ({
+        ...item,
+        publicNow: item.reference !== withdrawn.reference,
+      })),
+    );
     expect(
       (await submitInquiry(t.db, input, { ip: ip(), receiptSession: session })).receipt,
-    ).toEqual(original.receipt);
+    ).toEqual(afterWithdrawal);
     const stranger = newReceiptSession();
     expect(
       (await rejection(submitInquiry(t.db, input, { ip: ip(), receiptSession: stranger }))).code,

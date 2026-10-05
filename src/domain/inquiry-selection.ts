@@ -40,9 +40,13 @@ export type SelectedListing = z.infer<typeof selectedListingsSchema>[number];
 
 /** Public identity saved at submission; never refreshed from a later publication. */
 export const inquiryListingReceiptSchema = z.object({
-  reference: listingReferenceSchema,
+  // A receipt can outlive a reference format change; keep the saved identifier visible.
+  reference: z.string().min(1),
   title: z.string().min(1).nullable(),
   locale: z.enum(publicLocales).nullable(),
+  sourceUrl: z.url().nullable(),
+  /** Current public projection only; the saved identity above never changes. */
+  publicNow: z.boolean(),
 });
 export type InquiryListingReceipt = z.infer<typeof inquiryListingReceiptSchema>;
 
