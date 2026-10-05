@@ -73,7 +73,7 @@ through one day after the recorded slot; revocation or cancellation removes acce
 
 ## Verification
 
-Use a disposable Postgres 18 database. The integration helper creates and drops a separate
+Use a disposable PostgreSQL 16.14 database. The integration helper creates and drops a separate
 UUID database per suite; the browser harness creates its own run database.
 
 ```sh
@@ -92,7 +92,7 @@ denial, audience snapshots, revocation before replay, booking races, preserved r
 DST and calendar sequence/cancellation. Browser coverage exercises staff qualification,
 client feedback and a real request/confirmation/change/cancel flow, then message isolation and
 revocation. Identity ceremonies are covered by the identity suite; these browser fixtures use
-synthetic valid sessions. Private BG/RU copy remains an unreviewed draft. These checks do not
+synthetic valid sessions. Private localized copy remains an unreviewed draft. These checks do not
 establish production, provider, operator, language or release acceptance.
 
 ## Lifecycle and exact owner preview
