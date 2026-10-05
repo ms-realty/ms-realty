@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { auditEvents } from "@/db/schema";
+import { auditEvents, interests } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createListingFixture, defaultFacts, publishForTest } from "../publication/testing";
 import { caseMatchCriteriaInput } from "../search/search";
@@ -200,6 +200,21 @@ describe("O07 Case matching", () => {
       fieldErrors: { alternativeDecision: ["no_hard_mismatch"] },
     });
     const saved = await addInterest(t.db, f.staff.session, exactInput);
+    const [stored] = await t.db
+      .select({ createdAt: interests.createdAt })
+      .from(interests)
+      .where(eq(interests.id, saved.outcome.interestId));
+    expect(saved.outcome.recordedAt).toBe(stored?.createdAt.toISOString());
+    const alreadyAdded = await addInterest(t.db, f.staff.session, {
+      ...exactInput,
+      operationId: randomUUID(),
+      expectedVersion: 3,
+      matchReview: undefined,
+    });
+    expect(alreadyAdded.outcome).toMatchObject({
+      interestId: saved.outcome.interestId,
+      recordedAt: saved.outcome.recordedAt,
+    });
     const withSavedInterest = await readCaseMatches(t.db, f.staff.session, { id: f.record.id });
     expect(withSavedInterest.status).toBe("ready");
     if (withSavedInterest.status !== "ready") throw new Error("Expected current Brief matches");

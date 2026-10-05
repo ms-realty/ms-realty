@@ -372,7 +372,7 @@ export async function addInterest(
           reference: row.reference,
           interestId: existing.id,
           version: row.version,
-          recordedAt: new Date().toISOString(),
+          recordedAt: existing.createdAt.toISOString(),
         };
       const now = new Date();
       const availability = presentationOf(published, now).availability;
@@ -496,7 +496,7 @@ export async function addInterest(
         reference: row.reference,
         interestId: interest.id,
         version: row.version + 1,
-        recordedAt: new Date().toISOString(),
+        recordedAt: interest.createdAt.toISOString(),
       };
     },
   );
