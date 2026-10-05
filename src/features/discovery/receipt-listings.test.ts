@@ -53,8 +53,20 @@ describe("P12 receipt listings", () => {
   it("falls back to the detail route when no saved URL exists, and words a reference-only note", () => {
     const result = receiptListings([item("MS-00101", { title: null, locale: null })], "bg", at);
     expect(result?.heading).toBe("Имотът в запитването");
-    expect(result?.items[0]?.href).toBe("/bg/properties/MS-00101/ms-00101");
+    // The generated label is not a link; the row's own action opens the detail route.
+    expect(result?.items[0]?.href).toBeUndefined();
+    expect(result?.items[0]?.link.href).toBe("/bg/properties/MS-00101/ms-00101");
     expect(result?.note).toMatch(/^Номерът е записан при изпращането на /);
+  });
+
+  it("P12UNKNOWN: a saved name with unknown availability links to the same detail route", () => {
+    const [unknown] =
+      receiptListings([item("MS-00202", { publicNow: null })], "en", at)?.items ?? [];
+    expect(unknown).toMatchObject({
+      href: "/en/properties/MS-00202/ms-00202",
+      status: "We can't check whether this listing is active",
+      link: { href: "/en/properties/MS-00202/ms-00202" },
+    });
   });
 
   it("names nothing when the inquiry was about no property", () => {

@@ -141,8 +141,11 @@ export function receiptListings(
         name: item.title ?? fill(c.referenceOnly, { reference }),
         ...(item.title && item.locale ? { nameLang: item.locale } : {}),
         ...(item.title ? {} : { nameNote: c.noSavedName }),
+        // A saved name links exactly when its row leads to the listing; a generated
+        // «Имот № …» label never does (contract G-24, fix 6).
+        ...(item.title && item.publicNow !== false ? { href } : {}),
         ...(item.publicNow === true
-          ? { href, link: { href, label: c.view } }
+          ? { link: { href, label: c.view } }
           : item.publicNow === false
             ? {
                 warning: c.notPublic,

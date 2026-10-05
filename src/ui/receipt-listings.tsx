@@ -1,5 +1,5 @@
-// The saved subjects of a receipt (P12): one row per item in saved order, a name that links only
-// while the subject is verifiably public, and a caption saying when the names were saved.
+// The saved subjects of a receipt (P12): one row per item in saved order, a saved name that links
+// unless the subject is known to be gone, and a caption saying when the names were saved.
 import { buttonClass } from "./button-class";
 import type { ReceiptListings as ReceiptListingsData } from "./form/contract";
 import { Notice } from "./notice";
@@ -28,7 +28,7 @@ export function ReceiptListings({
                 </a>
               </p>
             ) : (
-              // Only a verifiably public listing looks like a link (contract G-24).
+              // Gone listings and generated labels never look like links (contract G-24).
               <p className="text-compact text-text-muted">
                 <bdi lang={item.nameLang}>{item.name}</bdi>
               </p>
