@@ -114,7 +114,9 @@ async function replicatedNext(): Promise<number> {
         const deadline = Date.now() + 120_000;
         while (!stopping && !ended && Date.now() < deadline) {
           try {
-            const response = await fetch(`http://127.0.0.1:${backend}/api/health`, {
+            // The app accepts the localhost health host; 127.0.0.1 is a different host and
+            // receives the deliberate public-route 404 even after Next has started.
+            const response = await fetch(`http://localhost:${backend}/api/health`, {
               signal: AbortSignal.timeout(1000),
             });
             await response.body?.cancel();
