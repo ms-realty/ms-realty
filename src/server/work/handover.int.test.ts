@@ -239,14 +239,20 @@ it("requires a future receiver review without hiding an overdue client deadline"
       operationId: randomUUID(),
       dueAt: new Date(Date.now() - 3_600_000).toISOString(),
     }),
-  ).rejects.toMatchObject({ code: "validation_failed" });
+  ).rejects.toMatchObject({
+    code: "validation_failed",
+    fieldErrors: { dueAt: ["future_required"] },
+  });
   await expect(
     handoverTask(t.db, f.receiver.session, {
       ...accept,
       operationId: randomUUID(),
       dueAt: new Date(Date.now() + 2 * 86400000).toISOString(),
     }),
-  ).rejects.toMatchObject({ code: "validation_failed" });
+  ).rejects.toMatchObject({
+    code: "validation_failed",
+    fieldErrors: { dueAt: ["after_deadline"] },
+  });
   const overdue = new Date(Date.now() - 3_600_000);
   await t.db.update(tasks).set({ dueAt: overdue }).where(eq(tasks.id, f.task.id));
   await handoverTask(t.db, f.receiver.session, accept);
@@ -257,6 +263,28 @@ it("requires a future receiver review without hiding an overdue client deadline"
     (await listTasks(t.db, f.receiver.session, { dueBefore: new Date() })).rows.map(
       (row) => row.task.id,
     ),
+  ).toContain(f.task.id);
+});
+
+it("records an undated task's receiver review without inventing a deadline", async () => {
+  const f = await fixture();
+  await t.db.update(tasks).set({ dueAt: null, dueTimezone: null }).where(eq(tasks.id, f.task.id));
+  await handoverTask(t.db, f.manager.session, f.input);
+  const reviewAt = new Date(Date.now() + 3_600_000);
+  await handoverTask(t.db, f.receiver.session, {
+    ...f.input,
+    action: "accept",
+    operationId: randomUUID(),
+    expectedVersion: 2,
+    nextAction: "Check the dependency and record the next step",
+    dueAt: reviewAt.toISOString(),
+  });
+  const view = await readTaskHandover(t.db, f.receiver.session, f.task.id);
+  expect(view.task).toMatchObject({ dueAt: null, dueTimezone: null, followUpAt: reviewAt });
+  expect(
+    (
+      await listTasks(t.db, f.receiver.session, { dueBefore: new Date(Date.now() + 7200000) })
+    ).rows.map((row) => row.task.id),
   ).toContain(f.task.id);
 });
 

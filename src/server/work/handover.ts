@@ -2,7 +2,6 @@ import "server-only";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { activityEvents, passkeys, principals, staffMemberships, tasks } from "@/db/schema";
-import { agencyTimeZone } from "@/i18n/config";
 import { availableStaff } from "../auth/availability";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { requireFreshAuth, type Session } from "../auth/sessions";
@@ -211,11 +210,11 @@ export async function handoverTask(db: Executor, session: Session, raw: unknown)
       if (reviewAt) {
         if (reviewAt <= now)
           throw new AppError("validation_failed", {
-            fieldErrors: { dueAt: ["Choose a future review time."] },
+            fieldErrors: { dueAt: ["future_required"] },
           });
         if (task.dueAt && task.dueAt > now && reviewAt > task.dueAt)
           throw new AppError("validation_failed", {
-            fieldErrors: { dueAt: ["Review before the existing deadline."] },
+            fieldErrors: { dueAt: ["after_deadline"] },
           });
       }
       await ctx.tx
@@ -225,8 +224,6 @@ export async function handoverTask(db: Executor, session: Session, raw: unknown)
             ? {
                 ownerId: input.receiverId,
                 title: input.nextAction,
-                dueAt: task.dueAt ?? reviewAt,
-                dueTimezone: task.dueTimezone ?? agencyTimeZone,
                 followUpAt: reviewAt,
               }
             : {}),
