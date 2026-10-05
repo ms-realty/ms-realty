@@ -26,6 +26,15 @@ text or cards. Exact URLs and available excerpts are listed in the controller's
 `output/msr-launch/source-recovery/required-primary-sources.json`. None of these
 conditions authorizes a builder-selected removal or homepage redirect.
 
+A later read-only check queried the live `.com` WordPress REST index and its exposed
+`posts`, `pages` and `categories` collections by the exact slugs of all 27 unresolved
+`.com` URLs. Three `/category/` URLs returned exact taxonomy records with short
+descriptions and current count zero; no exact record appeared in these collections
+for the other 24. The API did not expose the historical archive cards, custom listing
+content or original main text needed for equivalence. This observation changes no
+unresolved row or redirect decision; an original export/backup or independent
+historical source remains necessary.
+
 The larger real source set exposed a generator memory failure. Source extraction
 now closes each jsdom window, and re-extraction yields between bounded batches so
 queued document lifecycle work can drain. A narrow, source-specific selector also
