@@ -14,22 +14,31 @@ export const fileOperationTypes = [
   "file.scan.request",
 ];
 /** Query strings alone never establish a successful save. */
-export async function fileReceipt(db: Executor, session: Session, value: unknown) {
+export async function fileReceipt(
+  db: Executor,
+  session: Session,
+  value: unknown,
+  targets?: readonly { kind: FileKind; id: string }[],
+) {
   if (!z.uuid().safeParse(value).success) return null;
   await requireLiveSession(db, session);
   const id = value as string;
-  const [receipt] = await db
-    .select({ id: operations.id })
-    .from(operations)
-    .where(
-      and(
-        eq(operations.id, id),
-        eq(operations.actorKind, session.actor.kind),
-        eq(operations.actorId, session.actor.id),
-        eq(operations.status, "succeeded"),
-        inArray(operations.operationType, fileOperationTypes),
-      ),
-    );
+  // A transfer confirmation on a request belongs to that displayed file version. A review
+  // operation or another accessible upload cannot establish this request's transfer.
+  const [receipt] = targets
+    ? []
+    : await db
+        .select({ id: operations.id })
+        .from(operations)
+        .where(
+          and(
+            eq(operations.id, id),
+            eq(operations.actorKind, session.actor.kind),
+            eq(operations.actorId, session.actor.id),
+            eq(operations.status, "succeeded"),
+            inArray(operations.operationType, fileOperationTypes),
+          ),
+        );
   if (receipt) return receipt.id;
   const [upload] = await db
     .select()
@@ -42,6 +51,11 @@ export async function fileReceipt(db: Executor, session: Session, value: unknown
       ),
     );
   if (!upload?.completedAt) return null;
+  if (
+    targets &&
+    !targets.some((target) => target.kind === upload.targetType && target.id === upload.targetId)
+  )
+    return null;
   try {
     await targetAccess(db, session, upload.targetType as FileKind, upload.targetId);
     return upload.id;

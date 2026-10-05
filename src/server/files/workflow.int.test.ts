@@ -308,6 +308,21 @@ describe("AT28/AT42 real storage workflow", () => {
     await receiveUpload(t.db, services(), authenticated, { ...authority, bytes: image });
     await finalizeUpload(t.db, services(), authenticated, authority.uploadId);
     expect(await fileReceipt(t.db, authenticated, authority.uploadId)).toBe(authority.uploadId);
+    expect(
+      await fileReceipt(t.db, authenticated, authority.uploadId, [
+        { kind: "document", id: created.outcome.versionId },
+      ]),
+    ).toBe(authority.uploadId);
+    expect(
+      await fileReceipt(t.db, authenticated, authority.uploadId, [
+        { kind: "document", id: randomUUID() },
+      ]),
+    ).toBeNull();
+    expect(
+      await fileReceipt(t.db, authenticated, authority.uploadId, [
+        { kind: "media", id: created.outcome.versionId },
+      ]),
+    ).toBeNull();
     expect(await fileReceipt(t.db, session, authority.uploadId)).toBeNull();
     await processFileWorker(
       t.db,
