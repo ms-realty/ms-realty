@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "scope": "local synthetic closed-loop, not released or live infrastructure proof",
+  "source": {
+    "revision": "e15d2ccea094ab32ae2a0181a6e5af78d3ae4caf",
+    "dirty": false,
+    "provenance": "local-git"
+  },
+  "testExitCode": 1,
+  "environment": {
+    "platform": "darwin",
+    "cpus": 16,
+    "memoryBytes": 137438953472,
+    "node": "v22.22.2",
+    "nextDist": ".next",
+    "webReplicas": 2
+  },
+  "dataset": {
+    "listings": 10000,
+    "projections": 18571,
+    "largeMediaBytes": 747546,
+    "largeMediaSamples": 100,
+    "scanEvidence": "synthetic fixture, not real ClamAV"
+  },
+  "workload": {
+    "publicSessions": 50,
+    "staffSessions": 10,
+    "intendedSeconds": 60,
+    "elapsedMs": 61357.37966600002,
+    "peakMeasuredRequests": 60
+  },
+  "completedCycles": {
+    "public": 1523,
+    "staff": 172,
+    "everySessionCompleted": true
+  },
+  "measurements": {
+    "staff-today-html": {
+      "count": 172,
+      "p50": 563.97,
+      "p95": 1300.33,
+      "p99": 1656.01,
+      "max": 1672.06,
+      "budgetMs": 500
+    },
+    "public-search-html": {
+      "count": 1523,
+      "p50": 791.51,
+      "p95": 1789.06,
+      "p99": 3742.41,
+      "max": 3997.1,
+      "budgetMs": 500
+    },
+    "staff-task-html": {
+      "count": 172,
+      "p50": 905.07,
+      "p95": 1777.98,
+      "p99": 2476.67,
+      "max": 2685.38,
+      "budgetMs": 500
+    },
+    "public-detail-html": {
+      "count": 1523,
+      "p50": 778.68,
+      "p95": 1749.89,
+      "p99": 2446.05,
+      "max": 3040.47,
+      "budgetMs": 500
+    },
+    "public-media": {
+      "count": 1523,
+      "p50": 162.63,
+      "p95": 378.3,
+      "p99": 783.83,
+      "max": 2974.25,
+      "budgetMs": null
+    },
+    "staff-command-post": {
+      "count": 172,
+      "p50": 1371.6,
+      "p95": 4786.76,
+      "p99": 5209.24,
+      "max": 5396.23,
+      "budgetMs": 800
+    }
+  },
+  "failures": [],
+  "profiling": {
+    "runtimePerReplica": [
+      {
+        "samples": 62,
+        "meanCpuCores": 0.686,
+        "meanEventLoopUtilization": 0.897,
+        "maxEventLoopDelayP95Ms": 40.4,
+        "maxRssMiB": 714
+      },
+      {
+        "samples": 62,
+        "meanCpuCores": 0.677,
+        "meanEventLoopUtilization": 0.894,
+        "maxEventLoopDelayP95Ms": 143.8,
+        "maxRssMiB": 732
+      }
+    ],
+    "databaseSamples": 62,
+    "databaseErrors": [],
+    "databaseObservedStates": [
+      {
+        "state": "active",
+        "waitType": "Client",
+        "waitEvent": "ClientRead",
+        "sampleObservations": 59
+      },
+      {
+        "state": "active",
+        "waitType": "",
+        "waitEvent": "",
+        "sampleObservations": 60
+      },
+      {
+        "state": "idle in transaction",
+        "waitType": "Client",
+        "waitEvent": "ClientRead",
+        "sampleObservations": 20
+      },
+      {
+        "state": "idle in transaction",
+        "waitType": "",
+        "waitEvent": "",
+        "sampleObservations": 1
+      },
+      {
+        "state": "idle",
+        "waitType": "Client",
+        "waitEvent": "ClientRead",
+        "sampleObservations": 59
+      },
+      {
+        "state": "idle",
+        "waitType": "",
+        "waitEvent": "",
+        "sampleObservations": 9
+      }
+    ]
+  },
+  "qualification": {
+    "performanceBudgetsPassed": false,
+    "minimumInventory": true,
+    "minimumDuration": true,
+    "everySessionCompleted": true,
+    "frozenLaunchInventory": false,
+    "queueStarvation": false,
+    "liveInfrastructure": false,
+    "fieldWebVitals": false,
+    "releaseGatePass": false
+  },
+  "interpretation": "All five budgeted p95 lanes failed. This local macOS run cannot clear R08 or establish causality for the latency change versus earlier Linux runs."
+}
