@@ -1,6 +1,7 @@
 import "server-only";
 import { getDb } from "@/db/client";
 import type { Session } from "@/server/auth/sessions";
+import { wireCode } from "@/server/errors";
 import { readAlertRule } from "@/server/subscriptions/approval";
 import { configuredAlertRule, currentAlertRule } from "@/server/subscriptions/rule";
 import { alertTemplateCopy } from "@/server/subscriptions/template";
@@ -38,7 +39,8 @@ export async function AlertRuleScreen({
       {query.error ? (
         <div role="alert" tabIndex={-1}>
           <Notice tone="error">
-            {query.error === "VERSION_CONFLICT" || query.error === "APPROVAL_STALE"
+            {query.error === wireCode("version_conflict") ||
+            query.error === wireCode("approval_stale")
               ? copy.conflict
               : copy.error}
           </Notice>
