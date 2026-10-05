@@ -35,6 +35,26 @@ content or original main text needed for equivalence. This observation changes n
 unresolved row or redirect decision; an original export/backup or independent
 historical source remains necessary.
 
+The original SuperHosting account archive is now accessible locally. Its SHA-256 is
+`fc0ac4723c942039e1f8390e6f39a2097222489f21aaf4fe20627b85b3c4592a`.
+Only its two domain-specific WordPress SQL members were restored into an isolated
+local database without a published port. Matching published, passwordless records
+by host, stored rewrite family and percent-decoded slug found exact source records
+for 58 of the 61 frozen `.ru` identities and 18 of the 27 `.com` identities.
+The [per-identity evidence](../delivery/evidence/wordpress-source-match.json) stores
+record IDs, text hashes and lengths, locale markers and linked published-card counts;
+it contains no raw database text, account users, forms or private messages.
+
+The remaining `.ru` identities are the root route (two URL spellings), the listing
+archive and one listing slug. The archived Avenue theme and rewrite rules explain
+the root and listing-archive route shapes, but do not prove their exact rendered
+cards. Nine `.com` identities have no exact record in this archive. Two matched
+`.com` localized taxonomy rows also lack a marker for the requested locale. A
+taxonomy identity, description or archived card relationship is source evidence,
+not a finished same-path page or an approved equivalent target. R07 remains blocked
+on those rendered-content, media, status, locale, current-delta and human review
+checks; no redirect or deletion decision changed.
+
 The larger real source set exposed a generator memory failure. Source extraction
 now closes each jsdom window, and re-extraction yields between bounded batches so
 queued document lifecycle work can drain. A narrow, source-specific selector also
