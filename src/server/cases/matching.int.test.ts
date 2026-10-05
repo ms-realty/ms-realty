@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createListingFixture, defaultFacts, publishForTest } from "../publication/testing";
 import { caseMatchCriteriaInput } from "../search/search";
-import { reviseBrief } from "./commands";
+import { addInterest, reviseBrief } from "./commands";
 import { readCaseMatches } from "./matching";
 import { caseFixture } from "./testing";
 
@@ -86,6 +86,20 @@ describe("O07 Case matching", () => {
     expect(
       [...matches.confirmed, ...matches.needsConfirmation].map((item) => item.reference),
     ).not.toContain(unpublished.reference);
+    expect(matches.confirmed[0]?.existingInterestId).toBeNull();
+
+    const saved = await addInterest(t.db, f.staff.session, {
+      id: f.record.id,
+      operationId: randomUUID(),
+      expectedVersion: 2,
+      reference: exact.reference,
+      explanation: "The reviewed listing matches the structured Brief.",
+    });
+    const withSavedInterest = await readCaseMatches(t.db, f.staff.session, { id: f.record.id });
+    expect(withSavedInterest.status).toBe("ready");
+    if (withSavedInterest.status !== "ready") throw new Error("Expected current Brief matches");
+    expect(withSavedInterest.confirmed[0]?.existingInterestId).toBe(saved.outcome.interestId);
+    expect(withSavedInterest.needsConfirmation[0]?.existingInterestId).toBeNull();
 
     const firstPage = await readCaseMatches(t.db, f.staff.session, {
       id: f.record.id,
@@ -118,7 +132,7 @@ describe("O07 Case matching", () => {
     await reviseBrief(t.db, f.staff.session, {
       id: f.record.id,
       operationId: randomUUID(),
-      expectedVersion: 2,
+      expectedVersion: 3,
       requirements: "The client revised their requirements",
       preferences: "Near the centre",
     });

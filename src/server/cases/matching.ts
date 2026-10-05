@@ -1,9 +1,9 @@
 // O07: a staff Case read over the current public search projection. A Brief without reviewed
 // structured criteria cannot silently become a broad inventory recommendation.
 import "server-only";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { briefRevisions } from "@/db/schema";
+import { briefRevisions, interests, listings } from "@/db/schema";
 import { publicLocales } from "@/domain/ids";
 import type { Session } from "../auth/sessions";
 import type { Executor } from "../db";
@@ -76,6 +76,26 @@ export async function readCaseMatches(
     pageSize: input.pageSize,
     cursor: input.cursor,
   });
+  const existing = result.items.length
+    ? await db
+        .select({ id: interests.id, reference: listings.reference })
+        .from(interests)
+        .innerJoin(listings, eq(listings.id, interests.listingId))
+        .where(
+          and(
+            eq(interests.caseId, row.id),
+            inArray(
+              listings.reference,
+              result.items.map((item) => item.reference),
+            ),
+          ),
+        )
+    : [];
+  const interestByReference = new Map(existing.map((item) => [item.reference, item.id]));
+  const matches = result.items.map((item) => ({
+    ...item,
+    existingInterestId: interestByReference.get(item.reference) ?? null,
+  }));
   return {
     status: "ready" as const,
     caseId: row.id,
@@ -86,8 +106,8 @@ export async function readCaseMatches(
       clientAcknowledgedAt: brief.clientAcknowledgedAt,
     },
     criteria: result.criteria,
-    confirmed: result.items.filter((item) => item.match === "match"),
-    needsConfirmation: result.items.filter((item) => item.match === "needs_confirmation"),
+    confirmed: matches.filter((item) => item.match === "match"),
+    needsConfirmation: matches.filter((item) => item.match === "needs_confirmation"),
     count: result.count,
     nextCursor: result.nextCursor,
     queryId: result.queryId,

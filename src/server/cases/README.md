@@ -40,6 +40,8 @@ current Brief revision to eligible public search results, separating confirmed f
 facts needing confirmation; it never treats an unknown as a hard match or searches historical
 offers. A continued page must name the Brief revision it started from and conflicts after a
 revision change. The read model returns client acknowledgment so a draft Brief remains visible.
+Each result includes `existingInterestId` for that Case–Listing relation, or null, from the
+current result page; the idempotent Interest command remains the final duplicate guard.
 The staff workbench still has to bind this read model and explain any proposed alternative
 before O07 can pass journey acceptance.
 Staff messages intended for clients require an explicit human review bound to the exact
