@@ -20,6 +20,7 @@ const en = {
     "Listings with unknown facts do not match unless you explicitly include results needing confirmation.",
   source: "Search language",
   save: "Save this search preference",
+  saving: "Saving preference…",
   saved: "Search preference recorded",
   savedNext:
     "Review, pause or unsubscribe in your account preferences. Recording this choice does not confirm email delivery.",
@@ -55,6 +56,7 @@ const bg: typeof en = {
     "Имотите с неизвестни данни не съвпадат, освен ако изрично включите резултати, изискващи потвърждение.",
   source: "Език на търсенето",
   save: "Запазете предпочитанието за търсене",
+  saving: "Запазване…",
   saved: "Предпочитанието за търсене е записано",
   savedNext:
     "Прегледайте, спрете или прекратете абонамента от предпочитанията в профила. Записването не потвърждава доставен имейл.",

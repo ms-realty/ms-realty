@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import PublicPage from "../../../app/public/[locale]/(site)/search-alerts/page";
 import { SearchAlertForm } from "./search-alert-form";
@@ -92,4 +93,31 @@ it("shows complete verified emails with a deliberate native choice and unchecked
   expect(screen.getByRole("combobox", { name: "Frequency" })).toHaveValue("daily");
   expect(screen.getByRole("checkbox")).not.toBeChecked();
   expect(screen.getByRole("checkbox")).toHaveAccessibleName(/does not enable marketing/);
+});
+it("announces a concise pending save instead of an unconfirmed-status sentence", async () => {
+  const user = userEvent.setup();
+  render(
+    <SearchAlertForm
+      locale="en"
+      permalink="/en/preferences/search-alerts?purpose=sale"
+      contacts={[{ id: "contact-one", value: "synthetic@example.test" }]}
+      initialState={{
+        operationId: "op",
+        expectedRevision: null,
+        responseId: "render",
+        values: {
+          contactMethodId: "contact-one",
+          confirmed: "yes",
+          frequency: "daily",
+          timezone: "Europe/Sofia",
+          proof: "proof",
+        },
+        outcome: { kind: "idle" },
+      }}
+      action={() => new Promise(() => {})}
+    />,
+  );
+  await user.click(screen.getByRole("button", { name: "Save this search preference" }));
+  expect(await screen.findByRole("status")).toHaveTextContent(/^Saving preference…$/);
+  expect(screen.queryByText(/change is not confirmed/)).not.toBeInTheDocument();
 });

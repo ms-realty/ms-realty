@@ -44,7 +44,7 @@ export function SearchAlertForm({
         }}
         copy={{
           errorSummary: c.check,
-          pending: c.unconfirmed,
+          pending: c.saving,
           reapply: c.save,
           yourValue: c.retained,
           latestValue: c.check,
