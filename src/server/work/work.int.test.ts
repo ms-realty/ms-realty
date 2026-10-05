@@ -12,11 +12,20 @@ import {
   tasks,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
+import { inquiryCheckCode } from "@/domain/inquiry-check-code";
 import { createSession } from "../auth/sessions";
 import { issueSubmissionKey, newReceiptSession, submitInquiry } from "../inquiries/intake";
 import { createStaff } from "../testing";
 import { acceptInquiry, changeTask, readWorkOperation, triageInquiry } from "./commands";
-import { listContacts, listInbox, listTasks, readContact, readInquiry, readToday } from "./queries";
+import {
+  findInquiriesByCheckCode,
+  listContacts,
+  listInbox,
+  listTasks,
+  readContact,
+  readInquiry,
+  readToday,
+} from "./queries";
 
 let t: TestDatabase;
 beforeAll(async () => {
@@ -192,6 +201,36 @@ describe("staff work against durable inquiry intake", () => {
       { code: "not_found" },
     );
     expect((await listTasks(t.db, scoped.session)).rows).toEqual([]);
+  });
+
+  it("finds all authorized check-code candidates without exposing a submission key", async () => {
+    const first = await received("bg");
+    const second = await received("en");
+    // A code is intentionally not unique. Force a collision in the disposable database.
+    await t.db
+      .update(inquiries)
+      .set({
+        submissionKey: `${first.submissionKey.slice(0, 5)}${second.submissionKey.slice(5)}`,
+        state: "resolved_without_case",
+      })
+      .where(eq(inquiries.id, second.id));
+    const code = inquiryCheckCode(first.submissionKey);
+    expect(code).not.toBeNull();
+    const broker = await staff();
+    const found = await findInquiriesByCheckCode(t.db, broker.session, code ?? "");
+    expect(found.rows.map((row) => row.id).sort()).toEqual([first.id, second.id].sort());
+    expect(found.rows.some((row) => row.state === "resolved_without_case")).toBe(true);
+    expect(JSON.stringify(found)).not.toContain(first.submissionKey);
+
+    const scoped = await staff({
+      grants: [{ capability: "inquiry.read", recordType: "inquiry", recordId: first.id }],
+    });
+    expect(
+      (await findInquiriesByCheckCode(t.db, scoped.session, code ?? "")).rows.map((row) => row.id),
+    ).toEqual([first.id]);
+    await expect(findInquiriesByCheckCode(t.db, broker.session, "invalid")).rejects.toMatchObject({
+      code: "validation_failed",
+    });
   });
 
   it("a coordinator cannot accept; unenrolled staff cannot use command services", async () => {

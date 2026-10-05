@@ -12,6 +12,7 @@ import {
   tasks,
 } from "@/db/schema";
 import { hasCapability } from "@/domain/capabilities";
+import { checkCodeNoncePrefix } from "@/domain/inquiry-check-code";
 import { readInquiryContact } from "@/domain/inquiry-contact";
 import type { Session } from "../auth/sessions";
 import { assertCanRead, can, resolveGrants } from "../authz";
@@ -42,6 +43,34 @@ type QueueReadContext = Awaited<ReturnType<typeof queueReadContext>>;
 
 export async function listInbox(db: Executor, session: Session, view: InboxView = "all", page = 1) {
   return inboxQuery(db, await queueReadContext(db, session), view, page);
+}
+
+/** P12 telephone recovery: a short code narrows candidates; it never authorizes a receipt read. */
+export async function findInquiriesByCheckCode(db: Executor, session: Session, checkCode: string) {
+  const prefix = checkCodeNoncePrefix(checkCode);
+  if (!prefix) throw new AppError("validation_failed", { fieldErrors: { checkCode: ["invalid"] } });
+  const { grants } = await queueReadContext(db, session);
+  const rows = await db
+    .select({
+      id: inquiries.id,
+      reference: inquiries.reference,
+      state: inquiries.state,
+      preferredName: inquiries.preferredName,
+      preferredLocale: inquiries.preferredLocale,
+      createdAt: inquiries.createdAt,
+      ownerName: principals.displayName,
+    })
+    .from(inquiries)
+    .leftJoin(principals, eq(principals.id, inquiries.ownerId))
+    .where(
+      and(
+        visibleWhere(grants, "inquiry.read", "inquiry"),
+        sql`left(${inquiries.submissionKey}, 5) = ${prefix}`,
+      ),
+    )
+    .orderBy(desc(inquiries.createdAt), desc(inquiries.id))
+    .limit(pageSize + 1);
+  return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize };
 }
 
 async function inboxQuery(
