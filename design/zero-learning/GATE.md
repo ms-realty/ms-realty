@@ -12,7 +12,7 @@ This is a gate, not a report. A journey that fails any threshold does not pass i
 
 Passing this gate does not make the system production-ready. Launch authority stays with `production/data/launch-readiness.json` and `production/data/launch-input-checklist.md`.
 
-Scope (owner rule: the entire UI is zero-training, no exemptions): every screen and state of every journey W01–W14 on the public website (visitor), the client area and Agency OS (staff), at Desktop 1440 and Mobile 390, plus Hebrew right-to-left at Mobile 390. No screen ships on any surface without passing. User-facing text produced by the server counts too (errors, receipts, notifications and emails), and G2 applies in every one of the seven locales. Bulgarian is the source locale; Hebrew frames are drafts for layout review until a person approves the copy.
+Scope (owner rule: the entire UI is zero-training, no exemptions): every screen and state of every journey W01–W14 on the public website (visitor), the client area and Agency OS (staff), at Desktop 1440 and Mobile 390, plus Hebrew right-to-left at Mobile 390 for public and client screens. No screen ships on any surface without passing. User-facing text produced by the server counts too (errors, receipts, notifications and emails). G2 applies in every supported locale of the surface: seven (bg, en, ru, de, nl, el, he) on public and client surfaces, three (bg, en, ru) on staff surfaces (owner decision). Bulgarian is the source locale; Hebrew frames are drafts for layout review until a person approves the copy.
 
 ## G1 First-time task success
 
