@@ -70,10 +70,17 @@ export function InquiryReview({
         copy={copy}
         stage="review"
       />
+      {/* Self-declared text keeps the reading width inside the widened review. */}
       {review.viewingPreferences ? (
-        <ViewingPreferenceSummary input={review.viewingPreferences} locale={locale} />
+        <div className="max-w-reading">
+          <ViewingPreferenceSummary input={review.viewingPreferences} locale={locale} />
+        </div>
       ) : null}
-      {review.ownerInput ? <OwnerInquirySummary input={review.ownerInput} locale={locale} /> : null}
+      {review.ownerInput ? (
+        <div className="max-w-reading">
+          <OwnerInquirySummary input={review.ownerInput} locale={locale} />
+        </div>
+      ) : null}
       <dl className="grid min-w-0 gap-x-8 gap-y-5 sm:grid-cols-2">
         {rows.map(([label, value]) => (
           <div
