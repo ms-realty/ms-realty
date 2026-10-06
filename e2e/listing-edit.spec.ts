@@ -255,6 +255,38 @@ test.describe("JavaScript on", () => {
     await expect(page.getByText("The listing has changed since this save.")).toBeVisible();
   });
 
+  test("O12 Save draft from the dialog leaves without a browser prompt; a rejected save stays protected", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const f = seed();
+    const prompts: string[] = [];
+    page.on("dialog", (prompt) => {
+      prompts.push(prompt.type());
+      void prompt.accept();
+    });
+    await signIn(page, f.token);
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`));
+    const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
+    // A blank source reference is rejected by the save command.
+    const source = page.getByLabel("Source or evidence reference", { exact: true });
+    await source.fill("");
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
+    await dialog.getByRole("button", { name: "Save draft" }).click();
+    await expect(source).toHaveAttribute("aria-invalid", "true");
+    // Still unsaved: leaving asks again.
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Stay" }).click();
+    await source.fill("Synthetic brokerage contract, section 2");
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
+    await dialog.getByRole("button", { name: "Save draft" }).click();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Working draft saved" }),
+    ).toBeVisible();
+    expect(prompts).toEqual([]);
+  });
+
   test("O12 starts an imported listing from its revision and keeps the source field while typing", async ({
     page,
   }) => {
