@@ -112,7 +112,8 @@ describe("O07 add", () => {
     });
     expect(screen.getByText("Bright two-room flat close to the centre.")).toBeVisible();
     expect(screen.getByText("6 October 2026, 11:12 · Europe/Sofia")).toBeVisible();
-    expect(refresh).toHaveBeenCalled();
+    // The refresh runs in an effect after the frame commits.
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
     // The recorder is shown once a server read after the add names it, never guessed.
     view.rerender(
       <MatchAddWorkbench
