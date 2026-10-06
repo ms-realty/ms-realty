@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "scope": "Disposable PostgreSQL SQL-only diagnosis on one synthetic inventory; no HTTP concurrency, browser, production configuration or release qualification",
+  "sourceRevision": "8d6856fa146835833853a1260e7350905bbb0aab",
+  "productionAllowed": false,
+  "performanceGatePassed": false,
+  "environment": {
+    "postgresVersion": "16.14",
+    "database": "one freshly migrated disposable database",
+    "inventory": "10000 synthetic published Listings with Bulgarian and rotating approved translations",
+    "seedMs": 452533.54
+  },
+  "privateArtifacts": {
+    "location": "MS Realty local artifact: r08-probe",
+    "jit-index-probe.mts": {
+      "sha256": "5d1cd98f1b533ed0c0b8aab20d38340ab96c140a9cfca3a193205088de6b9313",
+      "bytes": 5880
+    },
+    "jit-index-report.json": {
+      "sha256": "5d8ba4734fa8581820a9af544c71cd15b66cde2758a54f428d6a08fe5b9c1cbc",
+      "bytes": 5735
+    }
+  },
+  "method": {
+    "settings": "SET LOCAL jit on/off inside the same transaction and verified with SHOW jit",
+    "sequence": "For each stage, warm JIT on and off, then measure on/off/off/on against the same analyzed inventory; compare baseline, candidate index, and baseline after dropping the index",
+    "candidateIndex": "current_publications (locale, destination, state, listing_id) INCLUDE (manifest_id, generation, activated_at)",
+    "indexPersisted": false,
+    "databaseRetained": false
+  },
+  "medianMs": {
+    "baseline": {
+      "eligibilityCountJitOn": 688.37,
+      "eligibilityCountJitOff": 189.13,
+      "jitCompilationOn": 509.62,
+      "searchListingsJitOn": 227.74,
+      "searchListingsJitOff": 232.75,
+      "pointerScan": "Seq Scan"
+    },
+    "candidateIndex": {
+      "eligibilityCountJitOn": 659.49,
+      "eligibilityCountJitOff": 185.34,
+      "jitCompilationOn": 491.9,
+      "searchListingsJitOn": 223.13,
+      "searchListingsJitOff": 233.81,
+      "pointerScan": "Seq Scan",
+      "candidateIndexUsed": false
+    },
+    "baselineAfterIndexDrop": {
+      "eligibilityCountJitOn": 671.12,
+      "eligibilityCountJitOff": 191.67,
+      "jitCompilationOn": 498.36,
+      "searchListingsJitOn": 224.88,
+      "searchListingsJitOff": 233.71,
+      "pointerScan": "Seq Scan"
+    }
+  },
+  "interpretation": [
+    "JIT compilation explains roughly 500 ms of this standalone eligibility count EXPLAIN at 10000 rows; its reported scan-node time overlaps that compilation time and is not an additive scan cost.",
+    "The same transaction-scoped JIT setting did not materially change the end-to-end searchListings call in these paired SQL probes, so the count-query result does not justify a global JIT setting change for the failed HTTP load.",
+    "The candidate current_publications index was not selected in any stage; with JIT off, the existing sequential scan itself read 10000 rows in about 1.2 to 1.5 ms from shared hits. Do not add this index as a performance fix.",
+    "All five budgeted p95 lanes in the separate two-replica HTTP load remain failed. A causal runtime correction and same-candidate HTTP rerun are still required."
+  ]
+}
