@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { known } from "@/domain/facts";
@@ -203,7 +203,10 @@ describe("X11 outcomes", () => {
       "href",
       "#share-20000000-0000-4000-8000-000000000001",
     );
-    expect(screen.getByRole("checkbox", { name: labels.reviewed })).not.toBeChecked();
+    // The review clears in the same outcome, which can commit just after the confirmation text.
+    await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: labels.reviewed })).not.toBeChecked(),
+    );
     // The next link is a new request with the key the server issued.
     await user.click(screen.getByRole("checkbox", { name: labels.reviewed }));
     await user.click(create());

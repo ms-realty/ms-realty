@@ -66,8 +66,11 @@ export function InventoryEditor({
       return (
         <div
           key={name}
+          // In the needed-before-saving block the fields pair up as drawn (647:12802).
           className={
-            name === "description" || name === "sourceReference" || name === "brokerNote"
+            name === "description" ||
+            name === "brokerNote" ||
+            (name === "sourceReference" && !required)
               ? "sm:col-span-2"
               : undefined
           }
@@ -75,7 +78,6 @@ export function InventoryEditor({
           <FormField
             {...field}
             label={labels[name]}
-            hint={required && name === "sourceReference" ? copy.o12.sourceMissing : undefined}
             multiline={name === "description" || name === "brokerNote"}
             rows={name === "description" && view === "edit" ? 6 : undefined}
           />

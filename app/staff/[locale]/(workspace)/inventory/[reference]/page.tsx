@@ -268,9 +268,6 @@ export default async function InventoryDetailPage({
         <p className="text-text-muted">{o12.instruction}</p>
       </header>
       {error}
-      {!parsed.success && mayEdit ? (
-        <p className="rounded-control bg-warning-soft p-3 text-dense text-text">{o12.noDraft}</p>
-      ) : null}
       {/* Text and Facts are one form; the tabs switch panels in place (group/o12). */}
       <div data-o12 className="group/o12 flex flex-col gap-6 sm:gap-8">
         <EditTabs
@@ -291,6 +288,12 @@ export default async function InventoryDetailPage({
             aria-label={o12.text}
             className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-[46.8rem]"
           >
+            {/* 647:12802: the no-draft note leads the work column, under the tabs. */}
+            {!parsed.success && mayEdit ? (
+              <p className="rounded-control bg-warning-soft p-3 text-dense text-text">
+                {o12.noDraft}
+              </p>
+            ) : null}
             <p className="hidden text-compact text-text-muted group-has-[#o12-facts:checked]/o12:block">
               {copy.factsHint}
             </p>

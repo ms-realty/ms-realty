@@ -44,11 +44,6 @@ export function FormField({
           {hint}
         </p>
       ) : null}
-      {error ? (
-        <p id={`${props.id}-error`} className="text-compact font-semibold text-error">
-          {error}
-        </p>
-      ) : null}
       {multiline ? (
         <textarea
           {...(props as TextareaHTMLAttributes<HTMLTextAreaElement>)}
@@ -58,6 +53,12 @@ export function FormField({
       ) : (
         <input {...(props as InputHTMLAttributes<HTMLInputElement>)} {...common} />
       )}
+      {/* UI06 Error: the message sits under the field it belongs to. */}
+      {error ? (
+        <p id={`${props.id}-error`} className="text-compact font-semibold text-error">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
