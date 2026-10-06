@@ -1,9 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import * as schema from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { staffFixture } from "../cases/testing";
+import { createCase, createProperty, type GrantSpec } from "../testing";
 import { listInbox, readToday } from "./queries";
 
 let t: TestDatabase;
@@ -14,22 +16,40 @@ afterAll(async () => {
   await t?.drop();
 });
 
-it("reads Today with one authorization context and four scoped queues", async () => {
+it("O01 reads bounded real queues with one authorization context", async () => {
   const staff = await staffFixture(t.db);
-  let reads = 0;
+  let reads: string[] = [];
   const measured = drizzle(t.sql, {
     schema,
     logger: {
-      logQuery() {
-        reads++;
+      logQuery(query) {
+        reads.push(query);
       },
     },
   });
   await listInbox(measured, staff.session, "unassigned");
-  const oneQueueReads = reads;
-  reads = 0;
-  await readToday(measured, staff.session);
-  expect(reads).toBeLessThanOrEqual(oneQueueReads + 3);
+  const oneQueueReads = reads.length;
+  reads = [];
+  const today = await readToday(measured, staff.session);
+  expect(reads.filter((query) => query.includes('from "grants"'))).toHaveLength(1);
+  expect(reads.length).toBeLessThanOrEqual(oneQueueReads + 10);
+  for (const queue of [
+    today.unassigned,
+    today.due,
+    today.mine,
+    today.handovers,
+    today.viewings,
+    today.caseContinue,
+    today.draftContinue,
+    today.listingReviews,
+    today.translationReviews,
+    today.deliveryExceptions,
+    today.publicationExceptions,
+  ]) {
+    expect(queue.status).toBe("ready");
+    expect(queue.total).toBeTypeOf("number");
+    expect(queue.rows.length).toBeLessThanOrEqual(30);
+  }
 });
 
 it("retains due and record-scope filters and refreshes grants on the next request", async () => {
@@ -83,4 +103,458 @@ it("retains due and record-scope filters and refreshes grants on the next reques
     .set({ revokedAt: new Date() })
     .where(eq(schema.grants.principalId, staff.id));
   expect((await readToday(t.db, staff.session, now)).due.rows).toEqual([]);
+});
+
+async function narrow(staffId: string, values: GrantSpec[]) {
+  await t.db
+    .update(schema.grants)
+    .set({ revokedAt: new Date() })
+    .where(eq(schema.grants.principalId, staffId));
+  if (values.length)
+    await t.db.insert(schema.grants).values(
+      values.map((grant) => ({
+        ...grant,
+        principalId: staffId,
+        reason: "Synthetic O01 permission fixture",
+      })),
+    );
+}
+
+async function listing(
+  ownerId: string,
+  editorialState: "draft" | "changes_requested" | "in_review" = "draft",
+) {
+  const propertyId = await createProperty(t.db);
+  const [row] = await t.db
+    .insert(schema.listings)
+    .values({
+      reference: `MS-O01-${randomUUID()}`,
+      propertyId,
+      purpose: "sale",
+      commercialState: "withdrawn",
+      responsibleBrokerId: ownerId,
+      editorialState,
+      draft: { title: "Synthetic unpublished copy must stay out of Today" },
+    })
+    .returning();
+  if (!row) throw new Error("Missing listing");
+  return row;
+}
+
+async function revision(row: typeof schema.listings.$inferSelect, number: number) {
+  const [facts] = await t.db
+    .insert(schema.propertyFactRevisions)
+    .values({
+      propertyId: row.propertyId,
+      revisionNumber: number,
+      contentDigest: randomUUID(),
+      materialChange: "initial",
+      createdByKind: "system",
+      createdById: "synthetic-fixture",
+    })
+    .returning();
+  if (!facts) throw new Error("Missing fact revision");
+  const [source] = await t.db
+    .insert(schema.listingRevisions)
+    .values({
+      listingId: row.id,
+      revisionNumber: number,
+      factRevisionId: facts.id,
+      contentDigest: randomUUID(),
+      sourceCopy: { private: "Synthetic unpublished facts" },
+      disclosure: {},
+      terms: {},
+      createdByKind: "system",
+      createdById: "synthetic-fixture",
+    })
+    .returning();
+  if (!source) throw new Error("Missing source revision");
+  return source;
+}
+
+it("O01 counts every visible due commitment before the cap and retains the original promise", async () => {
+  const staff = await staffFixture(t.db);
+  const other = await staffFixture(t.db);
+  const now = new Date();
+  const dueAt = new Date(now.getTime() - 3600000);
+  const followUpAt = new Date(now.getTime() + 3600000);
+  const tasks = await t.db
+    .insert(schema.tasks)
+    .values(
+      Array.from({ length: 36 }, (_, index) => ({
+        title: `Synthetic due commitment ${index}`,
+        ownerId: staff.id,
+        dueAt: new Date(dueAt.getTime() + index * 1000),
+        followUpAt,
+      })),
+    )
+    .returning();
+  const [handover] = await t.db
+    .insert(schema.tasks)
+    .values({
+      title: "Synthetic receiving broker offer",
+      ownerId: other.id,
+      pendingOwnerId: staff.id,
+      dueAt,
+    })
+    .returning();
+  if (!handover) throw new Error("Missing handover");
+  await narrow(staff.id, [
+    ...tasks.slice(0, 35).map((task) => ({
+      capability: "task.manage" as const,
+      recordType: "task",
+      recordId: task.id,
+    })),
+    { capability: "task.manage", recordType: "task", recordId: handover.id },
+  ]);
+  const today = await readToday(t.db, staff.session, now);
+  expect(today.due).toMatchObject({ status: "ready", total: 35, hasMore: true });
+  expect(today.due.rows).toHaveLength(30);
+  expect(today.due.rows[0]?.task).toMatchObject({ dueAt, followUpAt });
+  expect(today.due.rows.map((row) => row.task.id)).toEqual(tasks.slice(0, 30).map((row) => row.id));
+  expect(today.handovers.rows.map((row) => row.task.id)).toEqual([handover.id]);
+  const [preserved] = await t.db
+    .select()
+    .from(schema.tasks)
+    .where(eq(schema.tasks.id, handover.id));
+  expect(preserved).toMatchObject({ ownerId: other.id, pendingOwnerId: staff.id, dueAt });
+});
+
+it("O01 keeps a newly received overdue follow-up ahead of more than thirty older inquiries", async () => {
+  const staff = await staffFixture(t.db);
+  const now = new Date();
+  const rows = await t.db
+    .insert(schema.inquiries)
+    .values(
+      Array.from({ length: 36 }, (_, index) => ({
+        reference: `RQ-O01-${randomUUID()}`,
+        purpose: "question" as const,
+        source: "website" as const,
+        state: "assigned" as const,
+        submissionKey: randomUUID(),
+        payloadDigest: "synthetic",
+        ownerId: staff.id,
+        createdAt: new Date(now.getTime() - (36 - index) * 60000),
+        followUpAt: index === 35 ? new Date(now.getTime() - 1000) : null,
+      })),
+    )
+    .returning();
+  await narrow(
+    staff.id,
+    rows.map((row) => ({ capability: "inquiry.read", recordType: "inquiry", recordId: row.id })),
+  );
+  const today = await readToday(t.db, staff.session, now);
+  expect(today.mine).toMatchObject({ status: "ready", total: 36, hasMore: true });
+  expect(today.mine.rows).toHaveLength(30);
+  expect(today.mine.rows[0]?.inquiry.id).toBe(rows[35]?.id);
+  expect((await listInbox(t.db, staff.session, "mine")).rows[0]?.inquiry.id).toBe(rows[35]?.id);
+});
+
+it("O01 viewings require both Case and appointment grants and retain the confirmed slot for the receiver", async () => {
+  const staff = await staffFixture(t.db);
+  const host = await staffFixture(t.db);
+  const readableCase = await createCase(t.db, host.id);
+  const hiddenCase = await createCase(t.db, host.id);
+  const now = new Date();
+  const confirmedStartsAt = new Date(now.getTime() + 3600000);
+  const confirmedEndsAt = new Date(now.getTime() + 5400000);
+  const rows = await t.db
+    .insert(schema.appointments)
+    .values(
+      [readableCase, readableCase, hiddenCase].map((caseId, index) => ({
+        caseId,
+        reference: `AP-O01-${randomUUID()}`,
+        state: "reschedule_requested" as const,
+        format: "in_person" as const,
+        timezone: "Europe/Sofia",
+        icsUid: randomUUID(),
+        hostId: host.id,
+        confirmedStartsAt,
+        confirmedEndsAt,
+        proposedStartsAt: new Date(now.getTime() + 7200000),
+        proposedEndsAt: new Date(now.getTime() + 9000000),
+        ...(index === 0
+          ? {
+              pendingHostId: staff.id,
+              pendingHostVersion: 1,
+              pendingHostNote: "Synthetic receiver must accept",
+              pendingHostOfferedAt: now,
+            }
+          : {}),
+      })),
+    )
+    .returning();
+  await narrow(staff.id, [
+    { capability: "case.read", recordType: "case", recordId: readableCase },
+    ...[rows[0], rows[2]].flatMap((row) =>
+      row
+        ? [
+            {
+              capability: "appointment.manage" as const,
+              recordType: "appointment",
+              recordId: row.id,
+            },
+          ]
+        : [],
+    ),
+  ]);
+  const today = await readToday(t.db, staff.session, now);
+  expect(today.viewings).toMatchObject({ status: "ready", total: 1, hasMore: false });
+  expect(today.viewings.rows[0]).toMatchObject({
+    id: rows[0]?.id,
+    hostId: host.id,
+    awaitingAcceptance: true,
+    startsAt: confirmedStartsAt,
+    endsAt: confirmedEndsAt,
+    reason: "upcoming_viewing",
+  });
+  expect(today.viewings.rows[0]).not.toHaveProperty("accessNotes");
+  await narrow(staff.id, [{ capability: "case.read", recordType: "case", recordId: readableCase }]);
+  expect((await readToday(t.db, staff.session, now)).viewings.total).toBe(0);
+});
+
+it("O01 Continue includes owned Case work and editable listing drafts only within live read grants", async () => {
+  const staff = await staffFixture(t.db);
+  const other = await staffFixture(t.db);
+  const caseId = await createCase(t.db, staff.id);
+  const otherCase = await createCase(t.db, other.id);
+  const allowed = await listing(staff.id);
+  const hidden = await listing(staff.id);
+  const theirs = await listing(other.id);
+  await narrow(staff.id, [
+    { capability: "case.read", recordType: "case", recordId: caseId },
+    { capability: "case.read", recordType: "case", recordId: otherCase },
+    { capability: "listing.read", recordType: "property", recordId: allowed.propertyId },
+    { capability: "listing.edit", recordType: "property", recordId: allowed.propertyId },
+    { capability: "listing.read", recordType: "listing", recordId: hidden.id },
+    { capability: "listing.read", recordType: "listing", recordId: theirs.id },
+    { capability: "listing.edit", recordType: "listing", recordId: theirs.id },
+  ]);
+  const today = await readToday(t.db, staff.session);
+  expect(today.caseContinue.rows.map((row) => row.id)).toEqual([caseId]);
+  expect(today.draftContinue.rows.map((row) => row.id)).toEqual([allowed.id]);
+  expect(today.draftContinue.rows[0]).not.toHaveProperty("draft");
+  await narrow(staff.id, []);
+  const revoked = await readToday(t.db, staff.session);
+  expect(revoked.caseContinue.total).toBe(0);
+  expect(revoked.draftContinue.total).toBe(0);
+});
+
+it("O01 review counts honor reviewer records and locales and exclude superseded source translations", async () => {
+  const staff = await staffFixture(t.db);
+  const review = await listing(staff.id, "in_review");
+  const correction = await listing(staff.id, "changes_requested");
+  const hidden = await listing(staff.id, "in_review");
+  const old = await revision(review, 1);
+  const current = await revision(review, 2);
+  await t.db
+    .update(schema.listings)
+    .set({ approvedRevisionId: current.id })
+    .where(eq(schema.listings.id, review.id));
+  const translations = await t.db
+    .insert(schema.localizedRevisions)
+    .values([
+      { listingId: review.id, sourceRevisionId: old.id, locale: "ru", state: "reviewing" },
+      { listingId: review.id, sourceRevisionId: current.id, locale: "ru", state: "reviewing" },
+      { listingId: review.id, sourceRevisionId: current.id, locale: "en", state: "reviewing" },
+    ])
+    .returning();
+  await narrow(staff.id, [
+    { capability: "listing.read", recordType: "listing", recordId: review.id },
+    { capability: "listing.review_facts", recordType: "listing", recordId: review.id },
+    { capability: "listing.read", recordType: "listing", recordId: correction.id },
+    { capability: "listing.edit", recordType: "listing", recordId: correction.id },
+    { capability: "listing.review_facts", recordType: "listing", recordId: hidden.id },
+    {
+      capability: "translation.review",
+      recordType: "property",
+      recordId: review.propertyId,
+      locales: ["ru"],
+    },
+  ]);
+  const today = await readToday(t.db, staff.session);
+  expect(today.listingReviews.total).toBe(2);
+  expect(today.listingReviews.rows.map((row) => row.id).sort()).toEqual(
+    [review.id, correction.id].sort(),
+  );
+  expect(today.translationReviews.total).toBe(1);
+  expect(today.translationReviews.rows[0]).toMatchObject({
+    id: translations[1]?.id,
+    locale: "ru",
+    sourceRevisionId: current.id,
+  });
+  expect(JSON.stringify([today.listingReviews, today.translationReviews])).not.toContain(
+    "Synthetic unpublished",
+  );
+});
+
+it("O01 delivery exceptions require the Case email read contract and exclude recipients and raw errors", async () => {
+  const staff = await staffFixture(t.db);
+  const readable = await createCase(t.db, staff.id);
+  const hidden = await createCase(t.db, staff.id);
+  const messages = await t.db
+    .insert(schema.messages)
+    .values(
+      [readable, readable, hidden].map((caseId, index) => ({
+        caseId,
+        kind: "service_message" as const,
+        direction: "outbound" as const,
+        channel: "email" as const,
+        audience: "case_participants" as const,
+        state: index === 1 ? ("outcome_unknown" as const) : ("failed" as const),
+        authorKind: "staff" as const,
+        authorId: staff.id,
+        body: "Synthetic private message body",
+        subject: "Synthetic private subject",
+        recipients: [{ address: "synthetic-private@example.test" }],
+        payloadDigest: "synthetic",
+        approvedDigest: "synthetic",
+        logicalSendId: randomUUID(),
+      })),
+    )
+    .returning();
+  await narrow(staff.id, [
+    { capability: "case.read", recordType: "case", recordId: readable },
+    { capability: "message.draft", recordType: "case", recordId: readable },
+    { capability: "message.draft", recordType: "case", recordId: hidden },
+  ]);
+  const today = await readToday(t.db, staff.session);
+  expect(today.deliveryExceptions.total).toBe(2);
+  expect(today.deliveryExceptions.rows.map((row) => row.id).sort()).toEqual(
+    messages
+      .slice(0, 2)
+      .map((row) => row.id)
+      .sort(),
+  );
+  expect(JSON.stringify(today.deliveryExceptions)).not.toContain("private");
+  expect(today.operatorDeliveryExceptions).toBeNull();
+  await narrow(staff.id, [{ capability: "case.read", recordType: "case", recordId: readable }]);
+  expect((await readToday(t.db, staff.session)).deliveryExceptions.total).toBe(0);
+});
+
+it("O01 publication exceptions require readable listing and release scope, including unresolved older generations", async () => {
+  const staff = await staffFixture(t.db);
+  const allowed = await listing(staff.id);
+  const source = await revision(allowed, 1);
+  const [manifest] = await t.db
+    .insert(schema.publicationManifests)
+    .values({
+      listingId: allowed.id,
+      locale: "bg",
+      destination: "website",
+      generation: 0,
+      listingRevisionId: source.id,
+      factRevisionId: source.factRevisionId,
+      media: [],
+      disclosure: {},
+      availabilityBasis: {},
+      policyRevision: "synthetic",
+      decisions: {},
+      contentDigest: "synthetic",
+      createdById: staff.id,
+    })
+    .returning();
+  if (!manifest) throw new Error("Missing manifest");
+  const [delivery] = await t.db
+    .insert(schema.destinationDeliveries)
+    .values({
+      manifestId: manifest.id,
+      listingId: allowed.id,
+      locale: "bg",
+      destination: "website",
+      kind: "publish",
+      generation: 0,
+      state: "failed",
+      errorCode: "Synthetic raw provider error must stay private",
+    })
+    .returning();
+  await t.db
+    .update(schema.listings)
+    .set({ publicationGeneration: 1 })
+    .where(eq(schema.listings.id, allowed.id));
+  await narrow(staff.id, [
+    { capability: "publication.release", recordType: "listing", recordId: allowed.id },
+  ]);
+  expect((await readToday(t.db, staff.session)).publicationExceptions.total).toBe(0);
+  await narrow(staff.id, [
+    { capability: "publication.release", recordType: "listing", recordId: allowed.id },
+    { capability: "listing.read", recordType: "property", recordId: allowed.propertyId },
+  ]);
+  const today = await readToday(t.db, staff.session);
+  expect(today.publicationExceptions).toMatchObject({ status: "ready", total: 1 });
+  expect(today.publicationExceptions.rows[0]).toMatchObject({
+    id: delivery?.id,
+    generation: 0,
+    currentGeneration: 1,
+  });
+  expect(today.publicationExceptions.rows[0]).not.toHaveProperty("errorCode");
+});
+
+it("O01 exposes operations exceptions and stale worker proof only to a global report reader", async () => {
+  const staff = await staffFixture(t.db);
+  await t.db.insert(schema.externalActions).values({
+    kind: "email_send",
+    effectKey: randomUUID(),
+    payload: { recipient: "synthetic-private@example.test", private: "private payload" },
+    payloadDigest: "synthetic",
+    state: "outcome_unknown",
+    attempts: 1,
+    lastErrorCode: "raw private provider error",
+  });
+  const build = process.env.BUILD_SHA;
+  process.env.BUILD_SHA = "synthetic-o01-build";
+  try {
+    await t.db.insert(schema.workerProgress).values({
+      key: "queue-worker",
+      buildSha: "synthetic-o01-build",
+      completedAt: new Date(Date.now() - 3600000),
+    });
+    await narrow(staff.id, [
+      { capability: "report.read", recordType: "case", recordId: randomUUID() },
+    ]);
+    const limited = await readToday(t.db, staff.session);
+    expect(limited.operatorDeliveryExceptions).toBeNull();
+    expect(limited.worker).toBeNull();
+    await narrow(staff.id, [{ capability: "report.read" }]);
+    const today = await readToday(t.db, staff.session);
+    expect(today.operatorDeliveryExceptions).toMatchObject({ status: "ready", total: 1 });
+    expect(JSON.stringify(today.operatorDeliveryExceptions)).not.toContain("private");
+    expect(today.worker).toMatchObject({ state: "stale", reason: "progress_expired" });
+    expect(today.scope.state).toBe("unknown");
+    expect(today.staffedSla.state).toBe("unknown");
+  } finally {
+    if (build === undefined) delete process.env.BUILD_SHA;
+    else process.env.BUILD_SHA = build;
+  }
+});
+
+it("O01 keeps unaffected queues usable on real PostgreSQL group failures with unknown totals", async () => {
+  const staff = await staffFixture(t.db);
+  const [task] = await t.db
+    .insert(schema.tasks)
+    .values({
+      title: "Synthetic commitment survives another queue outage",
+      ownerId: staff.id,
+      dueAt: new Date(Date.now() - 1000),
+    })
+    .returning();
+  if (!task) throw new Error("Missing task");
+  await narrow(staff.id, [
+    { capability: "task.manage", recordType: "task", recordId: task.id },
+    { capability: "report.read" },
+  ]);
+  await t.sql.unsafe("alter table appointments rename to unavailable_o01_appointments");
+  await t.sql.unsafe("alter table external_actions rename to unavailable_o01_external_actions");
+  try {
+    const today = await readToday(t.db, staff.session);
+    expect(today.viewings).toMatchObject({ status: "unavailable", total: null });
+    expect(today.operatorDeliveryExceptions).toMatchObject({ status: "unavailable", total: null });
+    expect(today.due).toMatchObject({ status: "ready", total: 1 });
+    expect(today.due.rows[0]?.task.id).toBe(task.id);
+    expect(today.caseContinue).toMatchObject({ status: "ready", total: 0 });
+    expect(JSON.stringify(today)).not.toContain("unavailable_o01");
+  } finally {
+    await t.sql.unsafe("alter table unavailable_o01_appointments rename to appointments");
+    await t.sql.unsafe("alter table unavailable_o01_external_actions rename to external_actions");
+  }
 });
