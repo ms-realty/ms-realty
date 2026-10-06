@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "scope": "Historical exact-path WordPress page-cache supplement from the original account archive; not a current served page, live listing inventory, target equivalence or redirect approval",
+  "productionAllowed": false,
+  "humanReviewComplete": false,
+  "packetLocation": "Operator backup: MS-Realty/Reconciliation",
+  "sourceArchiveSha256": "fc0ac4723c942039e1f8390e6f39a2097222489f21aaf4fe20627b85b3c4592a",
+  "files": {
+    "r07-rendered-cache-review.html": {
+      "sha256": "02207efaa5a21eb896e5163621b303f08c664160d24ea65b251b0add593be03d",
+      "bytes": 213223,
+      "content": "Escaped script-free text, historical canonical and listing links from each exact-path cached file"
+    },
+    "r07-rendered-cache-index.csv": {
+      "sha256": "038df8b73714fb2ab3766fd83aebbc1f3b79800ab8f410c3030931c4de7db647",
+      "bytes": 10642,
+      "content": "Private URL spelling, cached file kind and hash, title, heading and link-count index"
+    },
+    "r07-rendered-cache-private.json": {
+      "sha256": "ace5166f84faf0e94c5ca442620d89db100750cd33b6ba9c5be256e2c64cf87d",
+      "bytes": 27244,
+      "content": "Private exact archive-member and frozen URL mapping for each cache candidate"
+    },
+    "r07-rendered-cache-manifest.json": {
+      "sha256": "d03b7e9b25fcf9163e00b65c1ce74f778d57b5ff5fb919148444e7a157e94906",
+      "bytes": 625,
+      "content": "Private output counts and review-file hashes"
+    },
+    "r07-extract-rendered-cache.py": {
+      "sha256": "aec7b63df6a7771151b8c71b949bab90329add453440e2864f4d4acf478ad0a0",
+      "content": "Private extractor requiring the original archive, nested homedir index and frozen source match report"
+    },
+    "r07-build-rendered-review.py": {
+      "sha256": "3aa30b92519fe5fde6e46c0832dd621965b3e190a9d629d73b405bc121ff6c17",
+      "content": "Private script-free review builder requiring the extracted cache and frozen source match report"
+    }
+  },
+  "counts": {
+    "frozenUrlSpellings": 89,
+    "exactPathCachedUrlSpellings": 28,
+    "distinctExactPathCachedFiles": 27,
+    "cachedFilesNamedOld": 23,
+    "cachedFilesNotNamedOld": 4,
+    "missingExactPathCacheUrlSpellings": 61,
+    "cachedTransferUrlSpellingsWithoutExactWordPressRecord": 4,
+    "cachedRuRootUrlSpellings": 2,
+    "cachedRuListingArchiveUrlSpellings": 1,
+    "ruHomepageDistinctHistoricalListingLinks": 23,
+    "ruListingArchiveDistinctHistoricalListingLinks": 22,
+    "humanReviewedUrlSpellings": 0
+  },
+  "limitations": [
+    "Twenty-three files are named _index.html.old; the other four may also be stale. The archive does not prove when or whether these bytes were served to any visitor.",
+    "The four cached transfer spellings have no exact published WordPress post record in the restored database; cache text is historical source evidence, not publication authority.",
+    "The two .ru root spellings are one identity and one cached file. Historical root and listing archive card sets differ; neither justifies treating either route as a redirect.",
+    "The 61 missing exact-path cache spellings still require source reconstruction or explicit human decisions; an absent cache file is not proof that a page did not exist.",
+    "Cached HTML may contain old or inaccurate facts and active third-party scripts. Only the escaped script-free private review view is intended for human inspection.",
+    "No current target content, photo rights, status, locale or URL equivalence was reviewed; the original URL decision form remains unsigned."
+  ]
+}
