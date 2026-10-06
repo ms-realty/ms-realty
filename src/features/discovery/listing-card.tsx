@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { PublicLocale } from "@/i18n/config";
 import { formatDateTime, formatExactArea } from "@/i18n/format";
 import type { ListingCard as Listing } from "@/server/listings/view-models";
@@ -75,10 +76,13 @@ export function ListingCard({
   listing,
   locale,
   copy,
+  actions,
 }: {
   listing: Listing;
   locale: PublicLocale;
   copy: DiscoveryCopy;
+  /** Context-specific links under the local save/compare toggles (P09: contact). */
+  actions?: ReactNode;
 }) {
   return (
     <article
@@ -105,8 +109,9 @@ export function ListingCard({
       </p>
       <ListingFacts listing={listing} locale={locale} copy={copy} />
       <Availability listing={listing} locale={locale} copy={copy} />
-      <div className="mt-auto">
+      <div className="mt-auto space-y-3">
         <LocalActions reference={listing.reference} copy={copy} />
+        {actions}
       </div>
     </article>
   );
