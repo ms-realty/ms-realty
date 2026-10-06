@@ -2,6 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { parseDateTime } from "@internationalized/date";
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { operations } from "@/db/schema";
 import { inventoryCopy } from "@/features/inventory/copy";
@@ -15,6 +16,7 @@ import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { inventoryDecisionFeedback } from "@/features/inventory/decision-feedback";
 import type { InventoryValues } from "@/features/inventory/editor";
 import { safeNext } from "@/features/inventory/next";
+import { savedOperationCookie } from "@/features/inventory/saved-operation";
 import { agencyTimeZone, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess } from "@/server/auth/pages";
 import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
@@ -149,10 +151,17 @@ export async function saveInventory(
     const ref = result.data.outcome.reference;
     const next = safeNext(locale, form.get("_next"));
     // O12SAVED: an edit lands on its focused receipt, rendered only for this actor's own save.
-    if (reference)
+    if (reference) {
+      // Acknowledge this save to the unsaved-work guard before the receipt's full page load.
+      (await cookies()).set(savedOperationCookie, operationId, {
+        path: "/",
+        maxAge: 60,
+        sameSite: "strict",
+      });
       redirect(
         `/${locale}/inventory/${encodeURIComponent(ref)}?saved=${encodeURIComponent(operationId)}${form.get("_tab") === "facts" ? "&tab=facts" : ""}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
       );
+    }
     return {
       ...state,
       outcome: {

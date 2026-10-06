@@ -2,9 +2,13 @@
 // UX 03.3: never silently discard a dirty working draft. Any link away from the editor (tabs
 // that navigate, Review, the staff shell) asks Save draft / Discard / Stay; closing or
 // reloading the page gets the browser's own prompt. The form is compared with its contents
-// when the page loaded; operation identity fields are ignored.
+// when the page loaded; operation identity fields are ignored. Only a save the server
+// acknowledged (savedOperationCookie for this form's operation) leaves without asking, so a
+// failed, rejected or stalled save keeps the work protected.
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/ui/button-class";
+import { formFields } from "@/ui/form/contract";
+import { savedOperationCookie } from "./saved-operation";
 
 export function UnsavedGuard({
   root,
@@ -21,8 +25,6 @@ export function UnsavedGuard({
   const form = useRef<HTMLFormElement | null>(null);
   const [target, setTarget] = useState("");
   const leaving = useRef(false);
-  /** Save from the dialog: no browser prompt while that save leaves the page. */
-  const saving = useRef<() => void>(() => {});
   useEffect(() => {
     const editor = document.querySelector<HTMLFormElement>(`${root} form`);
     if (!editor) return;
@@ -32,7 +34,13 @@ export function UnsavedGuard({
         [...new FormData(editor)].filter(([name]) => !name.startsWith("_")).map(String),
       );
     const initial = snapshot();
-    const dirty = () => !leaving.current && snapshot() !== initial;
+    const saved = () => {
+      const id = editor.querySelector<HTMLInputElement>(
+        `input[name="${formFields.operationId}"]`,
+      )?.value;
+      return Boolean(id) && document.cookie.split("; ").includes(`${savedOperationCookie}=${id}`);
+    };
+    const dirty = () => !leaving.current && !saved() && snapshot() !== initial;
     const click = (event: MouseEvent) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
         return;
@@ -58,32 +66,11 @@ export function UnsavedGuard({
       event.preventDefault();
       event.returnValue = "";
     };
-    // A save that stays here (invalid, rejected or unconfirmed) marks a field or focuses its
-    // result in the form; from then on, and on any edit, unsaved work is protected again.
-    const resume = () => {
-      leaving.current = false;
-    };
-    const invalid = new MutationObserver(() => {
-      if (editor.querySelector('[aria-invalid="true"]')) resume();
-    });
-    saving.current = () => {
-      leaving.current = true;
-      editor.addEventListener("focusin", resume, { once: true });
-      editor.addEventListener("input", resume, { once: true });
-      invalid.observe(editor, {
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["aria-invalid"],
-      });
-    };
     document.addEventListener("click", click, true);
     window.addEventListener("beforeunload", unload);
     return () => {
       document.removeEventListener("click", click, true);
       window.removeEventListener("beforeunload", unload);
-      editor.removeEventListener("focusin", resume);
-      editor.removeEventListener("input", resume);
-      invalid.disconnect();
     };
   }, [root]);
   return (
@@ -109,7 +96,6 @@ export function UnsavedGuard({
               const url = new URL(target);
               next.value = `${url.pathname}${url.search}`;
             }
-            saving.current();
             editor?.requestSubmit(
               editor.querySelector<HTMLButtonElement>('button[type="submit"]') ?? undefined,
             );

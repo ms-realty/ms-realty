@@ -255,36 +255,82 @@ test.describe("JavaScript on", () => {
     await expect(page.getByText("The listing has changed since this save.")).toBeVisible();
   });
 
-  test("O12 Save draft from the dialog leaves without a browser prompt; a rejected save stays protected", async ({
+  test("O12 a save leaves without a browser prompt only once the server acknowledged it", async ({
     page,
   }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(120_000);
     const f = seed();
-    const prompts: string[] = [];
-    page.on("dialog", (prompt) => {
-      prompts.push(prompt.type());
-      void prompt.accept();
-    });
     await signIn(page, f.token);
-    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`));
-    const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
-    // A blank source reference is rejected by the save command.
-    const source = page.getByLabel("Source or evidence reference", { exact: true });
-    await source.fill("");
-    await page.getByRole("link", { name: "Photos", exact: true }).click();
-    await dialog.getByRole("button", { name: "Save draft" }).click();
-    await expect(source).toHaveAttribute("aria-invalid", "true");
-    // Still unsaved: leaving asks again.
-    await page.getByRole("link", { name: "Photos", exact: true }).click();
-    await expect(dialog).toBeVisible();
-    await dialog.getByRole("button", { name: "Stay" }).click();
-    await source.fill("Synthetic brokerage contract, section 2");
-    await page.getByRole("link", { name: "Photos", exact: true }).click();
-    await dialog.getByRole("button", { name: "Save draft" }).click();
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Working draft saved" }),
-    ).toBeVisible();
-    expect(prompts).toEqual([]);
+    const edit = hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`);
+    // Each case gets its own tab, so no earlier tab's restored work can add a prompt.
+    const open = async () => {
+      const tab = await page.context().newPage();
+      const prompts: string[] = [];
+      tab.on("dialog", (prompt) => {
+        prompts.push(prompt.type());
+        void prompt.accept();
+      });
+      await tab.goto(edit);
+      return {
+        tab,
+        prompts,
+        dialog: tab.getByRole("dialog", { name: "You have unsaved changes" }),
+        source: tab.getByLabel("Source or evidence reference", { exact: true }),
+        photos: tab.getByRole("link", { name: "Photos", exact: true }),
+        saved: tab.getByRole("heading", { level: 1, name: "Working draft saved" }),
+      };
+    };
+
+    // Rejected (a blank source reference): still unsaved, leaving asks, reloading prompts.
+    const rejected = await open();
+    await rejected.source.fill("");
+    await rejected.photos.click();
+    await rejected.dialog.getByRole("button", { name: "Save draft" }).click();
+    await expect(rejected.source).toHaveAttribute("aria-invalid", "true");
+    await rejected.photos.click();
+    await expect(rejected.dialog).toBeVisible();
+    await rejected.dialog.getByRole("button", { name: "Stay" }).click();
+    await rejected.tab.reload();
+    expect(rejected.prompts).toEqual(["beforeunload"]);
+
+    // The request fails in transport or never answers: the work stays protected.
+    for (const failure of ["abort", "stall"] as const) {
+      const failed = await open();
+      await failed.tab.route("**/*", (route) =>
+        route.request().method() === "POST"
+          ? failure === "abort"
+            ? route.abort()
+            : undefined
+          : route.continue(),
+      );
+      await failed.source.fill(`Synthetic contract, ${failure}`);
+      await failed.photos.click();
+      await failed.dialog.getByRole("button", { name: "Save draft" }).click();
+      if (failure === "abort")
+        await expect(
+          failed.tab.getByText("Your entered values are retained below.", { exact: false }),
+        ).toBeVisible();
+      await failed.photos.click();
+      await expect(failed.dialog).toBeVisible();
+      await failed.dialog.getByRole("button", { name: "Stay" }).click();
+      // Reload while the request is still failing or pending, so it can never complete first.
+      await failed.tab.reload();
+      expect(failed.prompts).toEqual(["beforeunload"]);
+      await failed.tab.unrouteAll({ behavior: "ignoreErrors" });
+    }
+
+    // Acknowledged saves, from the dialog and from the form's own button, raise no prompt.
+    const viaDialog = await open();
+    await viaDialog.source.fill("Synthetic brokerage contract, section 2");
+    await viaDialog.photos.click();
+    await viaDialog.dialog.getByRole("button", { name: "Save draft" }).click();
+    await expect(viaDialog.saved).toBeVisible();
+    expect(viaDialog.prompts).toEqual([]);
+    const viaButton = await open();
+    await viaButton.source.fill("Synthetic brokerage contract, section 3");
+    await viaButton.tab.getByRole("button", { name: "Save the facts" }).click();
+    await expect(viaButton.saved).toBeVisible();
+    expect(viaButton.prompts).toEqual([]);
   });
 
   test("O12 starts an imported listing from its revision and keeps the source field while typing", async ({
