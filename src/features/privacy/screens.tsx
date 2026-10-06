@@ -5,7 +5,7 @@ import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
 import type { Session } from "@/server/auth/sessions";
 import { wireCode } from "@/server/errors";
-import { privateReceipt } from "@/server/privacy/native";
+import { privateReceipt, recordedPrivacyReviewKeys } from "@/server/privacy/native";
 import { getPreferences, preferencePurposes } from "@/server/privacy/preferences";
 import {
   clientPrivacyRequests,
@@ -421,6 +421,7 @@ export async function StaffPrivacyScreen({
   const search = privacyQueuePath(locale, position).split("?")[1];
   const submitPath = `/${locale}/operations/privacy/submit${search ? `?${search}` : ""}`;
   const owners = await privacyOwners(getDb());
+  const recorded = await recordedPrivacyReviewKeys(getDb(), session);
   return (
     <Frame title={c.operations} lead={c.staffLead}>
       <Result query={query} locale={locale} session={session} />
@@ -430,8 +431,8 @@ export async function StaffPrivacyScreen({
         const next = privacyRequestMachine.transitions[record.state];
         return (
           <section
-            // Keyed by staff member too: another member never inherits a dirty review.
-            key={`${record.id}:${session.account.id}`}
+            // Keyed by sign-in session too: another session never inherits a dirty review.
+            key={`${record.id}:${session.id}`}
             className="grid min-w-0 grid-cols-1 gap-4 rounded-panel border border-divider bg-surface p-5 wrap-anywhere"
           >
             <h2 className="text-section font-semibold">
@@ -454,8 +455,10 @@ export async function StaffPrivacyScreen({
                   id={record.id}
                   version={record.version}
                   operationId={randomUUID()}
-                  actorId={session.account.id}
+                  sessionKey={session.id}
+                  recorded={recorded}
                   restoredLabel={c.restoredReview}
+                  unkeptLabel={c.unkeptReview}
                 />
                 {/* A wrapping label would add the chosen option to the select's accessible name. */}
                 <div className="grid gap-1">

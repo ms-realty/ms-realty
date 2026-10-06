@@ -269,12 +269,14 @@ test("C-11: a dirty privacy review keeps its reviewed version through a page ref
     .from(schema.privacyRequests)
     .where(eq(schema.privacyRequests.id, id));
   expect(after).toMatchObject({ state: before?.state, version: Number(version) + 1 });
-  // The unsent review comes back with a notice, on the current version, and records once.
+  // The unsent review comes back with a notice, on the current version, without its
+  // confirmation: a person confirms again before it records once.
   await expect(
-    form.getByText("Your unsent review is restored below.", { exact: false }),
+    form.getByText("Your unsent review is restored below", { exact: false }),
   ).toBeVisible();
   await expect(form.getByLabel("Next state", { exact: true })).toHaveValue("verifying");
-  await expect(form.getByRole("checkbox", { name: /I reviewed the policy/ })).toBeChecked();
+  await expect(form.getByRole("checkbox", { name: /I reviewed the policy/ })).not.toBeChecked();
+  await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
   await expect(form.locator('input[name="expectedVersion"]')).toHaveValue(
     String(Number(version) + 1),
   );
@@ -286,7 +288,7 @@ test("C-11: a dirty privacy review keeps its reviewed version through a page ref
     .where(eq(schema.privacyRequests.id, id));
   expect(saved).toMatchObject({ state: "verifying", version: Number(version) + 2 });
   await expect(
-    form.getByText("Your unsent review is restored below.", { exact: false }),
+    form.getByText("Your unsent review is restored below", { exact: false }),
   ).toHaveCount(0);
 });
 
@@ -344,6 +346,122 @@ test("C-11: another staff member never inherits a dirty review or its operation"
   await expect(form.locator('input[name="operationId"]')).not.toHaveValue(operation);
   await expect(form.getByRole("checkbox", { name: /I reviewed the policy/ })).not.toBeChecked();
   await expect(
-    form.getByText("Your unsent review is restored below.", { exact: false }),
+    form.getByText("Your unsent review is restored below", { exact: false }),
   ).toHaveCount(0);
+});
+
+async function ownReview(page: import("@playwright/test").Page) {
+  const fixture = JSON.parse(
+    execFileSync(
+      process.execPath,
+      ["--conditions=react-server", "--import", "tsx", "src/server/privacy/queue-browser-seed.ts"],
+      {
+        env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
+        encoding: "utf8",
+      },
+    ),
+  ) as { token: string; sessionId: string; targetId: string };
+  await page
+    .context()
+    .addCookies([
+      {
+        name: "msr_staff_session",
+        value: fixture.token,
+        url: origins.staff,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+  await page.goto(hostUrl("staff", "/en/operations/privacy"));
+  const form = page
+    .locator("form")
+    .filter({ has: page.locator(`input[name="id"][value="${fixture.targetId}"]`) });
+  for (let pages = 0; (await form.count()) === 0 && pages < 40; pages++)
+    await page.getByRole("link", { name: "Next requests", exact: true }).click();
+  await expect(form).toHaveCount(1);
+  return { fixture, form, position: page.url() };
+}
+const restoredText = "Your unsent review is restored below";
+
+test("C-11: a recorded review whose answer was lost is cleared, not restored", async ({ page }) => {
+  test.setTimeout(120_000);
+  const { fixture, form, position } = await ownReview(page);
+  await form.getByLabel("Next state", { exact: true }).selectOption("verifying");
+  await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  // The server records the review; the browser never sees the answer.
+  await page.route("**/operations/privacy/submit**", async (route) => {
+    await route.fetch();
+    await route.abort();
+  });
+  await form.getByRole("button", { name: "Record human review", exact: true }).click();
+  await expect
+    .poll(async () => {
+      const [row] = await db
+        .select()
+        .from(schema.privacyRequests)
+        .where(eq(schema.privacyRequests.id, fixture.targetId));
+      return row?.state;
+    })
+    .toBe("verifying");
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+  await page.goto(position);
+  await expect(form).toHaveCount(1);
+  await expect(form.getByText(restoredText, { exact: false })).toHaveCount(0);
+});
+
+test("C-11: an unrelated receipt in the address does not clear an unsent review", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  const { form, position } = await ownReview(page);
+  await form.getByLabel("Next state", { exact: true }).selectOption("verifying");
+  const withReceipt = new URL(position);
+  withReceipt.searchParams.set("receipt", crypto.randomUUID());
+  await page.goto(withReceipt.toString());
+  await expect(form.getByText(restoredText, { exact: false })).toBeVisible();
+  await expect(form.getByLabel("Next state", { exact: true })).toHaveValue("verifying");
+});
+
+test("C-11: a passive reauthorization keeps the unsent review for this session", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  const { fixture, form, position } = await ownReview(page);
+  await form.getByLabel("Next state", { exact: true }).selectOption("verifying");
+  await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  await db
+    .update(schema.sessions)
+    .set({ reverifiedAt: new Date(Date.now() - 3600_000) })
+    .where(eq(schema.sessions.id, fixture.sessionId));
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await expect(page).toHaveURL((current) => current.pathname === "/en/access/reauth", {
+    timeout: 30_000,
+  });
+  await db
+    .update(schema.sessions)
+    .set({ reverifiedAt: new Date() })
+    .where(eq(schema.sessions.id, fixture.sessionId));
+  await page.goto(position);
+  await expect(form.getByText(restoredText, { exact: false })).toBeVisible();
+  await expect(form.getByLabel("Next state", { exact: true })).toHaveValue("verifying");
+  await expect(form.getByRole("checkbox", { name: /I reviewed the policy/ })).not.toBeChecked();
+});
+
+test("C-11: a browser that cannot keep the review says so before work is at risk", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "sessionStorage", {
+      get() {
+        throw new Error("Storage is blocked");
+      },
+    });
+  });
+  const { form } = await ownReview(page);
+  await expect(
+    form.getByText("This browser cannot keep an unsent review if the page reloads.", {
+      exact: false,
+    }),
+  ).toBeVisible();
 });

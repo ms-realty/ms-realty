@@ -22,7 +22,9 @@ const en = {
   error: "The change could not be confirmed. Review the current state before trying again.",
   conflict: "This record changed. Refresh and review the current version.",
   restoredReview:
-    "Your unsent review is restored below. Check it against the current version before you record it.",
+    "Your unsent review is restored below without its confirmation. Check it against the current version and confirm again before you record it.",
+  unkeptReview:
+    "This browser cannot keep an unsent review if the page reloads. Record it in one go, or copy longer notes first.",
   contacts: "Contact routes",
   verified: "Verified",
   unverified: "Not verified",
@@ -102,7 +104,9 @@ const bg: typeof en = {
   error: "Промяната не е потвърдена. Проверете текущото състояние преди нов опит.",
   conflict: "Записът е променен. Обновете и прегледайте текущата версия.",
   restoredReview:
-    "Неизпратеният ви преглед е възстановен по-долу. Проверете го спрямо текущата версия, преди да го запишете.",
+    "Неизпратеният ви преглед е възстановен по-долу без потвърждението. Проверете го спрямо текущата версия и потвърдете отново, преди да го запишете.",
+  unkeptReview:
+    "Този браузър не може да запази неизпратен преглед при презареждане. Запишете го наведнъж или първо копирайте по-дългите бележки.",
   contacts: "Начини за контакт",
   verified: "Потвърден",
   unverified: "Непотвърден",
