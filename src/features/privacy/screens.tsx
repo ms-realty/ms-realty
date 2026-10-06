@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
@@ -18,6 +19,7 @@ import { controlClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 import { privacyCopy, privacyLabel } from "./copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
+import { ReviewEnvelope } from "./review-envelope";
 
 type Query = { error?: string; receipt?: string; after?: string; before?: string };
 function Frame({ title, lead, children }: { title: string; lead: string; children: ReactNode }) {
@@ -447,7 +449,11 @@ export async function StaffPrivacyScreen({
             </p>
             {next.length ? (
               <form method="post" action={submitPath} className="grid min-w-0 grid-cols-1 gap-4">
-                <Envelope intent="review" id={record.id} version={record.version} />
+                <ReviewEnvelope
+                  id={record.id}
+                  version={record.version}
+                  operationId={randomUUID()}
+                />
                 {/* A wrapping label would add the chosen option to the select's accessible name. */}
                 <div className="grid gap-1">
                   <label htmlFor={`${record.id}-to`}>{c.state}</label>

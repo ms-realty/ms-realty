@@ -204,3 +204,69 @@ test("privacy queue reaches and reviews an unresolved request beyond 100 without
     await db.delete(schema.privacyRequests).where(inArray(schema.privacyRequests.id, fixture.ids));
   }
 });
+
+test("C-11: a dirty privacy review keeps its reviewed version through a page refresh", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  const fixture = JSON.parse(
+    execFileSync(
+      process.execPath,
+      ["--conditions=react-server", "--import", "tsx", "src/server/privacy/queue-browser-seed.ts"],
+      {
+        env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
+        encoding: "utf8",
+      },
+    ),
+  ) as { token: string; targetId: string };
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: fixture.token,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
+  await page.goto(hostUrl("staff", "/en/operations/privacy"));
+  // This run's own older record, on a cursor page that newer records from other projects (they
+  // share the database) cannot shift.
+  const id = fixture.targetId;
+  const form = page
+    .locator("form")
+    .filter({ has: page.locator(`input[name="id"][value="${id}"]`) });
+  for (let pages = 0; (await form.count()) === 0 && pages < 10; pages++)
+    await page.getByRole("link", { name: "Next requests", exact: true }).click();
+  await expect(form).toHaveCount(1);
+  const version = await form.locator('input[name="expectedVersion"]').inputValue();
+  const operation = await form.locator('input[name="operationId"]').inputValue();
+  const [before] = await db
+    .select()
+    .from(schema.privacyRequests)
+    .where(eq(schema.privacyRequests.id, id));
+  await form.getByLabel("Next state", { exact: true }).selectOption("verifying");
+  await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  // Another operator advances the record; this tab refreshes its server render when visible.
+  await db
+    .update(schema.privacyRequests)
+    .set({ version: Number(version) + 1 })
+    .where(eq(schema.privacyRequests.id, id));
+  // The guard conceals the page synchronously and reveals it after a new authorized render.
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  const record = form.getByRole("button", { name: "Record human review", exact: true });
+  await expect(record).toBeVisible({ timeout: 30_000 });
+  await expect(form.locator('input[name="expectedVersion"]')).toHaveValue(version);
+  await expect(form.locator('input[name="operationId"]')).toHaveValue(operation);
+  await expect(form.getByLabel("Next state", { exact: true })).toHaveValue("verifying");
+  await record.click();
+  await expect(
+    page.getByText("This record changed. Refresh and review the current version.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  const [after] = await db
+    .select()
+    .from(schema.privacyRequests)
+    .where(eq(schema.privacyRequests.id, id));
+  expect(after).toMatchObject({ state: before?.state, version: Number(version) + 1 });
+});
