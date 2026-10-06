@@ -87,6 +87,21 @@ describe("O12 source price decision evidence", () => {
     expect(workingDraftFrom(input, [])).toMatchObject({ priceState: "unknown", price: "" });
   });
 
+  it.each([undefined, null, "", "short_term_rent", "unclassified"])(
+    "requires a broker choice when the source purpose is %j",
+    (purpose) => {
+      const fact = { state: "known", value: eur(100), sourceReference: sourceUrl };
+      const input = {
+        ...revision(fact),
+        terms: { ...(purpose === undefined ? {} : { purpose }), facts: { price: fact } },
+      };
+      const before = structuredClone(input);
+      expect(workingDraftFrom(input, [])).toMatchObject({ priceState: "unknown", price: "" });
+      expect(uneditablePriceEvidence(input)).toEqual([{ fieldKey: "price", fact }]);
+      expect(input).toEqual(before);
+    },
+  );
+
   it("does not require a demotion decision for editable or absent source prices", () => {
     for (const price of [
       { state: "known", value: eur(100) },

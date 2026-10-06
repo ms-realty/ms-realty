@@ -46,7 +46,11 @@ const priceFact = (state: string, value: unknown) => ({
   sourceClass: "document_reviewed",
   sourceLanguage: "en",
 });
-const uneditablePrices = [
+const uneditablePrices: readonly {
+  label: string;
+  facts: Record<string, unknown>;
+  sourceTerms?: { purpose?: unknown };
+}[] = [
   {
     label: "BGN",
     facts: { price: priceFact("known", { ...eur(9_500_003), currency: "BGN" }) },
@@ -83,9 +87,23 @@ const uneditablePrices = [
       }),
     },
   },
+  {
+    label: "missing source purpose",
+    facts: { price: priceFact("known", eur(9_500_003)) },
+    sourceTerms: {},
+  },
+  {
+    label: "unsupported source purpose",
+    facts: { price: priceFact("known", eur(9_500_003)) },
+    sourceTerms: { purpose: "short_term_rent" },
+  },
 ];
 
-async function seed(actor: Actor, facts: Record<string, unknown>) {
+async function seed(
+  actor: Actor,
+  facts: Record<string, unknown>,
+  sourceTerms: { purpose?: unknown } = { purpose: "sale" },
+) {
   const created = await createListingDraft(t.db, {
     actor,
     operationId: randomUUID(),
@@ -117,7 +135,7 @@ async function seed(actor: Actor, facts: Record<string, unknown>) {
   });
   const original = await inventoryDetail(t.db, actor, created.outcome.reference);
   if (!original.revision) throw new Error("Expected seeded revision");
-  const terms = { purpose: "sale", facts };
+  const terms = { ...sourceTerms, facts };
   await t.db.insert(listingRevisions).values({
     listingId: original.listing.id,
     revisionNumber: original.revision.revisionNumber + 1,
@@ -154,9 +172,9 @@ async function snapshot(actor: Actor, reference: string) {
 
 it.each(uneditablePrices)(
   "O12 rejects silent unknown for $label with no writes, then records an explicit source-bound choice",
-  async ({ facts }) => {
+  async ({ facts, sourceTerms }) => {
     const staff = await createStaff(t.db, { roles: ["content_editor"] });
-    const reference = await seed(staff.actor, facts);
+    const reference = await seed(staff.actor, facts, sourceTerms);
     const before = await snapshot(staff.actor, reference);
     const draft = workingDraftFrom(before.detail.revision, before.detail.facts);
     expect(draft).toMatchObject({ priceState: "unknown", price: "" });
@@ -230,31 +248,75 @@ it.each(uneditablePrices)(
   },
 );
 
-it("O12 accepts a broker-corrected known price and rejects an empty claimed correction", async () => {
-  const staff = await createStaff(t.db, { roles: ["content_editor"] });
-  const reference = await seed(staff.actor, uneditablePrices[0]?.facts ?? {});
-  const before = await snapshot(staff.actor, reference);
-  const projected = workingDraftFrom(before.detail.revision, before.detail.facts);
-  const command = {
-    actor: staff.actor,
-    operationId: randomUUID(),
-    expectedRevision: before.detail.listing.version,
-    reference,
-    draft: { ...projected, priceState: "known" as const, price: "" },
-  };
-  await expect(saveListingDraft(t.db, command)).rejects.toMatchObject({
-    code: "validation_failed",
-    fieldErrors: { price: expect.any(Array) },
-  });
-  expect(await snapshot(staff.actor, reference)).toEqual(before);
-  const draft = { ...command.draft, price: "75000.25" };
-  await saveListingDraft(t.db, { ...command, draft });
-  const after = await inventoryDetail(t.db, staff.actor, reference);
-  expect(after.listing.draft).toEqual(draft);
-  expect(after.revision).toEqual(before.detail.revision);
-  expect(after.facts).toEqual(before.detail.facts);
-  expect(after.listing.approvedRevisionId).toBeNull();
-});
+it.each(["not_supplied", "not_applicable", "withheld"] as const)(
+  "O12 rejects %s replacing uneditable source evidence with no writes",
+  async (priceState) => {
+    const staff = await createStaff(t.db, { roles: ["content_editor"] });
+    for (const source of [uneditablePrices[0], uneditablePrices[5]]) {
+      if (!source) throw new Error("Expected synthetic source evidence");
+      const reference = await seed(staff.actor, source.facts);
+      const before = await snapshot(staff.actor, reference);
+      const projected = workingDraftFrom(before.detail.revision, before.detail.facts);
+      const command = {
+        actor: staff.actor,
+        operationId: randomUUID(),
+        expectedRevision: before.detail.listing.version,
+        reference,
+        draft: { ...projected, priceState },
+      };
+      await expect(saveListingDraft(t.db, command)).rejects.toMatchObject({
+        code: "validation_failed",
+        fieldErrors: { priceState: expect.any(Array) },
+      });
+      expect(await snapshot(staff.actor, reference)).toEqual(before);
+      await expect(
+        saveListingDraft(t.db, {
+          ...command,
+          priceDecision: {
+            kind: "retain_unknown",
+            sourceRevisionId: before.detail.revision?.id ?? "",
+          },
+        }),
+      ).rejects.toMatchObject({
+        code: "validation_failed",
+        fieldErrors: { priceDecision: expect.any(Array) },
+      });
+      expect(await snapshot(staff.actor, reference)).toEqual(before);
+    }
+  },
+);
+
+it.each([
+  { state: "known" as const, price: "75000.25" },
+  { state: "conflicting" as const, price: "75000.25|76000.50" },
+])(
+  "O12 accepts a broker-corrected $state price and rejects an empty claimed correction",
+  async ({ state, price }) => {
+    const staff = await createStaff(t.db, { roles: ["content_editor"] });
+    const reference = await seed(staff.actor, uneditablePrices[0]?.facts ?? {});
+    const before = await snapshot(staff.actor, reference);
+    const projected = workingDraftFrom(before.detail.revision, before.detail.facts);
+    const command = {
+      actor: staff.actor,
+      operationId: randomUUID(),
+      expectedRevision: before.detail.listing.version,
+      reference,
+      draft: { ...projected, priceState: state, price: "" },
+    };
+    await expect(saveListingDraft(t.db, command)).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { price: expect.any(Array) },
+    });
+    expect(await snapshot(staff.actor, reference)).toEqual(before);
+    const draft = { ...command.draft, price };
+    await saveListingDraft(t.db, { ...command, draft });
+    const after = await inventoryDetail(t.db, staff.actor, reference);
+    expect(after.listing.draft).toEqual(draft);
+    expect(after.revision).toEqual(before.detail.revision);
+    expect(after.facts).toEqual(before.detail.facts);
+    expect(after.listing.approvedRevisionId).toBeNull();
+  },
+);
 
 it("O12 requires the current source revision, version and existing edit permission", async () => {
   const staff = await createStaff(t.db, { roles: ["content_editor"] });

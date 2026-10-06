@@ -68,6 +68,7 @@ function editableFact(
 }
 
 function priceText(value: unknown, purpose: unknown): string | null {
+  if (purpose !== "sale" && purpose !== "long_term_rent") return null;
   const amount = record(value);
   if (
     amount.currency !== "EUR" ||
@@ -76,8 +77,7 @@ function priceText(value: unknown, purpose: unknown): string | null {
     amount.amountMinor < 0 ||
     (amount.period !== "total" && amount.period !== "month") ||
     !member(priceBases, amount.basis) ||
-    ((purpose === "sale" || purpose === "long_term_rent") &&
-      amount.period !== pricePeriodByPurpose[purpose])
+    amount.period !== pricePeriodByPurpose[purpose]
   ) {
     return null;
   }

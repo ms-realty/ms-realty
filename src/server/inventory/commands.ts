@@ -260,7 +260,17 @@ async function checkDraftPrice(
       if (error instanceof AppError) throw new DraftPriceValidation(error);
       throw error;
     }
+    return;
   }
+  throw new DraftPriceValidation(
+    new AppError("validation_failed", {
+      fieldErrors: {
+        priceState: [
+          "Existing source price evidence cannot be replaced with this state. Enter a corrected known or conflicting price, or explicitly retain unknown.",
+        ],
+      },
+    }),
+  );
 }
 
 export async function saveListingDraft(db: Executor, command: SaveListingDraftCommand) {
