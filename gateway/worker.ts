@@ -4,6 +4,7 @@
 import { type AccessEnv, accessAuthorized } from "./access";
 import { type LegacyMediaEnv, legacyMedia } from "./legacy-media";
 import { type MapAssetsEnv, mapAsset } from "./map-assets";
+import { recoverNotFoundDocument } from "./not-found-document";
 
 export interface LegacyRoute {
   host: string;
@@ -236,7 +237,18 @@ async function forward(
     }
   }
   responseHeaders.set("Cache-Control", "private, no-store");
-  return new Response(response.body, { status: response.status, headers: responseHeaders });
+  const surface =
+    host === new URL(env.STAFF_ORIGIN).host
+      ? "staff"
+      : host === new URL(env.CLIENT_ORIGIN).host
+        ? "client"
+        : "public";
+  return recoverNotFoundDocument(
+    request,
+    new Response(response.body, { status: response.status, headers: responseHeaders }),
+    target.pathname,
+    surface,
+  );
 }
 
 export async function gateway(

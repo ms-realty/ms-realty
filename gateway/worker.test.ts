@@ -15,6 +15,119 @@ const config = (rules: LegacyRoute[] = []): GatewayEnv => {
     LEGACY_ROUTES_SHA256: createHash("sha256").update(json).digest("hex"),
   };
 };
+
+describe("page-thrown 404 documents without JavaScript", () => {
+  const emptyDocument =
+    '<!DOCTYPE html><html id="__next_error__"><head><meta name="robots" content="noindex"/></head><body><div hidden=""><!--$--><!--/$--></div><script>self.__next_f=[]</script></body></html>';
+
+  for (const [host, path, locale, home] of [
+    ["makler-realty.com", "/he/properties/MS-99999/missing", "he", "/he"],
+    ["my.makler-realty.com", "/en/overview/missing", "en", "/en/overview"],
+    ["app.makler-realty.com", "/ru/cases/missing", "ru", "/ru/today"],
+  ]) {
+    it(`${host} preserves 404 and supplies localized recovery HTML`, async () => {
+      const upstream = vi.fn<typeof fetch>(
+        async () =>
+          new Response(emptyDocument, {
+            status: 404,
+            headers: {
+              "Content-Type": "text/html; charset=utf-8",
+              "Content-Security-Policy": "default-src 'self'; style-src 'nonce-testnonce'",
+              "Content-Length": String(emptyDocument.length),
+              ETag: '"origin-document"',
+              "Set-Cookie": "synthetic=reset; Path=/; HttpOnly",
+            },
+          }),
+      );
+      const response = await gateway(new Request(`https://${host}${path}`), config(), upstream);
+      expect(response.status).toBe(404);
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+      expect(response.headers.get("x-robots-tag")).toMatch(/noindex/);
+      expect(response.headers.get("content-length")).toBeNull();
+      expect(response.headers.get("etag")).toBeNull();
+      expect(response.headers.get("set-cookie")).toContain("synthetic=reset");
+      const html = await response.text();
+      expect(html).toContain(`<html lang="${locale}"`);
+      expect(html).toContain(`<a href="${home}">`);
+      expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
+      expect(html).toContain('<main id="main-content">');
+      expect(html).not.toContain("__next_error__");
+      expect(html).not.toContain("<script");
+      expect(upstream).toHaveBeenCalledTimes(1);
+    });
+  }
+
+  for (const [name, document, status, requestHeaders, contentType] of [
+    [
+      "rendered 404",
+      '<html lang="bg"><body><h1>Existing fallback</h1></body></html>',
+      404,
+      {},
+      "text/html",
+    ],
+    [
+      "error shell with real content",
+      '<html id="__next_error__"><body><h1>Future fallback</h1></body></html>',
+      404,
+      {},
+      "text/html",
+    ],
+    ["500 document", emptyDocument, 500, {}, "text/html"],
+    ["RSC response", emptyDocument, 404, { RSC: "1" }, "text/html"],
+    ["JSON response", emptyDocument, 404, {}, "application/json"],
+  ] as const) {
+    it(`leaves ${name} intact`, async () => {
+      const response = await gateway(
+        new Request("https://makler-realty.com/en/missing", { headers: requestHeaders }),
+        config(),
+        async () => new Response(document, { status, headers: { "Content-Type": contentType } }),
+      );
+      expect(response.status).toBe(status);
+      expect(await response.text()).toBe(document);
+    });
+  }
+
+  it("resumes a large 404 document intact rather than buffering it without a bound", async () => {
+    const before = '<html id="__next_error__"><body><script>';
+    const middle = "x".repeat(256 * 1024);
+    const after = "</script></body></html>";
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const chunk of [before, middle, after]) controller.enqueue(encoder.encode(chunk));
+        controller.close();
+      },
+    });
+    const response = await gateway(
+      new Request("https://makler-realty.com/en/missing"),
+      config(),
+      async () => new Response(stream, { status: 404, headers: { "Content-Type": "text/html" } }),
+    );
+    expect(response.status).toBe(404);
+    expect(await response.text()).toBe(before + middle + after);
+  });
+
+  it("preserves server-action and HEAD response semantics", async () => {
+    for (const request of [
+      new Request("https://makler-realty.com/en/missing", { method: "POST" }),
+      new Request("https://makler-realty.com/en/missing", { headers: { "Next-Action": "opaque" } }),
+      new Request("https://makler-realty.com/en/missing", { method: "HEAD" }),
+    ]) {
+      const response = await gateway(
+        request,
+        config(),
+        async () =>
+          new Response(request.method === "HEAD" ? null : emptyDocument, {
+            status: 404,
+            headers: { "Content-Type": "text/html" },
+          }),
+      );
+      expect(response.status).toBe(404);
+      expect(await response.text()).toBe(request.method === "HEAD" ? "" : emptyDocument);
+    }
+  });
+});
+
 describe("Candidate gateway", () => {
   it("matches decoded legacy Unicode identity without changing the original public spelling or query", async () => {
     const env = config([
