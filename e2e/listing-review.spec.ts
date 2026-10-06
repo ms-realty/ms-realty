@@ -24,6 +24,8 @@ type Seed = {
   bgn: { reference: string };
   twoAreas: { reference: string };
   token: string;
+  /** A translation reviewer: may review, may not publish. */
+  readerToken: string;
 };
 function seed(): Seed {
   return JSON.parse(
@@ -41,11 +43,11 @@ function seed(): Seed {
     ).trim(),
   );
 }
-async function open(page: Page, f: Seed, path: string) {
+async function open(page: Page, f: Seed, path: string, token = f.token) {
   await page.context().addCookies([
     {
       name: "msr_staff_session",
-      value: f.token,
+      value: token,
       url: origins.staff,
       httpOnly: true,
       sameSite: "Lax",
@@ -262,6 +264,18 @@ test("O16 keeps a rental draft price monthly before any frozen revision", async 
   await expect(page.getByRole("complementary", { name: "Before you decide" })).toContainText(
     "€900 per month",
   );
+});
+
+test("O16 offers the publication decision only to someone who may publish", async ({ page }) => {
+  const f = seed();
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`, f.readerToken);
+  await expect(
+    page.getByText("The exact candidate is eligible for a publication decision.", { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("A staff member who may publish takes this decision; you cannot publish."),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Go to the publication decision" })).toHaveCount(0);
 });
 
 test("O16 keeps BG and RU labels", async ({ page }) => {
