@@ -25,13 +25,14 @@ export function shareCreatorFrom(jar: {
 export async function loadCreatorLinks(
   sessionToken: string,
   locale: PublicLocale,
+  cursor?: string,
   now = new Date(),
 ): Promise<CreatorLinks> {
   try {
-    const { items } = await listCreatorShares(
+    const { items, nextCursor } = await listCreatorShares(
       getDb(),
       { kind: "anonymous", sessionToken },
-      { pageSize: 20 },
+      { pageSize: 20, ...(cursor ? { cursor } : {}) },
       now,
     );
     const origin = getEnv().hosts.public;
@@ -40,6 +41,7 @@ export async function loadCreatorLinks(
       links: items.map((item) =>
         sharedLinkView(item, { locale, origin, now, revokeKey: randomUUID() }),
       ),
+      nextCursor,
     };
   } catch (error) {
     // Name the failure class only: share rows, tokens and cookies never reach a log line.

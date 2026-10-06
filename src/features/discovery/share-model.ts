@@ -76,7 +76,10 @@ export function sharedLinkView(
 }
 
 /** One page of this browser's links; a failed read is a state the page words, not a crash. */
-export type CreatorLinks = { status: "ok"; links: SharedLinkView[] } | { status: "failed" };
+/** One page of this browser's links; `nextCursor` reaches older ones (opaque, no personal data). */
+export type CreatorLinks =
+  | { status: "ok"; links: SharedLinkView[]; nextCursor: string | null }
+  | { status: "failed" };
 
 /** What the recipient page needs to know about a ready list beyond the cards themselves. */
 export function recipientSummary(read: RecipientReady) {

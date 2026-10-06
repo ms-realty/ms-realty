@@ -32,7 +32,11 @@ function link(overrides: Partial<SharedLinkView> = {}): SharedLinkView {
     ...overrides,
   };
 }
-const ok = (...links: SharedLinkView[]): CreatorLinks => ({ status: "ok", links });
+const ok = (...links: SharedLinkView[]): CreatorLinks => ({
+  status: "ok",
+  links,
+  nextCursor: null,
+});
 const idle: ShareRevokeState = { operationId: key, outcome: { kind: "idle" } };
 
 function mount(links: CreatorLinks | null, revoke?: RevokeShareAction) {
