@@ -27,17 +27,15 @@ function seed(): Seed {
   );
 }
 async function open(page: Page, f: Seed, path: string) {
-  await page
-    .context()
-    .addCookies([
-      {
-        name: "msr_staff_session",
-        value: f.token,
-        url: origins.staff,
-        httpOnly: true,
-        sameSite: "Lax",
-      },
-    ]);
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: f.token,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
   await page.goto(hostUrl("staff", path));
 }
 
@@ -90,6 +88,41 @@ for (const javaScriptEnabled of [false, true])
       await expect(page.getByRole("navigation", { name: "Listing sections" })).toBeInViewport();
     });
   });
+
+test("O16 publishes the exact package through its decision and shows the result", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  const f = seed();
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  await expect(
+    page.getByText("The exact candidate is eligible for a publication decision.", { exact: false }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Go to the publication decision" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Publication decision · BG" }),
+  ).toBeVisible();
+  await expect(page.getByText("Publishing actor")).toBeVisible();
+  await expect(page.getByText("Butler cannot publish.", { exact: false })).toBeVisible();
+  const decision = page.locator('[data-inventory-decision="activate"]');
+  await decision
+    .getByLabel("Review scope or reason", { exact: true })
+    .fill("Synthetic exact package check, no real listing.");
+  await decision.getByRole("checkbox").check();
+  await decision.getByRole("button", { name: "Activate reviewed manifest (BG)" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "The listing is published" }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open the public page" })).toHaveAttribute(
+    "href",
+    new RegExp(`/bg/properties/${f.reference}/`),
+  );
+  // The result is this actor's own activation; a made-up id shows the review instead.
+  await open(page, f, `/en/inventory/${f.reference}?tab=review&published=${crypto.randomUUID()}`);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Review for publication" }),
+  ).toBeVisible();
+});
 
 test("O16 keeps BG and RU labels", async ({ page }) => {
   const f = seed();

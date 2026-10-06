@@ -462,6 +462,11 @@ export async function submitInventoryDecision(
         status: reconciliation,
       },
     };
+  // O16DONE: a confirmed activation lands on its own published-result state.
+  if (context.intent === "activate")
+    redirect(
+      `/${context.locale}/inventory/${encodeURIComponent(context.reference)}?tab=review&published=${encodeURIComponent(operationId)}`,
+    );
   return {
     ...state,
     outcome: {

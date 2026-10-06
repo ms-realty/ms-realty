@@ -6,7 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
-import { operations } from "@/db/schema";
+import { operations, principals } from "@/db/schema";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import { inventorySections } from "@/features/inventory/decision-contract";
 import { EditTabs } from "@/features/inventory/edit-tabs";
@@ -93,7 +93,15 @@ export default async function InventoryDetailPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; reference: string }>;
-  searchParams: Promise<{ error?: string; tab?: string; saved?: string; next?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    tab?: string;
+    saved?: string;
+    next?: string;
+    step?: string;
+    manifest?: string;
+    published?: string;
+  }>;
 }) {
   const { locale, reference } = await params;
   const query = await searchParams;
@@ -177,7 +185,11 @@ export default async function InventoryDetailPage({
     </p>
   ) : null;
 
-  if (tab === "review")
+  if (tab === "review") {
+    const [principal] = await db
+      .select({ name: principals.displayName })
+      .from(principals)
+      .where(eq(principals.id, session.account.id));
     return (
       <ReviewView
         locale={locale}
@@ -189,8 +201,12 @@ export default async function InventoryDetailPage({
         mayReview={mayReview}
         mayPublish={mayPublish}
         error={error}
+        actorId={session.actor.id}
+        actorName={principal?.name ?? ""}
+        query={{ step: query.step, manifest: query.manifest, published: query.published }}
       />
     );
+  }
 
   const summary = [
     property.settlement,
