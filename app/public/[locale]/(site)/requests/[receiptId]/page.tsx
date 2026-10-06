@@ -2,7 +2,6 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
-import { inquiryCheckCode } from "@/domain/inquiry-check-code";
 import { comparisonReturnHref } from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { InquiryContent } from "@/features/discovery/inquiry-content";
@@ -14,7 +13,7 @@ import { isRoutableLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { getEnv } from "@/server/config/env";
 import {
-  isIssuedSubmissionKey,
+  issuedCheckCode,
   readInquiryReceipt,
   receiptCheckAttempted,
   receiptCookieName,
@@ -40,7 +39,7 @@ export default async function ReceiptPage({
     </a>
   );
   // P12 telephone check code: only for a key this server issued; it never unlocks a receipt.
-  const checkCode = isIssuedSubmissionKey(receiptId) ? inquiryCheckCode(receiptId) : null;
+  const checkCode = issuedCheckCode(receiptId);
   const notShown = (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.notConfirmed}</h1>

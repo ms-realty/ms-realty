@@ -18,6 +18,7 @@ import { contactMethods, inquiries, listings, parties } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { type PublicLocale, parseReference, publicLocales } from "@/domain/ids";
 import { type InquiryPurpose, inquiryPurposes } from "@/domain/inquiry";
+import { inquiryCheckCode } from "@/domain/inquiry-check-code";
 import { contentReferenceSchema } from "@/domain/inquiry-content";
 import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
 import {
@@ -69,6 +70,16 @@ export function isIssuedSubmissionKey(value: string): boolean {
   if (!submissionKeyPattern.test(value)) return false;
   const [nonce = "", mac = ""] = value.split(".");
   return timingSafeEqual(Buffer.from(submissionMac(nonce)), Buffer.from(mac));
+}
+
+/** P12 telephone check code for a key this server issued. A verification failure (for example a
+ * missing auth secret) yields no code, so the receipt page keeps its neutral fallback. */
+export function issuedCheckCode(value: string): string | null {
+  try {
+    return isIssuedSubmissionKey(value) ? inquiryCheckCode(value) : null;
+  } catch {
+    return null;
+  }
 }
 
 // Receipt session: an opaque capability that only ever lives in the cookie.
