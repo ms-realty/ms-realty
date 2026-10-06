@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { FactState } from "@/domain/facts";
-import { draftSchema } from "./contracts";
+import { draftSchema, priceDecisionSchema } from "./contracts";
 import {
+  uneditablePriceEvidence,
   type WorkingDraftFact,
   type WorkingDraftRevision,
   workingDraftFrom,
@@ -50,6 +51,74 @@ function fact(
   };
 }
 const area = (value: number, basis = "usable") => ({ value, unit: "m2", basis });
+
+describe("O12 source price decision evidence", () => {
+  it.each([
+    { state: "known", value: { ...eur(100), currency: "BGN" } },
+    { state: "known", value: { ...eur(100), period: "month" } },
+    { state: "known", value: { amountMinor: 100, currency: "EUR", basis: "asking" } },
+    { state: "conflicting", value: [eur(100), { ...eur(101), currency: "BGN" }] },
+    { state: "conflicting", value: [eur(100), { ...eur(101), period: "month" }] },
+  ])("returns the exact uneditable source fact without coercion: %j", (price) => {
+    const fact = { ...price, sourceReference: sourceUrl, sourceClass: "legacy_import" };
+    const input = revision(fact);
+    const before = structuredClone(input);
+    expect(uneditablePriceEvidence(input)).toEqual([{ fieldKey: "price", fact }]);
+    expect(input).toEqual(before);
+  });
+
+  it("keeps periodless imported evidence retrievable alongside the unknown price", () => {
+    const fact = {
+      state: "known",
+      value: { amountMinor: 100, currency: "EUR" },
+      sourceReference: sourceUrl,
+      note: "Recorded amount without a period",
+    };
+    const input = {
+      terms: {
+        purpose: "long_term_rent",
+        facts: { price: { state: "unknown", value: null }, "price.amount_without_period": fact },
+      },
+      sourceCopy: {},
+    };
+    expect(uneditablePriceEvidence(input)).toEqual([
+      { fieldKey: "price.amount_without_period", fact },
+    ]);
+    expect(workingDraftFrom(input, [])).toMatchObject({ priceState: "unknown", price: "" });
+  });
+
+  it("does not require a demotion decision for editable or absent source prices", () => {
+    for (const price of [
+      { state: "known", value: eur(100) },
+      { state: "conflicting", value: [eur(100), eur(101)] },
+      { state: "unknown", value: null },
+      { state: "not_supplied", value: null },
+      { state: "withheld", value: null },
+    ]) {
+      expect(uneditablePriceEvidence(revision(price))).toEqual([]);
+    }
+    expect(uneditablePriceEvidence(null)).toEqual([]);
+  });
+
+  it("requires an explicit decision kind and immutable revision UUID, with no defaults", () => {
+    const sourceRevisionId = "00000000-0000-4000-8000-000000000001";
+    expect(priceDecisionSchema.optional().parse(undefined)).toBeUndefined();
+    expect(priceDecisionSchema.parse({ kind: "retain_unknown", sourceRevisionId })).toEqual({
+      kind: "retain_unknown",
+      sourceRevisionId,
+    });
+    for (const value of [
+      true,
+      {},
+      { kind: "retain_unknown" },
+      { kind: "retain_unknown", sourceRevisionId: "latest" },
+      { kind: "accept", sourceRevisionId },
+      { kind: "retain_unknown", sourceRevisionId, checked: true },
+    ]) {
+      expect(priceDecisionSchema.safeParse(value).success).toBe(false);
+    }
+  });
+});
 
 describe("workingDraftFrom", () => {
   it("projects imported source copy and exact facts without replacing original evidence language", () => {

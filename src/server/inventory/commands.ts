@@ -40,7 +40,14 @@ import { recordOutboxEvent } from "../jobs/outbox";
 import { runOperation } from "../operations";
 import { loadPublishedListings, termsFacts } from "../publication/presentation";
 import { nextReference } from "../references";
-import { createListingSchema, draftSchema, type ListingDraft } from "./contracts";
+import {
+  createListingSchema,
+  draftSchema,
+  type ListingDraft,
+  type PriceDecision,
+  priceDecisionSchema,
+} from "./contracts";
+import { uneditablePriceEvidence } from "./working-draft";
 
 export interface InventoryCommand {
   actor: Actor;
@@ -51,6 +58,12 @@ const envelope = z.object({
   operationId: z.string().min(8).max(160),
   expectedRevision: z.int().nonnegative(),
 });
+const saveDraftEnvelope = envelope.extend({ priceDecision: priceDecisionSchema.optional() });
+export type SaveListingDraftCommand = InventoryCommand & {
+  reference: string;
+  draft: unknown;
+  priceDecision?: PriceDecision;
+};
 function parse<T>(schema: z.ZodType<T>, value: unknown): T {
   const result = schema.safeParse(value);
   if (!result.success) {
@@ -105,6 +118,7 @@ async function history(
   listing: { id: string; reference: string },
   action: string,
   payload: Record<string, unknown>,
+  activityParams: Record<string, unknown> = {},
 ) {
   await recordAudit(tx, {
     action,
@@ -122,7 +136,7 @@ async function history(
     reference: listing.reference,
     messageKey: action,
     summary: `${listing.reference}: ${action}`,
-    params: {},
+    params: activityParams,
     audience: "internal",
   });
 }
@@ -186,39 +200,113 @@ export async function createListingDraft(
   );
 }
 
-export async function saveListingDraft(
+// These precondition failures must roll back the operation receipt too. runOperation
+// retains AppError failures, so convert this private error only after its transaction exits.
+class DraftPriceValidation extends Error {
+  constructor(readonly validation: AppError) {
+    super("Draft price decision failed");
+  }
+}
+
+async function checkDraftPrice(
   db: Executor,
-  command: InventoryCommand & { reference: string; draft: unknown },
+  listing: typeof listings.$inferSelect,
+  draft: ListingDraft,
+  decision: PriceDecision | undefined,
 ) {
-  parse(envelope, command);
+  const storedDraftValid = draftSchema.safeParse(listing.draft).success;
+  if (storedDraftValid && !decision) return;
+  const [revision] = await db
+    .select()
+    .from(listingRevisions)
+    .where(eq(listingRevisions.listingId, listing.id))
+    .orderBy(desc(listingRevisions.revisionNumber))
+    .limit(1);
+  const evidence = uneditablePriceEvidence(revision);
+  if (decision) {
+    if (
+      draft.priceState !== "unknown" ||
+      !revision ||
+      evidence.length === 0 ||
+      decision.sourceRevisionId !== revision.id
+    ) {
+      throw new DraftPriceValidation(
+        new AppError("validation_failed", {
+          fieldErrors: {
+            priceDecision: ["Review the current source price before choosing to retain unknown."],
+          },
+        }),
+      );
+    }
+    return;
+  }
+  if (evidence.length === 0) return;
+  if (draft.priceState === "unknown") {
+    throw new DraftPriceValidation(
+      new AppError("validation_failed", {
+        fieldErrors: {
+          priceDecision: [
+            "Correct the price or explicitly choose to retain unknown for this source.",
+          ],
+        },
+      }),
+    );
+  }
+  // A claimed correction must contain an editable amount, not just a different state.
+  if (draft.priceState === "known" || draft.priceState === "conflicting") {
+    try {
+      factValue(draft.priceState, draft.price, "price", (n) => n);
+    } catch (error) {
+      if (error instanceof AppError) throw new DraftPriceValidation(error);
+      throw error;
+    }
+  }
+}
+
+export async function saveListingDraft(db: Executor, command: SaveListingDraftCommand) {
+  const { priceDecision } = parse(saveDraftEnvelope, command);
   const draft = parse(draftSchema, command.draft);
   await human(db, command.actor);
   await edited(db, command.actor, command.reference);
-  return runOperation(
-    db,
-    {
-      actor: command.actor,
-      type: "inventory.draft.save",
-      idempotencyKey: command.operationId,
-      requestHash: hashRequest({
-        reference: command.reference,
-        draft,
-        expectedRevision: command.expectedRevision,
-      }),
-    },
-    async ({ tx, operationId }) => {
-      const listing = await edited(tx, command.actor, command.reference, true);
-      version(listing.version, command.expectedRevision);
-      await tx
-        .update(listings)
-        .set({ draft, version: listing.version + 1 })
-        .where(eq(listings.id, listing.id));
-      await history(tx, command.actor, operationId, listing, "listing.draft.saved", {
-        newVersion: listing.version + 1,
-      });
-      return { reference: listing.reference, version: listing.version + 1 };
-    },
-  );
+  try {
+    return await runOperation(
+      db,
+      {
+        actor: command.actor,
+        type: "inventory.draft.save",
+        idempotencyKey: command.operationId,
+        requestHash: hashRequest({
+          reference: command.reference,
+          draft,
+          expectedRevision: command.expectedRevision,
+          ...(priceDecision ? { priceDecision } : {}),
+        }),
+      },
+      async ({ tx, operationId }) => {
+        const listing = await edited(tx, command.actor, command.reference, true);
+        version(listing.version, command.expectedRevision);
+        await checkDraftPrice(tx, listing, draft, priceDecision);
+        await tx
+          .update(listings)
+          .set({ draft, version: listing.version + 1 })
+          .where(eq(listings.id, listing.id));
+        const decisionHistory = priceDecision ? { priceDecision } : {};
+        await history(
+          tx,
+          command.actor,
+          operationId,
+          listing,
+          "listing.draft.saved",
+          { newVersion: listing.version + 1, ...decisionHistory },
+          decisionHistory,
+        );
+        return { reference: listing.reference, version: listing.version + 1 };
+      },
+    );
+  } catch (error) {
+    if (error instanceof DraftPriceValidation) throw error.validation;
+    throw error;
+  }
 }
 
 function scalar(value: string, key: string, integer: boolean) {

@@ -85,6 +85,31 @@ function priceText(value: unknown, purpose: unknown): string | null {
   return `${minor / 100n}.${String(minor % 100n).padStart(2, "0")}`;
 }
 
+export type UneditablePriceEvidence = Readonly<{
+  fieldKey: "price" | "price.amount_without_period";
+  fact: Readonly<Record<string, unknown> & { state: "known" | "conflicting" }>;
+}>;
+
+/** Original source facts requiring a broker choice; no amount or period is inferred. */
+export function uneditablePriceEvidence(
+  revision: WorkingDraftRevision | null | undefined,
+): readonly UneditablePriceEvidence[] {
+  const terms = record(revision?.terms);
+  const facts = record(terms.facts);
+  return (["price", "price.amount_without_period"] as const).flatMap((fieldKey) => {
+    const fact = record(facts[fieldKey]);
+    const state = fact.state;
+    if (state !== "known" && state !== "conflicting") return [];
+    if (
+      fieldKey === "price" &&
+      editableFact(fact, (value) => priceText(value, terms.purpose)).state !== "unknown"
+    ) {
+      return [];
+    }
+    return [{ fieldKey, fact: { ...fact, state } }];
+  });
+}
+
 function scalarText(value: unknown, integer: boolean): string | null {
   if (
     typeof value !== "number" ||

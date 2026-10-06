@@ -24,6 +24,16 @@ export const draftSchema = z.object({
   sourceLanguage: z.enum(["bg", "en", "ru", "de", "nl", "el", "he"]),
 });
 export type ListingDraft = z.infer<typeof draftSchema>;
+
+// A broker decision belongs to one Save command, never to the mutable draft.
+export const priceDecisionSchema = z
+  .object({
+    kind: z.literal("retain_unknown"),
+    sourceRevisionId: z.uuid(),
+  })
+  .strict();
+export type PriceDecision = z.infer<typeof priceDecisionSchema>;
+
 export const emptyDraft: ListingDraft = {
   title: "",
   description: "",
