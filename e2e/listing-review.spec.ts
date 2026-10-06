@@ -120,6 +120,12 @@ test("O16 publishes the exact package through its decision and shows the result"
     page.getByRole("heading", { level: 1, name: "Publication decision · BG" }),
   ).toBeVisible();
   await expect(page.getByText("Publishing actor")).toBeVisible();
+  // The package's own recorded decisions name who decided them, as today's directory names them.
+  await expect(page.getByText("Factual approval", { exact: true })).toBeVisible();
+  await expect(page.getByText("Editorial approval", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Test Staff (name as in the directory now)", { exact: false }),
+  ).toHaveCount(2);
   await expect(page.getByText("Butler cannot publish.", { exact: false })).toBeVisible();
   const decision = page.locator('[data-inventory-decision="activate"]');
   await decision
