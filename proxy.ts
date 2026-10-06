@@ -7,6 +7,7 @@ import {
   isRoutableLocale,
   isStaffLocale,
   localeCookie,
+  requestPathHeader,
   routableLocales,
   staffLocaleCookie,
 } from "@/i18n/config";
@@ -197,6 +198,9 @@ function route(request: NextRequest) {
   requestHeaders.set(appSurfaceHeader, context);
   // Overwrite any caller-supplied value so the public layout can omit GTM on token routes.
   requestHeaders.set("x-msr-share-token-route", privateShareRoute ? "1" : "0");
+  // The external path, for a signed-out layout guard to name a validated place to return to.
+  // Overwritten here, never trusted from the caller.
+  requestHeaders.set(requestPathHeader, `${pathname}${search}`);
 
   // A first segment that is not a locale of this host names no page. It goes straight to
   // Next's not-found route: under /<context>/[locale] a notFound() thrown by the layout would

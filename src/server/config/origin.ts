@@ -51,6 +51,7 @@ export function originHeaders(
       name === "x-nonce" ||
       name === "x-app-surface" ||
       name === "x-app-locale" ||
+      name === "x-app-path" ||
       name === "content-security-policy"
     )
       result.delete(name);

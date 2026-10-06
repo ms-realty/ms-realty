@@ -7,6 +7,7 @@ import {
   type Page,
   test,
 } from "@playwright/test";
+import { eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import sharp from "sharp";
@@ -171,6 +172,64 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
   await expect(page).toHaveURL(hostUrl("staff", "/en/access"));
   await page.getByRole("button", { name: "Sign in with a passkey", exact: true }).click();
   await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
+  // C-12: signed out at a privacy queue position, sign-in returns to exactly that position,
+  // through the workspace guard, without replaying anything.
+  const boundaryTime = new Date(Date.now() + 7200_000);
+  const queueRows = await db
+    .insert(schema.privacyRequests)
+    .values([
+      {
+        reference: `PR-SIGNIN-BOUNDARY-${randomUUID()}`,
+        kind: "correction",
+        responsibleId: account.id,
+        createdAt: boundaryTime,
+        scope: { description: "Synthetic sign-in queue boundary" },
+      },
+      {
+        reference: `PR-SIGNIN-TARGET-${randomUUID()}`,
+        kind: "correction",
+        responsibleId: account.id,
+        createdAt: new Date(Date.now() + 3600_000),
+        scope: { description: "Synthetic untouched sign-in destination" },
+      },
+    ])
+    .returning();
+  const [boundary, destination] = queueRows;
+  if (!boundary || !destination) throw new Error("Missing synthetic continuation queue");
+  try {
+    const cursor = Buffer.from(
+      JSON.stringify({ createdAt: boundaryTime.toISOString(), id: boundary.id }),
+    ).toString("base64url");
+    const returnTo = `/en/operations/privacy?after=${cursor}`;
+    await page.goto(hostUrl("staff", "/en/access/enrol"));
+    await page.getByRole("button", { name: "Sign out", exact: true }).click();
+    await page.goto(hostUrl("staff", returnTo));
+    await expect(page).toHaveURL(
+      (url) => url.pathname === "/en/access" && url.searchParams.get("returnTo") === returnTo,
+    );
+    await page.getByRole("button", { name: "Sign in with a passkey", exact: true }).click();
+    await expect(page).toHaveURL(hostUrl("staff", returnTo));
+    await expect(
+      page.getByRole("heading", { level: 2 }).filter({ hasText: destination.reference }),
+    ).toBeVisible();
+    const [untouched] = await db
+      .select()
+      .from(schema.privacyRequests)
+      .where(eq(schema.privacyRequests.id, destination.id));
+    expect(untouched).toMatchObject({ state: "received", version: 1 });
+    // Signed in, the same sign-in link goes straight to the position; a foreign path does not.
+    await page.goto(hostUrl("staff", `/en/access?returnTo=${encodeURIComponent(returnTo)}`));
+    await expect(page).toHaveURL(hostUrl("staff", returnTo));
+    await page.goto(hostUrl("staff", `/en/access?returnTo=${encodeURIComponent("/en/tasks")}`));
+    await expect(page).not.toHaveURL(/\/en\/tasks/);
+  } finally {
+    await db.delete(schema.privacyRequests).where(
+      inArray(
+        schema.privacyRequests.id,
+        queueRows.map((row) => row.id),
+      ),
+    );
+  }
   await page.goto(hostUrl("staff", "/en/access/manage"));
   await expect(page.getByRole("heading", { name: "Manage access", exact: true })).toBeVisible();
   // An operator can assign an explicit review capability to themselves. The actual grant

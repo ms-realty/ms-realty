@@ -146,3 +146,5 @@ export const staffLocaleCookie = "staff_locale";
 export const appLocaleHeader = "x-app-locale";
 /** Set by proxy.ts: which surface the URL belongs to, so a 404 renders inside its shell. */
 export const appSurfaceHeader = "x-app-surface";
+/** The external request path, set by the proxy (never the caller) for return-path checks. */
+export const requestPathHeader = "x-app-path";

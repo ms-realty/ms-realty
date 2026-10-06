@@ -8,6 +8,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from "@simplewebauthn/server";
+import { privacyQueueReturn } from "@/features/privacy/access";
 import { isStaffLocale } from "@/i18n/config";
 import { staffAccess } from "@/server/auth/access";
 import { setCeremony, takeCeremony } from "@/server/auth/ceremony";
@@ -49,6 +50,7 @@ export async function beginStaffPasskey(): Promise<
 /** Sign-in; the workspace guard then sends the member to enrolment or denial if needed. */
 export async function completeStaffPasskey(
   locale: string,
+  returnTo: string | null,
   response: AuthenticationResponseJSON,
 ): Promise<ActionResult<{ next: string }>> {
   return action(async ({ db, correlationId }) => {
@@ -59,7 +61,8 @@ export async function completeStaffPasskey(
       correlationId,
     });
     await setSessionCookie("staff", issued.token, issued.session.expiresAt);
-    return { next: `/${page}/today` };
+    // Revalidated here too: the bound value came from the page, not from the person.
+    return { next: privacyQueueReturn(page, returnTo) ?? `/${page}/today` };
   });
 }
 
