@@ -103,8 +103,8 @@ async function perform<V extends FormValues>(
   const jar = isInquiryDraftKind(kind) ? await cookies() : null;
   let referenceCookie: string | undefined, fencedReference: string | undefined;
   let referenceAlreadyPending = false;
-  const holdReference = (name: string) =>
-    jar?.set(name, key, {
+  const holdReference = (name: string, value = key) =>
+    jar?.set(name, value, {
       path: "/",
       sameSite: "strict",
       secure: getEnv().hosts.staff.startsWith("https://"),
@@ -223,6 +223,14 @@ async function perform<V extends FormValues>(
         outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: copy.unknown, status },
       };
     failedReceipt = receipt.ok && receipt.data?.status === "failed";
+    if (!enhancedInquiry(data) && receipt.ok) {
+      // Native POST must render its useActionState values/errors before hydration. The
+      // record rechecks these advisory markers: terminal failure is settled; missing may
+      // expose only K, so even a still-running earlier request cannot become a second write.
+      if (failedReceipt) holdReference(referenceCookie, `failed:${key}`);
+      else if (!receipt.data && error.code === "VALIDATION_FAILED")
+        holdReference(referenceCookie, `retry:${key}`);
+    }
   }
   const knownState = failedReceipt ? { ...state, inquiryReferenceToAcknowledge: key } : state;
   // Missing is not proof that an earlier request stopped. Reuse K until a terminal failure

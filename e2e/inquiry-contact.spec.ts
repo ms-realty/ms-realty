@@ -723,6 +723,59 @@ test("O02 storage-disabled triage draft survives a successful contact redirect a
   expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
 });
 
+test("O03 native pre-ledger validation retains the note and corrects with the same reference", async ({
+  browser,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en");
+  const before = await contactEvidence(fixture.id);
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  await signIn(context, fixture.token);
+  const page = await context.newPage();
+  const note = `Synthetic native validation draft ${randomUUID()}`;
+  try {
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    await page
+      .getByLabel(copy.contactedAt, { exact: true })
+      .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+    await page.getByLabel(copy.note, { exact: true }).fill(note);
+    await page.getByLabel(copy.nextAction, { exact: true }).fill("   x   ");
+    await page
+      .getByLabel(copy.dueAt, { exact: true })
+      .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+    await page.getByLabel(copy.confirm, { exact: true }).check();
+    const key = await page
+      .locator('[data-inquiry-contact] input[name="_operationId"]')
+      .inputValue();
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+    await expect(page.getByLabel(copy.nextAction, { exact: true })).toHaveValue("   x   ");
+    await expect(page.getByLabel(copy.nextAction, { exact: true })).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(page.locator('[data-inquiry-contact] input[name="_operationId"]')).toHaveValue(
+      key,
+    );
+    await expect(page.getByLabel(copy.confirm, { exact: true })).not.toBeChecked();
+    expect(await contactEvidence(fixture.id)).toEqual(before);
+    await page
+      .getByLabel(copy.nextAction, { exact: true })
+      .fill("Review the corrected native contact");
+    await page.getByLabel(copy.confirm, { exact: true }).check();
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: workCopy("en").changeSaved, exact: true }),
+    ).toBeVisible();
+    const after = await contactEvidence(fixture.id);
+    expect(after.receipts).toEqual([{ key, status: "succeeded" }]);
+    expect(after.observations).toBe(before.observations + 1);
+    expect(after.tasks).toBe(before.tasks + 1);
+  } finally {
+    await context.close();
+  }
+});
+
 test("O02 native triage submits its reason with a stable inquiry form identity", async ({
   browser,
 }) => {
