@@ -7,6 +7,7 @@
 // Figma's Mine / Needs action views, Filters, pagination and "open the case waiting for action"
 // are left out rather than computed from its capped page of 50.
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { getDb } from "@/db/client";
 import type { Session } from "@/server/auth/sessions";
 import { listCases } from "@/server/cases/queries";
@@ -42,6 +43,7 @@ export async function CaseDirectoryScreen({
   const q = typed.slice(0, searchLimit);
   // A failed read is its own state; it never renders as an empty list.
   const rows = await listCases(getDb(), session, q).catch((error: unknown) => {
+    unstable_rethrow(error);
     console.error(
       "[O04] case list unavailable:",
       isAppError(error) ? error.code : error instanceof Error ? error.name : typeof error,
