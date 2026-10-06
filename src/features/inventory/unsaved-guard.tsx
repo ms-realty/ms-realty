@@ -3,8 +3,9 @@
 // that navigate, Review, the staff shell) asks Save draft / Discard / Stay; closing or
 // reloading the page gets the browser's own prompt. The form is compared with its contents
 // when the page loaded; operation identity fields are ignored. Only a save the server
-// acknowledged (savedOperationCookie for this form's operation) leaves without asking, so a
-// failed, rejected or stalled save keeps the work protected.
+// acknowledged (savedOperationCookie for this form's operation) leaves without asking, and only
+// while the form still holds what that save sent; a failed, rejected or stalled save, or any
+// later edit, keeps the work protected.
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/ui/button-class";
 import { formFields } from "@/ui/form/contract";
@@ -34,13 +35,22 @@ export function UnsavedGuard({
         [...new FormData(editor)].filter(([name]) => !name.startsWith("_")).map(String),
       );
     const initial = snapshot();
+    // What the last save sent: an acknowledgement covers exactly that content, never later edits.
+    let submitted: string | null = null;
+    const submit = () => {
+      submitted = snapshot();
+    };
     const saved = () => {
       const id = editor.querySelector<HTMLInputElement>(
         `input[name="${formFields.operationId}"]`,
       )?.value;
       return Boolean(id) && document.cookie.split("; ").includes(`${savedOperationCookie}=${id}`);
     };
-    const dirty = () => !leaving.current && !saved() && snapshot() !== initial;
+    const dirty = () => {
+      if (leaving.current) return false;
+      const now = snapshot();
+      return now !== initial && !(now === submitted && saved());
+    };
     const click = (event: MouseEvent) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
         return;
@@ -66,9 +76,11 @@ export function UnsavedGuard({
       event.preventDefault();
       event.returnValue = "";
     };
+    editor.addEventListener("submit", submit, true);
     document.addEventListener("click", click, true);
     window.addEventListener("beforeunload", unload);
     return () => {
+      editor.removeEventListener("submit", submit, true);
       document.removeEventListener("click", click, true);
       window.removeEventListener("beforeunload", unload);
     };

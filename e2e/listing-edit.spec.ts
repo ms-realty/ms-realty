@@ -214,6 +214,10 @@ test.describe("JavaScript on", () => {
     const before = await listing(f.listingId);
     await signIn(page, f.token);
     await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+    // The leave guard runs once hydrated, when the no-JavaScript note is gone.
+    await expect(
+      page.getByText("Without JavaScript, save before opening Photos or Review", { exact: false }),
+    ).toHaveCount(0);
     await page.getByLabel("Description", { exact: true }).fill("Незаписана промяна.");
     const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
 
@@ -318,6 +322,22 @@ test.describe("JavaScript on", () => {
       expect(failed.prompts).toEqual(["beforeunload"]);
       await failed.tab.unrouteAll({ behavior: "ignoreErrors" });
     }
+
+    // An acknowledgement covers only the content that was sent: the same editor, edited after
+    // its operation was acknowledged, is still protected.
+    const retained = await open();
+    await retained.source.fill("");
+    await retained.tab.getByRole("button", { name: "Save the facts" }).click();
+    await expect(retained.source).toHaveAttribute("aria-invalid", "true");
+    const operation = await retained.tab.locator('input[name="_operationId"]').first().inputValue();
+    await retained.tab
+      .context()
+      .addCookies([
+        { name: "msr_saved_operation", value: operation, url: origins.staff, sameSite: "Strict" },
+      ]);
+    await retained.source.fill("Synthetic contract, later edit");
+    await retained.tab.reload();
+    expect(retained.prompts).toEqual(["beforeunload"]);
 
     // Acknowledged saves, from the dialog and from the form's own button, raise no prompt.
     const viaDialog = await open();
