@@ -361,17 +361,15 @@ async function ownReview(page: import("@playwright/test").Page) {
       },
     ),
   ) as { token: string; sessionId: string; targetId: string };
-  await page
-    .context()
-    .addCookies([
-      {
-        name: "msr_staff_session",
-        value: fixture.token,
-        url: origins.staff,
-        httpOnly: true,
-        sameSite: "Lax",
-      },
-    ]);
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: fixture.token,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
   await page.goto(hostUrl("staff", "/en/operations/privacy"));
   const form = page
     .locator("form")
