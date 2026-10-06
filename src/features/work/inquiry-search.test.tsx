@@ -31,6 +31,7 @@ function renderSearch(
       scope="mine"
       page={1}
       clearHref="/en/inquiries?view=mine"
+      aside={<p>Nothing is listed in this scope</p>}
     >
       <p>Server-rendered queue</p>
     </InquirySearch>,
@@ -51,12 +52,15 @@ it("posts the term, replaces the queue with results and keeps the term out of ev
     }),
   );
   renderSearch(action);
+  expect(screen.getByText("Nothing is listed in this scope")).toBeVisible();
   fireEvent.change(screen.getByLabelText("Search conversations"), { target: { value: term } });
   fireEvent.click(screen.getByRole("button", { name: "Search" }));
   const heading = await screen.findByRole("heading", { name: "Search results" });
   await waitFor(() => expect(heading).toHaveFocus());
   expect(action.mock.calls[0]?.[1].get("q")).toBe(term);
   expect(screen.queryByText("Server-rendered queue")).toBeNull();
+  // The empty-scope explanation is about the queue, not about these results.
+  expect(screen.queryByText("Nothing is listed in this scope")).toBeNull();
   const results = screen.getByRole("list", { name: "Search results" });
   expect(within(results).getByRole("link")).toHaveAttribute("href", "/en/inquiries/two?view=mine");
   expect(within(results).getByRole("link")).toHaveTextContent("Synthetic Nikol · RQ-TEST-two");
@@ -93,6 +97,7 @@ it("shows a refused term inline, focuses the field and keeps the queue", async (
   );
   await waitFor(() => expect(input).toHaveFocus());
   expect(screen.getByText("Server-rendered queue")).toBeVisible();
+  expect(screen.getByText("Nothing is listed in this scope")).toBeVisible();
 });
 
 it("announces a failed search and keeps the queue", async () => {
