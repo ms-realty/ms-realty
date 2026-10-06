@@ -38,6 +38,7 @@ try {
     title: string,
     draft: Record<string, string>,
     price?: Parameters<typeof createListingFixture>[1]["price"],
+    facts?: Parameters<typeof createListingFixture>[1]["facts"],
   ) =>
     db.transaction(async (tx) => {
       await tx.execute(
@@ -49,6 +50,7 @@ try {
         description: "Синтетичен тестов имот. Не е реална оферта.",
         photos: 1,
         ...(price ? { price } : {}),
+        ...(facts ? { facts } : {}),
       });
       const number = randomBytes(6).readUIntBE(0, 6).toString();
       const reference = `MS-${number}`;
@@ -92,12 +94,23 @@ try {
     },
   );
   await publishForTest(db, broker.actor, fixture, ["bg"]);
+  // Two recorded area bases: the review shows both, never one picked.
+  const twoAreas = await listing("Синтетична обява с две площи", {}, undefined, {
+    bedrooms: { state: "known", value: 2 },
+    "area.living": {
+      state: "known",
+      value: { value: 68, unit: "m2", basis: "living" },
+      unit: "m2",
+    },
+    "area.land": { state: "known", value: { value: 450, unit: "m2", basis: "land" }, unit: "m2" },
+  });
   console.log(
     JSON.stringify({
       reference: fixture.reference,
       listingId: fixture.listingId,
       blank: { reference: blank.reference, listingId: blank.listingId },
       bgn: { reference: bgn.reference, listingId: bgn.listingId },
+      twoAreas: { reference: twoAreas.reference, listingId: twoAreas.listingId },
       token: broker.token,
       readerToken: readerSession.token,
     }),

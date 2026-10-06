@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
-import { operations } from "@/db/schema";
+import { listingRevisions, operations, propertyFacts } from "@/db/schema";
 import { publicLocales } from "@/domain/ids";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import {
@@ -71,14 +71,6 @@ function Rows({ rows }: { rows: [string, string][] }) {
       ))}
     </dl>
   );
-}
-
-function number(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  const record = value as { value?: unknown; amountMinor?: unknown } | null;
-  if (typeof record?.amountMinor === "number") return record.amountMinor / 100;
-  if (typeof record?.value === "number") return record.value;
-  return null;
 }
 
 export async function ReviewView({
@@ -151,33 +143,95 @@ export async function ReviewView({
     return manifest ? [manifest] : [];
   });
 
-  // The candidate and its facts: the frozen revision when there is one, else the working draft.
+  // One explicit subject: the approved revision, which readiness, prepare and activate use. A
+  // newer frozen revision is named separately and never inherits the approved one's checks.
   const input = readiness.input;
   const eligible = readiness.decision.outcome === "allowed";
+  const [approved] = listing.approvedRevisionId
+    ? await getDb()
+        .select()
+        .from(listingRevisions)
+        .where(eq(listingRevisions.id, listing.approvedRevisionId))
+    : [];
+  const subject = approved ?? revision;
+  const subjectFacts = !subject
+    ? []
+    : subject.id === revision?.id
+      ? data.facts
+      : await getDb()
+          .select()
+          .from(propertyFacts)
+          .where(eq(propertyFacts.factRevisionId, subject.factRevisionId));
   const photos = [...data.media]
     .filter(({ relation }) => !relation.removedAt && !relation.hidden)
     .sort((a, b) => a.relation.position - b.relation.position);
   const cover = photos.find(({ asset }) => asset.scan === "clean" && asset.processing === "ready");
-  const price = revision ? termsFacts(revision.terms).price : null;
-  const area = revision ? data.facts.find((fact) => fact.fieldKey.startsWith("area.")) : null;
-  const bedrooms = revision ? data.facts.find((fact) => fact.fieldKey === "bedrooms") : null;
-  const known = (state: string | undefined, value: unknown) =>
-    state === "known" ? number(value) : null;
-  const facts = {
-    price: revision
-      ? known(price?.state, price?.value)
-      : known(values.priceState, values.price === "" ? null : Number(values.price)),
-    area: revision
-      ? known(area?.state, area?.value)
-      : known(values.areaState, values.area === "" ? null : Number(values.area)),
-    bedrooms: revision
-      ? known(bedrooms?.state, bedrooms?.value)
-      : known(values.bedroomsState, values.bedrooms === "" ? null : Number(values.bedrooms)),
+  const known = (state: string, value: string) =>
+    state === "known" && value !== "" && Number.isFinite(Number(value));
+  // Recorded money keeps its own currency and period; nothing is converted.
+  const money = (value: unknown): string | null => {
+    const amount = value as { amountMinor?: unknown; currency?: unknown; period?: unknown } | null;
+    if (typeof amount?.amountMinor !== "number") return null;
+    const currency =
+      typeof amount.currency === "string" && /^[A-Z]{3}$/.test(amount.currency)
+        ? amount.currency
+        : null;
+    const text = currency
+      ? new Intl.NumberFormat(locale, {
+          style: "currency",
+          currency,
+          maximumFractionDigits: 2,
+          minimumFractionDigits: 0,
+        }).format(amount.amountMinor / 100)
+      : new Intl.NumberFormat(locale).format(amount.amountMinor / 100);
+    return amount.period === "month" ? `${text} ${o16.perMonth}` : text;
   };
+  const recorded = (
+    fact: { state: string; value: unknown } | undefined,
+    format: (v: unknown) => string | null,
+  ) =>
+    fact && (fact.state === "known" || fact.state === "conflicting")
+      ? (Array.isArray(fact.value) ? fact.value : [fact.value])
+          .map(format)
+          .filter(Boolean)
+          .join(" | ") || null
+      : null;
+  const priceLine = subject
+    ? recorded(termsFacts(subject.terms).price, money)
+    : known(values.priceState, values.price)
+      ? money({ amountMinor: Number(values.price) * 100, currency: "EUR", period: "total" })
+      : null;
+  // Every recorded area basis with its own unit; several bases are shown, never one picked.
+  const areaLines = subject
+    ? subjectFacts
+        .filter((fact) => fact.fieldKey.startsWith("area."))
+        .map((fact) => {
+          const text = recorded(fact, (value) => {
+            const area = value as { value?: unknown; unit?: unknown } | null;
+            if (typeof area?.value !== "number") return null;
+            const unit = area.unit === "m2" ? "m²" : typeof area.unit === "string" ? area.unit : "";
+            return `${new Intl.NumberFormat(locale).format(area.value)} ${unit}`.trim();
+          });
+          return text ? `${optionLabel(fact.fieldKey.slice(5), locale)} ${text}` : null;
+        })
+        .filter((line): line is string => Boolean(line))
+    : known(values.areaState, values.area)
+      ? [
+          `${optionLabel(values.areaBasis, locale)} ${new Intl.NumberFormat(locale).format(Number(values.area))} m²`,
+        ]
+      : [];
+  const bedroomFact = subjectFacts.find((fact) => fact.fieldKey === "bedrooms");
+  const bedroomsValue = subject
+    ? bedroomFact?.state === "known" && typeof bedroomFact.value === "number"
+      ? bedroomFact.value
+      : null
+    : known(values.bedroomsState, values.bedrooms)
+      ? Number(values.bedrooms)
+      : null;
   const unknown = [
-    facts.price === null ? o16.price : null,
-    facts.area === null ? o16.area : null,
-    facts.bedrooms === null ? copy.o12.bedroomsLabel : null,
+    priceLine === null ? o16.price : null,
+    areaLines.length === 0 ? o16.area : null,
+    bedroomsValue === null ? copy.o12.bedroomsLabel : null,
   ].filter(Boolean);
   const checks: [string, boolean][] = [
     [o16.checks.facts, input.factReviewValid],
@@ -316,10 +370,20 @@ export async function ReviewView({
                 : o16.publicNone}
             </p>
             <p className="bg-brand-tint p-3 text-brand">
-              {revision
-                ? fill(o16.candidateRevision, { n: revision.revisionNumber })
-                : o16.candidateDraft}
+              {approved
+                ? fill(o16.candidateApproved, { n: approved.revisionNumber })
+                : revision
+                  ? fill(o16.candidateUnapproved, { n: revision.revisionNumber })
+                  : o16.candidateDraft}
             </p>
+            {approved && revision && revision.id !== approved.id ? (
+              <p className="bg-warning-soft p-3 text-text">
+                {fill(o16.newerPending, {
+                  newer: revision.revisionNumber,
+                  approved: approved.revisionNumber,
+                })}
+              </p>
+            ) : null}
           </section>
           <section aria-labelledby="o16-working" className="flex flex-col gap-3">
             <h2 id="o16-working" className="text-dense font-semibold">
@@ -358,8 +422,8 @@ export async function ReviewView({
             <p className="text-dense text-text-muted">{o16.changesNeedReview}</p>
           </section>
           <section aria-labelledby="o16-approvals" className="flex flex-col gap-1">
-            <h2 id="o16-approvals" className="sr-only">
-              {o16.approvals}
+            <h2 id="o16-approvals" className="text-dense font-semibold">
+              {approved ? fill(o16.approvalsFor, { n: approved.revisionNumber }) : o16.approvals}
             </h2>
             <ul className="flex flex-col">
               {checks.map(([label, okay]) => (
@@ -436,13 +500,9 @@ export async function ReviewView({
           </a>
           <p>
             {[
-              facts.price === null
-                ? null
-                : `${o16.price} ${new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(facts.price)}`,
-              facts.area === null
-                ? null
-                : `${o16.area} ${new Intl.NumberFormat(locale).format(facts.area)} m²`,
-              facts.bedrooms === null ? null : bedroomCount(locale, facts.bedrooms),
+              priceLine === null ? null : `${o16.price} ${priceLine}`,
+              ...areaLines,
+              bedroomsValue === null ? null : bedroomCount(locale, bedroomsValue),
               property.settlement,
             ]
               .filter(Boolean)
