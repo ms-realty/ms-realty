@@ -430,7 +430,8 @@ export async function StaffPrivacyScreen({
         const next = privacyRequestMachine.transitions[record.state];
         return (
           <section
-            key={record.id}
+            // Keyed by staff member too: another member never inherits a dirty review.
+            key={`${record.id}:${session.account.id}`}
             className="grid min-w-0 grid-cols-1 gap-4 rounded-panel border border-divider bg-surface p-5 wrap-anywhere"
           >
             <h2 className="text-section font-semibold">
@@ -453,6 +454,8 @@ export async function StaffPrivacyScreen({
                   id={record.id}
                   version={record.version}
                   operationId={randomUUID()}
+                  actorId={session.account.id}
+                  restoredLabel={c.restoredReview}
                 />
                 {/* A wrapping label would add the chosen option to the select's accessible name. */}
                 <div className="grid gap-1">

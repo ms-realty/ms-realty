@@ -269,4 +269,81 @@ test("C-11: a dirty privacy review keeps its reviewed version through a page ref
     .from(schema.privacyRequests)
     .where(eq(schema.privacyRequests.id, id));
   expect(after).toMatchObject({ state: before?.state, version: Number(version) + 1 });
+  // The unsent review comes back with a notice, on the current version, and records once.
+  await expect(
+    form.getByText("Your unsent review is restored below.", { exact: false }),
+  ).toBeVisible();
+  await expect(form.getByLabel("Next state", { exact: true })).toHaveValue("verifying");
+  await expect(form.getByRole("checkbox", { name: /I reviewed the policy/ })).toBeChecked();
+  await expect(form.locator('input[name="expectedVersion"]')).toHaveValue(
+    String(Number(version) + 1),
+  );
+  await form.getByRole("button", { name: "Record human review", exact: true }).click();
+  await expect(page.getByText("Change recorded", { exact: false })).toBeVisible();
+  const [saved] = await db
+    .select()
+    .from(schema.privacyRequests)
+    .where(eq(schema.privacyRequests.id, id));
+  expect(saved).toMatchObject({ state: "verifying", version: Number(version) + 2 });
+  await expect(
+    form.getByText("Your unsent review is restored below.", { exact: false }),
+  ).toHaveCount(0);
+});
+
+test("C-11: another staff member never inherits a dirty review or its operation", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  const seedQueue = () =>
+    JSON.parse(
+      execFileSync(
+        process.execPath,
+        [
+          "--conditions=react-server",
+          "--import",
+          "tsx",
+          "src/server/privacy/queue-browser-seed.ts",
+        ],
+        {
+          env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
+          encoding: "utf8",
+        },
+      ),
+    ) as { token: string; targetId: string };
+  // B first, so A's records are the newer ones on A's pages.
+  const b = seedQueue(),
+    a = seedQueue();
+  const signIn = (token: string) =>
+    page.context().addCookies([
+      {
+        name: "msr_staff_session",
+        value: token,
+        url: origins.staff,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+  await signIn(a.token);
+  await page.goto(hostUrl("staff", "/en/operations/privacy"));
+  const form = page
+    .locator("form")
+    .filter({ has: page.locator(`input[name="id"][value="${a.targetId}"]`) });
+  for (let pages = 0; (await form.count()) === 0 && pages < 40; pages++)
+    await page.getByRole("link", { name: "Next requests", exact: true }).click();
+  const operation = await form.locator('input[name="operationId"]').inputValue();
+  await form.getByLabel("Next state", { exact: true }).selectOption("verifying");
+  await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  // Staff member B takes over this tab; the refreshed page belongs to B alone.
+  await signIn(b.token);
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await expect(page.getByRole("heading", { level: 1, name: "Privacy review" })).toBeVisible({
+    timeout: 30_000,
+  });
+  // B may review the same record: it is a fresh form with B's own operation.
+  await expect(form).toHaveCount(1);
+  await expect(form.locator('input[name="operationId"]')).not.toHaveValue(operation);
+  await expect(form.getByRole("checkbox", { name: /I reviewed the policy/ })).not.toBeChecked();
+  await expect(
+    form.getByText("Your unsent review is restored below.", { exact: false }),
+  ).toHaveCount(0);
 });

@@ -21,6 +21,8 @@ const en = {
   receipt: "Change recorded",
   error: "The change could not be confirmed. Review the current state before trying again.",
   conflict: "This record changed. Refresh and review the current version.",
+  restoredReview:
+    "Your unsent review is restored below. Check it against the current version before you record it.",
   contacts: "Contact routes",
   verified: "Verified",
   unverified: "Not verified",
@@ -99,6 +101,8 @@ const bg: typeof en = {
   receipt: "Промяната е записана",
   error: "Промяната не е потвърдена. Проверете текущото състояние преди нов опит.",
   conflict: "Записът е променен. Обновете и прегледайте текущата версия.",
+  restoredReview:
+    "Неизпратеният ви преглед е възстановен по-долу. Проверете го спрямо текущата версия, преди да го запишете.",
   contacts: "Начини за контакт",
   verified: "Потвърден",
   unverified: "Непотвърден",
