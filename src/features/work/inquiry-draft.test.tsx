@@ -258,6 +258,101 @@ describe("O02/O03 inquiry drafts", () => {
     );
   });
 
+  it.each([false, true])(
+    "retains edited same-reference recovery values after success-only status (storage disabled: %s)",
+    async (disabled) => {
+      if (disabled)
+        vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+          throw new Error("Storage disabled");
+        });
+      const draftOwner = owner();
+      const completions: ((state: FormState<ContactValues>) => void)[] = [];
+      const pending: FormAction<ContactValues> = () =>
+        new Promise((resolve) => completions.push(resolve));
+      const original = render(<Forms draftOwner={draftOwner} action={pending} />);
+      fireEvent.change(screen.getByLabelText(contact.note), { target: { value: "Original note" } });
+      fireEvent.change(screen.getByLabelText(contact.nextAction), {
+        target: { value: "Original next action" },
+      });
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: contact.submit })));
+      original.unmount();
+      const recovered = { ...initial(), inquiryRetryOperationId: initial().operationId };
+      const editing = render(<Forms draftOwner={draftOwner} state={recovered} />);
+      fireEvent.change(screen.getByLabelText(contact.note), {
+        target: { value: "Corrected note" },
+      });
+      fireEvent.change(screen.getByLabelText(contact.nextAction), {
+        target: { value: "Corrected next action" },
+      });
+      editing.unmount();
+      const retry = render(<Forms draftOwner={draftOwner} state={recovered} action={pending} />);
+      expect(screen.getByLabelText(contact.note)).toHaveValue("Corrected note");
+      expect(screen.getByLabelText(contact.note)).not.toHaveAttribute("readonly");
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: contact.submit })));
+      retry.unmount();
+      const status = render(
+        <InquiryDraftReconciliation
+          owner={draftOwner}
+          id="one"
+          kind="contact"
+          operationId={initial().operationId}
+          outcome="succeeded"
+        />,
+      );
+      status.unmount();
+      render(<Forms draftOwner={draftOwner} state={{ ...initial("b"), expectedRevision: 3 }} />);
+      expect(screen.getByLabelText(contact.note)).toHaveValue("Corrected note");
+      expect(screen.getByLabelText(contact.nextAction)).toHaveValue("Corrected next action");
+      expect(screen.getByLabelText(contact.confirm)).not.toBeChecked();
+      expect(document.querySelector('input[name="_operationId"]')).toHaveValue(
+        initial("b").operationId,
+      );
+      await act(async () => {
+        for (const finish of completions) finish(initial());
+      });
+    },
+  );
+
+  it("clears edited recovery values when their matching confirmation body is observed", async () => {
+    const draftOwner = owner();
+    let finish!: (state: FormState<ContactValues>) => void;
+    const original = render(
+      <Forms
+        draftOwner={draftOwner}
+        action={() =>
+          new Promise((resolve) => {
+            finish = resolve;
+          })
+        }
+      />,
+    );
+    fireEvent.change(screen.getByLabelText(contact.note), { target: { value: "Original note" } });
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: contact.submit })));
+    original.unmount();
+    await act(async () => finish(initial()));
+    const recovered = { ...initial(), inquiryRetryOperationId: initial().operationId };
+    const confirmed: FormAction<ContactValues> = async (state, data) => ({
+      ...state,
+      responseId: "confirmed-correction",
+      values: { ...state.values, note: String(data.get("note") ?? "") },
+      outcome: {
+        kind: "confirmed",
+        receipt: {
+          title: work.changeSaved,
+          reference: "RQ-SYNTHETIC",
+          recordedAt: { dateTime: new Date().toISOString(), label: "Just now" },
+          nextStep: "Review the inquiry",
+          destination: { href: "/en/inquiries/one", label: work.openRecord },
+        },
+      },
+    });
+    render(<Forms draftOwner={draftOwner} state={recovered} action={confirmed} />);
+    fireEvent.change(screen.getByLabelText(contact.note), { target: { value: "Corrected note" } });
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: contact.submit })));
+    expect(screen.getByRole("heading", { name: work.changeSaved })).toBeVisible();
+    expect(readInquiryDraft(draftOwner, "one", "contact", initial())).toBeNull();
+  });
+
   it("adopts edits to server-rendered controls before hydration over the older local draft", async () => {
     const draftOwner = owner();
     const first = render(<Forms draftOwner={draftOwner} />);

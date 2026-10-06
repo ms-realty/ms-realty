@@ -592,90 +592,159 @@ test("O02 lost validation body resumes the retained draft with the same referenc
   }
 });
 
-test("O02 missing-receipt recovery cannot duplicate an earlier contact still in flight", async ({
-  page,
-  context,
-}) => {
-  const fixture = seed(),
-    copy = contactCopy("en"),
-    work = workCopy("en");
-  const before = await contactEvidence(fixture.id);
-  await signIn(context, fixture.token);
-  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
-  const note = `Earlier in-flight contact ${randomUUID()}`;
-  await page
-    .getByLabel(copy.contactedAt, { exact: true })
-    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
-  await page.getByLabel(copy.note, { exact: true }).fill(note);
-  await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the original contact");
-  await page
-    .getByLabel(copy.dueAt, { exact: true })
-    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
-  await page.getByLabel(copy.confirm, { exact: true }).check();
-  const key = await page.locator('[data-inquiry-contact] input[name="_operationId"]').inputValue();
-  let acquired!: () => void, release!: () => void;
-  const locked = new Promise<void>((resolve) => {
-    acquired = resolve;
-  });
-  const held = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const rowLock = connection.begin(async (tx) => {
-    await tx`select id from inquiries where id = ${fixture.id}::uuid for update`;
-    acquired();
-    await held;
-  });
-  await locked;
-  let first = true;
-  await page.route("**/*", async (route) => {
-    if (first && route.request().method() === "POST" && route.request().headers()["next-action"]) {
-      first = false;
-      const response = await route.fetch();
-      // The original request continues in the server even after the client opens status.
-      await route.fulfill({ response, body: "" }).catch(() => {});
-    } else await route.continue();
-  });
-  const waiting = async () => {
-    const [row] = await connection<{ count: number }[]>`
+for (const retryBody of ["received", "lost"] as const) {
+  test(`O02 missing-receipt recovery cannot duplicate an earlier contact still in flight (retry body ${retryBody})`, async ({
+    page,
+    context,
+  }) => {
+    const fixture = seed(),
+      copy = contactCopy("en"),
+      work = workCopy("en");
+    const before = await contactEvidence(fixture.id);
+    await signIn(context, fixture.token);
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    const note = `Earlier in-flight contact ${randomUUID()}`;
+    await page
+      .getByLabel(copy.contactedAt, { exact: true })
+      .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+    await page.getByLabel(copy.note, { exact: true }).fill(note);
+    await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the original contact");
+    await page
+      .getByLabel(copy.dueAt, { exact: true })
+      .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+    await page.getByLabel(copy.confirm, { exact: true }).check();
+    const key = await page
+      .locator('[data-inquiry-contact] input[name="_operationId"]')
+      .inputValue();
+    let acquired!: () => void, release!: () => void;
+    const locked = new Promise<void>((resolve) => {
+      acquired = resolve;
+    });
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const rowLock = connection.begin(async (tx) => {
+      await tx`select id from inquiries where id = ${fixture.id}::uuid for update`;
+      acquired();
+      await held;
+    });
+    await locked;
+    let contactRequests = 0,
+      retryConflict = false,
+      retryCookie = "";
+    let delivered!: () => void;
+    const retryDropped = new Promise<void>((resolve) => {
+      delivered = resolve;
+    });
+    await page.route("**/*", async (route) => {
+      const request = route.request();
+      const contactRequest =
+        request.method() === "POST" &&
+        request.headers()["next-action"] &&
+        new URL(request.url()).pathname === `/en/inquiries/${fixture.id}`;
+      if (contactRequest) contactRequests++;
+      if (contactRequest && (contactRequests === 1 || retryBody === "lost")) {
+        const attempt = contactRequests;
+        const response = await route.fetch();
+        if (attempt === 2) {
+          retryConflict = (await response.text()).includes("IDEMPOTENCY_KEY_REUSED");
+          retryCookie = response.headers()["set-cookie"] ?? "";
+        }
+        // The original request continues in the server even after the client opens status.
+        // Deliver the real headers, including cookies, but lose both acknowledgment bodies.
+        if (attempt === 1) await route.fulfill({ response, body: "" }).catch(() => {});
+        else {
+          await route.fulfill({ response, body: "" });
+          delivered();
+        }
+      } else await route.continue();
+    });
+    const waiting = async () => {
+      const [row] = await connection<{ count: number }[]>`
       select count(*)::int as count from pg_stat_activity
       where datname = current_database() and wait_event_type = 'Lock'
       and query ilike '%inquiries%' and query ilike '%for update%'`;
-    return row?.count;
-  };
-  try {
-    await page.getByRole("button", { name: copy.submit, exact: true }).click();
-    await expect.poll(waiting).toBe(1);
-    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
-    await expect(page.getByText(work.statusMissing, { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: work.retryDraft, exact: true }).click();
-    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
-    await expect(page.locator('[data-inquiry-contact] input[name="_operationId"]')).toHaveValue(
-      key,
-    );
-    const changed = "Corrected contact intent while the earlier request is running";
-    await page.getByLabel(copy.nextAction, { exact: true }).fill(changed);
-    await page.getByLabel(copy.confirm, { exact: true }).check();
-    await page.getByRole("button", { name: copy.submit, exact: true }).click();
-    await expect.poll(waiting).toBe(2);
-    release();
-    await rowLock;
-    await expect(page.getByText(work.conflict, { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: copy.submit, exact: true })).toHaveCount(0);
-    await page.getByRole("link", { name: work.statusLink, exact: true }).click();
-    await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
-    await openRecord(page, work.openRecord);
-    await expect(page.getByRole("complementary").getByText(note, { exact: true })).toBeVisible();
-    await expect(page.getByLabel(copy.nextAction, { exact: true })).toHaveValue(changed);
-    const after = await contactEvidence(fixture.id);
-    expect(after.receipts).toEqual([{ key, status: "succeeded" }]);
-    expect(after.observations).toBe(before.observations + 1);
-    expect(after.tasks).toBe(before.tasks + 1);
-  } finally {
-    release();
-    await rowLock;
-    await page.unrouteAll({ behavior: "wait" });
-  }
-});
+      return row?.count;
+    };
+    try {
+      await page.getByRole("button", { name: copy.submit, exact: true }).click();
+      await expect.poll(waiting).toBe(1);
+      await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+      await expect(page.getByText(work.statusMissing, { exact: true })).toBeVisible();
+      await page.getByRole("button", { name: work.retryDraft, exact: true }).click();
+      await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+      await expect(page.locator('[data-inquiry-contact] input[name="_operationId"]')).toHaveValue(
+        key,
+      );
+      const changed = "Corrected contact intent while the earlier request is running";
+      const correctedNote = `Corrected unapplied note ${randomUUID()}`;
+      await page.getByLabel(copy.note, { exact: true }).fill(correctedNote);
+      await page.getByLabel(copy.nextAction, { exact: true }).fill(changed);
+      await page.getByLabel(copy.confirm, { exact: true }).check();
+      await page.getByRole("button", { name: copy.submit, exact: true }).click();
+      await expect.poll(waiting).toBe(2);
+      release();
+      await rowLock;
+      if (retryBody === "lost") {
+        await retryDropped;
+        expect(retryConflict).toBe(true);
+        expect(retryCookie).not.toContain("Max-Age=0");
+        expect(
+          (await context.cookies()).find((cookie) => cookie.name.endsWith(`_${fixture.id}_contact`))
+            ?.value,
+        ).toBe(key);
+        await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+      } else {
+        await expect(page.getByText(work.conflict, { exact: true })).toBeVisible();
+        await expect(page.getByRole("button", { name: copy.submit, exact: true })).toHaveCount(0);
+        await page.getByRole("link", { name: work.statusLink, exact: true }).click();
+      }
+      await expect(
+        page.getByRole("heading", { name: work.changeSaved, exact: true }),
+      ).toBeVisible();
+      await openRecord(page, work.openRecord);
+      await expect(page.getByRole("complementary").getByText(note, { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("complementary").getByText(correctedNote, { exact: true }),
+      ).toHaveCount(0);
+      await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(correctedNote);
+      await expect(page.getByLabel(copy.nextAction, { exact: true })).toHaveValue(changed);
+      await expect(page.getByLabel(copy.confirm, { exact: true })).not.toBeChecked();
+      const after = await contactEvidence(fixture.id);
+      expect(after.receipts).toEqual([{ key, status: "succeeded" }]);
+      expect(after.observations).toBe(before.observations + 1);
+      expect(after.tasks).toBe(before.tasks + 1);
+      const observations = await db
+        .select({ payload: schema.auditEvents.payload })
+        .from(schema.auditEvents)
+        .where(
+          and(
+            eq(schema.auditEvents.recordId, fixture.id),
+            eq(schema.auditEvents.action, "work.inquiry.contact_recorded"),
+          ),
+        );
+      expect(observations).toEqual([
+        {
+          payload: expect.objectContaining({
+            note,
+            nextAction: "Review the original contact",
+          }),
+        },
+      ]);
+      expect(
+        await db
+          .select({ id: schema.tasks.id })
+          .from(schema.tasks)
+          .where(and(eq(schema.tasks.inquiryId, fixture.id), eq(schema.tasks.title, changed))),
+      ).toEqual([]);
+      expect(contactRequests).toBe(2);
+    } finally {
+      release();
+      await rowLock;
+      await page.unrouteAll({ behavior: "wait" });
+    }
+  });
+}
 
 test("O02 storage-disabled triage draft survives a successful contact redirect and confirmed return", async ({
   page,

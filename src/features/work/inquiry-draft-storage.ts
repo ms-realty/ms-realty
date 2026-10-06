@@ -8,7 +8,7 @@ type RetainedDraft = {
   ownerId: string;
   values: FormValues;
   revision: number | null;
-  operation?: { id: string; revision: number | null };
+  operation?: { id: string; revision: number | null; preserveOnSuccess?: boolean };
 };
 
 const prefix = "msr.inquiry-draft.";
@@ -19,6 +19,9 @@ const memory = new Map<string, RetainedDraft | null>();
 const unpersisted = new Set<string>();
 const revision = (value: unknown): value is number | null =>
   value === null || (typeof value === "number" && Number.isSafeInteger(value) && value > 0);
+// Rechecking contact facts is required on recovery; it does not change the command's intent.
+const sameIntent = (left: FormValues, right: FormValues) =>
+  Object.keys(right).every((name) => name === "reviewed" || left[name] === right[name]);
 
 /** A new actor or auth session removes the previous session's private in-tab drafts. */
 export function claimInquiryDraftOwner(owner: InquiryDraftOwner): boolean {
@@ -93,7 +96,10 @@ export function reconcileInquiryDraft(
         ? JSON.parse(sessionStorage.getItem(key) ?? "null")
         : null;
     if (retained?.ownerId !== owner.id || retained.operation?.id !== operationId) return;
-    if (outcome === "succeeded") persistDraft(owner, key, null);
+    // Status identifies K, not which payload won a concurrent same-K recovery. Keep edited
+    // values for review unless the client actually observed their matching confirmation.
+    if (outcome === "succeeded" && !retained.operation.preserveOnSuccess)
+      persistDraft(owner, key, null);
     else {
       const { operation: _operation, ...draft } = retained;
       persistDraft(owner, key, draft);
@@ -129,7 +135,9 @@ export function readInquiryDraft<V extends FormValues>(
     if (
       stored.operation &&
       (!/^[A-Za-z0-9_-]{43}\.[0-9a-f]{32}$/.test(stored.operation.id) ||
-        !revision(stored.operation.revision))
+        !revision(stored.operation.revision) ||
+        (stored.operation.preserveOnSuccess !== undefined &&
+          typeof stored.operation.preserveOnSuccess !== "boolean"))
     )
       return null;
     // A fresh record revision requires a fresh human confirmation of the contact facts.
@@ -155,16 +163,27 @@ export function retainInquiryDraft<V extends FormValues>(
   kind: InquiryDraftKind,
   initial: FormState<V>,
   { state, values, pending }: FormSnapshot<V>,
+  retryOperationId?: string,
 ): boolean {
   // A late response from a former account must never recreate that account's storage.
   if (!ownsInquiryDrafts(owner)) return false;
   const key = draftKey(id, kind);
+  const previous = readInquiryDraft(owner, id, kind, initial);
+  const priorOperation =
+    previous?.operation?.id === state.operationId ? previous.operation : undefined;
   if (state.outcome.kind === "confirmed") {
+    // An earlier attempt's late confirmation must not delete a newer corrected draft.
+    if (priorOperation?.preserveOnSuccess && previous && !sameIntent(previous.values, values)) {
+      const { operation: _operation, ...draft } = previous;
+      return persistDraft(owner, key, draft);
+    }
     return persistDraft(owner, key, null);
   }
   const unresolved = pending || ["unknown", "accepted"].includes(state.outcome.kind);
+  const recovering = retryOperationId === state.operationId;
   if (
     !unresolved &&
+    !recovering &&
     Object.keys(initial.values).every((name) => values[name] === initial.values[name])
   ) {
     return persistDraft(owner, key, null);
@@ -173,8 +192,17 @@ export function retainInquiryDraft<V extends FormValues>(
     ownerId: owner.id,
     values: { ...values },
     revision: state.expectedRevision,
-    ...(unresolved
-      ? { operation: { id: state.operationId, revision: state.expectedRevision } }
+    ...(unresolved || recovering
+      ? {
+          operation: {
+            id: state.operationId,
+            revision: state.expectedRevision,
+            ...(priorOperation?.preserveOnSuccess ||
+            (recovering && (!priorOperation || !previous || !sameIntent(previous.values, values)))
+              ? { preserveOnSuccess: true }
+              : {}),
+          },
+        }
       : {}),
   };
   return persistDraft(owner, key, retained);

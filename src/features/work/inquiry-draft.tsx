@@ -178,7 +178,14 @@ function InquiryDraftSession<V extends FormValues>({
         firstSnapshot.current = snapshot;
         return;
       }
-      retainInquiryDraft(owner, id, kind, initial, snapshot);
+      retainInquiryDraft(
+        owner,
+        id,
+        kind,
+        initial,
+        snapshot,
+        (initial as FormState<V> & InquiryReferenceState).inquiryRetryOperationId,
+      );
       const acknowledgment = (snapshot.state as FormState<V> & InquiryReferenceState)
         .inquiryReferenceToAcknowledge;
       if (!snapshot.pending && acknowledgment && ownsInquiryDrafts(owner))
