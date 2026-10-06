@@ -52,3 +52,10 @@ Not done: the key `design/zero-learning/W03-expected-path-key.md` (evaluator's f
 - G-34: «Ще го направя аз» on PBUTLERANSWER frames is a bordered Secondary (4 instances).
 - G-35: the chosen review time on the O03 accept family (ready, sending, conflict, offline, unknown; design + prototypes) reads «Избрахте: 6 октомври 2026 · 10:00 · Europe/Sofia» (20 inputs). Shot reviewed.
 - G-36: «Оттеглете предложението» and «Вижте какво получава …» are bordered Secondary; every «Откажи» button label → «Назад» (84 changes in total; all renamed buttons navigate back or to the parent list, checked).
+
+## Fix 8 (UI master, one bridge job; versions «Before W03 fix 8», «W03 fix 8 done»)
+
+- G-37: «Запазете номера на заявката / за проверка» → «Запазете кода на заявката»; Hebrew «שמרו את מספר המעקב» → «שמרו את קוד הפנייה» (22 nodes, pages 03, 06, 09, 12, 13).
+- G-38: Hebrew P12UCHECK heading «הבדיקה הסתיימה: אין אישור», result line «לא ניתן לאשר שהפנייה התקבלה.» (614:71335, 614:71349 and the prototype 614:72329; draft until a reviewer approves).
+- G-39: «Оттеглете предложението» → «Вземете предложението обратно» (16 instances; the withdraw form keeps its own heading).
+- G-35: on the O03 accept «ready» frames (design + prototypes, 4) the lead reads «Избрахте кога ще прегледате запитването. Сега го поемете.», so the filled frame reads as the step after the choice.
