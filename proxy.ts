@@ -173,9 +173,11 @@ function route(request: NextRequest) {
   // Visible to this render too, so the page does not suggest the language just left.
   if (chosen) request.cookies.set(contextLocaleCookie(context), chosen);
 
+  const privateShareRoute = context === "public" && hasLocale && segments[2] === "share";
   const nonce = btoa(crypto.randomUUID());
   const analytics =
     context === "public" &&
+    !privateShareRoute &&
     Boolean(validGtmContainerId(process.env.GTM_CONTAINER_ID)) &&
     analyticsConsent(request.headers.get("cookie"));
   const localOrigins = Object.values(origins).every((value) => {
@@ -193,6 +195,8 @@ function route(request: NextRequest) {
   requestHeaders.set("Content-Security-Policy", csp);
   requestHeaders.set(appLocaleHeader, hasLocale ? first : entryLocale(request, context));
   requestHeaders.set(appSurfaceHeader, context);
+  // Overwrite any caller-supplied value so the public layout can omit GTM on token routes.
+  requestHeaders.set("x-msr-share-token-route", privateShareRoute ? "1" : "0");
 
   // A first segment that is not a locale of this host names no page. It goes straight to
   // Next's not-found route: under /<context>/[locale] a notFound() thrown by the layout would
@@ -203,7 +207,7 @@ function route(request: NextRequest) {
   response.headers.set("Content-Security-Policy", csp);
   // Mutable public truth and every private document must be re-read on the next request.
   response.headers.set("Cache-Control", "private, no-store");
-  if (context === "public" && segments[2] === "share") {
+  if (privateShareRoute) {
     response.headers.set("Referrer-Policy", "no-referrer");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
