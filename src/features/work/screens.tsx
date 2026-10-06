@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
@@ -30,7 +31,11 @@ import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
 import { TaskHandoverScreen } from "./handover-screen";
-import { InquiryDraftBoundary, InquiryDraftReconciliation } from "./inquiry-draft";
+import {
+  InquiryConfirmedReturn,
+  InquiryDraftBoundary,
+  InquiryDraftReconciliation,
+} from "./inquiry-draft";
 import { inquiryDraftOwner } from "./inquiry-draft-owner";
 import type { InquiryDraftKind } from "./inquiry-draft-storage";
 import { InquiryOwnerContext } from "./inquiry-owner-context";
@@ -873,7 +878,7 @@ export async function OperationScreen({
       </p>
       {fenced && !task && isInquiryDraftKind(type) ? (
         terminal ? (
-          <form
+          <InquiryConfirmedReturn
             action={resolveInquiryReferenceAction.bind(
               null,
               locale,
@@ -883,23 +888,23 @@ export async function OperationScreen({
               scope,
               page,
             )}
-          >
-            <button type="submit" className={link}>
-              {copy.openRecord}
-            </button>
-          </form>
+            href={inquiryHref(locale, id, scope, page)}
+            label={copy.openRecord}
+            className={link}
+          />
         ) : (
           <a className={link} href={inquiryStatusHref(locale, id, type, operationKey, scope, page)}>
             {copy.statusLink}
           </a>
         )
-      ) : (
-        <a
-          className={link}
-          href={task ? `/${locale}/tasks/${id}` : inquiryHref(locale, id, scope, page)}
-        >
+      ) : task ? (
+        <a className={link} href={`/${locale}/tasks/${id}`}>
           {copy.openRecord}
         </a>
+      ) : (
+        <Link className={link} href={inquiryHref(locale, id, scope, page)}>
+          {copy.openRecord}
+        </Link>
       )}
     </Page>
   );

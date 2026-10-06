@@ -1,5 +1,6 @@
 import type { FormState, FormValues } from "@/ui/form/contract";
 import type { FormSnapshot } from "@/ui/form/form";
+import { protectInquiryMemoryOnUnload } from "./inquiry-navigation-guard";
 
 export type InquiryDraftOwner = { id: string; expiresAt: number };
 export type InquiryDraftKind = "accept" | "contact" | "triage";
@@ -13,11 +14,24 @@ type RetainedDraft = {
 const prefix = "msr.inquiry-draft.";
 const ownerKey = `${prefix}owner`;
 const draftKey = (id: string, kind: InquiryDraftKind) => `${prefix}${id}:${kind}`;
+let memoryOwner: InquiryDraftOwner | null = null;
+const memory = new Map<string, RetainedDraft | null>();
+const unpersisted = new Set<string>();
 const revision = (value: unknown): value is number | null =>
   value === null || (typeof value === "number" && Number.isSafeInteger(value) && value > 0);
 
 /** A new actor or auth session removes the previous session's private in-tab drafts. */
 export function claimInquiryDraftOwner(owner: InquiryDraftOwner): boolean {
+  if (
+    memoryOwner?.id !== owner.id ||
+    memoryOwner.expiresAt <= Date.now() ||
+    owner.expiresAt <= Date.now()
+  ) {
+    memory.clear();
+    unpersisted.clear();
+    protectInquiryMemoryOnUnload(0);
+  }
+  memoryOwner = owner.expiresAt > Date.now() ? owner : null;
   try {
     const stored = JSON.parse(sessionStorage.getItem(ownerKey) ?? "null");
     if (stored?.id !== owner.id || stored?.expiresAt <= Date.now() || owner.expiresAt <= Date.now())
@@ -33,17 +47,33 @@ export function claimInquiryDraftOwner(owner: InquiryDraftOwner): boolean {
   }
 }
 
-function ownsDrafts(owner: InquiryDraftOwner): boolean {
+export function ownsInquiryDrafts(owner: InquiryDraftOwner): boolean {
+  return (
+    memoryOwner?.id === owner.id &&
+    memoryOwner.expiresAt > Date.now() &&
+    owner.expiresAt > Date.now()
+  );
+}
+
+function ownsStorage(owner: InquiryDraftOwner): boolean {
   const stored = JSON.parse(sessionStorage.getItem(ownerKey) ?? "null");
   return stored?.id === owner.id && stored.expiresAt > Date.now() && owner.expiresAt > Date.now();
 }
 
-export function discardInquiryDraft(owner: InquiryDraftOwner, id: string, kind: InquiryDraftKind) {
+function persistDraft(owner: InquiryDraftOwner, key: string, value: RetainedDraft | null) {
+  memory.set(key, value);
   try {
-    if (ownsDrafts(owner)) sessionStorage.removeItem(draftKey(id, kind));
+    if (!ownsStorage(owner)) throw new Error("Draft storage belongs to another session");
+    if (value) sessionStorage.setItem(key, JSON.stringify(value));
+    else sessionStorage.removeItem(key);
+    unpersisted.delete(key);
   } catch {
-    // The explicit leave choice also applies when storage is unavailable.
+    if (value) unpersisted.add(key);
+    else unpersisted.delete(key);
   }
+  // Protection follows the retained drafts, including when their forms have unmounted.
+  protectInquiryMemoryOnUnload(unpersisted.size ? owner.expiresAt : 0);
+  return !unpersisted.has(key);
 }
 
 /** Reconcile only the retained operation that the server has just authorized and read. */
@@ -55,14 +85,18 @@ export function reconcileInquiryDraft(
   outcome: "succeeded" | "failed",
 ) {
   try {
-    if (!ownsDrafts(owner)) return;
+    if (!ownsInquiryDrafts(owner)) return;
     const key = draftKey(id, kind);
-    const retained = JSON.parse(sessionStorage.getItem(key) ?? "null");
+    const retained = memory.has(key)
+      ? memory.get(key)
+      : ownsStorage(owner)
+        ? JSON.parse(sessionStorage.getItem(key) ?? "null")
+        : null;
     if (retained?.ownerId !== owner.id || retained.operation?.id !== operationId) return;
-    if (outcome === "succeeded") sessionStorage.removeItem(key);
+    if (outcome === "succeeded") persistDraft(owner, key, null);
     else {
-      delete retained.operation;
-      sessionStorage.setItem(key, JSON.stringify(retained));
+      const { operation: _operation, ...draft } = retained;
+      persistDraft(owner, key, draft);
     }
   } catch {
     // Preserve the unknown reference if browser storage cannot be changed.
@@ -76,10 +110,15 @@ export function readInquiryDraft<V extends FormValues>(
   initial: FormState<V>,
 ): RetainedDraft | null {
   try {
-    if (!ownsDrafts(owner)) return null;
-    const raw = sessionStorage.getItem(draftKey(id, kind));
-    if (!raw || raw.length > 32_000) return null;
-    const stored = JSON.parse(raw);
+    if (!ownsInquiryDrafts(owner)) return null;
+    const key = draftKey(id, kind);
+    let stored = memory.get(key);
+    if (!memory.has(key)) {
+      if (!ownsStorage(owner)) return null;
+      const raw = sessionStorage.getItem(key);
+      if (!raw || raw.length > 32_000) return null;
+      stored = JSON.parse(raw);
+    }
     if (stored?.ownerId !== owner.id || !revision(stored.revision)) return null;
     const values: FormValues = { ...initial.values };
     for (const name of Object.keys(values)) {
@@ -96,12 +135,14 @@ export function readInquiryDraft<V extends FormValues>(
     // A fresh record revision requires a fresh human confirmation of the contact facts.
     if (!stored.operation && stored.revision !== initial.expectedRevision && "reviewed" in values)
       values.reviewed = "";
-    return {
+    const retained = {
       ownerId: owner.id,
       values,
       revision: stored.revision,
       ...(stored.operation ? { operation: stored.operation } : {}),
     };
+    memory.set(key, retained);
+    return retained;
   } catch {
     return null;
   }
@@ -115,33 +156,26 @@ export function retainInquiryDraft<V extends FormValues>(
   initial: FormState<V>,
   { state, values, pending }: FormSnapshot<V>,
 ): boolean {
-  try {
-    // A late response from a former account must never recreate that account's storage.
-    if (!ownsDrafts(owner)) return false;
-    const key = draftKey(id, kind);
-    if (state.outcome.kind === "confirmed") {
-      sessionStorage.removeItem(key);
-      return true;
-    }
-    const unresolved = pending || ["unknown", "accepted"].includes(state.outcome.kind);
-    if (
-      !unresolved &&
-      Object.keys(initial.values).every((name) => values[name] === initial.values[name])
-    ) {
-      sessionStorage.removeItem(key);
-      return true;
-    }
-    const retained: RetainedDraft = {
-      ownerId: owner.id,
-      values,
-      revision: state.expectedRevision,
-      ...(unresolved
-        ? { operation: { id: state.operationId, revision: state.expectedRevision } }
-        : {}),
-    };
-    sessionStorage.setItem(key, JSON.stringify(retained));
-    return true;
-  } catch {
-    return false;
+  // A late response from a former account must never recreate that account's storage.
+  if (!ownsInquiryDrafts(owner)) return false;
+  const key = draftKey(id, kind);
+  if (state.outcome.kind === "confirmed") {
+    return persistDraft(owner, key, null);
   }
+  const unresolved = pending || ["unknown", "accepted"].includes(state.outcome.kind);
+  if (
+    !unresolved &&
+    Object.keys(initial.values).every((name) => values[name] === initial.values[name])
+  ) {
+    return persistDraft(owner, key, null);
+  }
+  const retained: RetainedDraft = {
+    ownerId: owner.id,
+    values: { ...values },
+    revision: state.expectedRevision,
+    ...(unresolved
+      ? { operation: { id: state.operationId, revision: state.expectedRevision } }
+      : {}),
+  };
+  return persistDraft(owner, key, retained);
 }

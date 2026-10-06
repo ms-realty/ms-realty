@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { type BrowserContext, expect, type Route, test } from "@playwright/test";
+import { type BrowserContext, expect, type Page, type Route, test } from "@playwright/test";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -49,6 +49,13 @@ async function signIn(context: BrowserContext, token: string) {
       sameSite: "Lax",
     },
   ]);
+}
+
+async function openRecord(page: Page, label: string) {
+  await page
+    .getByRole("link", { name: label, exact: true })
+    .or(page.getByRole("button", { name: label, exact: true }))
+    .click();
 }
 
 test("O02 draft notes and reasons survive scope and conversation switches, then clear after confirmation", async ({
@@ -122,7 +129,7 @@ test("O02 draft notes and reasons survive scope and conversation switches, then 
     );
   await page.getByRole("button", { name: copy.submit, exact: true }).click();
   await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
-  await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+  await openRecord(page, work.openRecord);
   await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
   await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(reason);
 
@@ -355,7 +362,7 @@ for (const kind of ["accept", "contact", "triage"] as const) {
   });
 }
 
-test("O02 storage-disabled sidebar navigation offers stay or discard once for all dirty forms", async ({
+test("O02 storage-disabled drafts survive history Forward and Back, with protection after unmount", async ({
   page,
   context,
 }) => {
@@ -370,23 +377,36 @@ test("O02 storage-disabled sidebar navigation offers stay or discard once for al
   await signIn(context, fixture.token);
   const inquiryUrl = hostUrl("staff", `/en/inquiries/${fixture.id}`);
   await page.goto(inquiryUrl);
+  const origin = await page.evaluate(() => performance.timeOrigin);
+  const sidebar = page
+    .getByRole("navigation", { name: "Workspace", exact: true })
+    .getByRole("link", { name: "Today", exact: true });
+  // Create the forward entry while the inquiry is clean, then edit after going Back.
+  await sidebar.click();
+  await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
+  await page.goBack();
+  await expect(page).toHaveURL(inquiryUrl);
   await page
     .getByLabel(copy.note, { exact: true })
     .fill("Private note with browser storage unavailable");
   await page
     .getByLabel(work.reason, { exact: true })
     .fill("Private triage reason with browser storage unavailable");
-  const sidebar = page
-    .getByRole("navigation", { name: "Workspace", exact: true })
-    .getByRole("link", { name: "Today", exact: true });
-  const dialogs: { type: string; message: string }[] = [];
-  let leave = false;
-  page.on("dialog", async (dialog) => {
-    dialogs.push({ type: dialog.type(), message: dialog.message() });
-    if (leave) await dialog.accept();
-    else await dialog.dismiss();
-  });
-  await sidebar.click();
+  await page.goForward();
+  await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
+  // The beforeunload protection must outlive the now-unmounted inquiry forms.
+  const asked = new Promise<void>((resolve) =>
+    page.once("dialog", async (dialog) => {
+      expect(dialog.type()).toBe("beforeunload");
+      await dialog.dismiss();
+      resolve();
+    }),
+  );
+  await page.evaluate(() => location.reload());
+  await asked;
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
+  await page.goBack();
   await expect(page).toHaveURL(inquiryUrl);
   await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(
     "Private note with browser storage unavailable",
@@ -394,14 +414,125 @@ test("O02 storage-disabled sidebar navigation offers stay or discard once for al
   await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(
     "Private triage reason with browser storage unavailable",
   );
-  expect(dialogs).toEqual([{ type: "confirm", message: work.draftLeave }]);
-  leave = true;
+  // Normal sidebar navigation also preserves the memory-only drafts without a leave prompt.
   await sidebar.click();
   await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
-  expect(dialogs).toEqual([
-    { type: "confirm", message: work.draftLeave },
-    { type: "confirm", message: work.draftLeave },
-  ]);
+  await page.goBack();
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(
+    "Private triage reason with browser storage unavailable",
+  );
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
+});
+
+test("O02 success headers without an acknowledgment body keep the pending SSR reference", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  await signIn(context, fixture.token);
+  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+  await page
+    .getByLabel(copy.contactedAt, { exact: true })
+    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  const note = `Synthetic headers-only acknowledgment ${randomUUID()}`;
+  await page.getByLabel(copy.note, { exact: true }).fill(note);
+  await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the received contact");
+  await page
+    .getByLabel(copy.dueAt, { exact: true })
+    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.confirm, { exact: true }).check();
+  const key = await page.locator('[data-inquiry-contact] input[name="_operationId"]').inputValue();
+  const ownerId = await page.evaluate(
+    () => JSON.parse(sessionStorage.getItem("msr.inquiry-draft.owner") ?? "null")?.id,
+  );
+  const name = inquiryReferenceCookie(ownerId, fixture.id, "contact");
+  let delivered!: () => void;
+  const headersDelivered = new Promise<void>((resolve) => {
+    delivered = resolve;
+  });
+  let responseCookie = "";
+  await page.route("**/*", async (route) => {
+    if (route.request().method() !== "POST" || !route.request().headers()["next-action"]) {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    responseCookie = response.headers()["set-cookie"] ?? "";
+    // Deliver every actual successful response header, including Set-Cookie, with no action
+    // acknowledgment body. Do not restore or fabricate the browser's reference cookie.
+    await route.fulfill({ response, body: "" });
+    delivered();
+  });
+  try {
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await headersDelivered;
+    expect(responseCookie).toContain(`${name}=${key}`);
+    expect((await context.cookies()).find((cookie) => cookie.name === name)?.value).toBe(key);
+    await page.route("**/_next/static/**", async (route) => {
+      if (route.request().resourceType() === "script") await route.abort();
+      else await route.continue();
+    });
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    await expect(page).toHaveURL(
+      hostUrl("staff", `/en/inquiries/${fixture.id}/operations?type=contact&key=${key}&view=all`),
+    );
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+    expect((await context.cookies()).find((cookie) => cookie.name === name)?.value).toBe(key);
+    await page.getByRole("button", { name: work.openRecord, exact: true }).click();
+    await expect(page.getByText(note, { exact: true })).toBeVisible();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
+  } finally {
+    await page.unrouteAll({ behavior: "wait" });
+  }
+});
+
+test("O02 storage-disabled triage draft survives a successful contact redirect and confirmed return", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  await context.addInitScript(() => {
+    Storage.prototype.setItem = () => {
+      throw new Error("Storage disabled");
+    };
+  });
+  await signIn(context, fixture.token);
+  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+  const origin = await page.evaluate(() => performance.timeOrigin);
+  const reason = `Unsent triage across contact redirect ${randomUUID()}`;
+  const note = `Observed successful contact ${randomUUID()}`;
+  await page.getByLabel(work.reason, { exact: true }).fill(reason);
+  await page
+    .getByLabel(copy.contactedAt, { exact: true })
+    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.note, { exact: true }).fill(note);
+  await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the successful contact");
+  await page
+    .getByLabel(copy.dueAt, { exact: true })
+    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.confirm, { exact: true }).check();
+  await page.getByRole("button", { name: copy.submit, exact: true }).click();
+  await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+  // This body was rendered: the successful reference may now be acknowledged by the client.
+  await expect
+    .poll(async () =>
+      (await context.cookies()).find((cookie) => cookie.name.endsWith(`_${fixture.id}_contact`)),
+    )
+    .toBeUndefined();
+  await expect(page).toHaveURL(
+    (address) => address.pathname === `/en/inquiries/${fixture.id}/operations`,
+  );
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
+  await openRecord(page, work.openRecord);
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(reason);
+  await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
+  await expect(page.getByText(note, { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
 });
 
 test("O02 native triage submits its reason with a stable inquiry form identity", async ({
@@ -418,7 +549,7 @@ test("O02 native triage submits its reason with a stable inquiry form identity",
     await page.getByLabel(work.state, { exact: true }).selectOption("contact_unreachable");
     await page.getByLabel(work.reason, { exact: true }).fill(reason);
     await page.getByRole("button", { name: work.disposition, exact: true }).click();
-    await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+    await expect(page.getByText(work.statusSucceeded, { exact: true })).toBeVisible();
     const [record] = await db
       .select()
       .from(schema.inquiries)
@@ -468,7 +599,7 @@ for (const locale of ["bg", "ru", "en"] as const) {
           page.getByRole("heading", { name: work.changeSaved, exact: true }),
         ).toBeVisible();
         await page.reload();
-        await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+        await openRecord(page, work.openRecord);
         await expect(page.getByTestId("inquiry-first-response")).toHaveText(copy.noResponse);
         await expect(page.getByText(attemptNote, { exact: true })).toBeVisible();
         const [oldTask] = await db
@@ -494,7 +625,7 @@ for (const locale of ["bg", "ru", "en"] as const) {
         await expect(
           page.getByRole("heading", { name: work.changeSaved, exact: true }),
         ).toBeVisible();
-        await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+        await openRecord(page, work.openRecord);
         await expect(page.getByText(responseNote, { exact: true })).toBeVisible();
         await expect(page.getByTestId("inquiry-first-response")).not.toHaveText(copy.noResponse);
         const [updated] = await db
@@ -635,7 +766,7 @@ for (const javaScriptEnabled of [true, false]) {
         page.getByRole("heading", { name: work.changeSaved, exact: true }),
       ).toBeVisible();
       await page.reload();
-      await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+      await openRecord(page, work.openRecord);
       await expect(page.getByTestId("inquiry-first-response")).toHaveText(copy.noResponse);
       await expect(
         page.getByRole("option", { name: `email · ${email}`, exact: true }),
@@ -660,7 +791,7 @@ for (const javaScriptEnabled of [true, false]) {
         page.getByRole("heading", { name: work.changeSaved, exact: true }),
       ).toBeVisible();
       await page.reload();
-      await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+      await openRecord(page, work.openRecord);
       // The width below is measured on the opened record once it has loaded with its styles.
       await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${received.id}`));
       await page.waitForLoadState("load");

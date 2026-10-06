@@ -30,6 +30,7 @@ import { taskHandoverCopy } from "./handover-copy";
 import { inquiryDraftOwner } from "./inquiry-draft-owner";
 import type { InquiryDraftKind } from "./inquiry-draft-storage";
 import {
+  inquiryEnhancedField,
   inquiryOperationType,
   inquiryReferenceCookie,
   inquiryStatusHref,
@@ -63,6 +64,8 @@ const localInstant = (value: string) =>
     : value;
 const inputInstant = (value: Date | null) => value?.toISOString().slice(0, 16) ?? "";
 const scopeFor = (kind: Kind, id: string) => `work.${kind}.${id}`;
+const enhancedInquiry = (data: FormData) =>
+  data.getAll(inquiryEnhancedField).length === 1 && data.get(inquiryEnhancedField) === "yes";
 const recordPath = (locale: string, kind: Kind, id: string) =>
   `/${locale}/${kind === "task" || kind === "handover" ? "tasks" : "inquiries"}/${id}`;
 
@@ -156,8 +159,9 @@ async function perform<V extends FormValues>(
       },
     };
   }
-  // Known replies release the fence. A lost acknowledgment keeps the client-written cookie.
-  if (referenceCookie && (result.ok || result.error.outcome !== "unknown"))
+  // Success headers are not an acknowledgment. Keep the reference until the client renders
+  // confirmation or explicitly resolves its terminal receipt; only known failures release it.
+  if (referenceCookie && !result.ok && result.error.outcome !== "unknown")
     jar?.delete(referenceCookie);
   if (result.ok)
     return {
@@ -366,7 +370,7 @@ export async function acceptAction(
     },
   );
   // The accepted inquiry no longer offers this form on a native POST response.
-  if (state.outcome.kind === "confirmed" && state.reconciliation)
+  if (state.outcome.kind === "confirmed" && state.reconciliation && !enhancedInquiry(data))
     redirect(state.reconciliation.href);
   return state;
 }
@@ -479,7 +483,7 @@ export async function contactAction(
       };
     },
   );
-  if (state.outcome.kind === "confirmed" && state.reconciliation)
+  if (state.outcome.kind === "confirmed" && state.reconciliation && !enhancedInquiry(data))
     redirect(state.reconciliation.href);
   return {
     ...state,

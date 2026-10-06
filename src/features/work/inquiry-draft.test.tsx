@@ -11,7 +11,11 @@ import { workCopy } from "./copy";
 import { TriageForm } from "./forms";
 import { InquiryDraftBoundary, InquiryDraftReconciliation } from "./inquiry-draft";
 import type { InquiryDraftOwner } from "./inquiry-draft-storage";
-import { readInquiryDraft } from "./inquiry-draft-storage";
+import { claimInquiryDraftOwner, readInquiryDraft } from "./inquiry-draft-storage";
+import { browserInquiryReference, inquiryReferenceCookie } from "./inquiry-reference";
+
+const router = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 const contact = contactCopy("en"),
   work = workCopy("en");
@@ -74,6 +78,8 @@ function Forms({
   );
 }
 beforeEach(() => {
+  router.push.mockClear();
+  claimInquiryDraftOwner({ id: "expired-test", expiresAt: 0 });
   sessionStorage.clear();
   for (const cookie of document.cookie.split("; ")) {
     const name = cookie.split("=")[0];
@@ -84,6 +90,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  claimInquiryDraftOwner({ id: "expired-test", expiresAt: 0 });
   vi.restoreAllMocks();
   sessionStorage.clear();
 });
@@ -113,9 +120,18 @@ describe("O02/O03 inquiry drafts", () => {
     );
   });
 
-  it.each(["actor-two-session-one", "actor-one-session-two"])(
-    "removes the old private draft across owner change to %s, including a return to the old owner",
-    async (id) => {
+  it.each([
+    ["actor-two-session-one", false],
+    ["actor-one-session-two", false],
+    ["actor-two-session-one", true],
+    ["actor-one-session-two", true],
+  ] as const)(
+    "removes the old private draft across owner change to %s (storage disabled: %s), including return",
+    async (id, disabled) => {
+      if (disabled)
+        vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+          throw new Error("Storage disabled");
+        });
       const draftOwner = owner(),
         user = userEvent.setup();
       const mounted = render(<Forms draftOwner={draftOwner} />);
@@ -149,6 +165,9 @@ describe("O02/O03 inquiry drafts", () => {
     await user.type(screen.getByLabelText(work.reason), "Unsent triage reason");
     await user.click(screen.getByRole("button", { name: contact.submit }));
     expect(await screen.findByRole("heading", { name: work.changeSaved })).toBeVisible();
+    expect(
+      browserInquiryReference(inquiryReferenceCookie(draftOwner.id, "one", "contact")),
+    ).toBeNull();
     expect(readInquiryDraft(draftOwner, "one", "contact", initial())).toBeNull();
     mounted.unmount();
     render(<Forms draftOwner={draftOwner} />);
@@ -255,14 +274,14 @@ describe("O02/O03 inquiry drafts", () => {
     expect(leaving.defaultPrevented).toBe(true);
   });
 
-  it("stops SPA link navigation and preserves every dirty form when the leave choice is cancelled", () => {
+  it("retains dirty forms through SPA unmounts when storage fails and protects a later full unload", () => {
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new Error("Storage disabled");
     });
-    const choose = vi.spyOn(window, "confirm").mockReturnValue(false);
-    render(
+    const draftOwner = owner();
+    const mounted = render(
       <>
-        <Forms draftOwner={owner()} />
+        <Forms draftOwner={draftOwner} />
         <a href="/en/today">Sidebar destination</a>
       </>,
     );
@@ -272,17 +291,39 @@ describe("O02/O03 inquiry drafts", () => {
     fireEvent.change(screen.getByLabelText(work.reason), {
       target: { value: "Private triage draft" },
     });
-    const nextHandler = vi.fn();
+    const nextHandler = vi.fn((event: Event) => event.preventDefault());
     document.addEventListener("click", nextHandler);
     try {
       fireEvent.click(screen.getByRole("link", { name: "Sidebar destination" }));
-      expect(choose).toHaveBeenCalledExactlyOnceWith(work.draftLeave);
-      expect(nextHandler).not.toHaveBeenCalled();
+      expect(nextHandler).toHaveBeenCalledOnce();
+      mounted.unmount();
+      const leaving = new Event("beforeunload", { cancelable: true });
+      window.dispatchEvent(leaving);
+      expect(leaving.defaultPrevented).toBe(true);
+      render(<Forms draftOwner={draftOwner} state={initial("b")} />);
       expect(screen.getByLabelText(contact.note)).toHaveValue("Private contact draft");
       expect(screen.getByLabelText(work.reason)).toHaveValue("Private triage draft");
     } finally {
       document.removeEventListener("click", nextHandler);
     }
+  });
+
+  it("drops memory drafts and full-unload protection when the owning session expires", () => {
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("Storage disabled");
+    });
+    const draftOwner = owner();
+    const mounted = render(<Forms draftOwner={draftOwner} />);
+    fireEvent.change(screen.getByLabelText(contact.note), {
+      target: { value: "Expired private note" },
+    });
+    mounted.unmount();
+    claimInquiryDraftOwner({ ...draftOwner, expiresAt: 0 });
+    const leaving = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(leaving);
+    expect(leaving.defaultPrevented).toBe(false);
+    render(<Forms draftOwner={draftOwner} />);
+    expect(screen.getByLabelText(contact.note)).toHaveValue("");
   });
 
   it("reconciles a server-verified terminal marker before a returning form restores its draft", async () => {
