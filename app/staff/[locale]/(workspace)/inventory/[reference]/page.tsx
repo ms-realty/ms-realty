@@ -7,21 +7,13 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { operations } from "@/db/schema";
-import { publicLocales } from "@/domain/ids";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
-import {
-  type InventoryDecisionContext,
-  type InventoryDecisionIntent,
-  inventorySections,
-} from "@/features/inventory/decision-contract";
-import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
-import { InventoryDecisionForm } from "@/features/inventory/decision-form";
+import { inventorySections } from "@/features/inventory/decision-contract";
 import { EditTabs } from "@/features/inventory/edit-tabs";
 import { InventoryEditor, type InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { type InventoryField, missingInput } from "@/features/inventory/fields";
 import { FocusedState } from "@/features/inventory/focused-state";
-import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { LeaveControl } from "@/features/inventory/leave-control";
 import { safeNext } from "@/features/inventory/next";
 import { describePriceEvidence } from "@/features/inventory/recorded-price";
@@ -35,7 +27,8 @@ import { uneditablePriceEvidence, workingDraftFrom } from "@/server/inventory/wo
 import { publicationReadiness } from "@/server/publication/commands";
 import { buttonClass } from "@/ui/button-class";
 import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon } from "@/ui/icons";
-import { saveInventory, submitInventoryDecision } from "../actions";
+import { saveInventory } from "../actions";
+import { ReviewView } from "./review-view";
 
 /** Copy with the listing reference isolated for bidirectional text. */
 function withReference(template: string, ref: ReactNode) {
@@ -190,6 +183,7 @@ export default async function InventoryDetailPage({
         locale={locale}
         reference={reference}
         data={data}
+        values={values}
         readiness={readiness}
         mayEdit={mayEdit}
         mayReview={mayReview}
@@ -435,266 +429,6 @@ export default async function InventoryDetailPage({
           </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-/** Review and publication decisions; O16 replaces this presentation. */
-async function ReviewView({
-  locale,
-  reference,
-  data,
-  readiness,
-  mayEdit,
-  mayReview,
-  mayPublish,
-  error,
-}: {
-  locale: string;
-  reference: string;
-  data: Awaited<ReturnType<typeof inventoryDetail>>;
-  readiness: Awaited<ReturnType<typeof publicationReadiness>>;
-  mayEdit: boolean;
-  mayReview: boolean;
-  mayPublish: boolean;
-  error: ReactNode;
-}) {
-  const { listing, property, revision } = data;
-  const copy = inventoryCopy(locale);
-  const decisionCopy = inventoryDecisionCopy(locale);
-  const evidence = evidenceCopy(locale);
-  const path = `/${locale}/inventory/${reference}`;
-  function decision(
-    intent: InventoryDecisionIntent,
-    label: string,
-    expectedRevision: number,
-    manifestId?: string,
-  ) {
-    const context: InventoryDecisionContext = {
-      locale,
-      reference,
-      intent,
-      revisionId: revision?.id ?? "",
-      ...(manifestId ? { manifestId } : {}),
-    };
-    return (
-      <InventoryDecisionForm
-        key={`${intent}-${manifestId ?? "current"}`}
-        context={context}
-        title={label}
-        action={submitInventoryDecision.bind(null, context)}
-        initialState={{
-          values: { scope: "", confirmed: "", publicationLocale: "bg" },
-          operationId: randomUUID(),
-          expectedRevision,
-          responseId: randomUUID(),
-          outcome: { kind: "idle" },
-        }}
-      />
-    );
-  }
-  const manifests = publicLocales.flatMap((language) => {
-    const manifest = data.manifests.find(
-      (item) => item.generation === listing.publicationGeneration && item.locale === language,
-    );
-    return manifest ? [manifest] : [];
-  });
-  return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-8">
-      <a href={path} className="text-action underline">
-        {copy.o12.backToEdit}
-      </a>
-      <header>
-        <h1 className="text-title font-semibold">{copy.o12.reviewTitle}</h1>
-        <p>
-          <bdi>{listing.reference}</bdi> · {property.settlement} ·{" "}
-          {optionLabel(property.propertyType, locale)} · {optionLabel(listing.purpose, locale)} ·{" "}
-          {copy.revision} {listing.version}
-        </p>
-      </header>
-      <nav
-        id={inventorySections.navigation}
-        aria-label={decisionCopy.navigation}
-        className="scroll-mt-6 rounded-panel border border-divider bg-surface p-4"
-      >
-        <ul className="flex flex-wrap gap-x-5 gap-y-2">
-          {[
-            [inventorySections.readiness, evidence.readiness],
-            [inventorySections.draft, copy.edit],
-            ...(listing.approvedRevisionId
-              ? [[inventorySections.locales, decisionCopy.locales]]
-              : []),
-            [inventorySections.review, copy.review],
-          ].map(([id, label]) => (
-            <li key={id}>
-              <a
-                className="inline-flex min-h-control items-center text-action underline"
-                href={`#${id}`}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <section
-        id={inventorySections.readiness}
-        className="scroll-mt-6 space-y-4 rounded-panel border border-divider bg-surface p-5"
-        aria-labelledby="readiness-heading"
-        tabIndex={-1}
-      >
-        <h2 id="readiness-heading" className="text-section font-semibold">
-          {evidence.readiness}
-        </h2>
-        <dl className="grid gap-2 sm:grid-cols-2">
-          {[
-            [evidence.factual, readiness.input.factReviewValid],
-            [evidence.editorial, readiness.input.revisionApprovalValid],
-            [evidence.agreement, readiness.input.sellerInstructionValid],
-            [evidence.photos, readiness.input.mediaEligible],
-            [evidence.language, readiness.input.localeApprovedForSource],
-            [evidence.claims, readiness.input.regulatedClaimsReviewed !== false],
-          ].map(([label, okay]) => (
-            <div key={String(label)} className="flex justify-between gap-3">
-              <dt>{label}</dt>
-              <dd className={okay ? "text-success" : "text-text-muted"}>
-                {okay ? evidence.yes : evidence.no}
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <a className="text-action underline" href={`${path}/evidence`}>
-          {evidence.title}
-        </a>
-        <div className="flex flex-wrap gap-4">
-          <a className="text-action underline" href={`${path}/media`}>
-            {locale === "bg"
-              ? "Снимки и права"
-              : locale === "ru"
-                ? "Фотографии и права"
-                : "Photos and rights"}
-          </a>
-          <a className="text-action underline" href={`${path}/documents`}>
-            {locale === "bg" ? "Документи" : locale === "ru" ? "Документы" : "Documents"}
-          </a>
-        </div>
-        <p>
-          {optionLabel(listing.commercialState, locale)} ·{" "}
-          {listing.availabilityBasis ?? evidence.no}
-        </p>
-        {mayEdit ? decision("availability", evidence.availability, listing.version) : null}
-      </section>
-      {listing.approvedRevisionId ? (
-        <nav
-          id={inventorySections.locales}
-          tabIndex={-1}
-          aria-label={locale === "bg" ? "Преводи" : locale === "ru" ? "Переводы" : "Translations"}
-          className="flex scroll-mt-6 flex-wrap gap-4"
-        >
-          {publicLocales
-            .filter((language) => language !== "bg")
-            .map((language) => (
-              <a
-                key={language}
-                className="text-action underline"
-                href={`${path}/translations/${language}`}
-              >
-                {language.toUpperCase()}
-              </a>
-            ))}
-        </nav>
-      ) : null}
-      {error}
-      <section
-        id={inventorySections.draft}
-        className="scroll-mt-6 space-y-4"
-        aria-labelledby="draft-heading"
-        tabIndex={-1}
-      >
-        <h2 id="draft-heading" className="text-section font-semibold">
-          {copy.edit}
-        </h2>
-        <p>{copy.draftNotice}</p>
-        {mayEdit ? decision("freeze", copy.prepare, listing.version) : null}
-        <a
-          href={`#${inventorySections.navigation}`}
-          className="inline-flex min-h-control items-center text-action underline"
-        >
-          {decisionCopy.backToSections}
-        </a>
-      </section>
-      <section
-        id={inventorySections.review}
-        className="scroll-mt-6 space-y-4 border-t border-divider pt-6"
-        aria-labelledby="review-heading"
-        tabIndex={-1}
-      >
-        <h2 id="review-heading" className="text-section font-semibold">
-          {copy.review}
-        </h2>
-        {revision ? (
-          <>
-            <p>
-              {copy.revision} {revision.revisionNumber} ·{" "}
-              {optionLabel(listing.editorialState, locale)}
-            </p>
-            <FrozenPreview
-              locale={locale}
-              reference={reference}
-              revision={revision}
-              facts={data.facts}
-            />
-            <div className="grid gap-4 lg:grid-cols-2">
-              {mayReview ? decision("facts", copy.reviewFacts, property.version) : null}
-              {mayEdit ? decision("submit", copy.submit, listing.version) : null}
-              {mayReview ? decision("approve", copy.approve, listing.version) : null}
-              {mayPublish
-                ? decision("prepare", copy.prepareManifest, listing.publicationGeneration)
-                : null}
-              {mayPublish
-                ? manifests.map((manifest) => (
-                    <div key={manifest.id}>
-                      <p>
-                        {manifest.locale.toUpperCase()} · {manifest.contentDigest.slice(0, 12)}
-                      </p>
-                      {decision(
-                        "activate",
-                        `${copy.activate} (${manifest.locale.toUpperCase()})`,
-                        listing.publicationGeneration,
-                        manifest.id,
-                      )}
-                    </div>
-                  ))
-                : null}
-            </div>
-          </>
-        ) : (
-          <p>{copy.noRevision}</p>
-        )}
-        {data.publications.length ? (
-          <ul>
-            {data.publications.map((p) => (
-              <li key={p.id}>
-                <bdi>{p.locale}</bdi> · {optionLabel(p.state, locale)}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>{copy.noPublication}</p>
-        )}
-        {mayPublish && data.publications.length > 0 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {decision("restrict", copy.restrict, listing.publicationGeneration)}
-            {decision("withdraw", copy.withdraw, listing.publicationGeneration)}
-          </div>
-        ) : null}
-        <a
-          href={`#${inventorySections.navigation}`}
-          className="inline-flex min-h-control items-center text-action underline"
-        >
-          {decisionCopy.backToSections}
-        </a>
-      </section>
     </div>
   );
 }
