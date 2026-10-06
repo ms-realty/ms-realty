@@ -40,7 +40,10 @@ export function UnsavedGuard({
     // the server, so nothing here reloads or relies on how long a cookie lives.
     let submitted: { snapshot: string; ack: string } | null = null;
     const submit = () => {
-      const ack = crypto.randomUUID();
+      // A repeated submit of the same content (a double click the form blocks) keeps its nonce,
+      // so whichever of them the server answers is the one this page recognises.
+      const now = snapshot();
+      const ack = submitted?.snapshot === now ? submitted.ack : crypto.randomUUID();
       let field = editor.querySelector<HTMLInputElement>(`input[name="${savedAckField}"]`);
       if (!field) {
         field = document.createElement("input");
@@ -49,7 +52,7 @@ export function UnsavedGuard({
         editor.append(field);
       }
       field.value = ack;
-      submitted = { snapshot: snapshot(), ack };
+      submitted = { snapshot: now, ack };
     };
     const saved = (now: string) =>
       submitted !== null &&

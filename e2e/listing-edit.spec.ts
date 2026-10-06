@@ -291,6 +291,9 @@ test.describe("JavaScript on", () => {
     await rejected.photos.click();
     await rejected.dialog.getByRole("button", { name: "Save draft" }).click();
     await expect(rejected.source).toHaveAttribute("aria-invalid", "true");
+    // In the page's language, never raw schema text.
+    await expect(rejected.tab.getByText("Fill in this field.").first()).toBeVisible();
+    await expect(rejected.tab.getByText(/expected string/)).toHaveCount(0);
     await rejected.photos.click();
     await expect(rejected.dialog).toBeVisible();
     await rejected.dialog.getByRole("button", { name: "Stay" }).click();
@@ -365,6 +368,14 @@ test.describe("JavaScript on", () => {
       .click();
     await expect(kept.saved).toBeVisible();
     expect(kept.prompts).toEqual([]);
+
+    // A double click submits the same content twice; the form blocks the second, the nonce
+    // stays, and the acknowledged save leaves without a prompt.
+    const twice = await open();
+    await twice.source.fill("Synthetic contract, double click");
+    await twice.tab.getByRole("button", { name: "Save the facts" }).dblclick();
+    await expect(twice.saved).toBeVisible();
+    expect(twice.prompts).toEqual([]);
 
     // Acknowledged saves, from the dialog and from the form's own button, raise no prompt.
     const viaDialog = await open();

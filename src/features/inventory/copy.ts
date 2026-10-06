@@ -150,6 +150,9 @@ const en = {
     priceUnreadable: "a price in a form this editor cannot show",
     priceKeepUnknown: "Keep the price unknown for now",
     priceUnknownError: "Enter the price, or confirm that it stays unknown for now.",
+    requiredError: "Fill in this field.",
+    chooseError: "Choose a value from the list.",
+    invalidError: "Check this value.",
     noscriptLeave:
       "Without JavaScript, save before opening Photos or Review, or your changes are lost.",
   },
@@ -339,6 +342,9 @@ const bg: Copy = {
     priceUnreadable: "цена във форма, която редакторът не може да покаже",
     priceKeepUnknown: "Засега оставете цената неизвестна",
     priceUnknownError: "Въведете цената или потвърдете, че засега остава неизвестна.",
+    requiredError: "Попълнете това поле.",
+    chooseError: "Изберете стойност от списъка.",
+    invalidError: "Проверете тази стойност.",
     noscriptLeave:
       "Без JavaScript запишете, преди да отворите „Снимки“ или прегледа, иначе промените се губят.",
   },
@@ -527,6 +533,9 @@ const ru: Copy = {
     priceUnreadable: "цену в виде, который редактор не может показать",
     priceKeepUnknown: "Пока оставить цену неизвестной",
     priceUnknownError: "Введите цену или подтвердите, что пока она остаётся неизвестной.",
+    requiredError: "Заполните это поле.",
+    chooseError: "Выберите значение из списка.",
+    invalidError: "Проверьте это значение.",
     noscriptLeave:
       "Без JavaScript сохраните перед переходом в «Фото» или к проверке, иначе изменения пропадут.",
   },

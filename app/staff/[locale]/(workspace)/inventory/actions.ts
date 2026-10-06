@@ -15,6 +15,7 @@ import {
 import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { inventoryDecisionFeedback } from "@/features/inventory/decision-feedback";
 import type { InventoryValues } from "@/features/inventory/editor";
+import { selects } from "@/features/inventory/fields";
 import { safeNext } from "@/features/inventory/next";
 import { savedAckField, savedOperationCookie } from "@/features/inventory/saved-operation";
 import { agencyTimeZone, isPublicLocale, isStaffLocale } from "@/i18n/config";
@@ -184,12 +185,20 @@ export async function saveInventory(
   }
   const error = result.error;
   if (error.code === "VALIDATION_FAILED") {
+    // Field errors in the page's language, never raw schema text: what to do with this field.
+    const human = (name: string) =>
+      selects[name as keyof typeof selects]
+        ? copy.o12.chooseError
+        : values[name as keyof InventoryValues]?.trim()
+          ? copy.o12.invalidError
+          : copy.o12.requiredError;
     const errors = Object.fromEntries(
-      Object.entries(error.fieldErrors ?? {}).map(([key, messages]) => [
+      Object.entries(error.fieldErrors ?? {}).map(([key, messages]) => {
         // The price decision is shown at the price status it decides about.
-        key === "priceDecision" ? "priceState" : key.replace(/^draft\./, ""),
-        key === "priceDecision" ? [copy.o12.priceUnknownError] : messages,
-      ]),
+        if (key === "priceDecision") return ["priceState", [copy.o12.priceUnknownError]];
+        const name = key.replace(/^draft\./, "");
+        return [name, name in values ? [human(name)] : messages];
+      }),
     );
     return {
       ...state,
