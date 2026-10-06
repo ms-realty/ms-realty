@@ -83,7 +83,8 @@
 
   --spacing: 0.25rem;
   --spacing-control: 2.75rem;
-  --spacing-gutter: 1rem;
+  /* Compact gutter: 20 px as the 390 px Figma frames; 16 px below 360 px (see :root below). */
+  --spacing-gutter: 1.25rem;
   --spacing-gutter-medium: 1.5rem;
   --spacing-gutter-wide: 2rem;
 
@@ -105,6 +106,14 @@
 
   --ease-*: initial;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The narrowest phones (320–359 px) keep 16 px gutters so dense rows such as the P07 comparison
+   still fit one line; from 360 px the compact gutter is the designed 20 px. */
+@media (width < 22.5rem) {
+  :root {
+    --spacing-gutter: 1rem;
+  }
 }
 
 /* Text roles keep their source family, including responsive text-* variants. */

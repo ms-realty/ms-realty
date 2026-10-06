@@ -309,7 +309,7 @@ Headings establish page/section/group hierarchy, not a display-font spectacle. U
 
 | Range | Default structural behavior | Required adaptation |
 |---|---|---|
-| Compact 320–639 CSS px | Single primary column, 16 px gutters; task navigation replaces desktop rails | Full-height sheets, dedicated detail routes, visible keyboard-safe actions |
+| Compact 320–639 CSS px | Single primary column, 20 px gutters (16 px below 360 px); task navigation replaces desktop rails | Full-height sheets, dedicated detail routes, visible keyboard-safe actions |
 | Medium 640–1023 | 24 px gutters, one or two content columns by fit | Do not force desktop map/review splits before both panes are readable |
 | Desktop 1024–1439 | 24–32 px gutters, stable navigation and optional inspector | Filter rail 240–280 px; app rail about 224 px; inspector 320–360 px only when space permits |
 | Wide 1440+ | Content bounded near 1440 px; prose/form columns stay narrower | Use extra room for meaningful comparison, not stretched inputs or more decoration |
