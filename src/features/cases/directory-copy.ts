@@ -22,7 +22,7 @@ const en = {
   noMatch: "No case matches this search.",
   clear: "Clear the search",
   failed: "The case list could not be loaded.",
-  failedDetail: "Nothing was changed. Try again in a moment.",
+  failedDetail: "This does not mean there are no cases. Try again in a moment.",
   retry: "Try again",
   // Same words as the staff rail item (messages/staff/*/workspace.json "moreTools").
   moreTools: "More tools",
@@ -67,7 +67,7 @@ const bg: Copy = {
   noMatch: "Няма случай, който съвпада с търсенето.",
   clear: "Изчистете търсенето",
   failed: "Списъкът със случаи не можа да се зареди.",
-  failedDetail: "Нищо не е променено. Опитайте отново след малко.",
+  failedDetail: "Това не означава, че няма случаи. Опитайте отново след малко.",
   retry: "Опитайте отново",
   moreTools: "Още инструменти",
   stages: {
@@ -108,7 +108,7 @@ const ru: Copy = {
   noMatch: "Ни одно дело не подходит под поиск.",
   clear: "Сбросить поиск",
   failed: "Не удалось загрузить список дел.",
-  failedDetail: "Ничего не изменилось. Попробуйте ещё раз чуть позже.",
+  failedDetail: "Это не значит, что дел нет. Попробуйте ещё раз чуть позже.",
   retry: "Попробовать снова",
   moreTools: "Другие инструменты",
   stages: {

@@ -1,6 +1,7 @@
 // O04 cases index markup: rows from listCases only, search pass-through and its 120-character
 // limit, the 50-row bound, and first-use empty, no-match and failed reads kept apart.
 import { cleanup, render, screen, within } from "@testing-library/react";
+import { notFound } from "next/navigation";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { Session } from "@/server/auth/sessions";
 import { CaseDirectoryScreen } from "./directory-screen";
@@ -136,7 +137,9 @@ it("shows a failed read as a failure with a retry, never as an empty list", asyn
   expect(
     screen.getByRole("heading", { level: 2, name: "The case list could not be loaded." }),
   ).toBeVisible();
-  expect(screen.getByText("Nothing was changed. Try again in a moment.")).toBeVisible();
+  expect(
+    screen.getByText("This does not mean there are no cases. Try again in a moment."),
+  ).toBeVisible();
   expect(screen.getByRole("link", { name: "Try again" })).toHaveAttribute(
     "href",
     "/en/cases?q=CS-2026",
@@ -147,6 +150,15 @@ it("shows a failed read as a failure with a retry, never as an empty list", asyn
   // The search stays available, and the log names the error type without its details.
   expect(screen.getByLabelText("Search")).toHaveValue("CS-2026");
   expect(log).toHaveBeenCalledWith("[O04] case list unavailable:", "Error");
+});
+
+it("lets Next.js control flow from the read through instead of calling it a failed read", async () => {
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+  listCases.mockImplementation(async () => notFound());
+  await expect(CaseDirectoryScreen({ locale: "en", session })).rejects.toMatchObject({
+    digest: expect.stringContaining("404"),
+  });
+  expect(log).not.toHaveBeenCalled();
 });
 
 it.each([
