@@ -2,7 +2,7 @@ import "server-only";
 import { and, eq, gt, isNull, lte, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
 import { caseParticipants, cases } from "@/db/schema";
-import type { Capability } from "@/domain/capabilities";
+import type { Capability, CapabilityGrant } from "@/domain/capabilities";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
 import { requireLiveSession, type Session } from "../auth/sessions";
@@ -27,6 +27,14 @@ export async function caseVisibility(db: Executor, session: Session): Promise<SQ
   const current = await liveUser(db, session);
   const capability = current.account.kind === "staff" ? "case.read" : "portal.case.read";
   const grants = await resolveGrants(db, current.actor);
+  return caseGrantVisibility(grants, capability);
+}
+
+/** The Case has no locale or property scope. Share this rule across read projections. */
+export function caseGrantVisibility(
+  grants: readonly CapabilityGrant[],
+  capability: Capability,
+): SQL {
   const clauses = grants
     .filter((g) => g.capability === capability)
     .flatMap(({ scope }) => {

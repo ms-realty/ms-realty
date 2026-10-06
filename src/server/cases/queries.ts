@@ -20,6 +20,13 @@ import { containsSearchControl } from "../search/controls";
 import { ownerNeedsCoverage } from "../work/coverage-policy";
 import { caseFor, caseVisibility, liveParticipation } from "./shared";
 
+export type {
+  CaseAttentionReason,
+  CaseIndexPage,
+  CaseIndexQuery,
+  CaseIndexRow,
+} from "./index-query";
+export { caseIndexCollections, caseNextActionStates, queryCaseIndex } from "./index-query";
 export { listInquiryCaseCandidates } from "./inquiry-link";
 
 export async function listCases(db: Executor, session: Session, search = "") {
