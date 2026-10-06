@@ -518,8 +518,11 @@ describe("database schema (architecture §4)", () => {
       state: "processed",
       processedAt: at,
     });
+    // An active share is bound to its creator (public_shares_creator_scope): synthetic values.
     await roundTrip(s.publicShares, {
       tokenHash: "share-hash",
+      viewToken: "synthetic-view-token",
+      creatorSessionHash: "synthetic-creator-session-hash",
       listingReferences: ["MS-00100"],
       expiresAt: later,
     });
