@@ -8,6 +8,8 @@ import { hostUrl, origins } from "./hosts";
 type Seed = {
   reference: string;
   blank: { reference: string };
+  bgn: { reference: string };
+  twoAreas: { reference: string };
   token: string;
 };
 function seed(): Seed {
@@ -51,7 +53,7 @@ for (const javaScriptEnabled of [false, true])
       ).toBeVisible();
       const candidate = page.getByRole("region", { name: "Publication candidate" });
       await expect(candidate).toContainText("Public version: BG");
-      await expect(candidate).toContainText("Review version 1 · Bulgarian");
+      await expect(candidate).toContainText("Approved version 1 · Bulgarian");
       await expect(
         page.getByText(`Current content from the editor · ${f.reference}`),
       ).toBeVisible();
@@ -59,7 +61,7 @@ for (const javaScriptEnabled of [false, true])
         page.getByText(`${f.reference} · Photo 1 of 1 · Original listing photo`),
       ).toBeVisible();
       // Approvals are status rows: no checkbox the reviewer could tick to fake one.
-      const approvals = page.getByRole("region", { name: "Required approvals" });
+      const approvals = page.getByRole("region", { name: /approvals/i });
       await expect(approvals.getByRole("checkbox")).toHaveCount(0);
       await expect(
         approvals.getByRole("listitem").filter({ hasText: "Facts are reviewed" }),
@@ -124,11 +126,40 @@ test("O16 publishes the exact package through its decision and shows the result"
   ).toBeVisible();
 });
 
+test("O16 names the approved version it publishes, apart from a newer review version", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  const f = seed();
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  // Freeze a newer review version: the approved one stays the publishing subject.
+  await page.getByRole("button", { name: "Freeze review candidate", exact: true }).click();
+  await expect(page.getByText("The action was recorded.")).toBeVisible();
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  const candidate = page.getByRole("region", { name: "Publication candidate" });
+  await expect(candidate).toContainText("Approved version 1 · Bulgarian");
+  await expect(candidate).toContainText(
+    "Review version 2 is not approved yet; publishing still uses approved version 1.",
+  );
+  await expect(page.getByRole("region", { name: "Approvals for version 1" })).toBeVisible();
+});
+
+test("O16 keeps recorded currency and every area basis as recorded", async ({ page }) => {
+  const f = seed();
+  await open(page, f, `/en/inventory/${f.bgn.reference}?tab=review`);
+  const before = page.getByRole("complementary", { name: "Before you decide" });
+  await expect(before).toContainText("BGN");
+  await expect(before).not.toContainText("€");
+  await open(page, f, `/en/inventory/${f.twoAreas.reference}?tab=review`);
+  await expect(before).toContainText("Living area 68 m²");
+  await expect(before).toContainText("Land area 450 m²");
+});
+
 test("O16 keeps BG and RU labels", async ({ page }) => {
   const f = seed();
   for (const [locale, title, approvals] of [
-    ["bg", "Преглед за публикуване", "Нужни одобрения"],
-    ["ru", "Проверка перед публикацией", "Необходимые одобрения"],
+    ["bg", "Преглед за публикуване", /одобрени/i],
+    ["ru", "Проверка перед публикацией", /одобрени/i],
   ] as const) {
     await open(page, f, `/${locale}/inventory/${f.reference}?tab=review`);
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
