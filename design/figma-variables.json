@@ -945,7 +945,7 @@
       "name": "spacing/gutter",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "description": "Compact page gutter (ux-spec §06.2).",
+      "description": "Compact page gutter, as the 390 px Figma frames (ux-spec §06.2).",
       "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
@@ -1786,7 +1786,7 @@
     {
       "variableId": "spacing/gutter",
       "modeId": "mode:size:light",
-      "value": 16
+      "value": 20
     },
     {
       "variableId": "spacing/gutter-medium",
