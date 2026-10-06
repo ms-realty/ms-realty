@@ -96,7 +96,9 @@ export default async function InventoryReceiptPage({
         <FocusedRows
           rows={[
             [o16.checkingRows.number, id.slice(0, 8)],
-            [o16.checkingRows.candidate, record.listing.reference],
+            // The address names the page context only; the candidate is not claimed until the
+            // operation itself records it.
+            [o16.checkingRows.candidate, o16.checkingCandidateUnknown],
             [o16.checkingRows.local, o16.checkingLocal],
             [o16.checkingRows.external, o16.checkingExternal],
             [o16.checkingRows.recovery, o16.checkingRecovery],

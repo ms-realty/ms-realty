@@ -132,6 +132,18 @@ test("O16 publishes the exact package through its decision and shows the result"
     "href",
     new RegExp(`/bg/properties/${f.reference}/`),
   );
+  // After a later withdrawal the same receipt no longer claims the page is published.
+  const receipt = page.url();
+  await db
+    .update(schema.currentPublications)
+    .set({ state: "withdrawn", reason: "Synthetic withdrawal after the activation." })
+    .where(eq(schema.currentPublications.listingId, f.listingId));
+  await page.goto(receipt);
+  await expect(page.getByRole("heading", { level: 1, name: "Activation recorded" })).toBeVisible();
+  await expect(
+    page.getByText("The public page no longer shows this package", { exact: false }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open the public page" })).toHaveCount(0);
   // The result is this actor's own activation; a made-up id shows the review instead.
   await open(page, f, `/en/inventory/${f.reference}?tab=review&published=${crypto.randomUUID()}`);
   await expect(
@@ -186,6 +198,8 @@ test("O16 shows an unconfirmed activation as still being checked, then its resul
     page.getByRole("heading", { level: 1, name: "Activation is still being checked" }),
   ).toBeVisible();
   await expect(page.getByText("Not published automatically")).toBeVisible();
+  // The address names context only: the candidate is not claimed for a pending request.
+  await expect(page.getByText("Known once the result is confirmed")).toBeVisible();
   await expect(page.getByText("published", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Review the exception" })).toHaveAttribute(
     "href",
