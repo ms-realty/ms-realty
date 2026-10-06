@@ -1,5 +1,6 @@
 // Staff-only copy. BG and RU are drafts for human language review; never public/indexable.
 const en = {
+  draftLeave: "This draft could not be saved in this tab. Leave and discard the unsent changes?",
   today: "Today",
   inbox: "Inquiries",
   tasks: "Tasks",
@@ -191,6 +192,8 @@ type Copy = {
     : { [S in keyof (typeof en)[K]]: string };
 };
 const bg: Copy = {
+  draftLeave:
+    "Черновата не може да се запази в този раздел. Да напуснете ли и да отхвърлите незапазените промени?",
   today: "Днес",
   inbox: "Запитвания",
   tasks: "Задачи",
@@ -373,6 +376,8 @@ const bg: Copy = {
   },
 };
 const ru: Copy = {
+  draftLeave:
+    "Не удалось сохранить черновик в этой вкладке. Выйти и потерять несохранённые изменения?",
   today: "Сегодня",
   inbox: "Запросы",
   tasks: "Задачи",

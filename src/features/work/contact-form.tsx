@@ -114,6 +114,7 @@ export function ContactForm({
       owner={draftOwner}
       id={id}
       kind="contact"
+      leaveMessage={work.draftLeave}
       action={action}
       initialState={{ ...initialState, currentContact: contact } as ContactState}
       permalink={path}

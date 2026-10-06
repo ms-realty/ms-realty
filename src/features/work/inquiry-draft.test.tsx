@@ -9,7 +9,7 @@ import { contactCopy } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
 import { TriageForm } from "./forms";
-import { InquiryDraftReconciliation } from "./inquiry-draft";
+import { InquiryDraftBoundary, InquiryDraftReconciliation } from "./inquiry-draft";
 import type { InquiryDraftOwner } from "./inquiry-draft-storage";
 import { readInquiryDraft } from "./inquiry-draft-storage";
 
@@ -73,7 +73,15 @@ function Forms({
     </>
   );
 }
-beforeEach(() => sessionStorage.clear());
+beforeEach(() => {
+  sessionStorage.clear();
+  for (const cookie of document.cookie.split("; ")) {
+    const name = cookie.split("=")[0];
+    if (name?.startsWith("msr_inquiry_"))
+      // biome-ignore lint/suspicious/noDocumentCookie: Reset only test-created native references.
+      document.cookie = `${name}=; Path=/; Max-Age=0`;
+  }
+});
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -245,5 +253,68 @@ describe("O02/O03 inquiry drafts", () => {
     const leaving = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(leaving);
     expect(leaving.defaultPrevented).toBe(true);
+  });
+
+  it("stops SPA link navigation and preserves every dirty form when the leave choice is cancelled", () => {
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("Storage disabled");
+    });
+    const choose = vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(
+      <>
+        <Forms draftOwner={owner()} />
+        <a href="/en/today">Sidebar destination</a>
+      </>,
+    );
+    fireEvent.change(screen.getByLabelText(contact.note), {
+      target: { value: "Private contact draft" },
+    });
+    fireEvent.change(screen.getByLabelText(work.reason), {
+      target: { value: "Private triage draft" },
+    });
+    const nextHandler = vi.fn();
+    document.addEventListener("click", nextHandler);
+    try {
+      fireEvent.click(screen.getByRole("link", { name: "Sidebar destination" }));
+      expect(choose).toHaveBeenCalledExactlyOnceWith(work.draftLeave);
+      expect(nextHandler).not.toHaveBeenCalled();
+      expect(screen.getByLabelText(contact.note)).toHaveValue("Private contact draft");
+      expect(screen.getByLabelText(work.reason)).toHaveValue("Private triage draft");
+    } finally {
+      document.removeEventListener("click", nextHandler);
+    }
+  });
+
+  it("reconciles a server-verified terminal marker before a returning form restores its draft", async () => {
+    const draftOwner = owner(),
+      user = userEvent.setup();
+    let finish!: (state: FormState<ContactValues>) => void;
+    const mounted = render(
+      <Forms
+        draftOwner={draftOwner}
+        action={() =>
+          new Promise((resolve) => {
+            finish = resolve;
+          })
+        }
+      />,
+    );
+    await user.type(screen.getByLabelText(contact.note), "Pending before native resolution");
+    await user.click(screen.getByRole("button", { name: contact.submit }));
+    mounted.unmount();
+    render(
+      <>
+        <InquiryDraftBoundary
+          owner={draftOwner}
+          resolutions={[
+            { id: "one", kind: "contact", key: initial().operationId, status: "succeeded" },
+          ]}
+        />
+        <Forms draftOwner={draftOwner} />
+      </>,
+    );
+    expect(screen.getByLabelText(contact.note)).toHaveValue("");
+    expect(screen.getByRole("button", { name: contact.submit })).toBeEnabled();
+    await act(async () => finish(initial()));
   });
 });

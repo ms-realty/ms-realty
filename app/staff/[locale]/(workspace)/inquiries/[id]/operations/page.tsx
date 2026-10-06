@@ -1,4 +1,4 @@
-import { checkLocale, OperationScreen } from "@/features/work/screens";
+import { checkLocale, OperationScreen, queryPage } from "@/features/work/screens";
 import { requireStaffPage } from "@/server/auth/pages";
 
 export default async function WorkPage({
@@ -19,6 +19,8 @@ export default async function WorkPage({
       id={id}
       type={query.type}
       operationKey={query.key}
+      view={query.view}
+      page={queryPage(query.page)}
     />
   );
 }

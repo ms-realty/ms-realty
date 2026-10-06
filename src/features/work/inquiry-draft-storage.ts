@@ -38,6 +38,14 @@ function ownsDrafts(owner: InquiryDraftOwner): boolean {
   return stored?.id === owner.id && stored.expiresAt > Date.now() && owner.expiresAt > Date.now();
 }
 
+export function discardInquiryDraft(owner: InquiryDraftOwner, id: string, kind: InquiryDraftKind) {
+  try {
+    if (ownsDrafts(owner)) sessionStorage.removeItem(draftKey(id, kind));
+  } catch {
+    // The explicit leave choice also applies when storage is unavailable.
+  }
+}
+
 /** Reconcile only the retained operation that the server has just authorized and read. */
 export function reconcileInquiryDraft(
   owner: InquiryDraftOwner,

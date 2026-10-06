@@ -1,20 +1,42 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isStaffLocale } from "@/i18n/config";
 import { requireAuthHost } from "@/server/auth/pages";
+import { getEnv } from "@/server/config/env";
 import { AppError } from "@/server/errors";
 import { action, type HandlerContext } from "@/server/http/next";
-import { acceptInquiry, changeTask, triageInquiry } from "@/server/work/commands";
+import {
+  acceptInquiry,
+  changeTask,
+  readWorkOperation,
+  triageInquiry,
+} from "@/server/work/commands";
 import { recordInquiryContact } from "@/server/work/contact";
 import { handoverTask } from "@/server/work/handover";
 import { handoverReviewInput, handoverReviewInstant } from "@/server/work/handover-time";
 import { readInquiry, readTask } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import {
+  isIssuedFormOperation,
+  issueFormOperation,
+  readFormEnvelope,
+  readFormValues,
+} from "@/ui/form/server";
 import { workCopy } from "./copy";
 import { taskHandoverCopy } from "./handover-copy";
+import { inquiryDraftOwner } from "./inquiry-draft-owner";
+import type { InquiryDraftKind } from "./inquiry-draft-storage";
+import {
+  inquiryOperationType,
+  inquiryReferenceCookie,
+  inquiryStatusHref,
+  isInquiryDraftKind,
+  parseInquiryReference,
+} from "./inquiry-reference";
+import { type InboxScope, inquiryHref } from "./inquiry-row";
 
 export type AcceptValues = { nextAction: string; dueAt: string };
 export type TriageValues = { state: string; reason: string; duplicateOfInquiryId: string };
@@ -75,12 +97,40 @@ async function perform<V extends FormValues>(
     responseId: randomUUID(),
     outcome: { kind: "idle" },
   };
+  const jar = isInquiryDraftKind(kind) ? await cookies() : null;
+  let referenceCookie: string | undefined, fencedReference: string | undefined;
   const result = await action(
     async (ctx) => {
       await requireAuthHost("staff");
       if (!isStaffLocale(locale)) throw new AppError("not_found");
       if (!ctx.session) throw new AppError("unauthenticated");
       if (!envelope?.expectedRevision) throw new AppError("validation_failed");
+      if (jar && isInquiryDraftKind(kind)) {
+        const name = inquiryReferenceCookie(inquiryDraftOwner(ctx.session).id, id, kind);
+        const previous = parseInquiryReference(jar.get(name)?.value);
+        if (previous && previous.key !== key && isIssuedFormOperation(scope, previous.key)) {
+          const receipt =
+            previous.status === "pending"
+              ? null
+              : await readWorkOperation(
+                  ctx.db,
+                  ctx.session,
+                  inquiryOperationType(kind),
+                  id,
+                  previous.key,
+                );
+          if (!receipt || receipt.status !== previous.status) {
+            fencedReference = previous.key;
+            throw new AppError("outcome_unknown");
+          }
+        }
+        referenceCookie = name;
+        jar.set(name, key, {
+          path: "/",
+          sameSite: "strict",
+          secure: getEnv().hosts.staff.startsWith("https://"),
+        });
+      }
       return execute(
         ctx,
         { operationId: envelope.operationId, expectedVersion: envelope.expectedRevision },
@@ -89,6 +139,26 @@ async function perform<V extends FormValues>(
     },
     { requireSession: true },
   );
+  if (fencedReference) {
+    const retainedStatus = {
+      href: `${path}/operations?type=${kind}&key=${encodeURIComponent(fencedReference)}`,
+      label: copy.statusLink,
+    };
+    return {
+      ...state,
+      operationId: fencedReference,
+      reconciliation: retainedStatus,
+      outcome: {
+        kind: "unknown",
+        code: "OUTCOME_UNKNOWN",
+        message: copy.unknown,
+        status: retainedStatus,
+      },
+    };
+  }
+  // Known replies release the fence. A lost acknowledgment keeps the client-written cookie.
+  if (referenceCookie && (result.ok || result.error.outcome !== "unknown"))
+    jar?.delete(referenceCookie);
   if (result.ok)
     return {
       ...state,
@@ -204,6 +274,62 @@ async function perform<V extends FormValues>(
       recovery: { href: path, label: copy.openRecord },
     },
   };
+}
+
+/** Read-only terminal confirmation; releases this reference without replaying its command. */
+export async function resolveInquiryReferenceAction(
+  locale: string,
+  id: string,
+  kind: InquiryDraftKind,
+  operationId: string,
+  scope: InboxScope,
+  page: number,
+) {
+  const jar = await cookies();
+  const statusPath = inquiryStatusHref(locale, id, kind, operationId, scope, page);
+  let newer: string | undefined;
+  const result = await action(
+    async (ctx) => {
+      await requireAuthHost("staff");
+      if (
+        !isStaffLocale(locale) ||
+        !isInquiryDraftKind(kind) ||
+        !isIssuedFormOperation(scopeFor(kind, id), operationId)
+      )
+        throw new AppError("not_found");
+      if (!ctx.session) throw new AppError("unauthenticated");
+      const name = inquiryReferenceCookie(inquiryDraftOwner(ctx.session).id, id, kind);
+      const current = parseInquiryReference(jar.get(name)?.value);
+      if (
+        current &&
+        current.key !== operationId &&
+        isIssuedFormOperation(scopeFor(kind, id), current.key)
+      ) {
+        newer = current.key;
+        throw new AppError("outcome_unknown");
+      }
+      const receipt = await readWorkOperation(
+        ctx.db,
+        ctx.session,
+        inquiryOperationType(kind),
+        id,
+        operationId,
+      );
+      if (receipt?.status !== "succeeded" && receipt?.status !== "failed")
+        throw new AppError("outcome_unknown");
+      // SSR validates this advisory marker against the actor's receipt before allowing a form.
+      jar.set(name, `${receipt.status}:${operationId}`, {
+        path: "/",
+        sameSite: "strict",
+        secure: getEnv().hosts.staff.startsWith("https://"),
+      });
+      return null;
+    },
+    { requireSession: true },
+  );
+  if (newer) redirect(inquiryStatusHref(locale, id, kind, newer, scope, page));
+  if (!result.ok) redirect(statusPath);
+  redirect(inquiryHref(locale, id, scope, page));
 }
 
 export async function acceptAction(

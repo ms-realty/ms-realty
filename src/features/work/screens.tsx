@@ -1,5 +1,6 @@
 import "server-only";
-import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
@@ -8,14 +9,19 @@ import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task"
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
 import { isStaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
-import { sha256Hex } from "@/server/crypto";
 import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
 import { readTaskHandover } from "@/server/work/handover";
 import { listContacts, listTasks, readContact, readInquiry } from "@/server/work/queries";
-import { initialFormState } from "@/ui/form/server";
+import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { ChevronStartIcon } from "@/ui/icons";
-import { acceptAction, contactAction, taskAction, triageAction } from "./actions";
+import {
+  acceptAction,
+  contactAction,
+  resolveInquiryReferenceAction,
+  taskAction,
+  triageAction,
+} from "./actions";
 import { contactCopy } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
@@ -25,20 +31,20 @@ import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
 import { TaskHandoverScreen } from "./handover-screen";
 import { InquiryDraftBoundary, InquiryDraftReconciliation } from "./inquiry-draft";
+import { inquiryDraftOwner } from "./inquiry-draft-owner";
+import type { InquiryDraftKind } from "./inquiry-draft-storage";
 import { InquiryOwnerContext } from "./inquiry-owner-context";
 import { conversationId, InquiryQueue } from "./inquiry-queue";
-import { parseInboxScope, queueHref } from "./inquiry-row";
+import {
+  inquiryOperationType,
+  inquiryReferenceCookie,
+  inquiryStatusHref,
+  isInquiryDraftKind,
+  parseInquiryReference,
+} from "./inquiry-reference";
+import { inquiryHref, parseInboxScope, queueHref } from "./inquiry-row";
 import { InquirySelectionContext } from "./inquiry-selection-context";
 import { When } from "./when";
-
-function inquiryDraftOwner(session: Session) {
-  return {
-    id: sha256Hex(
-      `${session.account.kind}:${session.account.id}:${session.actor.kind}:${session.actor.id}:${session.id}`,
-    ),
-    expiresAt: session.expiresAt.getTime(),
-  };
-}
 
 export function checkLocale(locale: string) {
   if (!isStaffLocale(locale)) notFound();
@@ -217,6 +223,29 @@ export async function InquiryScreen({
   const copy = workCopy(locale);
   const contact = contactCopy(locale);
   const draftOwner = inquiryDraftOwner(session);
+  const scope = parseInboxScope(view);
+  const jar = await cookies();
+  const resolutions: {
+    kind: InquiryDraftKind;
+    key: string;
+    status: "succeeded" | "failed";
+    id: string;
+  }[] = [];
+  // A lost acknowledgment must be fenced before scripts/hydration can expose another form.
+  for (const kind of ["accept", "contact", "triage"] as const) {
+    const reference = parseInquiryReference(
+      jar.get(inquiryReferenceCookie(draftOwner.id, id, kind))?.value,
+    );
+    if (!reference || !isIssuedFormOperation(`work.${kind}.${id}`, reference.key)) continue;
+    if (reference.status === "pending")
+      redirect(inquiryStatusHref(locale, id, kind, reference.key, scope, page));
+    const receipt = await privateRead(() =>
+      readWorkOperation(getDb(), session, inquiryOperationType(kind), id, reference.key),
+    );
+    if (receipt?.status !== reference.status)
+      redirect(inquiryStatusHref(locale, id, kind, reference.key, scope, page));
+    resolutions.push({ key: reference.key, status: reference.status, kind, id });
+  }
   const targets = (
     [
       "suspected_spam",
@@ -246,10 +275,9 @@ export async function InquiryScreen({
     })
     .safeParse(inquiry.context);
   const listing = snapshot.success ? snapshot.data.listing : null;
-  const scope = parseInboxScope(view);
   return (
     <div className="mx-auto min-w-0 max-w-page px-gutter py-6 sm:px-gutter-wide sm:py-8 lg:grid lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:items-start lg:gap-6">
-      <InquiryDraftBoundary owner={draftOwner} />
+      <InquiryDraftBoundary owner={draftOwner} resolutions={resolutions} />
       <InquiryQueue locale={locale} session={session} scope={scope} page={page} selectedId={id} />
       <div id={conversationId} tabIndex={-1} className="min-w-0 space-y-8 break-words outline-none">
         {/* Narrow screens: back to the same scope and page, scrolled to this conversation. */}
@@ -767,6 +795,8 @@ export async function OperationScreen({
   type,
   operationKey,
   task = false,
+  view,
+  page = 1,
 }: {
   locale: string;
   session: Session;
@@ -774,6 +804,8 @@ export async function OperationScreen({
   type: string | string[] | undefined;
   operationKey: string | string[] | undefined;
   task?: boolean;
+  view?: string | string[];
+  page?: number;
 }) {
   if (
     typeof operationKey !== "string" ||
@@ -796,6 +828,20 @@ export async function OperationScreen({
     readWorkOperation(getDb(), session, operationType, id, operationKey),
   );
   const copy = workCopy(locale);
+  const scope = parseInboxScope(view);
+  const draftOwner = inquiryDraftOwner(session);
+  const reference =
+    !task && isInquiryDraftKind(type)
+      ? parseInquiryReference(
+          (await cookies()).get(inquiryReferenceCookie(draftOwner.id, id, type))?.value,
+        )
+      : null;
+  const fenced =
+    reference &&
+    (reference.status === "pending" || reference.status !== receipt?.status) &&
+    reference.key === operationKey &&
+    isIssuedFormOperation(`work.${type}.${id}`, operationKey);
+  const terminal = receipt?.status === "succeeded" || receipt?.status === "failed";
   return (
     <Page
       title={
@@ -825,9 +871,36 @@ export async function OperationScreen({
               ? copy.statusFailed
               : copy.statusPending}
       </p>
-      <a className={link} href={`/${locale}/${task ? "tasks" : "inquiries"}/${id}`}>
-        {copy.openRecord}
-      </a>
+      {fenced && !task && isInquiryDraftKind(type) ? (
+        terminal ? (
+          <form
+            action={resolveInquiryReferenceAction.bind(
+              null,
+              locale,
+              id,
+              type,
+              operationKey,
+              scope,
+              page,
+            )}
+          >
+            <button type="submit" className={link}>
+              {copy.openRecord}
+            </button>
+          </form>
+        ) : (
+          <a className={link} href={inquiryStatusHref(locale, id, type, operationKey, scope, page)}>
+            {copy.statusLink}
+          </a>
+        )
+      ) : (
+        <a
+          className={link}
+          href={task ? `/${locale}/tasks/${id}` : inquiryHref(locale, id, scope, page)}
+        >
+          {copy.openRecord}
+        </a>
+      )}
     </Page>
   );
 }

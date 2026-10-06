@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { type BrowserContext, expect, test } from "@playwright/test";
+import { type BrowserContext, expect, type Route, test } from "@playwright/test";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -9,6 +9,7 @@ import * as schema from "../src/db/schema";
 import { discoveryCopy } from "../src/features/discovery/copy";
 import { contactCopy } from "../src/features/work/contact-copy";
 import { workCopy } from "../src/features/work/copy";
+import { inquiryReferenceCookie } from "../src/features/work/inquiry-reference";
 import { hostUrl, origins } from "./hosts";
 import { openUnassignedQueueAt } from "./inquiry-queue";
 
@@ -142,7 +143,7 @@ test("O02 draft notes and reasons survive scope and conversation switches, then 
   ).toBe(true);
 });
 
-test("O02 pending contact keeps its operation when acknowledgment is lost and clears after reconciliation", async ({
+test("O02 pending contact fences SSR with scripts delayed and clears after explicit native reconciliation", async ({
   page,
   context,
 }) => {
@@ -166,6 +167,11 @@ test("O02 pending contact keeps its operation when acknowledgment is lost and cl
   const operationId = await page
     .locator('[data-inquiry-contact] input[name="_operationId"]')
     .inputValue();
+  const ownerId = await page.evaluate(
+    () => JSON.parse(sessionStorage.getItem("msr.inquiry-draft.owner") ?? "null")?.id,
+  );
+  expect(ownerId).toMatch(/^[0-9a-f]{64}$/);
+  const referenceName = inquiryReferenceCookie(ownerId, fixture.id, "contact");
   let acknowledged!: () => void, release!: () => void;
   const received = new Promise<void>((resolve) => {
     acknowledged = resolve;
@@ -178,7 +184,12 @@ test("O02 pending contact keeps its operation when acknowledgment is lost and cl
       await route.continue();
       return;
     }
+    // Capture the client-written reference before observing the real command. route.fetch
+    // can ingest response cookies; restore the pre-reply cookie to model withheld headers.
+    const pending = (await context.cookies()).find((cookie) => cookie.name === referenceName);
+    expect(pending?.value).toBe(operationId);
     const response = await route.fetch();
+    if (pending) await context.addCookies([pending]);
     acknowledged();
     await holdResponse;
     // A full navigation closes the original action request after the server has accepted it.
@@ -189,24 +200,208 @@ test("O02 pending contact keeps its operation when acknowledgment is lost and cl
     await received;
     await page.goto(hostUrl("staff", "/en/inquiries?view=mine"));
     release();
-    await page.locator(`[data-inquiry-id="${fixture.id}"] a`).click();
-    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
-    await expect(page.getByLabel(copy.note, { exact: true })).toHaveAttribute("readonly");
-    await expect(page.getByRole("button", { name: copy.submit, exact: true })).toHaveCount(0);
-    const status = page.getByRole("link", { name: work.statusLink, exact: true });
-    await expect(status).toHaveAttribute(
-      "href",
-      `/en/inquiries/${fixture.id}/operations?type=contact&key=${operationId}`,
+    const blockScripts = async (route: Route) => {
+      if (route.request().resourceType() === "script") await route.abort();
+      else await route.continue();
+    };
+    await page.route("**/_next/static/**", blockScripts);
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}?view=mine&page=2`));
+    await expect(page).toHaveURL(
+      hostUrl(
+        "staff",
+        `/en/inquiries/${fixture.id}/operations?type=contact&key=${operationId}&view=mine&page=2`,
+      ),
     );
-    await status.click();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: copy.submit, exact: true })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
-    await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+    expect((await context.cookies()).find((cookie) => cookie.name === referenceName)?.value).toBe(
+      operationId,
+    );
+    // Native resolution verifies the terminal receipt before releasing the server fence.
+    await page.getByRole("button", { name: work.openRecord, exact: true }).click();
+    await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${fixture.id}?view=mine&page=2`));
+    expect(
+      decodeURIComponent(
+        (await context.cookies()).find((cookie) => cookie.name === referenceName)?.value ?? "",
+      ),
+    ).toBe(`succeeded:${operationId}`);
+    // The old local pending reference remains until scripts resume; verified SSR resolution
+    // must clear it before the restored form can block or offer another replay.
+    expect(
+      await page.evaluate(
+        (id) =>
+          JSON.parse(sessionStorage.getItem(`msr.inquiry-draft.${id}:contact`) ?? "null")?.operation
+            ?.id,
+        fixture.id,
+      ),
+    ).toBe(operationId);
+    await page.unroute("**/_next/static/**", blockScripts);
+    await page.reload();
     await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
+    await expect(page.getByRole("button", { name: copy.submit, exact: true })).toBeEnabled();
     await expect(page.getByText(note, { exact: true })).toBeVisible();
   } finally {
     release();
     await page.unrouteAll({ behavior: "wait" });
   }
+});
+
+for (const kind of ["accept", "contact", "triage"] as const) {
+  test(`O02 pending ${kind} is fenced before hydration and with scripts disabled`, async ({
+    page,
+    context,
+    browser,
+  }) => {
+    const fixture = seed(),
+      copy = contactCopy("en"),
+      work = workCopy("en");
+    if (kind === "accept")
+      await db
+        .update(schema.inquiries)
+        .set({ state: "received", ownerId: null, coverageQueue: "agency" })
+        .where(eq(schema.inquiries.id, fixture.id));
+    await signIn(context, fixture.token);
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    const field = page.getByLabel(
+      kind === "contact" ? copy.note : kind === "triage" ? work.reason : work.nextAction,
+      { exact: true },
+    );
+    const operationId = await field.evaluate(
+      (control) =>
+        (control.closest("form")?.querySelector('input[name="_operationId"]') as HTMLInputElement)
+          ?.value,
+    );
+    expect(operationId).toMatch(/^[A-Za-z0-9_-]{43}\.[0-9a-f]{32}$/);
+    const ownerId = await page.evaluate(
+      () => JSON.parse(sessionStorage.getItem("msr.inquiry-draft.owner") ?? "null")?.id,
+    );
+    expect(ownerId).toMatch(/^[0-9a-f]{64}$/);
+    const name = inquiryReferenceCookie(ownerId, fixture.id, kind);
+    await context.addCookies([
+      { name, value: operationId, url: origins.staff, sameSite: "Strict" },
+    ]);
+    const native = await browser.newContext({ javaScriptEnabled: false });
+    try {
+      await native.addCookies((await context.cookies()).filter((cookie) => cookie.name !== name));
+      const nativePage = await native.newPage();
+      await nativePage.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+      const freshField = nativePage.getByLabel(
+        kind === "contact" ? copy.note : kind === "triage" ? work.reason : work.nextAction,
+        { exact: true },
+      );
+      const freshId = await freshField.evaluate(
+        (control) =>
+          (control.closest("form")?.querySelector('input[name="_operationId"]') as HTMLInputElement)
+            ?.value,
+      );
+      expect(freshId).not.toBe(operationId);
+      const [before] = await db
+        .select({ version: schema.inquiries.version })
+        .from(schema.inquiries)
+        .where(eq(schema.inquiries.id, fixture.id));
+      // A form opened earlier must also be fenced by the server if another tab retained a
+      // different pending reference after this HTML was delivered.
+      await native.addCookies([
+        { name, value: operationId, url: origins.staff, sameSite: "Strict" },
+      ]);
+      await nativePage
+        .getByRole("button", {
+          name:
+            kind === "contact" ? copy.submit : kind === "triage" ? work.disposition : work.accept,
+          exact: true,
+        })
+        .click();
+      await expect(nativePage).toHaveURL(
+        (address) =>
+          address.href.split("#")[0] ===
+          hostUrl(
+            "staff",
+            `/en/inquiries/${fixture.id}/operations?type=${kind}&key=${operationId}&view=all`,
+          ),
+      );
+      const [after] = await db
+        .select({ version: schema.inquiries.version })
+        .from(schema.inquiries)
+        .where(eq(schema.inquiries.id, fixture.id));
+      expect(after?.version).toBe(before?.version);
+      await nativePage.goto(hostUrl("staff", `/en/inquiries/${fixture.id}?view=mine`));
+      await expect(nativePage).toHaveURL(
+        hostUrl(
+          "staff",
+          `/en/inquiries/${fixture.id}/operations?type=${kind}&key=${operationId}&view=mine`,
+        ),
+      );
+      await expect(nativePage.getByText(work.statusMissing, { exact: true })).toBeVisible();
+      await expect(nativePage.locator('input[name="_operationId"]')).toHaveCount(0);
+      await expect(
+        nativePage.getByRole("button", { name: work.openRecord, exact: true }),
+      ).toHaveCount(0);
+      // A forged terminal prefix cannot release a pending operation without its receipt.
+      await native.addCookies([
+        { name, value: `succeeded:${operationId}`, url: origins.staff, sameSite: "Strict" },
+      ]);
+      await nativePage.goto(hostUrl("staff", `/en/inquiries/${fixture.id}?view=mine`));
+      await expect(nativePage).toHaveURL(
+        hostUrl(
+          "staff",
+          `/en/inquiries/${fixture.id}/operations?type=${kind}&key=${operationId}&view=mine`,
+        ),
+      );
+      await expect(nativePage.locator('input[name="_operationId"]')).toHaveCount(0);
+    } finally {
+      await native.close();
+    }
+  });
+}
+
+test("O02 storage-disabled sidebar navigation offers stay or discard once for all dirty forms", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  await context.addInitScript(() => {
+    Storage.prototype.setItem = () => {
+      throw new Error("Storage disabled");
+    };
+  });
+  await signIn(context, fixture.token);
+  const inquiryUrl = hostUrl("staff", `/en/inquiries/${fixture.id}`);
+  await page.goto(inquiryUrl);
+  await page
+    .getByLabel(copy.note, { exact: true })
+    .fill("Private note with browser storage unavailable");
+  await page
+    .getByLabel(work.reason, { exact: true })
+    .fill("Private triage reason with browser storage unavailable");
+  const sidebar = page
+    .getByRole("navigation", { name: "Workspace", exact: true })
+    .getByRole("link", { name: "Today", exact: true });
+  const dialogs: { type: string; message: string }[] = [];
+  let leave = false;
+  page.on("dialog", async (dialog) => {
+    dialogs.push({ type: dialog.type(), message: dialog.message() });
+    if (leave) await dialog.accept();
+    else await dialog.dismiss();
+  });
+  await sidebar.click();
+  await expect(page).toHaveURL(inquiryUrl);
+  await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(
+    "Private note with browser storage unavailable",
+  );
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(
+    "Private triage reason with browser storage unavailable",
+  );
+  expect(dialogs).toEqual([{ type: "confirm", message: work.draftLeave }]);
+  leave = true;
+  await sidebar.click();
+  await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
+  expect(dialogs).toEqual([
+    { type: "confirm", message: work.draftLeave },
+    { type: "confirm", message: work.draftLeave },
+  ]);
 });
 
 test("O02 native triage submits its reason with a stable inquiry form identity", async ({

@@ -77,6 +77,7 @@ export function AcceptForm({
       owner={draftOwner}
       id={id}
       kind="accept"
+      leaveMessage={copy.draftLeave}
       action={action}
       initialState={initialState}
       permalink={path}
@@ -125,6 +126,7 @@ export function TriageForm({
       owner={draftOwner}
       id={id}
       kind="triage"
+      leaveMessage={copy.draftLeave}
       action={action}
       initialState={initialState}
       permalink={path}
