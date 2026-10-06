@@ -1,3 +1,4 @@
+// O02 inquiries queue: ?view= picks the scope, ?page= the page. Search never uses the URL.
 import { checkLocale, InboxScreen, queryPage } from "@/features/work/screens";
 import { requireStaffPage } from "@/server/auth/pages";
 
