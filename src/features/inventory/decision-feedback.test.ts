@@ -66,7 +66,7 @@ describe("inventory decision recovery", () => {
     );
     expect(result).toMatchObject({
       kind: "conflict",
-      recovery: { href: "/en/inventory/MS-00001?review=synthetic#inventory-review" },
+      recovery: { href: "/en/inventory/MS-00001?tab=review&review=synthetic#inventory-review" },
     });
     expect(result).not.toHaveProperty("reapply");
     expect(result).not.toHaveProperty("latest");
@@ -89,7 +89,7 @@ describe("inventory decision recovery", () => {
         status,
       ),
     ).toMatchObject({
-      recovery: { href: "/en/inventory/MS-00001?review=synthetic#inventory-review" },
+      recovery: { href: "/en/inventory/MS-00001?tab=review&review=synthetic#inventory-review" },
     });
   });
   it("returns field corrections without exposing raw validation detail", () => {

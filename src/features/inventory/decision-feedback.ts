@@ -21,7 +21,7 @@ export function inventoryDecisionFeedback(
   const href = `/${context.locale}/inventory/${context.reference}`;
   const current = {
     // A fresh query reloads the reviewed record instead of retaining an old rejected form.
-    href: `${href}?review=${encodeURIComponent(error.correlationId)}#${inventoryDecisionSection(context.intent)}`,
+    href: `${href}?tab=review&review=${encodeURIComponent(error.correlationId)}#${inventoryDecisionSection(context.intent)}`,
     label: feedback.review,
   };
   if (error.code === "OPERATION_PENDING")
@@ -85,7 +85,7 @@ export function inventoryDecisionFeedback(
                 label: feedback.translation,
               }
             : {
-                href: `${href}?review=${encodeURIComponent(error.correlationId)}#${reason === "listing_withdrawn" ? inventorySections.readiness : inventorySections.review}`,
+                href: `${href}?tab=review&review=${encodeURIComponent(error.correlationId)}#${reason === "listing_withdrawn" ? inventorySections.readiness : inventorySections.review}`,
                 label: feedback.review,
               };
     return {

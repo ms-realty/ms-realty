@@ -22,7 +22,8 @@ export function InventoryDecisionForm({
 }) {
   const copy = inventoryCopy(context.locale),
     decision = inventoryDecisionCopy(context.locale);
-  const href = `/${context.locale}/inventory/${context.reference}`;
+  // Decisions live on the review tab; a native POST must come back to it.
+  const href = `/${context.locale}/inventory/${context.reference}?tab=review`;
   // Freeze creates the first revision; availability also targets the listing itself.
   // Their native response identity must survive a change in the latest revision.
   const nativeTarget =

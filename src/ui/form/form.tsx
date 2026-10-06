@@ -65,6 +65,8 @@ export type ActionFormProps<V extends FormValues> = {
   submitLabel: string | ((state: FormState<V>) => string);
   /** Public source review can use the page width; entry fields retain their reading width. */
   layout?: "reading" | "full";
+  /** Navigation beside the one submit (links only; never a second command). */
+  secondaryActions?: ReactNode;
   children: (form: FormController<V>) => ReactNode;
 };
 
@@ -154,6 +156,7 @@ function FormSession<V extends FormValues>({
   formatValue,
   submitLabel,
   layout = "reading",
+  secondaryActions,
   children,
   snapshot,
 }: ActionFormProps<V> & { snapshot: RefObject<Snapshot> }) {
@@ -258,6 +261,35 @@ function FormSession<V extends FormValues>({
     );
   }
 
+  const submit = blocked ? null : (
+    <button
+      type="submit"
+      name={formFields.intent}
+      value={conflict?.reapply ? "reapply" : "submit"}
+      aria-disabled={pending || undefined}
+      data-pending={pending || undefined}
+      className={buttonClass("primary", "self-start")}
+    >
+      <span className="grid">
+        <span
+          className={cx("col-start-1 row-start-1", pending && "invisible")}
+          aria-hidden={pending || undefined}
+        >
+          {conflict?.reapply
+            ? copy.reapply
+            : typeof submitLabel === "function"
+              ? submitLabel(state)
+              : submitLabel}
+        </span>
+        <span
+          className={cx("col-start-1 row-start-1", !pending && "invisible")}
+          aria-hidden={!pending || undefined}
+        >
+          {copy.pending}
+        </span>
+      </span>
+    </button>
+  );
   return (
     <form
       ref={nativeForm}
@@ -405,35 +437,14 @@ function FormSession<V extends FormValues>({
           />
         </>
       ) : null}
-      {!blocked ? (
-        <button
-          type="submit"
-          name={formFields.intent}
-          value={conflict?.reapply ? "reapply" : "submit"}
-          aria-disabled={pending || undefined}
-          data-pending={pending || undefined}
-          className={buttonClass("primary", "self-start")}
-        >
-          <span className="grid">
-            <span
-              className={cx("col-start-1 row-start-1", pending && "invisible")}
-              aria-hidden={pending || undefined}
-            >
-              {conflict?.reapply
-                ? copy.reapply
-                : typeof submitLabel === "function"
-                  ? submitLabel(state)
-                  : submitLabel}
-            </span>
-            <span
-              className={cx("col-start-1 row-start-1", !pending && "invisible")}
-              aria-hidden={!pending || undefined}
-            >
-              {copy.pending}
-            </span>
-          </span>
-        </button>
-      ) : null}
+      {secondaryActions ? (
+        <div className="flex flex-wrap items-center gap-3">
+          {submit}
+          {secondaryActions}
+        </div>
+      ) : (
+        submit
+      )}
       <p className="sr-only" role="status">
         {pending ? copy.pending : ""}
       </p>

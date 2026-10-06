@@ -95,6 +95,11 @@ export async function saveInventory(
   );
   if (result.ok) {
     const ref = result.data.outcome.reference;
+    // O12SAVED: an edit lands on its focused receipt, rendered only for this actor's own save.
+    if (reference)
+      redirect(
+        `/${locale}/inventory/${encodeURIComponent(ref)}?saved=${encodeURIComponent(operationId)}${form.get("_tab") === "facts" ? "&tab=facts" : ""}`,
+      );
     return {
       ...state,
       outcome: {
@@ -408,7 +413,7 @@ export async function submitInventoryDecision(
         nextStep: feedback.next,
         destination: {
           // Force a fresh GET even for hydrated actions, then return to the same section.
-          href: `/${context.locale}/inventory/${context.reference}?operation=${operationId}#${inventoryDecisionSection(context.intent)}`,
+          href: `/${context.locale}/inventory/${context.reference}?tab=review&operation=${operationId}#${inventoryDecisionSection(context.intent)}`,
           label: copy.open,
         },
       },

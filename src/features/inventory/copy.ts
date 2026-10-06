@@ -41,6 +41,58 @@ const en = {
   reference: "Reference",
   purpose: "Purpose",
   permissions: "Your role cannot edit this record.",
+  o12: {
+    title: "Edit listing",
+    instruction: "Change the description, save it and review it for publication.",
+    sourceLine: "Bulgarian source · Working draft",
+    noDraft:
+      "No working draft is saved for this listing yet, so these fields start empty. The published listing is unchanged.",
+    tabs: "Listing parts",
+    facts: "Facts",
+    text: "Text",
+    photos: "Photos",
+    titleLabel: "Listing title",
+    descriptionLabel: "Description",
+    workingDraft: "Working draft BG",
+    saveText: "Save the description",
+    saveFacts: "Save the facts",
+    reviewForPublication: "Review for publication",
+    correctPublished: "Correct the published listing",
+    sourceTitle: "Facts from the BG source · Listing {reference}",
+    sourceReviewed: "Facts from an approved source",
+    sourceUnreviewed: "Facts not reviewed yet",
+    sourceMissing: "No source is recorded for these facts yet. Add one before saving.",
+    terms: "Listing terms and facts",
+    changeInFacts: "Change in Facts",
+    priceLabel: "Price · EUR",
+    areaLabel: "{basis} · m²",
+    bedroomsLabel: "Bedrooms",
+    settlementLabel: "Settlement",
+    bedrooms: { one: "{n} bedroom", other: "{n} bedrooms" } as Partial<
+      Record<Intl.LDMLPluralRule, string>
+    > & { other: string },
+    butler: "Butler",
+    butlerStatus: "Under your control",
+    butlerOffer:
+      "I can improve the structure of the text while keeping the price, area, bedrooms, area and reference exact.",
+    butlerRecord: "Current record",
+    butlerScope: "Permitted context only",
+    butlerNote: "You will get a draft to review. Nothing is sent or published.",
+    butlerPrepare: "Prepare a proposal",
+    butlerUnavailable:
+      "Butler cannot draft listing text yet. Write it yourself; only you save the draft.",
+    manualHeading: "Prefer to do it yourself?",
+    manual: "Continue without Butler",
+    saved: "Working draft saved",
+    savedDetail:
+      "Saved for listing {reference} · BG · Working draft. Publication and approvals stay separate.",
+    savedDescription: "Description at the last save",
+    savedLater: "The draft changed after this save. Open the listing to see the current version.",
+    toTask: "Back to the current task",
+    close: "Close",
+    reviewTitle: "Review for publication",
+    backToEdit: "Back to editing",
+  },
   labels: {
     propertyType: "Property type",
     purpose: "Purpose",
@@ -119,6 +171,57 @@ const bg: Copy = {
   reference: "Референция",
   purpose: "Цел",
   permissions: "Вашата роля няма право да редактира този запис.",
+  o12: {
+    title: "Редактиране на обява",
+    instruction: "Променете описанието, запишете го и го прегледайте за публикуване.",
+    sourceLine: "Български източник · Работна чернова",
+    noDraft:
+      "За тази обява още няма записана работна чернова, затова полетата са празни. Публикуваната обява не се променя.",
+    tabs: "Части на обявата",
+    facts: "Факти",
+    text: "Текст",
+    photos: "Снимки",
+    titleLabel: "Заглавие на обявата",
+    descriptionLabel: "Описание",
+    workingDraft: "Работна чернова BG",
+    saveText: "Запишете описанието",
+    saveFacts: "Запишете фактите",
+    reviewForPublication: "Прегледайте за публикуване",
+    correctPublished: "Коригирайте публикуваната обява",
+    sourceTitle: "Факти от BG източника · Обява {reference}",
+    sourceReviewed: "Факти от одобрен източник",
+    sourceUnreviewed: "Фактите още не са прегледани",
+    sourceMissing: "За тези факти още няма записан източник. Добавете го, преди да запишете.",
+    terms: "Условия и факти на обявата",
+    changeInFacts: "Променете във „Факти“",
+    priceLabel: "Цена · EUR",
+    areaLabel: "{basis} · m²",
+    bedroomsLabel: "Спални",
+    settlementLabel: "Населено място",
+    bedrooms: { one: "{n} спалня", other: "{n} спални" },
+    butler: "Butler",
+    butlerStatus: "Под Ваш контрол",
+    butlerOffer:
+      "Мога да подобря структурата на текста, като запазя цената, площта, спалните, района и номера точно.",
+    butlerRecord: "Текущ запис",
+    butlerScope: "Само разрешен контекст",
+    butlerNote: "Ще получите чернова за преглед. Нищо не се изпраща или публикува.",
+    butlerPrepare: "Подгответе предложение",
+    butlerUnavailable:
+      "Butler още не подготвя текстове на обяви. Напишете го сами — само Вие записвате черновата.",
+    manualHeading: "Предпочитате сами?",
+    manual: "Продължете без Butler",
+    saved: "Работната чернова е записана",
+    savedDetail:
+      "Записано за обява {reference} · BG · Работна чернова. Публикацията и одобренията остават отделни.",
+    savedDescription: "Описание при последния запис",
+    savedLater:
+      "Черновата е променена след този запис. Отворете обявата, за да видите текущата версия.",
+    toTask: "Към текущата задача",
+    close: "Затваряне",
+    reviewTitle: "Преглед за публикуване",
+    backToEdit: "Към редактирането",
+  },
   labels: {
     propertyType: "Вид имот",
     purpose: "Цел",
@@ -195,6 +298,57 @@ const ru: Copy = {
   reference: "Референция",
   purpose: "Цель",
   permissions: "Ваша роль не может редактировать эту запись.",
+  o12: {
+    title: "Редактирование объявления",
+    instruction: "Измените описание, сохраните его и проверьте перед публикацией.",
+    sourceLine: "Болгарский источник · Рабочий черновик",
+    noDraft:
+      "Рабочий черновик для этого объявления ещё не сохранён, поэтому поля пустые. Опубликованное объявление не меняется.",
+    tabs: "Разделы объявления",
+    facts: "Факты",
+    text: "Текст",
+    photos: "Фото",
+    titleLabel: "Заголовок объявления",
+    descriptionLabel: "Описание",
+    workingDraft: "Рабочий черновик BG",
+    saveText: "Сохранить описание",
+    saveFacts: "Сохранить факты",
+    reviewForPublication: "Проверить перед публикацией",
+    correctPublished: "Исправить опубликованное объявление",
+    sourceTitle: "Факты из BG-источника · Объявление {reference}",
+    sourceReviewed: "Факты из одобренного источника",
+    sourceUnreviewed: "Факты ещё не проверены",
+    sourceMissing: "Для этих фактов ещё не указан источник. Добавьте его перед сохранением.",
+    terms: "Условия и факты объявления",
+    changeInFacts: "Изменить в «Фактах»",
+    priceLabel: "Цена · EUR",
+    areaLabel: "{basis} · m²",
+    bedroomsLabel: "Спальни",
+    settlementLabel: "Населённый пункт",
+    bedrooms: { one: "{n} спальня", few: "{n} спальни", many: "{n} спален", other: "{n} спальни" },
+    butler: "Butler",
+    butlerStatus: "Под вашим контролем",
+    butlerOffer:
+      "Я могу улучшить структуру текста, сохранив цену, площадь, спальни, район и номер точно.",
+    butlerRecord: "Текущая запись",
+    butlerScope: "Только разрешённый контекст",
+    butlerNote: "Вы получите черновик для проверки. Ничего не отправляется и не публикуется.",
+    butlerPrepare: "Подготовить предложение",
+    butlerUnavailable:
+      "Butler пока не готовит тексты объявлений. Напишите текст сами — сохраняете черновик только вы.",
+    manualHeading: "Предпочитаете сами?",
+    manual: "Продолжить без Butler",
+    saved: "Рабочий черновик сохранён",
+    savedDetail:
+      "Сохранено для объявления {reference} · BG · Рабочий черновик. Публикация и одобрения остаются отдельными.",
+    savedDescription: "Описание при последнем сохранении",
+    savedLater:
+      "Черновик изменён после этого сохранения. Откройте объявление, чтобы увидеть текущую версию.",
+    toTask: "К текущей задаче",
+    close: "Закрыть",
+    reviewTitle: "Проверка перед публикацией",
+    backToEdit: "К редактированию",
+  },
   labels: {
     propertyType: "Вид объекта",
     purpose: "Цель",
@@ -270,4 +424,11 @@ const options = {
 export function optionLabel(value: string, locale: string) {
   const labels = options[value as keyof typeof options];
   return labels?.[locale === "bg" ? 1 : locale === "ru" ? 2 : 0] ?? value.replaceAll("_", " ");
+}
+
+/** "1 спалня", "2 спални": the count with its plural form for the page locale. */
+export function bedroomCount(locale: string, n: number) {
+  const forms = inventoryCopy(locale).o12.bedrooms;
+  const form = forms[new Intl.PluralRules(locale).select(n)] ?? forms.other;
+  return form.replace("{n}", new Intl.NumberFormat(locale).format(n));
 }

@@ -109,6 +109,8 @@ test("O12/O16 native decisions retain drafts and operation identity with mobile 
   await page.getByRole("link", { name: "Open listing", exact: true }).click();
   const reference = page.url().split("/").pop() ?? "";
   expect(reference).toMatch(/^MS-\d+$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
+  await page.getByRole("link", { name: "Review for publication", exact: true }).first().click();
   await expect(page.getByText("No publication has been activated.")).toBeVisible();
   await page.getByRole("button", { name: "Freeze review candidate", exact: true }).click();
   await expect(page.getByText("The action was recorded.")).toBeVisible();
@@ -208,7 +210,7 @@ test("O12/O16 native decisions retain drafts and operation identity with mobile 
       "This language version is approved. Create a new source revision to replace it.",
     ),
   ).toBeVisible();
-  await page.goto(hostUrl("staff", `/en/inventory/${reference}`));
+  await page.goto(hostUrl("staff", `/en/inventory/${reference}?tab=review`));
   await sections.getByRole("link", { name: "Review and publication", exact: true }).click();
   const release = page.locator('[data-inventory-decision="prepare"]');
   const releaseKey = await release.locator('input[name="_operationId"]').inputValue();
