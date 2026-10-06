@@ -122,6 +122,8 @@ U-01 saved a W03/P12 Figma contract at `claude/msr-ui-master` `0c55ea57` with Fi
 | R10 | BLOCKED | One immutable candidate with all earlier gates and named operator sign-off. The staging workflow exists only on the delivery branch, so GitHub Actions has no registered default-branch staging workflow or rollout receipt for this candidate. |
 | R11–R12 | NOT STARTED | Actual cutover verification, then a staffed operating cycle and joint handoff on the same released revision. |
 
+The private bounded R07 follow-up `r07-bounded-source-gaps.json` (SHA-256 `312ca3eef20aa71de351bdcad65278efbed58ac68c34b7c1d3ccc2520158735d`, mode 0600 in the operator reconciliation folder) found **zero new exact mappings**. All eight missing same-host gallery attachment records remain absent in current and historical WordPress tables; 24 affected listing cache variants contain no explicit mapping for them. Six same-number attachments on the other host are unverified leads only. Twelve source identities still lack exact published records; six have historical cache evidence, six do not. The URL and media human-review forms remain blank, so R07 stays BLOCKED. This private report adds no approved content, photos, rights or redirect decisions.
+
 ### R00 decisions that remain open
 
 | Subject | Current evidence | Required resolution |
