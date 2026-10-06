@@ -4,7 +4,7 @@
 // recorded order, target photo and listing. Real PostgreSQL, synthetic records.
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
@@ -160,6 +160,19 @@ for (const javaScriptEnabled of [false, true])
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
       await expect(page.getByRole("status")).toContainText("New photo order: 2, 1, 3.");
       const receiptA = page.url();
+      // A text-only draft save moves the listing version but not the photo order: the old
+      // receipt must not claim the order changed (same effect as saveListingDraft).
+      const [{ version: afterA } = { version: 0 }] = await db
+        .select({ version: schema.listings.version })
+        .from(schema.listings)
+        .where(eq(schema.listings.id, f.listingId));
+      await db
+        .update(schema.listings)
+        .set({ version: afterA + 1 })
+        .where(eq(schema.listings.id, f.listingId));
+      await page.reload();
+      await expect(page.getByRole("status")).toContainText("New photo order: 2, 1, 3.");
+      await expect(page.getByText("The order has changed since this save.")).toHaveCount(0);
       await page.getByRole("link", { name: "Back to the current task", exact: true }).click();
       await expect(heading(2)).toBeVisible();
       await page.getByRole("link", { name: "Move down", exact: true }).click();
@@ -222,6 +235,57 @@ for (const javaScriptEnabled of [false, true])
         page.getByRole("heading", { name: `Listing ${f.other.reference} · Photo 1 of 3` }),
       ).toBeVisible();
       expect(await workingOrder(f.other.listingId)).toEqual(f.other.relations);
+    });
+
+    test("O13 checks on a twice-placed photo read back the placement used", async ({ page }) => {
+      test.setTimeout(90_000);
+      const f = seed();
+      // One asset placed twice: review, scan and a failed command must return to placement 4.
+      const [first] = await db
+        .select({ assetId: schema.mediaRelations.mediaAssetId })
+        .from(schema.mediaRelations)
+        .where(eq(schema.mediaRelations.id, f.relations[0] ?? ""));
+      const [twice] = await db
+        .insert(schema.mediaRelations)
+        .values({ listingId: f.listingId, mediaAssetId: first?.assetId ?? "", position: 99 })
+        .returning({ id: schema.mediaRelations.id });
+      const fourth = page.getByRole("heading", { name: `Listing ${f.reference} · Photo 4 of 4` });
+      await openMedia(page, f);
+      await page.goto(hostUrl("staff", `/en/inventory/${f.reference}/media?photo=${twice?.id}`));
+      await expect(fourth).toBeVisible();
+
+      const review = async () => {
+        await page.getByLabel("Image description", { exact: true }).fill("Синтетична снимка");
+        await page.getByLabel("Rights holder", { exact: true }).fill("Синтетичен притежател");
+        await page
+          .getByLabel("Rights evidence / permission reference", { exact: true })
+          .fill("synthetic-permission");
+        await page.getByRole("checkbox", { name: /private addresses, people/ }).check();
+        await page.getByRole("checkbox", { name: /usage rights and permission/ }).check();
+        await page.getByRole("button", { name: "Record review", exact: true }).click();
+      };
+      await review();
+      await expect(page.getByRole("status").first()).toContainText("Saved.");
+      await expect(fourth).toBeVisible();
+
+      // A stale review fails and still shows placement 4.
+      await db
+        .update(schema.mediaAssets)
+        .set({ version: sql`${schema.mediaAssets.version} + 1` })
+        .where(eq(schema.mediaAssets.id, first?.assetId ?? ""));
+      await review();
+      await expect(page.getByRole("alert").filter({ hasText: "This item changed." })).toBeVisible();
+      await expect(fourth).toBeVisible();
+
+      // A scan retry on placement 4 returns to placement 4.
+      await db
+        .update(schema.mediaAssets)
+        .set({ scan: "failed", review: "pending", audience: "private" })
+        .where(eq(schema.mediaAssets.id, first?.assetId ?? ""));
+      await page.goto(hostUrl("staff", `/en/inventory/${f.reference}/media?photo=${twice?.id}`));
+      await page.getByRole("button", { name: "Retry scan", exact: true }).click();
+      await expect(page.getByRole("status").first()).toContainText("Saved.");
+      await expect(fourth).toBeVisible();
     });
   });
 

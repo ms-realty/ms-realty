@@ -89,7 +89,7 @@ export default async function MediaPage({
   const copy = filesCopy(locale);
   const query = await searchParams;
   // Readback: a receipt counts only for this listing, and it names its own target photo.
-  const receipt = await mediaReceipt(getDb(), session, listing.id, query.saved);
+  const receipt = await mediaReceipt(getDb(), session, listing.id, query.saved, query.photo);
   const path = `/${locale}/inventory/${reference}/media`;
   const action = `${path}/submit`;
   const ref = <bdi>{listing.reference}</bdi>;
@@ -123,7 +123,9 @@ export default async function MediaPage({
               )
             : withReference(copy.orderSavedPlain, {}, ref)}
         </p>
-        {recorded && recorded.version !== listing.version ? <p>{copy.orderChangedSince}</p> : null}
+        {recorded && recorded.after.join() !== order.join() ? (
+          <p>{copy.orderChangedSince}</p>
+        ) : null}
         <a href={back} className={buttonClass("primary")}>
           {copy.toTask}
         </a>
@@ -370,7 +372,7 @@ export default async function MediaPage({
 }
 
 function PhotoChecks({
-  row: { asset, upload },
+  row: { asset, upload, relation },
   copy,
   action,
   fileChooser,
@@ -409,6 +411,7 @@ function PhotoChecks({
           <form action={action} method="post" encType="multipart/form-data" className="grid gap-3">
             <FileEnvelope intent="upload" version={asset.version} />
             <input type="hidden" name="uploadId" value={upload.id} />
+            <input type="hidden" name="relationId" value={relation.id} />
             {fileChooser}
             <FileButton>{copy.resume}</FileButton>
           </form>
@@ -419,12 +422,14 @@ function PhotoChecks({
       {asset.sealedKey && asset.scan === "failed" ? (
         <form action={action} method="post">
           <FileEnvelope intent="scan" version={asset.version} id={asset.id} />
+          <input type="hidden" name="relationId" value={relation.id} />
           <FileButton>{copy.retry}</FileButton>
         </form>
       ) : null}
       {ready ? (
         <form action={action} method="post" className="grid gap-4 border-t border-divider pt-4">
           <FileEnvelope intent="review" version={asset.version} id={asset.id} />
+          <input type="hidden" name="relationId" value={relation.id} />
           <div className="grid gap-4 lg:grid-cols-2">
             <FileField name="altText" label={copy.altText} value={asset.altText ?? ""} />
             <FileField

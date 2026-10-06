@@ -246,7 +246,7 @@ export function fileFormRoute(kind: FileKind, context: "listing" | "case" = "lis
         saved = receipt?.id;
       }
       if (!saved) throw new Error("Successful file action has no durable receipt");
-      location = `${path}?saved=${saved}`;
+      location = `${path}?saved=${saved}${photo ? `&photo=${encodeURIComponent(photo)}` : ""}`;
     } catch (error) {
       if (isAppError(error) && error.code === "cross_origin_request")
         return new Response(null, { status: 403, headers: { "cache-control": "no-store" } });

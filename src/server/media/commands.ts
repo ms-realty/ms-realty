@@ -154,14 +154,17 @@ export async function mediaForListing(db: Executor, session: Session, reference:
 /**
  * O13 readback for `?saved=`: this actor's succeeded file operation or upload counts on a
  * listing only when its target is that listing or one of its current photos. The target
- * photo comes from the record, never the address. An order change also returns the order it
- * recorded (absent on older records) and the listing version that save produced.
+ * comes from the record, never the address. An asset placed twice has one record for both
+ * placements, so the submitting placement (`placement`) is honoured only when it is a
+ * current placement of that same asset on this listing. An order change also returns the
+ * order it recorded (absent on older records) and the listing version that save produced.
  */
 export async function mediaReceipt(
   db: Executor,
   session: Session,
   listingId: string,
   value: unknown,
+  placement?: string,
 ) {
   const id = await fileReceipt(db, session, value);
   if (!id) return null;
@@ -170,7 +173,9 @@ export async function mediaReceipt(
     .from(mediaRelations)
     .where(and(eq(mediaRelations.listingId, listingId), isNull(mediaRelations.removedAt)));
   const photo = (assetId: string) => {
-    const relation = relations.find((row) => row.assetId === assetId);
+    const relation =
+      relations.find((row) => row.id === placement && row.assetId === assetId) ??
+      relations.find((row) => row.assetId === assetId);
     return relation ? { id, relationId: relation.id, move: false, order: null } : null;
   };
   const [event] = await db
