@@ -1,21 +1,21 @@
 // O10 (Figma 11:5103, O10NEEDS 52:4407/52:4456, O10MINE 52:4505/52:4548): capability-scoped
-// inventory with search, filters and the All / Needs action / Mine views. No manufactured
-// totals or readiness claims: a row's next step comes only from recorded states.
+// inventory with search, filters and the All / Needs action / Mine views over the server's
+// paged query (inventoryListPage). No manufactured totals or readiness claims: a row's next
+// step and its destination come only from recorded states.
 
 import { getDb } from "@/db/client";
 import { listingPurposes, propertyTypes } from "@/domain/facts";
 import { inventoryCopy, optionLabel } from "@/features/inventory/copy";
-import { listingAction } from "@/features/inventory/needs-action";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
-import { inventoryList } from "@/server/inventory/commands";
-import { draftSchema } from "@/server/inventory/contracts";
+import { isAppError } from "@/server/errors";
+import { type InventoryListRow, inventoryListPage } from "@/server/inventory/queries";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass } from "@/ui/field-class";
 import { ChevronEndIcon, HomeIcon } from "@/ui/icons";
 
-type Query = { q?: string; view?: string; purpose?: string; type?: string };
+type Query = { q?: string; view?: string; purpose?: string; type?: string; cursor?: string };
 type RawQuery = Record<string, string | string[] | undefined>;
 
 /** One value per filter: a repeated parameter (?q=a&q=b) keeps its first value. */
@@ -37,56 +37,64 @@ export default async function InventoryPage({
     view: scalar(raw.view),
     purpose: scalar(raw.purpose),
     type: scalar(raw.type),
+    cursor: scalar(raw.cursor),
   };
   const session = await requireStaffPage(locale);
   const db = getDb();
   const copy = inventoryCopy(locale);
   const o10 = copy.o10;
-  // ponytail: filters the 200 most recently updated readable listings that inventoryList
-  // returns; move search to a server query if the inventory outgrows that window.
-  const rows = await inventoryList(db, session.actor);
   const mayCreate = await can(db, session.actor, "listing.edit");
   const view = query.view === "needs" || query.view === "mine" ? query.view : "all";
-  const q = (query.q ?? "").trim().toLocaleLowerCase(locale);
   const purpose = listingPurposes.find((value) => value === query.purpose);
   const type = propertyTypes.find((value) => value === query.type);
+  const filters = { q: query.q?.trim() ?? "", purpose, type, view } as const;
+  // A cursor from another filter or a stale list fails closed; start again from page one.
+  let restarted = false;
+  const page = await inventoryListPage(db, session.actor, {
+    ...filters,
+    cursor: query.cursor,
+  }).catch((error) => {
+    if (!query.cursor || !isAppError(error) || error.code !== "validation_failed") throw error;
+    restarted = true;
+    return inventoryListPage(db, session.actor, filters);
+  });
+  const q = filters.q;
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 2,
     minimumFractionDigits: 0,
   });
-  const items = rows.map(({ listing, property }) => {
-    const draft = draftSchema.safeParse(listing.draft);
-    const known = (state: string | undefined, value: string | undefined) =>
-      state === "known" && value && Number.isFinite(Number(value)) ? Number(value) : null;
-    const price = draft.success ? known(draft.data.priceState, draft.data.price) : null;
-    const area = draft.success ? known(draft.data.areaState, draft.data.area) : null;
+  const known = (state: string, value: string) =>
+    state === "known" && value && Number.isFinite(Number(value)) ? Number(value) : null;
+  const destination = (row: InventoryListRow) => {
+    const action = row.actions[0];
+    return action?.kind === "translation_review"
+      ? `/${locale}/inventory/${row.listing.reference}/translations/${action.locale}`
+      : `/${locale}/inventory/${row.listing.reference}`;
+  };
+  const shown = page.rows.map((row) => {
+    const price = known(row.workingDraft.priceState, row.workingDraft.price);
+    const area = known(row.workingDraft.areaState, row.workingDraft.area);
+    const action = row.actions[0];
     return {
-      listing,
-      property,
-      title: draft.success && draft.data.title ? draft.data.title : null,
-      action: listingAction(listing),
+      ...row,
+      href: destination(row),
       detail: [
         price === null ? null : money.format(price),
         area === null ? null : `${new Intl.NumberFormat(locale).format(area)} m²`,
       ],
+      actionLabel: !action
+        ? null
+        : action.kind === "translation_review"
+          ? o10.actions.translation_review.replace("{locale}", action.locale.toUpperCase())
+          : o10.actions[action.kind],
     };
   });
-  const shown = items.filter(
-    (item) =>
-      (view !== "needs" || item.action) &&
-      (view !== "mine" || item.listing.responsibleBrokerId === session.actor.id) &&
-      (!purpose || item.listing.purpose === purpose) &&
-      (!type || item.property.propertyType === type) &&
-      (!q ||
-        [item.listing.reference, item.title ?? "", item.property.settlement].some((text) =>
-          text.toLocaleLowerCase(locale).includes(q),
-        )),
-  );
-  const next = shown.find((item) => item.action);
+  const next = shown.find((item) => item.needsAction);
   const href = (changes: Query) => {
-    const merged = { ...query, ...changes };
+    // A filter change starts from page one; only "Show more" carries a cursor.
+    const merged = { ...query, cursor: undefined, ...changes };
     const search = new URLSearchParams(
       Object.entries(merged).filter((entry): entry is [string, string] => Boolean(entry[1])),
     );
@@ -95,7 +103,7 @@ export default async function InventoryPage({
     return `/${locale}/inventory${text ? `?${text}` : ""}`;
   };
   const empty =
-    rows.length === 0
+    page.total === 0 && !q && !purpose && !type && view === "all"
       ? copy.empty
       : q || purpose || type
         ? o10.noMatch
@@ -212,7 +220,7 @@ export default async function InventoryPage({
           {shown.map((item) => (
             <li key={item.listing.id}>
               <a
-                href={`/${locale}/inventory/${item.listing.reference}`}
+                href={item.href}
                 className="flex min-h-19 items-center gap-4 p-4 text-dense text-text no-underline hover:bg-subtle"
               >
                 <HomeIcon className="size-5" />
@@ -226,11 +234,7 @@ export default async function InventoryPage({
                     )}
                   </span>
                   <span className="font-medium text-text-muted">
-                    {[
-                      item.property.settlement,
-                      ...item.detail,
-                      item.action ? o10.actions[item.action] : null,
-                    ]
+                    {[item.property.settlement, ...item.detail, item.actionLabel]
                       .filter(Boolean)
                       .join(" · ")}
                   </span>
@@ -241,12 +245,27 @@ export default async function InventoryPage({
           ))}
         </ul>
       )}
+      {restarted ? <p className="text-dense text-text-muted">{o10.restarted}</p> : null}
+      {page.total > 0 ? (
+        <div className="flex flex-wrap items-center gap-4 text-dense text-text-muted">
+          <span>
+            {o10.count.replace("{total}", new Intl.NumberFormat(locale).format(page.total))}
+          </span>
+          {page.nextCursor ? (
+            <a href={href({ cursor: page.nextCursor })} className="text-action underline">
+              {o10.more}
+            </a>
+          ) : null}
+          {query.cursor && !restarted ? (
+            <a href={href({})} className="text-action underline">
+              {o10.first}
+            </a>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         {next ? (
-          <a
-            href={`/${locale}/inventory/${next.listing.reference}`}
-            className={buttonClass("primary")}
-          >
+          <a href={next.href} className={buttonClass("primary")}>
             {o10.open.replace("{reference}", next.listing.reference)}
           </a>
         ) : null}

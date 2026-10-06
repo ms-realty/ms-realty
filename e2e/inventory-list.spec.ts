@@ -71,10 +71,17 @@ for (const javaScriptEnabled of [false, true])
         "aria-current",
         "page",
       );
-      await expect(rows(page)).toHaveCount(2);
-      await expect(rows(page).filter({ hasText: f.settled })).toHaveCount(0);
+      await expect(rows(page)).toHaveCount(3);
+      // Translation work under review is waiting too, and leads to its O15 page.
+      await expect(rows(page).filter({ hasText: f.settled })).toContainText(
+        "Translation to review · EN",
+      );
+      await expect(rows(page).filter({ hasText: f.settled })).toHaveAttribute(
+        "href",
+        `/en/inventory/${f.settled}/translations/en`,
+      );
       const first = page.getByRole("link", { name: /^Open listing / });
-      await expect(first).toHaveAttribute("href", /\/en\/inventory\/MS-\d+$/);
+      await expect(first).toHaveAttribute("href", /\/en\/inventory\/MS-\d+(\/translations\/en)?$/);
 
       await views.getByRole("link", { name: "Mine" }).click();
       await expect(rows(page)).toHaveCount(1);
@@ -90,7 +97,15 @@ for (const javaScriptEnabled of [false, true])
 
       // A repeated parameter keeps its first value instead of failing.
       await open(page, f, `/en/inventory?q=${f.token}&q=other&view=needs&view=mine`);
-      await expect(rows(page)).toHaveCount(2);
+      await expect(rows(page)).toHaveCount(3);
+      await expect(page.getByText("Matches: 3")).toBeVisible();
+
+      // A cursor from another list fails closed and restarts from the first page.
+      await open(page, f, `/en/inventory?q=${f.token}&cursor=not-a-real-position`);
+      await expect(
+        page.getByText("The list changed since that page; showing the first page."),
+      ).toBeVisible();
+      await expect(rows(page)).toHaveCount(4);
 
       await open(page, f, `/en/inventory?q=${f.token}-nothing`);
       await expect(page.getByText("No listing matches this search.")).toBeVisible();
@@ -115,6 +130,6 @@ test("O10 keeps BG and RU view labels", async ({ page }) => {
       "aria-current",
       "page",
     );
-    await expect(page.getByRole("list", { name: list }).getByRole("link")).toHaveCount(2);
+    await expect(page.getByRole("list", { name: list }).getByRole("link")).toHaveCount(3);
   }
 });

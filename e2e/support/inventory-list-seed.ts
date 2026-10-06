@@ -57,16 +57,32 @@ try {
         .update(schema.sellerInstructions)
         .set({ reference: `SI-2026-${number}` })
         .where(eq(schema.sellerInstructions.listingId, item.listingId));
-      return reference;
+      return { reference, listingId: item.listingId, revisionId: item.revisionId };
     });
-  const review = await listing("преглед", { editorialState: "in_review" });
-  const availability = await listing("наличност", {
-    editorialState: "approved_revision",
-    commercialState: "confirmation_required",
-    purpose: "long_term_rent",
+  const review = (await listing("преглед", { editorialState: "in_review" })).reference;
+  const availability = (
+    await listing("наличност", {
+      editorialState: "approved_revision",
+      commercialState: "confirmation_required",
+      purpose: "long_term_rent",
+    })
+  ).reference;
+  const settledListing = await listing("готов", { editorialState: "approved_revision" }, true);
+  const settled = settledListing.reference;
+  const draftOnly = (await listing("чернова", { editorialState: "draft" })).reference;
+  // An English translation waiting for review against the approved source (O15 work).
+  await db
+    .update(schema.listings)
+    .set({ approvedRevisionId: settledListing.revisionId })
+    .where(eq(schema.listings.id, settledListing.listingId));
+  await db.insert(schema.localizedRevisions).values({
+    listingId: settledListing.listingId,
+    sourceRevisionId: settledListing.revisionId,
+    locale: "en",
+    state: "reviewing",
+    title: "Synthetic translation under review",
+    body: { description: "Synthetic translation text." },
   });
-  const settled = await listing("готов", { editorialState: "approved_revision" }, true);
-  const draftOnly = await listing("чернова", { editorialState: "draft" });
   console.log(
     JSON.stringify({ token, review, availability, settled, draftOnly, session: broker.token }),
   );
