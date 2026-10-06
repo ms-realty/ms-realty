@@ -78,6 +78,8 @@ for (const javaScriptEnabled of [true, false]) {
       await disclosure.click();
       await expect(details).not.toHaveAttribute("open");
       await form.getByRole("button", { name: "Search properties", exact: true }).click();
+      // Read the address only after the native submit has navigated (slow WebKit raced here).
+      await page.waitForURL((url) => url.searchParams.get("minBeds") === "3");
       const query = new URL(page.url()).searchParams;
       expect(query.get("q")).toBe(data.published.reference);
       expect(query.getAll("type").sort()).toEqual(["apartment", "house"]);
