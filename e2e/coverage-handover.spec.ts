@@ -188,6 +188,9 @@ for (const javaScriptEnabled of [true, false])
       expect(await findCoverageRecord(page, `/en/inquiries/${inquiry.id}`)).toBe(false);
       expect(await findCoverageRecord(page, `/en/operations/keys/${f.keyId}`)).toBe(true);
       await page.locator(`a[href="/en/operations/keys/${f.keyId}"]`).click();
+      // Measure the key page itself, after its styles load, not the navigation in between.
+      await expect(page).toHaveURL(hostUrl("staff", `/en/operations/keys/${f.keyId}`));
+      await page.waitForLoadState("load");
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         320,
       );
