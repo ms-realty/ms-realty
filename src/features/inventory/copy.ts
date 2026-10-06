@@ -106,6 +106,7 @@ const en = {
       "The exact candidate is eligible for a publication decision. Nothing is published until a person decides.",
     reviewMissing: "Review the missing approvals",
     toDecision: "Go to the publication decision",
+    decisionByPublisher: "A staff member who may publish takes this decision; you cannot publish.",
     editText: "Edit the text manually",
     back: "Back",
     beforeYouDecide: "Before you decide",
@@ -388,6 +389,8 @@ const bg: Copy = {
     eligible: "Точният кандидат е допустим за решение. Нищо не се публикува, докато човек не реши.",
     reviewMissing: "Прегледайте липсващите одобрения",
     toDecision: "Към решението на публикуващия",
+    decisionByPublisher:
+      "Решението се взема от служител с право да публикува; вие не можете да публикувате.",
     editText: "Редактирайте текста ръчно",
     back: "Назад",
     beforeYouDecide: "Преди да решите",
@@ -669,6 +672,8 @@ const ru: Copy = {
       "Точный кандидат допустим к решению о публикации. Ничего не публикуется, пока решение не примет человек.",
     reviewMissing: "Проверить недостающие одобрения",
     toDecision: "К решению о публикации",
+    decisionByPublisher:
+      "Это решение принимает сотрудник с правом публикации; вы не можете публиковать.",
     editText: "Редактировать текст вручную",
     back: "Назад",
     beforeYouDecide: "Прежде чем решать",
