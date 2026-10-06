@@ -3,7 +3,7 @@
 // data-* state attributes; native elements get the same look from :hover/:active/:disabled.
 import { cx } from "./cx";
 
-export type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive";
+export type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive" | "assist";
 
 const variants: Record<ButtonVariant, string> = {
   // Filled variants keep a transparent border so the outline survives forced-colors mode.
@@ -24,6 +24,12 @@ const variants: Record<ButtonVariant, string> = {
   destructive: cx(
     "border-transparent bg-error text-text-inverse",
     "hover:bg-error-hover data-hovered:bg-error-hover active:bg-error-pressed data-pressed:bg-error-pressed",
+  ),
+  // Butler draft entry (Figma UI04 State=AI): tinted, never filled, so asking for a draft
+  // never outranks the person's own next action.
+  assist: cx(
+    "border-transparent bg-assist-soft text-assist",
+    "hover:border-assist-line data-hovered:border-assist-line active:border-assist-line data-pressed:border-assist-line",
   ),
 };
 
