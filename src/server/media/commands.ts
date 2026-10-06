@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { fileUploads, listings, mediaAssets, mediaRelations } from "@/db/schema";
+import { auditEvents, fileUploads, listings, mediaAssets, mediaRelations } from "@/db/schema";
 import { mediaModifications, moveRelation } from "@/domain/media";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
@@ -148,6 +148,37 @@ export async function mediaForListing(db: Executor, session: Session, reference:
     }),
   );
   return { listing, assets };
+}
+
+/**
+ * O13ORDERSAVED: the moved relation of an order change this actor saved on this listing.
+ * Null for any other operation, including a hide/show placement, so a receipt id from the
+ * query string never presents itself as a saved order.
+ */
+export async function placementReceipt(
+  db: Executor,
+  session: Session,
+  listingId: string,
+  operationId: string,
+) {
+  if (!z.uuid().safeParse(operationId).success) return null;
+  const [event] = await db
+    .select({ payload: auditEvents.payload })
+    .from(auditEvents)
+    .where(
+      and(
+        eq(auditEvents.operationId, operationId),
+        eq(auditEvents.action, "media.placement.changed"),
+        eq(auditEvents.recordType, "listing"),
+        eq(auditEvents.recordId, listingId),
+        eq(auditEvents.actorKind, session.actor.kind),
+        eq(auditEvents.actorId, session.actor.id),
+      ),
+    );
+  const payload = event?.payload as { relationId?: unknown; move?: unknown } | undefined;
+  return payload?.move && typeof payload.relationId === "string"
+    ? { relationId: payload.relationId }
+    : null;
 }
 
 export async function reviewMedia(
