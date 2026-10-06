@@ -17,6 +17,7 @@ import { type Capability, type CapabilityGrant, hasCapability } from "@/domain/c
 import { workerHealth } from "../ai/operations";
 import type { Session } from "../auth/sessions";
 import type { Executor } from "../db";
+import { isAppError } from "../errors";
 import { appointmentCoverageAt, ownerNeedsCoverage } from "./coverage-policy";
 import { openAppointmentStates, visibleWhere } from "./shared";
 
@@ -49,17 +50,23 @@ function firstPage<Row extends { total: number }>(rows: Row[]) {
 export function todayQueueResult<Row>(
   result: PromiseSettledResult<QueuePage<Row>>,
   now: Date,
+  queueName: string,
 ): TodayQueue<Row>;
 export function todayQueueResult<Row>(
   result: PromiseSettledResult<QueuePage<Row> | null>,
   now: Date,
+  queueName: string,
 ): TodayQueue<Row> | null;
 export function todayQueueResult<Row>(
   result: PromiseSettledResult<QueuePage<Row> | null>,
   now: Date,
+  queueName: string,
 ): TodayQueue<Row> | null {
-  if (result.status === "rejected")
+  if (result.status === "rejected") {
+    const code = isAppError(result.reason) ? result.reason.code : "internal_error";
+    console.error(`[today] ${queueName} unavailable (${code})`);
     return { rows: [], total: null, hasMore: false, status: "unavailable", asOf: now, page: 1 };
+  }
   return result.value === null ? null : { ...result.value, status: "ready", asOf: now, page: 1 };
 }
 
