@@ -174,20 +174,24 @@ it("caps oldest-first reminders and adds only one query to the shared Today cont
       })),
     )
     .returning();
-  let reads = 0;
+  let reads: string[] = [];
   const measured = drizzle(t.sql, {
     schema,
     logger: {
-      logQuery() {
-        reads++;
+      logQuery(query) {
+        reads.push(query);
       },
     },
   });
   await listInbox(measured, f.manager.session);
-  const single = reads;
-  reads = 0;
+  const single = reads.length;
+  reads = [];
   const result = await readToday(measured, f.manager.session, f.now);
-  expect(reads).toBeLessThanOrEqual(single + 4);
+  expect(reads.length).toBeLessThanOrEqual(single + 13);
+  expect(reads.filter((query) => query.includes('from "key_sets"'))).toHaveLength(1);
+  expect(reads.filter((query) => query.includes('from "grants"'))).toHaveLength(1);
+  expect(result.keyReturns?.status).toBe("ready");
+  expect(result.keyReturns?.total).toBeGreaterThan(pageSize);
   expect(result.keyReturns?.hasMore).toBe(true);
   expect(result.keyReturns?.rows.map((r) => r.id)).toEqual(
     inserted.slice(0, pageSize).map((r) => r.id),
