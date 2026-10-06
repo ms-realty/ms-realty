@@ -32,7 +32,7 @@ export function FocusedState({
         <a
           href={closeHref}
           aria-label={closeLabel}
-          className="absolute end-4 top-4 inline-flex size-control items-center justify-center rounded-control text-text-muted hover:bg-subtle sm:end-8 sm:top-8"
+          className="absolute end-5 top-5 inline-flex size-control items-center justify-center rounded-control text-text-muted hover:bg-subtle sm:end-10 sm:top-10"
         >
           <CloseIcon className="size-5" />
         </a>

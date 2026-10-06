@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { publicLocales } from "@/domain/ids";
 import { controlClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
@@ -9,16 +10,26 @@ import { inventoryCopy } from "./copy";
 import type { InventoryDecisionContext, InventoryDecisionValues } from "./decision-contract";
 import { inventoryDecisionCopy } from "./decision-copy";
 
+/** O16PUB: the decision drawn as part of its focused card, in the card's own words. */
+export type FocusedDecision = {
+  scopeLabel: string;
+  confirmLabel: string;
+  note: ReactNode;
+  cancel: ReactNode;
+};
+
 export function InventoryDecisionForm({
   context,
   title,
   initialState,
   action,
+  focused,
 }: {
   context: InventoryDecisionContext;
   title: string;
   initialState: FormState<InventoryDecisionValues>;
   action: FormAction<InventoryDecisionValues>;
+  focused?: FocusedDecision;
 }) {
   const copy = inventoryCopy(context.locale),
     decision = inventoryDecisionCopy(context.locale);
@@ -32,10 +43,12 @@ export function InventoryDecisionForm({
       : (context.manifestId ?? context.revisionId);
   return (
     <div
-      className="space-y-3 rounded-panel border border-divider bg-surface p-5"
+      className={
+        focused ? undefined : "space-y-3 rounded-panel border border-divider bg-surface p-5"
+      }
       data-inventory-decision={context.intent}
     >
-      <h3 className="font-semibold">{title}</h3>
+      {focused ? null : <h3 className="font-semibold">{title}</h3>}
       <ActionForm
         action={action}
         initialState={initialState}
@@ -46,12 +59,13 @@ export function InventoryDecisionForm({
           label: copy.operation,
         }}
         labels={{
-          scope: copy.scope,
-          confirmed: copy.confirm,
+          scope: focused?.scopeLabel ?? copy.scope,
+          confirmed: focused?.confirmLabel ?? copy.confirm,
           publicationLocale: decision.publicationLocale,
         }}
         copy={copy.form}
         submitLabel={title}
+        secondaryActions={focused?.cancel}
       >
         {(form) => {
           const confirm = form.field("confirmed"),
@@ -91,7 +105,7 @@ export function InventoryDecisionForm({
                 <>
                   <FormField
                     {...form.field("scope")}
-                    label={copy.scope}
+                    label={focused?.scopeLabel ?? copy.scope}
                     required
                     maxLength={1000}
                   />
@@ -112,7 +126,7 @@ export function InventoryDecisionForm({
                           form.setValue("confirmed", event.target.checked ? "yes" : "")
                         }
                       />
-                      {copy.confirm}
+                      {focused?.confirmLabel ?? copy.confirm}
                     </label>
                     {confirm.readOnly && form.values.confirmed === "yes" ? (
                       <input type="hidden" name="confirmed" value="yes" />
@@ -125,6 +139,7 @@ export function InventoryDecisionForm({
                   </div>
                 </>
               ) : null}
+              {focused?.note}
               {form.state.outcome.kind !== "idle" && form.state.outcome.kind !== "validation" ? (
                 <a
                   href={
