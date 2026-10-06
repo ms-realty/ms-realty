@@ -923,6 +923,72 @@
         "x-acceptance": ["AT67"]
       }
     },
+    "/api/public-shares/creator-session": {
+      "get": {
+        "operationId": "shares.issueCreatorSession",
+        "summary": "Enter saved-share management with an anonymous creator session",
+        "description": "Public-host entry for a validated locale. Reuses a valid host-only creator cookie or sets a new one before redirecting to the saved page. No viewing token or share row is returned; the response is private and never cached.",
+        "tags": ["public_submission"],
+        "servers": [
+          {
+            "url": "https://makler-realty.com",
+            "description": "Public host"
+          }
+        ],
+        "security": [],
+        "responses": {
+          "303": {
+            "description": "Redirect to the validated locale's saved page",
+            "headers": {
+              "location": {
+                "description": "Public-host saved page for the validated locale",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "set-cookie": {
+                "description": "Host-only creator cookie, only if this browser lacks a valid one",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "cache-control": {
+                "description": "private, no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "referrer-policy": {
+                "description": "no-referrer",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-robots-tag": {
+                "description": "noindex, nofollow",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or unsupported locale"
+          },
+          "404": {
+            "description": "Unavailable outside the public host"
+          }
+        },
+        "x-host-context": "public",
+        "x-authorization": {
+          "class": "anonymous_creator"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT09"]
+      }
+    },
     "/api/inquiries": {
       "get": {
         "operationId": "inquiries.issueSubmissionKey",
@@ -2654,6 +2720,7 @@
   },
   "x-authorization-classes": {
     "public": "Anyone. No session is read.",
+    "anonymous_creator": "An anonymous visitor on the public host. An existing host-only share creator cookie may be reused, or a new one issued.",
     "receipt_session": "An anonymous visitor holding the receipt-session cookie that made the submission.",
     "client_session": "A signed-in client on the client host; record and field audience checks apply per record.",
     "staff_session": "A signed-in staff member with an active membership on the staff host, holding the named capability.",
