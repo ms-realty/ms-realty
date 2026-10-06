@@ -141,7 +141,15 @@
         "waitEvent": "",
         "sampleObservations": 9
       }
-    ]
+    ],
+    "databaseProbe": {
+      "initialEligibilityExplainExecutionMs": 1213.069,
+      "initialEligibilityJitMs": 754.94,
+      "initialCurrentPublicationsSeqScanMs": 752.184,
+      "initialCurrentPublicationsSeqScanRows": 10000,
+      "searchProbeMs": 533.4682499999763,
+      "interpretation": "The initial EXPLAIN includes substantial JIT compilation and cold-page effects. Its nested node times overlap; these numbers do not establish per-request causality or a JIT configuration change. Compare JIT on/off against the same seeded inventory before changing production settings."
+    }
   },
   "qualification": {
     "performanceBudgetsPassed": false,
