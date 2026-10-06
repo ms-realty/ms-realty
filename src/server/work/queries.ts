@@ -90,7 +90,14 @@ export async function searchInquiries(db: Executor, session: Session, q: string,
       : null;
   const rows = await db
     .select({
-      inquiry: inquiries,
+      inquiry: {
+        id: inquiries.id,
+        reference: inquiries.reference,
+        state: inquiries.state,
+        preferredName: inquiries.preferredName,
+        createdAt: inquiries.createdAt,
+        followUpAt: inquiries.followUpAt,
+      },
       ownerName: principals.displayName,
       needsCoverage: ownerNeedsCoverage(inquiries.ownerId),
     })

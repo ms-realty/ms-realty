@@ -238,7 +238,12 @@ describe("staff work against durable inquiry intake", () => {
   it("searches only authorized inquiry names and submitted contact values, with a bounded page", async () => {
     const first = await received();
     const second = await received();
-    if (!first.partyId || !first.contactMethodId || !second.contactMethodId)
+    if (
+      !first.partyId ||
+      !first.contactMethodId ||
+      !first.receiptSessionHash ||
+      !second.contactMethodId
+    )
       throw new Error("Intake contact is missing.");
     await t.db
       .update(inquiries)
@@ -268,6 +273,12 @@ describe("staff work against durable inquiry intake", () => {
     const names = await searchInquiries(t.db, broker.session, "  PET  ");
     expect(names.rows.map((row) => row.inquiry.id).sort()).toEqual([first.id, second.id].sort());
     expect(names).toMatchObject({ page: 1, hasMore: false });
+    expect(Object.keys(names.rows[0]?.inquiry ?? {}).sort()).toEqual(
+      ["id", "reference", "state", "preferredName", "createdAt", "followUpAt"].sort(),
+    );
+    expect(JSON.stringify(names)).not.toContain(first.submissionKey);
+    expect(JSON.stringify(names)).not.toContain(first.receiptSessionHash);
+    expect(JSON.stringify(names)).not.toContain(first.payloadDigest);
     expect((await searchInquiries(t.db, broker.session, "00359 (88) 123-4567")).rows).toMatchObject(
       [{ inquiry: { id: first.id, state: "resolved_without_case" } }],
     );
