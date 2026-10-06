@@ -303,7 +303,8 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
       ).status(),
     ).toBe(404);
 
-  await page.goto(hostUrl("staff", `/en/inventory/${reference}`));
+  // O12: decisions live on the listing's review tab, apart from the editor.
+  await page.goto(hostUrl("staff", `/en/inventory/${reference}?tab=review`));
   await decision(page, "Confirm current availability");
   await decision(page, "Freeze review candidate");
   await decision(page, "Approve factual revision");
@@ -351,7 +352,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     .getByRole("button", { name: "Record agreed instructions", exact: true })
     .click();
   await expect(page.getByText("The action was recorded.", { exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Open listing", exact: true }).click();
+  await page.goto(hostUrl("staff", `/en/inventory/${reference}?tab=review`));
   const prepared = page
     .locator("form")
     .filter({ has: page.getByRole("button", { name: "Prepare publication", exact: true }) });
