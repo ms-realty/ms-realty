@@ -164,6 +164,7 @@ export async function TodayScreen({
         <div className="grid min-w-0 items-start gap-8 xl:grid-cols-[minmax(0,1fr)_23.1875rem]">
           <div className="flex min-w-0 flex-col gap-6">
             <Worklist locale={locale} queues={queues} now={now} />
+            <p className="text-dense text-text-muted">{workCopy(locale).queueNote}</p>
             <a href={`/${locale}/tasks`} className={buttonClass("tertiary", "w-fit text-text")}>
               {t.allTasks}
             </a>
@@ -214,6 +215,21 @@ function Worklist({ locale, queues, now }: { locale: string; queues: Queues; now
   const t = todayCopy(locale);
   const work = workCopy(locale);
   const oldest = queues.unassigned.rows[0]?.inquiry.createdAt;
+  // Open inquiries arrive oldest first. Any whose follow-up time has passed moves to the front,
+  // oldest follow-up first, so the rows in view never hide an overdue follow-up.
+  const followUpDue = (item: InquiryItem) =>
+    item.inquiry.followUpAt !== null && item.inquiry.followUpAt <= now;
+  const mine = {
+    ...queues.mine,
+    rows: [
+      ...queues.mine.rows
+        .filter(followUpDue)
+        .sort(
+          (a, b) => (a.inquiry.followUpAt?.getTime() ?? 0) - (b.inquiry.followUpAt?.getTime() ?? 0),
+        ),
+      ...queues.mine.rows.filter((item) => !followUpDue(item)),
+    ],
+  };
   return (
     <>
       <section aria-labelledby="today-attention" className="flex flex-col gap-4">
@@ -254,7 +270,7 @@ function Worklist({ locale, queues, now }: { locale: string; queues: Queues; now
           id="due"
           locale={locale}
           title={work.due}
-          href={`/${locale}/tasks?view=mine`}
+          href={`/${locale}/tasks?view=overdue`}
           queue={queues.due}
           row={(item) => <TaskRow key={item.task.id} locale={locale} item={item} now={now} />}
         />
@@ -265,6 +281,9 @@ function Worklist({ locale, queues, now }: { locale: string; queues: Queues; now
             title={custodyCopy(locale).returnReminders}
             href={`/${locale}/operations/keys?state=overdue`}
             queue={queues.keyReturns}
+            notice={
+              <p className="text-dense text-text-muted">{custodyCopy(locale).reminderHint}</p>
+            }
             keyReturns
             row={(item) => <KeyRow key={item.id} locale={locale} item={item} />}
           />
@@ -289,7 +308,7 @@ function Worklist({ locale, queues, now }: { locale: string; queues: Queues; now
           locale={locale}
           title={work.mineInquiries}
           href={`/${locale}/inquiries?view=mine`}
-          queue={queues.mine}
+          queue={mine}
           row={(item) => (
             <InquiryRow key={item.inquiry.id} locale={locale} item={item} now={now} mine />
           )}
@@ -334,6 +353,7 @@ function Group<T>({
         >
           <span className="min-w-0 flex-1">{title}</span>
           <span className="min-w-6 rounded-full bg-subtle px-2 text-center text-caption font-semibold tabular-nums text-text-muted">
+            <span className="sr-only">{t.inQueue} </span>
             {count}
           </span>
           <ChevronEndIcon directional className="size-5 text-text-muted" />
@@ -442,7 +462,7 @@ function InquiryRow({
         </>
       }
       details={[
-        ["owner", t.owner.replace("{name}", ownerText(locale, ownerName, needsCoverage))],
+        ["owner", t.owner.replace("{name}", () => ownerText(locale, ownerName, needsCoverage))],
         ...(["received", "assigned"].includes(inquiry.state)
           ? []
           : [["state", work.states[inquiry.state]] satisfies Detail]),
@@ -482,13 +502,18 @@ function TaskRow({
       data={{ "data-task-id": task.id }}
       title={task.title}
       details={[
-        ["owner", t.owner.replace("{name}", ownerText(locale, ownerName, needsCoverage))],
+        ["owner", t.owner.replace("{name}", () => ownerText(locale, ownerName, needsCoverage))],
         ["time", due(locale, dueAt, now)],
         ...(task.promisedToClient
           ? [["promise", coverageCopy(locale).promise] satisfies Detail]
           : []),
         ...(task.waitingOn
-          ? [["waiting", t.waitingOn.replace("{what}", task.waitingOn)] satisfies Detail]
+          ? [
+              [
+                "waiting",
+                t.waitingOn.replace("{what}", () => task.waitingOn ?? ""),
+              ] satisfies Detail,
+            ]
           : []),
         [
           "next",
@@ -508,6 +533,11 @@ function TaskRow({
 
 function KeyRow({ locale, item }: { locale: string; item: KeyItem }) {
   const t = todayCopy(locale);
+  // Physical keys stay with the recorded holder until a return is recorded; coverage only
+  // follows up, so the holder keeps their name here.
+  const holder = `${item.holderName ?? workCopy(locale).noOwner}${
+    item.needsCoverage ? ` (${coverageCopy(locale).title})` : ""
+  }`;
   return (
     <Row
       href={`/${locale}/operations/keys/${item.id}`}
@@ -516,10 +546,7 @@ function KeyRow({ locale, item }: { locale: string; item: KeyItem }) {
       title={place(t.keys, <bdi>{item.reference}</bdi>)}
       details={[
         ["property", place(t.property, <bdi>{item.propertyReference}</bdi>)],
-        [
-          "holder",
-          t.holder.replace("{name}", ownerText(locale, item.holderName, item.needsCoverage)),
-        ],
+        ["holder", t.holder.replace("{name}", () => holder)],
         [
           "time",
           place(t.overdueSince, <When locale={locale} date={item.dueAt} zone={agencyZone} />),

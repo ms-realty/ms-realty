@@ -569,17 +569,27 @@ export async function TasksScreen({
   session,
   page,
   mine,
+  overdue = false,
   awaitingAcceptance = false,
 }: {
   locale: string;
   session: Session;
   page: number;
   mine: boolean;
+  /** My tasks whose earliest time has passed: the queue behind the O01 overdue count. */
+  overdue?: boolean;
   awaitingAcceptance?: boolean;
 }) {
   const copy = workCopy(locale);
-  const queue = await listTasks(getDb(), session, { page, mine, awaitingAcceptance });
-  const href = `/${locale}/tasks${awaitingAcceptance ? "?view=handovers" : mine ? "?view=mine" : ""}`;
+  const queue = await listTasks(getDb(), session, {
+    page,
+    mine: mine || overdue,
+    awaitingAcceptance,
+    ...(overdue ? { dueBefore: new Date() } : {}),
+  });
+  const href = `/${locale}/tasks${
+    awaitingAcceptance ? "?view=handovers" : overdue ? "?view=overdue" : mine ? "?view=mine" : ""
+  }`;
   return (
     <Page title={copy.tasks} locale={locale}>
       <nav className="flex flex-wrap gap-5" aria-label={copy.tasks}>
@@ -588,6 +598,9 @@ export async function TasksScreen({
         </a>
         <a className={link} href={`/${locale}/tasks?view=mine`}>
           {copy.mine}
+        </a>
+        <a className={link} href={`/${locale}/tasks?view=overdue`}>
+          {copy.due}
         </a>
         <a className={link} href={`/${locale}/tasks?view=handovers`}>
           {taskHandoverCopy(locale).inbox}
