@@ -88,6 +88,8 @@ const en = {
     workingDraft: "Working draft BG",
     saveText: "Save the description",
     saveFacts: "Save the facts",
+    keptSaved:
+      "This page's earlier save already went through. Your current values are kept below: review the latest version and apply them again.",
     reviewForPublication: "Review for publication",
     correctPublished: "Correct the published listing",
     sourceTitle: "Facts from the BG source · Listing {reference}",
@@ -276,6 +278,8 @@ const bg: Copy = {
     workingDraft: "Работна чернова BG",
     saveText: "Запишете описанието",
     saveFacts: "Запишете фактите",
+    keptSaved:
+      "По-ранното записване от тази страница вече е минало. Текущите ви стойности са запазени по-долу: прегледайте последната версия и ги приложете отново.",
     reviewForPublication: "Прегледайте за публикуване",
     correctPublished: "Коригирайте публикуваната обява",
     sourceTitle: "Факти от BG източника · Обява {reference}",
@@ -461,6 +465,8 @@ const ru: Copy = {
     workingDraft: "Рабочий черновик BG",
     saveText: "Сохранить описание",
     saveFacts: "Сохранить факты",
+    keptSaved:
+      "Более раннее сохранение с этой страницы уже прошло. Ваши текущие значения сохранены ниже: проверьте последнюю версию и примените их снова.",
     reviewForPublication: "Проверить перед публикацией",
     correctPublished: "Исправить опубликованное объявление",
     sourceTitle: "Факты из BG-источника · Объявление {reference}",

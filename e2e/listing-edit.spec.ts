@@ -323,50 +323,47 @@ test.describe("JavaScript on", () => {
       await failed.tab.unrouteAll({ behavior: "ignoreErrors" });
     }
 
-    // An acknowledgement covers only the content that was sent: the same editor, edited after
-    // its operation was acknowledged, is still protected.
-    const retained = await open();
-    await retained.source.fill("");
-    await retained.tab.getByRole("button", { name: "Save the facts" }).click();
-    await expect(retained.source).toHaveAttribute("aria-invalid", "true");
-    const operation = await retained.tab.locator('input[name="_operationId"]').first().inputValue();
-    await retained.tab
-      .context()
-      .addCookies([
-        { name: "msr_saved_operation", value: operation, url: origins.staff, sameSite: "Strict" },
-      ]);
-    await retained.source.fill("Synthetic contract, later edit");
-    await retained.tab.reload();
-    expect(retained.prompts).toEqual(["beforeunload"]);
+    // A real acknowledged save in one tab never covers another submit: a stalled save in a second
+    // tab, under that tab's cookie, still asks before the work is lost.
+    const first = await open();
+    const completed = await first.tab.locator('input[name="_operationId"]').first().inputValue();
+    await first.source.fill("Synthetic contract, first save");
+    await first.tab.getByRole("button", { name: "Save the facts" }).click();
+    await expect(first.saved).toBeVisible();
+    expect(first.prompts).toEqual([]);
+    expect(
+      (await first.tab.context().cookies()).some((cookie) => cookie.name === "msr_saved_operation"),
+    ).toBe(true);
+    const stalled = await open();
+    await stalled.tab.route("**/*", (route) =>
+      route.request().method() === "POST" ? undefined : route.continue(),
+    );
+    await stalled.source.fill("Synthetic contract, stalled second save");
+    await stalled.tab.getByRole("button", { name: "Save the facts" }).click();
+    await stalled.tab.reload();
+    expect(stalled.prompts).toEqual(["beforeunload"]);
+    await stalled.tab.unrouteAll({ behavior: "ignoreErrors" });
 
-    // A kept editor whose operation was acknowledged never submits it again: Save reloads on a
-    // fresh operation with the edits restored, and no stale request is sent.
+    // A page kept with an operation that already went through submits it again: the server
+    // answers with the latest version and a fresh operation; the values stay and apply cleanly.
     const kept = await open();
-    const keptOperation = await kept.tab.locator('input[name="_operationId"]').first().inputValue();
-    await kept.tab.context().addCookies([
-      {
-        name: "msr_saved_operation",
-        value: keptOperation,
-        url: origins.staff,
-        sameSite: "Strict",
-      },
-    ]);
-    const posts: string[] = [];
-    kept.tab.on("request", (request) => {
-      if (request.method() === "POST") posts.push(request.url());
-    });
-    await kept.source.fill("Synthetic contract, kept editor");
+    await kept.source.fill("Synthetic contract, kept page");
+    // Set last: any re-render restores the form's own operation id.
+    await kept.tab
+      .locator('input[name="_operationId"]')
+      .first()
+      .evaluate((input, value) => {
+        (input as HTMLInputElement).value = value;
+      }, completed);
     await kept.tab.getByRole("button", { name: "Save the facts" }).click();
     await expect(
-      kept.tab.getByText("Unsaved changes from earlier on this page are restored.", {
-        exact: false,
-      }),
+      kept.tab.getByText("This page's earlier save already went through.", { exact: false }),
     ).toBeVisible();
-    await expect(kept.source).toHaveValue("Synthetic contract, kept editor");
-    expect(await kept.tab.locator('input[name="_operationId"]').first().inputValue()).not.toBe(
-      keptOperation,
-    );
-    expect(posts).toEqual([]);
+    await expect(kept.source).toHaveValue("Synthetic contract, kept page");
+    await kept.tab
+      .getByRole("button", { name: "Apply reviewed draft to current revision" })
+      .click();
+    await expect(kept.saved).toBeVisible();
     expect(kept.prompts).toEqual([]);
 
     // Acknowledged saves, from the dialog and from the form's own button, raise no prompt.

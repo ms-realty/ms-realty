@@ -16,7 +16,7 @@ import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { inventoryDecisionFeedback } from "@/features/inventory/decision-feedback";
 import type { InventoryValues } from "@/features/inventory/editor";
 import { safeNext } from "@/features/inventory/next";
-import { savedOperationCookie } from "@/features/inventory/saved-operation";
+import { savedAckField, savedOperationCookie } from "@/features/inventory/saved-operation";
 import { agencyTimeZone, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess } from "@/server/auth/pages";
 import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
@@ -152,12 +152,15 @@ export async function saveInventory(
     const next = safeNext(locale, form.get("_next"));
     // O12SAVED: an edit lands on its focused receipt, rendered only for this actor's own save.
     if (reference) {
-      // Acknowledge this save to the unsaved-work guard before the receipt's full page load.
-      (await cookies()).set(savedOperationCookie, operationId, {
-        path: "/",
-        maxAge: 60,
-        sameSite: "strict",
-      });
+      // Acknowledge this exact submit to the unsaved-work guard before the receipt's full page
+      // load. Without a valid nonce (no script) there is no guard to tell.
+      const ack = String(form.get(savedAckField) ?? "");
+      if (/^[0-9a-f-]{36}$/.test(ack))
+        (await cookies()).set(savedOperationCookie, ack, {
+          path: "/",
+          maxAge: 60,
+          sameSite: "strict",
+        });
       redirect(
         `/${locale}/inventory/${encodeURIComponent(ref)}?saved=${encodeURIComponent(operationId)}${form.get("_tab") === "facts" ? "&tab=facts" : ""}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
       );
@@ -198,7 +201,12 @@ export async function saveInventory(
       },
     };
   }
-  if (error.code === "REVISION_CONFLICT" && reference) {
+  // A newer version, or an operation this editor already completed (a page kept after its
+  // save): show the latest and offer a deliberate reapply on a fresh operation.
+  if (
+    (error.code === "REVISION_CONFLICT" || error.code === "IDEMPOTENCY_KEY_REUSED") &&
+    reference
+  ) {
     const fresh = await action(
       async ({ db }) => {
         const access = await currentStaffAccess();
@@ -213,8 +221,8 @@ export async function saveInventory(
         ...state,
         outcome: {
           kind: "conflict",
-          code: "REVISION_CONFLICT",
-          message: error.message,
+          code: error.code,
+          message: error.code === "IDEMPOTENCY_KEY_REUSED" ? copy.o12.keptSaved : error.message,
           latest: {
             revision: fresh.data.listing.version,
             values: { ...values, ...(fresh.data.listing.draft as Partial<InventoryValues>) },

@@ -3,13 +3,12 @@
 // that navigate, Review, the staff shell) asks Save draft / Discard / Stay; closing or
 // reloading the page gets the browser's own prompt. The form is compared with its contents
 // when the page loaded; operation identity fields are ignored. Only a save the server
-// acknowledged (savedOperationCookie for this form's operation) leaves without asking, and only
+// acknowledged (savedOperationCookie echoing this submit's nonce) leaves without asking, and only
 // while the form still holds what that save sent; a failed, rejected or stalled save, or any
 // later edit, keeps the work protected.
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/ui/button-class";
-import { formFields } from "@/ui/form/contract";
-import { savedOperationCookie } from "./saved-operation";
+import { savedAckField, savedOperationCookie } from "./saved-operation";
 
 export function UnsavedGuard({
   root,
@@ -35,37 +34,31 @@ export function UnsavedGuard({
         [...new FormData(editor)].filter(([name]) => !name.startsWith("_")).map(String),
       );
     const initial = snapshot();
-    const saved = () => {
-      const id = editor.querySelector<HTMLInputElement>(
-        `input[name="${formFields.operationId}"]`,
-      )?.value;
-      return Boolean(id) && document.cookie.split("; ").includes(`${savedOperationCookie}=${id}`);
-    };
-    // A page whose operation is already acknowledged (kept or restored after its save) must not
-    // submit that operation again: it would replay the first result and drop newer edits. Reload
-    // for a fresh operation instead; DraftKeeper brings the unsaved edits back.
-    const renew = () => {
-      leaving.current = true;
-      window.location.reload();
-    };
-    // What the last save sent: an acknowledgement covers exactly that content, never later edits.
-    let submitted: string | null = null;
-    const submit = (event: SubmitEvent) => {
-      if (saved()) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        renew();
-        return;
+    // Each scripted submit carries a fresh nonce; only the server's echo of the latest one, for
+    // exactly the content that submit sent, lets the page leave without asking. A kept page
+    // that submits its completed operation again gets a conflict with a fresh operation from
+    // the server, so nothing here reloads or relies on how long a cookie lives.
+    let submitted: { snapshot: string; ack: string } | null = null;
+    const submit = () => {
+      const ack = crypto.randomUUID();
+      let field = editor.querySelector<HTMLInputElement>(`input[name="${savedAckField}"]`);
+      if (!field) {
+        field = document.createElement("input");
+        field.type = "hidden";
+        field.name = savedAckField;
+        editor.append(field);
       }
-      submitted = snapshot();
+      field.value = ack;
+      submitted = { snapshot: snapshot(), ack };
     };
-    const restored = (event: PageTransitionEvent) => {
-      if (event.persisted && saved()) renew();
-    };
+    const saved = (now: string) =>
+      submitted !== null &&
+      now === submitted.snapshot &&
+      document.cookie.split("; ").includes(`${savedOperationCookie}=${submitted.ack}`);
     const dirty = () => {
       if (leaving.current) return false;
       const now = snapshot();
-      return now !== initial && !(now === submitted && saved());
+      return now !== initial && !saved(now);
     };
     const click = (event: MouseEvent) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
@@ -95,10 +88,8 @@ export function UnsavedGuard({
     editor.addEventListener("submit", submit, true);
     document.addEventListener("click", click, true);
     window.addEventListener("beforeunload", unload);
-    window.addEventListener("pageshow", restored);
     return () => {
       editor.removeEventListener("submit", submit, true);
-      window.removeEventListener("pageshow", restored);
       document.removeEventListener("click", click, true);
       window.removeEventListener("beforeunload", unload);
     };
