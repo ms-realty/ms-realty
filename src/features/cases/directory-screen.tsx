@@ -55,7 +55,7 @@ export async function CaseDirectoryScreen({
   const link = "font-semibold text-action underline underline-offset-4";
 
   return (
-    <div className="flex flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
+    <div className="flex flex-col gap-6 px-gutter py-5 sm:gap-8 sm:px-gutter-wide sm:py-8">
       <header className="flex flex-col gap-6 sm:gap-8">
         <h1 className="text-heading font-semibold sm:text-title">{c.cases}</h1>
         <p className="text-text-muted">{copy.instruction}</p>
@@ -74,7 +74,8 @@ export async function CaseDirectoryScreen({
               maxLength={searchLimit}
               defaultValue={q}
               aria-describedby="case-search-hint"
-              className={cx(controlClass, "min-h-12 py-2")}
+              // UI06 search on O04: 52 px on the canvas fill, level with the 52 px button.
+              className={cx(controlClass, "min-h-13! bg-canvas! py-2")}
             />
             <p id="case-search-hint" className="sr-only">
               {copy.searchHint}
