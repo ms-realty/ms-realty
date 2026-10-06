@@ -158,9 +158,24 @@ export async function viewingQuery(db: Executor, context: Context, now: Date) {
 }
 
 export async function caseContinueQuery(db: Executor, context: Context) {
-  const dueAt = sql<Date | null>`least(${cases.nextActionDueAt}, ${cases.reviewAt})`.mapWith(
+  // Match readCase's shared-summary fallback. Private work, review dates and private
+  // update ordering require the Case's own case.read_internal grant, not another Case's.
+  const internal = caseScope(context.grants, "case.read_internal");
+  const nextAction = sql<string | null>`case when ${cases.disposition} = 'active'
+    then case when ${internal} then ${cases.nextAction} else ${cases.clientSummary} end
+    else null end`;
+  const nextActionDueAt = sql<Date | null>`case
+    when ${cases.disposition} = 'active' and (${internal} or ${cases.clientSummary} is not null)
+      then ${cases.nextActionDueAt} else null end`.mapWith(cases.nextActionDueAt);
+  const waitingOn = sql<string | null>`case when ${internal} then ${cases.waitingOn} else null end`;
+  const reviewAt =
+    sql<Date | null>`case when ${internal} then ${cases.reviewAt} else null end`.mapWith(
+      cases.reviewAt,
+    );
+  const dueAt = sql<Date | null>`least(${nextActionDueAt}, ${reviewAt})`.mapWith(
     cases.nextActionDueAt,
   );
+  const updatedAt = sql<Date | null>`case when ${internal} then ${cases.updatedAt} else null end`;
   const rows = await db
     .select({
       total,
@@ -173,10 +188,10 @@ export async function caseContinueQuery(db: Executor, context: Context) {
       ownerId: cases.ownerId,
       ownerName: principals.displayName,
       needsCoverage: ownerNeedsCoverage(cases.ownerId),
-      nextAction: cases.nextAction,
-      nextActionDueAt: cases.nextActionDueAt,
-      waitingOn: cases.waitingOn,
-      reviewAt: cases.reviewAt,
+      nextAction,
+      nextActionDueAt,
+      waitingOn,
+      reviewAt,
       dueAt,
     })
     .from(cases)
@@ -188,7 +203,7 @@ export async function caseContinueQuery(db: Executor, context: Context) {
         inArray(cases.disposition, ["active", "paused"]),
       ),
     )
-    .orderBy(asc(dueAt), desc(cases.updatedAt), asc(cases.id))
+    .orderBy(asc(dueAt), sql`${updatedAt} desc nulls last`, asc(cases.id))
     .limit(limit + 1);
   return firstPage(rows);
 }
@@ -283,7 +298,7 @@ export async function translationReviewQuery(db: Executor, context: Context) {
     .leftJoin(principals, eq(principals.id, listings.responsibleBrokerId))
     .where(
       and(
-        listingScope(context.grants),
+        listingScope(context.grants, "listing.read", localizedRevisions.locale),
         listingScope(context.grants, "translation.review", localizedRevisions.locale),
         eq(localizedRevisions.sourceRevisionId, listings.approvedRevisionId),
         eq(localizedRevisions.state, "reviewing"),
