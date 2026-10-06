@@ -11,15 +11,19 @@ import { useSelection, writeSelection } from "./local-selection";
 import { listingHref, locality, priceText } from "./presentation";
 import { savedCopy } from "./saved-copy";
 import type { LoadSavedProperties, SavedProperty } from "./saved-property-data";
+import { SharePanel, type SharePanelProps } from "./share-panel";
 
 export function SavedProperties({
   locale,
   copy,
   loadAction,
+  share,
 }: {
   locale: PublicLocale;
   copy: DiscoveryCopy;
   loadAction: LoadSavedProperties;
+  /** P08 entry to a public-facts link; absent where sharing is not offered. */
+  share?: Pick<SharePanelProps, "ready" | "entryHref" | "action" | "initialState" | "labels">;
 }) {
   const saved = useSelection("saved");
   const comparison = useSelection("compare");
@@ -76,6 +80,16 @@ export function SavedProperties({
   };
   const ready = selected.length >= 2 && selected.length <= 3 && selected.every(eligible);
   const temporaryOnly = saved.temporaryOnly || comparison.temporaryOnly;
+  // Only Listings that are public and still offered can go into a link; the server rechecks.
+  const resolved = loaded?.key === loadKey;
+  const shareable = saved.refs.flatMap((reference) => {
+    const item = byReference.get(reference);
+    return item?.status === "listing" && eligible(reference) ? [item.listing] : [];
+  });
+  const closedSaves = saved.refs.filter((reference) => {
+    const item = byReference.get(reference);
+    return item?.status === "unavailable" || (item?.status === "listing" && !eligible(reference));
+  }).length;
 
   const toggle = (reference: string) => {
     const next = selected.includes(reference)
@@ -169,23 +183,30 @@ export function SavedProperties({
                     </bdi>
                   </p>
                 </div>
-                {ready ? (
-                  <a
-                    className={buttonClass("primary", "max-w-full")}
-                    href={`/${locale}/compare?references=${selected.join(",")}`}
-                  >
-                    {labels.compareSelected}
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    className={buttonClass("primary", "max-w-full")}
-                    disabled
-                    aria-describedby="saved-compare-help"
-                  >
-                    {labels.compareSelected}
-                  </button>
-                )}
+                <div className="flex flex-wrap items-center gap-3">
+                  {ready ? (
+                    <a
+                      className={buttonClass("primary", "max-w-full")}
+                      href={`/${locale}/compare?references=${selected.join(",")}`}
+                    >
+                      {labels.compareSelected}
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className={buttonClass("primary", "max-w-full")}
+                      disabled
+                      aria-describedby="saved-compare-help"
+                    >
+                      {labels.compareSelected}
+                    </button>
+                  )}
+                  {share && resolved ? (
+                    <a className={buttonClass("secondary", "max-w-full")} href="#share">
+                      {share.labels.shareSelected}
+                    </a>
+                  ) : null}
+                </div>
               </div>
               <ul className="grid items-start gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
                 {saved.refs.map((reference) => {
@@ -279,6 +300,15 @@ export function SavedProperties({
                   );
                 })}
               </ul>
+              {share && resolved ? (
+                <SharePanel
+                  {...share}
+                  locale={locale}
+                  copy={copy}
+                  listings={shareable}
+                  skipped={closedSaves}
+                />
+              ) : null}
             </>
           ) : (
             <p>{saved.temporaryOnly ? labels.storageUnreadable : copy.emptySaved}</p>
