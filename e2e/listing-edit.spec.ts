@@ -344,6 +344,39 @@ test("O12 restores unsaved work after browser history and can discard it", async
   await expect(description).toHaveValue(saved);
 });
 
+test("O12 keeps earlier unsaved work when someone else saved, for a reviewed apply", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "chromium-desktop", "one browser is enough for storage");
+  const f = seed();
+  await signIn(page, f.token);
+  await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+  const description = page.getByLabel("Description", { exact: true });
+  await description.fill("Моя по-ранна промяна.");
+  // Another operator saves the listing meanwhile.
+  const current = await listing(f.listingId);
+  await db
+    .update(schema.listings)
+    .set({
+      version: current.version + 1,
+      draft: { ...current.draft, description: "Промяна от друг човек." },
+    })
+    .where(eq(schema.listings.id, f.listingId));
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.reload();
+  await expect(
+    page.getByText("Unsaved changes from before someone else saved this listing are kept.", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  // Nothing is applied silently: the field shows the current version until the choice.
+  await expect(description).toHaveValue("Промяна от друг човек.");
+  await expect(page.getByText("Моя по-ранна промяна.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Apply my earlier changes" }).click();
+  await expect(description).toHaveValue("Моя по-ранна промяна.");
+  expect((await listing(f.listingId)).draft.description).toBe("Промяна от друг човек.");
+});
+
 test("O12 keeps a source price it cannot carry visible and needs a choice to drop it", async ({
   page,
 }) => {

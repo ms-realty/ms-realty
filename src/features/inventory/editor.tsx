@@ -153,7 +153,18 @@ export function InventoryEditor({
           </div>
         ) : (
           <>
-            {draftKey ? <DraftKeeper form={form} storageKey={draftKey} copy={copy.o12} /> : null}
+            {draftKey ? (
+              <DraftKeeper
+                form={form}
+                storageKey={draftKey}
+                labels={labels}
+                copy={{
+                  ...copy.o12,
+                  yourValue: copy.form.yourValue,
+                  currentValue: copy.form.latestValue,
+                }}
+              />
+            ) : null}
             {missing.length ? (
               <fieldset className="grid gap-5 rounded-panel border border-warning p-4 sm:grid-cols-2">
                 <legend className="px-1 text-dense font-semibold">{copy.o12.needsInput}</legend>
@@ -185,41 +196,63 @@ export function InventoryEditor({
 
 /**
  * Keeps unsaved work in this tab's sessionStorage, so leaving through browser history or a
- * reload does not lose it: on return to the same listing version the work is restored, with
- * a way to discard it. Another version's copy is dropped; nothing is sent anywhere.
+ * reload does not lose it. On return to the same listing version the work is restored, with a
+ * way to discard it. Work kept from an earlier version (someone saved the listing since) is
+ * never dropped or applied silently: its differences from the current version are shown, and
+ * the person applies or discards them. Nothing is sent anywhere.
  */
 function DraftKeeper({
   form,
   storageKey,
+  labels,
   copy,
 }: {
   form: FormController<InventoryValues>;
   storageKey: string;
-  copy: { restored: string; discardRestored: string };
+  labels: Record<Field, string>;
+  copy: {
+    restored: string;
+    discardRestored: string;
+    staleRestored: string;
+    applyStale: string;
+    yourValue: string;
+    currentValue: string;
+  };
 }) {
   const initial = useRef(form.values);
   const [restored, setRestored] = useState(false);
+  const [stale, setStale] = useState<{ key: string; values: Partial<InventoryValues> } | null>(
+    null,
+  );
   // biome-ignore lint/correctness/useExhaustiveDependencies: restore once, on mount.
   useEffect(() => {
     try {
+      const read = (key: string) => {
+        const saved = JSON.parse(window.sessionStorage.getItem(key) ?? "null") as Record<
+          string,
+          unknown
+        > | null;
+        return Object.fromEntries(
+          Object.entries(saved ?? {}).filter(
+            ([name, value]) => typeof value === "string" && name in initial.current,
+          ),
+        ) as Partial<InventoryValues>;
+      };
       const prefix = storageKey.slice(0, storageKey.lastIndexOf(":") + 1);
       for (let index = window.sessionStorage.length - 1; index >= 0; index--) {
         const key = window.sessionStorage.key(index);
-        if (key?.startsWith(prefix) && key !== storageKey) window.sessionStorage.removeItem(key);
+        if (!key?.startsWith(prefix) || key === storageKey) continue;
+        const values = read(key);
+        const differs = (Object.keys(values) as Field[]).some(
+          (name) => values[name] !== initial.current[name],
+        );
+        if (differs) setStale({ key, values });
+        else window.sessionStorage.removeItem(key);
       }
-      const saved = JSON.parse(window.sessionStorage.getItem(storageKey) ?? "null") as Record<
-        string,
-        unknown
-      > | null;
-      if (!saved) return;
       let changed = false;
-      for (const [name, value] of Object.entries(saved))
-        if (
-          typeof value === "string" &&
-          name in initial.current &&
-          form.values[name as Field] !== value
-        ) {
-          form.setValue(name as Field, value);
+      for (const [name, value] of Object.entries(read(storageKey)))
+        if (form.values[name as Field] !== value) {
+          form.setValue(name as Field, value as string);
           changed = true;
         }
       setRestored(changed);
@@ -234,24 +267,78 @@ function DraftKeeper({
       else window.sessionStorage.removeItem(storageKey);
     } catch {}
   }, [form.values, storageKey]);
-  if (!restored) return null;
+  const forget = (key: string) => {
+    try {
+      window.sessionStorage.removeItem(key);
+    } catch {}
+  };
+  const differences = stale
+    ? (Object.keys(stale.values) as Field[]).filter(
+        (name) => stale.values[name] !== initial.current[name],
+      )
+    : [];
   return (
-    <Notice tone="info">
-      <p>{copy.restored}</p>
-      <button
-        type="button"
-        className="mt-2 font-semibold underline"
-        onClick={() => {
-          for (const name of Object.keys(initial.current) as Field[])
-            form.setValue(name, initial.current[name]);
-          try {
-            window.sessionStorage.removeItem(storageKey);
-          } catch {}
-          setRestored(false);
-        }}
-      >
-        {copy.discardRestored}
-      </button>
-    </Notice>
+    <>
+      {stale && differences.length ? (
+        <Notice tone="warning">
+          <p>{copy.staleRestored}</p>
+          <dl className="mt-2 grid gap-3">
+            {differences.map((name) => (
+              <div key={name} className="grid gap-1">
+                <dt className="font-semibold">{labels[name]}</dt>
+                <dd>
+                  {copy.yourValue}:{" "}
+                  <span className="whitespace-pre-wrap">{stale.values[name]}</span>
+                </dd>
+                <dd className="text-text-muted">
+                  {copy.currentValue}:{" "}
+                  <span className="whitespace-pre-wrap">{initial.current[name]}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-3 flex flex-wrap gap-4">
+            <button
+              type="button"
+              className="font-semibold underline"
+              onClick={() => {
+                for (const name of differences) form.setValue(name, stale.values[name] ?? "");
+                forget(stale.key);
+                setStale(null);
+              }}
+            >
+              {copy.applyStale}
+            </button>
+            <button
+              type="button"
+              className="font-semibold underline"
+              onClick={() => {
+                forget(stale.key);
+                setStale(null);
+              }}
+            >
+              {copy.discardRestored}
+            </button>
+          </div>
+        </Notice>
+      ) : null}
+      {restored ? (
+        <Notice tone="info">
+          <p>{copy.restored}</p>
+          <button
+            type="button"
+            className="mt-2 font-semibold underline"
+            onClick={() => {
+              for (const name of Object.keys(initial.current) as Field[])
+                form.setValue(name, initial.current[name]);
+              forget(storageKey);
+              setRestored(false);
+            }}
+          >
+            {copy.discardRestored}
+          </button>
+        </Notice>
+      ) : null}
+    </>
   );
 }

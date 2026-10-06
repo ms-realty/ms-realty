@@ -105,6 +105,9 @@ const en = {
       "You have unsaved changes. Save the draft with the button below, discard them, or stay here.",
     restored: "Unsaved changes from earlier on this page are restored. Save them or discard them.",
     discardRestored: "Discard these changes",
+    staleRestored:
+      "Unsaved changes from before someone else saved this listing are kept. Compare them with the current version, then apply or discard them.",
+    applyStale: "Apply my earlier changes",
     priceRecorded:
       "The source recorded {value}. It cannot be carried over as it is: enter the price in EUR, or confirm that it stays unknown for now.",
     periodTotal: "total price",
@@ -257,6 +260,9 @@ const bg: Copy = {
     restored:
       "Незаписаните промени от по-рано на тази страница са възстановени. Запишете ги или ги откажете.",
     discardRestored: "Откажете тези промени",
+    staleRestored:
+      "Незаписаните промени отпреди друг човек да запише обявата са запазени. Сравнете ги с текущата версия и ги приложете или откажете.",
+    applyStale: "Приложете моите по-ранни промени",
     priceRecorded:
       "Източникът е записал {value}. Цената не може да се пренесе както е: въведете я в EUR или потвърдете, че засега остава неизвестна.",
     periodTotal: "обща цена",
@@ -408,6 +414,9 @@ const ru: Copy = {
     restored:
       "Несохранённые изменения, сделанные ранее на этой странице, восстановлены. Сохраните или отмените их.",
     discardRestored: "Отменить эти изменения",
+    staleRestored:
+      "Несохранённые изменения, сделанные до того, как объявление сохранил кто-то другой, сохранены. Сравните их с текущей версией и примените или отмените.",
+    applyStale: "Применить мои прежние изменения",
     priceRecorded:
       "Источник записал {value}. Цену нельзя перенести как есть: введите её в EUR или подтвердите, что пока она остаётся неизвестной.",
     periodTotal: "общая цена",
