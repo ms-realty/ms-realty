@@ -15,7 +15,6 @@ import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { inventoryDecisionFeedback } from "@/features/inventory/decision-feedback";
 import type { InventoryValues } from "@/features/inventory/editor";
 import { safeNext } from "@/features/inventory/next";
-import { recordedPrice } from "@/features/inventory/recorded-price";
 import { agencyTimeZone, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess } from "@/server/auth/pages";
 import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
@@ -75,11 +74,7 @@ export async function saveInventory(
     reconciliation: status,
     outcome: { kind: "idle" },
   };
-  const periods = {
-    total: copy.o12.periodTotal,
-    month: copy.o12.periodMonth,
-    none: copy.o12.periodNone,
-  };
+  const priceDecision = reference ? String(form.get("_priceDecision") ?? "") : "";
   // UX 03.3 without JavaScript: Photos/Review submit `_leave`. An unchanged draft goes on;
   // unsaved work gets Save draft (the form) / Discard (the destination) / Stay (the values).
   const leave = reference ? safeNext(locale, form.get("_leave")) : null;
@@ -123,25 +118,23 @@ export async function saveInventory(
       const draft = Object.fromEntries(
         Object.keys(emptyDraft).map((key) => [key, values[key as keyof InventoryValues]]),
       );
-      // A source price the projection could not carry is never dropped silently: keeping it
-      // unknown is an explicit choice bound to that exact source revision (priceDecision).
-      // ponytail: interim app-side check; move to saveListingDraft's own priceDecision field
-      // when Codex's server seam lands.
-      if (reference && draft.priceState === "unknown") {
-        const current = await inventoryDetail(db, session.actor, reference);
-        if (
-          !draftSchema.safeParse(current.listing.draft).success &&
-          current.revision &&
-          recordedPrice(current.revision.terms, locale, periods) &&
-          form.get("_priceDecision") !== current.revision.id
-        )
-          throw new AppError("validation_failed", {
-            fieldErrors: { priceDecision: [copy.o12.priceUnknownError] },
-          });
-      }
       const command = { actor: session.actor, operationId, expectedRevision };
       const recorded = await (reference
-        ? saveListingDraft(db, { ...command, reference, draft })
+        ? saveListingDraft(db, {
+            ...command,
+            reference,
+            draft,
+            // The broker's explicit choice to keep an uncarriable source price unknown, bound to
+            // the revision it was shown against; the command rejects a stale or missing one.
+            ...(priceDecision
+              ? {
+                  priceDecision: {
+                    kind: "retain_unknown" as const,
+                    sourceRevisionId: priceDecision,
+                  },
+                }
+              : {}),
+          })
         : createListingDraft(db, { ...command, input: { ...values, draft } }));
       const [receipt] = await db
         .select({ completedAt: operations.completedAt })
@@ -183,7 +176,7 @@ export async function saveInventory(
       Object.entries(error.fieldErrors ?? {}).map(([key, messages]) => [
         // The price decision is shown at the price status it decides about.
         key === "priceDecision" ? "priceState" : key.replace(/^draft\./, ""),
-        messages,
+        key === "priceDecision" ? [copy.o12.priceUnknownError] : messages,
       ]),
     );
     return {

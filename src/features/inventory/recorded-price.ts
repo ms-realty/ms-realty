@@ -1,21 +1,19 @@
-// O12: a price the latest revision recorded but the working draft cannot carry as it is
-// (another currency, no stated period, or conflicting candidates). It stays visible, and saving
-// the draft with an unknown price needs an explicit broker choice; nothing is converted or
-// guessed.
+// O12: shows the source price evidence the working draft cannot carry (Codex's
+// uneditablePriceEvidence: another currency, no stated period, unsupported purpose, or
+// conflicting candidates) exactly as recorded. Nothing is converted or guessed; keeping the
+// price unknown is the broker's explicit priceDecision on Save.
+import type { UneditablePriceEvidence } from "@/server/inventory/working-draft";
+
 type Amount = { amountMinor?: unknown; currency?: unknown; period?: unknown };
 
-export function recordedPrice(
-  terms: unknown,
+export function describePriceEvidence(
+  evidence: readonly UneditablePriceEvidence[],
   locale: string,
-  periods: { total: string; month: string; none: string },
+  labels: { total: string; month: string; none: string; unreadable: string },
 ): string | null {
-  const facts = (terms as { facts?: Record<string, { state?: unknown; value?: unknown }> } | null)
-    ?.facts;
-  const recorded = [facts?.price, facts?.["price.amount_without_period"]].filter(
-    (fact) => fact && (fact.state === "known" || fact.state === "conflicting"),
-  );
-  const amounts = recorded.flatMap(
-    (fact) => (Array.isArray(fact?.value) ? fact.value : [fact?.value]) as Amount[],
+  if (!evidence.length) return null;
+  const amounts = evidence.flatMap(
+    ({ fact }) => (Array.isArray(fact.value) ? fact.value : [fact.value]) as Amount[],
   );
   const text = amounts
     .filter((amount) => typeof amount?.amountMinor === "number")
@@ -26,11 +24,11 @@ export function recordedPrice(
       );
       const period =
         amount.period === "total"
-          ? periods.total
+          ? labels.total
           : amount.period === "month"
-            ? periods.month
-            : periods.none;
-      return `${value} ${currency} · ${period}`.trim();
+            ? labels.month
+            : labels.none;
+      return `${value} ${currency} · ${period}`;
     });
-  return text.length ? text.join(" | ") : null;
+  return text.length ? text.join(" | ") : labels.unreadable;
 }

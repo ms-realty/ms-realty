@@ -110,6 +110,7 @@ const en = {
     periodTotal: "total price",
     periodMonth: "per month",
     periodNone: "period not stated",
+    priceUnreadable: "a price in a form this editor cannot show",
     priceKeepUnknown: "Keep the price unknown for now",
     priceUnknownError: "Enter the price, or confirm that it stays unknown for now.",
     noscriptLeave:
@@ -261,6 +262,7 @@ const bg: Copy = {
     periodTotal: "обща цена",
     periodMonth: "на месец",
     periodNone: "без посочен период",
+    priceUnreadable: "цена във форма, която редакторът не може да покаже",
     priceKeepUnknown: "Засега оставете цената неизвестна",
     priceUnknownError: "Въведете цената или потвърдете, че засега остава неизвестна.",
     noscriptLeave:
@@ -411,6 +413,7 @@ const ru: Copy = {
     periodTotal: "общая цена",
     periodMonth: "в месяц",
     periodNone: "период не указан",
+    priceUnreadable: "цену в виде, который редактор не может показать",
     priceKeepUnknown: "Пока оставить цену неизвестной",
     priceUnknownError: "Введите цену или подтвердите, что пока она остаётся неизвестной.",
     noscriptLeave:

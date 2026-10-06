@@ -24,14 +24,14 @@ import { FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { LeaveControl } from "@/features/inventory/leave-control";
 import { safeNext } from "@/features/inventory/next";
-import { recordedPrice } from "@/features/inventory/recorded-price";
+import { describePriceEvidence } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { isAppError } from "@/server/errors";
 import { inventoryDetail } from "@/server/inventory/commands";
 import { draftSchema } from "@/server/inventory/contracts";
-import { workingDraftFrom } from "@/server/inventory/working-draft";
+import { uneditablePriceEvidence, workingDraftFrom } from "@/server/inventory/working-draft";
 import { publicationReadiness } from "@/server/publication/commands";
 import { buttonClass } from "@/ui/button-class";
 import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon } from "@/ui/icons";
@@ -216,16 +216,16 @@ export default async function InventoryDetailPage({
       : null,
   ].filter(Boolean);
   const formId = mayEdit ? "o12-form" : undefined;
-  // A source price the draft cannot carry stays visible; keeping it unknown is an explicit,
-  // server-checked choice (saveInventory).
-  const recorded =
-    !parsed.success && revision && values.priceState === "unknown"
-      ? recordedPrice(revision.terms, locale, {
-          total: o12.periodTotal,
-          month: o12.periodMonth,
-          none: o12.periodNone,
-        })
-      : null;
+  // A source price the draft cannot carry stays visible; keeping it unknown is the broker's
+  // explicit priceDecision, which saveListingDraft binds to this exact source revision.
+  const recorded = parsed.success
+    ? null
+    : describePriceEvidence(uneditablePriceEvidence(revision), locale, {
+        total: o12.periodTotal,
+        month: o12.periodMonth,
+        none: o12.periodNone,
+        unreadable: o12.priceUnreadable,
+      });
   const missing: InventoryField[] = [
     ...missingInput(values),
     ...(recorded ? (["priceState", "price"] as const) : []),
