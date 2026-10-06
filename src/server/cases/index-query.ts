@@ -95,7 +95,9 @@ export interface CaseIndexRow {
   readonly reviewAt?: Date | null;
   readonly nextActionState: (typeof caseNextActionStates)[number];
   readonly needsReasons: readonly CaseAttentionReason[];
-  readonly updatedAt: Date;
+  readonly createdAt: Date;
+  /** Internal edits are visible only with case.read_internal on this Case. */
+  readonly updatedAt?: Date;
 }
 export interface CaseIndexPage {
   readonly rows: readonly CaseIndexRow[];
@@ -107,7 +109,7 @@ export interface CaseIndexPage {
 const cursorSchema = z.strictObject({
   query: z.string().length(64),
   id: z.uuid(),
-  updatedAt: z.iso.datetime({ precision: 6 }),
+  sortAt: z.iso.datetime({ precision: 6 }),
 });
 function readCursor(value: string | undefined, query: string) {
   if (!value) return null;
@@ -140,6 +142,7 @@ export async function queryCaseIndex(
   const cursor = readCursor(encodedCursor, queryId);
   const grants = await resolveGrants(db, live.actor);
   const internal = caseGrantVisibility(grants, "case.read_internal");
+  const sortAt = sql<Date>`case when ${internal} then ${cases.updatedAt} else ${cases.createdAt} end`;
   const now = sql`statement_timestamp()`;
   const relationship = and(
     eq(caseParticipants.caseId, cases.id),
@@ -201,10 +204,14 @@ export async function queryCaseIndex(
         requirementsUnknown: sql<boolean>`coalesce((${latestBrief}), false)`.as(
           "requirements_unknown",
         ),
-        updatedAt: cases.updatedAt,
+        createdAt: cases.createdAt,
+        updatedAt: sql<Date | null>`case when ${internal} then ${cases.updatedAt} end`
+          .mapWith(cases.updatedAt)
+          .as("updated_at"),
+        sortAt: sortAt.mapWith(cases.createdAt).as("sort_at"),
         // Date loses PostgreSQL microseconds. Keep the exact key in the cursor.
         cursorTime:
-          sql<string>`to_char(${cases.updatedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`.as(
+          sql<string>`to_char(${sortAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`.as(
             "cursor_time",
           ),
       })
@@ -284,15 +291,15 @@ export async function queryCaseIndex(
       .where(
         cursor
           ? or(
-              lt(selected.updatedAt, sql`${cursor.updatedAt}::timestamptz`),
+              lt(selected.sortAt, sql`${cursor.sortAt}::timestamptz`),
               and(
-                eq(selected.updatedAt, sql`${cursor.updatedAt}::timestamptz`),
+                eq(selected.sortAt, sql`${cursor.sortAt}::timestamptz`),
                 gt(selected.id, cursor.id),
               ),
             )
           : undefined,
       )
-      .orderBy(desc(selected.updatedAt), asc(selected.id))
+      .orderBy(desc(selected.sortAt), asc(selected.id))
       .limit(pageSize + 1),
   );
   const result = await db
@@ -300,7 +307,7 @@ export async function queryCaseIndex(
     .select({ total: counted.total, row: page._.selectedFields })
     .from(counted)
     .leftJoin(page, sql`true`)
-    .orderBy(desc(page.updatedAt), asc(page.id));
+    .orderBy(desc(page.sortAt), asc(page.id));
   const records = result.flatMap(({ row }) => (row?.id ? [row] : []));
   const visible = records.slice(0, pageSize);
   const last = visible.at(-1);
@@ -309,7 +316,7 @@ export async function queryCaseIndex(
     nextCursor:
       records.length > pageSize && last
         ? Buffer.from(
-            JSON.stringify({ query: queryId, id: last.id, updatedAt: last.cursorTime }),
+            JSON.stringify({ query: queryId, id: last.id, sortAt: last.cursorTime }),
           ).toString("base64url")
         : null,
     rows: visible.map((row) => ({
@@ -327,9 +334,10 @@ export async function queryCaseIndex(
       partyLabel: row.partyLabel,
       nextActionState: row.nextActionState,
       needsReasons: row.needsReasons,
-      updatedAt: row.updatedAt,
+      createdAt: row.createdAt,
       ...(row.internal
         ? {
+            updatedAt: row.updatedAt,
             nextAction: row.nextAction,
             dueAt: row.dueAt,
             waitingOn: row.waitingOn,

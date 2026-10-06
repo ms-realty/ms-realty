@@ -306,7 +306,7 @@ describe("O04 authorized Case index", () => {
     expect(ids(first)).toEqual(expected.slice(0, 2));
     expect(first.nextCursor).toBeTruthy();
     const decoded = JSON.parse(Buffer.from(first.nextCursor ?? "", "base64url").toString());
-    expect(decoded.updatedAt).toMatch(/\.\d{6}Z$/u);
+    expect(decoded.sortAt).toMatch(/\.\d{6}Z$/u);
     const second = await queryCaseIndex(t.db, staff.session, {
       pageSize: 2,
       cursor: first.nextCursor ?? undefined,
@@ -439,6 +439,140 @@ describe("O04 authorized Case index", () => {
     expect(new Set(ids(utc))).toEqual(new Set(ids(page)));
   });
 
+  it("keeps mixed-grant ordering and cursors stable across private edits to basic-read Cases", async () => {
+    const staff = await reader();
+    const instant = Date.now();
+    const internal = await addCase(staff, {
+      createdAt: new Date(instant - 6_000),
+      updatedAt: new Date(instant - 1_000),
+    });
+    const basicAnchor = await addCase(
+      staff,
+      {
+        createdAt: new Date(instant - 2_000),
+        updatedAt: new Date(instant - 10_000),
+      },
+      "read",
+    );
+    const basicTail = await addCase(
+      staff,
+      {
+        createdAt: new Date(instant - 3_000),
+        updatedAt: new Date(instant + 10_000),
+      },
+      "read",
+    );
+    const first = await queryCaseIndex(t.db, staff.session, { pageSize: 1 });
+    expect(ids(first)).toEqual([internal.id]);
+    expect(first.rows[0]).toMatchObject({
+      createdAt: internal.createdAt,
+      updatedAt: internal.updatedAt,
+    });
+    const second = await queryCaseIndex(t.db, staff.session, {
+      pageSize: 1,
+      cursor: first.nextCursor ?? undefined,
+    });
+    expect(ids(second)).toEqual([basicAnchor.id]);
+    expect(second.rows[0]?.createdAt).toEqual(basicAnchor.createdAt);
+    expect(second.rows[0]).not.toHaveProperty("updatedAt");
+    const basicCursor = JSON.parse(Buffer.from(second.nextCursor ?? "", "base64url").toString());
+    expect(new Date(basicCursor.sortAt)).toEqual(basicAnchor.createdAt);
+    expect(basicCursor).not.toHaveProperty("updatedAt");
+    for (const record of [basicAnchor, basicTail])
+      await t.db
+        .update(cases)
+        .set({
+          nextAction: "Changed private action",
+          waitingOn: "Changed private dependency",
+          reviewAt: future(),
+          updatedAt: new Date(instant + 3_600_000),
+        })
+        .where(eq(cases.id, record.id));
+    const afterFirst = await queryCaseIndex(t.db, staff.session, { pageSize: 1 });
+    expect(ids(afterFirst)).toEqual(ids(first));
+    expect(afterFirst.nextCursor).toBe(first.nextCursor);
+    const afterSecond = await queryCaseIndex(t.db, staff.session, {
+      pageSize: 1,
+      cursor: first.nextCursor ?? undefined,
+    });
+    expect(ids(afterSecond)).toEqual(ids(second));
+    expect(afterSecond.nextCursor).toBe(second.nextCursor);
+    const tail = await queryCaseIndex(t.db, staff.session, {
+      pageSize: 1,
+      cursor: second.nextCursor ?? undefined,
+    });
+    expect(ids(tail)).toEqual([basicTail.id]);
+    expect(tail.total).toBe(3);
+    expect(tail.nextCursor).toBeNull();
+    expect(tail.rows[0]).not.toHaveProperty("updatedAt");
+    expect(JSON.stringify([...afterSecond.rows, ...tail.rows])).not.toContain("Changed private");
+    // Internal readers still see and sort by edits on the Case their grant reaches.
+    await t.db
+      .update(cases)
+      .set({ updatedAt: new Date(instant - 4_000) })
+      .where(eq(cases.id, internal.id));
+    const reordered = await queryCaseIndex(t.db, staff.session);
+    expect(ids(reordered)).toEqual([basicAnchor.id, basicTail.id, internal.id]);
+    expect(reordered.rows[2]?.updatedAt).toEqual(new Date(instant - 4_000));
+    await t.db
+      .update(grants)
+      .set({ revokedAt: new Date() })
+      .where(and(eq(grants.principalId, staff.id), eq(grants.capability, "case.read_internal")));
+    expect(
+      (await queryCaseIndex(t.db, staff.session)).rows.every((row) => !("updatedAt" in row)),
+    ).toBe(true);
+  });
+
+  it("uses precise immutable creation keys for basic readers across ties and private anchor edits", async () => {
+    const staff = await reader();
+    const records = await Promise.all(Array.from({ length: 5 }, () => addCase(staff, {}, "read")));
+    const [clock] =
+      await t.sql`select to_char(date_trunc('milliseconds', statement_timestamp()) at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as tick`;
+    const tick = String(clock?.tick);
+    for (const [index, record] of records.entries())
+      await t.db
+        .update(cases)
+        .set({
+          createdAt: sql`${tick}::timestamptz + ${index < 3 ? 999 : 1001 - index} * interval '1 microsecond'`,
+          updatedAt: sql`${tick}::timestamptz + ${index} * interval '1 day'`,
+        })
+        .where(eq(cases.id, record.id));
+    const expected = [
+      ...records
+        .slice(0, 3)
+        .map((row) => row.id)
+        .sort(),
+      records[3]?.id,
+      records[4]?.id,
+    ];
+    const first = await queryCaseIndex(t.db, staff.session, { pageSize: 2 });
+    expect(ids(first)).toEqual(expected.slice(0, 2));
+    const decoded = JSON.parse(Buffer.from(first.nextCursor ?? "", "base64url").toString());
+    expect(decoded.sortAt).toMatch(/\.\d{3}999Z$/u);
+    const second = await queryCaseIndex(t.db, staff.session, {
+      pageSize: 2,
+      cursor: first.nextCursor ?? undefined,
+    });
+    expect(ids(second)).toEqual(expected.slice(2, 4));
+    await t.db
+      .update(cases)
+      .set({ updatedAt: future(), nextAction: "Private anchor edit" })
+      .where(eq(cases.id, expected[3] ?? ""));
+    const third = await queryCaseIndex(t.db, staff.session, {
+      pageSize: 2,
+      cursor: second.nextCursor ?? undefined,
+    });
+    expect(ids(third)).toEqual(expected.slice(4));
+    expect(third.nextCursor).toBeNull();
+    const combined = [...first.rows, ...second.rows, ...third.rows];
+    expect(new Set(combined.map((row) => row.id)).size).toBe(5);
+    expect(combined.every((row) => !("updatedAt" in row))).toBe(true);
+    expect([first.total, second.total, third.total]).toEqual([5, 5, 5]);
+    const afterEdit = await queryCaseIndex(t.db, staff.session, { pageSize: 2 });
+    expect(ids(afterEdit)).toEqual(ids(first));
+    expect(afterEdit.nextCursor).toBe(first.nextCursor);
+  });
+
   it("omits restricted work and applies the same authorization to filters and Needs membership", async () => {
     const staff = await reader();
     const visible = await addCase(staff, {
@@ -487,7 +621,7 @@ describe("O04 authorized Case index", () => {
     for (const record of [privateAction, privateWaiting, privatePause, unknown]) {
       const row = page.rows.find((candidate) => candidate.id === record.id);
       expect(row?.nextActionState).toBe("restricted");
-      for (const field of ["nextAction", "dueAt", "waitingOn", "reviewAt"])
+      for (const field of ["nextAction", "dueAt", "waitingOn", "reviewAt", "updatedAt"])
         expect(row).not.toHaveProperty(field);
     }
     expect(page.rows.find((row) => row.id === summary.id)).toMatchObject({
