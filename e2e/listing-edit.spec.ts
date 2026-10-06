@@ -58,17 +58,15 @@ async function publicManifests(listingId: string) {
   return JSON.stringify(rows);
 }
 async function signIn(page: Page, token: string) {
-  await page
-    .context()
-    .addCookies([
-      {
-        name: "msr_staff_session",
-        value: token,
-        url: origins.staff,
-        httpOnly: true,
-        sameSite: "Lax",
-      },
-    ]);
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: token,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
 }
 
 for (const javaScriptEnabled of [false, true])
@@ -87,12 +85,8 @@ for (const javaScriptEnabled of [false, true])
       await expect(
         page.getByText(`${f.reference} · Sandanski · €95,000 · 74.5 m² · 2 bedrooms`),
       ).toBeVisible();
-      const tabs = page.getByRole("navigation", { name: "Listing parts" });
-      await expect(tabs.getByRole("link", { name: "Text" })).toHaveAttribute(
-        "aria-current",
-        "page",
-      );
-      await expect(tabs.getByRole("link", { name: "Photos" })).toHaveAttribute(
+      await expect(page.getByRole("radio", { name: "Text" })).toBeChecked();
+      await expect(page.getByRole("link", { name: "Photos", exact: true })).toHaveAttribute(
         "href",
         `/en/inventory/${f.reference}/media`,
       );
@@ -151,7 +145,7 @@ for (const javaScriptEnabled of [false, true])
       // The older receipt now says the draft changed after it.
       await page.goto(receipt);
       await expect(
-        page.getByText("The draft changed after this save.", { exact: false }),
+        page.getByText("The listing has changed since this save.", { exact: false }),
       ).toBeVisible();
 
       // A receipt from another listing shows nothing on this one.
@@ -159,6 +153,30 @@ for (const javaScriptEnabled of [false, true])
       await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}?saved=${id}`));
       await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
       await expect(page.getByText("Working draft saved")).toHaveCount(0);
+    });
+
+    test("O12 keeps unsaved text and facts across the tabs", async ({ page }) => {
+      const f = seed();
+      await signIn(page, f.token);
+      await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+      const description = page.getByLabel("Description", { exact: true });
+      await description.fill("Незаписан текст.");
+      await page.getByText("Facts", { exact: true }).click();
+      await expect(page.getByRole("radio", { name: "Facts" })).toBeChecked();
+      await expect(description).toBeHidden();
+      const price = page.getByLabel("Price in EUR", { exact: true });
+      await price.fill("97000");
+      await page.getByText("Text", { exact: true }).click();
+      await expect(description).toHaveValue("Незаписан текст.");
+      await page.getByText("Facts", { exact: true }).click();
+      await expect(price).toHaveValue("97000");
+      expect((await listing(f.listingId)).draft.description).not.toBe("Незаписан текст.");
+      if (!javaScriptEnabled)
+        await expect(
+          page.getByText("Without JavaScript, save before opening Photos or Review", {
+            exact: false,
+          }),
+        ).toBeVisible();
     });
 
     test("O12 reports a stale save as a conflict and writes nothing", async ({ page }) => {
@@ -183,12 +201,83 @@ for (const javaScriptEnabled of [false, true])
     });
   });
 
+test.describe("JavaScript on", () => {
+  test("O12 asks Save draft / Discard / Stay before leaving unsaved work", async ({ page }) => {
+    test.setTimeout(90_000);
+    const f = seed();
+    const before = await listing(f.listingId);
+    await signIn(page, f.token);
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+    await page.getByLabel("Description", { exact: true }).fill("Незаписана промяна.");
+    const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
+
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Stay" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByLabel("Description", { exact: true })).toHaveValue(
+      "Незаписана промяна.",
+    );
+
+    await page.getByRole("link", { name: "Review for publication" }).click();
+    await dialog.getByRole("button", { name: "Discard changes" }).click();
+    await expect(page).toHaveURL(/\?tab=review$/);
+    expect(await listing(f.listingId)).toEqual(before);
+
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+    await page.getByLabel("Description", { exact: true }).fill("Записана от диалога.");
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
+    await dialog.getByRole("button", { name: "Save draft" }).click();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Working draft saved" }),
+    ).toBeVisible();
+    expect((await listing(f.listingId)).draft.description).toBe("Записана от диалога.");
+
+    // A photo-only change later moves the listing version; the receipt says only that.
+    const receipt = page.url();
+    const saved = await listing(f.listingId);
+    await db
+      .update(schema.listings)
+      .set({ version: saved.version + 1 })
+      .where(eq(schema.listings.id, f.listingId));
+    await page.goto(receipt);
+    await expect(page.getByText("The listing has changed since this save.")).toBeVisible();
+  });
+
+  test("O12 starts an imported listing from its revision and keeps the source field while typing", async ({
+    page,
+  }) => {
+    const f = seed();
+    await signIn(page, f.token);
+    await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}`));
+    await expect(page.getByLabel("Listing title", { exact: true })).toHaveValue(
+      "Синтетична обява без чернова",
+    );
+    const source = page.getByLabel("Source or evidence reference", { exact: true });
+    await source.pressSequentially("synthetic-source-record");
+    await expect(source).toHaveValue("synthetic-source-record");
+    await page.getByLabel("Language of the source evidence", { exact: true }).selectOption("bg");
+    await page.getByRole("button", { name: "Save the description", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Working draft saved" }),
+    ).toBeVisible();
+    const saved = await listing(f.blank.listingId);
+    expect(saved.draft).toMatchObject({
+      title: "Синтетична обява без чернова",
+      sourceReference: "synthetic-source-record",
+      sourceLanguage: "bg",
+      priceState: "known",
+      price: "95000.00",
+    });
+  });
+});
+
 test("O12 without a saved draft asks for the source and does not write", async ({ page }) => {
   const f = seed();
   await signIn(page, f.token);
   await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}`));
   await expect(
-    page.getByText("No working draft is saved for this listing yet", { exact: false }),
+    page.getByText("No working draft is saved yet.", { exact: false }),
   ).toBeVisible();
   const source = page.getByLabel("Source or evidence reference", { exact: true });
   await expect(source).toBeVisible();
@@ -209,10 +298,7 @@ test("O12 keeps BG and RU labels and a read-only role cannot edit", async ({ pag
   ] as const) {
     await page.goto(hostUrl("staff", `/${locale}/inventory/${f.reference}`));
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
-    await expect(page.getByRole("link", { name: text, exact: true })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
+    await expect(page.getByRole("radio", { name: text, exact: true })).toBeChecked();
     await expect(page.getByRole("button", { name: save, exact: true })).toBeVisible();
   }
   await page.context().clearCookies();

@@ -16,18 +16,21 @@ import {
 } from "@/features/inventory/decision-contract";
 import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { InventoryDecisionForm } from "@/features/inventory/decision-form";
+import { EditTabs } from "@/features/inventory/edit-tabs";
 import { InventoryEditor, type InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
+import { missingInput } from "@/features/inventory/fields";
 import { FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
+import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { isAppError } from "@/server/errors";
 import { inventoryDetail } from "@/server/inventory/commands";
-import { draftSchema, emptyDraft } from "@/server/inventory/contracts";
+import { draftSchema } from "@/server/inventory/contracts";
+import { workingDraftFrom } from "@/server/inventory/working-draft";
 import { publicationReadiness } from "@/server/publication/commands";
 import { buttonClass } from "@/ui/button-class";
-import { cx } from "@/ui/cx";
 import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon } from "@/ui/icons";
 import { saveInventory, submitInventoryDecision } from "../actions";
 
@@ -104,14 +107,16 @@ export default async function InventoryDetailPage({
     if (isAppError(error) && error.code === "not_found") notFound();
     throw error;
   });
-  const { listing, property } = data;
+  const { listing, property, revision } = data;
   const copy = inventoryCopy(locale);
   const o12 = copy.o12;
   const path = `/${locale}/inventory/${reference}`;
   const ref = <bdi>{listing.reference}</bdi>;
   const parsed = draftSchema.safeParse(listing.draft);
   const values: InventoryValues = {
-    ...(parsed.success ? parsed.data : emptyDraft),
+    // No saved draft yet: start from the latest immutable revision (Codex 8021808b); nothing
+    // is written until the broker saves through the version-checked command.
+    ...(parsed.success ? parsed.data : workingDraftFrom(revision, data.facts)),
     propertyType: property.propertyType,
     purpose: listing.purpose,
     country: property.country,
@@ -127,7 +132,7 @@ export default async function InventoryDetailPage({
     const back = tab === "facts" ? `${path}?tab=facts` : path;
     return (
       <FocusedState closeHref={back} closeLabel={o12.close}>
-        <h1 className="pe-12 text-title font-semibold">{o12.saved}</h1>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">{o12.saved}</h1>
         <CheckIcon className="size-8 text-success" />
         <p role="status">{withReference(o12.savedDetail, ref)}</p>
         {listing.version === saved.version ? (
@@ -229,105 +234,100 @@ export default async function InventoryDetailPage({
         </p>
         <p className="text-text-muted">{o12.instruction}</p>
       </header>
-      <nav aria-label={o12.tabs}>
-        <ul className="grid grid-cols-3 gap-1 rounded-control bg-subtle p-1">
-          {(
-            [
-              ["facts", `${path}?tab=facts`, o12.facts],
-              ["text", path, o12.text],
-              ["photos", `${path}/media`, o12.photos],
-            ] as const
-          ).map(([id, href, label]) => (
-            <li key={id} className="flex">
-              <a
-                href={href}
-                aria-current={id === tab ? "page" : undefined}
-                className={cx(
-                  "flex min-h-[2.875rem] w-full items-center justify-center rounded-control p-3 text-center text-dense font-semibold no-underline",
-                  id === tab
-                    ? "bg-canvas text-text"
-                    : "text-text-muted hover:bg-canvas/60 hover:text-text",
-                )}
-              >
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
       {error}
       {!parsed.success && mayEdit ? (
         <p className="rounded-control bg-warning-soft p-3 text-dense text-text">{o12.noDraft}</p>
       ) : null}
-      {tab === "facts" ? (
-        <section aria-label={o12.facts} className="flex max-w-[46.8rem] flex-col gap-6">
-          <p className="text-compact text-text-muted">{copy.factsHint}</p>
-          {mayEdit ? (
-            <InventoryEditor
-              locale={locale}
-              reference={reference}
-              view="facts"
-              action={saveInventory.bind(null, locale, reference)}
-              initialState={editorState()}
-              secondaryActions={review}
-              footer={<input type="hidden" name="_tab" value="facts" />}
-            />
-          ) : (
-            <p>{copy.permissions}</p>
-          )}
-          <div className="flex flex-wrap gap-4">
-            <a className="text-action underline" href={`${path}/evidence`}>
-              {evidence.title}
-            </a>
-            <a className="text-action underline" href={`${path}/documents`}>
-              {locale === "bg" ? "Документи" : locale === "ru" ? "Документы" : "Documents"}
-            </a>
-          </div>
-        </section>
-      ) : (
+      {/* Text and Facts are one form; the tabs switch panels in place (group/o12). */}
+      <div data-o12 className="group/o12 flex flex-col gap-6 sm:gap-8">
+        <EditTabs
+          tab={tab === "facts" ? "facts" : "text"}
+          photosHref={`${path}/media`}
+          labels={{
+            tabs: o12.tabs,
+            facts: o12.facts,
+            text: o12.text,
+            photos: o12.photos,
+            noscript: o12.noscriptLeave,
+          }}
+        />
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <section
             id="listing-text"
             aria-label={o12.text}
             className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-[46.8rem]"
           >
+            <p className="hidden text-compact text-text-muted group-has-[#o12-facts:checked]/o12:block">
+              {copy.factsHint}
+            </p>
             {mayEdit ? (
-              <InventoryEditor
-                locale={locale}
-                reference={reference}
-                view="text"
-                action={saveInventory.bind(null, locale, reference)}
-                initialState={editorState()}
-                footer={<p>{o12.workingDraft}</p>}
-                secondaryActions={
-                  <>
-                    {review}
-                    {published ? (
-                      <a
-                        href={`${path}?tab=review#${inventorySections.review}`}
-                        className={buttonClass("tertiary", "text-text")}
-                      >
-                        {o12.correctPublished}
-                      </a>
-                    ) : null}
-                  </>
-                }
-              />
+              <div data-o12-editor>
+                <InventoryEditor
+                  locale={locale}
+                  reference={reference}
+                  view="edit"
+                  missing={missingInput(values)}
+                  action={saveInventory.bind(null, locale, reference)}
+                  initialState={editorState()}
+                  footer={
+                    <>
+                      <p className="group-has-[#o12-facts:checked]/o12:hidden">
+                        {o12.workingDraft}
+                      </p>
+                      <input type="hidden" id="o12-tab-field" name="_tab" defaultValue={tab} />
+                    </>
+                  }
+                  secondaryActions={
+                    <>
+                      {review}
+                      {published ? (
+                        <a
+                          href={`${path}?tab=review#${inventorySections.review}`}
+                          className={buttonClass("tertiary", "text-text")}
+                        >
+                          {o12.correctPublished}
+                        </a>
+                      ) : null}
+                    </>
+                  }
+                />
+                <UnsavedGuard
+                  root="[data-o12-editor]"
+                  copy={{
+                    title: o12.unsavedTitle,
+                    body: o12.unsavedBody,
+                    save: o12.saveDraft,
+                    discard: o12.discard,
+                    stay: o12.stay,
+                  }}
+                />
+              </div>
             ) : (
               <p>{copy.permissions}</p>
             )}
-            <SourceReference
-              href={`${path}/evidence`}
-              title={withReference(o12.sourceTitle, ref)}
-              detail={readiness.input.factReviewValid ? o12.sourceReviewed : o12.sourceUnreviewed}
-            />
-            <div className="flex flex-col gap-6">
+            <div className="hidden flex-wrap gap-4 group-has-[#o12-facts:checked]/o12:flex">
+              <a className="text-action underline" href={`${path}/evidence`}>
+                {evidence.title}
+              </a>
+              <a className="text-action underline" href={`${path}/documents`}>
+                {locale === "bg" ? "Документи" : locale === "ru" ? "Документы" : "Documents"}
+              </a>
+            </div>
+            <div className="flex flex-col gap-6 group-has-[#o12-facts:checked]/o12:hidden">
+              <SourceReference
+                href={`${path}/evidence`}
+                title={withReference(o12.sourceTitle, ref)}
+                detail={readiness.input.factReviewValid ? o12.sourceReviewed : o12.sourceUnreviewed}
+              />
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="text-dense font-semibold">{o12.terms}</h2>
                 {mayEdit ? (
-                  <a href={`${path}?tab=facts`} className="text-dense text-action underline">
+                  <label
+                    htmlFor="o12-facts"
+                    className="cursor-pointer text-dense text-action underline"
+                  >
                     {o12.changeInFacts}
-                  </a>
+                  </label>
                 ) : null}
               </div>
               <dl className="grid gap-6 sm:grid-cols-2">
@@ -344,7 +344,7 @@ export default async function InventoryDetailPage({
           </section>
           <aside
             aria-labelledby="butler-heading"
-            className="flex flex-col gap-5 rounded-card bg-subtle p-5 lg:w-[23.2rem] lg:shrink-0"
+            className="flex flex-col gap-5 rounded-card bg-subtle p-5 group-has-[#o12-facts:checked]/o12:hidden lg:w-[23.2rem] lg:shrink-0"
           >
             <h2
               id="butler-heading"
@@ -382,7 +382,7 @@ export default async function InventoryDetailPage({
             </a>
           </aside>
         </div>
-      )}
+      </div>
     </div>
   );
 }

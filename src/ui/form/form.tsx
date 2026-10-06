@@ -62,7 +62,7 @@ export type ActionFormProps<V extends FormValues> = {
   labels: Record<keyof V, string>;
   /** Human-facing representations of opaque choices in a reviewed conflict comparison. */
   formatValue?: (name: string, value: string, state: FormState<V>) => string;
-  submitLabel: string | ((state: FormState<V>) => string);
+  submitLabel: ReactNode | ((state: FormState<V>) => ReactNode);
   /** Public source review can use the page width; entry fields retain their reading width. */
   layout?: "reading" | "full";
   /** Navigation beside the one submit (links only; never a second command). */

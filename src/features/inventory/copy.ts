@@ -46,7 +46,7 @@ const en = {
     instruction: "Change the description, save it and review it for publication.",
     sourceLine: "Bulgarian source · Working draft",
     noDraft:
-      "No working draft is saved for this listing yet, so these fields start empty. The published listing is unchanged.",
+      "No working draft is saved yet. The fields show the current approved version where it records them; nothing changes until you save.",
     tabs: "Listing parts",
     facts: "Facts",
     text: "Text",
@@ -87,11 +87,21 @@ const en = {
     savedDetail:
       "Saved for listing {reference} · BG · Working draft. Publication and approvals stay separate.",
     savedDescription: "Description at the last save",
-    savedLater: "The draft changed after this save. Open the listing to see the current version.",
+    savedLater: "The listing has changed since this save. Open it to see the current draft.",
     toTask: "Back to the current task",
     close: "Close",
     reviewTitle: "Review for publication",
     backToEdit: "Back to editing",
+    choose: "Choose…",
+    unsupported: "not supported, choose again",
+    needsInput: "Needed before this draft can be saved",
+    unsavedTitle: "You have unsaved changes",
+    unsavedBody: "Save the working draft, discard these changes, or stay on this page.",
+    saveDraft: "Save draft",
+    discard: "Discard changes",
+    stay: "Stay",
+    noscriptLeave:
+      "Without JavaScript, save before opening Photos or Review, or your changes are lost.",
   },
   labels: {
     propertyType: "Property type",
@@ -176,7 +186,7 @@ const bg: Copy = {
     instruction: "Променете описанието, запишете го и го прегледайте за публикуване.",
     sourceLine: "Български източник · Работна чернова",
     noDraft:
-      "За тази обява още няма записана работна чернова, затова полетата са празни. Публикуваната обява не се променя.",
+      "Още няма записана работна чернова. Полетата показват текущата одобрена версия, доколкото тя ги съдържа; нищо не се променя, докато не запишете.",
     tabs: "Части на обявата",
     facts: "Факти",
     text: "Текст",
@@ -215,12 +225,21 @@ const bg: Copy = {
     savedDetail:
       "Записано за обява {reference} · BG · Работна чернова. Публикацията и одобренията остават отделни.",
     savedDescription: "Описание при последния запис",
-    savedLater:
-      "Черновата е променена след този запис. Отворете обявата, за да видите текущата версия.",
+    savedLater: "Обявата е променяна след този запис. Отворете я, за да видите текущата чернова.",
     toTask: "Към текущата задача",
     close: "Затваряне",
     reviewTitle: "Преглед за публикуване",
     backToEdit: "Към редактирането",
+    choose: "Изберете…",
+    unsupported: "не се поддържа, изберете отново",
+    needsInput: "Нужно, преди черновата да може да се запише",
+    unsavedTitle: "Имате незаписани промени",
+    unsavedBody: "Запишете работната чернова, откажете промените или останете на страницата.",
+    saveDraft: "Запишете черновата",
+    discard: "Откажете промените",
+    stay: "Останете",
+    noscriptLeave:
+      "Без JavaScript запишете, преди да отворите „Снимки“ или прегледа, иначе промените се губят.",
   },
   labels: {
     propertyType: "Вид имот",
@@ -303,7 +322,7 @@ const ru: Copy = {
     instruction: "Измените описание, сохраните его и проверьте перед публикацией.",
     sourceLine: "Болгарский источник · Рабочий черновик",
     noDraft:
-      "Рабочий черновик для этого объявления ещё не сохранён, поэтому поля пустые. Опубликованное объявление не меняется.",
+      "Рабочий черновик ещё не сохранён. Поля показывают текущую одобренную версию, насколько она их содержит; ничего не меняется, пока вы не сохраните.",
     tabs: "Разделы объявления",
     facts: "Факты",
     text: "Текст",
@@ -343,11 +362,21 @@ const ru: Copy = {
       "Сохранено для объявления {reference} · BG · Рабочий черновик. Публикация и одобрения остаются отдельными.",
     savedDescription: "Описание при последнем сохранении",
     savedLater:
-      "Черновик изменён после этого сохранения. Откройте объявление, чтобы увидеть текущую версию.",
+      "Объявление менялось после этого сохранения. Откройте его, чтобы увидеть текущий черновик.",
     toTask: "К текущей задаче",
     close: "Закрыть",
     reviewTitle: "Проверка перед публикацией",
     backToEdit: "К редактированию",
+    choose: "Выберите…",
+    unsupported: "не поддерживается, выберите заново",
+    needsInput: "Нужно, чтобы черновик можно было сохранить",
+    unsavedTitle: "Есть несохранённые изменения",
+    unsavedBody: "Сохраните рабочий черновик, отмените изменения или останьтесь на странице.",
+    saveDraft: "Сохранить черновик",
+    discard: "Отменить изменения",
+    stay: "Остаться",
+    noscriptLeave:
+      "Без JavaScript сохраните перед переходом в «Фото» или к проверке, иначе изменения пропадут.",
   },
   labels: {
     propertyType: "Вид объекта",
