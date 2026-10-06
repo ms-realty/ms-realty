@@ -17,6 +17,7 @@ export default async function WorkPage({
       locale={locale}
       session={session}
       mine={query.view === "mine"}
+      overdue={query.view === "overdue"}
       awaitingAcceptance={query.view === "handovers"}
       page={queryPage(query.page)}
     />
