@@ -76,7 +76,23 @@ function run(program: string, input: unknown): string {
     },
   }).trim();
 }
+// Older links of the same creator, made directly: creation itself is rate-limited per creator.
+const olderProgram = `${prelude}
+try {
+  const [row] = await db.select().from(schema.publicShares).where(eq(schema.publicShares.id, input.id));
+  for (let index = 1; index <= input.count; index += 1)
+    await db.insert(schema.publicShares).values({
+      tokenHash: randomBytes(32).toString("hex"),
+      viewToken: randomBytes(32).toString("base64url"),
+      listingReferences: row.listingReferences,
+      creatorSessionHash: row.creatorSessionHash,
+      createdAt: new Date(row.createdAt.getTime() - index * 60_000),
+      expiresAt: row.expiresAt,
+    });
+} finally { await sql.end(); }
+`;
 const seed = (count: number): Listing[] => JSON.parse(run(seedProgram, { count }));
+const older = (id: string, count: number) => run(olderProgram, { id, count });
 const withdraw = (...references: string[]) => run(withdrawProgram, { references });
 const expire = (id: string) => run(expireProgram, { id });
 
@@ -614,4 +630,31 @@ test("P09: a consented recipient page mounts no analytics, so no tag can read th
   expect(tagRequests).toEqual([]);
   await expect(other.locator('script[src*="googletagmanager"]')).toHaveCount(0);
   await context.close();
+});
+
+test("P08: a creator with more than one page of links reaches and revokes the oldest", async ({
+  page,
+}) => {
+  const [listing] = seed(1);
+  if (!listing) throw new Error("No seeded listing");
+  await save(page, [listing]);
+  await enableSharing(page, listing);
+  const link = await createLink(page);
+  older(link.id, 20);
+  await page.reload();
+  await expect(cards(page)).toHaveCount(20);
+  await expect(sharedLinks(page).getByRole("link", { name: "Newest links" })).toHaveCount(0);
+  await sharedLinks(page).getByRole("link", { name: "Older links" }).click();
+  await expect(page).toHaveURL(/\/en\/saved\?links=[A-Za-z0-9_-]+#shared-links$/);
+  // 21 links: the newest 20 on the first page, the oldest one here.
+  await expect(cards(page)).toHaveCount(1);
+  await expect(sharedLinks(page).getByRole("link", { name: "Older links" })).toHaveCount(0);
+  await expect(sharedLinks(page).getByRole("link", { name: "Newest links" })).toHaveAttribute(
+    "href",
+    "/en/saved#shared-links",
+  );
+  const oldest = cards(page).first();
+  await oldest.locator("summary").click();
+  await oldest.getByRole("button", { name: "Revoke the link now" }).click();
+  await expect(oldest.getByText("The link is revoked. Future access has stopped.")).toBeVisible();
 });

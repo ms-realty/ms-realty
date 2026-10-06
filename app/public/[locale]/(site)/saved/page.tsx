@@ -16,12 +16,21 @@ import { createSavedShare, revokeSavedShare } from "./share-actions";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   return publicRouteMetadata((await params).locale, "/saved");
 }
-export default async function SavedPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function SavedPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { locale } = await params;
+  // X11M paging: an opaque cursor over this browser's own links; it carries no personal data.
+  const { links: page } = await searchParams;
+  const cursor = typeof page === "string" && page.length <= 256 ? page : undefined;
   if (!isRoutableLocale(locale)) notFound();
   const copy = discoveryCopy(locale);
   const creator = shareCreatorFrom(await cookies());
-  const links = creator ? await loadCreatorLinks(creator, locale) : null;
+  const links = creator ? await loadCreatorLinks(creator, locale, cursor) : null;
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.saved}</h1>
@@ -42,6 +51,7 @@ export default async function SavedPage({ params }: { params: Promise<{ locale: 
         copy={copy}
         labels={shareCopy(locale)}
         links={links}
+        paged={cursor !== undefined}
         revoke={revokeSavedShare.bind(null, locale)}
       />
       <a href={`/${locale}/properties`} className="underline">

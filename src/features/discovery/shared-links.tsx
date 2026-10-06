@@ -13,6 +13,7 @@ export function SharedLinks({
   copy,
   labels,
   links,
+  paged = false,
   revoke,
 }: {
   locale: PublicLocale;
@@ -20,6 +21,8 @@ export function SharedLinks({
   labels: ShareCopy;
   /** Null when this browser holds no creator cookie, so nothing can be listed or managed. */
   links: CreatorLinks | null;
+  /** True on an older page, so the newest links stay one link away. */
+  paged?: boolean;
   revoke: RevokeShareAction;
 }) {
   return (
@@ -55,6 +58,23 @@ export function SharedLinks({
       ) : (
         <p className="text-compact">{labels.linksEmpty}</p>
       )}
+      {paged || (links?.status === "ok" && links.nextCursor) ? (
+        <nav aria-label={labels.linksTitle} className="flex flex-wrap gap-x-6 gap-y-2">
+          {paged ? (
+            <a className="font-semibold underline" href={`/${locale}/saved#shared-links`}>
+              {labels.linksNewest}
+            </a>
+          ) : null}
+          {links?.status === "ok" && links.nextCursor ? (
+            <a
+              className="font-semibold underline"
+              href={`/${locale}/saved?links=${encodeURIComponent(links.nextCursor)}#shared-links`}
+            >
+              {labels.linksOlder}
+            </a>
+          ) : null}
+        </nav>
+      ) : null}
       <details className="rounded-panel border border-border bg-surface">
         <summary className="min-h-control cursor-pointer px-4 py-3 text-compact font-semibold">
           {labels.lostTitle}
