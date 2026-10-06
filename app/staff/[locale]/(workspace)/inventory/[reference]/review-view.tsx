@@ -3,7 +3,10 @@
 // never boxes to tick (O16EL: separate decisions, no shared "verified" mark). Every decision
 // below keeps its own form, actor, permission and revision check.
 import { randomUUID } from "node:crypto";
+import { and, eq } from "drizzle-orm";
 import type { ReactNode } from "react";
+import { getDb } from "@/db/client";
+import { operations } from "@/db/schema";
 import { publicLocales } from "@/domain/ids";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import {
@@ -15,10 +18,12 @@ import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { InventoryDecisionForm } from "@/features/inventory/decision-form";
 import type { InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
+import { FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
+import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
 import type { publicationReadiness } from "@/server/publication/commands";
-import { termsFacts } from "@/server/publication/presentation";
+import { listingSlug, termsFacts } from "@/server/publication/presentation";
 import { buttonClass } from "@/ui/button-class";
 import { CheckIcon, DocumentIcon, ExternalIcon, NoPhotoIcon, WarningIcon } from "@/ui/icons";
 import { submitInventoryDecision } from "../actions";
@@ -28,6 +33,46 @@ type Detail = Awaited<ReturnType<typeof inventoryDetail>>;
 function fill(template: string, values: Record<string, string | number>) {
   return template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ""));
 }
+/** O16DONE: only this staff member's own confirmed activation of this listing. */
+async function publishedReceipt(actorId: string, reference: string, id: string) {
+  if (!/^[0-9a-f-]{36}$/.test(id)) return null;
+  const [operation] = await getDb()
+    .select({ outcome: operations.outcome })
+    .from(operations)
+    .where(
+      and(
+        eq(operations.idempotencyKey, id),
+        eq(operations.actorKind, "staff"),
+        eq(operations.actorId, actorId),
+        eq(operations.operationType, "publication.activate"),
+        eq(operations.status, "succeeded"),
+      ),
+    )
+    .limit(1);
+  const outcome = operation?.outcome as
+    | { reference?: string; locale?: string; manifestId?: string }
+    | undefined;
+  return outcome?.reference === reference && outcome.locale && outcome.manifestId
+    ? { locale: outcome.locale, manifestId: outcome.manifestId }
+    : null;
+}
+
+function Rows({ rows }: { rows: [string, string][] }) {
+  return (
+    <dl className="divide-y divide-divider border-b border-divider">
+      {rows.map(([term, detail]) => (
+        <div key={term} className="flex items-start gap-3 p-3 text-dense">
+          <DocumentIcon className="size-5" />
+          <div className="grid gap-1">
+            <dt className="font-semibold">{term}</dt>
+            <dd className="text-text-muted">{detail}</dd>
+          </div>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function number(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   const record = value as { value?: unknown; amountMinor?: unknown } | null;
@@ -46,7 +91,13 @@ export async function ReviewView({
   mayReview,
   mayPublish,
   error,
+  actorId,
+  actorName,
+  query,
 }: {
+  actorId: string;
+  actorName: string;
+  query: { step?: string; manifest?: string; published?: string };
   locale: string;
   reference: string;
   data: Detail;
@@ -138,6 +189,106 @@ export async function ReviewView({
       ? ([[o16.checks.claims, false]] as [string, boolean][])
       : []),
   ];
+
+  const host = getEnv().hosts.public;
+  const review = `${path}?tab=review`;
+
+  // O16DONE (Figma 642:12842 / 642:12860): a confirmed activation by this staff member.
+  const done = query.published ? await publishedReceipt(actorId, ref, query.published) : null;
+  if (done) {
+    const manifest = data.manifests.find((item) => item.id === done.manifestId);
+    const url = `${host}/${done.locale}/properties/${ref}/${listingSlug(ref)}`;
+    return (
+      <FocusedState closeHref={review} closeLabel={copy.o12.close}>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">{o16.published}</h1>
+        <CheckIcon className="size-8 text-success" />
+        <p role="status">
+          {fill(o16.publishedDetail, {
+            reference: ref,
+            locale: done.locale.toUpperCase(),
+            name: actorName,
+            digest: manifest?.contentDigest.slice(0, 12) ?? "",
+          })}
+        </p>
+        <p>{o16.publicPage}</p>
+        <p className="break-all">{url}</p>
+        <div className="flex flex-wrap gap-3">
+          <a href={url} className={buttonClass("primary")}>
+            {o16.openPublic}
+          </a>
+          <a href={review} className={buttonClass("secondary")}>
+            {copy.o12.toTask}
+          </a>
+        </div>
+      </FocusedState>
+    );
+  }
+
+  // O16PUB (Figma 642:12654 / 642:12748): the publishing decision for one prepared package.
+  const chosen =
+    query.step === "publish" && mayPublish
+      ? manifests.find((item) => item.id === query.manifest)
+      : undefined;
+  if (chosen) {
+    const live = data.publications.length > 0;
+    return (
+      <FocusedState closeHref={review} closeLabel={copy.o12.close}>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">
+          {fill(o16.publishTitle, { locale: chosen.locale.toUpperCase() })}
+        </h1>
+        <p>{o16.publishLead}</p>
+        <Rows
+          rows={[
+            [
+              o16.rows.manifest,
+              fill(o16.package, {
+                reference: ref,
+                locale: chosen.locale.toUpperCase(),
+                digest: chosen.contentDigest.slice(0, 12),
+              }),
+            ],
+            [
+              o16.rows.facts,
+              input.factReviewValid && input.revisionApprovalValid
+                ? o16.approvedScope
+                : o16.missing,
+            ],
+            [o16.rows.seller, input.sellerInstructionValid ? o16.sellerCurrent : o16.missing],
+            [
+              o16.rows.media,
+              input.mediaEligible ? fill(o16.mediaRights, { n: photos.length }) : o16.missing,
+            ],
+            [
+              o16.rows.language,
+              chosen.locale === "bg"
+                ? o16.sourceLanguage
+                : input.localeApprovedForSource
+                  ? o16.localeApproved
+                  : o16.missing,
+            ],
+            [o16.rows.actor, fill(o16.actorRole, { name: actorName })],
+            [
+              o16.rows.effect,
+              fill(live ? o16.effectReplace : o16.effectNew, { host: new URL(host).host }),
+            ],
+          ]}
+        />
+        {decision(
+          "activate",
+          `${copy.activate} (${chosen.locale.toUpperCase()})`,
+          listing.publicationGeneration,
+          chosen.id,
+        )}
+        <p className="flex items-start gap-3 rounded-control bg-warning-soft p-4 text-dense">
+          <WarningIcon className="size-5 text-warning" />
+          {o16.publishNote}
+        </p>
+        <a href={review} className={buttonClass("tertiary", "text-text")}>
+          {o16.cancel}
+        </a>
+      </FocusedState>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
@@ -242,7 +393,13 @@ export async function ReviewView({
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <a
-              href={eligible ? `#${inventorySections.review}` : `#${inventorySections.navigation}`}
+              href={
+                eligible
+                  ? manifests[0]
+                    ? `${review}&step=publish&manifest=${manifests[0].id}`
+                    : `#${inventorySections.review}`
+                  : `#${inventorySections.navigation}`
+              }
               className={buttonClass("primary")}
             >
               {eligible ? o16.toDecision : o16.reviewMissing}
