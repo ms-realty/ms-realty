@@ -16,16 +16,28 @@ import { controlClass } from "@/ui/field-class";
 import { ChevronEndIcon, HomeIcon } from "@/ui/icons";
 
 type Query = { q?: string; view?: string; purpose?: string; type?: string };
+type RawQuery = Record<string, string | string[] | undefined>;
+
+/** One value per filter: a repeated parameter (?q=a&q=b) keeps its first value. */
+function scalar(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 export default async function InventoryPage({
   params,
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<Query>;
+  searchParams: Promise<RawQuery>;
 }) {
   const { locale } = await params;
-  const query = await searchParams;
+  const raw = await searchParams;
+  const query: Query = {
+    q: scalar(raw.q),
+    view: scalar(raw.view),
+    purpose: scalar(raw.purpose),
+    type: scalar(raw.type),
+  };
   const session = await requireStaffPage(locale);
   const db = getDb();
   const copy = inventoryCopy(locale);

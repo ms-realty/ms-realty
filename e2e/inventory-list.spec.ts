@@ -88,6 +88,10 @@ for (const javaScriptEnabled of [false, true])
       await expect(rows(page)).toHaveCount(1);
       await expect(rows(page)).toContainText(f.availability);
 
+      // A repeated parameter keeps its first value instead of failing.
+      await open(page, f, `/en/inventory?q=${f.token}&q=other&view=needs&view=mine`);
+      await expect(rows(page)).toHaveCount(2);
+
       await open(page, f, `/en/inventory?q=${f.token}-nothing`);
       await expect(page.getByText("No listing matches this search.")).toBeVisible();
       await page.getByRole("link", { name: "Clear the search" }).click();
