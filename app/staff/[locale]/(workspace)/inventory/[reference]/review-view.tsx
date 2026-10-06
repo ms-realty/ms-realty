@@ -432,7 +432,7 @@ export async function ReviewView({
               </p>
             ),
             cancel: (
-              <a href={review} className={buttonClass("secondary")}>
+              <a href={review} className={buttonClass("tertiary", "text-text")}>
                 {o16.cancel}
               </a>
             ),

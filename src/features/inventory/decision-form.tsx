@@ -66,6 +66,8 @@ export function InventoryDecisionForm({
         copy={copy.form}
         submitLabel={title}
         secondaryActions={focused?.cancel}
+        // The focused card's form spans the card (800 px in 642:12654).
+        layout={focused ? "full" : "reading"}
       >
         {(form) => {
           const confirm = form.field("confirmed"),
@@ -103,12 +105,24 @@ export function InventoryDecisionForm({
               ) : null}
               {context.intent !== "freeze" ? (
                 <>
-                  <FormField
-                    {...form.field("scope")}
-                    label={focused?.scopeLabel ?? copy.scope}
-                    required
-                    maxLength={1000}
-                  />
+                  {focused ? (
+                    // The prefilled scope wraps on phones instead of hiding its end.
+                    <FormField
+                      {...form.field("scope")}
+                      label={focused.scopeLabel}
+                      required
+                      maxLength={1000}
+                      multiline
+                      rows={2}
+                    />
+                  ) : (
+                    <FormField
+                      {...form.field("scope")}
+                      label={copy.scope}
+                      required
+                      maxLength={1000}
+                    />
+                  )}
                   <div>
                     <label className="flex items-start gap-2" htmlFor={confirm.id}>
                       <input
