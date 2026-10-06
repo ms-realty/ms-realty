@@ -451,19 +451,19 @@ export async function readToday(db: Executor, session: Session, now = new Date()
     workerQueueQuery(db, context, now),
   ]);
   return {
-    unassigned: todayQueueResult(results[0], now),
-    due: todayQueueResult(results[1], now),
-    mine: todayQueueResult(results[2], now),
-    handovers: todayQueueResult(results[3], now),
-    keyReturns: todayQueueResult(results[4], now),
-    viewings: todayQueueResult(results[5], now),
-    caseContinue: todayQueueResult(results[6], now),
-    draftContinue: todayQueueResult(results[7], now),
-    listingReviews: todayQueueResult(results[8], now),
-    translationReviews: todayQueueResult(results[9], now),
-    deliveryExceptions: todayQueueResult(results[10], now),
-    publicationExceptions: todayQueueResult(results[11], now),
-    operatorDeliveryExceptions: todayQueueResult(results[12], now),
+    unassigned: todayQueueResult(results[0], now, "unassigned"),
+    due: todayQueueResult(results[1], now, "due"),
+    mine: todayQueueResult(results[2], now, "mine"),
+    handovers: todayQueueResult(results[3], now, "handovers"),
+    keyReturns: todayQueueResult(results[4], now, "keyReturns"),
+    viewings: todayQueueResult(results[5], now, "viewings"),
+    caseContinue: todayQueueResult(results[6], now, "caseContinue"),
+    draftContinue: todayQueueResult(results[7], now, "draftContinue"),
+    listingReviews: todayQueueResult(results[8], now, "listingReviews"),
+    translationReviews: todayQueueResult(results[9], now, "translationReviews"),
+    deliveryExceptions: todayQueueResult(results[10], now, "deliveryExceptions"),
+    publicationExceptions: todayQueueResult(results[11], now, "publicationExceptions"),
+    operatorDeliveryExceptions: todayQueueResult(results[12], now, "operatorDeliveryExceptions"),
     worker:
       results[13].status === "fulfilled"
         ? results[13].value
