@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { auditEvents, fileUploads, listings, mediaAssets, mediaRelations } from "@/db/schema";
 import { mediaModifications, moveRelation } from "@/domain/media";
@@ -12,6 +12,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { fileSession, mediaAccess } from "../files/access";
 import { imageContentTypes } from "../files/inspect";
+import { fileReceipt } from "../files/receipts";
 import { reserveUpload } from "../files/uploads";
 import { runOperation } from "../operations";
 
@@ -151,34 +152,77 @@ export async function mediaForListing(db: Executor, session: Session, reference:
 }
 
 /**
- * O13ORDERSAVED: the moved relation of an order change this actor saved on this listing.
- * Null for any other operation, including a hide/show placement, so a receipt id from the
- * query string never presents itself as a saved order.
+ * O13 readback for `?saved=`: this actor's succeeded file operation or upload counts on a
+ * listing only when its target is that listing or one of its current photos. The target
+ * photo comes from the record, never the address. An order change also returns the order it
+ * recorded (absent on older records) and the listing version that save produced.
  */
-export async function placementReceipt(
+export async function mediaReceipt(
   db: Executor,
   session: Session,
   listingId: string,
-  operationId: string,
+  value: unknown,
 ) {
-  if (!z.uuid().safeParse(operationId).success) return null;
+  const id = await fileReceipt(db, session, value);
+  if (!id) return null;
+  const relations = await db
+    .select({ id: mediaRelations.id, assetId: mediaRelations.mediaAssetId })
+    .from(mediaRelations)
+    .where(and(eq(mediaRelations.listingId, listingId), isNull(mediaRelations.removedAt)));
+  const photo = (assetId: string) => {
+    const relation = relations.find((row) => row.assetId === assetId);
+    return relation ? { id, relationId: relation.id, move: false, order: null } : null;
+  };
   const [event] = await db
-    .select({ payload: auditEvents.payload })
+    .select({
+      action: auditEvents.action,
+      recordType: auditEvents.recordType,
+      recordId: auditEvents.recordId,
+      payload: auditEvents.payload,
+    })
     .from(auditEvents)
     .where(
       and(
-        eq(auditEvents.operationId, operationId),
-        eq(auditEvents.action, "media.placement.changed"),
-        eq(auditEvents.recordType, "listing"),
-        eq(auditEvents.recordId, listingId),
+        eq(auditEvents.operationId, id),
+        inArray(auditEvents.action, [
+          "media.placement.changed",
+          "media.reviewed",
+          "file.scan.requested",
+        ]),
         eq(auditEvents.actorKind, session.actor.kind),
         eq(auditEvents.actorId, session.actor.id),
       ),
     );
-  const payload = event?.payload as { relationId?: unknown; move?: unknown } | undefined;
-  return payload?.move && typeof payload.relationId === "string"
-    ? { relationId: payload.relationId }
-    : null;
+  if (event?.action === "media.placement.changed") {
+    if (event.recordType !== "listing" || event.recordId !== listingId) return null;
+    const payload = event.payload as Record<string, unknown>;
+    const ids = (list: unknown) =>
+      Array.isArray(list) && list.every((item) => typeof item === "string")
+        ? (list as string[])
+        : null;
+    const before = ids(payload.before),
+      after = ids(payload.after);
+    const relationId = relations.some((row) => row.id === payload.relationId)
+      ? (payload.relationId as string)
+      : null;
+    // A hide/show of a photo that has since been removed has nothing left to show.
+    if (!payload.move && !relationId) return null;
+    return {
+      id,
+      relationId,
+      move: Boolean(payload.move),
+      order:
+        before && after && typeof payload.version === "number"
+          ? { before, after, version: payload.version }
+          : null,
+    };
+  }
+  if (event) return event.recordType === "media" && event.recordId ? photo(event.recordId) : null;
+  const [upload] = await db
+    .select({ targetType: fileUploads.targetType, targetId: fileUploads.targetId })
+    .from(fileUploads)
+    .where(eq(fileUploads.id, id));
+  return upload?.targetType === "media" && upload.targetId ? photo(upload.targetId) : null;
 }
 
 export async function reviewMedia(
@@ -320,6 +364,9 @@ export async function placeMedia(
         .where(and(eq(mediaRelations.listingId, listing.id), isNull(mediaRelations.removedAt)));
       const relation = placements.find((row) => row.id === command.relationId);
       if (!relation) throw new AppError("not_found");
+      const byPosition = (rows: { relationId: string; position: number }[]) =>
+        [...rows].sort((a, b) => a.position - b.position).map(({ relationId }) => relationId);
+      let order: { before: string[]; after: string[] } | null = null;
       if (command.move) {
         let moved: ReturnType<typeof moveRelation>;
         try {
@@ -331,6 +378,12 @@ export async function placeMedia(
         } catch {
           throw new AppError("validation_failed");
         }
+        order = {
+          before: byPosition(
+            placements.map((row) => ({ relationId: row.id, position: row.position })),
+          ),
+          after: byPosition(moved),
+        };
         for (const item of moved)
           await tx
             .update(mediaRelations)
@@ -355,6 +408,8 @@ export async function placeMedia(
           relationId: relation.id,
           move: command.move ?? null,
           hidden: command.hidden ?? null,
+          // O13ORDERSAVED reads back exactly this saved order, never the later gallery.
+          ...(order ? { ...order, version: listing.version + 1 } : {}),
         },
       });
       return { version: listing.version + 1 };

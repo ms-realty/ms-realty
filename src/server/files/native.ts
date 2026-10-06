@@ -130,6 +130,8 @@ export function fileFormRoute(kind: FileKind, context: "listing" | "case" = "lis
     const path = `/${locale}/${context === "case" ? "cases" : "inventory"}/${encodeURIComponent(reference)}/${kind === "media" ? "media" : "documents"}`;
     const correlationId = correlationIdFrom(request.headers);
     let location = path;
+    // The photo a failed media command targeted; the page selects it only if it is listed.
+    let photo = "";
     try {
       const headers = new Headers(request.headers);
       if (
@@ -143,6 +145,7 @@ export function fileFormRoute(kind: FileKind, context: "listing" | "case" = "lis
       if (context === "case") await caseDocumentAccess(db, session, reference);
       const form = await boundedFileForm(request);
       const intent = text(form, "intent");
+      if (kind === "media") photo = text(form, "relationId") || text(form, "id");
       const command = {
         session,
         operationId: text(form, "operationId"),
@@ -251,7 +254,8 @@ export function fileFormRoute(kind: FileKind, context: "listing" | "case" = "lis
         location = `/${locale}/access/reauth?returnTo=${encodeURIComponent(path)}`;
       else if (isAppError(error) && error.code === "unauthenticated")
         location = `/${locale}/access`;
-      else location = `${path}?error=${toErrorBody(error, correlationId).code}`;
+      else
+        location = `${path}?error=${toErrorBody(error, correlationId).code}${photo ? `&photo=${encodeURIComponent(photo)}` : ""}`;
       if (!isAppError(error)) console.error(`[${correlationId}] file form failed`);
     }
     return new Response(null, {

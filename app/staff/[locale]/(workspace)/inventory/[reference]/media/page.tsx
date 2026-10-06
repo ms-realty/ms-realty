@@ -9,12 +9,11 @@ import { fileError, fileLabel, filesCopy, fillCopy } from "@/features/files/copy
 import { FileButton, FileCheck, FileEnvelope, FileField } from "@/features/files/forms";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isAppError } from "@/server/errors";
-import { fileReceipt } from "@/server/files/receipts";
-import { mediaForListing, placementReceipt } from "@/server/media/commands";
+import { mediaForListing, mediaReceipt } from "@/server/media/commands";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass } from "@/ui/field-class";
-import { CheckIcon, CloseIcon, NoPhotoIcon } from "@/ui/icons";
+import { CheckIcon, CloseIcon, DocumentIcon, NoPhotoIcon } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 
 type MediaRow = Awaited<ReturnType<typeof mediaForListing>>["assets"][number];
@@ -89,35 +88,48 @@ export default async function MediaPage({
   });
   const copy = filesCopy(locale);
   const query = await searchParams;
-  const saved = await fileReceipt(getDb(), session, query.saved);
-  const placed = saved ? await placementReceipt(getDb(), session, listing.id, saved) : null;
+  // Readback: a receipt counts only for this listing, and it names its own target photo.
+  const receipt = await mediaReceipt(getDb(), session, listing.id, query.saved);
   const path = `/${locale}/inventory/${reference}/media`;
   const action = `${path}/submit`;
   const ref = <bdi>{listing.reference}</bdi>;
   const total = assets.length;
+  const target = receipt ? receipt.relationId : query.photo;
   const selectedIndex = Math.max(
     0,
-    assets.findIndex(({ relation }) => relation.id === (placed?.relationId ?? query.photo)),
+    assets.findIndex(({ relation, asset }) => relation.id === target || asset.id === target),
   );
   const selected = assets[selectedIndex];
   const photoHref = (id: string) => `${path}?photo=${id}`;
   const order = assets.map(({ relation }) => relation.id);
   const numberOf = new Map(order.map((id, index) => [id, index + 1]));
 
-  // O13ORDERSAVED: shown only for an order change this staff member saved on this listing.
-  if (placed && selected)
+  // O13ORDERSAVED: the order this staff member saved on this listing, as it was recorded.
+  if (receipt?.move) {
+    const back = receipt.relationId ? photoHref(receipt.relationId) : path;
+    const recorded = receipt.order;
     return (
-      <FocusedState closeHref={photoHref(selected.relation.id)} closeLabel={copy.close}>
-        <h1 className="pe-12 text-title font-semibold">{copy.orderSaved}</h1>
+      <FocusedState closeHref={back} closeLabel={copy.close}>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">{copy.orderSaved}</h1>
         <CheckIcon className="size-8 text-success" />
         <p role="status">
-          {withReference(copy.orderSavedDetail, { n: selectedIndex + 1, total }, ref)}
+          {recorded
+            ? withReference(
+                copy.orderSavedDetail,
+                {
+                  order: recorded.after.map((id) => recorded.before.indexOf(id) + 1).join(", "),
+                },
+                ref,
+              )
+            : withReference(copy.orderSavedPlain, {}, ref)}
         </p>
-        <a href={photoHref(selected.relation.id)} className={buttonClass("primary")}>
+        {recorded && recorded.version !== listing.version ? <p>{copy.orderChangedSince}</p> : null}
+        <a href={back} className={buttonClass("primary")}>
           {copy.toTask}
         </a>
       </FocusedState>
     );
+  }
 
   // O13ORDER: the move is staged in the address only; Save sends the one version-checked move.
   const direction = query.move === "up" ? -1 : query.move === "down" ? 1 : 0;
@@ -128,13 +140,17 @@ export default async function MediaPage({
       selected.relation.id,
       direction < 0 ? { before: neighbour.relation.id } : { after: neighbour.relation.id },
     ).map(({ relationId }) => relationId);
-    const cover = (id: string | undefined) => assets.find(({ relation }) => relation.id === id);
-    const before = cover(order[0]);
-    const after = cover(proposed[0]);
+    // The next gallery's cover is the first photo that is not hidden, in each order.
+    const cover = (ids: string[]) =>
+      ids
+        .map((id) => assets.find(({ relation }) => relation.id === id))
+        .find((row) => row && !row.relation.hidden);
+    const before = cover(order);
+    const after = cover(proposed);
     const cancel = photoHref(selected.relation.id);
     return (
       <FocusedState closeHref={cancel} closeLabel={copy.close}>
-        <h1 className="pe-12 text-title font-semibold">{copy.reviewOrder}</h1>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">{copy.reviewOrder}</h1>
         <p>
           {withReference(
             copy.reviewLead,
@@ -146,7 +162,7 @@ export default async function MediaPage({
           )}
         </p>
         {before && after && before !== after ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {[
               [copy.coverBefore, before],
               [copy.coverAfter, after],
@@ -157,7 +173,7 @@ export default async function MediaPage({
                     n: numberOf.get((row as MediaRow).relation.id) ?? "",
                   })}
                 </figcaption>
-                <Preview row={row as MediaRow} label={copy.preview} className="h-50" />
+                <Preview row={row as MediaRow} label={copy.preview} className="h-28 sm:h-50" />
               </figure>
             ))}
           </div>
@@ -168,9 +184,12 @@ export default async function MediaPage({
             [copy.proposal, proposed.map((id) => numberOf.get(id)).join(", ")],
             [copy.unchanged, copy.unchangedDetail],
           ].map(([term, detail]) => (
-            <div key={term} className="grid gap-1 p-3 text-dense">
-              <dt className="font-semibold">{term}</dt>
-              <dd className="text-text-muted">{detail}</dd>
+            <div key={term} className="flex items-start gap-3 p-3 text-dense">
+              <DocumentIcon className="size-5" />
+              <div className="grid gap-1">
+                <dt className="font-semibold">{term}</dt>
+                <dd className="text-text-muted">{detail}</dd>
+              </div>
             </div>
           ))}
         </dl>
@@ -210,9 +229,9 @@ export default async function MediaPage({
         <h1 className="text-title font-semibold">{copy.orderTitle}</h1>
         <p className="text-text-muted">{copy.orderLead}</p>
       </div>
-      {saved ? (
+      {receipt ? (
         <Notice tone="success" role="status">
-          {copy.saved} <bdi>{saved}</bdi>
+          {copy.saved} <bdi>{receipt.id}</bdi>
         </Notice>
       ) : null}
       {query.error ? (

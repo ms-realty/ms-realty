@@ -99,6 +99,10 @@ export const ExternalIcon = icon(
   <path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />,
   "ExternalIcon",
 );
+export const DocumentIcon = icon(
+  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 9h1M9 13h6M9 17h6" />,
+  "DocumentIcon",
+);
 export const SaveIcon = icon(
   <path d="M12 19.5s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.6-7.5 10-7.5 10z" />,
   "SaveIcon",

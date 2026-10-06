@@ -131,8 +131,10 @@ const en = {
   cancel: "Cancel",
   close: "Close",
   orderSaved: "The new order is saved",
-  orderSavedDetail:
-    "{reference} · The draft gallery now has this photo in place {n} of {total}. The public listing has not changed.",
+  orderSavedDetail: "{reference} · New photo order: {order}. The public listing has not changed.",
+  orderSavedPlain:
+    "{reference} · The new working order is saved. The public listing has not changed.",
+  orderChangedSince: "The order has changed since this save. The gallery shows the current order.",
   toTask: "Back to the current task",
 };
 type FileCopy = typeof en;
@@ -272,7 +274,10 @@ const bg: FileCopy = {
   close: "Затваряне",
   orderSaved: "Новата подредба е записана",
   orderSavedDetail:
-    "{reference} · В черновата галерия снимката вече е на място {n} от {total}. Публичната обява не е променена.",
+    "{reference} · Нова подредба на снимките: {order}. Публичната обява не е променена.",
+  orderSavedPlain:
+    "{reference} · Новата работна подредба е записана. Публичната обява не е променена.",
+  orderChangedSince: "Подредбата е променяна след този запис. Текущата подредба е в галерията.",
   toTask: "Към текущата задача",
 };
 const ru: FileCopy = {
@@ -412,7 +417,10 @@ const ru: FileCopy = {
   close: "Закрыть",
   orderSaved: "Новый порядок сохранён",
   orderSavedDetail:
-    "{reference} · В черновой галерее это фото теперь на месте {n} из {total}. Публичное объявление не изменилось.",
+    "{reference} · Новый порядок фотографий: {order}. Публичное объявление не изменилось.",
+  orderSavedPlain:
+    "{reference} · Новый рабочий порядок сохранён. Публичное объявление не изменилось.",
+  orderChangedSince: "Порядок менялся после этого сохранения. Текущий порядок — в галерее.",
   toTask: "К текущей задаче",
 };
 export const filesCopy = (locale: string): FileCopy =>
