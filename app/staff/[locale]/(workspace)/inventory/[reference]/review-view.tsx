@@ -503,19 +503,25 @@ export async function ReviewView({
             )}
             {eligible ? o16.eligible : o16.blocked}
           </p>
+          {eligible && !mayPublish ? (
+            <p className="text-text-muted">{o16.decisionByPublisher}</p>
+          ) : null}
           <div className="flex flex-wrap items-center gap-3">
-            <a
-              href={
-                eligible
-                  ? manifests[0]
-                    ? `${review}&step=publish&manifest=${manifests[0].id}`
-                    : `#${inventorySections.review}`
-                  : `#${inventorySections.navigation}`
-              }
-              className={buttonClass("primary")}
-            >
-              {eligible ? o16.toDecision : o16.reviewMissing}
-            </a>
+            {/* The decision step exists only for someone who may publish; others never loop to it. */}
+            {eligible && !mayPublish ? null : (
+              <a
+                href={
+                  eligible
+                    ? manifests[0]
+                      ? `${review}&step=publish&manifest=${manifests[0].id}`
+                      : `#${inventorySections.review}`
+                    : `#${inventorySections.navigation}`
+                }
+                className={buttonClass("primary")}
+              >
+                {eligible ? o16.toDecision : o16.reviewMissing}
+              </a>
+            )}
             <a href={path} className={buttonClass("secondary", "text-text")}>
               {o16.editText}
             </a>
