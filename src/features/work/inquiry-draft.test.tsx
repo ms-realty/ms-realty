@@ -203,6 +203,61 @@ describe("O02/O03 inquiry drafts", () => {
     await act(async () => finish(initial()));
   });
 
+  it("restores an explicitly authorized missing-receipt retry as editable with the same key", async () => {
+    const draftOwner = owner(),
+      user = userEvent.setup();
+    let finish!: (state: FormState<ContactValues>) => void;
+    const action = vi.fn<FormAction<ContactValues>>(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const mounted = render(<Forms draftOwner={draftOwner} action={action} />);
+    await user.type(screen.getByLabelText(contact.note), "Validation response whose body was lost");
+    await user.click(screen.getByLabelText(contact.confirm));
+    await user.click(screen.getByRole("button", { name: contact.submit }));
+    mounted.unmount();
+    const recovered = { ...initial(), inquiryRetryOperationId: initial().operationId };
+    render(<Forms draftOwner={draftOwner} state={recovered} />);
+    expect(screen.getByLabelText(contact.note)).toHaveValue(
+      "Validation response whose body was lost",
+    );
+    expect(screen.getByLabelText(contact.note)).not.toHaveAttribute("readonly");
+    expect(screen.getByLabelText(contact.confirm)).not.toBeChecked();
+    expect(document.querySelector('input[name="_operationId"]')).toHaveValue(initial().operationId);
+    expect(screen.getByRole("button", { name: contact.submit })).toBeEnabled();
+    expect(action).toHaveBeenCalledTimes(1);
+    await act(async () => finish(initial()));
+  });
+
+  it("acknowledges the prior terminal failure only after its known response body renders", async () => {
+    const draftOwner = owner(),
+      user = userEvent.setup();
+    const action: FormAction<ContactValues> = async (state, data) => ({
+      ...initial("b"),
+      values: { ...state.values, note: String(data.get("note") ?? "") },
+      inquiryReferenceToAcknowledge: state.operationId,
+      outcome: {
+        kind: "validation",
+        code: "VALIDATION_FAILED",
+        message: work.validation,
+        fieldErrors: { nextAction: [work.invalid] },
+      },
+    });
+    render(<Forms draftOwner={draftOwner} action={action} />);
+    await user.type(screen.getByLabelText(contact.note), "Known failure draft remains editable");
+    await user.click(screen.getByRole("button", { name: contact.submit }));
+    expect(await screen.findByText(work.invalid)).toBeVisible();
+    expect(
+      browserInquiryReference(inquiryReferenceCookie(draftOwner.id, "one", "contact")),
+    ).toBeNull();
+    expect(screen.getByLabelText(contact.note)).toHaveValue("Known failure draft remains editable");
+    expect(document.querySelector('input[name="_operationId"]')).toHaveValue(
+      initial("b").operationId,
+    );
+  });
+
   it("adopts edits to server-rendered controls before hydration over the older local draft", async () => {
     const draftOwner = owner();
     const first = render(<Forms draftOwner={draftOwner} />);

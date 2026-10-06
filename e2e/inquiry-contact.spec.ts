@@ -58,6 +58,31 @@ async function openRecord(page: Page, label: string) {
     .click();
 }
 
+async function contactEvidence(id: string) {
+  const [receipts, observations, tasks] = await Promise.all([
+    db
+      .select({ key: schema.operations.idempotencyKey, status: schema.operations.status })
+      .from(schema.operations)
+      .where(
+        and(
+          eq(schema.operations.operationType, "work.inquiry.contact"),
+          eq(schema.operations.resultId, id),
+        ),
+      ),
+    db
+      .select({ id: schema.auditEvents.id })
+      .from(schema.auditEvents)
+      .where(
+        and(
+          eq(schema.auditEvents.recordId, id),
+          eq(schema.auditEvents.action, "work.inquiry.contact_recorded"),
+        ),
+      ),
+    db.select({ id: schema.tasks.id }).from(schema.tasks).where(eq(schema.tasks.inquiryId, id)),
+  ]);
+  return { receipts, observations: observations.length, tasks: tasks.length };
+}
+
 test("O02 draft notes and reasons survive scope and conversation switches, then clear after confirmation", async ({
   page,
   context,
@@ -485,6 +510,169 @@ test("O02 success headers without an acknowledgment body keep the pending SSR re
     await expect(page.getByText(note, { exact: true })).toBeVisible();
     await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
   } finally {
+    await page.unrouteAll({ behavior: "wait" });
+  }
+});
+
+test("O02 lost validation body resumes the retained draft with the same reference and writes once", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  const before = await contactEvidence(fixture.id);
+  await signIn(context, fixture.token);
+  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+  const note = `Private validation recovery note ${randomUUID()}`;
+  await page
+    .getByLabel(copy.contactedAt, { exact: true })
+    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.note, { exact: true }).fill(note);
+  // Native minLength permits these spaces; schema trim/min fails before runOperation.
+  await page.getByLabel(copy.nextAction, { exact: true }).fill("   x   ");
+  await page
+    .getByLabel(copy.dueAt, { exact: true })
+    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.confirm, { exact: true }).check();
+  const key = await page.locator('[data-inquiry-contact] input[name="_operationId"]').inputValue();
+  let delivered!: () => void;
+  const received = new Promise<void>((resolve) => {
+    delivered = resolve;
+  });
+  let dropped = false,
+    responseCookie = "";
+  await page.route("**/*", async (route) => {
+    if (
+      !dropped &&
+      route.request().method() === "POST" &&
+      route.request().headers()["next-action"]
+    ) {
+      dropped = true;
+      const response = await route.fetch();
+      responseCookie = response.headers()["set-cookie"] ?? "";
+      await route.fulfill({ response, body: "" });
+      delivered();
+    } else await route.continue();
+  });
+  try {
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await received;
+    // A pre-existing pending cookie may stay untouched; actual headers must not clear it.
+    expect(responseCookie).not.toContain("Max-Age=0");
+    expect(
+      (await context.cookies()).find((cookie) => cookie.name.endsWith(`_${fixture.id}_contact`))
+        ?.value,
+    ).toBe(key);
+    expect(await contactEvidence(fixture.id)).toEqual(before);
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    await expect(page.getByText(work.statusMissing, { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: work.retryDraft, exact: true }).click();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+    await expect(page.getByLabel(copy.note, { exact: true })).not.toHaveAttribute("readonly");
+    await expect(page.getByLabel(copy.nextAction, { exact: true })).toHaveValue("   x   ");
+    await expect(page.locator('[data-inquiry-contact] input[name="_operationId"]')).toHaveValue(
+      key,
+    );
+    await expect(page.getByLabel(copy.confirm, { exact: true })).not.toBeChecked();
+    await page
+      .getByLabel(copy.nextAction, { exact: true })
+      .fill("Review the recovered contact draft");
+    await page.getByLabel(copy.confirm, { exact: true }).check();
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+    await openRecord(page, work.openRecord);
+    await expect(page.getByText(note, { exact: true })).toBeVisible();
+    const after = await contactEvidence(fixture.id);
+    expect(after.receipts).toEqual([{ key, status: "succeeded" }]);
+    expect(after.observations).toBe(before.observations + 1);
+    expect(after.tasks).toBe(before.tasks + 1);
+  } finally {
+    await page.unrouteAll({ behavior: "wait" });
+  }
+});
+
+test("O02 missing-receipt recovery cannot duplicate an earlier contact still in flight", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  const before = await contactEvidence(fixture.id);
+  await signIn(context, fixture.token);
+  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+  const note = `Earlier in-flight contact ${randomUUID()}`;
+  await page
+    .getByLabel(copy.contactedAt, { exact: true })
+    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.note, { exact: true }).fill(note);
+  await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the original contact");
+  await page
+    .getByLabel(copy.dueAt, { exact: true })
+    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.confirm, { exact: true }).check();
+  const key = await page.locator('[data-inquiry-contact] input[name="_operationId"]').inputValue();
+  let acquired!: () => void, release!: () => void;
+  const locked = new Promise<void>((resolve) => {
+    acquired = resolve;
+  });
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const rowLock = connection.begin(async (tx) => {
+    await tx`select id from inquiries where id = ${fixture.id}::uuid for update`;
+    acquired();
+    await held;
+  });
+  await locked;
+  let first = true;
+  await page.route("**/*", async (route) => {
+    if (first && route.request().method() === "POST" && route.request().headers()["next-action"]) {
+      first = false;
+      const response = await route.fetch();
+      // The original request continues in the server even after the client opens status.
+      await route.fulfill({ response, body: "" }).catch(() => {});
+    } else await route.continue();
+  });
+  const waiting = async () => {
+    const [row] = await connection<{ count: number }[]>`
+      select count(*)::int as count from pg_stat_activity
+      where datname = current_database() and wait_event_type = 'Lock'
+      and query ilike '%inquiries%' and query ilike '%for update%'`;
+    return row?.count;
+  };
+  try {
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await expect.poll(waiting).toBe(1);
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    await expect(page.getByText(work.statusMissing, { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: work.retryDraft, exact: true }).click();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+    await expect(page.locator('[data-inquiry-contact] input[name="_operationId"]')).toHaveValue(
+      key,
+    );
+    const changed = "Corrected contact intent while the earlier request is running";
+    await page.getByLabel(copy.nextAction, { exact: true }).fill(changed);
+    await page.getByLabel(copy.confirm, { exact: true }).check();
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await expect.poll(waiting).toBe(2);
+    release();
+    await rowLock;
+    await expect(page.getByText(work.conflict, { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: copy.submit, exact: true })).toHaveCount(0);
+    await page.getByRole("link", { name: work.statusLink, exact: true }).click();
+    await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+    await openRecord(page, work.openRecord);
+    await expect(page.getByRole("complementary").getByText(note, { exact: true })).toBeVisible();
+    await expect(page.getByLabel(copy.nextAction, { exact: true })).toHaveValue(changed);
+    const after = await contactEvidence(fixture.id);
+    expect(after.receipts).toEqual([{ key, status: "succeeded" }]);
+    expect(after.observations).toBe(before.observations + 1);
+    expect(after.tasks).toBe(before.tasks + 1);
+  } finally {
+    release();
+    await rowLock;
     await page.unrouteAll({ behavior: "wait" });
   }
 });

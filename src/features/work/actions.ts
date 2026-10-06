@@ -102,6 +102,13 @@ async function perform<V extends FormValues>(
   };
   const jar = isInquiryDraftKind(kind) ? await cookies() : null;
   let referenceCookie: string | undefined, fencedReference: string | undefined;
+  let referenceAlreadyPending = false;
+  const holdReference = (name: string) =>
+    jar?.set(name, key, {
+      path: "/",
+      sameSite: "strict",
+      secure: getEnv().hosts.staff.startsWith("https://"),
+    });
   const result = await action(
     async (ctx) => {
       await requireAuthHost("staff");
@@ -128,11 +135,10 @@ async function perform<V extends FormValues>(
           }
         }
         referenceCookie = name;
-        jar.set(name, key, {
-          path: "/",
-          sameSite: "strict",
-          secure: getEnv().hosts.staff.startsWith("https://"),
-        });
+        referenceAlreadyPending = previous?.status === "pending" && previous.key === key;
+        // The enhanced form already put K in the request cookie. Rewriting it on a known
+        // failure rerenders the pending SSR fence before the client can observe that body.
+        if (!referenceAlreadyPending) holdReference(name);
       }
       return execute(
         ctx,
@@ -159,11 +165,10 @@ async function perform<V extends FormValues>(
       },
     };
   }
-  // Success headers are not an acknowledgment. Keep the reference until the client renders
-  // confirmation or explicitly resolves its terminal receipt; only known failures release it.
-  if (referenceCookie && !result.ok && result.error.outcome !== "unknown")
-    jar?.delete(referenceCookie);
-  if (result.ok)
+  // Headers are not an acknowledgment, including a failure before runOperation made a receipt.
+  // Keep the reference until the client observes a settled body or explicitly reconciles it.
+  if (result.ok) {
+    if (referenceCookie && referenceAlreadyPending) holdReference(referenceCookie);
     return {
       ...state,
       outcome: {
@@ -184,7 +189,45 @@ async function perform<V extends FormValues>(
         },
       },
     };
+  }
   const error = result.error;
+  if (isInquiryDraftKind(kind) && error.code === "IDEMPOTENCY_KEY_REUSED")
+    return {
+      ...state,
+      outcome: {
+        kind: "conflict",
+        code: "IDEMPOTENCY_KEY_REUSED",
+        message: copy.conflict,
+        recovery: status,
+      },
+    };
+  if (error.outcome === "unknown")
+    return {
+      ...state,
+      outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: copy.unknown, status },
+    };
+  let failedReceipt = false;
+  if (referenceCookie && isInquiryDraftKind(kind)) {
+    const receipt = await action(
+      async (ctx) => {
+        await requireAuthHost("staff");
+        if (!ctx.session) throw new AppError("unauthenticated");
+        return readWorkOperation(ctx.db, ctx.session, inquiryOperationType(kind), id, key);
+      },
+      { requireSession: true },
+    );
+    // A concurrent earlier attempt may have settled while this request failed validation.
+    if (receipt.ok && receipt.data?.status === "succeeded")
+      return {
+        ...state,
+        outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: copy.unknown, status },
+      };
+    failedReceipt = receipt.ok && receipt.data?.status === "failed";
+  }
+  const knownState = failedReceipt ? { ...state, inquiryReferenceToAcknowledge: key } : state;
+  // Missing is not proof that an earlier request stopped. Reuse K until a terminal failure
+  // permits a new intent; runOperation serializes K and rejects changed request hashes.
+  const correctedKey = referenceCookie && !failedReceipt ? key : issueFormOperation(scope);
   if (error.code === "REVISION_CONFLICT") {
     const current = await action(
       async (ctx) => {
@@ -194,9 +237,9 @@ async function perform<V extends FormValues>(
       { requireSession: true },
     );
     if (current.ok) {
-      const reapplyKey = issueFormOperation(scope);
+      const reapplyKey = correctedKey;
       return {
-        ...state,
+        ...knownState,
         outcome: {
           kind: "conflict",
           code: "REVISION_CONFLICT",
@@ -214,14 +257,8 @@ async function perform<V extends FormValues>(
       };
     }
   }
-  if (error.outcome === "unknown")
-    return {
-      ...state,
-      outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: copy.unknown, status },
-    };
-  const correctedKey = issueFormOperation(scope);
   const correctedState = {
-    ...state,
+    ...knownState,
     operationId: correctedKey,
     reconciliation: {
       href: `${path}/operations?type=${kind}&key=${encodeURIComponent(correctedKey)}`,
@@ -267,7 +304,7 @@ async function perform<V extends FormValues>(
         : error.fieldErrors?.form?.includes("open_commitments")
           ? copy.commitments
           : copy.unavailable;
-  // A known rejected operation is settled; a corrected intent needs a fresh identity.
+  // Only a recorded terminal failure permits a fresh identity for an inquiry correction.
   return {
     ...correctedState,
     outcome: {
@@ -280,7 +317,7 @@ async function perform<V extends FormValues>(
   };
 }
 
-/** Read-only terminal confirmation; releases this reference without replaying its command. */
+/** Explicit receipt review; missing may resume only the same key, never replay a command. */
 export async function resolveInquiryReferenceAction(
   locale: string,
   id: string,
@@ -288,6 +325,7 @@ export async function resolveInquiryReferenceAction(
   operationId: string,
   scope: InboxScope,
   page: number,
+  retryMissing: boolean,
 ) {
   const jar = await cookies();
   const statusPath = inquiryStatusHref(locale, id, kind, operationId, scope, page);
@@ -319,10 +357,15 @@ export async function resolveInquiryReferenceAction(
         id,
         operationId,
       );
-      if (receipt?.status !== "succeeded" && receipt?.status !== "failed")
-        throw new AppError("outcome_unknown");
+      const resolution =
+        retryMissing && !receipt
+          ? "retry"
+          : receipt?.status === "succeeded" || receipt?.status === "failed"
+            ? receipt.status
+            : null;
+      if (!resolution) throw new AppError("outcome_unknown");
       // SSR validates this advisory marker against the actor's receipt before allowing a form.
-      jar.set(name, `${receipt.status}:${operationId}`, {
+      jar.set(name, `${resolution}:${operationId}`, {
         path: "/",
         sameSite: "strict",
         secure: getEnv().hosts.staff.startsWith("https://"),

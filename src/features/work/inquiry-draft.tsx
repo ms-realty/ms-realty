@@ -17,6 +17,7 @@ import {
 import {
   acknowledgeInquiryReference,
   browserInquiryReference,
+  type InquiryReferenceState,
   inquiryEnhancedField,
   inquiryReferenceCookie,
 } from "./inquiry-reference";
@@ -153,7 +154,10 @@ function InquiryDraftSession<V extends FormValues>({
       }
     }
     const state: FormState<V> = { ...initialResponse, values };
-    if (retained?.operation) {
+    const retryOperationId = (initial as FormState<V> & InquiryReferenceState)
+      .inquiryRetryOperationId;
+    if (retryOperationId && "reviewed" in values) (values as FormValues).reviewed = "";
+    if (retained?.operation && retryOperationId !== retained.operation.id) {
       const status = {
         href: `${props.permalink}/operations?type=${kind}&key=${encodeURIComponent(retained.operation.id)}`,
         label: props.reconciliation.label,
@@ -175,6 +179,10 @@ function InquiryDraftSession<V extends FormValues>({
         return;
       }
       retainInquiryDraft(owner, id, kind, initial, snapshot);
+      const acknowledgment = (snapshot.state as FormState<V> & InquiryReferenceState)
+        .inquiryReferenceToAcknowledge;
+      if (!snapshot.pending && acknowledgment && ownsInquiryDrafts(owner))
+        acknowledgeInquiryReference(inquiryReferenceCookie(owner.id, id, kind), acknowledgment);
       if (
         !snapshot.pending &&
         snapshot.state.outcome.kind === "confirmed" &&

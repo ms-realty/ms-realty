@@ -4,6 +4,12 @@ import type { InboxScope } from "./inquiry-row";
 /** Presentation only: native submissions keep their HTML redirect and stable form identity. */
 export const inquiryEnhancedField = "_inquiryEnhanced";
 
+/** Feature metadata carried with an authorized form response, never with draft values. */
+export type InquiryReferenceState = {
+  inquiryRetryOperationId?: string;
+  inquiryReferenceToAcknowledge?: string;
+};
+
 /** An opaque operation reference only; the name fences actor, auth session, record and kind. */
 export function inquiryReferenceCookie(ownerId: string, id: string, kind: InquiryDraftKind) {
   return `msr_inquiry_${ownerId}_${id}_${kind}`;
@@ -39,13 +45,13 @@ export function inquiryOperationType(kind: InquiryDraftKind) {
 /** A claimed terminal state is advisory; the server must read the actor's actual receipt. */
 export function parseInquiryReference(
   value: string | undefined,
-): { status: "pending" | "succeeded" | "failed"; key: string } | null {
+): { status: "pending" | "retry" | "succeeded" | "failed"; key: string } | null {
   if (!value) return null;
   const parts = value.includes(":") ? value.split(":") : ["pending", value];
   const [status, key] = parts;
   if (
     parts.length !== 2 ||
-    (status !== "pending" && status !== "succeeded" && status !== "failed") ||
+    (status !== "pending" && status !== "retry" && status !== "succeeded" && status !== "failed") ||
     !key ||
     !/^[A-Za-z0-9_-]{43}\.[0-9a-f]{32}$/.test(key)
   )

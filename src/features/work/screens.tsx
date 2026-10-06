@@ -14,6 +14,7 @@ import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
 import { readTaskHandover } from "@/server/work/handover";
 import { listContacts, listTasks, readContact, readInquiry } from "@/server/work/queries";
+import type { FormState, FormValues } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { ChevronStartIcon } from "@/ui/icons";
 import {
@@ -41,6 +42,7 @@ import type { InquiryDraftKind } from "./inquiry-draft-storage";
 import { InquiryOwnerContext } from "./inquiry-owner-context";
 import { conversationId, InquiryQueue } from "./inquiry-queue";
 import {
+  type InquiryReferenceState,
   inquiryOperationType,
   inquiryReferenceCookie,
   inquiryStatusHref,
@@ -236,6 +238,7 @@ export async function InquiryScreen({
     status: "succeeded" | "failed";
     id: string;
   }[] = [];
+  const retryKeys: Partial<Record<InquiryDraftKind, string>> = {};
   // A lost acknowledgment must be fenced before scripts/hydration can expose another form.
   for (const kind of ["accept", "contact", "triage"] as const) {
     const reference = parseInquiryReference(
@@ -247,9 +250,33 @@ export async function InquiryScreen({
     const receipt = await privateRead(() =>
       readWorkOperation(getDb(), session, inquiryOperationType(kind), id, reference.key),
     );
+    if (reference.status === "retry") {
+      // An explicit missing-receipt review permits editing K, never a fresh command identity.
+      if (receipt) redirect(inquiryStatusHref(locale, id, kind, reference.key, scope, page));
+      retryKeys[kind] = reference.key;
+      continue;
+    }
     if (receipt?.status !== reference.status)
       redirect(inquiryStatusHref(locale, id, kind, reference.key, scope, page));
     resolutions.push({ key: reference.key, status: reference.status, kind, id });
+  }
+  function inquiryFormState<V extends FormValues>(
+    kind: InquiryDraftKind,
+    values: V,
+  ): FormState<V> & InquiryReferenceState {
+    const state = initialFormState(`work.${kind}.${id}`, values, inquiry.version);
+    const retryKey = retryKeys[kind];
+    return retryKey
+      ? {
+          ...state,
+          operationId: retryKey,
+          reconciliation: {
+            href: inquiryStatusHref(locale, id, kind, retryKey, scope, page),
+            label: copy.statusLink,
+          },
+          inquiryRetryOperationId: retryKey,
+        }
+      : state;
   }
   const targets = (
     [
@@ -390,11 +417,7 @@ export async function InquiryScreen({
                   locale={locale}
                   id={id}
                   action={acceptAction.bind(null, locale, id)}
-                  initialState={initialFormState(
-                    `work.accept.${id}`,
-                    { nextAction: "", dueAt: "" },
-                    inquiry.version,
-                  )}
+                  initialState={inquiryFormState("accept", { nextAction: "", dueAt: "" })}
                 />
               </section>
             ) : null}
@@ -416,20 +439,16 @@ export async function InquiryScreen({
                   id={id}
                   contact={detail.contactMethod}
                   action={contactAction.bind(null, locale, id)}
-                  initialState={initialFormState(
-                    `work.contact.${id}`,
-                    {
-                      contactChoice: `${detail.contactMethod.id}:${detail.contactMethod.version}`,
-                      result: "unanswered",
-                      contactedAt: "",
-                      note: "",
-                      nextAction: "",
-                      dueAt: "",
-                      promisedToClient: "",
-                      reviewed: "",
-                    },
-                    inquiry.version,
-                  )}
+                  initialState={inquiryFormState("contact", {
+                    contactChoice: `${detail.contactMethod.id}:${detail.contactMethod.version}`,
+                    result: "unanswered",
+                    contactedAt: "",
+                    note: "",
+                    nextAction: "",
+                    dueAt: "",
+                    promisedToClient: "",
+                    reviewed: "",
+                  })}
                 />
               </section>
             ) : null}
@@ -443,15 +462,11 @@ export async function InquiryScreen({
                   id={id}
                   action={triageAction.bind(null, locale, id)}
                   states={targets}
-                  initialState={initialFormState(
-                    `work.triage.${id}`,
-                    {
-                      state: targets[0] as InquiryState,
-                      reason: "",
-                      duplicateOfInquiryId: inquiry.duplicateOfInquiryId ?? "",
-                    },
-                    inquiry.version,
-                  )}
+                  initialState={inquiryFormState("triage", {
+                    state: targets[0] as InquiryState,
+                    reason: "",
+                    duplicateOfInquiryId: inquiry.duplicateOfInquiryId ?? "",
+                  })}
                 />
               </section>
             ) : null}
@@ -847,6 +862,11 @@ export async function OperationScreen({
     reference.key === operationKey &&
     isIssuedFormOperation(`work.${type}.${id}`, operationKey);
   const terminal = receipt?.status === "succeeded" || receipt?.status === "failed";
+  const missingInquiry =
+    !task &&
+    !receipt &&
+    isInquiryDraftKind(type) &&
+    isIssuedFormOperation(`work.${type}.${id}`, operationKey);
   return (
     <Page
       title={
@@ -876,7 +896,27 @@ export async function OperationScreen({
               ? copy.statusFailed
               : copy.statusPending}
       </p>
-      {fenced && !task && isInquiryDraftKind(type) ? (
+      {missingInquiry && isInquiryDraftKind(type) ? (
+        <div className="space-y-4">
+          <p>{copy.retryDraftLead}</p>
+          <form
+            action={resolveInquiryReferenceAction.bind(
+              null,
+              locale,
+              id,
+              type,
+              operationKey,
+              scope,
+              page,
+              true,
+            )}
+          >
+            <button type="submit" className={link}>
+              {copy.retryDraft}
+            </button>
+          </form>
+        </div>
+      ) : fenced && !task && isInquiryDraftKind(type) ? (
         terminal ? (
           <InquiryConfirmedReturn
             action={resolveInquiryReferenceAction.bind(
@@ -887,6 +927,7 @@ export async function OperationScreen({
               operationKey,
               scope,
               page,
+              false,
             )}
             href={inquiryHref(locale, id, scope, page)}
             label={copy.openRecord}

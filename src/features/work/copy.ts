@@ -65,6 +65,9 @@ const en = {
   statusTitle: "Action status",
   statusMissing:
     "No completed action was found. Return to the record and check its current state before submitting again.",
+  retryDraft: "Review retained draft",
+  retryDraftLead:
+    "The earlier request may still be running. Review your draft before retrying; this keeps the same action reference.",
   statusSucceeded: "This action was recorded successfully.",
   statusFailed: "This action was not applied. Return to the record to review and correct it.",
   statusPending:
@@ -257,6 +260,9 @@ const bg: Copy = {
   statusTitle: "Статус на действието",
   statusMissing:
     "Няма намерено завършено действие. Проверете текущото състояние на записа преди ново изпращане.",
+  retryDraft: "Преглед на запазената чернова",
+  retryDraftLead:
+    "Предишната заявка може още да се обработва. Прегледайте черновата преди повторен опит; номерът на действието се запазва.",
   statusSucceeded: "Действието е записано успешно.",
   statusFailed: "Действието не е приложено. Върнете се към записа за преглед и корекция.",
   statusPending:
@@ -439,6 +445,9 @@ const ru: Copy = {
   statusTitle: "Статус действия",
   statusMissing:
     "Завершённое действие не найдено. Проверьте текущее состояние записи перед повторной отправкой.",
+  retryDraft: "Проверить сохранённый черновик",
+  retryDraftLead:
+    "Предыдущий запрос может ещё обрабатываться. Проверьте черновик перед повторной попыткой; номер действия сохранится.",
   statusSucceeded: "Действие успешно записано.",
   statusFailed: "Действие не применено. Вернитесь к записи для проверки и исправления.",
   statusPending:
