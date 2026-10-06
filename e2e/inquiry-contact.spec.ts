@@ -50,6 +50,191 @@ async function signIn(context: BrowserContext, token: string) {
   ]);
 }
 
+test("O02 draft notes and reasons survive scope and conversation switches, then clear after confirmation", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  const marker = randomUUID();
+  const [other] = await db
+    .insert(schema.inquiries)
+    .values({
+      reference: `RQ-DRAFT-${marker}`,
+      source: "website",
+      state: "assigned",
+      purpose: "question",
+      ownerId: fixture.brokerId,
+      preferredName: "Synthetic second draft conversation",
+      message: "A separate synthetic inquiry for draft switching.",
+      submissionKey: randomUUID(),
+      payloadDigest: "synthetic-draft",
+    })
+    .returning({ id: schema.inquiries.id });
+  if (!other) throw new Error("Missing second conversation");
+  await signIn(context, fixture.token);
+  const note = `Private unsent contact note ${marker}`,
+    reason = `Private unsent triage reason ${marker}`;
+  const requested: string[] = [];
+  page.on("request", (request) => requested.push(request.url()));
+  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}?view=all`));
+  await page
+    .getByLabel(copy.contactedAt, { exact: true })
+    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.note, { exact: true }).fill(note);
+  await page
+    .getByLabel(copy.nextAction, { exact: true })
+    .fill("Review the service details with a human");
+  await page
+    .getByLabel(copy.dueAt, { exact: true })
+    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.confirm, { exact: true }).check();
+  await page.getByLabel(work.reason, { exact: true }).fill(reason);
+  const wide = (page.viewportSize()?.width ?? 0) >= 1024;
+  if (!wide) await page.getByRole("link", { name: work.queue.back, exact: true }).click();
+  await page
+    .getByRole("navigation", { name: work.queue.views, exact: true })
+    .getByRole("link", { name: work.scopes.mine, exact: true })
+    .click();
+  if (!wide) await page.locator(`[data-inquiry-id="${fixture.id}"] a`).click();
+  await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(reason);
+  async function openConversation(id: string) {
+    if (!wide) await page.getByRole("link", { name: work.queue.back, exact: true }).click();
+    await page.locator(`[data-inquiry-id="${id}"] a`).click();
+    await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${id}?view=mine`));
+  }
+  await openConversation(other.id);
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue("");
+  await page
+    .getByLabel(work.reason, { exact: true })
+    .fill("The second conversation's separate draft");
+  await openConversation(fixture.id);
+  await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(reason);
+  await expect(page.getByLabel(copy.confirm, { exact: true })).toBeChecked();
+  if (wide)
+    await expect(page.locator(`[data-inquiry-id="${fixture.id}"] a`)).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  await page.getByRole("button", { name: copy.submit, exact: true }).click();
+  await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+  await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+  await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(reason);
+
+  const anotherActor = seed();
+  await signIn(context, anotherActor.token);
+  await page.goto(hostUrl("staff", `/en/inquiries/${anotherActor.id}`));
+  await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
+  await signIn(context, fixture.token);
+  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+  await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue("");
+  expect(
+    requested.every(
+      (address) =>
+        ![note, reason].some(
+          (text) => address.includes(text) || address.includes(encodeURIComponent(text)),
+        ),
+    ),
+  ).toBe(true);
+});
+
+test("O02 pending contact keeps its operation when acknowledgment is lost and clears after reconciliation", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  await signIn(context, fixture.token);
+  await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+  const note = `Synthetic lost-acknowledgment note ${randomUUID()}`;
+  await page
+    .getByLabel(copy.contactedAt, { exact: true })
+    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.note, { exact: true }).fill(note);
+  await page
+    .getByLabel(copy.nextAction, { exact: true })
+    .fill("Review the contact before another action");
+  await page
+    .getByLabel(copy.dueAt, { exact: true })
+    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await page.getByLabel(copy.confirm, { exact: true }).check();
+  const operationId = await page
+    .locator('[data-inquiry-contact] input[name="_operationId"]')
+    .inputValue();
+  let acknowledged!: () => void, release!: () => void;
+  const received = new Promise<void>((resolve) => {
+    acknowledged = resolve;
+  });
+  const holdResponse = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/*", async (route) => {
+    if (route.request().method() !== "POST" || !route.request().headers()["next-action"]) {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    acknowledged();
+    await holdResponse;
+    // A full navigation closes the original action request after the server has accepted it.
+    await route.fulfill({ response }).catch(() => {});
+  });
+  try {
+    await page.getByRole("button", { name: copy.submit, exact: true }).click();
+    await received;
+    await page.goto(hostUrl("staff", "/en/inquiries?view=mine"));
+    release();
+    await page.locator(`[data-inquiry-id="${fixture.id}"] a`).click();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveAttribute("readonly");
+    await expect(page.getByRole("button", { name: copy.submit, exact: true })).toHaveCount(0);
+    const status = page.getByRole("link", { name: work.statusLink, exact: true });
+    await expect(status).toHaveAttribute(
+      "href",
+      `/en/inquiries/${fixture.id}/operations?type=contact&key=${operationId}`,
+    );
+    await status.click();
+    await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+    await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
+    await expect(page.getByText(note, { exact: true })).toBeVisible();
+  } finally {
+    release();
+    await page.unrouteAll({ behavior: "wait" });
+  }
+});
+
+test("O02 native triage submits its reason with a stable inquiry form identity", async ({
+  browser,
+}) => {
+  const fixture = seed(),
+    work = workCopy("en");
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  await signIn(context, fixture.token);
+  const page = await context.newPage();
+  const reason = `Synthetic native triage reason ${randomUUID()}`;
+  try {
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    await page.getByLabel(work.state, { exact: true }).selectOption("contact_unreachable");
+    await page.getByLabel(work.reason, { exact: true }).fill(reason);
+    await page.getByRole("button", { name: work.disposition, exact: true }).click();
+    await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
+    const [record] = await db
+      .select()
+      .from(schema.inquiries)
+      .where(eq(schema.inquiries.id, fixture.id));
+    expect(record?.state).toBe("contact_unreachable");
+    expect(record?.dispositionReason).toBe(reason);
+  } finally {
+    await context.close();
+  }
+});
+
 for (const locale of ["bg", "ru", "en"] as const) {
   for (const javaScriptEnabled of [true, false]) {
     test(`O03 / AT14: ${locale} ${javaScriptEnabled ? "hydrated" : "native"} contact distinguishes attempts, response and promises`, async ({

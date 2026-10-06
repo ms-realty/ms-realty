@@ -6,6 +6,8 @@ import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { AcceptValues, TaskValues, TriageValues } from "./actions";
 import { workCopy } from "./copy";
+import { InquiryDraftForm } from "./inquiry-draft";
+import type { InquiryDraftOwner } from "./inquiry-draft-storage";
 
 function SelectField<V extends FormValues>({
   form,
@@ -61,14 +63,24 @@ const status = (path: string, kind: string, key: string, label: string) => ({
   label,
 });
 
-export function AcceptForm({ locale, id, initialState, action }: Props<AcceptValues>) {
+export function AcceptForm({
+  locale,
+  id,
+  initialState,
+  action,
+  draftOwner,
+}: Props<AcceptValues> & { draftOwner: InquiryDraftOwner }) {
   const copy = workCopy(locale);
   const path = `/${locale}/inquiries/${id}`;
   return (
-    <ActionForm
+    <InquiryDraftForm
+      owner={draftOwner}
+      id={id}
+      kind="accept"
       action={action}
       initialState={initialState}
       permalink={path}
+      nativeIdentity={`inquiry-accept:${id}`}
       reconciliation={status(path, "accept", initialState.operationId, copy.statusLink)}
       copy={copy.form}
       labels={{ nextAction: copy.nextAction, dueAt: copy.dueAt }}
@@ -91,7 +103,7 @@ export function AcceptForm({ locale, id, initialState, action }: Props<AcceptVal
           />
         </>
       )}
-    </ActionForm>
+    </InquiryDraftForm>
   );
 }
 
@@ -101,14 +113,22 @@ export function TriageForm({
   initialState,
   action,
   states,
-}: Props<TriageValues> & { states: (keyof ReturnType<typeof workCopy>["states"])[] }) {
+  draftOwner,
+}: Props<TriageValues> & {
+  states: (keyof ReturnType<typeof workCopy>["states"])[];
+  draftOwner: InquiryDraftOwner;
+}) {
   const copy = workCopy(locale);
   const path = `/${locale}/inquiries/${id}`;
   return (
-    <ActionForm
+    <InquiryDraftForm
+      owner={draftOwner}
+      id={id}
+      kind="triage"
       action={action}
       initialState={initialState}
       permalink={path}
+      nativeIdentity={`inquiry-triage:${id}`}
       reconciliation={status(path, "triage", initialState.operationId, copy.statusLink)}
       copy={copy.form}
       labels={{
@@ -141,7 +161,7 @@ export function TriageForm({
           />
         </>
       )}
-    </ActionForm>
+    </InquiryDraftForm>
   );
 }
 

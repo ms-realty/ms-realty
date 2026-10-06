@@ -2,11 +2,13 @@
 
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
-import { ActionForm, type FormController } from "@/ui/form/form";
+import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { ContactState, ContactValues } from "./actions";
 import { contactCopy } from "./contact-copy";
 import { workCopy } from "./copy";
+import { InquiryDraftForm } from "./inquiry-draft";
+import type { InquiryDraftOwner } from "./inquiry-draft-storage";
 
 function Choice({
   form,
@@ -93,12 +95,14 @@ export function ContactForm({
   locale,
   id,
   contact,
+  draftOwner,
   action,
   initialState,
 }: {
   locale: string;
   id: string;
   contact: { id: string; version: number; kind: string; value: string };
+  draftOwner: InquiryDraftOwner;
   action: FormAction<ContactValues>;
   initialState: FormState<ContactValues>;
 }) {
@@ -106,7 +110,10 @@ export function ContactForm({
   const work = workCopy(locale);
   const path = `/${locale}/inquiries/${id}`;
   return (
-    <ActionForm
+    <InquiryDraftForm
+      owner={draftOwner}
+      id={id}
+      kind="contact"
       action={action}
       initialState={{ ...initialState, currentContact: contact } as ContactState}
       permalink={path}
@@ -219,6 +226,6 @@ export function ContactForm({
           </>
         );
       }}
-    </ActionForm>
+    </InquiryDraftForm>
   );
 }

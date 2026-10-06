@@ -48,6 +48,12 @@ export type FormController<V extends FormValues> = {
   setValue: (name: keyof V & string, value: string) => void;
 };
 
+export type FormSnapshot<V extends FormValues> = {
+  state: FormState<V>;
+  values: V;
+  pending: boolean;
+};
+
 export type ActionFormProps<V extends FormValues> = {
   action: FormAction<V>;
   initialState: FormState<V>;
@@ -70,6 +76,8 @@ export type ActionFormProps<V extends FormValues> = {
   secondaryActions?: ReactNode;
   /** Lets controls outside the form (tab radios, leave buttons) belong to it natively. */
   formId?: string;
+  /** Feature-owned draft retention; observes confirmation without wrapping the Server Action. */
+  onSnapshot?: (snapshot: FormSnapshot<V>) => void;
   children: (form: FormController<V>) => ReactNode;
 };
 
@@ -182,6 +190,7 @@ function FormSession<V extends FormValues>({
   layout = "reading",
   secondaryActions,
   formId,
+  onSnapshot,
   children,
   snapshot,
 }: ActionFormProps<V> & { snapshot: RefObject<Snapshot> }) {
@@ -196,6 +205,7 @@ function FormSession<V extends FormValues>({
   const [state, formAction, pending] = useActionState(action, initialState, formPermalink);
   const [draft, setDraft] = useState({ responseId: state.responseId, values: state.values });
   const inFlight = useRef(false);
+  const submittedState = useRef<FormState<V> | null>(null);
   const nativeForm = useRef<HTMLFormElement>(null);
   const adopted = useRef(false);
   // Hydrating a textarea resets it to its server text (inputs and selects keep their DOM
@@ -253,6 +263,9 @@ function FormSession<V extends FormValues>({
     if (!pending) inFlight.current = false;
   }, [pending]);
   const values = draft.responseId === state.responseId ? draft.values : state.values;
+  useLayoutEffect(() => {
+    onSnapshot?.({ state: pending ? (submittedState.current ?? state) : state, values, pending });
+  }, [onSnapshot, state, values, pending]);
   const outcome = state.outcome;
   const blocked =
     outcome.kind === "unknown" ||
@@ -354,6 +367,20 @@ function FormSession<V extends FormValues>({
           snapshot.current.operationId = conflict.reapply.operationId;
           snapshot.current.reconciliation = conflict.reapply.status;
         }
+        // Record the effective reference before navigation can lose the acknowledgment.
+        submittedState.current = {
+          ...state,
+          operationId: snapshot.current.operationId,
+          expectedRevision:
+            submitter?.value === "reapply" && conflict?.reapply
+              ? conflict.reapply.expectedRevision
+              : state.expectedRevision,
+        };
+        onSnapshot?.({
+          state: submittedState.current,
+          values,
+          pending: true,
+        });
         if (pendingReferenceCookie) {
           // The reference must exist synchronously before React sends the native action.
           // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store is asynchronous and unavailable on supported HTTP test hosts.

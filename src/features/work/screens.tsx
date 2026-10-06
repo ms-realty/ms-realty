@@ -8,6 +8,7 @@ import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task"
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
 import { isStaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
+import { sha256Hex } from "@/server/crypto";
 import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
 import { readTaskHandover } from "@/server/work/handover";
@@ -23,11 +24,21 @@ import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
 import { TaskHandoverScreen } from "./handover-screen";
+import { InquiryDraftBoundary, InquiryDraftReconciliation } from "./inquiry-draft";
 import { InquiryOwnerContext } from "./inquiry-owner-context";
 import { conversationId, InquiryQueue } from "./inquiry-queue";
 import { parseInboxScope, queueHref } from "./inquiry-row";
 import { InquirySelectionContext } from "./inquiry-selection-context";
 import { When } from "./when";
+
+function inquiryDraftOwner(session: Session) {
+  return {
+    id: sha256Hex(
+      `${session.account.kind}:${session.account.id}:${session.actor.kind}:${session.actor.id}:${session.id}`,
+    ),
+    expiresAt: session.expiresAt.getTime(),
+  };
+}
 
 export function checkLocale(locale: string) {
   if (!isStaffLocale(locale)) notFound();
@@ -174,6 +185,7 @@ export async function InboxScreen({
   const scope = parseInboxScope(view);
   return (
     <div className="mx-auto flex min-w-0 max-w-page flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
+      <InquiryDraftBoundary owner={inquiryDraftOwner(session)} />
       <header className="flex flex-col gap-6 sm:gap-8">
         <h1 className="text-heading font-semibold sm:text-title">{copy.inbox}</h1>
         <p className="text-text-muted">{copy.scopeLeads[scope]}</p>
@@ -204,6 +216,7 @@ export async function InquiryScreen({
   const { inquiry, ownerName } = detail;
   const copy = workCopy(locale);
   const contact = contactCopy(locale);
+  const draftOwner = inquiryDraftOwner(session);
   const targets = (
     [
       "suspected_spam",
@@ -236,6 +249,7 @@ export async function InquiryScreen({
   const scope = parseInboxScope(view);
   return (
     <div className="mx-auto min-w-0 max-w-page px-gutter py-6 sm:px-gutter-wide sm:py-8 lg:grid lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:items-start lg:gap-6">
+      <InquiryDraftBoundary owner={draftOwner} />
       <InquiryQueue locale={locale} session={session} scope={scope} page={page} selectedId={id} />
       <div id={conversationId} tabIndex={-1} className="min-w-0 space-y-8 break-words outline-none">
         {/* Narrow screens: back to the same scope and page, scrolled to this conversation. */}
@@ -339,6 +353,7 @@ export async function InquiryScreen({
                 <h2 className="text-subheading font-semibold">{copy.accept}</h2>
                 <p>{copy.acceptLead}</p>
                 <AcceptForm
+                  draftOwner={draftOwner}
                   locale={locale}
                   id={id}
                   action={acceptAction.bind(null, locale, id)}
@@ -363,6 +378,7 @@ export async function InquiryScreen({
                 <h2 className="text-subheading font-semibold">{contact.title}</h2>
                 <p>{contact.lead}</p>
                 <ContactForm
+                  draftOwner={draftOwner}
                   locale={locale}
                   id={id}
                   contact={detail.contactMethod}
@@ -389,6 +405,7 @@ export async function InquiryScreen({
                 <h2 className="text-subheading font-semibold">{copy.disposition}</h2>
                 <p>{copy.dispositionLead}</p>
                 <TriageForm
+                  draftOwner={draftOwner}
                   locale={locale}
                   id={id}
                   action={triageAction.bind(null, locale, id)}
@@ -788,6 +805,17 @@ export async function OperationScreen({
       }
       locale={locale}
     >
+      {!task &&
+      (type === "accept" || type === "contact" || type === "triage") &&
+      (receipt?.status === "succeeded" || receipt?.status === "failed") ? (
+        <InquiryDraftReconciliation
+          owner={inquiryDraftOwner(session)}
+          id={id}
+          kind={type}
+          operationId={operationKey}
+          outcome={receipt.status}
+        />
+      ) : null}
       <p>
         {!receipt
           ? copy.statusMissing
