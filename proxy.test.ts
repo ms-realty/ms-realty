@@ -137,6 +137,7 @@ describe("host routing (§11.1)", () => {
     expect(recipient.headers.get("cache-control")).toBe("private, no-store");
     expect(recipient.headers.get("referrer-policy")).toBe("no-referrer");
     expect(recipient.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    expect(recipient.headers.get("x-middleware-request-x-msr-share-token-route")).toBe("1");
     const api = run(hosts.public, "/api/public-shares/creator-session");
     expect(api.headers.get("cache-control")).toBe("private, no-store");
     expect(api.headers.get("referrer-policy")).toBe("no-referrer");
@@ -199,6 +200,17 @@ describe("staging and direct-origin boundary", () => {
     expect(allowed).toContain(
       "https://www.google-analytics.com https://region1.google-analytics.com",
     );
+    const privateLink = run(hosts.public, "/bg/share/view-token", {
+      cookie: "msr_analytics_consent=v1.granted",
+      "x-msr-share-token-route": "0",
+    });
+    expect(privateLink.headers.get("content-security-policy")).not.toContain("google");
+    expect(privateLink.headers.get("x-middleware-request-x-msr-share-token-route")).toBe("1");
+    expect(
+      run(hosts.public, "/bg/properties", { "x-msr-share-token-route": "1" }).headers.get(
+        "x-middleware-request-x-msr-share-token-route",
+      ),
+    ).toBe("0");
     expect(policy(hosts.staff, "msr_analytics_consent=v1.granted")).not.toContain("google");
     vi.stubEnv("GTM_CONTAINER_ID", "GTM-invalid/script");
     expect(policy(hosts.public, "msr_analytics_consent=v1.granted")).not.toContain("google");
