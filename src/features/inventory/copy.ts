@@ -137,6 +137,7 @@ const en = {
     currentName: "(name as in the directory now)",
     deciderUnknown: "Recorded decider not found in the directory",
     decisionMissing: "No recorded approval for this package",
+    decisionUnavailable: "The approval record could not be read now. Activation checks it again.",
     decisionMismatch: "The recorded approval does not match this package",
     approvalStates: {
       pending: "pending",
@@ -436,6 +437,8 @@ const bg: Copy = {
     currentName: "(името според текущия справочник)",
     deciderUnknown: "Записаният решаващ не е в справочника",
     decisionMissing: "Няма записано одобрение за този пакет",
+    decisionUnavailable:
+      "Записът за одобрение не може да се прочете сега. Активирането го проверява отново.",
     decisionMismatch: "Записаното одобрение не съответства на този пакет",
     approvalStates: {
       pending: "чака",
@@ -734,6 +737,7 @@ const ru: Copy = {
     currentName: "(имя по текущему справочнику)",
     deciderUnknown: "Записанный решающий не найден в справочнике",
     decisionMissing: "Нет записанного одобрения для этого пакета",
+    decisionUnavailable: "Запись об одобрении сейчас не читается. Активация проверит её снова.",
     decisionMismatch: "Записанное одобрение не соответствует этому пакету",
     approvalStates: {
       pending: "ожидает",

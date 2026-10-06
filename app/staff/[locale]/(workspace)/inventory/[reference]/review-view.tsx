@@ -335,13 +335,15 @@ export async function ReviewView({
     const reviewers = await publicationReviewActors(getDb(), actor, {
       reference,
       manifestId: chosen.id,
-    }).catch(() => null);
+    }).catch(() => "unavailable" as const);
     const when = new Intl.DateTimeFormat(locale, {
       dateStyle: "medium",
       timeStyle: "short",
       timeZone: agencyTimeZone,
     });
     const decided = (recorded: PublicationReviewDecision | undefined) => {
+      // A failed read is not a missing approval: say which it is.
+      if (reviewers === "unavailable") return o16.decisionUnavailable;
       if (recorded?.binding !== "matched")
         return recorded?.binding === "mismatched" ? o16.decisionMismatch : o16.decisionMissing;
       const decider = recorded.decider;
@@ -376,8 +378,14 @@ export async function ReviewView({
                 ? o16.approvedScope
                 : o16.missing,
             ],
-            [o16.rows.factualDecision, decided(reviewers?.factual)],
-            [o16.rows.editorialDecision, decided(reviewers?.editorial)],
+            [
+              o16.rows.factualDecision,
+              decided(reviewers === "unavailable" ? undefined : reviewers.factual),
+            ],
+            [
+              o16.rows.editorialDecision,
+              decided(reviewers === "unavailable" ? undefined : reviewers.editorial),
+            ],
             [o16.rows.seller, localInput.sellerInstructionValid ? o16.sellerCurrent : o16.missing],
             [
               o16.rows.media,
