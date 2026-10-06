@@ -1,7 +1,7 @@
 // Staff-only copy. BG and RU are drafts for human language review; never public/indexable.
 const en = {
   today: "Today",
-  inbox: "Inbox",
+  inbox: "Inquiries",
   tasks: "Tasks",
   contacts: "Contacts",
   unassigned: "Unassigned",
@@ -138,7 +138,7 @@ type Copy = {
 };
 const bg: Copy = {
   today: "Днес",
-  inbox: "Входящи",
+  inbox: "Запитвания",
   tasks: "Задачи",
   contacts: "Контакти",
   unassigned: "Неразпределени",
@@ -268,7 +268,7 @@ const bg: Copy = {
 };
 const ru: Copy = {
   today: "Сегодня",
-  inbox: "Входящие",
+  inbox: "Запросы",
   tasks: "Задачи",
   contacts: "Контакты",
   unassigned: "Без исполнителя",
