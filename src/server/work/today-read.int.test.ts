@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { afterAll, beforeAll, expect, it } from "vitest";
+import { afterAll, beforeAll, expect, it, vi } from "vitest";
 import * as schema from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { staffFixture } from "../cases/testing";
@@ -665,6 +665,7 @@ it("O01 keeps unaffected queues usable on real PostgreSQL group failures with un
   ]);
   await t.sql.unsafe("alter table appointments rename to unavailable_o01_appointments");
   await t.sql.unsafe("alter table external_actions rename to unavailable_o01_external_actions");
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
   try {
     const today = await readToday(t.db, staff.session);
     expect(today.viewings).toMatchObject({ status: "unavailable", total: null });
@@ -673,7 +674,12 @@ it("O01 keeps unaffected queues usable on real PostgreSQL group failures with un
     expect(today.due.rows[0]?.task.id).toBe(task.id);
     expect(today.caseContinue).toMatchObject({ status: "ready", total: 0 });
     expect(JSON.stringify(today)).not.toContain("unavailable_o01");
+    const logged = log.mock.calls.map(([message]) => String(message)).join("\n");
+    expect(logged).toContain("[today] viewings unavailable (internal_error)");
+    expect(logged).toContain("[today] operatorDeliveryExceptions unavailable (internal_error)");
+    expect(logged).not.toContain("unavailable_o01");
   } finally {
+    log.mockRestore();
     await t.sql.unsafe("alter table unavailable_o01_appointments rename to appointments");
     await t.sql.unsafe("alter table unavailable_o01_external_actions rename to external_actions");
   }

@@ -27,7 +27,9 @@ operation-status URL. No command sends externally.
 
 Staff routes use host-relative URLs: `/{locale}/today`, `/inquiries`, `/inquiries/{id}`,
 `/tasks`, `/tasks/{id}`, `/contacts`, `/contacts/{id}`. `/inbox` redirects to `/inquiries`.
-Every page checks current staff access. Today displays bounded real inquiry/task queues only.
+Every page checks current staff access. Today combines bounded inquiry and task queues with
+visible viewings, Case and listing work, reviews and delivery exceptions. Each queue reports
+its authorized total or an unavailable state; a failed read is never presented as empty work.
 Times in this slice are explicitly labelled UTC. BG/RU staff copy is draft translation.
 
 Verification on disposable PostgreSQL:
