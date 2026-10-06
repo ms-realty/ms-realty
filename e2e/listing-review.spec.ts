@@ -128,11 +128,15 @@ test("O16 publishes the exact package through its decision and shows the result"
   ).toHaveCount(2);
   await expect(page.getByText("Butler cannot publish.", { exact: false })).toBeVisible();
   const decision = page.locator('[data-inventory-decision="activate"]');
+  // 642:12654: the scope names this package and host; the card's own words, then publish.
+  await expect(decision.getByLabel("Decision scope", { exact: true })).toHaveValue(
+    /^Publish the BG package for /,
+  );
   await decision
-    .getByLabel("Review scope or reason", { exact: true })
-    .fill("Synthetic exact package check, no real listing.");
-  await decision.getByRole("checkbox").check();
-  await decision.getByRole("button", { name: "Activate reviewed manifest (BG)" }).click();
+    .getByRole("checkbox", { name: "I reviewed exactly this package and the stated scope." })
+    .check();
+  await expect(decision.getByRole("link", { name: "Cancel", exact: true })).toBeVisible();
+  await decision.getByRole("button", { name: "Publish the package", exact: true }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "The listing is published" }),
   ).toBeVisible();

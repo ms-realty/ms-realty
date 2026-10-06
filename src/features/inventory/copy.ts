@@ -159,6 +159,10 @@ const en = {
     publishNote:
       "The decision is recorded under your name. Butler cannot publish. If the result is unclear, you will see that activation is still being checked.",
     cancel: "Cancel",
+    publishPackage: "Publish the package",
+    decisionScope: "Decision scope",
+    scopeDefault: "Publish the {locale} package for {host}",
+    confirmPackage: "I reviewed exactly this package and the stated scope.",
     checking: "Activation is still being checked",
     checkingLead:
       'The action has a check number. We do not show "published" until the result is confirmed.',
@@ -465,6 +469,10 @@ const bg: Copy = {
     publishNote:
       "Решението се записва с Вашето име. Butler не може да публикува. При неясен резултат ще видите, че активирането още се проверява.",
     cancel: "Отказ",
+    publishPackage: "Публикувайте пакета",
+    decisionScope: "Обхват на решението",
+    scopeDefault: "Публикуване на {locale} пакета за {host}",
+    confirmPackage: "Прегледах точно този пакет и посочения обхват.",
     checking: "Активирането още се проверява",
     checkingLead:
       "Действието има номер за проверка. Не показваме „публикувано“, докато резултатът не бъде потвърден.",
@@ -769,6 +777,10 @@ const ru: Copy = {
     publishNote:
       "Решение записывается под вашим именем. Butler не может публиковать. Если результат неясен, вы увидите, что активация ещё проверяется.",
     cancel: "Отмена",
+    publishPackage: "Опубликовать пакет",
+    decisionScope: "Объём решения",
+    scopeDefault: "Публикация пакета {locale} для {host}",
+    confirmPackage: "Я проверил именно этот пакет и указанный объём.",
     checking: "Активация ещё проверяется",
     checkingLead:
       "У действия есть номер для проверки. Мы не показываем «опубликовано», пока результат не подтверждён.",

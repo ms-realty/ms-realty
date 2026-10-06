@@ -17,7 +17,7 @@ import {
   inventorySections,
 } from "@/features/inventory/decision-contract";
 import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
-import { InventoryDecisionForm } from "@/features/inventory/decision-form";
+import { type FocusedDecision, InventoryDecisionForm } from "@/features/inventory/decision-form";
 import type { InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
@@ -116,6 +116,7 @@ export async function ReviewView({
     label: string,
     expectedRevision: number,
     manifestId?: string,
+    within?: { scope: string; focused: FocusedDecision },
   ) {
     const context: InventoryDecisionContext = {
       locale,
@@ -130,8 +131,9 @@ export async function ReviewView({
         context={context}
         title={label}
         action={submitInventoryDecision.bind(null, context)}
+        {...(within ? { focused: within.focused } : {})}
         initialState={{
-          values: { scope: "", confirmed: "", publicationLocale: "bg" },
+          values: { scope: within?.scope ?? "", confirmed: "", publicationLocale: "bg" },
           operationId: randomUUID(),
           expectedRevision,
           responseId: randomUUID(),
@@ -414,19 +416,28 @@ export async function ReviewView({
             })}
           </p>
         ) : null}
-        {decision(
-          "activate",
-          `${copy.activate} (${chosen.locale.toUpperCase()})`,
-          listing.publicationGeneration,
-          chosen.id,
-        )}
-        <p className="flex items-start gap-3 rounded-control bg-warning-soft p-4 text-dense">
-          <WarningIcon className="size-5 text-warning" />
-          {o16.publishNote}
-        </p>
-        <a href={review} className={buttonClass("tertiary", "text-text")}>
-          {o16.cancel}
-        </a>
+        {/* 642:12654: one scope field, the confirmation, the note, then publish and cancel. */}
+        {decision("activate", o16.publishPackage, listing.publicationGeneration, chosen.id, {
+          scope: fill(o16.scopeDefault, {
+            locale: chosen.locale.toUpperCase(),
+            host: new URL(host).host,
+          }),
+          focused: {
+            scopeLabel: o16.decisionScope,
+            confirmLabel: o16.confirmPackage,
+            note: (
+              <p className="flex items-start gap-3 rounded-control bg-warning-soft p-4 text-dense">
+                <WarningIcon className="size-5 shrink-0 text-warning" />
+                {o16.publishNote}
+              </p>
+            ),
+            cancel: (
+              <a href={review} className={buttonClass("secondary")}>
+                {o16.cancel}
+              </a>
+            ),
+          },
+        })}
       </FocusedState>
     );
   }
