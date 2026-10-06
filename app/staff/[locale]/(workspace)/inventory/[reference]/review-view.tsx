@@ -7,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { listingRevisions, operations, propertyFacts } from "@/db/schema";
+import type { Actor } from "@/domain/capabilities";
 import { pricePeriodByPurpose } from "@/domain/facts";
 import { publicLocales } from "@/domain/ids";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
@@ -23,7 +24,7 @@ import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
-import type { publicationReadiness } from "@/server/publication/commands";
+import { publicationReadiness } from "@/server/publication/commands";
 import { listingSlug, termsFacts } from "@/server/publication/presentation";
 import { buttonClass } from "@/ui/button-class";
 import { CheckIcon, DocumentIcon, ExternalIcon, NoPhotoIcon, WarningIcon } from "@/ui/icons";
@@ -68,11 +69,11 @@ export async function ReviewView({
   mayReview,
   mayPublish,
   error,
-  actorId,
+  actor,
   actorName,
   query,
 }: {
-  actorId: string;
+  actor: Actor;
   actorName: string;
   query: { step?: string; manifest?: string; published?: string };
   locale: string;
@@ -238,7 +239,33 @@ export async function ReviewView({
   const review = `${path}?tab=review`;
 
   // O16DONE (Figma 642:12842 / 642:12860): a confirmed activation by this staff member.
-  const done = query.published ? await publishedReceipt(actorId, ref, query.published) : null;
+  const done = query.published ? await publishedReceipt(actor.id, ref, query.published) : null;
+  // "Published" only while this locale's live pointer still shows that exact package; a later
+  // restriction, withdrawal or newer package turns the receipt into a record of what happened.
+  const pointer = done ? data.publications.find((p) => p.locale === done.locale) : undefined;
+  if (done && !(pointer?.state === "active" && pointer.manifestId === done.manifestId)) {
+    const state = !pointer
+      ? o16.stateNone
+      : pointer.manifestId !== done.manifestId && pointer.state === "active"
+        ? o16.stateNewer
+        : optionLabel(pointer.state, locale);
+    return (
+      <FocusedState closeHref={review} closeLabel={copy.o12.close}>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">{o16.activationRecorded}</h1>
+        <p role="status">
+          {fill(o16.activationNotCurrent, {
+            reference: ref,
+            locale: done.locale.toUpperCase(),
+            name: actorName,
+            state,
+          })}
+        </p>
+        <a href={review} className={buttonClass("primary")}>
+          {copy.o12.toTask}
+        </a>
+      </FocusedState>
+    );
+  }
   if (done) {
     const manifest = data.manifests.find((item) => item.id === done.manifestId);
     const url = `${host}/${done.locale}/properties/${ref}/${listingSlug(ref)}`;
@@ -275,6 +302,12 @@ export async function ReviewView({
       : undefined;
   if (chosen) {
     const live = data.publications.length > 0;
+    // A translation package is checked for its own locale, never with the BG readiness.
+    const local =
+      chosen.locale === "bg"
+        ? readiness
+        : await publicationReadiness(getDb(), actor, reference, chosen.locale);
+    const localInput = local.input;
     return (
       <FocusedState closeHref={review} closeLabel={copy.o12.close}>
         <h1 className="pe-12 text-heading font-semibold sm:text-title">
@@ -293,20 +326,20 @@ export async function ReviewView({
             ],
             [
               o16.rows.facts,
-              input.factReviewValid && input.revisionApprovalValid
+              localInput.factReviewValid && localInput.revisionApprovalValid
                 ? o16.approvedScope
                 : o16.missing,
             ],
-            [o16.rows.seller, input.sellerInstructionValid ? o16.sellerCurrent : o16.missing],
+            [o16.rows.seller, localInput.sellerInstructionValid ? o16.sellerCurrent : o16.missing],
             [
               o16.rows.media,
-              input.mediaEligible ? fill(o16.mediaRights, { n: photos.length }) : o16.missing,
+              localInput.mediaEligible ? fill(o16.mediaRights, { n: photos.length }) : o16.missing,
             ],
             [
               o16.rows.language,
               chosen.locale === "bg"
                 ? o16.sourceLanguage
-                : input.localeApprovedForSource
+                : localInput.localeApprovedForSource
                   ? o16.localeApproved
                   : o16.missing,
             ],
@@ -317,6 +350,14 @@ export async function ReviewView({
             ],
           ]}
         />
+        {local.decision.outcome === "denied" ? (
+          <p role="alert" className="rounded-control bg-warning-soft p-4 text-dense">
+            {fill(o16.notEligibleLocale, {
+              locale: chosen.locale.toUpperCase(),
+              reason: local.decision.code.replaceAll("_", " "),
+            })}
+          </p>
+        ) : null}
         {decision(
           "activate",
           `${copy.activate} (${chosen.locale.toUpperCase()})`,
