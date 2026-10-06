@@ -634,25 +634,43 @@ test("P09: a consented recipient page mounts no analytics, so no tag can read th
 
 test("P08: a creator with more than one page of links reaches and revokes the oldest", async ({
   page,
-}) => {
+  browser,
+  baseURL,
+}, testInfo) => {
   const [listing] = seed(1);
   if (!listing) throw new Error("No seeded listing");
   await save(page, [listing]);
   await enableSharing(page, listing);
   const link = await createLink(page);
-  older(link.id, 20);
+  older(link.id, 21);
   await page.reload();
   await expect(cards(page)).toHaveCount(20);
   await expect(sharedLinks(page).getByRole("link", { name: "Newest links" })).toHaveCount(0);
   await sharedLinks(page).getByRole("link", { name: "Older links" }).click();
   await expect(page).toHaveURL(/\/en\/saved\?links=[A-Za-z0-9_-]+#shared-links$/);
-  // 21 links: the newest 20 on the first page, the oldest one here.
-  await expect(cards(page)).toHaveCount(1);
+  // 22 links: the newest 20 on the first page, the two oldest here.
+  await expect(cards(page)).toHaveCount(2);
   await expect(sharedLinks(page).getByRole("link", { name: "Older links" })).toHaveCount(0);
   await expect(sharedLinks(page).getByRole("link", { name: "Newest links" })).toHaveAttribute(
     "href",
     "/en/saved#shared-links",
   );
+  // Scripts off, the native revoke posts back to this older page, not to the newest one.
+  const plain = await browser.newContext({
+    ...testInfo.project.use,
+    baseURL,
+    javaScriptEnabled: false,
+    storageState: await page.context().storageState(),
+  });
+  const offline = await plain.newPage();
+  await offline.goto(page.url());
+  const second = cards(offline).nth(1);
+  await second.locator("summary").click();
+  await second.getByRole("button", { name: "Revoke the link now" }).click();
+  await expect(offline).toHaveURL(/\/en\/saved\?links=[A-Za-z0-9_-]+/);
+  await expect(cards(offline)).toHaveCount(2);
+  await expect(cards(offline).nth(1)).toHaveAttribute("data-share-state", "revoked");
+  await plain.close();
   const oldest = cards(page).first();
   await oldest.locator("summary").click();
   await oldest.getByRole("button", { name: "Revoke the link now" }).click();

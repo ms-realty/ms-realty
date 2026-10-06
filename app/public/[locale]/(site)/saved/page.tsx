@@ -51,7 +51,7 @@ export default async function SavedPage({
         copy={copy}
         labels={shareCopy(locale)}
         links={links}
-        paged={cursor !== undefined}
+        cursor={cursor}
         revoke={revokeSavedShare.bind(null, locale)}
       />
       <a href={`/${locale}/properties`} className="underline">
