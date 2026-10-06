@@ -400,10 +400,16 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
   it("cannot replace another Case's task association or bypass task authority", async () => {
     const f = await fixture();
     await linkGrants(f);
+    const candidates = await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id);
+    expect(candidates).toEqual([expect.objectContaining({ canLink: true })]);
+    const disabled = candidates.map((candidate) => ({ ...candidate, canLink: false }));
     await t.db
       .update(grants)
       .set({ revokedAt: new Date() })
       .where(and(eq(grants.principalId, f.target.staff.id), eq(grants.capability, "task.manage")));
+    expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual(
+      disabled,
+    );
     await expect(
       linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
     ).rejects.toMatchObject({ code: "forbidden" });
@@ -414,6 +420,9 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
       .set({ caseId: otherCaseId })
       .where(eq(tasks.id, f.task.id))
       .returning();
+    expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual(
+      disabled,
+    );
     await expect(
       linkInquiryToExistingCase(t.db, f.target.staff.session, {
         ...f.input,

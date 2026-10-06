@@ -213,6 +213,16 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
     inquiry.ownerId === live.account.id &&
     inquiryMachine.check(inquiry.state, "linked_to_case").outcome !== "denied" &&
     (await can(db, live.actor, "inquiry.respond", inquiryResource(inquiry)));
+  const commitments = await db.select().from(tasks).where(eq(tasks.inquiryId, inquiry.id));
+  canLink =
+    canLink &&
+    (
+      await Promise.all(
+        commitments.map((commitment) =>
+          can(db, live.actor, "task.manage", taskResource(commitment)),
+        ),
+      )
+    ).every(Boolean);
   if (canLink) {
     try {
       await requireAvailableStaff(db, live.account.id);
@@ -227,11 +237,19 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
       matchBasis: matchedParty ? ("party" as const) : ("contact_route" as const),
       canLink:
         canLink &&
+        commitments.every((commitment) => !commitment.caseId || commitment.caseId === row.id) &&
         (await can(db, live.actor, "case.transition", {
           type: "case",
           id: row.id,
           audience: "case_participants",
-        })),
+        })) &&
+        (
+          await Promise.all(
+            commitments.map((commitment) =>
+              can(db, live.actor, "task.manage", taskResource({ ...commitment, caseId: row.id })),
+            ),
+          )
+        ).every(Boolean),
     })),
   );
 }
