@@ -132,8 +132,28 @@ test("O16 publishes the exact package through its decision and shows the result"
     "href",
     new RegExp(`/bg/properties/${f.reference}/`),
   );
-  // After a later withdrawal the same receipt no longer claims the page is published.
+  // Expired seller consent hides the page while the pointer stays active: the receipt follows
+  // the public read, not the pointer.
   const receipt = page.url();
+  await db
+    .update(schema.sellerInstructions)
+    .set({ expiresAt: new Date(Date.now() - 1000) })
+    .where(eq(schema.sellerInstructions.listingId, f.listingId));
+  await page.goto(receipt);
+  await expect(page.getByRole("heading", { level: 1, name: "Activation recorded" })).toBeVisible();
+  await expect(
+    page.getByText("now: not shown publicly, the publication conditions are no longer met"),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open the public page" })).toHaveCount(0);
+  await db
+    .update(schema.sellerInstructions)
+    .set({ expiresAt: null })
+    .where(eq(schema.sellerInstructions.listingId, f.listingId));
+  await page.goto(receipt);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "The listing is published" }),
+  ).toBeVisible();
+  // After a later withdrawal the same receipt no longer claims the page is published.
   await db
     .update(schema.currentPublications)
     .set({ state: "withdrawn", reason: "Synthetic withdrawal after the activation." })
