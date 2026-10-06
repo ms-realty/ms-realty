@@ -281,6 +281,9 @@ for (const javaScriptEnabled of [true, false]) {
       ).toBeVisible();
       await page.reload();
       await page.getByRole("link", { name: work.openRecord, exact: true }).click();
+      // The width below is measured on the opened record once it has loaded with its styles.
+      await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${received.id}`));
+      await page.waitForLoadState("load");
       const [responded] = await db
         .select()
         .from(schema.inquiries)
