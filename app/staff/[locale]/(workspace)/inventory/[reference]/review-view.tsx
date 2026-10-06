@@ -18,7 +18,7 @@ import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { InventoryDecisionForm } from "@/features/inventory/decision-form";
 import type { InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
-import { FocusedState } from "@/features/inventory/focused-state";
+import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
@@ -55,22 +55,6 @@ async function publishedReceipt(actorId: string, reference: string, id: string) 
   return outcome?.reference === reference && outcome.locale && outcome.manifestId
     ? { locale: outcome.locale, manifestId: outcome.manifestId }
     : null;
-}
-
-function Rows({ rows }: { rows: [string, string][] }) {
-  return (
-    <dl className="divide-y divide-divider border-b border-divider">
-      {rows.map(([term, detail]) => (
-        <div key={term} className="flex items-start gap-3 p-3 text-dense">
-          <DocumentIcon className="size-5" />
-          <div className="grid gap-1">
-            <dt className="font-semibold">{term}</dt>
-            <dd className="text-text-muted">{detail}</dd>
-          </div>
-        </div>
-      ))}
-    </dl>
-  );
 }
 
 export async function ReviewView({
@@ -291,7 +275,7 @@ export async function ReviewView({
           {fill(o16.publishTitle, { locale: chosen.locale.toUpperCase() })}
         </h1>
         <p>{o16.publishLead}</p>
-        <Rows
+        <FocusedRows
           rows={[
             [
               o16.rows.manifest,

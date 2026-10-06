@@ -142,6 +142,23 @@ const en = {
     publishNote:
       "The decision is recorded under your name. Butler cannot publish. If the result is unclear, you will see that activation is still being checked.",
     cancel: "Cancel",
+    checking: "Activation is still being checked",
+    checkingLead:
+      'The action has a check number. We do not show "published" until the result is confirmed.',
+    checkingRows: {
+      number: "Check number",
+      candidate: "Candidate",
+      local: "Local result",
+      external: "External channels",
+      recovery: "Recovery",
+    },
+    checkingLocal: "Waiting for an observed confirmation",
+    checkingExternal: "Not published automatically",
+    checkingRecovery: "Check the same request; no new action",
+    checkingNote:
+      "A finished background task does not prove the content is public. An older attempt cannot activate a withdrawn candidate.",
+    checkAgain: "Check the publication",
+    reviewException: "Review the exception",
   },
   o12: {
     title: "Edit listing",
@@ -404,6 +421,23 @@ const bg: Copy = {
     publishNote:
       "Решението се записва с Вашето име. Butler не може да публикува. При неясен резултат ще видите, че активирането още се проверява.",
     cancel: "Отказ",
+    checking: "Активирането още се проверява",
+    checkingLead:
+      "Действието има номер за проверка. Не показваме „публикувано“, докато резултатът не бъде потвърден.",
+    checkingRows: {
+      number: "Номер за проверка",
+      candidate: "Кандидат",
+      local: "Локален резултат",
+      external: "Външни канали",
+      recovery: "Възстановяване",
+    },
+    checkingLocal: "Чака наблюдавано потвърждение",
+    checkingExternal: "Не са автоматично публикувани",
+    checkingRecovery: "Проверка на същата заявка, без ново действие",
+    checkingNote:
+      "Завършена фонова задача не доказва, че съдържанието е публично. По-стар вариант не може да активира отменен кандидат.",
+    checkAgain: "Проверете публикуването",
+    reviewException: "Прегледайте изключението",
   },
   o12: {
     title: "Редактиране на обява",
@@ -665,6 +699,23 @@ const ru: Copy = {
     publishNote:
       "Решение записывается под вашим именем. Butler не может публиковать. Если результат неясен, вы увидите, что активация ещё проверяется.",
     cancel: "Отмена",
+    checking: "Активация ещё проверяется",
+    checkingLead:
+      "У действия есть номер для проверки. Мы не показываем «опубликовано», пока результат не подтверждён.",
+    checkingRows: {
+      number: "Номер для проверки",
+      candidate: "Кандидат",
+      local: "Локальный результат",
+      external: "Внешние каналы",
+      recovery: "Восстановление",
+    },
+    checkingLocal: "Ожидает наблюдаемого подтверждения",
+    checkingExternal: "Не публикуются автоматически",
+    checkingRecovery: "Проверка того же запроса, без нового действия",
+    checkingNote:
+      "Завершённая фоновая задача не доказывает, что содержимое публично. Более старая попытка не может активировать снятого кандидата.",
+    checkAgain: "Проверить публикацию",
+    reviewException: "Посмотреть исключение",
   },
   o12: {
     title: "Редактирование объявления",

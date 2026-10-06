@@ -3,10 +3,23 @@
 // and keeps every decision on its own form. Real PostgreSQL, synthetic records.
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
+import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+
+const databaseUrl = process.env.E2E_DATABASE_URL;
+if (!databaseUrl || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(databaseUrl).pathname))
+  throw new Error("Listing review browser tests require the generated disposable database.");
+const connection = postgres(databaseUrl, { max: 2 });
+const db = drizzle(connection, { schema });
+test.afterAll(async () => connection.end());
 
 type Seed = {
   reference: string;
+  listingId: string;
+  brokerId: string;
   blank: { reference: string };
   bgn: { reference: string };
   twoAreas: { reference: string };
@@ -153,6 +166,49 @@ test("O16 keeps recorded currency and every area basis as recorded", async ({ pa
   await open(page, f, `/en/inventory/${f.twoAreas.reference}?tab=review`);
   await expect(before).toContainText("Living area 68 m²");
   await expect(before).toContainText("Land area 450 m²");
+});
+
+test("O16 shows an unconfirmed activation as still being checked, then its result", async ({
+  page,
+}) => {
+  const f = seed();
+  const key = crypto.randomUUID();
+  await db.insert(schema.operations).values({
+    actorKind: "staff",
+    actorId: f.brokerId,
+    operationType: "publication.activate",
+    idempotencyKey: key,
+    requestHash: "synthetic-unconfirmed-activation",
+    status: "outcome_unknown",
+  });
+  await open(page, f, `/en/inventory/operations/${key}?reference=${f.reference}`);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Activation is still being checked" }),
+  ).toBeVisible();
+  await expect(page.getByText("Not published automatically")).toBeVisible();
+  await expect(page.getByText("published", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Review the exception" })).toHaveAttribute(
+    "href",
+    `/en/inventory/${f.reference}?tab=review`,
+  );
+  // Once the same request is confirmed, checking again opens the published result.
+  const [manifest] = await db
+    .select({ id: schema.publicationManifests.id })
+    .from(schema.publicationManifests)
+    .where(eq(schema.publicationManifests.listingId, f.listingId))
+    .limit(1);
+  await db
+    .update(schema.operations)
+    .set({
+      status: "succeeded",
+      outcome: { reference: f.reference, locale: "bg", manifestId: manifest?.id },
+      completedAt: new Date(),
+    })
+    .where(eq(schema.operations.idempotencyKey, key));
+  await page.getByRole("link", { name: "Check the publication" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "The listing is published" }),
+  ).toBeVisible();
 });
 
 test("O16 keeps BG and RU labels", async ({ page }) => {
