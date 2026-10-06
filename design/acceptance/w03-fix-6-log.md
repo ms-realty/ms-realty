@@ -44,3 +44,11 @@ Not changed on purpose: the disabled primary of «O03 · Accept · time required
 | run 5 r01 | T5 · Desktop | Fixed in fix 5 (P12UCHECK); not touched here. |
 
 Not done: the key `design/zero-learning/W03-expected-path-key.md` (evaluator's file) still describes the old O03LR buttons, the plain P12UNKNOWN title and the old O03ACCSEND heading; the shared public footer overflow above; the other four sending families keep the form title (they already carry a status chip: «Изпраща се», «Записваме …»).
+
+## Fix 7 (UI master, one bridge job; versions «Before W03 fix 7», «W03 fix 7 done»)
+
+- G-01: P12UCHECK reads as the answer of the check, not as the start screen again: heading «Проверката приключи: няма потвърждение» (66:34223 · 66:34263, proto 66:36434 · 66:56374); result line «Не можем да потвърдим, че запитването е получено.» (66:34237 · 66:34277, proto 66:36448 · 66:56388). Shot reviewed.
+- G-33: one identifier for the visitor: 97 text nodes on pages 03, 06, 09, 12, 13, 14: «Номер за проверка: 024» → «Код на заявката: 7K3M9Q», «кажете (номер за проверка|номер) 024» → «кажете код 7K3M9Q», «Използваме същия номер за проверка 024» → «…същия код на заявката 7K3M9Q»; Hebrew «מספר (ה)מעקב: ⁦024⁩» → «קוד הפנייה: ⁦7K3M9Q⁩», «ומסרו את המספר» → «ומסרו את הקוד», «באותו מספר מעקב» → «באותו קוד פנייה».
+- G-34: «Ще го направя аз» on PBUTLERANSWER frames is a bordered Secondary (4 instances).
+- G-35: the chosen review time on the O03 accept family (ready, sending, conflict, offline, unknown; design + prototypes) reads «Избрахте: 6 октомври 2026 · 10:00 · Europe/Sofia» (20 inputs). Shot reviewed.
+- G-36: «Оттеглете предложението» and «Вижте какво получава …» are bordered Secondary; every «Откажи» button label → «Назад» (84 changes in total; all renamed buttons navigate back or to the parent list, checked).
