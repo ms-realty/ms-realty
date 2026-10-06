@@ -89,6 +89,40 @@ export function InquiryQueueView({
   const nested = Boolean(selectedId);
   const base = selectedId ? `/${locale}/inquiries/${selectedId}` : `/${locale}/inquiries`;
   const Heading = nested ? "h3" : "h2";
+  // Why nothing is listed. On the list page it fills the wide pane beside the queue, as in
+  // O02UNCLAIMED; beside an open conversation it stays in the queue column.
+  const status = !read.ok ? (
+    <EmptyState
+      kind="failed"
+      title={text.failed}
+      headingLevel={nested ? 3 : 2}
+      action={
+        <a href={queueHref(base, scope, page)} className={buttonClass("secondary")}>
+          {text.retry}
+        </a>
+      }
+    >
+      <p>{text.failedNote}</p>
+    </EmptyState>
+  ) : read.rows.length ? null : page > 1 ? (
+    // A later page can empty while earlier ones still hold work: not "nothing to do".
+    <div className="flex flex-col items-start gap-3 rounded-panel bg-subtle p-6">
+      <p>{text.pageEmpty}</p>
+      <a href={queueHref(base, scope)} className="text-action underline">
+        {text.firstPage}
+      </a>
+    </div>
+  ) : (
+    <div className="flex flex-col items-start gap-3 rounded-panel bg-subtle p-6">
+      <Heading className="text-subheading font-semibold">{copy.scopeEmpty[scope]}</Heading>
+      <p className="text-text-muted">{copy.scopeEmptyNotes[scope]}</p>
+      {scope === "unassigned" ? (
+        <a href={`/${locale}/coverage`} className={buttonClass("secondary")}>
+          {text.checkCoverage}
+        </a>
+      ) : null}
+    </div>
+  );
   const search = (
     <InquirySearch
       action={searchInquiriesAction.bind(null, locale)}
@@ -99,6 +133,7 @@ export function InquiryQueueView({
       selectedId={selectedId}
       clearHref={queueHref(base, scope, page)}
       nested={nested}
+      aside={nested ? undefined : status}
     >
       <nav aria-label={text.views}>
         <ul className="grid grid-cols-6 gap-1 rounded-control bg-subtle p-1 sm:grid-cols-5 lg:grid-cols-6">
@@ -128,20 +163,7 @@ export function InquiryQueueView({
           ))}
         </ul>
       </nav>
-      {!read.ok ? (
-        <EmptyState
-          kind="failed"
-          title={text.failed}
-          headingLevel={nested ? 3 : 2}
-          action={
-            <a href={queueHref(base, scope, page)} className={buttonClass("secondary")}>
-              {text.retry}
-            </a>
-          }
-        >
-          <p>{text.failedNote}</p>
-        </EmptyState>
-      ) : read.rows.length ? (
+      {read.ok && read.rows.length ? (
         <ul aria-label={text.list} className="divide-y divide-divider border-b border-divider">
           {read.rows.map((row) => (
             <InquiryRow
@@ -153,25 +175,8 @@ export function InquiryQueueView({
             />
           ))}
         </ul>
-      ) : page > 1 ? (
-        // A later page can empty while earlier ones still hold work: not "nothing to do".
-        <div className="flex flex-col items-start gap-3 rounded-panel bg-subtle p-6">
-          <p>{text.pageEmpty}</p>
-          <a href={queueHref(base, scope)} className="text-action underline">
-            {text.firstPage}
-          </a>
-        </div>
-      ) : (
-        <div className="flex flex-col items-start gap-3 rounded-panel bg-subtle p-6">
-          <Heading className="text-subheading font-semibold">{copy.scopeEmpty[scope]}</Heading>
-          <p className="text-text-muted">{copy.scopeEmptyNotes[scope]}</p>
-          {scope === "unassigned" ? (
-            <a href={`/${locale}/coverage`} className={buttonClass("secondary")}>
-              {text.checkCoverage}
-            </a>
-          ) : null}
-        </div>
-      )}
+      ) : null}
+      {nested ? status : null}
       {read.ok && (page > 1 || read.hasMore) ? (
         <nav aria-label={text.pages} className="flex flex-wrap gap-6">
           {page > 1 ? (
