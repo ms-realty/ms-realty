@@ -13,7 +13,7 @@ export function SharedLinks({
   copy,
   labels,
   links,
-  paged = false,
+  cursor,
   revoke,
 }: {
   locale: PublicLocale;
@@ -21,10 +21,16 @@ export function SharedLinks({
   labels: ShareCopy;
   /** Null when this browser holds no creator cookie, so nothing can be listed or managed. */
   links: CreatorLinks | null;
-  /** True on an older page, so the newest links stay one link away. */
-  paged?: boolean;
+  /** The opaque cursor of an older page: the newest links stay one link away, and a native
+   * revoke returns to this same page. */
+  cursor?: string;
   revoke: RevokeShareAction;
 }) {
+  const paged = cursor !== undefined;
+  const here =
+    cursor === undefined
+      ? `/${locale}/saved`
+      : `/${locale}/saved?links=${encodeURIComponent(cursor)}`;
   return (
     <section
       id="shared-links"
@@ -50,7 +56,7 @@ export function SharedLinks({
                 view={view}
                 labels={labels}
                 revoke={revoke}
-                permalink={`/${locale}/saved`}
+                permalink={here}
               />
             </li>
           ))}
