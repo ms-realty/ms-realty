@@ -13,9 +13,9 @@ export function todayCopy(locale: string) {
       "Waiting for action: {n}. Start at the top of the list.",
     ),
     leadNothing: s(
-      "В момента нищо не чака Вашето действие. Продължете с отворените си запитвания.",
-      "Сейчас ничего не ждёт вашего действия. Продолжите работу с открытыми запросами.",
-      "Nothing needs your action right now. Continue with your open inquiries.",
+      "Няма запитвания или задачи, които чакат Вашето действие. Продължете с отворените си запитвания.",
+      "Нет запросов и задач, которые ждут вашего действия. Продолжите работу с открытыми запросами.",
+      "No requests or tasks are waiting for your action. Continue with your open inquiries.",
     ),
     leadEmpty: s(
       "Проверете запитванията за нови заявки.",
@@ -42,6 +42,7 @@ export function todayCopy(locale: string) {
     allTasks: s("Всички задачи", "Все задачи", "All tasks"),
     none: s("Няма чакащи.", "Ничего не ждёт.", "Nothing waiting."),
     more: s("Още в тази опашка", "Ещё в этой очереди", "More in this queue"),
+    inQueue: s("В опашката:", "В очереди:", "In the queue:"),
     overload: s(
       "Повече от {n} запитвания нямат отговорник",
       "Больше {n} запросов без исполнителя",
@@ -77,9 +78,9 @@ export function todayCopy(locale: string) {
       keyReturn: s("запишете връщането", "запишите возврат", "record the return"),
     },
     emptyTitle: s(
-      "В момента нищо не чака действие",
-      "Сейчас ничего не ждёт действия",
-      "Nothing needs action right now",
+      "Няма запитвания или задачи за действие",
+      "Нет запросов и задач, требующих действия",
+      "No requests or tasks need action",
     ),
     emptyAction: s("Отворете запитванията", "Открыть запросы", "Open the inquiries"),
     failed: s(

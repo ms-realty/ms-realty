@@ -115,14 +115,19 @@ it("orders the worklist by the contract and links every count to its real queue"
   expect(
     screen.getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent),
   ).toEqual([
-    "Unassigned requests1",
-    "My overdue tasks1",
-    "Awaiting my acceptance1",
-    "My open inquiries1",
+    "Unassigned requestsIn the queue: 1",
+    "My overdue tasksIn the queue: 1",
+    "Awaiting my acceptanceIn the queue: 1",
+    "My open inquiriesIn the queue: 1",
   ]);
+  expect(
+    screen.getByText(
+      "These queues show the inquiries, follow-up tasks and key returns you can access. Other work is shown in its own workspace.",
+    ),
+  ).toBeVisible();
   for (const [name, href] of [
     [/^Unassigned requests/, "/en/inquiries?view=unassigned"],
-    [/^My overdue tasks/, "/en/tasks?view=mine"],
+    [/^My overdue tasks/, "/en/tasks?view=overdue"],
     [/^Awaiting my acceptance/, "/en/tasks?view=handovers"],
     [/^My open inquiries/, "/en/inquiries?view=mine"],
     ["All tasks", "/en/tasks"],
@@ -213,7 +218,7 @@ it("keeps overdue key returns among the due commitments for key managers", async
         dueAt,
         propertyReference: "PR-ONE",
         holderName: "Synthetic custody holder",
-        needsCoverage: false,
+        needsCoverage: true,
       },
     ]),
   });
@@ -221,19 +226,24 @@ it("keeps overdue key returns among the due commitments for key managers", async
   expect(
     screen.getAllByRole("heading", { level: 3 }).map((heading) => heading.textContent),
   ).toEqual([
-    "Unassigned requests1",
-    "My overdue tasks1",
-    "Overdue key returns1",
-    "Awaiting my acceptance1",
-    "My open inquiries1",
+    "Unassigned requestsIn the queue: 1",
+    "My overdue tasksIn the queue: 1",
+    "Overdue key returnsIn the queue: 1",
+    "Awaiting my acceptanceIn the queue: 1",
+    "My open inquiriesIn the queue: 1",
   ]);
   const reminders = document.querySelector("[data-key-return-reminders]");
   expect(reminders).not.toBeNull();
   const row = within(reminders as HTMLElement).getByRole("link", { name: /KS-ONE/ });
   expect(row).toHaveAttribute("href", "/en/operations/keys/key-one");
   expect(row).toHaveTextContent(
-    "Property PR-ONE · Holder: Synthetic custody holder · Overdue since",
+    "Property PR-ONE · Holder: Synthetic custody holder (Agency coverage) · Overdue since",
   );
+  expect(
+    within(reminders as HTMLElement).getByText(
+      "Current overdue sets are shown oldest first. A reminder changes neither custody nor the agreed deadline.",
+    ),
+  ).toBeVisible();
   expect(row.querySelector("time")).toHaveAttribute("datetime", dueAt.toISOString());
   expect(row.querySelector("time")).toHaveTextContent(
     `${new Intl.DateTimeFormat("en", {
@@ -284,7 +294,7 @@ it("shows overload with aging and an escalation route, never a celebration", asy
   expect(shown.map((link) => link.getAttribute("href"))).toEqual(
     [0, 1, 2, 3, 4].map((index) => `/en/inquiries/in-${index}`),
   );
-  expect(screen.queryByText("Nothing needs action right now")).not.toBeInTheDocument();
+  expect(screen.queryByText("No requests or tasks need action")).not.toBeInTheDocument();
 });
 
 it("keeps every group in view when one queue is long", async () => {
@@ -299,7 +309,7 @@ it("keeps every group in view when one queue is long", async () => {
   ).toHaveLength(5);
   expect(screen.getByRole("link", { name: "More in this queue" })).toHaveAttribute(
     "href",
-    "/en/tasks?view=mine",
+    "/en/tasks?view=overdue",
   );
   expect(screen.getByRole("list", { name: "Awaiting my acceptance" })).toBeVisible();
 });
@@ -309,7 +319,7 @@ it("says plainly when there is no work, scoped to the queues it read", async () 
   await show();
   expect(screen.getByText("Check the inquiries for new requests.")).toBeVisible();
   expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
-    "Nothing needs action right now",
+    "No requests or tasks need action",
   );
   expect(
     screen.getByText(
@@ -328,7 +338,9 @@ it("keeps open inquiries in view when nothing else waits", async () => {
   reads.today.mockResolvedValue({ ...empty(), mine: ordinary().mine });
   await show();
   expect(
-    screen.getByText("Nothing needs your action right now. Continue with your open inquiries."),
+    screen.getByText(
+      "No requests or tasks are waiting for your action. Continue with your open inquiries.",
+    ),
   ).toBeVisible();
   expect(screen.getAllByText("Nothing waiting.")).toHaveLength(3);
   expect(screen.getByRole("list", { name: "My open inquiries" })).toBeVisible();
@@ -349,7 +361,7 @@ it("reports a failed read as a failure, never as a day without work", async () =
     "/en/today",
   );
   expect(document.querySelector("[data-today-state=failed]")).not.toBeNull();
-  for (const text of [/Nothing needs/, /Nothing waiting/, /Check the inquiries/])
+  for (const text of [/No requests or tasks/, /Nothing waiting/, /Check the inquiries/])
     expect(screen.queryByText(text)).not.toBeInTheDocument();
   expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
   expect(log).toHaveBeenCalledWith("[O01] Today queues unavailable:", "TypeError");
@@ -360,6 +372,63 @@ it("lets an access change during the read reach the access flow", async () => {
   const ended = new AppError("unauthenticated");
   reads.today.mockRejectedValue(ended);
   await expect(TodayScreen({ locale: "en", session, name: null, now })).rejects.toBe(ended);
+});
+
+it("brings an open inquiry with a passed follow-up into the rows in view", async () => {
+  const open = (id: string, followUpAt: Date | null) => ({
+    ...inquiry(id, { state: "assigned", createdAt: minutesAgo(900), followUpAt }),
+    ownerName: "Maria Example",
+    needsCoverage: false,
+  });
+  reads.today.mockResolvedValue({
+    ...empty(),
+    mine: queue([
+      ...[1, 2, 3, 4, 5].map((index) => open(`in-${index}`, null)),
+      open("in-late", minutesAgo(30)),
+      open("in-later", minutesAgo(5)),
+    ]),
+  });
+  await show();
+  const rows = within(screen.getByRole("list", { name: "My open inquiries" })).getAllByRole("link");
+  expect(rows.map((row) => row.getAttribute("href"))).toEqual([
+    "/en/inquiries/in-late",
+    "/en/inquiries/in-later",
+    "/en/inquiries/in-1",
+    "/en/inquiries/in-2",
+    "/en/inquiries/in-3",
+  ]);
+  expect(rows[0]).toHaveTextContent("Overdue since");
+});
+
+it("keeps the queues in view when only the Butler check fails", async () => {
+  const log = vi.spyOn(console, "error").mockImplementation(() => {});
+  reads.source.mockRejectedValue(new RangeError("synthetic pool exhausted"));
+  await show();
+  expect(screen.queryByRole("complementary", { name: "Butler" })).not.toBeInTheDocument();
+  expect(screen.getByRole("list", { name: "Unassigned requests" })).toBeVisible();
+  expect(log).toHaveBeenCalledWith("[O01] Butler entry unavailable:", "RangeError");
+  log.mockRestore();
+
+  const ended = new AppError("unauthenticated");
+  reads.source.mockRejectedValue(ended);
+  await expect(TodayScreen({ locale: "en", session, name: null, now })).rejects.toBe(ended);
+});
+
+it("prints staff-typed text exactly, including dollar signs", async () => {
+  reads.today.mockResolvedValue({
+    ...ordinary(),
+    due: queue([
+      {
+        ...task("task-dollar", { state: "waiting", waitingOn: "bank $& $$ $' approval" }),
+        ownerName: "Name $& Example",
+      },
+    ]),
+  });
+  await show();
+  const row = within(screen.getByRole("list", { name: "My overdue tasks" })).getByRole("link");
+  expect(row).toHaveTextContent("Owner: Name $& Example");
+  expect(row).toHaveTextContent("Waiting on: bank $& $$ $' approval");
+  expect(row).toHaveTextContent("Next step: check the dependency");
 });
 
 it.each([
