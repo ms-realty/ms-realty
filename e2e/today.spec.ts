@@ -53,6 +53,16 @@ async function open(page: Page, token: string, path: string) {
 const groups = (page: Page) => page.getByRole("main").getByRole("heading", { level: 3 });
 const noOverflow = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+// Axe needs browser timers, which Playwright stops when scripting is off; the no-JavaScript
+// runs keep the structural assertions around each call.
+async function expectAccessible(page: Page, javaScriptEnabled: boolean) {
+  if (!javaScriptEnabled) return;
+  const { violations } = await new AxeBuilder({ page })
+    .include("main")
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(violations).toEqual([]);
+}
 
 for (const javaScriptEnabled of [false, true])
   test.describe(`JavaScript ${javaScriptEnabled ? "on" : "off"}`, () => {
@@ -71,10 +81,10 @@ for (const javaScriptEnabled of [false, true])
         main.getByText("Waiting for action: 4. Start at the top of the list."),
       ).toBeVisible();
       await expect(groups(page)).toHaveText([
-        "Unassigned requests2",
-        "My overdue tasks1",
-        "Awaiting my acceptance1",
-        "My open inquiries1",
+        "Unassigned requestsIn the queue: 2",
+        "My overdue tasksIn the queue: 1",
+        "Awaiting my acceptanceIn the queue: 1",
+        "My open inquiriesIn the queue: 1",
       ]);
       // Record-scoped access only: the team scope is not offered.
       const scope = page.getByRole("navigation", { name: "Work scope" });
@@ -123,15 +133,7 @@ for (const javaScriptEnabled of [false, true])
       );
 
       expect(await noOverflow(page)).toBe(true);
-      if (javaScriptEnabled)
-        expect(
-          (
-            await new AxeBuilder({ page })
-              .include("main")
-              .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-              .analyze()
-          ).violations,
-        ).toEqual([]);
+      await expectAccessible(page, javaScriptEnabled);
       await page.screenshot({
         path: testInfo.outputPath(`today-${javaScriptEnabled}.png`),
         fullPage: true,
@@ -154,10 +156,17 @@ for (const javaScriptEnabled of [false, true])
         await expect(page.locator("[data-inquiry-id]")).toHaveCount(rows);
         await page.goBack();
       }
-      await page.getByRole("link", { name: /^Awaiting my acceptance/ }).click();
-      await expect(page).toHaveURL(hostUrl("staff", "/en/tasks?view=handovers"));
-      await expect(page.locator(`a[href="/en/tasks/${f.offered}"]`)).toBeVisible();
-      await page.goBack();
+      for (const [name, url, task] of [
+        [/^My overdue tasks/, "/en/tasks?view=overdue", f.due],
+        [/^Awaiting my acceptance/, "/en/tasks?view=handovers", f.offered],
+      ] as const) {
+        await page.getByRole("link", { name }).click();
+        await expect(page).toHaveURL(hostUrl("staff", url));
+        // The queue holds exactly the work the count covered.
+        await expect(page.getByRole("main").locator('a[href^="/en/tasks/"]')).toHaveCount(1);
+        await expect(page.locator(`a[href="/en/tasks/${task}"]`)).toBeVisible();
+        await page.goBack();
+      }
       await unassigned.first().click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(f.oldestReference);
     });
@@ -171,10 +180,12 @@ for (const javaScriptEnabled of [false, true])
       await expect(
         page
           .getByRole("main")
-          .getByRole("heading", { level: 2, name: "Nothing needs action right now" }),
+          .getByRole("heading", { level: 2, name: "No requests or tasks need action" }),
       ).toBeVisible();
       await expect(page.getByRole("complementary", { name: "Butler" })).toHaveCount(0);
       await expect(groups(page)).toHaveCount(0);
+      expect(await noOverflow(page)).toBe(true);
+      await expectAccessible(page, javaScriptEnabled);
       await page.screenshot({
         path: testInfo.outputPath(`today-empty-${javaScriptEnabled}.png`),
         fullPage: true,
@@ -199,8 +210,9 @@ for (const javaScriptEnabled of [false, true])
         "href",
         "/en/inquiries?view=unassigned",
       );
-      await expect(page.getByText("Nothing needs action right now")).toHaveCount(0);
+      await expect(page.getByText("No requests or tasks need action")).toHaveCount(0);
       expect(await noOverflow(page)).toBe(true);
+      await expectAccessible(page, javaScriptEnabled);
       await page.screenshot({
         path: testInfo.outputPath(`today-overload-${javaScriptEnabled}.png`),
         fullPage: true,
@@ -218,10 +230,10 @@ test("O01 speaks Bulgarian and Russian", async ({ page }) => {
       /^(Добро утро|Добър ден|Добър вечер), Synthetic broker\.$/,
       ["За действие", "Моите задачи"],
       [
-        "Неразпределени запитвания2",
-        "Моите просрочени задачи1",
-        "Очакващи моето приемане1",
-        "Моите отворени запитвания1",
+        "Неразпределени запитванияВ опашката: 2",
+        "Моите просрочени задачиВ опашката: 1",
+        "Очакващи моето приеманеВ опашката: 1",
+        "Моите отворени запитванияВ опашката: 1",
       ],
     ],
     [
@@ -229,10 +241,10 @@ test("O01 speaks Bulgarian and Russian", async ({ page }) => {
       /^(Доброе утро|Добрый день|Добрый вечер), Synthetic broker\.$/,
       ["К действию", "Мои задачи"],
       [
-        "Запросы без исполнителя2",
-        "Мои просроченные задачи1",
-        "Ожидают моего принятия1",
-        "Мои открытые обращения1",
+        "Запросы без исполнителяВ очереди: 2",
+        "Мои просроченные задачиВ очереди: 1",
+        "Ожидают моего принятияВ очереди: 1",
+        "Мои открытые обращенияВ очереди: 1",
       ],
     ],
   ] as const) {
