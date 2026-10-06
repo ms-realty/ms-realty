@@ -41,6 +41,11 @@ import {
 import { assessPublishedCandidate } from "./matching";
 import { bumpCase, caseEvent, caseFor, liveParticipation } from "./shared";
 
+export {
+  type LinkInquiryToExistingCaseInput,
+  linkInquiryToExistingCase,
+} from "./inquiry-link";
+
 const createSchema = z.object({
   ...commandEnvelope,
   kind: z.enum(["buyer", "tenant", "seller", "landlord"]),

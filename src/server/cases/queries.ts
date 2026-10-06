@@ -20,6 +20,8 @@ import { containsSearchControl } from "../search/controls";
 import { ownerNeedsCoverage } from "../work/coverage-policy";
 import { caseFor, caseVisibility, liveParticipation } from "./shared";
 
+export { listInquiryCaseCandidates } from "./inquiry-link";
+
 export async function listCases(db: Executor, session: Session, search = "") {
   const visibility = await caseVisibility(db, session);
   const input = typeof search === "string" ? search : "";
