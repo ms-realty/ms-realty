@@ -1,5 +1,9 @@
-// Focused state card (O12SAVED, O13ORDER, O13ORDERSAVED): one outcome, one way back.
-// Geometry follows the frames: 20/20 on mobile (42:4304, 46:5107), 64/40 from sm (42:4285).
+// Focused state card (O12SAVED, O13ORDER, O13ORDERSAVED, O16AQ/PUB/DONE): one outcome, one way
+// back. It stands alone on its canvas with the authentic logo in the card; the workspace chrome
+// hides itself while one is shown (data-focused-state, see WorkspaceShell). Geometry follows the
+// frames: 20/20 on mobile (42:4304, 642:12748), 64 from the top and an 880 px card with 40 px
+// padding from sm (42:4285, 642:12654).
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { CloseIcon, DocumentIcon } from "@/ui/icons";
 
@@ -13,8 +17,18 @@ export function FocusedState({
   children: ReactNode;
 }) {
   return (
-    <div className="flex min-h-[80dvh] items-start justify-center bg-subtle p-5 sm:p-16">
+    <div
+      data-focused-state
+      className="flex min-h-dvh items-start justify-center bg-subtle p-5 sm:p-16"
+    >
       <div className="relative w-full max-w-[55rem] space-y-6 rounded-card bg-canvas p-5 sm:p-10">
+        <Image
+          src="/brand/logo-ms-realty.png"
+          alt="MS Realty"
+          width={86}
+          height={44}
+          className="h-auto shrink-0 object-contain"
+        />
         <a
           href={closeHref}
           aria-label={closeLabel}
