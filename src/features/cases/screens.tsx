@@ -184,6 +184,7 @@ export function BoundWorkflowForm({
   );
 }
 
+/** The client host's case chooser; staff use O04 (directory-screen.tsx). */
 export async function CaseIndexScreen(
   props: ScreenProps & {
     destination?: "overview" | "properties" | "messages";
@@ -192,7 +193,7 @@ export async function CaseIndexScreen(
 ) {
   const c = caseCopy(props.locale);
   const rows = await listCases(getDb(), props.session);
-  const root = props.session.account.kind === "staff" ? "cases" : (props.destination ?? "overview");
+  const root = props.destination ?? "overview";
   // listCases applies authorization in SQL before its unfiltered limit of 50. One returned
   // row therefore means one accessible Case, not one item on an arbitrary cursor page.
   // CaseScreen still reauthorizes the selected record before rendering any private facts.
@@ -210,11 +211,11 @@ export async function CaseIndexScreen(
   return (
     <WorkflowPage
       {...props}
-      clientOverview={props.session.account.kind !== "staff" && root === "overview"}
+      clientOverview={root === "overview"}
       title={root === "properties" ? c.interests : root === "messages" ? c.messages : c.cases}
     >
       <p>{c.scope}</p>
-      {props.session.account.kind !== "staff" && root === "overview" ? (
+      {root === "overview" ? (
         <a className={workflowLink} href={`/${props.locale}/proposals`}>
           {c.proposals}
         </a>
@@ -229,16 +230,7 @@ export async function CaseIndexScreen(
                   <bdi>{row.reference}</bdi> · {row.title}
                 </a>
                 <p>
-                  {c.owned}:{" "}
-                  {props.session.account.kind === "staff" ? (
-                    <CoverageOwner
-                      name={row.ownerName}
-                      needsCoverage={row.needsCoverage && row.disposition !== "closed"}
-                      locale={props.locale}
-                    />
-                  ) : (
-                    (row.ownerName ?? "—")
-                  )}
+                  {c.owned}: {row.ownerName ?? "—"}
                 </p>
                 <p className="text-text-muted">
                   {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
