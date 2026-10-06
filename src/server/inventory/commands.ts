@@ -49,6 +49,8 @@ import {
 } from "./contracts";
 import { uneditablePriceEvidence } from "./working-draft";
 
+export { inventoryList, inventoryListPage } from "./queries";
+
 export interface InventoryCommand {
   actor: Actor;
   operationId: string;
@@ -987,27 +989,6 @@ export async function recordSellerInstruction(
   );
 }
 
-export async function inventoryList(db: Executor, actor: Actor) {
-  await human(db, actor);
-  const rows = await db
-    .select({ listing: listings, property: properties })
-    .from(listings)
-    .innerJoin(properties, eq(properties.id, listings.propertyId))
-    .orderBy(desc(listings.updatedAt))
-    .limit(200);
-  const visible = await Promise.all(
-    rows.map(async (row) =>
-      (await can(db, actor, "listing.read", {
-        type: "listing",
-        id: row.listing.id,
-        propertyId: row.property.id,
-      }))
-        ? row
-        : null,
-    ),
-  );
-  return visible.filter((row) => row !== null);
-}
 export async function inventoryDetail(db: Executor, actor: Actor, reference: string) {
   await human(db, actor);
   const listing = await load(db, actor, reference);
