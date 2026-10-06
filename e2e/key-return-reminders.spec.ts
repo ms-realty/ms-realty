@@ -92,7 +92,8 @@ for (const locale of ["bg", "ru", "en"])
         await page
           .locator("[data-key-return-reminders]")
           .screenshot({ path: testInfo.outputPath(`key-reminder-${locale}-${javascript}.png`) });
-        await reminder.getByRole("link", { name: f.keyReference, exact: true }).click();
+        // The whole row is the link: its name starts with the key reference.
+        await reminder.getByRole("link", { name: f.keyReference }).click();
         const detail = page.url();
         await page.getByLabel(c.state, { exact: true }).selectOption("stored");
         await page

@@ -335,7 +335,8 @@ for (const javaScriptEnabled of [true, false])
       await context.clearCookies();
       await context.addCookies([cookie(receiver.brokerToken)]);
       await page.goto(hostUrl("staff", "/en/today"));
-      await page.getByRole("link", { name: "Awaiting my acceptance", exact: true }).click();
+      // The queue heading links to the queue and carries its count.
+      await page.getByRole("link", { name: /^Awaiting my acceptance/ }).click();
       await expect(page.locator(`a[href="${taskHref}"]`)).toHaveCount(0);
       expect(await findPaginatedRecord(page, taskHref, { viewportWidth: 320 })).toBe(true);
       expect(Number(new URL(page.url()).searchParams.get("page"))).toBeGreaterThan(1);
