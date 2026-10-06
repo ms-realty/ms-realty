@@ -5,6 +5,7 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 import * as schema from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { staffFixture } from "../cases/testing";
+import { translationWorkbench } from "../inventory/translations";
 import { createCase, createProperty, type GrantSpec } from "../testing";
 import { listInbox, readToday } from "./queries";
 
@@ -128,7 +129,7 @@ async function listing(
   const [row] = await t.db
     .insert(schema.listings)
     .values({
-      reference: `MS-O01-${randomUUID()}`,
+      reference: `MS-O01-${randomUUID()}`.toUpperCase(),
       propertyId,
       purpose: "sale",
       commercialState: "withdrawn",
@@ -340,6 +341,89 @@ it("O01 Continue includes owned Case work and editable listing drafts only withi
   expect(revoked.draftContinue.total).toBe(0);
 });
 
+it("O01 Continue protects private Case actions and deadline ordering under mixed internal grants", async () => {
+  const staff = await staffFixture(t.db);
+  const internal = await createCase(t.db, staff.id);
+  const ordinary = await createCase(t.db, staff.id);
+  const summarized = await createCase(t.db, staff.id);
+  const paused = await createCase(t.db, staff.id);
+  const now = new Date();
+  const dueAt = new Date(now.getTime() - 1000);
+  const reviewAt = new Date(now.getTime() + 1000);
+  const publicDueAt = new Date(now.getTime() + 60000);
+  for (const [index, id] of [internal, ordinary, summarized, paused].entries()) {
+    await t.db
+      .update(schema.cases)
+      .set({
+        nextAction: `Synthetic private next action ${index}`,
+        nextActionDueAt: dueAt,
+        waitingOn: `Synthetic private waiting dependency ${index}`,
+        reviewAt,
+        updatedAt: new Date(now.getTime() + index),
+      })
+      .where(eq(schema.cases.id, id));
+  }
+  await t.db
+    .update(schema.cases)
+    .set({
+      clientSummary: "Synthetic shared next step",
+      nextActionDueAt: publicDueAt,
+      updatedAt: new Date(now.getTime() + 2),
+    })
+    .where(eq(schema.cases.id, summarized));
+  await t.db
+    .update(schema.cases)
+    .set({
+      disposition: "paused",
+      dispositionReason: "Synthetic private pause reason",
+      updatedAt: new Date(now.getTime() + 3),
+    })
+    .where(eq(schema.cases.id, paused));
+  await narrow(staff.id, [
+    { capability: "case.read" },
+    { capability: "case.read_internal", recordType: "case", recordId: internal },
+  ]);
+  const before = (await readToday(t.db, staff.session, now)).caseContinue;
+  expect(before).toMatchObject({ status: "ready", total: 4 });
+  expect(before.rows.find((row) => row.id === internal)).toMatchObject({
+    nextAction: "Synthetic private next action 0",
+    nextActionDueAt: dueAt,
+    waitingOn: "Synthetic private waiting dependency 0",
+    reviewAt,
+    dueAt,
+  });
+  for (const id of [ordinary, paused]) {
+    expect(before.rows.find((row) => row.id === id)).toMatchObject({
+      nextAction: null,
+      nextActionDueAt: null,
+      waitingOn: null,
+      reviewAt: null,
+      dueAt: null,
+    });
+  }
+  expect(before.rows.find((row) => row.id === summarized)).toMatchObject({
+    nextAction: "Synthetic shared next step",
+    nextActionDueAt: publicDueAt,
+    waitingOn: null,
+    reviewAt: null,
+    dueAt: publicDueAt,
+  });
+  // Private deadlines must not select, count or rank a read-only Case in the Today page.
+  await t.db
+    .update(schema.cases)
+    .set({
+      nextActionDueAt: new Date(now.getTime() - 3600000),
+      reviewAt: new Date(now.getTime() - 7200000),
+    })
+    .where(eq(schema.cases.id, ordinary));
+  const after = (await readToday(t.db, staff.session, now)).caseContinue;
+  expect(after.total).toBe(before.total);
+  expect(after.rows.map((row) => row.id)).toEqual(before.rows.map((row) => row.id));
+  expect(after.rows.find((row) => row.id === ordinary)).toEqual(
+    before.rows.find((row) => row.id === ordinary),
+  );
+});
+
 it("O01 review counts honor reviewer records and locales and exclude superseded source translations", async () => {
   const staff = await staffFixture(t.db);
   const review = await listing(staff.id, "in_review");
@@ -386,6 +470,42 @@ it("O01 review counts honor reviewer records and locales and exclude superseded 
   expect(JSON.stringify([today.listingReviews, today.translationReviews])).not.toContain(
     "Synthetic unpublished",
   );
+});
+
+it("O01 translation reviews match the workbench when both read and review grants are locale scoped", async () => {
+  const staff = await staffFixture(t.db);
+  const candidate = await listing(staff.id, "in_review");
+  const source = await revision(candidate, 1);
+  await t.db
+    .update(schema.listings)
+    .set({ approvedRevisionId: source.id })
+    .where(eq(schema.listings.id, candidate.id));
+  const translations = await t.db
+    .insert(schema.localizedRevisions)
+    .values([
+      { listingId: candidate.id, sourceRevisionId: source.id, locale: "ru", state: "reviewing" },
+      { listingId: candidate.id, sourceRevisionId: source.id, locale: "en", state: "reviewing" },
+    ])
+    .returning();
+  await narrow(staff.id, [
+    { capability: "listing.read", recordType: "listing", recordId: candidate.id, locales: ["ru"] },
+    {
+      capability: "translation.review",
+      recordType: "property",
+      recordId: candidate.propertyId,
+      locales: ["ru", "en"],
+    },
+  ]);
+  expect(
+    (await translationWorkbench(t.db, staff.actor, candidate.reference, "ru")).translation?.id,
+  ).toBe(translations[0]?.id);
+  await expect(
+    translationWorkbench(t.db, staff.actor, candidate.reference, "en"),
+  ).rejects.toMatchObject({ code: "forbidden" });
+  const today = await readToday(t.db, staff.session);
+  expect(today.translationReviews).toMatchObject({ status: "ready", total: 1, hasMore: false });
+  expect(today.translationReviews.rows.map((row) => row.id)).toEqual([translations[0]?.id]);
+  expect(today.listingReviews.total).toBe(0);
 });
 
 it("O01 delivery exceptions require the Case email read contract and exclude recipients and raw errors", async () => {
