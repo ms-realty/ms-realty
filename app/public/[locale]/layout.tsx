@@ -46,7 +46,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/p
         <DisclosureBehavior />
         <LocaleProvider locale={locale}>
           {children}
-          {config.gtmContainerId ? (
+          {/* P09: proxy marks share-token routes; no analytics may read their URL token. */}
+          {config.gtmContainerId && requestHeaders.get("x-msr-share-token-route") !== "1" ? (
             <AnalyticsConsent
               locale={locale}
               initialPreference={analyticsPreference(requestHeaders.get("cookie"))}

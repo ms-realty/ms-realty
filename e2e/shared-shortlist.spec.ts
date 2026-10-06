@@ -581,3 +581,37 @@ test("P09: the Hebrew recipient view is right-to-left and fits 320 px", async ({
   await other.context.close();
   expect(problems).toEqual([]);
 });
+
+test("P09: a consented recipient page mounts no analytics, so no tag can read the token", async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  // The browser suite runs without a container; run with GTM_CONTAINER_ID set to cover this.
+  test.skip(!process.env.GTM_CONTAINER_ID, "needs a configured GTM container");
+  const [listing] = seed(1);
+  if (!listing) throw new Error("No seeded listing");
+  await save(page, [listing]);
+  await enableSharing(page, listing);
+  const link = await createLink(page);
+  const { context, page: other } = await recipient(browser, baseURL, {});
+  await context.addCookies([
+    { name: "msr_analytics_consent", value: "v1.granted", url: baseURL ?? "" },
+  ]);
+  const tagRequests: string[] = [];
+  await context.route("https://www.googletagmanager.com/**", (route) => {
+    tagRequests.push(route.request().url());
+    return route.abort();
+  });
+  // Control: the same consent loads the tag on an allow-listed public page.
+  await other.goto("/en");
+  await expect.poll(() => tagRequests.length).toBeGreaterThan(0);
+  tagRequests.length = 0;
+  const response = await other.goto(`/en/share/${link.token}`);
+  expect(response?.headers()["content-security-policy"]).not.toContain("google");
+  await expect(other.getByRole("heading", { level: 1 })).toBeVisible();
+  await other.waitForLoadState("networkidle");
+  expect(tagRequests).toEqual([]);
+  await expect(other.locator('script[src*="googletagmanager"]')).toHaveCount(0);
+  await context.close();
+});
