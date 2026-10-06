@@ -339,6 +339,36 @@ test.describe("JavaScript on", () => {
     await retained.tab.reload();
     expect(retained.prompts).toEqual(["beforeunload"]);
 
+    // A kept editor whose operation was acknowledged never submits it again: Save reloads on a
+    // fresh operation with the edits restored, and no stale request is sent.
+    const kept = await open();
+    const keptOperation = await kept.tab.locator('input[name="_operationId"]').first().inputValue();
+    await kept.tab.context().addCookies([
+      {
+        name: "msr_saved_operation",
+        value: keptOperation,
+        url: origins.staff,
+        sameSite: "Strict",
+      },
+    ]);
+    const posts: string[] = [];
+    kept.tab.on("request", (request) => {
+      if (request.method() === "POST") posts.push(request.url());
+    });
+    await kept.source.fill("Synthetic contract, kept editor");
+    await kept.tab.getByRole("button", { name: "Save the facts" }).click();
+    await expect(
+      kept.tab.getByText("Unsaved changes from earlier on this page are restored.", {
+        exact: false,
+      }),
+    ).toBeVisible();
+    await expect(kept.source).toHaveValue("Synthetic contract, kept editor");
+    expect(await kept.tab.locator('input[name="_operationId"]').first().inputValue()).not.toBe(
+      keptOperation,
+    );
+    expect(posts).toEqual([]);
+    expect(kept.prompts).toEqual([]);
+
     // Acknowledged saves, from the dialog and from the form's own button, raise no prompt.
     const viaDialog = await open();
     await viaDialog.source.fill("Synthetic brokerage contract, section 2");

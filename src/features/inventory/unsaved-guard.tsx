@@ -35,16 +35,32 @@ export function UnsavedGuard({
         [...new FormData(editor)].filter(([name]) => !name.startsWith("_")).map(String),
       );
     const initial = snapshot();
-    // What the last save sent: an acknowledgement covers exactly that content, never later edits.
-    let submitted: string | null = null;
-    const submit = () => {
-      submitted = snapshot();
-    };
     const saved = () => {
       const id = editor.querySelector<HTMLInputElement>(
         `input[name="${formFields.operationId}"]`,
       )?.value;
       return Boolean(id) && document.cookie.split("; ").includes(`${savedOperationCookie}=${id}`);
+    };
+    // A page whose operation is already acknowledged (kept or restored after its save) must not
+    // submit that operation again: it would replay the first result and drop newer edits. Reload
+    // for a fresh operation instead; DraftKeeper brings the unsaved edits back.
+    const renew = () => {
+      leaving.current = true;
+      window.location.reload();
+    };
+    // What the last save sent: an acknowledgement covers exactly that content, never later edits.
+    let submitted: string | null = null;
+    const submit = (event: SubmitEvent) => {
+      if (saved()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        renew();
+        return;
+      }
+      submitted = snapshot();
+    };
+    const restored = (event: PageTransitionEvent) => {
+      if (event.persisted && saved()) renew();
     };
     const dirty = () => {
       if (leaving.current) return false;
@@ -79,8 +95,10 @@ export function UnsavedGuard({
     editor.addEventListener("submit", submit, true);
     document.addEventListener("click", click, true);
     window.addEventListener("beforeunload", unload);
+    window.addEventListener("pageshow", restored);
     return () => {
       editor.removeEventListener("submit", submit, true);
+      window.removeEventListener("pageshow", restored);
       document.removeEventListener("click", click, true);
       window.removeEventListener("beforeunload", unload);
     };
