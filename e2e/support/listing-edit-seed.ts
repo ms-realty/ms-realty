@@ -112,6 +112,7 @@ try {
       bgn: { reference: bgn.reference, listingId: bgn.listingId },
       twoAreas: { reference: twoAreas.reference, listingId: twoAreas.listingId },
       token: broker.token,
+      brokerId: broker.id,
       readerToken: readerSession.token,
     }),
   );
