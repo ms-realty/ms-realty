@@ -70,7 +70,8 @@ const en = {
     count: "Matches: {total}",
     more: "Show more",
     first: "Back to the first page",
-    restarted: "The list changed since that page; showing the first page.",
+    shortened: "Search uses up to {n} characters; the rest was left out.",
+    restarted: "That page is no longer available; showing the first page.",
   },
   o12: {
     title: "Edit listing",
@@ -257,7 +258,8 @@ const bg: Copy = {
     count: "Съвпадения: {total}",
     more: "Покажете още",
     first: "Към първата страница",
-    restarted: "Списъкът се промени след тази страница; показваме първата.",
+    shortened: "Търсенето използва до {n} знака; останалото е пропуснато.",
+    restarted: "Тази страница вече не е налична; показваме първата.",
   },
   o12: {
     title: "Редактиране на обява",
@@ -441,7 +443,8 @@ const ru: Copy = {
     count: "Совпадений: {total}",
     more: "Показать ещё",
     first: "К первой странице",
-    restarted: "Список изменился после этой страницы; показываем первую.",
+    shortened: "Поиск учитывает до {n} символов; остальное пропущено.",
+    restarted: "Эта страница больше недоступна; показываем первую.",
   },
   o12: {
     title: "Редактирование объявления",

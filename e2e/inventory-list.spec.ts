@@ -12,6 +12,7 @@ type Seed = {
   settled: string;
   draftOnly: string;
   session: string;
+  exhausted: string;
 };
 function seed(): Seed {
   return JSON.parse(
@@ -103,9 +104,23 @@ for (const javaScriptEnabled of [false, true])
       // A cursor from another list fails closed and restarts from the first page.
       await open(page, f, `/en/inventory?q=${f.token}&cursor=not-a-real-position`);
       await expect(
-        page.getByText("The list changed since that page; showing the first page."),
+        page.getByText("That page is no longer available; showing the first page."),
       ).toBeVisible();
       await expect(rows(page)).toHaveCount(4);
+
+      // A valid cursor whose later page has emptied restarts too, not "no results".
+      await open(page, f, `/en/inventory?q=${f.token}&cursor=${f.exhausted}`);
+      await expect(
+        page.getByText("That page is no longer available; showing the first page."),
+      ).toBeVisible();
+      await expect(rows(page)).toHaveCount(4);
+
+      // Search longer than the query accepts is cut at 200 characters, and says so.
+      await open(page, f, `/en/inventory?q=${"x".repeat(205)}`);
+      await expect(
+        page.getByText("Search uses up to 200 characters", { exact: false }),
+      ).toBeVisible();
+      await expect(page.getByLabel("Search", { exact: true })).toHaveAttribute("maxlength", "200");
 
       await open(page, f, `/en/inventory?q=${f.token}-nothing`);
       await expect(page.getByText("No listing matches this search.")).toBeVisible();

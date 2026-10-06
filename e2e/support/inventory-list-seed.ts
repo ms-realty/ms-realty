@@ -7,6 +7,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
 import { staffFixture } from "@/server/cases/testing";
+import { hashRequest } from "@/server/crypto";
 import { createListingFixture, type ListingFixtureOptions } from "@/server/publication/testing";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -83,8 +84,36 @@ try {
     title: "Synthetic translation under review",
     body: { description: "Synthetic translation text." },
   });
+  // A valid cursor positioned after the oldest match: its later page is empty, total is not.
+  const [oldest] = await db
+    .select({ id: schema.listings.id, createdAt: schema.listings.createdAt })
+    .from(schema.listings)
+    .where(eq(schema.listings.reference, review))
+    .limit(1);
+  const exhausted = Buffer.from(
+    JSON.stringify({
+      version: 1,
+      createdAt: oldest?.createdAt.toISOString().replace(/\.(\d{3})Z$/, ".$1000Z"),
+      id: oldest?.id,
+      filter: hashRequest({
+        actor: broker.actor,
+        q: token,
+        purpose: null,
+        type: null,
+        view: "all",
+      }),
+    }),
+  ).toString("base64url");
   console.log(
-    JSON.stringify({ token, review, availability, settled, draftOnly, session: broker.token }),
+    JSON.stringify({
+      token,
+      review,
+      availability,
+      settled,
+      draftOnly,
+      session: broker.token,
+      exhausted,
+    }),
   );
 } finally {
   await connection.end();

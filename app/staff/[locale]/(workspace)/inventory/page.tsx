@@ -6,10 +6,11 @@
 import { getDb } from "@/db/client";
 import { listingPurposes, propertyTypes } from "@/domain/facts";
 import { inventoryCopy, optionLabel } from "@/features/inventory/copy";
+import { rowAction, rowDestination } from "@/features/inventory/row-action";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { isAppError } from "@/server/errors";
-import { type InventoryListRow, inventoryListPage } from "@/server/inventory/queries";
+import { inventoryListPage } from "@/server/inventory/queries";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass } from "@/ui/field-class";
@@ -17,6 +18,7 @@ import { ChevronEndIcon, HomeIcon } from "@/ui/icons";
 
 type Query = { q?: string; view?: string; purpose?: string; type?: string; cursor?: string };
 type RawQuery = Record<string, string | string[] | undefined>;
+const searchLimit = 200;
 
 /** One value per filter: a repeated parameter (?q=a&q=b) keeps its first value. */
 function scalar(value: string | string[] | undefined) {
@@ -47,10 +49,14 @@ export default async function InventoryPage({
   const view = query.view === "needs" || query.view === "mine" ? query.view : "all";
   const purpose = listingPurposes.find((value) => value === query.purpose);
   const type = propertyTypes.find((value) => value === query.type);
-  const filters = { q: query.q?.trim() ?? "", purpose, type, view } as const;
-  // A cursor from another filter or a stale list fails closed; start again from page one.
+  // The query accepts at most 200 search characters; longer input is cut there, and said so.
+  const typed = query.q?.trim() ?? "";
+  const shortened = typed.length > searchLimit;
+  const filters = { q: typed.slice(0, searchLimit), purpose, type, view } as const;
+  // A cursor from another filter or a stale list fails closed, and a later page that has
+  // emptied (rows=[] while matches remain) is not "no results": both restart at page one.
   let restarted = false;
-  const page = await inventoryListPage(db, session.actor, {
+  let page = await inventoryListPage(db, session.actor, {
     ...filters,
     cursor: query.cursor,
   }).catch((error) => {
@@ -58,6 +64,10 @@ export default async function InventoryPage({
     restarted = true;
     return inventoryListPage(db, session.actor, filters);
   });
+  if (query.cursor && !restarted && page.rows.length === 0 && page.total > 0) {
+    restarted = true;
+    page = await inventoryListPage(db, session.actor, filters);
+  }
   const q = filters.q;
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
@@ -67,19 +77,13 @@ export default async function InventoryPage({
   });
   const known = (state: string, value: string) =>
     state === "known" && value && Number.isFinite(Number(value)) ? Number(value) : null;
-  const destination = (row: InventoryListRow) => {
-    const action = row.actions[0];
-    return action?.kind === "translation_review"
-      ? `/${locale}/inventory/${row.listing.reference}/translations/${action.locale}`
-      : `/${locale}/inventory/${row.listing.reference}`;
-  };
   const shown = page.rows.map((row) => {
     const price = known(row.workingDraft.priceState, row.workingDraft.price);
     const area = known(row.workingDraft.areaState, row.workingDraft.area);
-    const action = row.actions[0];
+    const action = rowAction(row.actions);
     return {
       ...row,
-      href: destination(row),
+      href: rowDestination(locale, row.listing.reference, action),
       detail: [
         price === null ? null : money.format(price),
         area === null ? null : `${new Intl.NumberFormat(locale).format(area)} m²`,
@@ -127,7 +131,8 @@ export default async function InventoryPage({
               id="inventory-search"
               name="q"
               type="search"
-              defaultValue={query.q ?? ""}
+              maxLength={searchLimit}
+              defaultValue={filters.q}
               aria-describedby="inventory-search-hint"
               className={cx(controlClass, "min-h-12 py-2")}
             />
@@ -246,6 +251,11 @@ export default async function InventoryPage({
         </ul>
       )}
       {restarted ? <p className="text-dense text-text-muted">{o10.restarted}</p> : null}
+      {shortened ? (
+        <p role="status" className="text-dense text-text-muted">
+          {o10.shortened.replace("{n}", String(searchLimit))}
+        </p>
+      ) : null}
       {page.total > 0 ? (
         <div className="flex flex-wrap items-center gap-4 text-dense text-text-muted">
           <span>
