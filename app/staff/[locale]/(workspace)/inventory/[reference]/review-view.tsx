@@ -22,10 +22,15 @@ import type { InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
+import { agencyTimeZone } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
 import { publicationReadiness } from "@/server/publication/commands";
 import { eligiblePublications, listingSlug, termsFacts } from "@/server/publication/presentation";
+import {
+  type PublicationReviewDecision,
+  publicationReviewActors,
+} from "@/server/publication/review-actors";
 import { buttonClass } from "@/ui/button-class";
 import { CheckIcon, DocumentIcon, ExternalIcon, NoPhotoIcon, WarningIcon } from "@/ui/icons";
 import { submitInventoryDecision } from "../actions";
@@ -325,6 +330,30 @@ export async function ReviewView({
         ? readiness
         : await publicationReadiness(getDb(), actor, reference, chosen.locale);
     const localInput = local.input;
+    // Who recorded the exact decisions this package carries (never a newer approval or the
+    // author); a name is today's directory name, and a missing identity is said plainly.
+    const reviewers = await publicationReviewActors(getDb(), actor, {
+      reference,
+      manifestId: chosen.id,
+    }).catch(() => null);
+    const when = new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: agencyTimeZone,
+    });
+    const decided = (recorded: PublicationReviewDecision | undefined) => {
+      if (recorded?.binding !== "matched")
+        return recorded?.binding === "mismatched" ? o16.decisionMismatch : o16.decisionMissing;
+      const decider = recorded.decider;
+      return fill(o16.decidedBy, {
+        name:
+          decider?.identityState === "resolved" && decider.displayName
+            ? `${decider.displayName} ${o16.currentName}`
+            : o16.deciderUnknown,
+        when: recorded.decidedAt ? when.format(recorded.decidedAt) : "—",
+        state: o16.approvalStates[recorded.state],
+      });
+    };
     return (
       <FocusedState closeHref={review} closeLabel={copy.o12.close}>
         <h1 className="pe-12 text-heading font-semibold sm:text-title">
@@ -347,6 +376,8 @@ export async function ReviewView({
                 ? o16.approvedScope
                 : o16.missing,
             ],
+            [o16.rows.factualDecision, decided(reviewers?.factual)],
+            [o16.rows.editorialDecision, decided(reviewers?.editorial)],
             [o16.rows.seller, localInput.sellerInstructionValid ? o16.sellerCurrent : o16.missing],
             [
               o16.rows.media,
