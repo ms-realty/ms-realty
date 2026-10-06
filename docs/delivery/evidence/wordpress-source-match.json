@@ -42,9 +42,7 @@
   "identities": [
     {
       "id": "f427abbdddcd857eaeb0f1cd",
-      "sourceUrls": [
-        "https://makler-realty.com/category/category/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/category/category/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/category/category/",
@@ -66,9 +64,7 @@
     },
     {
       "id": "8f57852140689f707c1da8d9",
-      "sourceUrls": [
-        "https://makler-realty.com/category/uncategorized/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/category/uncategorized/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/category/uncategorized/",
@@ -90,9 +86,7 @@
     },
     {
       "id": "8ccff57ae5790cde9de6785d",
-      "sourceUrls": [
-        "https://makler-realty.com/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
@@ -114,9 +108,7 @@
     },
     {
       "id": "0fa55fa2c7790938c737c029",
-      "sourceUrls": [
-        "https://makler-realty.com/de/bulgarien-leben-im-kurort-sandanski/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/de/bulgarien-leben-im-kurort-sandanski/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/de/bulgarien-leben-im-kurort-sandanski/",
@@ -141,13 +133,7 @@
           "sourceTextBytes": 3806,
           "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 0,
           "linkedPublishedListings": 0,
           "linkedPublishedPosts": 0
@@ -156,9 +142,7 @@
     },
     {
       "id": "aefc233e4d0ec603eff52926",
-      "sourceUrls": [
-        "https://makler-realty.com/de/transfer-thessaloniki-bansko/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/de/transfer-thessaloniki-bansko/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/de/transfer-thessaloniki-bansko/",
@@ -183,13 +167,7 @@
           "sourceTextBytes": 3806,
           "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 0,
           "linkedPublishedListings": 0,
           "linkedPublishedPosts": 0
@@ -198,9 +176,7 @@
     },
     {
       "id": "f7a6fc7deaa418555adbf355",
-      "sourceUrls": [
-        "https://makler-realty.com/en/transfer-thessaloniki-bansko/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/en/transfer-thessaloniki-bansko/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/en/transfer-thessaloniki-bansko/",
@@ -258,9 +234,7 @@
     },
     {
       "id": "18c0b5691f108c4031cae92c",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/dom/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/nl/category-type/dom/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/nl/category-type/dom/",
@@ -273,13 +247,7 @@
           "sourceTextBytes": 293,
           "sourceTextSha256": "62705dc44a99aad37f94bd8d03fc2f9c6dd2acdd3b1c30d67f0120fb98ea9ec3",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 28,
           "linkedPublishedListings": 28,
           "linkedPublishedPosts": 0
@@ -288,9 +256,7 @@
     },
     {
       "id": "e7edeae7d8093730f2162771",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/house-floor/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/nl/category-type/house-floor/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/nl/category-type/house-floor/",
@@ -303,13 +269,7 @@
           "sourceTextBytes": 250,
           "sourceTextSha256": "47563e934f2052629fe315a8a4cfd73b1fa4153dac9ace0975fc5a203514f270",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 6,
           "linkedPublishedListings": 6,
           "linkedPublishedPosts": 0
@@ -318,9 +278,7 @@
     },
     {
       "id": "772f3a0505e284b73a0dc82f",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/office/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/nl/category-type/office/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/nl/category-type/office/",
@@ -333,13 +291,7 @@
           "sourceTextBytes": 211,
           "sourceTextSha256": "fd414cadd0f9ce88ea74f4b88969216a5d9a123219fc70c62e7d24b264576ebc",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 5,
           "linkedPublishedListings": 5,
           "linkedPublishedPosts": 0
@@ -348,9 +300,7 @@
     },
     {
       "id": "0a97b844445a41e85a7bb879",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/studio/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/nl/category-type/studio/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/nl/category-type/studio/",
@@ -363,12 +313,7 @@
           "sourceTextBytes": 205,
           "sourceTextSha256": "6cd90e6d63b53cdac4f5a0142a2d1b5d8f0c944d86b1f5ca3901bb09d014351b",
           "requestedLocalePresent": false,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "ru"],
           "recordedTermCount": 4,
           "linkedPublishedListings": 4,
           "linkedPublishedPosts": 0
@@ -377,9 +322,7 @@
     },
     {
       "id": "3bc6064df807891a14cddc3e",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/villa/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/nl/category-type/villa/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/nl/category-type/villa/",
@@ -392,13 +335,7 @@
           "sourceTextBytes": 293,
           "sourceTextSha256": "e115cd3675bdbee637b5be57e53ccd58da30cea0cc9c9404a765ee6958805f24",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 25,
           "linkedPublishedListings": 25,
           "linkedPublishedPosts": 0
@@ -422,13 +359,7 @@
           "sourceTextBytes": 316,
           "sourceTextSha256": "8a61dccf192f1fae74d0dea597fc54fe04b724bd403f4fd970de16def3270e38",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 10,
           "linkedPublishedListings": 10,
           "linkedPublishedPosts": 0
@@ -452,13 +383,7 @@
           "sourceTextBytes": 459,
           "sourceTextSha256": "afc4b520e55c8387aba79d49235856fc1136af93aad98fdd1996c0162a0dbdf7",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 19,
           "linkedPublishedListings": 19,
           "linkedPublishedPosts": 0
@@ -467,9 +392,7 @@
     },
     {
       "id": "ec6865e893f8a0d1113fa7d8",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/resort/nafplio/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/nl/resort/nafplio/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/nl/resort/nafplio/",
@@ -506,13 +429,7 @@
           "sourceTextBytes": 3806,
           "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
           "requestedLocalePresent": true,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 0,
           "linkedPublishedListings": 0,
           "linkedPublishedPosts": 0
@@ -536,9 +453,7 @@
           "sourceTextBytes": 1752,
           "sourceTextSha256": "0b9ef3bd9be4e5dcdb6fa759cdfa6bad0edb3f0640c7267fd5658933371ad985",
           "requestedLocalePresent": false,
-          "localeMarkers": [
-            "ru"
-          ],
+          "localeMarkers": ["ru"],
           "recordedTermCount": 1,
           "linkedPublishedListings": 1,
           "linkedPublishedPosts": 0
@@ -547,9 +462,7 @@
     },
     {
       "id": "00762ec63bd43584e5a7871c",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/transfer-thessaloniki-bansko/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/nl/transfer-thessaloniki-bansko/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/nl/transfer-thessaloniki-bansko/",
@@ -559,9 +472,7 @@
     },
     {
       "id": "c1c9f8607afe3fd2c41a98d1",
-      "sourceUrls": [
-        "https://makler-realty.com/resort/skiing-resort/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/resort/skiing-resort/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/resort/skiing-resort/",
@@ -574,13 +485,7 @@
           "sourceTextBytes": 273,
           "sourceTextSha256": "95fdd2a127e664e70e21af3770aaf733f99c5a3cf765a8199d3d9b6d6d734a6e",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 0,
           "linkedPublishedListings": 0,
           "linkedPublishedPosts": 0
@@ -604,13 +509,7 @@
           "sourceTextBytes": 3806,
           "sourceTextSha256": "4159c8cbd337d22874634982e8514938f3b6772b5601ebf2c1b1efd606219679",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en",
-            "nl",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "de", "en", "nl", "ru"],
           "recordedTermCount": 0,
           "linkedPublishedListings": 0,
           "linkedPublishedPosts": 0
@@ -634,11 +533,7 @@
           "sourceTextBytes": 452,
           "sourceTextSha256": "5931b222033a4ebe3e33e1c39d8785c91af2c46400bbc82d7a83b50ea93a878e",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "de",
-            "en"
-          ],
+          "localeMarkers": ["bg", "de", "en"],
           "recordedTermCount": 0,
           "linkedPublishedListings": 0,
           "linkedPublishedPosts": 0
@@ -647,9 +542,7 @@
     },
     {
       "id": "a3bbc78aa5b5cb8aad66a60e",
-      "sourceUrls": [
-        "https://makler-realty.com/transfer-thessaloniki-bansko/"
-      ],
+      "sourceUrls": ["https://makler-realty.com/transfer-thessaloniki-bansko/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.com/transfer-thessaloniki-bansko/",
@@ -659,10 +552,7 @@
     },
     {
       "id": "5bcfd16f674cb299f35b417f",
-      "sourceUrls": [
-        "https://makler-realty.ru",
-        "https://makler-realty.ru/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru", "https://makler-realty.ru/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru",
@@ -676,9 +566,7 @@
     },
     {
       "id": "7ed678dd16b3bd34b62e0bf2",
-      "sourceUrls": [
-        "https://makler-realty.ru/balcon/1/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/balcon/1/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/balcon/1/",
@@ -700,9 +588,7 @@
     },
     {
       "id": "b2cf4bf4606de8aeb61554a3",
-      "sourceUrls": [
-        "https://makler-realty.ru/balcon/2/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/balcon/2/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/balcon/2/",
@@ -724,9 +610,7 @@
     },
     {
       "id": "0345c324db7a6064ddc81343",
-      "sourceUrls": [
-        "https://makler-realty.ru/balcon/3/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/balcon/3/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/balcon/3/",
@@ -748,9 +632,7 @@
     },
     {
       "id": "ec0036927caf6f78b5024204",
-      "sourceUrls": [
-        "https://makler-realty.ru/balcon/4/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/balcon/4/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/balcon/4/",
@@ -772,9 +654,7 @@
     },
     {
       "id": "1f3c4cf367a96f355019ea67",
-      "sourceUrls": [
-        "https://makler-realty.ru/bedroom/1/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/bedroom/1/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/bedroom/1/",
@@ -796,9 +676,7 @@
     },
     {
       "id": "1544d7d4ce1c16d2f44005d9",
-      "sourceUrls": [
-        "https://makler-realty.ru/bedroom/2/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/bedroom/2/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/bedroom/2/",
@@ -820,9 +698,7 @@
     },
     {
       "id": "8718d8136ef5d1cfd92e3ccf",
-      "sourceUrls": [
-        "https://makler-realty.ru/bedroom/3/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/bedroom/3/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/bedroom/3/",
@@ -844,9 +720,7 @@
     },
     {
       "id": "50e7d6fae38026ab946cb695",
-      "sourceUrls": [
-        "https://makler-realty.ru/bedroom/4/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/bedroom/4/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/bedroom/4/",
@@ -868,9 +742,7 @@
     },
     {
       "id": "489161f6102e2516f99cc6c9",
-      "sourceUrls": [
-        "https://makler-realty.ru/bedroom/5/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/bedroom/5/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/bedroom/5/",
@@ -892,9 +764,7 @@
     },
     {
       "id": "12fb0238695d0fd61e588469",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/apartment/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/apartment/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/apartment/",
@@ -907,10 +777,7 @@
           "sourceTextBytes": 335,
           "sourceTextSha256": "ecc4bb56e6dafcfc8aacea5d719361f55821f9219330ee7e7702e3a261727f85",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 13,
           "linkedPublishedListings": 13,
           "linkedPublishedPosts": 0
@@ -919,9 +786,7 @@
     },
     {
       "id": "8a27d493f88e3789cb089b5b",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/commercial-area/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/commercial-area/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/commercial-area/",
@@ -934,10 +799,7 @@
           "sourceTextBytes": 218,
           "sourceTextSha256": "04e05b4c324c97d73415ac4bd0877e900e28ccb8b2bece8584128de61bbbfc27",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 8,
           "linkedPublishedListings": 8,
           "linkedPublishedPosts": 0
@@ -946,9 +808,7 @@
     },
     {
       "id": "9f06c18dff5931e567afd25f",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/dom/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/dom/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/dom/",
@@ -961,10 +821,7 @@
           "sourceTextBytes": 214,
           "sourceTextSha256": "f36f18ff2c0c21050da7cbb20088424573039ef0e8e0b2740888274571b9516d",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 16,
           "linkedPublishedListings": 16,
           "linkedPublishedPosts": 0
@@ -973,9 +830,7 @@
     },
     {
       "id": "fd0276c44f9b5137cca268c8",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/elite-realtor/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/elite-realtor/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/elite-realtor/",
@@ -988,10 +843,7 @@
           "sourceTextBytes": 151,
           "sourceTextSha256": "953d1feb9f45cb0a62afee9ff33e9c7e97ed91fc3cb92b78832d5f1e599bcc89",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 6,
           "linkedPublishedListings": 6,
           "linkedPublishedPosts": 0
@@ -1000,9 +852,7 @@
     },
     {
       "id": "f8ab9f5c93f20d5446875e71",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/hotel/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/hotel/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/hotel/",
@@ -1024,9 +874,7 @@
     },
     {
       "id": "2b1236ceb793117c3efdbf75",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/house-floor/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/house-floor/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/house-floor/",
@@ -1048,9 +896,7 @@
     },
     {
       "id": "bd9ea3d242273598050f3a4d",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/industrial-building/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/industrial-building/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/industrial-building/",
@@ -1072,9 +918,7 @@
     },
     {
       "id": "3c25c56f221f328a3ab5a367",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/magazin/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/magazin/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/magazin/",
@@ -1096,9 +940,7 @@
     },
     {
       "id": "7ed77a947d3f175fe559c861",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/office-building/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/office-building/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/office-building/",
@@ -1120,9 +962,7 @@
     },
     {
       "id": "4b0b9bfc9cd3456a70db0c7e",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/office/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/office/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/office/",
@@ -1135,10 +975,7 @@
           "sourceTextBytes": 225,
           "sourceTextSha256": "302a8e1d999c9437420771b7a8caf5e2c30b2779c338922de7c24b63800801d7",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 2,
           "linkedPublishedListings": 2,
           "linkedPublishedPosts": 0
@@ -1147,9 +984,7 @@
     },
     {
       "id": "d0137217e2841f29b68e8f9e",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/restaurant/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/restaurant/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/restaurant/",
@@ -1171,9 +1006,7 @@
     },
     {
       "id": "17b8b5cc64b8ecbe93ebd850",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/studio/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/studio/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/studio/",
@@ -1186,10 +1019,7 @@
           "sourceTextBytes": 185,
           "sourceTextSha256": "5f4ca38c659461a9b3a550d8f787347558effbebc0a54d35aed76f48a5a87a08",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 1,
           "linkedPublishedListings": 1,
           "linkedPublishedPosts": 0
@@ -1198,9 +1028,7 @@
     },
     {
       "id": "1c7322cec5bc1a157a13e632",
-      "sourceUrls": [
-        "https://makler-realty.ru/category-type/villa/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category-type/villa/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category-type/villa/",
@@ -1213,10 +1041,7 @@
           "sourceTextBytes": 197,
           "sourceTextSha256": "36df3d70a0d4b191d0e7cf7406b7ca8786f51f7d7a2020c2f699930541cd1211",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 12,
           "linkedPublishedListings": 12,
           "linkedPublishedPosts": 0
@@ -1240,10 +1065,7 @@
           "sourceTextBytes": 368,
           "sourceTextSha256": "27598c3942431aab26e66f26ad5ee85d7abb96a2d9c03a161be11cac3d8324cb",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 6,
           "linkedPublishedListings": 6,
           "linkedPublishedPosts": 0
@@ -1267,10 +1089,7 @@
           "sourceTextBytes": 204,
           "sourceTextSha256": "e696796554369fbf01bfa08c0d4313ed7762873daa46e9f9b3b7baacf116e98e",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 18,
           "linkedPublishedListings": 18,
           "linkedPublishedPosts": 0
@@ -1279,9 +1098,7 @@
     },
     {
       "id": "e0e69e7ab73de5dcd6f2346d",
-      "sourceUrls": [
-        "https://makler-realty.ru/category/uncategorized/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category/uncategorized/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category/uncategorized/",
@@ -1303,9 +1120,7 @@
     },
     {
       "id": "71ff222170a48f174e801cf9",
-      "sourceUrls": [
-        "https://makler-realty.ru/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/",
@@ -1327,9 +1142,7 @@
     },
     {
       "id": "4e9d5cb9d170b36225d617dd",
-      "sourceUrls": [
-        "https://makler-realty.ru/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
@@ -1351,9 +1164,7 @@
     },
     {
       "id": "1057f2897c86269c44ec6192",
-      "sourceUrls": [
-        "https://makler-realty.ru/floors/1/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/floors/1/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/floors/1/",
@@ -1375,9 +1186,7 @@
     },
     {
       "id": "a1ff749b2c36b4247e9c2d78",
-      "sourceUrls": [
-        "https://makler-realty.ru/floors/2/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/floors/2/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/floors/2/",
@@ -1399,9 +1208,7 @@
     },
     {
       "id": "b0dbfc2ee2ff9de98edbad71",
-      "sourceUrls": [
-        "https://makler-realty.ru/floors/3/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/floors/3/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/floors/3/",
@@ -1423,9 +1230,7 @@
     },
     {
       "id": "f0e7a4bd783ee1315b245b37",
-      "sourceUrls": [
-        "https://makler-realty.ru/floors/4/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/floors/4/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/floors/4/",
@@ -1447,9 +1252,7 @@
     },
     {
       "id": "4f7ae5e6948d3d27b5bf92fd",
-      "sourceUrls": [
-        "https://makler-realty.ru/floors/5/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/floors/5/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/floors/5/",
@@ -1471,9 +1274,7 @@
     },
     {
       "id": "41b48e62d2680e90aff9d2a0",
-      "sourceUrls": [
-        "https://makler-realty.ru/listing/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/listing/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/listing/",
@@ -1483,9 +1284,7 @@
     },
     {
       "id": "f67a98e21dace5f98af5b574",
-      "sourceUrls": [
-        "https://makler-realty.ru/listing/uchastok-strumiani/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/listing/uchastok-strumiani/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/listing/uchastok-strumiani/",
@@ -1495,9 +1294,7 @@
     },
     {
       "id": "bbe07f940adc32609d9c8f9c",
-      "sourceUrls": [
-        "https://makler-realty.ru/location/bulgaria/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/location/bulgaria/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/location/bulgaria/",
@@ -1510,10 +1307,7 @@
           "sourceTextBytes": 141,
           "sourceTextSha256": "af7404cc02da9ff06e7187c68dbcda8ee78367cd50aa1c6dcd47ac9d5754529c",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 50,
           "linkedPublishedListings": 50,
           "linkedPublishedPosts": 0
@@ -1522,9 +1316,7 @@
     },
     {
       "id": "1015d860c092a2a849f39c2a",
-      "sourceUrls": [
-        "https://makler-realty.ru/location/greece-property/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/location/greece-property/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/location/greece-property/",
@@ -1537,10 +1329,7 @@
           "sourceTextBytes": 98,
           "sourceTextSha256": "e59d534670ec2e805284c331c603f9871febc28eef1a32a74ba472f299bdf469",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 1,
           "linkedPublishedListings": 1,
           "linkedPublishedPosts": 0
@@ -1549,9 +1338,7 @@
     },
     {
       "id": "97d77666c8f9c34473642028",
-      "sourceUrls": [
-        "https://makler-realty.ru/property/rent/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/property/rent/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/property/rent/",
@@ -1564,10 +1351,7 @@
           "sourceTextBytes": 462,
           "sourceTextSha256": "e1804d5cbe1c3d6f1b03bfd5d1489fc2eae159edb5bead036ccc1244708cf57c",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 6,
           "linkedPublishedListings": 6,
           "linkedPublishedPosts": 0
@@ -1576,9 +1360,7 @@
     },
     {
       "id": "8ca16435f71ec311c71d0a63",
-      "sourceUrls": [
-        "https://makler-realty.ru/property/sell/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/property/sell/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/property/sell/",
@@ -1591,10 +1373,7 @@
           "sourceTextBytes": 204,
           "sourceTextSha256": "b9d35693f369168e3753b03966f370393319e0de58c2f29f59445b163628c1d0",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 45,
           "linkedPublishedListings": 45,
           "linkedPublishedPosts": 0
@@ -1603,9 +1382,7 @@
     },
     {
       "id": "4b5240e7d22ffee75854ac13",
-      "sourceUrls": [
-        "https://makler-realty.ru/resort/other/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/resort/other/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/resort/other/",
@@ -1627,9 +1404,7 @@
     },
     {
       "id": "b3e8c5ab367d58355ea26e53",
-      "sourceUrls": [
-        "https://makler-realty.ru/resort/skiing-resort/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/resort/skiing-resort/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/resort/skiing-resort/",
@@ -1642,10 +1417,7 @@
           "sourceTextBytes": 223,
           "sourceTextSha256": "36950414c93317e8cf79f4a8859b1cd7ef455530420378519a40f287c4c93bed",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 1,
           "linkedPublishedListings": 1,
           "linkedPublishedPosts": 0
@@ -1654,9 +1426,7 @@
     },
     {
       "id": "83ede7d99bd99416e82e28d4",
-      "sourceUrls": [
-        "https://makler-realty.ru/resort/spa-resorts/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/resort/spa-resorts/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/resort/spa-resorts/",
@@ -1669,10 +1439,7 @@
           "sourceTextBytes": 259,
           "sourceTextSha256": "f147eadb50288913cb16ac6aac8688579f737625f67d637831aa67e97354cd61",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 48,
           "linkedPublishedListings": 48,
           "linkedPublishedPosts": 0
@@ -1720,10 +1487,7 @@
           "sourceTextBytes": 2502,
           "sourceTextSha256": "94df4aa688b472ac5fb9c783833d70b9acc76ed917e1220874f7e33977541f60",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 1,
           "linkedPublishedListings": 1,
           "linkedPublishedPosts": 0
@@ -1747,10 +1511,7 @@
           "sourceTextBytes": 277,
           "sourceTextSha256": "69950ca3da5bf32f08b919a0dffd2cd082fc4e04d91df0fa7293a4d32e70a234",
           "requestedLocalePresent": null,
-          "localeMarkers": [
-            "bg",
-            "ru"
-          ],
+          "localeMarkers": ["bg", "ru"],
           "recordedTermCount": 2,
           "linkedPublishedListings": 2,
           "linkedPublishedPosts": 0
@@ -1807,9 +1568,7 @@
     },
     {
       "id": "ad0d73f24e724d05adcbdbf7",
-      "sourceUrls": [
-        "https://makler-realty.ru/tag/657/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/tag/657/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/tag/657/",
@@ -1831,9 +1590,7 @@
     },
     {
       "id": "2a86b1bb0f12dfc31e5dc88b",
-      "sourceUrls": [
-        "https://makler-realty.ru/tag/658/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/tag/658/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/tag/658/",
@@ -1855,9 +1612,7 @@
     },
     {
       "id": "1726a1aca726e01e3a7f47c7",
-      "sourceUrls": [
-        "https://makler-realty.ru/tag/659/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/tag/659/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/tag/659/",
@@ -1879,9 +1634,7 @@
     },
     {
       "id": "871d534cf39f20eeb7ab79ab",
-      "sourceUrls": [
-        "https://makler-realty.ru/tag/%d0%ba%d1%83%d1%80%d1%8c%d0%b5%d1%80%d1%8b/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/tag/%d0%ba%d1%83%d1%80%d1%8c%d0%b5%d1%80%d1%8b/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/tag/%d0%ba%d1%83%d1%80%d1%8c%d0%b5%d1%80%d1%8b/",
@@ -1903,9 +1656,7 @@
     },
     {
       "id": "ae166863ee6412b667235312",
-      "sourceUrls": [
-        "https://makler-realty.ru/tag/%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d0%b5/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/tag/%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d0%b5/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/tag/%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d0%b5/",
@@ -1975,9 +1726,7 @@
     },
     {
       "id": "c4dd31bd64ccac7321667055",
-      "sourceUrls": [
-        "https://makler-realty.ru/tag/%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b8%d0%b5/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/tag/%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b8%d0%b5/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/tag/%d1%80%d1%83%d1%81%d1%81%d0%ba%d0%b8%d0%b5/",
@@ -2023,9 +1772,7 @@
     },
     {
       "id": "1fb7da691f180c37d8bce112",
-      "sourceUrls": [
-        "https://makler-realty.ru/type/featured/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/type/featured/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/type/featured/",
@@ -2047,9 +1794,7 @@
     },
     {
       "id": "ec4207c94384fef287fb3642",
-      "sourceUrls": [
-        "https://makler-realty.ru/type/front/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/type/front/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/type/front/",
@@ -2071,9 +1816,7 @@
     },
     {
       "id": "d31e3909ea7242c56b7ce825",
-      "sourceUrls": [
-        "https://makler-realty.ru/type/reduced/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/type/reduced/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/type/reduced/",
@@ -2095,9 +1838,7 @@
     },
     {
       "id": "98a3615ef79c46abb81b4a21",
-      "sourceUrls": [
-        "https://makler-realty.ru/type/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/type/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/type/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd/",
@@ -2119,9 +1860,7 @@
     },
     {
       "id": "7c2ede8bdcfa96260c9b0578",
-      "sourceUrls": [
-        "https://makler-realty.ru/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/"
-      ],
+      "sourceUrls": ["https://makler-realty.ru/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/"],
       "observations": [
         {
           "sourceUrl": "https://makler-realty.ru/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
