@@ -140,7 +140,8 @@ for (const javaScriptEnabled of [false, true])
         .set({ version: (version ?? 0) + 2 })
         .where(eq(schema.listings.id, f.listingId));
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
-      await expect(page.getByRole("alert")).toContainText(
+      // Next's route announcer is also an alert; match the notice by its text.
+      await expect(page.getByRole("alert").filter({ hasText: "This item changed." })).toContainText(
         "This item changed. Refresh and review the latest version before trying again.",
       );
       expect(await workingOrder(f.listingId)).toEqual([second, first, third]);
@@ -193,7 +194,7 @@ for (const javaScriptEnabled of [false, true])
         .set({ version: version + 1 })
         .where(eq(schema.listings.id, f.listingId));
       await page.getByRole("button", { name: "Include in next gallery", exact: true }).click();
-      await expect(page.getByRole("alert")).toBeVisible();
+      await expect(page.getByRole("alert").filter({ hasText: "This item changed." })).toBeVisible();
       await expect(heading(2)).toBeVisible();
 
       // The cover comparison uses the first photo that is not hidden: with photo 1 (second)
