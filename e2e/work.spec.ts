@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { inquiryCheckCode } from "../src/domain/inquiry-check-code";
 import { hostUrl, origins } from "./hosts";
 import { openUnassignedQueueAt } from "./inquiry-queue";
 
@@ -100,7 +101,11 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   if (!inquiry) throw new Error("No durable inquiry");
   expect(inquiry.coverageQueue).toBeTruthy();
   expect(inquiry.ownerId).toBeNull();
-  await expect(page.getByText(inquiry.reference, { exact: true })).toBeVisible();
+  // The visitor's receipt names the request by its telephone code, never the internal RQ number.
+  await expect(
+    page.getByText(inquiryCheckCode(inquiry.submissionKey) ?? "", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(inquiry.reference, { exact: true })).toHaveCount(0);
 
   const broker = await staffSession(context);
   await openUnassignedQueueAt(page, inquiry.id);

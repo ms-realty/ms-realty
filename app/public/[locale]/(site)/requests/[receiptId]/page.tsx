@@ -70,12 +70,13 @@ export default async function ReceiptPage({
       <DiscoveryPage>
         <h1 className="text-title font-semibold">{copy.checkUnknownTitle}</h1>
         <Notice tone="warning" title={copy.checkResult}>
-          {checkCode ? <p>{copy.checkCode.replace("{code}", checkCode)}</p> : null}
           <p>
             <time dateTime={checkedAt}>
               {copy.checkedAt.replace("{time}", formatDateTime(locale, checkedAt))}
             </time>
           </p>
+          <p className="font-semibold">{copy.doNotResend}</p>
+          {checkCode ? <p>{copy.checkCode.replace("{code}", checkCode)}</p> : null}
         </Notice>
         <p className="max-w-reading">{copy.checkUnknownBody.replace("{code}", checkCode ?? "")}</p>
         <div className="flex flex-wrap gap-3">
@@ -101,7 +102,7 @@ export default async function ReceiptPage({
         <Receipt
           title={view.title}
           headingLevel={1}
-          referenceLabel={copy.reference}
+          referenceLabel={copy.checkCodeLabel}
           reference={view.reference}
           recordedAt={view.recordedAt}
           recordedAtLabel={copy.received}

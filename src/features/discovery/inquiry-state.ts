@@ -116,7 +116,7 @@ export function inquiryFormCopy(copy: DiscoveryCopy, submissionKey: string): For
     yourValue: copy.message,
     latestValue: copy.changed,
     revision: copy.reference,
-    reference: copy.reference,
+    reference: copy.checkCodeLabel,
     recordedAt: copy.received,
     unknown: inquiryUnknownMessage(copy, submissionKey),
     draftRetained: copy.retained,
@@ -129,7 +129,8 @@ export function inquiryReceiptView(
 ): FormReceipt {
   return {
     title: copy.received,
-    reference: receipt.reference,
+    // One identifier for the visitor: the telephone check code, never the internal RQ number.
+    reference: inquiryCheckCode(receipt.receiptId) ?? receipt.reference,
     recordedAt: { dateTime: receipt.acceptedAt, label: formatDateTime(locale, receipt.acceptedAt) },
     nextStep: copy.next,
     destination: { href: inquiryStatus(locale, receipt.receiptId), label: copy.receipt },

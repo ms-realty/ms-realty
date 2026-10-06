@@ -262,11 +262,14 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   });
   await page.getByRole("button", { name: "Send inquiry to MS Realty", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Inquiry received" })).toBeVisible();
-  const reference = (await page.locator("bdi").filter({ hasText: /^RQ-/ }).innerText()).trim();
+  // One identifier for the visitor: the request code, never the internal RQ number.
+  const code = inquiryCheckCode(key) ?? "";
+  await expect(page.getByText(code, { exact: true })).toBeVisible();
+  await expect(page.locator("bdi").filter({ hasText: /^RQ-/ })).toHaveCount(0);
   await page.getByRole("link", { name: "Open receipt" }).click();
   await expect(page.getByRole("heading", { name: "Inquiry received" })).toBeVisible();
   await page.reload();
-  await expect(page.getByText(reference, { exact: true })).toBeVisible();
+  await expect(page.getByText(code, { exact: true })).toBeVisible();
   const replay = await context.request.post("/api/inquiries", {
     headers: { origin: baseURL ?? "" },
     data: {
@@ -284,7 +287,9 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
     .from(schema.inquiries)
     .where(eq(schema.inquiries.submissionKey, key));
   expect(rows).toHaveLength(1);
-  expect(rows[0]).toMatchObject({ reference, coverageQueue: "intake", message, source: "website" });
+  expect(rows[0]).toMatchObject({ coverageQueue: "intake", message, source: "website" });
+  const reference = rows[0]?.reference ?? "";
+  expect(reference).toMatch(/^RQ-/);
   await page.screenshot({
     path: testInfo.outputPath("synthetic-native-receipt.png"),
     fullPage: true,
