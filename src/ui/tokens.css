@@ -107,13 +107,6 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Dense rows such as the P07 comparison still fit one line on 320 px phones. */
-@media (width < 22.5rem) {
-  :root {
-    --spacing-gutter: 1rem;
-  }
-}
-
 /* Text roles keep their source family, including responsive text-* variants. */
 @utility text-title {
   font-family: var(--font-sans);

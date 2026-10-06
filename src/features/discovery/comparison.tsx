@@ -114,7 +114,9 @@ export function Comparison({
         value: (listing) =>
           listing.area.state === "known" ? (
             <>
-              <bdi>
+              {/* Three columns on a 320 px phone leave about 90 px; tight tracking keeps an exact
+                  long area such as 72.123456789 on one line within the 20 px gutters. */}
+              <bdi className="max-[22.5rem]:tracking-tight">
                 {formatNumber(locale, listing.area.value.value, { maximumFractionDigits: 20 })}
               </bdi>{" "}
               <span className="inline-block whitespace-nowrap" data-unit="area">
