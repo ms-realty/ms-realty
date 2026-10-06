@@ -1,6 +1,6 @@
 # Figma page 14 coverage evidence
 
-This is a read-only inventory of [Responsive & localization](https://www.figma.com/design/PxfBJ2tdrj9A923fpgqzDn?node-id=38-4). It supplies frame identities for the sole verdict in `docs/acceptance.md`; it does not accept design, copy or rendered implementation. Live Figma metadata and eight official screenshots were inspected. Layer names sometimes retain their source language, so screenshots, not layer names, determine visible copy.
+This is an evidence inventory of [Responsive & localization](https://www.figma.com/design/PxfBJ2tdrj9A923fpgqzDn?node-id=38-4). It supplies frame identities for the sole verdict in `docs/acceptance.md`; it does not accept design, copy or rendered implementation. Live Figma metadata and eight official screenshots were inspected for the initial audit. Claude peer-reviewed the frame IDs and counts; a later independent follow-up inspected its bounded Figma edits. Layer names sometimes retain their source language, so screenshots, not layer names, determine visible copy.
 
 ## Standalone responsive specimens
 
@@ -8,14 +8,14 @@ This is a read-only inventory of [Responsive & localization](https://www.figma.c
 | --- | --- | --- |
 | P02 tablet, BG | `40:5` | 768 × 3171 |
 | C05 tablet, BG | `40:95` | 768 × 1743 |
-| O01 laptop, BG | `40:157` | 1024 × 1198 |
+| O01 laptop, BG | `40:157` | 1024 × approximately 1731 after the bounded layout edit; initially 1024 × 1198 |
 | Agency Today dark | `40:364` | 1440 × 1072 |
 | Hebrew RTL client sketch | `56:114` | 390 × 980 |
 | Offboarding narrow stress | `327:17695` | 320 × 900 |
 
 ## Named Hebrew base screens
 
-The 27 sections contain 52 frames. P11 and P12 have desktop frames only. These are base screens, not evidence that their validation, failure, interruption, recovery or accessibility states are covered.
+The 27 sections contain **104 frames: 52 base screens plus 52 annotation frames**. P11 and P12 have desktop base frames only. Every annotation labels the Hebrew copy as a draft awaiting a named human reviewer; 18 public annotations explicitly say the draft is not indexable until approved. These frames do not establish human approval or coverage of validation, failure, interruption, recovery or accessibility states.
 
 | Screen | Desktop 1440 | Mobile 390 |
 | --- | --- | --- |
@@ -51,8 +51,8 @@ The 27 sections contain 52 frames. P11 and P12 have desktop frames only. These a
 
 - The named Hebrew frames cover 27 of 41 active public/client screen IDs. P07–P10, P14 and P16–P24 have no named Hebrew specimen here. P14 may reuse C06 under `docs/ux-spec.md` §P14, but its authentication handoff and arrangement states still need an explicit mapping. C15 is retired.
 - P11 and P12 lack mobile Hebrew frames for inquiry entry, validation, receipt reconciliation and unknown-outcome handling. The separate 390 px client sketch does not fill those contracts.
-- In the 1024 px O01 frame `40:157`, Butler action `40:344` extends to x=1062 and language control `40:236` extends to x=1047, visibly beyond the frame. Its 226 px supporting pane is narrower than the UX spec's 320–360 px inspector guidance. This is a Figma design issue, not a measured implementation defect.
-- P13 Hebrew mobile `606:54882` visibly has a preferred date/time and contact field, but does not explicitly show the timezone, contact-language choice, requested format or practical-access note required by `docs/ux-spec.md` §P13. Additional state/component mappings elsewhere were not established by this audit.
+- The initial 1024 px O01 frame `40:157` clipped Butler action `40:344` at x=1062 and language control `40:236` at x=1047. Claude stacked Butler below the primary work; independent Figma follow-up found the action ending at x≈552 and language control at x=992, inside the frame. The UX spec's 320–360 px inspector guidance applies only when space permits, so the original 226 px rail width was not itself a defect. This is a source-design correction; rendered implementation remains unchecked.
+- Claude added the missing requested format, timezone, contact-language and practical-access fields to P13 Hebrew mobile `606:54882`. Independent follow-up then found requested-format UI06 `646:750` and preferred-date group/input `606:54900`/`606:54901` overlapping in form `606:54899` at x=20..370/y=307..387, with preferred time before timezone. Claude reported that a later layout recalculation separated those rows. That later state awaits independent screenshot review; P13 remains open for source-design verification and rendered behavior. Additional state/component mappings elsewhere were not established by this audit.
 - Page 14 has no named Hebrew variants for the applicable validation/recovery combinations in C01/C02, interrupted/rejected C09 uploads, superseded/unknown C10 proposals or revoked-access combinations. Page-09 shared states must be mapped to those journeys.
 - The 320 px offboarding frame is a single stress specimen with 20 px gutters, not complete narrow-width coverage. No 414 px specimen or named EN/RU/DE/NL/EL locale set was identified on this page. Build a viewport/locale task matrix before claiming responsive parity.
 - `docs/ux-spec.md` states release appearance is light, while page 14 contains dark Agency Today `40:364`. Reconcile whether this is a stress specimen or a released dark-mode obligation; do not infer a whole dark theme from one frame.
