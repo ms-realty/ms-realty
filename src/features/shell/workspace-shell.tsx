@@ -144,11 +144,12 @@ export async function WorkspaceShell({
 
   return (
     <PrivatePageGuard locale={locale} verification={randomUUID()}>
-      <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
+      {/* A focused state (one outcome, one way back) stands alone: the chrome steps aside. */}
+      <div className="group/shell min-h-dvh bg-canvas lg:grid lg:grid-cols-[14rem_minmax(0,1fr)] has-[[data-focused-state]]:block">
         <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>
 
         {/* Wide screens: persistent side navigation on a quiet subtle surface. */}
-        <header className="hidden bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:min-w-0 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:p-5">
+        <header className="hidden bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:min-w-0 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:p-5 group-has-[[data-focused-state]]/shell:hidden!">
           <p className="flex items-center">
             <Image
               src="/brand/logo-ms-realty.png"
@@ -172,7 +173,7 @@ export async function WorkspaceShell({
         </header>
 
         {/* Phones and tablets: brand bar, Today/Inquiries/Calendar tabs, the rest under More. */}
-        <header className="border-b border-divider bg-surface lg:hidden">
+        <header className="border-b border-divider bg-surface lg:hidden group-has-[[data-focused-state]]/shell:hidden">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2">
             <p className="me-auto flex items-center gap-2">
               <Image
@@ -220,7 +221,7 @@ export async function WorkspaceShell({
           {/* A named region, so the wide-screen context bar sits inside a landmark like the rest of the page. */}
           <section
             aria-label={t("currentPage")}
-            className="hidden min-h-[4.5rem] items-center justify-between gap-4 border-b border-divider px-8 py-3 lg:flex"
+            className="hidden min-h-[4.5rem] items-center justify-between gap-4 border-b border-divider px-8 py-3 lg:flex group-has-[[data-focused-state]]/shell:hidden!"
           >
             <WorkspaceContext
               label={t("label")}

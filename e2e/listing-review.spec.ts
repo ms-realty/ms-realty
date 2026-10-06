@@ -284,6 +284,31 @@ test("O16 offers the publication decision only to someone who may publish", asyn
   await expect(page.getByRole("link", { name: "Go to the publication decision" })).toHaveCount(0);
 });
 
+test("O16 reads before deciding, and the decision stands alone on its canvas", async ({ page }) => {
+  const f = seed();
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  const before = page.getByRole("heading", { level: 2, name: "Before you decide" });
+  const toDecision = page.getByRole("link", { name: "Go to the publication decision" });
+  const width = page.viewportSize()?.width ?? 1440;
+  const top = async (locator: typeof before) => (await locator.boundingBox())?.y ?? 0;
+  if (width < 1024) {
+    // Phones: the evidence comes after the preview and before the decision (18:3002).
+    expect(await top(before)).toBeLessThan(await top(toDecision));
+  }
+  if (width < 640) {
+    // The phone preview keeps the approved 3:2 frame (350 × 233, 164:14942).
+    const box = await page.locator("figure img, figure > div").first().boundingBox();
+    expect(Math.abs((box?.width ?? 0) / (box?.height ?? 1) - 1.5)).toBeLessThan(0.05);
+  }
+  await toDecision.click();
+  // The decision is a focused state: no workspace navigation, the logo inside the card.
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Publication decision · BG" }),
+  ).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Workspace" })).toBeHidden();
+  await expect(page.locator('[data-focused-state] img[alt="MS Realty"]')).toBeVisible();
+});
+
 test("O16 keeps BG and RU labels", async ({ page }) => {
   const f = seed();
   for (const [locale, title, approvals] of [

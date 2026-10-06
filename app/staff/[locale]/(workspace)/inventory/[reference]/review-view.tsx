@@ -430,8 +430,10 @@ export async function ReviewView({
         <p className="text-text-muted">{o16.instruction}</p>
       </header>
       {error}
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-        <div className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-[46.8rem]">
+      {/* Read, then decide: on phones the evidence sits between the preview and the approvals
+          and actions (18:3002); from lg it is the right-hand column (18:1471). */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,46.8rem)_23.2rem] lg:items-start lg:gap-x-8">
+        <div className="flex min-w-0 flex-col gap-6 lg:col-start-1">
           <section
             aria-labelledby="o16-candidate"
             className="flex flex-col gap-3 rounded-panel border border-divider bg-canvas p-4 text-dense"
@@ -481,10 +483,10 @@ export async function ReviewView({
                   <img
                     src={`/api/files/private/media/${cover.asset.id}?preview=1`}
                     alt={cover.asset.altText ?? ""}
-                    className="h-45 w-full object-cover"
+                    className="aspect-[3/2] w-full object-cover sm:aspect-auto sm:h-45"
                   />
                 ) : (
-                  <div className="flex h-45 w-full items-center justify-center bg-subtle text-text-muted">
+                  <div className="flex aspect-[3/2] w-full items-center justify-center bg-subtle text-text-muted sm:aspect-auto sm:h-45">
                     <NoPhotoIcon className="size-8" />
                   </div>
                 )}
@@ -500,6 +502,52 @@ export async function ReviewView({
             </div>
             <p className="text-dense text-text-muted">{o16.changesNeedReview}</p>
           </section>
+        </div>
+        <aside
+          aria-labelledby="o16-before"
+          className="flex flex-col gap-5 rounded-card bg-subtle p-5 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+        >
+          <h2 id="o16-before" className="text-heading font-semibold">
+            {o16.beforeYouDecide}
+          </h2>
+          <a
+            href={`${path}/evidence`}
+            className="flex items-start gap-3 rounded-control bg-subtle p-3 text-dense text-text no-underline hover:bg-selected"
+          >
+            <DocumentIcon className="size-5" />
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span className="font-semibold">
+                <bdi>{ref}</bdi> · BG
+              </span>
+              <span className="font-medium text-text-muted">
+                {input.factReviewValid ? copy.o12.sourceReviewed : copy.o12.sourceUnreviewed}
+              </span>
+            </span>
+            <ExternalIcon className="size-4" />
+          </a>
+          <p>
+            {[
+              priceLine === null ? null : `${o16.price} ${priceLine}`,
+              ...areaLines,
+              bedroomsValue === null ? null : bedroomCount(locale, bedroomsValue),
+              property.settlement,
+            ]
+              .filter(Boolean)
+              .map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+          </p>
+          {unknown.length ? (
+            <>
+              <hr className="border-divider" />
+              <p className="text-dense font-semibold text-warning">{o16.needsCheck}</p>
+              <p className="text-dense text-text-muted">{unknown.join(", ")}</p>
+            </>
+          ) : null}
+        </aside>
+        <div className="flex min-w-0 flex-col gap-6 lg:col-start-1">
           <section aria-labelledby="o16-approvals" className="flex flex-col gap-1">
             <h2 id="o16-approvals" className="text-dense font-semibold">
               {approved ? fill(o16.approvalsFor, { n: approved.revisionNumber }) : o16.approvals}
@@ -561,50 +609,6 @@ export async function ReviewView({
             </a>
           </div>
         </div>
-        <aside
-          aria-labelledby="o16-before"
-          className="flex flex-col gap-5 rounded-card bg-subtle p-5 lg:w-[23.2rem] lg:shrink-0"
-        >
-          <h2 id="o16-before" className="text-heading font-semibold">
-            {o16.beforeYouDecide}
-          </h2>
-          <a
-            href={`${path}/evidence`}
-            className="flex items-start gap-3 rounded-control bg-subtle p-3 text-dense text-text no-underline hover:bg-selected"
-          >
-            <DocumentIcon className="size-5" />
-            <span className="flex min-w-0 flex-1 flex-col gap-1">
-              <span className="font-semibold">
-                <bdi>{ref}</bdi> · BG
-              </span>
-              <span className="font-medium text-text-muted">
-                {input.factReviewValid ? copy.o12.sourceReviewed : copy.o12.sourceUnreviewed}
-              </span>
-            </span>
-            <ExternalIcon className="size-4" />
-          </a>
-          <p>
-            {[
-              priceLine === null ? null : `${o16.price} ${priceLine}`,
-              ...areaLines,
-              bedroomsValue === null ? null : bedroomCount(locale, bedroomsValue),
-              property.settlement,
-            ]
-              .filter(Boolean)
-              .map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
-          </p>
-          {unknown.length ? (
-            <>
-              <hr className="border-divider" />
-              <p className="text-dense font-semibold text-warning">{o16.needsCheck}</p>
-              <p className="text-dense text-text-muted">{unknown.join(", ")}</p>
-            </>
-          ) : null}
-        </aside>
       </div>
 
       <h2 className="text-section font-semibold">{o16.remaining}</h2>
