@@ -818,7 +818,7 @@ const rows = {
     "Wir können nicht bestätigen, dass die Anfrage eingegangen ist.",
     "We kunnen niet bevestigen dat de aanvraag is ontvangen.",
     "Δεν μπορούμε να επιβεβαιώσουμε ότι το αίτημα παραλήφθηκε.",
-    "איננו יכולים לאשר שהפנייה התקבלה.",
+    "לא ניתן לאשר שהפנייה התקבלה.",
   ],
   checkedAt: [
     "Проверено: {time} · Europe/Sofia",
