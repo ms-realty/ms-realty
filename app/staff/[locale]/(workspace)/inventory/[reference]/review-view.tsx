@@ -7,6 +7,7 @@ import { and, eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { listingRevisions, operations, propertyFacts } from "@/db/schema";
+import { pricePeriodByPurpose } from "@/domain/facts";
 import { publicLocales } from "@/domain/ids";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import {
@@ -183,7 +184,12 @@ export async function ReviewView({
   const priceLine = subject
     ? recorded(termsFacts(subject.terms).price, money)
     : known(values.priceState, values.price)
-      ? money({ amountMinor: Number(values.price) * 100, currency: "EUR", period: "total" })
+      ? money({
+          amountMinor: Number(values.price) * 100,
+          currency: "EUR",
+          // A draft price is total for a sale and monthly for a rent, never assumed.
+          period: pricePeriodByPurpose[listing.purpose],
+        })
       : null;
   // Every recorded area basis with its own unit; several bases are shown, never one picked.
   const areaLines = subject
