@@ -1,5 +1,5 @@
-// O12 browser seed: a published listing with a saved BG working draft, a second listing with no
-// saved draft, a broker session and a read-only (translation reviewer) session. Synthetic
+// O12 browser seed: a published listing with a saved BG working draft, two listings with no
+// saved draft (one with a BGN price the draft cannot carry), a broker session and a read-only (translation reviewer) session. Synthetic
 // records in the disposable browser database only; never launch or acceptance evidence.
 import { randomBytes, randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
@@ -34,7 +34,11 @@ try {
   );
   const readerSession = await createSession(db, { kind: "staff", id: reader.id });
   // Same lock and unique reference rewrite as the discovery and media order fixtures.
-  const listing = (title: string, draft: Record<string, string>) =>
+  const listing = (
+    title: string,
+    draft: Record<string, string>,
+    price?: Parameters<typeof createListingFixture>[1]["price"],
+  ) =>
     db.transaction(async (tx) => {
       await tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))`,
@@ -44,6 +48,7 @@ try {
         title,
         description: "Синтетичен тестов имот. Не е реална оферта.",
         photos: 1,
+        ...(price ? { price } : {}),
       });
       const number = randomBytes(6).readUIntBE(0, 6).toString();
       const reference = `MS-${number}`;
@@ -77,12 +82,18 @@ try {
     sourceLanguage: "bg",
   });
   const blank = await listing("Синтетична обява без чернова", {});
+  // A recorded price the draft cannot carry (another currency): it must stay visible.
+  const bgn = await listing("Синтетична обява с цена в лева", {}, {
+    state: "known",
+    value: { amountMinor: 11_500_000, currency: "BGN", period: "total", basis: "asking" },
+  });
   await publishForTest(db, broker.actor, fixture, ["bg"]);
   console.log(
     JSON.stringify({
       reference: fixture.reference,
       listingId: fixture.listingId,
       blank: { reference: blank.reference, listingId: blank.listingId },
+      bgn: { reference: bgn.reference, listingId: bgn.listingId },
       token: broker.token,
       readerToken: readerSession.token,
     }),

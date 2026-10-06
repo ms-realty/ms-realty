@@ -8,10 +8,13 @@ import { buttonClass } from "@/ui/button-class";
 
 export function UnsavedGuard({
   root,
+  storageKey,
   copy,
 }: {
   /** Selector of the element that holds the editor form. */
   root: string;
+  /** The tab-scoped copy of unsaved work (see DraftKeeper); Discard removes it. */
+  storageKey: string;
   copy: { title: string; body: string; save: string; discard: string; stay: string };
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -77,6 +80,12 @@ export function UnsavedGuard({
           onClick={() => {
             dialog.current?.close();
             const editor = form.current;
+            // Save, then offer to continue where the person was going (O12SAVED "Continue").
+            const next = editor?.querySelector<HTMLInputElement>('input[name="_next"]');
+            if (next && target) {
+              const url = new URL(target);
+              next.value = `${url.pathname}${url.search}`;
+            }
             editor?.requestSubmit(
               editor.querySelector<HTMLButtonElement>('button[type="submit"]') ?? undefined,
             );
@@ -89,6 +98,9 @@ export function UnsavedGuard({
           className={buttonClass("secondary")}
           onClick={() => {
             leaving.current = true;
+            try {
+              window.sessionStorage.removeItem(storageKey);
+            } catch {}
             window.location.assign(target);
           }}
         >

@@ -14,6 +14,8 @@ import {
 import { inventoryDecisionCopy } from "@/features/inventory/decision-copy";
 import { inventoryDecisionFeedback } from "@/features/inventory/decision-feedback";
 import type { InventoryValues } from "@/features/inventory/editor";
+import { safeNext } from "@/features/inventory/next";
+import { recordedPrice } from "@/features/inventory/recorded-price";
 import { agencyTimeZone, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess } from "@/server/auth/pages";
 import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
@@ -29,7 +31,8 @@ import {
   reviewSellerAuthority,
   saveListingDraft,
 } from "@/server/inventory/commands";
-import { emptyDraft } from "@/server/inventory/contracts";
+import { draftSchema, emptyDraft } from "@/server/inventory/contracts";
+import { workingDraftFrom } from "@/server/inventory/working-draft";
 import {
   activateManifest,
   approveFactRevision,
@@ -72,6 +75,46 @@ export async function saveInventory(
     reconciliation: status,
     outcome: { kind: "idle" },
   };
+  const periods = {
+    total: copy.o12.periodTotal,
+    month: copy.o12.periodMonth,
+    none: copy.o12.periodNone,
+  };
+  // UX 03.3 without JavaScript: Photos/Review submit `_leave`. An unchanged draft goes on;
+  // unsaved work gets Save draft (the form) / Discard (the destination) / Stay (the values).
+  const leave = reference ? safeNext(locale, form.get("_leave")) : null;
+  if (leave && reference) {
+    const current = await action(
+      async ({ db }) => {
+        const access = await currentStaffAccess();
+        if (access.state !== "ready") throw new AppError("unauthenticated");
+        return inventoryDetail(db, access.session.actor, reference);
+      },
+      { requireSession: true },
+    );
+    if (current.ok) {
+      const stored = draftSchema.safeParse(current.data.listing.draft);
+      const saved: Record<string, string> = stored.success
+        ? stored.data
+        : workingDraftFrom(current.data.revision, current.data.facts);
+      if (
+        Object.keys(emptyDraft).every(
+          (key) => (saved[key] ?? "") === values[key as keyof InventoryValues],
+        )
+      )
+        redirect(leave);
+    }
+    return {
+      ...state,
+      outcome: {
+        kind: "rejected",
+        code: "UNSAVED_CHANGES",
+        message: copy.o12.unsavedNative,
+        retryable: true,
+        recovery: { href: leave, label: copy.o12.discard },
+      },
+    };
+  }
   const result = await action(
     async ({ db }) => {
       const access = await currentStaffAccess();
@@ -80,6 +123,22 @@ export async function saveInventory(
       const draft = Object.fromEntries(
         Object.keys(emptyDraft).map((key) => [key, values[key as keyof InventoryValues]]),
       );
+      // A source price the projection could not carry is never dropped silently: keeping it
+      // unknown is an explicit choice bound to that exact source revision (priceDecision).
+      // ponytail: interim app-side check; move to saveListingDraft's own priceDecision field
+      // when Codex's server seam lands.
+      if (reference && draft.priceState === "unknown") {
+        const current = await inventoryDetail(db, session.actor, reference);
+        if (
+          !draftSchema.safeParse(current.listing.draft).success &&
+          current.revision &&
+          recordedPrice(current.revision.terms, locale, periods) &&
+          form.get("_priceDecision") !== current.revision.id
+        )
+          throw new AppError("validation_failed", {
+            fieldErrors: { priceDecision: [copy.o12.priceUnknownError] },
+          });
+      }
       const command = { actor: session.actor, operationId, expectedRevision };
       const recorded = await (reference
         ? saveListingDraft(db, { ...command, reference, draft })
@@ -95,10 +154,11 @@ export async function saveInventory(
   );
   if (result.ok) {
     const ref = result.data.outcome.reference;
+    const next = safeNext(locale, form.get("_next"));
     // O12SAVED: an edit lands on its focused receipt, rendered only for this actor's own save.
     if (reference)
       redirect(
-        `/${locale}/inventory/${encodeURIComponent(ref)}?saved=${encodeURIComponent(operationId)}${form.get("_tab") === "facts" ? "&tab=facts" : ""}`,
+        `/${locale}/inventory/${encodeURIComponent(ref)}?saved=${encodeURIComponent(operationId)}${form.get("_tab") === "facts" ? "&tab=facts" : ""}${next ? `&next=${encodeURIComponent(next)}` : ""}`,
       );
     return {
       ...state,
@@ -121,7 +181,8 @@ export async function saveInventory(
   if (error.code === "VALIDATION_FAILED") {
     const errors = Object.fromEntries(
       Object.entries(error.fieldErrors ?? {}).map(([key, messages]) => [
-        key.replace(/^draft\./, ""),
+        // The price decision is shown at the price status it decides about.
+        key === "priceDecision" ? "priceState" : key.replace(/^draft\./, ""),
         messages,
       ]),
     );

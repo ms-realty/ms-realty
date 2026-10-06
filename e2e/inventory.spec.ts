@@ -110,7 +110,8 @@ test("O12/O16 native decisions retain drafts and operation identity with mobile 
   const reference = page.url().split("/").pop() ?? "";
   expect(reference).toMatch(/^MS-\d+$/);
   await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
-  await page.getByRole("link", { name: "Review for publication", exact: true }).first().click();
+  // Without JavaScript, leaving the editor is a submit control (UX 03.3); unchanged → goes on.
+  await page.getByRole("button", { name: "Review for publication", exact: true }).click();
   await expect(page.getByText("No publication has been activated.")).toBeVisible();
   await page.getByRole("button", { name: "Freeze review candidate", exact: true }).click();
   await expect(page.getByText("The action was recorded.")).toBeVisible();

@@ -19,9 +19,12 @@ import { InventoryDecisionForm } from "@/features/inventory/decision-form";
 import { EditTabs } from "@/features/inventory/edit-tabs";
 import { InventoryEditor, type InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
-import { missingInput } from "@/features/inventory/fields";
+import { type InventoryField, missingInput } from "@/features/inventory/fields";
 import { FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
+import { LeaveControl } from "@/features/inventory/leave-control";
+import { safeNext } from "@/features/inventory/next";
+import { recordedPrice } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
@@ -97,7 +100,7 @@ export default async function InventoryDetailPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; reference: string }>;
-  searchParams: Promise<{ error?: string; tab?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; tab?: string; saved?: string; next?: string }>;
 }) {
   const { locale, reference } = await params;
   const query = await searchParams;
@@ -130,6 +133,8 @@ export default async function InventoryDetailPage({
   const saved = await savedDraft(session.actor.id, listing.reference, query.saved);
   if (saved) {
     const back = tab === "facts" ? `${path}?tab=facts` : path;
+    // Saved from the leave dialog: continue where the person was going; the receipt stays.
+    const next = safeNext(locale, query.next);
     return (
       <FocusedState closeHref={back} closeLabel={o12.close}>
         <h1 className="pe-12 text-heading font-semibold sm:text-title">{o12.saved}</h1>
@@ -145,9 +150,16 @@ export default async function InventoryDetailPage({
         ) : (
           <p>{o12.savedLater}</p>
         )}
-        <a href={back} className={buttonClass("primary")}>
-          {o12.toTask}
-        </a>
+        <div className="flex flex-wrap gap-3">
+          {next ? (
+            <a href={next} className={buttonClass("primary")}>
+              {o12.continue}
+            </a>
+          ) : null}
+          <a href={back} className={buttonClass(next ? "secondary" : "primary")}>
+            {o12.toTask}
+          </a>
+        </div>
       </FocusedState>
     );
   }
@@ -203,11 +215,22 @@ export default async function InventoryDetailPage({
       ? bedroomCount(locale, Number(values.bedrooms))
       : null,
   ].filter(Boolean);
-  const review = (
-    <a href={`${path}?tab=review`} className={buttonClass("secondary")}>
-      {o12.reviewForPublication}
-    </a>
-  );
+  const formId = mayEdit ? "o12-form" : undefined;
+  // A source price the draft cannot carry stays visible; keeping it unknown is an explicit,
+  // server-checked choice (saveInventory).
+  const recorded =
+    !parsed.success && revision && values.priceState === "unknown"
+      ? recordedPrice(revision.terms, locale, {
+          total: o12.periodTotal,
+          month: o12.periodMonth,
+          none: o12.periodNone,
+        })
+      : null;
+  const missing: InventoryField[] = [
+    ...missingInput(values),
+    ...(recorded ? (["priceState", "price"] as const) : []),
+  ];
+  const draftKey = `o12:${listing.reference}:${listing.version}`;
   const number = (state: string, value: string) =>
     known(state, value)
       ? new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(Number(value))
@@ -242,6 +265,7 @@ export default async function InventoryDetailPage({
       <div data-o12 className="group/o12 flex flex-col gap-6 sm:gap-8">
         <EditTabs
           tab={tab === "facts" ? "facts" : "text"}
+          formId={formId}
           photosHref={`${path}/media`}
           labels={{
             tabs: o12.tabs,
@@ -266,7 +290,27 @@ export default async function InventoryDetailPage({
                   locale={locale}
                   reference={reference}
                   view="edit"
-                  missing={missingInput(values)}
+                  formId={formId}
+                  draftKey={draftKey}
+                  missing={missing}
+                  missingNote={
+                    recorded ? (
+                      <div className="flex flex-col gap-3 sm:col-span-2">
+                        <p className="text-dense">
+                          {o12.priceRecorded.replace("{value}", recorded)}
+                        </p>
+                        <label className="flex items-start gap-3 text-dense">
+                          <input
+                            type="checkbox"
+                            name="_priceDecision"
+                            value={revision?.id ?? ""}
+                            className="mt-0.5 size-5 accent-action"
+                          />
+                          {o12.priceKeepUnknown}
+                        </label>
+                      </div>
+                    ) : null
+                  }
                   action={saveInventory.bind(null, locale, reference)}
                   initialState={editorState()}
                   footer={
@@ -274,25 +318,33 @@ export default async function InventoryDetailPage({
                       <p className="group-has-[#o12-facts:checked]/o12:hidden">
                         {o12.workingDraft}
                       </p>
-                      <input type="hidden" id="o12-tab-field" name="_tab" defaultValue={tab} />
+                      <input type="hidden" name="_next" defaultValue="" />
                     </>
                   }
                   secondaryActions={
                     <>
-                      {review}
+                      <LeaveControl
+                        href={`${path}?tab=review`}
+                        formId={formId}
+                        className={buttonClass("secondary")}
+                      >
+                        {o12.reviewForPublication}
+                      </LeaveControl>
                       {published ? (
-                        <a
+                        <LeaveControl
                           href={`${path}?tab=review#${inventorySections.review}`}
+                          formId={formId}
                           className={buttonClass("tertiary", "text-text")}
                         >
                           {o12.correctPublished}
-                        </a>
+                        </LeaveControl>
                       ) : null}
                     </>
                   }
                 />
                 <UnsavedGuard
                   root="[data-o12-editor]"
+                  storageKey={draftKey}
                   copy={{
                     title: o12.unsavedTitle,
                     body: o12.unsavedBody,

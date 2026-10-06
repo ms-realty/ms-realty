@@ -1,9 +1,10 @@
 "use client";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { controlClass } from "@/ui/field";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
+import { Notice } from "@/ui/notice";
 import { inventoryCopy, optionLabel } from "./copy";
 
 import {
@@ -30,6 +31,9 @@ export function InventoryEditor({
   reference,
   view = "create",
   missing = [],
+  missingNote,
+  formId,
+  draftKey,
   secondaryActions,
   footer,
 }: {
@@ -39,6 +43,11 @@ export function InventoryEditor({
   reference?: string;
   view?: "create" | "edit";
   missing?: Field[];
+  /** Shown inside the "needed before saving" block (e.g. a recorded price it cannot carry). */
+  missingNote?: ReactNode;
+  formId?: string;
+  /** sessionStorage key for unsaved work, scoped to listing and version (DraftKeeper). */
+  draftKey?: string;
   secondaryActions?: ReactNode;
   footer?: ReactNode;
 }) {
@@ -135,6 +144,7 @@ export function InventoryEditor({
         )
       }
       secondaryActions={secondaryActions}
+      formId={formId}
     >
       {(form) =>
         view === "create" ? (
@@ -143,10 +153,12 @@ export function InventoryEditor({
           </div>
         ) : (
           <>
+            {draftKey ? <DraftKeeper form={form} storageKey={draftKey} copy={copy.o12} /> : null}
             {missing.length ? (
               <fieldset className="grid gap-5 rounded-panel border border-warning p-4 sm:grid-cols-2">
                 <legend className="px-1 text-dense font-semibold">{copy.o12.needsInput}</legend>
                 {missing.map((name) => render(form, name, true))}
+                {missingNote}
               </fieldset>
             ) : null}
             <div
@@ -168,5 +180,78 @@ export function InventoryEditor({
         )
       }
     </ActionForm>
+  );
+}
+
+/**
+ * Keeps unsaved work in this tab's sessionStorage, so leaving through browser history or a
+ * reload does not lose it: on return to the same listing version the work is restored, with
+ * a way to discard it. Another version's copy is dropped; nothing is sent anywhere.
+ */
+function DraftKeeper({
+  form,
+  storageKey,
+  copy,
+}: {
+  form: FormController<InventoryValues>;
+  storageKey: string;
+  copy: { restored: string; discardRestored: string };
+}) {
+  const initial = useRef(form.values);
+  const [restored, setRestored] = useState(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: restore once, on mount.
+  useEffect(() => {
+    try {
+      const prefix = storageKey.slice(0, storageKey.lastIndexOf(":") + 1);
+      for (let index = window.sessionStorage.length - 1; index >= 0; index--) {
+        const key = window.sessionStorage.key(index);
+        if (key?.startsWith(prefix) && key !== storageKey) window.sessionStorage.removeItem(key);
+      }
+      const saved = JSON.parse(window.sessionStorage.getItem(storageKey) ?? "null") as Record<
+        string,
+        unknown
+      > | null;
+      if (!saved) return;
+      let changed = false;
+      for (const [name, value] of Object.entries(saved))
+        if (
+          typeof value === "string" &&
+          name in initial.current &&
+          form.values[name as Field] !== value
+        ) {
+          form.setValue(name as Field, value);
+          changed = true;
+        }
+      setRestored(changed);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try {
+      const dirty = (Object.keys(initial.current) as Field[]).some(
+        (name) => form.values[name] !== initial.current[name],
+      );
+      if (dirty) window.sessionStorage.setItem(storageKey, JSON.stringify(form.values));
+      else window.sessionStorage.removeItem(storageKey);
+    } catch {}
+  }, [form.values, storageKey]);
+  if (!restored) return null;
+  return (
+    <Notice tone="info">
+      <p>{copy.restored}</p>
+      <button
+        type="button"
+        className="mt-2 font-semibold underline"
+        onClick={() => {
+          for (const name of Object.keys(initial.current) as Field[])
+            form.setValue(name, initial.current[name]);
+          try {
+            window.sessionStorage.removeItem(storageKey);
+          } catch {}
+          setRestored(false);
+        }}
+      >
+        {copy.discardRestored}
+      </button>
+    </Notice>
   );
 }

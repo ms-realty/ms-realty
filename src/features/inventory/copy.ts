@@ -46,7 +46,7 @@ const en = {
     instruction: "Change the description, save it and review it for publication.",
     sourceLine: "Bulgarian source · Working draft",
     noDraft:
-      "No working draft is saved yet. The fields show the current approved version where it records them; nothing changes until you save.",
+      "No working draft is saved yet. The fields show the latest recorded revision where it records them; nothing changes until you save.",
     tabs: "Listing parts",
     facts: "Facts",
     text: "Text",
@@ -100,6 +100,18 @@ const en = {
     saveDraft: "Save draft",
     discard: "Discard changes",
     stay: "Stay",
+    continue: "Continue",
+    unsavedNative:
+      "You have unsaved changes. Save the draft with the button below, discard them, or stay here.",
+    restored: "Unsaved changes from earlier on this page are restored. Save them or discard them.",
+    discardRestored: "Discard these changes",
+    priceRecorded:
+      "The source recorded {value}. It cannot be carried over as it is: enter the price in EUR, or confirm that it stays unknown for now.",
+    periodTotal: "total price",
+    periodMonth: "per month",
+    periodNone: "period not stated",
+    priceKeepUnknown: "Keep the price unknown for now",
+    priceUnknownError: "Enter the price, or confirm that it stays unknown for now.",
     noscriptLeave:
       "Without JavaScript, save before opening Photos or Review, or your changes are lost.",
   },
@@ -186,7 +198,7 @@ const bg: Copy = {
     instruction: "Променете описанието, запишете го и го прегледайте за публикуване.",
     sourceLine: "Български източник · Работна чернова",
     noDraft:
-      "Още няма записана работна чернова. Полетата показват текущата одобрена версия, доколкото тя ги съдържа; нищо не се променя, докато не запишете.",
+      "Още няма записана работна чернова. Полетата показват последната записана версия, доколкото тя ги съдържа; нищо не се променя, докато не запишете.",
     tabs: "Части на обявата",
     facts: "Факти",
     text: "Текст",
@@ -238,6 +250,19 @@ const bg: Copy = {
     saveDraft: "Запишете черновата",
     discard: "Откажете промените",
     stay: "Останете",
+    continue: "Продължете",
+    unsavedNative:
+      "Имате незаписани промени. Запишете черновата с бутона по-долу, откажете ги или останете тук.",
+    restored:
+      "Незаписаните промени от по-рано на тази страница са възстановени. Запишете ги или ги откажете.",
+    discardRestored: "Откажете тези промени",
+    priceRecorded:
+      "Източникът е записал {value}. Цената не може да се пренесе както е: въведете я в EUR или потвърдете, че засега остава неизвестна.",
+    periodTotal: "обща цена",
+    periodMonth: "на месец",
+    periodNone: "без посочен период",
+    priceKeepUnknown: "Засега оставете цената неизвестна",
+    priceUnknownError: "Въведете цената или потвърдете, че засега остава неизвестна.",
     noscriptLeave:
       "Без JavaScript запишете, преди да отворите „Снимки“ или прегледа, иначе промените се губят.",
   },
@@ -322,7 +347,7 @@ const ru: Copy = {
     instruction: "Измените описание, сохраните его и проверьте перед публикацией.",
     sourceLine: "Болгарский источник · Рабочий черновик",
     noDraft:
-      "Рабочий черновик ещё не сохранён. Поля показывают текущую одобренную версию, насколько она их содержит; ничего не меняется, пока вы не сохраните.",
+      "Рабочий черновик ещё не сохранён. Поля показывают последнюю записанную версию, насколько она их содержит; ничего не меняется, пока вы не сохраните.",
     tabs: "Разделы объявления",
     facts: "Факты",
     text: "Текст",
@@ -375,6 +400,19 @@ const ru: Copy = {
     saveDraft: "Сохранить черновик",
     discard: "Отменить изменения",
     stay: "Остаться",
+    continue: "Продолжить",
+    unsavedNative:
+      "Есть несохранённые изменения. Сохраните черновик кнопкой ниже, отмените их или останьтесь здесь.",
+    restored:
+      "Несохранённые изменения, сделанные ранее на этой странице, восстановлены. Сохраните или отмените их.",
+    discardRestored: "Отменить эти изменения",
+    priceRecorded:
+      "Источник записал {value}. Цену нельзя перенести как есть: введите её в EUR или подтвердите, что пока она остаётся неизвестной.",
+    periodTotal: "общая цена",
+    periodMonth: "в месяц",
+    periodNone: "период не указан",
+    priceKeepUnknown: "Пока оставить цену неизвестной",
+    priceUnknownError: "Введите цену или подтвердите, что пока она остаётся неизвестной.",
     noscriptLeave:
       "Без JavaScript сохраните перед переходом в «Фото» или к проверке, иначе изменения пропадут.",
   },

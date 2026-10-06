@@ -1,17 +1,20 @@
 "use client";
 // O12 Facts / Text tabs: one form, two panels. The radios switch panels through CSS
 // (group-has on the [data-o12] wrapper), so nothing navigates and nothing typed is lost,
-// with or without JavaScript. With JavaScript the address keeps the deep link (?tab=facts),
-// the redirect after Save returns to the same tab, and a field the server rejected brings
-// its panel forward.
+// with or without JavaScript. The radios belong to the editor form (`form`), so Save returns
+// to the chosen tab natively. With JavaScript the address keeps the deep link (?tab=facts) and
+// a field the server rejected brings its panel forward.
 import { useEffect, useState } from "react";
+import { LeaveControl } from "./leave-control";
 
 export function EditTabs({
   tab,
+  formId,
   photosHref,
   labels,
 }: {
   tab: "text" | "facts";
+  formId?: string;
   photosHref: string;
   labels: { tabs: string; facts: string; text: string; photos: string; noscript: string };
 }) {
@@ -31,12 +34,10 @@ export function EditTabs({
       if (panel === "facts") url.searchParams.set("tab", "facts");
       else url.searchParams.delete("tab");
       window.history.replaceState(window.history.state, "", url);
-      const field = document.getElementById("o12-tab-field") as HTMLInputElement | null;
-      if (field) field.value = panel;
     };
     const change = (event: Event) => {
       const input = event.target as HTMLInputElement;
-      if (input.name === "o12-panel") sync(input.value);
+      if (input.name === "_tab") sync(input.value);
     };
     const invalid = new MutationObserver(() => {
       const panel = root
@@ -67,7 +68,8 @@ export function EditTabs({
             <label key={id} className={option}>
               <input
                 type="radio"
-                name="o12-panel"
+                name="_tab"
+                form={formId}
                 id={`o12-${id}`}
                 value={id}
                 defaultChecked={tab === id}
@@ -77,9 +79,9 @@ export function EditTabs({
             </label>
           ))}
         </fieldset>
-        <a href={photosHref} className={`${option} no-underline`}>
+        <LeaveControl href={photosHref} formId={formId} className={`${option} no-underline`}>
           {labels.photos}
-        </a>
+        </LeaveControl>
       </div>
       {enhanced ? null : <p className="text-caption text-text-muted">{labels.noscript}</p>}
     </div>

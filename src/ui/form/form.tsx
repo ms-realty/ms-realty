@@ -67,6 +67,8 @@ export type ActionFormProps<V extends FormValues> = {
   layout?: "reading" | "full";
   /** Navigation beside the one submit (links only; never a second command). */
   secondaryActions?: ReactNode;
+  /** Lets controls outside the form (tab radios, leave buttons) belong to it natively. */
+  formId?: string;
   children: (form: FormController<V>) => ReactNode;
 };
 
@@ -157,6 +159,7 @@ function FormSession<V extends FormValues>({
   submitLabel,
   layout = "reading",
   secondaryActions,
+  formId,
   children,
   snapshot,
 }: ActionFormProps<V> & { snapshot: RefObject<Snapshot> }) {
@@ -293,6 +296,7 @@ function FormSession<V extends FormValues>({
   return (
     <form
       ref={nativeForm}
+      id={formId}
       action={formAction}
       noValidate
       aria-busy={pending}

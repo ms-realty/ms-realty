@@ -21,6 +21,7 @@ type Seed = {
   reference: string;
   listingId: string;
   blank: { reference: string; listingId: string };
+  bgn: { reference: string; listingId: string };
   token: string;
   readerToken: string;
 };
@@ -86,8 +87,13 @@ for (const javaScriptEnabled of [false, true])
         page.getByText(`${f.reference} · Sandanski · €95,000 · 74.5 m² · 2 bedrooms`),
       ).toBeVisible();
       await expect(page.getByRole("radio", { name: "Text" })).toBeChecked();
-      await expect(page.getByRole("link", { name: "Photos", exact: true })).toHaveAttribute(
-        "href",
+      // Photos is a link with JavaScript and a submit control of the form without it.
+      const photos = page.getByRole(javaScriptEnabled ? "link" : "button", {
+        name: "Photos",
+        exact: true,
+      });
+      await expect(photos).toHaveAttribute(
+        javaScriptEnabled ? "href" : "value",
         `/en/inventory/${f.reference}/media`,
       );
       // Butler stays draft-only and cannot draft listing text yet; the manual path is primary.
@@ -98,7 +104,7 @@ for (const javaScriptEnabled of [false, true])
         "href",
         "#listing-text",
       );
-      await expect(page.getByRole("link", { name: "Correct the published listing" })).toBeVisible();
+      await expect(page.getByText("Correct the published listing", { exact: true })).toBeVisible();
 
       const description = "Обновено синтетично описание за тест на редактора.";
       await page.getByLabel("Listing title", { exact: true }).fill("Обновено синтетично заглавие");
@@ -232,6 +238,11 @@ test.describe("JavaScript on", () => {
       page.getByRole("heading", { level: 1, name: "Working draft saved" }),
     ).toBeVisible();
     expect((await listing(f.listingId)).draft.description).toBe("Записана от диалога.");
+    // The saved receipt offers to continue where the person was going.
+    await expect(page.getByRole("link", { name: "Continue", exact: true })).toHaveAttribute(
+      "href",
+      `/en/inventory/${f.reference}/media`,
+    );
 
     // A photo-only change later moves the listing version; the receipt says only that.
     const receipt = page.url();
@@ -272,13 +283,99 @@ test.describe("JavaScript on", () => {
   });
 });
 
+test.describe("JavaScript off", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("O12 asks before leaving unsaved work and saves on the chosen tab", async ({ page }) => {
+    const f = seed();
+    await signIn(page, f.token);
+    // An unchanged draft leaves straight away.
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+    await page.getByRole("button", { name: "Photos", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/en/inventory/${f.reference}/media(#.*)?$`));
+
+    // Unsaved work: Save draft / Discard / Stay, nothing written, entry kept.
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+    const before = await listing(f.listingId);
+    await page.getByLabel("Description", { exact: true }).fill("Незаписано без JavaScript.");
+    await page.getByRole("button", { name: "Review for publication" }).click();
+    await expect(page.getByText("You have unsaved changes.", { exact: false })).toBeVisible();
+    await expect(page.getByLabel("Description", { exact: true })).toHaveValue(
+      "Незаписано без JavaScript.",
+    );
+    await expect(page.getByRole("link", { name: "Discard changes" })).toHaveAttribute(
+      "href",
+      `/en/inventory/${f.reference}?tab=review`,
+    );
+    expect(await listing(f.listingId)).toEqual(before);
+
+    // The Facts tab chosen natively is where Save returns.
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+    await page.getByText("Facts", { exact: true }).click();
+    await page.getByLabel("Price in EUR", { exact: true }).fill("98000");
+    await page.getByRole("button", { name: "Save the facts", exact: true }).click();
+    await page.getByRole("link", { name: "Back to the current task", exact: true }).click();
+    await expect(page).toHaveURL(/\?tab=facts$/);
+    await expect(page.getByLabel("Price in EUR", { exact: true })).toHaveValue("98000");
+  });
+});
+
+test("O12 restores unsaved work after browser history and can discard it", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "chromium-desktop", "uses the desktop shell navigation");
+  const f = seed();
+  await signIn(page, f.token);
+  await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
+  await page.locator('nav a[href="/en/inventory"]').first().click();
+  await expect(page).toHaveURL(/\/en\/inventory$/);
+  await page.goBack();
+  const description = page.getByLabel("Description", { exact: true });
+  const saved = await description.inputValue();
+  await description.fill("Незаписано преди историята.");
+  await page.goForward();
+  await expect(page).toHaveURL(/\/en\/inventory$/);
+  await page.goBack();
+  await expect(
+    page.getByText("Unsaved changes from earlier on this page are restored."),
+  ).toBeVisible();
+  await expect(description).toHaveValue("Незаписано преди историята.");
+  await page.getByRole("button", { name: "Discard these changes" }).click();
+  await expect(description).toHaveValue(saved);
+});
+
+test("O12 keeps a source price it cannot carry visible and needs a choice to drop it", async ({
+  page,
+}) => {
+  const f = seed();
+  await signIn(page, f.token);
+  await page.goto(hostUrl("staff", `/en/inventory/${f.bgn.reference}`));
+  await expect(
+    page.getByText("The source recorded 115,000 BGN · total price.", { exact: false }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Source or evidence reference", { exact: true })
+    .fill("synthetic-bgn-source");
+  await page.getByLabel("Language of the source evidence", { exact: true }).selectOption("bg");
+  await page.getByRole("button", { name: "Save the description", exact: true }).click();
+  await expect(
+    page.getByText("Enter the price, or confirm that it stays unknown for now.").first(),
+  ).toBeVisible();
+  expect((await listing(f.bgn.listingId)).draft).toEqual({});
+  await page.getByRole("checkbox", { name: "Keep the price unknown for now" }).check();
+  await page.getByRole("button", { name: "Save the description", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Working draft saved" })).toBeVisible();
+  expect((await listing(f.bgn.listingId)).draft).toMatchObject({
+    priceState: "unknown",
+    price: "",
+  });
+});
+
 test("O12 without a saved draft asks for the source and does not write", async ({ page }) => {
   const f = seed();
   await signIn(page, f.token);
   await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}`));
-  await expect(
-    page.getByText("No working draft is saved yet.", { exact: false }),
-  ).toBeVisible();
+  await expect(page.getByText("No working draft is saved yet.", { exact: false })).toBeVisible();
   const source = page.getByLabel("Source or evidence reference", { exact: true });
   await expect(source).toBeVisible();
   const before = await listing(f.blank.listingId);
