@@ -109,8 +109,14 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
 
   const broker = await staffSession(context);
   await openUnassignedQueueAt(page, inquiry.id);
-  await expect(page.locator(`[data-inquiry-id="${inquiry.id}"]`)).toContainText(inquiry.reference);
-  await page.getByRole("link", { name: inquiry.reference, exact: true }).click();
+  // O02 row: the preferred name and intent, then age, language and the coverage owner.
+  const row = page.locator(`[data-inquiry-id="${inquiry.id}"]`);
+  await expect(row).toContainText("Synthetic visitor · ");
+  await expect(row).toContainText(
+    /Received \d+ minutes? ago · Preferred language: English · Accountable owner: Agency coverage/,
+  );
+  await row.getByRole("link").click();
+  await expect(page).toHaveURL(new RegExp(`/en/inquiries/${inquiry.id}\\?view=unassigned`));
   await expect(page.getByRole("heading", { name: inquiry.reference, exact: true })).toBeVisible();
   const stale = await context.newPage();
   await stale.goto(hostUrl("staff", `/en/inquiries/${inquiry.id}`));

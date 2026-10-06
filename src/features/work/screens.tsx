@@ -12,9 +12,7 @@ import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
 import { readTaskHandover } from "@/server/work/handover";
 import {
-  type InboxView,
   listContacts,
-  listInbox,
   listTasks,
   readContact,
   readInquiry,
@@ -31,6 +29,8 @@ import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
 import { TaskHandoverScreen } from "./handover-screen";
 import { InquiryOwnerContext } from "./inquiry-owner-context";
+import { InquiryQueue } from "./inquiry-queue";
+import { parseInboxScope } from "./inquiry-row";
 import { InquirySelectionContext } from "./inquiry-selection-context";
 
 export function checkLocale(locale: string) {
@@ -141,88 +141,50 @@ export function Pagination({
   );
 }
 
+/** O01 inquiry cards; the O02 queue has its own rows (inquiry-queue.tsx). */
 function InquiryList({
   rows,
   locale,
-  cards = false,
 }: {
-  rows: Awaited<ReturnType<typeof listInbox>>["rows"];
+  rows: Awaited<ReturnType<typeof readToday>>["mine"]["rows"];
   locale: string;
-  cards?: boolean;
 }) {
   const copy = workCopy(locale);
   if (!rows.length)
     return <p className="rounded-card border border-border p-5 text-text-muted">{copy.empty}</p>;
-  if (cards)
-    return (
-      <ul className="divide-y divide-border rounded-card border border-border bg-surface">
-        {rows.map(({ inquiry, ownerName, needsCoverage }) => (
-          <li key={inquiry.id} data-inquiry-id={inquiry.id} className="min-w-0 space-y-3 p-4">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-              <a className={link} href={`/${locale}/inquiries/${inquiry.id}`}>
-                <bdi>{inquiry.reference}</bdi>
-              </a>
-              <span className="text-compact text-text-muted">{copy.states[inquiry.state]}</span>
-            </div>
-            <dl className="grid min-w-0 gap-3 text-compact sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <dt className="text-text-muted">{copy.owner}</dt>
-                <dd>
-                  <CoverageOwner name={ownerName} needsCoverage={needsCoverage} locale={locale} />
-                </dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">{copy.received}</dt>
-                <dd>
-                  <When locale={locale} date={inquiry.createdAt} />
-                </dd>
-              </div>
-              <div>
-                <dt className="text-text-muted">{copy.followUp}</dt>
-                <dd>
-                  <When locale={locale} date={inquiry.followUpAt} />
-                </dd>
-              </div>
-            </dl>
-          </li>
-        ))}
-      </ul>
-    );
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-start text-compact">
-        <thead>
-          <tr className="border-b border-border">
-            {[copy.reference, copy.state, copy.owner, copy.received, copy.followUp].map((label) => (
-              <th key={label} scope="col" className="p-3 text-start font-semibold">
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(({ inquiry, ownerName, needsCoverage }) => (
-            <tr key={inquiry.id} data-inquiry-id={inquiry.id} className="border-b border-border">
-              <td className="p-3">
-                <a className={link} href={`/${locale}/inquiries/${inquiry.id}`}>
-                  <bdi>{inquiry.reference}</bdi>
-                </a>
-              </td>
-              <td className="p-3">{copy.states[inquiry.state]}</td>
-              <td className="p-3">
+    <ul className="divide-y divide-border rounded-card border border-border bg-surface">
+      {rows.map(({ inquiry, ownerName, needsCoverage }) => (
+        <li key={inquiry.id} data-inquiry-id={inquiry.id} className="min-w-0 space-y-3 p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+            <a className={link} href={`/${locale}/inquiries/${inquiry.id}`}>
+              <bdi>{inquiry.reference}</bdi>
+            </a>
+            <span className="text-compact text-text-muted">{copy.states[inquiry.state]}</span>
+          </div>
+          <dl className="grid min-w-0 gap-3 text-compact sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <dt className="text-text-muted">{copy.owner}</dt>
+              <dd>
                 <CoverageOwner name={ownerName} needsCoverage={needsCoverage} locale={locale} />
-              </td>
-              <td className="p-3">
+              </dd>
+            </div>
+            <div>
+              <dt className="text-text-muted">{copy.received}</dt>
+              <dd>
                 <When locale={locale} date={inquiry.createdAt} />
-              </td>
-              <td className="p-3">
+              </dd>
+            </div>
+            <div>
+              <dt className="text-text-muted">{copy.followUp}</dt>
+              <dd>
                 <When locale={locale} date={inquiry.followUpAt} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+              </dd>
+            </div>
+          </dl>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -360,7 +322,7 @@ export async function TodayScreen({ locale, session }: { locale: string; session
         </section>
         <section className="min-w-0 space-y-4">
           <h2 className="text-subheading font-semibold">{copy.unassigned}</h2>
-          <InquiryList rows={queues.unassigned.rows} locale={locale} cards />
+          <InquiryList rows={queues.unassigned.rows} locale={locale} />
           <a className={link} href={`/${locale}/inquiries?view=unassigned`}>
             {copy.inbox}
           </a>
@@ -374,7 +336,7 @@ export async function TodayScreen({ locale, session }: { locale: string; session
         </section>
         <section className="min-w-0 space-y-4">
           <h2 className="text-subheading font-semibold">{copy.mineInquiries}</h2>
-          <InquiryList rows={queues.mine.rows} locale={locale} cards />
+          <InquiryList rows={queues.mine.rows} locale={locale} />
           <a className={link} href={`/${locale}/inquiries?view=mine`}>
             {copy.inbox}
           </a>
@@ -384,6 +346,7 @@ export async function TodayScreen({ locale, session }: { locale: string; session
   );
 }
 
+/** O02 (Figma 11:4257 · 18:2905): the queue, beside a prompt to open a conversation on lg. */
 export async function InboxScreen({
   locale,
   session,
@@ -396,28 +359,17 @@ export async function InboxScreen({
   page: number;
 }) {
   const copy = workCopy(locale);
-  const active: InboxView =
-    typeof view === "string" && ["all", "unassigned", "mine", "awaiting", "review"].includes(view)
-      ? (view as InboxView)
-      : "all";
-  const queue = await listInbox(getDb(), session, active, page);
+  const scope = parseInboxScope(view);
   return (
-    <Page title={copy.inbox} locale={locale}>
-      <nav aria-label={copy.inbox} className="flex flex-wrap gap-5">
-        {(["all", "unassigned", "mine", "awaiting", "review"] as const).map((key) => (
-          <a
-            className={link}
-            aria-current={key === active ? "page" : undefined}
-            key={key}
-            href={`/${locale}/inquiries?view=${key}`}
-          >
-            {copy[key]}
-          </a>
-        ))}
-      </nav>
-      <InquiryList rows={queue.rows} locale={locale} />
-      <Pagination {...queue} href={`/${locale}/inquiries?view=${active}`} locale={locale} />
-    </Page>
+    <div className="mx-auto flex min-w-0 max-w-page flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
+      <header className="flex flex-col gap-6 sm:gap-8">
+        <h1 className="text-heading font-semibold sm:text-title">{copy.inbox}</h1>
+        <p className="text-text-muted">{copy.scopeLeads[scope]}</p>
+      </header>
+      <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[17.5rem_minmax(0,1fr)]">
+        <InquiryQueue locale={locale} session={session} scope={scope} page={page} />
+      </div>
+    </div>
   );
 }
 

@@ -237,10 +237,13 @@ for (const javaScriptEnabled of [true, false]) {
       });
       await signIn(context, broker.token);
       await openUnassignedQueueAt(page, received.id);
-      await expect(page.locator(`[data-inquiry-id="${received.id}"]`)).toContainText(
-        received.reference,
-      );
-      await page.getByRole("link", { name: received.reference, exact: true }).click();
+      // O02 row: no name was given, so the reference names it beside the listing it came from.
+      const row = page.locator(`[data-inquiry-id="${received.id}"]`);
+      await expect(row).toContainText(`${received.reference} · ${listing.reference}`);
+      await row.getByRole("link").click();
+      await expect(
+        page.getByRole("heading", { name: received.reference, exact: true }),
+      ).toBeVisible();
       await page
         .getByLabel(work.nextAction, { exact: true })
         .fill("Review and answer this specific inquiry");
