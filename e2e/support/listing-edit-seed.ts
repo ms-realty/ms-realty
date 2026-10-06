@@ -83,10 +83,14 @@ try {
   });
   const blank = await listing("Синтетична обява без чернова", {});
   // A recorded price the draft cannot carry (another currency): it must stay visible.
-  const bgn = await listing("Синтетична обява с цена в лева", {}, {
-    state: "known",
-    value: { amountMinor: 11_500_000, currency: "BGN", period: "total", basis: "asking" },
-  });
+  const bgn = await listing(
+    "Синтетична обява с цена в лева",
+    {},
+    {
+      state: "known",
+      value: { amountMinor: 11_500_000, currency: "BGN", period: "total", basis: "asking" },
+    },
+  );
   await publishForTest(db, broker.actor, fixture, ["bg"]);
   console.log(
     JSON.stringify({
