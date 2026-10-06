@@ -158,6 +158,13 @@ const en = {
     checkingNote:
       "A finished background task does not prove the content is public. An older attempt cannot activate a withdrawn candidate.",
     checkAgain: "Check the publication",
+    checkingCandidateUnknown: "Known once the result is confirmed",
+    activationRecorded: "Activation recorded",
+    activationNotCurrent:
+      "Listing {reference} · {locale} · activated by {name}. The public page no longer shows this package; now: {state}.",
+    stateNewer: "a newer package is live",
+    stateNone: "not published",
+    notEligibleLocale: "This package is not eligible for a decision in {locale} now: {reason}.",
     reviewException: "Review the exception",
   },
   o12: {
@@ -437,6 +444,13 @@ const bg: Copy = {
     checkingNote:
       "Завършена фонова задача не доказва, че съдържанието е публично. По-стар вариант не може да активира отменен кандидат.",
     checkAgain: "Проверете публикуването",
+    checkingCandidateUnknown: "Ще се знае, когато резултатът бъде потвърден",
+    activationRecorded: "Активирането е записано",
+    activationNotCurrent:
+      "Обява {reference} · {locale} · активирана от {name}. Публичната страница вече не показва този пакет; сега: {state}.",
+    stateNewer: "показва се по-нов пакет",
+    stateNone: "не е публикувана",
+    notEligibleLocale: "Този пакет сега не е допустим за решение на {locale}: {reason}.",
     reviewException: "Прегледайте изключението",
   },
   o12: {
@@ -715,6 +729,13 @@ const ru: Copy = {
     checkingNote:
       "Завершённая фоновая задача не доказывает, что содержимое публично. Более старая попытка не может активировать снятого кандидата.",
     checkAgain: "Проверить публикацию",
+    checkingCandidateUnknown: "Станет известен после подтверждения результата",
+    activationRecorded: "Активация записана",
+    activationNotCurrent:
+      "Объявление {reference} · {locale} · активировано: {name}. Публичная страница больше не показывает этот пакет; сейчас: {state}.",
+    stateNewer: "показывается более новый пакет",
+    stateNone: "не опубликовано",
+    notEligibleLocale: "Этот пакет сейчас недопустим для решения на {locale}: {reason}.",
     reviewException: "Посмотреть исключение",
   },
   o12: {

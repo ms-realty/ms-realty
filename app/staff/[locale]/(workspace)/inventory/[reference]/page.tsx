@@ -201,7 +201,7 @@ export default async function InventoryDetailPage({
         mayReview={mayReview}
         mayPublish={mayPublish}
         error={error}
-        actorId={session.actor.id}
+        actor={session.actor}
         actorName={principal?.name ?? ""}
         query={{ step: query.step, manifest: query.manifest, published: query.published }}
       />
