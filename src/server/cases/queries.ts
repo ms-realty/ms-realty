@@ -16,12 +16,16 @@ import type { Session } from "../auth/sessions";
 import { can } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { containsSearchControl } from "../search/controls";
 import { ownerNeedsCoverage } from "../work/coverage-policy";
 import { caseFor, caseVisibility, liveParticipation } from "./shared";
 
 export async function listCases(db: Executor, session: Session, search = "") {
   const visibility = await caseVisibility(db, session);
-  const term = (typeof search === "string" ? search : "")
+  const input = typeof search === "string" ? search : "";
+  // Invalid URL text must not reach PostgreSQL or widen into an unfiltered result.
+  if (containsSearchControl(input)) return [];
+  const term = input
     .trim()
     .slice(0, 120)
     .replace(/[\\%_]/g, "\\$&");

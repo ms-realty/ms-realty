@@ -33,6 +33,7 @@ import {
   placeName,
   toCard,
 } from "../publication/presentation";
+import { containsSearchControl } from "./controls";
 
 export const defaultPageSize = 24;
 export const maxPageSize = 60;
@@ -93,7 +94,12 @@ const searchInput = z
       .optional(),
     /** Explicit opt-in: include listings where a criterion is not known either way. */
     includeUnconfirmed: z.boolean().optional(),
-    q: z.string().trim().max(100).optional(),
+    q: z
+      .string()
+      .refine((value) => !containsSearchControl(value), "search_control_character")
+      .trim()
+      .max(100)
+      .optional(),
     sort: z.enum(searchSorts).optional(),
     pageSize: z.number().int().min(1).max(maxPageSize).optional(),
     cursor: z.string().max(512).optional(),

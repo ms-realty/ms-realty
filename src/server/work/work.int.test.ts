@@ -303,6 +303,9 @@ describe("staff work against durable inquiry intake", () => {
     await expect(searchInquiries(t.db, broker.session, " ")).rejects.toMatchObject({
       code: "validation_failed",
     });
+    await expect(searchInquiries(t.db, broker.session, "Pe\0t")).rejects.toMatchObject({
+      code: "validation_failed",
+    });
   });
 
   it("a coordinator cannot accept; unenrolled staff cannot use command services", async () => {

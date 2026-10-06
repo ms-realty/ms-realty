@@ -52,6 +52,14 @@ describe("Case continuity", () => {
     expect((await listCases(t.db, f.client.session)).map((r) => r.id)).toEqual([f.record.id]);
   });
 
+  it("treats a control-character Case search as no match instead of a database error", async () => {
+    const f = await caseFixture(t.db);
+    expect((await listCases(t.db, f.client.session, f.record.reference)).map((r) => r.id)).toEqual([
+      f.record.id,
+    ]);
+    expect(await listCases(t.db, f.client.session, `\0${f.record.reference}`)).toEqual([]);
+  });
+
   it("append-only Brief proposals preserve earlier wording and reject stale edits", async () => {
     const f = await caseFixture(t.db);
     await reviseBrief(t.db, f.staff.session, {

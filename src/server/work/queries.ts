@@ -19,6 +19,7 @@ import { assertCanRead, can, resolveGrants } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { normalizePhone } from "../inquiries/intake";
+import { containsSearchControl } from "../search/controls";
 import { ownerNeedsCoverage } from "./coverage-policy";
 import {
   effectiveTaskDue,
@@ -33,7 +34,12 @@ import {
 
 export type InboxView = "all" | "unassigned" | "mine" | "awaiting" | "review";
 const pageSchema = z.number().int().min(1).max(10000);
-const inquirySearchSchema = z.string().trim().min(2).max(120);
+const inquirySearchSchema = z
+  .string()
+  .refine((value) => !containsSearchControl(value), "search_control_character")
+  .trim()
+  .min(2)
+  .max(120);
 export const pageSize = 30;
 
 // Shared only inside one read service call. Commands and later requests resolve authority again.
