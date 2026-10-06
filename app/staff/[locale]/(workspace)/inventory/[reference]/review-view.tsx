@@ -9,7 +9,7 @@ import { getDb } from "@/db/client";
 import { listingRevisions, operations, propertyFacts } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { pricePeriodByPurpose } from "@/domain/facts";
-import { publicLocales } from "@/domain/ids";
+import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import {
   type InventoryDecisionContext,
@@ -25,7 +25,7 @@ import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
 import { publicationReadiness } from "@/server/publication/commands";
-import { listingSlug, termsFacts } from "@/server/publication/presentation";
+import { eligiblePublications, listingSlug, termsFacts } from "@/server/publication/presentation";
 import { buttonClass } from "@/ui/button-class";
 import { CheckIcon, DocumentIcon, ExternalIcon, NoPhotoIcon, WarningIcon } from "@/ui/icons";
 import { submitInventoryDecision } from "../actions";
@@ -35,6 +35,18 @@ type Detail = Awaited<ReturnType<typeof inventoryDetail>>;
 function fill(template: string, values: Record<string, string | number>) {
   return template.replace(/\{(\w+)\}/g, (_, key: string) => String(values[key] ?? ""));
 }
+/** The manifest the public website shows for this listing in `locale` right now, if any. */
+async function publicManifest(listingId: string, locale: PublicLocale) {
+  const db = getDb();
+  const eligible = eligiblePublications(db, locale);
+  const [row] = await db
+    .select({ manifestId: eligible.manifestId })
+    .from(eligible)
+    .where(eq(eligible.listingId, listingId))
+    .limit(1);
+  return row?.manifestId ?? null;
+}
+
 /** O16DONE: only this staff member's own confirmed activation of this listing. */
 async function publishedReceipt(actorId: string, reference: string, id: string) {
   if (!/^[0-9a-f-]{36}$/.test(id)) return null;
@@ -54,8 +66,9 @@ async function publishedReceipt(actorId: string, reference: string, id: string) 
   const outcome = operation?.outcome as
     | { reference?: string; locale?: string; manifestId?: string }
     | undefined;
-  return outcome?.reference === reference && outcome.locale && outcome.manifestId
-    ? { locale: outcome.locale, manifestId: outcome.manifestId }
+  const locale = publicLocales.find((value) => value === outcome?.locale);
+  return outcome?.reference === reference && locale && outcome.manifestId
+    ? { locale, manifestId: outcome.manifestId }
     : null;
 }
 
@@ -240,15 +253,19 @@ export async function ReviewView({
 
   // O16DONE (Figma 642:12842 / 642:12860): a confirmed activation by this staff member.
   const done = query.published ? await publishedReceipt(actor.id, ref, query.published) : null;
-  // "Published" only while this locale's live pointer still shows that exact package; a later
-  // restriction, withdrawal or newer package turns the receipt into a record of what happened.
+  // "Published" only while the public read itself (pointer, generation, seller evidence, approved
+  // translation) still shows that exact package; anything else turns the receipt into a record of
+  // what happened.
   const pointer = done ? data.publications.find((p) => p.locale === done.locale) : undefined;
-  if (done && !(pointer?.state === "active" && pointer.manifestId === done.manifestId)) {
+  const shown = done ? await publicManifest(data.listing.id, done.locale) : null;
+  if (done && shown !== done.manifestId) {
     const state = !pointer
       ? o16.stateNone
-      : pointer.manifestId !== done.manifestId && pointer.state === "active"
-        ? o16.stateNewer
-        : optionLabel(pointer.state, locale);
+      : pointer.state !== "active"
+        ? optionLabel(pointer.state, locale)
+        : shown
+          ? o16.stateNewer
+          : o16.stateIneligible;
     return (
       <FocusedState closeHref={review} closeLabel={copy.o12.close}>
         <h1 className="pe-12 text-heading font-semibold sm:text-title">{o16.activationRecorded}</h1>
