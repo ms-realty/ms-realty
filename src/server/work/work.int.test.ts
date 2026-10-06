@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   activityEvents,
   auditEvents,
+  contactMethods,
   grants,
   inquiries,
   outboxEvents,
@@ -25,6 +26,7 @@ import {
   readContact,
   readInquiry,
   readToday,
+  searchInquiries,
 } from "./queries";
 
 let t: TestDatabase;
@@ -229,6 +231,65 @@ describe("staff work against durable inquiry intake", () => {
       (await findInquiriesByCheckCode(t.db, scoped.session, code ?? "")).rows.map((row) => row.id),
     ).toEqual([first.id]);
     await expect(findInquiriesByCheckCode(t.db, broker.session, "invalid")).rejects.toMatchObject({
+      code: "validation_failed",
+    });
+  });
+
+  it("searches only authorized inquiry names and submitted contact values, with a bounded page", async () => {
+    const first = await received();
+    const second = await received();
+    if (!first.partyId || !first.contactMethodId || !second.contactMethodId)
+      throw new Error("Intake contact is missing.");
+    await t.db
+      .update(inquiries)
+      .set({ preferredName: "Mila Petkova", state: "resolved_without_case" })
+      .where(eq(inquiries.id, first.id));
+    await t.db
+      .update(inquiries)
+      .set({ preferredName: "Nina Petrova" })
+      .where(eq(inquiries.id, second.id));
+    await t.db
+      .update(contactMethods)
+      .set({ kind: "phone", value: "+359881234567", normalizedValue: "+359881234567" })
+      .where(eq(contactMethods.id, first.contactMethodId));
+    const [secondContact] = await t.db
+      .select()
+      .from(contactMethods)
+      .where(eq(contactMethods.id, second.contactMethodId));
+    if (!secondContact) throw new Error("Intake contact is missing.");
+    await t.db.insert(contactMethods).values({
+      partyId: first.partyId,
+      kind: "email",
+      value: "unrelated@example.test",
+      normalizedValue: "unrelated@example.test",
+    });
+
+    const broker = await staff();
+    const names = await searchInquiries(t.db, broker.session, "  PET  ");
+    expect(names.rows.map((row) => row.inquiry.id).sort()).toEqual([first.id, second.id].sort());
+    expect(names).toMatchObject({ page: 1, hasMore: false });
+    expect((await searchInquiries(t.db, broker.session, "00359 (88) 123-4567")).rows).toMatchObject(
+      [{ inquiry: { id: first.id, state: "resolved_without_case" } }],
+    );
+    expect(
+      (await searchInquiries(t.db, broker.session, secondContact.value.toUpperCase())).rows.map(
+        (row) => row.inquiry.id,
+      ),
+    ).toEqual([second.id]);
+    expect((await searchInquiries(t.db, broker.session, "unrelated@example.test")).rows).toEqual(
+      [],
+    );
+    expect((await searchInquiries(t.db, broker.session, "%_")).rows).toEqual([]);
+    expect((await searchInquiries(t.db, broker.session, "Pet", 2)).rows).toEqual([]);
+    expect(JSON.stringify(names)).not.toContain(secondContact.value);
+
+    const scoped = await staff({
+      grants: [{ capability: "inquiry.read", recordType: "inquiry", recordId: first.id }],
+    });
+    expect(
+      (await searchInquiries(t.db, scoped.session, "Pet")).rows.map((row) => row.inquiry.id),
+    ).toEqual([first.id]);
+    await expect(searchInquiries(t.db, broker.session, " ")).rejects.toMatchObject({
       code: "validation_failed",
     });
   });

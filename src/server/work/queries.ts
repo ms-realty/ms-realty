@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, exists, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   activityEvents,
@@ -18,6 +18,7 @@ import type { Session } from "../auth/sessions";
 import { assertCanRead, can, resolveGrants } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { normalizePhone } from "../inquiries/intake";
 import { ownerNeedsCoverage } from "./coverage-policy";
 import {
   effectiveTaskDue,
@@ -32,6 +33,7 @@ import {
 
 export type InboxView = "all" | "unassigned" | "mine" | "awaiting" | "review";
 const pageSchema = z.number().int().min(1).max(10000);
+const inquirySearchSchema = z.string().trim().min(2).max(120);
 export const pageSize = 30;
 
 // Shared only inside one read service call. Commands and later requests resolve authority again.
@@ -71,6 +73,55 @@ export async function findInquiriesByCheckCode(db: Executor, session: Session, c
     .orderBy(desc(inquiries.createdAt), desc(inquiries.id))
     .limit(pageSize + 1);
   return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize };
+}
+
+/** Staff Inbox search. The caller must submit personal terms in a POST body, never a URL. */
+export async function searchInquiries(db: Executor, session: Session, q: string, page = 1) {
+  const term = parseInput(inquirySearchSchema, q);
+  const offset = (parseInput(pageSchema, page) - 1) * pageSize;
+  const { grants } = await queueReadContext(db, session);
+  // Only the contact captured by this inquiry is searchable. Another method on the party
+  // cannot reveal a relationship to staff who can read the inquiry but not that contact.
+  const phone = normalizePhone(term);
+  const contact = phone
+    ? { kind: "phone" as const, normalized: phone }
+    : term.includes("@")
+      ? { kind: "email" as const, normalized: term.toLowerCase() }
+      : null;
+  const rows = await db
+    .select({
+      inquiry: inquiries,
+      ownerName: principals.displayName,
+      needsCoverage: ownerNeedsCoverage(inquiries.ownerId),
+    })
+    .from(inquiries)
+    .leftJoin(principals, eq(principals.id, inquiries.ownerId))
+    .where(
+      and(
+        visibleWhere(grants, "inquiry.read", "inquiry"),
+        or(
+          sql`strpos(lower(${inquiries.preferredName}), lower(${term})) > 0`,
+          contact
+            ? exists(
+                db
+                  .select({ id: contactMethods.id })
+                  .from(contactMethods)
+                  .where(
+                    and(
+                      eq(contactMethods.id, inquiries.contactMethodId),
+                      eq(contactMethods.kind, contact.kind),
+                      eq(contactMethods.normalizedValue, contact.normalized),
+                    ),
+                  ),
+              )
+            : undefined,
+        ),
+      ),
+    )
+    .orderBy(desc(inquiries.createdAt), desc(inquiries.id))
+    .limit(pageSize + 1)
+    .offset(offset);
+  return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize, page };
 }
 
 async function inboxQuery(
