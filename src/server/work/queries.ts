@@ -31,6 +31,18 @@ import {
   taskResource,
   visibleWhere,
 } from "./shared";
+import {
+  caseContinueQuery,
+  deliveryExceptionQuery,
+  draftContinueQuery,
+  listingReviewQuery,
+  operatorDeliveryExceptionQuery,
+  publicationExceptionQuery,
+  todayQueueResult,
+  translationReviewQuery,
+  viewingQuery,
+  workerQueueQuery,
+} from "./today-queries";
 
 export type InboxView = "all" | "unassigned" | "mine" | "awaiting" | "review";
 const pageSchema = z.number().int().min(1).max(10000);
@@ -160,6 +172,7 @@ async function inboxQuery(
             : undefined;
   const rows = await db
     .select({
+      total: sql<number>`count(*) over ()`.mapWith(Number),
       inquiry: inquiries,
       ownerName: principals.displayName,
       needsCoverage: ownerNeedsCoverage(inquiries.ownerId),
@@ -173,10 +186,19 @@ async function inboxQuery(
         condition,
       ),
     )
-    .orderBy(asc(inquiries.createdAt), asc(inquiries.id))
+    .orderBy(
+      ...(view === "mine" ? [sql`${inquiries.followUpAt} asc nulls last`] : []),
+      asc(inquiries.createdAt),
+      asc(inquiries.id),
+    )
     .limit(pageSize + 1)
     .offset(offset);
-  return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize, page };
+  return {
+    rows: rows.slice(0, pageSize).map(({ total: _total, ...row }) => row),
+    total: rows[0]?.total ?? (page === 1 ? 0 : null),
+    hasMore: rows.length > pageSize,
+    page,
+  };
 }
 
 export async function readInquiry(db: Executor, session: Session, id: string) {
@@ -291,6 +313,7 @@ async function tasksQuery(
   const effectiveDue = effectiveTaskDue;
   const rows = await db
     .select({
+      total: sql<number>`count(*) over ()`.mapWith(Number),
       task: tasks,
       ownerName: principals.displayName,
       needsCoverage: ownerNeedsCoverage(tasks.ownerId),
@@ -312,7 +335,12 @@ async function tasksQuery(
     .orderBy(asc(effectiveDue), asc(tasks.id))
     .limit(pageSize + 1)
     .offset((page - 1) * pageSize);
-  return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize, page };
+  return {
+    rows: rows.slice(0, pageSize).map(({ total: _total, ...row }) => row),
+    total: rows[0]?.total ?? (page === 1 ? 0 : null),
+    hasMore: rows.length > pageSize,
+    page,
+  };
 }
 
 export async function readTask(db: Executor, session: Session, id: string) {
@@ -382,6 +410,7 @@ async function overdueKeyQuery(db: Executor, context: QueueReadContext, now: Dat
     return null;
   const rows = await db
     .select({
+      total: sql<number>`count(*) over ()`.mapWith(Number),
       id: keySets.id,
       reference: keySets.reference,
       dueAt: keySets.dueAt,
@@ -395,18 +424,54 @@ async function overdueKeyQuery(db: Executor, context: QueueReadContext, now: Dat
     .where(and(eq(keySets.state, "checked_out"), lt(keySets.dueAt, now)))
     .orderBy(asc(keySets.dueAt), asc(keySets.id))
     .limit(pageSize + 1);
-  return { rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize };
+  return {
+    rows: rows.slice(0, pageSize).map(({ total: _total, ...row }) => row),
+    total: rows[0]?.total ?? 0,
+    hasMore: rows.length > pageSize,
+  };
 }
 
 /** Bounded real queues; no synthetic metrics or inference that other modules are clear. */
 export async function readToday(db: Executor, session: Session, now = new Date()) {
   const context = await queueReadContext(db, session);
-  const [unassigned, due, mine, handovers, keyReturns] = await Promise.all([
+  const results = await Promise.allSettled([
     inboxQuery(db, context, "unassigned"),
     tasksQuery(db, context, { mine: true, dueBefore: now }),
     inboxQuery(db, context, "mine"),
     tasksQuery(db, context, { awaitingAcceptance: true }),
     overdueKeyQuery(db, context, now),
+    viewingQuery(db, context, now),
+    caseContinueQuery(db, context),
+    draftContinueQuery(db, context),
+    listingReviewQuery(db, context, now),
+    translationReviewQuery(db, context),
+    deliveryExceptionQuery(db, context),
+    publicationExceptionQuery(db, context),
+    operatorDeliveryExceptionQuery(db, context),
+    workerQueueQuery(db, context, now),
   ]);
-  return { unassigned, due, mine, handovers, keyReturns, asOf: now };
+  return {
+    unassigned: todayQueueResult(results[0], now),
+    due: todayQueueResult(results[1], now),
+    mine: todayQueueResult(results[2], now),
+    handovers: todayQueueResult(results[3], now),
+    keyReturns: todayQueueResult(results[4], now),
+    viewings: todayQueueResult(results[5], now),
+    caseContinue: todayQueueResult(results[6], now),
+    draftContinue: todayQueueResult(results[7], now),
+    listingReviews: todayQueueResult(results[8], now),
+    translationReviews: todayQueueResult(results[9], now),
+    deliveryExceptions: todayQueueResult(results[10], now),
+    publicationExceptions: todayQueueResult(results[11], now),
+    operatorDeliveryExceptions: todayQueueResult(results[12], now),
+    worker:
+      results[13].status === "fulfilled"
+        ? results[13].value
+        : { state: "unavailable" as const, reason: "read_unavailable", completedAt: null },
+    // The legacy overview mixes owned commitments with readable coverage intake. Do not
+    // label it Mine/coverage/team or calculate staffed SLA from untyped policy JSON.
+    scope: { state: "unknown" as const, reason: "scope_policy_not_bound" },
+    staffedSla: { state: "unknown" as const, reason: "staffed_sla_policy_not_bound" },
+    asOf: now,
+  };
 }
