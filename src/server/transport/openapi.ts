@@ -29,6 +29,7 @@ const securitySchemes = {
 
 const securityFor: Record<EndpointDefinition["authorization"], object[]> = {
   public: [],
+  anonymous_creator: [],
   receipt_session: [{ receiptSession: [] }],
   client_session: [{ clientSession: [] }],
   staff_session: [{ staffSession: [] }],

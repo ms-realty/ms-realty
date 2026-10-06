@@ -34,6 +34,8 @@ export type TransportGroup = (typeof transportGroups)[number];
 /** Who may call an endpoint; the server derives the Principal, never the payload. */
 export const authorizationClasses = {
   public: "Anyone. No session is read.",
+  anonymous_creator:
+    "An anonymous visitor on the public host. An existing host-only share creator cookie may be reused, or a new one issued.",
   receipt_session:
     "An anonymous visitor holding the receipt-session cookie that made the submission.",
   client_session:
@@ -384,6 +386,37 @@ export const endpoints = [
       },
     ],
     errors: ["unauthenticated", "forbidden", "internal_error"],
+  },
+  {
+    id: "shares.issueCreatorSession",
+    summary: "Enter saved-share management with an anonymous creator session",
+    description:
+      "Public-host entry for a validated locale. Reuses a valid host-only creator cookie or sets a new one before redirecting to the saved page. No viewing token or share row is returned; the response is private and never cached.",
+    group: "public_submission",
+    method: "GET",
+    path: "/api/public-shares/creator-session",
+    host: "public",
+    authorization: "anonymous_creator",
+    acceptance: ["AT09"],
+    idempotency: "none",
+    revision: "none",
+    pagination: "none",
+    responses: [
+      {
+        status: 303,
+        description: "Redirect to the validated locale's saved page",
+        headers: {
+          location: "Public-host saved page for the validated locale",
+          "set-cookie": "Host-only creator cookie, only if this browser lacks a valid one",
+          "cache-control": "private, no-store",
+          "referrer-policy": "no-referrer",
+          "x-robots-tag": "noindex, nofollow",
+        },
+      },
+      { status: 400, description: "Missing or unsupported locale" },
+      { status: 404, description: "Unavailable outside the public host" },
+    ],
+    errors: [],
   },
   {
     id: "inquiries.issueSubmissionKey",

@@ -203,8 +203,10 @@ function route(request: NextRequest) {
   response.headers.set("Content-Security-Policy", csp);
   // Mutable public truth and every private document must be re-read on the next request.
   response.headers.set("Cache-Control", "private, no-store");
-  if (context === "public" && segments[2] === "share")
+  if (context === "public" && segments[2] === "share") {
     response.headers.set("Referrer-Policy", "no-referrer");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
   if (context !== "public") response.headers.set("X-Robots-Tag", "noindex, nofollow");
   if (chosen) {
     response.cookies.set(contextLocaleCookie(context), chosen, {

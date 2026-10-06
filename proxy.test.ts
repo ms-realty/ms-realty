@@ -136,6 +136,7 @@ describe("host routing (§11.1)", () => {
     const recipient = run(hosts.public, "/bg/share/view-token");
     expect(recipient.headers.get("cache-control")).toBe("private, no-store");
     expect(recipient.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(recipient.headers.get("x-robots-tag")).toBe("noindex, nofollow");
     const api = run(hosts.public, "/api/public-shares/creator-session");
     expect(api.headers.get("cache-control")).toBe("private, no-store");
     expect(api.headers.get("referrer-policy")).toBe("no-referrer");
