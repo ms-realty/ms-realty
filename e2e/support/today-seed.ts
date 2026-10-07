@@ -1,6 +1,7 @@
 // O01 browser seed. Each person sees only this run's synthetic records through record-scoped
 // grants, so Today is deterministic in the shared browser database: a broker with an ordinary
-// day, one with nothing visible, and one with more unassigned requests than Today lists.
+// day, one with nothing visible, one with more unassigned requests than Today lists, and one
+// whose only work is an overdue follow-up of their own inquiry.
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -66,7 +67,11 @@ async function grant(
   });
 }
 
-try {
+const token = async (id: string) => (await createSession(db, { kind: "staff", id })).token;
+
+// Each case seeds only what it reads: unassigned requests land in the shared agency queue
+// that other specs page through, so the overloaded queue is created only where it is tested.
+async function ordinary() {
   const broker = await person("Synthetic broker");
   const former = await person("Former synthetic broker", "ended");
   const listing = `MS-SYNTH-${randomUUID().slice(0, 8)}`;
@@ -108,31 +113,49 @@ try {
     await grant(broker.id, "inquiry.read", "inquiry", id);
   await grant(broker.id, "ai.draft", "inquiry", oldest.id);
   for (const id of [due.id, offered.id]) await grant(broker.id, "task.manage", "task", id);
+  return {
+    token: await token(broker.id),
+    listing,
+    oldest: oldest.id,
+    oldestReference: oldest.reference,
+    newest: newest.id,
+    mine: mine.id,
+    due: due.id,
+    dueTitle: due.title,
+    offered: offered.id,
+    offeredTitle: offered.title,
+  };
+}
 
+async function quiet() {
   const empty = await person("Synthetic quiet broker");
   const overloaded = await person("Synthetic covering broker");
   for (let index = 0; index < 31; index++) {
     const waiting = await inquiry({ createdAt: ago(240 - index) });
     await grant(overloaded.id, "inquiry.read", "inquiry", waiting.id);
   }
+  return { emptyToken: await token(empty.id), overloadToken: await token(overloaded.id) };
+}
 
-  const token = async (id: string) => (await createSession(db, { kind: "staff", id })).token;
-  console.log(
-    JSON.stringify({
-      token: await token(broker.id),
-      emptyToken: await token(empty.id),
-      overloadToken: await token(overloaded.id),
-      listing,
-      oldest: oldest.id,
-      oldestReference: oldest.reference,
-      newest: newest.id,
-      mine: mine.id,
-      due: due.id,
-      dueTitle: due.title,
-      offered: offered.id,
-      offeredTitle: offered.title,
-    }),
-  );
+// Only my own inquiry, its follow-up already due: the headline must not read as a clear day.
+async function overdue() {
+  const following = await person("Synthetic following broker");
+  const owned = await inquiry({
+    state: "assigned",
+    ownerId: following.id,
+    coverageQueue: null,
+    followUpAt: ago(30),
+    createdAt: ago(900),
+  });
+  await grant(following.id, "inquiry.read", "inquiry", owned.id);
+  return { overdueToken: await token(following.id), overdue: owned.id };
+}
+
+const scenarios = { ordinary, quiet, overdue };
+const scenario = process.argv[2] ?? "ordinary";
+try {
+  if (!(scenario in scenarios)) throw new Error(`Unknown Today seed scenario: ${scenario}`);
+  console.log(JSON.stringify(await scenarios[scenario as keyof typeof scenarios]()));
 } finally {
   await connection.end();
 }

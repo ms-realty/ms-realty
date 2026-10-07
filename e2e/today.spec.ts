@@ -1,31 +1,35 @@
 // O01 Today against real PostgreSQL with synthetic, record-scoped records: contract order,
 // counts that open their queues, rows with reason/owner/time/next step, the draft-only Butler
-// entry, and truthful no-work and overload states. JavaScript on and off; BG, EN and RU. The
-// mobile projects run every case at 390 px.
+// entry, truthful no-work, overload and overdue-follow-up states, and the 20 px phone padding
+// of the Figma 390 frames. JavaScript on and off; BG, EN and RU. The mobile projects run every
+// case at 390 px; the padding case also checks 320 px.
 import { execFileSync } from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
 
-type Seed = {
-  token: string;
-  emptyToken: string;
-  overloadToken: string;
-  listing: string;
-  oldest: string;
-  oldestReference: string;
-  newest: string;
-  mine: string;
-  due: string;
-  dueTitle: string;
-  offered: string;
-  offeredTitle: string;
+type Seeds = {
+  ordinary: {
+    token: string;
+    listing: string;
+    oldest: string;
+    oldestReference: string;
+    newest: string;
+    mine: string;
+    due: string;
+    dueTitle: string;
+    offered: string;
+    offeredTitle: string;
+  };
+  quiet: { emptyToken: string; overloadToken: string };
+  overdue: { overdueToken: string; overdue: string };
 };
-function seed(): Seed {
+/** Seeds only the scenario a case reads (see e2e/support/today-seed.ts). */
+function seed<K extends keyof Seeds>(scenario: K): Seeds[K] {
   return JSON.parse(
     execFileSync(
       process.execPath,
-      ["--conditions=react-server", "--import", "tsx", "e2e/support/today-seed.ts"],
+      ["--conditions=react-server", "--import", "tsx", "e2e/support/today-seed.ts", scenario],
       {
         encoding: "utf8",
         env: {
@@ -71,7 +75,7 @@ for (const javaScriptEnabled of [false, true])
     test("O01 lists work in contract order and every count opens its queue", async ({
       page,
     }, testInfo) => {
-      const f = seed();
+      const f = seed("ordinary");
       await open(page, f.token, "/en/today");
       const main = page.getByRole("main");
       await expect(main.getByRole("heading", { level: 1 })).toHaveText(
@@ -86,6 +90,13 @@ for (const javaScriptEnabled of [false, true])
         "Awaiting my acceptanceIn the queue: 1",
         "My open inquiriesIn the queue: 1",
       ]);
+      // The other lists loaded and hold nothing for this person: named once, not drawn empty.
+      await expect(page.locator('[data-today-quiet="attention"]')).toHaveText(
+        "Nothing waiting: Viewings · Listing corrections and reviews · Translations to review · Email delivery to check · Publication delivery to check",
+      );
+      await expect(page.locator('[data-today-quiet="continue"]')).toHaveText(
+        "Nothing waiting: My cases · My listing drafts",
+      );
       // Record-scoped access only: the team scope is not offered.
       const scope = page.getByRole("navigation", { name: "Work scope" });
       await expect(scope.getByRole("link")).toHaveText(["For action", "My tasks"]);
@@ -131,6 +142,12 @@ for (const javaScriptEnabled of [false, true])
         "href",
         `/en/inquiries/${f.oldest}`,
       );
+      await expect(
+        butler.getByText(
+          "Butler drafts only for the selected record, in its own review. There is no open chat here.",
+        ),
+      ).toBeVisible();
+      await expect(butler.getByRole("textbox")).toHaveCount(0);
 
       expect(await noOverflow(page)).toBe(true);
       await expectAccessible(page, javaScriptEnabled);
@@ -174,13 +191,13 @@ for (const javaScriptEnabled of [false, true])
     test("O01 separates a day without work from more work than it lists", async ({
       page,
     }, testInfo) => {
-      const f = seed();
+      const f = seed("quiet");
       await open(page, f.emptyToken, "/en/today");
       await expect(page.getByText("Check the inquiries for new requests.")).toBeVisible();
       await expect(
         page
           .getByRole("main")
-          .getByRole("heading", { level: 2, name: "No requests or tasks need action" }),
+          .getByRole("heading", { level: 2, name: "Nothing in today's lists needs action" }),
       ).toBeVisible();
       await expect(page.getByRole("complementary", { name: "Butler" })).toHaveCount(0);
       await expect(groups(page)).toHaveCount(0);
@@ -194,11 +211,14 @@ for (const javaScriptEnabled of [false, true])
       await expect(page).toHaveURL(hostUrl("staff", "/en/inquiries"));
 
       await open(page, f.overloadToken, "/en/today");
+      // The server counts the whole queue; Today loads its first thirty rows.
       await expect(
-        page.getByText("Waiting for action: 30+. Start at the top of the list."),
+        page.getByText("Waiting for action: 31. Start at the top of the list."),
       ).toBeVisible();
-      await expect(page.getByRole("link", { name: /^Unassigned requests/ })).toContainText("30+");
-      await expect(page.getByText("More than 30 requests have no owner")).toBeVisible();
+      await expect(page.getByRole("link", { name: /^Unassigned requests/ })).toContainText(
+        "In the queue: 31",
+      );
+      await expect(page.getByText("Requests without an owner: 31")).toBeVisible();
       await expect(
         page.getByText("Agency coverage holds them until someone accepts them.", { exact: false }),
       ).toContainText("The oldest arrived 4 hr. ago.");
@@ -210,7 +230,7 @@ for (const javaScriptEnabled of [false, true])
         "href",
         "/en/inquiries?view=unassigned",
       );
-      await expect(page.getByText("No requests or tasks need action")).toHaveCount(0);
+      await expect(page.getByText("Nothing in today's lists needs action")).toHaveCount(0);
       expect(await noOverflow(page)).toBe(true);
       await expectAccessible(page, javaScriptEnabled);
       await page.screenshot({
@@ -220,10 +240,57 @@ for (const javaScriptEnabled of [false, true])
       await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
       await expect(page).toHaveURL(hostUrl("staff", "/en/coverage"));
     });
+
+    test("O01 counts an overdue follow-up of my own inquiry as waiting for action", async ({
+      page,
+    }) => {
+      const f = seed("overdue");
+      await open(page, f.overdueToken, "/en/today");
+      // Review FIX: only my own inquiry holds work, and its follow-up is due.
+      await expect(
+        page.getByText("Overdue in your own work: 1. Start under “Continue from here”."),
+      ).toBeVisible();
+      await expect(page.getByText(/Nothing in today's lists/)).toHaveCount(0);
+      await expect(page.locator("[data-today-state=empty]")).toHaveCount(0);
+      await expect(groups(page)).toHaveText(["My open inquiriesIn the queue: 1"]);
+      const mine = page.getByRole("list", { name: "My open inquiries" }).getByRole("link");
+      await expect(mine).toHaveAttribute("href", `/en/inquiries/${f.overdue}`);
+      await expect(mine).toContainText("Overdue since");
+      await expect(page.locator('[data-today-quiet="attention"]')).toContainText(
+        "Nothing waiting: Unassigned requests · My overdue tasks · Awaiting my acceptance",
+      );
+      await expectAccessible(page, javaScriptEnabled);
+    });
+
+    test("O01 phone layout keeps the Figma 390 padding of 20 px down to 320 px", async ({
+      page,
+    }, testInfo) => {
+      const f = seed("overdue");
+      for (const width of [320, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        await open(page, f.overdueToken, "/en/today");
+        const main = await page.getByRole("main").boundingBox();
+        const heading = await page
+          .getByRole("main")
+          .getByRole("heading", { level: 1 })
+          .boundingBox();
+        const scope = await page.getByRole("navigation", { name: "Work scope" }).boundingBox();
+        if (!main || !heading || !scope) throw new Error("Today did not render its frame");
+        // Page content p-20 (Figma 14:4354): top and both sides, from the gutter token.
+        expect(Math.round(heading.y - main.y)).toBe(20);
+        expect(Math.round(heading.x - main.x)).toBe(20);
+        expect(Math.round(main.x + main.width - (scope.x + scope.width))).toBe(20);
+        expect(await noOverflow(page)).toBe(true);
+        await page.screenshot({
+          path: testInfo.outputPath(`today-${width}-${javaScriptEnabled}.png`),
+          fullPage: true,
+        });
+      }
+    });
   });
 
 test("O01 speaks Bulgarian and Russian", async ({ page }) => {
-  const f = seed();
+  const f = seed("ordinary");
   for (const [locale, greeting, tabs, groupNames] of [
     [
       "bg",
