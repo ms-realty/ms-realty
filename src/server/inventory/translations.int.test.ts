@@ -3,8 +3,9 @@ import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { grants, localizedRevisions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
-import { approveListingRevision } from "../publication/commands";
-import { createListingFixture } from "../publication/testing";
+import { approveFactRevision, approveListingRevision } from "../publication/commands";
+import { loadPublishedListings } from "../publication/presentation";
+import { createListingFixture, publishLocales } from "../publication/testing";
 import { createStaff } from "../testing";
 import { decideTranslation, saveTranslation, translationWorkbench } from "./translations";
 
@@ -111,4 +112,72 @@ it("enforces locale scope, current authority on replay and human review", async 
     .set({ revokedAt: new Date() })
     .where(eq(grants.principalId, translator.id));
   await expect(saveTranslation(t.db, command)).rejects.toMatchObject({ code: "forbidden" });
+});
+
+it("O12 stores and publishes the same normalized translated title after human review", async () => {
+  const { command, publisher, listing } = await fixture();
+  const title = "Synthetic translated apartment in Sandanski";
+  const description = "Synthetic translation.\nNot a real offer.";
+  const input = {
+    ...command,
+    title: "  Synthetic\r\ntranslated\u0085apartment\u2028in\u2029Sandanski  ",
+    description,
+  };
+  const saved = await saveTranslation(t.db, input);
+  const [row] = await t.db
+    .select()
+    .from(localizedRevisions)
+    .where(eq(localizedRevisions.id, saved.outcome.translationId));
+  expect(row).toMatchObject({ title, body: { description }, state: "draft", approvalId: null });
+  const replay = await saveTranslation(t.db, { ...input, title });
+  expect(replay.replayed).toBe(true);
+  expect(replay.outcome).toEqual(saved.outcome);
+  expect(await loadPublishedListings(t.db, { ids: [listing.listingId] }, "en")).toEqual([]);
+
+  const submitted = await decideTranslation(t.db, {
+    ...command,
+    operationId: randomUUID(),
+    expectedRevision: saved.outcome.version,
+    intent: "submit",
+    note: "Ready for language review",
+  });
+  const workbench = await translationWorkbench(t.db, command.actor, command.reference, "en");
+  await decideTranslation(t.db, {
+    ...command,
+    operationId: randomUUID(),
+    expectedRevision: submitted.outcome.version,
+    intent: "approve",
+    protectedFactsDigest: workbench.protectedFactsDigest,
+    note: "Compared exact source facts",
+  });
+  await approveFactRevision(t.db, {
+    actor: publisher.actor,
+    operationId: randomUUID(),
+    expectedRevision: 1,
+    factRevisionId: listing.factRevisionId,
+    scope: "All synthetic fixture facts",
+  });
+  await publishLocales(t.db, publisher.actor, listing, ["en"]);
+  const [published] = await loadPublishedListings(t.db, { ids: [listing.listingId] }, "en");
+  expect(published).toMatchObject({ title, description, locale: "en" });
+});
+
+it("O12 retains translated title requirements and checks length after normalization", async () => {
+  const { command } = await fixture();
+  for (const title of [" \r\n\u0085\u2028\u2029 ", "a".repeat(181)]) {
+    await expect(saveTranslation(t.db, { ...command, title })).rejects.toMatchObject({
+      code: "validation_failed",
+      fieldErrors: { title: expect.any(Array) },
+    });
+  }
+  const saved = await saveTranslation(t.db, {
+    ...command,
+    title: `${"a".repeat(90)}\r\n${"b".repeat(89)}`,
+  });
+  const [row] = await t.db
+    .select()
+    .from(localizedRevisions)
+    .where(eq(localizedRevisions.id, saved.outcome.translationId));
+  expect(row?.title).toBe(`${"a".repeat(90)} ${"b".repeat(89)}`);
+  expect(row?.title).toHaveLength(180);
 });

@@ -21,6 +21,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
 import { localizedRevisionDigest } from "../publication/commands";
+import { draftSchema } from "./contracts";
 
 const envelope = z.object({
   reference: z.string().min(1),
@@ -31,7 +32,7 @@ const envelope = z.object({
 });
 type Command = z.infer<typeof envelope> & { actor: Actor };
 const copySchema = z.object({
-  title: z.string().trim().min(1).max(180),
+  title: draftSchema.shape.title.pipe(z.string().min(1)),
   description: z.string().trim().min(1).max(12000),
 });
 function parse<T>(schema: z.ZodType<T>, input: unknown): T {
