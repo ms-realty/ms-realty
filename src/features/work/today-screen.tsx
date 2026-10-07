@@ -3,8 +3,10 @@
 // tasks, overdue key returns, work offered to me), viewings, corrections and reviews, delivery
 // exceptions — then my own work to continue: open inquiries, Cases and listing drafts. Each
 // group carries the server's authorized total for its queue. A list that did not load says so
-// and is never drawn as empty or as zero; lists that loaded empty are named on one line. Butler
-// only opens the O32 draft review for one selected record; it never acts.
+// and is never drawn as empty or as zero; lists that loaded empty are named on one line. A
+// count links only to a page that lists exactly the same work; elsewhere the rows link and the
+// group says when the full list is not available here. Butler only opens the O32 draft review
+// for one selected record; it never acts.
 import "server-only";
 import { unstable_rethrow } from "next/navigation";
 import { type ComponentType, Fragment, type ReactNode } from "react";
@@ -68,10 +70,9 @@ type Group = {
   id: string;
   title: string;
   queue: TodayQueue<unknown>;
-  /** The exact queue this group counts; the heading opens it. */
+  /** A page listing exactly the work this group counts; the heading opens it. Without one,
+   * no route continues the list, so only the rows link. */
   href?: string;
-  /** The nearest workspace when no queue page reproduces this list. */
-  workspace?: { href: string; label: string };
   rows: ReactNode[];
   notice?: ReactNode;
   keyReturns?: boolean;
@@ -117,9 +118,7 @@ export async function TodayScreen({
   const worklist = loaded ? worklistOf(locale, loaded.queues, now) : null;
   const empty =
     worklist !== null &&
-    [...worklist.attention, ...worklist.continued].every(
-      ({ queue }) => queue.status === "ready" && !queue.rows.length,
-    );
+    [...worklist.attention, ...worklist.continued].every(({ queue }) => quiet(queue));
   const shownName = name?.trim().replace(/\.$/, "");
   const tabs = [
     { href: `/${locale}/today`, label: t.forAction, current: true },
@@ -211,8 +210,11 @@ async function loadToday(db: Executor, session: Session, now: Date) {
     readToday(db, session, now),
     can(db, session.actor, "case.read", { type: "case", audience: "internal" }),
   ]);
-  // Butler is offered for the first inquiry in the list, only when its own source check passes.
-  const first = queues.unassigned.rows[0]?.inquiry ?? queues.mine.rows[0]?.inquiry;
+  // Butler is offered for the first inquiry of a list that loaded, only when its own source
+  // check passes.
+  const first = [queues.unassigned, queues.mine].find(
+    (queue) => queue.status === "ready" && queue.rows.length,
+  )?.rows[0]?.inquiry;
   return { queues, mayViewTeam, butler: first ? await butlerSource(db, session, first) : null };
 }
 
@@ -254,12 +256,9 @@ function worklistOf(locale: string, queues: Queues, now: Date): Worklist {
   const t = todayCopy(locale);
   const work = workCopy(locale);
   const custody = custodyCopy(locale);
-  const cases = caseCopy(locale);
-  const inventory = inventoryCopy(locale);
-  const needs = {
-    href: `/${locale}/inventory?view=needs`,
-    label: `${inventory.inventory} · ${inventory.o10.needs}`,
-  };
+  // Only these headings link: each page lists exactly the work its count covers. The other
+  // groups have no such page yet (Calendar, Cases and Inventory are broader or filtered
+  // differently), so their counts stay plain and the rows open each record.
   return {
     attention: [
       ...group(queues.unassigned, {
@@ -294,37 +293,35 @@ function worklistOf(locale: string, queues: Queues, now: Date): Worklist {
       ...group(queues.viewings, {
         id: "viewings",
         title: t.groups.viewings,
-        workspace: { href: `/${locale}/calendar`, label: cases.calendar },
         row: (item) => <ViewingRow key={item.id} locale={locale} item={item} />,
       }),
       ...group(queues.listingReviews, {
         id: "listing-reviews",
         title: t.groups.listingReviews,
-        workspace: needs,
         row: (item) => <ListingReviewRow key={item.id} locale={locale} item={item} now={now} />,
       }),
+      // Rows open the translation workbench the grant allows. No Inventory link: a reviewer
+      // scoped to one language cannot open the Inventory, and it lists other work as well.
       ...group(queues.translationReviews, {
         id: "translation-reviews",
         title: t.groups.translationReviews,
-        workspace: needs,
         row: (item) => <TranslationRow key={item.id} locale={locale} item={item} now={now} />,
       }),
       ...group(queues.deliveryExceptions, {
         id: "email-deliveries",
         title: t.groups.deliveryExceptions,
-        workspace: { href: `/${locale}/cases`, label: cases.cases },
         row: (item) => <EmailRow key={item.id} locale={locale} item={item} now={now} />,
       }),
       ...group(queues.publicationExceptions, {
         id: "publication-deliveries",
         title: t.groups.publicationExceptions,
-        workspace: { href: `/${locale}/inventory`, label: inventory.inventory },
         row: (item) => <PublicationRow key={item.id} locale={locale} item={item} now={now} />,
       }),
+      // O27 pages the same failed and unknown-outcome actions, oldest first, for report readers.
       ...group(queues.operatorDeliveryExceptions, {
         id: "delivery-operations",
         title: t.groups.operatorDeliveryExceptions,
-        workspace: { href: `/${locale}/operations/jobs`, label: aiCopy(locale).jobs },
+        href: `/${locale}/operations/jobs?view=exceptions#external-action-exceptions`,
         row: (item) => <OperationRow key={item.id} locale={locale} item={item} now={now} />,
       }),
     ],
@@ -340,17 +337,12 @@ function worklistOf(locale: string, queues: Queues, now: Date): Worklist {
       }),
       ...group(queues.caseContinue, {
         id: "case-continue",
-        title: cases.overview,
-        workspace: { href: `/${locale}/cases`, label: cases.cases },
+        title: caseCopy(locale).overview,
         row: (item) => <CaseRow key={item.id} locale={locale} item={item} now={now} />,
       }),
       ...group(queues.draftContinue, {
         id: "draft-continue",
         title: t.groups.draftContinue,
-        workspace: {
-          href: `/${locale}/inventory?view=mine`,
-          label: `${inventory.inventory} · ${inventory.o10.mine}`,
-        },
         row: (item) => <DraftRow key={item.id} locale={locale} item={item} now={now} />,
       }),
     ],
@@ -383,7 +375,12 @@ function headline(locale: string, queues: Queues, { attention, continued }: Work
     return waiting + overdue ? t.leadPartialWaiting.replace("{n}", all) : t.leadPartial;
   if (waiting) return t.leadWaiting.replace("{n}", all);
   if (overdue) return t.leadOverdue.replace("{n}", count(overdue, overdueMore));
-  return continued.some(({ queue }) => queue.rows.length) ? t.leadNothing : t.leadEmpty;
+  return continued.some(({ queue }) => !quiet(queue)) ? t.leadNothing : t.leadEmpty;
+}
+
+/** Loaded and holding nothing: the server's authorized total decides, not the loaded rows. */
+function quiet(queue: TodayQueue<unknown>) {
+  return queue.status === "ready" && !queue.hasMore && (queue.total ?? queue.rows.length) === 0;
 }
 
 /** Overdue rows of one's own queue; they come first, so a full page of them may continue. */
@@ -410,7 +407,7 @@ function Section({
   locale: string;
 }) {
   const t = todayCopy(locale);
-  const quiet = groups.filter(({ queue }) => queue.status === "ready" && !queue.rows.length);
+  const idle = groups.filter(({ queue }) => quiet(queue));
   return (
     <section aria-labelledby={`today-${id}`} className="flex flex-col gap-4">
       <h2 id={`today-${id}`} className="text-subheading font-semibold">
@@ -418,14 +415,14 @@ function Section({
       </h2>
       {intro}
       {groups
-        .filter((entry) => !quiet.includes(entry))
+        .filter((entry) => !idle.includes(entry))
         .map((entry) => (
           <QueueGroup key={entry.id} locale={locale} group={entry} />
         ))}
-      {quiet.length ? (
+      {idle.length ? (
         <p className="text-dense text-text-muted" data-today-quiet={id}>
           {t.nothingIn}{" "}
-          {quiet.map((entry, index) => (
+          {idle.map((entry, index) => (
             <Fragment key={entry.id}>
               {index ? " · " : null}
               {entry.title}
@@ -440,7 +437,7 @@ function Section({
 /** One queue: a heading with its count (or "not loaded"), then its oldest rows. */
 function QueueGroup({ locale, group }: { locale: string; group: Group }) {
   const t = todayCopy(locale);
-  const { id, title, queue, href, workspace, rows, notice, keyReturns } = group;
+  const { id, title, queue, href, rows, notice, keyReturns } = group;
   const number = new Intl.NumberFormat(locale);
   const failed = queue.status === "unavailable";
   const known = queue.total ?? queue.rows.length;
@@ -514,14 +511,12 @@ function QueueGroup({ locale, group }: { locale: string; group: Group }) {
                   <ul className="mt-4 flex flex-col gap-4">{rows.slice(rowsPerGroup)}</ul>
                 </details>
               ) : null}
-              {queue.hasMore && workspace ? (
+              {/* Beyond the loaded page no route continues this list: say so, promise nothing. */}
+              {queue.hasMore ? (
                 <p className="text-dense text-text-muted">
                   {t.firstLoaded
                     .replace("{n}", number.format(rows.length))
-                    .replace("{total}", count)}{" "}
-                  <a href={workspace.href} className={inlineLink}>
-                    {workspace.label}
-                  </a>
+                    .replace("{total}", count)}
                 </p>
               ) : null}
             </>
@@ -931,7 +926,8 @@ function OperationRow({ locale, item, now }: { locale: string; item: OperationIt
   const t = todayCopy(locale);
   return (
     <Row
-      href={`/${locale}/operations/jobs`}
+      // O27 opens this one exception while it is still failed or unknown, for report readers.
+      href={`/${locale}/operations/jobs?action=${encodeURIComponent(item.id)}#external-action-${item.id}`}
       Icon={SendIcon}
       data={{ "data-delivery-operation": item.id }}
       title={t.operation[item.kind]}
@@ -982,15 +978,13 @@ function CaseRow({ locale, item, now }: { locale: string; item: CaseItem; now: D
   );
 }
 
+/**
+ * A draft I am still writing. Requested changes and missing facts are review work, listed and
+ * counted once under corrections and reviews; the same listing appears here as well only for
+ * its own, differently named task.
+ */
 function DraftRow({ locale, item, now }: { locale: string; item: DraftItem; now: Date }) {
   const t = todayCopy(locale);
-  const actions = inventoryCopy(locale).o10.actions;
-  const [state, action] =
-    item.editorialState === "changes_requested"
-      ? [actions.changes, t.actions.changes]
-      : item.editorialState === "needs_facts"
-        ? [actions.facts, t.actions.facts]
-        : [t.draft, t.actions.editing];
   return (
     <Row
       href={listingPath(locale, item.reference)}
@@ -998,13 +992,13 @@ function DraftRow({ locale, item, now }: { locale: string; item: DraftItem; now:
       data={{ "data-listing-draft": item.id }}
       title={
         <>
-          {state} · <bdi>{item.reference}</bdi>
+          {t.draft} · <bdi>{item.reference}</bdi>
         </>
       }
       details={[
         owner(locale, item.ownerName, item.needsCoverage),
         ["time", place(t.saved, <Ago locale={locale} date={item.updatedAt} now={now} />)],
-        next(locale, action),
+        next(locale, t.actions.editing),
       ]}
     />
   );
