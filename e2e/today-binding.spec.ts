@@ -1,10 +1,13 @@
 // O01 binding to the scoped read model, ported from Codex's codex/msr-o01-today-binding browser
-// cases onto the Figma Today screen: real totals beyond the loaded page, record scope, rows that
-// open their own workspaces, and native navigation. The unavailable-list case lives in
-// today-unavailable.spec.ts because it breaks a shared table.
+// cases (4cae9799, 825091bf) onto the Figma Today screen: real totals beyond the loaded page,
+// record and locale scope, rows that open their own workspaces, native navigation, and no
+// promise of a page that would continue a list. Every count here is scoped by this test's own
+// grants, so parallel workers cannot change it. Agency-wide delivery operations live in
+// today-operations.spec.ts; the unavailable-list case waits in today-unavailable.spec.ts.
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+import { eq } from "drizzle-orm";
 import * as schema from "../src/db/schema";
 import { hostUrl } from "./hosts";
 import { noOverflow, staffSession, todayDatabase } from "./today-helpers";
@@ -118,11 +121,14 @@ for (const javaScriptEnabled of [false, true])
       await expect(viewings.getByRole("heading", { level: 3 })).toHaveText(
         "ViewingsIn the queue: 31",
       );
-      await expect(viewings.getByText(/^Today shows the first 30 of 31\./)).toBeVisible();
-      await expect(viewings.getByRole("link", { name: "Calendar", exact: true })).toHaveAttribute(
-        "href",
-        "/en/calendar",
-      );
+      // No page lists exactly these viewings: the count stays plain and nothing promises more.
+      await expect(
+        viewings.getByText(
+          "Today shows the first 30 of 31. The full list is not available here yet.",
+        ),
+      ).toBeVisible();
+      await expect(viewings.getByRole("heading", { level: 3 }).getByRole("link")).toHaveCount(0);
+      await expect(viewings.locator('a[href="/en/calendar"]')).toHaveCount(0);
       const first = appointments[0],
         sixth = appointments[5];
       if (!first || !sixth) throw new Error("Missing ordered viewing fixtures");
@@ -176,4 +182,167 @@ for (const javaScriptEnabled of [false, true])
         page.getByRole("heading", { name: first.reference, exact: false }),
       ).toBeVisible();
     });
+
+    test("O01 a reviewer scoped to one language keeps the translations it may open and an honest 31-item preview", async ({
+      page,
+      context,
+    }, testInfo) => {
+      const staff = await staffSession(db, context);
+      const items = await localeOnlyTranslations(staff.id);
+      const first = items[0],
+        last = items[30];
+      if (!first || !last) throw new Error("Missing translation fixtures");
+      await page.goto(hostUrl("staff", "/en/today"));
+      // Only the 31 Russian reviews the grants allow are counted; the English one is not.
+      await expect(
+        page.getByRole("main").getByText("Waiting for action: 31. Start at the top of the list."),
+      ).toBeVisible();
+      const group = page.locator('[data-today-group="translation-reviews"]');
+      await expect(group.getByRole("heading", { level: 3 })).toHaveText(
+        "Translations to reviewIn the queue: 31",
+      );
+      await expect(
+        group.getByText("Today shows the first 30 of 31. The full list is not available here yet."),
+      ).toBeVisible();
+      // Nothing points this reviewer at the Inventory, which a language grant cannot open.
+      await expect(
+        page.locator('main a[href^="/en/inventory?"], main a[href="/en/inventory"]'),
+      ).toHaveCount(0);
+      const link = (reference: string) =>
+        group.getByRole("link", { name: new RegExp(`^Translation to review · RU · ${reference}`) });
+      await expect(link(first.reference)).toBeVisible();
+      await group.getByText("Show 25 more").click();
+      await expect(group.locator('a[href$="/translations/ru"]')).toHaveCount(30);
+      await expect(group.locator('a[href$="/translations/en"]')).toHaveCount(0);
+      await expect(group.getByText(last.reference, { exact: false })).toHaveCount(0);
+      expect(await noOverflow(page)).toBe(true);
+      if (javaScriptEnabled)
+        expect(
+          (
+            await new AxeBuilder({ page })
+              .include("main")
+              .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+              .analyze()
+          ).violations,
+        ).toEqual([]);
+      await capture(page, testInfo.outputPath(`today-translations-31-${javaScriptEnabled}`));
+      await link(first.reference).click();
+      await expect(page).toHaveURL(
+        hostUrl("staff", `/en/inventory/${first.reference}/translations/ru`),
+      );
+      await expect(page.getByRole("heading", { level: 1 })).toContainText("RU");
+      await expect(page.getByText("Synthetic BG source", { exact: true })).toBeVisible();
+      await expect(page.getByRole("textbox", { name: /title/i })).toHaveValue(
+        "Synthetic RU translation",
+      );
+    });
   });
+
+/** Full-page captures at the project's width and at 320 px, for the review record. */
+async function capture(page: Page, path: string) {
+  const viewport = page.viewportSize();
+  await page.screenshot({ path: `${path}-${viewport?.width}.png`, fullPage: true });
+  if (!viewport || viewport.width === 320) return;
+  await page.setViewportSize({ width: 320, height: viewport.height });
+  expect(await noOverflow(page)).toBe(true);
+  await page.screenshot({ path: `${path}-320.png`, fullPage: true });
+  await page.setViewportSize(viewport);
+}
+
+/**
+ * 31 Russian translations under review on approved sources, each readable and reviewable only
+ * in Russian through record grants, plus one English review the grants do not cover.
+ */
+async function localeOnlyTranslations(staffId: string) {
+  const marker = randomUUID().toUpperCase();
+  const items = Array.from({ length: 31 }, (_, index) => ({
+    id: randomUUID(),
+    propertyId: randomUUID(),
+    factId: randomUUID(),
+    sourceId: randomUUID(),
+    reference: `MS-TR-${index}-${marker}`,
+  }));
+  await db.insert(schema.properties).values(
+    items.map((item) => ({
+      id: item.propertyId,
+      reference: `PR-${item.propertyId}`,
+      propertyType: "apartment" as const,
+      country: "BG",
+      region: "Blagoevgrad",
+      settlement: "Sandanski",
+    })),
+  );
+  await db.insert(schema.propertyFactRevisions).values(
+    items.map((item) => ({
+      id: item.factId,
+      propertyId: item.propertyId,
+      revisionNumber: 1,
+      contentDigest: randomUUID(),
+      materialChange: "initial" as const,
+      createdByKind: "system" as const,
+      createdById: "synthetic-today",
+    })),
+  );
+  await db.insert(schema.listings).values(
+    items.map((item) => ({
+      id: item.id,
+      propertyId: item.propertyId,
+      reference: item.reference,
+      purpose: "sale" as const,
+    })),
+  );
+  await db.insert(schema.listingRevisions).values(
+    items.map((item) => ({
+      id: item.sourceId,
+      listingId: item.id,
+      factRevisionId: item.factId,
+      revisionNumber: 1,
+      contentDigest: randomUUID(),
+      sourceCopy: { text: { title: "Synthetic BG source", description: "Synthetic fixture" } },
+      terms: {},
+      disclosure: {},
+      createdByKind: "system" as const,
+      createdById: "synthetic-today",
+    })),
+  );
+  for (const item of items)
+    await db
+      .update(schema.listings)
+      .set({ approvedRevisionId: item.sourceId })
+      .where(eq(schema.listings.id, item.id));
+  const now = Date.now();
+  // Oldest first: the 31st, newest, is the one beyond the loaded thirty.
+  await db.insert(schema.localizedRevisions).values(
+    items.map((item, index) => ({
+      listingId: item.id,
+      sourceRevisionId: item.sourceId,
+      locale: "ru" as const,
+      state: "reviewing" as const,
+      title: "Synthetic RU translation",
+      body: { description: "Synthetic translation" },
+      updatedAt: new Date(now - (31 - index) * 1000),
+    })),
+  );
+  const [first] = items;
+  if (!first) throw new Error("Missing translation fixtures");
+  await db.insert(schema.localizedRevisions).values({
+    listingId: first.id,
+    sourceRevisionId: first.sourceId,
+    locale: "en",
+    state: "reviewing",
+    title: "English translation outside the grant",
+  });
+  await db.insert(schema.grants).values(
+    items.flatMap((item) =>
+      (["listing.read", "translation.review"] as const).map((capability) => ({
+        principalId: staffId,
+        capability,
+        recordType: "listing",
+        recordId: item.id,
+        locales: ["ru" as const],
+        reason: "Locale-only Today browser fixture",
+      })),
+    ),
+  );
+  return items;
+}
