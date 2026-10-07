@@ -223,7 +223,7 @@ const en = {
     butler: "Butler",
     butlerStatus: "Under your control",
     butlerOffer:
-      "I can improve the structure of the text while keeping the price, area, bedrooms, area and reference exact.",
+      "I can improve the structure of the text while keeping the price, area, bedrooms, district and reference exact.",
     butlerRecord: "Current record",
     butlerScope: "Permitted context only",
     butlerNote: "You will get a draft to review. Nothing is sent or published.",

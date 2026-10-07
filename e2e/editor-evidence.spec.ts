@@ -74,6 +74,23 @@ test("editor states", async ({ page }, testInfo) => {
   // O16 review for publication.
   await page.goto(bg(`${f.reference}?tab=review`));
   await shot("o16-review");
+  // O12STALE and O12STALEAPPLIED: unsaved work kept from an earlier version of this listing
+  // (DraftKeeper keys it by listing version), compared, then applied without saving.
+  await page.evaluate((reference) => {
+    sessionStorage.setItem(
+      `o12:${reference}:0`,
+      JSON.stringify({ price: "118000", brokerNote: "Синтетична незаписана бележка." }),
+    );
+  }, f.reference);
+  await page.goto(bg(`${f.reference}?tab=facts`));
+  const apply = page.getByRole("button", { name: "Приложете моите по-ранни промени" });
+  await expect(apply).toBeVisible();
+  await shot("o12-stale");
+  await apply.click();
+  await expect(page.getByLabel("Цена в EUR", { exact: true })).toHaveValue("118000");
+  await shot("o12-stale-applied");
+  // The applied work is unsaved: leaving asks the browser's own question; leave anyway.
+  page.once("dialog", (dialog) => dialog.accept());
 
   // O13 media order and its saved state.
   const m = run("src/server/media/order-browser-seed.ts") as { token: string; reference: string };

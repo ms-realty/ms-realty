@@ -26,7 +26,7 @@ import { draftSchema } from "@/server/inventory/contracts";
 import { uneditablePriceEvidence, workingDraftFrom } from "@/server/inventory/working-draft";
 import { publicationReadiness } from "@/server/publication/commands";
 import { buttonClass } from "@/ui/button-class";
-import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon } from "@/ui/icons";
+import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon, WarningIcon } from "@/ui/icons";
 import { saveInventory } from "../actions";
 import { ReviewView } from "./review-view";
 
@@ -288,15 +288,6 @@ export default async function InventoryDetailPage({
             aria-label={o12.text}
             className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-[46.8rem]"
           >
-            {/* 647:12802: the no-draft note leads the work column, under the tabs. */}
-            {!parsed.success && mayEdit ? (
-              <p className="rounded-control bg-warning-soft p-3 text-dense text-text">
-                {o12.noDraft}
-              </p>
-            ) : null}
-            <p className="hidden text-compact text-text-muted group-has-[#o12-facts:checked]/o12:block">
-              {copy.factsHint}
-            </p>
             {mayEdit ? (
               <div data-o12-editor>
                 <InventoryEditor
@@ -305,23 +296,32 @@ export default async function InventoryDetailPage({
                   view="edit"
                   formId={formId}
                   draftKey={draftKey}
+                  // 647:12802: the no-draft alert leads the work column (under any error summary).
+                  lead={
+                    parsed.success ? null : (
+                      <p className="flex items-start gap-3 rounded-control bg-warning-soft p-4 text-dense">
+                        <WarningIcon className="size-5 shrink-0 text-warning" />
+                        {o12.noDraft}
+                      </p>
+                    )
+                  }
                   missing={missing}
                   missingNote={
                     recorded ? (
-                      <div className="flex flex-col gap-3 sm:col-span-2">
-                        <p className="text-dense">
+                      <>
+                        <p className="text-dense sm:col-span-2">
                           {o12.priceRecorded.replace("{value}", recorded)}
                         </p>
-                        <label className="flex items-start gap-3 text-dense">
+                        <label className="flex min-h-control items-start gap-3 p-3 text-dense sm:col-span-2">
                           <input
                             type="checkbox"
                             name="_priceDecision"
                             value={revision?.id ?? ""}
-                            className="mt-0.5 size-5 accent-action"
+                            className="size-5 shrink-0 accent-action"
                           />
                           {o12.priceKeepUnknown}
                         </label>
-                      </div>
+                      </>
                     ) : null
                   }
                   action={saveInventory.bind(null, locale, reference)}
@@ -344,10 +344,14 @@ export default async function InventoryDetailPage({
                         {o12.reviewForPublication}
                       </LeaveControl>
                       {published ? (
+                        // Text only: the Facts frames (647:12680, 657:12889) keep Save and Review.
                         <LeaveControl
                           href={`${path}?tab=review#${inventorySections.review}`}
                           formId={formId}
-                          className={buttonClass("tertiary", "text-text")}
+                          className={buttonClass(
+                            "tertiary",
+                            "text-text group-has-[#o12-facts:checked]/o12:hidden",
+                          )}
                         >
                           {o12.correctPublished}
                         </LeaveControl>
@@ -370,7 +374,7 @@ export default async function InventoryDetailPage({
             ) : (
               <p>{copy.permissions}</p>
             )}
-            <div className="hidden flex-wrap gap-4 group-has-[#o12-facts:checked]/o12:flex">
+            <div className="hidden flex-wrap gap-x-4 gap-y-2 font-semibold group-has-[#o12-facts:checked]/o12:flex">
               <a className="text-action underline" href={`${path}/evidence`}>
                 {evidence.title}
               </a>
@@ -407,9 +411,11 @@ export default async function InventoryDetailPage({
               </dl>
             </div>
           </section>
+          {/* Contextual Butler: beside the text on wide screens; on phones it follows the work
+              column on both tabs (659:12922, 661:13158). Drafting stays disabled and explained. */}
           <aside
             aria-labelledby="butler-heading"
-            className="flex flex-col gap-5 rounded-card bg-subtle p-5 group-has-[#o12-facts:checked]/o12:hidden lg:w-[23.2rem] lg:shrink-0"
+            className="flex flex-col gap-5 rounded-card bg-subtle p-5 lg:w-[23.2rem] lg:shrink-0 lg:group-has-[#o12-facts:checked]/o12:hidden"
           >
             <h2
               id="butler-heading"

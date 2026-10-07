@@ -137,6 +137,14 @@ for (const javaScriptEnabled of [false, true])
 
       // Facts save keeps the text, returns to Facts and shows the new value.
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`));
+      // Facts keeps Save and Review (647:12680); phones still show the contextual Butler
+      // block under the work column (659:12922), wide screens keep it beside Text only.
+      await expect(page.getByText("Correct the published listing", { exact: true })).toBeHidden();
+      if (test.info().project.name === "chromium-desktop") await expect(butler).toBeHidden();
+      else {
+        await expect(butler.getByRole("button", { name: "Prepare a proposal" })).toBeDisabled();
+        await expect(butler.getByText("Butler cannot draft listing text yet.")).toBeVisible();
+      }
       await page.getByLabel("Price in EUR", { exact: true }).fill("96000");
       await page.getByRole("button", { name: "Save the facts", exact: true }).click();
       await expect(
@@ -538,8 +546,10 @@ test("O12 keeps a source price it cannot carry visible and needs a choice to dro
   const f = seed();
   await signIn(page, f.token);
   await page.goto(hostUrl("staff", `/en/inventory/${f.bgn.reference}`));
+  // The needed-before-saving box (647:12802) stays one named group holding the recorded price.
+  const needed = page.getByRole("group", { name: "Needed before this draft can be saved" });
   await expect(
-    page.getByText("The source recorded 115,000 BGN · total price.", { exact: false }),
+    needed.getByText("The source recorded 115,000 BGN · total price.", { exact: false }),
   ).toBeVisible();
   await page
     .getByLabel("Source or evidence reference", { exact: true })
@@ -569,8 +579,15 @@ test("O12 without a saved draft asks for the source and does not write", async (
   const before = await listing(f.blank.listingId);
   await page.getByLabel("Listing title", { exact: true }).fill("Синтетично заглавие");
   await page.getByRole("button", { name: "Save the description", exact: true }).click();
-  await expect(page.getByRole("region", { name: "Check the form" })).toBeVisible();
+  const summary = page.getByRole("region", { name: "Check the form" });
+  await expect(summary).toBeVisible();
   await expect(source).toHaveAttribute("aria-invalid", "true");
+  // 694:13318: the error summary leads the work column, then the no-draft alert.
+  const summaryTop = (await summary.boundingBox())?.y ?? Number.POSITIVE_INFINITY;
+  const alertTop =
+    (await page.getByText("No working draft is saved yet.", { exact: false }).boundingBox())?.y ??
+    0;
+  expect(summaryTop).toBeLessThan(alertTop);
   expect(await listing(f.blank.listingId)).toEqual(before);
 });
 

@@ -4,6 +4,7 @@ import { controlClass } from "@/ui/field";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
+import { WarningIcon } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 import { inventoryCopy, optionLabel } from "./copy";
 
@@ -45,6 +46,7 @@ export function InventoryEditor({
   action,
   reference,
   view = "create",
+  lead,
   missing = [],
   missingNote,
   formId,
@@ -57,6 +59,8 @@ export function InventoryEditor({
   action: FormAction<InventoryValues>;
   reference?: string;
   view?: "create" | "edit";
+  /** Opens the edit column, under the error summary (694:13318), e.g. the no-draft alert. */
+  lead?: ReactNode;
   missing?: Field[];
   /** Shown inside the "needed before saving" block (e.g. a recorded price it cannot carry). */
   missingNote?: ReactNode;
@@ -173,7 +177,10 @@ export function InventoryEditor({
             {fields.map((name) => render(form, name))}
           </div>
         ) : (
-          <>
+          // 647:12802 / 657:12889: the work column reads alerts, the needed-before-saving
+          // block, the Facts hint, then the fields, 24 px apart.
+          <div className="flex flex-col gap-6">
+            {lead}
             {draftKey ? (
               <DraftKeeper
                 form={form}
@@ -187,12 +194,22 @@ export function InventoryEditor({
               />
             ) : null}
             {missing.length ? (
-              <fieldset className="grid gap-5 rounded-panel border border-warning p-4 sm:grid-cols-2">
-                <legend className="px-1 text-dense font-semibold">{copy.o12.needsInput}</legend>
+              // Named by its first row, as drawn (647:12802): a legend would sit in the border,
+              // and WebKit keeps it there even when floated.
+              <fieldset
+                aria-labelledby="o12-needed"
+                className="grid gap-x-6 gap-y-4 rounded-panel border border-warning p-4 sm:grid-cols-2"
+              >
+                <p id="o12-needed" className="text-dense font-semibold sm:col-span-2">
+                  {copy.o12.needsInput}
+                </p>
                 {missing.map((name) => render(form, name))}
                 {missingNote}
               </fieldset>
             ) : null}
+            <p className="hidden text-dense group-has-[#o12-facts:checked]/o12:block">
+              {copy.factsHint}
+            </p>
             <div
               data-o12-panel="text"
               className="flex flex-col gap-6 group-has-[#o12-facts:checked]/o12:hidden has-[[aria-invalid=true]]:flex!"
@@ -208,7 +225,7 @@ export function InventoryEditor({
                 .map((name) => render(form, name))}
             </div>
             {footer}
-          </>
+          </div>
         )
       }
     </ActionForm>
@@ -301,47 +318,51 @@ function DraftKeeper({
   return (
     <>
       {stale && differences.length ? (
-        <Notice tone="warning">
-          <p>{copy.staleRestored}</p>
-          <dl className="mt-2 grid gap-3">
-            {differences.map((name) => (
-              <div key={name} className="grid gap-1">
-                <dt className="font-semibold">{labels[name]}</dt>
-                <dd>
-                  {copy.yourValue}:{" "}
-                  <span className="whitespace-pre-wrap">{stale.values[name]}</span>
-                </dd>
-                <dd className="text-text-muted">
-                  {copy.currentValue}:{" "}
-                  <span className="whitespace-pre-wrap">{initial.current[name]}</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-3 flex flex-wrap gap-4">
-            <button
-              type="button"
-              className="font-semibold underline"
-              onClick={() => {
-                for (const name of differences) form.setValue(name, stale.values[name] ?? "");
-                forget(stale.key);
-                setStale(null);
-              }}
-            >
-              {copy.applyStale}
-            </button>
-            <button
-              type="button"
-              className="font-semibold underline"
-              onClick={() => {
-                forget(stale.key);
-                setStale(null);
-              }}
-            >
-              {copy.discardRestored}
-            </button>
+        // 657:31330 (UI26 inline alert): the message, each difference, then Apply / Discard.
+        <div className="flex items-start gap-3 rounded-control bg-warning-soft p-4 text-dense">
+          <WarningIcon className="size-5 shrink-0 text-warning" />
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <p>{copy.staleRestored}</p>
+            <dl className="flex flex-col gap-3">
+              {differences.map((name) => (
+                <div key={name} className="flex flex-col gap-1">
+                  <dt className="font-semibold">{labels[name]}</dt>
+                  <dd>
+                    {copy.yourValue}:{" "}
+                    <span className="whitespace-pre-wrap">{stale.values[name]}</span>
+                  </dd>
+                  <dd className="text-text-muted">
+                    {copy.currentValue}:{" "}
+                    <span className="whitespace-pre-wrap">{initial.current[name]}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div className="flex flex-wrap gap-x-4 gap-y-3 sm:gap-y-2">
+              <button
+                type="button"
+                className="text-start font-semibold underline"
+                onClick={() => {
+                  for (const name of differences) form.setValue(name, stale.values[name] ?? "");
+                  forget(stale.key);
+                  setStale(null);
+                }}
+              >
+                {copy.applyStale}
+              </button>
+              <button
+                type="button"
+                className="text-start font-semibold underline"
+                onClick={() => {
+                  forget(stale.key);
+                  setStale(null);
+                }}
+              >
+                {copy.discardRestored}
+              </button>
+            </div>
           </div>
-        </Notice>
+        </div>
       ) : null}
       {restored ? (
         <Notice tone="info">
