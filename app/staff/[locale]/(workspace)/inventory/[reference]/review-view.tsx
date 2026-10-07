@@ -177,8 +177,8 @@ export async function ReviewView({
     can(getDb(), actor, "media.manage", mediaResource),
     can(getDb(), actor, "listing.read", { ...mediaResource, locale: "bg" }),
   ]);
-  // Keep the recorded order; a reviewer can preview only the scoped gallery derivative.
-  const cover = photos.find(
+  // Keep the recorded order; a reviewer's selection and caption include only permitted previews.
+  const previewPhotos = photos.filter(
     ({ asset }) =>
       asset.scan === "clean" &&
       asset.processing === "ready" &&
@@ -198,6 +198,8 @@ export async function ReviewView({
               asset.derivativeContentType === "image/webp",
           ))),
   );
+  const cover = previewPhotos[0];
+  const captionPhotos = mayManageMedia ? photos : previewPhotos;
   const known = (state: string, value: string) =>
     state === "known" && value !== "" && Number.isFinite(Number(value));
   // Recorded money keeps its own currency and period; nothing is converted.
@@ -527,10 +529,9 @@ export async function ReviewView({
                   // biome-ignore lint/performance/noImgElement: Authenticated previews must bypass shared image optimizers.
                   <img
                     src={
-                      cover.asset.purpose === "listing_gallery" &&
-                      cover.asset.audience === "public_candidate"
-                        ? `/api/files/private/media/${cover.asset.id}?preview=1&listing=${listing.id}&locale=bg`
-                        : `/api/files/private/media/${cover.asset.id}?preview=1`
+                      mayManageMedia
+                        ? `/api/files/private/media/${cover.asset.id}?preview=1`
+                        : `/api/files/private/media/${cover.asset.id}?preview=1&listing=${listing.id}&locale=bg`
                     }
                     alt={cover.asset.altText ?? ""}
                     className="aspect-[3/2] w-full object-cover sm:aspect-auto sm:h-45"
@@ -544,8 +545,8 @@ export async function ReviewView({
                   {cover
                     ? fill(o16.photoCaption, {
                         reference: ref,
-                        n: photos.indexOf(cover) + 1,
-                        total: photos.length,
+                        n: captionPhotos.indexOf(cover) + 1,
+                        total: captionPhotos.length,
                       })
                     : photos.length > 0 && !mayManageMedia
                       ? o16.noPreview

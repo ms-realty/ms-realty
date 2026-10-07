@@ -9,7 +9,6 @@ import {
   mediaRelations,
   principals,
 } from "@/db/schema";
-import type { PublicLocale } from "@/domain/ids";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { requireFreshAuth, requireLiveSession, type Session } from "../auth/sessions";
 import { can } from "../authz";
@@ -55,7 +54,7 @@ export async function mediaAccess(db: Executor, session: Session, id: string) {
 
 export interface MediaReviewPreviewScope {
   readonly listingId: string;
-  readonly locale: PublicLocale;
+  readonly locale: "bg";
 }
 
 /** A reviewer's safe gallery derivative, never original or other private media access. */
@@ -66,7 +65,7 @@ export async function mediaReviewPreviewAccess(
   scope: MediaReviewPreviewScope,
 ) {
   session = await fileSession(db, session);
-  if (session.actor.kind !== "staff") throw new AppError("not_found");
+  if (session.actor.kind !== "staff" || scope.locale !== "bg") throw new AppError("not_found");
   const [row] = await db
     .select({ asset: mediaAssets, listing: listings })
     .from(mediaRelations)
@@ -90,7 +89,7 @@ export async function mediaReviewPreviewAccess(
       type: "listing",
       id: row.listing.id,
       propertyId: row.listing.propertyId,
-      locale: scope.locale,
+      locale: "bg",
     }))
   )
     throw new AppError("not_found");

@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { getDb } from "@/db/client";
-import { publicLocales } from "@/domain/ids";
 import { getEnv } from "@/server/config/env";
 import { fileServices } from "@/server/files/config";
 import { downloadResponse, privateDownload } from "@/server/files/download";
@@ -14,7 +13,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-const reviewPreviewScope = z.object({ listingId: z.uuid(), locale: z.enum(publicLocales) });
+const reviewPreviewScope = z.object({ listingId: z.uuid(), locale: z.literal("bg") });
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ kind: string; id: string }> },

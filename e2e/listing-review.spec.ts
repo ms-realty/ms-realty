@@ -2,7 +2,7 @@
 // human approvals as recorded status (never boxes to tick), says whether publishing is blocked,
 // and keeps every decision on its own form. Real PostgreSQL, synthetic records.
 import { execFileSync } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import { copyFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -320,6 +320,51 @@ test("O16 offers the publication decision only to someone who may publish", asyn
   expect((await page.request.get(previewUrl.href)).status()).toBe(404);
 });
 
+test("O16 rejects forged source locale and single-passkey HTTP reads", async ({ page }) => {
+  const f = seed();
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`, f.readerToken);
+  const image = page.locator('[aria-labelledby="o16-working"] img');
+  await expect
+    .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+    .toBeGreaterThan(0);
+  const source = await image.getAttribute("src");
+  if (!source) throw new Error("Missing O16 review preview");
+  const [reader] = await db
+    .select({ principalId: schema.sessions.principalId })
+    .from(schema.sessions)
+    .where(eq(schema.sessions.tokenHash, createHash("sha256").update(f.readerToken).digest("hex")));
+  if (!reader) throw new Error("Missing synthetic reviewer session");
+  await db
+    .update(schema.grants)
+    .set({ locales: ["en"] })
+    .where(eq(schema.grants.principalId, reader.principalId));
+  const previewUrl = new URL(source, origins.staff);
+  expect((await page.request.get(previewUrl.href)).status()).toBe(404);
+  previewUrl.searchParams.set("locale", "en");
+  const forged = await page.request.get(previewUrl.href);
+  expect(forged.status()).toBe(404);
+  expect(await forged.text()).toBe("");
+
+  await db
+    .update(schema.grants)
+    .set({ locales: ["bg"] })
+    .where(eq(schema.grants.principalId, reader.principalId));
+  const [key] = await db
+    .select()
+    .from(schema.passkeys)
+    .where(eq(schema.passkeys.principalId, reader.principalId));
+  if (!key) throw new Error("Missing synthetic reviewer passkey");
+  await db
+    .update(schema.passkeys)
+    .set({ revokedAt: new Date() })
+    .where(eq(schema.passkeys.id, key.id));
+  previewUrl.searchParams.set("locale", "bg");
+  // The outer staff-session gate still rejects an account with only one passkey.
+  expect((await page.request.get(previewUrl.href)).status()).toBe(401);
+  previewUrl.pathname = `/api/files/private/media/${randomUUID()}`;
+  expect((await page.request.get(previewUrl.href)).status()).toBe(401);
+});
+
 test("O16 selects a readable preview and preserves the recorded photo order", async ({ page }) => {
   const f = seed();
   const [first] = await db
@@ -356,15 +401,22 @@ test("O16 selects a readable preview and preserves the recorded photo order", as
     mediaAssetId: secondId,
     position: 1,
   });
+  const preview = page.locator('[aria-labelledby="o16-working"] figure');
+  const image = preview.locator("img");
+  const loaded = () => image.evaluate((img: HTMLImageElement) => img.naturalWidth);
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  // Management authority uses the generic preview even while the asset is a public candidate.
+  await expect(image).toHaveAttribute(
+    "src",
+    `/api/files/private/media/${first.asset.id}?preview=1`,
+  );
+  await expect.poll(loaded).toBeGreaterThan(0);
   await db
     .update(schema.mediaAssets)
     .set({ audience: "private", altText: "Private first photo" })
     .where(eq(schema.mediaAssets.id, first.asset.id));
 
-  const preview = page.locator('[aria-labelledby="o16-working"] figure');
-  const image = preview.locator("img");
-  const loaded = () => image.evaluate((img: HTMLImageElement) => img.naturalWidth);
-  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  await page.reload();
   await expect(image).toHaveAttribute("alt", "Private first photo");
   await expect.poll(loaded).toBeGreaterThan(0);
   await expect(preview).toContainText("Photo 1 of 2");
@@ -379,7 +431,11 @@ test("O16 selects a readable preview and preserves the recorded photo order", as
     `/api/files/private/media/${secondId}?preview=1&listing=${f.listingId}&locale=bg`,
   );
   await expect.poll(loaded).toBeGreaterThan(0);
-  await expect(preview).toContainText("Photo 2 of 2");
+  await expect(preview).toContainText("Photo 1 of 1");
+  const frame = await image.boundingBox();
+  const phone = (page.viewportSize()?.width ?? 1440) < 640;
+  expect(frame?.width).toBe(phone ? 350 : 240);
+  expect(frame?.height).toBeCloseTo(phone ? 233.33 : 180, 1);
 
   // With no permitted gallery preview, show an honest empty state and make no denied image request.
   await db
