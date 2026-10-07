@@ -17,6 +17,21 @@ import {
 
 export type { InventoryValues };
 
+// O12 follows the Facts design sequence independently of localized label insertion order.
+const factsFields: Field[] = [
+  "priceState",
+  "price",
+  "areaState",
+  "area",
+  "areaBasis",
+  "bedroomsState",
+  "bedrooms",
+  "sourceClass",
+  "sourceLanguage",
+  "sourceReference",
+  "brokerNote",
+];
+
 /**
  * One Server Action and one draft. `create` shows every field (O11). `edit` (O12) keeps the
  * whole draft in one form: a Text panel and a Facts panel that the page's tabs switch through
@@ -59,18 +74,18 @@ export function InventoryEditor({
   const fields = (Object.keys(copy.labels) as Field[]).filter(
     (name) => view === "create" || !identity.includes(name),
   );
-  const render = (form: FormController<InventoryValues>, name: Field, required = false) => {
+  const render = (form: FormController<InventoryValues>, name: Field) => {
     const field = form.field(name);
     const values = selects[name];
     if (!values)
       return (
         <div
           key={name}
-          // In the needed-before-saving block the fields pair up as drawn (647:12802).
+          // O12 pairs source language and reference; its optional private note spans the row.
           className={
             name === "description" ||
             name === "brokerNote" ||
-            (name === "sourceReference" && !required)
+            (name === "sourceReference" && view === "create")
               ? "sm:col-span-2"
               : undefined
           }
@@ -91,7 +106,11 @@ export function InventoryEditor({
         ? `${field.value} · ${copy.o12.unsupported}`
         : copy.o12.choose;
     return (
-      <div key={name} className="flex flex-col gap-2">
+      <div
+        key={name}
+        className="group flex min-w-0 flex-col gap-2"
+        data-invalid={field.error ? "true" : undefined}
+      >
         <label htmlFor={field.id} className="text-compact font-semibold">
           {labels[name]}
         </label>
@@ -170,7 +189,7 @@ export function InventoryEditor({
             {missing.length ? (
               <fieldset className="grid gap-5 rounded-panel border border-warning p-4 sm:grid-cols-2">
                 <legend className="px-1 text-dense font-semibold">{copy.o12.needsInput}</legend>
-                {missing.map((name) => render(form, name, true))}
+                {missing.map((name) => render(form, name))}
                 {missingNote}
               </fieldset>
             ) : null}
@@ -184,8 +203,8 @@ export function InventoryEditor({
               data-o12-panel="facts"
               className="hidden gap-5 sm:grid-cols-2 group-has-[#o12-facts:checked]/o12:grid has-[[aria-invalid=true]]:grid!"
             >
-              {fields
-                .filter((name) => !textFields.includes(name) && !missing.includes(name))
+              {factsFields
+                .filter((name) => !missing.includes(name))
                 .map((name) => render(form, name))}
             </div>
             {footer}
