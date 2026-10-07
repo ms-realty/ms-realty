@@ -51,6 +51,7 @@ const en = {
   liveness:
     "Worker liveness is not instrumented. Queue rows show stored job state, not proof that a worker is currently online.",
   queue: "Queue",
+  exceptionPages: "Exception pages",
   count: "Retained jobs",
   oldest: "Oldest recorded",
   checked: "Checked at",
@@ -114,6 +115,7 @@ const bg: Record<keyof typeof en, string> = {
   liveness:
     "Няма измерване на текущата работа на процеса. Записите показват съхранен статус, а не че процесът работи в момента.",
   queue: "Опашка",
+  exceptionPages: "Страници с изключения",
   count: "Съхранени задачи",
   oldest: "Най-стар запис",
   checked: "Проверено на",
@@ -176,6 +178,7 @@ const ru: Record<keyof typeof en, string> = {
   liveness:
     "Работа процесса сейчас не измеряется. Записи отражают сохранённый статус, а не подтверждают доступность процесса.",
   queue: "Очередь",
+  exceptionPages: "Страницы исключений",
   count: "Сохранённые задания",
   oldest: "Самая старая запись",
   checked: "Проверено",
