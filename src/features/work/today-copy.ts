@@ -61,10 +61,11 @@ export function todayCopy(locale: string) {
     nothingIn: s("Нищо не чака:", "Ничего не ждёт:", "Nothing waiting:"),
     more: s("Още в тази опашка", "Ещё в этой очереди", "More in this queue"),
     showMore: s("Покажете още {n}", "Показать ещё {n}", "Show {n} more"),
+    // No page continues these lists yet; the line never points at one.
     firstLoaded: s(
-      "„Днес“ показва първите {n} от {total}.",
-      "«Сегодня» показывает первые {n} из {total}.",
-      "Today shows the first {n} of {total}.",
+      "„Днес“ показва първите {n} от {total}. Пълният списък все още не е достъпен тук.",
+      "«Сегодня» показывает первые {n} из {total}. Полный список здесь пока недоступен.",
+      "Today shows the first {n} of {total}. The full list is not available here yet.",
     ),
     inQueue: s("В опашката:", "В очереди:", "In the queue:"),
     notLoaded: s("Не е заредено", "Не загружено", "Not loaded"),

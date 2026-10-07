@@ -476,6 +476,15 @@ it("distinguishes a list that did not load from a ready empty one", async () => 
   expect(quiet("attention")).not.toHaveTextContent(/Unassigned requests|Viewings/);
 });
 
+it("never offers Butler for a request from a list that did not load", async () => {
+  reads.today.mockResolvedValue({ ...ordinary(), unassigned: unavailable([inquiry("unread")]) });
+  await show();
+  // The next loaded list supplies the record instead.
+  expect(reads.source).toHaveBeenCalledWith("test-db", session, "in-mine");
+  expect(reads.source).not.toHaveBeenCalledWith("test-db", session, "unread");
+  expect(document.querySelector('a[href*="unread"]')).toBeNull();
+});
+
 it("still counts the lists that loaded when others did not", async () => {
   reads.today.mockResolvedValue({ ...ordinary(), deliveryExceptions: unavailable() });
   await show();
@@ -512,10 +521,12 @@ it("uses the authorized total and keeps every loaded row reachable without JavaS
     "href",
     "/en/calendar/29",
   );
-  // No queue page reproduces this list: the count stays here and names the nearest workspace.
-  expect(viewings.getByText(/^Today shows the first 30 of 67\./)).toBeVisible();
-  expect(viewings.getByRole("link", { name: "Calendar" })).toHaveAttribute("href", "/en/calendar");
-  expect(viewings.queryByRole("link", { name: /^Viewings/ })).toBeNull();
+  // No page lists exactly these viewings: the count stays plain and nothing promises the rest.
+  expect(
+    viewings.getByText("Today shows the first 30 of 67. The full list is not available here yet."),
+  ).toBeVisible();
+  expect(viewings.queryByRole("link", { name: /^Viewings|Calendar/ })).toBeNull();
+  expect(viewings.getAllByRole("link")).toHaveLength(30);
 });
 
 it("labels a bounded preview when the server total is unknown", async () => {
@@ -531,6 +542,7 @@ it("labels a bounded preview when the server total is unknown", async () => {
 });
 
 // One row in every queue the read model returns, for the newly bound groups.
+const actionId = "00000000-0000-4000-8000-000000000001";
 const everyQueue = () => ({
   ...empty(),
   viewings: queue([
@@ -602,7 +614,7 @@ const everyQueue = () => ({
   ]),
   operatorDeliveryExceptions: queue([
     {
-      id: "action",
+      id: actionId,
       kind: "email_send",
       state: "failed",
       attempts: 3,
@@ -658,7 +670,11 @@ it("opens each newly read record in its own workspace with its reason and next s
       "/en/inventory/MS-PUBLISH?tab=review",
       "Failed · Website · BG · An earlier version; check the current one",
     ],
-    [/^Email sending/, "/en/operations/jobs", "Failed · Attempts: 3 · Last attempt 10 min. ago"],
+    [
+      /^Email sending/,
+      `/en/operations/jobs?action=${actionId}#external-action-${actionId}`,
+      "Failed · Attempts: 3 · Last attempt 10 min. ago",
+    ],
     [/^Synthetic purchase case/, "/en/cases/case", "CS-1 · Owner: Maria Example · Overdue since"],
     [/^Draft · MS-DRAFT/, "/en/inventory/MS-DRAFT", "Next step: continue editing"],
   ] as const) {
@@ -707,6 +723,179 @@ it("omits role-gated queues that the read model withholds", async () => {
     expect(screen.queryByRole("heading", { name: new RegExp(`^${name}`) })).toBeNull();
     expect(quiet("attention")).not.toHaveTextContent(name);
   }
+});
+
+// Ported from Codex's 825091bf binding cases onto this screen.
+it("opens each operator exception itself and counts the same queue that O27 pages", async () => {
+  reads.today.mockResolvedValue({
+    ...empty(),
+    operatorDeliveryExceptions: queue(
+      [
+        {
+          id: actionId,
+          kind: "email_send",
+          state: "failed",
+          attempts: 1,
+          lastAttemptAt: minutesAgo(5),
+        },
+      ],
+      { total: 31, hasMore: true },
+    ),
+  });
+  await show();
+  const operations = within(groupOf("delivery-operations"));
+  const queuePage = "/en/operations/jobs?view=exceptions#external-action-exceptions";
+  // The heading count and "More" open the failed and unknown actions, oldest first, as here.
+  expect(operations.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+    queuePage,
+    `/en/operations/jobs?action=${actionId}#external-action-${actionId}`,
+    queuePage,
+  ]);
+  expect(operations.getByRole("heading", { level: 3 })).toHaveTextContent(
+    "Delivery operations to checkIn the queue: 31",
+  );
+  expect(operations.getByRole("link", { name: "More in this queue" })).toBeVisible();
+  expect(operations.queryByText(/full list is not available/)).toBeNull();
+});
+
+it("keeps translation reviews in the workbench the grant allows and says the full list is not here", async () => {
+  const translation = everyQueue().translationReviews.rows[0];
+  reads.today.mockResolvedValue({
+    ...empty(),
+    translationReviews: queue(
+      Array.from({ length: 30 }, (_, index) => ({
+        ...translation,
+        id: `translation-${index}`,
+        reference: `MS-RU-${index}`,
+      })),
+      { total: 31, hasMore: true },
+    ),
+  });
+  await show();
+  const translations = within(groupOf("translation-reviews"));
+  expect(translations.getByRole("heading", { level: 3 })).toHaveTextContent(
+    "Translations to reviewIn the queue: 31",
+  );
+  // Every link is a listed translation; nothing points a locale-scoped reviewer at Inventory.
+  const links = translations.getAllByRole("link", { hidden: true });
+  expect(links.map((link) => link.getAttribute("href"))).toEqual(
+    Array.from({ length: 30 }, (_, index) => `/en/inventory/MS-RU-${index}/translations/ru`),
+  );
+  expect(
+    translations.getByText(
+      "Today shows the first 30 of 31. The full list is not available here yet.",
+    ),
+  ).toBeVisible();
+  expect(document.querySelector('a[href^="/en/inventory?"], a[href="/en/inventory"]')).toBeNull();
+});
+
+const boundedGroups = [
+  ["viewings", "viewings"],
+  ["listing-reviews", "listingReviews"],
+  ["translation-reviews", "translationReviews"],
+  ["email-deliveries", "deliveryExceptions"],
+  ["publication-deliveries", "publicationExceptions"],
+  ["case-continue", "caseContinue"],
+  ["draft-continue", "draftContinue"],
+] as const;
+
+it.each(boundedGroups)("promises no page that would continue %s", async (id, key) => {
+  const rows: unknown[] = everyQueue()[key].rows;
+  reads.today.mockResolvedValue({
+    ...empty(),
+    [key]: queue(rows, { total: 31, hasMore: true }),
+  });
+  await show();
+  const group = within(groupOf(id));
+  // No page lists exactly this work: the count is plain, only the records link.
+  expect(within(group.getByRole("heading", { level: 3 })).queryByRole("link")).toBeNull();
+  expect(group.getAllByRole("link")).toHaveLength(rows.length);
+  expect(
+    group.getByText(
+      `Today shows the first ${rows.length} of 31. The full list is not available here yet.`,
+    ),
+  ).toBeVisible();
+});
+
+const fullDay = () => ({
+  ...everyQueue(),
+  unassigned: ordinary().unassigned,
+  due: ordinary().due,
+  mine: ordinary().mine,
+  handovers: ordinary().handovers,
+  keyReturns: queue([
+    {
+      id: "key-one",
+      reference: "KS-ONE",
+      dueAt: minutesAgo(600),
+      propertyReference: "PR-ONE",
+      holderName: "Synthetic custody holder",
+      needsCoverage: false,
+    },
+  ]),
+});
+const everyQueueKey = [
+  "unassigned",
+  "due",
+  "keyReturns",
+  "handovers",
+  "viewings",
+  "listingReviews",
+  "translationReviews",
+  "deliveryExceptions",
+  "publicationExceptions",
+  "operatorDeliveryExceptions",
+  "mine",
+  "caseContinue",
+  "draftContinue",
+] as const;
+
+it.each(everyQueueKey)("lets %s alone decide the headline and the empty state", async (key) => {
+  reads.today.mockResolvedValue({ ...empty(), [key]: unavailable() });
+  await show();
+  expect(document.querySelector("[data-today-state=empty]")).toBeNull();
+  expect(
+    screen.getByText(
+      "Some lists could not load, so this is not all of today's work. Reload the page.",
+    ),
+  ).toBeVisible();
+  expect(document.querySelectorAll('[data-today-status="unavailable"]')).toHaveLength(1);
+
+  cleanup();
+  reads.today.mockResolvedValue({ ...empty(), [key]: fullDay()[key] });
+  await show();
+  expect(document.querySelector("[data-today-state=empty]")).toBeNull();
+  expect(screen.queryByText("Check the inquiries for new requests.")).toBeNull();
+  expect(document.querySelectorAll("[data-today-group]")).toHaveLength(1);
+});
+
+it("names a draft and its availability check as two tasks and counts the check once", async () => {
+  const listing = { ...ownedBy, id: "listing-new", reference: "MS-NEW" };
+  reads.today.mockResolvedValue({
+    ...empty(),
+    listingReviews: queue([
+      {
+        ...listing,
+        editorialState: "draft",
+        commercialState: "confirmation_required",
+        freshnessState: "unknown",
+        dueAt: null,
+        canEdit: true,
+        canReviewFacts: false,
+        canRelease: false,
+      },
+    ]),
+    draftContinue: queue([{ ...listing, editorialState: "draft", updatedAt: minutesAgo(5) }]),
+  });
+  await show();
+  expect(within(groupOf("listing-reviews")).getByRole("link")).toHaveTextContent(
+    /^Availability to confirm · MS-NEW.*Next step: confirm current availability$/,
+  );
+  expect(within(groupOf("draft-continue")).getByRole("link")).toHaveTextContent(
+    /^Draft · MS-NEW.*Next step: continue editing$/,
+  );
+  // Editing my own draft is work to continue, not an action waiting on me.
+  expect(screen.getByText("Waiting for action: 1. Start at the top of the list.")).toBeVisible();
 });
 
 it("reports a failed read as a failure, never as a day without work", async () => {
