@@ -3,6 +3,7 @@
 // open their own workspaces, and native navigation. The unavailable-list case lives in
 // today-unavailable.spec.ts because it breaks a shared table.
 import { randomUUID } from "node:crypto";
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import * as schema from "../src/db/schema";
 import { hostUrl } from "./hosts";
@@ -155,6 +156,16 @@ for (const javaScriptEnabled of [false, true])
       // Today links to each workspace; nothing here publishes, sends or approves.
       await expect(main.getByRole("button", { name: /publish|send|approve/i })).toHaveCount(0);
       expect(await noOverflow(page)).toBe(true);
+      // Axe needs browser timers, which Playwright stops when scripting is off.
+      if (javaScriptEnabled)
+        expect(
+          (
+            await new AxeBuilder({ page })
+              .include("main")
+              .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+              .analyze()
+          ).violations,
+        ).toEqual([]);
       await page.screenshot({
         path: testInfo.outputPath(`today-scoped-${javaScriptEnabled}.png`),
         fullPage: true,
