@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
-import { findCoverageRecord } from "./coverage-helpers";
+import { findCoverageRecord, findCoverageRecords } from "./coverage-helpers";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -218,13 +218,14 @@ for (const javaScriptEnabled of [true, false])
       expect(
         (await db.select().from(schema.keySets).where(eq(schema.keySets.id, f.keyId)))[0],
       ).toMatchObject({ state: "stored", holderId: null });
-      for (const href of [
-        `/en/cases/${f.caseId}`,
-        `/en/tasks/${task.id}`,
-        `/en/inquiries/${inquiry.id}`,
-        `/en/operations/keys/${f.keyId}`,
-      ])
-        expect(await findCoverageRecord(page, href)).toBe(false);
+      expect(
+        await findCoverageRecords(page, [
+          `/en/cases/${f.caseId}`,
+          `/en/tasks/${task.id}`,
+          `/en/inquiries/${inquiry.id}`,
+          `/en/operations/keys/${f.keyId}`,
+        ]),
+      ).toEqual(new Set());
     } finally {
       await context.close();
     }

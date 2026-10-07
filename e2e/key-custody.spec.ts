@@ -33,6 +33,7 @@ for (const javaScriptEnabled of [true, false])
         },
       ),
     ) as {
+      keyId: string;
       staffToken: string;
       staffId: string;
       brokerId: string;
@@ -254,6 +255,12 @@ for (const javaScriptEnabled of [true, false])
       expect(response?.status()).toBe(404);
       await expect(page.getByText(tag, { exact: false })).toHaveCount(0);
     } finally {
-      await context.close();
+      try {
+        await context.close();
+      } finally {
+        // This direct seed has no custody receipt: the journey records a separate key set.
+        // Do not leave it in the shared runner's oldest overdue rows for the next browser.
+        await db.delete(schema.keySets).where(eq(schema.keySets.id, f.keyId));
+      }
     }
   });

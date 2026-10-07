@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { expect, type Route, test } from "@playwright/test";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
@@ -61,40 +61,60 @@ test("access administration does not disclose unreadable Cases in invitation cho
     .returning({ id: schema.cases.id });
   const allowed = records.at(-1);
   if (!allowed) throw new Error("Missing Case fixture");
-  await context.addCookies([
-    {
-      name: "msr_staff_session",
-      value: f.staffToken,
-      url: origins.staff,
-      httpOnly: true,
-      sameSite: "Lax",
-    },
-  ]);
-  const restricted = await page.goto(hostUrl("staff", "/en/access/manage?q=restricted&page=2"));
-  expect(await restricted?.text()).not.toContain("Synthetic restricted Case");
-  await expect(page.locator('select[name="caseId"] option:not([value=""])')).toHaveCount(0);
-  const [permission] = await db
-    .insert(schema.grants)
-    .values({
-      principalId: f.managerId,
-      capability: "case.read",
-      recordType: "case",
-      recordId: allowed.id,
-      reason: "Synthetic one-Case read scope",
-    })
-    .returning();
-  if (!permission) throw new Error("Missing permission fixture");
-  await page.reload();
-  await expect(page.locator('select[name="caseId"] option:not([value=""])')).toHaveCount(1);
-  await expect(page.locator(`select[name="caseId"] option[value="${allowed.id}"]`)).toHaveText(
-    /Synthetic restricted Case 200/,
-  );
-  await db
-    .update(schema.grants)
-    .set({ revokedAt: new Date() })
-    .where(eq(schema.grants.id, permission.id));
-  await page.reload();
-  await expect(page.locator('select[name="caseId"] option:not([value=""])')).toHaveCount(0);
+  try {
+    await context.addCookies([
+      {
+        name: "msr_staff_session",
+        value: f.staffToken,
+        url: origins.staff,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    // The permission result is the server-rendered form, independent of load-time resources.
+    const restricted = await page.goto(hostUrl("staff", "/en/access/manage?q=restricted&page=2"), {
+      waitUntil: "domcontentloaded",
+    });
+    expect(await restricted?.text()).not.toContain("Synthetic restricted Case");
+    const choices = page.locator('select[name="caseId"]');
+    await expect(choices).toBeVisible();
+    await expect(choices.locator('option:not([value=""])')).toHaveCount(0);
+    const [permission] = await db
+      .insert(schema.grants)
+      .values({
+        principalId: f.managerId,
+        capability: "case.read",
+        recordType: "case",
+        recordId: allowed.id,
+        reason: "Synthetic one-Case read scope",
+      })
+      .returning();
+    if (!permission) throw new Error("Missing permission fixture");
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(choices).toBeVisible();
+    await expect(choices.locator('option:not([value=""])')).toHaveCount(1);
+    await expect(choices.locator(`option[value="${allowed.id}"]`)).toHaveText(
+      /Synthetic restricted Case 200/,
+    );
+    await db
+      .update(schema.grants)
+      .set({ revokedAt: new Date() })
+      .where(eq(schema.grants.id, permission.id));
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(choices).toBeVisible();
+    await expect(choices.locator('option:not([value=""])')).toHaveCount(0);
+  } finally {
+    await db
+      .update(schema.grants)
+      .set({ revokedAt: new Date() })
+      .where(eq(schema.grants.principalId, f.managerId));
+    await db.delete(schema.cases).where(
+      inArray(
+        schema.cases.id,
+        records.map(({ id }) => id),
+      ),
+    );
+  }
 });
 
 test("offboarding keeps an unresolved operation after leaving and returning", async ({

@@ -37,32 +37,51 @@ export async function moveQueuePage(
   return true;
 }
 
-/** False means absent from every reachable page, never just absent from the current page. */
-export async function findPaginatedRecord(page: Page, href: string, options: QueueOptions = {}) {
+/** Missing links are absent from every reachable page, never just the current page. */
+export async function findPaginatedRecords(
+  page: Page,
+  hrefs: readonly string[],
+  options: QueueOptions = {},
+) {
   let rewound = 0;
   while (await moveQueuePage(page, "previous", options)) {
     if (++rewound >= 100) throw new Error("Queue fixture exceeded 100 previous pages");
   }
+  const remaining = new Set(hrefs);
+  const found = new Set<string>();
   for (let number = 1; number <= 100; number++) {
     if (options.viewportWidth !== undefined)
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         options.viewportWidth,
       );
-    const record = page.locator(`a[href="${href}"]`);
-    if (await record.count()) {
-      await expect(record).toBeVisible();
-      return true;
+    for (const href of remaining) {
+      const record = page.locator(`a[href="${href}"]`);
+      if (await record.count()) {
+        await expect(record).toBeVisible();
+        found.add(href);
+        remaining.delete(href);
+      }
     }
-    if (!(await moveQueuePage(page, "next", options))) return false;
+    if (!remaining.size || !(await moveQueuePage(page, "next", options))) return found;
   }
   throw new Error("Queue fixture exceeded 100 next pages");
 }
 
+/** False means absent from every reachable page, never just absent from the current page. */
+export async function findPaginatedRecord(page: Page, href: string, options: QueueOptions = {}) {
+  return (await findPaginatedRecords(page, [href], options)).has(href);
+}
+
 /** Existing linked-journey API; locale follows the requested record's route. */
 export async function findCoverageRecord(page: Page, href: string) {
-  const locale = href.split("/")[1] ?? "en";
+  return (await findCoverageRecords(page, [href])).has(href);
+}
+
+/** Check related records together so absence needs one complete traversal of the queue. */
+export async function findCoverageRecords(page: Page, hrefs: readonly string[]) {
+  const locale = hrefs[0]?.split("/")[1] ?? "en";
   const path = `/${locale}/coverage`;
   await page.goto(hostUrl("staff", path));
   await expect(page).toHaveURL(hostUrl("staff", path));
-  return findPaginatedRecord(page, href, { locale });
+  return findPaginatedRecords(page, hrefs, { locale });
 }

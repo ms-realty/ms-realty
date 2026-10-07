@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
@@ -126,6 +126,14 @@ for (const locale of ["bg", "ru", "en"])
         await expect(page.locator("[data-key-return-reminders]")).toHaveCount(0);
         expect((await page.goto(detail))?.status()).toBe(404);
       } finally {
-        await context.close();
+        try {
+          await context.close();
+        } finally {
+          // A failed read must not leave an unrecorded overdue seed ahead of a retry.
+          // Keep any key whose custody journey has already recorded a new version.
+          await db
+            .delete(schema.keySets)
+            .where(and(eq(schema.keySets.id, f.keyId), eq(schema.keySets.version, 1)));
+        }
       }
     });
