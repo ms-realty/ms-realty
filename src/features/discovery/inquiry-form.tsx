@@ -9,7 +9,7 @@ import {
 import type { PublicLocale } from "@/i18n/config";
 import type { ListingCard } from "@/server/listings/view-models";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
+import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -172,7 +172,7 @@ export function InquiryForm({
                   aria-describedby={content.error ? `${content.id}-error` : undefined}
                 >
                   {content.error ? (
-                    <p id={`${content.id}-error`} className="text-error">
+                    <p id={`${content.id}-error`} className={errorClass}>
                       {content.error}
                     </p>
                   ) : null}
@@ -229,7 +229,7 @@ export function InquiryForm({
                     <p>{copy.invalid}</p>
                   )}
                   {selection.error ? (
-                    <p id={`${selection.id}-error`} className="text-error">
+                    <p id={`${selection.id}-error`} className={errorClass}>
                       {selection.error}
                     </p>
                   ) : null}
@@ -256,7 +256,7 @@ export function InquiryForm({
                     <p>{copy.invalid}</p>
                   )}
                   {navigation.error ? (
-                    <p id={`${navigation.id}-error`} className="text-error">
+                    <p id={`${navigation.id}-error`} className={errorClass}>
                       {navigation.error}
                     </p>
                   ) : null}
@@ -279,7 +279,7 @@ export function InquiryForm({
                 name="observedManifestId"
                 value={form.values.observedManifestId}
               />
-              <div className={fieldClass}>
+              <div className={fieldClass} data-invalid={purpose.error ? "true" : undefined}>
                 <label htmlFor={purpose.id} className={labelClass}>
                   {copy.purpose}
                 </label>
@@ -303,7 +303,7 @@ export function InquiryForm({
                   ))}
                 </select>
                 {purpose.error ? (
-                  <p id={`${purpose.id}-error`} className="text-error">
+                  <p id={`${purpose.id}-error`} className={errorClass}>
                     {purpose.error}
                   </p>
                 ) : null}
@@ -355,7 +355,7 @@ export function InquiryForm({
                 maxLength={120}
                 autoComplete="name"
               />
-              <div className={fieldClass}>
+              <div className={fieldClass} data-invalid={contact.error ? "true" : undefined}>
                 <label htmlFor={contact.id} className={labelClass}>
                   {copy.contactMethod}
                 </label>
@@ -373,7 +373,7 @@ export function InquiryForm({
                   <option value="phone">{copy.phone}</option>
                 </select>
                 {contact.error ? (
-                  <p id={`${contact.id}-error`} className="text-error">
+                  <p id={`${contact.id}-error`} className={errorClass}>
                     {contact.error}
                   </p>
                 ) : null}
@@ -412,7 +412,7 @@ export function InquiryForm({
                   {copy.privacy}
                 </label>
                 {privacy.error ? (
-                  <p id={`${privacy.id}-error`} className="text-error">
+                  <p id={`${privacy.id}-error`} className={errorClass}>
                     {privacy.error}
                   </p>
                 ) : null}

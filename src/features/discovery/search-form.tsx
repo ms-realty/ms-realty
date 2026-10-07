@@ -164,7 +164,7 @@ export async function SearchForm({
           </summary>
           <div className="grid min-w-0 gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="flex min-w-0 flex-col gap-2">
-              <span>
+              <span className={labelClass}>
                 {extra.minimum} · {extra.amount}
               </span>
               <input
@@ -175,7 +175,7 @@ export async function SearchForm({
               />
             </label>
             <label className="flex min-w-0 flex-col gap-2">
-              <span>
+              <span className={labelClass}>
                 {extra.maximum} · {extra.amount}
               </span>
               <input
@@ -186,7 +186,7 @@ export async function SearchForm({
               />
             </label>
             <label className="flex min-w-0 flex-col gap-2">
-              <span>{extra.currency}</span>
+              <span className={labelClass}>{extra.currency}</span>
               <select
                 name="currency"
                 defaultValue={values.currency || "EUR"}
@@ -203,7 +203,7 @@ export async function SearchForm({
               </select>
             </label>
             <label className="flex min-w-0 flex-col gap-2">
-              <span>{copy.minBeds}</span>
+              <span className={labelClass}>{copy.minBeds}</span>
               <input
                 name="minBeds"
                 inputMode="numeric"
@@ -213,7 +213,7 @@ export async function SearchForm({
             </label>
             {(["maxBeds", "minRooms", "maxRooms"] as const).map((key) => (
               <label key={key} className="flex min-w-0 flex-col gap-2">
-                <span>{extra[key]}</span>
+                <span className={labelClass}>{extra[key]}</span>
                 <input
                   name={key}
                   inputMode="numeric"
@@ -264,7 +264,7 @@ export async function SearchForm({
               </div>
             </fieldset>
             <label className="flex min-w-0 flex-col gap-2 sm:col-span-2 lg:col-span-3">
-              <span>{extra.locations}</span>
+              <span className={labelClass}>{extra.locations}</span>
               <select
                 name="places"
                 multiple
@@ -288,7 +288,7 @@ export async function SearchForm({
               </select>
             </label>
             <label className="flex min-w-0 flex-col gap-2">
-              <span>{copy.areaBasis}</span>
+              <span className={labelClass}>{copy.areaBasis}</span>
               <select
                 name="areaBasis"
                 defaultValue={values.areaBasis || "living"}
@@ -306,7 +306,7 @@ export async function SearchForm({
               </select>
             </label>
             <label className="flex min-w-0 flex-col gap-2">
-              <span>{copy.minArea}</span>
+              <span className={labelClass}>{copy.minArea}</span>
               <input
                 name="minArea"
                 inputMode="decimal"
@@ -315,7 +315,7 @@ export async function SearchForm({
               />
             </label>
             <label className="flex min-w-0 flex-col gap-2">
-              <span>{copy.maxArea}</span>
+              <span className={labelClass}>{copy.maxArea}</span>
               <input
                 name="maxArea"
                 inputMode="decimal"
@@ -324,7 +324,7 @@ export async function SearchForm({
               />
             </label>
             <label className="flex min-w-0 flex-col gap-2">
-              <span>{copy.sort}</span>
+              <span className={labelClass}>{copy.sort}</span>
               <select
                 name="sort"
                 defaultValue={values.sort || "relevance"}

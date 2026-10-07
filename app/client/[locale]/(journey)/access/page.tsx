@@ -9,7 +9,7 @@ import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
 import { isRoutableLocale } from "@/i18n/config";
 import { currentClientSession, localReturnPath } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 import {
   beginClientPasskey,
@@ -112,7 +112,7 @@ export default async function ClientAccessPage({
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="returnTo" value={returnTo ?? ""} />
         <label className="flex flex-col gap-2" htmlFor="client-email">
-          {c.emailLabel}
+          <span className={labelClass}>{c.emailLabel}</span>
           <input
             className={controlClass}
             id="client-email"

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 export function Envelope({
   intent,
   id,
@@ -38,8 +38,8 @@ export function TextField({
   required?: boolean;
 }) {
   return (
-    <label className="grid gap-1">
-      {label}
+    <label className="grid gap-2">
+      <span className={labelClass}>{label}</span>
       <input
         className={controlClass}
         name={name}
@@ -87,11 +87,11 @@ export function Area({
   required?: boolean;
 }) {
   return (
-    <label className="grid gap-1">
-      {label}
+    <label className="grid gap-2">
+      <span className={labelClass}>{label}</span>
       <textarea
         name={name}
-        className={controlClass}
+        className={textareaClass}
         maxLength={4000}
         defaultValue={value}
         required={required}

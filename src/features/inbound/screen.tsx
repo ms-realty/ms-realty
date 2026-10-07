@@ -5,7 +5,7 @@ import { listCases, readCase } from "@/server/cases/queries";
 import { listInboundEmails, readInboundEmail } from "@/server/inbound/service";
 import type { ReceivedEmail } from "@/server/jobs/resend-receiving";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { issueFormOperation } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { InboundAttachments } from "./attachments";
@@ -160,36 +160,44 @@ export async function InboundDetail({
       {row.state === "triage" ? (
         <>
           <form method="get" action={base} className="grid min-w-0 gap-3">
-            <label htmlFor="inbound-search">{c.search}</label>
-            <input
-              id="inbound-search"
-              name="q"
-              type="search"
-              className={controlClass}
-              defaultValue={query.q ?? ""}
-              maxLength={120}
-            />
+            <div className="grid min-w-0 gap-2">
+              <label htmlFor="inbound-search" className={labelClass}>
+                {c.search}
+              </label>
+              <input
+                id="inbound-search"
+                name="q"
+                type="search"
+                className={controlClass}
+                defaultValue={query.q ?? ""}
+                maxLength={120}
+              />
+            </div>
             <button type="submit" className={buttonClass("secondary")}>
               {c.searchAction}
             </button>
           </form>
           <form method="get" action={base} className="grid min-w-0 gap-3">
             <input type="hidden" name="q" value={query.q ?? ""} />
-            <label htmlFor="inbound-case">{c.select}</label>
-            <select
-              id="inbound-case"
-              className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
-              name="case"
-              defaultValue={selected?.record.id ?? ""}
-              required
-            >
-              <option value="">—</option>
-              {choices.map((item) => (
-                <option value={item.id} key={item.id}>
-                  {item.reference} · {item.title}
-                </option>
-              ))}
-            </select>
+            <div className="grid min-w-0 gap-2">
+              <label htmlFor="inbound-case" className={labelClass}>
+                {c.select}
+              </label>
+              <select
+                id="inbound-case"
+                className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                name="case"
+                defaultValue={selected?.record.id ?? ""}
+                required
+              >
+                <option value="">—</option>
+                {choices.map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {item.reference} · {item.title}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button type="submit" className={buttonClass("secondary")}>
               {c.choose}
             </button>
@@ -220,7 +228,9 @@ export async function InboundDetail({
                 <input type="hidden" name="caseId" value={selected.record.id} />
                 <input type="hidden" name="caseVersion" value={selected.record.version} />
                 <div className="grid min-w-0 gap-2">
-                  <label htmlFor="inbound-party">{c.party}</label>
+                  <label htmlFor="inbound-party" className={labelClass}>
+                    {c.party}
+                  </label>
                   <select
                     id="inbound-party"
                     className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -238,10 +248,12 @@ export async function InboundDetail({
               </>
             ) : null}
             <div className="grid gap-2">
-              <label htmlFor="inbound-reason">{c.reason}</label>
+              <label htmlFor="inbound-reason" className={labelClass}>
+                {c.reason}
+              </label>
               <textarea
                 id="inbound-reason"
-                className={controlClass}
+                className={textareaClass}
                 name="reason"
                 required
                 minLength={10}

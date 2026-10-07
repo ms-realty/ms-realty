@@ -1,5 +1,5 @@
 "use client";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -48,7 +48,9 @@ export function TranslationEditor({
           <FormField {...form.field("title")} label={copy.title} />
           <FormField {...form.field("description")} label={copy.description} multiline />
           <div className="grid gap-2">
-            <label htmlFor={form.field("intent").id}>{copy.intent}</label>
+            <label htmlFor={form.field("intent").id} className={labelClass}>
+              {copy.intent}
+            </label>
             <select
               id={form.field("intent").id}
               name="intent"

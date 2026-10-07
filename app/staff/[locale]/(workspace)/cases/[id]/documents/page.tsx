@@ -13,7 +13,7 @@ import { isFresh } from "@/server/auth/sessions";
 import { caseDocumentPurposes, listCaseDocuments } from "@/server/documents/case";
 import { isAppError } from "@/server/errors";
 import { fileReceipt } from "@/server/files/receipts";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 
 export default async function DocumentsPage({
@@ -36,8 +36,8 @@ export default async function DocumentsPage({
   const saved = await fileReceipt(getDb(), session, query.saved);
   const action = `${path}/submit`;
   const chooser = (
-    <label className="grid gap-1">
-      {copy.file}
+    <label className="grid gap-2">
+      <span className={labelClass}>{copy.file}</span>
       <input
         type="file"
         name="file"
@@ -71,8 +71,8 @@ export default async function DocumentsPage({
           <h2 className="text-section font-semibold">{copy.upload}</h2>
           <FileEnvelope intent="upload" version={0} />
           {chooser}
-          <label className="grid gap-1">
-            {copy.purpose}
+          <label className="grid gap-2">
+            <span className={labelClass}>{copy.purpose}</span>
             <select className={controlClass} name="purpose">
               {caseDocumentPurposes.map((purpose) => (
                 <option key={purpose} value={purpose}>
@@ -81,8 +81,8 @@ export default async function DocumentsPage({
               ))}
             </select>
           </label>
-          <label className="grid gap-1">
-            {copy.classification}
+          <label className="grid gap-2">
+            <span className={labelClass}>{copy.classification}</span>
             <select className={controlClass} name="classification" defaultValue="contract">
               {documentClassifications.map((value) => (
                 <option key={value} value={value}>
@@ -163,8 +163,8 @@ export default async function DocumentsPage({
           {mayReview && isDocumentExposable(file.state, file.scan) ? (
             <form action={action} method="post" className="grid gap-4 border-t border-divider pt-4">
               <FileEnvelope intent="review" version={file.version} id={file.id} />
-              <label className="grid gap-1">
-                {copy.decision}
+              <label className="grid gap-2">
+                <span className={labelClass}>{copy.decision}</span>
                 <select
                   name="reviewType"
                   className={controlClass}
@@ -177,10 +177,10 @@ export default async function DocumentsPage({
                   ))}
                 </select>
               </label>
-              <label className="grid gap-1">
-                {copy.note}
+              <label className="grid gap-2">
+                <span className={labelClass}>{copy.note}</span>
                 <textarea
-                  className={controlClass}
+                  className={textareaClass}
                   name="note"
                   defaultValue={file.reviewNote ?? ""}
                   minLength={5}

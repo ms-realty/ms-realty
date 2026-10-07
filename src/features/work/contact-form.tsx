@@ -1,6 +1,6 @@
 "use client";
 
-import { controlClass, fieldClass } from "@/ui/field-class";
+import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -21,15 +21,11 @@ function Choice({
 }) {
   const field = form.field(name);
   return (
-    <div className={fieldClass}>
-      <label htmlFor={field.id} className="text-compact font-semibold">
+    // UI06 Error (6:68): the error border and the message under the control.
+    <div className={fieldClass} data-invalid={field.error ? "true" : undefined}>
+      <label htmlFor={field.id} className={labelClass}>
         {label}
       </label>
-      {field.error ? (
-        <p id={`${field.id}-error`} className="text-error">
-          {field.error}
-        </p>
-      ) : null}
       <select
         id={field.id}
         name={field.name}
@@ -47,6 +43,11 @@ function Choice({
           </option>
         ))}
       </select>
+      {field.error ? (
+        <p id={`${field.id}-error`} className={errorClass}>
+          {field.error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -80,7 +81,7 @@ function Confirmation({
         <span>{label}</span>
       </label>
       {field.error ? (
-        <p id={`${field.id}-error`} className="text-error">
+        <p id={`${field.id}-error`} className={errorClass}>
           {field.error}
         </p>
       ) : null}

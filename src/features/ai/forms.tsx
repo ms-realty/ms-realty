@@ -1,6 +1,6 @@
 "use client";
 import { workCopy } from "@/features/work/copy";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import type { AiValues } from "./actions";
@@ -41,7 +41,7 @@ export function AssistanceForm({
         <>
           {mode === "request" ? (
             <label className="block min-w-0">
-              <span className="mb-2 block">{copy.task}</span>
+              <span className={`mb-2 block ${labelClass}`}>{copy.task}</span>
               <select
                 name="task"
                 value={form.values.task}
@@ -58,7 +58,7 @@ export function AssistanceForm({
             </label>
           ) : (
             <label className="block min-w-0">
-              <span className="mb-2 block">{copy.decision}</span>
+              <span className={`mb-2 block ${labelClass}`}>{copy.decision}</span>
               <select
                 name="decision"
                 value={form.values.decision}

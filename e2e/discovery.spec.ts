@@ -205,6 +205,11 @@ test("F02/F29: native reviewed intent commits only chosen rules to editable sear
   await page.getByRole("button", { name: /^Filters/ }).click();
   await expect(page.getByRole("checkbox", { name: "Apartment", exact: true })).toBeChecked();
   await expect(page.getByLabel("Minimum bedrooms", { exact: true })).toHaveValue("2");
+  // UI06 (6:74): a filter's label is 14/20 semibold, like every field label.
+  const filterLabel = page.locator("details").getByText("Minimum bedrooms", { exact: true });
+  await expect(filterLabel).toHaveCSS("font-size", "14px");
+  await expect(filterLabel).toHaveCSS("line-height", "20px");
+  await expect(filterLabel).toHaveCSS("font-weight", "600");
   await page.goto("/en/properties/intent?text=holiday+rental+for+60+euro+per+night");
   await expect(page.getByRole("checkbox", { name: /^Price/ })).toHaveCount(0);
   await page.goto("/en/contact");

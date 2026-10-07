@@ -8,7 +8,7 @@ import { attachmentProviderEnabled } from "@/server/inbound/attachment-provider"
 import { attachmentImportScope, readInboundAttachments } from "@/server/inbound/attachments";
 import type { ReceivedEmail } from "@/server/jobs/resend-receiving";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { issueFormOperation } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { attachmentCopy } from "./attachment-copy";
@@ -103,72 +103,92 @@ export async function InboundAttachments({
           <input type="hidden" name="caseId" value={caseId} />
           <input type="hidden" name="caseVersion" value={view.record.version} />
           <p id="attachment-limit">{c.limit}</p>
-          <label htmlFor="attachment-choice">{c.select}</label>
-          <select
-            id="attachment-choice"
-            name="attachmentId"
-            className={`${controlClass} min-w-0 max-w-full text-ellipsis`}
-            required
-            defaultValue={draft?.attachmentId ?? ""}
-            aria-describedby="attachment-limit"
-          >
-            <option value="">—</option>
-            {pending.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.filename ?? a.id} · {a.contentType}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="attachment-filename">{c.fileName}</label>
-          <input
-            id="attachment-filename"
-            name="fileName"
-            className={controlClass}
-            required
-            maxLength={160}
-            defaultValue={draft?.fileName ?? ""}
-          />
-          <label htmlFor="attachment-purpose">{c.purpose}</label>
-          <select
-            id="attachment-purpose"
-            name="purpose"
-            className={controlClass}
-            required
-            defaultValue={draft?.purpose ?? ""}
-          >
-            <option value="">—</option>
-            {caseDocumentPurposes.map((p) => (
-              <option key={p} value={p}>
-                {c[p]}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="attachment-class">{c.classification}</label>
-          <select
-            id="attachment-class"
-            name="classification"
-            className={controlClass}
-            required
-            defaultValue={draft?.classification ?? ""}
-          >
-            <option value="">—</option>
-            {documentClassifications.map((p) => (
-              <option key={p} value={p}>
-                {p === "title" ? c.titleDocument : c[p]}
-              </option>
-            ))}
-          </select>
-          <label htmlFor="attachment-reason">{c.reason}</label>
-          <textarea
-            id="attachment-reason"
-            name="reason"
-            rows={4}
-            className={controlClass}
-            required
-            minLength={10}
-            maxLength={500}
-            defaultValue={draft?.reason ?? ""}
-          />
+          <div className="grid min-w-0 gap-2">
+            <label htmlFor="attachment-choice" className={labelClass}>
+              {c.select}
+            </label>
+            <select
+              id="attachment-choice"
+              name="attachmentId"
+              className={`${controlClass} min-w-0 max-w-full text-ellipsis`}
+              required
+              defaultValue={draft?.attachmentId ?? ""}
+              aria-describedby="attachment-limit"
+            >
+              <option value="">—</option>
+              {pending.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.filename ?? a.id} · {a.contentType}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid min-w-0 gap-2">
+            <label htmlFor="attachment-filename" className={labelClass}>
+              {c.fileName}
+            </label>
+            <input
+              id="attachment-filename"
+              name="fileName"
+              className={controlClass}
+              required
+              maxLength={160}
+              defaultValue={draft?.fileName ?? ""}
+            />
+          </div>
+          <div className="grid min-w-0 gap-2">
+            <label htmlFor="attachment-purpose" className={labelClass}>
+              {c.purpose}
+            </label>
+            <select
+              id="attachment-purpose"
+              name="purpose"
+              className={controlClass}
+              required
+              defaultValue={draft?.purpose ?? ""}
+            >
+              <option value="">—</option>
+              {caseDocumentPurposes.map((p) => (
+                <option key={p} value={p}>
+                  {c[p]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid min-w-0 gap-2">
+            <label htmlFor="attachment-class" className={labelClass}>
+              {c.classification}
+            </label>
+            <select
+              id="attachment-class"
+              name="classification"
+              className={controlClass}
+              required
+              defaultValue={draft?.classification ?? ""}
+            >
+              <option value="">—</option>
+              {documentClassifications.map((p) => (
+                <option key={p} value={p}>
+                  {p === "title" ? c.titleDocument : c[p]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid min-w-0 gap-2">
+            <label htmlFor="attachment-reason" className={labelClass}>
+              {c.reason}
+            </label>
+            <textarea
+              id="attachment-reason"
+              name="reason"
+              rows={4}
+              className={textareaClass}
+              required
+              minLength={10}
+              maxLength={500}
+              defaultValue={draft?.reason ?? ""}
+            />
+          </div>
           <label className="flex min-w-0 items-start gap-3">
             <input type="checkbox" name="reviewed" value="yes" required className="mt-1 shrink-0" />
             <span>{c.reviewed}</span>

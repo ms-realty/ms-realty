@@ -1,7 +1,7 @@
 import { propertyTypes } from "@/domain/facts";
 import type { OwnerInquiry } from "@/domain/owner-inquiry";
 import type { PublicLocale } from "@/i18n/config";
-import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
+import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import { discoveryCopy } from "./copy";
@@ -55,7 +55,7 @@ export function OwnerInquiryFields({
       {selects.map(({ name, label, options }) => {
         const field = form.field(name);
         return (
-          <div key={name} className={fieldClass}>
+          <div key={name} className={fieldClass} data-invalid={field.error ? "true" : undefined}>
             <label htmlFor={field.id} className={labelClass}>
               {label}
             </label>
@@ -78,7 +78,7 @@ export function OwnerInquiryFields({
               <option value="unknown">{copy.unknown}</option>
             </select>
             {field.error ? (
-              <p id={`${field.id}-error`} className="text-error">
+              <p id={`${field.id}-error`} className={errorClass}>
                 {field.error}
               </p>
             ) : null}

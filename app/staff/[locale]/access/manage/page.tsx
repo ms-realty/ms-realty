@@ -25,10 +25,11 @@ import { can } from "@/server/authz";
 import { caseVisibility } from "@/server/cases/shared";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 
-const field = cx("mt-1 block min-w-0 max-w-full", controlClass);
+const field = cx("block min-w-0 max-w-full", controlClass);
+const writingField = cx("block min-w-0 max-w-full", textareaClass);
 // Linux WebKit includes native option paint in document overflow. The padded containment
 // keeps the native control and its outer 3px/2px focus ring without widening the page.
 function AccessSelect(props: ComponentProps<"select">) {
@@ -115,12 +116,12 @@ export default async function ManagePage({
   );
   const person = (
     <>
-      <label className="block min-w-0">
-        {c.name}
+      <label className="grid min-w-0 grid-cols-1 gap-2">
+        <span className={labelClass}>{c.name}</span>
         <input name="displayName" className={field} maxLength={120} required autoComplete="name" />
       </label>
-      <label className="block min-w-0">
-        {c.email}
+      <label className="grid min-w-0 grid-cols-1 gap-2">
+        <span className={labelClass}>{c.email}</span>
         <input
           name="email"
           className={field}
@@ -183,8 +184,8 @@ export default async function ManagePage({
           >
             {hidden("staff")}
             {person}
-            <label htmlFor="staff-invitation-role" className="block min-w-0">
-              {c.role}
+            <label htmlFor="staff-invitation-role" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{c.role}</span>
               <AccessSelect
                 id="staff-invitation-role"
                 className={`${field} overflow-hidden text-ellipsis`}
@@ -244,8 +245,8 @@ export default async function ManagePage({
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
           >
             {hidden("recovery")}
-            <label htmlFor="recovery-principal" className="block min-w-0">
-              {c.member}
+            <label htmlFor="recovery-principal" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{c.member}</span>
               <AccessSelect
                 id="recovery-principal"
                 name="principalId"
@@ -263,10 +264,10 @@ export default async function ManagePage({
                 ))}
               </AccessSelect>
             </label>
-            <label className="block min-w-0">
-              {c.evidence}
+            <label className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{c.evidence}</span>
               <textarea
-                className={field}
+                className={writingField}
                 name="verificationNote"
                 minLength={10}
                 maxLength={500}
@@ -291,8 +292,8 @@ export default async function ManagePage({
           >
             {hidden("client")}
             {person}
-            <label htmlFor="client-invitation-principal" className="block min-w-0">
-              {c.case}
+            <label htmlFor="client-invitation-principal" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{c.case}</span>
               <AccessSelect
                 id="client-invitation-principal"
                 name="caseId"
@@ -310,8 +311,8 @@ export default async function ManagePage({
                 ))}
               </AccessSelect>
             </label>
-            <label htmlFor="client-invitation-role" className="block min-w-0">
-              {c.participant}
+            <label htmlFor="client-invitation-role" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{c.participant}</span>
               <AccessSelect
                 id="client-invitation-role"
                 name="role"
@@ -340,8 +341,8 @@ export default async function ManagePage({
           >
             {hidden("grant")}
             <input type="hidden" name="operationId" value={randomUUID()} />
-            <label htmlFor="capability-principal" className="block min-w-0">
-              {c.member}
+            <label htmlFor="capability-principal" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{c.member}</span>
               <AccessSelect
                 id="capability-principal"
                 name="principalId"
@@ -355,8 +356,8 @@ export default async function ManagePage({
                 ))}
               </AccessSelect>
             </label>
-            <label htmlFor="capability-choice" className="block min-w-0">
-              {grantCopy.capability}
+            <label htmlFor="capability-choice" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{grantCopy.capability}</span>
               <AccessSelect
                 id="capability-choice"
                 name="capability"
@@ -370,8 +371,8 @@ export default async function ManagePage({
                 ))}
               </AccessSelect>
             </label>
-            <label htmlFor="capability-record-type" className="block min-w-0">
-              {grantCopy.scope}
+            <label htmlFor="capability-record-type" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{grantCopy.scope}</span>
               <AccessSelect
                 id="capability-record-type"
                 name="recordType"
@@ -386,12 +387,12 @@ export default async function ManagePage({
                 ))}
               </AccessSelect>
             </label>
-            <label className="block min-w-0">
-              {grantCopy.recordId}
+            <label className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{grantCopy.recordId}</span>
               <input name="recordId" className={field} maxLength={36} />
             </label>
-            <label htmlFor="capability-locale" className="block min-w-0">
-              {grantCopy.locale}
+            <label htmlFor="capability-locale" className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{grantCopy.locale}</span>
               <AccessSelect
                 id="capability-locale"
                 name="grantLocale"
@@ -406,13 +407,19 @@ export default async function ManagePage({
                 ))}
               </AccessSelect>
             </label>
-            <label className="block min-w-0">
-              {grantCopy.expires}
+            <label className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{grantCopy.expires}</span>
               <input name="expiresAt" type="date" className={field} />
             </label>
-            <label className="block min-w-0">
-              {grantCopy.reason}
-              <textarea name="reason" className={field} minLength={10} maxLength={1000} required />
+            <label className="grid min-w-0 grid-cols-1 gap-2">
+              <span className={labelClass}>{grantCopy.reason}</span>
+              <textarea
+                name="reason"
+                className={writingField}
+                minLength={10}
+                maxLength={1000}
+                required
+              />
             </label>
             <label className="flex items-start gap-2">
               <input type="checkbox" name="confirmed" value="yes" required />
@@ -445,11 +452,11 @@ export default async function ManagePage({
                 {grant.locales?.length ? ` · ${grant.locales.join(", ")}` : ""}
               </p>
               <p>{grant.reason}</p>
-              <label className="block min-w-0">
-                {grantCopy.reason}
+              <label className="grid min-w-0 grid-cols-1 gap-2">
+                <span className={labelClass}>{grantCopy.reason}</span>
                 <textarea
                   name="reason"
-                  className={field}
+                  className={writingField}
                   minLength={10}
                   maxLength={1000}
                   required

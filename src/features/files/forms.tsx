@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 
 export function FileEnvelope({
   intent,
@@ -35,8 +35,8 @@ export function FileField({
   type?: string;
 }) {
   return (
-    <label className="grid gap-1">
-      {label}
+    <label className="grid gap-2">
+      <span className={labelClass}>{label}</span>
       <input
         className={controlClass}
         name={name}

@@ -9,7 +9,7 @@ import type { LocaleSource } from "@/server/ai/locale-draft";
 import { readLocaleAssistanceSource } from "@/server/ai/locale-source";
 import type { Session } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { type AiValues, localeAssistanceAction } from "./actions";
@@ -65,11 +65,11 @@ export async function LocaleAssistanceScreen({
         <p>{copy.boundary}</p>
         <form method="get" className="grid max-w-reading gap-4">
           <label className="grid gap-2">
-            <span>{copy.reference}</span>
+            <span className={labelClass}>{copy.reference}</span>
             <input name="reference" required maxLength={100} className={controlClass} />
           </label>
           <label className="grid gap-2">
-            <span>{copy.target}</span>
+            <span className={labelClass}>{copy.target}</span>
             <select name="language" required className={controlClass}>
               {publicLocales
                 .filter((value) => value !== "bg")

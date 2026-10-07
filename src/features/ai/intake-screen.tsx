@@ -9,7 +9,7 @@ import type { IntakeSource, intakeDraftSchema } from "@/server/ai/intake-draft";
 import { readIntakeAssistanceSource } from "@/server/ai/intake-source";
 import type { Session } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { type AiValues, intakeAssistanceAction } from "./actions";
@@ -95,7 +95,7 @@ export async function IntakeAssistanceScreen({
         <p>{copy.boundary}</p>
         <form method="get" className="grid max-w-reading gap-4">
           <label className="grid gap-2">
-            <span>{localeAiCopy(locale).reference}</span>
+            <span className={labelClass}>{localeAiCopy(locale).reference}</span>
             <input name="reference" required maxLength={100} className={controlClass} />
           </label>
           <button

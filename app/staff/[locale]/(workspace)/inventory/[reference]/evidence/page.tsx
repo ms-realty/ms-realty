@@ -6,7 +6,7 @@ import { can } from "@/server/authz";
 import { inventoryDetail, inventoryEvidence } from "@/server/inventory/commands";
 import { listContacts } from "@/server/work/queries";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { inventoryDecision } from "../../actions";
 
 export default async function SellerEvidencePage({
@@ -84,7 +84,7 @@ export default async function SellerEvidencePage({
           {envelope("authority")}
           <h2 className="text-section font-semibold">{copy.authority}</h2>
           <label className="grid gap-2">
-            {copy.party}
+            <span className={labelClass}>{copy.party}</span>
             <select name="partyId" required defaultValue="" className={controlClass}>
               <option value="">{copy.choose}</option>
               {contactPage.rows.map((p) => (
@@ -95,7 +95,7 @@ export default async function SellerEvidencePage({
             </select>
           </label>
           <label className="grid gap-2">
-            {copy.role}
+            <span className={labelClass}>{copy.role}</span>
             <select name="role" required className={controlClass}>
               {(["seller", "landlord", "authorized_representative"] as const).map((r) => (
                 <option key={r} value={r}>
@@ -105,19 +105,19 @@ export default async function SellerEvidencePage({
             </select>
           </label>
           <label className="grid gap-2">
-            {copy.authorityDocument}
+            <span className={labelClass}>{copy.authorityDocument}</span>
             <select name="documentVersionId" required defaultValue="" className={controlClass}>
               {documentOptions(authorityDocs)}
             </select>
           </label>
           <label className="grid gap-2">
-            {copy.scope}
+            <span className={labelClass}>{copy.scope}</span>
             <textarea
               name="scope"
               required
               minLength={5}
               maxLength={2000}
-              className={controlClass}
+              className={textareaClass}
             />
           </label>
           {confirm(copy.authorityConfirm)}
@@ -139,7 +139,7 @@ export default async function SellerEvidencePage({
           <h2 className="text-section font-semibold">{copy.instruction}</h2>
           <p>{copy.instructionNotice}</p>
           <label className="grid gap-2">
-            {copy.party}
+            <span className={labelClass}>{copy.party}</span>
             <select name="partyId" required defaultValue="" className={controlClass}>
               <option value="">{copy.choose}</option>
               {evidence.relationships.map((p) => (
@@ -150,13 +150,13 @@ export default async function SellerEvidencePage({
             </select>
           </label>
           <label className="grid gap-2">
-            {copy.agreementDocument}
+            <span className={labelClass}>{copy.agreementDocument}</span>
             <select name="documentVersionId" required defaultValue="" className={controlClass}>
               {documentOptions(agreementDocs)}
             </select>
           </label>
           <label className="grid gap-2">
-            {copy.representation}
+            <span className={labelClass}>{copy.representation}</span>
             <select name="representationScope" required className={controlClass}>
               {(["sale", "letting", "sale_and_letting"] as const).map((r) => (
                 <option key={r} value={r}>
@@ -166,15 +166,15 @@ export default async function SellerEvidencePage({
             </select>
           </label>
           <label className="grid gap-2">
-            {copy.commission}
-            <textarea name="commissionTerms" required maxLength={4000} className={controlClass} />
+            <span className={labelClass}>{copy.commission}</span>
+            <textarea name="commissionTerms" required maxLength={4000} className={textareaClass} />
           </label>
           <label className="grid gap-2">
-            {copy.agreedAt}
+            <span className={labelClass}>{copy.agreedAt}</span>
             <input name="agreedAt" type="datetime-local" required className={controlClass} />
           </label>
           <label className="grid gap-2">
-            {copy.expiresAt}
+            <span className={labelClass}>{copy.expiresAt}</span>
             <input name="expiresAt" type="datetime-local" className={controlClass} />
           </label>
           <label className="flex items-start gap-3">

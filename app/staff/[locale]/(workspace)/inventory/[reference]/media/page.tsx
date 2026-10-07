@@ -13,7 +13,7 @@ import { isAppError } from "@/server/errors";
 import { mediaForListing, mediaReceipt } from "@/server/media/commands";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { CheckIcon, DocumentIcon, NoPhotoIcon } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 
@@ -193,8 +193,8 @@ export default async function MediaPage({
   }
 
   const fileChooser = (
-    <label className="grid gap-1">
-      {copy.file}
+    <label className="grid gap-2">
+      <span className={labelClass}>{copy.file}</span>
       <input type="file" name="file" accept="image/jpeg,image/png,image/webp" required />
     </label>
   );
@@ -301,8 +301,8 @@ export default async function MediaPage({
         <p className="text-dense text-text-muted">{copy.imageLimit}</p>
         <FileEnvelope intent="upload" version={listing.version} />
         {fileChooser}
-        <label className="grid gap-1">
-          {copy.kind}
+        <label className="grid gap-2">
+          <span className={labelClass}>{copy.kind}</span>
           <select className={controlClass} name="kind">
             {["photo", "floor_plan", "render"].map((kind) => (
               <option key={kind} value={kind}>
@@ -424,8 +424,8 @@ function PhotoChecks({
               value={asset.caption ?? ""}
               required={false}
             />
-            <label className="grid gap-1">
-              {copy.modification}
+            <label className="grid gap-2">
+              <span className={labelClass}>{copy.modification}</span>
               <select
                 name="modification"
                 defaultValue={asset.modification}
@@ -447,8 +447,8 @@ function PhotoChecks({
           </div>
           <FileCheck name="privacyReviewed">{copy.privacy}</FileCheck>
           <FileCheck name="rightsConfirmed">{copy.rightsCheck}</FileCheck>
-          <label className="grid max-w-md gap-1">
-            {copy.decision}
+          <label className="grid max-w-md gap-2">
+            <span className={labelClass}>{copy.decision}</span>
             <select name="decision" className={controlClass}>
               <option value="approve">{copy.approve}</option>
               <option value="reject">{copy.reject}</option>

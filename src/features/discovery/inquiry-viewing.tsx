@@ -1,6 +1,6 @@
 import type { ViewingPreferences } from "@/domain/viewing-preferences";
 import type { PublicLocale } from "@/i18n/config";
-import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
+import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import { discoveryCopy } from "./copy";
@@ -24,7 +24,7 @@ export function ViewingPreferenceFields({
   ) => {
     const field = form.field(name);
     return (
-      <div className={fieldClass} key={name}>
+      <div className={fieldClass} key={name} data-invalid={field.error ? "true" : undefined}>
         <label htmlFor={field.id} className={labelClass}>
           {label}
         </label>
@@ -45,7 +45,7 @@ export function ViewingPreferenceFields({
           ))}
         </select>
         {field.error ? (
-          <p id={`${field.id}-error`} className="text-error">
+          <p id={`${field.id}-error`} className={errorClass}>
             {field.error}
           </p>
         ) : null}

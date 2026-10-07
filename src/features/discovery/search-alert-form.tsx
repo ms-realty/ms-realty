@@ -1,7 +1,7 @@
 "use client";
 import { privacyCopy } from "@/features/privacy/copy";
 import type { PublicLocale } from "@/i18n/config";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, errorClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -60,7 +60,7 @@ export function SearchAlertForm({
             <input type="hidden" name="proof" value={form.values.proof} />
             {/* Radios show each complete verified address; a native select clips long ones. */}
             <fieldset className="min-w-0 w-full space-y-2">
-              <legend>{p.email}</legend>
+              <legend className={labelClass}>{p.email}</legend>
               {contacts.map((contact, index) => (
                 <label key={contact.id} className="flex min-h-control min-w-0 items-center gap-3">
                   <input
@@ -91,7 +91,7 @@ export function SearchAlertForm({
                 <input type="hidden" name="contactMethodId" value={form.values.contactMethodId} />
               ) : null}
               {form.field("contactMethodId").error ? (
-                <p id={`${form.field("contactMethodId").id}-error`} className="text-error">
+                <p id={`${form.field("contactMethodId").id}-error`} className={errorClass}>
                   {form.field("contactMethodId").error}
                 </p>
               ) : null}
@@ -110,8 +110,14 @@ export function SearchAlertForm({
             ).map(([name, label, options]) => {
               const field = form.field(name);
               return (
-                <div key={name} className="grid min-w-0 grid-cols-1 gap-2">
-                  <label htmlFor={field.id}>{label}</label>
+                <div
+                  key={name}
+                  className="group grid min-w-0 grid-cols-1 gap-2"
+                  data-invalid={field.error ? "true" : undefined}
+                >
+                  <label htmlFor={field.id} className={labelClass}>
+                    {label}
+                  </label>
                   <select
                     id={field.id}
                     name={name}
@@ -131,7 +137,7 @@ export function SearchAlertForm({
                   </select>
                   {field.readOnly ? <input type="hidden" name={name} value={field.value} /> : null}
                   {field.error ? (
-                    <p id={`${field.id}-error`} className="text-error">
+                    <p id={`${field.id}-error`} className={errorClass}>
                       {field.error}
                     </p>
                   ) : null}
@@ -160,7 +166,7 @@ export function SearchAlertForm({
                 <span>{c.consent}</span>
               </label>
               {form.field("confirmed").error ? (
-                <p id={`${form.field("confirmed").id}-error`} className="text-error">
+                <p id={`${form.field("confirmed").id}-error`} className={errorClass}>
                   {form.field("confirmed").error}
                 </p>
               ) : null}

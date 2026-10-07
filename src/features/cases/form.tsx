@@ -1,5 +1,5 @@
 "use client";
-import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
+import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -99,7 +99,7 @@ export function WorkflowForm({
                     </label>
                   ))}
                   {field.error ? (
-                    <p id={errorId} className="text-error">
+                    <p id={errorId} className={errorClass}>
                       {field.error}
                     </p>
                   ) : null}
@@ -110,7 +110,11 @@ export function WorkflowForm({
               return (
                 // Linux WebKit lets long native option text escape a flex item even when
                 // the select's border box fits. Normal block flow preserves native UI.
-                <div key={field.name} className="group min-w-0 w-full space-y-2">
+                <div
+                  key={field.name}
+                  className="group min-w-0 w-full space-y-2"
+                  data-invalid={field.error ? "true" : undefined}
+                >
                   <label htmlFor={field.id} className={`block ${labelClass}`}>
                     {definition.label}
                   </label>
@@ -133,7 +137,7 @@ export function WorkflowForm({
                   </select>
                   {definition.hint ? <p id={hintId}>{definition.hint}</p> : null}
                   {field.error ? (
-                    <p id={errorId} className="text-error">
+                    <p id={errorId} className={errorClass}>
                       {field.error}
                     </p>
                   ) : null}
@@ -160,7 +164,7 @@ export function WorkflowForm({
                   </label>
                   {definition.hint ? <p id={hintId}>{definition.hint}</p> : null}
                   {field.error ? (
-                    <p id={errorId} className="text-error">
+                    <p id={errorId} className={errorClass}>
                       {field.error}
                     </p>
                   ) : null}

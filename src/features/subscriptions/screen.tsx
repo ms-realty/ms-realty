@@ -6,7 +6,7 @@ import { readAlertRule } from "@/server/subscriptions/approval";
 import { configuredAlertRule, currentAlertRule } from "@/server/subscriptions/rule";
 import { alertTemplateCopy } from "@/server/subscriptions/template";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { issueFormOperation } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { subscriptionCopy } from "./copy";
@@ -101,9 +101,11 @@ export async function AlertRuleScreen({
         <input type="hidden" name="expectedDecisionId" value={current.latest?.id ?? ""} />
         <input type="hidden" name="expectedDecisionVersion" value={current.latest?.version ?? 0} />
         <div className="grid gap-2">
-          <label htmlFor="alert-rule-note">{copy.note}</label>
+          <label htmlFor="alert-rule-note" className={labelClass}>
+            {copy.note}
+          </label>
           <textarea
-            className={controlClass}
+            className={textareaClass}
             id="alert-rule-note"
             aria-describedby="alert-rule-note-hint"
             name="note"
@@ -118,7 +120,7 @@ export async function AlertRuleScreen({
           </p>
         </div>
         <label className="grid gap-2">
-          {copy.expiry}
+          <span className={labelClass}>{copy.expiry}</span>
           <input
             className={controlClass}
             type="datetime-local"

@@ -14,7 +14,7 @@ import { hashRequest } from "@/server/crypto";
 import { normalizeSearch } from "@/server/search/search";
 import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass, labelClass } from "@/ui/field-class";
+import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   return publicRouteMetadata((await params).locale, "/properties/intent");
@@ -115,7 +115,7 @@ export default async function Page({
             maxLength={500}
             rows={4}
             required
-            className={controlClass}
+            className={textareaClass}
           />
         </label>
         <button className={buttonClass("primary")} type="submit">
@@ -135,7 +135,7 @@ export default async function Page({
           <input type="hidden" name="apply" value="1" />
           <h2 className="text-subheading font-semibold">{extra.review}</h2>
           <label className="grid gap-2">
-            <span>{copy.purpose}</span>
+            <span className={labelClass}>{copy.purpose}</span>
             <select
               required
               name="purpose"

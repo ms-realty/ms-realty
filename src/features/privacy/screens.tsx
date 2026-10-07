@@ -14,7 +14,7 @@ import {
   privacyQueueQuery,
 } from "@/server/privacy/requests";
 import type { NormalizedSearch } from "@/server/search/search";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 import { privacyCopy, privacyLabel } from "./copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
@@ -74,8 +74,8 @@ export function SearchEditor({
       <form action={`/${locale}/preferences/submit`} method="post" className="mt-4 grid gap-4">
         <Envelope intent="edit_search" id={subscription.id} version={subscription.version} />
         <input type="hidden" name="termsVersionId" value={termsVersionId} />
-        <label className="grid gap-1">
-          {c.searchPurpose}
+        <label className="grid gap-2">
+          <span className={labelClass}>{c.searchPurpose}</span>
           <select
             name="searchPurpose"
             className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -98,8 +98,8 @@ export function SearchEditor({
           }
         />
         <TextField name="timezone" label={c.timezone} value={subscription.timezone} required />
-        <label className="grid gap-1">
-          {c.frequency}
+        <label className="grid gap-2">
+          <span className={labelClass}>{c.frequency}</span>
           <select
             name="frequency"
             className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -136,8 +136,8 @@ export async function ClientPrivacyScreen({
         className="grid gap-4 rounded-panel border border-divider bg-surface p-5"
       >
         <Envelope intent="request" />
-        <label className="grid gap-1">
-          {c.type}
+        <label className="grid gap-2">
+          <span className={labelClass}>{c.type}</span>
           <select
             name="kind"
             className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -227,8 +227,8 @@ export async function PreferencesScreen({
         className="grid gap-4 rounded-panel border border-divider bg-surface p-5"
       >
         <Envelope intent="contact" version={data.party.version} />
-        <label className="grid gap-1">
-          {c.language}
+        <label className="grid gap-2">
+          <span className={labelClass}>{c.language}</span>
           <select
             className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
             name="preferredLocale"
@@ -247,8 +247,8 @@ export async function PreferencesScreen({
           value={preferences.timezone ?? "Europe/Sofia"}
           required
         />
-        <label className="grid gap-1">
-          {c.channel}
+        <label className="grid gap-2">
+          <span className={labelClass}>{c.channel}</span>
           <select
             name="channel"
             className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -289,8 +289,8 @@ export async function PreferencesScreen({
                 <Envelope intent="opt_in" />
                 <input type="hidden" name="purpose" value={purpose} />
                 <input type="hidden" name="termsVersionId" value={terms.version.id} />
-                <label className="grid gap-1">
-                  {c.email}
+                <label className="grid gap-2">
+                  <span className={labelClass}>{c.email}</span>
                   <select
                     name="contactMethodId"
                     className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -310,8 +310,8 @@ export async function PreferencesScreen({
                 />
                 {purpose === "search_alerts" ? (
                   <>
-                    <label className="grid gap-1">
-                      {c.searchPurpose}
+                    <label className="grid gap-2">
+                      <span className={labelClass}>{c.searchPurpose}</span>
                       <select
                         name="searchPurpose"
                         className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -322,8 +322,8 @@ export async function PreferencesScreen({
                     </label>
                     <TextField name="q" label={c.query} />
                     <TextField name="maxPrice" label={c.maxPrice} type="number" step="0.01" />
-                    <label className="grid gap-1">
-                      {c.frequency}
+                    <label className="grid gap-2">
+                      <span className={labelClass}>{c.frequency}</span>
                       <select
                         name="frequency"
                         className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
@@ -449,8 +449,10 @@ export async function StaffPrivacyScreen({
               <form method="post" action={submitPath} className="grid min-w-0 grid-cols-1 gap-4">
                 <Envelope intent="review" id={record.id} version={record.version} />
                 {/* A wrapping label would add the chosen option to the select's accessible name. */}
-                <div className="grid gap-1">
-                  <label htmlFor={`${record.id}-to`}>{c.state}</label>
+                <div className="grid gap-2">
+                  <label htmlFor={`${record.id}-to`} className={labelClass}>
+                    {c.state}
+                  </label>
                   <select
                     id={`${record.id}-to`}
                     name="to"
@@ -463,8 +465,10 @@ export async function StaffPrivacyScreen({
                     ))}
                   </select>
                 </div>
-                <div className="grid gap-1">
-                  <label htmlFor={`${record.id}-owner`}>{c.owner}</label>
+                <div className="grid gap-2">
+                  <label htmlFor={`${record.id}-owner`} className={labelClass}>
+                    {c.owner}
+                  </label>
                   <select
                     id={`${record.id}-owner`}
                     name="responsibleId"
