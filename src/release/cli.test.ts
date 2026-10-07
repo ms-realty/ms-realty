@@ -51,6 +51,16 @@ describe("release evaluator CLI", () => {
     );
     expect(report.verdict).toBe("blocked");
     expect(report.gates.every((gate) => gate.status === "blocked")).toBe(true);
+    expect(report.gates.find((gate) => gate.id === "R00")?.blockers).toEqual(
+      expect.arrayContaining([
+        "missing_evidence:authority_decision_record",
+        "legacy_mapping_unapproved:live_services",
+        "legacy_mapping_unapproved:payload_runtime",
+      ]),
+    );
+    expect(report.gates.find((gate) => gate.id === "R10")?.blockers).toEqual(
+      expect.arrayContaining(["dependency_blocked:R00", "missing_evidence:release_attestation"]),
+    );
     const markdown = readFileSync(join(input.output, "readiness.md"), "utf8");
     expect(markdown).toContain(report.snapshotId);
     expect(markdown).toContain("- Verdict: **blocked**");

@@ -281,6 +281,66 @@ const required = <T>(value: T | null | undefined): T => {
   return value;
 };
 
+// Concrete retained obligations: a signed generic report must not clear any of these checks.
+const retainedProofChecks = [
+  ["R00", "authority_decision_record", "authority:successor_provisioning_equivalence"],
+  ["R00", "authority_decision_record", "authority:successor_identity_equivalence"],
+  ["R00", "authority_decision_record", "authority:evidence_owners"],
+  ["R00", "authority_decision_record", "authority:broker_review_owners"],
+  ["R01", "successor_provisioning_report", "provisioning:legacy_contract_equivalence"],
+  ["R01", "successor_provisioning_report", "provisioning:checks_and_owners"],
+  ["R01", "successor_provisioning_report", "provisioning:cloudflare_gateway_container"],
+  ["R01", "successor_provisioning_report", "provisioning:immutable_web_worker_migration_image"],
+  ["R01", "successor_provisioning_report", "provisioning:postgres_16_14"],
+  ["R01", "successor_provisioning_report", "provisioning:private_tls_path"],
+  ["R01", "first_party_runtime_report", "runtime:staff_client_identity"],
+  ["R01", "first_party_runtime_report", "runtime:cms_listing_mutations"],
+  ["R01", "first_party_runtime_report", "runtime:deny_revocation"],
+  ["R01", "first_party_runtime_report", "runtime:restart_recovery"],
+  ["R02", "listing_review_report", "listing:complete_human_csv"],
+  ["R02", "listing_review_report", "listing:source_approval_separate"],
+  ["R02", "listing_review_report", "listing:broker_owners_assigned"],
+  ["R02", "listing_review_report", "listing:broker_decisions_complete"],
+  ["R02", "listing_review_report", "listing:translation_approval_before_indexing"],
+  ["R02", "listing_review_report", "warning_review:structured_data.missing_area"],
+  ["R02", "listing_review_report", "warning_review:structured_data.missing_bedrooms"],
+  ["R02", "listing_review_report", "warning_review:structured_data.missing_public_images"],
+  ["R02", "listing_review_report", "warning_review:listing_quality.missing_area"],
+  ["R02", "listing_review_report", "warning_review:listing_quality.thin_public_gallery"],
+  ["R03", "postgres_search_sync", "search:authoritative_postgres_target"],
+  ["R03", "postgres_search_sync", "search:sync_projection"],
+  ["R03", "postgres_search_sync", "search:deployed_path"],
+  ["R03", "postgres_search_sync", "search:failure_recovery"],
+  ["R03", "postgres_search_query", "search:authorized_query"],
+  ["R03", "postgres_search_query", "search:deny_query"],
+  ["R03", "postgres_search_query", "search:failure_recovery"],
+  ["R03", "deployed_check", "deployed:three_hosts"],
+  ["R03", "deployed_check", "deployed:browser_api_journeys"],
+  ["R06", "hermes_draft_worker", "assistance:authenticated_worker_provider"],
+  ["R06", "hermes_draft_worker", "assistance:budget_policy"],
+  ["R06", "hermes_draft_worker", "assistance:approved_sources"],
+  ["R06", "hermes_draft_worker", "assistance:publish_send_fact_index_denied"],
+  ["R07", "migration_rehearsal_report", "migration:originals_rights_transforms_access"],
+  ["R08", "monitoring_check", "monitoring:privacy_events"],
+  ["R08", "monitoring_check", "monitoring:analytics_export"],
+  ["R08", "monitoring_check", "monitoring:public_https_endpoint"],
+  ["R08", "monitoring_check", "monitoring:named_responders"],
+  ["R08", "rollback_drill", "rollback:automated_policy"],
+  ["R08", "rollback_drill", "rollback:passing_canary"],
+  ["R08", "rollback_drill", "rollback:isolated_drill"],
+  ["R08", "rollback_drill", "rollback:queue_intake_fallback"],
+  ["R08", "rollback_drill", "rollback:previous_origin_until_crawl_stable"],
+  ["R08", "rollback_drill", "rollback:disable_redirects_before_routes"],
+  ["R08", "rollback_drill", "rollback:previous_sitemap_robots"],
+  ["R08", "rollback_drill", "rollback:failed_url_review_owners"],
+  ["R08", "recovery_point", "recovery:encrypted"],
+  ["R08", "recovery_drill", "recovery:checksums"],
+  ["R08", "recovery_drill", "recovery:rollback_verified"],
+  ["R10", "release_attestation", "release:evidence_bundle_captured"],
+  ["R10", "release_attestation", "release:evidence_bundle_verified"],
+  ["R10", "release_attestation", "release:protected_staging_parity"],
+] as const;
+
 describe("gate policy (§20.3, §21.2)", () => {
   it("lists R00–R12 and requires every acceptance scenario AT01–AT68 in some gate", () => {
     expect(committedPolicy.gates.map((g) => g.id)).toEqual([...gateIds]);
@@ -295,9 +355,22 @@ describe("gate policy (§20.3, §21.2)", () => {
   it("keeps deployed-path freshness at 24 h and the recovery point at 60 min (§17.3, §21.3)", () => {
     const age = (id: string) =>
       committedPolicy.evidenceTypes.find((t) => t.id === id)?.maxAgeMinutes;
-    for (const id of ["deployed_check", "provider_check", "monitoring_check", "rollback_drill"]) {
+    for (const id of [
+      "deployed_check",
+      "provider_check",
+      "monitoring_check",
+      "rollback_drill",
+      "successor_provisioning_report",
+      "first_party_runtime_report",
+      "postgres_search_sync",
+      "postgres_search_query",
+      "hermes_draft_worker",
+    ]) {
       expect(age(id)).toBe(1440);
     }
+    expect(
+      committedPolicy.evidenceTypes.find((type) => type.id === "monitoring_check")?.environments,
+    ).toEqual(["production"]);
     expect(age("recovery_point")).toBe(60);
     const signed = committedPolicy.evidenceTypes
       .filter((t) => t.signatureRequired)
@@ -305,12 +378,24 @@ describe("gate policy (§20.3, §21.2)", () => {
     expect(signed).toEqual(expect.arrayContaining(["recovery_point", "recovery_drill"]));
   });
 
-  it("ships no trusted key and no owner approval: nothing is pre-cleared", () => {
+  it("ships no trusted key or signed approval: mapping chat approval clears no gate", () => {
     expect(committedPolicy.trustedKeys).toEqual([]);
     expect(committedPolicy.legacyGates.every((legacy) => legacy.approval === null)).toBe(true);
     expect(
       committedPolicy.legacyGates.find((legacy) => legacy.id === "live_services")?.disposition,
     ).toBe("replacement_proof");
+  });
+
+  it("requires each retained proof on its own signed evidence type and gate", () => {
+    for (const [gateId, typeId, assertionId] of retainedProofChecks) {
+      const type = required(committedPolicy.evidenceTypes.find((type) => type.id === typeId));
+      expect(type.signatureRequired, typeId).toBe(true);
+      expect(type.requiredAssertions, typeId).toContain(assertionId);
+      expect(
+        required(committedPolicy.gates.find((gate) => gate.id === gateId)).requiredEvidence,
+        gateId,
+      ).toContain(typeId);
+    }
   });
 
   it("rejects a policy whose gates reference an unknown evidence type", () => {
@@ -323,6 +408,104 @@ describe("gate policy (§20.3, §21.2)", () => {
 });
 
 describe("release evaluation", () => {
+  it.each(retainedProofChecks)(
+    "%s rejects signed %s proof missing %s",
+    (gateId, typeId, assertionId) => {
+      const id = `${gateId}-${typeId}`;
+      const report = withArtifact(id, (artifact) => ({
+        ...artifact,
+        assertions: artifact.assertions.filter((assertion) => assertion.id !== assertionId),
+      }));
+      expect(reasonsOf(report, id)).toContain(`missing_required_assertion:${assertionId}`);
+      expect(gate(report, gateId).blockers).toContain(
+        typeId === "release_attestation" ? "manifest_incomplete" : `missing_evidence:${typeId}`,
+      );
+      if (typeId === "release_attestation") {
+        expect(report.release.gaps).toContain("/approvals/operator/unverified");
+      }
+      expect(report.verdict).toBe("blocked");
+    },
+  );
+
+  it.each([
+    ["R01", "successor_provisioning_report"],
+    ["R01", "first_party_runtime_report"],
+    ["R03", "postgres_search_sync"],
+    ["R03", "postgres_search_query"],
+    ["R06", "hermes_draft_worker"],
+  ])("%s rejects a CI fixture offered as the live %s report", (gateId, typeId) => {
+    const id = `${gateId}-${typeId}`;
+    const report = withArtifact(id, (artifact) => ({
+      ...artifact,
+      evidenceClass: "test",
+      environment: "ci",
+    }));
+    expect(reasonsOf(report, id)).toContain("wrong_evidence_class");
+    expect(reasonsOf(report, id)).toContain("wrong_environment");
+    expect(gate(report, gateId).blockers).toContain(`missing_evidence:${typeId}`);
+  });
+
+  it("rejects signed staging monitoring as retained production monitoring proof", () => {
+    const input = scenario();
+    input.manifest.environment = "staging";
+    recollect(input);
+    input.evidence = input.evidence.map((artifact) =>
+      artifact.id === "R08-monitoring_check"
+        ? signEvidence(
+            { ...artifact, environment: "staging" },
+            operatorKey.privateKey,
+            operatorKeyId,
+          )
+        : artifact,
+    );
+    sealTestEvidence(input);
+    const report = evaluate(input);
+    expect(reasonsOf(report, "R08-monitoring_check")).toContain("wrong_environment");
+    expect(gate(report, "R08").blockers).toContain("missing_evidence:monitoring_check");
+  });
+
+  it("cannot use the source audit or CI assertions as the complete human broker review", () => {
+    const input = scenario();
+    const review = required(
+      input.evidence.find((artifact) => artifact.id === "R02-listing_review_report"),
+    );
+    input.evidence = input.evidence.map((artifact) => {
+      if (artifact.id === review.id) {
+        return signEvidence(
+          {
+            ...artifact,
+            source: "manual-source-audit-non-approval@1",
+            assertions: [{ id: "review:scope_complete", passed: true }],
+          },
+          operatorKey.privateKey,
+          operatorKeyId,
+        );
+      }
+      if (artifact.id === "R02-ci_test_report") {
+        return {
+          ...artifact,
+          assertions: [
+            ...new Map(
+              [...artifact.assertions, ...review.assertions].map((assertion) => [
+                assertion.id,
+                assertion,
+              ]),
+            ).values(),
+          ],
+        };
+      }
+      return artifact;
+    });
+    sealTestEvidence(input);
+    const report = evaluate(input);
+    expect(reasonsOf(report, "R02-ci_test_report")).toEqual([]);
+    expect(reasonsOf(report, review.id)).toContain(
+      "missing_required_assertion:listing:broker_decisions_complete",
+    );
+    expect(gate(report, "R02").blockers).toContain("missing_evidence:listing_review_report");
+    expect(report.verdict).toBe("blocked");
+  });
+
   it("AT67 blocks every gate when there is no evidence", () => {
     const { policy, manifest } = scenario();
     const report = evaluate({ policy, manifest, evidence: [] });
@@ -405,20 +588,22 @@ describe("release evaluation", () => {
     const input = scenario();
     input.manifest = {
       ...input.manifest,
-      evidenceIds: input.manifest.evidenceIds.filter((id) => id !== "R02-human_review"),
+      evidenceIds: input.manifest.evidenceIds.filter((id) => id !== "R02-listing_review_report"),
       evidenceDigests: Object.fromEntries(
-        Object.entries(input.manifest.evidenceDigests).filter(([id]) => id !== "R02-human_review"),
+        Object.entries(input.manifest.evidenceDigests).filter(
+          ([id]) => id !== "R02-listing_review_report",
+        ),
       ),
     };
-    expect(reasonsOf(evaluate(input), "R02-human_review")).toEqual(["not_in_manifest"]);
+    expect(reasonsOf(evaluate(input), "R02-listing_review_report")).toEqual(["not_in_manifest"]);
     const failing = withArtifact("R04-ci_test_report", (a) => ({
       ...a,
       assertions: [...a.assertions.slice(1), { id: "AT15", passed: false }],
     }));
     expect(reasonsOf(failing, "R04-ci_test_report")).toEqual(["assertion_failed"]);
     expect(gate(failing, "R04").blockers).toContain("missing_assertion:AT15");
-    const anonymous = withArtifact("R02-human_review", (a) => ({ ...a, reviewer: null }));
-    expect(reasonsOf(anonymous, "R02-human_review")).toEqual(["reviewer_missing"]);
+    const anonymous = withArtifact("R02-listing_review_report", (a) => ({ ...a, reviewer: null }));
+    expect(reasonsOf(anonymous, "R02-listing_review_report")).toEqual(["reviewer_missing"]);
   });
 
   it("reports unreadable and duplicate evidence without counting it", () => {
@@ -592,11 +777,11 @@ describe("release evaluation", () => {
       observedAt: minutesAgo(-6),
     }));
     expect(reasonsOf(future, "R03-deployed_check")).toContain("observed_in_future");
-    const unredacted = withArtifact("R02-human_review", (artifact) => ({
+    const unredacted = withArtifact("R02-listing_review_report", (artifact) => ({
       ...artifact,
       redactionStatus: "unredacted_restricted",
     }));
-    expect(reasonsOf(unredacted, "R02-human_review")).toContain("redaction_required");
+    expect(reasonsOf(unredacted, "R02-listing_review_report")).toContain("redaction_required");
     const duplicate = withArtifact("R01-ci_test_report", (artifact) => ({
       ...artifact,
       assertions: [...artifact.assertions, required(artifact.assertions[0])],
