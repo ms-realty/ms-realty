@@ -217,25 +217,32 @@ function InquiryDraftSession<V extends FormValues>({
   );
   // Recording a confirmed change re-issues its pending reference, so Next re-renders this record
   // in the same response and its pending fence can replace the form before the confirmed state
-  // renders. Settle the submitted draft where that confirmed body arrives. Only once hydrated:
-  // native submissions need the untouched Server Action reference (ui/form/form.tsx).
+  // renders. Settle the submitted draft where that confirmed body arrives, on the same promise
+  // React awaits so its timing is unchanged. Only once hydrated: native submissions need the
+  // untouched Server Action reference (ui/form/form.tsx).
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const serverAction = props.action;
   const settlingAction = useCallback<FormAction<V>>(
-    async (previous, data) => {
-      const state = await serverAction(previous, data);
-      if (state.outcome.kind === "confirmed" && ready.current)
-        retainInquiryDraft(
-          owner,
-          id,
-          kind,
-          initial,
-          { state, values: state.values, pending: false },
-          (initial as FormState<V> & InquiryReferenceState).inquiryRetryOperationId,
-          draftRevision.current,
-        );
-      return state;
+    (previous, data) => {
+      const response = serverAction(previous, data);
+      response.then(
+        (state) => {
+          if (state.outcome.kind === "confirmed" && ready.current)
+            retainInquiryDraft(
+              owner,
+              id,
+              kind,
+              initial,
+              { state, values: state.values, pending: false },
+              (initial as FormState<V> & InquiryReferenceState).inquiryRetryOperationId,
+              draftRevision.current,
+            );
+        },
+        // The form's own boundary reports a failed request.
+        () => {},
+      );
+      return response;
     },
     [serverAction, owner, id, kind, initial],
   );
