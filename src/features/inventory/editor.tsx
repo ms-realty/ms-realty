@@ -94,11 +94,16 @@ export function InventoryEditor({
               : undefined
           }
         >
-          {/* Both writing surfaces are the 144 px UI07 Textarea (694:13418, 647:31541). */}
+          {/* O12's UI06 title wraps on phones (14:4956); the description and private note
+              remain the 144 px UI07 writing surfaces (694:13418, 647:31541). */}
           <FormField
             {...field}
             label={labels[name]}
-            multiline={name === "description" || name === "brokerNote"}
+            multiline={
+              name === "title" && view === "edit"
+                ? "wrap"
+                : name === "description" || name === "brokerNote"
+            }
           />
         </div>
       );

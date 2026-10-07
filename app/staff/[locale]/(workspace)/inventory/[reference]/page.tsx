@@ -209,7 +209,6 @@ export default async function InventoryDetailPage({
   }
 
   const summary = [
-    property.settlement,
     known(values.priceState, values.price)
       ? new Intl.NumberFormat(locale, {
           style: "currency",
@@ -256,12 +255,20 @@ export default async function InventoryDetailPage({
   ];
 
   return (
-    <div className="flex flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
+    <div className="flex flex-col gap-6 px-gutter py-5 sm:gap-8 sm:px-gutter-wide sm:py-8">
       <header className="flex flex-col gap-6 sm:gap-8">
         <h1 className="text-heading font-semibold sm:text-title">{o12.title}</h1>
         <p className="text-text-muted">
           {ref}
-          {summary.map((part) => ` · ${part}`)}
+          {property.settlement ? ` · ${property.settlement}` : null}
+          {summary.length ? (
+            <>
+              {/* O12 Mobile keeps the listing identity above the recorded numbers (14:4947). */}
+              <span className="hidden sm:inline"> · </span>
+              <br className="sm:hidden" />
+              {summary.join(" · ")}
+            </>
+          ) : null}
           <br />
           {o12.sourceLine}
         </p>
@@ -289,7 +296,7 @@ export default async function InventoryDetailPage({
             className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-[46.8rem]"
           >
             {mayEdit ? (
-              <div data-o12-editor>
+              <div data-o12-editor className="[&>form]:gap-6">
                 <InventoryEditor
                   locale={locale}
                   reference={reference}
@@ -389,7 +396,9 @@ export default async function InventoryDetailPage({
                 detail={readiness.input.factReviewValid ? o12.sourceReviewed : o12.sourceUnreviewed}
               />
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="text-dense font-semibold">{o12.terms}</h2>
+                <h2 id="listing-terms-heading" className="text-dense font-semibold">
+                  {o12.terms}
+                </h2>
                 {mayEdit ? (
                   <label
                     htmlFor="o12-facts"
@@ -399,11 +408,13 @@ export default async function InventoryDetailPage({
                   </label>
                 ) : null}
               </div>
-              <dl className="grid gap-6 sm:grid-cols-2">
+              <dl aria-labelledby="listing-terms-heading" className="grid gap-6 sm:grid-cols-2">
                 {terms.map(([label, value]) => (
                   <div key={label} className="flex flex-col gap-2">
                     <dt className="text-dense font-semibold">{label}</dt>
-                    <dd className="min-h-12 rounded-control border border-divider bg-subtle p-3 leading-[1.625rem]">
+                    {/* O12 UI06 terms use the canvas and control border (11:455, 14:4961).
+                        They remain recorded context; the explicit Facts path owns editing. */}
+                    <dd className="min-h-input rounded-control border border-border bg-canvas p-3 text-body">
                       {value}
                     </dd>
                   </div>
