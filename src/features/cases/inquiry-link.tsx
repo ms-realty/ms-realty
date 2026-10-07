@@ -1,6 +1,7 @@
 // O03 existing-Case candidates (inside InquiryScreen) and the O03L review / O03LR result route
-// (Figma 20:1055 / 25:2228 and 20:1175 / 25:2279). C02 decides eligibility and enforces every
-// check on submit; this layer only words the candidates, the effects and the outcome.
+// (Figma 20:1055 / 25:2228 and 20:1175 / 25:2279). C02 decides eligibility, the reason a Case
+// cannot be linked and the match basis, and enforces every check on submit; this layer only
+// words the candidates, the effects and the outcome.
 import "server-only";
 import { sql } from "drizzle-orm";
 import Image from "next/image";
@@ -9,10 +10,9 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import type { CaseStage } from "@/domain/case";
-import { inquiryMachine } from "@/domain/inquiry";
 import { agencyTimeZone } from "@/i18n/config";
-import { requireAvailableStaff } from "@/server/auth/availability";
 import type { Session } from "@/server/auth/sessions";
+import type { InquiryCaseBlockReason } from "@/server/cases/inquiry-link";
 import { listInquiryCaseCandidates } from "@/server/cases/queries";
 import { isAppError } from "@/server/errors";
 import { findOperation } from "@/server/operations";
@@ -76,12 +76,13 @@ function Alert({
   );
 }
 
-function withReference(template: string, reference: string) {
-  const [before, after = ""] = template.split("{case}");
+/** Fills one slot of a copy template, isolating the record value's direction. */
+function withValue(template: string, value: string, slot = "{case}") {
+  const [before, after = ""] = template.split(slot);
   return (
     <>
       {before}
-      <bdi>{reference}</bdi>
+      <bdi>{value}</bdi>
       {after}
     </>
   );
@@ -120,31 +121,28 @@ async function readCandidates(session: Session, inquiryId: string) {
   }
 }
 
-/** The inquiry-wide C02 conditions, in its order. Null leaves only Case-level reasons. */
-async function inquiryBlock(detail: Detail, session: Session, copy: InquiryLinkCopy) {
-  const { inquiry } = detail;
-  if (inquiry.ownerId !== session.account.id) return copy.reasonOwner;
-  if (inquiryMachine.check(inquiry.state, "linked_to_case").outcome === "denied")
-    return copy.reasonState;
-  if (!detail.canRespond) return copy.reasonRespond;
-  const absent = await requireAvailableStaff(getDb(), session.account.id).then(
-    () => false,
-    (error: unknown) => isAppError(error) && error.code === "transition_denied",
-  );
-  return absent ? copy.reasonAway : null;
-}
+/** C02 checks these before any Case, so they block every candidate alike: say them once. */
+const inquiryReasons = new Set<InquiryCaseBlockReason>([
+  "inquiry_owner",
+  "inquiry_state",
+  "inquiry_permission",
+  "staff_unavailable",
+]);
 
-const caseBlock = (detail: Detail, candidate: Candidate, copy: InquiryLinkCopy) =>
-  detail.tasks.some(({ task }) => task.caseId && task.caseId !== candidate.id)
-    ? copy.reasonTask
-    : copy.reasonAccess;
+/** Why C02 suggested the Case. A contact route proves no identity, so it never names anyone. */
+function basisOf(candidate: Candidate, copy: InquiryLinkCopy) {
+  if (candidate.matchBasis === "contact_route") return copy.basisContact;
+  return candidate.partyLabel
+    ? withValue(copy.basisParty, candidate.partyLabel, "{party}")
+    : copy.basisPartyUnnamed;
+}
 
 function caseLabels(candidate: Candidate, locale: string, copy: InquiryLinkCopy) {
   return {
     kind:
       candidate.kind === "service_intake" ? copy.serviceIntake : caseCopy(locale)[candidate.kind],
     stage: copy.stages[candidate.stage as CaseStage] ?? candidate.stage,
-    basis: candidate.matchBasis === "party" ? copy.basisParty : copy.basisContact,
+    basis: basisOf(candidate, copy),
   };
 }
 
@@ -214,9 +212,7 @@ export async function InquiryCaseLink({
   if (inquiry.caseId || inquiry.state === "resolved_without_case") return null;
   const copy = inquiryLinkCopy(locale);
   const rows = inquiry.partyId ? await readCandidates(session, inquiry.id) : [];
-  const blocked = rows?.some((row) => !row.canLink)
-    ? await inquiryBlock(detail, session, copy)
-    : null;
+  const shared = rows?.find((row) => inquiryReasons.has(row.blockReason))?.blockReason ?? null;
   return (
     <section
       aria-labelledby="inquiry-case-link"
@@ -247,9 +243,9 @@ export async function InquiryCaseLink({
           </Alert>
         ) : (
           <>
-            {blocked ? (
+            {shared ? (
               <Alert tone="warning">
-                <p>{blocked}</p>
+                <p>{copy.reasons[shared]}</p>
               </Alert>
             ) : null}
             <ul className="flex flex-col" data-case-candidates>
@@ -259,7 +255,11 @@ export async function InquiryCaseLink({
                   locale={locale}
                   inquiryId={inquiry.id}
                   candidate={candidate}
-                  reason={candidate.canLink || blocked ? null : caseBlock(detail, candidate, copy)}
+                  reason={
+                    candidate.blockReason && candidate.blockReason !== shared
+                      ? copy.reasons[candidate.blockReason]
+                      : null
+                  }
                 />
               ))}
             </ul>
@@ -394,9 +394,7 @@ export async function InquiryLinkScreen({
     );
 
   const { kind, stage, basis } = caseLabels(candidate, locale, copy);
-  const blocked = candidate.canLink
-    ? null
-    : ((await inquiryBlock(detail, session, copy)) ?? caseBlock(detail, candidate, copy));
+  const blocked = candidate.blockReason ? copy.reasons[candidate.blockReason] : null;
   const initialState = initialFormState<InquiryLinkValues>(
     inquiryLinkScope(inquiry.id),
     { caseId: candidate.id, expectedCaseVersion: String(candidate.version) },
@@ -423,8 +421,8 @@ export async function InquiryLinkScreen({
           {copy.effectsTitle}
         </h2>
         <ul className="flex list-disc flex-col gap-2 ps-5 text-dense">
-          <li>{withReference(copy.effectJoins, candidate.reference)}</li>
-          <li>{withReference(copy.effectVisible, candidate.reference)}</li>
+          <li>{withValue(copy.effectJoins, candidate.reference)}</li>
+          <li>{withValue(copy.effectVisible, candidate.reference)}</li>
           <li>{copy.effectKept}</li>
           <li>{copy.effectNot}</li>
         </ul>
@@ -525,7 +523,7 @@ async function LinkOutcome({
       <h1 className="text-heading font-semibold sm:text-title">{copy.resultTitle}</h1>
       <InquiryStatus locale={locale} detail={detail} />
       <h2 className="text-heading font-semibold">
-        {withReference(copy.resultHeading, linked.caseReference)}
+        {withValue(copy.resultHeading, linked.caseReference)}
       </h2>
       <p className="text-text-muted">
         {copy.recorded}{" "}

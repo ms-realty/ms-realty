@@ -38,6 +38,13 @@ type Fixture = {
   caseA: { id: string; reference: string };
   caseB: { id: string; reference: string };
   lonelyInquiryId: string;
+  /** The Party behind every contact-route match; no suggestion may show this name. */
+  clientLabel: string;
+  /** An inquiry whose own Party is a live tenant of Case C and whose email reaches A and B. */
+  partyInquiryId: string;
+  partyTaskId: string;
+  partyLabel: string;
+  caseC: { id: string; reference: string };
 };
 
 function seed() {
@@ -173,8 +180,15 @@ for (const javaScriptEnabled of [true, false]) {
           copy.basisContact,
         ])
           await expect(rowA).toContainText(text);
-        for (const text of [f.caseB.reference, "Synthetic seller case", copy.stages.assessment])
+        for (const text of [
+          f.caseB.reference,
+          "Synthetic seller case",
+          copy.stages.assessment,
+          copy.basisContact,
+        ])
           await expect(rowB).toContainText(text);
+        // Both match on a contact route only, which proves no identity: no name is shown.
+        for (const row of [rowA, rowB]) await expect(row).not.toContainText(f.clientLabel);
         // The two choices stay distinct: a Case row reviews a link, this opens Case creation.
         await expect(section.getByRole("link", { name: copy.create, exact: true })).toHaveAttribute(
           "href",
@@ -189,6 +203,8 @@ for (const javaScriptEnabled of [true, false]) {
         await expect(page).toHaveURL(reviewPage(f.inquiryId, f.caseA.id));
         await expect(page.getByRole("heading", { level: 1, name: copy.linkTitle })).toBeVisible();
         await expect(page.getByRole("main")).toContainText(f.caseA.reference);
+        await expect(page.getByRole("main")).toContainText(copy.basisContact);
+        await expect(page.getByRole("main")).not.toContainText(f.clientLabel);
         await expect(
           page.getByRole("heading", { level: 2, name: copy.effectsTitle }),
         ).toBeVisible();
@@ -281,7 +297,7 @@ for (const javaScriptEnabled of [true, false]) {
         const section = page.locator("[data-inquiry-case-link]");
         const rowB = section.locator(`[data-case-candidate="${f.caseB.id}"]`);
         await expect(rowB).toContainText(f.caseB.reference);
-        await expect(rowB).toContainText(`${copy.notLinkable} · ${copy.reasonAccess}`);
+        await expect(rowB).toContainText(`${copy.notLinkable} · ${copy.reasons.case_permission}`);
         await expect(rowB.getByRole("link")).toHaveCount(0);
         // Scoped access cannot create a Case, so only the existing-Case choice is offered.
         await expect(section.getByRole("link", { name: copy.create, exact: true })).toHaveCount(0);
@@ -304,7 +320,9 @@ for (const javaScriptEnabled of [true, false]) {
         await submit(page).click();
         // Hydrated, the action's own refusal; native, the re-read review names the same gap.
         await expect(
-          page.getByText(javaScriptEnabled ? copy.denied : copy.reasonAccess, { exact: true }),
+          page.getByText(javaScriptEnabled ? copy.denied : copy.reasons.case_permission, {
+            exact: true,
+          }),
         ).toBeVisible();
         await expect(submit(page)).toHaveCount(0);
         if (javaScriptEnabled) await accessible(page);
@@ -380,14 +398,16 @@ test("O03 / F18: other owners and tasks already in another Case explain why a Ca
       // Another broker sees the same suggestions but only the inquiry's owner may link it.
       await colleague.page.goto(inquiryPage(f.inquiryId));
       const shared = colleague.page.locator("[data-inquiry-case-link]");
-      await expect(shared).toContainText(copy.reasonOwner);
+      await expect(shared).toContainText(copy.reasons.inquiry_owner);
       await expect(shared.locator("[data-case-candidate]")).toHaveCount(2);
       await expect(shared.locator("[data-case-candidate] a")).toHaveCount(0);
       await expect(shared.locator(`[data-case-candidate="${f.caseA.id}"]`)).toContainText(
         copy.notLinkable,
       );
       await colleague.page.goto(reviewPage(f.inquiryId, f.caseA.id));
-      await expect(colleague.page.getByText(copy.reasonOwner, { exact: true })).toBeVisible();
+      await expect(
+        colleague.page.getByText(copy.reasons.inquiry_owner, { exact: true }),
+      ).toBeVisible();
       await expect(submit(colleague.page)).toHaveCount(0);
 
       // A follow-up already bound to Case B leaves only Case B linkable for the owner.
@@ -398,7 +418,7 @@ test("O03 / F18: other owners and tasks already in another Case explain why a Ca
       await owner.page.goto(inquiryPage(f.inquiryId));
       const section = owner.page.locator("[data-inquiry-case-link]");
       await expect(section.locator(`[data-case-candidate="${f.caseA.id}"]`)).toContainText(
-        `${copy.notLinkable} · ${copy.reasonTask}`,
+        `${copy.notLinkable} · ${copy.reasons.task_case_conflict}`,
       );
       await expect(
         section.locator(`[data-case-candidate="${f.caseB.id}"]`).getByRole("link"),
@@ -408,6 +428,185 @@ test("O03 / F18: other owners and tasks already in another Case explain why a Ca
   } finally {
     await colleague.context.close();
     await owner.context.close();
+  }
+});
+
+type ScopedGrant = Pick<
+  typeof schema.grants.$inferInsert,
+  "capability" | "recordType" | "recordId"
+>;
+
+/** Replaces the staff member's grants with exactly these record-scoped ones. */
+async function onlyGrants(staffId: string, scoped: ScopedGrant[]) {
+  await db
+    .update(schema.grants)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(schema.grants.principalId, staffId), isNull(schema.grants.revokedAt)));
+  await db
+    .insert(schema.grants)
+    .values(
+      scoped.map((grant) => ({ ...grant, principalId: staffId, reason: "Synthetic O03 access" })),
+    );
+}
+
+const caseGrants = (capability: "case.read" | "case.transition", ...ids: string[]) =>
+  ids.map((recordId): ScopedGrant => ({ capability, recordType: "case", recordId }));
+
+test("O03 / F18: each C02 refusal names its own reason, and a hidden task reads as any inquiry refusal", async ({
+  browser,
+}, info) => {
+  const f = seed();
+  const { context, page } = await signedIn(browser, f.token, { ...info.project.use });
+  const section = page.locator("[data-inquiry-case-link]");
+  const row = (caseId: string) => section.locator(`[data-case-candidate="${caseId}"]`);
+  const inquiry = (capability: "inquiry.read" | "inquiry.respond"): ScopedGrant => ({
+    capability,
+    recordType: "inquiry",
+    recordId: f.inquiryId,
+  });
+  const bothCases = [
+    ...caseGrants("case.read", f.caseA.id, f.caseB.id),
+    ...caseGrants("case.transition", f.caseA.id, f.caseB.id),
+  ];
+  /** An inquiry-wide reason is said once; each row only says that it can't be linked. */
+  const inquiryWide = async (reason: string) => {
+    await page.goto(inquiryPage(f.inquiryId));
+    await expect(section.getByText(reason, { exact: true })).toHaveCount(1);
+    await expect(section.locator("[data-case-candidate]")).toHaveCount(2);
+    await expect(section.locator("[data-case-candidate] a")).toHaveCount(0);
+    for (const id of [f.caseA.id, f.caseB.id])
+      await expect(row(id)).toContainText(copy.notLinkable);
+    return section.innerText();
+  };
+  try {
+    await readingCandidates(async () => {
+      const membership = eq(schema.staffMemberships.principalId, f.staffId);
+      await db
+        .update(schema.staffMemberships)
+        .set({
+          absenceFrom: new Date(Date.now() - 60_000),
+          absenceReviewAt: new Date(Date.now() + 86_400_000),
+        })
+        .where(membership);
+      await inquiryWide(copy.reasons.staff_unavailable);
+      await db
+        .update(schema.staffMemberships)
+        .set({ absenceFrom: null, absenceReviewAt: null })
+        .where(membership);
+
+      // Without task authority the inquiry hides its task, so the refusal must not reveal one:
+      // it reads exactly as a refusal to work on the inquiry at all.
+      await onlyGrants(f.staffId, [
+        inquiry("inquiry.read"),
+        inquiry("inquiry.respond"),
+        ...bothCases,
+      ]);
+      const hiddenTask = await inquiryWide(copy.reasons.inquiry_permission);
+      for (const reason of [copy.reasons.task_permission, copy.reasons.task_case_conflict])
+        await expect(section).not.toContainText(reason);
+      await accessible(page);
+      await page.goto(reviewPage(f.inquiryId, f.caseA.id));
+      await expect(page.getByText(copy.reasons.inquiry_permission, { exact: true })).toBeVisible();
+      await expect(submit(page)).toHaveCount(0);
+      await onlyGrants(f.staffId, [
+        inquiry("inquiry.read"),
+        { capability: "task.manage", recordType: "task", recordId: f.taskId },
+        ...bothCases,
+      ]);
+      expect(await inquiryWide(copy.reasons.inquiry_permission)).toBe(hiddenTask);
+
+      // Task authority that stops at Case B: the task may follow the inquiry only into B.
+      await db
+        .update(schema.tasks)
+        .set({ caseId: f.caseB.id })
+        .where(eq(schema.tasks.id, f.taskId));
+      await onlyGrants(f.staffId, [
+        inquiry("inquiry.read"),
+        inquiry("inquiry.respond"),
+        { capability: "task.manage", recordType: "case", recordId: f.caseB.id },
+        ...bothCases,
+      ]);
+      await page.goto(inquiryPage(f.inquiryId));
+      await expect(row(f.caseA.id)).toContainText(
+        `${copy.notLinkable} · ${copy.reasons.task_permission}`,
+      );
+      await expect(section.getByText(copy.reasons.task_permission)).toHaveCount(1);
+      await expect(row(f.caseB.id).getByRole("link")).toHaveAttribute(
+        "href",
+        `/bg/inquiries/${f.inquiryId}/link?case=${f.caseB.id}`,
+      );
+
+      // A status that cannot link comes before any Case-level reason.
+      await db
+        .update(schema.inquiries)
+        .set({ state: "contact_unreachable", dispositionReason: "Synthetic unreachable route" })
+        .where(eq(schema.inquiries.id, f.inquiryId));
+      await inquiryWide(copy.reasons.inquiry_state);
+      await page.goto(reviewPage(f.inquiryId, f.caseB.id));
+      await expect(page.getByText(copy.reasons.inquiry_state, { exact: true })).toBeVisible();
+      await expect(submit(page)).toHaveCount(0);
+    });
+  } finally {
+    await context.close();
+  }
+});
+
+test("O03 / F18: an exact same-Party suggestion names the Party; a contact-route one names no one", async ({
+  browser,
+}, info) => {
+  const f = seed();
+  // Case B stays readable but not changeable, so the list also holds a blocked suggestion.
+  await onlyGrants(f.staffId, [
+    { capability: "inquiry.read", recordType: "inquiry", recordId: f.partyInquiryId },
+    { capability: "inquiry.respond", recordType: "inquiry", recordId: f.partyInquiryId },
+    { capability: "task.manage", recordType: "task", recordId: f.partyTaskId },
+    ...caseGrants("case.read", f.caseA.id, f.caseB.id, f.caseC.id),
+    ...caseGrants("case.transition", f.caseA.id, f.caseC.id),
+  ]);
+  const { context, page } = await signedIn(browser, f.token, { ...info.project.use });
+  const sameParty = copy.basisParty.replace("{party}", f.partyLabel);
+  try {
+    await readingCandidates(async () => {
+      await page.goto(inquiryPage(f.partyInquiryId));
+      const section = page.locator("[data-inquiry-case-link]");
+      const rowA = section.locator(`[data-case-candidate="${f.caseA.id}"]`);
+      const rowB = section.locator(`[data-case-candidate="${f.caseB.id}"]`);
+      const rowC = section.locator(`[data-case-candidate="${f.caseC.id}"]`);
+      await expect(section.locator("[data-case-candidate]")).toHaveCount(3);
+      for (const text of [f.caseC.reference, "Synthetic tenant case", sameParty])
+        await expect(rowC).toContainText(text);
+      await expect(rowC.getByRole("link")).toHaveAttribute(
+        "href",
+        `/bg/inquiries/${f.partyInquiryId}/link?case=${f.caseC.id}`,
+      );
+      for (const contactRow of [rowA, rowB]) {
+        await expect(contactRow).toContainText(copy.basisContact);
+        for (const label of [f.partyLabel, f.clientLabel])
+          await expect(contactRow).not.toContainText(label);
+      }
+      await expect(rowA.getByRole("link")).toHaveCount(1);
+      await expect(rowB).toContainText(`${copy.notLinkable} · ${copy.reasons.case_permission}`);
+      await expect(rowB.getByRole("link")).toHaveCount(0);
+      await fits(page);
+      await accessible(page);
+      await page.screenshot({
+        path: info.outputPath(`o03-same-party-${info.project.name}.png`),
+        fullPage: true,
+      });
+
+      // The review repeats the same basis: the Party for C, and no one for A.
+      await rowC.getByRole("link").click();
+      await expect(page).toHaveURL(reviewPage(f.partyInquiryId, f.caseC.id));
+      await expect(page.getByRole("main")).toContainText(sameParty);
+      await expect(submit(page)).toBeVisible();
+      await page.goto(reviewPage(f.partyInquiryId, f.caseA.id));
+      await expect(page.getByRole("main")).toContainText(copy.basisContact);
+      for (const label of [f.partyLabel, f.clientLabel])
+        await expect(page.getByRole("main")).not.toContainText(label);
+      await expect(submit(page)).toBeVisible();
+    });
+  } finally {
+    await context.close();
   }
 });
 

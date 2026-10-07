@@ -1,6 +1,8 @@
 // Synthetic O03 / C02 browser fixtures. Never accepts a persistent or production database.
 // An owned website inquiry shares an email with the party of two active Cases (one buyer, one
-// seller); a second owned inquiry has a contact that matches nothing.
+// seller); a second owned inquiry has a contact that matches nothing. A third owned inquiry's
+// own Party is a live tenant of a third Case (an exact same-Party match), and its email also
+// reaches the first two Cases (contact-route matches that name no one).
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -19,7 +21,7 @@ if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
 const connection = postgres(url, { max: 1, onnotice: () => {} });
 const db = drizzle(connection, { schema });
 
-async function ownedInquiry(session: Session, email: string) {
+async function ownedInquiry(session: Session, email: string, name = "Synthetic returning visitor") {
   const submissionKey = issueSubmissionKey();
   await submitInquiry(
     db,
@@ -27,7 +29,7 @@ async function ownedInquiry(session: Session, email: string) {
       submissionKey,
       purpose: "question",
       locale: "bg",
-      name: "Synthetic returning visitor",
+      name,
       contact: { kind: "email", value: email },
       message: "Synthetic follow-up about an earlier conversation.",
       privacyNotice: true,
@@ -49,7 +51,7 @@ async function ownedInquiry(session: Session, email: string) {
     nextAction: "Synthetic call back about the earlier conversation",
     dueAt: new Date(Date.now() + 86_400_000).toISOString(),
   });
-  return { ...received, taskId: accepted.outcome.taskId };
+  return { ...received, partyId: received.partyId, taskId: accepted.outcome.taskId };
 }
 
 try {
@@ -81,6 +83,34 @@ try {
     .set({ promisedToClient: true })
     .where(eq(schema.tasks.id, inquiry.taskId));
   const lonely = await ownedInquiry(target.staff.session, `o03-alone-${randomUUID()}@example.test`);
+  const partyLabel = "Synthetic same-party visitor";
+  const partyEmail = `o03-party-${randomUUID()}@example.test`;
+  const partyInquiry = await ownedInquiry(target.staff.session, partyEmail, partyLabel);
+  await db.insert(schema.contactMethods).values({
+    partyId: target.client.partyId,
+    kind: "email",
+    value: partyEmail,
+    normalizedValue: partyEmail,
+  });
+  const [third] = await db
+    .insert(schema.cases)
+    .values({
+      reference: await nextReference(db, "case"),
+      kind: "tenant",
+      stage: "evaluating",
+      title: "Synthetic tenant case",
+      ownerId: target.staff.id,
+      nextAction: "Shortlist synthetic rentals",
+    })
+    .returning({ id: schema.cases.id, reference: schema.cases.reference });
+  if (!third) throw new Error("Missing third synthetic Case");
+  await relate(db, { partyId: partyInquiry.partyId, role: "tenant", caseId: third.id });
+  // The Party behind the contact-route matches: its name must never appear on them.
+  const [client] = await db
+    .select({ label: schema.parties.displayName })
+    .from(schema.parties)
+    .where(eq(schema.parties.id, target.client.partyId));
+  if (!client) throw new Error("Missing synthetic client Party");
   // A colleague with the same broker access who does not own the inquiry.
   const colleague = await staffFixture(db);
   console.log(
@@ -95,6 +125,11 @@ try {
       caseA: { id: target.record.id, reference: target.record.reference },
       caseB: second,
       lonelyInquiryId: lonely.id,
+      clientLabel: client.label,
+      partyInquiryId: partyInquiry.id,
+      partyTaskId: partyInquiry.taskId,
+      partyLabel,
+      caseC: third,
     }),
   );
 } finally {

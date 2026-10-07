@@ -1,6 +1,9 @@
 // O03 / O03L / O03LR staff copy for linking an inquiry to an existing Case. BG is the source;
 // EN and RU are drafts for human language review. Staff-only, never public or indexable.
 import type { CaseStage } from "@/domain/case";
+import type { InquiryCaseBlockReason } from "@/server/cases/inquiry-link";
+
+type BlockReason = NonNullable<InquiryCaseBlockReason>;
 
 const bg = {
   title: "Свързване или създаване на случай",
@@ -8,16 +11,25 @@ const bg = {
   linkLead:
     "Активни случаи, достъпни за вас, със същото лице или същите данни за контакт като в запитването. Съвпадението е предложение, а не доказателство за самоличност.",
   capped: "Показани са 50-те последно обновени съвпадения.",
-  basisParty: "Същото лице като в запитването",
-  basisContact: "Същите данни за контакт като в запитването",
+  // Only an exact live same-Party participant has a name; a contact route names no one.
+  basisParty: "Същата страна: {party}",
+  basisPartyUnnamed: "Същата страна като в запитването",
+  basisContact: "Съвпадение по контакт",
   reviewLink: "Преглед на свързването",
   notLinkable: "Не може да се свърже",
-  reasonOwner: "Само отговорникът на запитването може да го свърже със случай.",
-  reasonState: "Статусът на запитването не позволява свързване.",
-  reasonRespond: "Достъпът ви не включва работа по това запитване.",
-  reasonAway: "За вас е отбелязано отсъствие, затова сега не можете да записвате свързване.",
-  reasonTask: "Задача от това запитване вече е към друг случай.",
-  reasonAccess: "Достъпът ви не позволява да свържете това запитване с този случай.",
+  // C02's own refusal class per candidate. inquiry_permission also covers a task the viewer
+  // cannot see, so it never mentions tasks.
+  reasons: {
+    inquiry_owner: "Само отговорникът на запитването може да го свърже със случай.",
+    inquiry_state: "Статусът на запитването не позволява свързване.",
+    inquiry_permission: "Достъпът ви не включва работа по това запитване.",
+    task_permission:
+      "Достъпът ви не позволява задачите на запитването да преминат към този случай.",
+    staff_unavailable:
+      "За вас е отбелязано отсъствие, затова сега не можете да записвате свързване.",
+    task_case_conflict: "Задача от това запитване вече е към друг случай.",
+    case_permission: "Достъпът ви не позволява да свържете това запитване с този случай.",
+  } satisfies Record<BlockReason, string>,
   emptyTitle: "Няма подходящ случай",
   emptyBody:
     "Нито един активен случай, достъпен за вас, няма същото лице или същите данни за контакт.",
@@ -101,8 +113,9 @@ const bg = {
     concluded: "Приключен",
   } satisfies Record<CaseStage, string>,
 };
-type Copy = Omit<{ [K in keyof typeof bg]: string }, "stages"> & {
+type Copy = Omit<{ [K in keyof typeof bg]: string }, "stages" | "reasons"> & {
   stages: Record<CaseStage, string>;
+  reasons: Record<BlockReason, string>;
 };
 
 const en: Copy = {
@@ -111,16 +124,20 @@ const en: Copy = {
   linkLead:
     "Active Cases you can access that have the same person or organization, or the same contact details, as this inquiry. A match is a suggestion, not proof of identity.",
   capped: "Showing the 50 most recently updated matches.",
-  basisParty: "Same person or organization as this inquiry",
-  basisContact: "Same contact details as this inquiry",
+  basisParty: "Same party: {party}",
+  basisPartyUnnamed: "Same party as this inquiry",
+  basisContact: "Contact route match",
   reviewLink: "Review the link",
   notLinkable: "Can't be linked",
-  reasonOwner: "Only the inquiry's owner can link it to a Case.",
-  reasonState: "This inquiry's status doesn't allow linking.",
-  reasonRespond: "Your access doesn't include working on this inquiry.",
-  reasonAway: "You are recorded as absent, so you can't record links now.",
-  reasonTask: "A task from this inquiry already belongs to another Case.",
-  reasonAccess: "Your access doesn't allow linking this inquiry to this Case.",
+  reasons: {
+    inquiry_owner: "Only the inquiry's owner can link it to a Case.",
+    inquiry_state: "This inquiry's status doesn't allow linking.",
+    inquiry_permission: "Your access doesn't include working on this inquiry.",
+    task_permission: "Your access doesn't allow this inquiry's tasks to move to this Case.",
+    staff_unavailable: "You are recorded as absent, so you can't record links now.",
+    task_case_conflict: "A task from this inquiry already belongs to another Case.",
+    case_permission: "Your access doesn't allow linking this inquiry to this Case.",
+  },
   emptyTitle: "No matching Case",
   emptyBody: "No active Case you can access has the same person, organization or contact details.",
   noPartyTitle: "Nothing to match yet",
@@ -208,16 +225,20 @@ const ru: Copy = {
   linkLead:
     "Доступные вам активные дела с тем же лицом или теми же контактными данными, что и в обращении. Совпадение — подсказка, а не доказательство личности.",
   capped: "Показаны 50 последних обновлённых совпадений.",
-  basisParty: "То же лицо, что и в обращении",
-  basisContact: "Те же контактные данные, что и в обращении",
+  basisParty: "Та же сторона: {party}",
+  basisPartyUnnamed: "Та же сторона, что и в обращении",
+  basisContact: "Совпадение по контакту",
   reviewLink: "Проверить связь",
   notLinkable: "Связать нельзя",
-  reasonOwner: "Связать обращение с делом может только его ответственный.",
-  reasonState: "Статус обращения не позволяет связать его с делом.",
-  reasonRespond: "Ваш доступ не включает работу с этим обращением.",
-  reasonAway: "У вас отмечено отсутствие, поэтому сейчас нельзя записывать связь.",
-  reasonTask: "Задача из этого обращения уже относится к другому делу.",
-  reasonAccess: "Ваш доступ не позволяет связать это обращение с этим делом.",
+  reasons: {
+    inquiry_owner: "Связать обращение с делом может только его ответственный.",
+    inquiry_state: "Статус обращения не позволяет связать его с делом.",
+    inquiry_permission: "Ваш доступ не включает работу с этим обращением.",
+    task_permission: "Ваш доступ не позволяет перенести задачи обращения в это дело.",
+    staff_unavailable: "У вас отмечено отсутствие, поэтому сейчас нельзя записывать связь.",
+    task_case_conflict: "Задача из этого обращения уже относится к другому делу.",
+    case_permission: "Ваш доступ не позволяет связать это обращение с этим делом.",
+  },
   emptyTitle: "Подходящего дела нет",
   emptyBody:
     "Ни в одном доступном вам активном деле нет того же лица или тех же контактных данных.",
