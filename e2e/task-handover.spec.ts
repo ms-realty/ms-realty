@@ -127,14 +127,17 @@ for (const javaScriptEnabled of [true, false])
       await page.getByRole("button", { name: "End staff access", exact: true }).click();
       await expect(page.getByText("Staff membership ended", { exact: true })).toBeVisible();
       await page.goto(hostUrl("staff", "/en/today"));
-      await page.getByRole("button", { name: "More", exact: true }).click();
-      await page.getByRole("link", { name: "More tools", exact: true }).click();
-      await expect(page).toHaveURL(hostUrl("staff", "/en/operations"));
-      await expect(page.getByRole("heading", { name: "Operations", exact: true })).toBeVisible();
-      await page
-        .getByRole("main")
-        .getByRole("link", { name: "Agency coverage", exact: true })
-        .click();
+      // The phone context bar's menu opens X02 in place, or its page without JavaScript.
+      const menu = page.getByRole("banner").getByRole("link", { name: "Open menu", exact: true });
+      if (javaScriptEnabled) await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
+      await menu.click();
+      if (!javaScriptEnabled) await expect(page).toHaveURL(hostUrl("staff", "/en/operations"));
+      const tools = javaScriptEnabled
+        ? page.getByRole("dialog", { name: "Agency tools", exact: true })
+        : page.getByRole("main");
+      await expect(tools.getByRole("heading", { name: "Agency tools", exact: true })).toBeVisible();
+      await tools.getByRole("link", { name: /^Agency coverage/ }).click();
+      await expect(page).toHaveURL(hostUrl("staff", "/en/coverage"));
       for (const [locale, heading] of [
         ["bg", "Дежурна опашка"],
         ["ru", "Очередь подхвата"],

@@ -12,6 +12,7 @@ import type nav from "../../messages/bg/nav.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
+import type tools from "../../messages/staff/bg/tools.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
 import { isStaffLocale, type PublicLocale } from "./config";
 
@@ -26,7 +27,7 @@ export const publicNamespaces = [
   "states",
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
-export const staffNamespaces = ["serverStaff", "workspace"] as const;
+export const staffNamespaces = ["serverStaff", "tools", "workspace"] as const;
 
 export interface PublicMessages {
   a11y: typeof a11y;
@@ -40,6 +41,7 @@ export interface PublicMessages {
 }
 export interface StaffMessages {
   serverStaff: typeof serverStaff;
+  tools: typeof tools;
   workspace: typeof workspace;
 }
 /** Staff namespaces are present only for staff locales (bg, en, ru). */

@@ -228,6 +228,25 @@ test.describe("JavaScript on", () => {
     await expect(page.getByLabel("Description", { exact: true })).toHaveValue(
       "Незаписана промяна.",
     );
+    if ((page.viewportSize()?.width ?? 1440) < 1024) {
+      // Opening the phone menu (X02) is not leaving; choosing a destination in it is.
+      const menu = page.getByRole("banner").getByRole("link", { name: "Open menu" });
+      await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
+      await menu.click();
+      const tools = page.getByRole("dialog", { name: "Agency tools", exact: true });
+      await expect(tools).toBeVisible();
+      await expect(dialog).toBeHidden();
+      await tools.getByRole("link", { name: /^Calendar/ }).click();
+      await expect(dialog).toBeVisible();
+      await dialog.getByRole("button", { name: "Stay" }).click();
+      await expect(dialog).toBeHidden();
+      await page.keyboard.press("Escape");
+      await expect(tools).toBeHidden();
+      await expect(page).toHaveURL(hostUrl("staff", `/en/inventory/${f.reference}`));
+      await expect(page.getByLabel("Description", { exact: true })).toHaveValue(
+        "Незаписана промяна.",
+      );
+    }
 
     await page.getByRole("link", { name: "Review for publication" }).click();
     await dialog.getByRole("button", { name: "Discard changes" }).click();

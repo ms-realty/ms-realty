@@ -57,6 +57,46 @@
       "sha256": "8f98ee8f44da3ab2a8e210903f344bdc3aaf20c09e2d0524e87b849231de2e10",
       "width": 20,
       "height": 20
+    },
+    {
+      "file": "sparkles.svg",
+      "nodeId": "618:73474",
+      "source": "https://www.figma.com/api/mcp/asset/2f8bc3e1-8abd-4888-a60d-b584c46bb9e8.svg",
+      "sha256": "32d6520a7ed21c6dcdb0ef4581620b1a1d3e10cd24058a04fa272b85a69ebd6b",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "panel-left.svg",
+      "nodeId": "18:2912",
+      "source": "https://www.figma.com/api/mcp/asset/e6b85d41-0904-4123-aab5-b1f4a03b6a19.svg",
+      "sha256": "43955de09b54af7ab6edff3140696bf168f51d3c9595381e04143cfa5ac84d81",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "folder.svg",
+      "nodeId": "23:4664",
+      "source": "https://www.figma.com/api/mcp/asset/07864fb7-5587-4537-852f-1e599cd56780.svg",
+      "sha256": "4031bdbe07182592d0fb624e7801e05b8a8a77c298234a62ed587c771ec02af3",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "chevron-right.svg",
+      "nodeId": "23:4669",
+      "source": "https://www.figma.com/api/mcp/asset/1fc5e309-f645-4cda-9658-aa63061810c6.svg",
+      "sha256": "7daf07c4e5ae2ae81dfa13c7f101e825ebbed0aae5ef8ecd13ccae003dd5f560",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "x.svg",
+      "nodeId": "23:4656",
+      "source": "https://www.figma.com/api/mcp/asset/ad3a184d-0d86-4458-80cd-df1e38fe785c.svg",
+      "sha256": "48a41d4daec37f660011b547585d53bfdea7cc44dd3bd3465816e670d5c08678",
+      "width": 20,
+      "height": 20
     }
   ]
 }

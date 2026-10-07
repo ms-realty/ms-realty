@@ -2,12 +2,16 @@ import { readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { type Capability, rolePresets } from "@/domain/capabilities";
 import {
+  agencyToolCapabilities,
+  agencyTools,
   footerNav,
   journeyHelpNav,
   journeyNav,
   linked,
   myJourneyNav,
+  permittedTools,
   publicPrimaryNav,
   publicUtilityNav,
   workspacePrimaryNav,
@@ -55,9 +59,10 @@ describe("navigation registry (§06)", () => {
       ...linked([myJourneyNav, ...journeyNav, journeyHelpNav], "bg").map(
         (item) => ["client", item.href] as [Host, string],
       ),
-      ...linked([...workspacePrimaryNav, ...workspaceSecondaryNav], "bg").map(
-        (item) => ["staff", item.href] as [Host, string],
-      ),
+      ...linked(
+        [...workspacePrimaryNav, ...workspaceSecondaryNav, ...Object.values(agencyTools).flat()],
+        "bg",
+      ).map((item) => ["staff", item.href] as [Host, string]),
     ];
     expect(hrefs.length).toBeGreaterThan(0);
     for (const [host, href] of hrefs) expect(routeExists(host, href), `${host} ${href}`).toBe(true);
@@ -90,10 +95,106 @@ describe("navigation registry (§06)", () => {
     expect(workspaceSecondaryNav.map((item) => item.label)).toEqual(["butler", "moreTools"]);
   });
 
-  it("keeps Today, Inquiries and Calendar primary on phones", () => {
-    expect(
-      workspacePrimaryNav.filter((item) => item.mobilePrimary).map((item) => item.label),
-    ).toEqual(["today", "inquiries", "calendar"]);
+  it("X02 keeps the drawn rows in order, then the working destinations the frame omits", () => {
+    expect(agencyTools.work.map((item) => item.label)).toEqual([
+      "today",
+      "inquiries",
+      "cases",
+      "inventory",
+      "imports",
+      "calendar",
+      "tasks",
+      "consultations",
+      "coverage",
+      "inbound",
+      "keys",
+      "complaints",
+    ]);
+    expect(agencyTools.management.map((item) => item.label)).toEqual([
+      "pages",
+      "reports",
+      "team",
+      "system",
+      "jobs",
+      "privacy",
+      "alerts",
+    ]);
+    // Everything the old «Операции» list and the phone More menu offered is still a row.
+    const paths = Object.values(agencyTools)
+      .flat()
+      .map((item) => item.path);
+    for (const path of [
+      ...workspacePrimaryNav.map((item) => item.path),
+      "/coverage",
+      "/content",
+      "/operations/keys",
+      "/operations/complaints",
+      "/operations/inbound",
+      "/operations/jobs",
+      "/operations/privacy",
+      "/operations/subscriptions",
+      "/access/manage",
+    ])
+      expect(paths, String(path)).toContain(path);
+  });
+
+  it("X02 offers only built rows the person may open", () => {
+    const rows = (held: readonly Capability[]) =>
+      permittedTools("en", new Set(held)).map((group) => [
+        group.section,
+        group.items.map((item) => item.href),
+      ]);
+    // Anyone with a workspace session: the everyday destinations, never unbuilt rows.
+    expect(rows([])).toEqual([
+      [
+        "work",
+        ["/en/today", "/en/inquiries", "/en/cases", "/en/inventory", "/en/calendar", "/en/tasks"],
+      ],
+    ]);
+    // A coordinator reads no internal case notes: no coverage or incoming email.
+    expect(rows(rolePresets.coordinator)).toEqual(rows([]));
+    expect(rows(rolePresets.assigned_broker)).toEqual([
+      [
+        "work",
+        [
+          "/en/today",
+          "/en/inquiries",
+          "/en/cases",
+          "/en/inventory",
+          "/en/calendar",
+          "/en/tasks",
+          "/en/coverage",
+          "/en/operations/inbound",
+        ],
+      ],
+    ]);
+    expect(rows(agencyToolCapabilities)).toEqual([
+      [
+        "work",
+        [
+          "/en/today",
+          "/en/inquiries",
+          "/en/cases",
+          "/en/inventory",
+          "/en/calendar",
+          "/en/tasks",
+          "/en/coverage",
+          "/en/operations/inbound",
+          "/en/operations/keys",
+          "/en/operations/complaints",
+        ],
+      ],
+      [
+        "management",
+        [
+          "/en/content",
+          "/en/access/manage",
+          "/en/operations/jobs",
+          "/en/operations/privacy",
+          "/en/operations/subscriptions",
+        ],
+      ],
+    ]);
   });
 
   it("prefixes public items with the locale and leaves unbuilt items out", () => {
