@@ -86,7 +86,19 @@ export async function recoverNotFoundDocument(
       chunk = await reader.read();
     } catch (error) {
       reader.releaseLock();
-      throw error;
+      // Keep the origin's status and headers even if its body disconnects. Replay any
+      // inspected bytes before propagating the stream error to the response consumer.
+      const body = new ReadableStream<Uint8Array>(
+        {
+          pull(controller) {
+            const buffered = chunks.shift();
+            if (buffered) controller.enqueue(buffered);
+            else controller.error(error);
+          },
+        },
+        { highWaterMark: 0 },
+      );
+      return new Response(body, response);
     }
     if (chunk.done) break;
     chunks.push(chunk.value);

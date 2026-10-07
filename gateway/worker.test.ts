@@ -107,6 +107,59 @@ describe("page-thrown 404 documents without JavaScript", () => {
     expect(await response.text()).toBe(before + middle + after);
   });
 
+  for (const prefix of [[], ['<html id="__next_error__"><body>', "<script>self.__next_f="]]) {
+    it(`preserves failed 404 inspection after ${prefix.length} chunks`, async () => {
+      const failure = new Error("Synthetic origin disconnect");
+      const encoder = new TextEncoder();
+      const chunks = prefix.map((chunk) => encoder.encode(chunk));
+      let sent = 0;
+      const stream = new ReadableStream<Uint8Array>(
+        {
+          pull(controller) {
+            const chunk = chunks[sent++];
+            if (chunk) controller.enqueue(chunk);
+            else controller.error(failure);
+          },
+        },
+        { highWaterMark: 0 },
+      );
+      const cookie = "msr_client_session=; Max-Age=0; Path=/; HttpOnly";
+      const csp = "default-src 'self'; style-src 'nonce-testnonce'";
+      const upstream = vi.fn<typeof fetch>(
+        async () =>
+          new Response(stream, {
+            status: 404,
+            headers: {
+              "Content-Type": "text/html; charset=utf-8",
+              "Set-Cookie": cookie,
+              "Content-Security-Policy": csp,
+            },
+          }),
+      );
+      const response = await gateway(
+        new Request("https://my.makler-realty.com/en/overview/missing"),
+        config(),
+        upstream,
+      );
+      expect(response.status).toBe(404);
+      expect(response.headers.get("set-cookie")).toBe(cookie);
+      expect(response.headers.get("content-security-policy")).toBe(csp);
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+      expect(stream.locked).toBe(false);
+      expect(upstream).toHaveBeenCalledTimes(1);
+      const reader = response.body?.getReader();
+      expect(reader).toBeDefined();
+      try {
+        for (const chunk of chunks) {
+          expect(await reader?.read()).toEqual({ done: false, value: chunk });
+        }
+        await expect(reader?.read()).rejects.toBe(failure);
+      } finally {
+        reader?.releaseLock();
+      }
+    });
+  }
+
   it("preserves server-action and HEAD response semantics", async () => {
     for (const request of [
       new Request("https://makler-realty.com/en/missing", { method: "POST" }),
