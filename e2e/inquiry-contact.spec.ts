@@ -311,19 +311,24 @@ for (const beforeHydration of [false, true])
       await page.goto(hostUrl("staff", "/en/today"), {
         waitUntil: beforeHydration ? "commit" : "load",
       });
-      const signOut = page.locator('form[action="/en/access/signout"] button:visible');
-      if ((await signOut.count()) === 0) {
+      const signOutButton = 'form[action="/en/access/signout"] button';
+      let signOut = page.locator(`${signOutButton}:visible`);
+      // Choose by the shell's lg breakpoint, not by what looks visible: a just-committed page can
+      // still show the side rail that phones hide once its stylesheet applies.
+      if ((page.viewportSize()?.width ?? 1440) < 1024) {
         // The phone shell opens X02 as a hydrated dialog or follows its native tools link.
         const menu = page.getByRole("link", { name: "Open menu", exact: true });
         if (!beforeHydration) await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
         await menu.click({ noWaitAfter: beforeHydration });
-        if (beforeHydration)
+        if (beforeHydration) {
           // The predicate matcher waits for load, but this native path deliberately holds scripts.
           await expect(page).toHaveURL(hostUrl("staff", "/en/operations"));
-        else
-          await expect(
-            page.getByRole("dialog", { name: "Agency tools", exact: true }),
-          ).toBeVisible();
+          signOut = page.getByRole("main").locator(signOutButton);
+        } else {
+          const tools = page.getByRole("dialog", { name: "Agency tools", exact: true });
+          await expect(tools).toBeVisible();
+          signOut = tools.locator(signOutButton);
+        }
       }
       const posted = page.waitForResponse(
         (response) =>
@@ -670,11 +675,26 @@ test("O02 storage-disabled drafts survive history Forward and Back, with protect
   const inquiryUrl = hostUrl("staff", `/en/inquiries/${fixture.id}`);
   await page.goto(inquiryUrl);
   const origin = await page.evaluate(() => performance.timeOrigin);
-  const sidebar = page
-    .getByRole("navigation", { name: "Workspace", exact: true })
-    .getByRole("link", { name: "Today", exact: true });
+  // Workspace navigation as each shell draws it: the side rail on wide screens; on phones the
+  // context bar's X02 menu, hydrated as a dialog, holds every destination. Both are SPA links.
+  async function openToday() {
+    if ((page.viewportSize()?.width ?? 1440) >= 1024) {
+      await page
+        .getByRole("navigation", { name: "Workspace", exact: true })
+        .getByRole("link", { name: "Today", exact: true })
+        .click();
+      return;
+    }
+    const menu = page.getByRole("banner").getByRole("link", { name: "Open menu", exact: true });
+    await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
+    await menu.click();
+    await page
+      .getByRole("dialog", { name: "Agency tools", exact: true })
+      .getByRole("link", { name: /^Today/ })
+      .click();
+  }
   // Create the forward entry while the inquiry is clean, then edit after going Back.
-  await sidebar.click();
+  await openToday();
   await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
   await page.goBack();
   await expect(page).toHaveURL(inquiryUrl);
@@ -706,8 +726,8 @@ test("O02 storage-disabled drafts survive history Forward and Back, with protect
   await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(
     "Private triage reason with browser storage unavailable",
   );
-  // Normal sidebar navigation also preserves the memory-only drafts without a leave prompt.
-  await sidebar.click();
+  // Normal workspace navigation also preserves the memory-only drafts without a leave prompt.
+  await openToday();
   await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
   await page.goBack();
   await expect(page.getByLabel(work.reason, { exact: true })).toHaveValue(
@@ -849,7 +869,10 @@ test("O02 lost validation body resumes the retained draft with the same referenc
     await page.getByRole("button", { name: copy.submit, exact: true }).click();
     await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
     await openRecord(page, work.openRecord);
+    // The recorded note shows once, in the activity: its own success settles the edited draft.
     await expect(page.getByText(note, { exact: true })).toBeVisible();
+    await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue("");
+    await expect(page.getByText(work.draft.restored, { exact: true })).toHaveCount(0);
     const after = await contactEvidence(fixture.id);
     expect(after.receipts).toEqual([{ key, status: "succeeded" }]);
     expect(after.observations).toBe(before.observations + 1);
@@ -1328,6 +1351,12 @@ for (const javaScriptEnabled of [true, false]) {
       // O02 row: no name was given, so the reference names it beside the listing it came from.
       const row = page.locator(`[data-inquiry-id="${received.id}"]`);
       await expect(row).toContainText(`${received.reference} · ${listing.reference}`);
+      // O02 keeps the queue scope and page in the conversation URL through every recorded step.
+      const opened = new URL(
+        (await row.getByRole("link").getAttribute("href")) ?? "",
+        origins.staff,
+      );
+      expect(opened.searchParams.get("view")).toBe("unassigned");
       await row.getByRole("link").click();
       await expect(
         page.getByRole("heading", { name: received.reference, exact: true }),
@@ -1370,7 +1399,11 @@ for (const javaScriptEnabled of [true, false]) {
       await page.reload();
       await openRecord(page, work.openRecord);
       // The width below is measured on the opened record once it has loaded with its styles.
-      await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${received.id}`));
+      // A native form POST may leave React's form permalink fragment; it is not part of the place.
+      await expect(page).toHaveURL(
+        (address) =>
+          address.pathname === `/en/inquiries/${received.id}` && address.search === opened.search,
+      );
       await page.waitForLoadState("load");
       const [responded] = await db
         .select()
