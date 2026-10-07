@@ -30,6 +30,10 @@ Staff routes use host-relative URLs: `/{locale}/today`, `/inquiries`, `/inquirie
 Every page checks current staff access. Today combines bounded inquiry and task queues with
 visible viewings, Case and listing work, reviews and delivery exceptions. Each queue reports
 its authorized total or an unavailable state; a failed read is never presented as empty work.
+A listing correction (changes requested, facts needed) is review work only; listing drafts
+hold drafts, so one action is never counted twice. Today links a count only to a page that
+lists the same work: the inbox and task views, overdue key returns, and the O27 exception
+queue (`/operations/jobs?view=exceptions`, oldest first; `?action=<id>` opens one exception).
 Exact times name their zone: UTC for inquiries, tasks, Cases and listings, the agency zone
 (Europe/Sofia) for key returns and the recorded zone for viewings; ages are relative to the
 read. BG/RU staff copy is draft translation.
@@ -39,8 +43,13 @@ Verification on disposable PostgreSQL:
 ```sh
 TEST_DATABASE_URL=postgres://… npx vitest run --project integration src/server/work --maxWorkers 2
 TEST_DATABASE_URL=postgres://… npx playwright test e2e/work.spec.ts --project chromium-desktop
-TEST_DATABASE_URL=postgres://… npx playwright test e2e/today.spec.ts e2e/today-binding.spec.ts
+TEST_DATABASE_URL=postgres://… npx playwright test e2e/today.spec.ts e2e/today-binding.spec.ts e2e/today-operations.spec.ts
 ```
+
+`today-operations.spec.ts` counts agency-wide delivery operations, which no grant scopes to
+one test: it runs in the desktop project only and counts relative to the exceptions recorded
+before it seeds. `today-unavailable.spec.ts` waits for a server seam that fails one queue
+read; it never renames shared tables.
 
 Each integration suite and browser run creates its own disposable database. Browser fixtures
 seed a valid staff session; passkey ceremony proof lives in `e2e/identity.spec.ts`. The work
