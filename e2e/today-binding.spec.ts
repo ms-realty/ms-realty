@@ -1,12 +1,14 @@
 // O01 binding to the scoped read model, ported from Codex's codex/msr-o01-today-binding browser
 // cases (4cae9799, 825091bf) onto the Figma Today screen: real totals beyond the loaded page,
 // record and locale scope, rows that open their own workspaces, native navigation, and no
-// promise of a page that would continue a list. Every count here is scoped by this test's own
-// grants, so parallel workers cannot change it. Agency-wide delivery operations live in
-// today-operations.spec.ts; the unavailable-list case waits in today-unavailable.spec.ts.
+// promise of a page that would continue a list, except the translation reviews, which continue
+// in the O01 focus view (?queue=translation-reviews&after=<cursor>). Every count here is scoped
+// by this test's own grants, so parallel workers cannot change it. Agency-wide delivery
+// operations live in today-operations.spec.ts; the unavailable-list case waits in
+// today-unavailable.spec.ts.
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import * as schema from "../src/db/schema";
 import { hostUrl } from "./hosts";
@@ -183,7 +185,7 @@ for (const javaScriptEnabled of [false, true])
       ).toBeVisible();
     });
 
-    test("O01 a reviewer scoped to one language keeps the translations it may open and an honest 31-item preview", async ({
+    test("O01 a reviewer scoped to one language keeps the translations it may open and links past the thirtieth", async ({
       page,
       context,
     }, testInfo) => {
@@ -198,33 +200,27 @@ for (const javaScriptEnabled of [false, true])
         page.getByRole("main").getByText("Waiting for action: 31. Start at the top of the list."),
       ).toBeVisible();
       const group = page.locator('[data-today-group="translation-reviews"]');
-      await expect(group.getByRole("heading", { level: 3 })).toHaveText(
-        "Translations to reviewIn the queue: 31",
+      const heading = group.getByRole("heading", { level: 3 });
+      await expect(heading).toHaveText("Translations to reviewIn the queue: 31");
+      // The count and the line past the thirtieth open the same queue in the O01 focus view.
+      await expect(heading.getByRole("link")).toHaveAttribute("href", focusPath);
+      await expect(group.getByText("Today shows the first 30 of 31.")).toBeVisible();
+      await expect(group.getByRole("link", { name: "Open the full list" })).toHaveAttribute(
+        "href",
+        focusPath,
       );
-      await expect(
-        group.getByText("Today shows the first 30 of 31. The full list is not available here yet."),
-      ).toBeVisible();
       // Nothing points this reviewer at the Inventory, which a language grant cannot open.
       await expect(
         page.locator('main a[href^="/en/inventory?"], main a[href="/en/inventory"]'),
       ).toHaveCount(0);
-      const link = (reference: string) =>
-        group.getByRole("link", { name: new RegExp(`^Translation to review · RU · ${reference}`) });
+      const link = (reference: string) => translationLink(group, reference);
       await expect(link(first.reference)).toBeVisible();
       await group.getByText("Show 25 more").click();
       await expect(group.locator('a[href$="/translations/ru"]')).toHaveCount(30);
       await expect(group.locator('a[href$="/translations/en"]')).toHaveCount(0);
       await expect(group.getByText(last.reference, { exact: false })).toHaveCount(0);
       expect(await noOverflow(page)).toBe(true);
-      if (javaScriptEnabled)
-        expect(
-          (
-            await new AxeBuilder({ page })
-              .include("main")
-              .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-              .analyze()
-          ).violations,
-        ).toEqual([]);
+      if (javaScriptEnabled) await accessible(page);
       await capture(page, testInfo.outputPath(`today-translations-31-${javaScriptEnabled}`));
       await link(first.reference).click();
       await expect(page).toHaveURL(
@@ -236,7 +232,128 @@ for (const javaScriptEnabled of [false, true])
         "Synthetic RU translation",
       );
     });
+
+    test("O01 the focus view pages the same translation reviews by the server's cursor and refuses a link it cannot continue", async ({
+      page,
+      context,
+      browser,
+    }, testInfo) => {
+      test.setTimeout(120_000);
+      const staff = await staffSession(db, context);
+      const items = await localeOnlyTranslations(staff.id);
+      const first = items[0],
+        thirtieth = items[29],
+        last = items[30];
+      if (!first || !thirtieth || !last) throw new Error("Missing translation fixtures");
+      await page.goto(hostUrl("staff", "/en/today"));
+      const group = page.locator('[data-today-group="translation-reviews"]');
+      // Today shows the thirty it read, plus a link to the rest.
+      await expect(group.locator('a[href$="/translations/ru"]')).toHaveCount(30);
+      await group.getByRole("link", { name: "Open the full list" }).click();
+
+      // Page one: the oldest thirty under the server's total, each opening its workbench.
+      await expect(page).toHaveURL(hostUrl("staff", focusPath));
+      const view = page.locator('[data-today-focus="translation-reviews"]');
+      await expect(view).toHaveAttribute("data-today-state", "ready");
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Translations to review");
+      await expect(view.getByText("Waiting for review: 31, oldest first.")).toBeVisible();
+      const list = page.getByRole("list", { name: "Translations to review" });
+      await expect(list.getByRole("link")).toHaveCount(30);
+      await expect(translationLink(list, first.reference)).toHaveAttribute(
+        "href",
+        `/en/inventory/${first.reference}/translations/ru`,
+      );
+      await expect(translationLink(list, thirtieth.reference)).toBeVisible();
+      await expect(list.getByText(last.reference, { exact: false })).toHaveCount(0);
+      await expect(page.locator('main a[href$="/translations/en"]')).toHaveCount(0);
+      expect(await noOverflow(page)).toBe(true);
+      if (javaScriptEnabled) await accessible(page);
+      await capture(page, testInfo.outputPath(`today-focus-page-1-${javaScriptEnabled}`));
+
+      // Page two, after the server's cursor: the rest, and a way back to the first page.
+      const pages = page.getByRole("navigation", { name: "Pages of this list" });
+      const next = await pages.getByRole("link", { name: "Next page" }).getAttribute("href");
+      const cursor = new URL(next ?? "", hostUrl("staff", "/")).searchParams.get("after");
+      if (!next || !cursor) throw new Error("Missing the next page link");
+      expect(next).toBe(`${focusPath}&after=${cursor}`);
+      await pages.getByRole("link", { name: "Next page" }).click();
+      await expect(page).toHaveURL(hostUrl("staff", next));
+      await expect(view.getByText("Continued after the previous page.")).toBeVisible();
+      await expect(view.getByText("Waiting for review: 31, oldest first.")).toBeVisible();
+      await expect(list.getByRole("link")).toHaveCount(1);
+      await expect(translationLink(list, last.reference)).toHaveAttribute(
+        "href",
+        `/en/inventory/${last.reference}/translations/ru`,
+      );
+      await expect(pages.getByRole("link", { name: "Next page" })).toHaveCount(0);
+      expect(await noOverflow(page)).toBe(true);
+      if (javaScriptEnabled) await accessible(page);
+      await capture(page, testInfo.outputPath(`today-focus-page-2-${javaScriptEnabled}`));
+      await pages.getByRole("link", { name: "Go to the first page" }).click();
+      await expect(page).toHaveURL(hostUrl("staff", focusPath));
+      await expect(list.getByRole("link")).toHaveCount(30);
+      await page.getByRole("link", { name: "Back to Today" }).click();
+      await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
+      await expect(group.getByRole("heading", { level: 3 })).toHaveText(
+        "Translations to reviewIn the queue: 31",
+      );
+
+      // A cursor the server refuses is a link that is no longer valid, never a failure: one
+      // that is not a cursor at all, and this person's own cursor with an impossible date.
+      const position = JSON.parse(Buffer.from(cursor, "base64url").toString());
+      const impossible = Buffer.from(
+        JSON.stringify({ ...position, at: "2026-02-30T25:61:00.000000Z" }),
+      ).toString("base64url");
+      for (const after of ["not-a-cursor", impossible]) {
+        await page.goto(hostUrl("staff", `${focusPath}&after=${after}`));
+        await expect(view).toHaveAttribute("data-today-state", "invalid-link");
+        await expect(
+          page.getByText("This page link is no longer valid. Start from the first page."),
+        ).toBeVisible();
+        await expect(page.getByRole("list", { name: "Translations to review" })).toHaveCount(0);
+        await expect(page.getByText(/could not load/)).toHaveCount(0);
+      }
+      expect(await noOverflow(page)).toBe(true);
+      if (javaScriptEnabled) await accessible(page);
+      await capture(page, testInfo.outputPath(`today-focus-invalid-${javaScriptEnabled}`));
+      await page.getByRole("link", { name: "Go to the first page" }).click();
+      await expect(page).toHaveURL(hostUrl("staff", focusPath));
+      await expect(list.getByRole("link")).toHaveCount(30);
+
+      // Another person's cursor never continues their list here: it is refused the same way.
+      const other = await browser.newContext({ ...testInfo.project.use, javaScriptEnabled });
+      try {
+        await staffSession(db, other);
+        const otherPage = await other.newPage();
+        await otherPage.goto(hostUrl("staff", next));
+        await expect(otherPage.locator("[data-today-focus]")).toHaveAttribute(
+          "data-today-state",
+          "invalid-link",
+        );
+        await expect(otherPage.getByText(last.reference, { exact: false })).toHaveCount(0);
+      } finally {
+        await other.close();
+      }
+      // A queue Today does not page is not a page.
+      expect((await page.goto(hostUrl("staff", "/en/today?queue=viewings")))?.status()).toBe(404);
+    });
   });
+
+const focusPath = "/en/today?queue=translation-reviews";
+const translationLink = (scope: Locator, reference: string) =>
+  scope.getByRole("link", { name: new RegExp(`^Translation to review · RU · ${reference}`) });
+
+async function accessible(page: Page) {
+  // Axe needs browser timers, which Playwright stops when scripting is off.
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .include("main")
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+}
 
 /** Full-page captures at the project's width and at 320 px, for the review record. */
 async function capture(page: Page, path: string) {
