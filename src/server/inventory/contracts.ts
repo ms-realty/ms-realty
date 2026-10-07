@@ -8,7 +8,12 @@ import {
 } from "@/domain/facts";
 
 export const draftSchema = z.object({
-  title: z.string().trim().max(180),
+  // Native O12 wrapping fields can submit hard breaks without JavaScript. Normalize before
+  // validation so storage, publication and the command's idempotency hash share one title.
+  title: z
+    .string()
+    .transform((value) => value.replace(/[\s\u0085]+/g, " "))
+    .pipe(z.string().trim().max(180)),
   description: z.string().trim().max(12_000),
   // Private opt-in intake source; never copied into public listing text.
   brokerNote: z.string().max(4000).default(""),

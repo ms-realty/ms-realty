@@ -33,6 +33,9 @@ const factsFields: Field[] = [
   "brokerNote",
 ];
 
+// Keep the soft-wrapping title logically single-line, including pasted Unicode separators.
+const singleLineTitle = (value: string) => value.replace(/[\s\u0085]+/g, " ");
+
 /**
  * One Server Action and one draft. `create` shows every field (O11). `edit` (O12) keeps the
  * whole draft in one form: a Text panel and a Facts panel that the page's tabs switch through
@@ -96,15 +99,32 @@ export function InventoryEditor({
         >
           {/* O12's UI06 title wraps on phones (14:4956); the description and private note
               remain the 144 px UI07 writing surfaces (694:13418, 647:31541). */}
-          <FormField
-            {...field}
-            label={labels[name]}
-            multiline={
-              name === "title" && view === "edit"
-                ? "wrap"
-                : name === "description" || name === "brokerNote"
-            }
-          />
+          {name === "title" && view === "edit" ? (
+            <FormField
+              {...field}
+              label={labels[name]}
+              multiline="wrap"
+              onChange={(event) => form.setValue(name, singleLineTitle(event.target.value))}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.nativeEvent.isComposing) event.preventDefault();
+              }}
+              onPaste={(event) => {
+                const pasted = event.clipboardData.getData("text/plain");
+                const value = singleLineTitle(pasted);
+                if (field.readOnly || value === pasted) return;
+                event.preventDefault();
+                const control = event.currentTarget;
+                control.setRangeText(value, control.selectionStart, control.selectionEnd, "end");
+                form.setValue(name, control.value);
+              }}
+            />
+          ) : (
+            <FormField
+              {...field}
+              label={labels[name]}
+              multiline={name === "description" || name === "brokerNote"}
+            />
+          )}
         </div>
       );
     // A value outside the list (blank, or a recorded one the form cannot save) stays visible
