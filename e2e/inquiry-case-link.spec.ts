@@ -73,8 +73,9 @@ async function signedIn(browser: Browser, token: string, options: BrowserContext
   return { context, page: await context.newPage() };
 }
 
-// Only the failed-read test holds Case participants exclusively. Every other test here reads
-// candidates under this shared lock, so a parallel worker never renders O03 into that window.
+// Only the failed-read test holds Case participants exclusively, and only in its isolated run.
+// Every other test here still reads candidates under this shared lock, so even a run that
+// includes it never renders O03 into that window.
 const gate = "e2e-o03-case-candidates";
 const readingCandidates = (run: () => Promise<void>) =>
   connection.begin(async (tx) => {
@@ -482,11 +483,16 @@ test("O03 / F18: the review and result routes require a staff session", async ({
 test("O03 / F18: a failed candidate read never reads as no matching Case", async ({
   browser,
 }, info) => {
-  // The fault holds a shared table for a moment; one engine is enough for server-rendered state.
-  test.skip(info.project.name !== "chromium-desktop", "one engine renders the failed read");
-  // The table lock can stall other workers' Case reads; CI waits for the server-side fault seam
-  // MSR-CODEX owns (as the O01 failed-queue test does). Run locally with one worker meanwhile.
-  test.skip(Boolean(process.env.CI), "needs the server-side fault seam, not a shared table lock");
+  // The fault locks case_participants, which other workers' Case reads share, so like the O01
+  // failed-read case (today-unavailable.spec.ts) it runs only in a separate single-worker run
+  // after the parallel suite, in one engine, which is enough for server-rendered state:
+  //   E2E_O03_UNAVAILABLE=1 npx playwright test e2e/inquiry-case-link.spec.ts --workers=1 --project=chromium-desktop --grep "a failed candidate read"
+  test.skip(
+    process.env.E2E_O03_UNAVAILABLE !== "1" ||
+      info.config.workers !== 1 ||
+      info.project.name !== "chromium-desktop",
+    "Locks a shared table: use the isolated single-worker run after the parallel suite.",
+  );
   const f = seed();
   const { context, page } = await signedIn(browser, f.token, { ...info.project.use });
   try {

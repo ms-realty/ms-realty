@@ -53,8 +53,15 @@ TEST_DATABASE_URL=postgres://… npx playwright test e2e/today.spec.ts e2e/today
 
 `today-operations.spec.ts` counts agency-wide delivery operations, which no grant scopes to
 one test: it runs in the desktop project only and counts relative to the exceptions recorded
-before it seeds. `today-unavailable.spec.ts` waits for a server seam that fails one queue
-read; it never renames shared tables.
+before it seeds. `today-unavailable.spec.ts` fails one queue read by renaming a shared table,
+so the parallel suite skips it; like the O03 failed candidate read in
+`inquiry-case-link.spec.ts`, it runs in its own single-worker desktop run after the suite, as
+CI does:
+
+```sh
+E2E_TODAY_UNAVAILABLE=1 TEST_DATABASE_URL=postgres://… npx playwright test e2e/today-unavailable.spec.ts --workers=1 --project=chromium-desktop
+E2E_O03_UNAVAILABLE=1 TEST_DATABASE_URL=postgres://… npx playwright test e2e/inquiry-case-link.spec.ts --workers=1 --project=chromium-desktop --grep "a failed candidate read"
+```
 
 Each integration suite and browser run creates its own disposable database. Browser fixtures
 seed a valid staff session; passkey ceremony proof lives in `e2e/identity.spec.ts`. The work
