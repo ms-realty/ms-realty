@@ -12,7 +12,14 @@ afterAll(async () => {
   await t?.drop();
 });
 
-const input = { buildSha: null, snapshot: null };
+const input = {
+  buildSha: null,
+  snapshot: null,
+  environment: null,
+  manifestDigest: null,
+  policyDigest: null,
+  snapshotDigest: null,
+};
 
 describe("readiness authorization", () => {
   it("answers staff holding report.read", async () => {

@@ -10,6 +10,7 @@ import { parseArgs } from "node:util";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../schema";
+import { databaseTransport } from "../transport";
 import { applyBatch, stageBatch } from "./pipeline";
 import { writeReport } from "./report";
 import { loadLegacySources } from "./sources";
@@ -36,7 +37,11 @@ if (values["dry-run"] && (values.rows || values.batch)) fail("--rows/--batch app
 const url = process.env.DATABASE_URL;
 if (!url) fail("DATABASE_URL is required.");
 
-const client = postgres(url, { max: 2, onnotice: () => {} });
+const client = postgres(url, {
+  ...databaseTransport(url).postgresOptions,
+  max: 2,
+  onnotice: () => {},
+});
 const db = drizzle(client, { schema });
 try {
   const sources = await loadLegacySources(values.source);

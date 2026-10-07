@@ -1,5 +1,49 @@
 # Legacy extraction
 
+## Current authority: zero-loss launch, 2026-10-01
+
+The decisions and counts below describe the historical extraction. They are **not operative
+terminal URL decisions**. The owner's zero-loss directive revoked all 268 earlier 410 approvals.
+Every known source URL needs equivalent same-path 200 content or a single 301 to equivalent
+200 content. There are no individually approved removals in the current directive.
+
+`migration/route-manifest.json` is the current migration authority. It counts all 457 source
+spellings and their 454 normalized request identities separately, preserves every source row,
+and lists source, current-delta, media and equivalence blockers. A blocked manifest is not a
+deployable map; `legacy-export-routes.mjs` refuses export. The original import enum and recorded
+historical approval fields remain intact solely as provenance.
+
+`migration/source-pages.json` preserves actual public WordPress main-content captures and
+their verified text hashes. The owner's explicit requirement to preserve public content,
+phones, emails and addresses overrides the earlier exclusion of contacts already published
+on those pages. This exception covers only previously public source text. Private customer,
+staff or partner records and private database exports are never imported. No source text is
+redacted or translated and then represented as equivalent. Every capture declares whether it
+comes from the historical tag or a dated current public GET;
+it does not claim that legal/process wording, listings, media, live deltas or current target
+equivalence have been reviewed. Source-as-is rendering and launch sign-off remain separate.
+
+Regenerate the deterministic source manifest with `node --import tsx scripts/legacy-manifest.mjs`.
+Use `legacy-capture.mjs --urls <explicit-public-url>` for bounded, read-only current GET evidence.
+Run it with `node --import tsx`; `--append` retains earlier requested sources. The transport
+uses Python urllib, the proven read-only inventory User-Agent, normal TLS verification and
+only allowed public hosts. Raw non-parking responses are archived by exact byte hash.
+`migration/required-inputs.json` preserves unresolved baseline URLs and the discovered live
+URL delta. The initial eight fresh responses include six exact BG/EN listing bodies for references
+958, 961 and 962, absent from the frozen 165. Their 30 unique full gallery URLs have no
+recorded staging R2 keys or load proof yet; the media allowlist contains only the 1710
+already-recorded public photo keys. Neither the bounded delta nor the staged snapshots
+establishes complete current-site coverage. Main-content fallback and equivalence reviews
+remain blocked, and the full exporter exits nonzero without writing a production route map.
+`staging-legacy-routes.json` and `staging-route-manifest.json` contain only body-preserving
+render projections for protected staging. Their `ready_partial` / `staging_only` scope lists
+every known exclusion, binds the exact map digest, and explicitly forbids production use.
+The `.ru` primary-source rows are explicit single-hop candidates to their exact copied
+Russian source page on `makler-realty.com`; this is not a homepage/domain collapse rule.
+These source reviews assert import fidelity, with no human approval or served HTTP status.
+Independent served-content/media checks and owner/controller sign-off remain launch gates.
+Do not migrate the expired-domain parking response on `.ru` as real estate content.
+
 The frozen legacy facts the new system imports once, extracted on 2026-09-23 from the
 old application before it was deleted. Every source path below is given as it exists at
 git tag `legacy-app-final`; each JSON file repeats its sources with their `sha256`, so a

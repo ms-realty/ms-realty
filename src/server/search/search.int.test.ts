@@ -178,8 +178,15 @@ describe("AT05/AT07 eligibility, text and places", () => {
     ]);
     const typed = await inPlace("bg", { propertyTypes: ["house"] });
     expect(typed.items.map((i) => i.reference)).toEqual([ref.B]);
+    expect(typed.count).toEqual({ value: 1, type: "exact" });
     // Facet counts ignore the type filter itself, and nothing else.
     expect(typed.facets.propertyType).toEqual(bg.facets.propertyType);
+    const multipleTypes = await inPlace("bg", { propertyTypes: ["house", "apartment"] });
+    expect(multipleTypes.count).toEqual({ value: 2, type: "exact" });
+    const absentType = await inPlace("bg", { propertyTypes: ["plot"] });
+    expect(absentType.items).toEqual([]);
+    expect(absentType.count).toEqual({ value: 0, type: "exact" });
+    expect(absentType.facets.propertyType).toEqual(bg.facets.propertyType);
 
     const en = await inPlace("en");
     expect(en.items.map((i) => i.reference)).toEqual([ref.A]);
@@ -313,6 +320,57 @@ describe("pagination, sorting and availability", () => {
     });
     expect(second.stale).toBe(true);
     expect(second.items.map((i) => i.reference)).not.toContain(last);
+  });
+
+  it("tracks cursor freshness within the selected types even when the total stays constant", async () => {
+    const isolated = await createPlaces(t.db, {
+      settlement: ["Хърсово", "Harsovo"],
+      municipality: ["Сандански", "Sandanski"],
+    });
+    const add = async (propertyType: "apartment" | "house", euros: number) => {
+      const f = await createListingFixture(t.db, {
+        reviewerId: staff.id,
+        placeId: isolated.settlementId,
+        propertyType,
+        price: { state: "known", value: eur(euros) },
+      });
+      await publishForTest(t.db, staff.actor, f);
+      return f;
+    };
+    const firstApartment = await add("apartment", 100_000);
+    const secondApartment = await add("apartment", 200_000);
+    await add("house", 50_000);
+    const input = query({
+      placeIds: [isolated.settlementId],
+      propertyTypes: ["apartment"],
+      pageSize: 1,
+    });
+    const first = await searchListings(t.db, input);
+    expect(first.items.map((i) => i.reference)).toEqual([firstApartment.reference]);
+    expect(first.nextCursor).not.toBeNull();
+    await add("house", 75_000);
+    const continuation = { ...input, cursor: first.nextCursor };
+    const unchanged = await searchListings(t.db, continuation);
+    expect(unchanged.items.map((i) => i.reference)).toEqual([secondApartment.reference]);
+    expect(unchanged.count).toEqual({ value: 2, type: "exact" });
+    expect(unchanged.facets.propertyType).toEqual([
+      { value: "apartment", count: 2 },
+      { value: "house", count: 2 },
+    ]);
+    expect(unchanged.stale).toBe(false);
+
+    await withdrawPublication(t.db, {
+      actor: staff.actor,
+      operationId: newOperationId(),
+      expectedRevision: 0,
+      reference: firstApartment.reference,
+      reason: "Owner withdrew before the replacement offer",
+    });
+    await add("apartment", 300_000);
+    const changed = await searchListings(t.db, continuation);
+    expect(changed.count).toEqual(unchanged.count);
+    expect(changed.items.map((i) => i.reference)).toEqual([secondApartment.reference]);
+    expect(changed.stale).toBe(true);
   });
 
   it("filters on the availability visitors are shown and keeps history out by default", async () => {

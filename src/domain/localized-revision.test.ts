@@ -61,7 +61,7 @@ describe("localized revisions (architecture §7.1, §7.2)", () => {
     });
   });
 
-  it("AT52: Hermes drafts copy but never approves it", () => {
+  it("AT52: Butler drafts copy but never approves it", () => {
     expect(
       guardLocaleTransition(
         "reviewing",

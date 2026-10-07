@@ -3,7 +3,7 @@
 // the OpenAPI 3.1 dialect). Written to docs/api/openapi.json by scripts/openapi.mjs.
 import "server-only";
 import { z } from "zod";
-import { AppError, wireCode } from "../errors";
+import { AppError, toErrorBody, wireCode } from "../errors";
 import {
   authorizationClasses,
   type EndpointDefinition,
@@ -12,7 +12,7 @@ import {
 } from "./registry";
 
 /** Bump on any change a client could observe. */
-export const transportVersion = "0.1.0";
+export const transportVersion = "0.3.0";
 
 const servers = {
   public: { url: "https://makler-realty.com", description: "Public host" },
@@ -29,9 +29,11 @@ const securitySchemes = {
 
 const securityFor: Record<EndpointDefinition["authorization"], object[]> = {
   public: [],
+  anonymous_creator: [],
   receipt_session: [{ receiptSession: [] }],
   client_session: [{ clientSession: [] }],
   staff_session: [{ staffSession: [] }],
+  private_session: [{ clientSession: [] }, { staffSession: [] }],
   provider_signature: [],
 };
 
@@ -52,7 +54,19 @@ function errorResponses(codes: readonly EndpointDefinition["errors"][number][]) 
       {
         description: wire.join(", "),
         content: {
-          "application/json": { schema: { $ref: "#/components/schemas/ErrorEnvelope" } },
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ErrorEnvelope" },
+            examples: Object.fromEntries(
+              codes
+                .filter((code) => new AppError(code).status === status)
+                .map((code) => [
+                  wireCode(code),
+                  {
+                    value: { error: toErrorBody(new AppError(code), "example-correlation-id") },
+                  },
+                ]),
+            ),
+          },
         },
         "x-error-codes": wire,
       },
@@ -102,7 +116,12 @@ function operation(entry: EndpointDefinition) {
     summary: entry.summary,
     ...(entry.description ? { description: entry.description } : {}),
     tags: [entry.group],
-    ...(entry.host === "any" ? {} : { servers: [servers[entry.host]] }),
+    ...(entry.host === "any"
+      ? {}
+      : {
+          servers:
+            entry.host === "private" ? [servers.client, servers.staff] : [servers[entry.host]],
+        }),
     security: securityFor[entry.authorization],
     ...(parameters ? { parameters } : {}),
     ...(entry.body

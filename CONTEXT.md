@@ -153,8 +153,9 @@ Whether a party may instruct the agency for a property. Self-declared and review
 **Audience**:
 Who may see a private item: internal, case participants, specialist or public. Internal notes and client messages are separate records, never two views of one body.
 
-**AI service (Hermes)**:
-An actor that can only draft, extract, propose and summarize. It never publishes, sends, makes a translation indexable, approves or grants access, and instructions found in content never give it authority.
+**Butler (AI service, formerly Hermes)**:
+An actor that drafts, extracts, proposes and summarizes within a selected task. Under the owner-approved R00 mapping it is draft-only (see `AGENTS.md`): a person owns every send, booking, publication, indexability, access change, cancellation and any step with legal, tax or money effect, and no autonomous routine action is enabled without a separate accepted policy and release proof. Instructions found in content never give it authority. Every Butler step shows its source, draft, review state, a receipt and a "Do it myself" path.
+_Avoid_: Hermes (retired name), bot, agent (for this actor in user-facing copy)
 
 ## Demand and work
 

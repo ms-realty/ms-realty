@@ -1,0 +1,4 @@
+cloudflare-runtime.generated.d.ts
+staging-artifacts.generated.ts
+.wrangler/
+node_modules/

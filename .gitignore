@@ -3,7 +3,7 @@ node_modules/
 .next*/
 next-env.d.ts
 *.tsbuildinfo
-coverage/
+/coverage/
 test-results/
 playwright-report/
 .env*
@@ -15,6 +15,13 @@ playwright-report/
 # Machine-local runtime state the legacy app left in existing checkouts. The legacy
 # code is gone (tag legacy-app-final); these must never be committed.
 /production/
+# Preserve only the two owner-designated launch-authority inputs from the legacy checkout.
+!/production/
+/production/*
+!/production/data/
+/production/data/*
+!/production/data/launch-readiness.json
+!/production/data/launch-input-checklist.md
 /migration/
 /search/
 __pycache__/
@@ -25,3 +32,15 @@ __pycache__/
 
 # Storybook build output (npm run storybook:build).
 /storybook-static/
+/dist-runtime/
+/deploy/*.generated.json
+/gateway/*.generated.json
+/.open-next/
+/gateway/.wrangler/
+/.wrangler/
+
+# Generated from the pinned MapLibre package before build/dev.
+/public/map-runtime/
+
+# Local synthetic map fixture; real assets are a separate immutable R2 release.
+/public/maps/

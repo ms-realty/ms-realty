@@ -37,9 +37,9 @@ type DateFieldExtras = {
 };
 
 const groupClass = cx(
-  "flex min-h-control w-full items-center rounded-control border border-border bg-surface ps-3 text-compact text-text",
+  "flex min-h-input w-full items-center rounded-control border border-border bg-canvas ps-3 text-body text-text",
   "data-hovered:border-text data-focus-within:outline-2 data-focus-within:outline-offset-2 data-focus-within:outline-focus",
-  "group-data-invalid:border-2 group-data-invalid:border-error",
+  "group-data-invalid:border-error",
   "group-data-readonly:border-dashed group-data-readonly:bg-subtle",
   "group-data-disabled:border-disabled-text group-data-disabled:bg-disabled group-data-disabled:text-disabled-text",
 );
@@ -116,10 +116,10 @@ export function DateField<T extends DateValue>({
         {label}
       </Label>
       <DateDescription description={description} timeZoneLabel={timeZoneLabel} />
-      <FieldError>{errorMessage}</FieldError>
       <div className={cx(groupClass, "pe-3")}>
         <Segments />
       </div>
+      <FieldError>{errorMessage}</FieldError>
     </RACDateField>
   );
 }
@@ -148,13 +148,13 @@ export function DatePicker<T extends DateValue>({
         {label}
       </Label>
       <DateDescription description={description} timeZoneLabel={timeZoneLabel} />
-      <FieldError>{errorMessage}</FieldError>
       <Group className={groupClass}>
         <Segments />
         <Button className="flex size-control shrink-0 cursor-pointer items-center justify-center rounded-e-control border-s border-divider text-action outline-offset-[-2px] data-hovered:bg-selected data-pressed:bg-selected">
           <CalendarIcon />
         </Button>
       </Group>
+      <FieldError>{errorMessage}</FieldError>
       <ListPopover className="max-h-none p-3">
         <Dialog className="outline-none">
           <Calendar className="flex flex-col gap-2">

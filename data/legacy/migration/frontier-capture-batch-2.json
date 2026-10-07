@@ -1,0 +1,3329 @@
+{
+  "schemaVersion": 1,
+  "requestMethod": "GET",
+  "authority": "2026-10-01 owner zero-loss migration",
+  "status": "partial_delta_not_reconciled",
+  "independentCheckerBaseline": false,
+  "requestedSources": 40,
+  "capturedSources": 40,
+  "verifiedPrimarySources": 9,
+  "parkedSources": 0,
+  "completeSiteDelta": false,
+  "captures": [
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-09.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-09.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:22.423Z",
+      "response_sha256": "ce717f9363ef558bd40ca2472d770797d021855aad812b65a0b6f8a8786a92d4",
+      "response_artifact": "data/legacy/migration/live-source-html/ce717f9363ef558bd40ca2472d770797d021855aad812b65a0b6f8a8786a92d4.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bb%d0%b5%d0%b2%d1%83%d0%bd%d0%be/",
+          "id": "a444b54de70330cf3e2696aa"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-08.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-08.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:23.315Z",
+      "response_sha256": "77e0a4a63b6a76722090eb8646b9e8f0b0fe37e24c5cd15da1bac0077762e011",
+      "response_artifact": "data/legacy/migration/live-source-html/77e0a4a63b6a76722090eb8646b9e8f0b0fe37e24c5cd15da1bac0077762e011.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-2/",
+          "id": "cf1b5bdcf073bb1ddeefcd17"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-07.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-07.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:24.658Z",
+      "response_sha256": "cca57c8451e37bbdf021523f7c8191c576dc57e8953e54c2b994bd74cc08c818",
+      "response_artifact": "data/legacy/migration/live-source-html/cca57c8451e37bbdf021523f7c8191c576dc57e8953e54c2b994bd74cc08c818.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%84%d0%b8%d1%81-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "1454d8128880e882957d2c2a"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-06.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-06.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:26.457Z",
+      "response_sha256": "e6dd77e9f735723e4fef1bf008840b8ed1c6f3b8765e4b61ce7251b1fc1fe2b5",
+      "response_artifact": "data/legacy/migration/live-source-html/e6dd77e9f735723e4fef1bf008840b8ed1c6f3b8765e4b61ce7251b1fc1fe2b5.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/industrial-buildings-for-rent-near-sandanski/",
+          "id": "92bcdb1abd0db3ca0e9e2758"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-05.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-05.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:27.104Z",
+      "response_sha256": "d2cd066d0852a058cc6ae7f67409317a39744ed8c7a4a69a1e0a158ac1570c45",
+      "response_artifact": "data/legacy/migration/live-source-html/d2cd066d0852a058cc6ae7f67409317a39744ed8c7a4a69a1e0a158ac1570c45.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d0%b5/",
+          "id": "eebd95d4517abd86c05184e8"
+        },
+        {
+          "url": "https://makler-realty.com/listing/zwei-zimmer-wohnung-zum-verkauf-in-park-hotel-pirin-sandanski/",
+          "id": "22912fe42795ea10c0d4a939"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-04.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-04.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:27.883Z",
+      "response_sha256": "5618fbd7f8dc126059776f69b99fd0cf3b1fdd4919a7706ac9f29b0d03b2bad4",
+      "response_artifact": "data/legacy/migration/live-source-html/5618fbd7f8dc126059776f69b99fd0cf3b1fdd4919a7706ac9f29b0d03b2bad4.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/industriegebaude-zur-miete-in-petrich-bulgarien/",
+          "id": "af557c1caeec269ca72d5dc5"
+        },
+        {
+          "url": "https://makler-realty.com/listing/industrieraume-zum-verkauf-rund-um-sandanski/",
+          "id": "1deee0f33db259bab2c32bd3"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8%d1%86%d0%b0/",
+          "id": "1fb4286efe23c60b724b21b6"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-03.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-03.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:29.757Z",
+      "response_sha256": "e5a568811722d4539b5c75dd944fea2fac09ea5156956d7fd14064107982ebc0",
+      "response_artifact": "data/legacy/migration/live-source-html/e5a568811722d4539b5c75dd944fea2fac09ea5156956d7fd14064107982ebc0.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/neue-1-zimmer-wohnung-zur-miete-in-sandanski/",
+          "id": "713285b1a8ee3c526136ba3f"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-02.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-02.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:31.468Z",
+      "response_sha256": "542a4030393db3b7ccde1f04d93eb9702ed9e9af565de2f113eeadca2497599c",
+      "response_artifact": "data/legacy/migration/live-source-html/542a4030393db3b7ccde1f04d93eb9702ed9e9af565de2f113eeadca2497599c.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/",
+          "id": "5a1d199ceb034115e54d6d34"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2020-01.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2020-01.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:32.162Z",
+      "response_sha256": "e2d66b72b5f6c209982bda57e5d87e76bbab08b256a6a831393c081777e823a1",
+      "response_artifact": "data/legacy/migration/live-source-html/e2d66b72b5f6c209982bda57e5d87e76bbab08b256a6a831393c081777e823a1.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d1%81%d1%82%d1%80%d0%be%d0%b8%d1%82%d0%b5%d0%bb%d1%81%d1%82%d0%b2%d0%be-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd/",
+          "id": "c4acffc2f37601c1c7678f05"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2019-12.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2019-12.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:32.830Z",
+      "response_sha256": "9b70b9791a0d7eda278eb2f41bf699adfc75db4e28bfa5dacb38d197cf1b0ea1",
+      "response_artifact": "data/legacy/migration/live-source-html/9b70b9791a0d7eda278eb2f41bf699adfc75db4e28bfa5dacb38d197cf1b0ea1.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/building-land-with-a-great-view-in-sandanski/",
+          "id": "0dfaba6f96c48d7034a09698"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2019-11.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2019-11.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:33.601Z",
+      "response_sha256": "030c5ca77a9b5ca2e6ccf44a13030330ef2fdbd0fb9666c874aecb27f2b676a0",
+      "response_artifact": "data/legacy/migration/live-source-html/030c5ca77a9b5ca2e6ccf44a13030330ef2fdbd0fb9666c874aecb27f2b676a0.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/new-apartment-for-rent-in-sandanski/",
+          "id": "b0424c660ece4c7aba8413f3"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2019-10.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2019-10.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:34.534Z",
+      "response_sha256": "b9393801149d9170b38b3a72c6d2546f7d88d88fc78e6422e8cbe5f5d7c4cf84",
+      "response_artifact": "data/legacy/migration/live-source-html/b9393801149d9170b38b3a72c6d2546f7d88d88fc78e6422e8cbe5f5d7c4cf84.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d1%80%d0%b0%d0%bd%d0%b6%d0%b5%d1%80%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "4720d4eed8e9a258f7051f2c"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2019-09.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2019-09.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:35.305Z",
+      "response_sha256": "94ad77e806dbd6a35eadf2676ca7e21db933a091e1c4e28a0ff7c9f84c32ffab",
+      "response_artifact": "data/legacy/migration/live-source-html/94ad77e806dbd6a35eadf2676ca7e21db933a091e1c4e28a0ff7c9f84c32ffab.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-15%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d1%81-%d0%ba%d0%b0%d0%bf%d0%b0%d1%82%d0%be%d0%b2%d0%be/",
+          "id": "3e5c6d59e5fa4fc734d858b7"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2019-08.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2019-08.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:35.990Z",
+      "response_sha256": "61373b892bc27cefcad3bb8a8805ac721cf77b74f1eda3c61e281857bf8af5d3",
+      "response_artifact": "data/legacy/migration/live-source-html/61373b892bc27cefcad3bb8a8805ac721cf77b74f1eda3c61e281857bf8af5d3.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%bd%d0%b0-%d0%b579-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "f5fbe153f5dcbd1a007dad7c"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2019-02.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2019-02.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:36.787Z",
+      "response_sha256": "0d9c148061b2a1f6d605de956650e61d285079e662c1b51cd222a72a4986ac6d",
+      "response_artifact": "data/legacy/migration/live-source-html/0d9c148061b2a1f6d605de956650e61d285079e662c1b51cd222a72a4986ac6d.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/industrial-building-for-sale-petrich-municipality/",
+          "id": "29f14c313edc2dee989f5474"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2018-11.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2018-11.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:37.452Z",
+      "response_sha256": "b1b35a6a530f393694c5480118edb86b589bed141fc344f4c2068e5bae76f60b",
+      "response_artifact": "data/legacy/migration/live-source-html/b1b35a6a530f393694c5480118edb86b589bed141fc344f4c2068e5bae76f60b.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/wohnung-zur-miete-in-spa-complex-medite-sandanski/",
+          "id": "712563f751af2a1b4fe6c770"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2018-08.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2018-08.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:38.171Z",
+      "response_sha256": "5347a2bfac5bfdb9d1fc6d6f0669d17d2a2fa458d8b3108f1ee529696e3166da",
+      "response_artifact": "data/legacy/migration/live-source-html/5347a2bfac5bfdb9d1fc6d6f0669d17d2a2fa458d8b3108f1ee529696e3166da.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/house-for-sale-in-the-park-of-sandanski/",
+          "id": "4e84bedb904e412555a3a43d"
+        },
+        {
+          "url": "https://makler-realty.com/listing/luxushaus-zum-verkauf-in-sandanski/",
+          "id": "9044471d5cad615daa885253"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2016-01.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2016-01.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:38.870Z",
+      "response_sha256": "135d88c50383e78ae32d03e9a1a4eadf56ff7d37ff28c044140f6f5b28a66cdc",
+      "response_artifact": "data/legacy/migration/live-source-html/135d88c50383e78ae32d03e9a1a4eadf56ff7d37ff28c044140f6f5b28a66cdc.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
+          "id": "56b158bf6641d113dd01918c"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2015-06.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2015-06.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:39.566Z",
+      "response_sha256": "716714c71f20f494c59322592e5c174b5ea1b68f4808f194ee46749479967e74",
+      "response_artifact": "data/legacy/migration/live-source-html/716714c71f20f494c59322592e5c174b5ea1b68f4808f194ee46749479967e74.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%b8%d0%b7%d0%bd%d0%b5%d1%81-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%80%d0%b5-%d0%b3-%d0%bf%d0%b5%d1%82%d1%80%d0%b8/",
+          "id": "cd00b7586630e1b209b7a375"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2015-03.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2015-03.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:42.419Z",
+      "response_sha256": "056d82267e8459b7b1394fcf3dd688536115097dfc954f80470d7cd85ab070bc",
+      "response_artifact": "data/legacy/migration/live-source-html/056d82267e8459b7b1394fcf3dd688536115097dfc954f80470d7cd85ab070bc.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
+          "id": "d2b62f5b0ab141a00b2a3c6c"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2014-10.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2014-10.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:43.227Z",
+      "response_sha256": "b73c919bc5f24e54afd42120910387e1242f9aa97ff4029f09ed22ca9a9f7319",
+      "response_artifact": "data/legacy/migration/live-source-html/b73c919bc5f24e54afd42120910387e1242f9aa97ff4029f09ed22ca9a9f7319.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%bf%d0%be%d0%b4-%d1%84%d0%b5%d1%80%d0%bc%d1%83-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "cd26131b171aaa0251a0659b"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-listings-2013-11.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-listings-2013-11.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:44.248Z",
+      "response_sha256": "df66354b1b305ceda539c04c307f7156795e78b5f66a5719bd0e8df630c29565",
+      "response_artifact": "data/legacy/migration/live-source-html/df66354b1b305ceda539c04c307f7156795e78b5f66a5719bd0e8df630c29565.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
+          "id": "eac4d8fd35deeb2d9a55d6de"
+        },
+        {
+          "url": "https://makler-realty.com/listing/apartments-park-hotel-pirin-sandanski/",
+          "id": "dba30936aaa24637b0186de7"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-post-2025-04.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-post-2025-04.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:44.923Z",
+      "response_sha256": "a303bbc2c0bdcc9b08d0fa304276a91feb84a20d2bc36351cee9aafc04a0911b",
+      "response_artifact": "data/legacy/migration/live-source-html/a303bbc2c0bdcc9b08d0fa304276a91feb84a20d2bc36351cee9aafc04a0911b.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "id": "f990e9239c70ba0c74f7f0f0"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-post-2016-06.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-post-2016-06.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:45.620Z",
+      "response_sha256": "87734e081048ef4598963e6fb13dcf98bcc54173961614d27be98aefb1181481",
+      "response_artifact": "data/legacy/migration/live-source-html/87734e081048ef4598963e6fb13dcf98bcc54173961614d27be98aefb1181481.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+          "id": "f74c99a6952679571c1a492f"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-post-2013-11.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-post-2013-11.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:46.267Z",
+      "response_sha256": "4f906e38b0adcacaa37b2fe65519eb0bd6a202c77679e98abec80ab4fc1e3386",
+      "response_artifact": "data/legacy/migration/live-source-html/4f906e38b0adcacaa37b2fe65519eb0bd6a202c77679e98abec80ab4fc1e3386.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "49bedd92a43a06d767046abe"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9c8e82b580f6d3aacd27f180"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-page-2018-05.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-page-2018-05.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:47.031Z",
+      "response_sha256": "2fcbd0dfd9fc9bd30b1c12ac81a6da2e5a32105f399a0367051e1fb1343872ef",
+      "response_artifact": "data/legacy/migration/live-source-html/2fcbd0dfd9fc9bd30b1c12ac81a6da2e5a32105f399a0367051e1fb1343872ef.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/%d0%bf%d0%be%d0%bb%d0%b8%d1%82%d0%b8%d0%ba%d0%b0-%d0%b7%d0%b0-%d0%b7%d0%b0%d1%89%d0%b8%d1%82%d0%b0-%d0%bd%d0%b0-%d0%bb%d0%b8%d1%87%d0%bd%d0%b8%d1%82%d0%b5-%d0%b4%d0%b0%d0%bd%d0%bd%d0%b8/",
+          "id": "51452b9f4a0761e4f00bd1b3"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-page-2017-10.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-page-2017-10.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:47.917Z",
+      "response_sha256": "fb7028f291229353cc3fbbe67de7c1a958cf682f335382b3a378ed2a22bea221",
+      "response_artifact": "data/legacy/migration/live-source-html/fb7028f291229353cc3fbbe67de7c1a958cf682f335382b3a378ed2a22bea221.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/add-property/",
+          "id": "10fccb0744fec0a3fb90efb6"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-page-2013-11.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-page-2013-11.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:48.693Z",
+      "response_sha256": "b17eb95fdf3645fa45d722b450a1c1e862e1ce92e651148bff5ca8f7fe46bae3",
+      "response_artifact": "data/legacy/migration/live-source-html/b17eb95fdf3645fa45d722b450a1c1e862e1ce92e651148bff5ca8f7fe46bae3.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/sitemap/",
+          "id": "bc81fb5e96eab3dc3164c92c"
+        },
+        {
+          "url": "https://makler-realty.com/sitemap-2/",
+          "id": "4f7a381d1adbee225351850a"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-page-2013-10.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-page-2013-10.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:49.423Z",
+      "response_sha256": "b6684bb9632bffc126b10beaefc8a01034b27f3ec6425e0932c19d858322a173",
+      "response_artifact": "data/legacy/migration/live-source-html/b6684bb9632bffc126b10beaefc8a01034b27f3ec6425e0932c19d858322a173.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/",
+          "id": "e7e3b01a337c15de87d9a018"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-page-2013-08.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-page-2013-08.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:50.108Z",
+      "response_sha256": "8bcfd44442b93ef4daf4f2d9b646ca5c6850e1a75a77dc71d721d8103cc0ff4e",
+      "response_artifact": "data/legacy/migration/live-source-html/8bcfd44442b93ef4daf4f2d9b646ca5c6850e1a75a77dc71d721d8103cc0ff4e.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "2679dac47a27d10a8d52126b"
+        },
+        {
+          "url": "https://makler-realty.com/services/",
+          "id": "19d1cb70c94d8f54ccfa90e9"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "7726f352c0c791aa78e975c2"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "369a2e4a883b3baf29e7f228"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "f6217d9782bf6cc114eebe55"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-pt-page-2013-07.html",
+      "final_url": "https://makler-realty.com/sitemap-pt-page-2013-07.html",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:50.768Z",
+      "response_sha256": "f7ebb89a678ec4369bb574109975ae46644c026a8b6c6564c5f84be4c40cb8ad",
+      "response_artifact": "data/legacy/migration/live-source-html/f7ebb89a678ec4369bb574109975ae46644c026a8b6c6564c5f84be4c40cb8ad.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "XML Sitemap",
+      "h1": "XML Sitemap",
+      "description": null,
+      "locale": null,
+      "parked": false,
+      "content_scope": "missing_main_content",
+      "extracted_body_text": "",
+      "text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "images": [],
+      "links": [
+        {
+          "url": "https://makler-realty.com/search/",
+          "id": "7d987617b3507a80a94a8e8e"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8/",
+          "id": "4edf901f4290a288e4660358"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "cfaf046fb60fbaa00934190e"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [],
+      "content_links": []
+    },
+    {
+      "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "final_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:51.435Z",
+      "response_sha256": "2181a7775bd5b62cf76976669e6533f045854fbda6e4992cb55a3117659e354b",
+      "response_artifact": "data/legacy/migration/live-source-html/2181a7775bd5b62cf76976669e6533f045854fbda6e4992cb55a3117659e354b.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [
+        {
+          "from": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "status": 302,
+          "to": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+        }
+      ],
+      "title": "Продава имот в м.Ранковец, гр.Сандански - Недвижими имоти в Сандански",
+      "h1": "Продава имот в м.Ранковец, гр.Сандански",
+      "description": null,
+      "locale": "bg-BG",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "№: 906 Държава: България Град: Сандански , СПА Курорт Категория обект: Ниви Площ: 4500 m2 Тип: Продажба Цена: По договаряне € Продава имот в м.Ранковец, гр.Сандански Продава 1/2 идеална част от имот с идентификатор 57176.41.8 в местността РАНКОВЕЦ. Имота е равен, с категория на земята 5, НТП Нива, площ на целия имот 8995 кв. м Имота граничи с полски път и е на около 45 метра от напоителния канал. В близост до имота има и застрояване. Tweet Име Email Телефон Съобщение Изпрати",
+      "text_sha256": "fe8a97d4f8c11a78788b264436e24047bb0c7887741938f6fafdfa0d813bc722",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/906-680x347.jpg",
+          "alt": "Продава имот в м.Ранковец, гр.Сандански"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/",
+          "id": "3c8edaf9291d59f466bc4654"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "dc101dfcfe36d68140702214"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "067f83b9e3b6d496527b366b"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9d1b1c607e6468323dac7046"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "920bf8b69be5286b4351a017"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "cfaf046fb60fbaa00934190e"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "f6217d9782bf6cc114eebe55"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "369a2e4a883b3baf29e7f228"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "7726f352c0c791aa78e975c2"
+        },
+        {
+          "url": "https://makler-realty.com/services/",
+          "id": "19d1cb70c94d8f54ccfa90e9"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "2679dac47a27d10a8d52126b"
+        },
+        {
+          "url": "https://makler-realty.com/sitemap-2/",
+          "id": "4f7a381d1adbee225351850a"
+        },
+        {
+          "url": "https://makler-realty.com/resort/nafplio/",
+          "id": "cfefe5e8879ecc3016b2b385"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "c44f6bcf754350140bb068f9"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "15fcd80b0e22d1ceb900df55"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/villa/",
+          "id": "127bc43837aaec75ece7984e"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/dom/",
+          "id": "5b8907dc6a900b807e49517b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/apartment/",
+          "id": "5cc21cd7d2026c5cb6a32aef"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/commercial-area/",
+          "id": "d10ddba4ba369b7bd8efbd48"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/hotel/",
+          "id": "605325a645e0a1dfd8a5e4ac"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office/",
+          "id": "c58cce18a45b0cccb7851c95"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office-building/",
+          "id": "4fbae5a16043f1b361fb0f89"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/industrial-building/",
+          "id": "c89230c979cf580139a5cbdd"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "898942a41516f65ec57e49e2"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/studio/",
+          "id": "1bb9d6aabfb4978e2c33a89b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "b50cf774b868111cfafc92d5"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d0%b5lite-realtor/",
+          "id": "8419286037593fd02b03ec38"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/house-floor/",
+          "id": "973c5f9b31d3b5c4ba035d8d"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "id": "f990e9239c70ba0c74f7f0f0"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "49bedd92a43a06d767046abe"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9c8e82b580f6d3aacd27f180"
+        },
+        {
+          "url": "https://makler-realty.com/location/bulgaria/",
+          "id": "502992149d46ba5f66ce0875"
+        },
+        {
+          "url": "https://makler-realty.com/resort/spa-resorts/",
+          "id": "04e17c4292046590e60771d4"
+        },
+        {
+          "url": "https://makler-realty.com/property/sell/",
+          "id": "4419cae8e9a6aec9261d8095"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "80a3626cd967960204ea9342"
+        },
+        {
+          "url": "https://makler-realty.com/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "51452b9f4a0761e4f00bd1b3"
+        }
+      ],
+      "sold": null,
+      "listing_reference": "906",
+      "source_fields": [
+        {
+          "label": "№:",
+          "value": "906"
+        },
+        {
+          "label": "Държава:",
+          "value": "България"
+        },
+        {
+          "label": "Град:",
+          "value": "Сандански, СПА Курорт"
+        },
+        {
+          "label": "Категория обект:",
+          "value": "Ниви"
+        },
+        {
+          "label": "Площ:",
+          "value": "4500 m2"
+        },
+        {
+          "label": "Тип:",
+          "value": "Продажба"
+        },
+        {
+          "label": "Цена:",
+          "value": "По договаряне €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/location/bulgaria/",
+          "text": "България"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Сандански"
+        },
+        {
+          "url": "https://makler-realty.com/resort/spa-resorts/",
+          "text": "СПА Курорт"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "text": "Ниви"
+        },
+        {
+          "url": "https://makler-realty.com/property/sell/",
+          "text": "Продажба"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "final_url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:52.874Z",
+      "response_sha256": "dadf39de72c38c82ab4a10586cd6158091c15ec817c00d7db131bbf8a6577b23",
+      "response_artifact": "data/legacy/migration/live-source-html/dadf39de72c38c82ab4a10586cd6158091c15ec817c00d7db131bbf8a6577b23.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански - Real estate in Bulgaria. SPA Resort Sandanski.",
+      "h1": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански",
+      "description": null,
+      "locale": "en-EN",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "ID №: 906 Country: Bulgaria City: Sandanski , SPA Resorts Category: Agricultural lands Area: 4500 m2 Property Type: Sell Price: Ask about price € Sorry, this entry is only available in Bulgarian . Tweet Name Email Phone Message Send",
+      "text_sha256": "335d1abf3c64d840f41ce6cc48791bbee306f8f3183fcc78d45bcf8e8f8dad5d",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/906-680x347.jpg",
+          "alt": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/en/",
+          "id": "1d5990d645b22cbb77498757"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "dc101dfcfe36d68140702214"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "067f83b9e3b6d496527b366b"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9d1b1c607e6468323dac7046"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "920bf8b69be5286b4351a017"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "c4cd65afd4a9f99cd7d45113"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "9cdcf66cf490624fe49dde8b"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "d0063278d71d7b7a468d327a"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "bbbf712fe80a86e761eca29b"
+        },
+        {
+          "url": "https://makler-realty.com/en/services/",
+          "id": "5d12871a9ec6cba94007bcc0"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "a54c28a835dd552a150886b5"
+        },
+        {
+          "url": "https://makler-realty.com/en/sitemap-2/",
+          "id": "09bc0f39563c99ffa6e504ec"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/nafplio/",
+          "id": "dd219907c85b3b3681955243"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "429327b830cb1309ddfa450f"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "ab3803e5d78c8041eb6aa5e2"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/villa/",
+          "id": "7f625b34077aa8349b266253"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/dom/",
+          "id": "5b11ce44ea42fa240e33c380"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/apartment/",
+          "id": "2929574e76102456cc172c80"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/commercial-area/",
+          "id": "f7b342512d241461ff64b6f5"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/hotel/",
+          "id": "f88cee111516bf2988f7a6d1"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/office/",
+          "id": "06af0cadf063058946b1d9de"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/office-building/",
+          "id": "975f2a34641ecd4e76db7d1f"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/industrial-building/",
+          "id": "a3d14fe828d2f84909bc6b7e"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "c943885d45e9e8eb927099c6"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/studio/",
+          "id": "29dd17759943c526f82774a0"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "3a666fd1e4300cce9ac94e37"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/%d0%b5lite-realtor/",
+          "id": "f913d031a23a8fb733bf4752"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/house-floor/",
+          "id": "dcbaf1df6d5fb56f6b484473"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "id": "b0b6f3c2a2db1575f0fe0ae4"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+          "id": "352a38ba1a2aebca6b57dbf8"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "44d7821f87cfcf9698eceba7"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "1b78f029a9e6cf185268e61a"
+        },
+        {
+          "url": "https://makler-realty.com/en/location/bulgaria/",
+          "id": "e070ac1355fb6b6adcb7f663"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/spa-resorts/",
+          "id": "d41dc1417e9d151c12827f8d"
+        },
+        {
+          "url": "https://makler-realty.com/en/property/sell/",
+          "id": "16894ce3c28db382b1c5b96f"
+        },
+        {
+          "url": "https://makler-realty.com/en",
+          "id": "85dfe12d8332dc08702fef5b"
+        },
+        {
+          "url": "https://makler-realty.com/en/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "f01d6cb8ee4fa41a79e91f81"
+        }
+      ],
+      "sold": null,
+      "listing_reference": "906",
+      "source_fields": [
+        {
+          "label": "ID №:",
+          "value": "906"
+        },
+        {
+          "label": "Country:",
+          "value": "Bulgaria"
+        },
+        {
+          "label": "City:",
+          "value": "Sandanski, SPA Resorts"
+        },
+        {
+          "label": "Category:",
+          "value": "Agricultural lands"
+        },
+        {
+          "label": "Area:",
+          "value": "4500 m2"
+        },
+        {
+          "label": "Property Type:",
+          "value": "Sell"
+        },
+        {
+          "label": "Price:",
+          "value": "Ask about price €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/en/location/bulgaria/",
+          "text": "Bulgaria"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/spa-resorts/",
+          "text": "SPA Resorts"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "text": "Agricultural lands"
+        },
+        {
+          "url": "https://makler-realty.com/en/property/sell/",
+          "text": "Sell"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Bulgarian"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "final_url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:53.814Z",
+      "response_sha256": "a5e4c7d1f2384a8290a4b67d62d1a16d3706be7789db0396cc8ad43f3a40ae8c",
+      "response_artifact": "data/legacy/migration/live-source-html/a5e4c7d1f2384a8290a4b67d62d1a16d3706be7789db0396cc8ad43f3a40ae8c.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански - Verkauf von Immobilien in Sandanski, Bulgarie",
+      "h1": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански",
+      "description": null,
+      "locale": "de-DE",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "Nr.: 906 Land: Stadt: Sandanski , Kurgebiete Kategorie: Landwirtschaftliche Flächen Fläche: 4500 m2 Art der Immobilie: Zu verkaufen Preis: Ask about price € Leider ist der Eintrag nur auf Bulgarisch verfügbar. Tweet Name Email Phone Message Send",
+      "text_sha256": "d52aff9da4af896ab58e53afc3098593d30121cce2e780eb234ef667875cc38f",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/906-680x347.jpg",
+          "alt": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/de/",
+          "id": "0b90a95009dd43d3a7f9c215"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "dc101dfcfe36d68140702214"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "067f83b9e3b6d496527b366b"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9d1b1c607e6468323dac7046"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "920bf8b69be5286b4351a017"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "8af39326463f8902001b0969"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "afb29cc38575dd27b98149dc"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "828fe78827189bd98ac04e2d"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "ca67fd3644253b25019a7882"
+        },
+        {
+          "url": "https://makler-realty.com/de/services/",
+          "id": "5485a91fd1d076ed52a2ef76"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "597f6e81694e31124c832f9b"
+        },
+        {
+          "url": "https://makler-realty.com/de/sitemap-2/",
+          "id": "fcc673b7a65cd573fef163a6"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/nafplio/",
+          "id": "c98cfc8d77e723e20618e74b"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "ee2f86b901a3a0ea1c1a28be"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "47b7e2a71e5bf49c31427211"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/villa/",
+          "id": "ddd8049c6d82bf50ce321983"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/dom/",
+          "id": "f4863622c38b91e6423953b7"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/apartment/",
+          "id": "347ee610d261baa8f92c0bf4"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/commercial-area/",
+          "id": "4365680e73124d1ae2ab776a"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/hotel/",
+          "id": "8aaed8b6a1c80d96256bfdef"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/office/",
+          "id": "e7bd6bc1f5f78d42466b88b2"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/office-building/",
+          "id": "c2fbcf86cfeb20bc187f3ed3"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/industrial-building/",
+          "id": "664dc2fdc196dd39b95401f4"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "6479cf64d57f1f723d171111"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/studio/",
+          "id": "712de84799b8a2fc6a202e2d"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "23671f634031b290f09a7ed9"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/%d0%b5lite-realtor/",
+          "id": "79279a4d4843dff9e8315f9d"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/house-floor/",
+          "id": "0f0c265656ba0456085a93b1"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+          "id": "0826d5bf645d486347e622ea"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "d4803e7425d4ee565b69714a"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "b44ef94163f0584037d27489"
+        },
+        {
+          "url": "https://makler-realty.com/de/location/bulgaria/",
+          "id": "e7bb0fbb86686e7519a3d1ca"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/spa-resorts/",
+          "id": "74468e6cf9c4a2b71382e0b6"
+        },
+        {
+          "url": "https://makler-realty.com/de/property/sell/",
+          "id": "05e68707397ec4a2359d283e"
+        },
+        {
+          "url": "https://makler-realty.com/de",
+          "id": "bdd92a07138a86cc8833f724"
+        },
+        {
+          "url": "https://makler-realty.com/de/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "dd5746a0882b297e4a8b4a41"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [
+        {
+          "label": "Nr.:",
+          "value": "906"
+        },
+        {
+          "label": "Stadt:",
+          "value": "Sandanski, Kurgebiete"
+        },
+        {
+          "label": "Kategorie:",
+          "value": "Landwirtschaftliche Flächen"
+        },
+        {
+          "label": "Fläche:",
+          "value": "4500 m2"
+        },
+        {
+          "label": "Art der Immobilie:",
+          "value": "Zu verkaufen"
+        },
+        {
+          "label": "Preis:",
+          "value": "Ask about price €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/de/location/bulgaria/",
+          "text": "https://makler-realty.com/de/location/bulgaria/"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/spa-resorts/",
+          "text": "Kurgebiete"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "text": "Landwirtschaftliche Flächen"
+        },
+        {
+          "url": "https://makler-realty.com/de/property/sell/",
+          "text": "Zu verkaufen"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Bulgarisch"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "final_url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:54.878Z",
+      "response_sha256": "04405cec74d9daa503b42e7aeee249461397a3548821366a7054d1298953b337",
+      "response_artifact": "data/legacy/migration/live-source-html/04405cec74d9daa503b42e7aeee249461397a3548821366a7054d1298953b337.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански - Vastgoed in Sandanski, Bansko, Petrich. Vastgoed in Bulgarije.",
+      "h1": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански",
+      "description": null,
+      "locale": "nl-NL",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "No.: 906 Land: Болгария Stad: Sandanski , Spagebieden Categorie: Landbouwgrond Leefruimte: 4500 m2 Type onroerend goed: Prijs: Ask about price € Onze verontschuldigingen, dit bericht is alleen beschikbaar in Bulgaars . Tweet Name Email Phone Message Send",
+      "text_sha256": "b11e2f8727960422b5e7914342ec2cd6d358b62cf4bba75bc8810345460cd105",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/08/906-680x347.jpg",
+          "alt": "(Bulgarian) Продава имот в м.Ранковец, гр.Сандански"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/nl/",
+          "id": "17c8ef67aac2d54d846556bc"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "dc101dfcfe36d68140702214"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "067f83b9e3b6d496527b366b"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9d1b1c607e6468323dac7046"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "920bf8b69be5286b4351a017"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "1ef84cbc1dbead4c9e8584b2"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "6a9ca758b0e9de259fd2a1d5"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "06a8f1e4a2f60d44e562cfd8"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "8b3c727487bf89bb3002d707"
+        },
+        {
+          "url": "https://makler-realty.com/nl/services/",
+          "id": "b385cecf7ecdee839541f3db"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "c4c987c75f270c20e2393670"
+        },
+        {
+          "url": "https://makler-realty.com/nl/sitemap-2/",
+          "id": "a7ee8b7ee6d95b72325b7b67"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/nafplio/",
+          "id": "ec6865e893f8a0d1113fa7d8"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "899d93121d3dbd867db12142"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "b44c4903e5c6e7b311ad3f0b"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/villa/",
+          "id": "3bc6064df807891a14cddc3e"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/dom/",
+          "id": "18c0b5691f108c4031cae92c"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/apartment/",
+          "id": "fb296a21105aa2c25b7c760f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/commercial-area/",
+          "id": "fce603b77281b46004a58e1f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/hotel/",
+          "id": "17bb4521a1a1c19bbc8bb702"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/office/",
+          "id": "772f3a0505e284b73a0dc82f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/office-building/",
+          "id": "6c82932ac4d8e4527092c6f1"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/industrial-building/",
+          "id": "7f5da64d605fc1fb8d040acc"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "41ed9d7d8ea5f2f343912b87"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/studio/",
+          "id": "0a97b844445a41e85a7bb879"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "26728ca5a959f43c8218a875"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/%d0%b5lite-realtor/",
+          "id": "978c71334c6efc2ce4694df7"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/house-floor/",
+          "id": "e7edeae7d8093730f2162771"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "4051f2c18e8d091b34081474"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "27c7186941280264247f94a3"
+        },
+        {
+          "url": "https://makler-realty.com/nl/location/bulgaria/",
+          "id": "b2a24df163c93b287a49d8ce"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/spa-resorts/",
+          "id": "42727d0014d842a4705d7834"
+        },
+        {
+          "url": "https://makler-realty.com/nl/property/sell/",
+          "id": "436dc4628f6e38b9e28aa346"
+        },
+        {
+          "url": "https://makler-realty.com/nl",
+          "id": "aad3bf55be0ef31588e05543"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "a324309a7ee3414d8efe7a1f"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [
+        {
+          "label": "No.:",
+          "value": "906"
+        },
+        {
+          "label": "Land:",
+          "value": "Болгария"
+        },
+        {
+          "label": "Stad:",
+          "value": "Sandanski, Spagebieden"
+        },
+        {
+          "label": "Categorie:",
+          "value": "Landbouwgrond"
+        },
+        {
+          "label": "Leefruimte:",
+          "value": "4500 m2"
+        },
+        {
+          "label": "Prijs:",
+          "value": "Ask about price €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/nl/location/bulgaria/",
+          "text": "Болгария"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/spa-resorts/",
+          "text": "Spagebieden"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "text": "Landbouwgrond"
+        },
+        {
+          "url": "https://makler-realty.com/nl/property/sell/",
+          "text": "https://makler-realty.com/nl/property/sell/"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Bulgaars"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "final_url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:55.785Z",
+      "response_sha256": "90efa16d6971664d297e504a97e0a4c50fc5b975a27478fda44c852ab0e127d0",
+      "response_artifact": "data/legacy/migration/live-source-html/90efa16d6971664d297e504a97e0a4c50fc5b975a27478fda44c852ab0e127d0.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [
+        {
+          "from": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "status": 302,
+          "to": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/"
+        }
+      ],
+      "title": "Земеделска земя в землището на с.Джигурово - Недвижими имоти в Сандански",
+      "h1": "Земеделска земя в землището на с.Джигурово",
+      "description": null,
+      "locale": "bg-BG",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "№: 896 Държава: България Град: Сандански , СПА Курорт Площ: 14411 m2 Тип: Продажба Цена: 11 500 € Земеделска земя в землището на с.Джигурово Имота се намира в м. ЧУЙ ПЕТЕЛ, в землището на с.Джигурово. Земеделска, категория 7, НТП Пасище, площ 14411 кв. м Tweet Име Email Телефон Съобщение Изпрати",
+      "text_sha256": "6097ad930a45e5e1aae940e4da2f6f56d8fbf22d826a041ea5c6e93eac88c1a7",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg",
+          "alt": "Земеделска земя в землището на с.Джигурово"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/",
+          "id": "3c8edaf9291d59f466bc4654"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "b76809be3edddc9d02b42b94"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "6f3de50081cb3208eb5cee3a"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "e792069846dbda52e0518e8e"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "f0240c521bcb47cb676c1964"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "cfaf046fb60fbaa00934190e"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "f6217d9782bf6cc114eebe55"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "369a2e4a883b3baf29e7f228"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "7726f352c0c791aa78e975c2"
+        },
+        {
+          "url": "https://makler-realty.com/services/",
+          "id": "19d1cb70c94d8f54ccfa90e9"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "2679dac47a27d10a8d52126b"
+        },
+        {
+          "url": "https://makler-realty.com/sitemap-2/",
+          "id": "4f7a381d1adbee225351850a"
+        },
+        {
+          "url": "https://makler-realty.com/resort/nafplio/",
+          "id": "cfefe5e8879ecc3016b2b385"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "c44f6bcf754350140bb068f9"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "15fcd80b0e22d1ceb900df55"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/villa/",
+          "id": "127bc43837aaec75ece7984e"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/dom/",
+          "id": "5b8907dc6a900b807e49517b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/apartment/",
+          "id": "5cc21cd7d2026c5cb6a32aef"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/commercial-area/",
+          "id": "d10ddba4ba369b7bd8efbd48"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/hotel/",
+          "id": "605325a645e0a1dfd8a5e4ac"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office/",
+          "id": "c58cce18a45b0cccb7851c95"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office-building/",
+          "id": "4fbae5a16043f1b361fb0f89"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/industrial-building/",
+          "id": "c89230c979cf580139a5cbdd"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "898942a41516f65ec57e49e2"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/studio/",
+          "id": "1bb9d6aabfb4978e2c33a89b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "b50cf774b868111cfafc92d5"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d0%b5lite-realtor/",
+          "id": "8419286037593fd02b03ec38"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/house-floor/",
+          "id": "973c5f9b31d3b5c4ba035d8d"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "id": "f990e9239c70ba0c74f7f0f0"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "49bedd92a43a06d767046abe"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9c8e82b580f6d3aacd27f180"
+        },
+        {
+          "url": "https://makler-realty.com/location/bulgaria/",
+          "id": "502992149d46ba5f66ce0875"
+        },
+        {
+          "url": "https://makler-realty.com/resort/spa-resorts/",
+          "id": "04e17c4292046590e60771d4"
+        },
+        {
+          "url": "https://makler-realty.com/property/sell/",
+          "id": "4419cae8e9a6aec9261d8095"
+        },
+        {
+          "url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "cda6f966bd12045de410d890"
+        },
+        {
+          "url": "https://makler-realty.com/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "51452b9f4a0761e4f00bd1b3"
+        }
+      ],
+      "sold": null,
+      "listing_reference": "896",
+      "source_fields": [
+        {
+          "label": "№:",
+          "value": "896"
+        },
+        {
+          "label": "Държава:",
+          "value": "България"
+        },
+        {
+          "label": "Град:",
+          "value": "Сандански, СПА Курорт"
+        },
+        {
+          "label": "Площ:",
+          "value": "14411 m2"
+        },
+        {
+          "label": "Тип:",
+          "value": "Продажба"
+        },
+        {
+          "label": "Цена:",
+          "value": "11 500 €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/location/bulgaria/",
+          "text": "България"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Сандански"
+        },
+        {
+          "url": "https://makler-realty.com/resort/spa-resorts/",
+          "text": "СПА Курорт"
+        },
+        {
+          "url": "https://makler-realty.com/property/sell/",
+          "text": "Продажба"
+        },
+        {
+          "url": "https://makler-realty.com/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/de/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "final_url": "https://makler-realty.com/de/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:57.038Z",
+      "response_sha256": "3a067b3f9c39bad7ff11db094b43bbec7f5e48fecf8eb5faa6b873e301c54f2a",
+      "response_artifact": "data/legacy/migration/live-source-html/3a067b3f9c39bad7ff11db094b43bbec7f5e48fecf8eb5faa6b873e301c54f2a.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "(Bulgarian) Земеделска земя в землището на с.Джигурово - Verkauf von Immobilien in Sandanski, Bulgarie",
+      "h1": "(Bulgarian) Земеделска земя в землището на с.Джигурово",
+      "description": null,
+      "locale": "de-DE",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "Nr.: 896 Land: Stadt: Sandanski , Kurgebiete Fläche: 14411 m2 Art der Immobilie: Zu verkaufen Preis: 11 500 € Leider ist der Eintrag nur auf Bulgarisch und Englisch verfügbar. Tweet Name Email Phone Message Send",
+      "text_sha256": "4d191a6a6d6e85e711460591a55da76691359c20029fa1c124d526c95ac682ca",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg",
+          "alt": "(Bulgarian) Земеделска земя в землището на с.Джигурово"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/de/",
+          "id": "0b90a95009dd43d3a7f9c215"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "b76809be3edddc9d02b42b94"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "6f3de50081cb3208eb5cee3a"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "e792069846dbda52e0518e8e"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "f0240c521bcb47cb676c1964"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "8af39326463f8902001b0969"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "afb29cc38575dd27b98149dc"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "828fe78827189bd98ac04e2d"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "ca67fd3644253b25019a7882"
+        },
+        {
+          "url": "https://makler-realty.com/de/services/",
+          "id": "5485a91fd1d076ed52a2ef76"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "597f6e81694e31124c832f9b"
+        },
+        {
+          "url": "https://makler-realty.com/de/sitemap-2/",
+          "id": "fcc673b7a65cd573fef163a6"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/nafplio/",
+          "id": "c98cfc8d77e723e20618e74b"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "ee2f86b901a3a0ea1c1a28be"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "47b7e2a71e5bf49c31427211"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/villa/",
+          "id": "ddd8049c6d82bf50ce321983"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/dom/",
+          "id": "f4863622c38b91e6423953b7"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/apartment/",
+          "id": "347ee610d261baa8f92c0bf4"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/commercial-area/",
+          "id": "4365680e73124d1ae2ab776a"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/hotel/",
+          "id": "8aaed8b6a1c80d96256bfdef"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/office/",
+          "id": "e7bd6bc1f5f78d42466b88b2"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/office-building/",
+          "id": "c2fbcf86cfeb20bc187f3ed3"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/industrial-building/",
+          "id": "664dc2fdc196dd39b95401f4"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "6479cf64d57f1f723d171111"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/studio/",
+          "id": "712de84799b8a2fc6a202e2d"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "23671f634031b290f09a7ed9"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/%d0%b5lite-realtor/",
+          "id": "79279a4d4843dff9e8315f9d"
+        },
+        {
+          "url": "https://makler-realty.com/de/category-type/house-floor/",
+          "id": "0f0c265656ba0456085a93b1"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+          "id": "0826d5bf645d486347e622ea"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "d4803e7425d4ee565b69714a"
+        },
+        {
+          "url": "https://makler-realty.com/de/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "b44ef94163f0584037d27489"
+        },
+        {
+          "url": "https://makler-realty.com/de/location/bulgaria/",
+          "id": "e7bb0fbb86686e7519a3d1ca"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/spa-resorts/",
+          "id": "74468e6cf9c4a2b71382e0b6"
+        },
+        {
+          "url": "https://makler-realty.com/de/property/sell/",
+          "id": "05e68707397ec4a2359d283e"
+        },
+        {
+          "url": "https://makler-realty.com/de",
+          "id": "bdd92a07138a86cc8833f724"
+        },
+        {
+          "url": "https://makler-realty.com/de/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "dd5746a0882b297e4a8b4a41"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [
+        {
+          "label": "Nr.:",
+          "value": "896"
+        },
+        {
+          "label": "Stadt:",
+          "value": "Sandanski, Kurgebiete"
+        },
+        {
+          "label": "Fläche:",
+          "value": "14411 m2"
+        },
+        {
+          "label": "Art der Immobilie:",
+          "value": "Zu verkaufen"
+        },
+        {
+          "label": "Preis:",
+          "value": "11 500 €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/de/location/bulgaria/",
+          "text": "https://makler-realty.com/de/location/bulgaria/"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/de/resort/spa-resorts/",
+          "text": "Kurgebiete"
+        },
+        {
+          "url": "https://makler-realty.com/de/property/sell/",
+          "text": "Zu verkaufen"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "text": "Bulgarisch"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "text": "Englisch"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/nl/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "final_url": "https://makler-realty.com/nl/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:27:58.581Z",
+      "response_sha256": "ad33c99854060b5164f77628339f17dad240bd4cd109ea7b5f79ae39b537dad8",
+      "response_artifact": "data/legacy/migration/live-source-html/ad33c99854060b5164f77628339f17dad240bd4cd109ea7b5f79ae39b537dad8.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "(Bulgarian) Земеделска земя в землището на с.Джигурово - Vastgoed in Sandanski, Bansko, Petrich. Vastgoed in Bulgarije.",
+      "h1": "(Bulgarian) Земеделска земя в землището на с.Джигурово",
+      "description": null,
+      "locale": "nl-NL",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "No.: 896 Land: Болгария Stad: Sandanski , Spagebieden Leefruimte: 14411 m2 Type onroerend goed: Prijs: 11 500 € Onze verontschuldigingen, dit bericht is alleen beschikbaar in Bulgaars en Engels . Tweet Name Email Phone Message Send",
+      "text_sha256": "6dc212a531e6b831901293b973b4cc63a84910e5b8a5d5b428e10af914a4915e",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg",
+          "alt": "(Bulgarian) Земеделска земя в землището на с.Джигурово"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/nl/",
+          "id": "17c8ef67aac2d54d846556bc"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "b76809be3edddc9d02b42b94"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "6f3de50081cb3208eb5cee3a"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "e792069846dbda52e0518e8e"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "id": "f0240c521bcb47cb676c1964"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "1ef84cbc1dbead4c9e8584b2"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "6a9ca758b0e9de259fd2a1d5"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "06a8f1e4a2f60d44e562cfd8"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "8b3c727487bf89bb3002d707"
+        },
+        {
+          "url": "https://makler-realty.com/nl/services/",
+          "id": "b385cecf7ecdee839541f3db"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "c4c987c75f270c20e2393670"
+        },
+        {
+          "url": "https://makler-realty.com/nl/sitemap-2/",
+          "id": "a7ee8b7ee6d95b72325b7b67"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/nafplio/",
+          "id": "ec6865e893f8a0d1113fa7d8"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "899d93121d3dbd867db12142"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "b44c4903e5c6e7b311ad3f0b"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/villa/",
+          "id": "3bc6064df807891a14cddc3e"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/dom/",
+          "id": "18c0b5691f108c4031cae92c"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/apartment/",
+          "id": "fb296a21105aa2c25b7c760f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/commercial-area/",
+          "id": "fce603b77281b46004a58e1f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/hotel/",
+          "id": "17bb4521a1a1c19bbc8bb702"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/office/",
+          "id": "772f3a0505e284b73a0dc82f"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/office-building/",
+          "id": "6c82932ac4d8e4527092c6f1"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/industrial-building/",
+          "id": "7f5da64d605fc1fb8d040acc"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "41ed9d7d8ea5f2f343912b87"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/studio/",
+          "id": "0a97b844445a41e85a7bb879"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "26728ca5a959f43c8218a875"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/%d0%b5lite-realtor/",
+          "id": "978c71334c6efc2ce4694df7"
+        },
+        {
+          "url": "https://makler-realty.com/nl/category-type/house-floor/",
+          "id": "e7edeae7d8093730f2162771"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "4051f2c18e8d091b34081474"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "27c7186941280264247f94a3"
+        },
+        {
+          "url": "https://makler-realty.com/nl/location/bulgaria/",
+          "id": "b2a24df163c93b287a49d8ce"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/spa-resorts/",
+          "id": "42727d0014d842a4705d7834"
+        },
+        {
+          "url": "https://makler-realty.com/nl/property/sell/",
+          "id": "436dc4628f6e38b9e28aa346"
+        },
+        {
+          "url": "https://makler-realty.com/nl",
+          "id": "aad3bf55be0ef31588e05543"
+        },
+        {
+          "url": "https://makler-realty.com/nl/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "a324309a7ee3414d8efe7a1f"
+        }
+      ],
+      "sold": null,
+      "listing_reference": null,
+      "source_fields": [
+        {
+          "label": "No.:",
+          "value": "896"
+        },
+        {
+          "label": "Land:",
+          "value": "Болгария"
+        },
+        {
+          "label": "Stad:",
+          "value": "Sandanski, Spagebieden"
+        },
+        {
+          "label": "Leefruimte:",
+          "value": "14411 m2"
+        },
+        {
+          "label": "Prijs:",
+          "value": "11 500 €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/nl/location/bulgaria/",
+          "text": "Болгария"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/nl/resort/spa-resorts/",
+          "text": "Spagebieden"
+        },
+        {
+          "url": "https://makler-realty.com/nl/property/sell/",
+          "text": "https://makler-realty.com/nl/property/sell/"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "text": "Bulgaars"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "text": "Engels"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/bg/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "final_url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:28:00.736Z",
+      "response_sha256": "30a3650e1362fc69612630af252f8844ac23eee187f983a618c3a84d8703ac5c",
+      "response_artifact": "data/legacy/migration/live-source-html/30a3650e1362fc69612630af252f8844ac23eee187f983a618c3a84d8703ac5c.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [
+        {
+          "from": "https://makler-realty.com/bg/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "status": 302,
+          "to": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/"
+        }
+      ],
+      "title": "Офис под наем в центъра на гр.Сандански - Недвижими имоти в Сандански",
+      "h1": "Офис под наем в центъра на гр.Сандански",
+      "description": null,
+      "locale": "bg-BG",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "№: 890 Държава: България Град: Сандански , СПА Курорт Категория обект: Офис Етаж: 2 Площ: 18 m2 Тип: Наем Цена: 83 € Офис под наем в центъра на гр.Сандански Офиса се намира на пешеходната улица на гр.Сандански /ул.Македония/. Състои се от едно помещение с площ от 18 кв.м., намира се на първи етаж /над партер/. Санитарния възел е общ за няколко офиса, които се намират на същия етаж. Подходящ е за адвокатска кантора – всички останали офиси в сградата се използват като такива. Tweet Име Email Телефон Съобщение Изпрати",
+      "text_sha256": "4e5d2227277201f711fb58ef1f700be20192b249cdbe105a29df9c2bba329e7d",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/02/890-2-680x510.jpeg",
+          "alt": "Офис под наем в центъра на гр.Сандански"
+        },
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/02/890-1-680x510.jpeg",
+          "alt": ""
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/",
+          "id": "3c8edaf9291d59f466bc4654"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "e34f905276c115f113a72b3c"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "5e19ec6631ddf8cd29f7735b"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "70aa29b954acc753999fcd88"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "12c5f9b0e1a891fc09aad620"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "cfaf046fb60fbaa00934190e"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "f6217d9782bf6cc114eebe55"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "369a2e4a883b3baf29e7f228"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "7726f352c0c791aa78e975c2"
+        },
+        {
+          "url": "https://makler-realty.com/services/",
+          "id": "19d1cb70c94d8f54ccfa90e9"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "2679dac47a27d10a8d52126b"
+        },
+        {
+          "url": "https://makler-realty.com/sitemap-2/",
+          "id": "4f7a381d1adbee225351850a"
+        },
+        {
+          "url": "https://makler-realty.com/resort/nafplio/",
+          "id": "cfefe5e8879ecc3016b2b385"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "c44f6bcf754350140bb068f9"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "15fcd80b0e22d1ceb900df55"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/villa/",
+          "id": "127bc43837aaec75ece7984e"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/dom/",
+          "id": "5b8907dc6a900b807e49517b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/apartment/",
+          "id": "5cc21cd7d2026c5cb6a32aef"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/commercial-area/",
+          "id": "d10ddba4ba369b7bd8efbd48"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/hotel/",
+          "id": "605325a645e0a1dfd8a5e4ac"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office/",
+          "id": "c58cce18a45b0cccb7851c95"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office-building/",
+          "id": "4fbae5a16043f1b361fb0f89"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/industrial-building/",
+          "id": "c89230c979cf580139a5cbdd"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "898942a41516f65ec57e49e2"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/studio/",
+          "id": "1bb9d6aabfb4978e2c33a89b"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "b50cf774b868111cfafc92d5"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/%d0%b5lite-realtor/",
+          "id": "8419286037593fd02b03ec38"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/house-floor/",
+          "id": "973c5f9b31d3b5c4ba035d8d"
+        },
+        {
+          "url": "https://makler-realty.com/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "id": "f990e9239c70ba0c74f7f0f0"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "49bedd92a43a06d767046abe"
+        },
+        {
+          "url": "https://makler-realty.com/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "9c8e82b580f6d3aacd27f180"
+        },
+        {
+          "url": "https://makler-realty.com/location/bulgaria/",
+          "id": "502992149d46ba5f66ce0875"
+        },
+        {
+          "url": "https://makler-realty.com/resort/spa-resorts/",
+          "id": "04e17c4292046590e60771d4"
+        },
+        {
+          "url": "https://makler-realty.com/floors/2/",
+          "id": "3e33051977cfa28b5bf23fa1"
+        },
+        {
+          "url": "https://makler-realty.com/property/rent/",
+          "id": "c01437d5b89fe97856651b17"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "028a1b164f650cd01c8177e4"
+        },
+        {
+          "url": "https://makler-realty.com/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "51452b9f4a0761e4f00bd1b3"
+        }
+      ],
+      "sold": null,
+      "listing_reference": "890",
+      "source_fields": [
+        {
+          "label": "№:",
+          "value": "890"
+        },
+        {
+          "label": "Държава:",
+          "value": "България"
+        },
+        {
+          "label": "Град:",
+          "value": "Сандански, СПА Курорт"
+        },
+        {
+          "label": "Категория обект:",
+          "value": "Офис"
+        },
+        {
+          "label": "Етаж:",
+          "value": "2"
+        },
+        {
+          "label": "Площ:",
+          "value": "18 m2"
+        },
+        {
+          "label": "Тип:",
+          "value": "Наем"
+        },
+        {
+          "label": "Цена:",
+          "value": "83 €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/location/bulgaria/",
+          "text": "България"
+        },
+        {
+          "url": "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Сандански"
+        },
+        {
+          "url": "https://makler-realty.com/resort/spa-resorts/",
+          "text": "СПА Курорт"
+        },
+        {
+          "url": "https://makler-realty.com/category-type/office/",
+          "text": "Офис"
+        },
+        {
+          "url": "https://makler-realty.com/floors/2/",
+          "text": "2"
+        },
+        {
+          "url": "https://makler-realty.com/property/rent/",
+          "text": "Наем"
+        },
+        {
+          "url": "https://makler-realty.com/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Tweet"
+        }
+      ]
+    },
+    {
+      "url": "https://makler-realty.com/en/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "final_url": "https://makler-realty.com/en/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "status": 200,
+      "captured_at_utc": "2026-10-01T19:28:02.194Z",
+      "response_sha256": "a4c444e40deaff24f8430c985953026aae1097bbc992c5d31f2b26bbc62bfa89",
+      "response_artifact": "data/legacy/migration/live-source-html/a4c444e40deaff24f8430c985953026aae1097bbc992c5d31f2b26bbc62bfa89.html.gz",
+      "provenance": "live",
+      "extractor": "legacy-main-v4",
+      "transport": "python_urllib_public_get",
+      "response_encoding": "utf-8",
+      "redirects": [],
+      "title": "(Bulgarian) Офис под наем в центъра на гр.Сандански - Real estate in Bulgaria. SPA Resort Sandanski.",
+      "h1": "(Bulgarian) Офис под наем в центъра на гр.Сандански",
+      "description": null,
+      "locale": "en-EN",
+      "parked": false,
+      "content_scope": "class:post_content",
+      "extracted_body_text": "ID №: 890 Country: Bulgaria City: Sandanski , SPA Resorts Category: Office Floor: 2 Area: 18 m2 Property Type: Rent Price: 83 € Sorry, this entry is only available in Bulgarian . Tweet Name Email Phone Message Send",
+      "text_sha256": "ff2f1ebe400487466062b6c3ae086092bf4c00363b7f6a8191b25762ea30204e",
+      "images": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/02/890-2-680x510.jpeg",
+          "alt": "(Bulgarian) Офис под наем в центъра на гр.Сандански"
+        },
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/02/890-1-680x510.jpeg",
+          "alt": ""
+        }
+      ],
+      "links": [
+        {
+          "url": "https://makler-realty.com/en/",
+          "id": "1d5990d645b22cbb77498757"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "e34f905276c115f113a72b3c"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "5e19ec6631ddf8cd29f7735b"
+        },
+        {
+          "url": "https://makler-realty.com/de/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "70aa29b954acc753999fcd88"
+        },
+        {
+          "url": "https://makler-realty.com/nl/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "12c5f9b0e1a891fc09aad620"
+        },
+        {
+          "url": "http://makler-realty.ru/",
+          "id": "5bcfd16f674cb299f35b417f"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+          "id": "c4cd65afd4a9f99cd7d45113"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%be-%d0%ba%d0%be%d0%bc%d0%bf%d0%b0%d0%bd%d0%b8%d0%b8/",
+          "id": "9cdcf66cf490624fe49dde8b"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
+          "id": "d0063278d71d7b7a468d327a"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%bf%d0%b0%d1%80%d1%82%d0%bd%d1%8c%d0%be%d1%80%d0%b8/",
+          "id": "bbbf712fe80a86e761eca29b"
+        },
+        {
+          "url": "https://makler-realty.com/en/services/",
+          "id": "5d12871a9ec6cba94007bcc0"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+          "id": "a54c28a835dd552a150886b5"
+        },
+        {
+          "url": "https://makler-realty.com/en/sitemap-2/",
+          "id": "09bc0f39563c99ffa6e504ec"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/nafplio/",
+          "id": "dd219907c85b3b3681955243"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+          "id": "429327b830cb1309ddfa450f"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "ab3803e5d78c8041eb6aa5e2"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/villa/",
+          "id": "7f625b34077aa8349b266253"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/dom/",
+          "id": "5b11ce44ea42fa240e33c380"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/apartment/",
+          "id": "2929574e76102456cc172c80"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/commercial-area/",
+          "id": "f7b342512d241461ff64b6f5"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/hotel/",
+          "id": "f88cee111516bf2988f7a6d1"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/office/",
+          "id": "06af0cadf063058946b1d9de"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/office-building/",
+          "id": "975f2a34641ecd4e76db7d1f"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/industrial-building/",
+          "id": "a3d14fe828d2f84909bc6b7e"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/",
+          "id": "c943885d45e9e8eb927099c6"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/studio/",
+          "id": "29dd17759943c526f82774a0"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/",
+          "id": "3a666fd1e4300cce9ac94e37"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/%d0%b5lite-realtor/",
+          "id": "f913d031a23a8fb733bf4752"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/house-floor/",
+          "id": "dcbaf1df6d5fb56f6b484473"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%be%d0%bd%d0%bb%d0%b0%d0%b9%d0%bd-%d0%ba%d0%b0%d0%bc%d0%b5%d1%80%d0%b0-%d1%85%d0%b8%d0%b6%d0%b0-%d0%b1%d0%b5%d0%b3%d0%be%d0%b2%d0%b8%d1%86%d0%b0/",
+          "id": "b0b6f3c2a2db1575f0fe0ae4"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+          "id": "352a38ba1a2aebca6b57dbf8"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "44d7821f87cfcf9698eceba7"
+        },
+        {
+          "url": "https://makler-realty.com/en/%d1%82%d0%b0%d0%ba%d1%81%d0%b8-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "id": "1b78f029a9e6cf185268e61a"
+        },
+        {
+          "url": "https://makler-realty.com/en/location/bulgaria/",
+          "id": "e070ac1355fb6b6adcb7f663"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/spa-resorts/",
+          "id": "d41dc1417e9d151c12827f8d"
+        },
+        {
+          "url": "https://makler-realty.com/en/floors/2/",
+          "id": "526e5dd7a2ea7d07d436baa5"
+        },
+        {
+          "url": "https://makler-realty.com/en/property/rent/",
+          "id": "520175f36e0f2049c36aee04"
+        },
+        {
+          "url": "https://makler-realty.com/en",
+          "id": "85dfe12d8332dc08702fef5b"
+        },
+        {
+          "url": "https://makler-realty.com/en/%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-%D0%B7%D0%B0-%D0%B7%D0%B0%D1%89%D0%B8%D1%82%D0%B0-%D0%BD%D0%B0-%D0%BB%D0%B8%D1%87%D0%BD%D0%B8%D1%82%D0%B5-%D0%B4%D0%B0%D0%BD%D0%BD%D0%B8/",
+          "id": "f01d6cb8ee4fa41a79e91f81"
+        }
+      ],
+      "sold": null,
+      "listing_reference": "890",
+      "source_fields": [
+        {
+          "label": "ID №:",
+          "value": "890"
+        },
+        {
+          "label": "Country:",
+          "value": "Bulgaria"
+        },
+        {
+          "label": "City:",
+          "value": "Sandanski, SPA Resorts"
+        },
+        {
+          "label": "Category:",
+          "value": "Office"
+        },
+        {
+          "label": "Floor:",
+          "value": "2"
+        },
+        {
+          "label": "Area:",
+          "value": "18 m2"
+        },
+        {
+          "label": "Property Type:",
+          "value": "Rent"
+        },
+        {
+          "label": "Price:",
+          "value": "83 €"
+        }
+      ],
+      "content_links": [
+        {
+          "url": "https://makler-realty.com/en/location/bulgaria/",
+          "text": "Bulgaria"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Sandanski"
+        },
+        {
+          "url": "https://makler-realty.com/en/resort/spa-resorts/",
+          "text": "SPA Resorts"
+        },
+        {
+          "url": "https://makler-realty.com/en/category-type/office/",
+          "text": "Office"
+        },
+        {
+          "url": "https://makler-realty.com/en/floors/2/",
+          "text": "2"
+        },
+        {
+          "url": "https://makler-realty.com/en/property/rent/",
+          "text": "Rent"
+        },
+        {
+          "url": "https://makler-realty.com/bg/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Bulgarian"
+        },
+        {
+          "url": "https://makler-realty.com/en/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+          "text": "Tweet"
+        }
+      ]
+    }
+  ],
+  "discoveredOutsideFrozenUrls": [
+    {
+      "url": "https://makler-realty.com/sitemap/",
+      "id": "bc81fb5e96eab3dc3164c92c"
+    },
+    {
+      "url": "https://makler-realty.com/sitemap-2/",
+      "id": "4f7a381d1adbee225351850a"
+    },
+    {
+      "url": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "dc101dfcfe36d68140702214"
+    },
+    {
+      "url": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "067f83b9e3b6d496527b366b"
+    },
+    {
+      "url": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "9d1b1c607e6468323dac7046"
+    },
+    {
+      "url": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b8%d0%bc%d0%be%d1%82-%d0%b2-%d0%bc-%d1%80%d0%b0%d0%bd%d0%ba%d0%be%d0%b2%d0%b5%d1%86-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "920bf8b69be5286b4351a017"
+    },
+    {
+      "url": "https://makler-realty.com/en/sitemap-2/",
+      "id": "09bc0f39563c99ffa6e504ec"
+    },
+    {
+      "url": "https://makler-realty.com/en/location/bulgaria/",
+      "id": "e070ac1355fb6b6adcb7f663"
+    },
+    {
+      "url": "https://makler-realty.com/en/resort/spa-resorts/",
+      "id": "d41dc1417e9d151c12827f8d"
+    },
+    {
+      "url": "https://makler-realty.com/en/property/sell/",
+      "id": "16894ce3c28db382b1c5b96f"
+    },
+    {
+      "url": "https://makler-realty.com/de/sitemap-2/",
+      "id": "fcc673b7a65cd573fef163a6"
+    },
+    {
+      "url": "https://makler-realty.com/de/location/bulgaria/",
+      "id": "e7bb0fbb86686e7519a3d1ca"
+    },
+    {
+      "url": "https://makler-realty.com/de/resort/spa-resorts/",
+      "id": "74468e6cf9c4a2b71382e0b6"
+    },
+    {
+      "url": "https://makler-realty.com/de/property/sell/",
+      "id": "05e68707397ec4a2359d283e"
+    },
+    {
+      "url": "https://makler-realty.com/nl/sitemap-2/",
+      "id": "a7ee8b7ee6d95b72325b7b67"
+    },
+    {
+      "url": "https://makler-realty.com/nl/location/bulgaria/",
+      "id": "b2a24df163c93b287a49d8ce"
+    },
+    {
+      "url": "https://makler-realty.com/nl/resort/spa-resorts/",
+      "id": "42727d0014d842a4705d7834"
+    },
+    {
+      "url": "https://makler-realty.com/nl/property/sell/",
+      "id": "436dc4628f6e38b9e28aa346"
+    },
+    {
+      "url": "https://makler-realty.com/bg/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "id": "b76809be3edddc9d02b42b94"
+    },
+    {
+      "url": "https://makler-realty.com/en/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "id": "6f3de50081cb3208eb5cee3a"
+    },
+    {
+      "url": "https://makler-realty.com/de/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "id": "e792069846dbda52e0518e8e"
+    },
+    {
+      "url": "https://makler-realty.com/nl/listing/zemedelska-zemq-s-dzhigurovo-prodava/",
+      "id": "f0240c521bcb47cb676c1964"
+    },
+    {
+      "url": "https://makler-realty.com/bg/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "e34f905276c115f113a72b3c"
+    },
+    {
+      "url": "https://makler-realty.com/en/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "5e19ec6631ddf8cd29f7735b"
+    },
+    {
+      "url": "https://makler-realty.com/de/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "70aa29b954acc753999fcd88"
+    },
+    {
+      "url": "https://makler-realty.com/nl/listing/%d0%be%d1%84%d0%b8%d1%81-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "12c5f9b0e1a891fc09aad620"
+    },
+    {
+      "url": "https://makler-realty.com/en/floors/2/",
+      "id": "526e5dd7a2ea7d07d436baa5"
+    },
+    {
+      "url": "https://makler-realty.com/en/property/rent/",
+      "id": "520175f36e0f2049c36aee04"
+    }
+  ]
+}

@@ -1,19 +1,24 @@
 {
   "label": "Workspace",
   "secondaryLabel": "Management",
+  "currentPage": "Current page",
   "today": "Today",
   "inquiries": "Inquiries",
   "cases": "Cases",
   "calendar": "Calendar",
   "inventory": "Inventory",
+  "tasks": "Tasks",
+  "butler": "Butler",
+  "moreTools": "More tools",
   "reviews": "Reviews",
   "content": "Content",
   "operations": "Operations",
   "settings": "Settings",
-  "more": "More",
   "search": "Search records",
   "interfaceLanguage": "Interface language",
   "todayHeading": "Today",
   "account": "Account",
-  "session": "Session"
+  "session": "Session",
+  "manageAccess": "Manage access",
+  "signOut": "Sign out"
 }

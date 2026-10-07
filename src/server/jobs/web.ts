@@ -4,6 +4,7 @@
 import "server-only";
 import { getDb } from "@/db/client";
 import { getEnv } from "../config/env";
+import { assertRecoveryOpen } from "../recovery/quarantine";
 import { TestMessageProvider } from "./provider";
 import { JobQueue, registerWorkers } from "./queue";
 
@@ -17,6 +18,7 @@ export function getJobQueue(): Promise<JobQueue> {
   cache.__msRealtyQueue ??= (async () => {
     const env = getEnv();
     if (!env.databaseUrl) throw new Error("DATABASE_URL is required.");
+    await assertRecoveryOpen(getDb());
     const queue = new JobQueue(env.databaseUrl, { producer: !env.testOutbox });
     await queue.start();
     if (env.testOutbox) {

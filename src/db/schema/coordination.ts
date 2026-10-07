@@ -39,7 +39,7 @@ import {
 import { principals } from "./identity";
 import { listingRevisions, listings, properties } from "./inventory";
 import { parties } from "./parties";
-import { externalActions } from "./records";
+import { externalActions, operations } from "./records";
 import { cases, inquiries, interests } from "./work";
 
 export const appointments = pgTable(
@@ -54,6 +54,11 @@ export const appointments = pgTable(
     listingId: uuid("listing_id").references(() => listings.id),
     propertyId: uuid("property_id").references(() => properties.id),
     hostId: uuid("host_id").references(() => principals.id),
+    /** The old host and booking remain in force until this named receiver personally accepts. */
+    pendingHostId: uuid("pending_host_id").references(() => principals.id),
+    pendingHostVersion: integer("pending_host_version"),
+    pendingHostNote: text("pending_host_note"),
+    pendingHostOfferedAt: instant("pending_host_offered_at"),
     /** IANA timezone controlling the local time; instants are stored in UTC. */
     timezone: text("timezone").notNull(),
     /** Preferred windows the requester gave; a request is never a booking. */
@@ -80,6 +85,10 @@ export const appointments = pgTable(
     cancelReason: text("cancel_reason"),
   },
   (t) => [
+    check(
+      "appointments_host_offer_complete",
+      sql`num_nonnulls(${t.pendingHostId}, ${t.pendingHostVersion}, ${t.pendingHostNote}, ${t.pendingHostOfferedAt}) in (0, 4) and (${t.pendingHostId} is null or (${t.hostId} is not null and ${t.pendingHostId} <> ${t.hostId} and ${t.pendingHostVersion} > 0 and ${t.pendingHostVersion} <= ${t.version} and char_length(${t.pendingHostNote}) between 10 and 2000))`,
+    ),
     check(
       "appointments_confirmed_slot",
       sql`${t.state} not in ('confirmed', 'reschedule_requested', 'completed', 'no_show') or (${t.confirmedStartsAt} is not null and ${t.confirmedEndsAt} is not null and ${t.confirmedEndsAt} > ${t.confirmedStartsAt})`,
@@ -212,6 +221,43 @@ export const proposalRevisions = pgTable(
   ],
 );
 
+/** Append-only decisions by the exact parties of one proposal revision (AT34). */
+export const proposalResponses = pgTable(
+  "proposal_responses",
+  {
+    id: id(),
+    createdAt: createdAt(),
+    revisionId: uuid("revision_id")
+      .notNull()
+      .references(() => proposalRevisions.id),
+    partyId: uuid("party_id")
+      .notNull()
+      .references(() => parties.id),
+    actorKind: actorKindEnum("actor_kind").notNull(),
+    actorId: text("actor_id").notNull(),
+    decision: text("decision").$type<"agree" | "decline" | "counter">().notNull(),
+    reason: text("reason").notNull(),
+    /** Digest of every exact term, party snapshot and listing source at response time. */
+    termsHash: text("terms_hash").notNull(),
+    operationId: uuid("operation_id")
+      .notNull()
+      .references(() => operations.id),
+    evidenceDocumentVersionId: uuid("evidence_document_version_id").references(
+      (): AnyPgColumn => documentVersions.id,
+    ),
+  },
+  (t) => [
+    uniqueIndex("proposal_responses_party_revision_idx").on(t.revisionId, t.partyId),
+    check("proposal_responses_human", sql`${t.actorKind} in ('staff', 'client')`),
+    check("proposal_responses_decision", sql`${t.decision} in ('agree', 'decline', 'counter')`),
+    check("proposal_responses_exact_terms", sql`${t.termsHash} ~ '^[a-f0-9]{64}$'`),
+    check(
+      "proposal_responses_staff_evidence",
+      sql`${t.actorKind} <> 'staff' or ${t.evidenceDocumentVersionId} is not null`,
+    ),
+  ],
+);
+
 /** One logical message with an explicit audience; delivery attempts are separate rows. */
 export const messages = pgTable(
   "messages",
@@ -294,7 +340,10 @@ export const documents = pgTable(
     retentionClass: text("retention_class"),
     expiresAt: instant("expires_at"),
   },
-  (t) => [index("documents_case_idx").on(t.caseId)],
+  (t) => [
+    index("documents_case_idx").on(t.caseId),
+    index("documents_property_purpose_idx").on(t.propertyId, t.purpose),
+  ],
 );
 
 export const documentVersions = pgTable(
@@ -318,6 +367,8 @@ export const documentVersions = pgTable(
     uploadedById: text("uploaded_by_id").notNull(),
     scan: scanStateEnum("scan").notNull().default("pending"),
     scannedAt: instant("scanned_at"),
+    scannerVersion: text("scanner_version"),
+    scannedSha256: text("scanned_sha256"),
     reviewType: documentReviewTypeEnum("review_type"),
     reviewedById: uuid("reviewed_by_id").references(() => principals.id),
     reviewedAt: instant("reviewed_at"),

@@ -7,6 +7,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Actor } from "@/domain/capabilities";
 import { gateIds, readinessReportSchema } from "@/release/schemas";
+import { readinessSnapshotDigest } from "@/release/signature";
 import { assertCan } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
@@ -44,25 +45,59 @@ function allBlocked(
   };
 }
 
-/** The gate summary of `snapshot` if it was evaluated for `buildSha`; otherwise all blocked. */
-export function summarizeReadiness(snapshot: unknown, buildSha: string | null): ReadinessResponse {
+export interface RuntimeReleaseBinding {
+  readonly environment: string | null;
+  readonly manifestDigest: string | null;
+  readonly policyDigest: string | null;
+  readonly snapshotDigest: string | null;
+  readonly now?: Date;
+}
+
+/** Saved verdicts must match the deployed identity and remain unmodified and unexpired. */
+export function summarizeReadiness(
+  snapshot: unknown,
+  buildSha: string | null,
+  binding: RuntimeReleaseBinding,
+): ReadinessResponse {
   const release = { sha: buildSha };
   if (snapshot === null) return allBlocked(release, "missing");
   const parsed = readinessReportSchema.safeParse(snapshot);
   if (!parsed.success) return allBlocked(release, "invalid");
   const report = parsed.data;
+  if (readinessSnapshotDigest(report) !== report.snapshotId) return allBlocked(release, "invalid");
   if (!buildSha || report.release.releaseSha !== buildSha) {
     return allBlocked(release, "other_release");
   }
+  if (
+    !binding.environment ||
+    !binding.manifestDigest ||
+    !binding.policyDigest ||
+    !binding.snapshotDigest
+  )
+    return allBlocked(release, "unbound");
+  if (report.snapshotId !== binding.snapshotDigest) return allBlocked(release, "other_snapshot");
+  if (report.release.environment !== binding.environment)
+    return allBlocked(release, "other_environment");
+  if (report.release.manifestDigest !== binding.manifestDigest)
+    return allBlocked(release, "other_manifest");
+  if (report.policy.policyDigest !== binding.policyDigest)
+    return allBlocked(release, "other_policy");
+  const now = (binding.now ?? new Date()).getTime();
+  if (!Number.isFinite(now) || Date.parse(report.evaluatedAt) > now + 5 * 60_000)
+    return allBlocked(release, "invalid");
+  if (Date.parse(report.expiresAt) <= now) return allBlocked(release, "expired");
   return {
     release,
     snapshotState: "current",
     snapshot: {
       snapshotId: report.snapshotId,
       evaluatedAt: report.evaluatedAt,
+      expiresAt: report.expiresAt,
       releaseSha: report.release.releaseSha,
       environment: report.release.environment,
       policyRevision: report.policy.policyRevision,
+      manifestDigest: report.release.manifestDigest,
+      policyDigest: report.policy.policyDigest,
     },
     verdict: report.verdict,
     gates: report.gates.map(({ id, status, blockers }) => ({ id, status, blockers })),
@@ -73,10 +108,10 @@ export function summarizeReadiness(snapshot: unknown, buildSha: string | null): 
 export async function readReadiness(
   db: Executor,
   actor: Actor | null,
-  input: { readonly buildSha: string | null; readonly snapshot: unknown },
+  input: RuntimeReleaseBinding & { readonly buildSha: string | null; readonly snapshot: unknown },
 ): Promise<ReadinessResponse> {
   if (!actor) throw new AppError("unauthenticated");
   if (actor.kind !== "staff") throw new AppError("forbidden");
   await assertCan(db, actor, "report.read");
-  return summarizeReadiness(input.snapshot, input.buildSha);
+  return summarizeReadiness(input.snapshot, input.buildSha, input);
 }

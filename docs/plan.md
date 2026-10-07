@@ -1,6 +1,8 @@
 # MS Realty rebuild plan
 
-Status: active · Started 2026-09-23 · Realigned 2026-09-26
+Status: active, not release-qualified · Started 2026-09-23 · Realigned 2026-09-26 · Recovery audited 2026-09-27
+
+The current execution record is [delivery/2026-09-27-recovery.md](delivery/2026-09-27-recovery.md). The interrupted workflow status is not acceptance evidence.
 
 Authority, in order: [`docs/architecture.md`](architecture.md) (final architecture v1.0,
 normative), [`docs/adr/0002-implementation-deviations.md`](adr/0002-implementation-deviations.md)
@@ -35,32 +37,37 @@ reviewers, real approvals and the cutover decision (§21.4, §8 below). The rebu
 everything up to those inputs, keeps each missing input visible as a blocked gate with its
 safe default, and never reports a gate as passed on local or synthetic evidence.
 
-## 3. Current state (2026-09-26)
+## 3. Current state (2026-09-27)
+
+The recovered implementation is tracked in the delivery record above. The legacy deployment
+description below is the 26 September baseline, not a fresh live-service observation.
 
 | Area | State |
 |---|---|
 | Legacy site | `makler-realty.com` serves the legacy WordPress site (Worker routes removed out-of-band on 2026-09-17); `makler-realty.ru` registration expired. The old Next/Payload app still runs on workers.dev and the origin at `a51827be`, watched by the legacy monitoring workflows pinned to tag `legacy-app-final` |
 | Merged | S0 deploy freeze (#260); S1 scaffold and legacy extraction (#261); S1 foundations (#263): domain model, schema, server core, UI kit, i18n shells, staged legacy import; CI v2 (`ci / gate`, #265/#272) |
 | Legacy data | `data/legacy/`: 165 listings (30 active at freeze), 457 exact URL decisions (179×301, 268×410, 10×200), 1725 R2 media objects, 31 places, approved guide content; verified by `data/legacy/verify.mjs` |
-| Known gaps vs architecture | Found by the 2026-09-24 review: no staff MFA; publication pointer/generation missing; retired scope still in the schema; one host instead of three; tokens from the superseded palette; 340 KB gzip JS on an empty public page; no shared form/mutation pattern; message catalogs not split for parallel work |
+| Recovered foundation | Three-host routing, mandatory two-passkey staff identity, revisioned publication/generation, split catalogs, architecture tokens, native forms and release evaluator implemented; production image, migrator and worker have local smoke evidence |
+| Delivery work | Inventory/publication, discovery/intake, case continuity, private files, process controls, draft assistance and opt-in alert rule implemented with scoped database/browser evidence. Integrated verification and review fixes in progress; remaining software and external inputs are enumerated in the delivery record |
+| Launch authority | Original `production/data/launch-readiness.json` and `launch-input-checklist.md` preserved; R00 and live qualification remain blocked |
 
 ## 4. Implementation decisions
 
-Architecture §2 as amended by ADR 0002. In practice:
+Architecture §2 as amended by [ADR 0002](adr/0002-implementation-deviations.md), [ADR 0003](adr/0003-openrouter-jev.md) and [ADR 0004](adr/0004-cloudflare-staging.md). In practice:
 
 | Concern | Choice |
 |---|---|
 | Application | Next.js 16 App Router, React 19, TypeScript strict, Node 24; one app serving three hosts: `makler-realty.com` (public), `my.makler-realty.com` (client), `app.makler-realty.com` (staff), routed by host in `proxy.ts`; local equivalents `*.localhost` |
-| Data | PostgreSQL 18, Drizzle ORM, committed SQL migrations (expand/backfill/contract), atomic revision guards |
+| Data | PostgreSQL 16.14 for the selected provider contract, Drizzle ORM, committed SQL migrations (expand/backfill/contract), atomic revision guards; actual private staging connectivity remains unverified |
 | Work | pg-boss in a dedicated worker; outbox + external-action ledger; lanes; leases |
 | Identity | First-party passwordless (ADR 0002): staff passkeys ×2 mandatory, client e-mail link with confirm POST; host-only cookies per context |
 | UI | React Aria Components + Tailwind v4 on DTCG-sourced semantic tokens (architecture §11.3 palette); server components by default; forms work without JavaScript |
 | i18n | next-intl; public/client `bg en ru de nl el he`, staff `bg en ru`; per-namespace catalogs; locale published only when its content is approved |
 | Rendering | Mutable public pages render per request from PostgreSQL (architecture §7.5); only static assets and approved media derivatives are cached |
 | Media | R2 EU jurisdiction: quarantine, private, public buckets via the S3 API; seal → scan (ClamAV) → derivatives; private downloads through the app |
-| Providers | Resend (mail), OpenAI Responses (Hermes adapter), Protomaps + MapLibre (maps), Better Stack (monitoring), AWS S3 Object Lock (independent archive); local fakes until accounts exist |
+| Providers | Resend (mail), OpenRouter hosted Jev Router + typed Jev Decisions (Hermes; ADR 0003), Protomaps + MapLibre (maps), Better Stack (monitoring), AWS S3 Object Lock (independent archive); synthetic checks until live qualification |
 | Tests | Vitest (unit, jsdom, integration on real PostgreSQL), Playwright (Chromium desktop/mobile + WebKit mobile) with axe and screenshot baselines in the pinned Playwright image |
-| Hosting | DigitalOcean App Platform Frankfurt: ≥2 web, 1 worker, PRE_DEPLOY migration job; HA Managed PostgreSQL 18; Cloudflare gateway Worker |
+| Hosting | Cloudflare gateway and protected Containers candidate: web, persistent worker and serialized migration use one immutable image digest with distinct credentials; separate PostgreSQL 16.14 staging service and private TLS path require live qualification before promotion |
 
 ## 5. Delivery slices
 
@@ -68,12 +75,12 @@ Order follows architecture §22.1. Each slice ends merged with green CI and a sl
 
 | Slice | Scope | Surfaces | Acceptance | Gate prepared |
 |---|---|---|---|---|
-| **S1b Realign foundation** | Adopt architecture names and records (PropertyFactRevision, ListingRevision, LocalizedRevision, PublicationManifest + CurrentPublication with generation, Interest, SellerInstruction, ExternalAction, Subscription/ConsentEvent, PrivacyRequest, ReleaseEvidence); drop retired scope (reservations, statements, service-request dispatch, short-stay purpose, night/week periods, spending capability); PostgreSQL 18; three hosts; staff passkey MFA, recovery, §8.1 timers, 72 h invitations; DTCG tokens with the §11.3 palette; bundle diet; shared form/mutation pattern; display-locale map; per-namespace and staff catalogs; component stories + screenshot tests + WebKit; transport-schema (OpenAPI) generation; release-evidence schema | shells, sign-in, access recovery | AT19, AT26, AT36–AT40 (local), AT41 | R01 |
+| **S1b Realign foundation** | Adopt architecture names and records (PropertyFactRevision, ListingRevision, LocalizedRevision, PublicationManifest + CurrentPublication with generation, Interest, SellerInstruction, ExternalAction, Subscription/ConsentEvent, PrivacyRequest, ReleaseEvidence); drop retired scope (reservations, statements, service-request dispatch, short-stay purpose, night/week periods, spending capability); qualify PostgreSQL 16.14 under ADR 0004; three hosts; staff passkey MFA, recovery, §8.1 timers, 72 h invitations; DTCG tokens with the §11.3 palette; bundle diet; shared form/mutation pattern; display-locale map; per-namespace and staff catalogs; component stories + screenshot tests + WebKit; transport-schema (OpenAPI) generation; release-evidence schema | shells, sign-in, access recovery | AT19, AT26, AT36–AT40 (local), AT41 | R01 |
 | **S2 Inventory → public truth** | Seller/landlord intake and receipt; property workbench (facts & sources, listings/terms, media, BG copy, locales, review/publish, distribution/history); upload → seal → scan → derivatives; locale revisions and review; manifests, eligibility, atomic publish/restrict/withdraw with generation fencing; material correction; editorial content; legacy import staging with a human disposition per listing; legacy URL map in the gateway | P17–P19, O10–O17, O21, O33, O28 | AT18–AT28, AT42, AT55, AT57, AT58 | R02, R07 (prep) |
 | **S3 Discovery → owned inquiry** | Public home, results/filters/map (Protomaps), property detail and media viewer, unavailable/legacy states, saved/compare/share, alerts with verified opt-in, areas/services/guides/contact/help/preferences, inquiry with no-JS receipt session, viewing request; staff Today, inquiry triage, assignment, first response, tasks; Resend adapter and inbound replies | P01–P16, P20–P24, O01–O03, O18 | AT01–AT14, AT44, AT46–AT49 | R03 |
 | **S4 Case continuity** | Client host: access, invitations, Case overview, Brief, Interests/feedback, appointments, messages, documents, proposals, owner listing preview, participants, preferences, privacy requests, closeout; staff Cases, Case workspace, parties, matching, calendar with exclusive resources and ICS, proposals, document review, handover; country process checklists and AML/KYC record-keeping (§7) | C01–C18 (not C15), O04–O09, O19, O20 | AT15–AT17, AT29–AT35, AT38–AT40, AT43, AT45 | R04, R05 |
 | **S5 Assistance and operations** | Hermes tasks `intake.extract`, `locale.draft`, `case.assist` with evaluation corpus, budgets, manual fallback; duplicate merge/split; privacy operations; reports; integration exceptions; team/access and service policy settings; kill switches | O22–O27, O32, O29/O30 as bounded service intake | AT50–AT56 | R06 |
-| **S6 Release qualification** | Container images (web, worker, migrate), App Platform spec, gateway Worker, secrets matrix, backups + sealed recovery points + safety ledger + S3 archive, Better Stack telemetry and heartbeats, load test at 10 000 listings, security review, accessibility and seven-locale review, performance budgets, migration rehearsal, release manifest and gate evaluator, runbooks | — | AT57–AT67 | R07–R10 |
+| **S6 Release qualification** | One immutable Containers image for web, worker and migration roles; protected gateway and Access, private database path, secrets matrix, backups + sealed recovery points + safety ledger + S3 archive, Better Stack telemetry and heartbeats, load test at 10 000 listings, security review, accessibility and seven-locale review, performance budgets, migration rehearsal, release manifest and gate evaluator, runbooks | — | AT57–AT67 | R07–R10 |
 | **S7 Cutover and acceptance** | Owner-authorized final delta import, routing change, deployed checks, SEO observations, operating-cycle acceptance, custody handoff | — | AT68 | R11, R12 |
 
 ## 6. How each slice is executed
@@ -83,7 +90,7 @@ Order follows architecture §22.1. Each slice ends merged with green CI and a sl
 2. **Shared patterns first.** Components and commands every screen needs are built once
    before screens fan out.
 3. **Parallel build** on disjoint paths; package and schema changes are owned by one stage.
-4. **Integrate.** `make check` and the Playwright suite green on PostgreSQL 18.
+4. **Integrate.** `make check` and the Playwright suite green on the selected PostgreSQL 16.14 contract; run the independent provider qualification before release.
 5. **Design review.** Screenshots of every screen and state at 390 and 1440 in bg and he,
    judged against the UX spec, fixed within tokens.
 6. **Review.** Independent lenses (architecture conformance by AT/UX ID, security and
@@ -91,7 +98,7 @@ Order follows architecture §22.1. Each slice ends merged with green CI and a sl
    adversarially verified before fixing.
 7. **Merge** with a PR that lists the IDs covered and what remains blocked.
 
-All subagents run on Opus 5.5.
+Use the model and effort selected for the active delivery session. Assign one owner per write surface, cap independent work to available capacity, and verify the integrated result. Historical Claude workflow model selections do not change the active session settings.
 
 ## 7. Additions beyond the architecture
 
@@ -122,9 +129,9 @@ Blocked gates stay blocked until these exist; the safe default applies meanwhile
 | Seller authority, media rights and public-address precision per listing | Listing stays unpublished | R02 |
 | Country process copy and document policy (BG, GR) reviewed by professionals | No process claims shown | R02/R04 |
 | Retention, deletion, contact-purpose and vendor-processing policy | No production personal-data capture | R00/R05 |
-| Provider accounts owned by the agency: DigitalOcean (App Platform, HA PostgreSQL), Cloudflare R2 EU buckets, Resend, OpenAI, Better Stack, AWS (S3 Object Lock) | Local fakes and synthetic tests only | R01/R08 |
+| Provider accounts owned by the agency: Cloudflare gateway/Containers/R2, private PostgreSQL, Resend, qualified OpenRouter/explicit model adapters, Better Stack monitoring and AWS S3 Object Lock | Local fakes and synthetic tests only | R01/R08 |
 | DNS for `my.` and `app.` hosts, the reply subdomain and cutover; renewal of `makler-realty.ru` | No cutover, no mail-DNS change | R07/R10 |
-| SEO evidence decision (Search Console, Yandex, backlinks) under R00 | Evidence required | R00/R11 |
+| Historical SEO analytics (Search Console, Yandex, backlinks) | Optional at every lifecycle stage by owner decision of 2026-09-24; never a release blocker | — |
 | Recovery custody, Ed25519 signing key holder, incident contacts | No release | R08/R10 |
 | AML officer, internal AML rules and risk assessment (ZMIP art. 98, 101) | Proposal steps that need due diligence stay blocked | R04 |
 | Accountant decision on VAT for commission on Greek properties | Commission recorded without tax treatment | R04 |

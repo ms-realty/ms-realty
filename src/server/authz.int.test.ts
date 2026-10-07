@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
-import type { Actor, Capability } from "@/domain/capabilities";
-import { assertCanRead, can, grantsFor } from "./authz";
+import { type Actor, type Capability, capabilities } from "@/domain/capabilities";
+import { assertCanRead, can, grantsFor, heldCapabilities } from "./authz";
 import {
   createCase,
   createClient,
@@ -313,6 +313,30 @@ describe("§8.2 roles (AT40)", () => {
   it("claim.approve comes only from an individual grant, never a preset", async () => {
     const qualified = await createStaff(t.db, { grants: [{ capability: "claim.approve" }] });
     await expectCan(qualified.actor, "claim.approve");
+  });
+
+  it("X02: held capabilities answer as can() without a record, from one resolution", async () => {
+    const caseId = await createCase(t.db);
+    const actors = [
+      (await createStaff(t.db, { roles: ["coordinator"] })).actor,
+      (await createStaff(t.db, { roles: ["manager", "content_editor"] })).actor,
+      // A record-scoped grant reaches its record, never a whole section.
+      (
+        await createStaff(t.db, {
+          grants: [{ role: "assigned_broker", recordType: "case", recordId: caseId }],
+        })
+      ).actor,
+      (await createStaff(t.db, { roles: ["manager"], membership: "ended" })).actor,
+    ];
+    for (const actor of actors) {
+      const held = await heldCapabilities(t.db, actor, capabilities);
+      for (const capability of capabilities)
+        expect(held.has(capability), capability).toBe(await can(t.db, actor, capability));
+    }
+    expect(await heldCapabilities(t.db, actors[2] as Actor, ["case.read"])).toEqual(new Set());
+    expect(
+      await heldCapabilities(t.db, actors[1] as Actor, ["access.grant", "claim.approve"]),
+    ).toEqual(new Set(["access.grant"]));
   });
 });
 

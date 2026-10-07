@@ -1,0 +1,3 @@
+ALTER TABLE "staff_memberships" ADD COLUMN "absence_from" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "staff_memberships" ADD COLUMN "absence_review_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "staff_memberships" ADD CONSTRAINT "staff_absence_review" CHECK (("staff_memberships"."absence_from" is null and "staff_memberships"."absence_review_at" is null) or ("staff_memberships"."absence_from" is not null and "staff_memberships"."absence_review_at" is not null and "staff_memberships"."absence_review_at" > "staff_memberships"."absence_from"));

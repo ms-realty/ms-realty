@@ -1,18 +1,30 @@
 {
   "$schema": "./schemas/gate-policy.schema.json",
   "schemaVersion": 1,
-  "policyRevision": "architecture-1.0/release-policy-draft-1",
+  "policyRevision": "architecture-1.0/release-policy-draft-3",
   "specVersion": "architecture-1.0",
   "trustedKeys": [],
   "evidenceTypes": [
     {
       "id": "authority_decision_record",
-      "description": "R00 decision record (§21.2): the accountable owner and technical release owner approve this policy revision, its legacy-gate mapping and the evidence schema",
+      "description": "R00 decision record (\u00a721.2): the accountable owner and technical release owner approve this policy revision, its legacy-gate mapping and the evidence schema",
       "environments": ["release"],
       "maxAgeMinutes": null,
       "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": false
+      "bindsArtifacts": false,
+      "classes": ["operator"],
+      "requiredAssertions": [
+        "authority:scope",
+        "authority:owners",
+        "authority:policy",
+        "authority:legacy_mapping",
+        "authority:external_evidence_transition",
+        "authority:successor_provisioning_equivalence",
+        "authority:successor_identity_equivalence",
+        "authority:evidence_owners",
+        "authority:broker_review_owners"
+      ]
     },
     {
       "id": "ci_test_report",
@@ -21,124 +33,345 @@
       "maxAgeMinutes": null,
       "signatureRequired": false,
       "reviewerRequired": false,
-      "bindsArtifacts": false
+      "bindsArtifacts": false,
+      "classes": ["test"],
+      "requiredAssertions": [
+        "ci:lint",
+        "ci:typecheck",
+        "ci:unit",
+        "ci:integration",
+        "ci:browser",
+        "ci:build"
+      ]
     },
     {
       "id": "migration_report",
       "description": "Migrations applied to the candidate database by the pinned migration image; backward compatible with the running release; build-time database isolation",
       "environments": ["release"],
       "maxAgeMinutes": null,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": false,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "migration:applied",
+        "migration:backward_compatible",
+        "migration:build_isolation"
+      ]
     },
     {
       "id": "deployed_check",
       "description": "Critical deployed-path checks (routing, authentication, intake, media) against the exact release",
       "environments": ["release"],
       "maxAgeMinutes": 1440,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": false,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "deployed:routing",
+        "deployed:identity",
+        "deployed:intake",
+        "deployed:media",
+        "deployed:three_hosts",
+        "deployed:browser_api_journeys",
+        "deployed:configuration_schema_provider_policy"
+      ]
     },
     {
       "id": "provider_check",
       "description": "Authenticated provider connectivity and send/receive/failure paths from the exact release",
       "environments": ["release"],
       "maxAgeMinutes": 1440,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": false,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": ["provider:authenticated_path", "provider:failure_path"]
+    },
+    {
+      "id": "successor_provisioning_report",
+      "description": "Live Cloudflare/PostgreSQL 16.14 and first-party identity provisioning; equivalent legacy checks and named evidence owners",
+      "environments": ["release"],
+      "maxAgeMinutes": 1440,
+      "signatureRequired": true,
+      "reviewerRequired": true,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "provisioning:cloudflare_gateway_container",
+        "provisioning:immutable_web_worker_migration_image",
+        "provisioning:postgres_16_14",
+        "provisioning:separate_database_roles",
+        "provisioning:private_tls_path",
+        "provisioning:first_party_identity",
+        "provisioning:hermes_provider",
+        "provisioning:legacy_contract_equivalence",
+        "provisioning:checks_and_owners"
+      ]
+    },
+    {
+      "id": "postgres_search_sync",
+      "description": "Redacted live PostgreSQL sync/projection report against the authoritative database and exact deployed release",
+      "environments": ["release"],
+      "maxAgeMinutes": 1440,
+      "signatureRequired": true,
+      "reviewerRequired": false,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "search:authoritative_postgres_target",
+        "search:sync_projection",
+        "search:deployed_path",
+        "search:failure_recovery"
+      ]
+    },
+    {
+      "id": "postgres_search_query",
+      "description": "Redacted live PostgreSQL authorized query and deny/failure/recovery report against the authoritative database and exact deployed release",
+      "environments": ["release"],
+      "maxAgeMinutes": 1440,
+      "signatureRequired": true,
+      "reviewerRequired": false,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "search:authoritative_postgres_target",
+        "search:authorized_query",
+        "search:deny_query",
+        "search:deployed_path",
+        "search:failure_recovery"
+      ]
+    },
+    {
+      "id": "hermes_draft_worker",
+      "description": "Live authenticated Hermes/Butler worker and approved provider, bounded draft tasks, budget/source policy and manual fallback",
+      "environments": ["release"],
+      "maxAgeMinutes": 1440,
+      "signatureRequired": true,
+      "reviewerRequired": true,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "assistance:authenticated_worker_provider",
+        "assistance:bounded_draft_tasks",
+        "assistance:budget_policy",
+        "assistance:approved_sources",
+        "assistance:publish_send_fact_index_denied",
+        "assistance:manual_fallback"
+      ]
+    },
+    {
+      "id": "first_party_runtime_report",
+      "description": "Exact-release first-party staff/client identity, CMS/listing mutation and worker-lease report against the deployed successor database",
+      "environments": ["release"],
+      "maxAgeMinutes": 1440,
+      "signatureRequired": true,
+      "reviewerRequired": true,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "runtime:staff_client_identity",
+        "runtime:grants_session_boundaries",
+        "runtime:migrations",
+        "runtime:cms_listing_mutations",
+        "runtime:human_publication",
+        "runtime:worker_leases",
+        "runtime:deny_revocation",
+        "runtime:restart_recovery"
+      ]
     },
     {
       "id": "monitoring_check",
-      "description": "External checks, heartbeats and a delivered alert reaching the named on-call owner",
-      "environments": ["release"],
+      "description": "Redacted production privacy_events and analytics_export report, public HTTPS checks, heartbeats and a delivered alert reaching named responders",
+      "environments": ["production"],
       "maxAgeMinutes": 1440,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "monitoring:probe",
+        "monitoring:heartbeat",
+        "monitoring:delivered_alert",
+        "monitoring:privacy_events",
+        "monitoring:analytics_export",
+        "monitoring:public_https_endpoint",
+        "monitoring:named_responders"
+      ]
     },
     {
       "id": "rollback_drill",
-      "description": "Application rollback rehearsal that preserves inquiries and commitments accepted after deployment",
+      "description": "Verified isolated rollback, automated policy, passing canary, all four legacy rollback steps and queue/intake fallback preserving accepted writes",
       "environments": ["release"],
       "maxAgeMinutes": 1440,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "rollback:rehearsed",
+        "rollback:accepted_writes_preserved",
+        "rollback:automated_policy",
+        "rollback:passing_canary",
+        "rollback:isolated_drill",
+        "rollback:queue_intake_fallback",
+        "rollback:cache_purge_sitemap_resubmit",
+        "rollback:previous_origin_until_crawl_stable",
+        "rollback:disable_redirects_before_routes",
+        "rollback:previous_sitemap_robots",
+        "rollback:failed_url_review_owners"
+      ]
     },
     {
       "id": "recovery_point",
-      "description": "Newest sealed independent recovery point (§17.3): older than 60 minutes fails the recovery target",
+      "description": "Newest sealed independent recovery point (\u00a717.3): older than 60 minutes fails the recovery target",
       "environments": ["release"],
       "maxAgeMinutes": 60,
       "signatureRequired": true,
       "reviewerRequired": false,
-      "bindsArtifacts": false
+      "bindsArtifacts": false,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "recovery:sealed",
+        "recovery:independent_archive",
+        "recovery:encrypted"
+      ]
     },
     {
       "id": "recovery_drill",
-      "description": "Managed and independent restore drills into clean resources, with a named operator and a separate reviewer (§17.3)",
+      "description": "Managed and independent restore drills into clean resources, with a named operator and a separate reviewer (\u00a717.3)",
       "environments": ["staging", "production"],
       "maxAgeMinutes": null,
       "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": false
+      "bindsArtifacts": false,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "recovery:managed_restore",
+        "recovery:independent_restore",
+        "recovery:integrity",
+        "recovery:operator_review",
+        "recovery:checksums",
+        "recovery:rollback_verified"
+      ]
     },
     {
       "id": "human_review",
       "description": "Scoped human review (listing rows, locale and RTL, accessibility, redirects, content); establishes its stated scope only",
       "environments": ["staging", "production"],
       "maxAgeMinutes": null,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": false
+      "bindsArtifacts": false,
+      "classes": ["human"],
+      "requiredAssertions": ["review:scope_complete", "review:approved"]
+    },
+    {
+      "id": "listing_review_report",
+      "description": "Complete exact-release human listing CSV with facts, source, availability, media rights, publication, assigned broker decisions and all five warning reviews",
+      "environments": ["release"],
+      "maxAgeMinutes": null,
+      "signatureRequired": true,
+      "reviewerRequired": true,
+      "bindsArtifacts": false,
+      "classes": ["human"],
+      "requiredAssertions": [
+        "review:scope_complete",
+        "review:approved",
+        "listing:complete_human_csv",
+        "listing:facts_source_availability",
+        "listing:media_rights_publication",
+        "listing:source_approval_separate",
+        "listing:broker_owners_assigned",
+        "listing:broker_decisions_complete",
+        "listing:translation_approval_before_indexing",
+        "warning_review:structured_data.missing_area",
+        "warning_review:structured_data.missing_bedrooms",
+        "warning_review:structured_data.missing_public_images",
+        "warning_review:listing_quality.missing_area",
+        "warning_review:listing_quality.thin_public_gallery"
+      ]
     },
     {
       "id": "load_security_report",
       "description": "Packaging, load qualification and security checks against the release images",
       "environments": ["staging", "production"],
       "maxAgeMinutes": null,
-      "signatureRequired": false,
-      "reviewerRequired": false,
-      "bindsArtifacts": true
+      "signatureRequired": true,
+      "reviewerRequired": true,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": ["security:independent_review", "security:load", "security:package"]
     },
     {
       "id": "migration_rehearsal_report",
       "description": "URL, data and media mapping with a rehearsed final-delta procedure, from the release's own manifests",
       "environments": ["staging", "production"],
       "maxAgeMinutes": null,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": false
+      "bindsArtifacts": false,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "migration:both_domains",
+        "migration:media_coverage",
+        "migration:final_delta",
+        "migration:complete_url_dispositions",
+        "migration:sold_listings_and_locales",
+        "migration:released_route_map",
+        "migration:reviewed_public_media",
+        "migration:originals_rights_transforms_access"
+      ]
     },
     {
       "id": "ai_evaluation_report",
-      "description": "Hermes task corpus evaluation (§14) with live provider evidence and manual fallback",
+      "description": "Hermes task corpus evaluation (\u00a714) with live provider evidence and manual fallback",
       "environments": ["staging", "production"],
       "maxAgeMinutes": null,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": false
+      "bindsArtifacts": false,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "assistance:three_workflows",
+        "assistance:live_provider",
+        "assistance:manual_fallback"
+      ]
     },
     {
       "id": "external_observation",
-      "description": "External observations: domains, certificates, mail DNS, Search Console, Yandex and backlinks",
+      "description": "Live domains, certificates, mail DNS and crawl/URL observations for both legacy domains; historical Search Console, Yandex and backlink exports are optional",
       "environments": ["production"],
       "maxAgeMinutes": 1440,
-      "signatureRequired": false,
+      "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": [
+        "external:both_domains",
+        "external:certificates",
+        "external:mail_dns",
+        "external:crawl_parity",
+        "external:status_canonical_metadata"
+      ]
     },
     {
       "id": "release_attestation",
-      "description": "Candidate attestation: operator custody and cutover approval for the exact release",
+      "description": "Captured and verified signed exact-release evidence bundle, protected staging parity, operator custody and named cutover approvals; separate from recovery",
       "environments": ["release"],
       "maxAgeMinutes": null,
       "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["operator"],
+      "requiredAssertions": [
+        "release:operator_custody",
+        "release:cutover_approved",
+        "release:evidence_bundle_captured",
+        "release:evidence_bundle_verified",
+        "release:protected_staging_parity"
+      ]
     },
     {
       "id": "operational_acceptance",
@@ -147,7 +380,15 @@
       "maxAgeMinutes": null,
       "signatureRequired": true,
       "reviewerRequired": true,
-      "bindsArtifacts": true
+      "bindsArtifacts": true,
+      "classes": ["operator"],
+      "requiredAssertions": [
+        "operations:staffed_cycle",
+        "operations:overnight_jobs",
+        "operations:backup",
+        "operations:no_unresolved_release_incident",
+        "operations:owner_handoff"
+      ]
     }
   ],
   "gates": [
@@ -158,7 +399,17 @@
       "exitEvidence": "Current instruction/artifact conflicts explicitly reconciled; final scope, owners, policy and evidence schema accepted",
       "dependsOn": [],
       "requiredEvidence": ["authority_decision_record"],
-      "requiredAssertions": [],
+      "requiredAssertions": [
+        "authority:scope",
+        "authority:owners",
+        "authority:policy",
+        "authority:legacy_mapping",
+        "authority:external_evidence_transition",
+        "authority:successor_provisioning_equivalence",
+        "authority:successor_identity_equivalence",
+        "authority:evidence_owners",
+        "authority:broker_review_owners"
+      ],
       "requiresCompleteManifest": false,
       "requiresLegacyMapping": true
     },
@@ -167,8 +418,14 @@
       "title": "Foundation",
       "stage": "pre_cutover",
       "exitEvidence": "Typed domain/migrations; real identity context; allow/deny tests; command/transaction/queue invariants",
-      "dependsOn": [],
-      "requiredEvidence": ["ci_test_report", "migration_report"],
+      "dependsOn": ["R00"],
+      "requiredEvidence": [
+        "ci_test_report",
+        "migration_report",
+        "deployed_check",
+        "successor_provisioning_report",
+        "first_party_runtime_report"
+      ],
       "requiredAssertions": ["AT19", "AT26", "AT36", "AT37", "AT38", "AT39", "AT40", "AT41"],
       "requiresCompleteManifest": false,
       "requiresLegacyMapping": false
@@ -178,8 +435,8 @@
       "title": "Inventory/publication",
       "stage": "pre_cutover",
       "exitEvidence": "Seller/source/media review, exact manifests, locales, correction/withdrawal and historical dispositions",
-      "dependsOn": [],
-      "requiredEvidence": ["ci_test_report", "human_review"],
+      "dependsOn": ["R00"],
+      "requiredEvidence": ["ci_test_report", "listing_review_report"],
       "requiredAssertions": ["AT18", "AT20", "AT21", "AT22", "AT23", "AT24", "AT25", "AT28"],
       "requiresCompleteManifest": false,
       "requiresLegacyMapping": false
@@ -189,8 +446,13 @@
       "title": "Discovery/intake",
       "stage": "pre_cutover",
       "exitEvidence": "Complete approved search/detail/saved/compare plus durable inquiry and staffed assignment/response",
-      "dependsOn": [],
-      "requiredEvidence": ["ci_test_report", "deployed_check"],
+      "dependsOn": ["R00"],
+      "requiredEvidence": [
+        "ci_test_report",
+        "deployed_check",
+        "postgres_search_sync",
+        "postgres_search_query"
+      ],
       "requiredAssertions": [
         "AT01",
         "AT02",
@@ -214,7 +476,7 @@
       "title": "Case continuity",
       "stage": "pre_cutover",
       "exitEvidence": "Brief/Interests, handover, viewing/resource/ICS, proposals, documents and closeout",
-      "dependsOn": [],
+      "dependsOn": ["R00"],
       "requiredEvidence": ["ci_test_report"],
       "requiredAssertions": [
         "AT15",
@@ -236,7 +498,7 @@
       "title": "Communication/privacy",
       "stage": "pre_cutover",
       "exitEvidence": "Real provider send/receive/failure proof, grants/revocation, consent and privacy workflows",
-      "dependsOn": [],
+      "dependsOn": ["R00"],
       "requiredEvidence": ["ci_test_report", "provider_check"],
       "requiredAssertions": ["AT42", "AT43", "AT44", "AT45", "AT46", "AT47", "AT48", "AT49"],
       "requiresCompleteManifest": false,
@@ -247,8 +509,8 @@
       "title": "Assistance",
       "stage": "pre_cutover",
       "exitEvidence": "Three evaluated draft workflows, live provider evidence and manual fallback",
-      "dependsOn": [],
-      "requiredEvidence": ["ai_evaluation_report", "provider_check"],
+      "dependsOn": ["R00"],
+      "requiredEvidence": ["ai_evaluation_report", "provider_check", "hermes_draft_worker"],
       "requiredAssertions": ["AT52", "AT53", "AT54"],
       "requiresCompleteManifest": false,
       "requiresLegacyMapping": false
@@ -258,7 +520,7 @@
       "title": "Migration/media",
       "stage": "pre_cutover",
       "exitEvidence": "Complete URL/data/media mapping and rehearsed final-delta procedure",
-      "dependsOn": [],
+      "dependsOn": ["R00"],
       "requiredEvidence": ["migration_rehearsal_report", "human_review"],
       "requiredAssertions": ["AT55", "AT56", "AT57", "AT58", "AT59"],
       "requiresCompleteManifest": false,
@@ -269,14 +531,15 @@
       "title": "Reliability/security",
       "stage": "pre_cutover",
       "exitEvidence": "Packaging/load/security checks, alerts, HA, independent recovery and rollback drills",
-      "dependsOn": [],
+      "dependsOn": ["R00"],
       "requiredEvidence": [
         "load_security_report",
         "migration_report",
         "monitoring_check",
         "rollback_drill",
         "recovery_drill",
-        "recovery_point"
+        "recovery_point",
+        "first_party_runtime_report"
       ],
       "requiredAssertions": ["AT50", "AT51", "AT60", "AT62", "AT63", "AT64", "AT65", "AT66"],
       "requiresCompleteManifest": false,
@@ -287,7 +550,7 @@
       "title": "UX/content",
       "stage": "pre_cutover",
       "exitEvidence": "All advertised task paths, seven-locale/RTL/accessibility review, real approved copy and measured performance",
-      "dependsOn": [],
+      "dependsOn": ["R00"],
       "requiredEvidence": ["ci_test_report", "human_review"],
       "requiredAssertions": ["AT03", "AT27", "AT61"],
       "requiresCompleteManifest": false,
@@ -305,7 +568,10 @@
         "provider_check",
         "monitoring_check",
         "rollback_drill",
-        "recovery_point"
+        "recovery_point",
+        "postgres_search_sync",
+        "postgres_search_query",
+        "hermes_draft_worker"
       ],
       "requiredAssertions": ["AT67"],
       "requiresCompleteManifest": true,
@@ -316,7 +582,7 @@
       "title": "Cutover verification",
       "stage": "post_cutover",
       "exitEvidence": "Real domains/certificates/mail DNS, intake, identity, media, URL/SEO observations and external proof for the deployed release",
-      "dependsOn": ["R10"],
+      "dependsOn": ["R00", "R10"],
       "requiredEvidence": ["deployed_check", "external_observation"],
       "requiredAssertions": ["AT57", "AT68"],
       "requiresCompleteManifest": true,
@@ -327,7 +593,7 @@
       "title": "Operational acceptance",
       "stage": "post_cutover",
       "exitEvidence": "A complete staffed operating cycle including overnight scheduled work and backup completes without an unresolved release-severity incident; named owner signs handoff",
-      "dependsOn": ["R11"],
+      "dependsOn": ["R00", "R11"],
       "requiredEvidence": ["operational_acceptance"],
       "requiredAssertions": [],
       "requiresCompleteManifest": true,
@@ -340,7 +606,7 @@
       "disposition": "retained_obligation",
       "gates": ["R07", "R11"],
       "evidenceTypes": ["migration_rehearsal_report", "external_observation"],
-      "note": "Every frozen legacy URL on both domains keeps its exact approved response (AT57). Search Console, Yandex and backlink evidence is retained: a baseline before cutover (R07) and observations after it (R11).",
+      "note": "Every frozen legacy URL on both domains needs fresh reviewed equivalent content, a one-hop redirect or explicit removal approval, preserving sold listings and locales (AT57). Historical Search Console, Yandex and backlink exports are optional; live crawl and URL parity remain required.",
       "approval": null
     },
     {
@@ -371,8 +637,8 @@
       "id": "listing_quality_review",
       "disposition": "retained_obligation",
       "gates": ["R02"],
-      "evidenceTypes": ["human_review"],
-      "note": "One valid human-review disposition for every in-scope listing row, keeping source-as-is authorization, factual review, media rights, translation approval and current availability distinct (§21.2 item 5).",
+      "evidenceTypes": ["listing_review_report"],
+      "note": "The manual audit covers 165 rows as non-approval evidence: 165 broker checks remain unassigned with zero broker approvals. Require one complete human CSV with assigned owners and per-listing broker decisions, separate from source-as-is authorization. Review all five open warnings: structured_data.missing_area=11, structured_data.missing_bedrooms=9, structured_data.missing_public_images=7, listing_quality.missing_area=165, listing_quality.thin_public_gallery=17. No missing fact or warning is inferred or silently waived; translations need separate human approval before indexing.",
       "approval": null
     },
     {
@@ -380,7 +646,7 @@
       "disposition": "replacement_proof",
       "gates": ["R03", "R10", "R11"],
       "evidenceTypes": ["deployed_check"],
-      "note": "Replaced by deployed-path checks on the new runtime for the exact release; needs owner approval under R00.",
+      "note": "The owner-approved mapping requires exact-release browser/API checks on all three hosts with the Cloudflare gateway, web, worker and migrations bound by digest, configuration, schema, provider accounts and policy. Signed R00 authority and live successor evidence remain missing; local fixtures do not count.",
       "approval": null
     },
     {
@@ -388,15 +654,22 @@
       "disposition": "replacement_proof",
       "gates": ["R08", "R10"],
       "evidenceTypes": ["deployed_check", "migration_report"],
-      "note": "Replaced by App Platform web, worker and migration images running the pinned release (AT60); needs owner approval under R00.",
+      "note": "ADR 0004 selects Cloudflare Containers with one immutable image for web, persistent pg-boss worker and file-based migrations, plus the Cloudflare gateway and PostgreSQL 16.14/private TLS path (AT60). The mapping is owner-approved; signed R00 authority and exact-release deployed proof remain required.",
       "approval": null
     },
     {
       "id": "live_services",
       "disposition": "replacement_proof",
-      "gates": ["R03", "R05", "R06", "R10"],
-      "evidenceTypes": ["provider_check", "deployed_check"],
-      "note": "The legacy contract required live Typesense/Meilisearch reports. PostgreSQL search is the final design (D04), but a PostgreSQL report neither satisfies nor waives that requirement until an explicit authority amendment is approved (§21.2 item 2). Hermes service checks map to R06 task evidence (item 6).",
+      "gates": ["R01", "R03", "R05", "R06", "R10"],
+      "evidenceTypes": [
+        "successor_provisioning_report",
+        "postgres_search_sync",
+        "postgres_search_query",
+        "hermes_draft_worker",
+        "provider_check",
+        "deployed_check"
+      ],
+      "note": "The current legacy authority requires postgres_search_sync, postgres_search_query and hermes_draft_worker reports. Retain live authoritative-database sync/projection, authorized query, deny/failure/recovery and deployed-path proof. Owner approval covers the successor provisioning substitution for DATABASE_URL, PAYLOAD_SECRET, MS_REALTY_SEARCH_ENGINE=postgres, live:provisioning and live:capture; its equivalent checks and owners must be implemented and proven before retiring old commands or report formats. Chat approval supplies neither signed R00 authority nor live reports.",
       "approval": null
     },
     {
@@ -404,15 +677,15 @@
       "disposition": "retained_obligation",
       "gates": ["R08", "R10"],
       "evidenceTypes": ["monitoring_check", "rollback_drill"],
-      "note": "Alerts reach the named owner and rollback preserves post-deployment data (AT63, AT65); no older than 24 hours at attestation.",
+      "note": "Retain privacy_events and analytics_export; analytics_export is missing and required for production readiness. Require a redacted production report under 24 hours old, passing public HTTPS endpoint/alert, named responders, automated rollback policy, passing canary, verified isolated drill and queue/intake fallback (AT63, AT65). Retain all four rollback steps: previous release/origin until crawl is stable; disable reviewed redirects before content routes on parity failure; republish previous sitemap/robots on regression; assign migration review-queue owners to failed old URLs. Preserve accepted writes, cache purge and sitemap resubmit.",
       "approval": null
     },
     {
       "id": "payload_runtime",
       "disposition": "replacement_proof",
       "gates": ["R01", "R08"],
-      "evidenceTypes": ["ci_test_report", "deployed_check"],
-      "note": "Payload is not used (ADR 0002). Replacement proof is the actual new runtime and identity evidence, including AT26 (no bypass path); a renamed component or stub endpoint is not replacement proof (§21.2 item 6). Needs owner approval under R00.",
+      "evidenceTypes": ["first_party_runtime_report", "deployed_check"],
+      "note": "The owner-approved mapping replaces Payload bootstrap/runtime/preflight with first-party staff/client identity and deployed PostgreSQL reports for grants, sessions, migrations, CMS/listing mutations, human publication and worker leases. Exercise deny, revocation, restart and recovery. Signed R00 authority, equivalent successor checks and live proof remain missing; package presence or local smoke is insufficient (AT26).",
       "approval": null
     },
     {
@@ -420,7 +693,7 @@
       "disposition": "retained_obligation",
       "gates": ["R07"],
       "evidenceTypes": ["migration_rehearsal_report"],
-      "note": "Media counts and units are reconciled and coverage is evaluated from the same release and object manifest (§21.2 item 4, AT58).",
+      "note": "Compare the complete released R2 object manifest with the reviewed public gallery/media inventory; prove originals, rights, transforms and access controls on the deployed path from the same release (AT58).",
       "approval": null
     },
     {
@@ -428,8 +701,9 @@
       "disposition": "retained_obligation",
       "gates": ["R08", "R10"],
       "evidenceTypes": ["recovery_drill", "recovery_point"],
-      "note": "Operator-authorized Ed25519-signed recovery evidence stays required (§21.3); recovery point age follows §17.3.",
+      "note": "Retain encrypted independent off-site backup, isolated restore, checksums, rollback and named operator/separate reviewer approval. Operator-authorized Ed25519-signed recovery evidence stays required; recovery point age follows \u00a717.3. R10 separately requires captured and verified signed exact-release evidence-bundle attestation.",
       "approval": null
     }
-  ]
+  ],
+  "snapshotMaxAgeMinutes": 1440
 }

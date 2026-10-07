@@ -14,7 +14,9 @@
   /* Hebrew text reaches Noto Sans Hebrew first: the metric fallback (local Arial) has Hebrew
      glyphs and would otherwise be used for Hebrew while Noto Sans, which has none, loads. */
   :lang(he) {
-    font-family: "Noto Sans Hebrew", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    --font-sans: "Noto Sans Hebrew", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    --font-display: "Noto Sans Hebrew", "Noto Sans", "Noto Sans Fallback", system-ui, sans-serif;
+    font-family: var(--font-sans);
   }
 
   /* Aligned amounts, times and counts use tabular figures (§11.3). */
@@ -43,6 +45,32 @@
   input,
   textarea {
     caret-color: var(--color-action);
+  }
+
+  /* WebKit's preformatted option text can expand the document beyond a bounded select.
+     Keep native selection and the full option label, without page-wide clipping. */
+  select {
+    white-space: normal;
+    /* WebKit ignores min-height on a native menulist, so draw the control ourselves: it then
+       keeps the 44 px touch height. Chevron = DS "Icon / chevron-down" (UI08 Select): a 20 px
+       box 12 px from the inline end, 10 x 5 stroke, 2 px, round caps, --color-text-muted. */
+    appearance: none;
+    padding-inline-end: 2.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 7.5l5 5 5-5' fill='none' stroke='%2352625a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-size: 1.25rem;
+    background-repeat: no-repeat;
+  }
+
+  [dir="rtl"] select {
+    background-position: left 0.75rem center;
+  }
+
+  /* Forced colours drop background images; fall back to the native arrow. */
+  @media (forced-colors: active) {
+    select {
+      appearance: auto;
+    }
   }
 
   a {
@@ -93,5 +121,14 @@
     :focus-visible {
       outline-color: Highlight;
     }
+  }
+}
+
+@layer utilities {
+  /* O12 uses UI06 Input instances (647:31515), without UI08's chevron. Keep the native
+     picker and forced-colours fallback; restore the field's 12 px inline-end inset. */
+  #o12-form select {
+    background-image: none;
+    padding-inline-end: calc(var(--spacing) * 3);
   }
 }

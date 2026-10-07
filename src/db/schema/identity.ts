@@ -53,17 +53,29 @@ export const principals = pgTable(
 );
 
 /** Active staff role for a staff principal; its absence closes the staff interface. */
-export const staffMemberships = pgTable("staff_memberships", {
-  ...mutable(),
-  principalId: uuid("principal_id")
-    .notNull()
-    .unique()
-    .references(() => principals.id),
-  state: staffMembershipStateEnum("state").notNull().default("active"),
-  staffLocale: staffLocaleEnum("staff_locale").notNull().default("bg"),
-  startedAt: instant("started_at").notNull().defaultNow(),
-  endedAt: instant("ended_at"),
-});
+export const staffMemberships = pgTable(
+  "staff_memberships",
+  {
+    ...mutable(),
+    principalId: uuid("principal_id")
+      .notNull()
+      .unique()
+      .references(() => principals.id),
+    state: staffMembershipStateEnum("state").notNull().default("active"),
+    staffLocale: staffLocaleEnum("staff_locale").notNull().default("bg"),
+    startedAt: instant("started_at").notNull().defaultNow(),
+    endedAt: instant("ended_at"),
+    /** Planned unavailability does not revoke sign-in. Coverage ends only on explicit return. */
+    absenceFrom: instant("absence_from"),
+    absenceReviewAt: instant("absence_review_at"),
+  },
+  (t) => [
+    check(
+      "staff_absence_review",
+      sql`(${t.absenceFrom} is null and ${t.absenceReviewAt} is null) or (${t.absenceFrom} is not null and ${t.absenceReviewAt} is not null and ${t.absenceReviewAt} > ${t.absenceFrom})`,
+    ),
+  ],
+);
 
 /**
  * Role presets and record-scoped capability grants. A grant names exactly one grantee and
@@ -74,7 +86,7 @@ export const grants = pgTable(
   {
     ...mutable(),
     principalId: uuid("principal_id").references(() => principals.id),
-    /** Non-human principal such as the Hermes draft service. */
+    /** Non-human principal such as the Butler draft service. */
     serviceName: text("service_name"),
     role: roleEnum("role"),
     capability: capabilityEnum("capability"),
@@ -90,7 +102,7 @@ export const grants = pgTable(
   (t) => [
     check("grants_one_grantee", sql`num_nonnulls(${t.principalId}, ${t.serviceName}) = 1`),
     check("grants_role_or_capability", sql`num_nonnulls(${t.role}, ${t.capability}) = 1`),
-    // AT52: a service principal (Hermes) can only ever hold drafting capabilities.
+    // AT52: a service principal (Butler) can only ever hold drafting capabilities.
     check(
       "grants_service_drafts_only",
       // Written NULL-safe: a check that evaluates to NULL would pass.
@@ -176,6 +188,8 @@ export const emailSignInTokens = pgTable(
     tokenHash: text("token_hash").notNull().unique(),
     purpose: signInTokenPurposeEnum("purpose").notNull(),
     principalKind: principalKindEnum("principal_kind").notNull(),
+    /** Bind a link to an immutable account, not an address that may later be reassigned. */
+    principalId: uuid("principal_id").references(() => principals.id),
     email: text("email").notNull(),
     /** Relative path to return to after verification. */
     returnTo: text("return_to"),

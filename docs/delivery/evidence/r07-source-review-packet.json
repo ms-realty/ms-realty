@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "scope": "Private operator source-review packet generated from published passwordless WordPress records and the frozen source inventory; incomplete human input, not served parity or publication approval.",
+  "productionAllowed": false,
+  "humanReviewComplete": false,
+  "packetLocation": "Operator backup: MS-Realty/Reconciliation",
+  "files": {
+    "r07-original-source-review.html": {
+      "sha256": "be5997005bf62fe698b7d6088618b9fec0ed1e5f7bbf6e2bb9f2034128902aa8",
+      "bytes": 277506,
+      "content": "Escaped original source text, source record identities, linked published listing/post titles and raw price/area/reference fields; no active scripts or remote resources"
+    },
+    "r07-human-review-open.csv": {
+      "sha256": "0d107a609a2492d62d57cbb16a22e68bb2a9c6ed0a1f224c009148474c434005",
+      "bytes": 16087,
+      "content": "One row per frozen URL spelling, with blank target, equivalence, photo, fact, locale, reviewer and decision cells"
+    }
+  },
+  "counts": {
+    "frozenIdentities": 88,
+    "urlSpellings": 89,
+    "exactTaxonomyObservations": 75,
+    "exactPublishedPostObservations": 1,
+    "noExactRecordObservations": 13,
+    "reviewedRows": 0
+  },
+  "limitations": [
+    "Root and archive card lists are source-query candidates, not actual rendered captures.",
+    "Missing source records remain missing; fuzzy title similarity does not prove equivalence.",
+    "WordPress meta values are raw source facts, without current listing verification.",
+    "The packet contains no image equivalence, target route readback or human sign-off."
+  ]
+}

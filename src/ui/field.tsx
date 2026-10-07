@@ -9,21 +9,19 @@ import {
   Text,
 } from "react-aria-components";
 import { cx } from "./cx";
+import { errorClass, labelClass } from "./field-class";
 import { ErrorIcon } from "./icons";
 
-// Shared field anatomy (GOV.UK order): label, hint, error, control.
+// Shared field anatomy (UI06 6:68): label, hint, control, then the error under the control.
+// Choice groups (checkbox, radio) keep their error above the options.
 
-export const controlClass = cx(
-  "min-h-control w-full rounded-control border border-border bg-surface px-3 text-compact text-text",
-  "placeholder:text-text-muted transition-colors duration-(--duration-fast)",
-  "data-hovered:border-text",
-  "group-data-invalid:border-2 group-data-invalid:border-error",
-  "group-data-readonly:border-dashed group-data-readonly:bg-subtle",
-  "group-data-disabled:cursor-not-allowed group-data-disabled:border-disabled-text group-data-disabled:bg-disabled group-data-disabled:text-disabled-text",
-  "forced-colors:group-data-disabled:border-[GrayText] forced-colors:group-data-disabled:text-[GrayText]",
-);
-
-export const fieldClass = "group flex flex-col gap-1.5";
+export {
+  controlClass,
+  errorClass,
+  fieldClass,
+  labelClass,
+  textareaClass,
+} from "./field-class";
 
 export function Label({
   children,
@@ -36,7 +34,7 @@ export function Label({
   isRequired?: boolean;
 }) {
   return (
-    <RACLabel className="text-compact font-semibold text-text">
+    <RACLabel className={labelClass}>
       {children}
       {optionalLabel && !isRequired ? (
         <span className="font-normal text-text-muted"> {optionalLabel}</span>
@@ -57,8 +55,9 @@ export function Description({ children }: { children?: ReactNode }) {
 /** The error text for the surrounding field; rendered only while the field is invalid. */
 export function FieldError({ children }: { children?: ReactNode }) {
   return (
-    <RACFieldError className="flex items-start gap-1.5 text-compact font-semibold text-error">
-      <ErrorIcon className="mt-0.5" />
+    // UI06 Error text (6:67), 14/20 medium, under the control; the 20 px icon fills the line.
+    <RACFieldError className={cx("flex items-start gap-1.5", errorClass)}>
+      <ErrorIcon />
       <span>{children}</span>
     </RACFieldError>
   );

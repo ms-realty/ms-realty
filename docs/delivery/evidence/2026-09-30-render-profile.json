@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "scope": "local synthetic evidence; R08 failed",
+  "load": {
+    "source": {
+      "revision": "ebebf03156e9f816dc2e70e2585a07584033e9ac",
+      "dirty": false,
+      "buildId": "DihC8w9abYJpa0TBl95L_",
+      "runId": "c40ff24efa9547e4aff72e92643a460b",
+      "exitCode": 1,
+      "report": "test-results/c40ff24efa9547e4aff72e92643a460b/agency-load-AT62-catalogue-ad422-ublic-and-10-staff-sessions-synthetic-load/load-report.json",
+      "container": "msr-load-join-20260930",
+      "scope": "Owned Linux container to native macOS PG18; shared development host; fresh build. No source changes during run.",
+      "result": "No operation failures; every budgeted read/command lane still failed its unchanged budget.",
+      "profileRoot": "test-results/c40ff24efa9547e4aff72e92643a460b"
+    },
+    "dataset": {
+      "listings": 10000,
+      "projections": 18571,
+      "largeMediaBytes": 748072,
+      "largeMediaSamples": 100,
+      "scanEvidence": "synthetic fixture, not real ClamAV"
+    },
+    "measurements": {
+      "staff-today-html": {
+        "count": 180,
+        "p50": 652.51,
+        "p95": 775.38,
+        "p99": 871.13,
+        "max": 930.26,
+        "budgetMs": 500
+      },
+      "public-search-html": {
+        "count": 2059,
+        "p50": 785.83,
+        "p95": 1086.01,
+        "p99": 1331.7,
+        "max": 1637.23,
+        "budgetMs": 500
+      },
+      "public-detail-html": {
+        "count": 2059,
+        "p50": 443.85,
+        "p95": 629.96,
+        "p99": 809.83,
+        "max": 1196.4,
+        "budgetMs": 500
+      },
+      "public-media": {
+        "count": 2059,
+        "p50": 191.57,
+        "p95": 312.2,
+        "p99": 354.02,
+        "max": 536.22,
+        "budgetMs": null
+      },
+      "staff-task-html": {
+        "count": 180,
+        "p50": 926.89,
+        "p95": 1285.84,
+        "p99": 1746.56,
+        "max": 1768.6,
+        "budgetMs": 500
+      },
+      "staff-command-post": {
+        "count": 180,
+        "p50": 1519.8,
+        "p95": 1920.34,
+        "p99": 1997.83,
+        "max": 2062.44,
+        "budgetMs": 800
+      }
+    },
+    "completedCycles": {
+      "public": 2059,
+      "staff": 180
+    },
+    "operationFailures": []
+  },
+  "formatters": {
+    "scope": "Paired source microbenchmark; 12000 default numbers or areas across seven locales plus 500 Sofia years; first two alternating waves excluded. No HTTP capacity proof.",
+    "beforeRevision": "ebebf03156e9f816dc2e70e2585a07584033e9ac",
+    "afterSourceSha256": "a35c6001dd723df3974356d59375e4264aec634bda71db717b9ed4ef8af2dba0",
+    "digest": "b3ec17633e213f2892f165de9ddd0251759a2574921a7ce08fa294a2bdef4add",
+    "summary": {
+      "before": {
+        "medianMs": 164.61002100000002,
+        "minMs": 162.93887499999994,
+        "maxMs": 173.77387499999998
+      },
+      "after": {
+        "medianMs": 5.393416499999944,
+        "minMs": 4.865084000000024,
+        "maxMs": 7.709916000000021
+      }
+    }
+  },
+  "ci": {
+    "source": "ebebf03156e9f816dc2e70e2585a07584033e9ac",
+    "run": "https://github.com/ms-realty/ms-realty/actions/runs/36747742134",
+    "result": "failed: BG/RU hydrated WebKit attachment test alert selector matched app notice and empty Next route announcer; corrected selector requires actual localized app error",
+    "focusedRepair": "inbound-alert-scope-browser.log: 2 passed"
+  },
+  "limits": [
+    "Shared development host, one web process; not cloud capacity or HA qualification.",
+    "Identical formatter strings prove source compatibility only, not full HTTP budget acceptance.",
+    "No production or live-provider changes."
+  ]
+}

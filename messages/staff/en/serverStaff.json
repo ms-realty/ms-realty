@@ -1,0 +1,16 @@
+{
+  "errors": {
+    "link_invalid": {
+      "message": "This link does not work.",
+      "next": "Ask your manager for a new invitation."
+    },
+    "passkey_failed": {
+      "message": "We could not confirm your passkey.",
+      "next": "Try again; if it still fails, ask your manager to restore your access."
+    },
+    "unavailable": {
+      "message": "Part of the service is not working right now, so nothing was saved.",
+      "next": "Try again in a few minutes."
+    }
+  }
+}

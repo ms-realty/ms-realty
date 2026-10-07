@@ -1,0 +1,53 @@
+name: MS Realty Cloudflare staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/msr-staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ms-realty-cloudflare-staging
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    name: Read the MS Realty Cloudflare account
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Capture resources without changing DNS or routes
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node scripts/cloudflare-inventory.mjs \
+            --json deploy/evidence/cloudflare-inventory.json \
+            --markdown deploy/evidence/CLOUDFLARE-INVENTORY.md
+      - name: Preserve the redacted inventory
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ms-realty-cloudflare-inventory-${{ github.run_id }}
+          path: deploy/evidence/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Publish inventory on the isolated staging branch
+        if: github.ref == 'refs/heads/codex/msr-staging'
+        run: |
+          git add -- deploy/evidence/cloudflare-inventory.json deploy/evidence/CLOUDFLARE-INVENTORY.md
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(staging): capture read-only Cloudflare resources [skip ci]'
+          git push origin HEAD:codex/msr-staging

@@ -22,6 +22,11 @@ updates:
       prefix: fix
       prefix-development: chore
       include: scope
+    # @types/node follows the runtime major (Node 24 in the selected image);
+    # bump it by hand together with the image.
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       patch-and-minor:
         update-types: [patch, minor]

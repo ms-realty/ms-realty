@@ -1,0 +1,17 @@
+{
+  "name": "ms-realty-cloudflare-adapter",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@cloudflare/containers": "0.3.7",
+    "jose": "6.2.12"
+  },
+  "devDependencies": {
+    "wrangler": "4.143.0"
+  },
+  "overrides": {
+    "miniflare": {
+      "undici": "7.29.1"
+    }
+  }
+}

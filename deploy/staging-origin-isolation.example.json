@@ -1,0 +1,10 @@
+{
+  "status": "UNQUALIFIED",
+  "from": "origin-read-only-inspection",
+  "environment": "staging",
+  "database": null,
+  "engineVersion": null,
+  "exposesPublicPostgres": null,
+  "productionChanged": null,
+  "inspectedAt": null
+}

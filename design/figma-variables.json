@@ -199,6 +199,66 @@
     },
     {
       "action": "CREATE",
+      "id": "color/on-action",
+      "name": "color/on-action",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "Text and icons on the primary action surface.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-on-action)"
+      }
+    },
+    {
+      "action": "CREATE",
+      "id": "color/brand",
+      "name": "color/brand",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "Agency identity; in palette B the same green as the primary action (owner decision 2026-10-02).",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-brand)"
+      }
+    },
+    {
+      "action": "CREATE",
+      "id": "color/brand-tint",
+      "name": "color/brand-tint",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "Agency supporting surface; same tint as a selected item.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-brand-tint)"
+      }
+    },
+    {
+      "action": "CREATE",
+      "id": "color/accent",
+      "name": "color/accent",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "Inline workflow links that read as the agency colour.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-accent)"
+      }
+    },
+    {
+      "action": "CREATE",
+      "id": "color/rule",
+      "name": "color/rule",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "Hairline separators between list entries.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-rule)"
+      }
+    },
+    {
+      "action": "CREATE",
       "id": "color/action",
       "name": "color/action",
       "variableCollectionId": "collection:color",
@@ -382,6 +442,18 @@
     },
     {
       "action": "CREATE",
+      "id": "color/danger-tint",
+      "name": "color/danger-tint",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "UI26 validation summary surface; Figma color/danger-tint (VariableID:4:54), light alias VariableID:4:29.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-danger-tint)"
+      }
+    },
+    {
+      "action": "CREATE",
       "id": "color/info",
       "name": "color/info",
       "variableCollectionId": "collection:color",
@@ -460,6 +532,15 @@
     },
     {
       "action": "CREATE",
+      "id": "font/family/display",
+      "name": "font/family/display",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "description": "Titles use Noto Sans like the body: owner decision 2026-10-02 (palette B, architecture §11.3), no Manrope.",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "font/weight/regular",
       "name": "font/weight/regular",
       "variableCollectionId": "collection:type",
@@ -492,6 +573,14 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/title/family",
+      "name": "typography/title/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/title/size",
       "name": "typography/title/size",
       "variableCollectionId": "collection:type",
@@ -514,6 +603,14 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "scopes": ["FONT_WEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/page/family",
+      "name": "typography/page/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
     },
     {
       "action": "CREATE",
@@ -542,6 +639,14 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/heading/family",
+      "name": "typography/heading/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/heading/size",
       "name": "typography/heading/size",
       "variableCollectionId": "collection:type",
@@ -564,6 +669,47 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "scopes": ["FONT_WEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/section/family",
+      "name": "typography/section/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/section/size",
+      "name": "typography/section/size",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "FLOAT",
+      "description": "Section heading inside a page (ux-spec §06.1: 22/30).",
+      "scopes": ["FONT_SIZE"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/section/line-height",
+      "name": "typography/section/line-height",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "FLOAT",
+      "scopes": ["LINE_HEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/section/weight",
+      "name": "typography/section/weight",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "FLOAT",
+      "scopes": ["FONT_WEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/subheading/family",
+      "name": "typography/subheading/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
     },
     {
       "action": "CREATE",
@@ -592,6 +738,14 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/price/family",
+      "name": "typography/price/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/price/size",
       "name": "typography/price/size",
       "variableCollectionId": "collection:type",
@@ -614,6 +768,14 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "scopes": ["FONT_WEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/body/family",
+      "name": "typography/body/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
     },
     {
       "action": "CREATE",
@@ -642,11 +804,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/compact/family",
+      "name": "typography/compact/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/compact/size",
       "name": "typography/compact/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Labels, controls and navigation, 16/24.",
+      "description": "Buttons, choices and navigation, 16/24. Form fields use dense semibold labels and body values (UI06).",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -664,6 +834,14 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "scopes": ["FONT_WEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/operational/family",
+      "name": "typography/operational/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
     },
     {
       "action": "CREATE",
@@ -692,11 +870,19 @@
     },
     {
       "action": "CREATE",
+      "id": "typography/dense/family",
+      "name": "typography/dense/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
+    },
+    {
+      "action": "CREATE",
       "id": "typography/dense/size",
       "name": "typography/dense/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Staff secondary data only, 14/20.",
+      "description": "Staff secondary data, 14/20; in semibold, every form field label (Figma MSR / dense · semibold).",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -714,6 +900,14 @@
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
       "scopes": ["FONT_WEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "typography/caption/family",
+      "name": "typography/caption/family",
+      "variableCollectionId": "collection:type",
+      "resolvedType": "STRING",
+      "scopes": ["FONT_FAMILY"]
     },
     {
       "action": "CREATE",
@@ -754,7 +948,16 @@
       "name": "spacing/control",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "description": "Comfort target for primary touch controls (§11.3).",
+      "description": "Comfort target for primary touch controls (§11.3): a minimum, not the drawn height of form fields.",
+      "scopes": ["GAP", "WIDTH_HEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "spacing/input",
+      "name": "spacing/input",
+      "variableCollectionId": "collection:size",
+      "resolvedType": "FLOAT",
+      "description": "Drawn height of a form input or select: 12 px padding around 16/26 text plus a 1 px border, on the canvas fill (Figma UI06 Input 6:74).",
       "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
@@ -763,7 +966,7 @@
       "name": "spacing/gutter",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "description": "Compact page gutter (ux-spec §06.2).",
+      "description": "Compact page gutter, 20 px from 320 px as the Figma mobile frames (ux-spec §06.2).",
       "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
@@ -799,6 +1002,15 @@
       "name": "container/form",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
+      "scopes": ["WIDTH_HEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "container/reading",
+      "name": "container/reading",
+      "variableCollectionId": "collection:size",
+      "resolvedType": "FLOAT",
+      "description": "Reading measure for prose and leads, about 70 characters.",
       "scopes": ["WIDTH_HEIGHT"]
     },
     {
@@ -866,6 +1078,15 @@
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
       "description": "Cards and panels where grouping is useful (ux-spec §06.1).",
+      "scopes": ["CORNER_RADIUS"]
+    },
+    {
+      "action": "CREATE",
+      "id": "radius/card",
+      "name": "radius/card",
+      "variableCollectionId": "collection:size",
+      "resolvedType": "FLOAT",
+      "description": "Grouped task surfaces; same as panel.",
       "scopes": ["CORNER_RADIUS"]
     },
     {
@@ -1068,6 +1289,46 @@
       }
     },
     {
+      "variableId": "color/on-action",
+      "modeId": "mode:color:light",
+      "value": {
+        "type": "VARIABLE_ALIAS",
+        "id": "color/text-inverse"
+      }
+    },
+    {
+      "variableId": "color/brand",
+      "modeId": "mode:color:light",
+      "value": {
+        "type": "VARIABLE_ALIAS",
+        "id": "color/action"
+      }
+    },
+    {
+      "variableId": "color/brand-tint",
+      "modeId": "mode:color:light",
+      "value": {
+        "type": "VARIABLE_ALIAS",
+        "id": "color/selected"
+      }
+    },
+    {
+      "variableId": "color/accent",
+      "modeId": "mode:color:light",
+      "value": {
+        "type": "VARIABLE_ALIAS",
+        "id": "color/brand"
+      }
+    },
+    {
+      "variableId": "color/rule",
+      "modeId": "mode:color:light",
+      "value": {
+        "type": "VARIABLE_ALIAS",
+        "id": "color/divider"
+      }
+    },
+    {
       "variableId": "color/action",
       "modeId": "mode:color:light",
       "value": {
@@ -1226,6 +1487,16 @@
       }
     },
     {
+      "variableId": "color/danger-tint",
+      "modeId": "mode:color:light",
+      "value": {
+        "r": 0.9961,
+        "g": 0.9412,
+        "b": 0.9373,
+        "a": 1
+      }
+    },
+    {
       "variableId": "color/info",
       "modeId": "mode:color:light",
       "value": {
@@ -1269,10 +1540,8 @@
       "variableId": "color/assist-line",
       "modeId": "mode:color:light",
       "value": {
-        "r": 0.6549,
-        "g": 0.5882,
-        "b": 0.8392,
-        "a": 1
+        "type": "VARIABLE_ALIAS",
+        "id": "color/assist"
       }
     },
     {
@@ -1287,6 +1556,11 @@
     },
     {
       "variableId": "font/family/sans",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
+      "variableId": "font/family/display",
       "modeId": "mode:type:light",
       "value": "Noto Sans"
     },
@@ -1311,6 +1585,11 @@
       "value": 700
     },
     {
+      "variableId": "typography/title/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/title/size",
       "modeId": "mode:type:light",
       "value": 32
@@ -1324,6 +1603,11 @@
       "variableId": "typography/title/weight",
       "modeId": "mode:type:light",
       "value": 600
+    },
+    {
+      "variableId": "typography/page/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/page/size",
@@ -1341,6 +1625,11 @@
       "value": 600
     },
     {
+      "variableId": "typography/heading/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/heading/size",
       "modeId": "mode:type:light",
       "value": 22
@@ -1354,6 +1643,31 @@
       "variableId": "typography/heading/weight",
       "modeId": "mode:type:light",
       "value": 600
+    },
+    {
+      "variableId": "typography/section/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
+      "variableId": "typography/section/size",
+      "modeId": "mode:type:light",
+      "value": 22
+    },
+    {
+      "variableId": "typography/section/line-height",
+      "modeId": "mode:type:light",
+      "value": 30
+    },
+    {
+      "variableId": "typography/section/weight",
+      "modeId": "mode:type:light",
+      "value": 600
+    },
+    {
+      "variableId": "typography/subheading/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/subheading/size",
@@ -1371,6 +1685,11 @@
       "value": 600
     },
     {
+      "variableId": "typography/price/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/price/size",
       "modeId": "mode:type:light",
       "value": 22
@@ -1384,6 +1703,11 @@
       "variableId": "typography/price/weight",
       "modeId": "mode:type:light",
       "value": 700
+    },
+    {
+      "variableId": "typography/body/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/body/size",
@@ -1401,6 +1725,11 @@
       "value": 400
     },
     {
+      "variableId": "typography/compact/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/compact/size",
       "modeId": "mode:type:light",
       "value": 16
@@ -1414,6 +1743,11 @@
       "variableId": "typography/compact/weight",
       "modeId": "mode:type:light",
       "value": 400
+    },
+    {
+      "variableId": "typography/operational/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/operational/size",
@@ -1431,6 +1765,11 @@
       "value": 400
     },
     {
+      "variableId": "typography/dense/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
+    },
+    {
       "variableId": "typography/dense/size",
       "modeId": "mode:type:light",
       "value": 14
@@ -1444,6 +1783,11 @@
       "variableId": "typography/dense/weight",
       "modeId": "mode:type:light",
       "value": 400
+    },
+    {
+      "variableId": "typography/caption/family",
+      "modeId": "mode:type:light",
+      "value": "Noto Sans"
     },
     {
       "variableId": "typography/caption/size",
@@ -1471,9 +1815,14 @@
       "value": 44
     },
     {
+      "variableId": "spacing/input",
+      "modeId": "mode:size:light",
+      "value": 52
+    },
+    {
       "variableId": "spacing/gutter",
       "modeId": "mode:size:light",
-      "value": 16
+      "value": 20
     },
     {
       "variableId": "spacing/gutter-medium",
@@ -1494,6 +1843,11 @@
       "variableId": "container/form",
       "modeId": "mode:size:light",
       "value": 640
+    },
+    {
+      "variableId": "container/reading",
+      "modeId": "mode:size:light",
+      "value": 680
     },
     {
       "variableId": "container/rail",
@@ -1532,6 +1886,11 @@
     },
     {
       "variableId": "radius/panel",
+      "modeId": "mode:size:light",
+      "value": 8
+    },
+    {
+      "variableId": "radius/card",
       "modeId": "mode:size:light",
       "value": 8
     },

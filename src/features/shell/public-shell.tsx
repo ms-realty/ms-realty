@@ -6,9 +6,10 @@ import type { ReactNode } from "react";
 import { isolateText, Ltr } from "@/i18n/bidi";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { agencyYear } from "@/i18n/format";
-import { ButtonLink, icons, SkipLink } from "@/ui";
+import { buttonClass } from "@/ui/button-class";
+import * as icons from "@/ui/icons";
+import { SkipLink } from "@/ui/skip-link";
 import { brandPhone } from "./agency";
-import { DisclosureBehavior } from "./disclosure-behavior";
 import { LanguageSuggestion } from "./language-suggestion";
 import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
@@ -51,7 +52,6 @@ export async function PublicShell({
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <SkipLink targetId={mainId}>{a11y("skipToContent")}</SkipLink>
-      <DisclosureBehavior />
       {suggestion ? (
         <LanguageSuggestion suggested={suggestion.locale} copy={suggestion.copy} />
       ) : null}
@@ -83,17 +83,16 @@ export async function PublicShell({
             </li>
             {utilities.some((item) => item.label === "contact") ? null : (
               <li>
-                <ButtonLink
+                <a
                   href={`tel:${brandPhone.e164}`}
-                  variant="secondary"
-                  className="px-3 md:px-4"
+                  className={buttonClass("secondary", "px-3 sm:px-4")}
                 >
                   <icons.PhoneIcon className="size-[1.125rem]" />
                   <span className="sr-only">{footer("callLabel")}</span>
-                  <span className="max-md:sr-only">
+                  <span className="max-sm:sr-only">
                     <Ltr>{brandPhone.display}</Ltr>
                   </span>
-                </ButtonLink>
+                </a>
               </li>
             )}
           </ul>

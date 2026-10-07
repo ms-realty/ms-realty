@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { setRequestLocale } from "next-intl/server";
+import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
 import { isStaffLocale } from "@/i18n/config";
 import { privateRobots } from "@/i18n/seo";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
@@ -14,7 +15,7 @@ import { LocaleProvider } from "@/ui/locale-provider";
 
 export const metadata: Metadata = {
   title: { template: "%s · MS Realty workspace", default: "MS Realty workspace" },
-  icons: { icon: "/brand/favicon.svg" },
+  icons: { icon: "/brand/logo-ms-realty.png" },
   robots: privateRobots,
 };
 
@@ -29,6 +30,7 @@ export default async function StaffLayout({ children, params }: LayoutProps<"/st
     <html lang={locale} dir="ltr">
       <body>
         <CspNonceMeta />
+        <DisclosureBehavior />
         <LocaleProvider locale={locale}>{children}</LocaleProvider>
       </body>
     </html>

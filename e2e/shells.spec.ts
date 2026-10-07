@@ -1,11 +1,36 @@
 // Locale routing and the three surface shells (ux-spec §03, §06; F01, AT03, AT61). The
 // chromium-mobile and chromium-desktop projects run every test. Host routing and cross-host
 // isolation are in hosts.spec.ts.
+
+import { createHash } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { hostUrl } from "./hosts";
 
 const wcag22aa = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+
+test("authentic favicon loads on public, client, staff and not-found surfaces", async ({
+  page,
+}) => {
+  for (const address of [
+    "/bg",
+    hostUrl("client", "/en/access"),
+    hostUrl("staff", "/en/access"),
+    "/en/no-such-page",
+  ]) {
+    await page.goto(address);
+    const href = await page.locator('link[rel="icon"]').first().getAttribute("href");
+    expect(href).toBe("/brand/logo-ms-realty.png");
+    const response = await page.request.get(new URL(href ?? "", page.url()).href);
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toContain("image/png");
+    expect(
+      createHash("sha256")
+        .update(await response.body())
+        .digest("hex"),
+    ).toBe("a066e47e0258bbdf20eb0f7c84dbd1d947f526c71c7dbb9b75e562dae660fd3b");
+  }
+});
 
 const publicLocales = [
   { locale: "bg", dir: "ltr", skip: "Към основното съдържание" },
@@ -52,6 +77,21 @@ test.describe("public locales (AT03)", () => {
       await expect(page.getByRole("contentinfo")).toBeVisible();
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       await expect(page.getByRole("link", { name: skip })).toHaveCount(1);
+      await expect
+        .poll(() =>
+          page
+            .locator('img[src="/brand/logo-ms-realty.png"]')
+            .evaluateAll(
+              (images) =>
+                images.length > 0 &&
+                images.every(
+                  (image) =>
+                    (image as HTMLImageElement).complete &&
+                    (image as HTMLImageElement).naturalWidth > 0,
+                ),
+            ),
+        )
+        .toBe(true);
 
       // The brand phone is a call link in the footer.
       const call = page.getByRole("contentinfo").locator('a[href="tel:+359879696870"]');
@@ -119,7 +159,7 @@ test.describe("locale negotiation suggests and never forces (F01, AT03)", () => 
     }) => {
       await page.goto("/bg");
       await expect(page.getByRole("region", { name: "Предложение за език" })).toHaveCount(0);
-      await page.locator("summary", { hasText: /Език/ }).click();
+      await page.getByRole("button", { name: /Език/ }).click();
       await page.getByRole("link", { name: "English", exact: true }).click();
       await expect(page).toHaveURL(/\/en$/);
       await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -165,7 +205,7 @@ test.describe("locale negotiation suggests and never forces (F01, AT03)", () => 
 
   test("switching language keeps the query and the fragment", async ({ page }) => {
     await page.goto("/bg?utm_source=x#contact");
-    await page.locator("summary", { hasText: /Език/ }).click();
+    await page.getByRole("button", { name: /Език/ }).click();
     await expect(page.getByRole("link", { name: "English", exact: true })).toHaveAttribute(
       "href",
       "/en?utm_source=x#contact",
@@ -188,9 +228,14 @@ test.describe("locale negotiation suggests and never forces (F01, AT03)", () => 
 });
 
 test.describe("keyboard and accessibility (AT61)", () => {
-  test("the skip link is the first stop and moves focus to main", async ({ page }) => {
+  test("the skip link is the first stop and moves focus to main", async ({ page, browserName }) => {
     await page.goto("/bg");
-    await page.keyboard.press("Tab");
+    // macOS WebKit defaults to fields-only Tab navigation, including under mobile
+    // emulation. Option-Tab is Apple's native all-items navigation; no focus is scripted.
+    // https://support.apple.com/guide/safari/cpsh003/mac
+    await page.keyboard.press(
+      browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab",
+    );
     const skip = page.getByRole("link", { name: "Към основното съдържание" });
     await expect(skip).toBeFocused();
     await expect(skip).toBeInViewport();
@@ -216,7 +261,7 @@ test.describe("keyboard and accessibility (AT61)", () => {
     page,
   }) => {
     await page.goto("/he");
-    const trigger = page.locator("summary", { hasText: /שפה/ });
+    const trigger = page.getByRole("button", { name: /שפה/ });
     await trigger.click();
     const current = page.getByRole("link", { name: "עברית" });
     await expect(current).toHaveAttribute("aria-current", "true");
@@ -310,14 +355,26 @@ test.describe("not found without JavaScript (§17.1, WCAG 3.1.1)", () => {
 });
 
 test.describe("crawl policy (§20.4)", () => {
-  test("a non-canonical host is noindex everywhere and disallows all crawling", async ({
+  test("explicit staging blocks crawling while preserving canonical, hreflang and sitemap", async ({
     page,
     request,
   }) => {
     await page.goto("/bg");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
-    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://makler-realty.com/bg",
+    );
+    const locales = ["bg", "en", "ru", "de", "nl", "el", "he"];
+    for (const locale of locales)
+      await expect(page.locator(`link[rel="alternate"][hreflang="${locale}"]`)).toHaveAttribute(
+        "href",
+        `https://makler-realty.com/${locale}`,
+      );
+    await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
+      "href",
+      "https://makler-realty.com/bg",
+    );
 
     const robots = await request.get("/robots.txt");
     expect(robots.status()).toBe(200);
@@ -327,7 +384,9 @@ test.describe("crawl policy (§20.4)", () => {
 
     const sitemap = await request.get("/sitemap.xml");
     expect(sitemap.status()).toBe(200);
-    expect(await sitemap.text()).not.toContain("<url>");
+    const sitemapBody = await sitemap.text();
+    for (const locale of locales)
+      expect(sitemapBody).toContain(`<loc>https://makler-realty.com/${locale}</loc>`);
   });
 });
 
@@ -336,28 +395,28 @@ test.describe("workspace shell (§03.1)", () => {
     // The browser prefers English; the staff host opens its default until a choice is made.
     const response = await page.goto(hostUrl("staff", "/"));
     expect(response?.status()).toBe(200);
-    expect(page.url()).toBe(hostUrl("staff", "/bg/today"));
+    expect(page.url()).toBe(hostUrl("staff", "/bg/access"));
     await expect(page.locator("html")).toHaveAttribute("lang", "bg");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
 
     await page.goto(hostUrl("staff", "/ru/today"));
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Сегодня");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вход для сотрудников");
   });
 
   test("changing the interface language keeps the page", async ({ page }) => {
-    await page.goto(hostUrl("staff", "/bg/today"));
+    await page.goto(hostUrl("staff", "/bg/access"));
     await page
-      .locator("summary", { hasText: /Език на интерфейса/ })
+      .getByRole("button", { name: /Език на интерфейса/ })
       .filter({ visible: true })
       .first()
       .click();
     await page.getByRole("link", { name: "English", exact: true }).click();
-    await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
+    await expect(page).toHaveURL(hostUrl("staff", "/en/access"));
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Today");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Staff sign-in");
 
     await page.goto(hostUrl("staff", "/"));
-    expect(page.url()).toBe(hostUrl("staff", "/en/today"));
+    expect(page.url()).toBe(hostUrl("staff", "/en/access"));
   });
 });

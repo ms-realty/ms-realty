@@ -17,11 +17,8 @@ import type { AuthorityState, ParticipantRole } from "@/domain/parties";
 import { firstPartyIssuers } from "@/domain/records";
 import type { Executor } from "./db";
 
-let sequence = 0;
-const next = () => {
-  sequence += 1;
-  return `${Date.now().toString(36)}${sequence}`;
-};
+// Browser seed subprocesses share one database and can start in the same millisecond.
+const next = () => randomUUID();
 
 export interface GrantSpec {
   readonly role?: Role;

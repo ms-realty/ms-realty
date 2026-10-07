@@ -1,10 +1,24 @@
+import { randomBytes, randomUUID } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 import { origins, e2ePort as port } from "./e2e/hosts";
 
 const isCI = Boolean(process.env.CI);
+if (!process.env.TEST_DATABASE_URL)
+  throw new Error("Playwright requires a disposable TEST_DATABASE_URL.");
+process.env.E2E_RUN_ID ??= randomUUID().replaceAll("-", "");
+const database = new URL(process.env.TEST_DATABASE_URL);
+database.pathname = `/msr_e2e_${process.env.E2E_RUN_ID}`;
+process.env.E2E_DATABASE_URL = database.toString();
+process.env.E2E_FILE_STORAGE_ROOT = join(tmpdir(), `msr-e2e-files-${process.env.E2E_RUN_ID}`);
+process.env.E2E_AUTH_SECRET ??= randomBytes(32).toString("hex");
 
 export default defineConfig({
   testDir: "e2e",
+  outputDir: `test-results/${process.env.E2E_RUN_ID}`,
+  testIgnore: "visual.spec.ts",
+  workers: 2,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : "list",
@@ -22,20 +36,42 @@ export default defineConfig({
       name: "chromium-mobile",
       use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } },
     },
+    {
+      name: "webkit-mobile",
+      use: { ...devices["iPhone 13"], viewport: { width: 390, height: 844 } },
+    },
   ],
   webServer: {
+    stdout: "pipe",
     // CI builds in its own step; locally the server always starts from a fresh build. Bound to
     // `localhost`, not 127.0.0.1: see proxy.ts on loopback IPs and rewrites.
-    command: `${isCI ? "" : "npm run build && "}npm run start -- --hostname localhost --port ${port}`,
+    command: "npx tsx scripts/e2e-server.ts",
     // Health is host-neutral; every page answers only on the three configured hosts.
     url: `http://localhost:${port}/api/health`,
-    reuseExistingServer: !isCI,
+    reuseExistingServer: false,
+    // Let the E2E server drop its own database/files before Playwright stops the process group.
+    gracefulShutdown: { signal: "SIGTERM", timeout: 10_000 },
     // Serves the design-system specimen (e2e/design-system.spec.ts); off everywhere else.
     env: {
       ENABLE_DESIGN_SPECIMEN: "1",
+      ENABLE_TEST_OUTBOX: "1",
+      FILE_STORAGE: "local",
+      FILE_STORAGE_ROOT: process.env.E2E_FILE_STORAGE_ROOT,
+      E2E_PORT: String(port),
+      // Synthetic browser runs use the explicit launch-gate staging policy. Hostname
+      // differences alone must never suppress production crawling or SEO metadata.
+      STAGING: "true",
+      APP_ORIGIN: origins.public,
+      CANONICAL_ORIGIN: "https://makler-realty.com",
       PUBLIC_ORIGIN: origins.public,
       CLIENT_ORIGIN: origins.client,
       STAFF_ORIGIN: origins.staff,
+      AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+      // Synthetic sender only; browser tests do not run an email worker.
+      CASE_EMAIL_ENABLED: "1",
+      CASE_REPLY_DOMAIN: "reply.example.test",
+      EMAIL_FROM: "MS Realty <service@example.test>",
+      MEDIA_PUBLIC_BASE_URL: `${origins.public}/media`,
     },
     timeout: 300_000,
   },

@@ -25,11 +25,11 @@ const localHostnames: Record<HostContext, string> = {
 
 /**
  * Where a host context starts when a URL names only the locale (`/` or `/{locale}`).
- * ponytail: the client home is access until C03 `/cases` exists (slice S3).
+ * Private home pages re-authorize and route signed-out visitors to access.
  */
 export const homePaths: Readonly<Record<HostContext, string>> = {
   public: "",
-  client: "/access",
+  client: "/overview",
   staff: "/today",
 };
 
@@ -85,16 +85,35 @@ export function hostContextFor(
 /**
  * The host context that serves each API family (`/api/<family>/…`). Route handlers live in
  * app/api, outside the host trees, so proxy.ts answers any family not listed for the
- * addressed host with 404. `/api/health` is host-neutral and never reaches the proxy.
+ * addressed host with 404. `/api/health` is host-neutral, and the proxy still enforces origin trust.
  */
 const apiFamilies: Readonly<Record<string, HostContext>> = {
   inquiries: "public",
+  "public-shares": "public",
   ops: "staff",
+  media: "public",
+  providers: "staff",
 };
 
 /** Whether the API path (`/api/…`) is served on this host context. */
-export function servesApi(context: HostContext, pathname: string): boolean {
+export function servesApi(
+  context: HostContext,
+  pathname: string,
+  origins: HostOrigins = hostOrigins(),
+): boolean {
   const family = pathname.split("/")[2] ?? "";
+  if (family === "files") return context === "staff" || context === "client";
+  // The route also requires ENABLE_TEST_OUTBOX. Real hosts cannot reach captured sign-in
+  // links even if an operator accidentally enables the development flag.
+  if (family === "test-outbox") {
+    return (
+      context !== "public" &&
+      hostContexts.every((surface) => {
+        const hostname = new URL(origins[surface]).hostname;
+        return hostname === "localhost" || hostname.endsWith(".localhost");
+      })
+    );
+  }
   return Object.hasOwn(apiFamilies, family) && apiFamilies[family] === context;
 }
 

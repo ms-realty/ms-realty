@@ -56,6 +56,7 @@ describe("normalizeSearch", () => {
   });
 
   it("allows only allowlisted fields, bases and sizes", () => {
+    expect(fieldErrors({ locale: "bg", purpose: "sale", q: "Sandanski\0" })).toHaveProperty("q");
     expect(fieldErrors({ locale: "bg", purpose: "sale", orderBy: "price; drop" })).toEqual({
       query: ["unrecognized_keys"],
     });

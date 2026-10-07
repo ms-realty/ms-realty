@@ -8,6 +8,10 @@ export const GET = route(
   async (_request, ctx) => {
     const body: ReadinessResponse = await readReadiness(ctx.db, ctx.actor, {
       buildSha: process.env.BUILD_SHA?.trim() || null,
+      environment: process.env.RELEASE_ENVIRONMENT?.trim() || null,
+      manifestDigest: process.env.RELEASE_MANIFEST_DIGEST?.trim() || null,
+      policyDigest: process.env.RELEASE_POLICY_DIGEST?.trim() || null,
+      snapshotDigest: process.env.RELEASE_SNAPSHOT_DIGEST?.trim() || null,
       snapshot: await loadReadinessSnapshot(),
     });
     return Response.json(body, { headers: { "cache-control": "no-store" } });

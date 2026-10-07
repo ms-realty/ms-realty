@@ -12,9 +12,18 @@ import {
   manifestApprovalRoles,
   type ReadinessReport,
   type ReleaseManifest,
+  readinessReportSchema,
   releaseManifestSchema,
 } from "./schemas";
-import { canonicalJson, checkSignature, sha256Digest } from "./signature";
+import {
+  approvalEvidenceDigest,
+  canonicalJson,
+  checkSignature,
+  evidenceDigest,
+  readinessSnapshotDigest,
+  releaseContextDigest,
+  sha256Digest,
+} from "./signature";
 
 /** Allowed clock skew for an observation time ahead of the evaluator. */
 const futureSkewMs = 5 * 60_000;
@@ -57,8 +66,10 @@ export function manifestGaps(manifest: ReleaseManifest): string[] {
     }
   };
   walk(manifest, "");
+  if (/^0+$/.test(manifest.releaseSha)) gaps.push("/releaseSha/placeholder");
+  if (!Object.keys(manifest.providerAccounts).length) gaps.push("/providerAccounts");
   for (const role of manifestApprovalRoles) {
-    if (!manifest.approvals.some((approval) => approval.role === role)) {
+    if (manifest.approvals.filter((approval) => approval.role === role).length !== 1) {
       gaps.push(`/approvals/${role}`);
     }
   }
@@ -73,6 +84,7 @@ export function manifestGaps(manifest: ReleaseManifest): string[] {
 interface Assessed {
   readonly file: string;
   readonly digest: string;
+  readonly artifactDigest: string | null;
   readonly artifact: EvidenceArtifact | null;
   readonly reasons: string[];
 }
@@ -87,12 +99,26 @@ function assessArtifact(
   const type = policy.evidenceTypes.find((candidate) => candidate.id === artifact.type);
   if (!type) return ["unknown_type"];
   if (!manifest.evidenceIds.includes(artifact.id)) reasons.push("not_in_manifest");
+  else if (manifest.evidenceDigests[artifact.id] !== evidenceDigest(artifact))
+    reasons.push("evidence_digest_mismatch");
   if (artifact.releaseSha !== manifest.releaseSha) reasons.push("wrong_release");
   if (artifact.policyRevision !== policy.policyRevision) reasons.push("wrong_policy");
+  if (artifact.policyDigest !== sha256Digest(canonicalJson(policy)))
+    reasons.push("policy_digest_mismatch");
+  if (artifact.dataDigest !== releaseContextDigest(manifest)) reasons.push("data_digest_mismatch");
   const environments = type.environments.map((env) =>
     env === "release" ? manifest.environment : env,
   );
   if (!environments.includes(artifact.environment)) reasons.push("wrong_environment");
+  if (!type.classes.includes(artifact.evidenceClass)) reasons.push("wrong_evidence_class");
+  if (
+    artifact.evidenceClass !== "test" &&
+    !["staging", "production"].includes(artifact.environment)
+  )
+    reasons.push("not_live_environment");
+  if (artifact.evidenceClass === "test" && !["local", "ci"].includes(artifact.environment))
+    reasons.push("test_environment_mismatch");
+  if (artifact.redactionStatus === "unredacted_restricted") reasons.push("redaction_required");
   if (type.bindsArtifacts) {
     for (const [name, expected] of Object.entries(manifest.artifacts)) {
       if (expected === null) reasons.push(`artifact_unknown:${name}`);
@@ -101,15 +127,22 @@ function assessArtifact(
   }
   const observed = Date.parse(artifact.observedAt);
   if (observed > now.getTime() + futureSkewMs) reasons.push("observed_in_future");
-  if (type.maxAgeMinutes !== null && now.getTime() - observed > type.maxAgeMinutes * 60_000) {
+  if (type.maxAgeMinutes !== null && now.getTime() - observed >= type.maxAgeMinutes * 60_000) {
     reasons.push("stale");
   }
+  if (artifact.expiresAt && now.getTime() >= Date.parse(artifact.expiresAt))
+    reasons.push("expired");
   if (type.reviewerRequired && !artifact.reviewer) reasons.push("reviewer_missing");
   if (type.signatureRequired || artifact.signature) {
     const signature = checkSignature(artifact, policy);
     if (signature !== "valid") reasons.push(signature);
   }
   if (artifact.assertions.some((assertion) => !assertion.passed)) reasons.push("assertion_failed");
+  for (const assertion of type.requiredAssertions) {
+    if (!artifact.assertions.some((candidate) => candidate.id === assertion && candidate.passed)) {
+      reasons.push(`missing_required_assertion:${assertion}`);
+    }
+  }
   return reasons;
 }
 
@@ -119,6 +152,9 @@ function assessEvidence(
   policy: GatePolicy,
   now: Date,
 ): Assessed[] {
+  if (new Set(files.map((file) => file.file)).size !== files.length) {
+    throw new ReleaseInputError("Evidence file paths must be unique");
+  }
   const assessed = [...files]
     .sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0))
     .map((file): Assessed => {
@@ -127,16 +163,29 @@ function assessEvidence(
       try {
         json = JSON.parse(file.content);
       } catch {
-        return { file: file.file, digest, artifact: null, reasons: ["invalid_json"] };
+        return {
+          file: file.file,
+          digest,
+          artifactDigest: null,
+          artifact: null,
+          reasons: ["invalid_json"],
+        };
       }
       const result = evidenceArtifactSchema.safeParse(json);
       if (!result.success) {
-        return { file: file.file, digest, artifact: null, reasons: ["invalid_schema"] };
+        return {
+          file: file.file,
+          digest,
+          artifactDigest: null,
+          artifact: null,
+          reasons: ["invalid_schema"],
+        };
       }
       const artifact = result.data;
       return {
         file: file.file,
         digest,
+        artifactDigest: evidenceDigest(artifact),
         artifact,
         reasons: assessArtifact(artifact, manifest, policy, now),
       };
@@ -156,6 +205,8 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
   const policy = parse(gatePolicySchema, input.policy, "gate policy");
   const manifest = parse(releaseManifestSchema, input.manifest, "release manifest");
   const now = input.now;
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime()))
+    throw new ReleaseInputError("Invalid evaluation time");
   const evaluatedAt = now.toISOString();
   const manifestDigest = sha256Digest(canonicalJson(manifest));
   const policyDigest = sha256Digest(canonicalJson(policy));
@@ -164,10 +215,61 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
   const counted = evidence.flatMap((item) =>
     item.artifact && item.reasons.length === 0 ? [item.artifact] : [],
   );
+  for (const id of manifest.evidenceIds) {
+    if (!counted.some((artifact) => artifact.id === id)) gaps.push(`/evidence/${id}`);
+  }
+  const signer = (artifact: EvidenceArtifact) =>
+    policy.trustedKeys.find((key) => key.keyId === artifact.signature?.keyId)?.owner;
+  for (const approval of manifest.approvals) {
+    const proof = counted.find((artifact) => artifact.id === approval.evidenceId);
+    if (
+      proof?.type !== "release_attestation" ||
+      proof.gate !== "R10" ||
+      proof.attestedEvidenceDigest !== approvalEvidenceDigest(manifest) ||
+      checkSignature(proof, policy) !== "valid" ||
+      signer(proof) !== approval.name ||
+      Date.parse(approval.approvedAt) > now.getTime() ||
+      proof.observedAt !== approval.approvedAt ||
+      !proof.assertions.some(
+        (assertion) => assertion.id === `approval:${approval.role}` && assertion.passed,
+      )
+    ) {
+      gaps.push(`/approvals/${approval.role}/unverified`);
+    }
+  }
+  if (
+    new Set(manifest.approvals.map((approval) => approval.evidenceId)).size !==
+    manifest.approvals.length
+  ) {
+    gaps.push("/approvals/evidence_not_separate");
+  }
+  const recoveryAge = policy.evidenceTypes.find(
+    (type) => type.id === "recovery_point",
+  )?.maxAgeMinutes;
+  if (manifest.recoveryPoint) {
+    const sealed = Date.parse(manifest.recoveryPoint.sealedAt);
+    if (sealed > now.getTime()) gaps.push("/recoveryPoint/sealed_in_future");
+    if (recoveryAge != null && now.getTime() - sealed >= recoveryAge * 60_000)
+      gaps.push("/recoveryPoint/stale");
+  }
   /** A replacement or retirement approval names a counted artifact of the mapping gate. */
   const mappingGate = policy.gates.find((gate) => gate.requiresLegacyMapping)?.id;
-  const legacyApproved = (evidenceId: string | undefined) =>
-    counted.some((artifact) => artifact.id === evidenceId && artifact.gate === mappingGate);
+  const legacyApproved = (legacy: GatePolicy["legacyGates"][number]) => {
+    const approval = legacy.approval;
+    if (!approval || Date.parse(approval.approvedAt) > now.getTime()) return false;
+    return counted.some(
+      (artifact) =>
+        artifact.id === approval.evidenceId &&
+        artifact.gate === mappingGate &&
+        artifact.type === "authority_decision_record" &&
+        checkSignature(artifact, policy) === "valid" &&
+        signer(artifact) === approval.approvedBy &&
+        Date.parse(approval.approvedAt) <= Date.parse(artifact.observedAt) &&
+        artifact.assertions.some(
+          (assertion) => assertion.id === `legacy:${legacy.id}` && assertion.passed,
+        ),
+    );
+  };
 
   const statuses = new Map<string, "pass" | "blocked">();
   const gates = policy.gates.map((gate) => {
@@ -176,6 +278,11 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
     if (manifest.policies.policyRevision !== policy.policyRevision) {
       blockers.push("policy_revision_mismatch");
     }
+    if (manifest.specVersion !== policy.specVersion) blockers.push("spec_version_mismatch");
+    if (!["staging", "production"].includes(manifest.environment))
+      blockers.push("non_deployed_release");
+    if (gate.stage === "post_cutover" && manifest.environment !== "production")
+      blockers.push("production_required");
     for (const dependency of gate.dependsOn) {
       if (statuses.get(dependency) !== "pass") blockers.push(`dependency_blocked:${dependency}`);
     }
@@ -193,7 +300,7 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
     if (gate.requiresLegacyMapping) {
       for (const legacy of policy.legacyGates) {
         if (legacy.disposition === "retained_obligation") continue;
-        if (!legacyApproved(legacy.approval?.evidenceId)) {
+        if (!legacyApproved(legacy)) {
           blockers.push(`legacy_mapping_unapproved:${legacy.id}`);
         }
       }
@@ -210,19 +317,20 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
     } as const;
   });
 
-  const snapshotId = sha256Digest(
-    canonicalJson({
-      manifestDigest,
-      policyDigest,
-      evidence: evidence.map((item) => ({ file: item.file, digest: item.digest })),
-      evaluatedAt,
-    }),
-  );
-
-  return {
+  const expiryTimes = [now.getTime() + policy.snapshotMaxAgeMinutes * 60_000];
+  for (const artifact of counted) {
+    const maxAge = policy.evidenceTypes.find((type) => type.id === artifact.type)?.maxAgeMinutes;
+    if (maxAge != null) expiryTimes.push(Date.parse(artifact.observedAt) + maxAge * 60_000);
+    if (artifact.expiresAt) expiryTimes.push(Date.parse(artifact.expiresAt));
+  }
+  if (manifest.recoveryPoint && recoveryAge != null) {
+    const expires = Date.parse(manifest.recoveryPoint.sealedAt) + recoveryAge * 60_000;
+    if (expires > now.getTime()) expiryTimes.push(expires);
+  }
+  const report: Omit<ReadinessReport, "snapshotId"> = {
     schemaVersion: 1,
-    snapshotId,
     evaluatedAt,
+    expiresAt: new Date(Math.min(...expiryTimes)).toISOString(),
     release: {
       releaseSha: manifest.releaseSha,
       environment: manifest.environment,
@@ -239,6 +347,7 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
       type: item.artifact?.type ?? null,
       gate: item.artifact?.gate ?? null,
       digest: item.digest,
+      artifactDigest: item.artifactDigest,
       counted: item.artifact !== null && item.reasons.length === 0,
       reasons: item.reasons,
     })),
@@ -246,10 +355,14 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
       id: legacy.id,
       disposition: legacy.disposition,
       gates: legacy.gates,
-      approved:
-        legacy.disposition === "retained_obligation" || legacyApproved(legacy.approval?.evidenceId),
+      approved: legacy.disposition === "retained_obligation" || legacyApproved(legacy),
     })),
   };
+  return parse(
+    readinessReportSchema,
+    { ...report, snapshotId: readinessSnapshotDigest(report) },
+    "readiness report",
+  );
 }
 
 const cell = (text: string) => text.replaceAll("|", "\\|").replaceAll("\n", " ");
@@ -264,6 +377,7 @@ export function renderReadinessMarkdown(report: ReadinessReport): string {
     "",
     `- Snapshot: \`${report.snapshotId}\``,
     `- Evaluated at: ${report.evaluatedAt}`,
+    `- Expires at: ${report.expiresAt}`,
     `- Release: \`${report.release.releaseSha}\` (${report.release.environment}, ${report.release.specVersion})`,
     `- Manifest: \`${report.release.manifestDigest}\``,
     `- Policy: ${report.policy.policyRevision} (\`${report.policy.policyDigest}\`)`,
