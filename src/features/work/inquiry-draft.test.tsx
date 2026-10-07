@@ -429,6 +429,10 @@ describe("O02/O03 inquiry drafts", () => {
       control.value = note;
       control.focus();
       control.setSelectionRange(4, 14, "backward");
+      // Earlier user-event cases leave a focus interceptor on this document. Its value
+      // setter moves the caret even on an unchanged assignment, unlike native browsers.
+      // This control is still server HTML: restore its native setter for the hydration check.
+      Reflect.deleteProperty(control, "value");
       let root!: ReturnType<typeof hydrateRoot>;
       try {
         await act(async () => {
