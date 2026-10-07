@@ -280,6 +280,133 @@ describe("O02/O03 inquiry drafts", () => {
     },
   );
 
+  it.each(["triage", "accept", "contact"] as const)(
+    "fences a %s B→C→D retry after a read-only visit, including edits after review",
+    async (kind) => {
+      const draftOwner = owner(),
+        user = userEvent.setup(),
+        called = vi.fn();
+      const action = async <V extends FormValues>(state: FormState<V>, data: FormData) => {
+        called(state, data);
+        return state;
+      };
+      const oldState: FormState<FormValues> = {
+        ...(kind === "triage" ? triageInitial() : initial()),
+        values:
+          kind === "triage"
+            ? { ...triageInitial().values, reason: "Revision two draft" }
+            : kind === "accept"
+              ? { nextAction: "Revision two draft", dueAt: "" }
+              : { ...initial().values, note: "Revision two draft", reviewed: "yes" },
+      };
+      claimInquiryDraftOwner(draftOwner);
+      retainInquiryDraft(draftOwner, "one", kind, oldState, {
+        state: oldState,
+        values: oldState.values,
+        pending: true,
+      });
+      const retained = () => readInquiryDraft(draftOwner, "one", kind, oldState);
+      const form = (retry: boolean) => {
+        const current = {
+          expectedRevision: 3,
+          operationId: retry ? oldState.operationId : initial("b").operationId,
+          ...(retry ? { inquiryRetryOperationId: oldState.operationId } : {}),
+        };
+        if (kind === "triage")
+          return (
+            <TriageForm
+              locale="en"
+              id="one"
+              draftOwner={draftOwner}
+              action={action}
+              initialState={{ ...triageInitial(), ...current }}
+              states={["contact_unreachable", "resolved_without_case"]}
+            />
+          );
+        if (kind === "accept")
+          return (
+            <AcceptForm
+              locale="en"
+              id="one"
+              draftOwner={draftOwner}
+              action={action}
+              initialState={{ ...initial(), ...current, values: { nextAction: "", dueAt: "" } }}
+            />
+          );
+        return (
+          <ContactForm
+            locale="en"
+            id="one"
+            draftOwner={draftOwner}
+            action={action}
+            initialState={{ ...initial(), ...current }}
+            contact={{ id: "method", version: 1, kind: "email", value: "synthetic@example.test" }}
+          />
+        );
+      };
+      const field =
+        kind === "triage" ? work.reason : kind === "accept" ? work.nextAction : contact.note;
+      const submit =
+        kind === "triage" ? work.disposition : kind === "accept" ? work.accept : contact.submit;
+      // B: an editable missing-receipt retry visits revision three without interacting.
+      const visitB = render(form(true));
+      expect(screen.getByText("Revision: 2 → 3")).toBeVisible();
+      expect(retained()?.revision).toBe(2);
+      expect(retained()?.operation?.revision).toBe(3);
+      visitB.unmount();
+      expect(
+        browserInquiryReference(inquiryReferenceCookie(draftOwner.id, "one", kind)),
+      ).toBeNull();
+      // C: the retry cookie is absent, but the pending operation remains in tab storage.
+      const visitC = render(form(false));
+      expect(screen.getByLabelText(field)).toHaveAttribute("readonly");
+      expect(screen.queryByRole("button", { name: submit })).toBeNull();
+      expect(screen.queryByLabelText(work.draft.confirm)).toBeNull();
+      expect(document.querySelector('input[name="_operationId"]')).toHaveValue(
+        oldState.operationId,
+      );
+      const afterC = retained();
+      visitC.unmount();
+      // D: authorization to retry K returns; C must not have rebased the old draft.
+      const visitD = render(form(true));
+      if (kind === "contact") {
+        expect(screen.getByLabelText(contact.confirm)).not.toBeChecked();
+        await user.click(screen.getByLabelText(contact.confirm));
+      }
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).not.toHaveBeenCalled();
+      expect(afterC?.revision).toBe(2);
+      expect(screen.getByText("Revision: 2 → 3")).toBeVisible();
+      expect(screen.getByLabelText(work.draft.confirm)).toHaveFocus();
+      expect(
+        browserInquiryReference(inquiryReferenceCookie(draftOwner.id, "one", kind)),
+      ).toBeNull();
+      await user.click(screen.getByLabelText(work.draft.confirm));
+      await user.type(screen.getByLabelText(field), " amended after review");
+      expect(retained()?.revision).toBe(2);
+      expect(
+        retained()?.values[
+          kind === "triage" ? "reason" : kind === "accept" ? "nextAction" : "note"
+        ],
+      ).toBe("Revision two draft amended after review");
+      visitD.unmount();
+      render(form(true));
+      expect(screen.getByLabelText(field)).toHaveValue("Revision two draft amended after review");
+      expect(screen.getByLabelText(work.draft.confirm)).not.toBeChecked();
+      if (kind === "contact") expect(screen.getByLabelText(contact.confirm)).not.toBeChecked();
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).not.toHaveBeenCalled();
+      await user.click(screen.getByLabelText(work.draft.confirm));
+      if (kind === "contact") await user.click(screen.getByLabelText(contact.confirm));
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).toHaveBeenCalledOnce();
+      expect(called.mock.calls[0]?.[0].operationId).toBe(oldState.operationId);
+      expect(called.mock.calls[0]?.[0].expectedRevision).toBe(3);
+      expect(called.mock.calls[0]?.[1].get("_expectedRevision")).toBe("3");
+      if (kind === "contact") expect(called.mock.calls[0]?.[1].get("reviewed")).toBe("yes");
+    },
+  );
+
   it.each([false, true])(
     "keeps the pre-hydration control, focus and selection without a differing restore (stored: %s)",
     async (stored) => {

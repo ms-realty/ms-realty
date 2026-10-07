@@ -167,6 +167,7 @@ function InquiryDraftSession<V extends FormValues>({
     revision: number | null;
     changed: boolean;
   } | null>(null);
+  const draftRevision = useRef<number | null | undefined>(undefined);
   const reviewRevision = useRef<number | null | undefined>(undefined);
   const [reviewChecked, setReviewChecked] = useState(false);
   const [reviewError, setReviewError] = useState(false);
@@ -193,7 +194,7 @@ function InquiryDraftSession<V extends FormValues>({
         initial,
         snapshot,
         (initial as FormState<V> & InquiryReferenceState).inquiryRetryOperationId,
-        reviewRevision.current,
+        draftRevision.current,
       );
       const acknowledgment = (snapshot.state as FormState<V> & InquiryReferenceState)
         .inquiryReferenceToAcknowledge;
@@ -255,8 +256,13 @@ function InquiryDraftSession<V extends FormValues>({
         (!retained.operation || retryOperationId === retained.operation.id) &&
         retained.revision !== initialResponse.expectedRevision,
     );
-    if (retained) setRestoreInfo({ revision: retained.revision, changed });
-    if (changed && retained) reviewRevision.current = retained.revision;
+    if (retained) {
+      // The operation may use a newer revision during retry or read-only recovery.
+      // Restoring either path must keep the revision these draft entries were based on.
+      draftRevision.current = retained.revision;
+      setRestoreInfo({ revision: retained.revision, changed });
+    }
+    if (changed) reviewRevision.current = initialResponse.expectedRevision;
     const state: FormState<V> = { ...initialResponse, values };
     if ((retryOperationId || changed) && "reviewed" in values) (values as FormValues).reviewed = "";
     if (retained?.operation && retryOperationId !== retained.operation.id) {
