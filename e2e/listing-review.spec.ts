@@ -2,8 +2,12 @@
 // human approvals as recorded status (never boxes to tick), says whether publishing is blocked,
 // and keeps every decision on its own form. Real PostgreSQL, synthetic records.
 import { execFileSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { constants } from "node:fs";
+import { copyFile } from "node:fs/promises";
+import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
@@ -314,6 +318,86 @@ test("O16 offers the publication decision only to someone who may publish", asyn
   previewUrl.searchParams.set("locale", "bg");
   previewUrl.searchParams.set("listing", "invalid-listing-id");
   expect((await page.request.get(previewUrl.href)).status()).toBe(404);
+});
+
+test("O16 selects a readable preview and preserves the recorded photo order", async ({ page }) => {
+  const f = seed();
+  const [first] = await db
+    .select({ asset: schema.mediaAssets })
+    .from(schema.mediaRelations)
+    .innerJoin(schema.mediaAssets, eq(schema.mediaAssets.id, schema.mediaRelations.mediaAssetId))
+    .where(eq(schema.mediaRelations.listingId, f.listingId));
+  const storageRoot = process.env.E2E_FILE_STORAGE_ROOT;
+  if (!first?.asset.sealedKey || !first.asset.derivativeKey || !storageRoot)
+    throw new Error("Missing sealed synthetic review photo or disposable storage");
+  const secondId = randomUUID();
+  const sealedKey = `sealed/o16-review-${secondId}`;
+  const derivativeKey = `derivatives/o16-review-${secondId}.webp`;
+  await copyFile(
+    join(storageRoot, first.asset.sealedKey),
+    join(storageRoot, sealedKey),
+    constants.COPYFILE_EXCL,
+  );
+  await copyFile(
+    join(storageRoot, first.asset.derivativeKey),
+    join(storageRoot, derivativeKey),
+    constants.COPYFILE_EXCL,
+  );
+  await db.insert(schema.mediaAssets).values({
+    ...first.asset,
+    id: secondId,
+    originalKey: `staging/o16-review-${secondId}.webp`,
+    sealedKey,
+    derivativeKey,
+    altText: "Eligible second photo",
+  });
+  await db.insert(schema.mediaRelations).values({
+    listingId: f.listingId,
+    mediaAssetId: secondId,
+    position: 1,
+  });
+  await db
+    .update(schema.mediaAssets)
+    .set({ audience: "private", altText: "Private first photo" })
+    .where(eq(schema.mediaAssets.id, first.asset.id));
+
+  const preview = page.locator('[aria-labelledby="o16-working"] figure');
+  const image = preview.locator("img");
+  const loaded = () => image.evaluate((img: HTMLImageElement) => img.naturalWidth);
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  await expect(image).toHaveAttribute("alt", "Private first photo");
+  await expect.poll(loaded).toBeGreaterThan(0);
+  await expect(preview).toContainText("Photo 1 of 2");
+
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`, f.readerToken);
+  const denied = hostUrl("staff", `/api/files/private/media/${first.asset.id}?preview=1`);
+  expect((await page.request.get(denied)).status()).toBe(404);
+  expect((await page.request.get(`${denied}&listing=${f.listingId}&locale=bg`)).status()).toBe(404);
+  await expect(image).toHaveAttribute("alt", "Eligible second photo");
+  await expect(image).toHaveAttribute(
+    "src",
+    `/api/files/private/media/${secondId}?preview=1&listing=${f.listingId}&locale=bg`,
+  );
+  await expect.poll(loaded).toBeGreaterThan(0);
+  await expect(preview).toContainText("Photo 2 of 2");
+
+  // With no permitted gallery preview, show an honest empty state and make no denied image request.
+  await db
+    .update(schema.mediaAssets)
+    .set({ audience: "private" })
+    .where(eq(schema.mediaAssets.id, secondId));
+  await page.reload();
+  await expect(image).toHaveCount(0);
+  await expect(preview).toContainText("No photo preview is available to you.");
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  await expect(image).toHaveAttribute("alt", "Private first photo");
+  await expect.poll(loaded).toBeGreaterThan(0);
+  const order = await db
+    .select({ assetId: schema.mediaRelations.mediaAssetId })
+    .from(schema.mediaRelations)
+    .where(eq(schema.mediaRelations.listingId, f.listingId))
+    .orderBy(asc(schema.mediaRelations.position));
+  expect(order.map((row) => row.assetId)).toEqual([first.asset.id, secondId]);
 });
 
 test("O16 reads before deciding, and the decision stands alone on its canvas", async ({ page }) => {

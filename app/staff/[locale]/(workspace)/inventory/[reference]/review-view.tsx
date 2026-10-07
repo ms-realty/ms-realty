@@ -23,6 +23,7 @@ import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { agencyTimeZone } from "@/i18n/config";
+import { can } from "@/server/authz";
 import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
 import { publicationReadiness } from "@/server/publication/commands";
@@ -171,7 +172,32 @@ export async function ReviewView({
   const photos = [...data.media]
     .filter(({ relation }) => !relation.removedAt && !relation.hidden)
     .sort((a, b) => a.relation.position - b.relation.position);
-  const cover = photos.find(({ asset }) => asset.scan === "clean" && asset.processing === "ready");
+  const mediaResource = { type: "listing", id: listing.id, propertyId: property.id };
+  const [mayManageMedia, mayReadSourcePreview] = await Promise.all([
+    can(getDb(), actor, "media.manage", mediaResource),
+    can(getDb(), actor, "listing.read", { ...mediaResource, locale: "bg" }),
+  ]);
+  // Keep the recorded order; a reviewer can preview only the scoped gallery derivative.
+  const cover = photos.find(
+    ({ asset }) =>
+      asset.scan === "clean" &&
+      asset.processing === "ready" &&
+      (mayManageMedia ||
+        (mayReadSourcePreview &&
+          asset.propertyId === property.id &&
+          asset.purpose === "listing_gallery" &&
+          asset.audience === "public_candidate" &&
+          Boolean(
+            asset.sealedKey &&
+              asset.sha256 &&
+              asset.scannedSha256 === asset.sha256 &&
+              asset.scannedAt &&
+              asset.scannerVersion &&
+              asset.derivativeKey &&
+              asset.derivativeSha256 &&
+              asset.derivativeContentType === "image/webp",
+          ))),
+  );
   const known = (state: string, value: string) =>
     state === "known" && value !== "" && Number.isFinite(Number(value));
   // Recorded money keeps its own currency and period; nothing is converted.
@@ -516,8 +542,14 @@ export async function ReviewView({
                 )}
                 <figcaption className="text-dense text-text-muted">
                   {cover
-                    ? fill(o16.photoCaption, { reference: ref, total: photos.length })
-                    : o16.noPhoto}
+                    ? fill(o16.photoCaption, {
+                        reference: ref,
+                        n: photos.indexOf(cover) + 1,
+                        total: photos.length,
+                      })
+                    : photos.length > 0 && !mayManageMedia
+                      ? o16.noPreview
+                      : o16.noPhoto}
                 </figcaption>
               </figure>
               <p className="min-w-0 whitespace-pre-wrap" lang="bg">

@@ -87,8 +87,9 @@ const en = {
     perMonth: "per month",
     working: "Working version BG",
     workingLine: "Current content from the editor · {reference}",
-    photoCaption: "{reference} · Photo 1 of {total} · Original listing photo",
+    photoCaption: "{reference} · Photo {n} of {total} · Original listing photo",
     noPhoto: "No reviewed photo yet",
+    noPreview: "No photo preview is available to you.",
     changesNeedReview: "Changes to the text or photos need a new review.",
     approvals: "Required approvals",
     checks: {
@@ -395,8 +396,9 @@ const bg: Copy = {
     perMonth: "на месец",
     working: "Работна версия BG",
     workingLine: "Текущо съдържание от редактора · {reference}",
-    photoCaption: "{reference} · Снимка 1 от {total} · Оригинална снимка от обявата",
+    photoCaption: "{reference} · Снимка {n} от {total} · Оригинална снимка от обявата",
     noPhoto: "Още няма прегледана снимка",
+    noPreview: "Няма достъпна за вас снимка за преглед.",
     changesNeedReview: "Промените в текста или снимките изискват нов преглед.",
     approvals: "Нужни одобрения",
     checks: {
@@ -702,8 +704,9 @@ const ru: Copy = {
     perMonth: "в месяц",
     working: "Рабочая версия BG",
     workingLine: "Текущее содержимое из редактора · {reference}",
-    photoCaption: "{reference} · Фото 1 из {total} · Исходное фото объявления",
+    photoCaption: "{reference} · Фото {n} из {total} · Исходное фото объявления",
     noPhoto: "Проверенных фото пока нет",
+    noPreview: "Нет доступного вам предпросмотра фото.",
     changesNeedReview: "Изменения текста или фото требуют новой проверки.",
     approvals: "Необходимые одобрения",
     checks: {
