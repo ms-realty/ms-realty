@@ -15,7 +15,13 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { mediaAssetEligible } from "../media/eligibility";
 import { currentSellerEvidence } from "../publication/seller-evidence";
-import { documentAccess, type FileKind, mediaAccess } from "./access";
+import {
+  documentAccess,
+  type FileKind,
+  type MediaReviewPreviewScope,
+  mediaAccess,
+  mediaReviewPreviewAccess,
+} from "./access";
 import type { FileStorage } from "./storage";
 import { digestOf } from "./storage";
 
@@ -38,10 +44,14 @@ export async function privateDownload(
   kind: FileKind,
   id: string,
   preview = false,
+  reviewScope?: MediaReviewPreviewScope,
 ): Promise<FileDownload> {
+  if (reviewScope && (kind !== "media" || !preview)) throw new AppError("not_found");
   let file: FileDownload;
   if (kind === "media") {
-    const asset = await mediaAccess(db, session, id);
+    const asset = reviewScope
+      ? await mediaReviewPreviewAccess(db, session, id, reviewScope)
+      : await mediaAccess(db, session, id);
     if (
       !asset.sealedKey ||
       !asset.sha256 ||
@@ -52,7 +62,12 @@ export async function privateDownload(
     )
       throw new AppError("not_found");
     if (preview) {
-      if (!asset.derivativeKey || !asset.derivativeSha256 || asset.processing !== "ready")
+      if (
+        !asset.derivativeKey ||
+        !asset.derivativeSha256 ||
+        asset.processing !== "ready" ||
+        (reviewScope && asset.derivativeContentType !== "image/webp")
+      )
         throw new AppError("not_found");
       file = {
         bytes: await verified(storage, asset.derivativeKey, asset.derivativeSha256),
@@ -90,7 +105,10 @@ export async function privateDownload(
     action: "file.downloaded",
     recordType: kind,
     recordId: id,
-    payload: { rendition: preview ? "safe_preview" : "original" },
+    payload: {
+      rendition: preview ? "safe_preview" : "original",
+      ...(reviewScope ? { listingId: reviewScope.listingId, locale: reviewScope.locale } : {}),
+    },
   });
   return file;
 }

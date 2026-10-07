@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getDb } from "@/db/client";
+import { publicLocales } from "@/domain/ids";
 import { getEnv } from "@/server/config/env";
 import { fileServices } from "@/server/files/config";
 import { downloadResponse, privateDownload } from "@/server/files/download";
@@ -13,6 +14,7 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+const reviewPreviewScope = z.object({ listingId: z.uuid(), locale: z.enum(publicLocales) });
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ kind: string; id: string }> },
@@ -26,6 +28,14 @@ export async function GET(
     (context !== "staff" && context !== "client")
   )
     return new Response(null, { status: 404 });
+  const query = new URL(request.url).searchParams;
+  const preview = query.get("preview") === "1";
+  const scoped = query.has("listing") || query.has("locale");
+  const scope = scoped
+    ? reviewPreviewScope.safeParse({ listingId: query.get("listing"), locale: query.get("locale") })
+    : null;
+  if (scoped && (values.kind !== "media" || !preview || !scope?.success))
+    return new Response(null, { status: 404 });
   try {
     const db = getDb();
     const session = requireSession(await identify(db, request.headers, env));
@@ -35,7 +45,8 @@ export async function GET(
       session,
       values.kind as "media" | "document",
       values.id,
-      new URL(request.url).searchParams.get("preview") === "1",
+      preview,
+      scope?.success ? scope.data : undefined,
     );
     return downloadResponse(file, request.headers.get("range"));
   } catch (error) {

@@ -9,6 +9,7 @@ import {
   mediaRelations,
   principals,
 } from "@/db/schema";
+import type { PublicLocale } from "@/domain/ids";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { requireFreshAuth, requireLiveSession, type Session } from "../auth/sessions";
 import { can } from "../authz";
@@ -50,6 +51,50 @@ export async function mediaAccess(db: Executor, session: Session, id: string) {
       return asset;
   }
   throw new AppError("not_found");
+}
+
+export interface MediaReviewPreviewScope {
+  readonly listingId: string;
+  readonly locale: PublicLocale;
+}
+
+/** A reviewer's safe gallery derivative, never original or other private media access. */
+export async function mediaReviewPreviewAccess(
+  db: Executor,
+  session: Session,
+  id: string,
+  scope: MediaReviewPreviewScope,
+) {
+  session = await fileSession(db, session);
+  if (session.actor.kind !== "staff") throw new AppError("not_found");
+  const [row] = await db
+    .select({ asset: mediaAssets, listing: listings })
+    .from(mediaRelations)
+    .innerJoin(mediaAssets, eq(mediaAssets.id, mediaRelations.mediaAssetId))
+    .innerJoin(listings, eq(listings.id, mediaRelations.listingId))
+    .where(
+      and(
+        eq(mediaRelations.mediaAssetId, id),
+        eq(mediaRelations.listingId, scope.listingId),
+        isNull(mediaRelations.removedAt),
+        eq(mediaRelations.hidden, false),
+        eq(mediaAssets.propertyId, listings.propertyId),
+        eq(mediaAssets.purpose, "listing_gallery"),
+        eq(mediaAssets.audience, "public_candidate"),
+      ),
+    )
+    .limit(1);
+  if (
+    !row ||
+    !(await can(db, session.actor, "listing.read", {
+      type: "listing",
+      id: row.listing.id,
+      propertyId: row.listing.propertyId,
+      locale: scope.locale,
+    }))
+  )
+    throw new AppError("not_found");
+  return row.asset;
 }
 
 export async function documentAccess(

@@ -20,7 +20,7 @@ type Seed = {
   reference: string;
   listingId: string;
   brokerId: string;
-  blank: { reference: string };
+  blank: { reference: string; listingId: string };
   bgn: { reference: string };
   twoAreas: { reference: string };
   token: string;
@@ -286,6 +286,34 @@ test("O16 offers the publication decision only to someone who may publish", asyn
     page.getByText("A staff member who may publish takes this decision; you cannot publish."),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Go to the publication decision" })).toHaveCount(0);
+  const image = page.locator('[aria-labelledby="o16-working"] img');
+  await expect
+    .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+    .toBeGreaterThan(0);
+  const source = await image.getAttribute("src");
+  if (!source) throw new Error("Missing O16 review preview");
+  const previewUrl = new URL(source, origins.staff);
+  expect(previewUrl.searchParams.get("listing")).toBe(f.listingId);
+  expect(previewUrl.searchParams.get("locale")).toBe("bg");
+  const response = await page.request.get(previewUrl.href);
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toBe("image/webp");
+  expect(response.headers()["cache-control"]).toContain("no-store");
+  // Review access does not become original, generic preview, or unrelated placement access.
+  const generic = new URL(previewUrl.pathname, origins.staff);
+  expect((await page.request.get(generic.href)).status()).toBe(404);
+  generic.searchParams.set("preview", "1");
+  expect((await page.request.get(generic.href)).status()).toBe(404);
+  previewUrl.searchParams.set("listing", f.blank.listingId);
+  expect((await page.request.get(previewUrl.href)).status()).toBe(404);
+  previewUrl.searchParams.delete("listing");
+  expect((await page.request.get(previewUrl.href)).status()).toBe(404);
+  previewUrl.searchParams.set("listing", f.listingId);
+  previewUrl.searchParams.set("locale", "invalid-locale");
+  expect((await page.request.get(previewUrl.href)).status()).toBe(404);
+  previewUrl.searchParams.set("locale", "bg");
+  previewUrl.searchParams.set("listing", "invalid-listing-id");
+  expect((await page.request.get(previewUrl.href)).status()).toBe(404);
 });
 
 test("O16 reads before deciding, and the decision stands alone on its canvas", async ({ page }) => {

@@ -500,7 +500,12 @@ export async function ReviewView({
                 {cover ? (
                   // biome-ignore lint/performance/noImgElement: Authenticated previews must bypass shared image optimizers.
                   <img
-                    src={`/api/files/private/media/${cover.asset.id}?preview=1`}
+                    src={
+                      cover.asset.purpose === "listing_gallery" &&
+                      cover.asset.audience === "public_candidate"
+                        ? `/api/files/private/media/${cover.asset.id}?preview=1&listing=${listing.id}&locale=bg`
+                        : `/api/files/private/media/${cover.asset.id}?preview=1`
+                    }
                     alt={cover.asset.altText ?? ""}
                     className="aspect-[3/2] w-full object-cover sm:aspect-auto sm:h-45"
                   />
