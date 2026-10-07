@@ -442,6 +442,18 @@
     },
     {
       "action": "CREATE",
+      "id": "color/danger-tint",
+      "name": "color/danger-tint",
+      "variableCollectionId": "collection:color",
+      "resolvedType": "COLOR",
+      "description": "UI26 validation summary surface; Figma color/danger-tint (VariableID:4:54), light alias VariableID:4:29.",
+      "scopes": ["ALL_FILLS", "STROKE_COLOR", "EFFECT_COLOR"],
+      "codeSyntax": {
+        "WEB": "var(--color-danger-tint)"
+      }
+    },
+    {
+      "action": "CREATE",
       "id": "color/info",
       "name": "color/info",
       "variableCollectionId": "collection:color",
@@ -1471,6 +1483,16 @@
         "r": 0.9843,
         "g": 0.9176,
         "b": 0.9098,
+        "a": 1
+      }
+    },
+    {
+      "variableId": "color/danger-tint",
+      "modeId": "mode:color:light",
+      "value": {
+        "r": 0.9961,
+        "g": 0.9412,
+        "b": 0.9373,
         "a": 1
       }
     },

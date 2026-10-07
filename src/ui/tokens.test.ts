@@ -56,6 +56,7 @@ const textPairs: Array<[string, string]> = [
   ["text", "success-soft"],
   ["text", "warning-soft"],
   ["text", "error-soft"],
+  ["text", "danger-tint"],
   ["text", "info-soft"],
   ["text-inverse", "action"],
   ["text-inverse", "action-hover"],
@@ -89,6 +90,7 @@ const nonTextPairs: Array<[string, string]> = [
   ["success", "success-soft"],
   ["warning", "warning-soft"],
   ["error", "error-soft"],
+  ["error", "danger-tint"],
   ["info", "info-soft"],
   ["assist", "assist-soft"],
   // The focus ring is offset 2px, so it sits on the page surface, never on the button fill.
