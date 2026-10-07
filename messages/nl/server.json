@@ -17,8 +17,8 @@
       "next": "Vraag de beheerder om u toegang te geven."
     },
     "butler_approval_required": {
-      "message": "Een persoon moet dit goedkeuren, daarom heeft Butler het niet gedaan.",
-      "next": "Bekijk het en keur het goed, of doe het zelf."
+      "message": "Butler heeft deze stap niet uitgevoerd. Een medewerker met toestemming moet dit handmatig doen.",
+      "next": "Controleer de gegevens en voer de stap handmatig uit, of vraag een bevoegde medewerker."
     },
     "not_found": {
       "message": "We konden dit niet vinden, of het is niet met u gedeeld.",

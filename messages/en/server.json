@@ -17,8 +17,8 @@
       "next": "Ask the person who manages it to give you access."
     },
     "butler_approval_required": {
-      "message": "A person needs to approve this, so Butler did not do it.",
-      "next": "Review and approve it, or do it yourself."
+      "message": "Butler did not take this step. An authorized staff member must do it manually.",
+      "next": "Review the details and use the manual action, or ask an authorized staff member."
     },
     "not_found": {
       "message": "We could not find this, or it is not shared with you.",

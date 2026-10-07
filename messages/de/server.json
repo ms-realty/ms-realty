@@ -17,8 +17,8 @@
       "next": "Bitten Sie die zuständige Person, Ihnen Zugriff zu geben."
     },
     "butler_approval_required": {
-      "message": "Das muss eine Person freigeben, deshalb hat Butler es nicht ausgeführt.",
-      "next": "Prüfen Sie es und geben Sie es frei, oder erledigen Sie es selbst."
+      "message": "Butler hat diesen Schritt nicht ausgeführt. Ein Teammitglied mit den nötigen Rechten muss ihn manuell ausführen.",
+      "next": "Prüfen Sie die Angaben und nutzen Sie die manuelle Aktion, oder bitten Sie ein berechtigtes Teammitglied."
     },
     "not_found": {
       "message": "Wir konnten das nicht finden, oder es ist nicht für Sie freigegeben.",

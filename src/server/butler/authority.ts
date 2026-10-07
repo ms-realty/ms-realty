@@ -1,5 +1,10 @@
 import "server-only";
-import { type ButlerEligibility, type ButlerEvidence, butlerEligibility } from "@/domain/butler";
+import {
+  type ButlerEligibility,
+  type ButlerEvidence,
+  butlerEligibility,
+  isButlerRoutineAction,
+} from "@/domain/butler";
 import type { OperationContext, OperationInput } from "../operations";
 
 declare const authorityBrand: unique symbol;
@@ -53,6 +58,12 @@ export async function checkButlerAuthorization(
     return {
       action: "unclassified",
       eligibility: { decision: "blocked", reason: "server_authority_required" },
+    };
+  }
+  if (isButlerRoutineAction(binding.action) && !binding.readAndLock) {
+    return {
+      action: binding.action,
+      eligibility: { decision: "blocked", reason: "action_not_registered" },
     };
   }
   // Checked after the operation lock in a savepoint; never precomputed from request flags or

@@ -107,13 +107,13 @@ Reached in practice from staff screens; seven locales because the family is shar
 
 | | message | next |
 |---|---|---|
-| bg | Тази стъпка трябва да се извърши от човек, затова Butler не я е извършил. | Прегледайте я и я извършете лично. |
-| en | A person must take this step, so Butler did not do it. | Review it, then do it yourself. |
-| ru | Этот шаг должен выполнить человек, поэтому Butler его не выполнил. | Проверьте его, затем выполните самостоятельно. |
-| de | Eine Person muss diesen Schritt ausführen, deshalb hat Butler ihn nicht ausgeführt. | Prüfen Sie den Schritt und führen Sie ihn selbst aus. |
-| nl | Een persoon moet deze stap uitvoeren, daarom heeft Butler dat niet gedaan. | Bekijk de stap en voer deze zelf uit. |
-| el | Αυτό το βήμα πρέπει να το κάνει άνθρωπος, γι' αυτό το Butler δεν το έκανε. | Ελέγξτε το βήμα και κάντε το εσείς. |
-| he | אדם צריך לבצע את השלב הזה, ולכן Butler לא ביצע אותו. | בדקו את השלב ובצעו אותו בעצמכם. |
+| bg | Butler не извърши тази стъпка. Служител с нужните права трябва да я извърши ръчно. | Прегледайте данните и използвайте ръчното действие или помолете служител с нужните права. |
+| en | Butler did not take this step. An authorized staff member must do it manually. | Review the details and use the manual action, or ask an authorized staff member. |
+| ru | Butler не выполнил этот шаг. Сотрудник с нужными правами должен выполнить его вручную. | Проверьте данные и выполните шаг вручную или обратитесь к сотруднику с нужными правами. |
+| de | Butler hat diesen Schritt nicht ausgeführt. Ein Teammitglied mit den nötigen Rechten muss ihn manuell ausführen. | Prüfen Sie die Angaben und nutzen Sie die manuelle Aktion, oder bitten Sie ein berechtigtes Teammitglied. |
+| nl | Butler heeft deze stap niet uitgevoerd. Een medewerker met toestemming moet dit handmatig doen. | Controleer de gegevens en voer de stap handmatig uit, of vraag een bevoegde medewerker. |
+| el | Το Butler δεν έκανε αυτό το βήμα. Ένας εξουσιοδοτημένος υπάλληλος πρέπει να το κάνει χειροκίνητα. | Ελέγξτε τα στοιχεία και εκτελέστε το βήμα χειροκίνητα ή ζητήστε το από εξουσιοδοτημένο υπάλληλο. |
+| he | Butler לא ביצע את השלב הזה. איש צוות עם הרשאה מתאימה צריך לבצע אותו ידנית. | בדקו את הפרטים ובצעו את השלב ידנית, או פנו לאיש צוות עם ההרשאה המתאימה. |
 
 ### not_found · not_applied
 
@@ -1017,6 +1017,9 @@ Sources: `src/domain/butler.ts` (`butlerEligibility`, `butlerReceipt`), `src/ser
 | blocked · action_not_allowlisted | bg | Butler няма право да прави такава стъпка, затова нищо не е направено. | Използвайте «Ще го направя аз», за да я направите ръчно. |
 | | en | Butler is not allowed to take this kind of step, so nothing was done. | Use «Do it myself» to do it by hand. |
 | | ru | Butler не может выполнять такие шаги, поэтому ничего не сделано. | Нажмите «Сделать самостоятельно», чтобы сделать это вручную. |
+| blocked · action_not_registered | bg | Butler не може да изпълни тази стъпка, затова нищо не е направено. | Служител с нужните права може да я извърши ръчно чрез «Ще го направя аз». |
+| | en | Butler cannot perform this step, so nothing was done. | An authorized staff member can take it manually through «Do it myself». |
+| | ru | Butler не может выполнить этот шаг, поэтому ничего не сделано. | Сотрудник с нужными правами может выполнить его вручную через «Сделать самостоятельно». |
 | blocked · server_authority_required | bg | Butler спря, защото не можа да потвърди, че стъпката е разрешена, затова нищо не е направено. | Използвайте «Ще го направя аз», за да я направите ръчно. |
 | | en | Butler stopped because it could not confirm this step was allowed, so nothing was done. | Use «Do it myself» to do it by hand. |
 | | ru | Butler остановился: не удалось подтвердить, что шаг разрешён, поэтому ничего не сделано. | Нажмите «Сделать самостоятельно», чтобы сделать это вручную. |
@@ -1050,7 +1053,7 @@ Sources: `src/domain/butler.ts` (`butlerEligibility`, `butlerReceipt`), `src/ser
 
 ### 7c. Action labels · `server.butler.action.<action>` (S: bg, en, ru)
 
-`<action>` is the action string from `butlerAutomaticActions`, `butlerHumanActions`, or `unclassified`.
+`<action>` is the action string from `butlerRoutineActions`, `butlerHumanActions`, or `unclassified`. These labels name intents; they grant no execution authority.
 
 | action | bg | en | ru |
 |---|---|---|---|

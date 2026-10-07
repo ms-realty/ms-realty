@@ -49,7 +49,7 @@ const definitions = {
   },
   butler_approval_required: {
     status: 409,
-    message: "Human approval is required for this action.",
+    message: "Butler did not take this step. An authorized staff member must do it manually.",
     retryable: false,
     outcome: "not_applied",
   },

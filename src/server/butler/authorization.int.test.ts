@@ -4,10 +4,14 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   activityEvents,
+  appointments,
   auditEvents,
   caseParticipants,
   cases,
+  externalActions,
+  messages,
   operations,
+  outboxEvents,
   tasks,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -47,6 +51,19 @@ const request = (action: string, body?: Record<string, unknown>) => ({
 const allTasks = () => t.db.select().from(tasks).where(eq(tasks.caseId, fixture.record.id));
 const allActivities = () =>
   t.db.select().from(activityEvents).where(eq(activityEvents.recordId, fixture.record.id));
+async function businessState() {
+  const [taskRows, activityRows, caseRows, messageRows, viewingRows, outboxRows, externalRows] =
+    await Promise.all([
+      allTasks(),
+      allActivities(),
+      t.db.select().from(cases).where(eq(cases.id, fixture.record.id)),
+      t.db.select().from(messages),
+      t.db.select().from(appointments),
+      t.db.select().from(outboxEvents),
+      t.db.select().from(externalActions),
+    ]);
+  return { taskRows, activityRows, caseRows, messageRows, viewingRows, outboxRows, externalRows };
+}
 const verdictAudits = (operationId: string) =>
   t.db
     .select()
@@ -189,12 +206,41 @@ describe("durable Butler draft-only authorization", () => {
     });
   });
   it.each(butlerRoutineActions.filter((a) => a !== "task.create"))(
-    "%s without a registered guard is blocked",
+    "%s on an active case records a truthful adapter denial without any effect",
     async (action) => {
-      await expect(runButlerAction(t.db, request(action))).rejects.toMatchObject({
-        code: "forbidden",
-        current: { butlerReceipt: { verdict: "blocked" } },
-      });
+      const [currentCase] = await t.db
+        .select({ disposition: cases.disposition })
+        .from(cases)
+        .where(eq(cases.id, fixture.record.id));
+      expect(currentCase?.disposition).toBe("active");
+      const input = request(action);
+      const before = await businessState();
+      for (let retry = 0; retry < 2; retry++)
+        await expect(runButlerAction(t.db, input)).rejects.toMatchObject({
+          code: "forbidden",
+          outcome: "not_applied",
+          current: {
+            butlerReceipt: {
+              policy: "owner_draft_only",
+              action,
+              verdict: "blocked",
+              reason: "action_not_registered",
+              outcome: "not_applied",
+              manual: { requiresAuthorization: true, requiresReconciliation: false },
+            },
+          },
+        });
+      const stored = await findOperation(t.db, butler, `butler.${action}`, input.idempotencyKey);
+      if (!stored?.butlerReceipt) throw new Error("Missing unregistered-intent receipt");
+      expect(stored.status).toBe("failed");
+      expect(await readButlerReceipt(t.db, fixture.staff.session, stored.operationId)).toEqual(
+        stored.butlerReceipt,
+      );
+      expect(await verdictAudits(stored.operationId)).toHaveLength(1);
+      expect(await businessState()).toEqual(before);
+      await expect(
+        runButlerAction(t.db, { ...input, body: { ...input.body, details: "Changed intent" } }),
+      ).rejects.toMatchObject({ code: "idempotency_key_reused" });
     },
   );
   it("a valid old task intent retains one human receipt without inserting a task or activity", async () => {
@@ -381,6 +427,91 @@ describe("durable Butler draft-only authorization", () => {
       "Invalid Butler adapter registry",
     );
   });
+  it.each([
+    "acknowledgement.send",
+    "chaser.send",
+    "viewing.book",
+    "document.record_received",
+  ] as const)(
+    "%s cannot execute even with a registered adapter and complete evidence",
+    async (action) => {
+      let effects = 0;
+      const execute = createButlerExecutor([
+        defineButlerAction(action, z.object({ caseId: z.uuid() }).strict(), {
+          async readAndLock(ctx, command): Promise<ButlerEvidence> {
+            const [record] = await ctx.tx
+              .select({ id: cases.id, disposition: cases.disposition })
+              .from(cases)
+              .where(eq(cases.id, command.caseId))
+              .for("update");
+            if (!record) throw new Error("Missing active case fixture");
+            return {
+              caseId: record.id,
+              caseActive: record.disposition === "active",
+              protectedEffects: [],
+              message: {
+                templateId: "synthetic-reviewed-template",
+                templateAction: action,
+                approvedDigest: "synthetic-reviewed-rendering",
+                renderedDigest: "synthetic-reviewed-rendering",
+                active: true,
+                recipients: [
+                  {
+                    partyId: fixture.client.partyId,
+                    currentCaseParticipant: true,
+                    contactEligible: true,
+                    firstContactHumanReceiptId: "synthetic-human-first-contact",
+                  },
+                ],
+              },
+              viewing: {
+                requestedSlotDigest: "synthetic-agreed-slot",
+                acceptances: [
+                  {
+                    side: "visitor",
+                    receiptId: "synthetic-visitor-consent",
+                    partyId: fixture.client.partyId,
+                    slotDigest: "synthetic-agreed-slot",
+                    current: true,
+                  },
+                  {
+                    side: "host",
+                    receiptId: "synthetic-host-consent",
+                    partyId: "synthetic-host",
+                    slotDigest: "synthetic-agreed-slot",
+                    current: true,
+                  },
+                ],
+                resourcesCheckedAndLocked: true,
+                listingAvailable: true,
+              },
+              document: {
+                receivedVersionId: "synthetic-persisted-upload",
+                persistedUpload: true,
+                belongsToCase: true,
+                receiptOnly: true,
+              },
+            };
+          },
+          async execute() {
+            effects++;
+            throw new Error("Draft-only must prevent this callback");
+          },
+        }),
+      ]);
+      const input = request(action);
+      const before = await businessState();
+      for (let retry = 0; retry < 2; retry++)
+        await expect(execute(t.db, input)).rejects.toMatchObject({
+          code: "butler_approval_required",
+          current: { butlerReceipt: { action, reason: "draft_only", outcome: "not_applied" } },
+        });
+      expect(effects).toBe(0);
+      expect(await businessState()).toEqual(before);
+      const stored = await findOperation(t.db, butler, `butler.${action}`, input.idempotencyKey);
+      expect(await verdictAudits(stored?.operationId ?? "")).toHaveLength(1);
+    },
+  );
   it.each([
     new AppError("unavailable"),
     new AppError("unavailable", { outcome: "unknown" }),
