@@ -9,12 +9,19 @@ import {
   Text,
 } from "react-aria-components";
 import { cx } from "./cx";
-import { labelClass } from "./field-class";
+import { errorClass, labelClass } from "./field-class";
 import { ErrorIcon } from "./icons";
 
-// Shared field anatomy (GOV.UK order): label, hint, error, control.
+// Shared field anatomy (UI06 6:68): label, hint, control, then the error under the control.
+// Choice groups (checkbox, radio) keep their error above the options.
 
-export { controlClass, fieldClass, labelClass } from "./field-class";
+export {
+  controlClass,
+  errorClass,
+  fieldClass,
+  labelClass,
+  textareaClass,
+} from "./field-class";
 
 export function Label({
   children,
@@ -48,8 +55,9 @@ export function Description({ children }: { children?: ReactNode }) {
 /** The error text for the surrounding field; rendered only while the field is invalid. */
 export function FieldError({ children }: { children?: ReactNode }) {
   return (
-    <RACFieldError className="flex items-start gap-1.5 text-compact font-semibold text-error">
-      <ErrorIcon className="mt-0.5" />
+    // UI06 Error text (6:67), 14/20 medium, under the control; the 20 px icon fills the line.
+    <RACFieldError className={cx("flex items-start gap-1.5", errorClass)}>
+      <ErrorIcon />
       <span>{children}</span>
     </RACFieldError>
   );

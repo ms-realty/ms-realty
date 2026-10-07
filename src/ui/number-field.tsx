@@ -44,12 +44,11 @@ export function NumberField({
         {unit ? <VisuallyHidden> ({unit})</VisuallyHidden> : null}
       </Label>
       <Description>{description}</Description>
-      <FieldError>{errorMessage}</FieldError>
       <Group
         className={cx(
           "flex min-h-input w-full max-w-xs items-stretch overflow-hidden rounded-control border border-border bg-canvas",
           "data-hovered:border-text data-focus-within:outline-2 data-focus-within:outline-offset-2 data-focus-within:outline-focus",
-          "group-data-invalid:border-2 group-data-invalid:border-error",
+          "group-data-invalid:border-error",
           "group-data-readonly:border-dashed group-data-readonly:bg-subtle",
           "group-data-disabled:border-disabled-text group-data-disabled:bg-disabled",
         )}
@@ -69,6 +68,7 @@ export function NumberField({
           <PlusIcon />
         </Button>
       </Group>
+      <FieldError>{errorMessage}</FieldError>
     </RACNumberField>
   );
 }

@@ -68,7 +68,7 @@ test("UI05 pending keeps width and prevents a second submission while the real r
   await expect(page.getByRole("heading", { name: "Practice form checked" })).toBeVisible();
 });
 
-test("UI06 field: a 52 px canvas control under a 14/20 label, and the error border stays inside it", async ({
+test("UI06 field: a 52 px canvas control under a 14/20 label; an error keeps the 1 px border in red with a 14/20 message 8 px under it", async ({
   page,
 }) => {
   await page.goto("/en/design/forms");
@@ -80,32 +80,78 @@ test("UI06 field: a 52 px canvas control under a 14/20 label, and the error bord
       const box = input.getBoundingClientRect();
       const style = getComputedStyle(input);
       const text = label ? getComputedStyle(label) : null;
+      const message = error ? getComputedStyle(error) : null;
       return {
         height: box.height,
         fill: style.backgroundColor,
-        border: style.borderTopWidth,
+        border: `${style.borderTopWidth} ${style.borderTopColor}`,
         label: text && `${text.fontSize}/${text.lineHeight} ${text.fontWeight}`,
         labelGap: label?.nextElementSibling
           ? label.nextElementSibling.getBoundingClientRect().top -
             label.getBoundingClientRect().bottom
           : null,
-        errorBelow: error ? error.getBoundingClientRect().top >= box.bottom : null,
+        errorGap: error ? error.getBoundingClientRect().top - box.bottom : null,
+        errorText: message && `${message.fontSize}/${message.lineHeight} ${message.fontWeight}`,
       };
     });
   // Figma UI06 Input (6:74): 52 px on the canvas fill, label 14/20 semibold, 8 px apart.
   expect(await look()).toEqual({
     height: 52,
     fill: "rgb(248, 247, 243)",
-    border: "1px",
+    border: "1px rgb(104, 122, 111)",
     label: "14px/20px 600",
     labelGap: 8,
-    errorBelow: null,
+    errorGap: null,
+    errorText: null,
   });
   await subject.fill("ab");
   await page.getByRole("button", { name: "Check practice form", exact: true }).click();
   await expect(subject).toHaveAttribute("aria-invalid", "true");
-  // 694:13318: the 2 px error border and the message under the field keep the 52 px row.
-  expect(await look()).toMatchObject({ height: 52, border: "2px", errorBelow: true });
+  // UI06 Error (6:68, 6:67) and O12 694:13318: the 1 px border in the error colour, the
+  // 14/20 medium message 8 px under the field, and the same 52 px row. Polled: the border
+  // colour eases in over the 150 ms colour transition.
+  await expect.poll(look).toMatchObject({
+    height: 52,
+    border: "1px rgb(161, 42, 37)",
+    errorGap: 8,
+    errorText: "14px/20px 500",
+  });
+});
+
+test("UI07 textarea: a 144 px writing surface with 16 px padding and the 8 px panel radius", async ({
+  page,
+}) => {
+  await page.goto("/en/design/forms");
+  const note = page.getByRole("textbox", { name: "Practice note (optional)", exact: true });
+  const look = () =>
+    note.evaluate((area) => {
+      const style = getComputedStyle(area);
+      return {
+        height: area.getBoundingClientRect().height,
+        padding: style.padding,
+        radius: style.borderTopLeftRadius,
+        fill: style.backgroundColor,
+        border: `${style.borderTopWidth} ${style.borderTopColor}`,
+      };
+    });
+  // Figma UI07 Textarea (6:85): at least 144 px, 16 px padding, the 8 px panel radius.
+  expect(await look()).toEqual({
+    height: 144,
+    padding: "16px",
+    radius: "8px",
+    fill: "rgb(248, 247, 243)",
+    border: "1px rgb(104, 122, 111)",
+  });
+  await note.fill("x".repeat(2001));
+  await page.getByRole("button", { name: "Check practice form", exact: true }).click();
+  await expect(note).toHaveAttribute("aria-invalid", "true");
+  // An error only recolours the 1 px border (polled through the colour transition); the
+  // surface keeps its padding and 144 px.
+  await expect.poll(look).toMatchObject({
+    height: 144,
+    padding: "16px",
+    border: "1px rgb(161, 42, 37)",
+  });
 });
 
 test("S11 validation retains input, repeats focus recovery and opens a confirmed practice receipt", async ({
