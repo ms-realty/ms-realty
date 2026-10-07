@@ -46,7 +46,11 @@
   },
   "overrides": [
     {
-      "includes": ["public/brand/workspace/*.svg", "public/brand/journey/*.svg"],
+      "includes": [
+        "public/brand/workspace/*.svg",
+        "public/brand/journey/*.svg",
+        "src/features/discovery/area-assets/*.svg"
+      ],
       "linter": {
         "rules": {
           "a11y": {

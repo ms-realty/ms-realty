@@ -1,11 +1,12 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { approvals, contentPages, contentPageVersions } from "@/db/schema";
 import { type ApprovalKind, approvalCapability } from "@/domain/approval";
 import type { PublicLocale } from "@/i18n/config";
 import { hashRequest } from "@/server/crypto";
 import type { Executor } from "@/server/db";
+import { loadPlaceChains, placeName } from "@/server/publication/presentation";
 
 // A deliberately narrow plaintext projection. Rich text, embedded scripts and remote media
 // have no renderer here. Operator-authored CMS content must use an explicit supported shape.
@@ -119,3 +120,52 @@ export async function readApprovedContent(
   const content = approvedContent(row.version, decisions, locale);
   return content ? { ...content, placeId: row.page.placeId } : null;
 }
+
+/** P15: exact approved editions only. A guide without a place binding remains unbound. */
+export async function readApprovedAreas(db: Executor, locale: PublicLocale) {
+  // The CMS currently stores source editions only. Never turn BG text into a translation.
+  if (locale !== "bg") return [];
+  const rows = await db
+    .select({ page: contentPages, version: contentPageVersions })
+    .from(contentPages)
+    .innerJoin(
+      contentPageVersions,
+      and(
+        eq(contentPageVersions.contentPageId, contentPages.id),
+        eq(contentPageVersions.versionNumber, contentPages.publishedVersionNumber),
+      ),
+    )
+    .where(and(eq(contentPages.kind, "area"), eq(contentPages.publicationState, "active")))
+    .orderBy(asc(contentPages.slug));
+  if (!rows.length) return [];
+  const decisions = await db
+    .select()
+    .from(approvals)
+    .where(
+      and(
+        eq(approvals.subjectType, "content_page_version"),
+        inArray(
+          approvals.subjectId,
+          rows.map(({ version }) => version.id),
+        ),
+      ),
+    );
+  const approved = rows.flatMap(({ page, version }) => {
+    if (!/^[a-z\d][a-z\d-]{0,100}$/.test(page.slug)) return [];
+    const content = approvedContent(version, decisions, locale);
+    return content ? [{ ...content, slug: page.slug, placeId: page.placeId }] : [];
+  });
+  const chains = await loadPlaceChains(
+    db,
+    approved.flatMap((area) => (area.placeId ? [area.placeId] : [])),
+  );
+  return approved.map((area) => ({
+    ...area,
+    geography: (chains.get(area.placeId ?? "") ?? []).map((place) => ({
+      ...placeName(place, locale),
+      countryCode: place.countryCode,
+    })),
+  }));
+}
+
+export type ApprovedArea = Awaited<ReturnType<typeof readApprovedAreas>>[number];
