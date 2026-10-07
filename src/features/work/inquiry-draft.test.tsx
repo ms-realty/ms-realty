@@ -784,6 +784,83 @@ describe("O02/O03 inquiry drafts", () => {
     },
   );
 
+  it.each([false, true])(
+    "settles edited same-reference recovery values from their confirmed body when the record replaces the form first (storage disabled: %s)",
+    async (disabled) => {
+      if (disabled)
+        vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+          throw new Error("Storage disabled");
+        });
+      const draftOwner = owner();
+      let finishOriginal!: (state: FormState<ContactValues>) => void;
+      const original = render(
+        <Forms
+          draftOwner={draftOwner}
+          action={() =>
+            new Promise((resolve) => {
+              finishOriginal = resolve;
+            })
+          }
+        />,
+      );
+      fireEvent.change(screen.getByLabelText(contact.note), { target: { value: "Original note" } });
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: contact.submit })));
+      original.unmount();
+      const recovered = { ...initial(), inquiryRetryOperationId: initial().operationId };
+      let confirmed!: FormState<ContactValues>;
+      let finishRetry!: (state: FormState<ContactValues>) => void;
+      const retry = render(
+        <Forms
+          draftOwner={draftOwner}
+          state={recovered}
+          action={(state, data) => {
+            confirmed = {
+              ...state,
+              responseId: "confirmed-retry",
+              values: { ...state.values, note: String(data.get("note") ?? "") },
+              outcome: {
+                kind: "confirmed",
+                receipt: {
+                  title: work.changeSaved,
+                  reference: "RQ-SYNTHETIC",
+                  recordedAt: { dateTime: new Date().toISOString(), label: "Just now" },
+                  nextStep: "Review the inquiry",
+                  destination: { href: "/en/inquiries/one", label: work.openRecord },
+                },
+              },
+            };
+            return new Promise((resolve) => {
+              finishRetry = resolve;
+            });
+          }}
+        />,
+      );
+      fireEvent.change(screen.getByLabelText(contact.note), {
+        target: { value: "Corrected note" },
+      });
+      await act(async () => fireEvent.click(screen.getByRole("button", { name: contact.submit })));
+      // The confirmed body arrives, but the record's pending fence replaces the form before
+      // React renders that confirmed state.
+      finishRetry(confirmed);
+      retry.unmount();
+      await act(async () => {});
+      const status = render(
+        <InquiryDraftReconciliation
+          owner={draftOwner}
+          id="one"
+          kind="contact"
+          operationId={initial().operationId}
+          outcome="succeeded"
+        />,
+      );
+      status.unmount();
+      render(<Forms draftOwner={draftOwner} state={{ ...initial("b"), expectedRevision: 3 }} />);
+      expect(screen.getByLabelText(contact.note)).toHaveValue("");
+      expect(screen.queryByText(work.draft.restored)).toBeNull();
+      await act(async () => finishOriginal(initial()));
+    },
+  );
+
   it("clears edited recovery values when their matching confirmation body is observed", async () => {
     const draftOwner = owner();
     let finish!: (state: FormState<ContactValues>) => void;

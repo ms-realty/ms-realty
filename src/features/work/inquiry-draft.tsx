@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 import { errorClass, fieldClass } from "@/ui/field-class";
-import type { FormState, FormValues } from "@/ui/form/contract";
+import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm, type ActionFormProps, type FormSnapshot } from "@/ui/form/form";
 import { Notice } from "@/ui/notice";
 import {
@@ -215,6 +215,30 @@ function InquiryDraftSession<V extends FormValues>({
     },
     [owner, id, kind, initial, props.reconciliation.href],
   );
+  // Recording a confirmed change re-issues its pending reference, so Next re-renders this record
+  // in the same response and its pending fence can replace the form before the confirmed state
+  // renders. Settle the submitted draft where that confirmed body arrives. Only once hydrated:
+  // native submissions need the untouched Server Action reference (ui/form/form.tsx).
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  const serverAction = props.action;
+  const settlingAction = useCallback<FormAction<V>>(
+    async (previous, data) => {
+      const state = await serverAction(previous, data);
+      if (state.outcome.kind === "confirmed" && ready.current)
+        retainInquiryDraft(
+          owner,
+          id,
+          kind,
+          initial,
+          { state, values: state.values, pending: false },
+          (initial as FormState<V> & InquiryReferenceState).inquiryRetryOperationId,
+          draftRevision.current,
+        );
+      return state;
+    },
+    [serverAction, owner, id, kind, initial],
+  );
   useLayoutEffect(() => {
     if (ready.current) return;
     claimInquiryDraftOwner(owner);
@@ -368,6 +392,7 @@ function InquiryDraftSession<V extends FormValues>({
     >
       <ActionForm
         {...props}
+        action={hydrated ? settlingAction : props.action}
         key={`${owner.id}:${id}:${kind}:${restored ? "restored" : "initial"}`}
         initialState={restored ?? initial}
         focusInitialStatus={restored ? false : props.focusInitialStatus}
