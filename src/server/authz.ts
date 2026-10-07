@@ -270,6 +270,20 @@ export async function can(
 }
 
 /**
+ * Which of `wanted` the actor may use now outside any one record, exactly as can() without a
+ * resource answers each, from a single grant resolution (navigation offers what may be opened).
+ */
+export async function heldCapabilities(
+  db: Executor,
+  actor: Actor,
+  wanted: readonly Capability[],
+  now: Date = new Date(),
+): Promise<Set<Capability>> {
+  const grants = await resolveGrants(db, actor, now);
+  return new Set(wanted.filter((capability) => allows(actor, grants, capability, undefined, now)));
+}
+
+/**
  * A current directory projection for several staff members, using the same grant expansion
  * and record/locale rules as can(). No grants survive this call; commands recheck under lock.
  */

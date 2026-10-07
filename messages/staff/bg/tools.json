@@ -1,0 +1,42 @@
+{
+  "title": "Инструменти на агенцията",
+  "openMenu": "Отваряне на менюто",
+  "close": "Затваряне",
+  "sections": {
+    "work": "Работа",
+    "management": "Съдържание и управление"
+  },
+  "items": {
+    "today": { "title": "Днес", "description": "Следващи действия" },
+    "inquiries": { "title": "Запитвания", "description": "Разговори и запитвания" },
+    "cases": { "title": "Случаи", "description": "Контекст и следващи стъпки" },
+    "inventory": { "title": "Имоти", "description": "Обяви и подготовка" },
+    "imports": {
+      "title": "Импорт и групови промени",
+      "description": "Таблица с обяви и проверка на редовете"
+    },
+    "calendar": { "title": "Календар", "description": "Огледи и организация" },
+    "tasks": { "title": "Задачи", "description": "Поети задачи" },
+    "consultations": {
+      "title": "Консултации",
+      "description": "Заявки за консултации и кой ги поема"
+    },
+    "coverage": { "title": "Дежурна опашка", "description": "Работа без наличен отговорник" },
+    "inbound": { "title": "Входящи имейли", "description": "Непроверени входящи писма" },
+    "keys": { "title": "Ключове", "description": "Кой държи ключовете и докога" },
+    "complaints": { "title": "Жалби", "description": "Отговорник, срок и резултат" },
+    "pages": { "title": "Страници", "description": "Одобрено съдържание" },
+    "reports": { "title": "Отчети", "description": "Период и проверени източници" },
+    "team": { "title": "Екип и достъп", "description": "Хора и права" },
+    "system": { "title": "Състояние на системата", "description": "Източници и свързаност" },
+    "jobs": { "title": "Задачи и статус на помощта", "description": "Опашка и разходи на Butler" },
+    "privacy": {
+      "title": "Искания за лични данни",
+      "description": "Проверка, обхват и изпълнение"
+    },
+    "alerts": {
+      "title": "Правило за известия за имоти",
+      "description": "Шаблон, график и одобрение"
+    }
+  }
+}

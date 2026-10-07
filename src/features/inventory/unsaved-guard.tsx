@@ -69,6 +69,8 @@ export function UnsavedGuard({
       const link = (event.target as Element | null)?.closest?.("a[href]");
       if (!(link instanceof HTMLAnchorElement) || link.target === "_blank" || link.download) return;
       if (dialog.current?.contains(link)) return;
+      // The phone menu opens X02 over the editor; only a destination chosen there leaves.
+      if (link.getAttribute("aria-haspopup") === "dialog") return;
       const url = new URL(link.href, window.location.href);
       const here = new URL(window.location.href);
       if (
