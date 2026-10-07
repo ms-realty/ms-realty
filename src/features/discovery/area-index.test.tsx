@@ -7,6 +7,7 @@ import type { AreaData } from "./area-data";
 import { AreaDetail } from "./area-detail";
 import { AreaIndex } from "./area-index";
 import { AreaPhotograph } from "./area-media";
+import { discoveryCopy } from "./copy";
 
 afterEach(cleanup);
 const placeId = "00000000-0000-4000-8000-000000000001";
@@ -113,6 +114,21 @@ it("P15 labels absent approved translations and offers BG as a deliberate source
   expect(screen.getByText(areaCopy("he").noTranslation)).toBeInTheDocument();
   const source = document.querySelector('a[href="/bg/areas"]');
   expect(source).toHaveAttribute("hreflang", "bg");
+});
+
+it("P15 shows retry and manual contact instead of missing-translation copy when the BG source probe fails", () => {
+  render(<AreaIndex locale="en" data={{ ...noData, contentFailed: true }} />);
+  expect(screen.getByText(discoveryCopy("en").failed)).toBeVisible();
+  expect(screen.queryByText(areaCopy("en").noTranslation)).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: areaCopy("en").refresh })).toHaveAttribute(
+    "href",
+    "/en/areas",
+  );
+  expect(screen.getByRole("link", { name: areaCopy("en").contact })).toHaveAttribute(
+    "href",
+    "/en/contact",
+  );
+  expect(document.querySelector('a[href="/bg/areas"]')).toBeNull();
 });
 
 it("P15 preserves the approved edition and contextual inquiry without inventing an unbound location", () => {

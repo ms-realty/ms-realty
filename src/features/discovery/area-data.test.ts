@@ -54,6 +54,22 @@ it("P15 binds every preview query to the featured guide's exact recorded place",
   });
 });
 
+it.each([null, { kind: "plan" }])(
+  "P15 retains an eligible sale preview with cover %j when the rent query is empty",
+  async (cover) => {
+    guides.mockResolvedValue([guide]);
+    const sale = { reference: "MS-99998", cover };
+    search.mockImplementation((_db, input) =>
+      Promise.resolve({ items: input.purpose === "sale" ? [sale] : [] }),
+    );
+    const result = await loadAreaData(db, "bg");
+    expect(result.featured).toBe(sale);
+    expect(result.inventoryFailed).toBe(false);
+    expect(search).toHaveBeenCalledTimes(2);
+    for (const [_db, query] of search.mock.calls) expect(query.placeIds).toEqual([place.id]);
+  },
+);
+
 it("P15 presents partial inventory failures as unavailable and never exposes a partial count", async () => {
   places.mockImplementation((_db, input) =>
     input.purpose === "sale" ? Promise.resolve([place]) : Promise.reject(new Error("DB failure")),
@@ -70,5 +86,19 @@ it("P15 offers a deliberate BG switch without mixing source prose into an unappr
   expect(result.guides).toEqual([]);
   expect(result.featured).toBeNull();
   expect(result.sourceAvailable).toBe(true);
+  expect(search).not.toHaveBeenCalled();
+});
+
+it("P15 marks an unreadable BG source as a content failure while retaining separately loaded inventory", async () => {
+  guides.mockImplementation((_db, locale) =>
+    locale === "bg" ? Promise.reject(new Error("BG source read failed")) : Promise.resolve([]),
+  );
+  const result = await loadAreaData(db, "en");
+  expect(result.contentFailed).toBe(true);
+  expect(result.sourceAvailable).toBe(false);
+  expect(result.guides).toEqual([]);
+  expect(result.featured).toBeNull();
+  expect(result.inventoryFailed).toBe(false);
+  expect(result.locations).toHaveLength(1);
   expect(search).not.toHaveBeenCalled();
 });

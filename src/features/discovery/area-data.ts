@@ -65,7 +65,7 @@ export async function loadAreaData(db: Executor, locale: PublicLocale): Promise<
         featured =
           result.items.find((listing) => listing.cover?.kind === "photo") ??
           result.items[0] ??
-          null;
+          featured;
         if (featured?.cover?.kind === "photo") break;
       }
     } catch {
@@ -73,17 +73,20 @@ export async function loadAreaData(db: Executor, locale: PublicLocale): Promise<
       featured = null;
     }
   }
-  const sourceAvailable =
-    locale !== "bg" && content.status === "fulfilled" && !guides.length
-      ? await readApprovedAreas(db, "bg")
-          .then((areas) => areas.length > 0)
-          .catch(() => false)
-      : false;
+  let sourceAvailable = false;
+  let contentFailed = content.status === "rejected";
+  if (locale !== "bg" && !contentFailed && !guides.length) {
+    try {
+      sourceAvailable = (await readApprovedAreas(db, "bg")).length > 0;
+    } catch {
+      contentFailed = true;
+    }
+  }
   return {
     guides,
     locations: [...locations.values()],
     featured,
-    contentFailed: content.status === "rejected",
+    contentFailed,
     inventoryFailed: inventoryFailed || previewFailed,
     sourceAvailable,
   };

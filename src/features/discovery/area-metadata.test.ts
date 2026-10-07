@@ -31,11 +31,23 @@ afterEach(() => {
 });
 
 it("P15 index cannot be indexed in any locale even on the canonical production host", async () => {
-  for (const locale of ["bg", "en", "ru", "de", "nl", "el", "he"])
-    expect((await indexMetadata({ params: Promise.resolve({ locale }) })).robots).toMatchObject({
-      index: false,
-    });
+  for (const locale of ["bg", "en", "ru", "de", "nl", "el", "he"]) {
+    const metadata = await indexMetadata({ params: Promise.resolve({ locale }) });
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+    expect(metadata.alternates?.languages).toEqual({});
+  }
 });
+
+it.each(["", "Synthetic-Area", "../synthetic-area", "synthetic%2Farea", "a".repeat(102)])(
+  "P15 rejects malformed slug %j before reading any approved content",
+  async (slug) => {
+    const request = { params: Promise.resolve({ locale: "bg", slug }) };
+    await expect(detailMetadata(request)).rejects.toThrow("not found");
+    await expect(DetailPage(request)).rejects.toThrow("not found");
+    expect(approved).not.toHaveBeenCalled();
+    expect(source).not.toHaveBeenCalled();
+  },
+);
 
 it("P15 unknown content is a real not-found route rather than a generic 200 guide", async () => {
   for (const locale of ["bg", "en"]) {
@@ -49,7 +61,9 @@ it("P15 missing translations retain deliberate source recovery and noindex outsi
   source.mockResolvedValue({ title: "Approved BG guide" });
   for (const locale of ["en", "he"]) {
     const request = { params: Promise.resolve({ locale, slug: "synthetic-area" }) };
-    expect((await detailMetadata(request)).robots).toMatchObject({ index: false });
+    const metadata = await detailMetadata(request);
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+    expect(metadata.alternates?.languages).toEqual({});
     expect((await DetailPage(request)).props).toMatchObject({
       area: null,
       sourceAvailable: true,
@@ -62,7 +76,9 @@ it("P15 failed reads retain recovery and noindex instead of claiming missing con
   approved.mockRejectedValue(new Error("Synthetic database outage"));
   for (const locale of ["bg", "en"]) {
     const request = { params: Promise.resolve({ locale, slug: "synthetic-area" }) };
-    expect((await detailMetadata(request)).robots).toMatchObject({ index: false });
+    const metadata = await detailMetadata(request);
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+    expect(metadata.alternates?.languages).toEqual({});
     expect((await DetailPage(request)).props).toMatchObject({
       area: null,
       sourceAvailable: false,
@@ -73,10 +89,11 @@ it("P15 failed reads retain recovery and noindex instead of claiming missing con
 
 it("P15 noindex overrides preserve the shared staging nofollow policy", async () => {
   vi.stubEnv("STAGING", "true");
-  expect((await indexMetadata({ params: Promise.resolve({ locale: "bg" }) })).robots).toEqual({
-    index: false,
-    follow: false,
-  });
+  for (const locale of ["bg", "en", "ru", "de", "nl", "el", "he"])
+    expect((await indexMetadata({ params: Promise.resolve({ locale }) })).robots).toEqual({
+      index: false,
+      follow: false,
+    });
   source.mockResolvedValue({ title: "Approved BG guide" });
   expect(
     (await detailMetadata({ params: Promise.resolve({ locale: "en", slug: "synthetic-area" }) }))
@@ -97,6 +114,8 @@ it("P15 BG content metadata retains the exact approved edition and existing sour
   });
   expect(metadata.title).toBe("Approved BG guide");
   expect(metadata.description).toBe("Exact approved BG prose");
-  expect(metadata.robots).toMatchObject({ index: true });
-  expect(metadata.alternates?.canonical).toBe("https://makler-realty.com/bg/areas/synthetic-area");
+  expect(metadata.robots).toEqual({ index: true, follow: true });
+  const canonical = "https://makler-realty.com/bg/areas/synthetic-area";
+  expect(metadata.alternates?.canonical).toBe(canonical);
+  expect(metadata.alternates?.languages).toEqual({ bg: canonical, "x-default": canonical });
 });
