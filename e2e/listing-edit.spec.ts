@@ -3,7 +3,7 @@
 // the other tab's values and the public listing, report a stale save as a conflict, and keep
 // Butler draft-only with the manual path. Real PostgreSQL, synthetic records.
 import { execFileSync } from "node:child_process";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -69,6 +69,22 @@ async function signIn(page: Page, token: string) {
     },
   ]);
 }
+/** Holds the page's scripts until released, so the server-rendered editor is used first. */
+async function holdScripts(page: Page) {
+  let release = () => {};
+  const scripts = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/_next/**/*.js*", async (route) => {
+    await scripts;
+    await route.continue();
+  });
+  return release;
+}
+const hydrated = (page: Page) =>
+  expect(
+    page.getByText("Without JavaScript, save before opening Photos or Review", { exact: false }),
+  ).toHaveCount(0);
 
 for (const javaScriptEnabled of [false, true])
   test.describe(`JavaScript ${javaScriptEnabled ? "on" : "off"}`, () => {
@@ -365,6 +381,79 @@ test.describe("JavaScript on", () => {
     await expect(page).toHaveURL(hostUrl("staff", "/en/calendar"));
     await expect(tools).toBeHidden();
     expect(await listing(f.listingId)).toEqual(saved);
+  });
+
+  test("O12 keeps and protects what was typed before the editor's JavaScript ran", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const f = seed();
+    await signIn(page, f.token);
+    const title = page.getByLabel("Listing title", { exact: true });
+    const description = page.getByLabel("Description", { exact: true });
+    const restored = page.getByText("Unsaved changes from earlier on this page are restored.");
+    // Each load holds the scripts while text is typed into the server-rendered editor.
+    const typeBeforeHydration = async (field: Locator, text: string, load: () => unknown) => {
+      const release = await holdScripts(page);
+      await load();
+      await field.fill(text);
+      release();
+      await hydrated(page);
+    };
+    page.on("dialog", (prompt) => prompt.accept());
+
+    // An input: kept, and leaving asks first.
+    await typeBeforeHydration(title, "Заглавие преди JavaScript", () =>
+      page.goto(hostUrl("staff", `/en/inventory/${f.reference}`), { waitUntil: "commit" }),
+    );
+    await expect(title).toHaveValue("Заглавие преди JavaScript");
+    const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
+    await page.getByRole("link", { name: "Photos", exact: true }).click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Stay" }).click();
+
+    // A prefilled textarea: hydration used to put the server text back.
+    await expect(description).not.toHaveValue("");
+    await typeBeforeHydration(description, "Описание преди JavaScript.", () =>
+      page.reload({ waitUntil: "commit" }),
+    );
+    await expect(description).toHaveValue("Описание преди JavaScript.");
+    await expect(restored).toBeVisible();
+    await expect(title).toHaveValue("Заглавие преди JavaScript");
+
+    // The tab's kept work comes back, but not over a field typed again before hydration, and
+    // discarding the restored work leaves that newer text alone.
+    await typeBeforeHydration(description, "По-ново описание преди JavaScript.", () =>
+      page.reload({ waitUntil: "commit" }),
+    );
+    await expect(description).toHaveValue("По-ново описание преди JavaScript.");
+    await expect(restored).toBeVisible();
+    await expect(title).toHaveValue("Заглавие преди JavaScript");
+    await page.getByRole("button", { name: "Discard these changes" }).click();
+    await expect(title).toHaveValue("Синтетичен апартамент за редакция");
+    await expect(description).toHaveValue("По-ново описание преди JavaScript.");
+    await page.getByRole("button", { name: "Save the description", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Working draft saved" }),
+    ).toBeVisible();
+    expect((await listing(f.listingId)).draft).toMatchObject({
+      title: "Синтетичен апартамент за редакция",
+      description: "По-ново описание преди JavaScript.",
+    });
+  });
+
+  test("O12 typing replaces text selected before the editor's JavaScript ran", async ({ page }) => {
+    const f = seed();
+    await signIn(page, f.token);
+    const release = await holdScripts(page);
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`), { waitUntil: "commit" });
+    const description = page.getByLabel("Description", { exact: true });
+    await description.selectText();
+    release();
+    await hydrated(page);
+    // Hydration used to collapse the selection, so the typing went in front of the old text.
+    await page.keyboard.type("Нов текст.");
+    await expect(description).toHaveValue("Нов текст.");
   });
 
   test("O12 a save leaves without a browser prompt only once the server acknowledged it", async ({

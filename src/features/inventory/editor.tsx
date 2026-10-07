@@ -258,10 +258,14 @@ function DraftKeeper({
   };
 }) {
   const initial = useRef(form.values);
-  const [restored, setRestored] = useState(false);
+  const [restored, setRestored] = useState<Field[]>([]);
   const [stale, setStale] = useState<{ key: string; values: Partial<InventoryValues> } | null>(
     null,
   );
+  // This version's kept work, applied once the form holds anything typed before hydration: a
+  // field already changed on this page keeps that newer input, and discarding the restored work
+  // leaves it alone.
+  const [kept, setKept] = useState<Partial<InventoryValues> | null>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: restore once, on mount.
   useEffect(() => {
     try {
@@ -287,15 +291,20 @@ function DraftKeeper({
         if (differs) setStale({ key, values });
         else window.sessionStorage.removeItem(key);
       }
-      let changed = false;
-      for (const [name, value] of Object.entries(read(storageKey)))
-        if (form.values[name as Field] !== value) {
-          form.setValue(name as Field, value as string);
-          changed = true;
-        }
-      setRestored(changed);
+      const values = read(storageKey);
+      if (Object.keys(values).length) setKept(values);
     } catch {}
   }, []);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: applies the kept work once.
+  useEffect(() => {
+    if (!kept) return;
+    const names = (Object.entries(kept) as [Field, string][]).flatMap(([name, value]) =>
+      value !== initial.current[name] && form.values[name] === initial.current[name] ? [name] : [],
+    );
+    for (const name of names) form.setValue(name, kept[name] ?? "");
+    setRestored(names);
+    setKept(null);
+  }, [kept]);
   useEffect(() => {
     try {
       const dirty = (Object.keys(initial.current) as Field[]).some(
@@ -364,17 +373,16 @@ function DraftKeeper({
           </div>
         </div>
       ) : null}
-      {restored ? (
+      {restored.length ? (
         <Notice tone="info">
           <p>{copy.restored}</p>
           <button
             type="button"
             className="mt-2 font-semibold underline"
             onClick={() => {
-              for (const name of Object.keys(initial.current) as Field[])
-                form.setValue(name, initial.current[name]);
+              for (const name of restored) form.setValue(name, initial.current[name]);
               forget(storageKey);
-              setRestored(false);
+              setRestored([]);
             }}
           >
             {copy.discardRestored}

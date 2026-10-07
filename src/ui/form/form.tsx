@@ -11,6 +11,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { buttonClass } from "../button-class";
 import { cx } from "../cx";
@@ -80,6 +81,27 @@ export function nativeFormPermalink(
   nativeIdentity?: string,
 ) {
   return `${permalink}${permalink.includes("#") ? "-" : "#form-"}${encodeURIComponent(nativeIdentity ?? positionalId)}`;
+}
+
+const noSubscription = () => () => {};
+
+/**
+ * Text in this form's server-rendered textareas (field binding ids), by field name, read before
+ * they hydrate. Hydration rewrites a textarea's default text and resets its value to it, which
+ * also collapses a selection unless the value counts as edited; assigning the value it already
+ * has marks it edited, so a selection made before JavaScript arrived still takes the typing.
+ */
+function textareaValues(prefix: string, names: string[]) {
+  const values: Record<string, string> = {};
+  if (typeof document === "undefined") return values;
+  for (const name of names) {
+    const control = document.getElementById(`${prefix}-${name}`);
+    if (!(control instanceof HTMLTextAreaElement)) continue;
+    const text = control.value;
+    values[name] = text;
+    control.value = text;
+  }
+  return values;
 }
 
 function FocusResult({ children }: { children: ReactNode }) {
@@ -176,12 +198,24 @@ function FormSession<V extends FormValues>({
   const inFlight = useRef(false);
   const nativeForm = useRef<HTMLFormElement>(null);
   const adopted = useRef(false);
+  // Hydrating a textarea resets it to its server text (inputs and selects keep their DOM
+  // values), so read typed text now, before the fields below hydrate. Only while hydrating: a
+  // client render can still show another page's form with the same field ids.
+  const hydrating = useSyncExternalStore(
+    noSubscription,
+    () => false,
+    () => true,
+  );
+  const [typed] = useState(() =>
+    hydrating ? textareaValues(prefix, Object.keys(initialState.values)) : {},
+  );
   useLayoutEffect(() => {
     if (adopted.current || !nativeForm.current) return;
     adopted.current = true;
     // Server-rendered controls are usable before JavaScript. Hydration preserves their DOM
-    // values, but React's initial draft does not know about those edits. Adopt only the safe
-    // declared fields before a later controlled render can replace the visitor's input.
+    // values (textareas: read above), but React's initial draft does not know about those
+    // edits. Adopt only the safe declared fields before a later controlled render can replace
+    // the visitor's input.
     const values = { ...state.values };
     for (const name of Object.keys(values)) {
       const control = nativeForm.current.elements.namedItem(name);
@@ -196,7 +230,7 @@ function FormSession<V extends FormValues>({
         ) as V[keyof V];
       } else if (control instanceof HTMLTextAreaElement || control instanceof HTMLSelectElement) {
         if (control instanceof HTMLSelectElement && control.multiple) continue;
-        values[name as keyof V] = control.value as V[keyof V];
+        values[name as keyof V] = (typed[name] ?? control.value) as V[keyof V];
       } else if (control instanceof RadioNodeList) {
         const controls = Array.from(control);
         if (controls.every((item) => item instanceof HTMLInputElement && item.type === "checkbox"))
@@ -214,7 +248,7 @@ function FormSession<V extends FormValues>({
     }
     if (Object.keys(values).some((key) => values[key] !== state.values[key]))
       setDraft({ responseId: state.responseId, values });
-  }, [state.responseId, state.values]);
+  }, [state.responseId, state.values, typed]);
   useEffect(() => {
     if (!pending) inFlight.current = false;
   }, [pending]);

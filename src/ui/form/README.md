@@ -42,5 +42,8 @@ text/textarea, single-select and checkbox controls. This prevents a subsequent c
 from restoring the server's initial draft over text entered on a slow connection. Operation
 identity, revisions, hidden fields, passwords and file controls are excluded. It runs once per
 form instance; later rejected/conflict states remain governed by the server response. The
-server still validates every submitted field and explicit confirmation. The delayed-script
-journeys in `e2e/form-hydration.spec.ts` cover early typing, selection and review confirmation.
+server still validates every submitted field and explicit confirmation. React hydrates a
+textarea back to its server text, so the form reads its textareas by their `field()` id before
+they hydrate; a textarea that does not use that id loses text typed before JavaScript. The
+delayed-script journeys in `e2e/form-hydration.spec.ts` cover early typing, selection and review
+confirmation; `e2e/listing-edit.spec.ts` covers a prefilled textarea.

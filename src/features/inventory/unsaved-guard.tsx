@@ -2,7 +2,7 @@
 // UX 03.3: never silently discard a dirty working draft. Any link away from the editor (tabs
 // that navigate, Review, the staff shell) asks Save draft / Discard / Stay; closing or
 // reloading the page gets the browser's own prompt. The form is compared with its contents
-// when the page loaded; operation identity fields are ignored. Only a save the server
+// as served; operation identity fields are ignored. Only a save the server
 // acknowledged (savedOperationCookie echoing this submit's nonce) leaves without asking, and only
 // while the form still holds what that save sent; a failed, rejected or stalled save, or any
 // later edit, keeps the work protected.
@@ -31,11 +31,13 @@ export function UnsavedGuard({
     const editor = document.querySelector<HTMLFormElement>(`${root} form`);
     if (!editor) return;
     form.current = editor;
-    const snapshot = () =>
-      JSON.stringify(
-        [...new FormData(editor)].filter(([name]) => !name.startsWith("_")).map(String),
-      );
-    const initial = snapshot();
+    const snapshot = (of = editor) =>
+      JSON.stringify([...new FormData(of)].filter(([name]) => !name.startsWith("_")).map(String));
+    // The form as served: text typed before hydration is already in the fields and is unsaved
+    // work too, so compare with the fields' defaults rather than their current values.
+    const served = editor.cloneNode(true) as HTMLFormElement;
+    served.reset();
+    const initial = snapshot(served);
     // Each scripted submit carries a fresh nonce; only the server's echo of the latest one, for
     // exactly the content that submit sent, lets the page leave without asking. A kept page
     // that submits its completed operation again gets a conflict with a fresh operation from

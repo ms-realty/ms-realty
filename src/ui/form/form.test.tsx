@@ -361,6 +361,45 @@ describe("UI07 / S11–S17 progressive form", () => {
     );
   });
 
+  it("keeps text typed into a prefilled textarea before hydration, which resets it to the server text", async () => {
+    const prefilled = {
+      ...initialState,
+      values: { subject: "Server subject", note: "Server note" },
+    };
+    const Specimen = () => (
+      <SpecimenForm
+        action={async (state) => state}
+        initialState={prefilled}
+        permalink="/practice"
+        statusHref="/status"
+        copy={copy}
+      />
+    );
+    const container = document.createElement("div");
+    document.body.append(container);
+    container.innerHTML = renderToString(<Specimen />);
+    const subject = container.querySelector<HTMLInputElement>('input[name="subject"]');
+    const note = container.querySelector<HTMLTextAreaElement>('textarea[name="note"]');
+    if (!subject || !note) throw new Error("Missing server-rendered fields");
+    // A visitor replaces both values before JavaScript arrives.
+    subject.value = "Typed subject";
+    note.value = "Typed note";
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <Specimen />);
+      });
+      expect(note).toHaveValue("Typed note");
+      expect(subject).toHaveValue("Typed subject");
+      const form = container.querySelector("form");
+      if (!form) throw new Error("Missing hydrated form");
+      expect(new FormData(form).get("note")).toBe("Typed note");
+    } finally {
+      await act(async () => root?.unmount());
+      container.remove();
+    }
+  });
+
   it("reconciles the returned operation after restored validation, rather than the fresh page identity", async () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     mount(
