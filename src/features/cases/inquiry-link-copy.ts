@@ -6,7 +6,8 @@ const bg = {
   title: "Свързване или създаване на случай",
   linkTitle: "Свързване със съществуващ случай",
   linkLead:
-    "Случаи, достъпни за вас, със същото лице или същите данни за контакт като в запитването. Съвпадението е предложение, а не доказателство за самоличност.",
+    "Активни случаи, достъпни за вас, със същото лице или същите данни за контакт като в запитването. Съвпадението е предложение, а не доказателство за самоличност.",
+  capped: "Показани са 50-те последно обновени съвпадения.",
   basisParty: "Същото лице като в запитването",
   basisContact: "Същите данни за контакт като в запитването",
   reviewLink: "Преглед на свързването",
@@ -18,7 +19,8 @@ const bg = {
   reasonTask: "Задача от това запитване вече е към друг случай.",
   reasonAccess: "Достъпът ви не позволява да свържете това запитване с този случай.",
   emptyTitle: "Няма подходящ случай",
-  emptyBody: "Нито един достъпен за вас случай няма същото лице или същите данни за контакт.",
+  emptyBody:
+    "Нито един активен случай, достъпен за вас, няма същото лице или същите данни за контакт.",
   noPartyTitle: "Все още няма с какво да се сравни",
   noPartyBody:
     "Към запитването няма свързан контакт, затова не може да се предложи съществуващ случай.",
@@ -39,8 +41,10 @@ const bg = {
   effectsTitle: "Какво прави свързването",
   effectJoins:
     "Запитването влиза в случай {case}. Задачите му преминават към случая със същия отговорник, срокове и обещания към клиента.",
+  effectVisible:
+    "Служителите с достъп до случай {case} ще виждат запитването и задачите му; клиентите няма да ги виждат.",
   effectKept: "Запазват се оригиналното запитване, лицето в него и разписката на клиента.",
-  effectNot: "Не се създават ново лице, нов участник или нов достъп до случая за никого.",
+  effectNot: "Не се създават ново лице, участник, разрешение или покана.",
   matchWarning:
     "Същият имейл или телефон не доказва, че е същият човек. Новият случай изисква тип, отговорник и следващо действие; свързването запазва оригиналното запитване.",
   submit: "Запишете свързването",
@@ -67,7 +71,7 @@ const bg = {
   recorded: "Решението е записано:",
   nextStep: "Следваща стъпка по запитването",
   resultNote:
-    "Оригиналната разписка и историята са запазени. Свързването не дава достъп на никого; покани и разрешения са отделни действия.",
+    "Оригиналната разписка и историята са запазени. Не са добавени участник, разрешение или покана; служителите с достъп до случая вече виждат запитването и задачите му.",
   statusTitle: "Статус на свързването",
   statusPending:
     "Свързването още няма потвърден резултат. Проверете отново, преди да опитате друго.",
@@ -105,7 +109,8 @@ const en: Copy = {
   title: "Link or create a Case",
   linkTitle: "Link to an existing Case",
   linkLead:
-    "Cases you can access that have the same person or organization, or the same contact details, as this inquiry. A match is a suggestion, not proof of identity.",
+    "Active Cases you can access that have the same person or organization, or the same contact details, as this inquiry. A match is a suggestion, not proof of identity.",
+  capped: "Showing the 50 most recently updated matches.",
   basisParty: "Same person or organization as this inquiry",
   basisContact: "Same contact details as this inquiry",
   reviewLink: "Review the link",
@@ -117,7 +122,7 @@ const en: Copy = {
   reasonTask: "A task from this inquiry already belongs to another Case.",
   reasonAccess: "Your access doesn't allow linking this inquiry to this Case.",
   emptyTitle: "No matching Case",
-  emptyBody: "No Case you can access has the same person, organization or contact details.",
+  emptyBody: "No active Case you can access has the same person, organization or contact details.",
   noPartyTitle: "Nothing to match yet",
   noPartyBody: "This inquiry has no linked contact, so no existing Case can be suggested.",
   failedTitle: "Matching Cases couldn't be loaded",
@@ -137,8 +142,10 @@ const en: Copy = {
   effectsTitle: "What linking does",
   effectJoins:
     "The inquiry joins Case {case}. Its tasks move to the Case with the same owner, due times and client promises.",
+  effectVisible:
+    "Staff with access to Case {case} will see this inquiry and its tasks; clients will not.",
   effectKept: "The original inquiry, its person or organization and the client's receipt are kept.",
-  effectNot: "No new person, participant or access to the Case is created for anyone.",
+  effectNot: "No new person, participant, permission or invitation is created.",
   matchWarning:
     "The same email or phone doesn't prove it is the same person. A new Case needs a purpose, an owner and a next action; linking keeps the original inquiry.",
   submit: "Record the link",
@@ -164,7 +171,7 @@ const en: Copy = {
   recorded: "Decision recorded:",
   nextStep: "Next step for this inquiry",
   resultNote:
-    "The original receipt and history are kept. Linking gives no one access; invitations and permissions are separate actions.",
+    "The original receipt and history are kept. No participant, permission or invitation was added; staff with access to the Case can now see this inquiry and its tasks.",
   statusTitle: "Link status",
   statusPending: "The link has no confirmed result yet. Check again before trying anything else.",
   statusFailed: "The link was not recorded. Nothing changed.",
@@ -199,7 +206,8 @@ const ru: Copy = {
   title: "Связать или создать дело",
   linkTitle: "Связать с существующим делом",
   linkLead:
-    "Доступные вам дела с тем же лицом или теми же контактными данными, что и в обращении. Совпадение — подсказка, а не доказательство личности.",
+    "Доступные вам активные дела с тем же лицом или теми же контактными данными, что и в обращении. Совпадение — подсказка, а не доказательство личности.",
+  capped: "Показаны 50 последних обновлённых совпадений.",
   basisParty: "То же лицо, что и в обращении",
   basisContact: "Те же контактные данные, что и в обращении",
   reviewLink: "Проверить связь",
@@ -211,7 +219,8 @@ const ru: Copy = {
   reasonTask: "Задача из этого обращения уже относится к другому делу.",
   reasonAccess: "Ваш доступ не позволяет связать это обращение с этим делом.",
   emptyTitle: "Подходящего дела нет",
-  emptyBody: "Ни в одном доступном вам деле нет того же лица или тех же контактных данных.",
+  emptyBody:
+    "Ни в одном доступном вам активном деле нет того же лица или тех же контактных данных.",
   noPartyTitle: "Пока не с чем сравнить",
   noPartyBody: "К обращению не привязан контакт, поэтому предложить существующее дело нельзя.",
   failedTitle: "Не удалось загрузить подходящие дела",
@@ -231,8 +240,10 @@ const ru: Copy = {
   effectsTitle: "Что делает связь",
   effectJoins:
     "Обращение войдёт в дело {case}. Его задачи перейдут в дело с тем же ответственным, сроками и обещаниями клиенту.",
+  effectVisible:
+    "Сотрудники с доступом к делу {case} увидят это обращение и его задачи; клиенты — нет.",
   effectKept: "Сохраняются исходное обращение, лицо в нём и квитанция клиента.",
-  effectNot: "Новое лицо, участник или доступ к делу ни для кого не создаются.",
+  effectNot: "Не создаются новое лицо, участник, разрешение или приглашение.",
   matchWarning:
     "Тот же email или телефон не доказывает, что это тот же человек. Для нового дела нужны цель, ответственный и следующее действие; связь сохраняет исходное обращение.",
   submit: "Записать связь",
@@ -257,7 +268,7 @@ const ru: Copy = {
   recorded: "Решение записано:",
   nextStep: "Следующий шаг по обращению",
   resultNote:
-    "Исходная квитанция и история сохранены. Связь никому не даёт доступа; приглашения и разрешения — отдельные действия.",
+    "Исходная квитанция и история сохранены. Участники, разрешения и приглашения не добавлены; сотрудники с доступом к делу теперь видят это обращение и его задачи.",
   statusTitle: "Статус связи",
   statusPending:
     "У связи ещё нет подтверждённого результата. Проверьте снова, прежде чем делать что-то ещё.",

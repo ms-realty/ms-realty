@@ -11,7 +11,7 @@ import { issueSubmissionKey, newReceiptSession, submitInquiry } from "../inquiri
 import { nextReference } from "../references";
 import { relate } from "../testing";
 import { acceptInquiry } from "../work/commands";
-import { caseFixture } from "./testing";
+import { caseFixture, staffFixture } from "./testing";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -81,10 +81,13 @@ try {
     .set({ promisedToClient: true })
     .where(eq(schema.tasks.id, inquiry.taskId));
   const lonely = await ownedInquiry(target.staff.session, `o03-alone-${randomUUID()}@example.test`);
+  // A colleague with the same broker access who does not own the inquiry.
+  const colleague = await staffFixture(db);
   console.log(
     JSON.stringify({
       staffId: target.staff.id,
       token: target.staff.token,
+      colleagueToken: colleague.token,
       inquiryId: inquiry.id,
       inquiryReference: inquiry.reference,
       partyId: inquiry.partyId,

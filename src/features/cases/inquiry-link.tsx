@@ -100,13 +100,13 @@ const mayCreateCase = (detail: Detail, session: Session) =>
   detail.inquiry.ownerId === session.account.id &&
   detail.inquiry.state === "assigned";
 
-/** Suggestions are optional: a failed or blocked read must not hold O03 or read as "no match". */
+/** Suggestions are optional: a failed, slow or blocked read must not hold O03 or read as "none". */
 async function readCandidates(session: Session, inquiryId: string) {
   try {
     return await getDb().transaction(async (tx) => {
-      // ponytail: waits at most 2 s behind a table lock (for example a migration); raise it only
-      // if ordinary reads start failing here.
-      await tx.execute(sql`set local lock_timeout = '2s'`);
+      // ponytail: each statement gets at most 2 s, including a wait behind a table lock (for
+      // example a migration); raise it only if ordinary reads start failing here.
+      await tx.execute(sql`set local statement_timeout = '2s'`);
       return listInquiryCaseCandidates(tx, session, inquiryId);
     });
   } catch (error) {
@@ -263,6 +263,8 @@ export async function InquiryCaseLink({
                 />
               ))}
             </ul>
+            {/* C02 returns at most 50 rows, most recently updated first. */}
+            {rows.length >= 50 ? <p className="text-dense text-text-muted">{copy.capped}</p> : null}
           </>
         )}
       </div>
@@ -422,6 +424,7 @@ export async function InquiryLinkScreen({
         </h2>
         <ul className="flex list-disc flex-col gap-2 ps-5 text-dense">
           <li>{withReference(copy.effectJoins, candidate.reference)}</li>
+          <li>{withReference(copy.effectVisible, candidate.reference)}</li>
           <li>{copy.effectKept}</li>
           <li>{copy.effectNot}</li>
         </ul>
