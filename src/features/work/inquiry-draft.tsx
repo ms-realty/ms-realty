@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { fieldClass } from "@/ui/field-class";
+import { errorClass, fieldClass } from "@/ui/field-class";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm, type ActionFormProps, type FormSnapshot } from "@/ui/form/form";
 import { Notice } from "@/ui/notice";
@@ -416,7 +416,7 @@ function InquiryDraftSession<V extends FormValues>({
                   <span>{draftCopy.confirm}</span>
                 </label>
                 {reviewError ? (
-                  <p id={`${reviewId}-error`} className="text-error">
+                  <p id={`${reviewId}-error`} className={errorClass}>
                     {draftCopy.required}
                   </p>
                 ) : null}

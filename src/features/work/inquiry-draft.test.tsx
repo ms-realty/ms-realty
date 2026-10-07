@@ -5,6 +5,7 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SignOutForm } from "@/features/shell/account";
+import { errorClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import type { AcceptValues, ContactValues, TriageValues } from "./actions";
 import { contactCopy } from "./contact-copy";
@@ -175,6 +176,8 @@ describe("O02/O03 inquiry drafts", () => {
       await user.click(screen.getByRole("button", { name: submit }));
       expect(called).not.toHaveBeenCalled();
       expect(screen.getByText(work.draft.required)).toBeVisible();
+      // UI06: the same 14/20 medium error under the control as every other field.
+      expect(screen.getByText(work.draft.required)).toHaveClass(errorClass);
       expect(screen.getByLabelText(work.draft.confirm)).toHaveFocus();
       expect(
         browserInquiryReference(inquiryReferenceCookie(draftOwner.id, "one", kind)),
