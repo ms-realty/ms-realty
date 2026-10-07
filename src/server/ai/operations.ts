@@ -1,5 +1,5 @@
 import "server-only";
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { externalActions, inboxEvents, workerProgress } from "@/db/schema";
 import type { Session } from "../auth/sessions";
 import { assertCan } from "../authz";
@@ -32,8 +32,14 @@ export function workerHealth(
   };
 }
 
+export type ExternalActionView = { kind: "queue"; page: number } | { kind: "record"; id: string };
+
 /** Aggregate status only: no private source, job payload, recipient or provider error body. */
-export async function readAssistanceOperations(db: Executor, session: Session) {
+export async function readAssistanceOperations(
+  db: Executor,
+  session: Session,
+  externalView?: ExternalActionView,
+) {
   const live = await liveStaff(db, session);
   await assertCan(db, live.actor, "report.read");
   const [installed] = await db.execute<{ table: string | null }>(
@@ -83,9 +89,20 @@ export async function readAssistanceOperations(db: Executor, session: Session) {
       code: externalActions.lastErrorCode,
     })
     .from(externalActions)
-    .where(inArray(externalActions.state, ["attempting", "outcome_unknown", "failed"]))
-    .orderBy(desc(externalActions.updatedAt))
-    .limit(30);
+    .where(
+      externalView
+        ? and(
+            inArray(externalActions.state, ["outcome_unknown", "failed"]),
+            externalView.kind === "record" ? eq(externalActions.id, externalView.id) : undefined,
+          )
+        : inArray(externalActions.state, ["attempting", "outcome_unknown", "failed"]),
+    )
+    .orderBy(
+      externalView ? asc(externalActions.updatedAt) : desc(externalActions.updatedAt),
+      asc(externalActions.id),
+    )
+    .limit(externalView?.kind === "queue" ? 31 : 30)
+    .offset(externalView?.kind === "queue" ? (externalView.page - 1) * 30 : 0);
   const safeCode = (code: string | null) =>
     code &&
     /^(delivery_awaiting_reference|inbound_requires_triage|unsupported_event|provider_unreachable|delivery_failed|unsupported_or_expired_message|provider_rate_limited|provider_rejected_[45]\d\d)$/.test(
@@ -117,6 +134,9 @@ export async function readAssistanceOperations(db: Executor, session: Session) {
           : "unsupported_event",
       code: safeCode(event.code),
     })),
-    external: external.map((event) => ({ ...event, code: safeCode(event.code) })),
+    external: external.slice(0, 30).map((event) => ({ ...event, code: safeCode(event.code) })),
+    externalNavigation: externalView
+      ? { ...externalView, hasMore: externalView.kind === "queue" && external.length > 30 }
+      : null,
   };
 }

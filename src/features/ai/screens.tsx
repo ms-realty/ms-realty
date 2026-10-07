@@ -13,7 +13,7 @@ import { assistanceAvailability } from "@/server/ai/config";
 import { type AssistanceSource, draftSchema } from "@/server/ai/draft";
 import { type IntakeSource, intakeDraftSchema } from "@/server/ai/intake-draft";
 import { type LocaleSource, localeDraftSchema } from "@/server/ai/locale-draft";
-import { readAssistanceOperations } from "@/server/ai/operations";
+import { type ExternalActionView, readAssistanceOperations } from "@/server/ai/operations";
 import type { Session } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
 import { initialFormState } from "@/ui/form/server";
@@ -316,9 +316,24 @@ export async function AssistanceRunScreen({
   );
 }
 
-export async function JobsScreen({ locale, session }: { locale: string; session: Session }) {
+export async function JobsScreen({
+  locale,
+  session,
+  externalView,
+}: {
+  locale: string;
+  session: Session;
+  externalView?: ExternalActionView;
+}) {
   const copy = aiCopy(locale);
-  const status = await readAssistanceOperations(getDb(), session).catch(privateError);
+  const status = await readAssistanceOperations(getDb(), session, externalView).catch(privateError);
+  const exceptionQueueHref = `/${locale}/operations/jobs?view=exceptions`;
+  const refreshHref =
+    externalView?.kind === "record"
+      ? `/${locale}/operations/jobs?action=${encodeURIComponent(externalView.id)}`
+      : externalView?.kind === "queue"
+        ? `${exceptionQueueHref}&page=${externalView.page}`
+        : `/${locale}/operations/jobs`;
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.jobs}</h1>
@@ -426,7 +441,7 @@ export async function JobsScreen({ locale, session }: { locale: string; session:
           ))}
         </ul>
       </section>
-      <section className="space-y-3">
+      <section id="external-action-exceptions" className="space-y-3">
         <h2 className="text-subheading font-semibold">
           {locale === "bg"
             ? "Изключения при външни действия"
@@ -441,9 +456,31 @@ export async function JobsScreen({ locale, session }: { locale: string; session:
               ? "Неизвестный результат требует проверки; автоматического повтора отправки нет."
               : "An unknown outcome requires reconciliation; it is not automatically resent."}
         </p>
+        {status.externalNavigation ? (
+          <p>
+            {locale === "bg"
+              ? "Неуспешни действия и действия с неизвестен резултат, първо най-старите."
+              : locale === "ru"
+                ? "Неудачные действия и действия с неизвестным результатом, сначала самые старые."
+                : "Failed and unknown-outcome actions, oldest first."}
+          </p>
+        ) : null}
+        {status.externalNavigation && !status.external.length ? (
+          <p>
+            {locale === "bg"
+              ? "Няма съответстващи изключения. Вече разрешено изключение няма да се показва тук."
+              : locale === "ru"
+                ? "Нет подходящих исключений. Уже разрешённое исключение здесь не отображается."
+                : "No matching exceptions. An exception already resolved will no longer appear here."}
+          </p>
+        ) : null}
         <ul className="space-y-3">
           {status.external.map((event) => (
-            <li key={event.id} className="break-words rounded-control border border-border p-4">
+            <li
+              key={event.id}
+              id={`external-action-${event.id}`}
+              className="break-words rounded-control border border-border p-4"
+            >
               <bdi>{event.id}</bdi>
               <p>
                 {event.kind} · {event.state} · {event.code ?? "—"}
@@ -454,8 +491,52 @@ export async function JobsScreen({ locale, session }: { locale: string; session:
             </li>
           ))}
         </ul>
+        {status.externalNavigation ? (
+          <nav className="flex flex-wrap gap-5" aria-label={copy.queue}>
+            {status.externalNavigation.kind === "record" ? (
+              <a href={`${exceptionQueueHref}#external-action-exceptions`} className="underline">
+                {locale === "bg"
+                  ? "Всички изключения"
+                  : locale === "ru"
+                    ? "Все исключения"
+                    : "All exceptions"}
+              </a>
+            ) : (
+              <>
+                <span>
+                  {locale === "bg" ? "Страница" : locale === "ru" ? "Страница" : "Page"}{" "}
+                  {status.externalNavigation.page}
+                </span>
+                {status.externalNavigation.page > 1 ? (
+                  <a
+                    href={`${exceptionQueueHref}&page=${status.externalNavigation.page - 1}#external-action-exceptions`}
+                    className="underline"
+                  >
+                    {locale === "bg"
+                      ? "Предишни изключения"
+                      : locale === "ru"
+                        ? "Предыдущие исключения"
+                        : "Previous exceptions"}
+                  </a>
+                ) : null}
+                {status.externalNavigation.hasMore ? (
+                  <a
+                    href={`${exceptionQueueHref}&page=${status.externalNavigation.page + 1}#external-action-exceptions`}
+                    className="underline"
+                  >
+                    {locale === "bg"
+                      ? "Следващи изключения"
+                      : locale === "ru"
+                        ? "Следующие исключения"
+                        : "Next exceptions"}
+                  </a>
+                ) : null}
+              </>
+            )}
+          </nav>
+        ) : null}
       </section>
-      <a href={`/${locale}/operations/jobs`} className="self-start underline">
+      <a href={refreshHref} className="self-start underline">
         {copy.refresh}
       </a>
     </DiscoveryPage>
