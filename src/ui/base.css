@@ -123,3 +123,12 @@
     }
   }
 }
+
+@layer utilities {
+  /* O12 uses UI06 Input instances (647:31515), without UI08's chevron. Keep the native
+     picker and forced-colours fallback; restore the field's 12 px inline-end inset. */
+  #o12-form select {
+    background-image: none;
+    padding-inline-end: calc(var(--spacing) * 3);
+  }
+}

@@ -16,7 +16,8 @@ const surfaceClass = cx(
 
 // UI06 Input (Figma 6:74), also drawn for selects in every P, C and O form: 12 px padding
 // around 16/26 text and a 1 px border make 52 px on the canvas fill. The 44 px `control` token
-// stays the touch-target minimum. A native select keeps room for the base.css chevron.
+// stays the touch-target minimum. Native selects reserve room for the base.css UI08 chevron;
+// O12's scoped rule restores the 12 px inset of its UI06 instances.
 export const controlClass = cx(
   surfaceClass,
   "min-h-input rounded-control px-3 py-3 [&:is(select)]:pe-11",
