@@ -312,8 +312,19 @@ for (const beforeHydration of [false, true])
         waitUntil: beforeHydration ? "commit" : "load",
       });
       const signOut = page.locator('form[action="/en/access/signout"] button:visible');
-      if ((await signOut.count()) === 0)
-        await page.getByRole("button", { name: "More", exact: true }).click();
+      if ((await signOut.count()) === 0) {
+        // The phone shell opens X02 as a hydrated dialog or follows its native tools link.
+        const menu = page.getByRole("link", { name: "Open menu", exact: true });
+        if (!beforeHydration) await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
+        await menu.click({ noWaitAfter: beforeHydration });
+        if (beforeHydration)
+          // The predicate matcher waits for load, but this native path deliberately holds scripts.
+          await expect(page).toHaveURL(hostUrl("staff", "/en/operations"));
+        else
+          await expect(
+            page.getByRole("dialog", { name: "Agency tools", exact: true }),
+          ).toBeVisible();
+      }
       const posted = page.waitForResponse(
         (response) =>
           new URL(response.url()).pathname === "/en/access/signout" &&
