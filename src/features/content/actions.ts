@@ -184,9 +184,18 @@ export async function saveContentAction(
         code: "VALIDATION_FAILED",
         message: copy.validation,
         fieldErrors: Object.fromEntries(
-          Object.keys(result.error.fieldErrors ?? {})
-            .filter((field) => field in base.values)
-            .map((field) => [field, [field === "placeId" ? copy.areaPlaceOnly : copy.invalid]]),
+          Object.entries(result.error.fieldErrors ?? {})
+            .filter(([field]) => field in base.values)
+            .map(([field, reasons]) => [
+              field,
+              [
+                field === "placeId" && reasons.includes("place_not_available")
+                  ? copy.placeUnavailable
+                  : field === "placeId" && reasons.includes("area_content_required")
+                    ? copy.areaPlaceOnly
+                    : copy.invalid,
+              ],
+            ]),
         ),
       },
     };
