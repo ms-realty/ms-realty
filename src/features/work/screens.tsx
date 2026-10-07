@@ -416,7 +416,7 @@ export async function InquiryScreen({
                   draftOwner={draftOwner}
                   locale={locale}
                   id={id}
-                  action={acceptAction.bind(null, locale, id)}
+                  action={acceptAction.bind(null, locale, id, scope, page)}
                   initialState={inquiryFormState("accept", { nextAction: "", dueAt: "" })}
                 />
               </section>
@@ -438,7 +438,7 @@ export async function InquiryScreen({
                   locale={locale}
                   id={id}
                   contact={detail.contactMethod}
-                  action={contactAction.bind(null, locale, id)}
+                  action={contactAction.bind(null, locale, id, scope, page)}
                   initialState={inquiryFormState("contact", {
                     contactChoice: `${detail.contactMethod.id}:${detail.contactMethod.version}`,
                     result: "unanswered",

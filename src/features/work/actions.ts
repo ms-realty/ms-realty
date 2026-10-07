@@ -37,7 +37,7 @@ import {
   isInquiryDraftKind,
   parseInquiryReference,
 } from "./inquiry-reference";
-import { type InboxScope, inquiryHref } from "./inquiry-row";
+import { type InboxScope, inquiryHref, parseInboxScope } from "./inquiry-row";
 
 export type AcceptValues = { nextAction: string; dueAt: string };
 export type TriageValues = { state: string; reason: string; duplicateOfInquiryId: string };
@@ -387,9 +387,32 @@ export async function resolveInquiryReferenceAction(
   redirect(inquiryHref(locale, id, scope, page));
 }
 
+/**
+ * A native POST that confirmed an accept or contact continues on its status page, in the queue
+ * scope and page the conversation was opened from (O02), because the record no longer offers that
+ * form. An enhanced form keeps its confirmed state; its record's pending fence leads there.
+ */
+function continueNativeConfirmed(
+  locale: string,
+  id: string,
+  kind: "accept" | "contact",
+  queue: { scope: InboxScope; page: number },
+  state: { operationId: string; outcome: { kind: string } },
+  data: FormData,
+) {
+  if (state.outcome.kind !== "confirmed" || enhancedInquiry(data)) return;
+  const page =
+    Number.isSafeInteger(queue.page) && queue.page > 0 && queue.page <= 10_000 ? queue.page : 1;
+  redirect(
+    inquiryStatusHref(locale, id, kind, state.operationId, parseInboxScope(queue.scope), page),
+  );
+}
+
 export async function acceptAction(
   locale: string,
   id: string,
+  scope: InboxScope,
+  page: number,
   _previous: FormState<AcceptValues>,
   data: FormData,
 ) {
@@ -421,8 +444,7 @@ export async function acceptAction(
     },
   );
   // The accepted inquiry no longer offers this form on a native POST response.
-  if (state.outcome.kind === "confirmed" && state.reconciliation && !enhancedInquiry(data))
-    redirect(state.reconciliation.href);
+  continueNativeConfirmed(locale, id, "accept", { scope, page }, state, data);
   return state;
 }
 
@@ -470,6 +492,8 @@ export async function triageAction(
 export async function contactAction(
   locale: string,
   id: string,
+  scope: InboxScope,
+  page: number,
   _previous: ContactState,
   data: FormData,
 ) {
@@ -534,8 +558,7 @@ export async function contactAction(
       };
     },
   );
-  if (state.outcome.kind === "confirmed" && state.reconciliation && !enhancedInquiry(data))
-    redirect(state.reconciliation.href);
+  continueNativeConfirmed(locale, id, "contact", { scope, page }, state, data);
   return {
     ...state,
     currentContact,
