@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import * as schema from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -78,6 +78,37 @@ it("continues the oldest-first Today exceptions past 30 and opens an exact older
   expect(
     (await readAssistanceOperations(t.db, session, { kind: "record", id: first.id })).external,
   ).toHaveLength(0);
+});
+
+it("pages exceptions that share one update time by id, without a repeat or a gap", async () => {
+  const { session } = await operator([{ capability: "report.read" }]);
+  // Older than every other fixture in this file, so these lead the oldest-first queue.
+  const at = new Date(Date.UTC(2001, 0, 1));
+  const actions = await t.db
+    .insert(schema.externalActions)
+    .values(
+      Array.from({ length: 31 }, () => ({
+        kind: "email_send" as const,
+        effectKey: randomUUID(),
+        payload: {},
+        payloadDigest: "synthetic",
+        state: "outcome_unknown" as const,
+        attempts: 1,
+        updatedAt: at,
+        lastAttemptAt: at,
+      })),
+    )
+    .returning();
+  const ids = actions.map((action) => action.id).sort();
+  try {
+    const page1 = await readAssistanceOperations(t.db, session, { kind: "queue", page: 1 });
+    const page2 = await readAssistanceOperations(t.db, session, { kind: "queue", page: 2 });
+    expect(page1.external.map((event) => event.id)).toEqual(ids.slice(0, 30));
+    expect(page2.external[0]?.id).toBe(ids[30]);
+    expect(page1.externalNavigation).toMatchObject({ kind: "queue", page: 1, hasMore: true });
+  } finally {
+    await t.db.delete(schema.externalActions).where(inArray(schema.externalActions.id, ids));
+  }
 });
 
 it("requires current global report access for both queue pages and exact records", async () => {

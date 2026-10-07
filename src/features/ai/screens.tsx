@@ -492,7 +492,7 @@ export async function JobsScreen({
           ))}
         </ul>
         {status.externalNavigation ? (
-          <nav className="flex flex-wrap gap-5" aria-label={copy.queue}>
+          <nav className="flex flex-wrap gap-5" aria-label={copy.exceptionPages}>
             {status.externalNavigation.kind === "record" ? (
               <a href={`${exceptionQueueHref}#external-action-exceptions`} className="underline">
                 {locale === "bg"
