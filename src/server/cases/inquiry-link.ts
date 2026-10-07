@@ -139,22 +139,30 @@ export async function linkInquiryToExistingCase(
 }
 
 /** O03 suggestions only: an exact Party/contact route is never an identity or access decision. */
+export type InquiryCaseBlockReason =
+  | "inquiry_owner"
+  | "inquiry_state"
+  | "inquiry_permission"
+  | "task_permission"
+  | "staff_unavailable"
+  | "task_case_conflict"
+  | "case_permission"
+  | null;
+
 export async function listInquiryCaseCandidates(db: Executor, session: Session, id: string) {
   const live = await liveStaff(db, session);
   if (!z.uuid().safeParse(id).success) throw new AppError("not_found");
   const [inquiry] = await db.select().from(inquiries).where(eq(inquiries.id, id));
   if (!inquiry) throw new AppError("not_found");
   await assertCanRead(db, live.actor, "inquiry.read", inquiryResource(inquiry));
-  if (!inquiry.partyId || inquiry.caseId) return [];
+  const partyId = inquiry.partyId;
+  if (!partyId || inquiry.caseId) return [];
   const [route] = inquiry.contactMethodId
     ? await db
         .select({ kind: contactMethods.kind, normalizedValue: contactMethods.normalizedValue })
         .from(contactMethods)
         .where(
-          and(
-            eq(contactMethods.id, inquiry.contactMethodId),
-            eq(contactMethods.partyId, inquiry.partyId),
-          ),
+          and(eq(contactMethods.id, inquiry.contactMethodId), eq(contactMethods.partyId, partyId)),
         )
     : [];
   const sameParty = exists(
@@ -165,7 +173,7 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
       .where(
         and(
           eq(caseParticipants.caseId, cases.id),
-          eq(caseParticipants.partyId, inquiry.partyId),
+          eq(caseParticipants.partyId, partyId),
           isNull(parties.mergedIntoPartyId),
           liveParticipation(),
         ),
@@ -209,47 +217,76 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
     )
     .orderBy(desc(cases.updatedAt), asc(cases.id))
     .limit(50);
-  let canLink =
-    inquiry.ownerId === live.account.id &&
-    inquiryMachine.check(inquiry.state, "linked_to_case").outcome !== "denied" &&
-    (await can(db, live.actor, "inquiry.respond", inquiryResource(inquiry)));
+  // A candidate is visible under case.read even when the command is unavailable.
+  // Return the same authoritative refusal class that the command guards enforce.
+  let blockReason: InquiryCaseBlockReason = null;
+  if (inquiry.ownerId !== live.account.id) blockReason = "inquiry_owner";
+  else if (inquiryMachine.check(inquiry.state, "linked_to_case").outcome === "denied")
+    blockReason = "inquiry_state";
+  else if (!(await can(db, live.actor, "inquiry.respond", inquiryResource(inquiry))))
+    blockReason = "inquiry_permission";
   const commitments = await db.select().from(tasks).where(eq(tasks.inquiryId, inquiry.id));
-  canLink =
-    canLink &&
-    (
+  if (
+    !blockReason &&
+    !(
       await Promise.all(
         commitments.map((commitment) =>
           can(db, live.actor, "task.manage", taskResource(commitment)),
         ),
       )
-    ).every(Boolean);
-  if (canLink) {
+    ).every(Boolean)
+  )
+    blockReason = "task_permission";
+  if (!blockReason) {
     try {
       await requireAvailableStaff(db, live.account.id);
     } catch (error) {
       if (!(error instanceof AppError) || error.code !== "transition_denied") throw error;
-      canLink = false;
+      blockReason = "staff_unavailable";
     }
   }
+  // Case detail already shows current participant names to an authorized staff reader.
+  // Use only the exact live Party participant; a contact-route match proves no identity.
+  const [matchedParty] = rows.some((row) => row.sameParty)
+    ? await db
+        .select({ label: parties.displayName })
+        .from(parties)
+        .where(and(eq(parties.id, partyId), isNull(parties.mergedIntoPartyId)))
+    : [];
   return Promise.all(
-    rows.map(async ({ sameParty: matchedParty, ...row }) => ({
-      ...row,
-      matchBasis: matchedParty ? ("party" as const) : ("contact_route" as const),
-      canLink:
-        canLink &&
-        commitments.every((commitment) => !commitment.caseId || commitment.caseId === row.id) &&
-        (await can(db, live.actor, "case.transition", {
+    rows.map(async ({ sameParty, ...row }) => {
+      let reason: InquiryCaseBlockReason = blockReason;
+      if (
+        !reason &&
+        !(await can(db, live.actor, "case.transition", {
           type: "case",
           id: row.id,
           audience: "case_participants",
-        })) &&
-        (
+        }))
+      )
+        reason = "case_permission";
+      if (
+        !reason &&
+        !(
           await Promise.all(
             commitments.map((commitment) =>
               can(db, live.actor, "task.manage", taskResource({ ...commitment, caseId: row.id })),
             ),
           )
-        ).every(Boolean),
-    })),
+        ).every(Boolean)
+      )
+        reason = "task_permission";
+      // Reveal an existing task association only after the actor can manage the
+      // task under both the current and proposed Case scope.
+      if (!reason && commitments.some((task) => task.caseId && task.caseId !== row.id))
+        reason = "task_case_conflict";
+      return {
+        ...row,
+        matchBasis: sameParty ? ("party" as const) : ("contact_route" as const),
+        partyLabel: sameParty ? (matchedParty?.label ?? null) : null,
+        canLink: reason === null,
+        blockReason: reason,
+      };
+    }),
   );
 }

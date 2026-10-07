@@ -236,7 +236,9 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
         kind: "buyer",
         stage: "needs_agreed",
         matchBasis: "contact_route",
+        partyLabel: null,
         canLink: true,
+        blockReason: null,
       },
     ]);
     await expect(
@@ -259,8 +261,17 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
       .update(inquiries)
       .set({ partyId: f.target.client.partyId, contactMethodId: null })
       .where(eq(inquiries.id, f.inquiry.id));
+    const [party] = await t.db
+      .select({ label: parties.displayName })
+      .from(parties)
+      .where(eq(parties.id, f.target.client.partyId));
     expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
-      expect.objectContaining({ id: f.target.record.id, matchBasis: "party" }),
+      expect.objectContaining({
+        id: f.target.record.id,
+        matchBasis: "party",
+        partyLabel: party?.label,
+        blockReason: null,
+      }),
     ]);
     await t.db
       .insert(caseParticipants)
@@ -305,7 +316,7 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
         and(eq(grants.principalId, f.target.staff.id), eq(grants.capability, "case.transition")),
       );
     expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
-      expect.objectContaining({ canLink: false }),
+      expect.objectContaining({ canLink: false, blockReason: "case_permission" }),
     ]);
     await expect(
       linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
@@ -402,13 +413,17 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
     await linkGrants(f);
     const candidates = await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id);
     expect(candidates).toEqual([expect.objectContaining({ canLink: true })]);
-    const disabled = candidates.map((candidate) => ({ ...candidate, canLink: false }));
+    const taskDenied = candidates.map((candidate) => ({
+      ...candidate,
+      canLink: false,
+      blockReason: "task_permission",
+    }));
     await t.db
       .update(grants)
       .set({ revokedAt: new Date() })
       .where(and(eq(grants.principalId, f.target.staff.id), eq(grants.capability, "task.manage")));
     expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual(
-      disabled,
+      taskDenied,
     );
     await expect(
       linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
@@ -421,7 +436,11 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
       .where(eq(tasks.id, f.task.id))
       .returning();
     expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual(
-      disabled,
+      candidates.map((candidate) => ({
+        ...candidate,
+        canLink: false,
+        blockReason: "task_case_conflict",
+      })),
     );
     await expect(
       linkInquiryToExistingCase(t.db, f.target.staff.session, {
@@ -618,7 +637,7 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
       })
       .where(eq(inquiries.id, f.inquiry.id));
     expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
-      expect.objectContaining({ canLink: false }),
+      expect.objectContaining({ canLink: false, blockReason: "inquiry_owner" }),
     ]);
     await expect(
       linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
