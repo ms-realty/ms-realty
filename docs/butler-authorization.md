@@ -1,82 +1,50 @@
-# Butler authorization — owner Option 2
+# Butler authorization — draft-only
 
-Authority: the owner's decision recorded in lane `msr.owner_decisions_2026_10_02`.
-This supersedes the former draft-only rule **for the bounded Butler command executor**.
-Raw model/Hermes capabilities remain draft-only. No model receives send, publication,
-access, legal, price or financial capabilities. This change grants no launch permission.
+Authority: the current owner rule in `AGENTS.md` and the approved
+[R00 successor policy](delivery/r00-successor-policy.md). Butler/Hermes may draft within
+a selected task. Automatic internal task creation, customer sends, booking, publication,
+approval and other autonomous routine actions require a separately accepted policy and
+proof from the exact release before they can be enabled.
 
-The backend denies by default. These six command classes are the entire automatic list:
+## Server boundary
 
-| Action | Evidence the server must load and lock before execution |
-| --- | --- |
-| `acknowledgement.send` | Current case participant and contact eligibility; recorded human first contact; current reviewed acknowledgement template and exact validated rendering |
-| `reminder.send` | The same evidence, for a reviewed reminder template |
-| `chaser.send` | The same evidence, for a reviewed chaser template |
-| `viewing.book` | Independent current acceptance by visitor and host of the same appointment revision, times, timezone and resources; listing available; existing resource/conflict checks and locks pass in this transaction |
-| `document.record_received` | A persisted uploaded version belonging to the case; receipt bookkeeping only, without purpose/legal acceptance or clearing a condition |
-| `task.create` | Internal creation only, current case and available owner; no client promise, cancellation, completion, condition decision or monetary effect |
+`src/domain/butler.ts` recognizes six routine intent names: `acknowledgement.send`,
+`reminder.send`, `chaser.send`, `viewing.book`, `document.record_received` and `task.create`.
+Recognition and complete server evidence do not grant execution authority. A valid routine
+intent returns `awaiting_approval` with reason `draft_only` and outcome `not_applied`.
+Protected actions still require a human; missing or invalid scope, unknown actions and
+unregistered send/booking intents are blocked.
 
-First contact, prices, offers, terms, condition clearance/waivers, publishing/withdrawal,
-indexable translations, access grants, cancellations, legal and monetary actions require
-a person. Protected effects take precedence over an automatic action's label. Unlisted
-actions are blocked. A model's `approved`, `safe`, participant or resource booleans confer
-no authority.
+`src/server/butler/executor.ts` captures a trusted registry and strict schemas at bootstrap.
+Requests cannot supply evidence, callbacks or an actor selector. Its opaque authorization
+binds the parsed immutable command, case, key and callback identity. `runOperation` checks
+that binding and current evidence inside a savepoint, then denies every new Butler effect
+before its callback can run. Raw `ai_service` writes and forged Butler authority are also
+blocked. Ordinary human commands keep their independent authorization.
 
-## Backend integration
+`src/server/butler/tasks.ts` retains the old `task.create` input
+`{ caseId, title, purpose? }`, current-case lock and available-owner checks. It contains no
+task or activity insertion. A valid old request records a truthful denial; it cannot create
+a task, even if a trusted adapter is registered. Promise, state and approval flags remain
+invalid input. No customer-send or booking adapter is registered in this worker entry point.
 
-`src/server/butler/executor.ts` captures an immutable registry at server bootstrap. Each
-`defineButlerAction` binds one fixed class, a strict command schema, a trusted `readAndLock`
-adapter and its concrete executor. The command contains record references/data, never
-evidence or permission flags. Do not expose registry construction, authority minting or
-an actor selector as a route/Server Action/model tool.
+## Receipt and manual path
 
-The executor selects `system:butler`, hashes the parsed immutable command and binds
-authorization to that command, case, idempotency key and callback identity. `runOperation`
-checks it inside the same savepoint as the effect. A cast or JSON lookalike does not pass
-the private WeakMap check. Direct `ai_service` writes and direct unregistered Butler
-operations are blocked before their callbacks run. Other established human/background
-commands retain their existing authorization and receipt behavior.
+`awaiting_approval` records a blocked intent, not a resumable automatic task. Approving a
+draft or changing the policy cannot execute that old attempt. A person takes the step
+through a separately authorized manual command with current scope, revision and any
+required identity checks. The old idempotency key always replays its stored result.
 
-`src/server/butler/tasks.ts` supplies the concrete internal-task adapter and
-`runButlerAction(db, { action, idempotencyKey, body })`. It creates an open task for the
-current case owner after locking the case and checking current staff availability. Its
-strict body is `{ caseId, title, purpose? }`; state changes, promises and authority fields
-are rejected.
-
-**Current execution coverage:** internal task creation is wired to real database records.
-Messages, viewing booking and document receipts have policy checks but no production
-adapter registered in this entry point. They return `blocked` until their actual template,
-consent/resource or upload evidence adapters are qualified and registered. In particular,
-the existing acknowledgement of an already-confirmed viewing is **not** evidence of both
-sides accepting a proposed slot. No automatic customer send or booking has been enabled.
-
-For message adapters, reviewed template/render evidence must come from trusted revision
-and renderer records. Preserve existing consent, opt-out, recipient, deduplication and
-provider reconciliation guards. A draft or enqueue receipt is not a confirmed send. A
-provider timeout/ambiguous exception must be `outcome: "unknown"`, never a fresh-send retry.
-For viewing adapters, reuse the existing appointment/resource guards; lock acceptance
-revisions and broker/property resources. Do not fabricate a staff session to satisfy them.
-
-Human-only requests create an `awaiting_approval` receipt without running the effect.
-Approval/manual completion uses the existing, independently authorized human command
-with current scope, revision and required step-up checks. A blanket approval boolean does
-not turn the old Butler attempt into an executable one.
-
-## Contract for Claude UI
-
-No UI, layout, palette, copy or Figma changes are included here. The controller relays this
-contract to **MS Realty UI/UX redesign**; shared-file coordination remains in lane `msr`.
-
-The stable `ButlerReceipt` type lives in `src/domain/butler.ts`:
+The safe `ButlerReceipt` DTO retains its existing fields:
 
 ```ts
 {
-  policy: "owner_option_2_2026_10_02",
+  policy: "owner_draft_only",
   operationId: string,
   action: string,
-  verdict: "done_automatically" | "awaiting_approval" | "blocked",
+  verdict: "awaiting_approval" | "blocked",
   reason: string,
-  outcome: "applied" | "not_applied" | "unknown",
+  outcome: "not_applied",
   manual: {
     available: true,
     requiresAuthorization: true,
@@ -85,24 +53,27 @@ The stable `ButlerReceipt` type lives in `src/domain/butler.ts`:
 }
 ```
 
-Successful commands return `butlerReceipt` alongside the existing operation result.
-Errors carry `current.butlerReceipt`; `findOperation` also returns the receipt for worker
-recovery. `readButlerReceipt(db, session, operationId)` returns only this safe DTO to a
-live staff session with current case access, without raw command/outcome/provider data.
-Wire the actual UI transport only after the controller relays the shared-file agreement.
+New settled intents use `owner_draft_only`. Errors carry `current.butlerReceipt`, and
+`findOperation` returns the same receipt for worker recovery. `readButlerReceipt` exposes
+only that DTO to a live staff session with current case access. Every settled valid intent
+commits its operation receipt and one `butler.verdict` audit together. An identical retry
+adds neither an effect nor another audit; a changed body under the same key conflicts.
+Failed evidence checks roll back savepoint writes and retain a blocked `not_applied`
+receipt, even if a reader reports uncertainty: no effect callback began. Invalid envelopes
+and database outages cannot claim a settled receipt.
 
-Render the three verdicts and always offer “Do it myself.” This is a choice of human
-workflow, not an authorization grant. If `requiresReconciliation` is true, reconcile the
-unknown result before repeating its external effect through either path.
+Historical records may retain policy `owner_option_2_2026_10_02`, verdict
+`done_automatically` and outcome `applied`. Those fields describe a stored prior result,
+never authority for a new effect. Historical success and failure replay unchanged. An
+unknown historical result remains parked with `requiresReconciliation: true`; trusted
+reconciliation records what already happened, retains the original policy marker and
+adds one `butler.reconciled` audit. It never repeats the effect. Reconcile before repeating
+an unknown external effect through a manual command.
 
-Every settled valid command intent has an operation receipt and a `butler.verdict` audit
-entry committed together. An identical retry returns the same receipt/result without
-re-execution or duplicate audit; changing the body under the same key conflicts. Known
-failures roll back business writes and retain the blocked verdict. Unknown external results
-remain parked until trusted reconciliation records their actual outcome and preserves the
-Butler receipt (`butler.reconciled` audit). Invalid envelopes or database outages cannot
-claim a settled action receipt.
+Always offer the independent manual path. Render `done_automatically` only for historical
+applied receipts or their confirmed reconciliation, never for a new draft-only intent.
+No UI transport, layout or Figma changes are included in this server correction.
 
-Local database tests use a disposable PostgreSQL 16.15 Homebrew fixture. They prove command
-authorization/receipt behavior only; they are not Cloudflare staging, PostgreSQL 16.14
-provider, template approval, real send, viewing-consent, parity or launch evidence.
+Disposable PostgreSQL tests verify denial, absence of task/activity insertion, savepoint
+rollback, readback, idempotency and historical reconciliation. They are local regression
+evidence; they do not clear worker/provider, staging or launch gates.

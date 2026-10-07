@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  type ButlerAutomaticAction,
   type ButlerEvidence,
-  butlerAutomaticActions,
+  type ButlerRoutineAction,
   butlerEligibility,
   butlerHumanActions,
   butlerReceipt,
+  butlerRoutineActions,
 } from "./butler";
 
 function required<T>(value: T | null | undefined): T {
@@ -13,7 +13,7 @@ function required<T>(value: T | null | undefined): T {
   return value;
 }
 const caseId = "00000000-0000-4000-8000-000000000001";
-function evidence(action: ButlerAutomaticAction): ButlerEvidence {
+function evidence(action: ButlerRoutineAction): ButlerEvidence {
   return {
     caseId,
     caseActive: true,
@@ -64,11 +64,11 @@ function evidence(action: ButlerAutomaticAction): ButlerEvidence {
   };
 }
 
-describe("Butler Option 2 eligibility", () => {
-  it.each(butlerAutomaticActions)("admits %s only with its server guards satisfied", (action) => {
+describe("Butler draft-only eligibility", () => {
+  it.each(butlerRoutineActions)("%s still needs a human with complete evidence", (action) => {
     expect(butlerEligibility(action, caseId, evidence(action))).toEqual({
-      decision: "automatic",
-      reason: "owner_option_2",
+      decision: "awaiting_approval",
+      reason: "draft_only",
     });
     expect(butlerEligibility(action, caseId)).toMatchObject({ decision: "blocked" });
     expect(butlerEligibility(action, "different-case", evidence(action))).toMatchObject({
@@ -99,7 +99,7 @@ describe("Butler Option 2 eligibility", () => {
       decision: "blocked",
     });
   });
-  it.each(butlerAutomaticActions)("a protected side effect cannot hide behind %s", (action) => {
+  it.each(butlerRoutineActions)("a protected side effect cannot hide behind %s", (action) => {
     for (const effect of butlerHumanActions)
       expect(
         butlerEligibility(action, caseId, { ...evidence(action), protectedEffects: [effect] }),
@@ -177,7 +177,7 @@ describe("Butler Option 2 eligibility", () => {
         }),
       ).toMatchObject({ decision: "blocked" });
   });
-  it("creates internal tasks, not promises or state changes", () => {
+  it("invalid task scope and client promises cannot bypass human review", () => {
     const proof = evidence("task.create");
     expect(
       butlerEligibility("task.create", caseId, {
@@ -212,4 +212,19 @@ describe("Butler Option 2 eligibility", () => {
       ).toBe(true);
     },
   );
+  it("uses draft-only for new receipts and retains a historical policy only when explicit", () => {
+    expect(
+      butlerReceipt("op", "task.create", "awaiting_approval", "draft_only", "not_applied").policy,
+    ).toBe("owner_draft_only");
+    expect(
+      butlerReceipt(
+        "old-op",
+        "task.create",
+        "done_automatically",
+        "reconciled_applied",
+        "applied",
+        "owner_option_2_2026_10_02",
+      ).policy,
+    ).toBe("owner_option_2_2026_10_02");
+  });
 });

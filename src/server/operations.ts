@@ -93,7 +93,7 @@ function failureError(failure: StoredFailure): AppError {
  * `fn` runs inside a savepoint: a non-retryable `AppError` it throws is stored as the failed
  * outcome; one with `outcome: "unknown"` parks the receipt as outcome_unknown; anything else
  * (including retryable errors) rolls everything back and leaves no receipt, so a retry runs.
- * Butler attempts instead retain a verdict; an unknown external effect never becomes a retry.
+ * Butler attempts retain a denial; historical unknown effects still require reconciliation.
  */
 export async function runOperation<T>(
   db: Executor,
@@ -197,7 +197,6 @@ export async function runOperation<T>(
     let action = type.startsWith("butler.") ? type.slice("butler.".length) : "unclassified";
     let denial: "awaiting_approval" | "blocked" | undefined;
     let denialReason: string | undefined;
-    let executionStarted = false;
 
     try {
       const result = toJson(
@@ -213,42 +212,34 @@ export async function runOperation<T>(
           if (automated) {
             const checked = await checkButlerAuthorization(input, fn, context);
             action = checked.action;
-            if (checked.eligibility.decision !== "automatic") {
-              denial = checked.eligibility.decision;
-              denialReason = checked.eligibility.reason;
-              throw new AppError(
-                denial === "awaiting_approval" ? "butler_approval_required" : "forbidden",
-              );
-            }
+            // Draft-only is an execution boundary, even for a valid registered intent.
+            denial = checked.eligibility.decision;
+            denialReason = checked.eligibility.reason;
+            throw new AppError(
+              denial === "awaiting_approval" ? "butler_approval_required" : "forbidden",
+            );
           }
-          executionStarted = true;
           return fn(context);
         }),
       );
-      const verdict = automated
-        ? butlerReceipt(operationId, action, "done_automatically", "owner_option_2", "applied")
-        : undefined;
-      await settle(
-        "succeeded",
-        verdict ? { kind: "butler_outcome_v1", result, butlerReceipt: verdict } : result,
-        verdict,
-      );
+      await settle("succeeded", result);
       return {
         kind: "success",
         value: {
           operationId,
           replayed: false,
           outcome: result,
-          ...(verdict ? { butlerReceipt: verdict } : {}),
         },
       };
     } catch (error) {
       if (!isAppError(error) && !automated) throw error;
-      const known = isAppError(error)
-        ? error
-        : new AppError("unavailable", {
-            outcome: executionStarted ? "unknown" : "not_applied",
-          });
+      const failure = isAppError(error) ? error : new AppError("unavailable");
+      // New Butler attempts cannot reach an effect. A failed evidence read cannot claim an
+      // ambiguous external outcome; historical unknown receipts were handled by replay above.
+      const known =
+        automated && failure.outcome === "unknown"
+          ? new AppError("unavailable", { cause: error })
+          : failure;
       if (known.outcome === "unknown") {
         const verdict = automated
           ? butlerReceipt(operationId, action, "blocked", "outcome_unknown", "unknown")
@@ -271,7 +262,7 @@ export async function runOperation<T>(
             "not_applied",
           )
         : undefined;
-      const failure: StoredFailure = {
+      const storedFailure: StoredFailure = {
         code: known.code,
         ...(known.fieldErrors ? { fieldErrors: known.fieldErrors } : {}),
         ...(verdict
@@ -280,8 +271,8 @@ export async function runOperation<T>(
             ? { current: toJson(known.current) }
             : {}),
       };
-      await settle("failed", failure, verdict);
-      return { kind: "error", error: failureError(failure) };
+      await settle("failed", storedFailure, verdict);
+      return { kind: "error", error: failureError(storedFailure) };
     }
   });
   if (settled.kind === "error") throw settled.error;
@@ -358,6 +349,7 @@ export async function reconcileOperation(
           settlement.status === "succeeded" ? "done_automatically" : "blocked",
           settlement.status === "succeeded" ? "reconciled_applied" : settlement.code,
           settlement.status === "succeeded" ? "applied" : "not_applied",
+          previous.policy,
         )
       : undefined;
     const result = settlement.status === "succeeded" ? toJson(settlement.outcome) : undefined;

@@ -1,5 +1,5 @@
-// Owner decision 2026-10-02: Option 2. Eligibility is NOT a claim that an action ran.
-export const butlerAutomaticActions = [
+// Recognized routine intents, not executable capabilities under the draft-only policy.
+export const butlerRoutineActions = [
   "acknowledgement.send",
   "reminder.send",
   "chaser.send",
@@ -7,7 +7,7 @@ export const butlerAutomaticActions = [
   "document.record_received",
   "task.create",
 ] as const;
-export type ButlerAutomaticAction = (typeof butlerAutomaticActions)[number];
+export type ButlerRoutineAction = (typeof butlerRoutineActions)[number];
 
 export const butlerHumanActions = [
   "contact.first",
@@ -26,9 +26,10 @@ export const butlerHumanActions = [
 ] as const;
 export type ButlerHumanAction = (typeof butlerHumanActions)[number];
 
-export type ButlerEligibility =
-  | { readonly decision: "automatic"; readonly reason: "owner_option_2" }
-  | { readonly decision: "awaiting_approval" | "blocked"; readonly reason: string };
+export interface ButlerEligibility {
+  readonly decision: "awaiting_approval" | "blocked";
+  readonly reason: string;
+}
 
 /** Server adapter evidence only. Never accept these facts from a model/request body. */
 export interface ButlerEvidence {
@@ -38,7 +39,7 @@ export interface ButlerEvidence {
   readonly protectedEffects: readonly ButlerHumanAction[];
   readonly message?: {
     readonly templateId: string;
-    readonly templateAction: ButlerAutomaticAction;
+    readonly templateAction: ButlerRoutineAction;
     readonly approvedDigest: string | null;
     readonly renderedDigest: string;
     readonly active: boolean;
@@ -59,7 +60,7 @@ export interface ButlerEvidence {
       readonly slotDigest: string;
       readonly current: boolean;
     }[];
-    /** Existing booking guards, including locks/conflicts, run in the execution transaction. */
+    /** Resource checks remain evidence for review, never authority to book a viewing. */
     readonly resourcesCheckedAndLocked: boolean;
     readonly listingAvailable: boolean;
   };
@@ -77,8 +78,8 @@ export interface ButlerEvidence {
   };
 }
 
-export function isButlerAutomaticAction(action: string): action is ButlerAutomaticAction {
-  return (butlerAutomaticActions as readonly string[]).includes(action);
+export function isButlerRoutineAction(action: string): action is ButlerRoutineAction {
+  return (butlerRoutineActions as readonly string[]).includes(action);
 }
 
 export function butlerEligibility(
@@ -92,7 +93,7 @@ export function butlerEligibility(
     reason,
   });
   if ((butlerHumanActions as readonly string[]).includes(action)) return approval("human_required");
-  if (!isButlerAutomaticAction(action)) return blocked("action_not_allowlisted");
+  if (!isButlerRoutineAction(action)) return blocked("action_not_allowlisted");
   if (!evidence || evidence.caseId !== caseId || !evidence.caseActive)
     return blocked("case_scope_not_current");
   if (evidence.protectedEffects.length) return approval("protected_effect");
@@ -154,11 +155,12 @@ export function butlerEligibility(
       break;
     }
   }
-  return { decision: "automatic", reason: "owner_option_2" };
+  return approval("draft_only");
 }
 
 export interface ButlerReceipt {
-  readonly policy: "owner_option_2_2026_10_02";
+  /** The legacy marker is retained only for stored receipt readback and reconciliation. */
+  readonly policy: "owner_draft_only" | "owner_option_2_2026_10_02";
   readonly operationId: string;
   readonly action: string;
   readonly verdict: "done_automatically" | "awaiting_approval" | "blocked";
@@ -178,9 +180,10 @@ export function butlerReceipt(
   verdict: ButlerReceipt["verdict"],
   reason: string,
   outcome: ButlerReceipt["outcome"],
+  policy: ButlerReceipt["policy"] = "owner_draft_only",
 ): ButlerReceipt {
   return {
-    policy: "owner_option_2_2026_10_02",
+    policy,
     operationId,
     action,
     verdict,

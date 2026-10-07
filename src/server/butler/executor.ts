@@ -1,6 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import type { ButlerAutomaticAction, ButlerEvidence } from "@/domain/butler";
+import type { ButlerEvidence, ButlerRoutineAction } from "@/domain/butler";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
@@ -13,7 +13,7 @@ export interface ButlerActionAdapter {
   readonly [adapterBrand]: true;
 }
 interface Definition {
-  readonly action: ButlerAutomaticAction;
+  readonly action: ButlerRoutineAction;
   readonly parse: (body: unknown) => { caseId: string };
   readonly readAndLock: (ctx: OperationContext, body: unknown) => Promise<ButlerEvidence>;
   readonly execute: (ctx: OperationContext, body: unknown) => Promise<unknown>;
@@ -22,13 +22,12 @@ const definitions = new WeakMap<ButlerActionAdapter, Definition>();
 
 /**
  * Register once in trusted server code, never in a route using model-supplied functions/facts.
- * A definition is one fixed action, strict command schema, locked evidence and concrete effect.
- * For sends, execute must return only after a confirmed send, not draft/outbox acceptance;
- * throw AppError with outcome:"unknown" for an unresolved provider result. Existing send
- * deduplication, opt-out/recipient guards and provider reconciliation remain mandatory.
+ * A definition binds a fixed intent, strict schema and locked evidence. Registration never
+ * grants execution authority: runOperation denies every new Butler effect under draft-only.
+ * Retained callbacks cannot run until a separate policy and release proof are accepted.
  */
 export function defineButlerAction<Command extends { caseId: string }, Result>(
-  action: ButlerAutomaticAction,
+  action: ButlerRoutineAction,
   schema: z.ZodType<Command>,
   adapter: {
     readonly readAndLock: (ctx: OperationContext, command: Command) => Promise<ButlerEvidence>;
@@ -64,7 +63,7 @@ const caseSubject = z.object({ caseId: z.uuid() }).passthrough();
 
 /** The registry is captured at bootstrap. A JSON request cannot register/relabel an adapter. */
 export function createButlerExecutor(registrations: readonly ButlerActionAdapter[]) {
-  const registry = new Map<ButlerAutomaticAction, Definition>();
+  const registry = new Map<ButlerRoutineAction, Definition>();
   for (const registration of registrations) {
     const definition = definitions.get(registration);
     if (!definition || registry.has(definition.action))
@@ -73,7 +72,7 @@ export function createButlerExecutor(registrations: readonly ButlerActionAdapter
   }
   return async (db: Executor, raw: unknown) => {
     const request = parseInput(requestSchema, raw);
-    const definition = registry.get(request.action as ButlerAutomaticAction);
+    const definition = registry.get(request.action as ButlerRoutineAction);
     const body = freezeJson(
       JSON.parse(
         JSON.stringify(

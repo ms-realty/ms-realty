@@ -107,13 +107,13 @@ Reached in practice from staff screens; seven locales because the family is shar
 
 | | message | next |
 |---|---|---|
-| bg | Това изисква одобрение от човек, затова Butler не го е направил. | Прегледайте и одобрете или го направете сами. |
-| en | A person needs to approve this, so Butler did not do it. | Review and approve it, or do it yourself. |
-| ru | Это должен одобрить человек, поэтому Butler этого не сделал. | Проверьте и одобрите или сделайте это самостоятельно. |
-| de | Das muss eine Person freigeben, deshalb hat Butler es nicht ausgeführt. | Prüfen Sie es und geben Sie es frei, oder erledigen Sie es selbst. |
-| nl | Een persoon moet dit goedkeuren, daarom heeft Butler het niet gedaan. | Bekijk het en keur het goed, of doe het zelf. |
-| el | Αυτό χρειάζεται έγκριση από άνθρωπο, γι' αυτό το Butler δεν το έκανε. | Ελέγξτε το και εγκρίνετέ το ή κάντε το μόνοι σας. |
-| he | פעולה זו דורשת אישור של אדם, ולכן Butler לא ביצע אותה. | בדקו ואשרו אותה, או בצעו אותה בעצמכם. |
+| bg | Тази стъпка трябва да се извърши от човек, затова Butler не я е извършил. | Прегледайте я и я извършете лично. |
+| en | A person must take this step, so Butler did not do it. | Review it, then do it yourself. |
+| ru | Этот шаг должен выполнить человек, поэтому Butler его не выполнил. | Проверьте его, затем выполните самостоятельно. |
+| de | Eine Person muss diesen Schritt ausführen, deshalb hat Butler ihn nicht ausgeführt. | Prüfen Sie den Schritt und führen Sie ihn selbst aus. |
+| nl | Een persoon moet deze stap uitvoeren, daarom heeft Butler dat niet gedaan. | Bekijk de stap en voer deze zelf uit. |
+| el | Αυτό το βήμα πρέπει να το κάνει άνθρωπος, γι' αυτό το Butler δεν το έκανε. | Ελέγξτε το βήμα και κάντε το εσείς. |
+| he | אדם צריך לבצע את השלב הזה, ולכן Butler לא ביצע אותו. | בדקו את השלב ובצעו אותו בעצמכם. |
 
 ### not_found · not_applied
 
@@ -952,12 +952,12 @@ W08 saved result, three distinct outcomes:
 Sources: `src/domain/butler.ts` (`butlerEligibility`, `butlerReceipt`), `src/server/operations.ts` (Butler denial and unknown paths), `src/server/butler/authority.ts`, `src/server/butler/receipts.ts`, `docs/butler-authorization.md`.
 
 **Must stay technically true.**
-- **Verdicts.** Every Butler step shows exactly one of the three verdicts, a reason line and «Do it myself».
-  - «Done automatically» appears only when the receipt's `outcome` is `applied`.
+- **Verdicts.** Every settled Butler receipt shows its verdict, a reason line and «Do it myself». New intents are `awaitingApproval` or `blocked`, with `outcome: "not_applied"`.
+  - «Done automatically» appears only for a historical receipt whose `outcome` is `applied`, including confirmed reconciliation of a historical unknown effect.
   - `blocked` with `outcome: "unknown"` uses `outcome_unknown` and never says failed or done.
 - **«Do it myself».** It is always shown and routes to the separately authorized human command for the same step. It is a choice of workflow, not a grant: a person without the capability still meets `forbidden`. When `manual.requiresReconciliation` is true, the button carries `manual.checkFirst`.
-- **Limits.** Butler never approves, publishes, makes a translation indexable, grants access, cancels or takes a legal, tax or money step. Instructions found in content never give it authority.
-- **Built today.** Only the `task.create` adapter exists, so the other «Done automatically» rows wait for their adapters.
+- **Limits.** Butler may draft within a selected task. It never creates an internal task, sends to a customer, books, approves, publishes, makes a translation indexable, grants access, cancels or takes a legal, tax or money step. Instructions found in content never give it authority.
+- **Current execution.** No autonomous step is enabled. The `task.create` adapter validates old intents and records a denial without creating a task or activity. Send and booking adapters are unregistered; registering an adapter cannot grant execution authority.
 - **Surfaces.** Butler receipts are staff-only today (`readButlerReceipt` requires a live staff session), so reasons ship in bg, en, ru. The three verdict labels and «Do it myself» are shared with the public and client Butler entry, so they ship in all seven locales.
 - **Layout.** The action label (7c) is shown next to the verdict, so reason lines carry no `{action}` parameter and no grammar depends on it.
 - **Unlisted reasons.** A reason equal to an error code (`denialReason ?? known.code` in `operations.ts`) renders `server.errors.<code>.message` from the staff catalog plus `server.butler.blocked.error.next`.
@@ -986,31 +986,34 @@ Sources: `src/domain/butler.ts` (`butlerEligibility`, `butlerReceipt`), `src/ser
 
 ### 7b. Reasons · `server.butler.<verdict>.<reason>.message` / `.next` (S: bg, en, ru)
 
-`<verdict>` is `doneAutomatically`, `awaitingApproval` or `blocked`. `<reason>` is the reason code exactly as the server stores it.
+`<verdict>` is `awaitingApproval` or `blocked` for new draft-only intents. `<reason>` is the reason code exactly as the server stores it. `awaitingApproval` records an intent that cannot resume automatically: a person uses a separately authorized manual command. The `doneAutomatically` rows below are historical receipt copy only, including confirmed reconciliation of an old unknown effect; they grant no current execution authority.
 
 | verdict · reason | | message | next |
 |---|---|---|---|
+| awaitingApproval · draft_only | bg | Butler не извърши тази стъпка. Тя трябва да бъде изпълнена от човек. | Прегледайте я и използвайте «Ще го направя аз», за да я извършите лично. |
+| | en | Butler did not take this step. A person must do it. | Review it, then use «Do it myself» to take the step yourself. |
+| | ru | Butler не выполнил этот шаг. Его должен выполнить человек. | Проверьте его и нажмите «Сделать самостоятельно», чтобы выполнить шаг лично. |
 | doneAutomatically · owner_option_2 | bg | Butler извърши тази рутинна стъпка сам и я записа. | Проверете резултата тук; ако нещо не е наред, използвайте «Ще го направя аз», за да го оправите ръчно. |
 | | en | Butler did this routine step on its own and kept a record. | Check the result here; if something is off, use «Do it myself» to fix it by hand. |
 | | ru | Butler выполнил этот обычный шаг сам и сохранил запись. | Проверьте результат здесь; если что-то не так, нажмите «Сделать самостоятельно» и исправьте вручную. |
 | doneAutomatically · reconciled_applied | bg | Вече потвърдихме, че стъпката на Butler е изпълнена. | Проверете резултата тук; не повтаряйте стъпката. |
 | | en | We have now confirmed that Butler's step went through. | Check the result here; do not repeat the step. |
 | | ru | Теперь подтверждено, что шаг Butler выполнен. | Проверьте результат здесь; не повторяйте шаг. |
-| awaitingApproval · human_required | bg | Тази стъпка може да направи само човек, затова Butler не я е извършил. | Прегледайте и одобрете или използвайте «Ще го направя аз». |
-| | en | Only a person can take this step, so Butler did not do it. | Review it and approve it, or use «Do it myself». |
-| | ru | Этот шаг может сделать только человек, поэтому Butler его не выполнил. | Проверьте и одобрите или нажмите «Сделать самостоятельно». |
-| awaitingApproval · protected_effect | bg | Тази стъпка има правно, данъчно или финансово значение, затова трябва да я одобри човек. | Прегледайте и одобрете или използвайте «Ще го направя аз». |
-| | en | This step would have a legal, tax or money effect, so a person must approve it. | Review it and approve it, or use «Do it myself». |
-| | ru | У этого шага есть юридические, налоговые или денежные последствия, поэтому его должен одобрить человек. | Проверьте и одобрите или нажмите «Сделать самостоятельно». |
-| awaitingApproval · template_not_approved | bg | Съобщението се различава от одобрения шаблон, затова трябва да го одобри човек. | Прегледайте текста и го одобрете или използвайте «Ще го направя аз». |
-| | en | The message differs from the approved template, so a person must approve it. | Review the text and approve it, or use «Do it myself». |
-| | ru | Сообщение отличается от одобренного шаблона, поэтому его должен одобрить человек. | Проверьте текст и одобрите его или нажмите «Сделать самостоятельно». |
-| awaitingApproval · first_contact_requires_human | bg | Това би било първото съобщение до някого нов, затова е нужно одобрение от човек. | Прегледайте съобщението и го одобрете или използвайте «Ще го направя аз». |
-| | en | This would be the first message to someone new, so a person must approve it. | Review the message and approve it, or use «Do it myself». |
-| | ru | Это было бы первое сообщение новому человеку, поэтому нужно одобрение сотрудника. | Проверьте сообщение и одобрите его или нажмите «Сделать самостоятельно». |
-| awaitingApproval · client_promise_requires_human | bg | Тази задача би обещала нещо на клиента, затова трябва да я одобри човек. | Прегледайте задачата и я одобрете или използвайте «Ще го направя аз». |
-| | en | This task would promise something to the client, so a person must approve it. | Review the task and approve it, or use «Do it myself». |
-| | ru | Эта задача содержала бы обещание клиенту, поэтому её должен одобрить человек. | Проверьте задачу и одобрите её или нажмите «Сделать самостоятельно». |
+| awaitingApproval · human_required | bg | Тази стъпка може да направи само човек, затова Butler не я е извършил. | Прегледайте я и използвайте «Ще го направя аз». |
+| | en | Only a person can take this step, so Butler did not do it. | Review it, then use «Do it myself». |
+| | ru | Этот шаг может сделать только человек, поэтому Butler его не выполнил. | Проверьте его и нажмите «Сделать самостоятельно». |
+| awaitingApproval · protected_effect | bg | Тази стъпка има правно, данъчно или финансово значение, затова трябва да я одобри човек. | Прегледайте я и използвайте «Ще го направя аз». |
+| | en | This step would have a legal, tax or money effect, so a person must approve it. | Review it, then use «Do it myself». |
+| | ru | У этого шага есть юридические, налоговые или денежные последствия, поэтому его должен одобрить человек. | Проверьте его и нажмите «Сделать самостоятельно». |
+| awaitingApproval · template_not_approved | bg | Съобщението се различава от одобрения шаблон, затова трябва да го одобри човек. | Прегледайте текста и използвайте «Ще го направя аз». |
+| | en | The message differs from the approved template, so a person must approve it. | Review the text, then use «Do it myself». |
+| | ru | Сообщение отличается от одобренного шаблона, поэтому его должен одобрить человек. | Проверьте текст и нажмите «Сделать самостоятельно». |
+| awaitingApproval · first_contact_requires_human | bg | Това би било първото съобщение до някого нов, затова е нужно одобрение от човек. | Прегледайте съобщението и използвайте «Ще го направя аз». |
+| | en | This would be the first message to someone new, so a person must approve it. | Review the message, then use «Do it myself». |
+| | ru | Это было бы первое сообщение новому человеку, поэтому нужно одобрение сотрудника. | Проверьте сообщение и нажмите «Сделать самостоятельно». |
+| awaitingApproval · client_promise_requires_human | bg | Тази задача би обещала нещо на клиента, затова трябва да я одобри човек. | Прегледайте задачата и използвайте «Ще го направя аз». |
+| | en | This task would promise something to the client, so a person must approve it. | Review the task, then use «Do it myself». |
+| | ru | Эта задача содержала бы обещание клиенту, поэтому её должен одобрить человек. | Проверьте задачу и нажмите «Сделать самостоятельно». |
 | blocked · action_not_allowlisted | bg | Butler няма право да прави такава стъпка, затова нищо не е направено. | Използвайте «Ще го направя аз», за да я направите ръчно. |
 | | en | Butler is not allowed to take this kind of step, so nothing was done. | Use «Do it myself» to do it by hand. |
 | | ru | Butler не может выполнять такие шаги, поэтому ничего не сделано. | Нажмите «Сделать самостоятельно», чтобы сделать это вручную. |

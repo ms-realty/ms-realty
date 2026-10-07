@@ -55,8 +55,8 @@ export async function checkButlerAuthorization(
       eligibility: { decision: "blocked", reason: "server_authority_required" },
     };
   }
-  // Executed after the operation lock, in the same savepoint as the effect; never precomputed
-  // from request booleans or cached model output. Adapters must lock facts/resources here.
+  // Checked after the operation lock in a savepoint; never precomputed from request flags or
+  // cached model output. Current evidence can explain a denial, never authorize an effect.
   const evidence = binding.readAndLock ? await binding.readAndLock(ctx) : undefined;
   return {
     action: binding.action,
