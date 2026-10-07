@@ -67,7 +67,8 @@ function syntheticPdf(purpose: string, reference: string) {
   );
 }
 
-async function decision(page: Page, label: string) {
+// O16PUB answers a publication with its own focused result rather than the shared receipt.
+async function decision(page: Page, label: string, result?: { heading: string; back: string }) {
   const form = page
     .locator("form")
     .filter({ has: page.getByRole("button", { name: label, exact: true }) });
@@ -80,6 +81,11 @@ async function decision(page: Page, label: string) {
     await form.getByRole("checkbox").check();
   }
   await form.getByRole("button", { name: label, exact: true }).click();
+  if (result) {
+    await expect(page.getByRole("heading", { level: 1, name: result.heading })).toBeVisible();
+    await page.getByRole("link", { name: result.back, exact: true }).click();
+    return;
+  }
   await expect(page.getByText("The action was recorded.", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Open listing", exact: true }).click();
 }
@@ -359,7 +365,11 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   await prepared.getByLabel("Publication language", { exact: false }).selectOption("bg");
   await decision(page, "Prepare publication");
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
-  await decision(page, "Activate reviewed manifest (BG)");
+  await decision(page, "Activate reviewed manifest (BG)", {
+    heading: "The listing is published",
+    back: "Back to the current task",
+  });
+  await expect(page).toHaveURL(/\?tab=review$/);
 
   const [published] =
     await connection`select p.state, p.generation, p.manifest_id, m.locale, m.listing_revision_id, m.media from current_publications p join publication_manifests m on m.id = p.manifest_id where p.listing_id = ${listing.id} and p.locale = 'bg'`;
