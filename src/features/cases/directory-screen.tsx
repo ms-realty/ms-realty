@@ -13,9 +13,8 @@ import type { Session } from "@/server/auth/sessions";
 import { listCases } from "@/server/cases/queries";
 import { isAppError } from "@/server/errors";
 import { buttonClass } from "@/ui/button-class";
-import { cx } from "@/ui/cx";
 import { EmptyState } from "@/ui/empty-state";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { ChevronEndIcon, FolderIcon } from "@/ui/icons";
 import { workCopy } from "../work/copy";
 import { coverageCopy } from "../work/coverage-copy";
@@ -64,7 +63,7 @@ export async function CaseDirectoryScreen({
         {/* Figma: the button sits under the field on phones and beside it on wider screens. */}
         <form method="get" className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
           <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-1">
-            <label htmlFor="case-search" className="text-dense font-semibold">
+            <label htmlFor="case-search" className={labelClass}>
               {copy.search}
             </label>
             <input
@@ -74,14 +73,13 @@ export async function CaseDirectoryScreen({
               maxLength={searchLimit}
               defaultValue={q}
               aria-describedby="case-search-hint"
-              // UI06 search on O04: 52 px on the canvas fill, level with the 52 px button.
-              className={cx(controlClass, "min-h-13! bg-canvas! py-2")}
+              className={controlClass}
             />
             <p id="case-search-hint" className="sr-only">
               {copy.searchHint}
             </p>
           </div>
-          <button type="submit" className={buttonClass("secondary", "sm:min-h-13")}>
+          <button type="submit" className={buttonClass("secondary", "sm:min-h-input")}>
             {copy.apply}
           </button>
         </form>
