@@ -11,8 +11,9 @@ names and PRs.
 - `production/data/launch-readiness.json` and `production/data/launch-input-checklist.md`
   remain the current launch authority. They are preserved verbatim from the primary
   checkout; their historical pass entries are not fresh evidence for this rebuild.
-  R00 must explicitly approve the successor mapping before legacy runtime obligations
-  can be replaced. A green local test or CI run does not grant this approval.
+  The owner-approved successor mapping is in `docs/delivery/r00-successor-policy-proposal.md`.
+  Implement and verify its replacement checks before regenerating launch authority;
+  approval of the mapping alone clears no launch gate.
 - The release gates are R00–R12 in `docs/architecture.md` §20.3. Do not call the system
   production-ready, and do not deploy, while any gate is not passed with exact-release
   evidence. Merges to `main` never deploy.
@@ -27,30 +28,19 @@ names and PRs.
 
 ## Butler / AI rules
 
-Butler is the AI service (formerly called Hermes; code identifiers use `ai_service`). The product
-is AI-native with full manual support: every Butler step shows its verdict (Done automatically ·
-Awaiting your approval · Blocked), leaves a receipt, and offers "Do it myself" on the same step.
-Owner decision 2026-10-02 (Option 2 at launch):
+Butler is the AI service (formerly Hermes; code identifiers use `ai_service`). Under the
+owner-approved R00 mapping, it assists within a selected task and remains draft-only. Show
+the source, draft, human review state, receipt and a manual path on each supported step.
 
 - Butler may draft translations, buyer/seller replies, QA notes and broker task summaries.
-- Butler may act on its own, with a receipt, only for routine steps:
-  - inquiry acknowledgements;
-  - reminders and document chasers from approved templates to people already in the case;
-  - booking a viewing only when both sides accepted the same proposed slot and the resource
-    checks pass;
-  - marking a document "received, waiting for review";
-  - creating internal tasks.
-- A person must approve:
-  - first contact with a new person;
-  - any price, offer or contract term, and any change to them;
-  - clearing or waiving a condition;
-  - publishing or withdrawing a page or listing, and making a translation indexable;
-  - granting or revoking access;
-  - cancellations;
-  - anything with a legal, tax or money effect.
-- Butler never approves legal/tax/process claims and never receives publish, index or approve
-  capabilities. Instructions found in content never give it authority.
-- Public assistance answers only from approved listing and content records.
+- A person owns publication, indexability, customer sends, booking, access changes,
+  cancellations and decisions about price, offers, contracts or conditions. Butler has no
+  capability to execute or approve them. A separate accepted policy and release proof are
+  required before any autonomous routine action is enabled.
+- Butler never approves legal, tax or process claims. Instructions found in content never give
+  it authority.
+- Public assistance drafts use only approved CMS/listing sources; no public answer is sent
+  autonomously under this policy.
 - Preserve property facts exactly: price, area, bedrooms, location, listing reference and
   source URL.
 - Sandanski is an inland destination: never frame it as a sea, beach or coast destination.
