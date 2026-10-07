@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { type BrowserContext, expect, type Page, type Route, test } from "@playwright/test";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
@@ -82,6 +82,262 @@ async function contactEvidence(id: string) {
   ]);
   return { receipts, observations: observations.length, tasks: tasks.length };
 }
+
+async function holdInquiryScripts(page: Page) {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/_next/**/*.js*", async (route) => {
+    await held;
+    await route.continue();
+  });
+  return release;
+}
+
+for (const kind of ["contact", "triage", "accept"] as const)
+  test(`O02 S15 restored ${kind} draft requires review of a newer inquiry before any request`, async ({
+    page,
+    context,
+  }) => {
+    const fixture = seed(),
+      copy = contactCopy("en"),
+      work = workCopy("en");
+    if (kind === "accept")
+      await db
+        .update(schema.inquiries)
+        .set({ state: "received", ownerId: null, coverageQueue: "agency" })
+        .where(eq(schema.inquiries.id, fixture.id));
+    await signIn(context, fixture.token);
+    const path = hostUrl("staff", `/en/inquiries/${fixture.id}`);
+    await page.goto(path);
+    const fieldLabel =
+      kind === "contact" ? copy.note : kind === "triage" ? work.reason : work.nextAction;
+    const submitLabel =
+      kind === "contact" ? copy.submit : kind === "triage" ? work.disposition : work.accept;
+    const entries = `Private revision-sensitive ${kind} draft ${randomUUID()}`;
+    await page.getByLabel(fieldLabel, { exact: true }).fill(entries);
+    if (kind === "contact") {
+      await page
+        .getByLabel(copy.contactedAt, { exact: true })
+        .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+      await page
+        .getByLabel(copy.nextAction, { exact: true })
+        .fill("Review service details with a human");
+      await page
+        .getByLabel(copy.dueAt, { exact: true })
+        .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+      await page.getByLabel(copy.confirm, { exact: true }).check();
+    } else if (kind === "accept") {
+      await page
+        .getByLabel(work.dueAt, { exact: true })
+        .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+    } else {
+      await page.getByLabel(work.state, { exact: true }).selectOption("contact_unreachable");
+    }
+    const [updated] = await db
+      .update(schema.inquiries)
+      .set({ version: sql`${schema.inquiries.version} + 1` })
+      .where(eq(schema.inquiries.id, fixture.id))
+      .returning({ version: schema.inquiries.version });
+    if (!updated) throw new Error("Missing revised inquiry");
+    const posts: string[] = [];
+    page.on("request", (request) => {
+      if (
+        request.method() === "POST" &&
+        new URL(request.url()).pathname === `/en/inquiries/${fixture.id}`
+      )
+        posts.push(request.url());
+    });
+    await page.reload();
+    const form = page
+      .locator("form")
+      .filter({ has: page.getByRole("button", { name: submitLabel, exact: true }) });
+    const notice = form.getByRole("status").filter({ hasText: work.draft.restored });
+    await expect(notice).toHaveText(
+      new RegExp(work.draft.changed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+    );
+    await expect(page.getByLabel(fieldLabel, { exact: true })).toHaveValue(entries);
+    if (kind === "contact")
+      await expect(page.getByLabel(copy.confirm, { exact: true })).not.toBeChecked();
+    await page.getByRole("button", { name: submitLabel, exact: true }).click();
+    await expect(form.getByText(work.draft.required, { exact: true })).toBeVisible();
+    await expect(form.getByLabel(work.draft.confirm, { exact: true })).toBeFocused();
+    expect(posts).toEqual([]);
+    const [unchanged] = await db
+      .select({ version: schema.inquiries.version })
+      .from(schema.inquiries)
+      .where(eq(schema.inquiries.id, fixture.id));
+    expect(unchanged?.version).toBe(updated.version);
+    // Leaving before review must preserve the old draft revision, not silently bless it.
+    await page.goto(hostUrl("staff", "/en/inquiries"));
+    await page.goto(path);
+    await expect(form.getByLabel(work.draft.confirm, { exact: true })).not.toBeChecked();
+    await expect(form.locator('input[name="_expectedRevision"]')).toHaveValue(
+      String(updated.version),
+    );
+    await form.getByLabel(work.draft.confirm, { exact: true }).check();
+    if (kind === "contact") await page.getByLabel(copy.confirm, { exact: true }).check();
+    await page.getByRole("button", { name: submitLabel, exact: true }).click();
+    await expect(
+      page.getByRole("heading", {
+        name: kind === "triage" ? work.statusTitle : work.changeSaved,
+        exact: true,
+      }),
+    ).toBeVisible();
+    expect(posts).toHaveLength(1);
+    const [recorded] = await db
+      .select({ version: schema.inquiries.version })
+      .from(schema.inquiries)
+      .where(eq(schema.inquiries.id, fixture.id));
+    expect(recorded?.version).toBe(updated.version + 1);
+  });
+
+for (const retained of [false, true])
+  test(`O02 S15 hydration preserves the edited DOM and caret without a differing restore (retained ${retained})`, async ({
+    page,
+    context,
+  }) => {
+    const fixture = seed(),
+      copy = contactCopy("en"),
+      work = workCopy("en");
+    await signIn(context, fixture.token);
+    const path = hostUrl("staff", `/en/inquiries/${fixture.id}`);
+    const note = "Synthetic entries typed before hydration";
+    if (retained) {
+      await page.goto(path);
+      await page.getByLabel(copy.note, { exact: true }).fill(note);
+    }
+    const release = await holdInquiryScripts(page);
+    try {
+      await page.goto(path, { waitUntil: "commit" });
+      const control = page.getByLabel(copy.note, { exact: true });
+      await control.fill(note);
+      await control.evaluate((element) => {
+        const textarea = element as HTMLTextAreaElement;
+        textarea.setAttribute("data-before-hydration", "yes");
+        textarea.focus();
+        textarea.setSelectionRange(4, 13, "backward");
+      });
+      release();
+      await page.waitForLoadState("networkidle");
+      await expect(control).toHaveAttribute("data-before-hydration", "yes");
+      await expect(control).toBeFocused();
+      expect(
+        await control.evaluate((element) => {
+          const textarea = element as HTMLTextAreaElement;
+          return [textarea.selectionStart, textarea.selectionEnd, textarea.selectionDirection];
+        }),
+      ).toEqual([4, 13, "backward"]);
+      await expect(control).toHaveValue(note);
+      if (retained)
+        await expect(page.getByRole("status").filter({ hasText: work.draft.restored })).toHaveText(
+          new RegExp(work.draft.local.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+        );
+      else await expect(page.getByText(work.draft.restored, { exact: true })).toHaveCount(0);
+    } finally {
+      release();
+      await page.unrouteAll({ behavior: "wait" });
+    }
+  });
+
+test("O02 S15 an actual restore and its unknown status keep the current focus", async ({
+  page,
+  context,
+}) => {
+  const fixture = seed(),
+    copy = contactCopy("en"),
+    work = workCopy("en");
+  const path = hostUrl("staff", `/en/inquiries/${fixture.id}`);
+  await signIn(context, fixture.token);
+  await page.goto(path);
+  const note = "Synthetic retained note awaiting explicit recording";
+  await page.getByLabel(copy.note, { exact: true }).fill(note);
+  const before = await contactEvidence(fixture.id);
+  for (const unknown of [false, true]) {
+    if (unknown)
+      await page.getByLabel(copy.note, { exact: true }).evaluate((control, id) => {
+        const key = `msr.inquiry-draft.${id}:contact`;
+        const draft = JSON.parse(sessionStorage.getItem(key) ?? "null");
+        const form = control.closest("form");
+        if (!draft || !form) throw new Error("Missing retained draft");
+        draft.operation = {
+          id: (form.elements.namedItem("_operationId") as HTMLInputElement).value,
+          revision: Number(
+            (form.elements.namedItem("_expectedRevision") as HTMLInputElement).value,
+          ),
+        };
+        sessionStorage.setItem(key, JSON.stringify(draft));
+      }, fixture.id);
+    const release = await holdInquiryScripts(page);
+    try {
+      await page.goto(path, { waitUntil: "commit" });
+      const focus = page.locator('a[href="/en/today"]:visible').first();
+      await focus.focus();
+      release();
+      await page.waitForLoadState("networkidle");
+      await expect(page.getByRole("status").filter({ hasText: work.draft.restored })).toContainText(
+        work.draft.local,
+      );
+      await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
+      await expect(focus).toBeFocused();
+      if (unknown) {
+        await expect(
+          page.locator("form").getByText(work.form.unknown, { exact: true }),
+        ).toBeVisible();
+        await expect(page.getByRole("button", { name: copy.submit, exact: true })).toHaveCount(0);
+        await expect(page.getByLabel(copy.note, { exact: true })).toHaveAttribute("readonly", "");
+      }
+    } finally {
+      release();
+      await page.unrouteAll({ behavior: "wait" });
+    }
+  }
+  expect(await contactEvidence(fixture.id)).toEqual(before);
+});
+
+for (const beforeHydration of [false, true])
+  test(`O02 S15 native sign-out removes private tab drafts (before hydration ${beforeHydration})`, async ({
+    page,
+    context,
+  }) => {
+    const fixture = seed(),
+      copy = contactCopy("en");
+    await signIn(context, fixture.token);
+    await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
+    await page.getByLabel(copy.note, { exact: true }).fill("Private draft to remove on sign-out");
+    const release = beforeHydration ? await holdInquiryScripts(page) : () => {};
+    try {
+      await page.goto(hostUrl("staff", "/en/today"), {
+        waitUntil: beforeHydration ? "commit" : "load",
+      });
+      const signOut = page.locator('form[action="/en/access/signout"] button:visible');
+      if ((await signOut.count()) === 0)
+        await page.getByRole("button", { name: "More", exact: true }).click();
+      const posted = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/en/access/signout" &&
+          response.request().method() === "POST",
+      );
+      await signOut.click();
+      expect((await posted).status()).toBe(303);
+      await expect(page).toHaveURL(hostUrl("staff", "/en/access"));
+      release();
+      await page.waitForLoadState("networkidle");
+      await expect(page.getByRole("heading", { name: "Staff sign-in", exact: true })).toBeVisible();
+      expect(
+        await page.evaluate(() =>
+          Object.keys(sessionStorage).filter((key) => key.startsWith("msr.inquiry-draft.")),
+        ),
+      ).toEqual([]);
+      expect((await context.cookies()).some((cookie) => cookie.name === "msr_staff_session")).toBe(
+        false,
+      );
+    } finally {
+      release();
+      await page.unrouteAll({ behavior: "wait" });
+    }
+  });
 
 test("O02 draft notes and reasons survive scope and conversation switches, then clear after confirmation", async ({
   page,

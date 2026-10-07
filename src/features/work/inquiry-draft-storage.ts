@@ -19,9 +19,30 @@ const memory = new Map<string, RetainedDraft | null>();
 const unpersisted = new Set<string>();
 const revision = (value: unknown): value is number | null =>
   value === null || (typeof value === "number" && Number.isSafeInteger(value) && value > 0);
-// Rechecking contact facts is required on recovery; it does not change the command's intent.
-const sameIntent = (left: FormValues, right: FormValues) =>
+// Compare local entries without the recovery review checkbox. The server still validates
+// the command payload before accepting any retry with the same operation reference.
+const sameDraftEntries = (left: FormValues, right: FormValues) =>
   Object.keys(right).every((name) => name === "reviewed" || left[name] === right[name]);
+
+function clearStoredInquiryDrafts() {
+  for (let index = sessionStorage.length - 1; index >= 0; index--) {
+    const key = sessionStorage.key(index);
+    if (key?.startsWith(prefix)) sessionStorage.removeItem(key);
+  }
+}
+
+/** Signing out removes private tab drafts before navigation or any late action response. */
+export function releaseInquiryDraftOwner() {
+  memoryOwner = null;
+  memory.clear();
+  unpersisted.clear();
+  protectInquiryMemoryOnUnload(0);
+  try {
+    clearStoredInquiryDrafts();
+  } catch {
+    // Unavailable browser storage must not prevent the native sign-out request.
+  }
+}
 
 /** A new actor or auth session removes the previous session's private in-tab drafts. */
 export function claimInquiryDraftOwner(owner: InquiryDraftOwner): boolean {
@@ -36,12 +57,19 @@ export function claimInquiryDraftOwner(owner: InquiryDraftOwner): boolean {
   }
   memoryOwner = owner.expiresAt > Date.now() ? owner : null;
   try {
-    const stored = JSON.parse(sessionStorage.getItem(ownerKey) ?? "null");
-    if (stored?.id !== owner.id || stored?.expiresAt <= Date.now() || owner.expiresAt <= Date.now())
-      for (let index = sessionStorage.length - 1; index >= 0; index--) {
-        const key = sessionStorage.key(index);
-        if (key?.startsWith(prefix)) sessionStorage.removeItem(key);
-      }
+    let stored: InquiryDraftOwner | null = null;
+    try {
+      stored = JSON.parse(sessionStorage.getItem(ownerKey) ?? "null");
+    } catch {
+      // A corrupt owner marker cannot authorize the previous tab's private drafts.
+    }
+    if (
+      stored?.id !== owner.id ||
+      typeof stored?.expiresAt !== "number" ||
+      stored.expiresAt <= Date.now() ||
+      owner.expiresAt <= Date.now()
+    )
+      clearStoredInquiryDrafts();
     if (owner.expiresAt <= Date.now()) return false;
     sessionStorage.setItem(ownerKey, JSON.stringify(owner));
     return true;
@@ -164,6 +192,8 @@ export function retainInquiryDraft<V extends FormValues>(
   initial: FormState<V>,
   { state, values, pending }: FormSnapshot<V>,
   retryOperationId?: string,
+  /** Keep the draft's original revision until its owner explicitly reviews the current record. */
+  draftRevision: number | null = state.expectedRevision,
 ): boolean {
   // A late response from a former account must never recreate that account's storage.
   if (!ownsInquiryDrafts(owner)) return false;
@@ -173,7 +203,11 @@ export function retainInquiryDraft<V extends FormValues>(
     previous?.operation?.id === state.operationId ? previous.operation : undefined;
   if (state.outcome.kind === "confirmed") {
     // An earlier attempt's late confirmation must not delete a newer corrected draft.
-    if (priorOperation?.preserveOnSuccess && previous && !sameIntent(previous.values, values)) {
+    if (
+      priorOperation?.preserveOnSuccess &&
+      previous &&
+      !sameDraftEntries(previous.values, values)
+    ) {
       const { operation: _operation, ...draft } = previous;
       return persistDraft(owner, key, draft);
     }
@@ -191,14 +225,15 @@ export function retainInquiryDraft<V extends FormValues>(
   const retained: RetainedDraft = {
     ownerId: owner.id,
     values: { ...values },
-    revision: state.expectedRevision,
+    revision: unresolved || recovering ? state.expectedRevision : draftRevision,
     ...(unresolved || recovering
       ? {
           operation: {
             id: state.operationId,
             revision: state.expectedRevision,
             ...(priorOperation?.preserveOnSuccess ||
-            (recovering && (!priorOperation || !previous || !sameIntent(previous.values, values)))
+            (recovering &&
+              (!priorOperation || !previous || !sameDraftEntries(previous.values, values)))
               ? { preserveOnSuccess: true }
               : {}),
           },

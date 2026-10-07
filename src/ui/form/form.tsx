@@ -78,6 +78,8 @@ export type ActionFormProps<V extends FormValues> = {
   formId?: string;
   /** Feature-owned draft retention; observes confirmation without wrapping the Server Action. */
   onSnapshot?: (snapshot: FormSnapshot<V>) => void;
+  /** Restoring an existing pending status must not interrupt focus; new responses still focus. */
+  focusInitialStatus?: boolean;
   children: (form: FormController<V>) => ReactNode;
 };
 
@@ -112,9 +114,17 @@ function textareaValues(prefix: string, names: string[]) {
   return values;
 }
 
-function FocusResult({ children }: { children: ReactNode }) {
+function FocusResult({
+  children,
+  focusOnMount = true,
+}: {
+  children: ReactNode;
+  focusOnMount?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => ref.current?.focus(), []);
+  useEffect(() => {
+    if (focusOnMount) ref.current?.focus();
+  }, [focusOnMount]);
   return (
     <div ref={ref} tabIndex={-1}>
       {children}
@@ -191,6 +201,7 @@ function FormSession<V extends FormValues>({
   secondaryActions,
   formId,
   onSnapshot,
+  focusInitialStatus = true,
   children,
   snapshot,
 }: ActionFormProps<V> & { snapshot: RefObject<Snapshot> }) {
@@ -411,7 +422,10 @@ function FormSession<V extends FormValues>({
         </FocusResult>
       ) : null}
       {outcome.kind === "accepted" || outcome.kind === "unknown" ? (
-        <FocusResult key={`status-${state.responseId}`}>
+        <FocusResult
+          key={`status-${state.responseId}`}
+          focusOnMount={focusInitialStatus || state.responseId !== initialState.responseId}
+        >
           <Notice
             tone={outcome.kind === "unknown" ? "warning" : "info"}
             title={outcome.message}

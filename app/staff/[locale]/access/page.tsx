@@ -4,6 +4,7 @@ import { AccessFrame } from "@/features/identity/access-frame";
 import { ceremonyMessages, identityCopy } from "@/features/identity/copy";
 import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
 import { privacyQueueReturn } from "@/features/privacy/access";
+import { SignedOutInquiryDraftBoundary } from "@/features/work/inquiry-draft";
 import { isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess, staffAccessPath } from "@/server/auth/pages";
 import { beginStaffPasskey, completeStaffPasskey } from "./actions";
@@ -31,6 +32,7 @@ export default async function StaffAccessPage({
   const c = identityCopy(locale);
   return (
     <AccessFrame title={c.staffSignInTitle} lead={c.staffSignInLead} standalone>
+      <SignedOutInquiryDraftBoundary />
       <PasskeyCeremony
         kind="authenticate"
         begin={beginStaffPasskey}

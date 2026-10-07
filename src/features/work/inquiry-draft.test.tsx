@@ -1,17 +1,27 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { FormEvent } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { FormAction, FormState } from "@/ui/form/contract";
-import type { ContactValues, TriageValues } from "./actions";
+import { SignOutForm } from "@/features/shell/account";
+import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
+import type { AcceptValues, ContactValues, TriageValues } from "./actions";
 import { contactCopy } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
-import { TriageForm } from "./forms";
-import { InquiryDraftBoundary, InquiryDraftReconciliation } from "./inquiry-draft";
+import { AcceptForm, TriageForm } from "./forms";
+import {
+  InquiryDraftBoundary,
+  InquiryDraftReconciliation,
+  SignedOutInquiryDraftBoundary,
+} from "./inquiry-draft";
 import type { InquiryDraftOwner } from "./inquiry-draft-storage";
-import { claimInquiryDraftOwner, readInquiryDraft } from "./inquiry-draft-storage";
+import {
+  claimInquiryDraftOwner,
+  readInquiryDraft,
+  retainInquiryDraft,
+} from "./inquiry-draft-storage";
 import { browserInquiryReference, inquiryReferenceCookie } from "./inquiry-reference";
 
 const router = vi.hoisted(() => ({ push: vi.fn() }));
@@ -92,10 +102,249 @@ afterEach(() => {
   cleanup();
   claimInquiryDraftOwner({ id: "expired-test", expiresAt: 0 });
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   sessionStorage.clear();
 });
 
 describe("O02/O03 inquiry drafts", () => {
+  it.each(["contact", "triage", "accept"] as const)(
+    "requires explicit revision review for a restored %s draft, including another navigation",
+    async (kind) => {
+      const draftOwner = owner(),
+        user = userEvent.setup(),
+        called = vi.fn();
+      const action = async <V extends FormValues>(state: FormState<V>, data: FormData) => {
+        called(state, data);
+        return state;
+      };
+      const form = (revision: number) => {
+        const state = { ...initial(revision === 2 ? "a" : "b"), expectedRevision: revision };
+        if (kind === "contact")
+          return (
+            <ContactForm
+              locale="en"
+              id="one"
+              draftOwner={draftOwner}
+              action={action}
+              initialState={state}
+              contact={{ id: "method", version: 1, kind: "email", value: "synthetic@example.test" }}
+            />
+          );
+        if (kind === "triage")
+          return (
+            <TriageForm
+              locale="en"
+              id="one"
+              draftOwner={draftOwner}
+              action={action}
+              initialState={{ ...triageInitial(), expectedRevision: revision }}
+              states={["contact_unreachable", "resolved_without_case"]}
+            />
+          );
+        const accept: FormState<AcceptValues> = {
+          ...state,
+          values: { nextAction: "", dueAt: "" },
+        };
+        return (
+          <AcceptForm
+            locale="en"
+            id="one"
+            draftOwner={draftOwner}
+            action={action}
+            initialState={accept}
+          />
+        );
+      };
+      const field =
+        kind === "contact" ? contact.note : kind === "triage" ? work.reason : work.nextAction;
+      const submit =
+        kind === "contact" ? contact.submit : kind === "triage" ? work.disposition : work.accept;
+      const original = render(form(2));
+      await user.type(
+        screen.getByLabelText(field),
+        "Private entries composed against revision two",
+      );
+      if (kind === "contact") await user.click(screen.getByLabelText(contact.confirm));
+      original.unmount();
+      const changed = render(form(3));
+      expect(screen.getByText(work.draft.restored).closest('[role="status"]')).toHaveTextContent(
+        work.draft.changed,
+      );
+      expect(screen.getByText("Revision: 2 → 3")).toBeVisible();
+      if (kind === "contact") expect(screen.getByLabelText(contact.confirm)).not.toBeChecked();
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).not.toHaveBeenCalled();
+      expect(screen.getByText(work.draft.required)).toBeVisible();
+      expect(screen.getByLabelText(work.draft.confirm)).toHaveFocus();
+      expect(
+        browserInquiryReference(inquiryReferenceCookie(draftOwner.id, "one", kind)),
+      ).toBeNull();
+      await user.type(screen.getByLabelText(field), " amended before review");
+      changed.unmount();
+      render(form(3));
+      expect(screen.getByLabelText(work.draft.confirm)).not.toBeChecked();
+      expect(screen.getByText("Revision: 2 → 3")).toBeVisible();
+      await user.click(screen.getByLabelText(work.draft.confirm));
+      if (kind === "contact") await user.click(screen.getByLabelText(contact.confirm));
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).toHaveBeenCalledOnce();
+      expect(called.mock.calls[0]?.[0].expectedRevision).toBe(3);
+    },
+  );
+
+  it.each([false, true])(
+    "keeps the pre-hydration control, focus and selection without a differing restore (stored: %s)",
+    async (stored) => {
+      const draftOwner = owner();
+      const note = "Pre-hydration entries keep their caret";
+      if (stored) {
+        claimInquiryDraftOwner(draftOwner);
+        const state = initial();
+        retainInquiryDraft(draftOwner, "one", "contact", state, {
+          state,
+          values: { ...state.values, note },
+          pending: false,
+        });
+      }
+      const host = document.createElement("div");
+      host.innerHTML = renderToString(<Forms draftOwner={draftOwner} />);
+      document.body.append(host);
+      const control = host.querySelector<HTMLTextAreaElement>('textarea[name="note"]');
+      if (!control) throw new Error("Missing pre-hydration textarea");
+      control.value = note;
+      control.focus();
+      control.setSelectionRange(4, 14, "backward");
+      let root!: ReturnType<typeof hydrateRoot>;
+      try {
+        await act(async () => {
+          root = hydrateRoot(host, <Forms draftOwner={draftOwner} />);
+        });
+        expect(host.querySelector('textarea[name="note"]')).toBe(control);
+        expect(control).toHaveFocus();
+        expect(control).toHaveValue(note);
+        expect([control.selectionStart, control.selectionEnd, control.selectionDirection]).toEqual([
+          4,
+          14,
+          "backward",
+        ]);
+        if (stored) expect(screen.getByText(work.draft.restored)).toBeVisible();
+        else expect(screen.queryByText(work.draft.restored)).toBeNull();
+      } finally {
+        await act(async () => root.unmount());
+        host.remove();
+      }
+    },
+  );
+
+  it.each([false, true])(
+    "announces a restored draft politely without focus theft (unresolved: %s)",
+    async (pending) => {
+      const draftOwner = owner(),
+        state = initial();
+      claimInquiryDraftOwner(draftOwner);
+      retainInquiryDraft(draftOwner, "one", "contact", state, {
+        state,
+        values: { ...state.values, note: "Stored private draft" },
+        pending,
+      });
+      const view = (
+        <>
+          <button type="button">Keep my focus</button>
+          <Forms draftOwner={draftOwner} state={initial("b")} />
+        </>
+      );
+      const host = document.createElement("div");
+      host.innerHTML = renderToString(view);
+      document.body.append(host);
+      const focus = screen.getByRole("button", { name: "Keep my focus" });
+      focus.focus();
+      const focused = vi.spyOn(HTMLElement.prototype, "focus");
+      let root!: ReturnType<typeof hydrateRoot>;
+      try {
+        await act(async () => {
+          root = hydrateRoot(host, view);
+        });
+        expect(screen.getByText(work.draft.restored).closest('[role="status"]')).toHaveTextContent(
+          work.draft.local,
+        );
+        expect(screen.getByLabelText(contact.note)).toHaveValue("Stored private draft");
+        expect(focus).toHaveFocus();
+        expect(focused).not.toHaveBeenCalled();
+        if (pending) {
+          expect(screen.getByText(work.form.unknown)).toBeVisible();
+          expect(screen.queryByRole("button", { name: contact.submit })).toBeNull();
+          expect(document.querySelector('input[name="_operationId"]')).toHaveValue(
+            state.operationId,
+          );
+        }
+      } finally {
+        await act(async () => root.unmount());
+        host.remove();
+      }
+    },
+  );
+
+  it("clears private drafts before the shared shell's native sign-out handler sees the request", () => {
+    const draftOwner = owner(),
+      nativeRequest = vi.fn((event: FormEvent) => event.preventDefault());
+    const mounted = render(
+      <div onSubmit={nativeRequest}>
+        <Forms draftOwner={draftOwner} />
+        <SignOutForm locale="en" label="Sign out" />
+      </div>,
+    );
+    sessionStorage.setItem("unrelated-preference", "retained");
+    fireEvent.change(screen.getByLabelText(contact.note), {
+      target: { value: "Private sign-out draft" },
+    });
+    const signOut = screen.getByRole("button", { name: "Sign out" }).closest("form");
+    if (!signOut) throw new Error("Missing native sign-out form");
+    expect(signOut).toHaveAttribute("method", "post");
+    fireEvent.submit(signOut);
+    expect(nativeRequest).toHaveBeenCalledOnce();
+    expect(Object.keys(sessionStorage)).toEqual(["unrelated-preference"]);
+    // A stale mounted form or late result cannot reclaim its former session's storage.
+    fireEvent.change(screen.getByLabelText(contact.note), {
+      target: { value: "Late former-session edit" },
+    });
+    expect(Object.keys(sessionStorage)).toEqual(["unrelated-preference"]);
+    mounted.unmount();
+    render(<Forms draftOwner={draftOwner} />);
+    expect(screen.getByLabelText(contact.note)).toHaveValue("");
+  });
+
+  it("clears a native sign-out's retained draft on the signed-out page", () => {
+    const draftOwner = owner();
+    const mounted = render(<Forms draftOwner={draftOwner} />);
+    fireEvent.change(screen.getByLabelText(contact.note), {
+      target: { value: "Native private draft" },
+    });
+    mounted.unmount();
+    render(<SignedOutInquiryDraftBoundary />);
+    expect(sessionStorage.length).toBe(0);
+    expect(readInquiryDraft(draftOwner, "one", "contact", initial())).toBeNull();
+  });
+
+  it("capture-fences a competing pending reference before marking the form enhanced", async () => {
+    const draftOwner = owner(),
+      action = vi.fn<FormAction<ContactValues>>(idle),
+      assign = vi.fn();
+    vi.stubGlobal("location", { protocol: "http:", assign });
+    render(<Forms draftOwner={draftOwner} action={action} />);
+    const competing = initial("c").operationId;
+    // biome-ignore lint/suspicious/noDocumentCookie: Simulate the other tab's opaque pending reference.
+    document.cookie = `${inquiryReferenceCookie(draftOwner.id, "one", "contact")}=${competing}; Path=/`;
+    const form = screen.getByLabelText(contact.note).closest("form");
+    if (!form) throw new Error("Missing contact form");
+    await act(async () => fireEvent.submit(form));
+    expect(action).not.toHaveBeenCalled();
+    expect(assign).toHaveBeenCalledWith(
+      `/en/inquiries/one/operations?type=contact&key=${competing}`,
+    );
+    expect(form.querySelector('input[name="_inquiryEnhanced"]')).toHaveValue("");
+    expect(form.querySelector('input[name="_operationId"]')).toHaveValue(initial().operationId);
+  });
+
   it("restores each inquiry's contact note and triage reason after switching away and returning", async () => {
     const draftOwner = owner(),
       user = userEvent.setup();

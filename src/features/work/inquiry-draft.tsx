@@ -2,9 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { fieldClass } from "@/ui/field-class";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm, type ActionFormProps, type FormSnapshot } from "@/ui/form/form";
+import { Notice } from "@/ui/notice";
 import {
   claimInquiryDraftOwner,
   type InquiryDraftKind,
@@ -12,6 +22,7 @@ import {
   ownsInquiryDrafts,
   readInquiryDraft,
   reconcileInquiryDraft,
+  releaseInquiryDraftOwner,
   retainInquiryDraft,
 } from "./inquiry-draft-storage";
 import {
@@ -52,6 +63,26 @@ export function InquiryDraftBoundary({
     }
   }, [owner, resolutions]);
   return null;
+}
+
+/** The signed-out page also fences a native sign-out that happened before hydration. */
+export function SignedOutInquiryDraftBoundary() {
+  useLayoutEffect(() => releaseInquiryDraftOwner(), []);
+  return null;
+}
+
+export function InquiryDraftSignOutForm({
+  action,
+  children,
+}: {
+  action: string;
+  children: ReactNode;
+}) {
+  return (
+    <form action={action} method="post" onSubmitCapture={() => releaseInquiryDraftOwner()}>
+      {children}
+    </form>
+  );
 }
 
 export function InquiryDraftReconciliation({
@@ -107,6 +138,13 @@ type InquiryDraftFormProps<V extends FormValues> = ActionFormProps<V> & {
   owner: InquiryDraftOwner;
   id: string;
   kind: InquiryDraftKind;
+  draftCopy: {
+    restored: string;
+    local: string;
+    changed: string;
+    confirm: string;
+    required: string;
+  };
 };
 
 export function InquiryDraftForm<V extends FormValues>(props: InquiryDraftFormProps<V>) {
@@ -117,6 +155,7 @@ function InquiryDraftSession<V extends FormValues>({
   owner,
   id,
   kind,
+  draftCopy,
   ...props
 }: InquiryDraftFormProps<V>) {
   const router = useRouter();
@@ -124,54 +163,23 @@ function InquiryDraftSession<V extends FormValues>({
   const ready = useRef(false);
   const firstSnapshot = useRef<FormSnapshot<V> | null>(null);
   const [restored, setRestored] = useState<FormState<V> | null>(null);
+  const [restoreInfo, setRestoreInfo] = useState<{
+    revision: number | null;
+    changed: boolean;
+  } | null>(null);
+  const reviewRevision = useRef<number | null | undefined>(undefined);
+  const [reviewChecked, setReviewChecked] = useState(false);
+  const [reviewError, setReviewError] = useState(false);
+  const reviewControl = useRef<HTMLInputElement>(null);
+  const reviewId = useId();
+  const restoreFocus = useRef<{
+    name: string;
+    start: number | null;
+    end: number | null;
+    direction: "forward" | "backward" | "none" | null;
+  } | null>(null);
   const [confirmedStatus, setConfirmedStatus] = useState<string | null>(null);
   const initial = props.initialState;
-  useLayoutEffect(() => {
-    if (ready.current) return;
-    claimInquiryDraftOwner(owner);
-    // An HTML POST response wins over an older local draft, including its receipt/errors.
-    const native = firstSnapshot.current?.state;
-    const initialResponse = native && native.responseId !== initial.responseId ? native : initial;
-    const retained =
-      initialResponse.outcome.kind === "idle" ? readInquiryDraft(owner, id, kind, initial) : null;
-    const values = { ...initialResponse.values, ...retained?.values } as V;
-    // Preserve edits made to the server-rendered controls before hydration, too.
-    const form = container.current?.querySelector("form");
-    for (const name of Object.keys(initial.values)) {
-      const control = form?.elements.namedItem(name);
-      if (
-        control instanceof HTMLInputElement ||
-        control instanceof HTMLTextAreaElement ||
-        control instanceof HTMLSelectElement
-      ) {
-        const value =
-          control instanceof HTMLInputElement && control.type === "checkbox"
-            ? control.checked
-              ? control.value
-              : ""
-            : control.value;
-        if (value !== initial.values[name]) values[name as keyof V] = value as V[keyof V];
-      }
-    }
-    const state: FormState<V> = { ...initialResponse, values };
-    const retryOperationId = (initial as FormState<V> & InquiryReferenceState)
-      .inquiryRetryOperationId;
-    if (retryOperationId && "reviewed" in values) (values as FormValues).reviewed = "";
-    if (retained?.operation && retryOperationId !== retained.operation.id) {
-      const status = {
-        href: `${props.permalink}/operations?type=${kind}&key=${encodeURIComponent(retained.operation.id)}`,
-        label: props.reconciliation.label,
-      };
-      Object.assign(state, {
-        operationId: retained.operation.id,
-        expectedRevision: retained.operation.revision,
-        reconciliation: status,
-        outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: props.copy.unknown, status },
-      });
-    }
-    ready.current = true;
-    setRestored(state);
-  }, [owner, id, kind, initial, props.permalink, props.reconciliation.label, props.copy.unknown]);
   const onSnapshot = useCallback(
     (snapshot: FormSnapshot<V>) => {
       if (!ready.current) {
@@ -185,6 +193,7 @@ function InquiryDraftSession<V extends FormValues>({
         initial,
         snapshot,
         (initial as FormState<V> & InquiryReferenceState).inquiryRetryOperationId,
+        reviewChecked ? undefined : reviewRevision.current,
       );
       const acknowledgment = (snapshot.state as FormState<V> & InquiryReferenceState)
         .inquiryReferenceToAcknowledge;
@@ -203,8 +212,115 @@ function InquiryDraftSession<V extends FormValues>({
           setConfirmedStatus(snapshot.state.reconciliation?.href ?? props.reconciliation.href);
       }
     },
-    [owner, id, kind, initial, props.reconciliation.href],
+    [owner, id, kind, initial, props.reconciliation.href, reviewChecked],
   );
+  useLayoutEffect(() => {
+    if (ready.current) return;
+    claimInquiryDraftOwner(owner);
+    // An HTML POST response wins over an older local draft, including its receipt/errors.
+    const native = firstSnapshot.current?.state;
+    const initialResponse = native && native.responseId !== initial.responseId ? native : initial;
+    const retained =
+      initialResponse.outcome.kind === "idle"
+        ? readInquiryDraft(owner, id, kind, initialResponse)
+        : null;
+    const values = { ...initialResponse.values, ...retained?.values } as V;
+    const liveValues = { ...initialResponse.values };
+    // ActionForm already adopts pre-hydration edits. Compare with those live controls so
+    // ordinary hydration, or an identical retained draft, keeps its DOM, focus and caret.
+    const form = container.current?.querySelector("form");
+    for (const name of Object.keys(initialResponse.values)) {
+      const control = form?.elements.namedItem(name);
+      if (
+        control instanceof HTMLInputElement ||
+        control instanceof HTMLTextAreaElement ||
+        control instanceof HTMLSelectElement
+      ) {
+        const value =
+          control instanceof HTMLInputElement && control.type === "checkbox"
+            ? control.checked
+              ? control.value
+              : ""
+            : control.value;
+        liveValues[name as keyof V] = value as V[keyof V];
+        if (value !== initialResponse.values[name]) values[name as keyof V] = value as V[keyof V];
+      }
+    }
+    const changed = Boolean(
+      retained && !retained.operation && retained.revision !== initialResponse.expectedRevision,
+    );
+    if (retained) setRestoreInfo({ revision: retained.revision, changed });
+    if (changed && retained) reviewRevision.current = retained.revision;
+    const state: FormState<V> = { ...initialResponse, values };
+    const retryOperationId = (initial as FormState<V> & InquiryReferenceState)
+      .inquiryRetryOperationId;
+    if ((retryOperationId || changed) && "reviewed" in values) (values as FormValues).reviewed = "";
+    if (retained?.operation && retryOperationId !== retained.operation.id) {
+      const status = {
+        href: `${props.permalink}/operations?type=${kind}&key=${encodeURIComponent(retained.operation.id)}`,
+        label: props.reconciliation.label,
+      };
+      Object.assign(state, {
+        operationId: retained.operation.id,
+        expectedRevision: retained.operation.revision,
+        reconciliation: status,
+        outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: props.copy.unknown, status },
+      });
+    }
+    ready.current = true;
+    if (
+      Object.keys(values).some((name) => values[name] !== liveValues[name]) ||
+      state.operationId !== initialResponse.operationId ||
+      state.expectedRevision !== initialResponse.expectedRevision ||
+      state.outcome.kind !== initialResponse.outcome.kind
+    ) {
+      const active = document.activeElement;
+      if (
+        active &&
+        form?.contains(active) &&
+        (active instanceof HTMLInputElement ||
+          active instanceof HTMLTextAreaElement ||
+          active instanceof HTMLSelectElement)
+      )
+        restoreFocus.current = {
+          name: active.name,
+          start: active instanceof HTMLSelectElement ? null : active.selectionStart,
+          end: active instanceof HTMLSelectElement ? null : active.selectionEnd,
+          direction: active instanceof HTMLSelectElement ? null : active.selectionDirection,
+        };
+      setRestored(state);
+    } else {
+      onSnapshot({
+        state: initialResponse,
+        values,
+        pending: firstSnapshot.current?.pending ?? false,
+      });
+    }
+  }, [
+    owner,
+    id,
+    kind,
+    initial,
+    props.permalink,
+    props.reconciliation.label,
+    props.copy.unknown,
+    onSnapshot,
+  ]);
+  useLayoutEffect(() => {
+    const focus = restoreFocus.current;
+    if (!restored || !focus) return;
+    restoreFocus.current = null;
+    const control = container.current?.querySelector("form")?.elements.namedItem(focus.name);
+    if (
+      control instanceof HTMLInputElement ||
+      control instanceof HTMLTextAreaElement ||
+      control instanceof HTMLSelectElement
+    ) {
+      control.focus({ preventScroll: true });
+      if (!(control instanceof HTMLSelectElement) && focus.start !== null && focus.end !== null)
+        control.setSelectionRange(focus.start, focus.end, focus.direction ?? undefined);
+    }
+  }, [restored]);
   useEffect(() => {
     // The client has processed the confirmed body before moving to its authorized status.
     if (confirmedStatus) router.push(confirmedStatus);
@@ -229,6 +345,13 @@ function InquiryDraftSession<V extends FormValues>({
           );
           return;
         }
+        if (reviewRevision.current !== undefined && !reviewChecked) {
+          event.preventDefault();
+          event.stopPropagation();
+          setReviewError(true);
+          reviewControl.current?.focus();
+          return;
+        }
         const enhanced = form?.elements.namedItem(inquiryEnhancedField);
         if (enhanced instanceof HTMLInputElement) enhanced.value = "yes";
       }}
@@ -237,13 +360,58 @@ function InquiryDraftSession<V extends FormValues>({
         {...props}
         key={`${owner.id}:${id}:${kind}:${restored ? "restored" : "initial"}`}
         initialState={restored ?? initial}
+        focusInitialStatus={restored ? false : props.focusInitialStatus}
         onSnapshot={onSnapshot}
         pendingReferenceCookie={inquiryReferenceCookie(owner.id, id, kind)}
       >
         {(form) => (
           <>
             <input type="hidden" name={inquiryEnhancedField} defaultValue="" />
+            {restoreInfo ? (
+              <Notice
+                role="status"
+                tone={restoreInfo.changed ? "warning" : "info"}
+                title={draftCopy.restored}
+              >
+                <p>{draftCopy.local}</p>
+                {restoreInfo.changed ? (
+                  <>
+                    <p id={`${reviewId}-notice`}>{draftCopy.changed}</p>
+                    <p>
+                      {props.copy.revision}: {restoreInfo.revision} → {initial.expectedRevision}
+                    </p>
+                  </>
+                ) : null}
+              </Notice>
+            ) : null}
             {props.children(form)}
+            {restoreInfo?.changed ? (
+              <div className={fieldClass}>
+                <label htmlFor={reviewId} className="flex items-start gap-3">
+                  <input
+                    ref={reviewControl}
+                    id={reviewId}
+                    type="checkbox"
+                    checked={reviewChecked}
+                    disabled={form.pending}
+                    required
+                    onChange={(event) => {
+                      setReviewChecked(event.target.checked);
+                      setReviewError(false);
+                    }}
+                    className="mt-1 size-5 shrink-0 accent-accent"
+                    aria-invalid={reviewError || undefined}
+                    aria-describedby={`${reviewId}-notice${reviewError ? ` ${reviewId}-error` : ""}`}
+                  />
+                  <span>{draftCopy.confirm}</span>
+                </label>
+                {reviewError ? (
+                  <p id={`${reviewId}-error`} className="text-error">
+                    {draftCopy.required}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </>
         )}
       </ActionForm>

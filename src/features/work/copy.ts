@@ -91,6 +91,15 @@ const en = {
   commitments: "Resolve the open follow-up tasks before closing this inquiry.",
   sessionEnded: "Your session ended. Sign in again before continuing.",
   unknown: "We could not confirm the result. Check the action status before trying again.",
+  draft: {
+    restored: "Draft restored in this tab",
+    local: "This is a local copy. Other staff cannot see this draft.",
+    changed:
+      "This inquiry changed since you started the draft. Review the current inquiry and your entries before recording a change.",
+    confirm: "I reviewed this draft against the current inquiry.",
+    required:
+      "Confirm that you reviewed this draft against the current inquiry before recording it.",
+  },
   form: {
     errorSummary: "There is a problem",
     pending: "Recording…",
@@ -283,6 +292,14 @@ const bg: Copy = {
   commitments: "Приключете отворените задачи преди затваряне на запитването.",
   sessionEnded: "Сесията е изтекла. Влезте отново.",
   unknown: "Не можем да потвърдим резултата. Проверете статуса преди повторен опит.",
+  draft: {
+    restored: "Черновата е възстановена в този раздел",
+    local: "Това е локално копие. Другите служители не виждат тази чернова.",
+    changed:
+      "Запитването е променено след започване на черновата. Прегледайте текущото запитване и въведените данни преди записване на промяна.",
+    confirm: "Прегледах тази чернова спрямо текущото запитване.",
+    required: "Потвърдете, че сте прегледали черновата спрямо текущото запитване преди записване.",
+  },
   form: {
     errorSummary: "Има проблем",
     pending: "Записване…",
@@ -469,6 +486,14 @@ const ru: Copy = {
   commitments: "Завершите открытые задачи перед закрытием обращения.",
   sessionEnded: "Сессия завершена. Войдите снова.",
   unknown: "Не удалось подтвердить результат. Проверьте статус перед повтором.",
+  draft: {
+    restored: "Черновик восстановлен в этой вкладке",
+    local: "Это локальная копия. Другие сотрудники не видят этот черновик.",
+    changed:
+      "Обращение изменилось после начала черновика. Проверьте текущее обращение и введённые данные перед записью изменения.",
+    confirm: "Я проверил этот черновик по текущему обращению.",
+    required: "Подтвердите проверку черновика по текущему обращению перед его записью.",
+  },
   form: {
     errorSummary: "Возникла проблема",
     pending: "Запись…",

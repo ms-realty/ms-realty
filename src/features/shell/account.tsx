@@ -1,5 +1,6 @@
 // The signed-in person in the workspace chrome: the foot of the wide-screen rail and of the X02
 // agency tools on phones.
+import { InquiryDraftSignOutForm } from "@/features/work/inquiry-draft";
 import { cx } from "@/ui/cx";
 
 export function AccountIdentity({
@@ -30,11 +31,11 @@ export function AccountIdentity({
 /** A native POST, so signing out works before and without JavaScript. */
 export function SignOutForm({ locale, label }: { locale: string; label: string }) {
   return (
-    <form action={`/${locale}/access/signout`} method="post">
+    <InquiryDraftSignOutForm action={`/${locale}/access/signout`}>
       <button type="submit" className="min-h-control text-compact text-action underline">
         {label}
       </button>
-    </form>
+    </InquiryDraftSignOutForm>
   );
 }
 
