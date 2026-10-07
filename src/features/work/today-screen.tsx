@@ -4,9 +4,10 @@
 // exceptions — then my own work to continue: open inquiries, Cases and listing drafts. Each
 // group carries the server's authorized total for its queue. A list that did not load says so
 // and is never drawn as empty or as zero; lists that loaded empty are named on one line. A
-// count links only to a page that lists exactly the same work; elsewhere the rows link and the
-// group says when the full list is not available here. Butler only opens the O32 draft review
-// for one selected record; it never acts.
+// count links only to a page that lists exactly the same work: a queue page, or for
+// translation reviews the O01 focus view that pages the same queue (today-focus.tsx).
+// Elsewhere the rows link and the group says when the full list is not available here. Butler
+// only opens the O32 draft review for one selected record; it never acts.
 import "server-only";
 import { unstable_rethrow } from "next/navigation";
 import { type ComponentType, Fragment, type ReactNode } from "react";
@@ -73,6 +74,9 @@ type Group = {
   /** A page listing exactly the work this group counts; the heading opens it. Without one,
    * no route continues the list, so only the rows link. */
   href?: string;
+  /** The O01 focus view that pages this same queue: the heading opens it, and so does the
+   * line after the loaded rows, which Today keeps in place. */
+  focus?: string;
   rows: ReactNode[];
   notice?: ReactNode;
   keyReturns?: boolean;
@@ -84,11 +88,14 @@ const agencyZone = "Europe/Sofia";
 // cannot push a later group's overdue work out of sight. The count covers the whole queue.
 const rowsPerGroup = 5;
 // The page guard ran just before: these mean access changed meanwhile, not that a queue failed.
-const accessErrors = ["unauthenticated", "forbidden", "not_found"];
+export const accessErrors = ["unauthenticated", "forbidden", "not_found"];
 const inlineLink = "font-semibold text-action underline underline-offset-4";
 const listingSnapshot = z.object({
   listing: z.object({ reference: z.string() }).nullable().optional(),
 });
+/** The O01 focus view of the translation reviews: its first page, or the page after a cursor. */
+export const translationReviewsHref = (locale: string, after?: string) =>
+  `/${locale}/today?queue=translation-reviews${after === undefined ? "" : `&after=${encodeURIComponent(after)}`}`;
 
 export async function TodayScreen({
   locale,
@@ -301,10 +308,12 @@ function worklistOf(locale: string, queues: Queues, now: Date): Worklist {
         row: (item) => <ListingReviewRow key={item.id} locale={locale} item={item} now={now} />,
       }),
       // Rows open the translation workbench the grant allows. No Inventory link: a reviewer
-      // scoped to one language cannot open the Inventory, and it lists other work as well.
+      // scoped to one language cannot open the Inventory, and it lists other work as well. The
+      // focus view pages the same authorized queue, so the count and the rest open there.
       ...group(queues.translationReviews, {
         id: "translation-reviews",
         title: t.groups.translationReviews,
+        focus: translationReviewsHref(locale),
         row: (item) => <TranslationRow key={item.id} locale={locale} item={item} now={now} />,
       }),
       ...group(queues.deliveryExceptions, {
@@ -437,7 +446,8 @@ function Section({
 /** One queue: a heading with its count (or "not loaded"), then its oldest rows. */
 function QueueGroup({ locale, group }: { locale: string; group: Group }) {
   const t = todayCopy(locale);
-  const { id, title, queue, href, rows, notice, keyReturns } = group;
+  const { id, title, queue, href, focus, rows, notice, keyReturns } = group;
+  const opens = href ?? focus;
   const number = new Intl.NumberFormat(locale);
   const failed = queue.status === "unavailable";
   const known = queue.total ?? queue.rows.length;
@@ -465,9 +475,9 @@ function QueueGroup({ locale, group }: { locale: string; group: Group }) {
       data-key-return-reminders={keyReturns ? "" : undefined}
     >
       <h3 className="text-dense font-semibold">
-        {href ? (
+        {opens ? (
           <a
-            href={href}
+            href={opens}
             className="flex min-h-control items-center gap-3 text-text no-underline hover:text-action"
           >
             {label}
@@ -511,12 +521,24 @@ function QueueGroup({ locale, group }: { locale: string; group: Group }) {
                   <ul className="mt-4 flex flex-col gap-4">{rows.slice(rowsPerGroup)}</ul>
                 </details>
               ) : null}
-              {/* Beyond the loaded page no route continues this list: say so, promise nothing. */}
+              {/* Beyond the loaded page only a focus view continues this list; without one, say
+                  so and promise nothing. */}
               {queue.hasMore ? (
                 <p className="text-dense text-text-muted">
-                  {t.firstLoaded
-                    .replace("{n}", number.format(rows.length))
-                    .replace("{total}", count)}
+                  {focus ? (
+                    <>
+                      {t.firstShown
+                        .replace("{n}", number.format(rows.length))
+                        .replace("{total}", count)}{" "}
+                      <a href={focus} className={inlineLink}>
+                        {t.fullList}
+                      </a>
+                    </>
+                  ) : (
+                    t.firstLoaded
+                      .replace("{n}", number.format(rows.length))
+                      .replace("{total}", count)
+                  )}
                 </p>
               ) : null}
             </>
@@ -826,7 +848,8 @@ function ListingReviewRow({
   );
 }
 
-function TranslationRow({
+/** One translation review, as Today and its focus view list it. */
+export function TranslationRow({
   locale,
   item,
   now,

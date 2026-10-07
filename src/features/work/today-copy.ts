@@ -67,6 +67,44 @@ export function todayCopy(locale: string) {
       "«Сегодня» показывает первые {n} из {total}. Полный список здесь пока недоступен.",
       "Today shows the first {n} of {total}. The full list is not available here yet.",
     ),
+    // A list whose focus view pages the rest: the line links to it.
+    firstShown: s(
+      "„Днес“ показва първите {n} от {total}.",
+      "«Сегодня» показывает первые {n} из {total}.",
+      "Today shows the first {n} of {total}.",
+    ),
+    fullList: s("Отворете целия списък", "Открыть весь список", "Open the full list"),
+    // O01 focus view: one queue, paged by the server past the rows Today shows.
+    focus: {
+      back: s("Назад към „Днес“", "Назад к «Сегодня»", "Back to Today"),
+      lead: s(
+        "Чакат преглед: {n}, най-старите първи.",
+        "Ждут проверки: {n}, сначала самые давние.",
+        "Waiting for review: {n}, oldest first.",
+      ),
+      later: s(
+        "Продължение след предишната страница.",
+        "Продолжение после предыдущей страницы.",
+        "Continued after the previous page.",
+      ),
+      empty: s(
+        "Няма преводи, които чакат Вашия преглед.",
+        "Нет переводов, ожидающих вашей проверки.",
+        "No translations are waiting for your review.",
+      ),
+      emptyLater: s(
+        "След предишната страница няма повече преводи.",
+        "После предыдущей страницы переводов больше нет.",
+        "There are no more translations after the previous page.",
+      ),
+      invalid: s(
+        "Тази връзка към страница вече не е валидна. Започнете от първата страница.",
+        "Эта ссылка на страницу больше не действует. Начните с первой страницы.",
+        "This page link is no longer valid. Start from the first page.",
+      ),
+      first: s("Към първата страница", "К первой странице", "Go to the first page"),
+      pages: s("Страници на списъка", "Страницы списка", "Pages of this list"),
+    },
     inQueue: s("В опашката:", "В очереди:", "In the queue:"),
     notLoaded: s("Не е заредено", "Не загружено", "Not loaded"),
     queueFailed: s(

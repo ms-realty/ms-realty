@@ -758,41 +758,76 @@ it("opens each operator exception itself and counts the same queue that O27 page
   expect(operations.queryByText(/full list is not available/)).toBeNull();
 });
 
-it("keeps translation reviews in the workbench the grant allows and says the full list is not here", async () => {
-  const translation = everyQueue().translationReviews.rows[0];
+const translations = (count: number) =>
+  Array.from({ length: count }, (_, index) => ({
+    ...everyQueue().translationReviews.rows[0],
+    id: `translation-${index}`,
+    reference: `MS-RU-${index}`,
+  }));
+const translationFocus = "/en/today?queue=translation-reviews";
+
+it("keeps translation reviews in the workbench the grant allows and opens the rest in the O01 focus view", async () => {
   reads.today.mockResolvedValue({
     ...empty(),
-    translationReviews: queue(
-      Array.from({ length: 30 }, (_, index) => ({
-        ...translation,
-        id: `translation-${index}`,
-        reference: `MS-RU-${index}`,
-      })),
-      { total: 31, hasMore: true },
-    ),
+    translationReviews: queue(translations(30), { total: 31, hasMore: true }),
   });
   await show();
-  const translations = within(groupOf("translation-reviews"));
-  expect(translations.getByRole("heading", { level: 3 })).toHaveTextContent(
-    "Translations to reviewIn the queue: 31",
-  );
-  // Every link is a listed translation; nothing points a locale-scoped reviewer at Inventory.
-  const links = translations.getAllByRole("link", { hidden: true });
-  expect(links.map((link) => link.getAttribute("href"))).toEqual(
-    Array.from({ length: 30 }, (_, index) => `/en/inventory/MS-RU-${index}/translations/ru`),
-  );
+  const group = within(groupOf("translation-reviews"));
+  const heading = group.getByRole("heading", { level: 3 });
+  expect(heading).toHaveTextContent("Translations to reviewIn the queue: 31");
+  // The count opens the focus view: the same authorized queue, paged by the server.
+  expect(within(heading).getByRole("link")).toHaveAttribute("href", translationFocus);
+  // All thirty loaded reviews stay on Today and open their workbench; nothing points a
+  // locale-scoped reviewer at Inventory.
   expect(
-    translations.getByText(
-      "Today shows the first 30 of 31. The full list is not available here yet.",
-    ),
-  ).toBeVisible();
+    group.getAllByRole("link", { hidden: true }).map((link) => link.getAttribute("href")),
+  ).toEqual([
+    translationFocus,
+    ...Array.from({ length: 30 }, (_, index) => `/en/inventory/MS-RU-${index}/translations/ru`),
+    translationFocus,
+  ]);
+  expect(group.getByText("Show 25 more").tagName).toBe("SUMMARY");
+  // The honest line past the thirtieth is now a real link to the rest.
+  const rest = group.getByRole("link", { name: "Open the full list" });
+  expect(rest).toHaveAttribute("href", translationFocus);
+  expect(rest.parentElement).toHaveTextContent(
+    "Today shows the first 30 of 31. Open the full list",
+  );
+  expect(group.queryByText(/full list is not available/)).toBeNull();
   expect(document.querySelector('a[href^="/en/inventory?"], a[href="/en/inventory"]')).toBeNull();
+});
+
+it("links the count of a short translation queue to its focus view and promises no more", async () => {
+  reads.today.mockResolvedValue({ ...empty(), translationReviews: queue(translations(6)) });
+  await show();
+  const group = within(groupOf("translation-reviews"));
+  expect(
+    within(group.getByRole("heading", { level: 3 })).getByRole("link", {
+      name: /^Translations to review/,
+    }),
+  ).toHaveAttribute("href", translationFocus);
+  expect(group.getByText("Show 1 more").tagName).toBe("SUMMARY");
+  expect(group.queryByRole("link", { name: "Open the full list" })).toBeNull();
+  expect(group.queryByText(/Today shows the first/)).toBeNull();
+});
+
+it.each([
+  ["bg", "„Днес“ показва първите 30 от 31.", "Отворете целия списък"],
+  ["ru", "«Сегодня» показывает первые 30 из 31.", "Открыть весь список"],
+])("links the rest of the translation reviews in %s", async (locale, line, name) => {
+  reads.today.mockResolvedValue({
+    ...empty(),
+    translationReviews: queue(translations(30), { total: 31, hasMore: true }),
+  });
+  await show(locale);
+  const link = within(groupOf("translation-reviews")).getByRole("link", { name });
+  expect(link).toHaveAttribute("href", `/${locale}/today?queue=translation-reviews`);
+  expect(link.parentElement).toHaveTextContent(`${line} ${name}`);
 });
 
 const boundedGroups = [
   ["viewings", "viewings"],
   ["listing-reviews", "listingReviews"],
-  ["translation-reviews", "translationReviews"],
   ["email-deliveries", "deliveryExceptions"],
   ["publication-deliveries", "publicationExceptions"],
   ["case-continue", "caseContinue"],

@@ -4,10 +4,11 @@ This is the current-schema port of the useful inquiry, task, contact and Today b
 PR275. It uses `principals`/`parties`, current domain state machines and the immutable activity,
 audit and outbox tables. It does not use the retired PR275 records or migrations.
 
-`listInbox`, `listTasks`, `listContacts`, `readInquiry`, `readTask`, `readContact` and `readToday`
-require a live staff session with active membership and two enrolled passkeys. Record,
-case and locale grants are applied before queue ordering/pagination. Contact reads require an
-accessible linked inquiry; contact verification does not imply authority or grant case access.
+`listInbox`, `listTasks`, `listContacts`, `readInquiry`, `readTask`, `readContact`, `readToday`
+and `listTranslationReviews` require a live staff session with active membership and two
+enrolled passkeys. Record, case and locale grants are applied before queue
+ordering/pagination. Contact reads require an accessible linked inquiry; contact verification
+does not imply authority or grant case access.
 
 `acceptInquiry` explicitly assigns work to the staff member accepting it and creates the next
 owned internal follow-up in the same transaction. It does not claim a client response or move
@@ -32,8 +33,12 @@ visible viewings, Case and listing work, reviews and delivery exceptions. Each q
 its authorized total or an unavailable state; a failed read is never presented as empty work.
 A listing correction (changes requested, facts needed) is review work only; listing drafts
 hold drafts, so one action is never counted twice. Today links a count only to a page that
-lists the same work: the inbox and task views, overdue key returns, and the O27 exception
-queue (`/operations/jobs?view=exceptions`, oldest first; `?action=<id>` opens one exception).
+lists the same work: the inbox and task views, overdue key returns, the O27 exception queue
+(`/operations/jobs?view=exceptions`, oldest first; `?action=<id>` opens one exception) and the
+O01 focus view of translation reviews (`/today?queue=translation-reviews`). That view pages
+`listTranslationReviews` 30 at a time with its opaque `after` cursor; a cursor the server
+refuses (`validation_failed`) reads as a page link that is no longer valid, and any other
+`queue` is a 404.
 Exact times name their zone: UTC for inquiries, tasks, Cases and listings, the agency zone
 (Europe/Sofia) for key returns and the recorded zone for viewings; ages are relative to the
 read. BG/RU staff copy is draft translation.
