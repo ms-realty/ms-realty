@@ -10,6 +10,8 @@ The staff host exposes `/{locale}/cases`, `/cases/new?inquiry={id}`, `/cases/{id
 and `/calendar/{id}`. Inbox detail links to qualification after the broker accepts ownership.
 It also lists `listInquiryCaseCandidates`; `/inquiries/{id}/link?case={caseId}` reviews
 `linkInquiryToExistingCase` (O03L), and `?key={operation}` shows the actor's own result (O03LR).
+Candidate rows carry a server-owned `blockReason` when linking is unavailable. `partyLabel`
+is present only for an exact live Party participant; a contact-route match has no identity label.
 The client host exposes `/{locale}/overview`, `/properties`, `/appointments` and `/messages`,
 with record detail below each collection. These routes resolve only records within current
 access. Shared navigation uses the existing private shells.
