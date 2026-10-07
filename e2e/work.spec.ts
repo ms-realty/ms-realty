@@ -144,7 +144,14 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
     "Synthetic request held for staff review",
   );
   await stale.getByRole("button", { name: "Apply my reviewed changes", exact: true }).click();
-  await expect(stale.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
+  // A recorded triage continues on its action status, behind the record's pending fence (O02).
+  const triageRecorded = async () => {
+    await expect(stale.getByRole("heading", { name: "Action status", exact: true })).toBeVisible();
+    await expect(
+      stale.getByText("This action was recorded successfully.", { exact: true }),
+    ).toBeVisible();
+  };
+  await triageRecorded();
   await stale.getByRole("link", { name: "Open updated record", exact: true }).click();
   await expect(stale.getByTestId("inquiry-state")).toHaveText("Suspected spam");
   await expect(stale.getByTestId("inquiry-owner")).toHaveText(broker.displayName);
@@ -163,7 +170,7 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await stale.getByLabel("Status", { exact: true }).selectOption("resolved_without_case");
   await stale.getByLabel("Reason", { exact: true }).fill("Synthetic test completed without a case");
   await stale.getByRole("button", { name: "Record a disposition", exact: true }).click();
-  await expect(stale.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
+  await triageRecorded();
   const [saved] = await db
     .select()
     .from(schema.inquiries)
