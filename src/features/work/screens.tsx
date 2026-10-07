@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { type InquiryState, inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
+import { InquiryCaseLink } from "@/features/cases/inquiry-link";
 import { custodyCopy } from "@/features/key-custody/copy";
 import { isStaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
@@ -547,6 +548,7 @@ export async function InquiryScreen({
               </div>
             </dl>
           </section>
+          <InquiryCaseLink locale={locale} session={session} detail={detail} />
           {canAccept ? (
             <section className="space-y-4 rounded-card border border-border p-5">
               <h2 className="text-subheading font-semibold">{copy.accept}</h2>

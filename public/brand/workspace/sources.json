@@ -97,6 +97,22 @@
       "sha256": "48a41d4daec37f660011b547585d53bfdea7cc44dd3bd3465816e670d5c08678",
       "width": 20,
       "height": 20
+    },
+    {
+      "file": "circle-alert.svg",
+      "nodeId": "6:397",
+      "source": "https://www.figma.com/api/mcp/asset/37c9bfa3-88f0-446f-ab48-f0380d51fda4.svg",
+      "sha256": "7ebd7d6c58beb928f1208b7f3f4b178be8cebe90b425f31ec6423e15ed738893",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "list-todo.svg",
+      "nodeId": "20:1265",
+      "source": "https://www.figma.com/api/mcp/asset/81061fe0-466e-4232-82e2-0ec1a63a107a.svg",
+      "sha256": "9cac72d06e40455603bced3d601a7a55228bf2d320a698334cfea1cd067b7f56",
+      "width": 20,
+      "height": 20
     }
   ]
 }
