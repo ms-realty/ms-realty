@@ -46,6 +46,7 @@ jobs:
         git diff --exit-code -- docs/api/openapi.json release/schemas
         node --test scripts/ci-clamav.test.mjs
         node scripts/ci-clamav.mjs bash -euo pipefail -c 'npm run test:integration -- src/server/files/workflow.int.test.ts; npm run e2e'
+        E2E_TODAY_UNAVAILABLE=1 npx playwright test e2e/today-unavailable.spec.ts --workers=1 --project=chromium-desktop
         bash scripts/visual-docker.sh check
         docker build --build-arg BUILD_SHA="$GITHUB_SHA" -t msr-delivery:ci .
         node scripts/container-smoke.mjs msr-delivery:ci
