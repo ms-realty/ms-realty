@@ -71,11 +71,13 @@ test("access administration does not disclose unreadable Cases in invitation cho
         sameSite: "Lax",
       },
     ]);
-    // The permission result is the server-rendered form, independent of load-time resources.
-    const restricted = await page.goto(hostUrl("staff", "/en/access/manage?q=restricted&page=2"), {
-      waitUntil: "domcontentloaded",
-    });
-    expect(await restricted?.text()).not.toContain("Synthetic restricted Case");
+    // Read the server HTML before page navigation can evict its response body from Chromium.
+    const restrictedUrl = hostUrl("staff", "/en/access/manage?q=restricted&page=2");
+    const restricted = await context.request.get(restrictedUrl);
+    expect(restricted.status()).toBe(200);
+    expect(restricted.url()).toBe(restrictedUrl);
+    expect(await restricted.text()).not.toContain("Synthetic restricted Case");
+    await page.goto(restrictedUrl, { waitUntil: "domcontentloaded" });
     const choices = page.locator('select[name="caseId"]');
     await expect(choices).toBeVisible();
     await expect(choices.locator('option:not([value=""])')).toHaveCount(0);
