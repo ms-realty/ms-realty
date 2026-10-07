@@ -43,7 +43,7 @@ const total = sql<number>`count(*) over ()`.mapWith(Number);
 const translationPosition = z
   .object({
     version: z.literal(1),
-    at: z.string().regex(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z$/),
+    at: z.iso.datetime({ precision: 6 }),
     id: z.uuid(),
     filter: z.string(),
   })

@@ -5,6 +5,7 @@ import { afterAll, beforeAll, expect, it, vi } from "vitest";
 import * as schema from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { staffFixture } from "../cases/testing";
+import { hashRequest } from "../crypto";
 import { translationWorkbench } from "../inventory/translations";
 import { createCase, createProperty, type GrantSpec } from "../testing";
 import { listInbox, listTranslationReviews, readToday } from "./queries";
@@ -538,6 +539,61 @@ it("O01 translation reviews match the workbench when both read and review grants
   expect(today.translationReviews).toMatchObject({ status: "ready", total: 1, hasMore: false });
   expect(today.translationReviews.rows.map((row) => row.id)).toEqual([translations[0]?.id]);
   expect(today.listingReviews.total).toBe(0);
+
+  await narrow(staff.id, [
+    {
+      capability: "listing.read",
+      recordType: "listing",
+      recordId: candidate.id,
+      locales: ["ru", "en"],
+    },
+    {
+      capability: "translation.review",
+      recordType: "property",
+      recordId: candidate.propertyId,
+      locales: ["en"],
+    },
+  ]);
+  expect((await listTranslationReviews(t.db, staff.session)).rows.map((row) => row.id)).toEqual([
+    translations[1]?.id,
+  ]);
+  // The workbench permits a read-only view with listing.read, while the review
+  // queue also requires translation.review for this locale.
+  expect(
+    (await translationWorkbench(t.db, staff.actor, candidate.reference, "ru")).translation?.id,
+  ).toBe(translations[0]?.id);
+  expect(
+    (await translationWorkbench(t.db, staff.actor, candidate.reference, "en")).translation?.id,
+  ).toBe(translations[1]?.id);
+
+  await narrow(staff.id, [
+    { capability: "listing.read", recordType: "listing", recordId: candidate.id, locales: ["en"] },
+    {
+      capability: "translation.review",
+      recordType: "property",
+      recordId: candidate.propertyId,
+      locales: ["ru"],
+    },
+  ]);
+  expect(await listTranslationReviews(t.db, staff.session)).toMatchObject({ rows: [], total: 0 });
+
+  await narrow(staff.id, [
+    {
+      capability: "listing.read",
+      recordType: "listing",
+      recordId: candidate.id,
+      locales: ["ru", "en"],
+    },
+    {
+      capability: "translation.review",
+      recordType: "property",
+      recordId: candidate.propertyId,
+      locales: ["ru", "en"],
+    },
+  ]);
+  expect(
+    new Set((await listTranslationReviews(t.db, staff.session)).rows.map((row) => row.id)),
+  ).toEqual(new Set(translations.map((row) => row.id)));
 });
 
 it("O01 pages every locale-scoped translation review without exposing other locales or stale grants", async () => {
@@ -580,7 +636,7 @@ it("O01 pages every locale-scoped translation review without exposing other loca
     .where(
       inArray(
         schema.localizedRevisions.id,
-        en.slice(0, 30).map((row) => row.id),
+        en.slice(0, 27).map((row) => row.id),
       ),
     );
   await t.db
@@ -589,7 +645,7 @@ it("O01 pages every locale-scoped translation review without exposing other loca
     .where(
       inArray(
         schema.localizedRevisions.id,
-        en.slice(30).map((row) => row.id),
+        en.slice(27).map((row) => row.id),
       ),
     );
   await narrow(staff.id, [
@@ -607,6 +663,13 @@ it("O01 pages every locale-scoped translation review without exposing other loca
   expect(first.rows.every((row) => row.locale === "en")).toBe(true);
   expect(JSON.stringify(first)).not.toContain("Synthetic unpublished");
   if (!first.nextCursor) throw new Error("Missing translation continuation cursor");
+  const decoded = JSON.parse(Buffer.from(first.nextCursor, "base64url").toString()) as {
+    version: number;
+    at: string;
+    id: string;
+    filter: string;
+  };
+  expect(decoded.at).toBe("2020-01-01T00:00:00.000001Z");
   const second = await listTranslationReviews(t.db, staff.session, first.nextCursor);
   expect(second).toMatchObject({ total: 35, hasMore: false, nextCursor: null });
   expect(second.rows).toHaveLength(5);
@@ -620,6 +683,42 @@ it("O01 pages every locale-scoped translation review without exposing other loca
   await expect(listTranslationReviews(t.db, staff.session, "malformed")).rejects.toMatchObject({
     code: "validation_failed",
   });
+  const crossQueueCursor = Buffer.from(
+    JSON.stringify({
+      ...decoded,
+      filter: hashRequest({ actor: staff.session.actor, queue: "listingReviews" }),
+    }),
+  ).toString("base64url");
+  await expect(listTranslationReviews(t.db, staff.session, crossQueueCursor)).rejects.toMatchObject(
+    {
+      code: "validation_failed",
+    },
+  );
+  const badDateCursor = Buffer.from(
+    JSON.stringify({ ...decoded, at: "2020-13-45T00:00:00.000001Z" }),
+  ).toString("base64url");
+  await expect(listTranslationReviews(t.db, staff.session, badDateCursor)).rejects.toMatchObject({
+    code: "validation_failed",
+  });
+
+  const stillGranted = candidates.slice(0, 33);
+  await narrow(staff.id, [
+    ...stillGranted.map(({ candidate }) => ({
+      capability: "listing.read" as const,
+      recordType: "listing" as const,
+      recordId: candidate.id,
+      locales: ["en" as const],
+    })),
+    { capability: "translation.review", locales: ["en"] },
+  ]);
+  const narrowed = await listTranslationReviews(t.db, staff.session, first.nextCursor);
+  expect(narrowed.total).toBe(33);
+  expect(
+    narrowed.rows.every((row) =>
+      stillGranted.some(({ candidate }) => candidate.id === row.listingId),
+    ),
+  ).toBe(true);
+  expect((await readToday(t.db, staff.session)).translationReviews.total).toBe(33);
   await narrow(staff.id, []);
   expect(await listTranslationReviews(t.db, staff.session, first.nextCursor)).toMatchObject({
     rows: [],
