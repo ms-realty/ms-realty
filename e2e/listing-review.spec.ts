@@ -313,6 +313,27 @@ test("O16 reads before deciding, and the decision stands alone on its canvas", a
   await expect(page.locator('[data-focused-state] img[alt="MS Realty"]')).toBeVisible();
 });
 
+test("O16PUB scope is a UI06 field that wraps: one 52 px line, 78 px for two on a phone", async ({
+  page,
+}) => {
+  const f = seed();
+  await open(page, f, `/en/inventory/${f.reference}?tab=review`);
+  await page.getByRole("link", { name: "Go to the publication decision" }).click();
+  const scope = page
+    .locator('[data-inventory-decision="activate"]')
+    .getByLabel("Decision scope", { exact: true });
+  await expect(scope).toHaveValue(/^Publish the BG package for /);
+  const shown = await scope.evaluate((area) => ({
+    height: area.getBoundingClientRect().height,
+    hiddenEnd: area.scrollHeight > area.clientHeight,
+  }));
+  // 642:12654 / 642:12748: the whole value shows, on one line at 1440 and two at 390.
+  expect(shown).toEqual({
+    height: (page.viewportSize()?.width ?? 1440) < 640 ? 78 : 52,
+    hiddenEnd: false,
+  });
+});
+
 test("O16 keeps BG and RU labels", async ({ page }) => {
   const f = seed();
   for (const [locale, title, approvals] of [

@@ -614,6 +614,33 @@ test.describe("JavaScript on", () => {
       price: "95000.00",
     });
   });
+
+  test("O12 Facts sit in pairs 24 px apart, a pair 24 px across or 16 px stacked on phones", async ({
+    page,
+  }) => {
+    const f = seed();
+    await signIn(page, f.token);
+    await page.goto(hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`));
+    const panel = page.locator('[data-o12-panel="facts"]');
+    await expect(panel.getByLabel("Price in EUR", { exact: true })).toBeVisible();
+    const gaps = await panel.evaluate((element) => {
+      const box = (node: Element | undefined) => node?.getBoundingClientRect() ?? new DOMRect();
+      const [first, second] = [box(element.children[0]), box(element.children[1])];
+      const [a, b] = [box(element.children[0]?.children[0]), box(element.children[0]?.children[1])];
+      return {
+        pairs: Math.round(second.top - first.bottom),
+        inPair: Math.round(b.top > a.top ? b.top - a.bottom : b.left - a.right),
+      };
+    });
+    // 647:12680 (desktop) / 659:12922 (phone).
+    expect(gaps).toEqual({
+      pairs: 24,
+      inPair: (page.viewportSize()?.width ?? 1440) < 640 ? 16 : 24,
+    });
+    // UI06 (6:74): a native select is as tall as an input, 52 px.
+    for (const name of ["Price status", "Price in EUR"])
+      expect((await panel.getByLabel(name, { exact: true }).boundingBox())?.height).toBe(52);
+  });
 });
 
 test.describe("JavaScript off", () => {

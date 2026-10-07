@@ -1,6 +1,6 @@
 "use client";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { controlClass, labelClass } from "@/ui/field";
+import { controlClass, errorClass, labelClass } from "@/ui/field";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -94,11 +94,11 @@ export function InventoryEditor({
               : undefined
           }
         >
+          {/* Both writing surfaces are the 144 px UI07 Textarea (694:13418, 647:31541). */}
           <FormField
             {...field}
             label={labels[name]}
             multiline={name === "description" || name === "brokerNote"}
-            rows={name === "description" && view === "edit" ? 6 : undefined}
           />
         </div>
       );
@@ -137,13 +137,19 @@ export function InventoryEditor({
         </select>
         {field.readOnly ? <input type="hidden" name={name} value={field.value} /> : null}
         {field.error ? (
-          <p id={`${field.id}-error`} className="text-error">
+          <p id={`${field.id}-error`} className={errorClass}>
             {field.error}
           </p>
         ) : null}
       </div>
     );
   };
+  // 647:12680 / 659:12922: Facts sit in pairs 24 px apart; a pair is one row (24 px between its
+  // fields) from sm, and two fields 16 px apart on phones. The private note follows on its own.
+  const facts = factsFields.filter((name) => !missing.includes(name) && name !== "brokerNote");
+  const factPairs = Array.from({ length: Math.ceil(facts.length / 2) }, (_, index) =>
+    facts.slice(index * 2, index * 2 + 2),
+  );
   return (
     <ActionForm
       action={action}
@@ -218,11 +224,14 @@ export function InventoryEditor({
             </div>
             <div
               data-o12-panel="facts"
-              className="hidden gap-5 sm:grid-cols-2 group-has-[#o12-facts:checked]/o12:grid has-[[aria-invalid=true]]:grid!"
+              className="hidden flex-col gap-6 group-has-[#o12-facts:checked]/o12:flex has-[[aria-invalid=true]]:flex!"
             >
-              {factsFields
-                .filter((name) => !missing.includes(name))
-                .map((name) => render(form, name))}
+              {factPairs.map((pair) => (
+                <div key={pair.join()} className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+                  {pair.map((name) => render(form, name))}
+                </div>
+              ))}
+              {missing.includes("brokerNote") ? null : render(form, "brokerNote")}
             </div>
             {footer}
           </div>

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { publicLocales } from "@/domain/ids";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, errorClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -75,8 +75,13 @@ export function InventoryDecisionForm({
           return (
             <>
               {context.intent === "prepare" ? (
-                <div className="grid gap-2">
-                  <label htmlFor={language.id}>{decision.publicationLocale}</label>
+                <div
+                  className="group grid gap-2"
+                  data-invalid={language.error ? "true" : undefined}
+                >
+                  <label htmlFor={language.id} className={labelClass}>
+                    {decision.publicationLocale}
+                  </label>
                   <select
                     id={language.id}
                     name={language.name}
@@ -97,7 +102,7 @@ export function InventoryDecisionForm({
                     <input type="hidden" name="publicationLocale" value={language.value} />
                   ) : null}
                   {language.error ? (
-                    <p className="text-error" id={`${language.id}-error`}>
+                    <p className={errorClass} id={`${language.id}-error`}>
                       {language.error}
                     </p>
                   ) : null}
@@ -106,14 +111,14 @@ export function InventoryDecisionForm({
               {context.intent !== "freeze" ? (
                 <>
                   {focused ? (
-                    // The prefilled scope wraps on phones instead of hiding its end.
+                    // 642:12654 / 642:12748: the prefilled scope is one 52 px line on desktop
+                    // and wraps to 78 px on phones instead of hiding its end.
                     <FormField
                       {...form.field("scope")}
                       label={focused.scopeLabel}
                       required
                       maxLength={1000}
-                      multiline
-                      rows={2}
+                      multiline="wrap"
                     />
                   ) : (
                     <FormField
@@ -146,7 +151,7 @@ export function InventoryDecisionForm({
                       <input type="hidden" name="confirmed" value="yes" />
                     ) : null}
                     {confirm.error ? (
-                      <p className="mt-2 text-error" id={`${confirm.id}-error`}>
+                      <p className={`mt-2 ${errorClass}`} id={`${confirm.id}-error`}>
                         {confirm.error}
                       </p>
                     ) : null}

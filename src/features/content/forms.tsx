@@ -1,6 +1,6 @@
 "use client";
 import { workCopy } from "@/features/work/copy";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -50,7 +50,7 @@ export function ContentForm({
           ) : (
             <>
               <label className="grid gap-2">
-                <span>{copy.kind}</span>
+                <span className={labelClass}>{copy.kind}</span>
                 <select
                   name="kind"
                   value={form.values.kind}
@@ -69,12 +69,12 @@ export function ContentForm({
             </>
           )}
           <FormField {...form.field("title")} label={copy.pageTitle} required maxLength={200} />
+          {/* 20:173 / 25:1837: the page text is the 144 px UI07 Textarea; it resizes. */}
           <FormField
             {...form.field("text")}
             label={copy.text}
             hint={copy.paragraphs}
             multiline
-            rows={10}
             required
             maxLength={50000}
           />
