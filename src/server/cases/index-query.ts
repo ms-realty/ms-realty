@@ -17,6 +17,7 @@ import { resolveGrants } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { containsSearchControl } from "../search/controls";
 import { ownerNeedsCoverage } from "../work/coverage-policy";
 import { liveStaff, parseInput } from "../work/shared";
 import { caseGrantVisibility, liveParticipation } from "./shared";
@@ -39,17 +40,10 @@ export type CaseAttentionReason =
   | "paused_review_due";
 
 // Reject controls before trimming: in particular, a NUL must never reach PostgreSQL text.
-function containsControl(value: string) {
-  for (const character of value) {
-    const code = character.charCodeAt(0);
-    if (code < 32 || (code >= 127 && code <= 159)) return true;
-  }
-  return false;
-}
 const textFilter = z
   .string()
   .max(120)
-  .refine((value) => !containsControl(value), "Control characters are not allowed")
+  .refine((value) => !containsSearchControl(value), "Control characters are not allowed")
   .transform((value) => value.trim());
 const optionalTextFilter = textFilter.transform((value) => value || undefined).optional();
 const querySchema = z.strictObject({
@@ -132,9 +126,10 @@ export async function queryCaseIndex(
   input: CaseIndexQuery = {},
 ): Promise<CaseIndexPage> {
   const live = await liveStaff(db, session);
-  // Match listCases' URL-search contract: invalid controls are a no-match result,
-  // never an unfiltered collection or a PostgreSQL text error.
-  if (typeof input?.search === "string" && containsControl(input.search))
+  // listCases' URL-search contract (containsSearchControl, src/server/search/controls.ts):
+  // invalid controls are a no-match result, never an unfiltered collection or a PostgreSQL
+  // text error.
+  if (typeof input?.search === "string" && containsSearchControl(input.search))
     return { rows: [], total: 0, nextCursor: null };
   const query = parseInput(querySchema, input);
   const { cursor: encodedCursor, pageSize, ...filters } = query;
