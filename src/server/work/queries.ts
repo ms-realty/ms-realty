@@ -39,6 +39,7 @@ import {
   operatorDeliveryExceptionQuery,
   publicationExceptionQuery,
   todayQueueResult,
+  translationReviewPageQuery,
   translationReviewQuery,
   viewingQuery,
   workerQueueQuery,
@@ -63,6 +64,11 @@ type QueueReadContext = Awaited<ReturnType<typeof queueReadContext>>;
 
 export async function listInbox(db: Executor, session: Session, view: InboxView = "all", page = 1) {
   return inboxQuery(db, await queueReadContext(db, session), view, page);
+}
+
+/** O01 complete translation-review queue; each cursor read resolves live authority again. */
+export async function listTranslationReviews(db: Executor, session: Session, cursor?: string) {
+  return translationReviewPageQuery(db, await queueReadContext(db, session), cursor);
 }
 
 /** P12 telephone recovery: a short code narrows candidates; it never authorizes a receipt read. */

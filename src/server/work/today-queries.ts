@@ -2,6 +2,7 @@
 import "server-only";
 import { and, asc, desc, eq, inArray, lte, or, type SQL, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { z } from "zod";
 import {
   appointments,
   cases,
@@ -16,8 +17,9 @@ import {
 import { type Capability, type CapabilityGrant, hasCapability } from "@/domain/capabilities";
 import { workerHealth } from "../ai/operations";
 import type { Session } from "../auth/sessions";
+import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
-import { isAppError } from "../errors";
+import { AppError, isAppError } from "../errors";
 import { appointmentCoverageAt, ownerNeedsCoverage } from "./coverage-policy";
 import { openAppointmentStates, visibleWhere } from "./shared";
 
@@ -38,6 +40,14 @@ export interface TodayQueue<Row> extends QueuePage<Row> {
 }
 const limit = 30;
 const total = sql<number>`count(*) over ()`.mapWith(Number);
+const translationPosition = z
+  .object({
+    version: z.literal(1),
+    at: z.string().regex(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z$/),
+    id: z.uuid(),
+    filter: z.string(),
+  })
+  .strict();
 
 function firstPage<Row extends { total: number }>(rows: Row[]) {
   return {
@@ -289,34 +299,123 @@ export async function listingReviewQuery(db: Executor, context: Context, now: Da
   return firstPage(rows);
 }
 
-export async function translationReviewQuery(db: Executor, context: Context) {
-  const rows = await db
-    .select({
-      total,
-      id: localizedRevisions.id,
-      listingId: listings.id,
-      reference: listings.reference,
-      sourceRevisionId: localizedRevisions.sourceRevisionId,
-      locale: localizedRevisions.locale,
-      ownerId: listings.responsibleBrokerId,
-      ownerName: principals.displayName,
-      needsCoverage: ownerNeedsCoverage(listings.responsibleBrokerId),
-      requestedAt: localizedRevisions.updatedAt,
-    })
-    .from(localizedRevisions)
-    .innerJoin(listings, eq(listings.id, localizedRevisions.listingId))
-    .leftJoin(principals, eq(principals.id, listings.responsibleBrokerId))
-    .where(
-      and(
-        listingScope(context.grants, "listing.read", localizedRevisions.locale),
-        listingScope(context.grants, "translation.review", localizedRevisions.locale),
-        eq(localizedRevisions.sourceRevisionId, listings.approvedRevisionId),
-        eq(localizedRevisions.state, "reviewing"),
+/** A cursor never grants access: every request rechecks live listing and locale review grants. */
+export async function translationReviewPageQuery(db: Executor, context: Context, cursor?: string) {
+  const filter = hashRequest({ actor: context.live.actor, queue: "translationReviews" });
+  let position: z.infer<typeof translationPosition> | undefined;
+  if (cursor !== undefined) {
+    if (cursor.length < 1 || cursor.length > 1024) throw new AppError("validation_failed");
+    try {
+      const parsed = translationPosition.parse(
+        JSON.parse(Buffer.from(cursor, "base64url").toString()),
+      );
+      if (parsed.filter !== filter) throw new Error("Different actor or queue");
+      position = parsed;
+    } catch {
+      throw new AppError("validation_failed");
+    }
+  }
+  const matches = db.$with("today_translation_matches").as(
+    db
+      .select({
+        id: localizedRevisions.id,
+        listingId: sql<string>`${listings.id}`.as("listing_id"),
+        reference: listings.reference,
+        sourceRevisionId: localizedRevisions.sourceRevisionId,
+        locale: localizedRevisions.locale,
+        ownerId: listings.responsibleBrokerId,
+        ownerName: principals.displayName,
+        needsCoverage: ownerNeedsCoverage(listings.responsibleBrokerId).as("needs_coverage"),
+        requestedAt: localizedRevisions.updatedAt,
+        position:
+          sql<string>`to_char(${localizedRevisions.updatedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`.as(
+            "position",
+          ),
+      })
+      .from(localizedRevisions)
+      .innerJoin(listings, eq(listings.id, localizedRevisions.listingId))
+      .leftJoin(principals, eq(principals.id, listings.responsibleBrokerId))
+      .where(
+        and(
+          listingScope(context.grants, "listing.read", localizedRevisions.locale),
+          listingScope(context.grants, "translation.review", localizedRevisions.locale),
+          eq(localizedRevisions.sourceRevisionId, listings.approvedRevisionId),
+          eq(localizedRevisions.state, "reviewing"),
+        ),
       ),
+  );
+  const count = db
+    .$with("today_translation_count")
+    .as(db.select({ total: sql<number>`count(*)::integer`.as("total") }).from(matches));
+  const page = db.$with("today_translation_page").as(
+    db
+      .select()
+      .from(matches)
+      .where(
+        position
+          ? sql`(${matches.requestedAt}, ${matches.id}) > (${position.at}::timestamptz, ${position.id}::uuid)`
+          : undefined,
+      )
+      .orderBy(asc(matches.requestedAt), asc(matches.id))
+      .limit(limit + 1),
+  );
+  // Count and page share one snapshot, including an empty later page. No hidden rows enter
+  // either the total or the cursor because the grant intersection is in matches.
+  const fetched = await db
+    .with(matches, count, page)
+    .select({
+      total: count.total,
+      id: page.id,
+      listingId: page.listingId,
+      reference: page.reference,
+      sourceRevisionId: page.sourceRevisionId,
+      locale: page.locale,
+      ownerId: page.ownerId,
+      ownerName: page.ownerName,
+      needsCoverage: page.needsCoverage,
+      requestedAt: page.requestedAt,
+      position: page.position,
+    })
+    .from(count)
+    .leftJoin(page, sql`true`)
+    .orderBy(asc(page.requestedAt), asc(page.id));
+  type Projected = (typeof fetched)[number];
+  // Every page column is null together on the count row when a later page is empty.
+  const visible = fetched
+    .filter(
+      (
+        row,
+      ): row is Projected & {
+        id: string;
+        listingId: string;
+        reference: string;
+        sourceRevisionId: string;
+        locale: NonNullable<Projected["locale"]>;
+        needsCoverage: boolean;
+        requestedAt: Date;
+        position: string;
+      } => row.id !== null,
     )
-    .orderBy(asc(localizedRevisions.updatedAt), asc(localizedRevisions.id))
-    .limit(limit + 1);
-  return firstPage(rows);
+    .map(({ total: _total, ...row }) => row);
+  const rows = visible.slice(0, limit).map(({ position: _position, ...row }) => row);
+  const last = visible[limit - 1];
+  const hasMore = visible.length > limit;
+  return {
+    rows,
+    total: fetched[0]?.total ?? 0,
+    hasMore,
+    nextCursor:
+      hasMore && last
+        ? Buffer.from(
+            JSON.stringify({ version: 1, at: last.position, id: last.id, filter }),
+          ).toString("base64url")
+        : null,
+  };
+}
+
+export async function translationReviewQuery(db: Executor, context: Context) {
+  const { rows, total, hasMore } = await translationReviewPageQuery(db, context);
+  return { rows, total, hasMore };
 }
 
 export async function deliveryExceptionQuery(db: Executor, context: Context) {

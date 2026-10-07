@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { afterAll, beforeAll, expect, it, vi } from "vitest";
 import * as schema from "@/db/schema";
@@ -7,7 +7,7 @@ import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { staffFixture } from "../cases/testing";
 import { translationWorkbench } from "../inventory/translations";
 import { createCase, createProperty, type GrantSpec } from "../testing";
-import { listInbox, readToday } from "./queries";
+import { listInbox, listTranslationReviews, readToday } from "./queries";
 
 let t: TestDatabase;
 beforeAll(async () => {
@@ -538,6 +538,95 @@ it("O01 translation reviews match the workbench when both read and review grants
   expect(today.translationReviews).toMatchObject({ status: "ready", total: 1, hasMore: false });
   expect(today.translationReviews.rows.map((row) => row.id)).toEqual([translations[0]?.id]);
   expect(today.listingReviews.total).toBe(0);
+});
+
+it("O01 pages every locale-scoped translation review without exposing other locales or stale grants", async () => {
+  const staff = await staffFixture(t.db);
+  const other = await staffFixture(t.db);
+  const candidates = await Promise.all(
+    Array.from({ length: 35 }, async () => {
+      const candidate = await listing(staff.id);
+      const source = await revision(candidate, 1);
+      await t.db
+        .update(schema.listings)
+        .set({ approvedRevisionId: source.id })
+        .where(eq(schema.listings.id, candidate.id));
+      return { candidate, source };
+    }),
+  );
+  const firstCandidate = candidates[0];
+  if (!firstCandidate) throw new Error("Missing translation fixture");
+  const translations = await t.db
+    .insert(schema.localizedRevisions)
+    .values([
+      ...candidates.map(({ candidate, source }) => ({
+        listingId: candidate.id,
+        sourceRevisionId: source.id,
+        locale: "en" as const,
+        state: "reviewing" as const,
+      })),
+      {
+        listingId: firstCandidate.candidate.id,
+        sourceRevisionId: firstCandidate.source.id,
+        locale: "ru" as const,
+        state: "reviewing" as const,
+      },
+    ])
+    .returning();
+  const en = translations.filter((row) => row.locale === "en");
+  await t.db
+    .update(schema.localizedRevisions)
+    .set({ updatedAt: sql`'2020-01-01T00:00:00.000000Z'::timestamptz` })
+    .where(
+      inArray(
+        schema.localizedRevisions.id,
+        en.slice(0, 30).map((row) => row.id),
+      ),
+    );
+  await t.db
+    .update(schema.localizedRevisions)
+    .set({ updatedAt: sql`'2020-01-01T00:00:00.000001Z'::timestamptz` })
+    .where(
+      inArray(
+        schema.localizedRevisions.id,
+        en.slice(30).map((row) => row.id),
+      ),
+    );
+  await narrow(staff.id, [
+    ...candidates.map(({ candidate }) => ({
+      capability: "listing.read" as const,
+      recordType: "listing" as const,
+      recordId: candidate.id,
+      locales: ["en" as const],
+    })),
+    { capability: "translation.review", locales: ["en"] },
+  ]);
+  const first = await listTranslationReviews(t.db, staff.session);
+  expect(first).toMatchObject({ total: 35, hasMore: true });
+  expect(first.rows).toHaveLength(30);
+  expect(first.rows.every((row) => row.locale === "en")).toBe(true);
+  expect(JSON.stringify(first)).not.toContain("Synthetic unpublished");
+  if (!first.nextCursor) throw new Error("Missing translation continuation cursor");
+  const second = await listTranslationReviews(t.db, staff.session, first.nextCursor);
+  expect(second).toMatchObject({ total: 35, hasMore: false, nextCursor: null });
+  expect(second.rows).toHaveLength(5);
+  expect(second.rows.every((row) => row.locale === "en")).toBe(true);
+  expect(new Set([...first.rows, ...second.rows].map((row) => row.id)).size).toBe(35);
+  await expect(listTranslationReviews(t.db, other.session, first.nextCursor)).rejects.toMatchObject(
+    {
+      code: "validation_failed",
+    },
+  );
+  await expect(listTranslationReviews(t.db, staff.session, "malformed")).rejects.toMatchObject({
+    code: "validation_failed",
+  });
+  await narrow(staff.id, []);
+  expect(await listTranslationReviews(t.db, staff.session, first.nextCursor)).toMatchObject({
+    rows: [],
+    total: 0,
+    hasMore: false,
+    nextCursor: null,
+  });
 });
 
 it("O01 delivery exceptions require the Case email read contract and exclude recipients and raw errors", async () => {
