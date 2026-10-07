@@ -732,6 +732,17 @@ describe("O04 authorized Case index", () => {
       });
     const first = await queryCaseIndex(t.db, staff.session, { pageSize: 1 });
     const cursor = first.nextCursor ?? "";
+    const zeroYear = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as {
+      query: string;
+      id: string;
+      sortAt: string;
+    };
+    zeroYear.sortAt = `0000${zeroYear.sortAt.slice(4)}`;
+    await expect(
+      queryCaseIndex(t.db, staff.session, {
+        cursor: Buffer.from(JSON.stringify(zeroYear)).toString("base64url"),
+      }),
+    ).rejects.toMatchObject({ code: "validation_failed" });
     await expect(
       queryCaseIndex(t.db, staff.session, { collection: "mine", cursor }),
     ).rejects.toMatchObject({ code: "validation_failed" });

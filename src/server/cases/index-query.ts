@@ -114,7 +114,8 @@ function readCursor(value: string | undefined, query: string) {
   if (!value) return null;
   try {
     const cursor = cursorSchema.parse(JSON.parse(Buffer.from(value, "base64url").toString("utf8")));
-    if (cursor.query === query) return cursor;
+    // PostgreSQL rejects year zero although the ISO parser accepts its shape.
+    if (cursor.query === query && !cursor.sortAt.startsWith("0000-")) return cursor;
   } catch {
     // Cursors are untrusted query input, never stored authorization or totals.
   }
@@ -235,8 +236,8 @@ export async function queryCaseIndex(
     case when ${authorized.disposition} = 'active' and ${authorized.requirementsUnknown} then 'requirements_unknown' end,
     case when ${authorized.disposition} = 'active' and ${authorized.internal} and ${authorized.nextAction} is not null and ${authorized.dueAt} is null then 'next_action_unscheduled' end,
     case when ${authorized.disposition} = 'active' and ${authorized.internal} and ${authorized.nextAction} is not null and ${authorized.dueAt} <= ${now} then 'next_action_due' end,
-    case when ${authorized.disposition} = 'active' and ${authorized.waitingOn} is not null and ${authorized.reviewAt} <= ${now} then 'waiting_review_due' end,
-    case when ${authorized.disposition} = 'paused' and ${authorized.reviewAt} <= ${now} then 'paused_review_due' end
+    case when ${authorized.disposition} = 'active' and ${authorized.internal} and ${authorized.waitingOn} is not null and ${authorized.reviewAt} <= ${now} then 'waiting_review_due' end,
+    case when ${authorized.disposition} = 'paused' and ${authorized.internal} and ${authorized.reviewAt} <= ${now} then 'paused_review_due' end
   ], null)::text[]`;
   const actionState = sql<CaseIndexRow["nextActionState"]>`case
     when ${authorized.disposition} = 'closed' then 'none'
