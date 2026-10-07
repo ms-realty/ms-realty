@@ -192,7 +192,7 @@ export function retainInquiryDraft<V extends FormValues>(
   initial: FormState<V>,
   { state, values, pending }: FormSnapshot<V>,
   retryOperationId?: string,
-  /** Keep the draft's original revision until its owner explicitly reviews the current record. */
+  /** Keep the original revision until the current record has an observed terminal result. */
   draftRevision: number | null = state.expectedRevision,
 ): boolean {
   // A late response from a former account must never recreate that account's storage.
@@ -225,7 +225,9 @@ export function retainInquiryDraft<V extends FormValues>(
   const retained: RetainedDraft = {
     ownerId: owner.id,
     values: { ...values },
-    revision: unresolved || recovering ? state.expectedRevision : draftRevision,
+    // A retry can carry the old operation key across a newer record revision.
+    // Retain the draft's original revision across navigation and uncertain results.
+    revision: draftRevision,
     ...(unresolved || recovering
       ? {
           operation: {

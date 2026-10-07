@@ -192,6 +192,94 @@ describe("O02/O03 inquiry drafts", () => {
     },
   );
 
+  it.each(["triage", "accept"] as const)(
+    "keeps revision review required for a %s missing-receipt retry across navigation",
+    async (kind) => {
+      const draftOwner = owner();
+      const user = userEvent.setup();
+      const called = vi.fn();
+      const action = async <V extends FormValues>(state: FormState<V>, data: FormData) => {
+        called(state, data);
+        return state;
+      };
+      claimInquiryDraftOwner(draftOwner);
+      let operationId: string;
+      let retainedRevision: () => number | null | undefined;
+      let form: () => ReturnType<typeof TriageForm>;
+      if (kind === "triage") {
+        const oldState: FormState<TriageValues> = {
+          ...triageInitial(),
+          values: { ...triageInitial().values, reason: "Old reason" },
+        };
+        retainInquiryDraft(draftOwner, "one", kind, oldState, {
+          state: oldState,
+          values: oldState.values,
+          pending: true,
+        });
+        operationId = oldState.operationId;
+        retainedRevision = () => readInquiryDraft(draftOwner, "one", kind, oldState)?.revision;
+        const current = { ...oldState, expectedRevision: 3, inquiryRetryOperationId: operationId };
+        form = () => (
+          <TriageForm
+            locale="en"
+            id="one"
+            draftOwner={draftOwner}
+            action={action}
+            initialState={current}
+            states={["contact_unreachable", "resolved_without_case"]}
+          />
+        );
+      } else {
+        const oldState: FormState<AcceptValues> = {
+          ...initial(),
+          outcome: { kind: "idle" },
+          values: { nextAction: "Old next action", dueAt: "" },
+        };
+        retainInquiryDraft(draftOwner, "one", kind, oldState, {
+          state: oldState,
+          values: oldState.values,
+          pending: true,
+        });
+        operationId = oldState.operationId;
+        retainedRevision = () => readInquiryDraft(draftOwner, "one", kind, oldState)?.revision;
+        const current = { ...oldState, expectedRevision: 3, inquiryRetryOperationId: operationId };
+        form = () => (
+          <AcceptForm
+            locale="en"
+            id="one"
+            draftOwner={draftOwner}
+            action={action}
+            initialState={current}
+          />
+        );
+      }
+      const submit = kind === "triage" ? work.disposition : work.accept;
+      const first = render(form());
+      expect(screen.getByText("Revision: 2 → 3")).toBeVisible();
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).not.toHaveBeenCalled();
+      expect(retainedRevision()).toBe(2);
+      first.unmount();
+      const second = render(form());
+      expect(screen.getByText("Revision: 2 → 3")).toBeVisible();
+      expect(screen.getByLabelText(work.draft.confirm)).not.toBeChecked();
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).not.toHaveBeenCalled();
+      await user.click(screen.getByLabelText(work.draft.confirm));
+      expect(retainedRevision()).toBe(2);
+      second.unmount();
+      render(form());
+      expect(screen.getByLabelText(work.draft.confirm)).not.toBeChecked();
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).not.toHaveBeenCalled();
+      await user.click(screen.getByLabelText(work.draft.confirm));
+      await user.click(screen.getByRole("button", { name: submit }));
+      expect(called).toHaveBeenCalledOnce();
+      expect(called.mock.calls[0]?.[0].expectedRevision).toBe(3);
+      expect(called.mock.calls[0]?.[0].operationId).toBe(operationId);
+    },
+  );
+
   it.each([false, true])(
     "keeps the pre-hydration control, focus and selection without a differing restore (stored: %s)",
     async (stored) => {

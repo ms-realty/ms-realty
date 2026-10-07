@@ -193,7 +193,7 @@ function InquiryDraftSession<V extends FormValues>({
         initial,
         snapshot,
         (initial as FormState<V> & InquiryReferenceState).inquiryRetryOperationId,
-        reviewChecked ? undefined : reviewRevision.current,
+        reviewRevision.current,
       );
       const acknowledgment = (snapshot.state as FormState<V> & InquiryReferenceState)
         .inquiryReferenceToAcknowledge;
@@ -212,7 +212,7 @@ function InquiryDraftSession<V extends FormValues>({
           setConfirmedStatus(snapshot.state.reconciliation?.href ?? props.reconciliation.href);
       }
     },
-    [owner, id, kind, initial, props.reconciliation.href, reviewChecked],
+    [owner, id, kind, initial, props.reconciliation.href],
   );
   useLayoutEffect(() => {
     if (ready.current) return;
@@ -246,14 +246,18 @@ function InquiryDraftSession<V extends FormValues>({
         if (value !== initialResponse.values[name]) values[name as keyof V] = value as V[keyof V];
       }
     }
+    // A missing-receipt retry is editable, but it still needs fresh review when the
+    // record changed. Only an unresolved operation rendered read-only skips this gate.
+    const retryOperationId = (initial as FormState<V> & InquiryReferenceState)
+      .inquiryRetryOperationId;
     const changed = Boolean(
-      retained && !retained.operation && retained.revision !== initialResponse.expectedRevision,
+      retained &&
+        (!retained.operation || retryOperationId === retained.operation.id) &&
+        retained.revision !== initialResponse.expectedRevision,
     );
     if (retained) setRestoreInfo({ revision: retained.revision, changed });
     if (changed && retained) reviewRevision.current = retained.revision;
     const state: FormState<V> = { ...initialResponse, values };
-    const retryOperationId = (initial as FormState<V> & InquiryReferenceState)
-      .inquiryRetryOperationId;
     if ((retryOperationId || changed) && "reviewed" in values) (values as FormValues).reviewed = "";
     if (retained?.operation && retryOperationId !== retained.operation.id) {
       const status = {
