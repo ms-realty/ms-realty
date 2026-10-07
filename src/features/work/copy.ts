@@ -12,7 +12,7 @@ const en = {
   due: "My overdue tasks",
   mineInquiries: "My open inquiries",
   queueNote:
-    "These queues show the inquiries, follow-up tasks and key returns you can access. Other work is shown in its own workspace.",
+    "These lists show the work you can access: inquiries, tasks, key returns, viewings, Cases, listings, translations and delivery problems. Each record opens in its own workspace.",
   empty: "No matching items in this queue.",
   noContacts: "No contacts linked to inquiries you can access.",
   previous: "Previous page",
@@ -148,7 +148,7 @@ const bg: Copy = {
   due: "Моите просрочени задачи",
   mineInquiries: "Моите отворени запитвания",
   queueNote:
-    "Тук са запитванията, задачите и връщането на ключове, до които имате достъп. Останалата работа е в съответните раздели.",
+    "Тук е работата, до която имате достъп: запитвания, задачи, връщане на ключове, огледи, случаи, обяви, преводи и проблеми с доставката. Всеки запис се отваря в своя раздел.",
   empty: "Няма съответстващи записи.",
   noContacts: "Няма контакти към достъпни за вас запитвания.",
   previous: "Предишна страница",
@@ -277,7 +277,7 @@ const ru: Copy = {
   due: "Мои просроченные задачи",
   mineInquiries: "Мои открытые обращения",
   queueNote:
-    "Здесь показаны доступные вам обращения, задачи и возвраты ключей. Остальная работа находится в соответствующих разделах.",
+    "Здесь работа, к которой у вас есть доступ: обращения, задачи, возвраты ключей, показы, дела, объявления, переводы и проблемы доставки. Каждая запись открывается в своём разделе.",
   empty: "Нет подходящих записей.",
   noContacts: "Нет контактов по доступным вам обращениям.",
   previous: "Предыдущая страница",

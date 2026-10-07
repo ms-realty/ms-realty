@@ -30,13 +30,16 @@ Staff routes use host-relative URLs: `/{locale}/today`, `/inquiries`, `/inquirie
 Every page checks current staff access. Today combines bounded inquiry and task queues with
 visible viewings, Case and listing work, reviews and delivery exceptions. Each queue reports
 its authorized total or an unavailable state; a failed read is never presented as empty work.
-Times in this slice are explicitly labelled UTC. BG/RU staff copy is draft translation.
+Exact times name their zone: UTC for inquiries, tasks, Cases and listings, the agency zone
+(Europe/Sofia) for key returns and the recorded zone for viewings; ages are relative to the
+read. BG/RU staff copy is draft translation.
 
 Verification on disposable PostgreSQL:
 
 ```sh
 TEST_DATABASE_URL=postgres://… npx vitest run --project integration src/server/work --maxWorkers 2
 TEST_DATABASE_URL=postgres://… npx playwright test e2e/work.spec.ts --project chromium-desktop
+TEST_DATABASE_URL=postgres://… npx playwright test e2e/today.spec.ts e2e/today-binding.spec.ts
 ```
 
 Each integration suite and browser run creates its own disposable database. Browser fixtures
