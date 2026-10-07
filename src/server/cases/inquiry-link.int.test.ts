@@ -14,6 +14,7 @@ import {
   outboxEvents,
   parties,
   sessions,
+  staffMemberships,
   tasks,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -303,6 +304,51 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
     expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([]);
   });
 
+  it.each(["expired", "revoked"] as const)(
+    "keeps a contact-route suggestion anonymous when same-Party participation is %s",
+    async (ended) => {
+      const f = await fixture();
+      const [route] = await t.db
+        .select({ id: contactMethods.id })
+        .from(contactMethods)
+        .where(eq(contactMethods.partyId, f.target.client.partyId));
+      if (!route || !f.inquiry.partyId) throw new Error("Missing synthetic contact-route Party");
+      await t.db
+        .update(inquiries)
+        .set({ partyId: f.target.client.partyId, contactMethodId: route.id })
+        .where(eq(inquiries.id, f.inquiry.id));
+      await t.db.insert(caseParticipants).values({
+        caseId: f.target.record.id,
+        partyId: f.inquiry.partyId,
+        role: "co_buyer",
+      });
+      expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
+        expect.objectContaining({ matchBasis: "party", partyLabel: "Test Client" }),
+      ]);
+      await t.db
+        .update(caseParticipants)
+        .set(
+          ended === "expired"
+            ? { expiresAt: new Date(Date.now() - 60_000) }
+            : { revokedAt: new Date() },
+        )
+        .where(
+          and(
+            eq(caseParticipants.caseId, f.target.record.id),
+            eq(caseParticipants.partyId, f.target.client.partyId),
+          ),
+        );
+      expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
+        expect.objectContaining({
+          matchBasis: "contact_route",
+          partyLabel: null,
+          canLink: true,
+          blockReason: null,
+        }),
+      ]);
+    },
+  );
+
   it("rechecks revoked target read/transition authority before mutation and on same-key replay", async () => {
     const f = await fixture();
     await linkGrants(f);
@@ -408,22 +454,42 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
     },
   );
 
-  it("cannot replace another Case's task association or bypass task authority", async () => {
+  it("does not reveal hidden inquiry tasks or replace another Case's task association", async () => {
     const f = await fixture();
     await linkGrants(f);
     const candidates = await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id);
     expect(candidates).toEqual([expect.objectContaining({ canLink: true })]);
-    const taskDenied = candidates.map((candidate) => ({
+    const inquiryDenied = candidates.map((candidate) => ({
       ...candidate,
       canLink: false,
-      blockReason: "task_permission",
+      blockReason: "inquiry_permission",
     }));
     await t.db
       .update(grants)
       .set({ revokedAt: new Date() })
       .where(and(eq(grants.principalId, f.target.staff.id), eq(grants.capability, "task.manage")));
+    expect((await readInquiry(t.db, f.target.staff.session, f.inquiry.id)).tasks).toEqual([]);
     expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual(
-      taskDenied,
+      inquiryDenied,
+    );
+    await expect(
+      linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await linkGrants(f);
+    await t.db
+      .update(grants)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(eq(grants.principalId, f.target.staff.id), eq(grants.capability, "inquiry.respond")),
+      );
+    expect(
+      (await readInquiry(t.db, f.target.staff.session, f.inquiry.id)).tasks.map(
+        ({ task }) => task.id,
+      ),
+    ).toEqual([f.task.id]);
+    // The candidate response is identical for inquiry and hidden-task refusals.
+    expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual(
+      inquiryDenied,
     );
     await expect(
       linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
@@ -452,6 +518,76 @@ describe("C02 existing Case link / O03 safe suggestions", () => {
       f.inquiry,
     ]);
     expect(await t.db.select().from(tasks).where(eq(tasks.id, f.task.id))).toEqual([bound]);
+  });
+
+  it("reports task permission only when current task authority passed and proposed Case authority fails", async () => {
+    const f = await fixture();
+    await linkGrants(f);
+    const currentCaseId = await createCase(t.db, f.target.staff.id);
+    const [bound] = await t.db
+      .update(tasks)
+      .set({ caseId: currentCaseId })
+      .where(eq(tasks.id, f.task.id))
+      .returning();
+    await t.db
+      .update(grants)
+      .set({ recordType: "case", recordId: currentCaseId })
+      .where(and(eq(grants.principalId, f.target.staff.id), eq(grants.capability, "task.manage")));
+    expect(
+      (await readInquiry(t.db, f.target.staff.session, f.inquiry.id)).tasks.map(
+        ({ task }) => task.id,
+      ),
+    ).toEqual([f.task.id]);
+    expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
+      expect.objectContaining({ canLink: false, blockReason: "task_permission" }),
+    ]);
+    await expect(
+      linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    expect(await t.db.select().from(tasks).where(eq(tasks.id, f.task.id))).toEqual([bound]);
+    expect(await t.db.select().from(inquiries).where(eq(inquiries.id, f.inquiry.id))).toEqual([
+      f.inquiry,
+    ]);
+  });
+
+  it("reports an inquiry state that cannot link and preserves the refused inquiry", async () => {
+    const f = await fixture();
+    const [resolved] = await t.db
+      .update(inquiries)
+      .set({ state: "resolved_without_case", dispositionReason: "Synthetic inquiry resolution" })
+      .where(eq(inquiries.id, f.inquiry.id))
+      .returning();
+    expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
+      expect.objectContaining({ canLink: false, blockReason: "inquiry_state" }),
+    ]);
+    await expect(
+      linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
+    ).rejects.toMatchObject({ code: "transition_denied" });
+    expect(await t.db.select().from(inquiries).where(eq(inquiries.id, f.inquiry.id))).toEqual([
+      resolved,
+    ]);
+    expect(await t.db.select().from(tasks).where(eq(tasks.id, f.task.id))).toEqual([f.task]);
+  });
+
+  it("reports staff unavailability without granting link authority", async () => {
+    const f = await fixture();
+    await t.db
+      .update(staffMemberships)
+      .set({
+        absenceFrom: new Date(Date.now() - 60_000),
+        absenceReviewAt: new Date(Date.now() + 86_400_000),
+      })
+      .where(eq(staffMemberships.principalId, f.target.staff.id));
+    expect(await listInquiryCaseCandidates(t.db, f.target.staff.session, f.inquiry.id)).toEqual([
+      expect.objectContaining({ canLink: false, blockReason: "staff_unavailable" }),
+    ]);
+    await expect(
+      linkInquiryToExistingCase(t.db, f.target.staff.session, f.input),
+    ).rejects.toMatchObject({ code: "transition_denied" });
+    expect(await t.db.select().from(inquiries).where(eq(inquiries.id, f.inquiry.id))).toEqual([
+      f.inquiry,
+    ]);
+    expect(await t.db.select().from(tasks).where(eq(tasks.id, f.task.id))).toEqual([f.task]);
   });
 
   it("concurrent different target choices converge on one association and one preserved task", async () => {

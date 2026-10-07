@@ -235,8 +235,11 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
         ),
       )
     ).every(Boolean)
-  )
-    blockReason = "task_permission";
+  ) {
+    // Inquiry detail hides tasks without current task authority. Keep this refusal
+    // neutral so the candidate cannot reveal a task that the viewer cannot read.
+    blockReason = "inquiry_permission";
+  }
   if (!blockReason) {
     try {
       await requireAvailableStaff(db, live.account.id);
