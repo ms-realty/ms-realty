@@ -484,6 +484,9 @@ test("O03 / F18: a failed candidate read never reads as no matching Case", async
 }, info) => {
   // The fault holds a shared table for a moment; one engine is enough for server-rendered state.
   test.skip(info.project.name !== "chromium-desktop", "one engine renders the failed read");
+  // The table lock can stall other workers' Case reads; CI waits for the server-side fault seam
+  // MSR-CODEX owns (as the O01 failed-queue test does). Run locally with one worker meanwhile.
+  test.skip(Boolean(process.env.CI), "needs the server-side fault seam, not a shared table lock");
   const f = seed();
   const { context, page } = await signedIn(browser, f.token, { ...info.project.use });
   try {
