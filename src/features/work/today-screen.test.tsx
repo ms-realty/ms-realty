@@ -530,105 +530,108 @@ it("labels a bounded preview when the server total is unknown", async () => {
   expect(screen.getByText("Waiting for action: 1+. Start at the top of the list.")).toBeVisible();
 });
 
+// One row in every queue the read model returns, for the newly bound groups.
+const everyQueue = () => ({
+  ...empty(),
+  viewings: queue([
+    viewing("past", { reason: "record_outcome", startsAt: minutesAgo(120) }),
+    viewing("offered", { awaitingAcceptance: true, needsCoverage: true }),
+    viewing("open", { reason: "arrange_viewing", startsAt: null, endsAt: null }),
+  ]),
+  listingReviews: queue([
+    {
+      ...ownedBy,
+      id: "review",
+      reference: "MS-REVIEW",
+      editorialState: "in_review",
+      commercialState: "confirmation_required",
+      freshnessState: "review_due",
+      dueAt: minutesAgo(60),
+      canEdit: false,
+      canReviewFacts: true,
+      canRelease: false,
+    },
+    {
+      ...ownedBy,
+      id: "facts",
+      reference: "MS-FACTS",
+      editorialState: "needs_facts",
+      commercialState: "available",
+      freshnessState: "current",
+      dueAt: null,
+      canEdit: true,
+      canReviewFacts: false,
+      canRelease: false,
+    },
+  ]),
+  translationReviews: queue([
+    {
+      ...ownedBy,
+      id: "translation",
+      listingId: "listing",
+      reference: "MS-RU",
+      sourceRevisionId: "source",
+      locale: "ru",
+      requestedAt: minutesAgo(30),
+    },
+  ]),
+  deliveryExceptions: queue([
+    {
+      ...ownedBy,
+      id: "message",
+      caseId: "case-email",
+      reference: "CS-EMAIL",
+      state: "outcome_unknown",
+      recordedAt: minutesAgo(45),
+    },
+  ]),
+  publicationExceptions: queue([
+    {
+      ...ownedBy,
+      id: "publication",
+      listingId: "listing",
+      reference: "MS-PUBLISH",
+      state: "failed",
+      kind: "publish",
+      destination: "website",
+      locale: "bg",
+      generation: 1,
+      currentGeneration: 2,
+      recordedAt: minutesAgo(15),
+    },
+  ]),
+  operatorDeliveryExceptions: queue([
+    {
+      id: "action",
+      kind: "email_send",
+      state: "failed",
+      attempts: 3,
+      lastAttemptAt: minutesAgo(10),
+    },
+  ]),
+  caseContinue: queue([
+    {
+      ...ownedBy,
+      id: "case",
+      reference: "CS-1",
+      title: "Synthetic purchase case",
+      kind: "buyer",
+      stage: "needs_agreed",
+      disposition: "active",
+      nextAction: "Check the shared brief $& $$",
+      nextActionDueAt: minutesAgo(20),
+      waitingOn: null,
+      reviewAt: null,
+      dueAt: minutesAgo(20),
+    },
+  ]),
+  draftContinue: queue([
+    { ...ownedBy, id: "draft", reference: "MS-DRAFT", editorialState: "draft", updatedAt: now },
+  ]),
+});
+
 it("opens each newly read record in its own workspace with its reason and next step", async () => {
-  reads.today.mockResolvedValue({
-    ...empty(),
-    viewings: queue([
-      viewing("past", { reason: "record_outcome", startsAt: minutesAgo(120) }),
-      viewing("offered", { awaitingAcceptance: true, needsCoverage: true }),
-      viewing("open", { reason: "arrange_viewing", startsAt: null, endsAt: null }),
-    ]),
-    listingReviews: queue([
-      {
-        ...ownedBy,
-        id: "review",
-        reference: "MS-REVIEW",
-        editorialState: "in_review",
-        commercialState: "confirmation_required",
-        freshnessState: "review_due",
-        dueAt: minutesAgo(60),
-        canEdit: false,
-        canReviewFacts: true,
-        canRelease: false,
-      },
-      {
-        ...ownedBy,
-        id: "facts",
-        reference: "MS-FACTS",
-        editorialState: "needs_facts",
-        commercialState: "available",
-        freshnessState: "current",
-        dueAt: null,
-        canEdit: true,
-        canReviewFacts: false,
-        canRelease: false,
-      },
-    ]),
-    translationReviews: queue([
-      {
-        ...ownedBy,
-        id: "translation",
-        listingId: "listing",
-        reference: "MS-RU",
-        sourceRevisionId: "source",
-        locale: "ru",
-        requestedAt: minutesAgo(30),
-      },
-    ]),
-    deliveryExceptions: queue([
-      {
-        ...ownedBy,
-        id: "message",
-        caseId: "case-email",
-        reference: "CS-EMAIL",
-        state: "outcome_unknown",
-        recordedAt: minutesAgo(45),
-      },
-    ]),
-    publicationExceptions: queue([
-      {
-        ...ownedBy,
-        id: "publication",
-        listingId: "listing",
-        reference: "MS-PUBLISH",
-        state: "failed",
-        kind: "publish",
-        destination: "website",
-        locale: "bg",
-        generation: 1,
-        currentGeneration: 2,
-        recordedAt: minutesAgo(15),
-      },
-    ]),
-    operatorDeliveryExceptions: queue([
-      {
-        id: "action",
-        kind: "email_send",
-        state: "failed",
-        attempts: 3,
-        lastAttemptAt: minutesAgo(10),
-      },
-    ]),
-    caseContinue: queue([
-      {
-        ...ownedBy,
-        id: "case",
-        reference: "CS-1",
-        title: "Synthetic purchase case",
-        kind: "buyer",
-        stage: "needs_agreed",
-        disposition: "active",
-        nextAction: "Check the shared brief $& $$",
-        nextActionDueAt: minutesAgo(20),
-        waitingOn: null,
-        reviewAt: null,
-        dueAt: minutesAgo(20),
-      },
-    ]),
-    draftContinue: queue([
-      { ...ownedBy, id: "draft", reference: "MS-DRAFT", editorialState: "draft", updatedAt: now },
-    ]),
-  });
+  reads.today.mockResolvedValue(everyQueue());
   await show();
   for (const [name, href, text] of [
     [/^Viewing outcome to record · AP-past/, "/en/calendar/past", "Next step: record the outcome"],
@@ -801,4 +804,52 @@ it.each([
   await show(locale);
   expect(screen.getAllByText(status)).toHaveLength(1);
   expect(screen.getByText(new RegExp(`^${lead}`))).toBeVisible();
+});
+
+it.each([
+  [
+    "bg",
+    [
+      "Огледи",
+      "Резултат от огледа за записване · AP-past",
+      "Водещ: Maria Example",
+      "Нужен преглед · MS-REVIEW",
+      "Превод за преглед · RU · MS-RU",
+      "Публикуване · MS-PUBLISH",
+      "Неуспешно · Уебсайт · BG",
+      "Изпращане на имейл",
+      "Моите случаи",
+      "Чернова · MS-DRAFT",
+    ],
+  ],
+  [
+    "ru",
+    [
+      "Показы",
+      "Нужно записать итог показа · AP-past",
+      "Ведущий: Maria Example",
+      "Нужна проверка · MS-REVIEW",
+      "Перевод на проверку · RU · MS-RU",
+      "Публикация · MS-PUBLISH",
+      "Не удалось · Сайт · BG",
+      "Отправка письма",
+      "Мои дела",
+      "Черновик · MS-DRAFT",
+    ],
+  ],
+])("speaks %s on every new row, with no raw identifiers", async (locale, texts) => {
+  reads.today.mockResolvedValue(everyQueue());
+  await show(locale);
+  const main = document.body.textContent ?? "";
+  for (const text of texts) expect(main).toContain(text);
+  for (const raw of [
+    "record_outcome",
+    "in_review",
+    "outcome_unknown",
+    "email_send",
+    "website",
+    "Next step",
+    "Owner:",
+  ])
+    expect(main).not.toContain(raw);
 });
