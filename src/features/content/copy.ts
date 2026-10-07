@@ -10,6 +10,27 @@ const en = {
   paragraphs: "Separate paragraphs with a blank line. Plain text only.",
   jurisdiction: "Jurisdiction or geographic scope",
   scope: "Scope of professional review",
+  place: "Area guide location (optional)",
+  placeHint:
+    "For area content, choose a recorded location to link the guide to inventory. A change creates a draft and needs qualified, editorial and publication review.",
+  placesUnavailable:
+    "The location register is unavailable. The recorded selection is retained. Retry before changing it.",
+  placeFilter: "Find a recorded location",
+  noPlaceMatches: "No locations match. Clear the search to see all recorded locations.",
+  areaPlaceOnly:
+    "Location choices apply only to area guides. Service and help content are saved without a location binding.",
+  unbound: "No location — guide only",
+  placesEmpty:
+    "No recorded locations are available. You can save a guide without linking inventory.",
+  placeUnavailable: "Recorded location unavailable",
+  workingPlace: "Working location",
+  publishedPlace: "Published location",
+  legacyPlace:
+    "The legacy location is outside this edition. Select and review a location before linking the public guide to inventory.",
+  district: "District",
+  municipality: "Municipality",
+  settlement: "Settlement",
+  neighborhood: "Neighborhood",
   save: "Save draft",
   saved: "Content change recorded",
   next: "Open the content workbench to review the exact edition.",
@@ -59,6 +80,26 @@ const bg: Copy = {
   paragraphs: "Разделяйте абзаците с празен ред. Само обикновен текст.",
   jurisdiction: "Юрисдикция или географски обхват",
   scope: "Обхват на професионалния преглед",
+  place: "Място на районния материал (по избор)",
+  placeHint:
+    "За районен материал изберете записано място за връзка към имотите. Промяната създава чернова за квалифициран преглед, редакционно одобрение и публикуване.",
+  placesUnavailable:
+    "Регистърът на местата не е достъпен. Записаният избор се запазва. Опитайте отново, преди да го промените.",
+  placeFilter: "Намиране на записано място",
+  noPlaceMatches: "Няма съвпадащи места. Изчистете търсенето, за да видите всички записани места.",
+  areaPlaceOnly:
+    "Изборът на място се отнася само за районни материали. Услугите и помощните текстове се запазват без връзка към място.",
+  unbound: "Без място — само материал",
+  placesEmpty: "Няма записани места. Можете да запазите материала без връзка към имоти.",
+  placeUnavailable: "Записаното място не е налично",
+  workingPlace: "Място на работната версия",
+  publishedPlace: "Място на публикацията",
+  legacyPlace:
+    "Старото място е извън тази версия. Изберете и прегледайте място, преди да свържете публичния материал с имотите.",
+  district: "Област",
+  municipality: "Община",
+  settlement: "Населено място",
+  neighborhood: "Квартал",
   save: "Запазване на чернова",
   saved: "Промяната е записана",
   next: "Отворете съдържанието за преглед на точната версия.",
@@ -106,6 +147,26 @@ const ru: Copy = {
   paragraphs: "Разделяйте абзацы пустой строкой. Только обычный текст.",
   jurisdiction: "Юрисдикция или географический охват",
   scope: "Область профессиональной проверки",
+  place: "Место материала о районе (необязательно)",
+  placeHint:
+    "Для материала о районе выберите место из реестра для связи с объектами. Изменение создаёт черновик для квалифицированной, редакционной проверки и публикации.",
+  placesUnavailable:
+    "Реестр мест недоступен. Записанный выбор сохранён. Повторите попытку перед его изменением.",
+  placeFilter: "Найти место в реестре",
+  noPlaceMatches: "Совпадений нет. Очистите поиск, чтобы увидеть все места из реестра.",
+  areaPlaceOnly:
+    "Выбор места применяется только к материалам о районах. Услуги и помощь сохраняются без связи с местом.",
+  unbound: "Без места — только материал",
+  placesEmpty: "В реестре нет мест. Материал можно сохранить без связи с объектами.",
+  placeUnavailable: "Записанное место недоступно",
+  workingPlace: "Место рабочей версии",
+  publishedPlace: "Место публикации",
+  legacyPlace:
+    "Прежнее место записано вне этой версии. Выберите и проверьте место перед связыванием публичного материала с объектами.",
+  district: "Область",
+  municipality: "Муниципалитет",
+  settlement: "Населённый пункт",
+  neighborhood: "Район",
   save: "Сохранить черновик",
   saved: "Изменение записано",
   next: "Откройте редактор для проверки точной версии.",

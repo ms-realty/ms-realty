@@ -1,8 +1,8 @@
 // O21: immutable plaintext versions and separate human editorial, claim and release decisions.
 import "server-only";
-import { and, desc, eq, inArray, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
-import { approvals, contentPages, contentPageVersions } from "@/db/schema";
+import { approvals, contentPages, contentPageVersions, geographyPlaces } from "@/db/schema";
 import { type ApprovalKind, approvalCapability } from "@/domain/approval";
 import type { Capability } from "@/domain/capabilities";
 import { recordActivity } from "../activity";
@@ -13,16 +13,24 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { findOperation, type OperationContext, runOperation } from "../operations";
+import { loadPlaceChains } from "../publication/presentation";
 import { commandEnvelope, liveStaff, parseInput, version } from "../work/shared";
 import { approvedContent, contentBody } from "./public";
 
 export const contentKinds = ["area", "service", "help"] as const;
+// P15 guides describe a district, municipality, settlement or neighborhood, not a country.
+const contentPlaceLevels = ["district", "municipality", "settlement", "neighborhood"] as const;
 const operationId = z.string().min(16).max(200);
 const textInput = {
   title: z.string().trim().min(1).max(200),
   text: z.string().trim().min(1).max(50000),
   jurisdiction: z.string().trim().min(2).max(200),
   reviewScope: z.string().trim().min(3).max(1000),
+  placeId: z
+    .uuid()
+    .transform((value) => value.toLowerCase())
+    .nullable()
+    .optional(),
 };
 const createSchema = z.object({
   operationId,
@@ -77,6 +85,64 @@ async function pageFor(
   return { live, page };
 }
 
+async function placeOptions(db: Executor) {
+  const rows = await db
+    .select({
+      id: geographyPlaces.id,
+      level: geographyPlaces.level,
+      nameNative: geographyPlaces.nameNative,
+      nameLatin: geographyPlaces.nameLatin,
+      countryCode: geographyPlaces.countryCode,
+    })
+    .from(geographyPlaces)
+    .where(inArray(geographyPlaces.level, contentPlaceLevels))
+    .orderBy(asc(geographyPlaces.nameNative), asc(geographyPlaces.id));
+  const chains = await loadPlaceChains(
+    db,
+    rows.map((place) => place.id),
+  );
+  return rows.map((place) => ({
+    ...place,
+    level: place.level as (typeof contentPlaceLevels)[number],
+    // Keep names in the BG source script and disambiguate homonyms with their ancestry.
+    context: (chains.get(place.id) ?? [])
+      .slice(1)
+      .map((parent) => parent.nameNative)
+      .join(" / "),
+  }));
+}
+export type ContentPlaceOption = Awaited<ReturnType<typeof placeOptions>>[number];
+
+async function availablePlaceOptions(db: Executor) {
+  try {
+    return { places: await placeOptions(db), placesAvailable: true };
+  } catch {
+    // A register outage cannot become an empty-register claim or block unrelated CMS work.
+    return { places: [] as ContentPlaceOption[], placesAvailable: false };
+  }
+}
+
+export async function readContentPlaces(db: Executor, session: Session) {
+  const live = await liveStaff(db, session);
+  await assertCan(db, live.actor, "content.edit", resource());
+  return availablePlaceOptions(db);
+}
+
+async function validatePlace(db: Executor, placeId: string | null | undefined, kind: Page["kind"]) {
+  if (!placeId) return;
+  if (kind !== "area")
+    throw new AppError("validation_failed", {
+      fieldErrors: { placeId: ["area_content_required"] },
+    });
+  const [place] = await db
+    .select({ id: geographyPlaces.id })
+    .from(geographyPlaces)
+    .where(and(eq(geographyPlaces.id, placeId), inArray(geographyPlaces.level, contentPlaceLevels)))
+    .for("share");
+  if (!place)
+    throw new AppError("validation_failed", { fieldErrors: { placeId: ["place_not_available"] } });
+}
+
 export async function listContent(db: Executor, session: Session) {
   const live = await liveStaff(db, session);
   const grants = await resolveGrants(db, live.actor);
@@ -122,7 +188,29 @@ export async function readContentWorkbench(db: Executor, session: Session, id: s
       readCapabilities.map(async (cap) => [cap, await can(db, live.actor, cap, resource(id))]),
     ),
   ) as Record<Capability, boolean>;
-  return { page, current, versions, decisions, access };
+  const [published] = page.publishedVersionNumber
+    ? await db
+        .select()
+        .from(contentPageVersions)
+        .where(
+          and(
+            eq(contentPageVersions.contentPageId, id),
+            eq(contentPageVersions.versionNumber, page.publishedVersionNumber),
+          ),
+        )
+    : [];
+  const publishedBody = published ? contentBody.safeParse(published.body) : null;
+  const locations =
+    page.kind === "area" ? await availablePlaceOptions(db) : { places: [], placesAvailable: true };
+  return {
+    page,
+    current,
+    versions,
+    decisions,
+    access,
+    ...locations,
+    publishedPlaceId: publishedBody?.success ? (publishedBody.data.placeId ?? null) : null,
+  };
 }
 
 export async function readContentOperation(
@@ -151,9 +239,10 @@ export async function readContentOperation(
     : null;
 }
 
-function bodyOf(input: { title: string; text: string }) {
+function bodyOf(input: { title: string; text: string; placeId?: string | null }) {
   return parseInput(contentBody, {
     title: input.title,
+    placeId: input.placeId ?? null,
     paragraphs: input.text
       .split(/\n\s*\n/)
       .map((p) => p.trim())
@@ -203,6 +292,7 @@ export async function createContent(db: Executor, session: Session, raw: CreateC
     async (ctx) => {
       await liveStaff(ctx.tx, session);
       await assertCan(ctx.tx, live.actor, "content.edit", resource());
+      await validatePlace(ctx.tx, input.placeId, input.kind);
       await ctx.tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended(${`content:${input.kind}:${input.slug}`}, 0))`,
       );
@@ -250,6 +340,7 @@ export async function saveContent(db: Executor, session: Session, raw: ContentDr
     async (ctx) => {
       const { page } = await pageFor(ctx.tx, session, input.id, "content.edit", true);
       version(page, input.expectedVersion);
+      await validatePlace(ctx.tx, input.placeId, page.kind);
       const number = page.currentVersionNumber + 1;
       await ctx.tx.insert(contentPageVersions).values({
         contentPageId: page.id,
@@ -325,6 +416,9 @@ export async function decideContent(db: Executor, session: Session, raw: Content
           ),
         );
       if (!current) throw new AppError("not_found");
+      const body = parseInput(contentBody, current.body);
+      if (hashRequest(current.body) !== current.contentHash) throw new AppError("approval_stale");
+      await validatePlace(ctx.tx, body.placeId, page.kind);
       let candidate = current;
       if (input.decision === "claims") {
         // ReviewedAt belongs to the immutable reviewed edition; draft content is not rewritten.

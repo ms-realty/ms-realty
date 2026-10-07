@@ -6,7 +6,12 @@ import { workCopy } from "@/features/work/copy";
 import { isStaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { getEnv } from "@/server/config/env";
-import { listContent, readContentOperation, readContentWorkbench } from "@/server/content/commands";
+import {
+  listContent,
+  readContentOperation,
+  readContentPlaces,
+  readContentWorkbench,
+} from "@/server/content/commands";
 import { contentBody } from "@/server/content/public";
 import { AppError } from "@/server/errors";
 import { initialFormState } from "@/ui/form/server";
@@ -71,6 +76,7 @@ export async function ContentNewScreen({ locale, session }: { locale: string; se
   const copy = contentCopy(locale),
     result = await listContent(getDb(), session).catch(privateError);
   if (!result.canCreate) notFound();
+  const { places, placesAvailable } = await readContentPlaces(getDb(), session).catch(privateError);
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.new}</h1>
@@ -78,6 +84,8 @@ export async function ContentNewScreen({ locale, session }: { locale: string; se
       <p>{copy.sequence}</p>
       <ContentForm
         locale={locale}
+        places={places}
+        placesAvailable={placesAvailable}
         initialState={initialFormState<ContentValues>("content.create", {
           kind: "help",
           slug: "",
@@ -85,6 +93,7 @@ export async function ContentNewScreen({ locale, session }: { locale: string; se
           text: "",
           jurisdiction: "",
           reviewScope: "",
+          placeId: "",
         })}
         action={saveContentAction.bind(null, locale, null)}
       />
@@ -101,10 +110,16 @@ export async function ContentWorkbenchScreen({
   id: string;
 }) {
   const copy = contentCopy(locale),
-    { page, current, decisions, access } = await readContentWorkbench(getDb(), session, id).catch(
-      privateError,
-    );
+    { page, current, decisions, access, places, placesAvailable, publishedPlaceId } =
+      await readContentWorkbench(getDb(), session, id).catch(privateError);
   const body = contentBody.parse(current.body);
+  const placeLabel = (placeId: string | null | undefined) => {
+    if (!placeId) return copy.unbound;
+    const place = places.find((option) => option.id === placeId);
+    return place
+      ? `${place.nameNative} · ${copy[place.level]}${place.context ? ` / ${place.context}` : ""} (${place.countryCode})`
+      : `${copy.placeUnavailable}: ${placeId}`;
+  };
   const publicPath =
     page.kind === "service" && ["sell", "let"].includes(page.slug)
       ? page.slug
@@ -163,6 +178,10 @@ export async function ContentWorkbenchScreen({
           [copy.state, page.publicationState],
           [copy.draft, current.versionNumber],
           [copy.live, page.publishedVersionNumber ?? copy.none],
+          ...(page.kind === "area" ? [[copy.workingPlace, placeLabel(body.placeId)]] : []),
+          ...(page.kind === "area" && page.publishedVersionNumber
+            ? [[copy.publishedPlace, placeLabel(publishedPlaceId)]]
+            : []),
           [copy.jurisdiction, current.jurisdiction],
           [copy.scope, current.reviewScope],
         ].map(([label, value]) => (
@@ -172,6 +191,9 @@ export async function ContentWorkbenchScreen({
           </div>
         ))}
       </dl>
+      {page.kind === "area" && body.placeId === undefined && page.placeId ? (
+        <Notice tone="info" title={copy.legacyPlace} />
+      ) : null}
       <section className="space-y-4 rounded-panel border border-border p-5">
         <h2 className="text-subheading font-semibold">{copy.preview}</h2>
         <h3 className="font-semibold" lang="bg">
@@ -200,6 +222,8 @@ export async function ContentWorkbenchScreen({
           <ContentForm
             locale={locale}
             id={id}
+            places={places}
+            placesAvailable={placesAvailable}
             initialState={initialFormState<ContentValues>(
               `content.save.${id}`,
               {
@@ -209,6 +233,7 @@ export async function ContentWorkbenchScreen({
                 text: body.paragraphs.join("\n\n"),
                 jurisdiction: current.jurisdiction ?? "",
                 reviewScope: current.reviewScope ?? "",
+                placeId: body.placeId ?? "",
               },
               page.version,
             )}

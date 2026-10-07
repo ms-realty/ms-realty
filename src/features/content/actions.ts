@@ -23,6 +23,7 @@ export type ContentValues = {
   text: string;
   jurisdiction: string;
   reviewScope: string;
+  placeId: string;
 };
 export type DecisionValues = { note: string; expiresAt: string; reviewed: string };
 
@@ -91,6 +92,7 @@ export async function saveContentAction(
     "text",
     "jurisdiction",
     "reviewScope",
+    "placeId",
   ]);
   const result = await action(
     async (ctx) => {
@@ -102,6 +104,8 @@ export async function saveContentAction(
         return (
           await createContent(ctx.db, ctx.session, {
             ...base.values,
+            // The native create form also offers the area field when JS is unavailable.
+            placeId: base.values.kind === "area" ? base.values.placeId || null : null,
             kind: base.values.kind as "help",
             operationId: envelope.operationId,
           })
@@ -109,6 +113,7 @@ export async function saveContentAction(
       return (
         await saveContent(ctx.db, ctx.session, {
           ...base.values,
+          placeId: base.values.placeId || null,
           id,
           expectedVersion: envelope.expectedRevision as number,
           operationId: envelope.operationId,
@@ -156,6 +161,7 @@ export async function saveContentAction(
               text: body.paragraphs.join("\n\n"),
               jurisdiction: current.current.jurisdiction ?? "",
               reviewScope: current.current.reviewScope ?? "",
+              placeId: body.placeId ?? "",
             },
           },
           reapply: {
@@ -180,7 +186,7 @@ export async function saveContentAction(
         fieldErrors: Object.fromEntries(
           Object.keys(result.error.fieldErrors ?? {})
             .filter((field) => field in base.values)
-            .map((field) => [field, [copy.invalid]]),
+            .map((field) => [field, [field === "placeId" ? copy.areaPlaceOnly : copy.invalid]]),
         ),
       },
     };

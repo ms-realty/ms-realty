@@ -14,6 +14,13 @@ export const contentBody = z
   .object({
     title: z.string().trim().min(1).max(200),
     paragraphs: z.array(z.string().trim().min(1).max(5000)).min(1).max(30),
+    // New bindings belong to the immutable, hashed edition. Legacy editions without this
+    // field stay unbound; the mutable content_pages.place_id is never approval evidence.
+    placeId: z
+      .uuid()
+      .transform((value) => value.toLowerCase())
+      .nullable()
+      .optional(),
   })
   .strict();
 type Version = typeof contentPageVersions.$inferSelect;
@@ -65,6 +72,7 @@ export function approvedContent(
   }
   return {
     ...body.data,
+    placeId: body.data.placeId ?? null,
     version: {
       id: version.id,
       number: version.versionNumber,
@@ -118,7 +126,7 @@ export async function readApprovedContent(
     );
   const decisions = await (options.lock ? decisionQuery.for("share") : decisionQuery);
   const content = approvedContent(row.version, decisions, locale);
-  return content ? { ...content, placeId: row.page.placeId } : null;
+  return content;
 }
 
 /** P15: exact approved editions only. A guide without a place binding remains unbound. */
@@ -153,7 +161,7 @@ export async function readApprovedAreas(db: Executor, locale: PublicLocale) {
   const approved = rows.flatMap(({ page, version }) => {
     if (!/^[a-z\d][a-z\d-]{0,100}$/.test(page.slug)) return [];
     const content = approvedContent(version, decisions, locale);
-    return content ? [{ ...content, slug: page.slug, placeId: page.placeId }] : [];
+    return content ? [{ ...content, slug: page.slug }] : [];
   });
   const chains = await loadPlaceChains(
     db,
