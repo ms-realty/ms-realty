@@ -78,7 +78,6 @@ export type CaseIndexQuery = z.input<typeof querySchema>;
 export interface CaseIndexRow {
   readonly id: string;
   readonly reference: string;
-  readonly version: number;
   readonly title: string;
   readonly kind: CaseKind;
   readonly serviceTopic: typeof cases.$inferSelect.serviceTopic;
@@ -166,7 +165,6 @@ export async function queryCaseIndex(
       .select({
         id: cases.id,
         reference: cases.reference,
-        version: cases.version,
         title: cases.title,
         kind: cases.kind,
         serviceTopic: cases.serviceTopic,
@@ -322,7 +320,6 @@ export async function queryCaseIndex(
     rows: visible.map((row) => ({
       id: row.id,
       reference: row.reference,
-      version: row.version,
       title: row.title,
       kind: row.kind,
       serviceTopic: row.serviceTopic,

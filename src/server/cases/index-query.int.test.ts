@@ -621,7 +621,7 @@ describe("O04 authorized Case index", () => {
     for (const record of [privateAction, privateWaiting, privatePause, unknown]) {
       const row = page.rows.find((candidate) => candidate.id === record.id);
       expect(row?.nextActionState).toBe("restricted");
-      for (const field of ["nextAction", "dueAt", "waitingOn", "reviewAt", "updatedAt"])
+      for (const field of ["nextAction", "dueAt", "waitingOn", "reviewAt", "updatedAt", "version"])
         expect(row).not.toHaveProperty(field);
     }
     expect(page.rows.find((row) => row.id === summary.id)).toMatchObject({
