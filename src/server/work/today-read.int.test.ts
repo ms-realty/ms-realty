@@ -123,7 +123,7 @@ async function narrow(staffId: string, values: GrantSpec[]) {
 
 async function listing(
   ownerId: string,
-  editorialState: "draft" | "changes_requested" | "in_review" = "draft",
+  editorialState: "draft" | "needs_facts" | "changes_requested" | "in_review" = "draft",
 ) {
   const propertyId = await createProperty(t.db);
   const [row] = await t.db
@@ -339,6 +339,38 @@ it("O01 Continue includes owned Case work and editable listing drafts only withi
   const revoked = await readToday(t.db, staff.session);
   expect(revoked.caseContinue.total).toBe(0);
   expect(revoked.draftContinue.total).toBe(0);
+});
+
+it("O01 counts one listing action once: corrections are review work, a draft keeps its own check", async () => {
+  const staff = await staffFixture(t.db);
+  const changes = await listing(staff.id, "changes_requested");
+  const facts = await listing(staff.id, "needs_facts");
+  const draft = await listing(staff.id);
+  // A new draft's availability is unconfirmed: confirming it is a task apart from editing it.
+  const unconfirmed = await listing(staff.id);
+  await t.db
+    .update(schema.listings)
+    .set({ commercialState: "confirmation_required" })
+    .where(eq(schema.listings.id, unconfirmed.id));
+  await narrow(
+    staff.id,
+    [changes, facts, draft, unconfirmed].flatMap((row) =>
+      (["listing.read", "listing.edit"] as const).map((capability) => ({
+        capability,
+        recordType: "listing",
+        recordId: row.id,
+      })),
+    ),
+  );
+  const today = await readToday(t.db, staff.session);
+  expect(today.listingReviews).toMatchObject({ status: "ready", total: 3 });
+  expect(today.listingReviews.rows.map((row) => row.id).sort()).toEqual(
+    [changes.id, facts.id, unconfirmed.id].sort(),
+  );
+  expect(today.draftContinue).toMatchObject({ status: "ready", total: 2 });
+  expect(today.draftContinue.rows.map((row) => row.id).sort()).toEqual(
+    [draft.id, unconfirmed.id].sort(),
+  );
 });
 
 it("O01 Continue protects private Case actions and deadline ordering under mixed internal grants", async () => {

@@ -234,7 +234,10 @@ export async function draftContinueQuery(db: Executor, context: Context) {
         listingScope(context.grants),
         listingScope(context.grants, "listing.edit"),
         eq(listings.responsibleBrokerId, context.live.account.id),
-        inArray(listings.editorialState, ["draft", "needs_facts", "changes_requested"]),
+        // Requested changes and missing facts are review work: listingReviewQuery lists them
+        // under the same read and edit scope, so listing them here too would count one action
+        // twice. A draft may still be there for its own, differently named check.
+        eq(listings.editorialState, "draft"),
       ),
     )
     .orderBy(desc(listings.updatedAt), asc(listings.id))
