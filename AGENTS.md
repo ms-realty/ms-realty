@@ -11,7 +11,7 @@ names and PRs.
 - `production/data/launch-readiness.json` and `production/data/launch-input-checklist.md`
   remain the current launch authority. They are preserved verbatim from the primary
   checkout; their historical pass entries are not fresh evidence for this rebuild.
-  The owner-approved successor mapping is in `docs/delivery/r00-successor-policy-proposal.md`.
+  The owner-approved successor mapping is in `docs/delivery/r00-successor-policy.md`.
   Implement and verify its replacement checks before regenerating launch authority;
   approval of the mapping alone clears no launch gate.
 - The release gates are R00–R12 in `docs/architecture.md` §20.3. Do not call the system
