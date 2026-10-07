@@ -1,6 +1,6 @@
 "use client";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { controlClass } from "@/ui/field";
+import { controlClass, labelClass } from "@/ui/field";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -115,7 +115,7 @@ export function InventoryEditor({
         className="group flex min-w-0 flex-col gap-2"
         data-invalid={field.error ? "true" : undefined}
       >
-        <label htmlFor={field.id} className="text-compact font-semibold">
+        <label htmlFor={field.id} className={labelClass}>
           {labels[name]}
         </label>
         <select

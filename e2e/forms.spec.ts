@@ -68,6 +68,46 @@ test("UI05 pending keeps width and prevents a second submission while the real r
   await expect(page.getByRole("heading", { name: "Practice form checked" })).toBeVisible();
 });
 
+test("UI06 field: a 52 px canvas control under a 14/20 label, and the error border stays inside it", async ({
+  page,
+}) => {
+  await page.goto("/en/design/forms");
+  const subject = page.getByRole("textbox", { name: "Practice subject", exact: true });
+  const look = () =>
+    subject.evaluate((input) => {
+      const label = input.closest(".group")?.querySelector("label");
+      const error = document.getElementById(`${input.id}-error`);
+      const box = input.getBoundingClientRect();
+      const style = getComputedStyle(input);
+      const text = label ? getComputedStyle(label) : null;
+      return {
+        height: box.height,
+        fill: style.backgroundColor,
+        border: style.borderTopWidth,
+        label: text && `${text.fontSize}/${text.lineHeight} ${text.fontWeight}`,
+        labelGap: label?.nextElementSibling
+          ? label.nextElementSibling.getBoundingClientRect().top -
+            label.getBoundingClientRect().bottom
+          : null,
+        errorBelow: error ? error.getBoundingClientRect().top >= box.bottom : null,
+      };
+    });
+  // Figma UI06 Input (6:74): 52 px on the canvas fill, label 14/20 semibold, 8 px apart.
+  expect(await look()).toEqual({
+    height: 52,
+    fill: "rgb(248, 247, 243)",
+    border: "1px",
+    label: "14px/20px 600",
+    labelGap: 8,
+    errorBelow: null,
+  });
+  await subject.fill("ab");
+  await page.getByRole("button", { name: "Check practice form", exact: true }).click();
+  await expect(subject).toHaveAttribute("aria-invalid", "true");
+  // 694:13318: the 2 px error border and the message under the field keep the 52 px row.
+  expect(await look()).toMatchObject({ height: 52, border: "2px", errorBelow: true });
+});
+
 test("S11 validation retains input, repeats focus recovery and opens a confirmed practice receipt", async ({
   page,
   context,

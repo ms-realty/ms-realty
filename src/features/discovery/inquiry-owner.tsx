@@ -1,7 +1,7 @@
 import { propertyTypes } from "@/domain/facts";
 import type { OwnerInquiry } from "@/domain/owner-inquiry";
 import type { PublicLocale } from "@/i18n/config";
-import { controlClass, fieldClass } from "@/ui/field-class";
+import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import { discoveryCopy } from "./copy";
@@ -56,7 +56,7 @@ export function OwnerInquiryFields({
         const field = form.field(name);
         return (
           <div key={name} className={fieldClass}>
-            <label htmlFor={field.id} className="font-semibold">
+            <label htmlFor={field.id} className={labelClass}>
               {label}
             </label>
             <select

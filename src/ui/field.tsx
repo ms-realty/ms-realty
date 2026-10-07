@@ -9,11 +9,12 @@ import {
   Text,
 } from "react-aria-components";
 import { cx } from "./cx";
+import { labelClass } from "./field-class";
 import { ErrorIcon } from "./icons";
 
 // Shared field anatomy (GOV.UK order): label, hint, error, control.
 
-export { controlClass, fieldClass } from "./field-class";
+export { controlClass, fieldClass, labelClass } from "./field-class";
 
 export function Label({
   children,
@@ -26,7 +27,7 @@ export function Label({
   isRequired?: boolean;
 }) {
   return (
-    <RACLabel className="text-compact font-semibold text-text">
+    <RACLabel className={labelClass}>
       {children}
       {optionalLabel && !isRequired ? (
         <span className="font-normal text-text-muted"> {optionalLabel}</span>

@@ -804,7 +804,7 @@
       "name": "typography/compact/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Labels, controls and navigation, 16/24.",
+      "description": "Buttons, choices and navigation, 16/24. Form fields use dense semibold labels and body values (UI06).",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -870,7 +870,7 @@
       "name": "typography/dense/size",
       "variableCollectionId": "collection:type",
       "resolvedType": "FLOAT",
-      "description": "Staff secondary data only, 14/20.",
+      "description": "Staff secondary data, 14/20; in semibold, every form field label (Figma MSR / dense · semibold).",
       "scopes": ["FONT_SIZE"]
     },
     {
@@ -936,7 +936,16 @@
       "name": "spacing/control",
       "variableCollectionId": "collection:size",
       "resolvedType": "FLOAT",
-      "description": "Comfort target for primary touch controls (§11.3).",
+      "description": "Comfort target for primary touch controls (§11.3): a minimum, not the drawn height of form fields.",
+      "scopes": ["GAP", "WIDTH_HEIGHT"]
+    },
+    {
+      "action": "CREATE",
+      "id": "spacing/input",
+      "name": "spacing/input",
+      "variableCollectionId": "collection:size",
+      "resolvedType": "FLOAT",
+      "description": "Drawn height of a form input or select: 12 px padding around 16/26 text plus a 1 px border, on the canvas fill (Figma UI06 Input 6:74).",
       "scopes": ["GAP", "WIDTH_HEIGHT"]
     },
     {
@@ -1782,6 +1791,11 @@
       "variableId": "spacing/control",
       "modeId": "mode:size:light",
       "value": 44
+    },
+    {
+      "variableId": "spacing/input",
+      "modeId": "mode:size:light",
+      "value": 52
     },
     {
       "variableId": "spacing/gutter",

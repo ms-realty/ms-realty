@@ -1,7 +1,7 @@
 import { DiscoveryPage } from "@/features/discovery/page";
 import { workCopy } from "@/features/work/copy";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 import { aiCopy } from "./copy";
 import { entryCopy } from "./entry-copy";
@@ -72,7 +72,7 @@ export function AssistanceEntry({
           {entry.choices.length ? (
             <form action={path} method="get" className="flex min-w-0 flex-col items-start gap-4">
               <div className="w-full max-w-reading space-y-2">
-                <label htmlFor="butler-inquiry-source" className="block font-semibold">
+                <label htmlFor="butler-inquiry-source" className={`block ${labelClass}`}>
                   {copy.source}
                 </label>
                 <select

@@ -14,7 +14,7 @@ import { hashRequest } from "@/server/crypto";
 import { normalizeSearch } from "@/server/search/search";
 import { publicRouteMetadata } from "@/server/seo/public-metadata";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   return publicRouteMetadata((await params).locale, "/properties/intent");
@@ -108,7 +108,7 @@ export default async function Page({
         className="max-w-reading space-y-4"
       >
         <label className="grid gap-2">
-          <span className="font-semibold">{extra.title}</span>
+          <span className={labelClass}>{extra.title}</span>
           <textarea
             name="text"
             defaultValue={text}

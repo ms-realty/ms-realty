@@ -13,7 +13,7 @@ import { isAppError } from "@/server/errors";
 import { inventoryListPage } from "@/server/inventory/queries";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { ChevronEndIcon, HomeIcon } from "@/ui/icons";
 
 type Query = { q?: string; view?: string; purpose?: string; type?: string; cursor?: string };
@@ -124,7 +124,7 @@ export default async function InventoryPage({
         {view !== "all" ? <input type="hidden" name="view" value={view} /> : null}
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex min-w-0 flex-1 basis-64 flex-col gap-2">
-            <label htmlFor="inventory-search" className="text-dense font-semibold">
+            <label htmlFor="inventory-search" className={labelClass}>
               {o10.search}
             </label>
             <input
@@ -134,13 +134,13 @@ export default async function InventoryPage({
               maxLength={searchLimit}
               defaultValue={filters.q}
               aria-describedby="inventory-search-hint"
-              className={cx(controlClass, "min-h-12 py-2")}
+              className={controlClass}
             />
             <p id="inventory-search-hint" className="sr-only">
               {o10.searchHint}
             </p>
           </div>
-          <button type="submit" className={buttonClass("secondary", "min-h-13")}>
+          <button type="submit" className={buttonClass("secondary", "sm:min-h-input")}>
             {o10.apply}
           </button>
         </div>
@@ -161,7 +161,7 @@ export default async function InventoryPage({
               ] as const
             ).map(([name, label, values, current]) => (
               <div key={name} className="flex flex-col gap-2">
-                <label htmlFor={`inventory-${name}`} className="text-dense font-semibold">
+                <label htmlFor={`inventory-${name}`} className={labelClass}>
                   {label}
                 </label>
                 <select

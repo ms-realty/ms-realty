@@ -37,7 +37,7 @@ type DateFieldExtras = {
 };
 
 const groupClass = cx(
-  "flex min-h-control w-full items-center rounded-control border border-border bg-surface ps-3 text-compact text-text",
+  "flex min-h-input w-full items-center rounded-control border border-border bg-canvas ps-3 text-body text-text",
   "data-hovered:border-text data-focus-within:outline-2 data-focus-within:outline-offset-2 data-focus-within:outline-focus",
   "group-data-invalid:border-2 group-data-invalid:border-error",
   "group-data-readonly:border-dashed group-data-readonly:bg-subtle",

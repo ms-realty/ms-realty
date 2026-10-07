@@ -1,6 +1,6 @@
 import type { ViewingPreferences } from "@/domain/viewing-preferences";
 import type { PublicLocale } from "@/i18n/config";
-import { controlClass, fieldClass } from "@/ui/field-class";
+import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import { discoveryCopy } from "./copy";
@@ -25,7 +25,7 @@ export function ViewingPreferenceFields({
     const field = form.field(name);
     return (
       <div className={fieldClass} key={name}>
-        <label htmlFor={field.id} className="font-semibold">
+        <label htmlFor={field.id} className={labelClass}>
           {label}
         </label>
         <select

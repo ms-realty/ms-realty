@@ -6,7 +6,7 @@ import { interpretedFeatureKeys } from "@/server/ai/intent";
 import { intentPlaces } from "@/server/ai/intent-source";
 import { searchableAreaBases } from "@/server/search/search";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { ChevronDownIcon, FiltersIcon } from "@/ui/icons";
 import type { DiscoveryCopy } from "./copy";
 import { intentCopy } from "./intent-copy";
@@ -90,7 +90,7 @@ export async function SearchForm({
     >
       <div className="grid min-w-0 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto]">
         <label className="flex min-w-0 flex-col gap-2">
-          <span className="font-semibold">{copy.purpose}</span>
+          <span className={labelClass}>{copy.purpose}</span>
           <select name="purpose" defaultValue={values.purpose || "sale"} className={controlClass}>
             <option value="sale">{copy.buy}</option>
             <option value="long_term_rent">{copy.rent}</option>
@@ -100,10 +100,13 @@ export async function SearchForm({
           </select>
         </label>
         <label className="flex min-w-0 flex-col gap-2">
-          <span className="font-semibold">{copy.query}</span>
+          <span className={labelClass}>{copy.query}</span>
           <input name="q" defaultValue={values.q} maxLength={100} className={controlClass} />
         </label>
-        <button type="submit" className={buttonClass("primary", "sm:col-span-2 lg:col-span-1")}>
+        <button
+          type="submit"
+          className={buttonClass("primary", "sm:col-span-2 lg:col-span-1 lg:min-h-input")}
+        >
           {copy.search}
         </button>
       </div>

@@ -2,7 +2,7 @@
 
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { cx } from "../cx";
-import { controlClass, fieldClass } from "../field-class";
+import { controlClass, fieldClass, labelClass } from "../field-class";
 
 type Shared = {
   id: string;
@@ -29,11 +29,11 @@ export function FormField({
   const common = {
     "aria-describedby": describedBy || undefined,
     "aria-invalid": Boolean(error) || undefined,
-    className: cx(controlClass, "py-2", props.readOnly && "bg-subtle"),
+    className: cx(controlClass, props.readOnly && "bg-subtle"),
   } as const;
   return (
     <div className={fieldClass} data-invalid={error ? "true" : undefined}>
-      <label htmlFor={props.id} className="text-compact font-semibold text-text">
+      <label htmlFor={props.id} className={labelClass}>
         {label}
         {optionalLabel ? (
           <span className="font-normal text-text-muted"> {optionalLabel}</span>

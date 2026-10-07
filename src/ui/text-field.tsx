@@ -41,7 +41,7 @@ export function TextField({
       </Label>
       <Description>{description}</Description>
       <FieldError>{errorMessage}</FieldError>
-      <Input placeholder={placeholder} dir={inputDir} className={cx(controlClass, "py-2")} />
+      <Input placeholder={placeholder} dir={inputDir} className={controlClass} />
     </RACTextField>
   );
 }
@@ -70,7 +70,7 @@ export function TextArea({
         rows={rows}
         placeholder={placeholder}
         dir={inputDir}
-        className={cx(controlClass, "resize-y py-2 leading-6")}
+        className={cx(controlClass, "resize-y")}
       />
     </RACTextField>
   );

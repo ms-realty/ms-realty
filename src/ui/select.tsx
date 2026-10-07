@@ -58,7 +58,7 @@ export function Select({
       <Button
         className={cx(
           controlClass,
-          "flex cursor-pointer items-center justify-between gap-2 py-2 text-start",
+          "flex cursor-pointer items-center justify-between gap-2 text-start",
         )}
       >
         <SelectValue className="truncate data-placeholder:text-text-muted" />

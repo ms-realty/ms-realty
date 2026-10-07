@@ -8,7 +8,7 @@ import { documentRequestWorkbench } from "@/server/documents/requests";
 import { isAppError } from "@/server/errors";
 import { fileReceipt } from "@/server/files/receipts";
 import { findOperation } from "@/server/operations";
-import { controlClass } from "@/ui/field-class";
+import { controlClass, labelClass } from "@/ui/field-class";
 import { initialFormState } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import { type WorkflowField, WorkflowForm } from "../cases/form";
@@ -288,7 +288,7 @@ export async function DocumentRequestsScreen(
               <input type="hidden" name="operationId" value={randomUUID()} />
               <input type="hidden" name="expectedRevision" value={row.version} />
               <label className="block space-y-2">
-                <span className="font-semibold">{c.file}</span>
+                <span className={labelClass}>{c.file}</span>
                 <input
                   className={controlClass}
                   type="file"

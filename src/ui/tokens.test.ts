@@ -137,8 +137,9 @@ describe("design tokens (spec §16.2)", () => {
     expect(contrast(color(fg), color(bg))).toBeGreaterThanOrEqual(3);
   });
 
-  it("keeps a 44px default control height and a 4px spacing base", () => {
+  it("keeps a 44px touch target, a 52px form input (UI06) and a 4px spacing base", () => {
     expect(css).toMatch(/--spacing-control:\s*2\.75rem/);
+    expect(css).toMatch(/--spacing-input:\s*3\.25rem/);
     expect(css).toMatch(/--spacing:\s*0\.25rem/);
     expect(css).toContain("--radius-control: 0.375rem;");
     expect(css).toContain("--radius-panel: 0.5rem;");

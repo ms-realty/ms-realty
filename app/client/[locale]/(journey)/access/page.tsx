@@ -9,6 +9,7 @@ import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
 import { isRoutableLocale } from "@/i18n/config";
 import { currentClientSession, localReturnPath } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
+import { controlClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 import {
   beginClientPasskey,
@@ -113,7 +114,7 @@ export default async function ClientAccessPage({
         <label className="flex flex-col gap-2" htmlFor="client-email">
           {c.emailLabel}
           <input
-            className="min-h-control rounded-control border border-border bg-surface px-3 py-2"
+            className={controlClass}
             id="client-email"
             name="email"
             type="email"

@@ -9,7 +9,7 @@ import {
 import type { PublicLocale } from "@/i18n/config";
 import type { ListingCard } from "@/server/listings/view-models";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass, fieldClass } from "@/ui/field-class";
+import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -280,7 +280,7 @@ export function InquiryForm({
                 value={form.values.observedManifestId}
               />
               <div className={fieldClass}>
-                <label htmlFor={purpose.id} className="font-semibold">
+                <label htmlFor={purpose.id} className={labelClass}>
                   {copy.purpose}
                 </label>
                 <select
@@ -356,7 +356,7 @@ export function InquiryForm({
                 autoComplete="name"
               />
               <div className={fieldClass}>
-                <label htmlFor={contact.id} className="font-semibold">
+                <label htmlFor={contact.id} className={labelClass}>
                   {copy.contactMethod}
                 </label>
                 <select

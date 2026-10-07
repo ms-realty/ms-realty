@@ -24,10 +24,11 @@ import { isFresh } from "@/server/auth/sessions";
 import { can } from "@/server/authz";
 import { caseVisibility } from "@/server/cases/shared";
 import { buttonClass } from "@/ui/button-class";
+import { cx } from "@/ui/cx";
+import { controlClass } from "@/ui/field-class";
 import { Notice } from "@/ui/notice";
 
-const field =
-  "mt-1 block w-full min-w-0 max-w-full min-h-control rounded-control border border-border bg-surface px-3 py-2";
+const field = cx("mt-1 block min-w-0 max-w-full", controlClass);
 // Linux WebKit includes native option paint in document overflow. The padded containment
 // keeps the native control and its outer 3px/2px focus ring without widening the page.
 function AccessSelect(props: ComponentProps<"select">) {
@@ -186,7 +187,7 @@ export default async function ManagePage({
               {c.role}
               <AccessSelect
                 id="staff-invitation-role"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 name="role"
                 defaultValue="assigned_broker"
               >
@@ -248,7 +249,7 @@ export default async function ManagePage({
               <AccessSelect
                 id="recovery-principal"
                 name="principalId"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 required
                 defaultValue=""
               >
@@ -295,7 +296,7 @@ export default async function ManagePage({
               <AccessSelect
                 id="client-invitation-principal"
                 name="caseId"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 required
                 defaultValue=""
               >
@@ -314,7 +315,7 @@ export default async function ManagePage({
               <AccessSelect
                 id="client-invitation-role"
                 name="role"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 defaultValue="collaborator"
               >
                 {participantRoles.map((role) => (
@@ -344,7 +345,7 @@ export default async function ManagePage({
               <AccessSelect
                 id="capability-principal"
                 name="principalId"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 required
               >
                 {allMembers.map((member) => (
@@ -359,7 +360,7 @@ export default async function ManagePage({
               <AccessSelect
                 id="capability-choice"
                 name="capability"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 defaultValue="document.review"
               >
                 {capabilities.map((capability) => (
@@ -374,7 +375,7 @@ export default async function ManagePage({
               <AccessSelect
                 id="capability-record-type"
                 name="recordType"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 defaultValue=""
               >
                 <option value="">{grantCopy.global}</option>
@@ -394,7 +395,7 @@ export default async function ManagePage({
               <AccessSelect
                 id="capability-locale"
                 name="grantLocale"
-                className={`${field} h-control overflow-hidden text-ellipsis`}
+                className={`${field} overflow-hidden text-ellipsis`}
                 defaultValue=""
               >
                 <option value="">{grantCopy.allLocales}</option>
