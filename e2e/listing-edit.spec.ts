@@ -286,6 +286,87 @@ test.describe("JavaScript on", () => {
     await expect(page.getByText("The listing has changed since this save.")).toBeVisible();
   });
 
+  test("O12 leaving through the phone menu (X02): Stay, a rejected or confirmed Save draft, Discard", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const f = seed();
+    await signIn(page, f.token);
+    // X02 belongs to the phone and tablet context bar: every project runs this at phone width.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const edit = hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`);
+    await page.goto(edit);
+    const menu = page.getByRole("banner").getByRole("link", { name: "Open menu" });
+    // Hydrated: the menu opens X02 in place and the leave guard is listening.
+    await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
+    const tools = page.getByRole("dialog", { name: "Agency tools", exact: true });
+    const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
+    const source = page.getByLabel("Source or evidence reference", { exact: true });
+    const chooseCalendar = async () => {
+      await menu.click();
+      await expect(tools).toBeVisible();
+      await tools.getByRole("link", { name: /^Calendar/ }).click();
+      await expect(dialog).toBeVisible();
+    };
+    const toolsModal = () =>
+      page.evaluate(() => document.getElementById("agency-tools-menu")?.matches(":modal"));
+    const before = await listing(f.listingId);
+
+    // Stay: back in X02 over the same page, the work kept.
+    await source.fill("");
+    await chooseCalendar();
+    await dialog.getByRole("button", { name: "Stay" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(tools).toBeVisible();
+    expect(
+      await page.evaluate(() => Boolean(document.activeElement?.closest("#agency-tools-menu"))),
+    ).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(tools).toBeHidden();
+    await expect(menu).toBeFocused();
+    await expect(page).toHaveURL(edit);
+    await expect(source).toHaveValue("");
+
+    // Rejected (a blank source reference): X02 closes, the error summary takes focus and the
+    // editor answers again, nothing written.
+    await chooseCalendar();
+    await dialog.getByRole("button", { name: "Save draft" }).click();
+    const summary = page.getByRole("region", { name: "Check the form" });
+    await expect(summary).toBeFocused();
+    await expect(tools).toBeHidden();
+    expect(await toolsModal()).toBe(false);
+    await expect(source).toHaveAttribute("aria-invalid", "true");
+    await expect(page).toHaveURL(edit);
+    expect(await listing(f.listingId)).toEqual(before);
+    await summary.getByRole("link", { name: /^Source or evidence reference/ }).click();
+    await expect(source).toBeFocused();
+    await page.keyboard.type("Synthetic source, saved from the menu");
+    await expect(source).toHaveValue("Synthetic source, saved from the menu");
+
+    // Confirmed: the receipt, with X02 closed, continues to the destination chosen there.
+    await chooseCalendar();
+    await dialog.getByRole("button", { name: "Save draft" }).click();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Working draft saved" }),
+    ).toBeVisible();
+    await expect(tools).toBeHidden();
+    await expect(page.getByRole("link", { name: "Continue", exact: true })).toHaveAttribute(
+      "href",
+      "/en/calendar",
+    );
+    const saved = await listing(f.listingId);
+    expect(saved.draft.sourceReference).toBe("Synthetic source, saved from the menu");
+
+    // Discard: straight to the destination, nothing written.
+    await page.goto(edit);
+    await source.fill("Synthetic source, discarded");
+    await chooseCalendar();
+    await dialog.getByRole("button", { name: "Discard changes" }).click();
+    await expect(page).toHaveURL(hostUrl("staff", "/en/calendar"));
+    await expect(tools).toBeHidden();
+    expect(await listing(f.listingId)).toEqual(saved);
+  });
+
   test("O12 a save leaves without a browser prompt only once the server acknowledged it", async ({
     page,
   }) => {

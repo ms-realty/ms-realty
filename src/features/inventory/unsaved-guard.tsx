@@ -24,6 +24,8 @@ export function UnsavedGuard({
   const dialog = useRef<HTMLDialogElement>(null);
   const form = useRef<HTMLFormElement | null>(null);
   const [target, setTarget] = useState("");
+  // The open dialog the chosen link sits in (the phone menu, X02), or null.
+  const origin = useRef<HTMLDialogElement | null>(null);
   const leaving = useRef(false);
   useEffect(() => {
     const editor = document.querySelector<HTMLFormElement>(`${root} form`);
@@ -83,6 +85,7 @@ export function UnsavedGuard({
       event.preventDefault();
       event.stopPropagation();
       setTarget(url.href);
+      origin.current = link.closest("dialog");
       dialog.current?.showModal();
     };
     const unload = (event: BeforeUnloadEvent) => {
@@ -115,6 +118,9 @@ export function UnsavedGuard({
           className={buttonClass("primary")}
           onClick={() => {
             dialog.current?.close();
+            // Saving stays on the editor until the server answers: close the menu the link was
+            // chosen in, so the editor is not inert and a rejected save's error takes focus.
+            origin.current?.close();
             const editor = form.current;
             // Save, then offer to continue where the person was going (O12SAVED "Continue").
             const next = editor?.querySelector<HTMLInputElement>('input[name="_next"]');
