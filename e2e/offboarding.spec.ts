@@ -18,6 +18,8 @@ for (const javaScriptEnabled of [true, false])
   test(`O23: offboard with retained keys and work, JavaScript ${javaScriptEnabled}`, async ({
     browser,
   }, testInfo) => {
+    // About 23 s in CI WebKit on a normal runner, so the 30 s default is too tight.
+    test.setTimeout(90_000);
     const f = JSON.parse(
       execFileSync(
         process.execPath,

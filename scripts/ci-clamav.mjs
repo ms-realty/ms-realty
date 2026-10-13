@@ -165,7 +165,8 @@ try {
     env,
     310_000,
   );
-  if (exitCode === 0) exitCode = await run(command, args, env, 45 * 60_000);
+  // The browser suite takes about 32 min on a normal runner and 1.4x that on a slow one.
+  if (exitCode === 0) exitCode = await run(command, args, env, 60 * 60_000);
 } catch (error) {
   console.error(error instanceof Error ? error.message : "CI scanner setup failed");
   exitCode = interrupted ?? 1;

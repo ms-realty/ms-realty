@@ -36,6 +36,8 @@ test("access administration does not disclose unreadable Cases in invitation cho
   page,
   context,
 }) => {
+  // 201 seeded Cases: about 28 s in CI WebKit on a normal runner, so the 30 s default is too tight.
+  test.setTimeout(90_000);
   const f = seed();
   await db
     .update(schema.grants)
