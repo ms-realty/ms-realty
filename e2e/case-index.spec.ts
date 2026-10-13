@@ -87,7 +87,7 @@ for (const javaScriptEnabled of [false, true])
       // One link per case; its name carries type, purpose, stage, disposition and owner.
       await expect(
         page.getByRole("link", {
-          name: `${buyer.reference} · Buying ${buyer.title} · Requirements to agree Accountable broker: ${f.ownerName}`,
+          name: `${buyer.reference} · Buying ${buyer.title} · Agreeing requirements Accountable broker: ${f.ownerName}`,
           exact: true,
         }),
       ).toHaveAttribute("href", `/en/cases/${buyer.id}`);
@@ -98,7 +98,7 @@ for (const javaScriptEnabled of [false, true])
         `${paused.reference} · Selling ${paused.title} · Preparing the listing Paused · Accountable broker: ${f.ownerName}`,
       );
       await expect(rows(page).filter({ hasText: closed.reference })).toHaveText(
-        `${closed.reference} · Letting ${closed.title} · Marketing Closed · Accountable broker: ${f.ownerName}`,
+        `${closed.reference} · Letting ${closed.title} · On the market Closed · Accountable broker: ${f.ownerName}`,
       );
       await expect(rows(page).filter({ hasText: covered.reference })).toHaveText(
         `${covered.reference} · Buying ${covered.title} · Viewings Agency coverage · Last accepted owner: ${f.formerName}`,
@@ -185,7 +185,7 @@ test("O04 keeps BG and RU labels, and a first-use empty state", async ({ page })
       "Търсене",
       "Покажете",
       "Списък със случаи",
-      `${buyer.reference} · Покупка ${buyer.title} · Изисквания за уточнение Отговорен брокер: ${f.ownerName}`,
+      `${buyer.reference} · Покупка ${buyer.title} · Уточняване на изискванията Отговорен брокер: ${f.ownerName}`,
       "Случаи: 6",
     ],
     [
