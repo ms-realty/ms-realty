@@ -145,3 +145,4 @@ Blocked gates stay blocked until these exist; the safe default applies meanwhile
 | 2026-09-24 | S1 | #261 | Legacy app removed; legacy facts extracted; scaffold and CI |
 | 2026-09-24 | S1 | #263 | Foundations: domain, schema, server core, UI, i18n, import; 27 verified review findings fixed |
 | 2026-09-26 | S1b | — | Realigned to the final architecture (this document, ADR 0002) |
+| 2026-10-13 | S4 | #280 | O04 cases index ships search-only over `listCases` (case number or title, 50 newest). Open follow-up: adopt the paged `queryCaseIndex` for the Mine / Needs action views, filters, party and next-action columns and pagination (ux-spec §O04) |

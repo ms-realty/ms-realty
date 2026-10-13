@@ -3,11 +3,12 @@
 // disposition and accountable owner. Search and every state are GET links or forms, so the
 // page works without JavaScript.
 //
-// listCases returns no owner id, needs-action flag, party, next action, cursor or total, so the
-// Figma's Mine / Needs action views, Filters, pagination and "open the case waiting for action"
-// are left out rather than computed from its capped page of 50.
+// This slice is search-only over listCases. The Figma's Mine / Needs action views, Filters, party
+// and next-action columns, pagination and "open the case waiting for action" need the paged read
+// model queryCaseIndex (src/server/cases/index-query.ts); adopting it is the recorded follow-up
+// (docs/plan.md, O04), and nothing here computes them from listCases' capped page of 50.
 import "server-only";
-import { unstable_rethrow } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { getDb } from "@/db/client";
 import type { Session } from "@/server/auth/sessions";
 import { listCases } from "@/server/cases/queries";
@@ -43,6 +44,8 @@ export async function CaseDirectoryScreen({
   // A failed read is its own state; it never renders as an empty list.
   const rows = await listCases(getDb(), session, q).catch((error: unknown) => {
     unstable_rethrow(error);
+    // Lost staff access is a denial, not a failed read (same as matching-screen.tsx).
+    if (isAppError(error) && (error.code === "not_found" || error.code === "forbidden")) notFound();
     console.error(
       "[O04] case list unavailable:",
       isAppError(error) ? error.code : error instanceof Error ? error.name : typeof error,
@@ -169,7 +172,9 @@ export async function CaseDirectoryScreen({
           </ul>
           <p className="text-dense text-text-muted">
             {rows.length >= rowLimit
-              ? copy.bounded
+              ? q
+                ? copy.boundedSearch
+                : copy.bounded
               : copy.count.replace("{n}", new Intl.NumberFormat(locale).format(rows.length))}
           </p>
         </>
