@@ -128,11 +128,12 @@ export async function activePolicy(db: Executor, id: string, now = new Date()) {
     .from(processPolicies)
     .where(eq(processPolicies.id, id))
     .for("share");
+  // created_at is stamped by the database clock; comparing it with the application's `now`
+  // denied every policy created within the clock skew between the two hosts.
   if (
     !policy ||
     policy.revokedAt ||
     policy.validUntil <= now ||
-    policy.createdAt > now ||
     policy.policyHash !== policyDigest(policy) ||
     !processItemsSchema.safeParse(policy.items).success
   )

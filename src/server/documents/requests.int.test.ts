@@ -239,6 +239,14 @@ it("blocks writes after policy revocation and rejects stale versions", async () 
       ?.canUpload,
   ).toBe(false);
 });
+it("accepts a policy whose database creation stamp is ahead of the application clock", async () => {
+  const f = await documentRequestFixture(t.db);
+  await t.db
+    .update(processPolicies)
+    .set({ createdAt: new Date(Date.now() + 5_000) })
+    .where(eq(processPolicies.id, f.policyId));
+  await expect(reserve(f)).resolves.toMatchObject({ uploadId: expect.any(String) });
+});
 it("does not request sensitive identity evidence during initial buyer browsing", async () => {
   const f = await documentRequestFixture(t.db);
   await expect(
