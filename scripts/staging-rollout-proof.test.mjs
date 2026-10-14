@@ -17,7 +17,8 @@ function fixture() {
     base = `${root}/containers/applications`;
   const bindings = [],
     apps = [],
-    completedAt = new Date(Date.now() - 1_000).toISOString();
+    // Live Cloudflare timestamps carry nanosecond fractions.
+    completedAt = new Date(Date.now() - 1_000).toISOString().replace(/Z$/, "000064Z");
   const buildNonce = randomUUID();
   for (const [index, role] of ["web", "worker", "migrator"].entries()) {
     const actorId = String(index + 1).repeat(64),
@@ -42,16 +43,22 @@ function fixture() {
       scheduling_policy: "default",
       configuration: { image },
       version: 2,
-      active_rollout_id: `rollout-${role}`,
+      // Cloudflare clears active_rollout_id once the rollout completes.
+      active_rollout_id: null,
     });
-    documents.set(`${base}/app-${role}/rollouts/rollout-${role}`, {
-      result: {
-        id: `rollout-${role}`,
-        status: "completed",
-        version: 2,
-        target_configuration: { image },
-        completed_at: completedAt,
-      },
+    // Shape of GET .../rollouts as observed live: no result_info, versions as current/target.
+    documents.set(`${base}/app-${role}/rollouts`, {
+      result: [
+        {
+          id: `rollout-${role}`,
+          status: "completed",
+          kind: "full_auto",
+          current_version: 1,
+          target_version: 2,
+          target_configuration: { image },
+          last_updated_at: completedAt,
+        },
+      ],
     });
     documents.set(`${base}/app-${role}/instances-v2`, {
       result: [
@@ -103,6 +110,27 @@ test("returns provider observation only after all three actors and completed rol
   assert.equal(f.calls.length, 8);
   assert.equal("PASS" in result, false);
 });
+test("accepts a newly created application, which Cloudflare records without a rollout", async () => {
+  const f = fixture();
+  for (const app of f.apps) {
+    app.version = 1;
+    f.documents.set(`${f.base}/${app.id}/rollouts`, { result: [] });
+  }
+  const result = await observe(f);
+  assert.deepEqual(
+    result.roles.map((role) => [role.applicationVersion, role.rolloutId, role.rolloutVersion]),
+    [
+      [1, null, null],
+      [1, null, null],
+      [1, null, null],
+    ],
+  );
+});
+test("accepts a completed rollout that is still reported as active", async () => {
+  const f = fixture();
+  f.apps[0].active_rollout_id = "rollout-web";
+  assert.equal((await observe(f)).roles[0].rolloutId, "rollout-web");
+});
 test("fully follows application and instance cursor pages", async () => {
   const f = fixture(),
     app = f.documents.get(f.base);
@@ -143,20 +171,35 @@ const failures = {
     delete f.documents.get(f.base).result_info;
   },
   "no completed rollout": (f) => {
-    f.documents.get(`${f.base}/app-web/rollouts/rollout-web`).result.status = "progressing";
+    f.documents.get(`${f.base}/app-web/rollouts`).result[0].status = "progressing";
   },
-  "missing rollout ID": (f) => {
-    delete f.apps[0].active_rollout_id;
+  "later version without a rollout": (f) => {
+    f.documents.set(`${f.base}/app-web/rollouts`, { result: [] });
+  },
+  "rollout still active for another version": (f) => {
+    f.apps[0].active_rollout_id = "rollout-next";
+  },
+  "new application with a rollout in progress": (f) => {
+    f.apps[0].version = 1;
+    f.apps[0].active_rollout_id = "rollout-next";
+    f.documents.set(`${f.base}/app-web/rollouts`, { result: [] });
   },
   "wrong rollout version": (f) => {
-    f.documents.get(`${f.base}/app-web/rollouts/rollout-web`).result.version = 1;
+    f.documents.get(`${f.base}/app-web/rollouts`).result[0].target_version = 1;
+  },
+  "two rollouts to the current version": (f) => {
+    const list = f.documents.get(`${f.base}/app-web/rollouts`).result;
+    list.push({ ...list[0], id: "rollout-again" });
+  },
+  "missing rollout list": (f) => {
+    f.documents.set(`${f.base}/app-web/rollouts`, { result: null });
   },
   "wrong target digest": (f) => {
-    f.documents.get(`${f.base}/app-web/rollouts/rollout-web`).result.target_configuration.image =
+    f.documents.get(`${f.base}/app-web/rollouts`).result[0].target_configuration.image =
       "old:latest";
   },
   "invalid completion timestamp": (f) => {
-    f.documents.get(`${f.base}/app-web/rollouts/rollout-web`).result.completed_at = "tomorrow";
+    f.documents.get(`${f.base}/app-web/rollouts`).result[0].last_updated_at = "tomorrow";
   },
   "missing actor binding": (f) => {
     f.bindings.shift();

@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 import { readStagingInputs, validateStaging } from "./staging-config.mjs";
 import { observeRuntimeRollout } from "./staging-rollout-proof.mjs";
+import { settle } from "./staging-settle.mjs";
 
 try {
   const { input, artifacts } = await readStagingInputs(process.argv[2]);
@@ -22,15 +23,22 @@ try {
       signal: AbortSignal.timeout(20000),
     });
     if (!response.ok || !response.headers.get("x-robots-tag")?.includes("noindex"))
-      throw new Error("Protected noindex staging control endpoint unavailable");
+      throw new Error(
+        `Protected noindex staging control endpoint unavailable (HTTP ${response.status})`,
+      );
     return response.json();
   };
   // Preparing identities does not start queue jobs or migrations. Config/env pins cannot
   // authorize a migration until the provider actually reports the exact running images.
-  const prepared = await call("runtime", "POST");
-  await observeRuntimeRollout(input, prepared, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {
-    allowPreparedWeb: true,
-  });
+  // The release deploy returns before its containers start and its rolling update completes.
+  const prepared = await settle(() => call("runtime", "POST"), { ms: 180_000 });
+  await settle(
+    () =>
+      observeRuntimeRollout(input, prepared, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {
+        allowPreparedWeb: true,
+      }),
+    { ms: 600_000 },
+  );
   await call("migrate", "POST");
   const deadline = Date.now() + 600000;
   let completed;
@@ -61,10 +69,9 @@ try {
   const health = await response.json();
   if (health.build !== input.sourceCommit) throw new Error("Staging web build identity mismatch");
   const runtime = await call("runtime", "POST");
-  const observation = await observeRuntimeRollout(
-    input,
-    runtime,
-    process.env.STAGING_CLOUDFLARE_READ_TOKEN,
+  const observation = await settle(
+    () => observeRuntimeRollout(input, runtime, process.env.STAGING_CLOUDFLARE_READ_TOKEN),
+    { ms: 180_000 },
   );
   await writeFile(
     "deploy/staging-runtime.generated.json",

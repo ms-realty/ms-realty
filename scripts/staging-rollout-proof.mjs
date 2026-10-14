@@ -15,9 +15,10 @@ const demand = (condition, label) => {
   if (!condition) throw new Error(`Staging rollout observation failed: ${label}`);
 };
 const identifier = (value) => typeof value === "string" && /^[a-zA-Z0-9_-]{1,128}$/.test(value);
+// Cloudflare reports nanosecond fractions (for example 10:36:46.403000064Z).
 const timestamp = (value, now) =>
   typeof value === "string" &&
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) &&
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/.test(value) &&
   Number.isFinite(Date.parse(value)) &&
   Date.parse(value) <= now &&
   new Date(value).toISOString().slice(0, 19) === value.slice(0, 19);
@@ -170,21 +171,34 @@ export async function observeRuntimeRollout(
         app.configuration?.image === input.image &&
         Number.isInteger(app.version) &&
         app.version > 0 &&
-        identifier(app.active_rollout_id),
+        (app.active_rollout_id == null || identifier(app.active_rollout_id)),
       `${role} digest-pinned scheduled application`,
     );
     const appPath = `${base}/${encodeURIComponent(app.id)}`;
-    const rollout = (await read(`${appPath}/rollouts/${encodeURIComponent(app.active_rollout_id)}`))
-      .result;
-    demand(
-      object(rollout) &&
-        rollout.id === app.active_rollout_id &&
-        rollout.status === "completed" &&
-        rollout.version === app.version &&
-        rollout.target_configuration?.image === input.image &&
-        timestamp(rollout.completed_at, Date.now()),
-      `${role} completed exact-version rollout`,
-    );
+    // Cloudflare applies a new application's first configuration directly and records no rollout.
+    // A later version has exactly one rollout targeting it; active_rollout_id is cleared once it
+    // completes. The rollout list carries no pagination metadata.
+    const rollouts = (await read(`${appPath}/rollouts`)).result;
+    demand(Array.isArray(rollouts) && rollouts.every(object), `${role} rollout list shape`);
+    const current = rollouts.filter((candidate) => candidate.target_version === app.version);
+    let rollout = null;
+    if (current.length === 0)
+      demand(
+        app.version === 1 && app.active_rollout_id == null,
+        `${role} completed exact-version rollout`,
+      );
+    else {
+      [rollout] = current;
+      demand(
+        current.length === 1 &&
+          identifier(rollout.id) &&
+          (app.active_rollout_id == null || app.active_rollout_id === rollout.id) &&
+          rollout.status === "completed" &&
+          rollout.target_configuration?.image === input.image &&
+          timestamp(rollout.last_updated_at, Date.now()),
+        `${role} completed exact-version rollout`,
+      );
+    }
     const instances = await pages(`${appPath}/instances-v2`),
       actorId = runtime.roles[role].actorId;
     const instanceIds = new Set();
@@ -226,14 +240,14 @@ export async function observeRuntimeRollout(
       actorId,
       namespaceId: namespaceByRole[role],
       applicationId: app.id,
-      rolloutId: rollout.id,
+      rolloutId: rollout?.id ?? null,
       applicationVersion: app.version,
-      rolloutVersion: rollout.version,
+      rolloutVersion: rollout?.target_version ?? null,
       image: actor[0].image,
       state: actor[0].status.state,
       startedAt: actor[0].started_at,
       statusUpdatedAt: actor[0].status.updated_at,
-      completedAt: rollout.completed_at,
+      completedAt: rollout?.last_updated_at ?? null,
       buildNonce: runtime.roles[role].buildNonce,
     });
   }
