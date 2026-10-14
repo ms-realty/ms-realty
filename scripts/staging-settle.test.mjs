@@ -4,7 +4,12 @@ import { settle } from "./staging-settle.mjs";
 
 function clock() {
   let at = 0;
-  return { now: () => at, wait: async (ms) => void (at += ms) };
+  return {
+    now: () => at,
+    wait: async (ms) => {
+      at += ms;
+    },
+  };
 }
 
 test("returns the first success after transient failures", async () => {
