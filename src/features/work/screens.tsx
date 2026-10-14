@@ -57,11 +57,15 @@ import { When } from "./when";
 export function checkLocale(locale: string) {
   if (!isStaffLocale(locale)) notFound();
 }
+/**
+ * One private record read. A record the viewer may not read, or may not use on this page, is
+ * a 404 to them like a missing one (M-003): never a crash, and never a hint that it exists.
+ */
 export async function privateRead<T>(fn: () => Promise<T>) {
   try {
     return await fn();
   } catch (error) {
-    if (isAppError(error) && error.code === "not_found") notFound();
+    if (isAppError(error) && (error.code === "not_found" || error.code === "forbidden")) notFound();
     throw error;
   }
 }

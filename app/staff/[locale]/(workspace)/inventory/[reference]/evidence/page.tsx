@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "@/db/client";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
+import { privateRead } from "@/features/work/screens";
 import { isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
@@ -21,8 +22,8 @@ export default async function SellerEvidencePage({
   const session = await requireStaffPage(locale),
     db = getDb(),
     copy = evidenceCopy(locale);
-  const detail = await inventoryDetail(db, session.actor, reference);
-  const evidence = await inventoryEvidence(db, session.actor, reference);
+  const detail = await privateRead(() => inventoryDetail(db, session.actor, reference));
+  const evidence = await privateRead(() => inventoryEvidence(db, session.actor, reference));
   const contactPage = await listContacts(db, session).catch(() => ({ rows: [] }));
   const resource = { type: "listing", id: detail.listing.id, propertyId: detail.property.id };
   const edit = await can(db, session.actor, "listing.edit", resource);

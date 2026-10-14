@@ -1,0 +1,8 @@
+{
+  "today": "Back to Today",
+  "permission": {
+    "title": "Your access does not include this page",
+    "managers": "Ask one of the people who manage access to give it to you: {names}.",
+    "noManagers": "Ask your manager to give you access."
+  }
+}

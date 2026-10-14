@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, expect, it } from "vitest";
-import { auditEvents, grants, sessions } from "@/db/schema";
+import { auditEvents, grants, principals, sessions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { can } from "../authz";
 import { createStaff, type GrantSpec } from "../testing";
-import { grantStaffCapability, revokeStaffGrant } from "./grants";
+import { accessManagerNames, grantStaffCapability, revokeStaffGrant } from "./grants";
 import { finishPasskeyRegistration, startPasskeyRegistration } from "./passkeys";
 import { createSession, readSession } from "./sessions";
 import { SoftAuthenticator } from "./testing-authenticator";
@@ -169,4 +169,18 @@ it("canonical session freshness and active authorization are checked before any 
   await expect(
     grantStaffCapability(t.db, unrelated.session, { ...input, operationId: randomUUID() }),
   ).rejects.toMatchObject({ code: "forbidden" });
+});
+
+it("names only the active staff who may grant access, for the permission state (S07)", async () => {
+  const marker = randomUUID().slice(0, 8);
+  const named = async (name: string, options: Parameters<typeof createStaff>[1]) => {
+    const staff = await createStaff(t.db, options);
+    await t.db.update(principals).set({ displayName: name }).where(eq(principals.id, staff.id));
+  };
+  await named(`Manager ${marker}`, { roles: ["manager"] });
+  await named(`Coordinator ${marker}`, { roles: ["coordinator"] });
+  await named(`Former manager ${marker}`, { roles: ["manager"], membership: "ended" });
+  await named(`Suspended manager ${marker}`, { roles: ["manager"], status: "suspended" });
+  const names = (await accessManagerNames(t.db)).filter((name) => name.endsWith(marker));
+  expect(names).toEqual([`Manager ${marker}`]);
 });

@@ -16,7 +16,7 @@ import {
 import { type Capability, capabilities, hasCapability, rolePresets } from "@/domain/capabilities";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { recordAudit } from "../audit";
-import { can, resolveGrants } from "../authz";
+import { can, resolveGrants, staffWhoCan } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
@@ -275,6 +275,31 @@ export async function listStaffGrants(db: Executor, session: Session) {
       ),
     )
     .orderBy(principals.displayName);
+}
+
+/**
+ * Who a staff member can ask for access (S07): the display names, and nothing else, of the
+ * active staff who may grant it.
+ */
+export async function accessManagerNames(db: Executor): Promise<string[]> {
+  const staff = await db
+    .select({ id: principals.id, name: principals.displayName })
+    .from(principals)
+    .innerJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
+    .where(
+      and(
+        eq(principals.kind, "staff"),
+        eq(principals.status, "active"),
+        eq(staffMemberships.state, "active"),
+      ),
+    )
+    .orderBy(principals.displayName);
+  const managers = await staffWhoCan(
+    db,
+    staff.map((person) => person.id),
+    ["access.grant"],
+  );
+  return staff.filter((person) => managers.has(person.id)).map((person) => person.name);
 }
 
 export async function offboardingOperator(db: Executor, session: Session) {

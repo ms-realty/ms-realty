@@ -43,6 +43,7 @@ const en = {
   permissions: "Your role cannot edit this record.",
   o10: {
     instruction: "Open the listing that is waiting for action, or search for a property by number.",
+    about: "The properties and listings the agency works with.",
     search: "Search",
     searchHint: "Listing number, title or settlement",
     filters: "Filters",
@@ -352,6 +353,7 @@ const bg: Copy = {
   permissions: "Вашата роля няма право да редактира този запис.",
   o10: {
     instruction: "Отворете обявата, която чака действие, или потърсете имот по номер.",
+    about: "Имотите и обявите, с които работи агенцията.",
     search: "Търсене",
     searchHint: "Номер на обявата, заглавие или населено място",
     filters: "Филтри",
@@ -659,6 +661,7 @@ const ru: Copy = {
   permissions: "Ваша роль не может редактировать эту запись.",
   o10: {
     instruction: "Откройте объявление, которое ждёт действия, или найдите объект по номеру.",
+    about: "Объекты и объявления, с которыми работает агентство.",
     search: "Поиск",
     searchHint: "Номер объявления, заголовок или населённый пункт",
     filters: "Фильтры",

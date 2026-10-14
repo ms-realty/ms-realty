@@ -4,6 +4,7 @@ import { getDb } from "@/db/client";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { translationCopy } from "@/features/inventory/translation-copy";
 import { TranslationEditor } from "@/features/inventory/translation-editor";
+import { privateRead } from "@/features/work/screens";
 import { isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
@@ -20,7 +21,9 @@ export default async function TranslationPage({
   const session = await requireStaffPage(locale),
     db = getDb(),
     copy = translationCopy(locale);
-  const data = await translationWorkbench(db, session.actor, reference, language),
+  const data = await privateRead(() =>
+      translationWorkbench(db, session.actor, reference, language),
+    ),
     row = data.translation;
   const resource = {
     type: "listing",
