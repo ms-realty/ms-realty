@@ -58,3 +58,61 @@ export function resolveLocalTime(
   if (choose) return { outcome: "resolved", instant: choose === "earlier" ? earlier : later };
   return { outcome: "ambiguous", candidates: [earlier, later] };
 }
+
+const localMinute = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+/** The minute an instant shows on a wall clock in `timeZone`, as a `datetime-local` value. */
+export function localInputValue(
+  instant: Date | string | null | undefined,
+  timeZone: string,
+): string {
+  if (instant === null || instant === undefined || instant === "") return "";
+  const ms = instant instanceof Date ? instant.getTime() : Date.parse(instant);
+  if (!Number.isFinite(ms)) return "";
+  return new Date(wallClockAsUtc(ms, timeZone)).toISOString().slice(0, 16);
+}
+
+export type LocalInputReason =
+  | "invalid_local_time"
+  | "nonexistent_local_time"
+  | "ambiguous_local_time";
+
+export type LocalInput =
+  | {
+      readonly ok: true;
+      /** The UTC instant to store. */
+      readonly instant: string;
+      /** The zone's offset at that instant, such as "+03:00". */
+      readonly offset: string;
+      /** The wall time occurs twice; its first occurrence was taken. */
+      readonly repeated: boolean;
+    }
+  | { readonly ok: false; readonly reason: LocalInputReason };
+
+/**
+ * Reads a `datetime-local` value (YYYY-MM-DDTHH:mm) as a wall time in `timeZone`. A time in
+ * the spring-forward gap is rejected. A repeated autumn time is rejected where one exact
+ * instant is committed (`"reject"`); a visitor's viewing preference takes its first
+ * occurrence (`"first"`) and says so, instead of asking the visitor to choose.
+ */
+export function readLocalInput(
+  value: string,
+  timeZone: string,
+  repeated: "reject" | "first" = "reject",
+): LocalInput {
+  const wall = Date.parse(`${value}:00Z`);
+  if (
+    !localMinute.test(value) ||
+    !Number.isFinite(wall) ||
+    new Date(wall).toISOString().slice(0, 16) !== value
+  )
+    return { ok: false, reason: "invalid_local_time" };
+  const resolved = resolveLocalTime(value, timeZone);
+  if (resolved.outcome === "nonexistent") return { ok: false, reason: "nonexistent_local_time" };
+  if (resolved.outcome === "ambiguous" && repeated === "reject")
+    return { ok: false, reason: "ambiguous_local_time" };
+  const instant = resolved.outcome === "resolved" ? resolved.instant : resolved.candidates[0];
+  const minutes = Math.abs(wall - Date.parse(instant)) / 60_000;
+  const offset = `${wall < Date.parse(instant) ? "-" : "+"}${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  return { ok: true, instant, offset, repeated: resolved.outcome === "ambiguous" };
+}

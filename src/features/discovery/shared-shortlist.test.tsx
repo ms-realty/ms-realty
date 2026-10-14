@@ -67,7 +67,8 @@ describe("P09 recipient list", () => {
     expect(screen.getByText(labels.checked)).toBeVisible();
     const until = container.querySelector("time");
     expect(until?.getAttribute("datetime")).toBe(instant);
-    expect(until?.textContent).toMatch(/2026/);
+    expect(until?.textContent).toMatch(/\d{2}:\d{2} \(Sofia time\)$/);
+    expect(until?.textContent).not.toMatch(/UTC|GMT|EES?T|Europe\//);
     // Facts are preserved exactly: price with basis, area, bedrooms, place, reference.
     const first = container.querySelector('article[data-listing-reference="MS-00001"]');
     expect(first).not.toBeNull();
