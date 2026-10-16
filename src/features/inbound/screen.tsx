@@ -1,4 +1,5 @@
 import { NativeForm } from "@/ui/form/native-form";
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { getDb } from "@/db/client";
 import type { Session } from "@/server/auth/sessions";
@@ -130,7 +131,9 @@ export async function InboundDetail({
         </pre>
         {row.htmlOmitted ? <p>{c.omitted}</p> : null}
         <p>{c.auth}</p>
-        <pre className="whitespace-pre-wrap break-all">{JSON.stringify(row.authentication)}</pre>
+        <TechnicalDetails locale={locale}>
+          <pre className="whitespace-pre-wrap break-all">{JSON.stringify(row.authentication)}</pre>
+        </TechnicalDetails>
         {attachments.length ? (
           <section>
             <h3>{c.attachments}</h3>

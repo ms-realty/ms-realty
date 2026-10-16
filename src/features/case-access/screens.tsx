@@ -1,3 +1,4 @@
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
@@ -109,7 +110,11 @@ export async function CaseAccessScreen(
                 ? cc.conflict
                 : cc.statusUnknown}
           </h2>
-          {receipt ? <p>{receipt.operationId}</p> : null}
+          {receipt ? (
+            <TechnicalDetails locale={props.locale}>
+              <bdi>{receipt.operationId}</bdi>
+            </TechnicalDetails>
+          ) : null}
         </section>
       ) : null}
       <div className="flex flex-wrap gap-5">

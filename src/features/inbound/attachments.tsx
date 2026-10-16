@@ -1,4 +1,5 @@
 import { NativeForm } from "@/ui/form/native-form";
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { getDb } from "@/db/client";
 import { documentClassifications } from "@/domain/document";
@@ -65,7 +66,10 @@ export async function InboundAttachments({
       {saved && view.imports.some((i) => i.file.id === saved.versionId) ? (
         <div role="status">
           <Notice tone="success">
-            {c.receipt}: <bdi data-attachment-receipt>{saved.id}</bdi>
+            {c.receipt}
+            <TechnicalDetails locale={locale}>
+              <bdi data-attachment-receipt>{saved.id}</bdi>
+            </TechnicalDetails>
           </Notice>
         </div>
       ) : null}

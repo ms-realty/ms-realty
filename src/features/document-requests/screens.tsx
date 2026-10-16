@@ -1,4 +1,5 @@
 import { NativeForm } from "@/ui/form/native-form";
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
@@ -121,7 +122,11 @@ export async function DocumentRequestsScreen(
                 ? c.failed
                 : c.processing}
           </h2>
-          {receipt ? <p>{receipt.operationId}</p> : null}
+          {receipt ? (
+            <TechnicalDetails locale={locale}>
+              <bdi>{receipt.operationId}</bdi>
+            </TechnicalDetails>
+          ) : null}
           <a className={workflowLink} href={`${path}?refresh=${randomUUID()}`}>
             {caseCopy(locale).back}
           </a>

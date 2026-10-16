@@ -465,6 +465,7 @@ it("offers only accessible current, clean, purpose-reviewed completion versions"
   await t.db.insert(grants).values({
     principalId: f.staff.id,
     capability: "compliance.review",
+    reason: "Synthetic completion evidence access",
     recordType: "case",
     recordId: f.record.id,
   });
