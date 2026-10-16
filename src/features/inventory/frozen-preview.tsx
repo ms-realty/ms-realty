@@ -1,6 +1,8 @@
 // Server-rendered review of the exact immutable candidate; never the mutable working draft.
 import type { listingRevisions, propertyFacts } from "@/db/schema";
+import { factFieldLabel } from "@/i18n/fact-labels";
 import { termsFacts } from "@/server/publication/presentation";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { inventoryCopy, optionLabel } from "./copy";
 import { evidenceCopy } from "./evidence-copy";
 
@@ -51,7 +53,7 @@ export function FrozenPreview({
   return (
     <section className="space-y-3 rounded-panel border border-divider bg-surface p-5">
       <h3 className="font-semibold">
-        {evidence.source} · <bdi>{reference}</bdi> · {copy.revision} {revision.revisionNumber}
+        {evidence.source} · <bdi>{reference}</bdi>
       </h3>
       <p className="text-compact text-text-muted">{evidence.sourceHint}</p>
       <p className="text-section font-semibold" lang="bg">
@@ -66,29 +68,37 @@ export function FrozenPreview({
           <dd>
             {optionLabel(price?.state ?? "unknown", locale)} · {valueText(price?.value, locale)}
           </dd>
-          <dd className="break-words text-compact text-text-muted">{priceSource}</dd>
+          {priceSource ? (
+            <dd>
+              <TechnicalDetails locale={locale}>{priceSource}</TechnicalDetails>
+            </dd>
+          ) : null}
         </div>
         {facts.map((f) => (
           <div key={f.id}>
             <dt className="font-semibold">
-              {f.fieldKey === "location"
-                ? copy.location
-                : f.fieldKey.startsWith("area.")
-                  ? copy.labels.area
-                  : f.fieldKey === "bedrooms"
-                    ? copy.labels.bedrooms
-                    : f.fieldKey.replaceAll("_", " ")}
+              {f.fieldKey === "location" ? copy.location : factFieldLabel(f.fieldKey, locale)}
             </dt>
             <dd>
               {optionLabel(f.state, locale)}
               {f.value !== null ? ` · ${valueText(f.value, locale)}` : ""}
             </dd>
-            <dd className="break-words text-compact text-text-muted">
-              {f.sourceReference} · {f.sourceLanguage?.toUpperCase()}
+            <dd>
+              <TechnicalDetails locale={locale}>
+                <p>
+                  <bdi>{f.fieldKey}</bdi>
+                </p>
+                <p>
+                  {f.sourceReference} · {f.sourceLanguage?.toUpperCase()}
+                </p>
+              </TechnicalDetails>
             </dd>
           </div>
         ))}
       </dl>
+      <TechnicalDetails locale={locale}>
+        {copy.revision} {revision.revisionNumber}
+      </TechnicalDetails>
     </section>
   );
 }

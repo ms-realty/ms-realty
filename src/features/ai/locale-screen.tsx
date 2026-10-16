@@ -2,7 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
-import { isPublicLocale, publicLocales } from "@/i18n/config";
+import { isPublicLocale, localeEndonyms, publicLocales } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { listLocaleAssistanceRuns, readLocaleAssistanceOperation } from "@/server/ai/assistance";
 import { assistanceAvailability } from "@/server/ai/config";
@@ -13,9 +13,11 @@ import { AppError } from "@/server/errors";
 import { controlClass, labelClass } from "@/ui/field-class";
 import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { type AiValues, localeAssistanceAction } from "./actions";
 import { aiCopy } from "./copy";
 import { LocaleAssistanceForm } from "./forms";
+import { aiLabel } from "./labels";
 import { localeAiCopy } from "./locale-copy";
 
 export function LocaleSourcePanel({ source, locale }: { source: LocaleSource; locale: string }) {
@@ -26,7 +28,7 @@ export function LocaleSourcePanel({ source, locale }: { source: LocaleSource; lo
       <h2 className="text-subheading font-semibold">{common.source}</h2>
       <p>{copy.excluded}</p>
       <p>
-        {source.reference} · BG → {source.targetLocale.toUpperCase()}
+        {source.reference} · {localeEndonyms.bg} → {localeEndonyms[source.targetLocale]}
       </p>
       <div lang="bg" className="space-y-3">
         <h3 className="font-semibold">{source.fields.title}</h3>
@@ -35,12 +37,12 @@ export function LocaleSourcePanel({ source, locale }: { source: LocaleSource; lo
       <p className="break-all">
         {copy.sourceUrl}: {source.sourceUrl}
       </p>
-      <details className="rounded-panel border border-border p-4">
-        <summary className="cursor-pointer font-semibold">{copy.facts}</summary>
+      <TechnicalDetails locale={locale}>
+        <p>{copy.facts}</p>
         <pre className="mt-4 whitespace-pre-wrap break-words text-caption">
           {JSON.stringify(source.protectedFacts, null, 2)}
         </pre>
-      </details>
+      </TechnicalDetails>
     </section>
   );
 }
@@ -114,7 +116,10 @@ export async function LocaleAssistanceScreen({
       </a>
       <LocaleSourcePanel source={source} locale={locale} />
       {operation ? (
-        <Notice tone="info" title={result ? result.status : common.operationMissing}>
+        <Notice
+          tone="info"
+          title={result ? aiLabel("operation", result.status, locale) : common.operationMissing}
+        >
           {result?.id ? (
             <a className="underline" href={`/${locale}/operations/assistance/${result.id}`}>
               {common.open}
@@ -146,7 +151,7 @@ export async function LocaleAssistanceScreen({
                 <a className="underline" href={`/${locale}/operations/assistance/${run.id}`}>
                   {common.open}
                 </a>{" "}
-                · {run.state} ·{" "}
+                · {aiLabel("run", run.state, locale)} ·{" "}
                 {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
               </li>
             ))}

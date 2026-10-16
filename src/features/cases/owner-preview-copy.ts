@@ -1,3 +1,5 @@
+import { factFieldLabel } from "@/i18n/fact-labels";
+
 export const ownerPreviewCopy = (locale: string) =>
   locale === "bg"
     ? {
@@ -101,8 +103,14 @@ const previewLabels: Record<string, [string, string, string]> = {
   exact: ["Exact location", "Точно местоположение", "Точное местоположение"],
 };
 export function ownerPreviewLabel(value: string, locale: string) {
+  if (
+    ["price", "bedrooms", "rooms", "location"].includes(value) ||
+    value.startsWith("area.") ||
+    value.startsWith("feature.")
+  )
+    return factFieldLabel(value, locale);
   return (
     previewLabels[value]?.[locale === "bg" ? 1 : locale === "ru" ? 2 : 0] ??
-    value.replaceAll(/[_.]/g, " ")
+    factFieldLabel(value, locale)
   );
 }

@@ -148,7 +148,7 @@ export default async function SellerEvidencePage({
               <option value="">{copy.choose}</option>
               {evidence.relationships.map((p) => (
                 <option key={p.id} value={p.partyId}>
-                  {p.name} · {p.role in copy ? copy[p.role as "seller"] : p.role}
+                  {p.name} · {workflowLabel(p.role, locale)}
                 </option>
               ))}
             </select>
@@ -222,3 +222,5 @@ export default async function SellerEvidencePage({
     </div>
   );
 }
+
+import { workflowLabel } from "@/i18n/workflow-labels";

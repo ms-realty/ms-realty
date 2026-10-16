@@ -947,6 +947,45 @@ const options = {
   other: ["Other", "Друг", "Другой"],
   sale: ["Sale", "Продажба", "Продажа"],
   long_term_rent: ["Long-term rent", "Дългосрочен наем", "Долгосрочная аренда"],
+  month: ["Per month", "На месец", "В месяц"],
+  asking: ["Asking price", "Офертна цена", "Цена предложения"],
+  negotiable: ["Negotiable price", "Цена по договаряне", "Цена по согласованию"],
+  fixed: ["Fixed price", "Фиксирана цена", "Фиксированная цена"],
+  indicative: ["Indicative price", "Ориентировъчна цена", "Ориентировочная цена"],
+  unspecified: ["Not specified", "Не е уточнено", "Не указано"],
+  asking_total: ["Total asking price", "Обща офертна цена", "Полная цена предложения"],
+  asking_monthly: ["Monthly asking price", "Месечна офертна цена", "Ежемесячная цена предложения"],
+  built_up: ["Built area", "Застроена площ", "Застроенная площадь"],
+  available: ["Available", "Свободен", "Доступен"],
+  confirmation_required: [
+    "Availability needs confirmation",
+    "Наличността чака потвърждение",
+    "Доступность требует подтверждения",
+  ],
+  negotiating: ["Under negotiation", "В процес на договаряне", "Ведутся переговоры"],
+  reserved_with_recorded_basis: [
+    "Reservation recorded",
+    "Записана резервация",
+    "Бронирование зафиксировано",
+  ],
+  sold: ["Sold", "Продаден", "Продан"],
+  let: ["Let", "Отдаден под наем", "Сдан в аренду"],
+  withdrawn: ["Withdrawn", "Оттеглен", "Снят"],
+  draft: ["Draft", "Чернова", "Черновик"],
+  needs_facts: [
+    "Property facts need review",
+    "Данните за имота чакат преглед",
+    "Сведения об объекте требуют проверки",
+  ],
+  in_review: ["Under review", "В процес на преглед", "На проверке"],
+  approved_revision: ["Revision approved", "Версията е одобрена", "Версия одобрена"],
+  changes_requested: ["Changes requested", "Поискани промени", "Запрошены изменения"],
+  active: ["Public version active", "Публичната версия е активна", "Публичная версия активна"],
+  restricted: [
+    "Public visibility restricted",
+    "Публичната видимост е ограничена",
+    "Публичная видимость ограничена",
+  ],
   living: ["Living area", "Жилищна площ", "Жилая площадь"],
   usable: ["Usable area", "Полезна площ", "Полезная площадь"],
   built: ["Built area", "Застроена площ", "Застроенная площадь"],
@@ -967,7 +1006,14 @@ const options = {
 } satisfies Record<string, [string, string, string]>;
 export function optionLabel(value: string, locale: string) {
   const labels = options[value as keyof typeof options];
-  return labels?.[locale === "bg" ? 1 : locale === "ru" ? 2 : 0] ?? value.replaceAll("_", " ");
+  return (
+    labels?.[locale === "bg" ? 1 : locale === "ru" ? 2 : 0] ??
+    (locale === "bg"
+      ? "Друга записана стойност"
+      : locale === "ru"
+        ? "Другое записанное значение"
+        : "Other recorded value")
+  );
 }
 
 /** "1 спалня", "2 спални": the count with its plural form for the page locale. */

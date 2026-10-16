@@ -244,7 +244,7 @@ export async function InboundDetail({
                     <option value="">—</option>
                     {selected.participants.map((p) => (
                       <option key={p.id} value={p.partyId}>
-                        {p.name} · {p.role}
+                        {p.name} · {workflowLabel(p.role, locale)}
                       </option>
                     ))}
                   </select>
@@ -300,3 +300,5 @@ export async function InboundDetail({
     </div>
   );
 }
+
+import { workflowLabel } from "@/i18n/workflow-labels";

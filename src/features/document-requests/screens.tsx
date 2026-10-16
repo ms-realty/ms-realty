@@ -156,7 +156,10 @@ export async function DocumentRequestsScreen(
                 required: true,
                 options: [
                   { value: "", label: "—" },
-                  ...view.recipients.map((r) => ({ value: r.id, label: `${r.name} · ${r.role}` })),
+                  ...view.recipients.map((r) => ({
+                    value: r.id,
+                    label: `${r.name} · ${workflowLabel(r.role, locale)}`,
+                  })),
                 ],
               },
               {
@@ -370,3 +373,5 @@ export async function DocumentRequestsScreen(
     </WorkflowPage>
   );
 }
+
+import { workflowLabel } from "@/i18n/workflow-labels";

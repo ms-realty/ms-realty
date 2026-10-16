@@ -438,7 +438,10 @@ export async function ReviewView({
           <p role="alert" className="rounded-control bg-warning-soft p-4 text-dense">
             {fill(o16.notEligibleLocale, {
               locale: chosen.locale.toUpperCase(),
-              reason: local.decision.code.replaceAll("_", " "),
+              reason:
+                inventoryDecisionCopy(locale).blockers[
+                  local.decision.code as keyof ReturnType<typeof inventoryDecisionCopy>["blockers"]
+                ] ?? inventoryDecisionCopy(locale).unavailable,
             })}
           </p>
         ) : null}

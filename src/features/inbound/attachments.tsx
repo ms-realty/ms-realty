@@ -121,12 +121,22 @@ export async function InboundAttachments({
               aria-describedby="attachment-limit"
             >
               <option value="">—</option>
-              {pending.map((a) => (
+              {pending.map((a, index) => (
                 <option key={a.id} value={a.id}>
-                  {a.filename ?? a.id} · {a.contentType}
+                  {a.filename || `${c.unnamed} ${index + 1}`}
                 </option>
               ))}
             </select>
+            <TechnicalDetails locale={locale}>
+              <ul>
+                {pending.map((a, index) => (
+                  <li key={a.id}>
+                    {a.filename || `${c.unnamed} ${index + 1}`} · <bdi>{a.id}</bdi> ·{" "}
+                    <bdi>{a.contentType}</bdi>
+                  </li>
+                ))}
+              </ul>
+            </TechnicalDetails>
           </div>
           <div className="grid min-w-0 gap-2">
             <label htmlFor="attachment-filename" className={labelClass}>

@@ -18,6 +18,7 @@ import { AppError } from "@/server/errors";
 import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { Receipt } from "@/ui/receipt";
+import { TechnicalDetails } from "@/ui/technical-details";
 import {
   type ContentValues,
   type DecisionValues,
@@ -26,6 +27,7 @@ import {
 } from "./actions";
 import { contentCopy } from "./copy";
 import { ContentForm, ContentReviewForm } from "./forms";
+import { contentLabel } from "./labels";
 
 export function checkContentLocale(locale: string) {
   if (!isStaffLocale(locale)) notFound();
@@ -57,13 +59,21 @@ export async function ContentListScreen({ locale, session }: { locale: string; s
               <a href={`/${locale}/content/${page.id}`} className="font-semibold underline">
                 {page.kind === "area" || page.kind === "service" || page.kind === "help"
                   ? copy[page.kind]
-                  : page.kind}{" "}
+                  : copy.kind}{" "}
                 / {page.slug}
               </a>
               <p className="text-compact">
-                {copy.draft}: {page.currentVersionNumber} · {copy.live}:{" "}
-                {page.publishedVersionNumber ?? copy.none} · {page.publicationState}
+                {contentLabel("publication", page.publicationState, locale)}
               </p>
+              <TechnicalDetails locale={locale}>
+                <p>
+                  {page.kind} · {page.publicationState}
+                </p>
+                <p>
+                  {copy.draft}: {page.currentVersionNumber} · {copy.live}:{" "}
+                  {page.publishedVersionNumber ?? copy.none}
+                </p>
+              </TechnicalDetails>
             </li>
           ))}
         </ul>
@@ -119,7 +129,7 @@ export async function ContentWorkbenchScreen({
     const place = places.find((option) => option.id === placeId);
     return place
       ? `${place.nameNative} · ${copy[place.level]}${place.context ? ` / ${place.context}` : ""} (${place.countryCode})`
-      : `${copy.placeUnavailable}: ${placeId}`;
+      : copy.placeUnavailable;
   };
   const publicPath =
     page.kind === "service" && ["sell", "let"].includes(page.slug)
@@ -173,12 +183,10 @@ export async function ContentWorkbenchScreen({
             copy.kind,
             page.kind === "area" || page.kind === "service" || page.kind === "help"
               ? copy[page.kind]
-              : page.kind,
+              : copy.kind,
           ],
           [copy.slug, page.slug],
-          [copy.state, page.publicationState],
-          [copy.draft, current.versionNumber],
-          [copy.live, page.publishedVersionNumber ?? copy.none],
+          [copy.state, contentLabel("publication", page.publicationState, locale)],
           ...(page.kind === "area" ? [[copy.workingPlace, placeLabel(body.placeId)]] : []),
           ...(page.kind === "area" && page.publishedVersionNumber
             ? [[copy.publishedPlace, placeLabel(publishedPlaceId)]]
@@ -192,6 +200,28 @@ export async function ContentWorkbenchScreen({
           </div>
         ))}
       </dl>
+      <TechnicalDetails locale={locale}>
+        <p>
+          {page.kind} · {page.publicationState}
+        </p>
+        <p>
+          {copy.draft}: {current.versionNumber} · {copy.live}:{" "}
+          {page.publishedVersionNumber ?? copy.none}
+        </p>
+        <p>
+          <bdi>{current.contentHash}</bdi>
+        </p>
+        {body.placeId ? (
+          <p>
+            <bdi>{body.placeId}</bdi>
+          </p>
+        ) : null}
+        {publishedPlaceId ? (
+          <p>
+            <bdi>{publishedPlaceId}</bdi>
+          </p>
+        ) : null}
+      </TechnicalDetails>
       {page.kind === "area" && body.placeId === undefined && page.placeId ? (
         <Notice tone="info" title={copy.legacyPlace} />
       ) : null}
@@ -248,7 +278,8 @@ export async function ContentWorkbenchScreen({
           <ul className="space-y-3">
             {decisions.map((decision) => (
               <li key={decision.id} className="break-words">
-                {decision.kind} · {decision.state} ·{" "}
+                {contentLabel("review", decision.kind, locale)} ·{" "}
+                {contentLabel("state", decision.state, locale)} ·{" "}
                 {decision.decidedAt
                   ? formatDateTime(isPublicLocale(locale) ? locale : "bg", decision.decidedAt)
                   : copy.none}{" "}
@@ -257,6 +288,15 @@ export async function ContentWorkbenchScreen({
                   ? formatDateTime(isPublicLocale(locale) ? locale : "bg", decision.expiresAt)
                   : copy.none}
                 <p className="text-caption">{decision.decisionNote}</p>
+                <TechnicalDetails locale={locale}>
+                  <p>
+                    {decision.kind} · {decision.state}
+                  </p>
+                  <p>
+                    <bdi>{decision.id}</bdi> · {decision.subjectVersion} ·{" "}
+                    <bdi>{decision.subjectHash}</bdi>
+                  </p>
+                </TechnicalDetails>
               </li>
             ))}
           </ul>
@@ -318,7 +358,16 @@ export async function ContentOperationScreen({
           <p>{copy.next}</p>
         </Receipt>
       ) : (
-        <Notice tone="info" title={result ? result.status : copy.statusMissing} />
+        <Notice
+          tone="info"
+          title={result ? contentLabel("operation", result.status, locale) : copy.statusMissing}
+        >
+          {result ? (
+            <TechnicalDetails locale={locale}>
+              <p>{result.status}</p>
+            </TechnicalDetails>
+          ) : null}
+        </Notice>
       )}
       <a
         className="underline"

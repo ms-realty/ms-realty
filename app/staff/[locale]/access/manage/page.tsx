@@ -11,12 +11,17 @@ import { participantRoles } from "@/domain/parties";
 import { absenceCopy } from "@/features/absence/copy";
 import { WorkflowTime } from "@/features/cases/screens";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
-import { accessErrorMessage, identityCopy, roleLabel } from "@/features/identity/copy";
+import {
+  accessErrorMessage,
+  capabilityLabel,
+  identityCopy,
+  roleLabel,
+} from "@/features/identity/copy";
 import { grantManagementCopy } from "@/features/identity/grant-copy";
 import { managementCopy, staffRoleLabel } from "@/features/identity/management-copy";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { offboardingCopy } from "@/features/offboarding/copy";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale, localeEndonyms } from "@/i18n/config";
 import { listStaffGrants } from "@/server/auth/grants";
 import { staffRoles } from "@/server/auth/invitations";
 import { requireStaffPage } from "@/server/auth/pages";
@@ -28,6 +33,7 @@ import { cx } from "@/ui/cx";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
+import { TechnicalDetails } from "@/ui/technical-details";
 
 const field = cx("block min-w-0 max-w-full", controlClass);
 const writingField = cx("block min-w-0 max-w-full", textareaClass);
@@ -367,7 +373,7 @@ export default async function ManagePage({
               >
                 {capabilities.map((capability) => (
                   <option key={capability} value={capability}>
-                    {capability}
+                    {capabilityLabel(locale, capability)}
                   </option>
                 ))}
               </AccessSelect>
@@ -403,7 +409,7 @@ export default async function ManagePage({
                 <option value="">{grantCopy.allLocales}</option>
                 {publicLocales.map((value) => (
                   <option key={value} value={value}>
-                    {value.toUpperCase()}
+                    {localeEndonyms[value]}
                   </option>
                 ))}
               </AccessSelect>
@@ -444,14 +450,37 @@ export default async function ManagePage({
               <input type="hidden" name="expectedRevision" value={grant.version} />
               <p>
                 <strong>{name}</strong> ·{" "}
-                {grant.capability ??
-                  (grant.role
-                    ? staffRoleLabel(locale, grant.role as Parameters<typeof staffRoleLabel>[1])
-                    : "")}{" "}
-                · {grant.recordType ?? grantCopy.global}
-                {grant.recordId ? ` · ${grant.recordId}` : ""}
-                {grant.locales?.length ? ` · ${grant.locales.join(", ")}` : ""}
+                {grant.capability
+                  ? capabilityLabel(locale, grant.capability)
+                  : grant.role
+                    ? staffRoleLabel(locale, grant.role)
+                    : ""}{" "}
+                ·{" "}
+                {grant.recordType &&
+                ["document", "listing", "property", "case"].includes(grant.recordType)
+                  ? grantCopy[grant.recordType as "document" | "listing" | "property" | "case"]
+                  : grant.recordType
+                    ? grantCopy.scope
+                    : grantCopy.global}
+                {grant.locales?.length
+                  ? ` · ${grant.locales.map((value) => (isPublicLocale(value) ? localeEndonyms[value] : grantCopy.locale)).join(", ")}`
+                  : ""}
               </p>
+              <TechnicalDetails locale={locale}>
+                <p>
+                  <bdi>{grant.capability ?? grant.role}</bdi>
+                </p>
+                <p>
+                  <bdi>
+                    {grant.recordType} {grant.recordId}
+                  </bdi>
+                </p>
+                {grant.locales?.length ? (
+                  <p>
+                    <bdi>{grant.locales.join(", ")}</bdi>
+                  </p>
+                ) : null}
+              </TechnicalDetails>
               <p>{grant.reason}</p>
               <label className="grid min-w-0 grid-cols-1 gap-2">
                 <span className={labelClass}>{grantCopy.reason}</span>

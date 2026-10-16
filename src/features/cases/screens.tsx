@@ -261,7 +261,7 @@ export async function CaseIndexScreen(
                   {c.owned}: {row.ownerName ?? "—"}
                 </p>
                 <p className="text-text-muted">
-                  {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+                  {row.kind in c ? c[row.kind as "buyer"] : workflowLabel(row.kind, props.locale)} ·{" "}
                   {workflowLabel(row.stage, props.locale)} ·{" "}
                   {row.disposition === "paused"
                     ? lifecycleCopy(props.locale).pause
@@ -346,7 +346,7 @@ export function ClientCaseOverview({
   return (
     <div className="min-w-0 space-y-6 [overflow-wrap:anywhere]">
       <p className="text-body text-text-muted">
-        {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+        {row.kind in c ? c[row.kind as "buyer"] : workflowLabel(row.kind, locale)} ·{" "}
         {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
           ? c.needsReview
           : workflowLabel(row.stage, locale)}{" "}
@@ -596,7 +596,7 @@ export async function CaseScreen(
               </strong>
             </p>
             <p>
-              {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+              {row.kind in c ? c[row.kind as "buyer"] : workflowLabel(row.kind, props.locale)} ·{" "}
               {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
                 ? c.needsReview
                 : workflowLabel(row.stage, props.locale)}{" "}
