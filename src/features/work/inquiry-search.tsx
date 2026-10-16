@@ -8,6 +8,7 @@ import { type ReactNode, useActionState, useEffect, useRef } from "react";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass } from "@/ui/field-class";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { SearchIcon } from "@/ui/icons";
 import { workCopy } from "./copy";
 import { type InboxScope, InquiryRow, inquiryHref } from "./inquiry-row";
@@ -108,10 +109,10 @@ export function InquirySearch({
                   .join(" ")}
                 className={cx(controlClass, "min-h-12 min-w-0 flex-1 py-2")}
               />
-              <button type="submit" className={buttonClass("secondary", "min-h-12 px-3")}>
+              <SubmitButton className={buttonClass("secondary", "min-h-12 px-3")}>
                 <SearchIcon />
                 <span className="sr-only">{text.searchSubmit}</span>
-              </button>
+              </SubmitButton>
             </div>
             <p id="inquiry-search-hint" className="sr-only">
               {text.searchHint}
@@ -169,14 +170,14 @@ export function InquirySearch({
               <form action={formAction} className="flex flex-wrap gap-6 py-2">
                 <input type="hidden" name="q" value={state.q} />
                 {outcome.page > 1 ? (
-                  <button type="submit" name="page" value={outcome.page - 1} className={pageButton}>
+                  <SubmitButton name="page" value={outcome.page - 1} className={pageButton}>
                     {copy.previous}
-                  </button>
+                  </SubmitButton>
                 ) : null}
                 {outcome.hasMore ? (
-                  <button type="submit" name="page" value={outcome.page + 1} className={pageButton}>
+                  <SubmitButton name="page" value={outcome.page + 1} className={pageButton}>
                     {copy.next}
-                  </button>
+                  </SubmitButton>
                 ) : null}
               </form>
             ) : null}

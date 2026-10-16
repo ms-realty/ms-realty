@@ -96,7 +96,7 @@ export function NativeForm({ children, ...props }: Props) {
       {...props}
       ref={form}
       method="post"
-      aria-busy={state !== "idle" || undefined}
+      aria-busy={state === "sending" || state === "checking" || undefined}
       onSubmit={(event) => {
         if (submitted.current) {
           event.preventDefault();

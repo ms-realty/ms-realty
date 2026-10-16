@@ -27,6 +27,11 @@ export function NavigationLoading({ surface }: { surface: HostContext }) {
   const active = pending?.from === locationKey(pathname, search) ? pending : null;
 
   useEffect(() => {
+    // A completed transition must stay completed when browser history revisits its source.
+    setPending((current) => (current?.from === locationKey(pathname, search) ? current : null));
+  }, [pathname, search]);
+
+  useEffect(() => {
     function start(href: string) {
       const target = navigationLoadingTarget(surface, href, window.location.href);
       if (target)

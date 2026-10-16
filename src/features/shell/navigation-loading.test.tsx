@@ -81,6 +81,25 @@ it("responds to accepted Next navigation and clears when the route commits", () 
   expect(screen.getByText("Authorized content")).toBeVisible();
 });
 
+it("does not reactivate a completed navigation when history returns to its source", () => {
+  const view = render(content());
+  act(() =>
+    window.dispatchEvent(
+      new CustomEvent(navigationStartEvent, { detail: { href: "/en/inventory" } }),
+    ),
+  );
+  expect(screen.getByRole("status")).toBeInTheDocument();
+  route.pathname = "/en/inventory";
+  window.history.replaceState(null, "", route.pathname);
+  view.rerender(content());
+  expect(screen.getByText("Authorized content")).toBeVisible();
+  route.pathname = "/en/today";
+  window.history.replaceState(null, "", route.pathname);
+  view.rerender(content());
+  expect(screen.queryByRole("status")).toBeNull();
+  expect(screen.getByText("Authorized content")).toBeVisible();
+});
+
 it("does not leave a same-path filter navigation hidden after its query commits", () => {
   route.pathname = "/en/inventory";
   route.search = "view=mine";

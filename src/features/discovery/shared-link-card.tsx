@@ -12,6 +12,7 @@ import type { PublicLocale } from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
 import { formFields } from "@/ui/form/contract";
 import { nativeFormPermalink } from "@/ui/form/form";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { Notice } from "@/ui/notice";
 import { StatusBadge, type StatusTone } from "@/ui/status-badge";
 import { CopyLink } from "./copy-link";
@@ -189,9 +190,7 @@ function ReplayRevocation({
       <input type="hidden" name={formFields.operationId} value={operationId} />
       <input type="hidden" name={shareFields.shareId} value={view.id} />
       <Checking labels={labels}>
-        <button type="submit" className={buttonClass("secondary")}>
-          {labels.checkAgain}
-        </button>
+        <SubmitButton className={buttonClass("secondary")}>{labels.checkAgain}</SubmitButton>
       </Checking>
     </form>
   );

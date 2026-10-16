@@ -160,7 +160,16 @@ export function TriageForm({
     >
       {(form) => (
         <>
-          <fieldset className="space-y-3" disabled={form.field("state").readOnly}>
+          <fieldset
+            id={form.field("state").id}
+            tabIndex={-1}
+            className="space-y-3"
+            disabled={form.field("state").readOnly}
+            aria-invalid={Boolean(form.field("state").error) || undefined}
+            aria-describedby={
+              form.field("state").error ? `${form.field("state").id}-error` : undefined
+            }
+          >
             <legend className={labelClass}>{triage.choose}</legend>
             {states.map((value) => (
               <label
@@ -178,6 +187,11 @@ export function TriageForm({
                 <span>{copy.states[value]}</span>
               </label>
             ))}
+            {form.field("state").error ? (
+              <p id={`${form.field("state").id}-error`} className={errorClass}>
+                {form.field("state").error}
+              </p>
+            ) : null}
           </fieldset>
           {["suspected_spam", "duplicate_candidate"].includes(form.values.state) ? (
             <div className="space-y-3 rounded-control border border-warning bg-subtle p-4">
@@ -196,7 +210,10 @@ export function TriageForm({
             maxLength={1500}
           />
           {form.values.state === "duplicate_candidate" ? (
-            <div className={fieldClass}>
+            <div
+              className={fieldClass}
+              data-invalid={form.field("duplicateOfInquiryId").error ? "true" : undefined}
+            >
               <label className={labelClass} htmlFor={form.field("duplicateOfInquiryId").id}>
                 {triage.original}
               </label>
@@ -216,6 +233,14 @@ export function TriageForm({
                 }
                 onChange={(event) => form.setValue("duplicateOfInquiryId", event.target.value)}
                 disabled={form.field("duplicateOfInquiryId").readOnly}
+                aria-invalid={Boolean(form.field("duplicateOfInquiryId").error) || undefined}
+                aria-describedby={[
+                  `${form.field("duplicateOfInquiryId").id}-hint`,
+                  form.field("duplicateOfInquiryId").error &&
+                    `${form.field("duplicateOfInquiryId").id}-error`,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
               />
               <datalist id={`${form.field("duplicateOfInquiryId").id}-choices`}>
                 {duplicateCandidates.map((candidate) => (
@@ -224,7 +249,17 @@ export function TriageForm({
                   </option>
                 ))}
               </datalist>
-              <p className="text-caption text-text-muted">{triage.hint}</p>
+              <p
+                id={`${form.field("duplicateOfInquiryId").id}-hint`}
+                className="text-caption text-text-muted"
+              >
+                {triage.hint}
+              </p>
+              {form.field("duplicateOfInquiryId").error ? (
+                <p id={`${form.field("duplicateOfInquiryId").id}-error`} className={errorClass}>
+                  {form.field("duplicateOfInquiryId").error}
+                </p>
+              ) : null}
             </div>
           ) : (
             <input type="hidden" name="duplicateOfInquiryId" value="" />

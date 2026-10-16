@@ -391,9 +391,17 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   ).toHaveCount(0);
   const publicImage = publicPage.locator(`img[src="${mediaPath}"]`);
   await expect(publicImage).toBeVisible();
+  await expect(publicImage).toHaveAttribute("width", "96");
+  await expect(publicImage).toHaveAttribute("height", "60");
+  await expect(publicImage).toHaveAttribute("srcset", `${mediaPath} 96w`);
   await expect
-    .poll(() => publicImage.evaluate((image) => (image as HTMLImageElement).naturalWidth))
-    .toBe(96);
+    .poll(() =>
+      publicImage.evaluate((element) => {
+        const image = element as HTMLImageElement;
+        return image.complete && image.naturalWidth > 0 ? new URL(image.currentSrc).pathname : null;
+      }),
+    )
+    .toBe(mediaPath);
   const imageResponse = await request.get(hostUrl("public", mediaPath));
   expect(imageResponse.status()).toBe(200);
   expect(imageResponse.headers()["content-type"]).toContain("image/webp");

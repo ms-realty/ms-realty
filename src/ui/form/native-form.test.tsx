@@ -80,6 +80,7 @@ it("reports upload bytes and checking separately, and retains an uncertain resul
     request.onerror();
   });
   expect(screen.getByRole("status")).toHaveTextContent("could not confirm the result");
+  expect(form).not.toHaveAttribute("aria-busy", "true");
   expect(screen.getByRole("link", { name: "Check the record" })).toBeVisible();
   fireEvent.submit(form);
   expect(requests).toHaveLength(1);

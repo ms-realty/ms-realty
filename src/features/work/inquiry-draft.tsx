@@ -16,6 +16,7 @@ import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { nativeTimeValue } from "@/ui/form/date-time-value";
 import { ActionForm, type ActionFormProps, type FormSnapshot } from "@/ui/form/form";
 import { NativeForm } from "@/ui/form/native-form";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { Notice } from "@/ui/notice";
 import {
   claimInquiryDraftOwner,
@@ -129,9 +130,7 @@ export function InquiryConfirmedReturn({
     </Link>
   ) : (
     <form action={action}>
-      <button type="submit" className={className}>
-        {label}
-      </button>
+      <SubmitButton className={className}>{label}</SubmitButton>
     </form>
   );
 }

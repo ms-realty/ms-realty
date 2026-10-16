@@ -41,3 +41,35 @@ it("requires an explicit disposition and a separate queue-effect confirmation", 
   fireEvent.change(picker, { target: { value: "INQ-001" } });
   expect(picker).toHaveValue("INQ-001");
 });
+
+it("associates a rejected original inquiry with its hint and field error", () => {
+  render(
+    <TriageForm
+      locale="en"
+      id="invalid-reference"
+      draftOwner={{ id: "synthetic-owner", expiresAt: Date.now() + 60000 }}
+      states={["duplicate_candidate"]}
+      initialState={{
+        operationId: "synthetic-operation",
+        responseId: "synthetic-invalid-response",
+        expectedRevision: 1,
+        outcome: {
+          kind: "validation",
+          code: "VALIDATION_FAILED",
+          message: "Check the original inquiry.",
+          fieldErrors: { duplicateOfInquiryId: ["Choose an inquiry you can access."] },
+        },
+        values: {
+          state: "duplicate_candidate",
+          reason: "Review this possible duplicate",
+          duplicateOfInquiryId: "INQ-UNKNOWN",
+        },
+      }}
+      action={async (state) => state}
+    />,
+  );
+  const picker = screen.getByRole("combobox", { name: "Original inquiry" });
+  expect(picker).toHaveAttribute("aria-invalid", "true");
+  expect(picker).toHaveAccessibleDescription(/Choose an inquiry you can access\./);
+  expect(picker).toHaveAccessibleDescription(/reference/i);
+});

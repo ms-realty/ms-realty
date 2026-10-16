@@ -17,6 +17,7 @@ import { readTaskHandover } from "@/server/work/handover";
 import { listContacts, listTasks, readContact, readInquiry } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { ChevronStartIcon } from "@/ui/icons";
 import {
   acceptAction,
@@ -920,9 +921,7 @@ export async function OperationScreen({
               true,
             )}
           >
-            <button type="submit" className={link}>
-              {copy.retryDraft}
-            </button>
+            <SubmitButton className={link}>{copy.retryDraft}</SubmitButton>
           </form>
         </div>
       ) : fenced && !task && isInquiryDraftKind(type) ? (

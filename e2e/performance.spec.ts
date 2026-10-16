@@ -48,7 +48,9 @@ test("S1b self-hosted fonts resolve and preload only the page's scripts", async 
       const response = await page.request.get(url);
       expect(response.status()).toBe(200);
       expect(response.headers()["content-type"]).toMatch(/font|woff/);
-      expect(response.headers()["cache-control"]).toBe("public, max-age=31536000, immutable");
+      // The harness deliberately runs STAGING=true; its no-store override applies to fonts too.
+      // Production immutable headers are qualified by the origin/gateway policy tests.
+      expect(response.headers()["cache-control"]).toBe("private, no-store");
       files.push({ path: new URL(url).pathname, bodyBytes: (await response.body()).byteLength });
     }
     await test.info().attach(`preloaded-fonts-${locale}.json`, {
