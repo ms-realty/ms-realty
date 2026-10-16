@@ -35,6 +35,7 @@ export function ApprovedMedia({
             className="object-contain"
             unoptimized
             loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : undefined}
             onError={() => setFailedSource(source)}
           />
         ) : (

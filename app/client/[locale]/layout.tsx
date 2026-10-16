@@ -1,5 +1,5 @@
 import "../../globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { setRequestLocale } from "next-intl/server";
@@ -9,9 +9,11 @@ import { privateRobots } from "@/i18n/seo";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
+import { appViewport } from "@/ui/viewport";
 
 // Root layout of the client host (my.makler-realty.com, §11.1): the seven public locales,
 // lang/dir from the URL. Access control, not robots, keeps it private (§20.4).
+export const viewport: Viewport = appViewport;
 
 export const metadata: Metadata = {
   title: { template: "%s · MS Realty", default: "MS Realty" },

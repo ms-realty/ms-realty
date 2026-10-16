@@ -15,6 +15,7 @@ import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
 import { NavLink } from "./nav-link";
 import { footerNav, linked, publicPrimaryNav, publicUtilityNav } from "./navigation";
+import { StickyHeader } from "./sticky-header";
 import { languageSuggestionFor } from "./suggestion";
 
 export const mainId = "main";
@@ -55,14 +56,14 @@ export async function PublicShell({
       {suggestion ? (
         <LanguageSuggestion suggested={suggestion.locale} copy={suggestion.copy} />
       ) : null}
-      <header className="sticky top-0 z-(--z-header) border-b border-divider bg-canvas/95 backdrop-blur supports-[backdrop-filter]:bg-canvas/85">
+      <StickyHeader>
         <div className="mx-auto flex min-h-18 max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-gutter py-2 lg:px-gutter-wide">
           <Link
             href={`/${locale}`}
             aria-label={t("home")}
             className="me-auto inline-flex min-h-control items-center rounded-control lg:me-0"
           >
-            <Image src="/brand/logo-ms-realty.png" alt="" width={86} height={44} priority />
+            <Image src="/brand/logo-ms-realty.png" alt="" width={86} height={44} />
           </Link>
           {primary.length > 0 ? (
             <nav aria-label={t("primaryLabel")} className="hidden flex-1 lg:block">
@@ -102,7 +103,7 @@ export async function PublicShell({
             </MenuDisclosure>
           ) : null}
         </div>
-      </header>
+      </StickyHeader>
       <main id={mainId} tabIndex={-1} className="flex-1 outline-none">
         {children}
       </main>

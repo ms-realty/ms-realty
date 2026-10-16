@@ -1,5 +1,5 @@
 import "../../globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -15,8 +15,10 @@ import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
 import { StructuredData } from "@/ui/structured-data";
+import { appViewport } from "@/ui/viewport";
 
 // Root layout of the public host (makler-realty.com, §11.1): lang/dir come from the URL.
+export const viewport: Viewport = appViewport;
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = trackingConfig();
