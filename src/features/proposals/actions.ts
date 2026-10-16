@@ -1,8 +1,10 @@
 "use server";
 import { randomUUID } from "node:crypto";
+import { isCurrencyCode } from "@/domain/ids";
 import { offsetInputValue } from "@/domain/time";
 import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
+import { moneyCopy } from "@/i18n/money-copy";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
 import { AppError } from "@/server/errors";
@@ -79,10 +81,13 @@ export async function proposalAction(
         operationId: envelope.operationId,
         expectedVersion: envelope.expectedRevision,
       };
+      const currency = values.currency ?? "";
       const terms = {
         clientPartyId: values.clientPartyId ?? "",
         additionalPartyIds: (values.additionalPartyIds ?? "").split("\n").filter(Boolean),
-        amountMinor: amountToMinor(values.amount ?? ""),
+        amountMinor: isCurrencyCode(currency)
+          ? amountToMinor(values.amount ?? "", isPublicLocale(locale) ? locale : "bg", currency)
+          : Number.NaN,
         currency: values.currency as "EUR",
         period: values.period as "total",
         paymentBasis: values.paymentBasis ?? "",
@@ -172,10 +177,12 @@ export async function proposalAction(
         .map((field) => [
           field,
           [
-            timeReasonMessage(
-              isPublicLocale(locale) ? locale : "bg",
-              error.fieldErrors?.[field]?.[0],
-            ) ?? c.invalid,
+            field === "amount"
+              ? moneyCopy(isPublicLocale(locale) ? locale : "bg").invalid
+              : (timeReasonMessage(
+                  isPublicLocale(locale) ? locale : "bg",
+                  error.fieldErrors?.[field]?.[0],
+                ) ?? c.invalid),
           ],
         ]),
     );

@@ -1,4 +1,5 @@
 "use client";
+import { isCurrencyCode } from "@/domain/ids";
 import { isInstantInput } from "@/domain/time";
 import { isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
@@ -7,6 +8,7 @@ import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-cla
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
+import { MoneyField } from "@/ui/money-field";
 import { workCopy } from "../work/copy";
 export type WorkflowField = {
   name: string;
@@ -16,6 +18,7 @@ export type WorkflowField = {
     | "text"
     | "datetime-local"
     | "number"
+    | "money"
     | "checkbox"
     | "checkbox-group"
     | "select"
@@ -23,6 +26,8 @@ export type WorkflowField = {
   hint?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
+  /** The declared ISO currency field; changing it never converts the entered amount. */
+  currencyField?: string;
 };
 export function WorkflowForm({
   locale,
@@ -34,6 +39,7 @@ export function WorkflowForm({
   status,
   submit,
   pendingReferenceCookie,
+  disclosure,
 }: {
   locale: string;
   initialState: FormState<FormValues>;
@@ -44,6 +50,7 @@ export function WorkflowForm({
   status: { href: string; label: string };
   submit: string;
   pendingReferenceCookie?: string;
+  disclosure?: string;
 }) {
   return (
     <ActionForm
@@ -59,6 +66,7 @@ export function WorkflowForm({
       nativeIdentity={nativeIdentity}
       reconciliation={status}
       pendingReferenceCookie={pendingReferenceCookie}
+      disclosure={disclosure}
       copy={workCopy(locale).form}
       labels={Object.fromEntries(fields.map((field) => [field.name, field.label]))}
       submitLabel={submit}
@@ -69,6 +77,21 @@ export function WorkflowForm({
             const field = form.field(definition.name);
             if (definition.type === "hidden")
               return <input key={field.name} type="hidden" name={field.name} value={field.value} />;
+            if (definition.type === "money") {
+              const currency = form.values[definition.currencyField ?? "currency"] ?? "";
+              return (
+                <MoneyField
+                  key={field.name}
+                  {...field}
+                  locale={isPublicLocale(locale) ? locale : "bg"}
+                  currency={isCurrencyCode(currency) ? currency : undefined}
+                  label={definition.label}
+                  hint={definition.hint}
+                  required={definition.required}
+                  onValueChange={(value) => form.setValue(field.name, value)}
+                />
+              );
+            }
             if (definition.type === "datetime-local")
               return (
                 <DateTimeField

@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { currencyCodes } from "@/domain/ids";
-import { displayLocale, isPublicLocale } from "@/i18n/config";
+import { isPublicLocale } from "@/i18n/config";
+import { formatExactMoney, formatMoneyInput } from "@/i18n/money";
+import { moneyCopy } from "@/i18n/money-copy";
 import { readCase } from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
 import { isAppError } from "@/server/errors";
@@ -30,6 +32,7 @@ import {
   proposalTypes,
 } from "./contract";
 import { proposalCopy } from "./copy";
+import { counterofferCopy } from "./counteroffer-copy";
 
 function ProposalForm(
   props: ScreenProps & {
@@ -40,6 +43,7 @@ function ProposalForm(
     values?: Record<string, string>;
     path: string;
     label: string;
+    disclosure?: string;
   },
 ) {
   const initial = initialFormState(
@@ -67,16 +71,24 @@ function ProposalForm(
         label: caseCopy(props.locale).status,
       }}
       submit={props.label}
+      disclosure={props.disclosure}
     />
   );
 }
 function termFields(locale: string): WorkflowField[] {
   const c = proposalCopy(locale);
+  const money = moneyCopy(isPublicLocale(locale) ? locale : "bg");
   return [
-    { name: "amount", label: c.amount, required: true },
+    {
+      name: "amount",
+      label: money.amount,
+      type: "money",
+      currencyField: "currency",
+      required: true,
+    },
     {
       name: "currency",
-      label: c.currency,
+      label: money.currency,
       type: "select",
       required: true,
       options: currencyCodes.map((value) => ({ value, label: value })),
@@ -198,10 +210,7 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
       </p>
       <p className="text-subheading font-semibold">
         <bdi>
-          {new Intl.NumberFormat(isPublicLocale(locale) ? displayLocale(locale) : "en-GB", {
-            style: "currency",
-            currency: row.currency,
-          }).format(row.amountMinor / 100)}
+          {formatExactMoney(isPublicLocale(locale) ? locale : "bg", row.amountMinor, row.currency)}
         </bdi>{" "}
         · {row.period === "month" ? c.month : c.total}
       </p>
@@ -248,6 +257,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
     copy = caseCopy(props.locale),
     row = view.revision,
     staff = props.session.account.kind === "staff";
+  const counter = counterofferCopy(isPublicLocale(props.locale) ? props.locale : "bg");
   const path = `/${props.locale}/proposals/${view.proposal.id}`;
   const common = { ...props, id: view.proposal.id, version: view.proposal.version, path };
   const hidden: WorkflowField[] = [{ name: "revisionId", label: "", type: "hidden" }];
@@ -403,11 +413,12 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
       {view.current &&
       view.intact &&
       (view.canRespond || (staff && row.state !== "agreed_for_next_step")) ? (
-        <WorkflowSection title={staff ? c.revise : c.counter}>
+        <WorkflowSection title={staff ? c.revise : counter.open}>
           <ProposalForm
             {...common}
             command="revise"
-            label={staff ? c.revise : c.counter}
+            label={staff ? c.revise : counter.submit}
+            disclosure={staff ? undefined : counter.open}
             fields={[
               ...hidden,
               staff
@@ -442,7 +453,11 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
                 )
                 .map((p) => p.partyId)
                 .join("\n"),
-              amount: (row.amountMinor / 100).toFixed(2),
+              amount: formatMoneyInput(
+                isPublicLocale(props.locale) ? props.locale : "bg",
+                row.amountMinor,
+                row.currency,
+              ),
               currency: row.currency,
               period: row.period,
               paymentBasis: row.paymentBasis,

@@ -71,6 +71,8 @@ export type ActionFormProps<V extends FormValues> = {
   /** Human-facing representations of opaque choices in a reviewed conflict comparison. */
   formatValue?: (name: string, value: string, state: FormState<V>) => string;
   submitLabel: ReactNode | ((state: FormState<V>) => ReactNode);
+  /** Native disclosure stays open for restored responses and drafts, including an HTML POST. */
+  disclosure?: string;
   /** Public source review can use the page width; entry fields retain their reading width. */
   layout?: "reading" | "full";
   /** Navigation beside the one submit (links only; never a second command). */
@@ -206,6 +208,7 @@ function FormSession<V extends FormValues>({
   labels,
   formatValue,
   submitLabel,
+  disclosure,
   layout = "reading",
   secondaryActions,
   formId,
@@ -292,6 +295,27 @@ function FormSession<V extends FormValues>({
     onSnapshot?.({ state: pending ? (submittedState.current ?? state) : state, values, pending });
   }, [onSnapshot, state, values, pending]);
   const outcome = state.outcome;
+  const disclosureOpen =
+    pending ||
+    outcome.kind !== "idle" ||
+    Object.keys(values).some((name) => values[name] !== initialState.values[name]);
+  const disclose = (content: ReactNode) =>
+    disclosure ? (
+      <details
+        open={disclosureOpen || undefined}
+        // A person can collapse a pending disclosure natively. Reopen on a response before
+        // focus effects run for its errors/receipt, even when React's open prop is unchanged.
+        ref={(node) => {
+          if (node && disclosureOpen) node.open = true;
+        }}
+        className="rounded-control border border-border p-4"
+      >
+        <summary className="min-h-control cursor-pointer font-semibold">{disclosure}</summary>
+        <div className="pt-4">{content}</div>
+      </details>
+    ) : (
+      content
+    );
   const blocked =
     outcome.kind === "unknown" ||
     outcome.kind === "accepted" ||
@@ -315,7 +339,7 @@ function FormSession<V extends FormValues>({
   }
 
   if (outcome.kind === "confirmed") {
-    return (
+    return disclose(
       <Receipt
         title={outcome.receipt.title}
         reference={outcome.receipt.reference}
@@ -333,7 +357,7 @@ function FormSession<V extends FormValues>({
           <ReceiptListings listings={outcome.receipt.listings} headingLevel={3} />
         ) : null}
         <p>{outcome.receipt.nextStep}</p>
-      </Receipt>
+      </Receipt>,
     );
   }
 
@@ -366,7 +390,7 @@ function FormSession<V extends FormValues>({
       </span>
     </button>
   );
-  return (
+  return disclose(
     <form
       ref={nativeForm}
       id={formId}
@@ -542,6 +566,6 @@ function FormSession<V extends FormValues>({
       <p className="sr-only" role="status">
         {pending ? copy.pending : ""}
       </p>
-    </form>
+    </form>,
   );
 }
