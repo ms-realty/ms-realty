@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { parseEnv } from "../config/env";
 import { fileServices } from "./config";
 import { downloadResponse, publicMediaCacheControl } from "./download";
-import { derivative, inspectFile } from "./inspect";
+import { derivative, derivatives, inspectFile } from "./inspect";
 import { ClamAvScanner } from "./scan";
 import { digestOf, LocalFileStorage, MAX_DOCUMENT_BYTES } from "./storage";
 
@@ -96,6 +96,30 @@ describe("AT42 immutable bytes and bounded inspection", () => {
         .storage,
     ).toBeInstanceOf(LocalFileStorage);
   });
+  it.each([
+    [2600, 1462, [480, 960, 1600, 2400]],
+    [2000, 3000, [480, 960, 1600]],
+    [32, 24, [32]],
+  ] as const)(
+    "seals genuine sizes for %i×%i without upscaling or retaining metadata",
+    async (width, height, expected) => {
+      const source = await sharp({ create: { width, height, channels: 3, background: "#90a4ae" } })
+        .withMetadata()
+        .webp()
+        .toBuffer();
+      const sizes = await derivatives(source);
+      expect(sizes.map((size) => size.width)).toEqual([...expected]);
+      for (const size of sizes) {
+        const actual = await sharp(size.bytes).metadata();
+        expect(actual).toMatchObject({ format: "webp", width: size.width, height: size.height });
+        expect(actual.exif).toBeUndefined();
+        expect(actual.icc).toBeUndefined();
+        expect(size.width).toBeLessThanOrEqual(width);
+        expect(size.height).toBeLessThanOrEqual(height);
+        expect(size.height).toBeLessThanOrEqual(2400);
+      }
+    },
+  );
   it("keeps scanning required by default and permits unverified files only on explicit staging", () => {
     const local = { FILE_STORAGE: "local", FILE_STORAGE_ROOT: "/tmp/msr-explicit" };
     expect(fileServices(local, parseEnv({})).scanner).toBeInstanceOf(ClamAvScanner);

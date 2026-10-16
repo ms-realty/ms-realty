@@ -752,6 +752,7 @@ export async function currentEligibility(
     derivativeKey: asset.derivativeKey ?? "",
     derivativeSha256: asset.derivativeSha256 ?? "",
     derivativeContentType: asset.derivativeContentType ?? "",
+    ...(asset.derivativeRenditions.length ? { renditions: asset.derivativeRenditions } : {}),
     rightsReference: asset.rightsReference,
     kind: asset.kind,
     width: asset.width,

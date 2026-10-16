@@ -2,6 +2,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { documents, documentVersions, mediaAssets } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
+import type { MediaRendition } from "@/domain/media-rendition";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import { assertCan } from "../authz";
@@ -9,7 +10,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { type FileKind, targetAccess } from "./access";
 import type { FileServices } from "./config";
-import { derivative } from "./inspect";
+import { derivatives } from "./inspect";
 import { digestOf } from "./storage";
 
 async function process(
@@ -73,6 +74,7 @@ async function process(
           derivativeKey: string;
           derivativeSha256: string;
           derivativeContentType: string;
+          derivativeRenditions: readonly MediaRendition[];
           width: number;
           height: number;
         }
@@ -94,16 +96,31 @@ async function process(
       scannedAt = scan.scannedAt;
       scannedSha256 = scan.sha256;
       if (kind === "media" && scanState === "clean") {
-        const safe = await derivative(bytes);
-        const digest = digestOf(safe.bytes);
-        const key = `derivatives/${id}/${digest}.webp`;
-        await services.storage.writeImmutable(key, safe.bytes, "image/webp");
-        if (digestOf(await services.storage.read(key)) !== digest)
-          throw new AppError("unavailable");
+        const variants = await derivatives(bytes);
+        const sealed: MediaRendition[] = [];
+        for (const variant of variants) {
+          const digest = digestOf(variant.bytes);
+          const key = `derivatives/${id}/${digest}.webp`;
+          await services.storage.writeImmutable(key, variant.bytes, "image/webp");
+          const readback = await services.storage.read(key);
+          if (readback.length !== variant.bytes.length || digestOf(readback) !== digest)
+            throw new AppError("unavailable");
+          sealed.push({
+            key,
+            sha256: digest,
+            contentType: "image/webp",
+            width: variant.width,
+            height: variant.height,
+            byteSize: variant.bytes.length,
+          });
+        }
+        const safe = sealed.at(-1);
+        if (!safe) throw new AppError("unavailable");
         output = {
-          derivativeKey: key,
-          derivativeSha256: digest,
+          derivativeKey: safe.key,
+          derivativeSha256: safe.sha256,
           derivativeContentType: "image/webp",
+          derivativeRenditions: sealed,
           width: safe.width,
           height: safe.height,
         };

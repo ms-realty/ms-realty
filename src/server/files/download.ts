@@ -10,6 +10,7 @@ import {
 } from "@/db/schema";
 import { publicMediaCacheControl } from "@/domain/cache-policy";
 import { isDocumentExposable } from "@/domain/document";
+import { parseMediaRenditions, publishedMediaRenditions } from "@/domain/media-rendition";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import type { Executor } from "../db";
@@ -121,13 +122,11 @@ export async function publicMediaDownload(
   digest: string,
 ): Promise<FileDownload> {
   const [asset] = await db.select().from(mediaAssets).where(eq(mediaAssets.id, id));
-  if (
-    !asset ||
-    !mediaAssetEligible(asset) ||
-    asset.derivativeSha256 !== digest ||
-    !asset.derivativeKey
-  )
-    throw new AppError("not_found");
+  if (!asset || !mediaAssetEligible(asset) || !asset.derivativeKey) throw new AppError("not_found");
+  const rendition = parseMediaRenditions(asset.derivativeRenditions, id)?.find(
+    (item) => item.sha256 === digest,
+  );
+  if (!rendition && asset.derivativeSha256 !== digest) throw new AppError("not_found");
   const manifests = await db
     .select({ media: publicationManifests.media })
     .from(currentPublications)
@@ -168,19 +167,29 @@ export async function publicMediaDownload(
   const included = manifests.some(
     ({ media }) =>
       Array.isArray(media) &&
-      media.some(
-        (item: Record<string, unknown>) =>
+      media.some((item: Record<string, unknown>) => {
+        const renditions = publishedMediaRenditions(
+          asset.derivativeRenditions,
+          item.renditions,
+          id,
+        );
+        return (
+          Boolean(renditions) &&
           item.assetId === asset.id &&
           item.sha256 === asset.sha256 &&
           item.derivativeKey === asset.derivativeKey &&
-          item.derivativeSha256 === digest &&
+          item.derivativeSha256 === asset.derivativeSha256 &&
           item.derivativeContentType === "image/webp" &&
-          item.rightsReference === asset.rightsReference,
-      ),
+          item.rightsReference === asset.rightsReference &&
+          (digest === item.derivativeSha256 || renditions?.some((entry) => entry.sha256 === digest))
+        );
+      }),
   );
   if (!included) throw new AppError("not_found");
+  const bytes = await verified(storage, rendition?.key ?? asset.derivativeKey, digest);
+  if (rendition && bytes.length !== rendition.byteSize) throw new AppError("not_found");
   return {
-    bytes: await verified(storage, asset.derivativeKey, digest),
+    bytes,
     contentType: "image/webp",
     fileName: `${id}.webp`,
     inline: true,
