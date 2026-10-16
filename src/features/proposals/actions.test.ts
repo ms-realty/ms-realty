@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { beforeEach, expect, it, vi } from "vitest";
 import { publicLocales } from "@/domain/ids";
 import { moneyCopy } from "@/i18n/money-copy";
@@ -7,7 +8,7 @@ import type { FormState, FormValues } from "@/ui/form/contract";
 import { formFields } from "@/ui/form/contract";
 import { issueFormOperation } from "@/ui/form/server";
 import { proposalAction } from "./actions";
-import { proposalScope } from "./contract";
+import { proposalEnhancementField, proposalScope, proposalStatus } from "./contract";
 
 const mocked = vi.hoisted(() => ({
   create: vi.fn(),
@@ -30,6 +31,11 @@ vi.mock("@/server/http/next", async () => {
   };
 });
 vi.mock("@/server/auth/pages", () => ({ requireAuthHost: mocked.host }));
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn((href: string) => {
+    throw new Error(`REDIRECT ${href}`);
+  }),
+}));
 vi.mock("@/server/proposals/service", () => ({
   createProposal: mocked.create,
   reviseProposal: mocked.revise,
@@ -81,7 +87,15 @@ beforeEach(() => {
   mocked.revise.mockImplementation(execute);
 });
 
-it.each([
+it("opens the durable operation status after a successful native client counteroffer", async () => {
+  const { data, operationId } = submission("revise", "119,000.03");
+  await expect(proposalAction("client", "en", "revise", id, previous, data)).rejects.toThrow(
+    `REDIRECT ${proposalStatus("en", "revise", id, operationId)}`,
+  );
+  expect(mocked.revise).toHaveBeenCalledOnce();
+});
+
+const moneyEntries = [
   ["bg", "90\u00a0071\u00a0992\u00a0547\u00a0409,91"],
   ["en", "90,071,992,547,409.91"],
   ["ru", "90 071 992 547 409,91"],
@@ -89,11 +103,14 @@ it.each([
   ["nl", "90.071.992.547.409,91"],
   ["el", "90.071.992.547.409,91"],
   ["he", "90,071,992,547,409.91"],
-] as const)(
+] as const;
+it.each(moneyEntries)(
   "reads a native %s counteroffer exactly with unchanged binding values",
   async (locale, amount) => {
     const { data, operationId } = submission("revise", amount, "GBP");
-    const state = await proposalAction("client", locale, "revise", id, previous, data);
+    await expect(proposalAction("client", locale, "revise", id, previous, data)).rejects.toThrow(
+      `REDIRECT ${proposalStatus(locale, "revise", id, operationId)}`,
+    );
     expect(mocked.host).toHaveBeenCalledWith("client");
     expect(mocked.revise).toHaveBeenCalledWith(
       "synthetic-db",
@@ -110,8 +127,26 @@ it.each([
         reason: "Synthetic revised terms",
       }),
     );
+  },
+);
+
+it.each(moneyEntries)(
+  "keeps the enhanced %s counteroffer receipt and exact draft",
+  async (locale, amount) => {
+    const { data, operationId } = submission("revise", amount, "GBP");
+    data.set(proposalEnhancementField, "yes");
+    const state = await proposalAction("client", locale, "revise", id, previous, data);
+    expect(redirect).not.toHaveBeenCalled();
+    expect(mocked.revise.mock.calls[0]?.[2]).toMatchObject({
+      operationId,
+      amountMinor: Number.MAX_SAFE_INTEGER,
+      currency: "GBP",
+    });
     expect(state.values.amount).toBe(amount);
-    expect(state.outcome.kind).toBe("confirmed");
+    expect(state.outcome).toMatchObject({
+      kind: "confirmed",
+      receipt: { destination: { href: `/${locale}/proposals/${id}` } },
+    });
   },
 );
 
@@ -144,6 +179,7 @@ it.each(publicLocales)(
       kind: "validation",
       fieldErrors: { amount: [moneyCopy(locale).invalid] },
     });
+    expect(redirect).not.toHaveBeenCalled();
   },
 );
 
@@ -156,4 +192,44 @@ it("keeps the existing positive amount and declared currency checks", async () =
     const state = await proposalAction("client", "en", "revise", id, previous, data);
     expect(state.outcome.kind).toBe("validation");
   }
+});
+
+it.each(["", "yes"])(
+  "retains the exact unknown counteroffer and operation with enhancement %j",
+  async (enhanced) => {
+    const { data, operationId } = submission("revise", "119,000.03");
+    if (enhanced) data.set(proposalEnhancementField, enhanced);
+    mocked.revise.mockRejectedValueOnce(new AppError("outcome_unknown"));
+    const state = await proposalAction("client", "en", "revise", id, previous, data);
+    expect(redirect).not.toHaveBeenCalled();
+    expect(mocked.revise).toHaveBeenCalledOnce();
+    expect(state.operationId).toBe(operationId);
+    expect(state.values.amount).toBe("119,000.03");
+    expect(state.outcome).toMatchObject({
+      kind: "unknown",
+      status: { href: proposalStatus("en", "revise", id, operationId) },
+    });
+  },
+);
+
+it("keeps a native staff revision on its existing receipt", async () => {
+  mocked.session.account.kind = "staff";
+  const { data } = submission("revise", "119,000.03");
+  const state = await proposalAction("staff", "en", "revise", id, previous, data);
+  expect(state.outcome.kind).toBe("confirmed");
+  expect(redirect).not.toHaveBeenCalled();
+});
+
+it("uses the enhancement hint only after the existing host and revision gates", async () => {
+  const { data } = submission("revise", "119,000.03");
+  data.set(proposalEnhancementField, "yes");
+  mocked.host.mockRejectedValueOnce(new AppError("forbidden"));
+  const denied = await proposalAction("client", "en", "revise", id, previous, data);
+  expect(denied.outcome).toMatchObject({ kind: "rejected", code: "NOT_AUTHORIZED" });
+  expect(mocked.revise).not.toHaveBeenCalled();
+  data.set(formFields.expectedRevision, "invalid");
+  const invalid = await proposalAction("client", "en", "revise", id, previous, data);
+  expect(invalid.outcome.kind).toBe("validation");
+  expect(mocked.revise).not.toHaveBeenCalled();
+  expect(redirect).not.toHaveBeenCalled();
 });

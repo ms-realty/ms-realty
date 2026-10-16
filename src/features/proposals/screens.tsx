@@ -26,6 +26,7 @@ import { privateRead } from "../work/screens";
 import { proposalAction } from "./actions";
 import {
   type ProposalCommand,
+  proposalEnhancementField,
   proposalFields,
   proposalScope,
   proposalStatus,
@@ -72,6 +73,11 @@ function ProposalForm(
       }}
       submit={props.label}
       disclosure={props.disclosure}
+      enhancementField={
+        props.session.account.kind === "client" && props.command === "revise"
+          ? proposalEnhancementField
+          : undefined
+      }
     />
   );
 }

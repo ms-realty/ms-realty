@@ -1,5 +1,6 @@
 "use server";
 import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
 import { isCurrencyCode } from "@/domain/ids";
 import { offsetInputValue } from "@/domain/time";
 import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
@@ -22,6 +23,7 @@ import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import {
   type ProposalCommand,
+  proposalEnhancementField,
   proposalFields,
   proposalScope,
   proposalStatus,
@@ -136,7 +138,16 @@ export async function proposalAction(
     },
     { requireSession: true },
   );
-  if (result.ok)
+  if (result.ok) {
+    const enhancement = data.getAll(proposalEnhancementField);
+    if (
+      context === "client" &&
+      command === "revise" &&
+      !(enhancement.length === 1 && enhancement[0] === "yes")
+    )
+      // The new unsubmitted revision hides this form from the client on the HTML response.
+      // Its existing signed, actor-scoped operation status survives that visibility change.
+      redirect(status.href);
     return {
       ...state,
       outcome: {
@@ -155,6 +166,7 @@ export async function proposalAction(
         },
       },
     };
+  }
   const error = result.error;
   if (error.outcome === "unknown")
     return {

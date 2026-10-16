@@ -40,6 +40,7 @@ export function WorkflowForm({
   submit,
   pendingReferenceCookie,
   disclosure,
+  enhancementField,
 }: {
   locale: string;
   initialState: FormState<FormValues>;
@@ -51,6 +52,7 @@ export function WorkflowForm({
   submit: string;
   pendingReferenceCookie?: string;
   disclosure?: string;
+  enhancementField?: string;
 }) {
   return (
     <ActionForm
@@ -67,6 +69,7 @@ export function WorkflowForm({
       reconciliation={status}
       pendingReferenceCookie={pendingReferenceCookie}
       disclosure={disclosure}
+      enhancementField={enhancementField}
       copy={workCopy(locale).form}
       labels={Object.fromEntries(fields.map((field) => [field.name, field.label]))}
       submitLabel={submit}

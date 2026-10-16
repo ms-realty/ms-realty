@@ -73,6 +73,8 @@ export type ActionFormProps<V extends FormValues> = {
   submitLabel: ReactNode | ((state: FormState<V>) => ReactNode);
   /** Native disclosure stays open for restored responses and drafts, including an HTML POST. */
   disclosure?: string;
+  /** Optional navigation hint: empty in native HTML, yes after hydration. Never an auth gate. */
+  enhancementField?: string;
   /** Public source review can use the page width; entry fields retain their reading width. */
   layout?: "reading" | "full";
   /** Navigation beside the one submit (links only; never a second command). */
@@ -209,6 +211,7 @@ function FormSession<V extends FormValues>({
   formatValue,
   submitLabel,
   disclosure,
+  enhancementField,
   layout = "reading",
   secondaryActions,
   formId,
@@ -444,6 +447,9 @@ function FormSession<V extends FormValues>({
         name={formFields.expectedRevision}
         value={state.expectedRevision ?? ""}
       />
+      {enhancementField ? (
+        <input type="hidden" name={enhancementField} value={hydrating ? "" : "yes"} />
+      ) : null}
       <ErrorSummary key={`errors-${state.responseId}`} title={copy.errorSummary} errors={errors} />
       {outcome.kind === "rejected" ? (
         <FocusResult key={`rejected-${state.responseId}`}>

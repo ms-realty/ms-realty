@@ -1,10 +1,12 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { publicLocales } from "@/domain/ids";
 import { formatMoneyInput } from "@/i18n/money";
 import { moneyCopy } from "@/i18n/money-copy";
 import type { Session } from "@/server/auth/sessions";
+import { proposalEnhancementField } from "./contract";
 import { counterofferCopy } from "./counteroffer-copy";
 import { ProposalScreen } from "./screens";
 
@@ -83,6 +85,10 @@ it.each(publicLocales)(
     expect(posted.get("clientPartyId")).toBe("primary-party");
     expect(posted.get("additionalPartyIds")).toBe("additional-party");
     expect(posted.get("currency")).toBe("BGN");
+    expect(posted.get(proposalEnhancementField)).toBe("yes");
+    expect(
+      container.querySelector(`form input[name="${proposalEnhancementField}"]`)?.closest("details"),
+    ).toBe(details);
     expect(container.querySelector("[data-proposal-revision] bdi")).toHaveTextContent(
       /91.*BGN|BGN.*91/,
     );
@@ -96,8 +102,26 @@ it.each(["bg", "en", "ru"] as const)(
     const amount = screen.getByRole("textbox", { name: `${moneyCopy(locale).amount} (BGN)` });
     expect(amount.closest("details")).toBeNull();
     expect(amount).toBeVisible();
+    expect(document.querySelector(`input[name="${proposalEnhancementField}"]`)).toBeNull();
   },
 );
+
+it("renders the native counteroffer hint empty before hydration", async () => {
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(
+    await ProposalScreen({ locale: "en", session: session("client"), id: "proposal-one" }),
+  );
+  const input = container.querySelector<HTMLInputElement>(
+    `input[name="${proposalEnhancementField}"]`,
+  );
+  expect(input).toHaveValue("");
+  expect(input?.closest("details")?.open).toBe(false);
+  const form = input?.form;
+  expect(form).not.toBeNull();
+  const data = new FormData(form ?? undefined);
+  expect(data.getAll(proposalEnhancementField)).toEqual([""]);
+  expect(data.get("revisionId")).toBe("revision-one");
+});
 
 it.each(["current", "intact", "canRespond"] as const)(
   "keeps the client counteroffer unavailable when %s is false",

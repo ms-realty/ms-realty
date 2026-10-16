@@ -8,6 +8,8 @@ export const proposalTypes = {
   decide: "proposal.decide",
 } as const;
 export type ProposalCommand = keyof typeof proposalTypes;
+/** Advisory navigation hint. Commands still verify the session, scope and expected revision. */
+export const proposalEnhancementField = "_proposalEnhanced";
 const terms = [
   "clientPartyId",
   "additionalPartyIds",
