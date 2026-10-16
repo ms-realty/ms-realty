@@ -1,5 +1,6 @@
 "use client";
 
+import { contactMethodKinds } from "@/domain/parties";
 import { isInstantInput } from "@/domain/time";
 import { isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
@@ -9,7 +10,7 @@ import type { FormAction, FormState } from "@/ui/form/contract";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { ContactState, ContactValues } from "./actions";
-import { contactCopy } from "./contact-copy";
+import { contactCopy, contactMethodLabel } from "./contact-copy";
 import { workCopy } from "./copy";
 import { InquiryDraftForm } from "./inquiry-draft";
 import type { InquiryDraftOwner } from "./inquiry-draft-storage";
@@ -150,9 +151,13 @@ export function ContactForm({
             (item) => item && value === `${item.id}:${item.version}`,
           );
           return method
-            ? `${method.kind} · ${method.value}`
+            ? `${contactMethodLabel(method.kind, locale)} · ${method.value}`
             : value.includes(" · ")
-              ? value
+              ? value.replace(/^[^·]+(?= · )/, (kind) =>
+                  contactMethodKinds.some((item) => item === kind)
+                    ? contactMethodLabel(kind, locale)
+                    : kind,
+                )
               : copy.chooseContact;
         }
         if (name === "result")
@@ -186,7 +191,7 @@ export function ContactForm({
                   ? [
                       {
                         value: `${current.id}:${current.version}`,
-                        label: `${current.kind} · ${current.value}`,
+                        label: `${contactMethodLabel(current.kind, locale)} · ${current.value}`,
                       },
                     ]
                   : []),

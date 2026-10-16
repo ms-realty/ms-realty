@@ -1,4 +1,7 @@
 // Staff copy; BG/RU remain drafts for human review, never public/indexable.
+import type { ContactMethodKind } from "@/domain/parties";
+import type { StaffLocale } from "@/i18n/config";
+
 const en = {
   title: "Record a client contact",
   lead: "Record a contact that already took place. This entry does not send a message or verify delivery. Unanswered attempts and automatic receipts are not a useful human response.",
@@ -74,4 +77,32 @@ const ru: Copy = {
 };
 export function contactCopy(locale: string): Copy {
   return locale === "bg" ? bg : locale === "ru" ? ru : en;
+}
+
+const methodNames: Record<StaffLocale, Record<ContactMethodKind, string>> = {
+  bg: {
+    email: "Имейл",
+    phone: "Телефон",
+    whatsapp: "WhatsApp",
+    viber: "Viber",
+    postal: "Пощенски адрес",
+  },
+  en: {
+    email: "Email",
+    phone: "Phone",
+    whatsapp: "WhatsApp",
+    viber: "Viber",
+    postal: "Postal address",
+  },
+  ru: {
+    email: "Электронная почта",
+    phone: "Телефон",
+    whatsapp: "WhatsApp",
+    viber: "Viber",
+    postal: "Почтовый адрес",
+  },
+};
+export function contactMethodLabel(kind: string, locale: string) {
+  const labels = methodNames[locale === "bg" || locale === "ru" ? locale : "en"];
+  return labels[kind as ContactMethodKind] ?? contactCopy(locale).contact;
 }

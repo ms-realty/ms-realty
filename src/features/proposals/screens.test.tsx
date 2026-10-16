@@ -69,7 +69,7 @@ it.each(publicLocales)(
       await ProposalScreen({ locale, session: session("client"), id: "proposal-one" }),
     );
     const copy = counterofferCopy(locale);
-    const details = container.querySelector("details");
+    const details = screen.getByLabelText(`${moneyCopy(locale).amount} (BGN)`).closest("details");
     expect(details?.open).toBe(false);
     expect(details?.querySelector("summary")).toHaveTextContent(copy.open);
     expect(screen.getByLabelText(`${moneyCopy(locale).amount} (BGN)`)).not.toBeVisible();
@@ -130,7 +130,7 @@ it.each(["current", "intact", "canRespond"] as const)(
     const { container } = render(
       await ProposalScreen({ locale: "en", session: session("client"), id: "proposal-one" }),
     );
-    expect(container.querySelector("details")).toBeNull();
+    expect(container.querySelector('input[name="amount"]')).toBeNull();
     expect(screen.queryByRole("textbox", { name: "Amount (BGN)" })).not.toBeInTheDocument();
   },
 );

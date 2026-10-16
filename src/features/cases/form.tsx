@@ -9,7 +9,18 @@ import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import { MoneyField } from "@/ui/money-field";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { workCopy } from "../work/copy";
+
+const booleanLabels = {
+  bg: ["Да", "Не"],
+  en: ["Yes", "No"],
+  ru: ["Да", "Нет"],
+  de: ["Ja", "Nein"],
+  nl: ["Ja", "Nee"],
+  el: ["Ναι", "Όχι"],
+  he: ["כן", "לא"],
+} as const;
 export type WorkflowField = {
   name: string;
   label: string;
@@ -56,12 +67,26 @@ export function WorkflowForm({
 }) {
   return (
     <ActionForm
-      formatValue={(name, value) =>
-        fields.some((field) => field.name === name && field.type === "datetime-local") &&
-        isInstantInput(value)
-          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
-          : value
-      }
+      formatValue={(name, value) => {
+        const definition = fields.find((field) => field.name === name);
+        if (definition?.type === "datetime-local" && isInstantInput(value))
+          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true });
+        if (definition?.type === "select" || definition?.type === "checkbox-group") {
+          const selected =
+            definition.type === "checkbox-group" ? value.split("\n").filter(Boolean) : [value];
+          const labels = selected.map(
+            (item) => definition.options?.find((option) => option.value === item)?.label,
+          );
+          if (labels.every((label) => label !== undefined)) return labels.join(", ");
+          return <TechnicalDetails locale={locale}>{value}</TechnicalDetails>;
+        }
+        if (definition?.type === "checkbox") {
+          if (["true", "false", ""].includes(value))
+            return booleanLabels[isPublicLocale(locale) ? locale : "bg"][value === "true" ? 0 : 1];
+          return <TechnicalDetails locale={locale}>{value}</TechnicalDetails>;
+        }
+        return value;
+      }}
       action={action}
       initialState={initialState}
       permalink={path}

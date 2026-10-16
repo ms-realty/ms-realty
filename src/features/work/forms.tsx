@@ -3,11 +3,13 @@
 import { isInstantInput } from "@/domain/time";
 import { isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
+import { workflowLabel } from "@/i18n/workflow-labels";
 import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
+import { TechnicalDetails } from "@/ui/technical-details";
 import type { AcceptValues, TaskValues, TriageValues } from "./actions";
 import { workCopy } from "./copy";
 import { InquiryDraftForm } from "./inquiry-draft";
@@ -140,6 +142,19 @@ export function TriageForm({
       owner={draftOwner}
       id={id}
       kind="triage"
+      formatValue={(name, value) => {
+        if (name === "state")
+          return copy.states[value as keyof typeof copy.states] ?? workflowLabel(value, locale);
+        if (name === "duplicateOfInquiryId") {
+          const original = duplicateCandidates.find(
+            (candidate) => candidate.id === value || candidate.reference === value,
+          );
+          if (original) return original.reference;
+          if (/^[a-f0-9-]{36}$/i.test(value))
+            return <TechnicalDetails locale={locale}>{value}</TechnicalDetails>;
+        }
+        return value;
+      }}
       draftCopy={copy.draft}
       action={action}
       initialState={initialState}
@@ -281,11 +296,13 @@ export function TaskForm({
   const path = `/${locale}/tasks/${id}`;
   return (
     <ActionForm
-      formatValue={(name, value) =>
-        name === "followUpAt" && isInstantInput(value)
+      formatValue={(name, value) => {
+        if (name === "state")
+          return copy.states[value as keyof typeof copy.states] ?? workflowLabel(value, locale);
+        return name === "followUpAt" && isInstantInput(value)
           ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
-          : value
-      }
+          : value;
+      }}
       action={action}
       initialState={initialState}
       permalink={path}

@@ -19,6 +19,7 @@ import { ErrorSummary } from "../error-summary";
 import { Notice } from "../notice";
 import { Receipt } from "../receipt";
 import { ReceiptListings } from "../receipt-listings";
+import { TechnicalDetails } from "../technical-details";
 import {
   type FieldErrors,
   type FormAction,
@@ -69,7 +70,7 @@ export type ActionFormProps<V extends FormValues> = {
   copy: FormCopy;
   labels: Record<keyof V, string>;
   /** Human-facing representations of opaque choices in a reviewed conflict comparison. */
-  formatValue?: (name: string, value: string, state: FormState<V>) => string;
+  formatValue?: (name: string, value: string, state: FormState<V>) => ReactNode;
   submitLabel: ReactNode | ((state: FormState<V>) => ReactNode);
   /** Native disclosure stays open for restored responses and drafts, including an HTML POST. */
   disclosure?: string;
@@ -92,7 +93,7 @@ type Snapshot = {
   operationId: string;
   values: FormValues;
   reconciliation: RecoveryLink;
-  formatValue?: (name: string, value: string) => string;
+  formatValue?: (name: string, value: string) => ReactNode;
 };
 
 export function nativeFormPermalink(
@@ -149,6 +150,7 @@ class TransportBoundary extends Component<
     snapshot: RefObject<Snapshot>;
     copy: FormCopy;
     labels: Record<string, string>;
+    locale: string;
   },
   { failed: boolean }
 > {
@@ -163,23 +165,35 @@ class TransportBoundary extends Component<
       <FocusResult>
         <Notice tone="warning" title={this.props.copy.unknown}>
           <p>{this.props.copy.draftRetained}</p>
-          <p className="break-all">
-            <bdi>{operationId}</bdi>
-          </p>
           <a href={reconciliation.href} className="font-semibold underline">
             {reconciliation.label}
           </a>
         </Notice>
         <dl className="mt-4 space-y-3">
-          {Object.entries(values).map(([name, value]) => (
-            <div key={name}>
-              <dt className="font-semibold">{this.props.labels[name]}</dt>
-              <dd className="whitespace-pre-wrap break-words">
-                {formatValue?.(name, value) ?? value}
-              </dd>
-            </div>
-          ))}
+          {Object.entries(values)
+            .filter(([name]) => this.props.labels[name]?.trim())
+            .map(([name, value]) => (
+              <div key={name}>
+                <dt className="font-semibold">{this.props.labels[name]}</dt>
+                <dd className="whitespace-pre-wrap break-words">
+                  {formatValue?.(name, value) ?? value}
+                </dd>
+              </div>
+            ))}
         </dl>
+        <TechnicalDetails locale={this.props.locale}>
+          <p className="break-all">
+            <bdi>{operationId}</bdi>
+          </p>
+          {Object.entries(values)
+            .filter(([name]) => !this.props.labels[name]?.trim())
+            .map(([name, value]) => (
+              <dl key={name}>
+                <dt>{name}</dt>
+                <dd className="whitespace-pre-wrap break-words">{value}</dd>
+              </dl>
+            ))}
+        </TechnicalDetails>
       </FocusResult>
     );
   }
@@ -193,7 +207,12 @@ export function ActionForm<V extends FormValues>(props: ActionFormProps<V>) {
     formatValue: (name, value) => props.formatValue?.(name, value, props.initialState) ?? value,
   });
   return (
-    <TransportBoundary snapshot={snapshot} copy={props.copy} labels={props.labels}>
+    <TransportBoundary
+      snapshot={snapshot}
+      copy={props.copy}
+      labels={props.labels}
+      locale={props.permalink.split("/")[1] ?? "en"}
+    >
       <FormSession {...props} snapshot={snapshot} />
     </TransportBoundary>
   );
@@ -487,9 +506,6 @@ function FormSession<V extends FormValues>({
           <Notice tone="warning" title={conflict.message}>
             {conflict.latest ? (
               <div className="flex flex-col gap-3">
-                <p>
-                  {copy.revision}: {conflict.latest.revision}
-                </p>
                 {conflict.latest.details?.map(({ label, value }) => (
                   <dl key={label} className="border-t border-border pt-2">
                     <dt className="font-semibold">{label}</dt>
@@ -497,7 +513,10 @@ function FormSession<V extends FormValues>({
                   </dl>
                 ))}
                 {Object.keys(labels)
-                  .filter((name) => Object.hasOwn(conflict.latest?.values ?? {}, name))
+                  .filter(
+                    (name) =>
+                      labels[name]?.trim() && Object.hasOwn(conflict.latest?.values ?? {}, name),
+                  )
                   .map((name) => (
                     <dl key={name} className="border-t border-border pt-2">
                       <dt className="font-semibold">{labels[name]}</dt>
@@ -512,6 +531,24 @@ function FormSession<V extends FormValues>({
                       </dd>
                     </dl>
                   ))}
+                <TechnicalDetails locale={permalink.split("/")[1] ?? "en"}>
+                  <p>
+                    {copy.revision}: {conflict.latest.revision}
+                  </p>
+                  {Object.entries(conflict.latest.values)
+                    .filter(([name]) => !labels[name]?.trim())
+                    .map(([name, value]) => (
+                      <dl key={name}>
+                        <dt>{name}</dt>
+                        <dd>
+                          {copy.yourValue}: {values[name]}
+                        </dd>
+                        <dd>
+                          {copy.latestValue}: {value}
+                        </dd>
+                      </dl>
+                    ))}
+                </TechnicalDetails>
               </div>
             ) : null}
             {conflict.recovery ? (

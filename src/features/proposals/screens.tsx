@@ -13,6 +13,7 @@ import { isAppError } from "@/server/errors";
 import { findOperation } from "@/server/operations";
 import { listProposals, proposalContext, readProposal } from "@/server/proposals/queries";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { caseCopy } from "../cases/copy";
 import { type WorkflowField, WorkflowForm } from "../cases/form";
 import {
@@ -212,8 +213,11 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
   return (
     <div className="space-y-3" data-proposal-revision={row.number}>
       <p>
-        {c.revision} {row.number} · <strong>{c[row.state]}</strong>
+        <strong>{c[row.state]}</strong>
       </p>
+      <TechnicalDetails locale={locale}>
+        {c.revision} {row.number}
+      </TechnicalDetails>
       <p className="text-subheading font-semibold">
         <bdi>
           {formatExactMoney(isPublicLocale(locale) ? locale : "bg", row.amountMinor, row.currency)}
@@ -297,9 +301,12 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
       {view.expired ? <p role="status">{c.expiredNotice}</p> : null}
       {!view.intact || view.source?.changed ? <p role="status">{c.changed}</p> : null}
       {view.source ? (
-        <p>
-          {view.source.reference} · {c.source} {view.source.revision}
-        </p>
+        <div>
+          <p>{view.source.reference}</p>
+          <TechnicalDetails locale={props.locale}>
+            {c.source} {view.source.revision}
+          </TechnicalDetails>
+        </div>
       ) : null}
       <WorkflowSection title={c.terms}>
         <Terms row={row} locale={props.locale} />
