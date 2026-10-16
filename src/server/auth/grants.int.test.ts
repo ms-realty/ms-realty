@@ -4,7 +4,7 @@ import { afterAll, beforeAll, expect, it } from "vitest";
 import { auditEvents, grants, principals, sessions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { can } from "../authz";
-import { createStaff, type GrantSpec } from "../testing";
+import { createClient, createStaff, type GrantSpec } from "../testing";
 import { accessManagerNames, grantStaffCapability, revokeStaffGrant } from "./grants";
 import { finishPasskeyRegistration, startPasskeyRegistration } from "./passkeys";
 import { createSession, readSession } from "./sessions";
@@ -181,6 +181,22 @@ it("names only the active staff who may grant access, for the permission state (
   await named(`Coordinator ${marker}`, { roles: ["coordinator"] });
   await named(`Former manager ${marker}`, { roles: ["manager"], membership: "ended" });
   await named(`Suspended manager ${marker}`, { roles: ["manager"], status: "suspended" });
-  const names = (await accessManagerNames(t.db)).filter((name) => name.endsWith(marker));
+  const staff = await createStaff(t.db);
+  const { session } = await createSession(t.db, { kind: "staff", id: staff.id });
+  const names = (await accessManagerNames(t.db, session)).filter((name) => name.endsWith(marker));
   expect(names).toEqual([`Manager ${marker}`]);
+});
+
+it("does not expose access-manager names to client or revoked staff sessions", async () => {
+  const client = await createClient(t.db);
+  const clientSession = await createSession(t.db, { kind: "client", id: client.id });
+  await expect(accessManagerNames(t.db, clientSession.session)).rejects.toMatchObject({
+    code: "forbidden",
+  });
+  const staff = await createStaff(t.db);
+  const { session } = await createSession(t.db, { kind: "staff", id: staff.id });
+  await t.db.update(sessions).set({ revokedAt: new Date() }).where(eq(sessions.id, session.id));
+  await expect(accessManagerNames(t.db, session)).rejects.toMatchObject({
+    code: "unauthenticated",
+  });
 });

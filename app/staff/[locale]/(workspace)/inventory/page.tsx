@@ -70,7 +70,14 @@ export default async function InventoryPage({
   } catch (error) {
     // No listing.read scope (a member without grants yet): say so instead of crashing (M-003).
     if (isAppError(error) && error.code === "forbidden")
-      return <PermissionState locale={locale} title={copy.inventory} about={o10.about} />;
+      return (
+        <PermissionState
+          locale={locale}
+          title={copy.inventory}
+          about={o10.about}
+          session={session}
+        />
+      );
     throw error;
   }
   if (query.cursor && !restarted && page.rows.length === 0 && page.total > 0) {

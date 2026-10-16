@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { getDb } from "@/db/client";
 import { defaultStaffLocale, displayLocale, isStaffLocale } from "@/i18n/config";
 import { accessManagerNames } from "@/server/auth/grants";
+import type { Session } from "@/server/auth/sessions";
 import { buttonClass } from "@/ui/button-class";
 import { EmptyState } from "@/ui/empty-state";
 
@@ -13,16 +14,18 @@ export async function PermissionState({
   locale: requested,
   title,
   about,
+  session,
 }: {
   locale: string;
   /** The page's own heading, so the person knows where they are. */
   title: string;
   /** One sentence on what the page is for. */
   about: string;
+  session: Session;
 }) {
   const locale = isStaffLocale(requested) ? requested : defaultStaffLocale;
   const t = await getTranslations({ locale, namespace: "workspaceStates" });
-  const managers = await accessManagerNames(getDb());
+  const managers = await accessManagerNames(getDb(), session);
   const names = new Intl.ListFormat(displayLocale(locale), { type: "disjunction" }).format(
     managers,
   );

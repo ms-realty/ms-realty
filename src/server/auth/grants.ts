@@ -281,7 +281,9 @@ export async function listStaffGrants(db: Executor, session: Session) {
  * Who a staff member can ask for access (S07): the display names, and nothing else, of the
  * active staff who may grant it.
  */
-export async function accessManagerNames(db: Executor): Promise<string[]> {
+export async function accessManagerNames(db: Executor, session: Session): Promise<string[]> {
+  const live = await requireLiveSession(db, session);
+  if (live.actor.kind !== "staff") throw new AppError("forbidden");
   const staff = await db
     .select({ id: principals.id, name: principals.displayName })
     .from(principals)
