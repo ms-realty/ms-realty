@@ -279,6 +279,7 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     await expect(
       page.getByText("Please revise my requirements to include a lift", { exact: true }),
     ).toBeVisible();
+    await page.getByRole("button", { name: "Internal note · staff only", exact: true }).click();
     await page
       .getByLabel("Internal note · staff only", { exact: true })
       .fill("Private synthetic broker note");

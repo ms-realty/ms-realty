@@ -122,6 +122,11 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await expect(page.getByRole("heading", { name: inquiry.reference, exact: true })).toBeVisible();
   const stale = await context.newPage();
   await stale.goto(hostUrl("staff", `/en/inquiries/${inquiry.id}`));
+  await expect(stale.getByRole("radio", { name: "Suspected spam", exact: true })).not.toBeChecked();
+  await stale.getByRole("radio", { name: "Suspected spam", exact: true }).check();
+  await stale
+    .getByRole("checkbox", { name: "I confirm moving this inquiry to review", exact: true })
+    .check();
   await stale.getByLabel("Reason", { exact: true }).fill("Synthetic request held for staff review");
 
   const nextAction = `Review visitor question ${randomUUID().slice(0, 8)}`;
@@ -136,7 +141,7 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await expect(page.getByTestId("inquiry-owner")).toHaveText(broker.displayName);
   await expect(page.getByTestId("inquiry-state")).toHaveText("Assigned");
 
-  await stale.getByRole("button", { name: "Record a disposition", exact: true }).click();
+  await stale.getByRole("button", { name: "Record: Suspected spam", exact: true }).click();
   await expect(
     stale.getByText(
       "This record changed. Compare the latest version with your draft before applying it again.",
@@ -146,6 +151,9 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await expect(stale.getByLabel("Reason", { exact: true })).toHaveValue(
     "Synthetic request held for staff review",
   );
+  await stale
+    .getByRole("checkbox", { name: "I confirm moving this inquiry to review", exact: true })
+    .check();
   await stale.getByRole("button", { name: "Apply my reviewed changes", exact: true }).click();
   // A recorded triage continues on its action status, behind the record's pending fence (O02).
   const triageRecorded = async () => {
@@ -170,9 +178,9 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await page.getByRole("button", { name: "Update task", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
   await stale.reload();
-  await stale.getByLabel("Status", { exact: true }).selectOption("resolved_without_case");
+  await stale.getByRole("radio", { name: "Resolved without case", exact: true }).check();
   await stale.getByLabel("Reason", { exact: true }).fill("Synthetic test completed without a case");
-  await stale.getByRole("button", { name: "Record a disposition", exact: true }).click();
+  await stale.getByRole("button", { name: "Record: Resolved without case", exact: true }).click();
   await triageRecorded();
   const [saved] = await db
     .select()

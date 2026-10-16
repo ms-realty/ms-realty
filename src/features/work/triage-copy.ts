@@ -1,6 +1,7 @@
 const catalogs = {
   bg: {
     choose: "Изберете решение",
+    recordSelected: "Запис на избраното решение",
     save: "Запис",
     original: "Първоначално запитване",
     select: "Изберете запитване",
@@ -11,6 +12,7 @@ const catalogs = {
   },
   en: {
     choose: "Choose a disposition",
+    recordSelected: "Record selected disposition",
     save: "Record",
     original: "Original inquiry",
     select: "Choose an inquiry",
@@ -21,6 +23,7 @@ const catalogs = {
   },
   ru: {
     choose: "Выберите решение",
+    recordSelected: "Записать выбранное решение",
     save: "Записать",
     original: "Исходное обращение",
     select: "Выберите обращение",

@@ -115,7 +115,11 @@ for (const kind of ["contact", "triage", "accept"] as const)
     const fieldLabel =
       kind === "contact" ? copy.note : kind === "triage" ? work.reason : work.nextAction;
     const submitLabel =
-      kind === "contact" ? copy.submit : kind === "triage" ? work.disposition : work.accept;
+      kind === "contact"
+        ? copy.submit
+        : kind === "triage"
+          ? `Record: ${work.states.contact_unreachable}`
+          : work.accept;
     const entries = `Private revision-sensitive ${kind} draft ${randomUUID()}`;
     await page.getByLabel(fieldLabel, { exact: true }).fill(entries);
     if (kind === "contact") {
@@ -137,7 +141,7 @@ for (const kind of ["contact", "triage", "accept"] as const)
         new Date(Date.now() + 7_200_000),
       );
     } else {
-      await page.getByLabel(work.state, { exact: true }).selectOption("contact_unreachable");
+      await page.getByRole("radio", { name: work.states.contact_unreachable, exact: true }).check();
     }
     const [updated] = await db
       .update(schema.inquiries)
@@ -620,7 +624,11 @@ for (const kind of ["accept", "contact", "triage"] as const) {
       await nativePage
         .getByRole("button", {
           name:
-            kind === "contact" ? copy.submit : kind === "triage" ? work.disposition : work.accept,
+            kind === "contact"
+              ? copy.submit
+              : kind === "triage"
+                ? "Record selected disposition"
+                : work.accept,
           exact: true,
         })
         .click();
@@ -1164,9 +1172,9 @@ test("O02 native triage submits its reason with a stable inquiry form identity",
   const reason = `Synthetic native triage reason ${randomUUID()}`;
   try {
     await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
-    await page.getByLabel(work.state, { exact: true }).selectOption("contact_unreachable");
+    await page.getByRole("radio", { name: work.states.contact_unreachable, exact: true }).check();
     await page.getByLabel(work.reason, { exact: true }).fill(reason);
-    await page.getByRole("button", { name: work.disposition, exact: true }).click();
+    await page.getByRole("button", { name: "Record selected disposition", exact: true }).click();
     await expect(page.getByText(work.statusSucceeded, { exact: true })).toBeVisible();
     const [record] = await db
       .select()

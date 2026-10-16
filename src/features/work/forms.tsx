@@ -150,12 +150,12 @@ export function TriageForm({
       labels={{
         state: copy.state,
         reason: copy.reason,
-        duplicateOfInquiryId: copy.duplicateOfInquiryId,
+        duplicateOfInquiryId: triage.original,
       }}
       submitLabel={(state) =>
         state.values.state in copy.states
           ? `${triage.save}: ${copy.states[state.values.state as keyof typeof copy.states]}`
-          : triage.choose
+          : triage.recordSelected
       }
     >
       {(form) => (
