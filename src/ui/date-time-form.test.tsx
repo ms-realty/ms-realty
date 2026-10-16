@@ -9,7 +9,7 @@ import { formSpecimenCopy } from "./form/specimen-copy";
 
 afterEach(cleanup);
 const original = "2026-10-25T01:30:42.125Z";
-function TimeForm() {
+function TimeForm({ seconds = false }: { seconds?: boolean } = {}) {
   return (
     <ActionForm
       action={async (state) => state}
@@ -30,6 +30,7 @@ function TimeForm() {
         <>
           <DateTimeField
             {...form.field("dueAt")}
+            step={seconds ? 1 : undefined}
             label="Follow-up"
             locale="en"
             onValueChange={(value) => form.setValue("dueAt", value)}
@@ -42,6 +43,54 @@ function TimeForm() {
 }
 
 describe("UI11 progressive exact-instant entry", () => {
+  it("keeps typed seconds and the native one-second step for a contact observation", () => {
+    const { container } = render(<TimeForm seconds />);
+    const input = screen.getByLabelText("Follow-up");
+    expect(input).toHaveAttribute("step", "1");
+    expect(input).toHaveValue("2026-10-25T03:30:42");
+    fireEvent.change(input, { target: { value: "2026-10-25T03:30:43" } });
+    fireEvent.change(screen.getByLabelText("Which occurrence?"), { target: { value: "earlier" } });
+    expect(container.querySelector("output")?.textContent).toBe("2026-10-25T00:30:43.000Z");
+    expect(container.querySelector('[id$="-readback"]')).toHaveTextContent("03:30:43");
+    const form = container.querySelector("form");
+    if (!form) throw new Error("Missing native form");
+    expect(formInstant(readTimeFormValues(new FormData(form), ["dueAt"]), "dueAt")).toBe(
+      "2026-10-25T00:30:43.000Z",
+    );
+  });
+
+  it("preserves native second edits across hydration without changing minute-only defaults", async () => {
+    const container = document.createElement("div");
+    document.body.append(container);
+    container.innerHTML = renderToString(<TimeForm seconds />);
+    const input = container.querySelector<HTMLInputElement>('input[name="dueAt"]');
+    const select = container.querySelector<HTMLSelectElement>('select[name="dueAtOccurrence"]');
+    const form = container.querySelector("form");
+    if (!input || !select || !form) throw new Error("Missing native time form");
+    expect(formInstant(readTimeFormValues(new FormData(form), ["dueAt"]), "dueAt")).toBe(original);
+    input.value = "2026-10-25T03:30:44";
+    select.value = "earlier";
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <TimeForm seconds />);
+      });
+      expect(container.querySelector("output")?.textContent).toBe("2026-10-25T00:30:44.000Z");
+      expect(input.value).toBe("2026-10-25T03:30:44");
+      expect(formInstant(readTimeFormValues(new FormData(form), ["dueAt"]), "dueAt")).toBe(
+        "2026-10-25T00:30:44.000Z",
+      );
+    } finally {
+      await act(async () => root?.unmount());
+      container.remove();
+    }
+    const minute = document.createElement("div");
+    minute.innerHTML = renderToString(<TimeForm />);
+    expect(minute.querySelector('input[type="datetime-local"]')).not.toHaveAttribute("step");
+    expect(minute.querySelector<HTMLInputElement>('input[name="dueAt"]')?.value).toBe(
+      "2026-10-25T03:30",
+    );
+  });
   it("does not preselect an autumn choice for a prefilled ordinary time", () => {
     const container = document.createElement("div");
     container.innerHTML = renderToString(

@@ -103,6 +103,8 @@ export interface ZonedOptions {
 }
 
 export interface InstantOptions extends ZonedOptions {
+  /** Contact observations can be entered and read back to the second. */
+  readonly seconds?: boolean;
   /**
    * Adds the zone in words, «(софийско време)», for a reader who could be somewhere else:
    * visitors and clients reading an appointment or a deadline, or staff reading a time kept in a
@@ -186,9 +188,12 @@ export function formatDate(
 export function formatTime(
   locale: PublicLocale,
   instant: Instant,
-  { timeZone = agencyTimeZone, zoneLabel = false }: InstantOptions = {},
+  { timeZone = agencyTimeZone, zoneLabel = false, seconds = false }: InstantOptions = {},
 ): string {
-  const text = dateTimeFormat(locale, timeZone, timePart).format(toDate(instant));
+  const text = dateTimeFormat(locale, timeZone, {
+    ...timePart,
+    ...(seconds ? { second: "2-digit" } : {}),
+  }).format(toDate(instant));
   return named(locale, text, timeZone, zoneLabel);
 }
 
@@ -196,7 +201,7 @@ export function formatTime(
 export function formatDateTime(
   locale: PublicLocale,
   instant: Instant,
-  { timeZone = agencyTimeZone, zoneLabel = false, now }: InstantOptions = {},
+  { timeZone = agencyTimeZone, zoneLabel = false, now, seconds = false }: InstantOptions = {},
 ): string {
   const date = toDate(instant);
   const text = dateTimeFormat(locale, timeZone, {
@@ -204,6 +209,7 @@ export function formatDateTime(
     ...datePart,
     ...yearUnlessCurrent([date], now, timeZone),
     ...timePart,
+    ...(seconds ? ({ second: "2-digit" } as const) : {}),
   }).format(date);
   const occurrence = occurrenceWords(locale, date, timeZone);
   return named(locale, occurrence ? `${text} · ${occurrence}` : text, timeZone, zoneLabel);
@@ -214,7 +220,7 @@ export function formatDateTimeRange(
   locale: PublicLocale,
   start: Instant,
   end: Instant,
-  { timeZone = agencyTimeZone, zoneLabel = false, now }: InstantOptions = {},
+  { timeZone = agencyTimeZone, zoneLabel = false, now, seconds = false }: InstantOptions = {},
 ): string {
   const from = toDate(start);
   const to = toDate(end);
@@ -223,6 +229,7 @@ export function formatDateTimeRange(
     ...datePart,
     ...yearUnlessCurrent([from, to], now, timeZone),
     ...timePart,
+    ...(seconds ? ({ second: "2-digit" } as const) : {}),
   }).formatRange(from, to);
   const first = occurrenceWords(locale, from, timeZone),
     last = occurrenceWords(locale, to, timeZone);
@@ -230,7 +237,7 @@ export function formatDateTimeRange(
     first || last
       ? first === last
         ? `${text} · ${first}`
-        : `${formatDateTime(locale, from, { timeZone, now })} – ${formatDateTime(locale, to, { timeZone, now })}`
+        : `${formatDateTime(locale, from, { timeZone, now, seconds })} – ${formatDateTime(locale, to, { timeZone, now, seconds })}`
       : text;
   return named(locale, resolved, timeZone, zoneLabel);
 }

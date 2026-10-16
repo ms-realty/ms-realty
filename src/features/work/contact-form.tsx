@@ -140,7 +140,10 @@ export function ContactForm({
       }}
       formatValue={(name, value, state) => {
         if (["contactedAt", "dueAt"].includes(name) && isInstantInput(value))
-          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true });
+          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, {
+            zoneLabel: true,
+            seconds: name === "contactedAt",
+          });
         if (name === "contactChoice") {
           const typed = state as ContactState;
           const method = [typed.previousContact, typed.currentContact, contact].find(
@@ -200,6 +203,7 @@ export function ContactForm({
             />
             <DateTimeField
               {...form.field("contactedAt")}
+              step={1}
               label={copy.contactedAt}
               hint={copy.timeHint}
               locale={isPublicLocale(locale) ? locale : "bg"}

@@ -101,14 +101,14 @@ describe("datetime-local values read in the agency zone (UI11, ux-spec §18.5)",
     });
   });
 
-  it("rejects values that are not a calendar minute instead of normalising them", () => {
+  it("rejects invalid calendar minutes and seconds instead of normalising them", () => {
     for (const value of [
       "",
       "2026-02-30T10:00",
       "2026-10-20T25:00",
       "2026-10-20T10:60",
       "2026-10-20 10:00",
-      "2026-10-20T10:00:00",
+      "2026-10-20T10:00:60",
       "2026-10-20T10:00+03:00",
       "2026-10-20T10:00Z",
     ])

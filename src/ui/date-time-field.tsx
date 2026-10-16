@@ -59,7 +59,8 @@ export function DateTimeField({
   const [typed, setTyped] = useState(String(props.defaultValue ?? ""));
   const raw = controlled ? String(props.value ?? "") : typed;
   const original = isInstantInput(raw) ? raw : "";
-  const value = original ? localInputValue(original, timeZone) : raw;
+  const seconds = props.step === "any" || (props.step !== undefined && Number(props.step) < 60);
+  const value = original ? localInputValue(original, timeZone, seconds ? "second" : "minute") : raw;
   const [choice, setChoice] = useState("");
   const first = original ? readLocalInput(value, timeZone, "earlier") : null;
   const savedChoice =
@@ -90,7 +91,7 @@ export function DateTimeField({
       ? ""
       : read.ok
         ? [
-            formatDateTime(locale, read.instant, { timeZone }),
+            formatDateTime(locale, read.instant, { timeZone, seconds }),
             read.repeated && repeatedHour === "first" ? copy.repeatedFirst : "",
           ]
             .filter(Boolean)
