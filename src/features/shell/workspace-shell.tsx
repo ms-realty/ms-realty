@@ -5,7 +5,7 @@
 import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx } from "@/ui/cx";
@@ -24,6 +24,7 @@ import {
   type WorkspaceNavLabel,
   workspaceSecondaryNav,
 } from "./navigation";
+import { NavigationLoading } from "./navigation-loading";
 import { WorkspaceContext } from "./workspace-context";
 
 export const workspaceMainId = "main";
@@ -239,7 +240,10 @@ export async function WorkspaceShell({
             {languageSwitcher}
           </section>
           <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
-            {children}
+            <Suspense fallback={null}>
+              <NavigationLoading surface="staff" />
+            </Suspense>
+            <div data-route-content="">{children}</div>
           </main>
         </div>
       </div>

@@ -9,5 +9,20 @@
     "body": "Try again. If it keeps happening, call us and quote the reference.",
     "reference": "Reference: {reference}",
     "retry": "Try again"
+  },
+  "recovery": {
+    "staffHome": "Back to Today",
+    "clientHome": "Back to my deals",
+    "list": "Back to list",
+    "record": "Back to record",
+    "deal": "Back to deal",
+    "search": "Search properties",
+    "access": "Back to sign in",
+    "tools": "Back to agency tools",
+    "call": "Call us: {phone}",
+    "loadingList": "Loading the list…",
+    "loadingRecord": "Loading the record…",
+    "loadingListing": "Loading the listing…",
+    "actionOutcome": "If you just saved or sent something, check the same receipt before trying that action again."
   }
 }

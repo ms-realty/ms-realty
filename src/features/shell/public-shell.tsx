@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { isolateText, Ltr } from "@/i18n/bidi";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { agencyYear } from "@/i18n/format";
@@ -15,6 +15,7 @@ import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
 import { NavLink } from "./nav-link";
 import { footerNav, linked, publicPrimaryNav, publicUtilityNav } from "./navigation";
+import { NavigationLoading } from "./navigation-loading";
 import { StickyHeader } from "./sticky-header";
 import { languageSuggestionFor } from "./suggestion";
 
@@ -105,7 +106,10 @@ export async function PublicShell({
         </div>
       </StickyHeader>
       <main id={mainId} tabIndex={-1} className="flex-1 outline-none">
-        {children}
+        <Suspense fallback={null}>
+          <NavigationLoading surface="public" />
+        </Suspense>
+        <div data-route-content="">{children}</div>
       </main>
       <footer className="border-t border-divider bg-surface">
         <div className="mx-auto grid max-w-page gap-10 px-gutter pt-14 pb-10 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:px-gutter-wide">

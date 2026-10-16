@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { cx } from "@/ui/cx";
+import { navigationStartEvent } from "./navigation-loading-state";
 
 /** A navigation link that marks itself as the current page. */
 export function NavLink({
@@ -30,6 +31,9 @@ export function NavLink({
   return (
     <Link
       href={href}
+      onNavigate={() =>
+        window.dispatchEvent(new CustomEvent(navigationStartEvent, { detail: { href } }))
+      }
       aria-current={current ? "page" : undefined}
       className={cx("group", className)}
       data-current={current || undefined}

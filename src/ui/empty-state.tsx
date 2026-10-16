@@ -26,7 +26,7 @@ export type EmptyStateProps = {
   action?: ReactNode;
   /** For "failed": a support reference. */
   reference?: ReactNode;
-  headingLevel?: 2 | 3;
+  headingLevel?: 1 | 2 | 3;
   className?: string;
 };
 
@@ -53,7 +53,15 @@ export function EmptyState({
       <span className="flex size-12 items-center justify-center rounded-full bg-subtle">
         <Icon className={cx("size-6", tint)} />
       </span>
-      <Heading className="text-subheading font-semibold text-text">{title}</Heading>
+      <Heading
+        tabIndex={headingLevel === 1 ? -1 : undefined}
+        className={cx(
+          "font-semibold text-text",
+          headingLevel === 1 ? "text-heading sm:text-title" : "text-subheading",
+        )}
+      >
+        {title}
+      </Heading>
       {children ? <div className="max-w-prose text-compact text-text-muted">{children}</div> : null}
       {criteria ? <div className="flex flex-wrap gap-2">{criteria}</div> : null}
       {action ? <div className="pt-1">{action}</div> : null}

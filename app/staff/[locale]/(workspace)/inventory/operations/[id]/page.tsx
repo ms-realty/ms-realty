@@ -52,6 +52,7 @@ export default async function InventoryReceiptPage({
       ),
     )
     .limit(1);
+  if (!operation) notFound();
   const outcome = operation?.outcome as
     | { reference?: string; propertyId?: string; locale?: string }
     | undefined;
@@ -145,9 +146,6 @@ export default async function InventoryReceiptPage({
           </time>
         </p>
       ) : null}
-      <p className="break-all text-caption text-text-muted">
-        <bdi>{id}</bdi>
-      </p>
       <a
         className={buttonClass("secondary")}
         href={`/${locale}/inventory${reference ? `/${reference}` : ""}`}

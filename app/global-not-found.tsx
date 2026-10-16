@@ -18,7 +18,7 @@ import {
 } from "@/i18n/config";
 import { requestLocale } from "@/i18n/request-locale";
 import { privateRobots } from "@/i18n/seo";
-import { type HostContext, homePaths } from "@/server/config/hosts";
+import type { HostContext } from "@/server/config/hosts";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
@@ -49,7 +49,7 @@ export default async function GlobalNotFound() {
   const { context, locale } = await notFoundSurface();
   setRequestLocale(locale);
   preloadFonts(locale);
-  const content = <NotFoundContent locale={locale} homeHref={`/${locale}${homePaths[context]}`} />;
+  const content = <NotFoundContent locale={locale} surface={context} />;
   let page: ReactNode;
   if (context === "staff" && isStaffLocale(locale)) {
     page = <WorkspaceShell locale={locale}>{content}</WorkspaceShell>;
