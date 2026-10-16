@@ -1408,7 +1408,7 @@ for (const javaScriptEnabled of [true, false]) {
       await openRecord(page, work.openRecord);
       await expect(page.getByTestId("inquiry-first-response")).toHaveText(copy.noResponse);
       await expect(
-        page.getByRole("option", { name: `email · ${email}`, exact: true }),
+        page.getByRole("option", { name: `Email · ${email}`, exact: true }),
       ).toBeAttached();
       await page.getByLabel(copy.result, { exact: true }).selectOption("useful_response");
       await expect.poll(() => Date.now()).toBeGreaterThan(received.createdAt.getTime() + 1500);
@@ -1507,11 +1507,11 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(page.getByLabel(copy.note, { exact: true })).toHaveValue(note);
       await expect(page.getByLabel(copy.confirm, { exact: true })).not.toBeChecked();
       await expect(
-        page.getByRole("option", { name: `email · ${corrected}`, exact: true }),
+        page.getByRole("option", { name: `Email · ${corrected}`, exact: true }),
       ).toBeAttached();
       await page
         .getByLabel(copy.contact, { exact: true })
-        .selectOption({ label: `email · ${corrected}` });
+        .selectOption({ label: `Email · ${corrected}` });
       await page.getByLabel(copy.confirm, { exact: true }).check();
       await page.getByRole("button", { name: work.form.reapply, exact: true }).click();
       await expect(
