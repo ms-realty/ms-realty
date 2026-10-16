@@ -1,3 +1,4 @@
+import { NativeForm } from "@/ui/form/native-form";
 import "server-only";
 import { getDb } from "@/db/client";
 import type { Session } from "@/server/auth/sessions";
@@ -210,7 +211,7 @@ export async function InboundDetail({
               </a>
             </p>
           ) : null}
-          <form method="post" action={`${base}/submit`} className="grid min-w-0 gap-4">
+          <NativeForm method="post" action={`${base}/submit`} className="grid min-w-0 gap-4">
             <input
               type="hidden"
               name="operationId"
@@ -288,7 +289,7 @@ export async function InboundDetail({
                 {c.reject}
               </button>
             </div>
-          </form>
+          </NativeForm>
         </>
       ) : (
         <p>{row.decisionNote}</p>

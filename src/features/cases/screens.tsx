@@ -1,3 +1,5 @@
+import { workflowLabel } from "@/i18n/workflow-labels";
+import { AudienceComposer } from "./audience-composer";
 import "server-only";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -234,7 +236,7 @@ export async function CaseIndexScreen(
                 </p>
                 <p className="text-text-muted">
                   {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
-                  {row.stage.replaceAll("_", " ")} ·{" "}
+                  {workflowLabel(row.stage, props.locale)} ·{" "}
                   {row.disposition === "paused"
                     ? lifecycleCopy(props.locale).pause
                     : lifecycleCopy(props.locale)[row.disposition]}
@@ -321,7 +323,7 @@ export function ClientCaseOverview({
         {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
         {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
           ? c.needsReview
-          : row.stage.replaceAll("_", " ")}{" "}
+          : workflowLabel(row.stage, locale)}{" "}
         ·{" "}
         {row.disposition === "paused"
           ? lifecycleCopy(locale).pause
@@ -570,7 +572,7 @@ export async function CaseScreen(
               {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
               {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
                 ? c.needsReview
-                : row.stage.replaceAll("_", " ")}{" "}
+                : workflowLabel(row.stage, props.locale)}{" "}
               ·{" "}
               {row.disposition === "paused"
                 ? lifecycleCopy(props.locale).pause
@@ -917,11 +919,26 @@ export async function CaseScreen(
           {thread.length ? (
             <ol className="space-y-5">
               {thread.map((message) => (
-                <li key={message.id} className="rounded-control border border-border p-4">
+                <li
+                  key={message.id}
+                  data-message-audience={message.audience}
+                  className={
+                    message.audience === "internal"
+                      ? "rounded-control border border-dashed border-border bg-subtle p-4"
+                      : "rounded-control border border-border bg-surface p-4"
+                  }
+                >
                   <p className="text-caption">
                     {message.authorName ?? "—"} ·{" "}
-                    {message.audience === "internal" ? c.internal : c.shared} ·{" "}
-                    <WorkflowTime value={message.at} locale={props.locale} />
+                    {message.audience === "internal" ? (
+                      <>
+                        <span aria-hidden="true">🔒 </span>
+                        {c.internal}
+                      </>
+                    ) : (
+                      c.shared
+                    )}{" "}
+                    · <WorkflowTime value={message.at} locale={props.locale} />
                   </p>
                   <p className="whitespace-pre-wrap">{message.body}</p>
                 </li>
@@ -930,35 +947,42 @@ export async function CaseScreen(
           ) : (
             <p>{c.noMessages}</p>
           )}
-          {view.canPost ? (
-            <BoundWorkflowForm
-              {...props}
-              command="message"
-              id={row.id}
-              revision={row.version}
-              path={path}
-              fields={[
-                { name: "body", label: c.message, type: "textarea", required: true },
-                ...(staff
-                  ? [{ name: "reviewed", label: c.reviewPost, type: "checkbox" as const }]
-                  : []),
-              ]}
-              submit={c.post}
-            />
-          ) : null}
-          {view.canNote ? (
-            <WorkflowSection title={c.internal}>
-              <BoundWorkflowForm
-                {...props}
-                command="note"
-                id={row.id}
-                revision={row.version}
-                path={path}
-                fields={[{ name: "body", label: c.internal, type: "textarea", required: true }]}
-                submit={c.note}
-              />
-            </WorkflowSection>
-          ) : null}
+          <AudienceComposer
+            sharedLabel={c.shared}
+            internalLabel={c.internal}
+            recipients={view.participants.map(({ id, name }) => ({ id, name }))}
+            shared={
+              view.canPost ? (
+                <BoundWorkflowForm
+                  {...props}
+                  command="message"
+                  id={row.id}
+                  revision={row.version}
+                  path={path}
+                  fields={[
+                    { name: "body", label: c.message, type: "textarea", required: true },
+                    ...(staff
+                      ? [{ name: "reviewed", label: c.reviewPost, type: "checkbox" as const }]
+                      : []),
+                  ]}
+                  submit={c.post}
+                />
+              ) : null
+            }
+            internal={
+              view.canNote ? (
+                <BoundWorkflowForm
+                  {...props}
+                  command="note"
+                  id={row.id}
+                  revision={row.version}
+                  path={path}
+                  fields={[{ name: "body", label: c.internal, type: "textarea", required: true }]}
+                  submit={c.note}
+                />
+              ) : null
+            }
+          />
         </WorkflowSection>
       ) : null}
       {staff ? (
@@ -966,8 +990,8 @@ export async function CaseScreen(
           <ul className="space-y-3">
             {view.participants.map((participant) => (
               <li key={participant.id}>
-                {participant.name} · {participant.role.replaceAll("_", " ")} · {c.authority}:{" "}
-                {participant.authority.replaceAll("_", " ")}
+                {participant.name} · {workflowLabel(participant.role, props.locale)} · {c.authority}
+                : {workflowLabel(participant.authority, props.locale)}
               </li>
             ))}
           </ul>

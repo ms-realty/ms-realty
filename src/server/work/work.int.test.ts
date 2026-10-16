@@ -190,6 +190,7 @@ describe("staff work against durable inquiry intake", () => {
     expect((await listInbox(t.db, scoped.session)).rows.map((r) => r.inquiry.id)).toEqual([
       visible.id,
     ]);
+    expect((await readInquiry(t.db, scoped.session, visible.id)).duplicateCandidates).toEqual([]);
     await expect(readInquiry(t.db, scoped.session, hidden.id)).rejects.toMatchObject({
       code: "not_found",
     });

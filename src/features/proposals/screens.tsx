@@ -1,3 +1,4 @@
+import { workflowLabel } from "@/i18n/workflow-labels";
 import "server-only";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -215,7 +216,7 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
       <ul>
         {row.parties.map((p) => (
           <li key={p.partyId}>
-            {p.name} · {p.role.replaceAll("_", " ")}
+            {p.name} · {workflowLabel(p.role, locale)}
           </li>
         ))}
       </ul>

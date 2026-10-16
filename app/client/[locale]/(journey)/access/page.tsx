@@ -1,4 +1,5 @@
 // C01 / F13: invited client authentication, explicit email verification and optional passkey.
+
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
@@ -10,6 +11,7 @@ import { isRoutableLocale } from "@/i18n/config";
 import { currentClientSession, localReturnPath } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass, labelClass } from "@/ui/field-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import {
   beginClientPasskey,
@@ -108,7 +110,11 @@ export default async function ClientAccessPage({
       lead={query.sent === "1" ? c.linkSent : c.clientAccessLead}
     >
       {error ? <Notice tone="error">{error}</Notice> : null}
-      <form method="post" action={`/${locale}/access/request`} className="flex flex-col gap-4">
+      <NativeForm
+        method="post"
+        action={`/${locale}/access/request`}
+        className="flex flex-col gap-4"
+      >
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="returnTo" value={returnTo ?? ""} />
         <label className="flex flex-col gap-2" htmlFor="client-email">
@@ -127,7 +133,7 @@ export default async function ClientAccessPage({
         <button className={buttonClass()} type="submit">
           {c.sendLink}
         </button>
-      </form>
+      </NativeForm>
       <p className="text-compact text-text-muted">{c.noSelfRegistration}</p>
       <p>{c.orPasskey}</p>
       <PasskeyCeremony

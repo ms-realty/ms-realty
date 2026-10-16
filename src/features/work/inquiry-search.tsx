@@ -100,10 +100,12 @@ export function InquirySearch({
                 maxLength={searchTermLimit}
                 defaultValue={state.q}
                 aria-invalid={outcome.kind === "invalid" || undefined}
-                aria-describedby={cx(
+                aria-describedby={[
                   "inquiry-search-hint",
                   message !== null && "inquiry-search-message",
-                )}
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
                 className={cx(controlClass, "min-h-12 min-w-0 flex-1 py-2")}
               />
               <button type="submit" className={buttonClass("secondary", "min-h-12 px-3")}>

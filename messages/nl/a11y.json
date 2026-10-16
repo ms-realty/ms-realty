@@ -5,5 +5,9 @@
   "languageList": "Kies een taal",
   "currentLanguage": "Huidige taal: {language}",
   "closeMenu": "Menu sluiten",
-  "openMenu": "Menu openen"
+  "openMenu": "Menu openen",
+  "privateAccess": {
+    "checking": "Toegang controleren…",
+    "retry": "Toegang opnieuw controleren"
+  }
 }

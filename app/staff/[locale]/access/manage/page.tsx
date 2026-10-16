@@ -26,6 +26,7 @@ import { caseVisibility } from "@/server/cases/shared";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 
 const field = cx("block min-w-0 max-w-full", controlClass);
@@ -177,7 +178,7 @@ export default async function ManagePage({
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{c.staffTitle}</h2>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -202,7 +203,7 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass()}>
               {c.invite}
             </button>
-          </form>
+          </NativeForm>
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{offboardingCopy(locale).title}</h2>
@@ -239,7 +240,7 @@ export default async function ManagePage({
           ) : null}
           <h2 className="text-section font-semibold">{c.recoveryTitle}</h2>
           <p>{c.recoveryNote}</p>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -281,11 +282,11 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass("destructive")} disabled={!members.length}>
               {c.recover}
             </button>
-          </form>
+          </NativeForm>
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{c.clientTitle}</h2>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -329,12 +330,12 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass()} disabled={!availableCases.length}>
               {c.invite}
             </button>
-          </form>
+          </NativeForm>
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{grantCopy.title}</h2>
           <p>{grantCopy.lead}</p>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -428,10 +429,10 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass()}>
               {grantCopy.grant}
             </button>
-          </form>
+          </NativeForm>
           <h3 className="font-semibold">{grantCopy.existing}</h3>
           {currentGrants.map(({ grant, name }) => (
-            <form
+            <NativeForm
               key={grant.id}
               method="post"
               action={`/${locale}/access/manage/submit`}
@@ -465,7 +466,7 @@ export default async function ManagePage({
               <button type="submit" className={buttonClass("destructive")}>
                 {grantCopy.revoke}
               </button>
-            </form>
+            </NativeForm>
           ))}
         </section>
         <a href={`/${locale}/today`} className="text-action underline">

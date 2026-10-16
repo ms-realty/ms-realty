@@ -1,3 +1,4 @@
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -5,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
-import { type InquiryState, inquiryMachine } from "@/domain/inquiry";
+import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
 import { isStaffLocale } from "@/i18n/config";
@@ -462,8 +463,9 @@ export async function InquiryScreen({
                   id={id}
                   action={triageAction.bind(null, locale, id)}
                   states={targets}
+                  duplicateCandidates={detail.duplicateCandidates}
                   initialState={inquiryFormState("triage", {
-                    state: targets[0] as InquiryState,
+                    state: "",
                     reason: "",
                     duplicateOfInquiryId: inquiry.duplicateOfInquiryId ?? "",
                   })}
@@ -518,13 +520,16 @@ export async function InquiryScreen({
                 </dd>
               </div>
               <div>
-                <dt className="font-semibold">{copy.revision}</dt>
-                <dd>{inquiry.version}</dd>
-              </div>
-              <div>
-                <dt className="font-semibold">ID</dt>
-                <dd className="break-all text-caption">
-                  <bdi>{id}</bdi>
+                <dt className="sr-only">{copy.revision}</dt>
+                <dd>
+                  <TechnicalDetails locale={locale}>
+                    <p>
+                      {copy.revision}: {inquiry.version}
+                    </p>
+                    <p>
+                      <bdi>{id}</bdi>
+                    </p>
+                  </TechnicalDetails>
                 </dd>
               </div>
               {inquiry.dispositionReason ? (

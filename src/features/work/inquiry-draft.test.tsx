@@ -159,7 +159,11 @@ describe("O02/O03 inquiry drafts", () => {
       const field =
         kind === "contact" ? contact.note : kind === "triage" ? work.reason : work.nextAction;
       const submit =
-        kind === "contact" ? contact.submit : kind === "triage" ? work.disposition : work.accept;
+        kind === "contact"
+          ? contact.submit
+          : kind === "triage"
+            ? `Record: ${work.states.contact_unreachable}`
+            : work.accept;
       const original = render(form(2));
       await user.type(
         screen.getByLabelText(field),
@@ -256,7 +260,7 @@ describe("O02/O03 inquiry drafts", () => {
           />
         );
       }
-      const submit = kind === "triage" ? work.disposition : work.accept;
+      const submit = kind === "triage" ? `Record: ${work.states.contact_unreachable}` : work.accept;
       const first = render(form());
       expect(screen.getByText("Revision: 2 → 3")).toBeVisible();
       await user.click(screen.getByRole("button", { name: submit }));
@@ -350,7 +354,11 @@ describe("O02/O03 inquiry drafts", () => {
       const field =
         kind === "triage" ? work.reason : kind === "accept" ? work.nextAction : contact.note;
       const submit =
-        kind === "triage" ? work.disposition : kind === "accept" ? work.accept : contact.submit;
+        kind === "triage"
+          ? `Record: ${work.states.contact_unreachable}`
+          : kind === "accept"
+            ? work.accept
+            : contact.submit;
       // B: an editable missing-receipt retry visits revision three without interacting.
       const visitB = render(form(true));
       expect(screen.getByText("Revision: 2 → 3")).toBeVisible();

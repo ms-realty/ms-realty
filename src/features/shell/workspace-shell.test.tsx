@@ -5,7 +5,7 @@ import enA11y from "../../../messages/en/a11y.json";
 import enCommon from "../../../messages/en/common.json";
 import enTools from "../../../messages/staff/en/tools.json";
 import enWorkspace from "../../../messages/staff/en/workspace.json";
-import { permittedTools } from "./navigation";
+import { permittedTools, workspacePrimaryNav } from "./navigation";
 import { WorkspaceShell } from "./workspace-shell";
 
 const location = vi.hoisted(() => ({ pathname: "/en/cases/case-1", refresh: vi.fn() }));
@@ -39,7 +39,18 @@ async function shell(search?: ReactNode) {
       locale: "en",
       account: { name: "Synthetic Broker" },
       mayManageAccess: false,
-      tools: permittedTools("en", new Set(["case.read_internal"])),
+      primary: workspacePrimaryNav,
+      tools: permittedTools(
+        "en",
+        new Set([
+          "inquiry.read",
+          "case.read",
+          "listing.read",
+          "appointment.manage",
+          "task.manage",
+          "case.read_internal",
+        ]),
+      ),
       search,
       children: <p>Authorized work</p>,
     }),

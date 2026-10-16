@@ -462,6 +462,11 @@ export async function triageAction(
     ["state", "reason", "duplicateOfInquiryId"],
     async (ctx, envelope, values) => {
       if (!ctx.session) throw new AppError("unauthenticated");
+      if (
+        ["suspected_spam", "duplicate_candidate"].includes(values.state) &&
+        data.get("queueEffectReviewed") !== "yes"
+      )
+        throw new AppError("validation_failed", { fieldErrors: { reason: ["review_required"] } });
       return (
         await triageInquiry(ctx.db, ctx.session, {
           id,

@@ -1,3 +1,4 @@
+import { NativeForm } from "@/ui/form/native-form";
 import "server-only";
 import { getDb } from "@/db/client";
 import { documentClassifications } from "@/domain/document";
@@ -88,7 +89,7 @@ export async function InboundAttachments({
       ) : view.record.disposition === "closed" ? (
         <p>{c.closed}</p>
       ) : pending.length ? (
-        <form
+        <NativeForm
           method="post"
           action={`${base}/attachments/submit`}
           className="grid min-w-0 gap-4"
@@ -196,7 +197,7 @@ export async function InboundAttachments({
           <button type="submit" className={buttonClass("primary")}>
             {c.submit}
           </button>
-        </form>
+        </NativeForm>
       ) : null}
     </section>
   );

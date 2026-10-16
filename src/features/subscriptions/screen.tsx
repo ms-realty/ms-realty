@@ -1,3 +1,4 @@
+import { NativeForm } from "@/ui/form/native-form";
 import "server-only";
 import { getDb } from "@/db/client";
 import type { Session } from "@/server/auth/sessions";
@@ -91,7 +92,7 @@ export async function AlertRuleScreen({
           </details>
         ))}
       </section>
-      <form
+      <NativeForm
         action={`/${locale}/operations/subscriptions/submit`}
         method="post"
         className="grid gap-4"
@@ -145,7 +146,7 @@ export async function AlertRuleScreen({
             {copy.disable}
           </button>
         </div>
-      </form>
+      </NativeForm>
       <a className="underline" href={`/${locale}/operations/jobs`}>
         {copy.back}
       </a>

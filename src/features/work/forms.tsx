@@ -8,6 +8,7 @@ import type { AcceptValues, TaskValues, TriageValues } from "./actions";
 import { workCopy } from "./copy";
 import { InquiryDraftForm } from "./inquiry-draft";
 import type { InquiryDraftOwner } from "./inquiry-draft-storage";
+import { triageCopy } from "./triage-copy";
 
 function SelectField<V extends FormValues>({
   form,
@@ -115,11 +116,14 @@ export function TriageForm({
   action,
   states,
   draftOwner,
+  duplicateCandidates = [],
 }: Props<TriageValues> & {
   states: (keyof ReturnType<typeof workCopy>["states"])[];
+  duplicateCandidates?: { id: string; reference: string; preferredName: string | null }[];
   draftOwner: InquiryDraftOwner;
 }) {
   const copy = workCopy(locale);
+  const triage = triageCopy(locale);
   const path = `/${locale}/inquiries/${id}`;
   return (
     <InquiryDraftForm
@@ -138,16 +142,42 @@ export function TriageForm({
         reason: copy.reason,
         duplicateOfInquiryId: copy.duplicateOfInquiryId,
       }}
-      submitLabel={copy.disposition}
+      submitLabel={(state) =>
+        state.values.state in copy.states
+          ? `${triage.save}: ${copy.states[state.values.state as keyof typeof copy.states]}`
+          : triage.choose
+      }
     >
       {(form) => (
         <>
-          <SelectField
-            form={form}
-            name="state"
-            label={copy.state}
-            options={states.map((value) => ({ value, label: copy.states[value] }))}
-          />
+          <fieldset className="space-y-3" disabled={form.field("state").readOnly}>
+            <legend className={labelClass}>{triage.choose}</legend>
+            {states.map((value) => (
+              <label
+                key={value}
+                className="flex min-h-control items-center gap-3 rounded-control border border-border p-3"
+              >
+                <input
+                  type="radio"
+                  name="state"
+                  value={value}
+                  required
+                  checked={form.values.state === value}
+                  onChange={() => form.setValue("state", value)}
+                />
+                <span>{copy.states[value]}</span>
+              </label>
+            ))}
+          </fieldset>
+          {["suspected_spam", "duplicate_candidate"].includes(form.values.state) ? (
+            <div className="space-y-3 rounded-control border border-warning bg-subtle p-4">
+              <p>{triage.confirm}</p>
+              <label className="flex min-h-control items-center gap-3">
+                <input type="checkbox" name="queueEffectReviewed" value="yes" required />
+                {triage.review}
+              </label>
+            </div>
+          ) : null}
           <FormField
             {...form.field("reason")}
             label={copy.reason}
@@ -155,12 +185,32 @@ export function TriageForm({
             required
             maxLength={1500}
           />
-          <FormField
-            {...form.field("duplicateOfInquiryId")}
-            label={copy.duplicateOfInquiryId}
-            hint={copy.duplicateHint}
-            required={form.values.state === "duplicate_candidate"}
-          />
+          {form.values.state === "duplicate_candidate" ? (
+            <div className={fieldClass}>
+              <label className={labelClass} htmlFor={form.field("duplicateOfInquiryId").id}>
+                {triage.original}
+              </label>
+              <select
+                className={controlClass}
+                id={form.field("duplicateOfInquiryId").id}
+                name="duplicateOfInquiryId"
+                required
+                value={form.values.duplicateOfInquiryId}
+                onChange={(event) => form.setValue("duplicateOfInquiryId", event.target.value)}
+                disabled={form.field("duplicateOfInquiryId").readOnly}
+              >
+                <option value="">{triage.select}</option>
+                {duplicateCandidates.map((candidate) => (
+                  <option key={candidate.id} value={candidate.id}>
+                    {candidate.reference} · {candidate.preferredName}
+                  </option>
+                ))}
+              </select>
+              <p className="text-caption text-text-muted">{triage.hint}</p>
+            </div>
+          ) : (
+            <input type="hidden" name="duplicateOfInquiryId" value="" />
+          )}
         </>
       )}
     </InquiryDraftForm>

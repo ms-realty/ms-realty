@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, exists, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, exists, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   activityEvents,
@@ -274,8 +274,19 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
             ),
           )
       : [];
+  const duplicateCandidates = await db
+    .select({
+      id: inquiries.id,
+      reference: inquiries.reference,
+      preferredName: inquiries.preferredName,
+    })
+    .from(inquiries)
+    .where(and(ne(inquiries.id, row.id), visibleWhere(grants, "inquiry.read", "inquiry")))
+    .orderBy(desc(inquiries.createdAt), desc(inquiries.id))
+    .limit(200);
   return {
     inquiry: row,
+    duplicateCandidates,
     ownerName: owner?.name ?? null,
     needsCoverage: owner?.needsCoverage ?? true,
     tasks: relatedTasks,

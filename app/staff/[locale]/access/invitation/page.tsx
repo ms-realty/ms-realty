@@ -6,6 +6,7 @@ import { isStaffLocale } from "@/i18n/config";
 import { inspectStaffInvitation } from "@/server/auth/invitations";
 import { currentStaffAccess, requireAuthHost } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 export const metadata = {
   robots: { index: false, follow: false },
@@ -59,13 +60,13 @@ export default async function InvitationPage({
               time: invitation.expiresAt?.toLocaleString(locale) ?? "",
             })}
           </p>
-          <form method="post" action={`/${locale}/access/invitation/submit`}>
+          <NativeForm method="post" action={`/${locale}/access/invitation/submit`}>
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="token" value={token} />
             <button type="submit" className={buttonClass()}>
               {c.acceptAndContinue}
             </button>
-          </form>
+          </NativeForm>
         </>
       ) : (
         <Notice tone="warning">{messages[invitation.state]}</Notice>

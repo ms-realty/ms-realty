@@ -1,3 +1,4 @@
+import { NativeForm } from "@/ui/form/native-form";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
@@ -279,7 +280,7 @@ export async function DocumentRequestsScreen(
             </a>
           ) : null}
           {!staff && props.id && row.canUpload ? (
-            <form
+            <NativeForm
               method="post"
               encType="multipart/form-data"
               action={`${path}/submit`}
@@ -303,7 +304,7 @@ export async function DocumentRequestsScreen(
               >
                 {c.upload}
               </button>
-            </form>
+            </NativeForm>
           ) : !staff && props.id && !row.cancelledAt ? (
             <p>{c.unavailable}</p>
           ) : null}

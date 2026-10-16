@@ -1,4 +1,5 @@
 // C02 / AT37: no private scope before the recipient authenticates; acceptance is an explicit POST.
+
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
@@ -13,6 +14,7 @@ import { isRoutableLocale } from "@/i18n/config";
 import { viewClientInvitation } from "@/server/auth/invitations";
 import { currentClientSession } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 export default async function InvitationPage({
   params,
@@ -67,7 +69,7 @@ export default async function InvitationPage({
           {view.status === "accepted" ? (
             <Notice tone="success">{c.invitationAccepted}</Notice>
           ) : (
-            <form
+            <NativeForm
               method="post"
               action={`/${locale}/invitations/${id}/respond`}
               className="flex flex-wrap gap-3"
@@ -85,7 +87,7 @@ export default async function InvitationPage({
               >
                 {c.decline}
               </button>
-            </form>
+            </NativeForm>
           )}
         </>
       ) : (
