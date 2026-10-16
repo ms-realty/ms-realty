@@ -9,6 +9,7 @@ import { listContacts } from "@/server/work/queries";
 import { buttonClass } from "@/ui/button-class";
 import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { inventoryDecision } from "../../actions";
 
 export default async function SellerEvidencePage({
@@ -123,13 +124,13 @@ export default async function SellerEvidencePage({
             />
           </label>
           {confirm(copy.authorityConfirm)}
-          <button
+          <SubmitButton
             type="submit"
             className={buttonClass("primary")}
             disabled={!authorityDocs.length || !contactPage.rows.length}
           >
             {copy.authority}
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
       {edit ? (
@@ -198,13 +199,13 @@ export default async function SellerEvidencePage({
             {copy.rights}
           </label>
           {confirm(copy.instructionConfirm)}
-          <button
+          <SubmitButton
             type="submit"
             className={buttonClass("primary")}
             disabled={!agreementDocs.length || !evidence.relationships.length || !detail.revision}
           >
             {copy.instruction}
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
       <section>

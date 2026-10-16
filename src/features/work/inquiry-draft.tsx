@@ -15,6 +15,7 @@ import { errorClass, fieldClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { nativeTimeValue } from "@/ui/form/date-time-value";
 import { ActionForm, type ActionFormProps, type FormSnapshot } from "@/ui/form/form";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import {
   claimInquiryDraftOwner,
@@ -80,9 +81,9 @@ export function InquiryDraftSignOutForm({
   children: ReactNode;
 }) {
   return (
-    <form action={action} method="post" onSubmitCapture={() => releaseInquiryDraftOwner()}>
+    <NativeForm action={action} method="post" onSubmitCapture={() => releaseInquiryDraftOwner()}>
       {children}
-    </form>
+    </NativeForm>
   );
 }
 
