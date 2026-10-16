@@ -277,3 +277,31 @@ for (const javaScriptEnabled of [true, false]) {
     }
   });
 }
+
+test("M-003/M-096 staff awaiting grants get guidance and no inaccessible navigation", async ({
+  page,
+  context,
+}) => {
+  const member = await staffSession(context);
+  await db
+    .update(schema.grants)
+    .set({ revokedAt: new Date() })
+    .where(eq(schema.grants.principalId, member.id));
+  const response = await page.goto(hostUrl("staff", "/en/today"));
+  expect(response?.status()).toBe(200);
+  await expect(
+    page.getByRole("heading", { name: "Your access does not include this page", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Your worklist will appear here when the agency assigns your access.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  for (const name of ["Inquiries", "Cases", "Inventory", "Calendar", "Tasks"])
+    await expect(page.locator("header").getByRole("link", { name, exact: true })).toHaveCount(0);
+  const inventory = await page.goto(hostUrl("staff", "/en/inventory"));
+  expect(inventory?.status()).toBe(200);
+  await expect(
+    page.getByRole("heading", { name: "Your access does not include this page", exact: true }),
+  ).toBeVisible();
+});

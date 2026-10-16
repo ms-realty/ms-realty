@@ -76,7 +76,9 @@ export function NativeForm({ children, ...props }: Props) {
       setState("idle");
       setProgress(null);
       form.current
-        ?.querySelectorAll<HTMLButtonElement | HTMLInputElement>("[data-native-submit]")
+        ?.querySelectorAll<
+          HTMLButtonElement | HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >("[data-native-submit]")
         .forEach((control) => {
           control.disabled = false;
           delete control.dataset.nativeSubmit;
@@ -109,9 +111,9 @@ export function NativeForm({ children, ...props }: Props) {
           | null;
         const disable = () => {
           element
-            .querySelectorAll<HTMLButtonElement | HTMLInputElement>(
-              'button:not([type="button"]):not([type="reset"]), input[type="submit"], input[type="image"]',
-            )
+            .querySelectorAll<
+              HTMLButtonElement | HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+            >("button, input, textarea, select")
             .forEach((control) => {
               if (!control.disabled) {
                 control.dataset.nativeSubmit = "true";

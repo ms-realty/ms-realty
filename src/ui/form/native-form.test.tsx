@@ -67,6 +67,7 @@ it("reports upload bytes and checking separately, and retains an uncertain resul
   if (!(body instanceof FormData)) throw new Error("Missing upload data");
   expect(body.get("intent")).toBe("upload");
   expect(screen.getByRole("button")).toBeDisabled();
+  expect(screen.getByRole("textbox")).toBeDisabled();
   act(() => {
     request.upload.onprogress({ lengthComputable: true, loaded: 50, total: 100 });
   });

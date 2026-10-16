@@ -38,6 +38,14 @@ export default async function WorkPage({ params, searchParams }: Props) {
   const { locale } = await params;
   checkLocale(locale);
   const session = await requireStaffPage(locale);
+  const query = await searchParams;
+  const queue = scalar(query.queue);
+  if (queue !== undefined) {
+    if (queue !== "translation-reviews") notFound();
+    return (
+      <TranslationReviewsScreen locale={locale} session={session} after={scalar(query.after)} />
+    );
+  }
   if ((await resolveGrants(getDb(), session.actor)).length === 0) {
     const t = await getTranslations({ locale, namespace: "workspaceStates" });
     return (
@@ -48,14 +56,6 @@ export default async function WorkPage({ params, searchParams }: Props) {
         about={t("permission.workAbout")}
         showToday={false}
       />
-    );
-  }
-  const query = await searchParams;
-  const queue = scalar(query.queue);
-  if (queue !== undefined) {
-    if (queue !== "translation-reviews") notFound();
-    return (
-      <TranslationReviewsScreen locale={locale} session={session} after={scalar(query.after)} />
     );
   }
   // The greeting names the signed-in person, as the workspace shell does.

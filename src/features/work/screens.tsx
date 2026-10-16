@@ -9,7 +9,7 @@ import { getDb } from "@/db/client";
 import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
-import { isStaffLocale } from "@/i18n/config";
+import { isStaffLocale, type StaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
@@ -54,7 +54,7 @@ import { inquiryHref, parseInboxScope, queueHref } from "./inquiry-row";
 import { InquirySelectionContext } from "./inquiry-selection-context";
 import { When } from "./when";
 
-export function checkLocale(locale: string) {
+export function checkLocale(locale: string): asserts locale is StaffLocale {
   if (!isStaffLocale(locale)) notFound();
 }
 /**
