@@ -1,23 +1,24 @@
+import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { workCopy } from "./copy";
 
-/** A recorded instant with its zone named, or the explicit "no date" wording. */
+/** A recorded instant on the agency's clock, or the explicit "no date" wording. */
 export function When({
   date,
   locale,
-  zone = "UTC",
+  zone = agencyTimeZone,
 }: {
   date: Date | null;
   locale: string;
+  /** A time kept in another zone shows that zone's clock and names it. */
   zone?: string;
 }) {
   return date ? (
-    <time dateTime={date.toISOString()}>
-      {new Intl.DateTimeFormat(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
+    <time dateTime={date.toISOString()} className="tabular-nums">
+      {formatDateTime(isPublicLocale(locale) ? locale : "bg", date, {
         timeZone: zone,
-      }).format(date)}{" "}
-      {zone}
+        zoneLabel: zone !== agencyTimeZone,
+      })}
     </time>
   ) : (
     <span>{workCopy(locale).noDate}</span>

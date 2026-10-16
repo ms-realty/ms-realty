@@ -28,6 +28,42 @@ const zoneWords: Record<string, Row> = {
 };
 
 const rows = {
+  occurrence: [
+    "Кой от двата часа?",
+    "Which occurrence?",
+    "Какое из двух времён?",
+    "Welche Uhrzeit?",
+    "Welke keer?",
+    "Ποια από τις δύο ώρες;",
+    "איזו הופעה של השעה?",
+  ],
+  choose: [
+    "Изберете при повторен час",
+    "Choose when the hour repeats",
+    "Выберите при повторном часе",
+    "Bei doppelter Uhrzeit auswählen",
+    "Kies als het uur herhaald wordt",
+    "Επιλέξτε όταν η ώρα επαναλαμβάνεται",
+    "בחרו כשהשעה חוזרת",
+  ],
+  earlier: [
+    "Първият път, преди смяната",
+    "First, before the clocks change",
+    "Первое, до перевода часов",
+    "Erstes Mal, vor der Zeitumstellung",
+    "Eerste keer, vóór de omschakeling",
+    "Πρώτη φορά, πριν την αλλαγή",
+    "הראשונה, לפני שינוי השעון",
+  ],
+  later: [
+    "Вторият път, след смяната",
+    "Second, after the clocks change",
+    "Второе, после перевода часов",
+    "Zweites Mal, nach der Zeitumstellung",
+    "Tweede keer, na de omschakeling",
+    "Δεύτερη φορά, μετά την αλλαγή",
+    "השנייה, אחרי שינוי השעון",
+  ],
   /** A wall time inside the spring-forward gap. */
   nonexistent: [
     "Този час не съществува: през тази нощ часовникът се мести с един час напред. Изберете друг час.",
@@ -40,13 +76,13 @@ const rows = {
   ],
   /** A wall time inside the autumn repeated hour, where a commitment needs one exact instant. */
   repeated: [
-    "Този час се повтаря два пъти: през тази нощ часовникът се връща с един час назад. Изберете друг час.",
-    "This time happens twice: the clocks go back one hour that night. Choose another time.",
-    "Это время наступит дважды: в эту ночь часы переводят на час назад. Выберите другое время.",
-    "Diese Uhrzeit gibt es zweimal: In dieser Nacht wird die Uhr eine Stunde zurückgestellt. Bitte eine andere Uhrzeit wählen.",
-    "Deze tijd komt twee keer voor: die nacht gaat de klok een uur terug. Kies een andere tijd.",
-    "Αυτή η ώρα υπάρχει δύο φορές: εκείνη τη νύχτα τα ρολόγια γυρίζουν μία ώρα πίσω. Επιλέξτε άλλη ώρα.",
-    "השעה הזו מופיעה פעמיים: באותו לילה מחזירים את השעון בשעה. בחרו שעה אחרת.",
+    "Този час се повтаря два пъти: през тази нощ часовникът се връща с един час назад. Изберете първия или втория път.",
+    "This time happens twice: the clocks go back one hour that night. Choose the first or second occurrence.",
+    "Это время наступит дважды: в эту ночь часы переводят на час назад. Выберите первое или второе.",
+    "Diese Uhrzeit gibt es zweimal: In dieser Nacht wird die Uhr eine Stunde zurückgestellt. Bitte das erste oder zweite Mal auswählen.",
+    "Deze tijd komt twee keer voor: die nacht gaat de klok een uur terug. Kies de eerste of tweede keer.",
+    "Αυτή η ώρα υπάρχει δύο φορές: εκείνη τη νύχτα τα ρολόγια γυρίζουν μία ώρα πίσω. Επιλέξτε την πρώτη ή τη δεύτερη.",
+    "השעה הזו מופיעה פעמיים: באותו לילה מחזירים את השעון בשעה. בחרו בראשונה או בשנייה.",
   ],
   /** The same repeated hour where a visitor's preference takes its first occurrence. */
   repeatedFirst: [

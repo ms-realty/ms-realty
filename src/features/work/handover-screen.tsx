@@ -63,7 +63,7 @@ export function TaskHandoverScreen({
               name: "dueAt",
               label: c.reviewAt,
               type: "datetime-local",
-              hint: `${c.zoneNote} ${c.acceptRule}`,
+              hint: c.acceptRule,
               required: true,
             },
           ]

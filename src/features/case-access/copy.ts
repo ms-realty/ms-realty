@@ -18,7 +18,7 @@ const en = {
   target: "Participant",
   decision: "Decision",
   outcome: "Outcome shown to the requester",
-  expires: "Access expires (Europe/Sofia)",
+  expires: "Access expires",
   expiryHint:
     "Required for specialists. This controls access duration; the invitation itself expires after 72 hours.",
   approve: "Approve",
@@ -72,7 +72,7 @@ const bg: typeof en = {
   target: "Участник",
   decision: "Решение",
   outcome: "Резултат, видим за заявителя",
-  expires: "Достъпът изтича (Europe/Sofia)",
+  expires: "Достъпът изтича",
   expiryHint:
     "Задължително за специалисти. Това е срокът на достъпа; самата покана изтича след 72 часа.",
   approve: "Одобряване",
@@ -126,7 +126,7 @@ const ru: typeof en = {
   target: "Участник",
   decision: "Решение",
   outcome: "Результат, видимый заявителю",
-  expires: "Доступ истекает (Europe/Sofia)",
+  expires: "Доступ истекает",
   expiryHint: "Обязательно для специалистов. Это срок доступа; само приглашение действует 72 часа.",
   approve: "Одобрить",
   decline: "Отклонить",

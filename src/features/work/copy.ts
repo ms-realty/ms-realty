@@ -42,8 +42,8 @@ const en = {
   acceptLead:
     "Accept responsibility and record your next internal follow-up. This does not record a response to the client.",
   nextAction: "Next action",
-  dueAt: "Follow-up time (UTC)",
-  utcHint: "Enter a date and time in UTC. Your chosen time is stored with the commitment.",
+  dueAt: "Follow-up time",
+  utcHint: "Choose the date and time in Sofia. The chosen time is stored with the commitment.",
   reason: "Reason",
   duplicateOfInquiryId: "Original inquiry ID (for duplicate review)",
   duplicateHint:
@@ -53,7 +53,7 @@ const en = {
     "Review states keep the request visible. Resolution requires every open task to be completed or explicitly cancelled.",
   taskChange: "Update task",
   note: "Outcome, dependency or cancellation reason",
-  followUpAt: "Dependency review time (UTC)",
+  followUpAt: "Dependency review time",
   guardedTask: "Completion needs the evidence and controls in the workspace that owns this task.",
   purpose: "Purpose",
   outcome: "Recorded outcome",
@@ -80,9 +80,9 @@ const en = {
     after_deadline:
       "This time is after the deadline promised to the client. Choose an earlier time.",
     invalid_local_time:
-      "This time does not exist in Europe/Sofia (the clocks move forward). Choose another time.",
+      "This time does not exist in Sofia (the clocks move forward). Choose another time.",
     ambiguous_local_time:
-      "This time occurs twice in Europe/Sofia (the clocks move back). Choose another time.",
+      "This time occurs twice in Sofia (the clocks move back). Choose another time.",
   } as Record<string, string>,
   conflict:
     "This record changed. Compare the latest version with your draft before applying it again.",
@@ -245,8 +245,8 @@ const bg: Copy = {
   acceptLead:
     "Поемете запитването и запишете следващото вътрешно действие. Това не отбелязва отговор до клиента.",
   nextAction: "Следващо действие",
-  dueAt: "Срок за действие (UTC)",
-  utcHint: "Въведете дата и час в UTC. Избраният час се записва към ангажимента.",
+  dueAt: "Срок за действие",
+  utcHint: "Изберете дата и час по софийско време. Избраният час се записва към ангажимента.",
   reason: "Причина",
   duplicateOfInquiryId: "ID на първоначалното запитване (при дубликат)",
   duplicateHint:
@@ -256,7 +256,7 @@ const bg: Copy = {
     "Запитванията за преглед остават видими. За приключване завършете или изрично отменете всички отворени задачи.",
   taskChange: "Обновяване на задача",
   note: "Резултат, зависимост или причина за отмяна",
-  followUpAt: "Час за преглед на зависимостта (UTC)",
+  followUpAt: "Час за преглед на зависимостта",
   guardedTask:
     "Завършването изисква доказателствата и проверките в раздела, който управлява тази задача.",
   purpose: "Цел",
@@ -282,9 +282,9 @@ const bg: Copy = {
     future_required: "Изберете час в бъдещето.",
     after_deadline: "Този час е след срока, обещан на клиента. Изберете по-ранен час.",
     invalid_local_time:
-      "Този час не съществува в Europe/Sofia (часовникът се мести напред). Изберете друг час.",
+      "Този час не съществува по софийско време (часовникът се мести напред). Изберете друг час.",
     ambiguous_local_time:
-      "Този час се повтаря в Europe/Sofia (часовникът се мести назад). Изберете друг час.",
+      "Този час се повтаря по софийско време (часовникът се мести назад). Изберете друг час.",
   } as Record<string, string>,
   conflict: "Записът е променен. Сравнете новата версия с черновата преди повторно прилагане.",
   denied: "Текущият ви достъп не позволява това действие.",
@@ -438,8 +438,8 @@ const ru: Copy = {
   acceptLead:
     "Примите ответственность и запишите следующий внутренний шаг. Это не отмечает ответ клиенту.",
   nextAction: "Следующее действие",
-  dueAt: "Срок следующего действия (UTC)",
-  utcHint: "Введите дату и время в UTC. Выбранное время сохранится в задаче.",
+  dueAt: "Срок следующего действия",
+  utcHint: "Выберите дату и время по софийскому времени. Выбранное время сохранится в задаче.",
   reason: "Причина",
   duplicateOfInquiryId: "ID исходного обращения (для дубликата)",
   duplicateHint:
@@ -449,7 +449,7 @@ const ru: Copy = {
     "Обращения на проверке остаются видимыми. Перед закрытием завершите или явно отмените все открытые задачи.",
   taskChange: "Обновить задачу",
   note: "Результат, зависимость или причина отмены",
-  followUpAt: "Время проверки зависимости (UTC)",
+  followUpAt: "Время проверки зависимости",
   guardedTask:
     "Завершение требует доказательств и проверок в разделе, который управляет этой задачей.",
   purpose: "Цель",
@@ -475,9 +475,9 @@ const ru: Copy = {
     future_required: "Выберите время в будущем.",
     after_deadline: "Это время позже срока, обещанного клиенту. Выберите более раннее время.",
     invalid_local_time:
-      "Такого времени нет в Europe/Sofia (часы переводятся вперёд). Выберите другое время.",
+      "Такого времени нет по софийскому времени (часы переводятся вперёд). Выберите другое время.",
     ambiguous_local_time:
-      "Это время повторяется в Europe/Sofia (часы переводятся назад). Выберите другое время.",
+      "Это время повторяется по софийскому времени (часы переводятся назад). Выберите другое время.",
   } as Record<string, string>,
   conflict:
     "Запись изменилась. Сравните последнюю версию с черновиком перед повторным применением.",

@@ -56,7 +56,7 @@ export function custodyCopy(locale: string) {
     ),
     storageLabel: s("Място за съхранение", "Метка места хранения", "Storage label"),
     holderId: s("Служител, получил ключовете", "Сотрудник, получивший ключи", "Staff holder"),
-    dueAt: s("Връщане до · Europe/Sofia", "Вернуть до · Europe/Sofia", "Due back · Europe/Sofia"),
+    dueAt: s("Връщане до", "Вернуть до", "Due back"),
     state: s("Състояние", "Состояние", "State"),
     stored: s("На съхранение", "На хранении", "In storage"),
     checked_out: s("Предадени на служител", "Выданы сотруднику", "Checked out"),

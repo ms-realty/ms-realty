@@ -1,5 +1,9 @@
 "use client";
 
+import { isInstantInput } from "@/domain/time";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import type { FormController } from "@/ui/form/form";
@@ -135,6 +139,8 @@ export function ContactForm({
         reviewed: copy.confirm,
       }}
       formatValue={(name, value, state) => {
+        if (["contactedAt", "dueAt"].includes(name) && isInstantInput(value))
+          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true });
         if (name === "contactChoice") {
           const typed = state as ContactState;
           const method = [typed.previousContact, typed.currentContact, contact].find(
@@ -192,12 +198,12 @@ export function ContactForm({
                 { value: "useful_response", label: copy.useful_response },
               ]}
             />
-            <FormField
+            <DateTimeField
               {...form.field("contactedAt")}
               label={copy.contactedAt}
               hint={copy.timeHint}
-              type="datetime-local"
-              step={1}
+              locale={isPublicLocale(locale) ? locale : "bg"}
+              onValueChange={(value) => form.setValue("contactedAt", value)}
               required
             />
             <FormField
@@ -215,11 +221,12 @@ export function ContactForm({
               maxLength={500}
               required
             />
-            <FormField
+            <DateTimeField
               {...form.field("dueAt")}
               label={copy.dueAt}
               hint={work.utcHint}
-              type="datetime-local"
+              locale={isPublicLocale(locale) ? locale : "bg"}
+              onValueChange={(value) => form.setValue("dueAt", value)}
               required
             />
             <Confirmation form={form} name="promisedToClient" label={copy.promise} />

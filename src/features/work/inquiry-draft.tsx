@@ -13,6 +13,7 @@ import {
 } from "react";
 import { errorClass, fieldClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
+import { nativeTimeValue } from "@/ui/form/date-time-value";
 import { ActionForm, type ActionFormProps, type FormSnapshot } from "@/ui/form/form";
 import { Notice } from "@/ui/notice";
 import {
@@ -273,7 +274,9 @@ function InquiryDraftSession<V extends FormValues>({
             ? control.checked
               ? control.value
               : ""
-            : control.value;
+            : control instanceof HTMLInputElement && form
+              ? (nativeTimeValue(form, control) ?? control.value)
+              : control.value;
         liveValues[name as keyof V] = value as V[keyof V];
         if (value !== initialResponse.values[name]) values[name as keyof V] = value as V[keyof V];
       }

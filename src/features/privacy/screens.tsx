@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDate } from "@/i18n/format";
 import type { Session } from "@/server/auth/sessions";
 import { wireCode } from "@/server/errors";
 import { privateReceipt } from "@/server/privacy/native";
@@ -172,7 +174,9 @@ export async function ClientPrivacyScreen({
             {c.owner}: {request.ownerName}
           </p>
           <p>
-            {request.dueAt ? `${c.due}: ${request.dueAt.toISOString().slice(0, 10)}` : c.awaiting}
+            {request.dueAt
+              ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : "bg", request.dueAt)}`
+              : c.awaiting}
           </p>
         </article>
       ))}
@@ -448,7 +452,9 @@ export async function StaffPrivacyScreen({
               {c.owner}: {ownerName}
             </p>
             <p>
-              {record.dueAt ? `${c.due}: ${record.dueAt.toISOString().slice(0, 10)}` : c.awaiting}
+              {record.dueAt
+                ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : "bg", record.dueAt)}`
+                : c.awaiting}
             </p>
             {next.length ? (
               <NativeForm

@@ -10,7 +10,8 @@ import {
   identityCopy,
   roleLabel,
 } from "@/features/identity/copy";
-import { isRoutableLocale } from "@/i18n/config";
+import { isPublicLocale, isRoutableLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { viewClientInvitation } from "@/server/auth/invitations";
 import { currentClientSession } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
@@ -63,7 +64,9 @@ export default async function InvitationPage({
           <p>
             {fill(c.invitationRecipient, {
               email: view.details.recipientEmail,
-              time: view.details.expiresAt.toLocaleString(locale),
+              time: formatDateTime(isPublicLocale(locale) ? locale : "bg", view.details.expiresAt, {
+                zoneLabel: true,
+              }),
             })}
           </p>
           {view.status === "accepted" ? (

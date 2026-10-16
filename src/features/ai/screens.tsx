@@ -2,7 +2,8 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import {
   listAssistanceRuns,
   readAssistanceOperation,
@@ -121,7 +122,9 @@ export async function AssistanceScreen({
                   {copy.open}
                 </a>{" "}
                 · {run.state} · {run.task} ·{" "}
-                <time dateTime={run.createdAt.toISOString()}>{run.createdAt.toISOString()}</time>
+                <time dateTime={run.createdAt.toISOString()}>
+                  {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
+                </time>
               </li>
             ))}
           </ul>
@@ -302,7 +305,12 @@ export async function AssistanceRunScreen({
             [copy.model, run.model],
             [copy.revision, run.sourceVersion],
             [copy.digest, run.sourceDigest],
-            [copy.generated, run.generatedAt?.toISOString() ?? "—"],
+            [
+              copy.generated,
+              run.generatedAt
+                ? formatDateTime(isPublicLocale(locale) ? locale : "bg", run.generatedAt)
+                : "—",
+            ],
             [copy.costs, run.actualCostMicros ?? copy.unknown],
           ].map(([label, value]) => (
             <div key={String(label)}>
@@ -354,7 +362,10 @@ export async function JobsScreen({
         </ul>
       </section>
       <p>
-        {copy.checked}: <time dateTime={status.checkedAt}>{status.checkedAt}</time>
+        {copy.checked}:{" "}
+        <time dateTime={status.checkedAt}>
+          {formatDateTime(isPublicLocale(locale) ? locale : "bg", status.checkedAt)}
+        </time>
       </p>
       <Notice
         tone={status.worker.state === "current" ? "info" : "warning"}
@@ -410,7 +421,9 @@ export async function JobsScreen({
                   </th>
                   <td className="p-3">{job.state}</td>
                   <td className="p-3">{job.count}</td>
-                  <td className="p-3">{new Date(job.oldest).toISOString()}</td>
+                  <td className="p-3">
+                    {formatDateTime(isPublicLocale(locale) ? locale : "bg", job.oldest)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -435,7 +448,7 @@ export async function JobsScreen({
                 {event.provider} · {event.eventType} · {event.state} · {event.code ?? "—"}
               </p>
               <time dateTime={event.receivedAt.toISOString()}>
-                {event.receivedAt.toISOString()}
+                {formatDateTime(isPublicLocale(locale) ? locale : "bg", event.receivedAt)}
               </time>
             </li>
           ))}
@@ -486,7 +499,8 @@ export async function JobsScreen({
                 {event.kind} · {event.state} · {event.code ?? "—"}
               </p>
               <p>
-                {event.at?.toISOString() ?? "—"} · {event.attempts}
+                {event.at ? formatDateTime(isPublicLocale(locale) ? locale : "bg", event.at) : "—"}{" "}
+                · {event.attempts}
               </p>
             </li>
           ))}

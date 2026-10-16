@@ -72,7 +72,7 @@ export function taskHandoverCopy(locale: string) {
       "Напишите причину отзыва.",
       "Write the reason for withdrawing.",
     ),
-    zoneNote: s("Час по Europe/Sofia.", "Время по Europe/Sofia.", "Time in Europe/Sofia."),
+    zoneNote: s("Час по софийско време.", "Время по софийскому времени.", "Sofia time."),
     declineRecorded: s("Отказът е записан", "Отказ записан", "Decline recorded"),
     declineRecordedNext: s(
       "Не е нужно друго от вас. {owner} ще избере друг колега.",

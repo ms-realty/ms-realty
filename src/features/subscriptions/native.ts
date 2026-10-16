@@ -11,6 +11,7 @@ import { getEnv } from "@/server/config/env";
 import { keyedHash } from "@/server/crypto";
 import type { Executor } from "@/server/db";
 import { AppError, isAppError, toErrorBody } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { decideAlertRule } from "@/server/subscriptions/approval";
 import { currentAlertRule } from "@/server/subscriptions/rule";
 import { isIssuedFormOperation } from "@/ui/form/server";
@@ -44,7 +45,7 @@ async function retain(session: Session, locale: string, form: FormData) {
   const data = Buffer.from(
     JSON.stringify({
       note: String(form.get("note") ?? "").slice(0, 1000),
-      expiresAt: String(form.get("expiresAt") ?? "").slice(0, 30),
+      expiresAt: readTimeFormValues(form, ["expiresAt"]).expiresAt?.slice(0, 30) ?? "",
     }),
   ).toString("base64url");
   // UTF-8 note length can exceed the browser's cookie budget; preserve only a bounded draft.
@@ -97,9 +98,7 @@ export const alertRuleFormRoute = nativeAuthRoute(
         expiresAt:
           text("decision") === "disable"
             ? null
-            : /^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(text("expiresAt"))
-              ? `${text("expiresAt")}:00.000Z`
-              : text("expiresAt") || null,
+            : formInstant(readTimeFormValues(form, ["expiresAt"]), "expiresAt") || null,
       });
       (await cookies()).set(cookieName, "", {
         path: `/${locale}/operations/subscriptions`,

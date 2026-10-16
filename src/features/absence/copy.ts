@@ -22,18 +22,14 @@ export function absenceCopy(locale: string) {
     available: s("На разположение", "Доступен для работы", "Available for work"),
     planned: s("Планирано отсъствие", "Запланировано отсутствие", "Absence scheduled"),
     absent: s("Отсъства", "Отсутствует", "Absent"),
-    starts: s("Начало (UTC)", "Начало (UTC)", "Starts at (UTC)"),
+    starts: s("Начало", "Начало", "Starts at"),
     startsRecorded: s("Начало", "Начало", "Starts at"),
     startsHint: s(
       "Оставете празно за незабавно начало.",
       "Оставьте пустым, чтобы начать сейчас.",
       "Leave blank to start now.",
     ),
-    review: s(
-      "Проверка на покритието (UTC)",
-      "Проверить подхват работы (UTC)",
-      "Coverage review due (UTC)",
-    ),
+    review: s("Проверка на покритието", "Проверить подхват работы", "Coverage review due"),
     reviewRecorded: s("Проверка на покритието", "Проверить подхват работы", "Coverage review due"),
     reviewHint: s(
       "Този срок не връща служителя автоматично.",

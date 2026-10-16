@@ -10,7 +10,6 @@ import { caseFor } from "@/server/cases/shared";
 import { isAppError } from "@/server/errors";
 import { findOperation } from "@/server/operations";
 import { listProposals, proposalContext, readProposal } from "@/server/proposals/queries";
-import { deadlineInput } from "@/server/proposals/terms";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import { type WorkflowField, WorkflowForm } from "../cases/form";
@@ -95,7 +94,7 @@ function termFields(locale: string): WorkflowField[] {
     { name: "paymentBasis", label: c.paymentBasis, type: "textarea", required: true },
     { name: "conditions", label: c.conditions, type: "textarea" },
     { name: "inclusions", label: c.inclusions, type: "textarea" },
-    { name: "deadline", label: c.deadline, hint: caseCopy(locale).offsetHint, required: true },
+    { name: "deadline", label: c.deadline, type: "datetime-local", required: true },
   ];
 }
 export async function ProposalIndexScreen(props: ScreenProps & { caseId?: string }) {
@@ -210,7 +209,7 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
         {c.paymentBasis}: {row.paymentBasis}
       </p>
       <p>
-        {c.deadline}: <WorkflowTime value={row.deadlineAt} locale={locale} />
+        {c.deadline}: <WorkflowTime value={row.deadlineAt} locale={locale} zoneLabel />
       </p>
       <h3 className="font-semibold">{c.parties}</h3>
       <ul>
@@ -303,7 +302,11 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
                       : c.countered}
                 </p>
                 <p>{response.reason}</p>
-                <WorkflowTime value={response.at} locale={props.locale} />
+                <WorkflowTime
+                  value={response.at}
+                  locale={props.locale}
+                  zoneLabel={props.session.account.kind === "client"}
+                />
               </li>
             ))}
           </ul>
@@ -445,7 +448,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
               paymentBasis: row.paymentBasis,
               conditions: row.conditions.join("\n"),
               inclusions: row.inclusions.join("\n"),
-              deadline: deadlineInput(row.deadlineAt),
+              deadline: row.deadlineAt.toISOString(),
             }}
           />
         </WorkflowSection>

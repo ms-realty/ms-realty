@@ -3,10 +3,13 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
 import { getEnv } from "@/server/config/env";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action, type HandlerContext } from "@/server/http/next";
 import {
   acceptInquiry,
@@ -16,15 +19,9 @@ import {
 } from "@/server/work/commands";
 import { recordInquiryContact } from "@/server/work/contact";
 import { handoverTask } from "@/server/work/handover";
-import { handoverReviewInput, handoverReviewInstant } from "@/server/work/handover-time";
 import { readInquiry, readTask } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import {
-  isIssuedFormOperation,
-  issueFormOperation,
-  readFormEnvelope,
-  readFormValues,
-} from "@/ui/form/server";
+import { isIssuedFormOperation, issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { workCopy } from "./copy";
 import { taskHandoverCopy } from "./handover-copy";
 import { inquiryDraftOwner } from "./inquiry-draft-owner";
@@ -58,11 +55,7 @@ export type ContactState = FormState<ContactValues> & {
   previousContact?: ContactMethodView | null;
 };
 type Kind = "accept" | "triage" | "contact" | "task" | "handover";
-const localInstant = (value: string) =>
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?$/.test(value)
-    ? `${value}${value.length === 16 ? ":00" : ""}Z`
-    : value;
-const inputInstant = (value: Date | null) => value?.toISOString().slice(0, 16) ?? "";
+const inputInstant = (value: Date | null) => value?.toISOString() ?? "";
 const scopeFor = (kind: Kind, id: string) => `work.${kind}.${id}`;
 const enhancedInquiry = (data: FormData) =>
   data.getAll(inquiryEnhancedField).length === 1 && data.get(inquiryEnhancedField) === "yes";
@@ -84,7 +77,7 @@ async function perform<V extends FormValues>(
 ): Promise<FormState<V>> {
   const copy = workCopy(locale);
   const scope = scopeFor(kind, id);
-  const values = readFormValues<V>(data, fields);
+  const values = readTimeFormValues<V>(data, fields);
   const envelope = readFormEnvelope(data, scope);
   const path = recordPath(locale, kind, id);
   const key = envelope?.operationId ?? issueFormOperation(scope);
@@ -178,11 +171,7 @@ async function perform<V extends FormValues>(
           reference: result.data.reference ?? id,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: `${new Intl.DateTimeFormat(locale, {
-              dateStyle: "medium",
-              timeStyle: "short",
-              timeZone: "UTC",
-            }).format(new Date(result.data.recordedAt))} UTC`,
+            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt),
           },
           nextStep: copy.nextStep,
           destination: { href: path, label: copy.openRecord },
@@ -296,7 +285,9 @@ async function perform<V extends FormValues>(
                     ? decisionCopy.declineReasonRequired
                     : decisionCopy.withdrawReasonRequired
                   : reason
-                    ? (copy.reasons[reason] ?? copy.invalid)
+                    ? (timeReasonMessage(isPublicLocale(locale) ? locale : "bg", reason) ??
+                      copy.reasons[reason] ??
+                      copy.invalid)
                     : copy.invalid;
               return [field, [message]];
             }),
@@ -429,7 +420,7 @@ export async function acceptAction(
           id,
           ...envelope,
           ...values,
-          dueAt: localInstant(values.dueAt),
+          dueAt: formInstant(values, "dueAt"),
         })
       ).outcome;
     },
@@ -532,10 +523,10 @@ export async function contactAction(
           contactMethodId,
           expectedContactVersion: Number(revision),
           result: values.result as "unanswered" | "useful_response",
-          contactedAt: localInstant(values.contactedAt),
+          contactedAt: formInstant(values, "contactedAt"),
           note: values.note,
           nextAction: values.nextAction,
-          dueAt: localInstant(values.dueAt),
+          dueAt: formInstant(values, "dueAt"),
           promisedToClient: values.promisedToClient === "yes",
           reviewed: values.reviewed === "yes",
         })
@@ -591,7 +582,7 @@ export async function taskAction(
           ...envelope,
           state: values.state as Parameters<typeof changeTask>[2]["state"],
           note: values.note,
-          ...(values.followUpAt ? { followUpAt: localInstant(values.followUpAt) } : {}),
+          ...(values.followUpAt ? { followUpAt: formInstant(values, "followUpAt") } : {}),
         })
       ).outcome;
     },
@@ -631,7 +622,7 @@ export async function taskHandoverAction(
           action: values.action,
           receiverId: values.receiverId,
           ...(values.action === "accept"
-            ? { nextAction: values.nextAction, dueAt: handoverReviewInstant(values.dueAt ?? "") }
+            ? { nextAction: values.nextAction, dueAt: formInstant(values, "dueAt") }
             : values.action === "request"
               ? { reason: values.reason, reviewed: values.reviewed === "true" }
               : { reason: values.reason }),
@@ -649,7 +640,7 @@ export async function taskHandoverAction(
           reason: "",
           reviewed: "",
           nextAction: task.title,
-          dueAt: handoverReviewInput(task.followUpAt),
+          dueAt: inputInstant(task.followUpAt),
         },
       };
     },

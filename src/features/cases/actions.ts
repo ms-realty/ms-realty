@@ -1,7 +1,10 @@
 "use server";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
-import { displayLocale, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import { offsetInputValue } from "@/domain/time";
+import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import { acceptAppointmentHost } from "@/server/appointments/host-handover";
 import { offerAppointmentHost } from "@/server/appointments/host-offer";
 import {
@@ -28,9 +31,10 @@ import {
 } from "@/server/cases/lifecycle";
 import { acknowledgeOwnerPreview, bindSellerCase } from "@/server/cases/owner-preview";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { hostHandoverCopy } from "../appointments/host-copy";
 import {
   type WorkflowCommand,
@@ -41,9 +45,6 @@ import {
 } from "./contract";
 import { caseCopy } from "./copy";
 import { matchReviewFromForm } from "./matching-review";
-
-const instant = (value: string) =>
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value) ? `${value}:00Z` : value;
 
 export async function workflowAction(
   context: "staff" | "client",
@@ -62,7 +63,7 @@ export async function workflowAction(
   const copy = caseCopy(locale),
     scope = workflowScope(command, id);
   const fields = workflowFields[command] ?? [];
-  const values = readFormValues<FormValues>(data, fields);
+  const values = readTimeFormValues<FormValues>(data, fields);
   if (command === "emailDraft") {
     for (const name of ["subscriptionIds", "documentVersionIds"] as const)
       values[name] = data
@@ -199,12 +200,12 @@ export async function workflowAction(
               state: values.state as "active",
               reason: values.reason ?? "",
               waitingOn: values.waitingOn ?? "",
-              reviewAt: instant(values.reviewAt ?? ""),
+              reviewAt: formInstant(values, "reviewAt"),
               outcome: values.outcome ?? "",
               retention: values.retention ?? "",
               aftercare: values.aftercare ?? "",
               nextAction: values.nextAction ?? "",
-              dueAt: instant(values.dueAt ?? ""),
+              dueAt: formInstant(values, "dueAt"),
             })
           ).outcome;
         case "handover":
@@ -225,7 +226,7 @@ export async function workflowAction(
               kind: values.kind as "buyer",
               title: values.title ?? "",
               nextAction: values.nextAction ?? "",
-              dueAt: instant(values.dueAt ?? ""),
+              dueAt: formInstant(values, "dueAt"),
               requirements: values.requirements ?? "",
               preferences: values.preferences ?? "",
             })
@@ -235,7 +236,7 @@ export async function workflowAction(
             await updateNextAction(db, s, {
               ...base,
               nextAction: values.nextAction ?? "",
-              dueAt: instant(values.dueAt ?? ""),
+              dueAt: formInstant(values, "dueAt"),
               clientSummary: values.clientSummary ?? "",
             })
           ).outcome;
@@ -290,8 +291,8 @@ export async function workflowAction(
             await arrangeAppointment(db, s, {
               ...base,
               action: values.action as "propose",
-              startsAt: values.startsAt ?? "",
-              endsAt: values.endsAt ?? "",
+              startsAt: offsetInputValue(formInstant(values, "startsAt"), agencyTimeZone),
+              endsAt: offsetInputValue(formInstant(values, "endsAt"), agencyTimeZone),
               bufferMinutes: /^\d{1,3}$/.test(values.bufferMinutes ?? "")
                 ? Number(values.bufferMinutes)
                 : Number.NaN,
@@ -328,7 +329,9 @@ export async function workflowAction(
           reference: result.data.reference,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: `${new Intl.DateTimeFormat(isPublicLocale(locale) ? displayLocale(locale) : "en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Sofia" }).format(new Date(result.data.recordedAt))} Europe/Sofia`,
+            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt, {
+              zoneLabel: context === "client",
+            }),
           },
           nextStep: copy.nextStep,
           destination: { href: destination, label: copy.back },
@@ -377,7 +380,15 @@ export async function workflowAction(
         fieldErrors: Object.fromEntries(
           fields
             .filter((field) => error.fieldErrors?.[field])
-            .map((field) => [field, [copy.invalid]]),
+            .map((field) => [
+              field,
+              [
+                timeReasonMessage(
+                  isPublicLocale(locale) ? locale : "bg",
+                  error.fieldErrors?.[field]?.[0],
+                ) ?? copy.invalid,
+              ],
+            ]),
         ),
       },
     };

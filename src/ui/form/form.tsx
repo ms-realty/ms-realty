@@ -28,6 +28,7 @@ import {
   formFields,
   type RecoveryLink,
 } from "./contract";
+import { nativeTimeValue } from "./date-time-value";
 
 type FieldBinding = {
   id: string;
@@ -83,7 +84,12 @@ export type ActionFormProps<V extends FormValues> = {
   children: (form: FormController<V>) => ReactNode;
 };
 
-type Snapshot = { operationId: string; values: FormValues; reconciliation: RecoveryLink };
+type Snapshot = {
+  operationId: string;
+  values: FormValues;
+  reconciliation: RecoveryLink;
+  formatValue?: (name: string, value: string) => string;
+};
 
 export function nativeFormPermalink(
   permalink: string,
@@ -148,7 +154,7 @@ class TransportBoundary extends Component<
   }
   render() {
     if (!this.state.failed) return this.props.children;
-    const { values, operationId, reconciliation } = this.props.snapshot.current;
+    const { values, operationId, reconciliation, formatValue } = this.props.snapshot.current;
     return (
       <FocusResult>
         <Notice tone="warning" title={this.props.copy.unknown}>
@@ -164,7 +170,9 @@ class TransportBoundary extends Component<
           {Object.entries(values).map(([name, value]) => (
             <div key={name}>
               <dt className="font-semibold">{this.props.labels[name]}</dt>
-              <dd className="whitespace-pre-wrap break-words">{value}</dd>
+              <dd className="whitespace-pre-wrap break-words">
+                {formatValue?.(name, value) ?? value}
+              </dd>
             </div>
           ))}
         </dl>
@@ -178,6 +186,7 @@ export function ActionForm<V extends FormValues>(props: ActionFormProps<V>) {
     operationId: props.initialState.operationId,
     values: props.initialState.values,
     reconciliation: props.reconciliation,
+    formatValue: (name, value) => props.formatValue?.(name, value, props.initialState) ?? value,
   });
   return (
     <TransportBoundary snapshot={snapshot} copy={props.copy} labels={props.labels}>
@@ -242,6 +251,11 @@ function FormSession<V extends FormValues>({
       const control = nativeForm.current.elements.namedItem(name);
       if (control instanceof HTMLInputElement) {
         if (["hidden", "password", "file", "submit", "button"].includes(control.type)) continue;
+        const timeValue = nativeTimeValue(nativeForm.current, control);
+        if (timeValue !== null) {
+          values[name as keyof V] = timeValue as V[keyof V];
+          continue;
+        }
         if (control.type === "radio") {
           values[name as keyof V] = (control.checked ? control.value : "") as V[keyof V];
           continue;
@@ -296,6 +310,7 @@ function FormSession<V extends FormValues>({
       operationId: state.operationId,
       values,
       reconciliation: state.reconciliation ?? reconciliation,
+      formatValue: (name, value) => formatValue?.(name, value, state) ?? value,
     };
   }
 
@@ -339,7 +354,7 @@ function FormSession<V extends FormValues>({
           {conflict?.reapply
             ? copy.reapply
             : typeof submitLabel === "function"
-              ? submitLabel(state)
+              ? submitLabel({ ...state, values })
               : submitLabel}
         </span>
         <span

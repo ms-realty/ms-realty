@@ -69,7 +69,7 @@ export function processCopy(locale: string) {
       "Утверждённой политики нет. Сначала загрузите и проверьте документ.",
       "No approved policy. Upload and review the supplied document first.",
     ),
-    time: s("Часова зона Europe/Sofia", "Часовой пояс Europe/Sofia", "Time zone: Europe/Sofia"),
+    time: s("Софийско време", "По софийскому времени", "Sofia time"),
     yes: s("Да", "Да", "Yes"),
     no: s("Не", "Нет", "No"),
     policies: s("Утвърдени политики", "Утверждённые политики", "Approved policies"),
@@ -310,7 +310,6 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
     type,
     required,
     ...(options ? { options } : {}),
-    ...(type === "datetime-local" ? { hint: c.time } : {}),
   });
   const bind = (command: ProcessBinding["command"], rest = {}): ProcessBinding => ({
     caseId: id,
@@ -668,7 +667,6 @@ export async function RestrictedProcessScreen(props: ScreenProps & { id: string 
               name: "reportedAt",
               label: c.fields.reportedAt,
               type: "datetime-local",
-              hint: c.time,
             },
           ]}
         />

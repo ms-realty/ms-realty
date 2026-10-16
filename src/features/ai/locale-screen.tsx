@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { isPublicLocale, publicLocales } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { listLocaleAssistanceRuns, readLocaleAssistanceOperation } from "@/server/ai/assistance";
 import { assistanceAvailability } from "@/server/ai/config";
 import type { LocaleSource } from "@/server/ai/locale-draft";
@@ -145,7 +146,8 @@ export async function LocaleAssistanceScreen({
                 <a className="underline" href={`/${locale}/operations/assistance/${run.id}`}>
                   {common.open}
                 </a>{" "}
-                · {run.state} · {run.createdAt.toISOString()}
+                · {run.state} ·{" "}
+                {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
               </li>
             ))}
           </ul>

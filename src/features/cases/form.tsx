@@ -1,4 +1,8 @@
 "use client";
+import { isInstantInput } from "@/domain/time";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
@@ -43,6 +47,12 @@ export function WorkflowForm({
 }) {
   return (
     <ActionForm
+      formatValue={(name, value) =>
+        fields.some((field) => field.name === name && field.type === "datetime-local") &&
+        isInstantInput(value)
+          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
+          : value
+      }
       action={action}
       initialState={initialState}
       permalink={path}
@@ -59,6 +69,18 @@ export function WorkflowForm({
             const field = form.field(definition.name);
             if (definition.type === "hidden")
               return <input key={field.name} type="hidden" name={field.name} value={field.value} />;
+            if (definition.type === "datetime-local")
+              return (
+                <DateTimeField
+                  key={field.name}
+                  {...field}
+                  locale={isPublicLocale(locale) ? locale : "bg"}
+                  label={definition.label}
+                  hint={definition.hint}
+                  required={definition.required}
+                  onValueChange={(value) => form.setValue(field.name, value)}
+                />
+              );
             const errorId = field.error ? `${field.id}-error` : undefined;
             const hintId = definition.hint ? `${field.id}-hint` : undefined;
             const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;

@@ -1,11 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "@/db/client";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
+import { isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { inventoryDetail, inventoryEvidence } from "@/server/inventory/commands";
 import { listContacts } from "@/server/work/queries";
 import { buttonClass } from "@/ui/button-class";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { inventoryDecision } from "../../actions";
 
@@ -169,14 +171,19 @@ export default async function SellerEvidencePage({
             <span className={labelClass}>{copy.commission}</span>
             <textarea name="commissionTerms" required maxLength={4000} className={textareaClass} />
           </label>
-          <label className="grid gap-2">
-            <span className={labelClass}>{copy.agreedAt}</span>
-            <input name="agreedAt" type="datetime-local" required className={controlClass} />
-          </label>
-          <label className="grid gap-2">
-            <span className={labelClass}>{copy.expiresAt}</span>
-            <input name="expiresAt" type="datetime-local" className={controlClass} />
-          </label>
+          <DateTimeField
+            id="instruction-agreedAt"
+            name="agreedAt"
+            label={copy.agreedAt}
+            locale={isPublicLocale(locale) ? locale : "bg"}
+            required
+          />
+          <DateTimeField
+            id="instruction-expiresAt"
+            name="expiresAt"
+            label={copy.expiresAt}
+            locale={isPublicLocale(locale) ? locale : "bg"}
+          />
           <label className="flex items-start gap-3">
             <input
               type="checkbox"

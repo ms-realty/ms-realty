@@ -1,5 +1,9 @@
 "use client";
 
+import { isInstantInput } from "@/domain/time";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
@@ -78,6 +82,11 @@ export function AcceptForm({
       owner={draftOwner}
       id={id}
       kind="accept"
+      formatValue={(name, value) =>
+        name === "dueAt" && isInstantInput(value)
+          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
+          : value
+      }
       draftCopy={copy.draft}
       action={action}
       initialState={initialState}
@@ -96,10 +105,11 @@ export function AcceptForm({
             required
             maxLength={500}
           />
-          <FormField
+          <DateTimeField
             {...form.field("dueAt")}
             label={copy.dueAt}
-            type="datetime-local"
+            locale={isPublicLocale(locale) ? locale : "bg"}
+            onValueChange={(value) => form.setValue("dueAt", value)}
             hint={copy.utcHint}
             required
           />
@@ -228,6 +238,11 @@ export function TaskForm({
   const path = `/${locale}/tasks/${id}`;
   return (
     <ActionForm
+      formatValue={(name, value) =>
+        name === "followUpAt" && isInstantInput(value)
+          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
+          : value
+      }
       action={action}
       initialState={initialState}
       permalink={path}
@@ -251,11 +266,12 @@ export function TaskForm({
             required={form.values.state !== "in_progress"}
             maxLength={1500}
           />
-          <FormField
+          <DateTimeField
             {...form.field("followUpAt")}
             label={copy.followUpAt}
             hint={copy.utcHint}
-            type="datetime-local"
+            locale={isPublicLocale(locale) ? locale : "bg"}
+            onValueChange={(value) => form.setValue("followUpAt", value)}
             required={form.values.state === "waiting"}
           />
         </>

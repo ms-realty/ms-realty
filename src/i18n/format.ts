@@ -3,8 +3,9 @@
 // zone (agency default Europe/Sofia), never the server's or the browser's, and never as a raw
 // zone id, "UTC", an offset or ISO text: the machine value belongs in `<time dateTime>`.
 import { type CurrencyCode, currencyMinorDigits, type PublicLocale } from "@/domain/ids";
+import { localInputValue, resolveLocalTime } from "@/domain/time";
 import { agencyTimeZone, displayLocale } from "./config";
-import { zoneWordsFor } from "./time-copy";
+import { timeCopy, zoneWordsFor } from "./time-copy";
 
 type Instant = Date | string | number;
 
@@ -142,6 +143,16 @@ function named(locale: PublicLocale, text: string, timeZone: string, zoneLabel: 
   return zoneLabel ? `${text} (${timeZoneLabel(locale, timeZone)})` : text;
 }
 
+function occurrenceWords(locale: PublicLocale, date: Date, timeZone: string) {
+  const local = resolveLocalTime(localInputValue(date, timeZone), timeZone);
+  if (local.outcome !== "ambiguous") return "";
+  return timeCopy(locale)[
+    Math.floor(date.getTime() / 60_000) === Math.floor(Date.parse(local.candidates[0]) / 60_000)
+      ? "earlier"
+      : "later"
+  ];
+}
+
 /**
  * A zone in plain words: «софийско време», "Sofia time". A zone the agency does not work in
  * uses the runtime's generic name ("Israel Time"); an offset such as "GMT+3" is never shown.
@@ -194,7 +205,8 @@ export function formatDateTime(
     ...yearUnlessCurrent([date], now, timeZone),
     ...timePart,
   }).format(date);
-  return named(locale, text, timeZone, zoneLabel);
+  const occurrence = occurrenceWords(locale, date, timeZone);
+  return named(locale, occurrence ? `${text} · ${occurrence}` : text, timeZone, zoneLabel);
 }
 
 /** An interval such as a viewing, «сб, 17 октомври, 10:00 – 11:00», naming its zone once. */
@@ -212,5 +224,13 @@ export function formatDateTimeRange(
     ...yearUnlessCurrent([from, to], now, timeZone),
     ...timePart,
   }).formatRange(from, to);
-  return named(locale, text, timeZone, zoneLabel);
+  const first = occurrenceWords(locale, from, timeZone),
+    last = occurrenceWords(locale, to, timeZone);
+  const resolved =
+    first || last
+      ? first === last
+        ? `${text} · ${first}`
+        : `${formatDateTime(locale, from, { timeZone, now })} – ${formatDateTime(locale, to, { timeZone, now })}`
+      : text;
+  return named(locale, resolved, timeZone, zoneLabel);
 }

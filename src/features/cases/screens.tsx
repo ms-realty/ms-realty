@@ -6,7 +6,8 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { interestMachine } from "@/domain/interest";
-import { displayLocale, isPublicLocale } from "@/i18n/config";
+import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
+import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import type { Session } from "@/server/auth/sessions";
 import { listCases, readCase, readCaseMessages, readInterestContext } from "@/server/cases/queries";
@@ -118,26 +119,51 @@ export function WorkflowSection({
     </section>
   );
 }
+type TimeProps = {
+  locale: string;
+  /** The zone the time is kept in; a zone other than the agency's is always named. */
+  zone?: string;
+  /** Names the zone in words for a client, who could be reading from anywhere (M-050). */
+  zoneLabel?: boolean;
+};
+const timeLocale = (locale: string) => (isPublicLocale(locale) ? locale : "bg");
+
+/** One instant in the shared format; staff read agency times without a zone name. */
 export function WorkflowTime({
   value,
   locale,
-  zone = "Europe/Sofia",
-}: {
-  value: Date | null;
-  locale: string;
-  zone?: string;
-}) {
+  zone = agencyTimeZone,
+  zoneLabel = false,
+}: TimeProps & { value: Date | null }) {
   return value ? (
-    <time dateTime={value.toISOString()}>
-      {new Intl.DateTimeFormat(isPublicLocale(locale) ? displayLocale(locale) : "en-GB", {
-        dateStyle: "medium",
-        timeStyle: "short",
+    <time dateTime={value.toISOString()} className="tabular-nums">
+      {formatDateTime(timeLocale(locale), value, {
         timeZone: zone,
-      }).format(value)}{" "}
-      {zone}
+        zoneLabel: zoneLabel || zone !== agencyTimeZone,
+      })}
     </time>
   ) : (
     <span>—</span>
+  );
+}
+
+/** An appointment interval: its day once and its zone once. */
+export function WorkflowTimeRange({
+  start,
+  end,
+  locale,
+  zone = agencyTimeZone,
+  zoneLabel = false,
+}: TimeProps & { start: Date; end: Date | null }) {
+  if (!end) return <WorkflowTime value={start} locale={locale} zone={zone} zoneLabel={zoneLabel} />;
+  // The machine value is the start; the words carry the end on the same day.
+  return (
+    <time dateTime={start.toISOString()} className="tabular-nums">
+      {formatDateTimeRange(timeLocale(locale), start, end, {
+        timeZone: zone,
+        zoneLabel: zoneLabel || zone !== agencyTimeZone,
+      })}
+    </time>
   );
 }
 export function BoundWorkflowForm({
@@ -366,14 +392,14 @@ export function ClientCaseOverview({
                 {row.reviewAt ? (
                   <p>
                     <strong>{c.reviewAt}:</strong>{" "}
-                    <WorkflowTime value={row.reviewAt} locale={locale} />
+                    <WorkflowTime value={row.reviewAt} locale={locale} zoneLabel />
                   </p>
                 ) : null}
               </div>
             ) : null}
             {active && row.dueAt ? (
               <p>
-                <WorkflowTime value={row.dueAt} locale={locale} />
+                <WorkflowTime value={row.dueAt} locale={locale} zoneLabel />
               </p>
             ) : null}
             <div className="flex flex-wrap items-center gap-4">
@@ -435,6 +461,7 @@ export async function CaseScreen(
                 <WorkflowTime
                   value={appointment.confirmedStartsAt ?? appointment.proposedStartsAt}
                   locale={props.locale}
+                  zoneLabel={props.session.account.kind === "client"}
                 />
               </>
             ) : null}
@@ -591,7 +618,11 @@ export async function CaseScreen(
                   {staff ? <strong>{c.next}: </strong> : null}
                   {row.nextAction ?? c.noAction}
                 </p>
-                <WorkflowTime value={row.dueAt} locale={props.locale} />
+                <WorkflowTime
+                  value={row.dueAt}
+                  locale={props.locale}
+                  zoneLabel={props.session.account.kind === "client"}
+                />
               </>
             ) : (
               <div className="space-y-3 rounded-control border border-border p-4">
@@ -614,7 +645,11 @@ export async function CaseScreen(
                 {row.reviewAt ? (
                   <p>
                     <strong>{c.reviewAt}:</strong>{" "}
-                    <WorkflowTime value={row.reviewAt} locale={props.locale} />
+                    <WorkflowTime
+                      value={row.reviewAt}
+                      locale={props.locale}
+                      zoneLabel={props.session.account.kind === "client"}
+                    />
                   </p>
                 ) : null}
               </div>
@@ -646,6 +681,7 @@ export async function CaseScreen(
                   <WorkflowTime
                     value={task.state === "waiting" ? task.followUpAt : task.dueAt}
                     locale={props.locale}
+                    zoneLabel={props.session.account.kind === "client"}
                   />
                 </li>
               ))}
@@ -740,7 +776,7 @@ export async function CaseScreen(
                 ]}
                 values={{
                   nextAction: row.nextAction ?? "",
-                  dueAt: row.dueAt?.toISOString().slice(0, 16) ?? "",
+                  dueAt: row.dueAt?.toISOString() ?? "",
                   clientSummary: row.clientSummary ?? "",
                 }}
                 submit={c.nextSave}
@@ -938,7 +974,12 @@ export async function CaseScreen(
                     ) : (
                       c.shared
                     )}{" "}
-                    · <WorkflowTime value={message.at} locale={props.locale} />
+                    ·{" "}
+                    <WorkflowTime
+                      value={message.at}
+                      locale={props.locale}
+                      zoneLabel={props.session.account.kind === "client"}
+                    />
                   </p>
                   <p className="whitespace-pre-wrap">{message.body}</p>
                 </li>
@@ -1020,6 +1061,7 @@ export function AppointmentList(
           <WorkflowTime
             value={row.confirmedStartsAt ?? row.proposedStartsAt}
             locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
           />
         </li>
       ))}

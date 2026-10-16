@@ -111,7 +111,10 @@ describe("O07 add", () => {
       reviewed: true,
     });
     expect(screen.getByText("Bright two-room flat close to the centre.")).toBeVisible();
-    expect(screen.getByText("6 October 2026, 11:12 · Europe/Sofia")).toBeVisible();
+    const recordedTime = screen.getByText(/Tue.*6 October.*11:12/);
+    expect(recordedTime).toBeVisible();
+    expect(recordedTime).toHaveAttribute("datetime", "2026-10-06T08:12:00.000Z");
+    expect(recordedTime).not.toHaveTextContent(/Europe\/|UTC|GMT/);
     // The refresh runs in an effect after the frame commits.
     await waitFor(() => expect(refresh).toHaveBeenCalled());
     // The recorder is shown once a server read after the add names it, never guessed.
@@ -127,7 +130,7 @@ describe("O07 add", () => {
         })}
       />,
     );
-    expect(screen.getByText("Maria D. · 6 October 2026, 11:12 · Europe/Sofia")).toBeVisible();
+    expect(screen.getByText(/Maria D\. · Tue.*6 October.*11:12/)).toBeVisible();
     expect(screen.getByRole("link", { name: "Open MS-00912 in the deal" })).toHaveAttribute(
       "href",
       "/en/cases/case-1#interest-i1",

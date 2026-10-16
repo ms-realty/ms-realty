@@ -131,7 +131,10 @@ export function inquiryReceiptView(
     title: copy.received,
     // One identifier for the visitor: the telephone check code, never the internal RQ number.
     reference: inquiryCheckCode(receipt.receiptId) ?? receipt.reference,
-    recordedAt: { dateTime: receipt.acceptedAt, label: formatDateTime(locale, receipt.acceptedAt) },
+    recordedAt: {
+      dateTime: receipt.acceptedAt,
+      label: formatDateTime(locale, receipt.acceptedAt, { zoneLabel: true }),
+    },
     nextStep: copy.next,
     destination: { href: inquiryStatus(locale, receipt.receiptId), label: copy.receipt },
     ...withListings(receipt, locale),

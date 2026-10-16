@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { z } from "zod";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { listIntakeAssistanceRuns, readIntakeAssistanceOperation } from "@/server/ai/assistance";
 import { assistanceAvailability } from "@/server/ai/config";
 import type { IntakeSource, intakeDraftSchema } from "@/server/ai/intake-draft";
@@ -172,7 +174,8 @@ export async function IntakeAssistanceScreen({
               <a className="underline" href={`/${locale}/operations/assistance/${run.id}`}>
                 {common.open}
               </a>{" "}
-              · {run.state} · {run.createdAt.toISOString()}
+              · {run.state} ·{" "}
+              {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
             </li>
           ))}
         </ul>

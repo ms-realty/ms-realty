@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { workCopy } from "@/features/work/copy";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import type { Session } from "@/server/auth/sessions";
 import { getEnv } from "@/server/config/env";
 import {
@@ -212,7 +213,7 @@ export async function ContentWorkbenchScreen({
         ))}
         <p className="text-caption">
           {current.reviewedAt
-            ? `${copy.reviewDate}: ${current.reviewedAt.toISOString()}`
+            ? `${copy.reviewDate}: ${formatDateTime(isPublicLocale(locale) ? locale : "bg", current.reviewedAt)}`
             : copy.missingReview}
         </p>
       </section>
@@ -247,8 +248,14 @@ export async function ContentWorkbenchScreen({
           <ul className="space-y-3">
             {decisions.map((decision) => (
               <li key={decision.id} className="break-words">
-                {decision.kind} · {decision.state} · {decision.decidedAt?.toISOString()} ·{" "}
-                {copy.until}: {decision.expiresAt?.toISOString() ?? copy.none}
+                {decision.kind} · {decision.state} ·{" "}
+                {decision.decidedAt
+                  ? formatDateTime(isPublicLocale(locale) ? locale : "bg", decision.decidedAt)
+                  : copy.none}{" "}
+                · {copy.until}:{" "}
+                {decision.expiresAt
+                  ? formatDateTime(isPublicLocale(locale) ? locale : "bg", decision.expiresAt)
+                  : copy.none}
                 <p className="text-caption">{decision.decisionNote}</p>
               </li>
             ))}
@@ -302,7 +309,10 @@ export async function ContentOperationScreen({
           title={copy.saved}
           reference={result.operationId}
           referenceLabel={formCopy.reference}
-          recordedAt={{ dateTime: result.recordedAt, label: result.recordedAt }}
+          recordedAt={{
+            dateTime: result.recordedAt,
+            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.recordedAt),
+          }}
           recordedAtLabel={formCopy.recordedAt}
         >
           <p>{copy.next}</p>

@@ -2,6 +2,8 @@
 // (Figma 20:1055 / 25:2228 and 20:1175 / 25:2279). C02 decides eligibility, the reason a Case
 // cannot be linked and the match basis, and enforces every check on submit; this layer only
 // words the candidates, the effects and the outcome.
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import "server-only";
 import { sql } from "drizzle-orm";
 import Image from "next/image";
@@ -10,7 +12,6 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import type { CaseStage } from "@/domain/case";
-import { agencyTimeZone } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import type { InquiryCaseBlockReason } from "@/server/cases/inquiry-link";
 import { listInquiryCaseCandidates } from "@/server/cases/queries";
@@ -89,11 +90,7 @@ function withValue(template: string, value: string, slot = "{case}") {
 }
 
 const formatInstant = (locale: string, iso: string) =>
-  `${new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: agencyTimeZone,
-  }).format(new Date(iso))} ${agencyTimeZone}`;
+  formatDateTime(isPublicLocale(locale) ? locale : "bg", iso);
 
 /** Same condition as the inquiry page's own "create a Case" link. */
 const mayCreateCase = (detail: Detail, session: Session) =>

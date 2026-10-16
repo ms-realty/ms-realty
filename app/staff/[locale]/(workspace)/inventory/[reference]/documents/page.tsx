@@ -9,6 +9,8 @@ import {
 } from "@/domain/document";
 import { fileError, fileLabel, filesCopy } from "@/features/files/copy";
 import { FileButton, FileCheck, FileEnvelope, FileField } from "@/features/files/forms";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDate } from "@/i18n/format";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { documentsForListing } from "@/server/documents/commands";
@@ -136,7 +138,7 @@ export default async function DocumentsPage({
             <p>
               {copy.expiry}:{" "}
               <time dateTime={document.expiresAt.toISOString()}>
-                {document.expiresAt.toISOString().slice(0, 10)}
+                {formatDate(isPublicLocale(locale) ? locale : "bg", document.expiresAt)}
               </time>
             </p>
           ) : null}
