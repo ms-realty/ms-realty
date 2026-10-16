@@ -15,6 +15,7 @@ export async function PermissionState({
   title,
   about,
   session,
+  showToday = true,
 }: {
   locale: string;
   /** The page's own heading, so the person knows where they are. */
@@ -22,6 +23,7 @@ export async function PermissionState({
   /** One sentence on what the page is for. */
   about: string;
   session: Session;
+  showToday?: boolean;
 }) {
   const locale = isStaffLocale(requested) ? requested : defaultStaffLocale;
   const t = await getTranslations({ locale, namespace: "workspaceStates" });
@@ -42,9 +44,11 @@ export async function PermissionState({
         kind="inaccessible"
         title={t("permission.title")}
         action={
-          <a href={`/${locale}/today`} className={buttonClass("secondary")}>
-            {t("today")}
-          </a>
+          showToday ? (
+            <a href={`/${locale}/today`} className={buttonClass("secondary")}>
+              {t("today")}
+            </a>
+          ) : undefined
         }
       >
         <p>{managers.length ? t("permission.managers", { names }) : t("permission.noManagers")}</p>

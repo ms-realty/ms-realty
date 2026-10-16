@@ -207,6 +207,28 @@ async function inboxQuery(
   };
 }
 
+/** Human reference lookup keeps duplicate selection usable beyond the recent picker page. */
+export async function inquiryIdByReference(db: Executor, session: Session, reference: string) {
+  const { grants } = await queueReadContext(db, session);
+  const term = parseInput(
+    z
+      .string()
+      .trim()
+      .min(3)
+      .max(80)
+      .refine((value) => !containsSearchControl(value)),
+    reference,
+  );
+  const [row] = await db
+    .select({ id: inquiries.id })
+    .from(inquiries)
+    .where(and(eq(inquiries.reference, term), visibleWhere(grants, "inquiry.read", "inquiry")))
+    .limit(1);
+  if (!row)
+    throw new AppError("validation_failed", { fieldErrors: { duplicateOfInquiryId: ["invalid"] } });
+  return row.id;
+}
+
 export async function readInquiry(db: Executor, session: Session, id: string) {
   const live = await liveStaff(db, session);
   if (!z.uuid().safeParse(id).success) throw new AppError("not_found");
@@ -282,7 +304,13 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
     })
     .from(inquiries)
     .where(and(ne(inquiries.id, row.id), visibleWhere(grants, "inquiry.read", "inquiry")))
-    .orderBy(desc(inquiries.createdAt), desc(inquiries.id))
+    .orderBy(
+      ...(row.duplicateOfInquiryId
+        ? [desc(sql`${inquiries.id} = ${row.duplicateOfInquiryId}`)]
+        : []),
+      desc(inquiries.createdAt),
+      desc(inquiries.id),
+    )
     .limit(200);
   return {
     inquiry: row,

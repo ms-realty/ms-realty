@@ -200,22 +200,30 @@ export function TriageForm({
               <label className={labelClass} htmlFor={form.field("duplicateOfInquiryId").id}>
                 {triage.original}
               </label>
-              <select
+              <input
+                type="search"
+                autoComplete="off"
+                maxLength={80}
                 className={controlClass}
                 id={form.field("duplicateOfInquiryId").id}
                 name="duplicateOfInquiryId"
+                list={`${form.field("duplicateOfInquiryId").id}-choices`}
                 required
-                value={form.values.duplicateOfInquiryId}
+                value={
+                  duplicateCandidates.find(
+                    (candidate) => candidate.id === form.values.duplicateOfInquiryId,
+                  )?.reference ?? form.values.duplicateOfInquiryId
+                }
                 onChange={(event) => form.setValue("duplicateOfInquiryId", event.target.value)}
                 disabled={form.field("duplicateOfInquiryId").readOnly}
-              >
-                <option value="">{triage.select}</option>
+              />
+              <datalist id={`${form.field("duplicateOfInquiryId").id}-choices`}>
                 {duplicateCandidates.map((candidate) => (
-                  <option key={candidate.id} value={candidate.id}>
-                    {candidate.reference} · {candidate.preferredName}
+                  <option key={candidate.id} value={candidate.reference}>
+                    {candidate.preferredName}
                   </option>
                 ))}
-              </select>
+              </datalist>
               <p className="text-caption text-text-muted">{triage.hint}</p>
             </div>
           ) : (

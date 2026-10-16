@@ -38,7 +38,6 @@ it("requires an explicit disposition and a separate queue-effect confirmation", 
   fireEvent.click(screen.getByRole("radio", { name: "Possible duplicate" }));
   const picker = screen.getByRole("combobox", { name: "Original inquiry" });
   expect(picker).toBeRequired();
-  expect(screen.getByRole("option", { name: "INQ-001 · Synthetic client" })).toHaveValue(
-    "inquiry-id",
-  );
+  fireEvent.change(picker, { target: { value: "INQ-001" } });
+  expect(picker).toHaveValue("INQ-001");
 });

@@ -19,7 +19,7 @@ import {
 } from "@/server/work/commands";
 import { recordInquiryContact } from "@/server/work/contact";
 import { handoverTask } from "@/server/work/handover";
-import { readInquiry, readTask } from "@/server/work/queries";
+import { inquiryIdByReference, readInquiry, readTask } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { isIssuedFormOperation, issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { workCopy } from "./copy";
@@ -458,15 +458,19 @@ export async function triageAction(
         data.get("queueEffectReviewed") !== "yes"
       )
         throw new AppError("validation_failed", { fieldErrors: { reason: ["review_required"] } });
+      const original = values.duplicateOfInquiryId;
+      const duplicateId =
+        original &&
+        !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(original)
+          ? await inquiryIdByReference(ctx.db, ctx.session, original)
+          : original;
       return (
         await triageInquiry(ctx.db, ctx.session, {
           id,
           ...envelope,
           state: values.state as Parameters<typeof triageInquiry>[2]["state"],
           reason: values.reason,
-          ...(values.duplicateOfInquiryId
-            ? { duplicateOfInquiryId: values.duplicateOfInquiryId }
-            : {}),
+          ...(duplicateId ? { duplicateOfInquiryId: duplicateId } : {}),
         })
       ).outcome;
     },

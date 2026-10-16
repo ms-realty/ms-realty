@@ -4,7 +4,7 @@ const catalogs = {
     save: "Запис",
     original: "Първоначално запитване",
     select: "Изберете запитване",
-    hint: "Показани са до 200 от последните запитвания, до които имате достъп, с техния номер и име.",
+    hint: "Изберете от последните достъпни запитвания или въведете номера на по-старо запитване от входящата кутия.",
     confirm:
       "Това премества запитването в опашката за проверка. То не се изтрива и може да бъде поето отново.",
     review: "Потвърждавам преместването за проверка",
@@ -14,7 +14,7 @@ const catalogs = {
     save: "Record",
     original: "Original inquiry",
     select: "Choose an inquiry",
-    hint: "Up to 200 recent inquiries you can access are shown by reference and name.",
+    hint: "Choose a recent inquiry or enter the reference of an older inquiry from the inbox.",
     confirm:
       "This moves the inquiry to the review queue. It is not deleted and can be accepted again.",
     review: "I confirm moving this inquiry to review",
@@ -24,7 +24,7 @@ const catalogs = {
     save: "Записать",
     original: "Исходное обращение",
     select: "Выберите обращение",
-    hint: "Показано до 200 последних доступных обращений с номером и именем.",
+    hint: "Выберите недавнее обращение или введите номер более раннего обращения из входящих.",
     confirm:
       "Обращение перейдёт в очередь проверки. Оно не удаляется, и его можно снова принять в работу.",
     review: "Подтверждаю перевод обращения на проверку",
