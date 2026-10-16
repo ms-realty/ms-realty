@@ -8,6 +8,7 @@ import {
   publicationManifests,
   sellerInstructions,
 } from "@/db/schema";
+import { publicMediaCacheControl } from "@/domain/cache-policy";
 import { isDocumentExposable } from "@/domain/document";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
@@ -186,11 +187,22 @@ export async function publicMediaDownload(
   };
 }
 
+/**
+ * §7.5: an eligible public derivative may be reused for five minutes by a browser and an hour by
+ * a shared cache. Withdrawal revokes origin eligibility at once; copies already cached expire
+ * within those bounds. Private files keep `private, no-store`.
+ */
+export { publicMediaCacheControl };
+
 /** Authorization happens before this helper, for every range as well as full requests. */
-export function downloadResponse(file: FileDownload, range: string | null): Response {
+export function downloadResponse(
+  file: FileDownload,
+  range: string | null,
+  cacheControl = "private, no-store",
+): Response {
   const headers = new Headers({
     "content-type": file.contentType,
-    "cache-control": "private, no-store",
+    "cache-control": cacheControl,
     "x-content-type-options": "nosniff",
     "content-security-policy": "sandbox; default-src 'none'",
     "cross-origin-resource-policy": "same-origin",
@@ -198,18 +210,21 @@ export function downloadResponse(file: FileDownload, range: string | null): Resp
     "accept-ranges": "bytes",
     "content-disposition": `${file.inline ? "inline" : "attachment"}; filename="download"; filename*=UTF-8''${encodeURIComponent(file.fileName).replace(/['()*]/g, (char) => `%${char.charCodeAt(0).toString(16)}`)}`,
   });
+  // A range error is never cached, whatever the representation's own policy.
+  const unsatisfiable = () =>
+    new Response(null, {
+      status: 416,
+      headers: {
+        ...Object.fromEntries(headers),
+        "cache-control": "private, no-store",
+        "content-range": `bytes */${file.bytes.length}`,
+      },
+    });
   let start = 0;
   let end = file.bytes.length - 1;
   if (range) {
     const match = /^bytes=(\d*)-(\d*)$/.exec(range);
-    if (!match || (!match[1] && !match[2]))
-      return new Response(null, {
-        status: 416,
-        headers: {
-          ...Object.fromEntries(headers),
-          "content-range": `bytes */${file.bytes.length}`,
-        },
-      });
+    if (!match || (!match[1] && !match[2])) return unsatisfiable();
     if (!match[1]) start = Math.max(0, file.bytes.length - Number(match[2]));
     else {
       start = Number(match[1]);
@@ -221,13 +236,7 @@ export function downloadResponse(file: FileDownload, range: string | null): Resp
       start > end ||
       start >= file.bytes.length
     )
-      return new Response(null, {
-        status: 416,
-        headers: {
-          ...Object.fromEntries(headers),
-          "content-range": `bytes */${file.bytes.length}`,
-        },
-      });
+      return unsatisfiable();
     headers.set("content-range", `bytes ${start}-${end}/${file.bytes.length}`);
   }
   headers.set("content-length", String(end - start + 1));

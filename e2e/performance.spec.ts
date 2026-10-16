@@ -27,8 +27,14 @@ test("S1b public initial JavaScript stays below 250 KiB gzip", async ({ page, re
 
 test("S1b self-hosted fonts resolve and preload only the page's scripts", async ({ page }) => {
   for (const [locale, expectedFiles] of [
-    ["bg", ["/fonts/noto-sans-latin.woff2", "/fonts/noto-sans-cyrillic.woff2"]],
-    ["he", ["/fonts/noto-sans-latin.woff2", "/fonts/noto-sans-hebrew.woff2"]],
+    [
+      "bg",
+      ["/fonts/noto-sans-latin.afc7a910f4ff.woff2", "/fonts/noto-sans-cyrillic.70af9f676b2a.woff2"],
+    ],
+    [
+      "he",
+      ["/fonts/noto-sans-latin.afc7a910f4ff.woff2", "/fonts/noto-sans-hebrew.30420f52f956.woff2"],
+    ],
   ] as const) {
     await page.goto(`/${locale}`);
     await page.evaluate(() => document.fonts.ready);
@@ -42,6 +48,7 @@ test("S1b self-hosted fonts resolve and preload only the page's scripts", async 
       const response = await page.request.get(url);
       expect(response.status()).toBe(200);
       expect(response.headers()["content-type"]).toMatch(/font|woff/);
+      expect(response.headers()["cache-control"]).toBe("public, max-age=31536000, immutable");
       files.push({ path: new URL(url).pathname, bodyBytes: (await response.body()).byteLength });
     }
     await test.info().attach(`preloaded-fonts-${locale}.json`, {

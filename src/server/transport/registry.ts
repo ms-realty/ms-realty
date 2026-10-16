@@ -317,7 +317,7 @@ export const endpoints = [
     revision: "none",
     pagination: "none",
     description:
-      "Rechecks active website manifest membership, rights, clean scanned sealed bytes and exact derivative digest on every request. Private originals and staging bytes are never served. No-store enables immediate restriction.",
+      "Rechecks active website manifest membership, rights, clean scanned sealed bytes and exact derivative digest on each origin request. Private originals and staging bytes are never served. Eligible derivatives have at most five minutes of browser freshness and one hour at a shared cache; origin restrictions apply immediately to cache misses.",
     params: z.object({ id: z.uuid(), digest: z.string().regex(/^[a-f0-9]{64}$/) }),
     responses: [
       {

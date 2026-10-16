@@ -6,7 +6,7 @@ import sharp from "sharp";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseEnv } from "../config/env";
 import { fileServices } from "./config";
-import { downloadResponse } from "./download";
+import { downloadResponse, publicMediaCacheControl } from "./download";
 import { derivative, inspectFile } from "./inspect";
 import { ClamAvScanner } from "./scan";
 import { digestOf, LocalFileStorage, MAX_DOCUMENT_BYTES } from "./storage";
@@ -135,6 +135,26 @@ describe("AT42 immutable bytes and bounded inspection", () => {
     expect(response.headers.get("content-disposition")).toContain("attachment");
     expect(downloadResponse(file, "bytes=0-1,4-5").status).toBe(416);
     expect(downloadResponse(file, "bytes=15-").status).toBe(416);
+  });
+  it("only an authorized public response receives bounded freshness; range errors stay unstored", async () => {
+    const file = {
+      bytes: Buffer.from("0123456789"),
+      contentType: "image/webp",
+      fileName: "approved.webp",
+      inline: true,
+    };
+    for (const range of [null, "bytes=2-5"]) {
+      const response = downloadResponse(file, range, publicMediaCacheControl);
+      expect(response.status).toBe(range ? 206 : 200);
+      expect(response.headers.get("cache-control")).toBe("public, max-age=300, s-maxage=3600");
+      expect(response.headers.get("content-type")).toBe("image/webp");
+    }
+    for (const range of ["bytes=0-1,4-5", "bytes=15-", "bytes=-0", "invalid"]) {
+      const response = downloadResponse(file, range, publicMediaCacheControl);
+      expect(response.status).toBe(416);
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+    }
+    expect(downloadResponse(file, null).headers.get("cache-control")).toBe("private, no-store");
   });
 });
 

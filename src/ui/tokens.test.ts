@@ -1,5 +1,7 @@
 // Architecture §11.3: every foreground/background token pair the components use meets
 // WCAG 2.2 AA contrast. CSS is generated from the DTCG source in design/tokens.json.
+
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parse } from "postcss";
 import { compile } from "tailwindcss";
@@ -215,17 +217,21 @@ describe("design tokens (spec §16.2)", () => {
   });
 
   it("preloads only the title/body subsets needed by each locale from local WOFF2 assets", () => {
-    const latin = ["/fonts/noto-sans-latin.woff2"];
+    const latin = ["/fonts/noto-sans-latin.afc7a910f4ff.woff2"];
     for (const locale of ["en", "de", "nl"] as const) expect(fontFilesFor(locale)).toEqual(latin);
     for (const locale of ["bg", "ru"] as const)
-      expect(fontFilesFor(locale)).toEqual([...latin, "/fonts/noto-sans-cyrillic.woff2"]);
-    expect(fontFilesFor("el")).toEqual([...latin, "/fonts/noto-sans-greek.woff2"]);
-    expect(fontFilesFor("he")).toEqual([...latin, "/fonts/noto-sans-hebrew.woff2"]);
+      expect(fontFilesFor(locale)).toEqual([
+        ...latin,
+        "/fonts/noto-sans-cyrillic.70af9f676b2a.woff2",
+      ]);
+    expect(fontFilesFor("el")).toEqual([...latin, "/fonts/noto-sans-greek.4fbef7965ae0.woff2"]);
+    expect(fontFilesFor("he")).toEqual([...latin, "/fonts/noto-sans-hebrew.30420f52f956.woff2"]);
     for (const locale of ["bg", "ru", "en", "de", "nl", "el", "he"] as const) {
       for (const path of fontFilesFor(locale)) {
         const file = readFileSync(new URL(`../../public${path}`, import.meta.url));
         expect(file.length).toBeGreaterThan(1000);
         expect(file.subarray(0, 4).toString()).toBe("wOF2");
+        expect(path).toContain(`.${createHash("sha256").update(file).digest("hex").slice(0, 12)}.`);
       }
     }
   });

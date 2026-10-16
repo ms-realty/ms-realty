@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { publicAssetCacheControl } from "./src/domain/cache-policy";
 
 // The Content-Security-Policy needs a per-request nonce, so it is set in proxy.ts.
 const securityHeaders = [
@@ -44,7 +45,17 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/fonts/:file([a-z0-9-]+\\.[a-f0-9]{12}\\.woff2)",
+        headers: [{ key: "Cache-Control", value: publicAssetCacheControl }],
+      },
+      {
+        source: "/map-runtime/v6.11.2/:file(maplibre-gl-worker\\.mjs|maplibre-gl-shared\\.mjs)",
+        headers: [{ key: "Cache-Control", value: publicAssetCacheControl }],
+      },
+    ];
   },
 };
 
