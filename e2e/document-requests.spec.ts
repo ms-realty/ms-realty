@@ -6,6 +6,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 test.use({ javaScriptEnabled: false });
 const url = process.env.E2E_DATABASE_URL;
@@ -80,9 +81,10 @@ test("native purpose-bound request, real scan, replacement and revoked private a
     await create
       .getByLabel("Acceptable alternatives", { exact: true })
       .fill("Discuss the plan in person with your broker");
-    await create
-      .getByLabel("Request expires (Europe/Sofia)", { exact: true })
-      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      create.getByLabel("Request expires", { exact: true }),
+      new Date(Date.now() + 86400000),
+    );
     await create.getByRole("button", { name: "Request a document", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "The action was recorded.", exact: true }),

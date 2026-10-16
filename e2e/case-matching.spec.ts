@@ -1,12 +1,15 @@
 // O07 matching workbench (design/contracts/o07.md, W05/F21): frames read from the server, the
 // single-property check and the add, with and without JavaScript. Synthetic, isolated fixtures;
 // product-path evidence only, not live release proof.
+
 import { execFileSync } from "node:child_process";
 import { type Browser, expect, type Page, type TestInfo, test } from "@playwright/test";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { zonedTime } from "../src/features/cases/matching-copy";
+import { formatDateTime } from "../src/i18n/format";
 import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -116,7 +119,15 @@ async function expectTruthfulAdd(
     expect(rows[0]?.explanation).toEqual([explanation]);
     await expect(addedHeading).toBeVisible();
     await expect(page.getByText("Добавен в списъка на клиента", exact)).toBeVisible();
-    await expect(page.getByText(/ · Europe\/Sofia$/).first()).toBeVisible();
+    const recorded = page
+      .locator("dt")
+      .filter({ hasText: /^Записано$/ })
+      .locator("xpath=..")
+      .locator("time");
+    const recordedAt = await recorded.getAttribute("datetime");
+    if (!recordedAt) throw new Error("Missing exact add receipt time");
+    await expect(recorded).toContainText(formatDateTime("bg", recordedAt));
+    await expect(recorded).not.toContainText(/Europe\/|UTC|GMT/);
     await expect(page.getByRole("definition").filter({ hasText: explanation })).toBeVisible();
   } else {
     await expect(notAdded).toBeVisible();
@@ -183,7 +194,7 @@ for (const javaScriptEnabled of [true, false]) {
         page.getByRole("heading", { name: "Няма имоти, които отговарят", exact: true }),
       ).toBeVisible();
       await expect(
-        page.getByText(/^Проверихме всички публикувани обяви в \d{1,2}:\d{2} · Europe\/Sofia\.$/),
+        page.getByText(/^Проверихме всички публикувани обяви в \d{1,2}:\d{2}\.$/),
       ).toBeVisible();
       await expect(
         page.getByRole("link", { name: `Попитайте ${f.clientName} какво да промени`, exact: true }),
@@ -261,9 +272,7 @@ for (const javaScriptEnabled of [true, false]) {
       ).toBeVisible();
       await expect(page.getByText(`${f.clientName} още не е потвърдил това.`, exact)).toBeVisible();
       await expect(page.getByText("Намерени 5 имота · показани 5", exact)).toBeVisible();
-      await expect(
-        page.getByText(/^Обявите са проверени в \d{1,2}:\d{2} · Europe\/Sofia\.$/),
-      ).toBeVisible();
+      await expect(page.getByText(/^Обявите са проверени в \d{1,2}:\d{2}\.$/)).toBeVisible();
       await expect(
         page.getByRole("heading", { name: "Отговарят на всичко · 4", exact: true }),
       ).toBeVisible();
@@ -487,7 +496,9 @@ for (const javaScriptEnabled of [true, false]) {
         await page.goto(at(path));
         await expect(
           page.getByText(
-            /^Списъкът е зареден в \d{1,2}:\d{2} · Europe\/Sofia\. Оттогава обявите или това, което търси клиентът, са променени\.$/,
+            words(
+              `Списъкът е зареден в ${zonedTime("bg", loaded)}. Оттогава обявите или това, което търси клиентът, са променени.`,
+            ),
           ),
         ).toBeVisible();
         await expect(

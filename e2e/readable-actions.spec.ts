@@ -1,6 +1,7 @@
 // Primary actions must stay readable, and every design-token utility used in screens must resolve
 // to real CSS. Guards the slice-0 fix: `text-on-action` and nine other roles once compiled to
 // nothing, which left three submit buttons with ~1.1:1 label contrast.
+
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -12,6 +13,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -181,9 +183,10 @@ test.describe("C09 without JavaScript", () => {
     await create
       .getByLabel("Acceptable alternatives", { exact: true })
       .fill("Discuss it with your broker");
-    await create
-      .getByLabel("Request expires (Europe/Sofia)", { exact: true })
-      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      create.getByLabel("Request expires", { exact: true }),
+      new Date(Date.now() + 86400000),
+    );
     await create.getByRole("button", { name: "Request a document", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "The action was recorded.", exact: true }),

@@ -12,6 +12,7 @@ import { workCopy } from "../src/features/work/copy";
 import { inquiryReferenceCookie } from "../src/features/work/inquiry-reference";
 import { hostUrl, origins } from "./hosts";
 import { openUnassignedQueueAt } from "./inquiry-queue";
+import { fillAgencyInstant } from "./time";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -118,20 +119,23 @@ for (const kind of ["contact", "triage", "accept"] as const)
     const entries = `Private revision-sensitive ${kind} draft ${randomUUID()}`;
     await page.getByLabel(fieldLabel, { exact: true }).fill(entries);
     if (kind === "contact") {
-      await page
-        .getByLabel(copy.contactedAt, { exact: true })
-        .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel(copy.contactedAt, { exact: true }),
+        new Date(Date.now() - 60_000),
+      );
       await page
         .getByLabel(copy.nextAction, { exact: true })
         .fill("Review service details with a human");
-      await page
-        .getByLabel(copy.dueAt, { exact: true })
-        .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel(copy.dueAt, { exact: true }),
+        new Date(Date.now() + 7_200_000),
+      );
       await page.getByLabel(copy.confirm, { exact: true }).check();
     } else if (kind === "accept") {
-      await page
-        .getByLabel(work.dueAt, { exact: true })
-        .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel(work.dueAt, { exact: true }),
+        new Date(Date.now() + 7_200_000),
+      );
     } else {
       await page.getByLabel(work.state, { exact: true }).selectOption("contact_unreachable");
     }
@@ -384,16 +388,18 @@ test("O02 draft notes and reasons survive scope and conversation switches, then 
   const requested: string[] = [];
   page.on("request", (request) => requested.push(request.url()));
   await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}?view=all`));
-  await page
-    .getByLabel(copy.contactedAt, { exact: true })
-    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.contactedAt, { exact: true }),
+    new Date(Date.now() - 60_000),
+  );
   await page.getByLabel(copy.note, { exact: true }).fill(note);
   await page
     .getByLabel(copy.nextAction, { exact: true })
     .fill("Review the service details with a human");
-  await page
-    .getByLabel(copy.dueAt, { exact: true })
-    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.dueAt, { exact: true }),
+    new Date(Date.now() + 7_200_000),
+  );
   await page.getByLabel(copy.confirm, { exact: true }).check();
   await page.getByLabel(work.reason, { exact: true }).fill(reason);
   const wide = (page.viewportSize()?.width ?? 0) >= 1024;
@@ -457,16 +463,18 @@ test("O02 pending contact fences SSR with scripts delayed and clears after expli
   await signIn(context, fixture.token);
   await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
   const note = `Synthetic lost-acknowledgment note ${randomUUID()}`;
-  await page
-    .getByLabel(copy.contactedAt, { exact: true })
-    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.contactedAt, { exact: true }),
+    new Date(Date.now() - 60_000),
+  );
   await page.getByLabel(copy.note, { exact: true }).fill(note);
   await page
     .getByLabel(copy.nextAction, { exact: true })
     .fill("Review the contact before another action");
-  await page
-    .getByLabel(copy.dueAt, { exact: true })
-    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.dueAt, { exact: true }),
+    new Date(Date.now() + 7_200_000),
+  );
   await page.getByLabel(copy.confirm, { exact: true }).check();
   const operationId = await page
     .locator('[data-inquiry-contact] input[name="_operationId"]')
@@ -745,15 +753,17 @@ test("O02 success headers without an acknowledgment body keep the pending SSR re
     work = workCopy("en");
   await signIn(context, fixture.token);
   await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
-  await page
-    .getByLabel(copy.contactedAt, { exact: true })
-    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.contactedAt, { exact: true }),
+    new Date(Date.now() - 60_000),
+  );
   const note = `Synthetic headers-only acknowledgment ${randomUUID()}`;
   await page.getByLabel(copy.note, { exact: true }).fill(note);
   await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the received contact");
-  await page
-    .getByLabel(copy.dueAt, { exact: true })
-    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.dueAt, { exact: true }),
+    new Date(Date.now() + 7_200_000),
+  );
   await page.getByLabel(copy.confirm, { exact: true }).check();
   const key = await page.locator('[data-inquiry-contact] input[name="_operationId"]').inputValue();
   const ownerId = await page.evaluate(
@@ -812,15 +822,17 @@ test("O02 lost validation body resumes the retained draft with the same referenc
   await signIn(context, fixture.token);
   await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
   const note = `Private validation recovery note ${randomUUID()}`;
-  await page
-    .getByLabel(copy.contactedAt, { exact: true })
-    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.contactedAt, { exact: true }),
+    new Date(Date.now() - 60_000),
+  );
   await page.getByLabel(copy.note, { exact: true }).fill(note);
   // Native minLength permits these spaces; schema trim/min fails before runOperation.
   await page.getByLabel(copy.nextAction, { exact: true }).fill("   x   ");
-  await page
-    .getByLabel(copy.dueAt, { exact: true })
-    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.dueAt, { exact: true }),
+    new Date(Date.now() + 7_200_000),
+  );
   await page.getByLabel(copy.confirm, { exact: true }).check();
   const key = await page.locator('[data-inquiry-contact] input[name="_operationId"]').inputValue();
   let delivered!: () => void;
@@ -894,14 +906,16 @@ for (const retryBody of ["received", "lost"] as const) {
     await signIn(context, fixture.token);
     await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
     const note = `Earlier in-flight contact ${randomUUID()}`;
-    await page
-      .getByLabel(copy.contactedAt, { exact: true })
-      .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      page.getByLabel(copy.contactedAt, { exact: true }),
+      new Date(Date.now() - 60_000),
+    );
     await page.getByLabel(copy.note, { exact: true }).fill(note);
     await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the original contact");
-    await page
-      .getByLabel(copy.dueAt, { exact: true })
-      .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      page.getByLabel(copy.dueAt, { exact: true }),
+      new Date(Date.now() + 7_200_000),
+    );
     await page.getByLabel(copy.confirm, { exact: true }).check();
     const key = await page
       .locator('[data-inquiry-contact] input[name="_operationId"]')
@@ -1054,14 +1068,16 @@ test("O02 storage-disabled triage draft survives a successful contact redirect a
   const reason = `Unsent triage across contact redirect ${randomUUID()}`;
   const note = `Observed successful contact ${randomUUID()}`;
   await page.getByLabel(work.reason, { exact: true }).fill(reason);
-  await page
-    .getByLabel(copy.contactedAt, { exact: true })
-    .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.contactedAt, { exact: true }),
+    new Date(Date.now() - 60_000),
+  );
   await page.getByLabel(copy.note, { exact: true }).fill(note);
   await page.getByLabel(copy.nextAction, { exact: true }).fill("Review the successful contact");
-  await page
-    .getByLabel(copy.dueAt, { exact: true })
-    .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel(copy.dueAt, { exact: true }),
+    new Date(Date.now() + 7_200_000),
+  );
   await page.getByLabel(copy.confirm, { exact: true }).check();
   await page.getByRole("button", { name: copy.submit, exact: true }).click();
   await expect(page.getByRole("heading", { name: work.changeSaved, exact: true })).toBeVisible();
@@ -1094,14 +1110,16 @@ test("O03 native pre-ledger validation retains the note and corrects with the sa
   const note = `Synthetic native validation draft ${randomUUID()}`;
   try {
     await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
-    await page
-      .getByLabel(copy.contactedAt, { exact: true })
-      .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      page.getByLabel(copy.contactedAt, { exact: true }),
+      new Date(Date.now() - 60_000),
+    );
     await page.getByLabel(copy.note, { exact: true }).fill(note);
     await page.getByLabel(copy.nextAction, { exact: true }).fill("   x   ");
-    await page
-      .getByLabel(copy.dueAt, { exact: true })
-      .fill(new Date(Date.now() + 7_200_000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      page.getByLabel(copy.dueAt, { exact: true }),
+      new Date(Date.now() + 7_200_000),
+    );
     await page.getByLabel(copy.confirm, { exact: true }).check();
     const key = await page
       .locator('[data-inquiry-contact] input[name="_operationId"]')
@@ -1180,14 +1198,16 @@ for (const locale of ["bg", "ru", "en"] as const) {
         await expect(page.getByTestId("inquiry-first-response")).toHaveText(copy.noResponse);
         const attemptNote = `Synthetic unanswered contact ${randomUUID()}`;
         const nextAction = `Follow up on the question ${randomUUID().slice(0, 8)}`;
-        await page
-          .getByLabel(copy.contactedAt, { exact: true })
-          .fill(new Date(Date.now() - 60000).toISOString().slice(0, 16));
+        await fillAgencyInstant(
+          page.getByLabel(copy.contactedAt, { exact: true }),
+          new Date(Date.now() - 60000),
+        );
         await page.getByLabel(copy.note, { exact: true }).fill(attemptNote);
         await page.getByLabel(copy.nextAction, { exact: true }).fill(nextAction);
-        await page
-          .getByLabel(copy.dueAt, { exact: true })
-          .fill(new Date(Date.now() + 7200000).toISOString().slice(0, 16));
+        await fillAgencyInstant(
+          page.getByLabel(copy.dueAt, { exact: true }),
+          new Date(Date.now() + 7200000),
+        );
         await page.getByRole("button", { name: copy.submit, exact: true }).click();
         await expect(
           page.getByRole("region", { name: work.form.errorSummary, exact: true }),
@@ -1211,14 +1231,18 @@ for (const locale of ["bg", "ru", "en"] as const) {
         const responseNote = `Synthetic useful service explanation ${randomUUID()}`;
         await page.getByLabel(copy.result, { exact: true }).selectOption("useful_response");
         const observedAt = new Date(Date.now() - 30000).toISOString().slice(0, 16);
-        await page.getByLabel(copy.contactedAt, { exact: true }).fill(observedAt);
+        await fillAgencyInstant(
+          page.getByLabel(copy.contactedAt, { exact: true }),
+          `${observedAt}:00.000Z`,
+        );
         await page.getByLabel(copy.note, { exact: true }).fill(responseNote);
         await page
           .getByLabel(copy.nextAction, { exact: true })
           .fill("Send the agreed service details after human review");
-        await page
-          .getByLabel(copy.dueAt, { exact: true })
-          .fill(new Date(Date.now() + 10800000).toISOString().slice(0, 16));
+        await fillAgencyInstant(
+          page.getByLabel(copy.dueAt, { exact: true }),
+          new Date(Date.now() + 10800000),
+        );
         await page.getByLabel(copy.promise, { exact: true }).check();
         await page.getByLabel(copy.confirm, { exact: true }).check();
         await page.getByRole("button", { name: copy.submit, exact: true }).click();
@@ -1364,9 +1388,10 @@ for (const javaScriptEnabled of [true, false]) {
       await page
         .getByLabel(work.nextAction, { exact: true })
         .fill("Review and answer this specific inquiry");
-      await page
-        .getByLabel(work.dueAt, { exact: true })
-        .fill(new Date(Date.now() + 3600000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel(work.dueAt, { exact: true }),
+        new Date(Date.now() + 3600000),
+      );
       await page.getByRole("button", { name: work.accept, exact: true }).click();
       await expect(
         page.getByRole("heading", { name: work.changeSaved, exact: true }),
@@ -1380,16 +1405,21 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByLabel(copy.result, { exact: true }).selectOption("useful_response");
       await expect.poll(() => Date.now()).toBeGreaterThan(received.createdAt.getTime() + 1500);
       const observedAt = new Date(Date.now() - 500).toISOString().slice(0, 19);
-      await page.getByLabel(copy.contactedAt, { exact: true }).fill(observedAt.replace(/:00$/, ""));
+      await fillAgencyInstant(
+        page.getByLabel(copy.contactedAt, { exact: true }),
+        `${observedAt}.000Z`,
+        "second",
+      );
       await page
         .getByLabel(copy.note, { exact: true })
         .fill("Synthetic human explanation of the requested service and next steps");
       await page
         .getByLabel(copy.nextAction, { exact: true })
         .fill("Human review of the agreed details");
-      await page
-        .getByLabel(copy.dueAt, { exact: true })
-        .fill(new Date(Date.now() + 7200000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel(copy.dueAt, { exact: true }),
+        new Date(Date.now() + 7200000),
+      );
       await page.getByLabel(copy.promise, { exact: true }).check();
       await page.getByLabel(copy.confirm, { exact: true }).check();
       await page.getByRole("button", { name: copy.submit, exact: true }).click();
@@ -1446,16 +1476,18 @@ for (const javaScriptEnabled of [true, false]) {
     try {
       await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
       const note = `Synthetic stale contact ${randomUUID()}`;
-      await page
-        .getByLabel(copy.contactedAt, { exact: true })
-        .fill(new Date(Date.now() - 60000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel(copy.contactedAt, { exact: true }),
+        new Date(Date.now() - 60000),
+      );
       await page.getByLabel(copy.note, { exact: true }).fill(note);
       await page
         .getByLabel(copy.nextAction, { exact: true })
         .fill("Review the corrected contact before the next step");
-      await page
-        .getByLabel(copy.dueAt, { exact: true })
-        .fill(new Date(Date.now() + 7200000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel(copy.dueAt, { exact: true }),
+        new Date(Date.now() + 7200000),
+      );
       await page.getByLabel(copy.confirm, { exact: true }).check();
       const corrected = `${randomUUID()}@example.test`;
       await db

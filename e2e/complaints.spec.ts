@@ -48,7 +48,7 @@ for (const javaScriptEnabled of [true, false])
       await page
         .getByLabel("Received description", { exact: true })
         .fill("Synthetic complaint about a missed follow-up. No real customer.");
-      await page.getByLabel("Due at · Europe/Sofia", { exact: true }).fill("2027-01-15T14:00");
+      await page.getByLabel("Due at", { exact: true }).fill("2027-01-15T14:00");
       await page
         .getByLabel("I reviewed the record, owner, due date and outcome", { exact: true })
         .check();

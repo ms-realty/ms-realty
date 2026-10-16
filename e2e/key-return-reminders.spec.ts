@@ -7,6 +7,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { caseCopy } from "../src/features/cases/copy";
 import { custodyCopy } from "../src/features/key-custody/copy";
+import { formatDateTime } from "../src/i18n/format";
 import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -17,7 +18,7 @@ const connection = postgres(url, { max: 2 }),
 test.afterAll(async () => {
   await connection.end();
 });
-for (const locale of ["bg", "ru", "en"])
+for (const locale of ["bg", "ru", "en"] as const)
   for (const javascript of [true, false])
     test(`Today overdue key return ${locale} ${javascript ? "hydrated" : "native"}`, async ({
       browser,
@@ -69,13 +70,7 @@ for (const locale of ["bg", "ru", "en"])
         const reminder = page.locator(`[data-key-return="${f.keyId}"]`);
         await expect(reminder).toBeVisible();
         await expect(reminder.locator("time")).toHaveAttribute("datetime", f.dueAt);
-        await expect(reminder.locator("time")).toContainText(
-          new Intl.DateTimeFormat(locale, {
-            dateStyle: "medium",
-            timeStyle: "short",
-            timeZone: "Europe/Sofia",
-          }).format(new Date(f.dueAt)),
-        );
+        await expect(reminder.locator("time")).toContainText(formatDateTime(locale, f.dueAt));
         await expect(reminder).toContainText("Synthetic custody holder");
         if (javascript)
           expect(

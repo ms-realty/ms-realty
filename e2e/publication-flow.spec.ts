@@ -345,7 +345,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     .fill("Synthetic test agreement only; no real commission or financial obligation.");
   // A previous day avoids machine timezone/DST ambiguity; the UI interprets Europe/Sofia.
   await instructionForm
-    .getByLabel("Agreed at (Europe/Sofia)", { exact: true })
+    .getByLabel("Agreed at", { exact: true })
     .fill(`${new Date(Date.now() - 86400000).toISOString().slice(0, 10)}T12:00`);
   await instructionForm.getByLabel("The agreement permits publication").check();
   await instructionForm.getByLabel("The agreement grants the stated media usage rights").check();

@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 test.use({ javaScriptEnabled: false });
 test("client requests bounded specialist access; staff approves and later revokes case access without JavaScript", async ({
@@ -79,9 +80,10 @@ test("client requests bounded specialist access; staff approves and later revoke
       }),
     });
     await request.getByLabel("Decision", { exact: true }).selectOption("approve");
-    await request
-      .getByLabel("Access expires (Europe/Sofia)", { exact: true })
-      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      request.getByLabel("Access expires", { exact: true }),
+      new Date(Date.now() + 86400000),
+    );
     await request
       .getByLabel("Outcome shown to the requester", { exact: true })
       .fill("Approved for a time limited specialist review");

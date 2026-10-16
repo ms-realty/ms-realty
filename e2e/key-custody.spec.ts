@@ -124,12 +124,12 @@ for (const javaScriptEnabled of [true, false])
           exact: true,
         }),
       ).not.toBeChecked();
-      await expect(page.getByLabel("Due back · Europe/Sofia", { exact: true })).toHaveAttribute(
+      await expect(page.getByLabel("Due back", { exact: true })).toHaveAttribute(
         "aria-invalid",
         "true",
       );
       const year = new Date().getUTCFullYear() + 1;
-      await page.getByLabel("Due back · Europe/Sofia", { exact: true }).fill(`${year}-01-15T12:00`);
+      await page.getByLabel("Due back", { exact: true }).fill(`${year}-01-15T12:00`);
       await page
         .getByRole("checkbox", {
           name: "I checked physical custody, the recipient and handover evidence",
@@ -158,9 +158,7 @@ for (const javaScriptEnabled of [true, false])
         fullPage: true,
       });
       const amendment = page.getByRole("region", { name: "Change due-back time", exact: true });
-      await amendment
-        .getByLabel("Due back · Europe/Sofia", { exact: true })
-        .fill(`${year}-01-15T12:00`);
+      await amendment.getByLabel("Due back", { exact: true }).fill(`${year}-01-15T12:00`);
       await amendment
         .getByLabel("Deadline reason and agreement", { exact: true })
         .fill("Broker confirmed revised return time under synthetic agreement K4.");
@@ -173,15 +171,14 @@ for (const javaScriptEnabled of [true, false])
         amendment.getByLabel("Deadline reason and agreement", { exact: true }),
       ).toHaveValue("Broker confirmed revised return time under synthetic agreement K4.");
       await expect(amendment.getByRole("checkbox")).not.toBeChecked();
-      await expect(
-        amendment.getByLabel("Due back · Europe/Sofia", { exact: true }),
-      ).toHaveAttribute("aria-invalid", "true");
+      await expect(amendment.getByLabel("Due back", { exact: true })).toHaveAttribute(
+        "aria-invalid",
+        "true",
+      );
       expect(
         (await db.select().from(schema.keySets).where(eq(schema.keySets.id, key.id)))[0]?.version,
       ).toBe(2);
-      await amendment
-        .getByLabel("Due back · Europe/Sofia", { exact: true })
-        .fill(`${year}-01-16T14:30`);
+      await amendment.getByLabel("Due back", { exact: true }).fill(`${year}-01-16T14:30`);
       await amendment.getByRole("checkbox").check();
       await amendment.getByRole("button", { name: "Change due-back time", exact: true }).click();
       await expect(

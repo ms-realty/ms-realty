@@ -1,8 +1,10 @@
 // Synthetic no-JavaScript human policy review. Runtime sends remain disabled throughout.
+
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import postgres from "postgres";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 test("F05: native exact-rule approval, retained error inputs, durable receipt and disable without sending", async ({
   browser,
@@ -65,9 +67,10 @@ test("F05: native exact-rule approval, retained error inputs, durable receipt an
       "Synthetic native review; no real subscriber or provider involved",
     );
     await expect(page.getByRole("checkbox")).not.toBeChecked();
-    await page
-      .getByLabel("Approval expires at (UTC)", { exact: true })
-      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      page.getByLabel("Approval expires at", { exact: true }),
+      new Date(Date.now() + 86400000),
+    );
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "Approve fixed rule", exact: true }).click();
     await expect(page.locator("[data-rule-receipt]")).toBeVisible();

@@ -1,6 +1,7 @@
 // Real public intake → authorized staff queue → accountable follow-up and conflict recovery.
 // Identity ceremonies have their own suite; these fixtures seed valid sessions only in this
 // run's disposable database. They never stand in for live acceptance or launch evidence.
+
 import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
 import { type BrowserContext, expect, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
@@ -10,6 +11,7 @@ import * as schema from "../src/db/schema";
 import { inquiryCheckCode } from "../src/domain/inquiry-check-code";
 import { hostUrl, origins } from "./hosts";
 import { openUnassignedQueueAt } from "./inquiry-queue";
+import { fillAgencyInstant } from "./time";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
 if (!databaseUrl || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(databaseUrl).pathname))
@@ -124,9 +126,10 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
 
   const nextAction = `Review visitor question ${randomUUID().slice(0, 8)}`;
   await page.getByLabel("Next action", { exact: true }).fill(nextAction);
-  await page
-    .getByLabel("Follow-up time (UTC)", { exact: true })
-    .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel("Follow-up time", { exact: true }),
+    new Date(Date.now() + 86400000),
+  );
   await page.getByRole("button", { name: "Accept and assign to me", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Open updated record", exact: true }).click();
