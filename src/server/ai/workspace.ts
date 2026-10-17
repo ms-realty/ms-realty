@@ -10,9 +10,9 @@ import {
 } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import {
+  type ArtifactProposal,
   artifactProposalSchema,
   contextSelectionSchema,
-  type ArtifactProposal,
   validateArtifactSources,
   type WorkspaceCheckpoint,
   type WorkspaceContext,
