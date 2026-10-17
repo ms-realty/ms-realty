@@ -280,8 +280,11 @@ test("O02 S15 an actual restore and its unknown status keep the current focus", 
     const release = await holdInquiryScripts(page);
     try {
       await page.goto(path, { waitUntil: "commit" });
-      const focus = page.locator('a[href="/en/today"]:visible').first();
+      // Target the work navigation, which stays visible at every breakpoint. Before
+      // styles finish streaming, a rail link can briefly match :visible and then hide.
+      const focus = page.getByRole("main").locator('a[href="/en/today"]').first();
       await focus.focus();
+      await expect(focus).toBeFocused();
       release();
       await page.waitForLoadState("networkidle");
       await expect(page.getByRole("status").filter({ hasText: work.draft.restored })).toContainText(
