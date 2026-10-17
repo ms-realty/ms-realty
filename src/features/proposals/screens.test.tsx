@@ -6,7 +6,10 @@ import { publicLocales } from "@/domain/ids";
 import { formatMoneyInput } from "@/i18n/money";
 import { moneyCopy } from "@/i18n/money-copy";
 import type { Session } from "@/server/auth/sessions";
-import { proposalEnhancementField } from "./contract";
+import type { FormState } from "@/ui/form/contract";
+import { initialFormState } from "@/ui/form/server";
+import { caseCopy } from "../cases/copy";
+import { proposalEnhancementField, proposalStatus } from "./contract";
 import { counterofferCopy } from "./counteroffer-copy";
 import { ProposalScreen } from "./screens";
 
@@ -18,6 +21,10 @@ vi.mock("@/server/proposals/queries", () => ({
   listProposals: vi.fn(),
 }));
 vi.mock("./actions", () => ({ proposalAction: async () => {} }));
+vi.mock("@/ui/form/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/ui/form/server")>();
+  return { ...actual, initialFormState: vi.fn(actual.initialFormState) };
+});
 
 const session = (kind: "staff" | "client") => ({ account: { kind } }) as Session;
 const view = () => ({
@@ -132,5 +139,69 @@ it.each(["current", "intact", "canRespond"] as const)(
     );
     expect(container.querySelector('input[name="amount"]')).toBeNull();
     expect(screen.queryByRole("textbox", { name: "Amount (BGN)" })).not.toBeInTheDocument();
+  },
+);
+
+it.each(["unknown", "confirmed"] as const)(
+  "keeps a restored %s counteroffer visible after its committed revision hides client commands",
+  async (kind) => {
+    reads.proposal.mockResolvedValue({ ...view(), current: false, canRespond: false });
+    const copy = caseCopy("en");
+    const status = proposalStatus("en", "revise", "proposal-one", "original-operation");
+    const returned: FormState<Record<string, string>> = {
+      operationId: "original-operation",
+      expectedRevision: 4,
+      responseId: "original-response",
+      reconciliation: { href: status, label: copy.status },
+      values: {
+        revisionId: "revision-one",
+        clientPartyId: "primary-party",
+        additionalPartyIds: "additional-party",
+        amount: "119,000.03",
+        currency: "GBP",
+        period: "total",
+        paymentBasis: "Exact entered payment basis",
+        conditions: "Exact entered condition",
+        inclusions: "Exact entered inclusion",
+        deadline: view().revision.deadlineAt.toISOString(),
+        reason: "Exact entered explanation",
+      },
+      outcome:
+        kind === "unknown"
+          ? {
+              kind,
+              code: "OUTCOME_UNKNOWN",
+              message: copy.statusUnknown,
+              status: { href: status, label: copy.status },
+            }
+          : {
+              kind,
+              receipt: {
+                title: copy.saved,
+                reference: "SYNTHETIC-PROPOSAL",
+                recordedAt: { dateTime: "2026-10-16T12:00:00Z", label: "Recorded time" },
+                nextStep: copy.nextStep,
+                destination: { href: "/en/proposals/proposal-one", label: copy.back },
+              },
+            },
+    };
+    // The form hook restores this state from the native POST; the page's fresh read has
+    // already lost revise eligibility. This isolates whether that hook is still mounted.
+    vi.mocked(initialFormState).mockReturnValueOnce(returned);
+    render(await ProposalScreen({ locale: "en", session: session("client"), id: "proposal-one" }));
+    if (kind === "unknown") {
+      expect(screen.getByLabelText("Amount (GBP)")).toHaveValue("119,000.03");
+      expect(screen.getByLabelText("Amount (GBP)")).toHaveAttribute("readonly");
+      expect(screen.getByDisplayValue("Exact entered explanation")).toBeVisible();
+      expect(screen.getByRole("link", { name: copy.status })).toHaveAttribute("href", status);
+      expect(document.querySelector('[name="_operationId"]')).toHaveValue("original-operation");
+    } else {
+      expect(screen.getByRole("heading", { name: copy.saved })).toBeVisible();
+      expect(screen.getByRole("link", { name: copy.back })).toHaveAttribute(
+        "href",
+        "/en/proposals/proposal-one",
+      );
+    }
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   },
 );

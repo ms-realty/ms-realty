@@ -46,6 +46,7 @@ function ProposalForm(
     path: string;
     label: string;
     disclosure?: string;
+    commandAvailable?: boolean;
   },
 ) {
   const initial = initialFormState(
@@ -68,6 +69,8 @@ function ProposalForm(
       initialState={initial}
       fields={props.fields}
       path={props.path}
+      nativeIdentity={proposalScope(props.command, props.id)}
+      commandAvailable={props.commandAvailable}
       status={{
         href: proposalStatus(props.locale, props.command, props.id, initial.operationId),
         label: caseCopy(props.locale).status,
@@ -273,6 +276,10 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
   const hidden: WorkflowField[] = [{ name: "revisionId", label: "", type: "hidden" }];
   const revisionValues = { revisionId: row.id };
   const buyer = row.parties.find((p) => ["buyer", "co_buyer", "tenant"].includes(p.role));
+  const canRevise =
+    view.current &&
+    view.intact &&
+    (view.canRespond || (staff && row.state !== "agreed_for_next_step"));
   let buyers = [{ partyId: buyer?.partyId ?? "", name: buyer?.name ?? "" }];
   if (staff && view.proposal.interestId) {
     try {
@@ -423,13 +430,21 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
           />
         </WorkflowSection>
       ) : null}
-      {view.current &&
-      view.intact &&
-      (view.canRespond || (staff && row.state !== "agreed_for_next_step")) ? (
-        <WorkflowSection title={staff ? c.revise : counter.open}>
+      {canRevise || !staff ? (
+        // Keep the client hook mounted when a committed counteroffer makes the visible
+        // submitted revision historical. Only a restored response can reveal this form.
+        <section
+          className={
+            canRevise ? "space-y-4 rounded-card border border-border bg-surface p-5" : undefined
+          }
+        >
+          {canRevise ? (
+            <h2 className="text-subheading font-semibold">{staff ? c.revise : counter.open}</h2>
+          ) : null}
           <ProposalForm
             {...common}
             command="revise"
+            commandAvailable={canRevise}
             label={staff ? c.revise : counter.submit}
             disclosure={staff ? undefined : counter.open}
             fields={[
@@ -479,7 +494,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
               deadline: row.deadlineAt.toISOString(),
             }}
           />
-        </WorkflowSection>
+        </section>
       ) : null}
       {view.history.length ? (
         <WorkflowSection title={c.history}>

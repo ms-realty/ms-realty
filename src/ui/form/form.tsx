@@ -63,6 +63,8 @@ export type ActionFormProps<V extends FormValues> = {
   permalink: string;
   /** Stable, page-unique business identity for a form in a list that can reorder. */
   nativeIdentity?: string;
+  /** Current server eligibility. Keep the state hook mounted for recovery, never a new command. */
+  commandAvailable?: boolean;
   /** A server-authorized status URL for this logical operation; safe on lost acknowledgment. */
   reconciliation: RecoveryLink;
   /** Preserve a signed operation reference before the request can lose its acknowledgment. */
@@ -223,6 +225,7 @@ function FormSession<V extends FormValues>({
   initialState,
   permalink,
   nativeIdentity,
+  commandAvailable = true,
   reconciliation,
   pendingReferenceCookie,
   copy,
@@ -339,6 +342,7 @@ function FormSession<V extends FormValues>({
       content
     );
   const blocked =
+    !commandAvailable ||
     outcome.kind === "unknown" ||
     outcome.kind === "accepted" ||
     (outcome.kind === "rejected" && !outcome.retryable) ||
@@ -359,6 +363,10 @@ function FormSession<V extends FormValues>({
       formatValue: (name, value) => formatValue?.(name, value, state) ?? value,
     };
   }
+
+  // An HTML POST can restore its response after the committed command changes eligibility.
+  // Preserve every hook above so React can recover that state before hiding a fresh idle form.
+  if (!commandAvailable && outcome.kind === "idle" && !pending) return null;
 
   if (outcome.kind === "confirmed") {
     return disclose(
@@ -584,7 +592,7 @@ function FormSession<V extends FormValues>({
             }),
         }),
       })}
-      {conflict?.reapply ? (
+      {commandAvailable && conflict?.reapply ? (
         <>
           <input
             type="hidden"

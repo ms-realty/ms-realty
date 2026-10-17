@@ -1,11 +1,12 @@
 // M-051 / C08: the native and enhanced money entry reach the same guarded revision command.
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { caseCopy } from "../src/features/cases/copy";
+import { proposalStatus } from "../src/features/proposals/contract";
 import { proposalCopy } from "../src/features/proposals/copy";
 import { counterofferCopy } from "../src/features/proposals/counteroffer-copy";
 import { hostUrl, origins } from "./hosts";
@@ -160,3 +161,200 @@ for (const locale of ["bg", "en", "ru", "de", "nl", "el", "he"] as const)
         await clients.close();
       }
     });
+
+test("C08 native lost acknowledgement retains the exact draft after the committed revision changes eligibility", async ({
+  page,
+  context,
+  browser,
+}, info) => {
+  const fixture = JSON.parse(
+    execFileSync(
+      process.execPath,
+      ["--conditions=react-server", "--import", "tsx", "src/server/proposals/browser-seed.ts"],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+          DATABASE_URL: databaseUrl,
+        },
+      },
+    ),
+  ) as {
+    proposalId: string;
+    revisionId: string;
+    caseId: string;
+    staffToken: string;
+    clientToken: string;
+  };
+  await context.addCookies([
+    {
+      name: "msr_staff_session",
+      value: fixture.staffToken,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
+  const staffCopy = proposalCopy("en");
+  await page.goto(hostUrl("staff", `/en/proposals/${fixture.proposalId}`));
+  await page.getByLabel(staffCopy.reviewCheck, { exact: true }).check();
+  await page.getByRole("button", { name: staffCopy.review, exact: true }).click();
+  await recorded(page);
+  await page.getByLabel(staffCopy.submitCheck, { exact: true }).check();
+  await page.getByRole("button", { name: staffCopy.submit, exact: true }).click();
+  await recorded(page);
+
+  const clients = await browser.newContext({ ...info.project.use, javaScriptEnabled: false });
+  try {
+    await clients.addCookies([
+      {
+        name: "msr_client_session",
+        value: fixture.clientToken,
+        url: origins.client,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    const client = await clients.newPage();
+    let nativePosts = 0;
+    client.on("request", (request) => {
+      if (request.method() === "POST") nativePosts += 1;
+    });
+    await client.goto(hostUrl("client", `/en/proposals/${fixture.proposalId}`));
+    const disclosure = client.locator("details").filter({
+      has: client.locator('form input[name="amount"]'),
+    });
+    await disclosure.locator(":scope > summary").click();
+    const form = disclosure.locator("form");
+    await form.locator('input[name="amount"]').fill("119,000.03");
+    await form.locator('textarea[name="paymentBasis"]').fill("Exact entered payment basis");
+    await form.locator('textarea[name="conditions"]').fill("Exact entered condition");
+    await form.locator('textarea[name="inclusions"]').fill("Exact entered inclusion");
+    await form.locator('textarea[name="reason"]').fill("Exact entered recovery explanation");
+    const operationId = await form.locator('input[name="_operationId"]').inputValue();
+    const expectedRevision = await form.locator('input[name="_expectedRevision"]').inputValue();
+    const deadline = await form.locator('input[name="deadline"]').inputValue();
+    const clientPartyId = await form.locator('input[name="clientPartyId"]').inputValue();
+    const entries = await form.evaluate((element: HTMLFormElement) =>
+      Array.from(new FormData(element).entries()).map(([name, value]) => [name, String(value)]),
+    );
+    entries.push(["_intent", "submit"]);
+    // Execute the guarded command once, then simulate its lost acknowledgement in the exact
+    // operation ledger. The browser's original native form is submitted only once below.
+    execFileSync(
+      process.execPath,
+      [
+        "--conditions=react-server",
+        "--import",
+        "tsx",
+        "src/features/proposals/testing/commit-before-ack.ts",
+      ],
+      {
+        encoding: "utf8",
+        input: JSON.stringify({ token: fixture.clientToken, id: fixture.proposalId, entries }),
+        env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET },
+      },
+    );
+    const revisions = () =>
+      db
+        .select()
+        .from(schema.proposalRevisions)
+        .where(eq(schema.proposalRevisions.proposalId, fixture.proposalId))
+        .orderBy(asc(schema.proposalRevisions.revisionNumber));
+    const saved = await revisions();
+    expect(saved).toHaveLength(2);
+    expect(saved[0]?.state).toBe("countered");
+    expect(saved[1]).toMatchObject({
+      amountMinor: 11900003,
+      currency: "EUR",
+      state: "draft",
+      submittedAt: null,
+      respondsToRevisionId: fixture.revisionId,
+      paymentBasis: "Exact entered payment basis",
+      conditions: ["Exact entered condition"],
+      inclusions: ["Exact entered inclusion"],
+    });
+    expect(saved[1]?.deadlineAt.getTime()).toBe(saved[0]?.deadlineAt.getTime());
+    expect(saved[1]?.parties).toEqual(saved[0]?.parties);
+
+    await form.getByRole("button", { name: counterofferCopy("en").submit, exact: true }).click();
+    const copy = caseCopy("en");
+    await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
+    await expect(client.getByText(proposalCopy("en").notCurrent, { exact: true })).toBeVisible();
+    await expect(disclosure).toHaveAttribute("open", "");
+    await expect(form.locator('input[name="amount"]')).toHaveValue("119,000.03");
+    await expect(form.locator('input[name="amount"]')).toHaveAttribute("readonly", "");
+    await expect(form.locator('textarea[name="paymentBasis"]')).toHaveValue(
+      "Exact entered payment basis",
+    );
+    await expect(form.locator('textarea[name="reason"]')).toHaveValue(
+      "Exact entered recovery explanation",
+    );
+    await expect(form.locator('input[name="deadline"]')).toHaveValue(deadline);
+    await expect(form.locator('input[name="_operationId"]')).toHaveValue(operationId);
+    await expect(form.locator('input[name="_expectedRevision"]')).toHaveValue(expectedRevision);
+    await expect(form.locator('input[name="revisionId"]')).toHaveValue(fixture.revisionId);
+    await expect(form.locator('input[name="clientPartyId"]')).toHaveValue(clientPartyId);
+    await expect(form.locator('select[name="currency"]')).toHaveValue("EUR");
+    await expect(form.locator('select[name="currency"]')).toBeDisabled();
+    await expect(form.locator('textarea[name="conditions"]')).toHaveValue(
+      "Exact entered condition",
+    );
+    await expect(form.locator('textarea[name="inclusions"]')).toHaveValue(
+      "Exact entered inclusion",
+    );
+    await expect(form.getByRole("button")).toHaveCount(0);
+    const statusHref = proposalStatus("en", "revise", fixture.proposalId, operationId);
+    await expect(form.getByRole("link", { name: copy.status, exact: true })).toHaveAttribute(
+      "href",
+      statusHref,
+    );
+    await client.screenshot({
+      path: info.outputPath("lost-acknowledgement-draft.png"),
+      fullPage: true,
+    });
+    await form.getByRole("link", { name: copy.status, exact: true }).click();
+    await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
+    await client.reload();
+    await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
+
+    await db
+      .update(schema.operations)
+      .set({ status: "succeeded" })
+      .where(
+        and(
+          eq(schema.operations.operationType, "proposal.revise"),
+          eq(schema.operations.idempotencyKey, operationId),
+        ),
+      );
+    await client.reload();
+    await expect(client.getByText(copy.statusSaved, { exact: true })).toBeVisible();
+    await client.getByRole("link", { name: copy.back, exact: true }).click();
+    await expect(client.locator('input[name="amount"]')).toHaveCount(0);
+    await expect(
+      client.getByRole("button", { name: counterofferCopy("en").submit, exact: true }),
+    ).toHaveCount(0);
+    await client.reload();
+    await expect(client.locator('input[name="amount"]')).toHaveCount(0);
+    expect(await revisions()).toHaveLength(2);
+    expect(nativePosts).toBe(1);
+
+    await db
+      .update(schema.caseParticipants)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(
+          eq(schema.caseParticipants.caseId, fixture.caseId),
+          eq(schema.caseParticipants.partyId, clientPartyId),
+        ),
+      );
+    const denied = await client.goto(hostUrl("client", statusHref));
+    expect(denied?.status()).toBe(404);
+    await expect(client.getByText(copy.statusSaved, { exact: true })).toHaveCount(0);
+    expect(nativePosts).toBe(1);
+    expect(await revisions()).toHaveLength(2);
+  } finally {
+    await clients.close();
+  }
+});

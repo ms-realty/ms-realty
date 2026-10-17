@@ -47,6 +47,7 @@ export function WorkflowForm({
   action,
   path,
   nativeIdentity,
+  commandAvailable,
   status,
   submit,
   pendingReferenceCookie,
@@ -59,6 +60,7 @@ export function WorkflowForm({
   action: FormAction<FormValues>;
   path: string;
   nativeIdentity?: string;
+  commandAvailable?: boolean;
   status: { href: string; label: string };
   submit: string;
   pendingReferenceCookie?: string;
@@ -91,6 +93,7 @@ export function WorkflowForm({
       initialState={initialState}
       permalink={path}
       nativeIdentity={nativeIdentity}
+      commandAvailable={commandAvailable}
       reconciliation={status}
       pendingReferenceCookie={pendingReferenceCookie}
       disclosure={disclosure}
