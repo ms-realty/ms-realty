@@ -2,13 +2,24 @@
 import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { type BrowserContext, expect, type Page, type TestInfo, test } from "@playwright/test";
+import {
+  type BrowserContext,
+  expect,
+  type Page,
+  type Request,
+  type TestInfo,
+  test,
+} from "@playwright/test";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import {
+  classifyWorkspaceNavigationPrefetchPageError,
   isDepartingWorkspacePrefetch,
+  type WorkspaceNavigationPrefetchPageError,
+  type WorkspaceObservedRscRequest,
+  type WorkspacePageError,
   type WorkspacePrefetchFailure,
 } from "../src/features/ai/testing/workspace-browser-diagnostics";
 import { workspaceCopy } from "../src/features/ai/workspace-copy";
@@ -85,6 +96,9 @@ const browserDiagnostics = new WeakMap<
     providerRequests: string[];
     disabledScripts: string[];
     cancelledPrefetches: WorkspacePrefetchFailure[];
+    observedRscRequests: WorkspaceObservedRscRequest[];
+    rawPageErrors: (WorkspacePageError & { departingPage: string | null })[];
+    navigationPrefetchPageErrors: WorkspaceNavigationPrefetchPageError[];
     departingPage: string | null;
   }
 >();
@@ -96,15 +110,28 @@ test.beforeEach(async ({ page }, testInfo) => {
     providerRequests: [] as string[],
     disabledScripts: [] as string[],
     cancelledPrefetches: [] as WorkspacePrefetchFailure[],
+    observedRscRequests: [] as WorkspaceObservedRscRequest[],
+    rawPageErrors: [] as (WorkspacePageError & { departingPage: string | null })[],
+    navigationPrefetchPageErrors: [] as WorkspaceNavigationPrefetchPageError[],
     departingPage: null as string | null,
   };
+  const observedRequests = new WeakMap<Request, WorkspaceObservedRscRequest>();
   browserDiagnostics.set(page, entries);
-  page.on("pageerror", (error) => entries.errors.push(error.message));
+  page.on("pageerror", (error) => {
+    const raw = { name: error.name, message: error.message, stack: error.stack };
+    entries.rawPageErrors.push({ ...raw, departingPage: entries.departingPage });
+    entries.errors.push(error.message);
+  });
   page.on("console", (message) => {
     if (message.type() === "error") entries.console.push(message.text());
   });
   page.on("requestfailed", (request) => {
     const error = request.failure()?.errorText;
+    const observed = observedRequests.get(request);
+    if (observed) {
+      observed.failure = error ?? "unknown";
+      observed.finished = false;
+    }
     if (error?.includes("ERR_ABORTED")) return;
     const headers = request.headers();
     const failure = {
@@ -131,10 +158,47 @@ test.beforeEach(async ({ page }, testInfo) => {
   page.on("request", (request) => {
     if (/openrouter|api\.openai|api\.anthropic/.test(request.url()))
       entries.providerRequests.push(request.url());
+    if (new URL(request.url()).searchParams.has("_rsc")) {
+      const headers = request.headers();
+      const observed = {
+        method: request.method(),
+        resourceType: request.resourceType(),
+        url: request.url(),
+        referer: headers.referer,
+        rsc: headers.rsc,
+        prefetch: headers["next-router-prefetch"],
+        status: null,
+        finished: false,
+        failure: null,
+      };
+      observedRequests.set(request, observed);
+      entries.observedRscRequests.push(observed);
+    }
+  });
+  page.on("response", (response) => {
+    const observed = observedRequests.get(response.request());
+    if (observed) observed.status = response.status();
+  });
+  page.on("requestfinished", (request) => {
+    const observed = observedRequests.get(request);
+    if (observed) observed.finished = true;
   });
 });
-test.afterEach(async ({ page }, testInfo) => {
+test.afterEach(async ({ page, browserName }, testInfo) => {
   const entries = browserDiagnostics.get(page);
+  if (entries)
+    entries.errors = entries.rawPageErrors.flatMap(({ departingPage, ...error }) => {
+      const classified = classifyWorkspaceNavigationPrefetchPageError(
+        browserName,
+        error,
+        entries.observedRscRequests,
+        departingPage,
+        origins.staff,
+      );
+      if (!classified) return [error.message];
+      entries.navigationPrefetchPageErrors.push(classified);
+      return [];
+    });
   await testInfo.attach("browser-diagnostics", {
     body: JSON.stringify(entries, null, 2),
     contentType: "application/json",
@@ -144,17 +208,21 @@ test.afterEach(async ({ page }, testInfo) => {
   expect(entries?.providerRequests).toEqual([]);
   expect(entries?.console).toEqual([]);
 });
-async function openWorkspacePage(page: Page, href: string) {
+async function leaveWorkspacePage<T>(page: Page, navigate: () => Promise<T>) {
   const entries = browserDiagnostics.get(page);
   if (!entries) throw new Error("Missing workspace browser diagnostics");
   // These deliberate page changes may cancel Next's optional link prefetches.
   // The exception ends with this navigation and requires its exact departing referer.
-  entries.departingPage = page.url() !== href ? page.url() : null;
+  entries.departingPage = page.url();
   try {
-    return await page.goto(href);
+    return await navigate();
   } finally {
     entries.departingPage = null;
   }
+}
+async function openWorkspacePage(page: Page, href: string) {
+  if (page.url() === href) return page.goto(href);
+  return leaveWorkspacePage(page, () => page.goto(href));
 }
 async function capture(page: Page, testInfo: TestInfo, name: string) {
   if (
@@ -490,10 +558,12 @@ for (const javaScriptEnabled of [true, false]) {
       // A native receipt can paint before its document and shell assets finish loading.
       // Complete that load before following its task link, retaining strict request checks.
       if (!javaScriptEnabled) await page.waitForLoadState("load");
-      await artifact
-        .getByRole("region", { name: copy.recordSaved, exact: true })
-        .getByRole("link", { name: copy.openRecord, exact: true })
-        .click();
+      await leaveWorkspacePage(page, () =>
+        artifact
+          .getByRole("region", { name: copy.recordSaved, exact: true })
+          .getByRole("link", { name: copy.openRecord, exact: true })
+          .click(),
+      );
       await expect(page).toHaveURL(hostUrl("staff", "/en/tasks/" + rows[0]?.id));
       const artifacts = await db
         .select()
