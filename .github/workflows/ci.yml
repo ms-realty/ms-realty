@@ -99,13 +99,13 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
-      - name: Compare the pinned Linux visual baselines
-        run: bash scripts/visual-docker.sh check
       - name: Prepare container-smoke dependencies and disposable PostgreSQL
         run: |
           npm ci --no-audit --no-fund
           docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:16.14-alpine -c max_locks_per_transaction=256
           until docker exec ci-postgres pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
+      - name: Compare the pinned Linux visual baselines
+        run: bash scripts/visual-docker.sh check
       - name: Build and exercise the delivery container
         run: |
           docker build --build-arg BUILD_SHA="$GITHUB_SHA" -t msr-delivery:ci .
