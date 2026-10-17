@@ -12,6 +12,11 @@ const publicHosts = {
   client: "my.makler-realty.com",
   staff: "app.makler-realty.com",
 } as const;
+const recoveryHomes = {
+  public: { name: "Go to the home page", href: "/en" },
+  client: { name: "Back to my deals", href: "/en/overview" },
+  staff: { name: "Back to Today", href: "/en/today" },
+} as const;
 const env: GatewayEnv = {
   STAGING: "false",
   ORIGIN_URL: "https://origin.invalid",
@@ -97,9 +102,12 @@ for (const surface of ["public", "client", "staff"] satisfies HostContext[]) {
       await expect(page.locator("html")).toHaveAttribute("lang", "en");
       await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
       await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
-      await expect(
-        page.getByRole("link", { name: "Go to the home page", exact: true }),
-      ).toBeVisible();
+      // The page-thrown blank document uses the gateway shim; unmatched routes render the
+      // application's full recovery screen, which names the private destination.
+      const homeName = target === path ? "Go to the home page" : recoveryHomes[surface].name;
+      const home = page.getByRole("link", { name: homeName, exact: true });
+      await expect(home).toBeVisible();
+      await expect(home).toHaveAttribute("href", recoveryHomes[surface].href);
       expect(
         await page
           .locator('meta[name="robots"]')

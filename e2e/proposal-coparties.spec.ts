@@ -41,20 +41,22 @@ test("additional proposal parties survive native validation and require review o
     .locator("section")
     .filter({ has: page.getByRole("heading", { name: "Save a new revision", exact: true }) });
   const selected = form.getByRole("checkbox", { name: "Synthetic additional buyer", exact: true });
+  const amount = form.getByLabel("Amount (EUR)", { exact: true });
   await selected.check();
-  await form.getByLabel("Amount", { exact: true }).fill("0");
+  await amount.fill("0");
   await form
     .getByLabel("Reason or response note", { exact: true })
     .fill("Both buyers must agree to the same terms");
   await form.getByRole("button", { name: "Save a new revision", exact: true }).click();
   await expect(selected).toBeChecked();
-  await expect(form.getByLabel("Amount", { exact: true })).toHaveValue("0");
-  await form.getByLabel("Amount", { exact: true }).fill("110000");
+  await expect(amount).toHaveValue("0");
+  await amount.fill("110000");
   await form.getByRole("button", { name: "Save a new revision", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Open current record", exact: true }).click();
   const terms = page.locator('[data-proposal-revision="2"]');
   await expect(terms).toContainText("Synthetic additional buyer");
+  await expect(terms).toContainText("EUR 110,000.00");
   await expect(terms).toContainText("Draft · not shared");
   await expect(
     page.getByRole("button", { name: "Make available to these parties", exact: true }),
@@ -65,9 +67,9 @@ test("additional proposal parties survive native validation and require review o
   await expect(
     form.getByRole("checkbox", { name: "Synthetic additional buyer", exact: true }),
   ).toBeChecked();
-  await expect(page.locator('[data-proposal-revision="1"]')).not.toContainText(
-    "Synthetic additional buyer",
-  );
+  const previous = page.locator('[data-proposal-revision="1"]');
+  await expect(previous).not.toContainText("Synthetic additional buyer");
+  await expect(previous).toContainText("EUR 120,000.00");
   await page.screenshot({
     path: info.outputPath("additional-proposal-parties.png"),
     fullPage: true,
