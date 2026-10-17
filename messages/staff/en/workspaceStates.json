@@ -2,7 +2,7 @@
   "today": "Back to Today",
   "permission": {
     "title": "Your access does not include this page",
-    "managers": "Ask one of the people who manage access to give it to you: {names}.",
+    "managers": "Contact {names} through your usual work channel and ask for access to this page.",
     "noManagers": "Ask your manager to give you access.",
     "workAbout": "Your worklist will appear here when the agency assigns your access."
   }

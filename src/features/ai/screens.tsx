@@ -184,6 +184,7 @@ export async function AssistanceRunScreen({
     : translatedSource
       ? localeDraftSchema.safeParse(run.output)
       : draftSchema.safeParse(run.output);
+  const purposes: Record<string, string> = workCopy(locale).purposes;
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.title}</h1>
@@ -279,14 +280,41 @@ export async function AssistanceRunScreen({
                       citation,
                     ]),
                   ).values(),
-                ].map((citation) => (
-                  <li key={`${citation.field}:${citation.quote}`}>
-                    <span className="text-caption">{aiLabel("field", citation.field, locale)}</span>
+                ].map((citation) => {
+                  const purposeLabel =
+                    citation.field === "purpose" &&
+                    source.fields.purpose === citation.quote &&
+                    Object.hasOwn(purposes, citation.quote)
+                      ? purposes[citation.quote]
+                      : null;
+                  const quote = (
                     <blockquote className="whitespace-pre-wrap border-s-2 border-border ps-4">
                       {citation.quote}
                     </blockquote>
-                  </li>
-                ))}
+                  );
+                  return (
+                    <li key={`${citation.field}:${citation.quote}`}>
+                      <span className="text-caption">
+                        {aiLabel("field", citation.field, locale)}
+                      </span>
+                      {purposeLabel ? (
+                        <>
+                          <p>{purposeLabel}</p>
+                          <TechnicalDetails locale={locale}>
+                            <p>
+                              <bdi>
+                                {source.id} · {source.version} · {citation.field}
+                              </bdi>
+                            </p>
+                            {quote}
+                          </TechnicalDetails>
+                        </>
+                      ) : (
+                        quote
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </>
           ) : null}

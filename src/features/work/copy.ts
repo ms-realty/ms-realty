@@ -110,7 +110,8 @@ const en = {
     reference: "Reference",
     recordedAt: "Recorded at",
     unknown: "Result not confirmed",
-    draftRetained: "Your draft is retained. Check the action status before trying again.",
+    draftRetained:
+      "The values below are your draft. They do not confirm that anything was saved. Open Action status to check the same request before trying again.",
   },
   states: {
     received: "Received",
@@ -310,7 +311,8 @@ const bg: Copy = {
     reference: "Номер",
     recordedAt: "Записано на",
     unknown: "Непотвърден резултат",
-    draftRetained: "Черновата е запазена. Проверете статуса преди повторен опит.",
+    draftRetained:
+      "Стойностите по-долу са вашата чернова. Те не потвърждават, че промяната е записана. Отворете статуса на действието, за да проверите същата заявка преди нов опит.",
   },
   states: {
     received: "Получено",
@@ -504,7 +506,8 @@ const ru: Copy = {
     reference: "Номер",
     recordedAt: "Записано",
     unknown: "Результат не подтверждён",
-    draftRetained: "Черновик сохранён. Проверьте статус перед повтором.",
+    draftRetained:
+      "Значения ниже — ваш черновик. Они не подтверждают, что изменение записано. Откройте статус действия, чтобы проверить тот же запрос перед новой попыткой.",
   },
   states: {
     received: "Получено",

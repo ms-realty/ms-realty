@@ -346,6 +346,7 @@ export async function ContentOperationScreen({
       <h1 className="text-title font-semibold">{copy.check}</h1>
       {result?.status === "succeeded" && result.id && result.recordedAt ? (
         <Receipt
+          locale={locale}
           title={copy.saved}
           reference={result.operationId}
           referenceLabel={formCopy.reference}

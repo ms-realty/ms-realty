@@ -100,6 +100,7 @@ export default async function ReceiptPage({
     <DiscoveryPage>
       <div className="max-w-reading">
         <Receipt
+          locale={locale}
           title={view.title}
           headingLevel={1}
           referenceLabel={copy.checkCodeLabel}

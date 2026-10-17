@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import type { Session } from "@/server/auth/sessions";
 import { IntakeDraftPanel, IntakeSourcePanel } from "./intake-screen";
 import { LocaleSourcePanel } from "./locale-screen";
-import { AssistanceScreen, JobsScreen } from "./screens";
+import { AssistanceRunScreen, AssistanceScreen, JobsScreen } from "./screens";
 
 const fixture = vi.hoisted(() => ({
   id: "00000000-0000-4000-8000-000000000001",
@@ -55,6 +55,7 @@ const fixture = vi.hoisted(() => ({
     externalNavigation: null,
   },
 }));
+const mocks = vi.hoisted(() => ({ readRun: vi.fn() }));
 vi.mock("@/db/client", () => ({ getDb: () => ({}) }));
 vi.mock("@/server/ai/operations", () => ({ readAssistanceOperations: async () => fixture.status }));
 vi.mock("@/server/ai/config", () => ({ assistanceAvailability: () => ({ enabled: false }) }));
@@ -62,7 +63,7 @@ vi.mock("@/server/ai/assistance", () => ({
   readAssistanceSource: async () => fixture.source,
   listAssistanceRuns: async () => [],
   readAssistanceOperation: vi.fn(),
-  readAssistanceRun: vi.fn(),
+  readAssistanceRun: mocks.readRun,
   listIntakeAssistanceRuns: vi.fn(),
   readIntakeAssistanceOperation: vi.fn(),
   listLocaleAssistanceRuns: vi.fn(),
@@ -169,3 +170,73 @@ it("keeps note hashes and protected-fact JSON in technical disclosures", () => {
   expect(container.textContent).toContain(note.noteDigest);
   expect(container.textContent).toContain("exact_recorded_value");
 });
+
+async function renderRun(
+  locale: string,
+  citation: { field: "purpose" | "message" | "reference"; quote: string },
+  fields: Partial<typeof fixture.source.fields> = {},
+) {
+  const source = { ...fixture.source, fields: { ...fixture.source.fields, ...fields } };
+  mocks.readRun.mockResolvedValue({
+    sourceCurrent: true,
+    run: {
+      id: fixture.id,
+      sourceId: source.id,
+      sourceVersion: source.version,
+      sourceSnapshot: source,
+      sourceDigest: "a".repeat(64),
+      task: "reply_draft",
+      state: "accepted",
+      version: 1,
+      model: "synthetic-model",
+      generatedAt: new Date(0),
+      actualCostMicros: 0,
+      validation: null,
+      output: { body: "Exact draft body.", citations: [citation], warnings: [] },
+    },
+  });
+  return render(await AssistanceRunScreen({ locale, id: fixture.id, session }));
+}
+
+it.each([
+  ["bg", "Заявка за оглед"],
+  ["en", "Viewing request"],
+  ["ru", "Запрос просмотра"],
+])(
+  "labels an exact structured purpose citation in %s and retains its source binding",
+  async (locale, label) => {
+    const { container } = await renderRun(locale, { field: "purpose", quote: "viewing_request" });
+    expect(primaryText(container)).toContain(label);
+    expect(primaryText(container)).not.toContain("viewing_request");
+    expect(primaryText(container)).toContain("Exact draft body.");
+    const quote = container.querySelector("blockquote");
+    expect(quote?.textContent).toBe("viewing_request");
+    expect(quote?.closest("details")?.textContent).toContain("purpose");
+    expect(quote?.closest("details")?.textContent).toContain(fixture.source.id);
+  },
+);
+
+it.each([
+  { field: "message" as const, quote: "viewing_request", fields: { message: "viewing_request" } },
+  {
+    field: "message" as const,
+    quote: "112 000 EUR; 2 bedrooms; exact_source_note.",
+    fields: { message: "112 000 EUR; 2 bedrooms; exact_source_note." },
+  },
+  { field: "reference" as const, quote: "RQ-TEST-0001", fields: {} },
+  { field: "purpose" as const, quote: "future_purpose", fields: { purpose: "future_purpose" } },
+  {
+    field: "purpose" as const,
+    quote: "viewing_request",
+    fields: { purpose: "viewing_request / callback" },
+  },
+])(
+  "preserves the exact primary quote for non-controlled citation $field: $quote",
+  async ({ field, quote, fields }) => {
+    const { container } = await renderRun("bg", { field, quote }, fields);
+    const rendered = container.querySelector("blockquote");
+    expect(rendered?.textContent).toBe(quote);
+    expect(rendered?.closest("details")).toBeNull();
+    expect(primaryText(container)).toContain(quote);
+  },
+);

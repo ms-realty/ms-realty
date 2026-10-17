@@ -442,6 +442,7 @@ describe("UI07 / S11–S17 progressive form", () => {
         "href",
         "/status/same",
       );
+      if (kind === "unknown") expect(screen.getByText(copy.form.draftRetained)).toBeVisible();
     },
   );
 

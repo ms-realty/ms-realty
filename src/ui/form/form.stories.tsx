@@ -48,7 +48,7 @@ function scenario(
           <SpecimenForm
             action={async (previous) => previous}
             initialState={{ ...state, outcome: outcome(copy) }}
-            permalink="#story"
+            permalink={`/${locale}/design/forms#story`}
             statusHref="#story-status"
             copy={copy}
           />
@@ -110,12 +110,13 @@ export const ConfirmedReceipt: Story = scenario((copy) => ({
 
 export const Pending: Story = {
   render: (_args, context) => {
-    const copy = formSpecimenCopy(localeOf(context));
+    const locale = localeOf(context);
+    const copy = formSpecimenCopy(locale);
     return (
       <SpecimenForm
         action={() => new Promise(() => undefined)}
         initialState={state}
-        permalink="#story"
+        permalink={`/${locale}/design/forms#story`}
         statusHref="#story-status"
         copy={copy}
       />

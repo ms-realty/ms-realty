@@ -373,6 +373,7 @@ function FormSession<V extends FormValues>({
       <Receipt
         title={outcome.receipt.title}
         reference={outcome.receipt.reference}
+        locale={permalink.split("/")[1] ?? "bg"}
         referenceLabel={copy.reference}
         recordedAt={outcome.receipt.recordedAt}
         recordedAtLabel={copy.recordedAt}
@@ -506,7 +507,9 @@ function FormSession<V extends FormValues>({
                 {outcome.status.label}
               </a>
             }
-          />
+          >
+            {outcome.kind === "unknown" ? <p>{copy.draftRetained}</p> : null}
+          </Notice>
         </FocusResult>
       ) : null}
       {conflict ? (
