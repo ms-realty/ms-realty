@@ -505,6 +505,9 @@ for (const javaScriptEnabled of [true, false]) {
         .from(schema.briefRevisions)
         .where(eq(schema.briefRevisions.caseId, f.caseId));
       expect(briefs.length).toBeGreaterThan(1);
+      // Native WebKit can paint the receipt before its POST document finishes streaming.
+      // Finish that finite load before the explicit refresh, retaining strict network checks.
+      if (!javaScriptEnabled) await page.waitForLoadState("load");
       await page.goto(workspace("en", f.id));
       const saved = page.locator("article").filter({
         has: page.getByRole("heading", { name: "Buyer research handoff", exact: true }),
