@@ -20,6 +20,17 @@ if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
 const connection = postgres(url, { max: 2 }),
   db = drizzle(connection, { schema });
 test.afterAll(async () => connection.end());
+
+// SSR fields can be read before the browser's ownership effect has initialized.
+// Only fixture setup waits here; the later reloads still fence before hydration.
+async function waitForDraftOwner(page: Page): Promise<string> {
+  const read = () =>
+    page.evaluate(
+      () => JSON.parse(sessionStorage.getItem("msr.inquiry-draft.owner") ?? "null")?.id,
+    );
+  await expect.poll(read).toMatch(/^[0-9a-f]{64}$/);
+  return read();
+}
 function seed() {
   return JSON.parse(
     execFileSync(
@@ -486,9 +497,7 @@ test("O02 pending contact fences SSR with scripts delayed and clears after expli
   const operationId = await page
     .locator('[data-inquiry-contact] input[name="_operationId"]')
     .inputValue();
-  const ownerId = await page.evaluate(
-    () => JSON.parse(sessionStorage.getItem("msr.inquiry-draft.owner") ?? "null")?.id,
-  );
+  const ownerId = await waitForDraftOwner(page);
   expect(ownerId).toMatch(/^[0-9a-f]{64}$/);
   const referenceName = inquiryReferenceCookie(ownerId, fixture.id, "contact");
   let acknowledged!: () => void, release!: () => void;
@@ -592,9 +601,7 @@ for (const kind of ["accept", "contact", "triage"] as const) {
           ?.value,
     );
     expect(operationId).toMatch(/^[A-Za-z0-9_-]{43}\.[0-9a-f]{32}$/);
-    const ownerId = await page.evaluate(
-      () => JSON.parse(sessionStorage.getItem("msr.inquiry-draft.owner") ?? "null")?.id,
-    );
+    const ownerId = await waitForDraftOwner(page);
     expect(ownerId).toMatch(/^[0-9a-f]{64}$/);
     const name = inquiryReferenceCookie(ownerId, fixture.id, kind);
     await context.addCookies([
@@ -777,9 +784,7 @@ test("O02 success headers without an acknowledgment body keep the pending SSR re
   );
   await page.getByLabel(copy.confirm, { exact: true }).check();
   const key = await page.locator('[data-inquiry-contact] input[name="_operationId"]').inputValue();
-  const ownerId = await page.evaluate(
-    () => JSON.parse(sessionStorage.getItem("msr.inquiry-draft.owner") ?? "null")?.id,
-  );
+  const ownerId = await waitForDraftOwner(page);
   const name = inquiryReferenceCookie(ownerId, fixture.id, "contact");
   let delivered!: () => void;
   const headersDelivered = new Promise<void>((resolve) => {
