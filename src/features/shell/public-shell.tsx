@@ -131,7 +131,7 @@ export async function PublicShell({
           </div>
           {footerLinks.length > 0 ? (
             <nav aria-label={footer("label")}>
-              <ul className="grid gap-2.5 sm:grid-cols-2">
+              <ul className="grid gap-2.5 lg:grid-cols-2">
                 {footerLinks.map((item) => (
                   <li key={item.label}>
                     <NavLink

@@ -1139,6 +1139,20 @@ export async function WorkflowStatusScreen(
               ? c.statusFailed
               : c.statusUnknown}
       </p>
+      {receipt && receipt.status !== "succeeded" && receipt.status !== "failed" ? (
+        <a
+          className={workflowLink}
+          href={workflowStatus(
+            props.session.account.kind,
+            props.locale,
+            command,
+            id,
+            props.operationKey,
+          )}
+        >
+          {c.checkAgain}
+        </a>
+      ) : null}
       <a className={workflowLink} href={destination}>
         {c.back}
       </a>

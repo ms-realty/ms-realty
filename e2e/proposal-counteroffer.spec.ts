@@ -314,10 +314,21 @@ test("C08 native lost acknowledgement retains the exact draft after the committe
       path: info.outputPath("lost-acknowledgement-draft.png"),
       fullPage: true,
     });
+    await client.screenshot({ path: info.outputPath("lost-acknowledgement-viewport.png") });
     await form.getByRole("link", { name: copy.status, exact: true }).click();
     await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
-    await client.reload();
+    await expect(client.getByRole("link", { name: copy.checkAgain, exact: true })).toHaveAttribute(
+      "href",
+      statusHref,
+    );
+    await client.getByRole("link", { name: copy.checkAgain, exact: true }).click();
     await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
+    expect(nativePosts).toBe(1);
+    await client.screenshot({
+      path: info.outputPath("operation-status-unknown.png"),
+      fullPage: true,
+    });
+    await client.screenshot({ path: info.outputPath("operation-status-unknown-viewport.png") });
 
     await db
       .update(schema.operations)
@@ -330,6 +341,10 @@ test("C08 native lost acknowledgement retains the exact draft after the committe
       );
     await client.reload();
     await expect(client.getByText(copy.statusSaved, { exact: true })).toBeVisible();
+    await client.screenshot({
+      path: info.outputPath("operation-status-saved.png"),
+      fullPage: true,
+    });
     await client.getByRole("link", { name: copy.back, exact: true }).click();
     await expect(client.locator('input[name="amount"]')).toHaveCount(0);
     await expect(

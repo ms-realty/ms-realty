@@ -556,6 +556,14 @@ export async function ProposalStatusScreen(
               ? c.statusFailed
               : c.statusUnknown}
       </p>
+      {receipt && receipt.status !== "succeeded" && receipt.status !== "failed" ? (
+        <a
+          className={workflowLink}
+          href={proposalStatus(props.locale, command, id, props.keyValue)}
+        >
+          {c.checkAgain}
+        </a>
+      ) : null}
       <a className={workflowLink} href={href}>
         {c.back}
       </a>

@@ -9,6 +9,7 @@ import { accessManagerNames } from "@/server/auth/grants";
 import type { Session } from "@/server/auth/sessions";
 import { buttonClass } from "@/ui/button-class";
 import { EmptyState } from "@/ui/empty-state";
+import { brandPhone } from "./agency";
 
 export async function PermissionState({
   locale: requested,
@@ -44,11 +45,16 @@ export async function PermissionState({
         kind="inaccessible"
         title={t("permission.title")}
         action={
-          showToday ? (
-            <a href={`/${locale}/today`} className={buttonClass("secondary")}>
-              {t("today")}
+          <div className="flex flex-wrap gap-3">
+            <a href={`tel:${brandPhone.e164}`} className={buttonClass("secondary")}>
+              {t("permission.callAgency")}
             </a>
-          ) : undefined
+            {showToday ? (
+              <a href={`/${locale}/today`} className={buttonClass("tertiary")}>
+                {t("today")}
+              </a>
+            ) : null}
+          </div>
         }
       >
         <p className="wrap-anywhere">

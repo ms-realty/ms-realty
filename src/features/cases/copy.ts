@@ -117,7 +117,8 @@ const en = {
   statusFailed: "The action was not applied. Review the current record before retrying.",
   statusSaved: "The action was recorded.",
   statusUnknown:
-    "The result is not confirmed. Keep this reference and check again before retrying.",
+    "We do not yet know whether your change was saved. It may already be recorded. Do not submit it again.",
+  checkAgain: "Check this action again",
   back: "Open current record",
   saved: "Change recorded",
   nextStep: "Open the record to see its current state.",
@@ -237,6 +238,9 @@ const bg: Copy = {
   previousTime: "Предишна уговорка",
   proposedTime: "Предложен час",
   requestNote: "Предпочитаният период е заявка. Изчакайте изрично потвърждение.",
+  statusUnknown:
+    "Все още не знаем дали промяната ви е запазена. Възможно е вече да е записана. Не я изпращайте отново.",
+  checkAgain: "Проверете това действие отново",
   status: "Статус на действието",
   back: "Отваряне на текущия запис",
   saved: "Промяната е записана",
@@ -354,6 +358,9 @@ const ru: Copy = {
   previousTime: "Прежняя договорённость",
   proposedTime: "Предложенное время",
   requestNote: "Предпочтительное время — запрос. Дождитесь явного подтверждения.",
+  statusUnknown:
+    "Мы пока не знаем, сохранено ли изменение. Возможно, оно уже записано. Не отправляйте его повторно.",
+  checkAgain: "Проверить это действие ещё раз",
   status: "Статус действия",
   back: "Открыть текущую запись",
   saved: "Изменение записано",

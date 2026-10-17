@@ -38,7 +38,13 @@ it.each(["bg", "en", "ru"] as const)(
     );
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Inventory");
     expect(container.textContent).toContain("Synthetic Manager");
-    expect(screen.getByRole("link")).toHaveAttribute("href", `/${locale}/today`);
+    expect(screen.getByRole("link", { name: { bg, en, ru }[locale].today })).toHaveAttribute(
+      "href",
+      `/${locale}/today`,
+    );
+    expect(
+      screen.getByRole("link", { name: { bg, en, ru }[locale].permission.callAgency }),
+    ).toHaveAttribute("href", "tel:+359879696870");
     expect(query.managers).toHaveBeenCalledWith(query.db, session);
     expect(container.querySelector("form, input, table")).toBeNull();
   },

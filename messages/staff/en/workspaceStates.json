@@ -4,6 +4,7 @@
     "title": "Your access does not include this page",
     "managers": "Contact {names} through your usual work channel and ask for access to this page.",
     "noManagers": "Ask your manager to give you access.",
-    "workAbout": "Your worklist will appear here when the agency assigns your access."
+    "workAbout": "Your worklist will appear here when the agency assigns your access.",
+    "callAgency": "Call the agency"
   }
 }

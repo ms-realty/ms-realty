@@ -67,8 +67,16 @@ it.each([null, "accepted", "in_progress", "outcome_unknown", "failed"] as const)
   "keeps receipt status %j honest without a new command",
   async (status) => {
     reads.receipt.mockResolvedValue(status ? { status, outcome: { id } } : null);
-    render(await ProposalStatusScreen(props()));
+    const input = props();
+    render(await ProposalStatusScreen(input));
     expect(screen.queryByText(copy.statusSaved)).not.toBeInTheDocument();
+    const checkAgain = screen.queryByRole("link", { name: "Check this action again" });
+    if (status && status !== "failed") {
+      expect(checkAgain).toHaveAttribute(
+        "href",
+        `/en/proposals/operations?command=revise&id=${id}&key=${encodeURIComponent(input.keyValue)}`,
+      );
+    } else expect(checkAgain).not.toBeInTheDocument();
     expect(
       screen.getByText(
         !status ? copy.statusAbsent : status === "failed" ? copy.statusFailed : copy.statusUnknown,
