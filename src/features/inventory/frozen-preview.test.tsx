@@ -28,6 +28,26 @@ const facts = [
   },
 ] as unknown as (typeof propertyFacts.$inferSelect)[];
 
+it("keeps a standalone translation source directly beneath the page heading", () => {
+  render(
+    <>
+      <h1>Review translation</h1>
+      <FrozenPreview
+        headingLevel={2}
+        locale="en"
+        reference="MS-00001"
+        revision={revision}
+        facts={facts}
+      />
+    </>,
+  );
+  expect(screen.getAllByRole("heading").map((heading) => heading.tagName)).toEqual(["H1", "H2"]);
+  expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
+    "Frozen review candidate · MS-00001",
+  );
+  expect(screen.getByText("Keep_source_prose_exact.")).toBeVisible();
+});
+
 it.each(["bg", "en", "ru"])(
   "keeps exact fact values and source text while moving keys and revision metadata out of the %s preview",
   (locale) => {

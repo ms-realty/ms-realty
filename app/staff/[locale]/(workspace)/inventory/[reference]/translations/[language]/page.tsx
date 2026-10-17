@@ -45,6 +45,7 @@ export default async function TranslationPage({
       <p>{copy.next}</p>
       <div className="grid items-start gap-8 lg:grid-cols-2">
         <FrozenPreview
+          headingLevel={2}
           locale={locale}
           reference={reference}
           revision={data.revision}

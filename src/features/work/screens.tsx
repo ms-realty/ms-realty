@@ -132,8 +132,9 @@ export function Pagination({
   locale: string;
 }) {
   const copy = workCopy(locale);
+  if (page === 1 && !hasMore) return null;
   return (
-    <nav className="flex gap-6 py-4" aria-label={copy.details}>
+    <nav className="flex gap-6 py-4" aria-label={`${copy.previous} / ${copy.next}`}>
       {page > 1 ? (
         <a className={link} href={`${href}${href.includes("?") ? "&" : "?"}page=${page - 1}`}>
           {copy.previous}
