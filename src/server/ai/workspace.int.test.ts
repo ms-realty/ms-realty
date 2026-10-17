@@ -323,6 +323,7 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
     expect(await forbiddenEffects()).toEqual(before);
   });
 
+  // Ten inference turns, seven commands and independent PostgreSQL readbacks share this timeout.
   it("investigates, clarifies, accepts correction, versions work and materializes a person-owned task and buyer Brief", async () => {
     const started = performance.now();
     const f = await caseFixture(t.db);
@@ -831,7 +832,7 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
     ])
       expect(serializedPacket).not.toContain(excluded);
     buyerQualityPacket = candidatePacket;
-  });
+  }, 30_000);
 
   it("commits jobs transactionally and handles concurrent duplicate plan/tool deliveries once", async () => {
     const f = await caseFixture(t.db),

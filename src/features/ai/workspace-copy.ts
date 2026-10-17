@@ -14,7 +14,7 @@ const en = {
   context: "Choose the context",
   contextHelp:
     "Only records you can use are offered. Review the exact sources after saving. Private contacts and documents are excluded.",
-  case: "Case (optional)",
+  case: "Deal (optional)",
   inquiry: "Inquiry (optional)",
   listings: "Approved listings (optional)",
   none: "None selected",
@@ -37,6 +37,11 @@ const en = {
     "Compare the current sources with the saved revisions. Save a correction or request fresh research before using a stale draft.",
   truncated: "This context is shortened. Review the original records for the full history.",
   matched: "Matches the saved source review",
+  sourceTitles: {
+    needs: "What the client needs",
+    history: "Deal history",
+    message: "Message about the deal",
+  },
   authority: "A person reviews and saves work records.",
   current: "Current revision",
   pinned: "Saved revision",
@@ -124,7 +129,7 @@ const en = {
   selectedListings: "Listings in this proposal",
   materialize: "Use this reviewed proposal",
   createTask: "Create an internal task",
-  saveBuyer: "Save buyer brief and handoff",
+  saveBuyer: "Save buyer needs and handoff",
   parent: "Attach to",
   standalone: "My internal work",
   personReview:
@@ -132,16 +137,17 @@ const en = {
   taskHelp:
     "Creates an open internal task owned by you. The task does not perform the action described in it.",
   buyerHelp:
-    "Saves requirements and preferences to the selected buyer case. Listings remain a manual broker handoff until each current candidate is reviewed in case matching.",
-  buyerNeedsCase: "Choose a buyer or tenant case in a new workspace before saving this handoff.",
+    "Saves requirements and preferences to the selected deal for the buyer. Listings remain a manual broker handoff until each current candidate is reviewed in listing matching for the deal.",
+  buyerNeedsCase:
+    "Choose a deal for a buyer or tenant in a new workspace before saving this handoff.",
   recordSaved: "Work record saved",
   recordNext: "Open the resulting record and review what remains to be done.",
   openRecord: "Open resulting record",
-  manualListings: "Review proposed listings in case matching",
+  manualListings: "Review proposed listings for this deal",
   manual: "Continue manually",
   allWork: "All workspaces",
   back: "Back to Butler",
-  retained: "Your entries are retained. Check the original operation before trying again.",
+  retained: "Your entries are retained. Check the same request before trying again.",
   changed:
     "The record or sources changed. Refresh, review the current version and reuse your retained entries.",
   denied:
@@ -150,17 +156,17 @@ const en = {
   required: "Enter the required information.",
   acknowledge: "Review and confirm this step.",
   notFoundOperation:
-    "No receipt is available for this operation yet. This does not establish whether it succeeded.",
-  operation: "Original operation",
-  operationSaved: "The original operation is confirmed",
-  operationPending: "The original operation still needs reconciliation",
+    "No confirmation is available for this request yet. This does not establish whether it succeeded.",
+  operation: "Check the original request",
+  operationSaved: "The original request is confirmed",
+  operationPending: "The original request is not yet confirmed. Check it again.",
   manualResearch: "Review the research manually",
   revisionMismatch: "This source has a different revision from the saved review.",
   artifactKinds: {
-    research: "Research brief",
+    research: "Research summary",
     options: "Options and tradeoffs",
     task: "Task proposal",
-    buyer_handoff: "Buyer brief and handoff",
+    buyer_handoff: "Buyer needs and handoff",
     reply: "Reply draft",
     seller_copy: "Seller copy draft",
     owner_analysis: "Business analysis",
@@ -203,7 +209,7 @@ const bg: WorkspaceCopy = {
   context: "Изберете контекста",
   contextHelp:
     "Предлагат се само записи, които имате право да използвате. Прегледайте точните източници след записване. Лични контакти и документи не се включват.",
-  case: "Казус (незадължително)",
+  case: "Сделка (незадължително)",
   inquiry: "Запитване (незадължително)",
   listings: "Одобрени обяви (незадължително)",
   none: "Без избор",
@@ -226,6 +232,11 @@ const bg: WorkspaceCopy = {
     "Сравнете текущите източници със запазените версии. Запишете корекция или поискайте ново проучване, преди да използвате остаряла чернова.",
   truncated: "Контекстът е съкратен. Прегледайте оригиналните записи за пълната история.",
   matched: "Съответства на запазения преглед",
+  sourceTitles: {
+    needs: "Какво търси клиентът",
+    history: "История на сделката",
+    message: "Съобщение за сделката",
+  },
   authority: "Човек преглежда и записва работните записи.",
   current: "Текуща версия",
   pinned: "Запазена версия",
@@ -313,27 +324,28 @@ const bg: WorkspaceCopy = {
   taskHelp:
     "Създава отворена вътрешна задача, за която отговаряте вие. Задачата не изпълнява описаното действие.",
   buyerHelp:
-    "Записва изискванията и предпочитанията в избрания казус на купувача. Обявите остават за ръчен преглед от брокер в сравняването на казуса.",
+    "Записва изискванията и предпочитанията в избраната сделка с купувача. Обявите остават за ръчен преглед от брокер в подбора на имоти за сделката.",
   buyerNeedsCase:
-    "Изберете казус на купувач или наемател в ново проучване, преди да запишете това предаване.",
+    "Изберете сделка с купувач или наемател в ново проучване, преди да запишете това предаване.",
   recordSaved: "Работният запис е създаден",
   recordNext: "Отворете резултата и прегледайте какво остава да се направи.",
   openRecord: "Отваряне на създадения запис",
-  manualListings: "Преглед на предложените обяви в казуса",
+  manualListings: "Преглед на предложените обяви за сделката",
   manual: "Продължаване ръчно",
   allWork: "Всички проучвания",
   back: "Назад към Butler",
-  retained: "Въведеното е запазено. Проверете първоначалната операция преди нов опит.",
+  retained: "Въведеното е запазено. Проверете същата заявка преди нов опит.",
   changed:
     "Записът или източниците са променени. Обновете, прегледайте текущата версия и използвайте запазения текст.",
   denied: "Промяната не е записана. Проверете достъпа, избрания контекст и задължителните полета.",
   invalid: "Проверете отбелязаните полета.",
   required: "Попълнете задължителната информация.",
   acknowledge: "Прегледайте и потвърдете тази стъпка.",
-  notFoundOperation: "Все още няма разписка за операцията. Това не показва дали тя е успяла.",
-  operation: "Първоначална операция",
-  operationSaved: "Първоначалната операция е потвърдена",
-  operationPending: "Първоначалната операция още изисква проверка",
+  notFoundOperation:
+    "Все още няма потвърждение за тази заявка. Това не показва дали тя е изпълнена.",
+  operation: "Проверка на първоначалната заявка",
+  operationSaved: "Първоначалната заявка е потвърдена",
+  operationPending: "Първоначалната заявка все още не е потвърдена. Проверете я отново.",
   manualResearch: "Ръчен преглед на проучването",
   revisionMismatch: "Източникът е с различна версия от запазения преглед.",
   artifactKinds: {
@@ -374,7 +386,7 @@ const ru: WorkspaceCopy = {
   context: "Выберите контекст",
   contextHelp:
     "Предлагаются только доступные вам записи. Проверьте точные источники после сохранения. Личные контакты и документы не включаются.",
-  case: "Дело (необязательно)",
+  case: "Сделка (необязательно)",
   inquiry: "Обращение (необязательно)",
   listings: "Одобренные объявления (необязательно)",
   none: "Не выбрано",
@@ -397,6 +409,11 @@ const ru: WorkspaceCopy = {
     "Сравните текущие источники с сохранёнными версиями. Сохраните уточнение или запросите новое исследование перед использованием устаревшего черновика.",
   truncated: "Контекст сокращён. Полную историю можно прочитать в исходных записях.",
   matched: "Соответствует сохранённому просмотру",
+  sourceTitles: {
+    needs: "Что нужно клиенту",
+    history: "История сделки",
+    message: "Сообщение по сделке",
+  },
   authority: "Рабочие записи проверяет и сохраняет человек.",
   current: "Текущая версия",
   pinned: "Сохранённая версия",
@@ -491,17 +508,17 @@ const ru: WorkspaceCopy = {
   taskHelp:
     "Создаёт открытую внутреннюю задачу, за которую отвечаете вы. Задача не выполняет описанное в ней действие.",
   buyerHelp:
-    "Сохраняет требования и предпочтения в выбранном деле покупателя. Объявления остаются для ручной проверки брокером в подборе по делу.",
+    "Сохраняет требования и предпочтения в выбранной сделке с покупателем. Объявления остаются для ручной проверки брокером в подборе по сделке.",
   buyerNeedsCase:
-    "Выберите дело покупателя или арендатора в новом исследовании перед сохранением этой передачи.",
+    "Выберите сделку с покупателем или арендатором в новом исследовании перед сохранением этой передачи.",
   recordSaved: "Рабочая запись создана",
   recordNext: "Откройте результат и проверьте, что ещё нужно сделать.",
   openRecord: "Открыть созданную запись",
-  manualListings: "Проверить предложенные объявления в подборе по делу",
+  manualListings: "Проверить предложенные объявления в подборе по сделке",
   manual: "Продолжить вручную",
   allWork: "Все исследования",
   back: "Назад к Butler",
-  retained: "Введённое сохранено. Проверьте исходную операцию перед новой попыткой.",
+  retained: "Введённое сохранено. Проверьте тот же запрос перед новой попыткой.",
   changed:
     "Запись или источники изменились. Обновите страницу, проверьте текущую версию и используйте сохранённый текст.",
   denied: "Изменение не сохранено. Проверьте доступ, выбранный контекст и обязательные поля.",
@@ -509,10 +526,10 @@ const ru: WorkspaceCopy = {
   required: "Введите обязательные сведения.",
   acknowledge: "Проверьте и подтвердите этот шаг.",
   notFoundOperation:
-    "Квитанции по операции пока нет. Это не доказывает, что она выполнена или не выполнена.",
-  operation: "Исходная операция",
-  operationSaved: "Исходная операция подтверждена",
-  operationPending: "Исходную операцию ещё нужно проверить",
+    "Подтверждения по этому запросу пока нет. Это не доказывает, что он выполнен или не выполнен.",
+  operation: "Проверить исходный запрос",
+  operationSaved: "Исходный запрос подтверждён",
+  operationPending: "Исходный запрос ещё не подтверждён. Проверьте его снова.",
   manualResearch: "Проверить исследование вручную",
   revisionMismatch: "Версия источника отличается от сохранённой при просмотре.",
   artifactKinds: {

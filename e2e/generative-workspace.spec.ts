@@ -172,6 +172,7 @@ for (const javaScriptEnabled of [true, false]) {
       await capture(page, testInfo, "goal");
       await page.getByRole("button", { name: copy.create, exact: true }).click();
       await expect(page.getByRole("heading", { name: copy.saved, exact: true })).toBeVisible();
+      await capture(page, testInfo, "goal-saved");
       const [saved] = await db
         .select()
         .from(schema.generativeSessions)
@@ -187,6 +188,7 @@ for (const javaScriptEnabled of [true, false]) {
         .getByRole("link", { name: copy.open, exact: true })
         .click();
       await expect(page.getByRole("heading", { level: 1, name: saved?.goal })).toBeVisible();
+      await capture(page, testInfo, "goal-opened");
       expect(await page.getByRole("button", { name: copy.resume, exact: true }).count()).toBe(0);
       await page
         .getByRole("textbox", { name: copy.message, exact: true })

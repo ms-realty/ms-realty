@@ -5,7 +5,12 @@ import type { WorkspaceContext } from "@/domain/generative";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { workspaceCopy } from "./workspace-copy";
 import { WorkspaceForm } from "./workspace-forms";
-import { WorkspaceArtifactContent, WorkspaceProgress, WorkspaceSources } from "./workspace-panels";
+import {
+  WorkspaceArtifactContent,
+  WorkspaceProgress,
+  WorkspaceSources,
+  workspaceSourceTitle,
+} from "./workspace-panels";
 import { projectWorkspaceProgress } from "./workspace-progress";
 import { emptyWorkspaceValues, type WorkspaceValues, type WorkspaceView } from "./workspace-types";
 
@@ -233,7 +238,7 @@ it("does not reuse a stored review confirmation", () => {
   ).not.toBeChecked();
 });
 
-it("shows both source revisions, exact quotes and a current-source link without exposing opaque IDs as labels", () => {
+it("keeps diagnostic revisions in technical details and exact quotes behind their source disclosure", () => {
   const { container } = render(
     <WorkspaceSources
       locale="en"
@@ -241,16 +246,89 @@ it("shows both source revisions, exact quotes and a current-source link without 
       pins={[{ ...source, revision: "1", digest: "old-digest" }]}
     />,
   );
-  expect(screen.getByText("Current revision: 2 · Saved revision: 1")).toBeVisible();
+  expect(primaryText(container)).not.toContain("Current revision");
+  expect(primaryText(container)).not.toContain("Saved revision");
   expect(screen.getByText(workspaceCopy("en").revisionMismatch)).toBeVisible();
   expect(screen.getByRole("link", { name: workspaceCopy("en").original })).toHaveAttribute(
     "href",
     "/en/cases/" + id,
   );
   expect(primaryText(container)).not.toContain(id);
+  fireEvent.click(screen.getByText("Technical details"));
+  expect(screen.getByText("Current revision: 2")).toBeVisible();
+  expect(screen.getByText("Saved revision: 1")).toBeVisible();
   fireEvent.click(screen.getByText(workspaceCopy("en").sourceText));
   expect(screen.getByText(source.text)).toBeVisible();
 });
+
+it.each(["bg", "ru", "en"])(
+  "keeps fixed internal headings and numbered revisions out of primary %s workbench content",
+  (locale) => {
+    const copy = workspaceCopy(locale);
+    const fixedSources = [
+      { ...source, key: "brief:" + id, title: "Current case brief" },
+      { ...source, key: "history:" + id, title: "Case stage history" },
+      { ...source, key: "message:" + id, type: "message" as const, title: "Case message" },
+    ];
+    const supplied = { ...context, sources: fixedSources };
+    const artifact = {
+      id,
+      version: 3,
+      state: "draft",
+      contextDigest: context.digest,
+      proposal: {
+        kind: "buyer_handoff",
+        title: "Prepared comparison",
+        body: "Compare the supplied evidence.",
+        requirements: "Quiet room",
+        preferences: "Near transport",
+        listingIds: [],
+        citations: [{ source: fixedSources[0]?.key, quote: "The lift is unconfirmed." }],
+      },
+    } as unknown as WorkspaceView["artifacts"][number];
+    const { container } = render(
+      <>
+        <WorkspaceSources locale={locale} context={supplied} pins={fixedSources} />
+        <WorkspaceArtifactContent
+          locale={locale}
+          artifact={artifact}
+          context={supplied}
+          revision={7}
+        />
+      </>,
+    );
+    const primary = primaryText(container);
+    expect(primary).not.toMatch(/\b(?:case|brief|operation)\b|операци|операци[яи]|\bдело\b/i);
+    expect(primary).not.toContain(`${copy.version} 7`);
+    expect(primary).not.toContain(`${copy.current}: 2`);
+    expect(primary).not.toContain(`${copy.pinned}: 2`);
+    for (const title of Object.values(copy.sourceTitles))
+      expect(screen.getByRole("heading", { name: title })).toBeVisible();
+    for (const item of fixedSources) {
+      const originalTitle = screen.getByText(item.title, { exact: true });
+      expect(originalTitle.closest("details")).not.toBeNull();
+      expect(originalTitle).not.toBeVisible();
+    }
+    const revision = screen.getByText(`${copy.version} 7`, { exact: true });
+    const details = revision.closest("details");
+    expect(details).not.toBeNull();
+    expect(revision).not.toBeVisible();
+    fireEvent.click(details!.querySelector("summary")!);
+    expect(revision).toBeVisible();
+    expect(screen.getAllByText(`${copy.current}: 2`).every((node) => node.closest("details"))).toBe(
+      true,
+    );
+    expect(
+      workspaceSourceTitle(
+        { ...source, type: "listing", audience: "approved_public", title: "Current case brief" },
+        locale,
+      ),
+    ).toBe("Current case brief");
+    expect(workspaceSourceTitle({ ...source, title: "Current case brief" }, locale)).toBe(
+      "Current case brief",
+    );
+  },
+);
 
 it("renders exact cited evidence and buyer handoff requirements with honest manual review", () => {
   const artifact = {

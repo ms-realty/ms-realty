@@ -25,6 +25,24 @@ export function sourceHref(source: WorkspaceSource, locale: string): string | nu
           : null;
 }
 
+/** Translate only fixed system headings. User titles and approved listing titles stay exact. */
+export function workspaceSourceTitle(source: WorkspaceSource, locale: string): string {
+  if (source.audience !== "internal") return source.title;
+  const copy = workspaceCopy(locale).sourceTitles;
+  if (source.type === "case") {
+    if (source.key.startsWith("brief:") && source.title === "Current case brief") return copy.needs;
+    if (source.key.startsWith("history:") && source.title === "Case stage history")
+      return copy.history;
+  }
+  if (
+    source.type === "message" &&
+    source.key.startsWith("message:") &&
+    source.title === "Case message"
+  )
+    return copy.message;
+  return source.title;
+}
+
 export function WorkspaceSources({
   locale,
   context,
@@ -58,7 +76,7 @@ export function WorkspaceSources({
               className="min-w-0 space-y-3 py-4 first:pt-0"
             >
               <h3 className="break-words font-semibold">
-                <bdi>{source.title}</bdi>
+                <bdi>{workspaceSourceTitle(source, locale)}</bdi>
               </h3>
               <p className="text-compact text-text-muted">
                 {source.audience === "internal"
@@ -67,18 +85,15 @@ export function WorkspaceSources({
                     ? copy.approved
                     : copy.external}
               </p>
-              <p className="break-words text-compact">
-                {/^[0-9]+$/.test(source.revision)
-                  ? `${copy.current}: ${source.revision}${pinned && /^[0-9]+$/.test(pinned.revision) ? ` · ${copy.pinned}: ${pinned.revision}` : ` · ${copy.added}`}`
-                  : pinned && !changed
-                    ? copy.matched
-                    : pinned
-                      ? copy.revisionMismatch
-                      : copy.added}
+              <p
+                className={
+                  changed
+                    ? "break-words text-compact font-semibold text-warning"
+                    : "break-words text-compact"
+                }
+              >
+                {pinned ? (changed ? copy.revisionMismatch : copy.matched) : copy.added}
               </p>
-              {changed ? (
-                <p className="text-compact font-semibold text-warning">{copy.revisionMismatch}</p>
-              ) : null}
               <WorkspaceListingFacts locale={locale} source={source} />
               {source.type === "calculation" ? (
                 <p className="font-semibold">{copy.calculation}</p>
@@ -95,6 +110,15 @@ export function WorkspaceSources({
                 </a>
               ) : null}
               <TechnicalDetails locale={locale}>
+                <p>{source.title}</p>
+                <p>
+                  {copy.current}: {source.revision}
+                </p>
+                {pinned ? (
+                  <p>
+                    {copy.pinned}: {pinned.revision}
+                  </p>
+                ) : null}
                 <p className="break-all">{source.key}</p>
                 <p className="break-all">{source.digest}</p>
                 <dl>
@@ -297,7 +321,7 @@ export function WorkspaceArtifactContent({
   return (
     <div className="space-y-4">
       <p className="text-compact font-semibold text-text-muted">
-        {copy.artifactKinds[proposal.kind]} · {copy.version} {revision} ·{" "}
+        {copy.artifactKinds[proposal.kind]} ·{" "}
         {artifact.state === "draft"
           ? copy.draft
           : artifact.state === "superseded"
@@ -353,7 +377,7 @@ export function WorkspaceArtifactContent({
                   </blockquote>
                   {source ? (
                     <a href={"#" + sourceAnchor(source.key)} className={workspaceLink}>
-                      {source.title}
+                      {workspaceSourceTitle(source, locale)}
                     </a>
                   ) : (
                     <p className="text-compact text-warning">{copy.missingSource}</p>
@@ -368,13 +392,16 @@ export function WorkspaceArtifactContent({
       </div>
       <p className="text-compact text-text-muted">{copy.authority}</p>
       <TechnicalDetails locale={locale}>
+        <p>
+          {copy.version} {revision}
+        </p>
         {artifact.operationPolicy ? (
           <p className="whitespace-pre-wrap break-words">
             {JSON.stringify(artifact.operationPolicy)}
           </p>
         ) : null}
         <p>
-          {aiLabel("code", artifact.state, locale)} · {copy.version}: {artifact.version}
+          {aiLabel("code", artifact.state, locale)} · {copy.current}: {artifact.version}
         </p>
         <p className="break-all">{artifact.id}</p>
         <p className="break-all">{artifact.contextDigest}</p>

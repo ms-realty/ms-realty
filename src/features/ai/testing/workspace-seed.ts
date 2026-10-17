@@ -17,6 +17,10 @@ const sql = postgres(url, { max: 2 });
 const db = drizzle(sql, { schema });
 try {
   const f = await caseFixture(db);
+  await db
+    .update(schema.cases)
+    .set({ title: "Synthetic buyer deal" })
+    .where(eq(schema.cases.id, f.record.id));
   const listing = await db.transaction(async (tx) => {
     // The publication helper's local counter restarts in each seed process. Serialize its
     // temporary reference and replace it with a database-issued reference before commit.
