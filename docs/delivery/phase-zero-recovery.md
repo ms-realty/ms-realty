@@ -43,11 +43,15 @@ Migration `0022_media_renditions` is additive. New images seal real responsive s
 
 ## Verification
 
-Local Node 24.16.0 and disposable PostgreSQL 16.14: 2,815 unit/DOM/integration tests passed, 12 optional tests skipped. The separately added production-label guard passed. Lint and app/gateway types passed; tokens, generated API and release schemas passed without generated drift. Production code was qualified at `2cee72e0ab929c2d4ffec4cef5fee58c31a6ab9f`; subsequent commits adjust tests and this evidence record. The full suite ran on the same production code before its test-only guard/contact-selector commit.
+Local Node 24.16.0 and disposable PostgreSQL 16.14: 2,815 unit/DOM/integration tests passed, 12 optional tests skipped. The later production-label guard passed separately. The first hosted CI run passed all 2,816 unit/integration tests, including that guard, and the dependency scan. Lint and app/gateway types passed; tokens, generated API and release schemas passed without generated drift.
 
 The final candidate production build passed. Of 252 browser cases against a disposable database and the pinned real ClamAV image, 246 passed initially and six failed on stale assistance metadata selectors. The tests now open the technical disclosures and verify the same metadata, exact citation offsets and queue identity; all six passed without retries against the same production build. No product, permission or database assertions were removed. All 42 counteroffer cases passed: seven locales, native/enhanced entry and three browser profiles.
 
-A preceding production-code checkpoint passed 75 additional browser cases with three intentional skips, plus all nine history/font/publication regressions across desktop Chromium, phone Chromium and phone WebKit. Those earlier results are checkpoint evidence, not an assertion that the complete browser suite passed on the final candidate. The Linux visual check is downloading its pinned browser image; hosted CI has not run on this continuation yet.
+A preceding production-code checkpoint passed 75 additional browser cases with three intentional skips, plus all nine history/font/publication regressions across desktop Chromium, phone Chromium and phone WebKit. Those earlier results are checkpoint evidence, not an assertion that the complete browser suite passed on the final candidate. The interrupted Linux visual download established no visual result.
+
+The first hosted run reached its job limit during the full 1,167-case browser suite. Follow-up fixes align exact recovery/money/access assertions with the intended behavior, omit the optional viewport key that Linux WebKit reports as an error, and wrap long access-manager names. A real Linux WebKit probe reproduces the viewport error and confirms a clean safe-area baseline; no console errors are filtered. A fresh production-build regression run passed 162 cases, exposed six long-name overflow cases, and all six passed after the wrapping fix with an explicit long-name fixture. App types and lint passed again.
+
+CI now invokes each browser profile against its own disposable database, retaining every test and retry policy while avoiding cross-profile fixture accumulation. Per-profile HTML reports are separate, and the line reporter prints failures before a job cancellation can discard the final summary. The candidate PR tracks fresh hosted CI and Linux visual results; neither source changes nor local results establish a green required gate.
 
 The automatic Jev rule check was unavailable with `daily_budget_reached`. Configured rules were reviewed locally and a credential-pattern scan of the added source found no candidates. This does not establish an automated Jev pass.
 
@@ -56,5 +60,7 @@ The automatic Jev rule check was unavailable with `daily_budget_reached`. Config
 This candidate does not close the entire 140-finding audit or declare Phase 0 acceptance complete. The full 828-capture vocabulary/failure crawl, G1/G2 human acceptance, real device keyboard/inset checks, public-media cache/purge verification, human language/listing review and external launch evidence remain separate. The Phase 1 critical translated-edition and client-locale findings M-001/M-002 are still open.
 
 M-110 retains private reauthorization while restoring focus, scroll and drafts. A counteroffer whose write commits but whose acknowledgment is lost still needs explicit operation-status reconciliation; the native success receipt is fixed, but independent draft persistence after that eligibility transition has not been established. No uncertain write is automatically resent.
+
+Large staff-directory and coverage-queue performance remain unqualified. Isolating browser fixtures does not establish production scalability for the existing unbounded access-management lists.
 
 Launch authority files are unchanged. Nothing here deploys, publishes listings, sends customer messages, grants access or enables autonomous Butler actions.

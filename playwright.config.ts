@@ -21,7 +21,7 @@ export default defineConfig({
   workers: 2,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
-  reporter: isCI ? [["list"], ["html", { open: "never" }]] : "list",
+  reporter: isCI ? [["line"], ["html", { open: "never" }]] : "list",
   use: {
     // Tests address the public host unless they choose another (e2e/hosts.ts).
     baseURL: origins.public,

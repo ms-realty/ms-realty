@@ -45,7 +45,14 @@ jobs:
         npm run release:schemas
         git diff --exit-code -- docs/api/openapi.json release/schemas
         node --test scripts/ci-clamav.test.mjs
-        node scripts/ci-clamav.mjs bash -euo pipefail -c 'npm run test:integration -- src/server/files/workflow.int.test.ts; npm run e2e'
+        # Each Playwright invocation owns a fresh database. Keep fixture growth from one
+        # browser profile out of the next profile's permission and coverage queues.
+        node scripts/ci-clamav.mjs bash -euo pipefail -c '
+          npm run test:integration -- src/server/files/workflow.int.test.ts
+          for profile in chromium-desktop chromium-mobile webkit-mobile; do
+            PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report/$profile" npm run e2e -- --project="$profile"
+          done
+        '
         E2E_TODAY_UNAVAILABLE=1 npx playwright test e2e/today-unavailable.spec.ts --workers=1 --project=chromium-desktop
         E2E_O03_UNAVAILABLE=1 npx playwright test e2e/inquiry-case-link.spec.ts --workers=1 --project=chromium-desktop --grep "a failed candidate read"
         bash scripts/visual-docker.sh check

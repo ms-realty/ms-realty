@@ -21,7 +21,7 @@ type Seeds = {
     offered: string;
     offeredTitle: string;
   };
-  quiet: { emptyToken: string; overloadToken: string };
+  quiet: { emptyToken: string; overloadToken: string; managerName: string };
   overdue: { overdueToken: string; overdue: string };
 };
 /** Seeds only the scenario a case reads (see e2e/support/today-seed.ts). */
@@ -207,6 +207,7 @@ for (const javaScriptEnabled of [false, true])
           /^Ask (?:your manager to give you access|one of the people who manage access to give it to you: .+)\.$/,
         ),
       ).toBeVisible();
+      await expect(permission.getByText(f.managerName, { exact: false })).toBeVisible();
       await expect(page.locator('[data-today-state="empty"]')).toHaveCount(0);
       await expect(page.getByText("Nothing in today's lists needs action")).toHaveCount(0);
       await expect(page.getByRole("navigation", { name: "Work scope" })).toHaveCount(0);

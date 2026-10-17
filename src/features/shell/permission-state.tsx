@@ -51,7 +51,9 @@ export async function PermissionState({
           ) : undefined
         }
       >
-        <p>{managers.length ? t("permission.managers", { names }) : t("permission.noManagers")}</p>
+        <p className="wrap-anywhere">
+          {managers.length ? t("permission.managers", { names }) : t("permission.noManagers")}
+        </p>
       </EmptyState>
     </div>
   );
