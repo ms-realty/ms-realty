@@ -204,10 +204,13 @@ for (const javaScriptEnabled of [false, true])
       ).toBeVisible();
       await expect(
         permission.getByText(
-          /^Ask (?:your manager to give you access|one of the people who manage access to give it to you: .+)\.$/,
+          /^Contact .+ through your usual work channel and ask for access to this page\.$/,
         ),
       ).toBeVisible();
       await expect(permission.getByText(f.managerName, { exact: false })).toBeVisible();
+      const callAgency = permission.getByRole("link", { name: "Call the agency", exact: true });
+      await expect(callAgency).toBeVisible();
+      await expect(callAgency).toHaveAttribute("href", "tel:+359879696870");
       await expect(page.locator('[data-today-state="empty"]')).toHaveCount(0);
       await expect(page.getByText("Nothing in today's lists needs action")).toHaveCount(0);
       await expect(page.getByRole("navigation", { name: "Work scope" })).toHaveCount(0);
