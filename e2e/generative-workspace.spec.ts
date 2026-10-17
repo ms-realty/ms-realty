@@ -302,12 +302,12 @@ for (const javaScriptEnabled of [true, false]) {
       expect(run?.contextPins.length).toBeGreaterThan(0);
     });
 
-    test("keeps Stop and corrections valid while the worker advances only its version", async ({
-      page,
-      context,
-    }) => {
-      const copy = workspaceCopy("en");
-      for (const command of ["cancel", "message"] as const) {
+    for (const command of ["cancel", "message"] as const) {
+      test(`keeps ${command === "cancel" ? "Stop" : "corrections"} valid while the worker advances only its version`, async ({
+        page,
+        context,
+      }) => {
+        const copy = workspaceCopy("en");
         const f = await fixture(context, "active");
         await page.goto(workspace("en", f.id));
         await expect(
@@ -348,8 +348,8 @@ for (const javaScriptEnabled of [true, false]) {
           .from(schema.generativeRuns)
           .where(eq(schema.generativeRuns.id, f.runId as string));
         expect(run?.state).toBe("cancelled");
-      }
-    });
+      });
+    }
 
     test("a stale Stop cannot cancel work started by a newer human correction", async ({
       page,
