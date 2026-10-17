@@ -1,6 +1,19 @@
 // O23: explicit grants are human, capability-scoped, step-up protected and receipt-backed.
 import "server-only";
-import { and, count, eq, gt, inArray, isNull, ne, notInArray, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  eq,
+  gt,
+  ilike,
+  inArray,
+  isNull,
+  ne,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import {
   appointments,
@@ -260,10 +273,25 @@ export async function revokeStaffGrant(db: Executor, session: Session, input: un
   );
 }
 
-export async function listStaffGrants(db: Executor, session: Session) {
+export const staffGrantsPageSize = 25;
+
+export async function listStaffGrants(
+  db: Executor,
+  session: Session,
+  input: { page?: number; search?: string } = {},
+) {
   await liveManager(db, session);
   if (!(await can(db, session.actor, "access.grant"))) throw new AppError("forbidden");
-  return db
+  const { page, search } = parse(
+    z.object({
+      page: z.number().int().min(1).max(10000).default(1),
+      search: z.string().trim().max(254).default(""),
+    }),
+    input,
+  );
+  // Treat names and addresses literally; '%' and '_' in an identity are not wildcards.
+  const pattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+  const rows = await db
     .select({ grant: grants, name: principals.displayName, email: principals.email })
     .from(grants)
     .innerJoin(principals, eq(principals.id, grants.principalId))
@@ -272,9 +300,20 @@ export async function listStaffGrants(db: Executor, session: Session) {
         eq(principals.kind, "staff"),
         isNull(grants.revokedAt),
         or(isNull(grants.expiresAt), gt(grants.expiresAt, new Date())),
+        search
+          ? or(ilike(principals.displayName, pattern), ilike(principals.email, pattern))
+          : undefined,
       ),
     )
-    .orderBy(principals.displayName);
+    .orderBy(asc(principals.displayName), asc(principals.id), asc(grants.id))
+    .limit(staffGrantsPageSize + 1)
+    .offset((page - 1) * staffGrantsPageSize);
+  return {
+    rows: rows.slice(0, staffGrantsPageSize),
+    page,
+    hasMore: rows.length > staffGrantsPageSize,
+    search,
+  };
 }
 
 /**
