@@ -22,10 +22,10 @@ try {
     .set({ title: "Synthetic buyer deal" })
     .where(eq(schema.cases.id, f.record.id));
   const listing = await db.transaction(async (tx) => {
-    // The publication helper's local counter restarts in each seed process. Serialize its
-    // temporary reference and replace it with a database-issued reference before commit.
+    // Share the browser seeds' lock: the publication helper's temporary references
+    // restart in each process and must be replaced before another fixture uses them.
     await tx.execute(
-      querySql`select pg_advisory_xact_lock(hashtext('workspace_ui_publication_fixture'))`,
+      querySql`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))`,
     );
     const prepared = await createListingFixture(tx, {
       reviewerId: f.staff.id,
@@ -37,10 +37,13 @@ try {
       .where(eq(schema.properties.id, prepared.propertyId));
     const [nextListing] = await tx
       .select({
-        next: querySql<number>`coalesce(max(substring(${schema.listings.reference} from '^MS-([0-9]+)$')::integer), 70000) + 1`,
+        next: querySql<string>`(coalesce(max(substring(${schema.listings.reference} from '^MS-([0-9]+)$')::numeric), 70000) + 1)::text`,
       })
       .from(schema.listings);
-    const reference = `MS-${String(nextListing?.next ?? 70002).padStart(5, "0")}`;
+    // Other fixtures use large numeric references. Keep the exact decimal string throughout.
+    if (!nextListing?.next || !/^[0-9]+$/.test(nextListing.next))
+      throw new Error("Synthetic listing reference allocation failed");
+    const reference = `MS-${nextListing.next.padStart(5, "0")}`;
     await tx
       .update(schema.listings)
       .set({ reference })
