@@ -22,6 +22,22 @@ it("identifies the observed cancelled Next prefetch only during its explicit dep
   expect(isDepartingWorkspacePrefetch(prefetch, departing + "?other=1", origin)).toBe(false);
 });
 
+it("accepts the observed macOS abort spelling with the same navigation and prefetch boundaries", () => {
+  const cancelled = { ...prefetch, error: "cancelled" };
+  expect(isDepartingWorkspacePrefetch(cancelled, departing, origin)).toBe(true);
+  expect(isDepartingWorkspacePrefetch(cancelled, null, origin)).toBe(false);
+  expect(
+    isDepartingWorkspacePrefetch({ ...cancelled, prefetch: undefined }, departing, origin),
+  ).toBe(false);
+  expect(
+    isDepartingWorkspacePrefetch(
+      { ...prefetch, error: "request cancelled unexpectedly" },
+      departing,
+      origin,
+    ),
+  ).toBe(false);
+});
+
 it.each<[string, Partial<WorkspacePrefetchFailure>]>([
   ["active navigation", { resourceType: "document" }],
   ["ordinary fetch", { prefetch: undefined }],

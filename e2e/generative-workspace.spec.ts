@@ -81,7 +81,7 @@ const browserDiagnostics = new WeakMap<
   {
     errors: string[];
     console: string[];
-    failedRequests: string[];
+    failedRequests: (WorkspacePrefetchFailure & { departingPage: string | null })[];
     providerRequests: string[];
     disabledScripts: string[];
     cancelledPrefetches: WorkspacePrefetchFailure[];
@@ -92,7 +92,7 @@ test.beforeEach(async ({ page }, testInfo) => {
   const entries = {
     errors: [] as string[],
     console: [] as string[],
-    failedRequests: [] as string[],
+    failedRequests: [] as (WorkspacePrefetchFailure & { departingPage: string | null })[],
     providerRequests: [] as string[],
     disabledScripts: [] as string[],
     cancelledPrefetches: [] as WorkspacePrefetchFailure[],
@@ -126,7 +126,7 @@ test.beforeEach(async ({ page }, testInfo) => {
       error === "csp" &&
       request.url().startsWith(origins.staff + "/_next/static/");
     if (nativeDisabledScript) entries.disabledScripts.push(request.url());
-    else entries.failedRequests.push(request.url() + " " + error);
+    else entries.failedRequests.push({ ...failure, departingPage: entries.departingPage });
   });
   page.on("request", (request) => {
     if (/openrouter|api\.openai|api\.anthropic/.test(request.url()))
@@ -144,10 +144,10 @@ test.afterEach(async ({ page }, testInfo) => {
   expect(entries?.providerRequests).toEqual([]);
   expect(entries?.console).toEqual([]);
 });
-async function openWorkspaceLocale(page: Page, href: string) {
+async function openWorkspacePage(page: Page, href: string) {
   const entries = browserDiagnostics.get(page);
   if (!entries) throw new Error("Missing workspace browser diagnostics");
-  // These deliberate locale changes may cancel Next's optional link prefetches.
+  // These deliberate page changes may cancel Next's optional link prefetches.
   // The exception ends with this navigation and requires its exact departing referer.
   entries.departingPage = page.url() !== href ? page.url() : null;
   try {
@@ -449,6 +449,8 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(
         original.getByRole("heading", { name: copy.revised, exact: true }),
       ).toBeVisible();
+      // This earlier native receipt also streams shell assets before its link is usable.
+      if (!javaScriptEnabled) await page.waitForLoadState("load");
       await original.getByRole("link", { name: copy.open, exact: true }).click();
       const artifact = page.locator("article").filter({
         has: page.getByRole("heading", {
@@ -525,7 +527,7 @@ for (const javaScriptEnabled of [true, false]) {
       await page.setViewportSize({ width: 390, height: 844 });
       for (const locale of ["bg", "ru", "en"]) {
         const labels = workspaceCopy(locale);
-        await openWorkspaceLocale(page, workspace(locale, f.id));
+        await openWorkspacePage(page, workspace(locale, f.id));
         await expect(
           page.getByRole("heading", { name: labels.sources, exact: true }),
         ).toBeVisible();
@@ -679,7 +681,8 @@ test("F29 source changes retain a dirty correction and an unconfirmed receipt ne
   );
   expect(await page.getByRole("button", { name: copy.createTask, exact: true }).count()).toBe(0);
   const key = "unconfirmed-original-operation";
-  await page.goto(
+  await openWorkspacePage(
+    page,
     workspace("en", f.id) + "?" + new URLSearchParams({ operation: key, command: "message" }),
   );
   await expect(page.getByText(copy.notFoundOperation, { exact: true })).toBeVisible();

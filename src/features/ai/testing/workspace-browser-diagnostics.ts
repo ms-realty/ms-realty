@@ -17,7 +17,7 @@ export function isDepartingWorkspacePrefetch(
   if (
     !departingPage ||
     request.referer !== departingPage ||
-    request.error !== "Load request cancelled" ||
+    (request.error !== "Load request cancelled" && request.error !== "cancelled") ||
     request.method !== "GET" ||
     request.resourceType !== "fetch" ||
     request.rsc !== "1" ||
