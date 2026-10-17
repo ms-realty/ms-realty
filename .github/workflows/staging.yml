@@ -46,7 +46,8 @@ jobs:
     # in staging; an independent fingerprint and staging-only sentinel reject silent fallback.
     environment: staging
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Build/tests plus bounded waits for container start (3 min), rollouts (10 min) and migration (10 min).
+    timeout-minutes: 75
     permissions:
       contents: read
       id-token: write
@@ -95,7 +96,7 @@ jobs:
           npm ci --prefix gateway --ignore-scripts --no-audit --no-fund
           node scripts/staging-types.mjs
           npm run test:unit -- gateway/worker.test.ts gateway/access.test.ts gateway/legacy-media.test.ts gateway/runtime-env.test.ts proxy.test.ts src/server/config/origin.test.ts src/server/jobs/cloudflare-email.test.ts
-          node --test scripts/staging-contract.test.mjs scripts/runtime-entry.test.mjs scripts/staging-rollout-proof.test.mjs scripts/staging-connectivity.test.mjs
+          node --test scripts/staging-contract.test.mjs scripts/runtime-entry.test.mjs scripts/staging-rollout-proof.test.mjs scripts/staging-connectivity.test.mjs scripts/staging-settle.test.mjs
         env:
           CI: ""
       - name: Build once and push staging image

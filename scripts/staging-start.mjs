@@ -2,7 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 import { readStagingInputs, validateStaging } from "./staging-config.mjs";
 import { observeRuntimeRollout } from "./staging-rollout-proof.mjs";
-import { settle } from "./staging-settle.mjs";
+import { permanent, settle } from "./staging-settle.mjs";
 
 try {
   const { input, artifacts } = await readStagingInputs(process.argv[2]);
@@ -23,7 +23,7 @@ try {
       signal: AbortSignal.timeout(20000),
     });
     if (!response.ok || !response.headers.get("x-robots-tag")?.includes("noindex"))
-      throw new Error(
+      throw (response.status === 401 || response.status === 403 ? permanent : Error)(
         `Protected noindex staging control endpoint unavailable (HTTP ${response.status})`,
       );
     return response.json();

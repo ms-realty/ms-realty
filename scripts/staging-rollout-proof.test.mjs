@@ -184,6 +184,37 @@ const failures = {
     f.apps[0].active_rollout_id = "rollout-next";
     f.documents.set(`${f.base}/app-web/rollouts`, { result: [] });
   },
+  "pending rollout to a later version without an active ID": (f) => {
+    f.documents.get(`${f.base}/app-web/rollouts`).result.push({
+      id: "rollout-next",
+      status: "progressing",
+      current_version: 2,
+      target_version: 3,
+      target_configuration: { image: "old:latest" },
+      last_updated_at: new Date(Date.now() - 1_000).toISOString(),
+    });
+  },
+  "new application with only a progressing rollout": (f) => {
+    f.apps[1].version = 1;
+    f.documents.set(`${f.base}/app-worker/rollouts`, {
+      result: [
+        {
+          id: "rollout-worker-next",
+          status: "progressing",
+          current_version: 1,
+          target_version: 2,
+          target_configuration: { image: "old:latest" },
+          last_updated_at: new Date(Date.now() - 1_000).toISOString(),
+        },
+      ],
+    });
+  },
+  "reverted rollout to the current version": (f) => {
+    f.documents.get(`${f.base}/app-migrator/rollouts`).result[0].status = "reverted";
+  },
+  "replaced rollout to the current version": (f) => {
+    f.documents.get(`${f.base}/app-web/rollouts`).result[0].status = "replaced";
+  },
   "wrong rollout version": (f) => {
     f.documents.get(`${f.base}/app-web/rollouts`).result[0].target_version = 1;
   },

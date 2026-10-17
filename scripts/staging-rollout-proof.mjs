@@ -180,6 +180,17 @@ export async function observeRuntimeRollout(
     // completes. The rollout list carries no pagination metadata.
     const rollouts = (await read(`${appPath}/rollouts`)).result;
     demand(Array.isArray(rollouts) && rollouts.every(object), `${role} rollout list shape`);
+    // active_rollout_id alone cannot reveal an unfinished update, so no rollout may be pending,
+    // still progressing or aimed past the version the application reports.
+    demand(
+      rollouts.every(
+        (candidate) =>
+          Number.isInteger(candidate.target_version) &&
+          candidate.target_version <= app.version &&
+          !["pending", "progressing"].includes(candidate.status),
+      ),
+      `${role} no unfinished or later rollout`,
+    );
     const current = rollouts.filter((candidate) => candidate.target_version === app.version);
     let rollout = null;
     if (current.length === 0)
