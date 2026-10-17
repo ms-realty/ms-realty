@@ -33,8 +33,9 @@ jobs:
         npm run openapi:generate
         npm run release:schemas
         git diff --exit-code -- docs/api/openapi.json release/schemas
+        TEST_PRIVATE_TLS_FIXTURE=true npx vitest run --project integration src/db/transport-tls.int.test.ts src/db/connectivity-tls.int.test.ts src/server/recovery/startup-tls.int.test.ts --maxWorkers=1
         node --test scripts/ci-clamav.test.mjs
-        node scripts/ci-clamav.mjs npm run test:integration -- src/server/files/workflow.int.test.ts
+        node scripts/ci-clamav.mjs npm run test:integration -- src/server/files/workflow.int.test.ts src/server/documents/requests.int.test.ts
 
   browsers:
     name: Browser / ${{ matrix.profile }}
@@ -75,6 +76,12 @@ jobs:
         run: |
           E2E_TODAY_UNAVAILABLE=1 npx playwright test e2e/today-unavailable.spec.ts --workers=1 --project=chromium-desktop
           E2E_O03_UNAVAILABLE=1 npx playwright test e2e/inquiry-case-link.spec.ts --workers=1 --project=chromium-desktop --grep "a failed candidate read"
+      - name: Verify analytics cannot read a shared-link token
+        env:
+          GTM_CONTAINER_ID: GTM-SYNTHETIC
+          BROWSER_PROFILE: ${{ matrix.profile }}
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/${{ matrix.profile }}-analytics
+        run: npx playwright test e2e/shared-shortlist.spec.ts --project="$BROWSER_PROFILE" --grep "a consented recipient page mounts no analytics" --workers=1 --retries=0
       - name: Preserve browser reports and failure traces
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

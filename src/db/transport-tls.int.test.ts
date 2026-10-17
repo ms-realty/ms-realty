@@ -40,7 +40,14 @@ describe.skipIf(process.env.TEST_PRIVATE_TLS_FIXTURE !== "true")(
     it("pg and pg-boss establish TLS and complete an isolated queue round trip", async () => {
       const options = databaseTransport(fixture.url, fixture.env).pgOptions;
       const client = new pg.Client(options);
-      const boss = new PgBoss({ ...options, max: 1, supervise: false, schedule: false });
+      const queueApplication = "msr_private_tls_queue";
+      const boss = new PgBoss({
+        ...options,
+        application_name: queueApplication,
+        max: 1,
+        supervise: false,
+        schedule: false,
+      });
       boss.on("error", () => {});
       try {
         await client.connect();
@@ -56,7 +63,8 @@ describe.skipIf(process.env.TEST_PRIVATE_TLS_FIXTURE !== "true")(
         expect(job?.data).toEqual({ purpose: "local TLS fixture" });
         await boss.complete("transport.qualification", job?.id as string);
         const sessions = await client.query(
-          "select s.ssl from pg_stat_activity a join pg_stat_ssl s using (pid) where a.application_name = 'pgboss'",
+          "select s.ssl from pg_stat_activity a join pg_stat_ssl s using (pid) where a.application_name = $1",
+          [queueApplication],
         );
         expect(sessions.rows.length).toBeGreaterThan(0);
         expect(sessions.rows.every((session: { ssl: boolean }) => session.ssl)).toBe(true);

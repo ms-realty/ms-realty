@@ -56,6 +56,8 @@ A recurring WebKit shortlist page error was traced to the creator fixture's imme
 
 CI now gives each browser profile its own runner, disposable database, real scanner and full retry policy. Visual comparisons and the delivery-container smoke check run independently of source and browser jobs. The delivery job installs locked host dependencies and starts its disposable PostgreSQL before mounting the visual container. Failure reports/traces are retained. Both `ci / gate` and its legacy `npm run check` alias require every source, browser and delivery job to succeed; failure, cancellation or skipped jobs cannot satisfy the gate.
 
+Dedicated required checks also exercise the ten owned PostgreSQL TLS cases, both file-workflow and requested-document real-scanner paths, and analytics exclusion for shared-link tokens in all three browser profiles. Local TLS checks passed after giving the queue fixture an explicit connection name; the previous assertion relied on a pg-boss default that now includes an instance suffix. The TLS fixtures verify driver, queue, identity, trusted-CA/hostname and recovery behavior on disposable local PostgreSQL. They do not qualify the live protected staging path. Analytics checks use a synthetic tag ID with intercepted requests and do not qualify real tag-container contents.
+
 The automatic Jev check was unavailable with `daily_budget_reached`. Configured rules and credential patterns were reviewed locally; this is not an automatic Jev pass.
 
 ## Remaining acceptance boundaries
