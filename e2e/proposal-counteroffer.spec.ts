@@ -281,6 +281,19 @@ test("C08 native lost acknowledgement retains the exact draft after the committe
     await form.getByRole("button", { name: counterofferCopy("en").submit, exact: true }).click();
     const copy = caseCopy("en");
     await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
+    await info.attach("native-result-position", {
+      body: JSON.stringify(
+        await form.evaluate((node) => ({
+          id: node.id,
+          hash: location.hash,
+          scrollY,
+          top: node.getBoundingClientRect().top,
+        })),
+      ),
+      contentType: "application/json",
+    });
+    await client.screenshot({ path: info.outputPath("lost-acknowledgement-viewport.png") });
+    await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeInViewport();
     await expect(client.getByText(proposalCopy("en").notCurrent, { exact: true })).toBeVisible();
     await expect(disclosure).toHaveAttribute("open", "");
     await expect(form.locator('input[name="amount"]')).toHaveValue("119,000.03");
@@ -314,7 +327,6 @@ test("C08 native lost acknowledgement retains the exact draft after the committe
       path: info.outputPath("lost-acknowledgement-draft.png"),
       fullPage: true,
     });
-    await client.screenshot({ path: info.outputPath("lost-acknowledgement-viewport.png") });
     await form.getByRole("link", { name: copy.status, exact: true }).click();
     await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
     await expect(client.getByRole("link", { name: copy.checkAgain, exact: true })).toHaveAttribute(

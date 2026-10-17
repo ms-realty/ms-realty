@@ -250,6 +250,9 @@ function FormSession<V extends FormValues>({
   // Fragments never change the route or reach the server as query data. This is only
   // native UI recovery identity; signed operation scope/version checks remain separate.
   const formPermalink = nativeFormPermalink(permalink, prefix, nativeIdentity);
+  // The native response returns to this fragment. Keep a real target so result feedback
+  // is in view even when hydration never runs.
+  const nativeTargetId = decodeURIComponent(formPermalink.slice(formPermalink.indexOf("#") + 1));
   const [state, formAction, pending] = useActionState(action, initialState, formPermalink);
   const [draft, setDraft] = useState({ responseId: state.responseId, values: state.values });
   const inFlight = useRef(false);
@@ -424,7 +427,7 @@ function FormSession<V extends FormValues>({
   return disclose(
     <form
       ref={nativeForm}
-      id={formId}
+      id={formId ?? nativeTargetId}
       action={formAction}
       noValidate
       aria-busy={pending}
