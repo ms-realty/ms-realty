@@ -91,7 +91,12 @@ async function contextChoices(session: Session, q: string): Promise<WorkspaceCho
         listingIds: kind === "listing" ? [id] : [],
       }),
       null,
-    );
+    ).catch((error: unknown) => {
+      // Inventory includes drafts and withdrawn offers; they are not approved research choices.
+      if (kind === "listing" && error instanceof AppError && error.code === "listing_unavailable")
+        return null;
+      throw error;
+    });
     const source = context?.sources.find((item) => item.key === kind + ":" + id);
     if (!source) return null;
     return {

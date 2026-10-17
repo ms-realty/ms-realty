@@ -1,12 +1,16 @@
 // O32 / F29: synthetic UI and ordinary commands, separate from live model qualification.
 import { execFileSync } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { type BrowserContext, expect, type Page, type TestInfo, test } from "@playwright/test";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import {
+  isDepartingWorkspacePrefetch,
+  type WorkspacePrefetchFailure,
+} from "../src/features/ai/testing/workspace-browser-diagnostics";
 import { workspaceCopy } from "../src/features/ai/workspace-copy";
 import { hostUrl, origins } from "./hosts";
 
@@ -80,6 +84,8 @@ const browserDiagnostics = new WeakMap<
     failedRequests: string[];
     providerRequests: string[];
     disabledScripts: string[];
+    cancelledPrefetches: WorkspacePrefetchFailure[];
+    departingPage: string | null;
   }
 >();
 test.beforeEach(async ({ page }, testInfo) => {
@@ -89,6 +95,8 @@ test.beforeEach(async ({ page }, testInfo) => {
     failedRequests: [] as string[],
     providerRequests: [] as string[],
     disabledScripts: [] as string[],
+    cancelledPrefetches: [] as WorkspacePrefetchFailure[],
+    departingPage: null as string | null,
   };
   browserDiagnostics.set(page, entries);
   page.on("pageerror", (error) => entries.errors.push(error.message));
@@ -98,6 +106,20 @@ test.beforeEach(async ({ page }, testInfo) => {
   page.on("requestfailed", (request) => {
     const error = request.failure()?.errorText;
     if (error?.includes("ERR_ABORTED")) return;
+    const headers = request.headers();
+    const failure = {
+      error,
+      method: request.method(),
+      resourceType: request.resourceType(),
+      url: request.url(),
+      referer: headers.referer,
+      rsc: headers.rsc,
+      prefetch: headers["next-router-prefetch"],
+    };
+    if (isDepartingWorkspacePrefetch(failure, entries.departingPage, origins.staff)) {
+      entries.cancelledPrefetches.push(failure);
+      return;
+    }
     const nativeDisabledScript =
       testInfo.titlePath.some((part) => part.includes("JavaScript false")) &&
       request.resourceType() === "script" &&
@@ -122,6 +144,18 @@ test.afterEach(async ({ page }, testInfo) => {
   expect(entries?.providerRequests).toEqual([]);
   expect(entries?.console).toEqual([]);
 });
+async function openWorkspaceLocale(page: Page, href: string) {
+  const entries = browserDiagnostics.get(page);
+  if (!entries) throw new Error("Missing workspace browser diagnostics");
+  // These deliberate locale changes may cancel Next's optional link prefetches.
+  // The exception ends with this navigation and requires its exact departing referer.
+  entries.departingPage = page.url() !== href ? page.url() : null;
+  try {
+    return await page.goto(href);
+  } finally {
+    entries.departingPage = null;
+  }
+}
 async function capture(page: Page, testInfo: TestInfo, name: string) {
   if (
     testInfo.project.name !== "chromium-desktop" ||
@@ -156,9 +190,31 @@ for (const javaScriptEnabled of [true, false]) {
     }, testInfo) => {
       const f = await fixture(context),
         copy = workspaceCopy("en");
-      await page.goto(hostUrl("staff", "/en/operations/assistance/research"));
+      const [approved] = await db
+        .select({ propertyId: schema.listings.propertyId })
+        .from(schema.listings)
+        .where(eq(schema.listings.id, f.listingId));
+      if (!approved) throw new Error("Missing approved listing fixture");
+      const unavailableReferences = [0, 1].map(() => `MS-${randomBytes(6).readUIntBE(0, 6)}`);
+      await db.insert(schema.listings).values(
+        unavailableReferences.map((reference, index) => ({
+          reference,
+          propertyId: approved.propertyId,
+          purpose: "sale" as const,
+          commercialState:
+            index === 0 ? ("confirmation_required" as const) : ("withdrawn" as const),
+          responsibleBrokerId: f.actorId,
+        })),
+      );
+      const entry = await page.goto(hostUrl("staff", "/en/operations/assistance/research"));
+      expect(entry?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: copy.title })).toBeVisible();
       await expect(page.getByText(copy.disabled)).toBeVisible();
+      await expect(
+        page.getByRole("checkbox", { name: f.listingReference, exact: true }),
+      ).toBeVisible();
+      for (const reference of unavailableReferences)
+        await expect(page.getByRole("checkbox", { name: reference, exact: true })).toHaveCount(0);
       expect(await page.locator('[name="task"]').count()).toBe(0);
       const id = new URL(page.url()).searchParams.get("draft");
       expect(id).toBeTruthy();
@@ -429,6 +485,9 @@ for (const javaScriptEnabled of [true, false]) {
           "Verify street noise using approved evidence. Retain uncertainty. Do not send messages.",
       });
       await capture(page, testInfo, "reviewed-task");
+      // A native receipt can paint before its document and shell assets finish loading.
+      // Complete that load before following its task link, retaining strict request checks.
+      if (!javaScriptEnabled) await page.waitForLoadState("load");
       await artifact
         .getByRole("region", { name: copy.recordSaved, exact: true })
         .getByRole("link", { name: copy.openRecord, exact: true })
@@ -466,7 +525,7 @@ for (const javaScriptEnabled of [true, false]) {
       await page.setViewportSize({ width: 390, height: 844 });
       for (const locale of ["bg", "ru", "en"]) {
         const labels = workspaceCopy(locale);
-        await page.goto(workspace(locale, f.id));
+        await openWorkspaceLocale(page, workspace(locale, f.id));
         await expect(
           page.getByRole("heading", { name: labels.sources, exact: true }),
         ).toBeVisible();
