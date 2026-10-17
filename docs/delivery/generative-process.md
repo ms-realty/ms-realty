@@ -39,7 +39,11 @@ URL are shown from deterministic typed fact cards. Generated artifact narratives
 those cards; they cannot remix the source digits into a new listing statement. Calculated
 values keep a complete reproducible expression and separate derived-source label; they do
 not become listing price authority. Exact prefixed owner requirements remain distinct from
-property facts. Syntactic, quote and numeric validation is not a semantic quality guarantee;
+property facts. A person's saved buyer requirements and preferences are reviewed inputs,
+with an ordinary revision receipt; model-generated needs still require source evidence.
+These inputs never alter the approved property fact cards. Unsupported edits return a
+correctable, not-applied validation result while retaining entered text.
+Syntactic, quote and numeric validation is not a semantic quality guarantee;
 factual judgment and public language remain subject to review.
 
 ## Activation and limits

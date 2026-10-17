@@ -256,8 +256,9 @@ export async function workspaceAction(
         kind: "validation",
         code: "VALIDATION_FAILED",
         message: copy.invalid,
-        fieldErrors:
-          mode === "create"
+        fieldErrors: result.error.fieldErrors?.body?.includes("workspace_evidence_invalid")
+          ? { body: [copy.evidenceInvalid] }
+          : mode === "create"
             ? {
                 goal: [copy.required],
                 constraints: [copy.constraintsHelp],

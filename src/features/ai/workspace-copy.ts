@@ -112,6 +112,10 @@ const en = {
   edit: "Edit this draft",
   draftTitle: "Draft title",
   body: "Draft content",
+  bodyHelp:
+    "Use the text for reasons and next steps. Listing numbers come from approved fact cards. Buyer needs are separate person-entered requirements and preferences.",
+  evidenceInvalid:
+    "Check the title and text against the current sources. Listing numbers belong in the fact cards. Prepare research again if the cited evidence has changed.",
   requirements: "Buyer requirements",
   preferences: "Buyer preferences",
   revise: "Save a new draft version",
@@ -290,6 +294,10 @@ const bg: WorkspaceCopy = {
   edit: "Редактиране на черновата",
   draftTitle: "Заглавие на черновата",
   body: "Съдържание на черновата",
+  bodyHelp:
+    "В текста описвайте причините и следващите стъпки. Числата за имотите идват от одобрените карти с факти. Нуждите на купувача са отделни изисквания и предпочитания, въведени от човек.",
+  evidenceInvalid:
+    "Проверете заглавието и текста спрямо текущите източници. Числата за имотите са в картите с факти. Подгответе ново проучване, ако цитираните доказателства са променени.",
   requirements: "Изисквания на купувача",
   preferences: "Предпочитания на купувача",
   revise: "Запазване на нова версия",
@@ -464,6 +472,10 @@ const ru: WorkspaceCopy = {
   edit: "Редактировать черновик",
   draftTitle: "Заголовок черновика",
   body: "Содержание черновика",
+  bodyHelp:
+    "В тексте указывайте причины и следующие шаги. Числовые данные об объектах берутся из одобренных карточек фактов. Потребности покупателя — отдельные требования и предпочтения, введённые человеком.",
+  evidenceInvalid:
+    "Проверьте заголовок и текст по текущим источникам. Числовые данные об объектах находятся в карточках фактов. Подготовьте новое исследование, если цитируемые доказательства изменились.",
   requirements: "Требования покупателя",
   preferences: "Предпочтения покупателя",
   revise: "Сохранить новую версию",

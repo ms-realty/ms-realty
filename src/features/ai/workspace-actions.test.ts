@@ -4,6 +4,7 @@ import type { HandlerContext } from "@/server/http/next";
 import { formFields } from "@/ui/form/contract";
 import { initialFormState } from "@/ui/form/server";
 import { workspaceAction } from "./workspace-actions";
+import { workspaceCopy } from "./workspace-copy";
 import {
   emptyWorkspaceValues,
   type WorkspaceMode,
@@ -249,5 +250,27 @@ it.each(["message", "cancel"] as const)(
       expectedGeneration: 4,
     });
     expect(mocks.read).not.toHaveBeenCalled();
+  },
+);
+
+it.each(["bg", "ru", "en"] as const)(
+  "keeps an evidence-invalid human edit recoverable with helpful %s copy",
+  async (locale) => {
+    const values = { title: "Retain the edited title", body: "The listing price is 1 EUR." };
+    const { initial, data } = submission("revise", values);
+    mocks.revise.mockRejectedValueOnce(
+      new AppError("validation_failed", {
+        fieldErrors: { body: ["workspace_evidence_invalid"] },
+      }),
+    );
+    const result = await workspaceAction(locale, id, "revise", artifactId, [], null, initial, data);
+    expect(result.values).toMatchObject(values);
+    expect(result.outcome).toMatchObject({
+      kind: "validation",
+      fieldErrors: { body: [workspaceCopy(locale).evidenceInvalid] },
+    });
+    expect(result.operationId).not.toBe(initial.operationId);
+    expect(mocks.materialize).not.toHaveBeenCalled();
+    expect(mocks.research).not.toHaveBeenCalled();
   },
 );

@@ -23,8 +23,25 @@ TEST_DATABASE_URL=postgres://postgres@127.0.0.1:55447/postgres \
   --output output/generative-process-evaluation
 ```
 
-The harness retains `evaluation-summary.json`, the full Vitest JSON, stdout/stderr and
-`workspace-offline-metrics.json`. Preserve failures and their exit codes. A metrics file with
+The harness retains `evaluation-summary.json`, the full Vitest JSON, stdout/stderr,
+`workspace-offline-metrics.json`, `broker-quality-packet.json` and `REVIEW-PACKET.md`.
+The review packet is collected from the actual successful synthetic buyer job, after its
+database and receipt assertions pass. It contains minimized authorized source snapshots/pins,
+saved clarification/correction/conversation and plans, tool checkpoints, actual artifact
+versions/citations, successful person commands/receipts and task replay, independently read
+task/Case/Brief/manual-handoff records, forbidden-effect deltas and persisted usage/cost.
+Raw fixture accounts/contact records, session material and credentials are excluded. Opaque
+synthetic actor/record identifiers remain to reconcile citations and receipts. The ordinary
+staff commands were invoked by the test harness; no real broker or live model authored them.
+Adversarial command probes remain in the test report rather than the quality packet's
+successful workflow sequence.
+
+`REVIEW-PACKET.md` is the reviewer entrypoint. It describes anonymization, a separately
+obtained experienced-broker baseline, randomized blind comparison and the rubric. Human
+scores and the expert baseline remain null/unrun. A missing or incomplete packet is omitted
+and makes the evaluator fail even when the behavioral suite passes; no replacement example
+or invented expert result is emitted. A valid packet from a successful job cannot override
+other failing cases. Preserve failures and their exit codes. A metrics file with
 a completed journey cannot override a failed test report. Reuse an evidence run until code,
 configuration, corpus or an unresolved concern changes the required checks.
 
@@ -63,6 +80,7 @@ qualified by this local test.
 | Interrupted tool with changed preconditions | After source or policy drift, an expired saved read-only/preparation tool is abandoned, its original run becomes stale at observed known cost, and an explicitly reviewed fresh run receives a new identity. No unknown-provider acknowledgement, duplicate prior inference or abandoned artifact is introduced. |
 | Resource limits | Existing assistance and workspace runs share actor concurrency and daily charge reservations; step, input, per-response output, aggregate token, elapsed and cost bounds prevent additional unbounded work |
 | Same operation and versions | Original operation readback creates no command; an identical materialization replay returns the saved outcome; superseded/stale artifacts cannot create effects |
+| Person proposal edits | Invalid source-bound text returns a known 422/not-applied body error without superseding or mutating the artifact. A new budget entered in person-edited buyer requirements persists to the real Brief; the same unseen model budget is rejected. Numeric property-title/body claims remain strict even on a trusted person revision. |
 
 The forbidden-effect baseline is recorded after fixture setup and read independently after
 execution. It includes messages, external-action records, provider send attempts, appointments, grants, current

@@ -120,11 +120,19 @@ function Fields({
           required={name !== "constraints" && name !== "preferences"}
           rows={rows}
           maxLength={maxLength}
-          aria-describedby={help ? binding.id + "-help" : undefined}
+          aria-describedby={
+            [help ? binding.id + "-help" : null, binding.error ? binding.id + "-error" : null]
+              .filter(Boolean)
+              .join(" ") || undefined
+          }
           aria-invalid={Boolean(binding.error) || undefined}
           className={textareaClass}
         />
-        {binding.error ? <p className="text-compact text-error">{binding.error}</p> : null}
+        {binding.error ? (
+          <p id={binding.id + "-error"} className="text-compact text-error">
+            {binding.error}
+          </p>
+        ) : null}
       </div>
     );
   };
@@ -177,7 +185,7 @@ function Fields({
     return (
       <>
         {text("title", copy.draftTitle, undefined, 180, 2)}
-        {text("body", copy.body, undefined, 6000, 8)}
+        {text("body", copy.body, copy.bodyHelp, 6000, 8)}
         {props.buyer ? (
           <>
             {text("requirements", copy.requirements, undefined, 4000)}

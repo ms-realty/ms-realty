@@ -7,6 +7,7 @@ import {
   appointments,
   assistanceRuns,
   briefRevisions,
+  cases,
   currentPublications,
   externalActions,
   generativeArtifacts,
@@ -92,6 +93,7 @@ type Fixture = Awaited<ReturnType<typeof caseFixture>>;
 type PlanTurn = NonNullable<WorkspaceJobDependencies["planTurn"]>;
 const empty: ContextSelection = { caseId: null, inquiryId: null, listingIds: [] };
 const journeyMetrics: Record<string, unknown>[] = [];
+let buyerQualityPacket: Record<string, unknown> | null = null;
 
 beforeAll(async () => {
   t = await createTestDatabase();
@@ -118,6 +120,11 @@ afterAll(async () => {
         null,
         2,
       )}\n`,
+    );
+  if (process.env.GENERATIVE_QUALITY_PACKET_OUTPUT && buyerQualityPacket)
+    await writeFile(
+      process.env.GENERATIVE_QUALITY_PACKET_OUTPUT,
+      `${JSON.stringify(buyerQualityPacket, null, 2)}\n`,
     );
 });
 
@@ -398,7 +405,7 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
     });
     expect(waiting.checkpoints[4]?.toolResult).toMatchObject({ value: 1764.7058823529412 });
     expect(await forbiddenEffects()).toEqual(beforeEffects);
-    const corrected = await appendWorkspaceMessage(t.db, f.staff.session, {
+    const correctionInput = {
       id: w.id,
       expectedVersion: waiting.workspace.version,
       operationId: randomUUID(),
@@ -407,10 +414,13 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
         "Quiet is more important than proximity to the centre.",
         "No customer contact without person review.",
       ],
-    });
+    };
+    const corrected = await appendWorkspaceMessage(t.db, f.staff.session, correctionInput);
     expect(corrected.outcome.state).toBe("idle");
     const resumed = await start(f, w.id);
+    const resumedInputs: PlannerInput[] = [];
     const revise: PlanTurn = async (input) => {
+      resumedInputs.push(input);
       expect(
         input.conversation.some(
           (item) => item.role === "user" && item.text.includes("Quiet comes first"),
@@ -458,14 +468,16 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
     const task = ready.artifacts.find((item) => item.proposal.kind === "task");
     const buyer = ready.artifacts.find((item) => item.proposal.kind === "buyer_handoff");
     if (!task || !buyer) throw new Error("Expected complete editable deliverables");
-    const edited = await reviseWorkspaceArtifact(t.db, f.staff.session, {
+    const editInput = {
       sessionId: w.id,
       id: task.id,
       expectedVersion: task.version,
       operationId: randomUUID(),
       proposal: { ...task.proposal, title: "Person-edited quiet-location review" },
-    });
-    expect((await artifacts(w.id)).find((item) => item.id === task.id)?.state).toBe("superseded");
+    };
+    const edited = await reviseWorkspaceArtifact(t.db, f.staff.session, editInput);
+    const editedArtifacts = await artifacts(w.id);
+    expect(editedArtifacts.find((item) => item.id === task.id)?.state).toBe("superseded");
     await expect(
       materializeWorkspaceArtifact(t.db, f.staff.session, {
         sessionId: w.id,
@@ -485,9 +497,8 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
       command: { parent: null, taskType: "general" as const },
     };
     const taskDone = await materializeWorkspaceArtifact(t.db, f.staff.session, taskInput);
-    expect((await materializeWorkspaceArtifact(t.db, f.staff.session, taskInput)).outcome).toEqual(
-      taskDone.outcome,
-    );
+    const taskReplay = await materializeWorkspaceArtifact(t.db, f.staff.session, taskInput);
+    expect(taskReplay.outcome).toEqual(taskDone.outcome);
     await expect(
       materializeWorkspaceArtifact(t.db, f.staff.session, {
         ...taskInput,
@@ -513,14 +524,17 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
       promisedToClient: false,
       completedAt: null,
     });
-    const handoff = await materializeWorkspaceArtifact(t.db, f.staff.session, {
+    const handoffInput = {
       sessionId: w.id,
       id: buyer.id,
       expectedVersion: buyer.version,
       operationId: randomUUID(),
-      reviewed: true,
-      command: { parent: { type: "case", id: f.record.id, expectedVersion: f.record.version } },
-    });
+      reviewed: true as const,
+      command: {
+        parent: { type: "case" as const, id: f.record.id, expectedVersion: f.record.version },
+      },
+    };
+    const handoff = await materializeWorkspaceArtifact(t.db, f.staff.session, handoffInput);
     expect(handoff.outcome.result).toMatchObject({
       type: "case",
       id: f.record.id,
@@ -542,7 +556,8 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
       "Quiet remote working comes first",
     );
     expect((await t.db.select().from(interests)).length).toBe(beforeInterests.length);
-    expect(await forbiddenEffects()).toEqual(beforeEffects);
+    const afterEffects = await forbiddenEffects();
+    expect(afterEffects).toEqual(beforeEffects);
     const readback = await readWorkspaceOperation(
       t.db,
       f.staff.session,
@@ -553,20 +568,269 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
     expect(readback).toMatchObject({ status: "succeeded", resultId: w.id });
     const runs = await t.db.select().from(generativeRuns).where(eq(generativeRuns.sessionId, w.id));
     expect(runs.every((item) => item.actualCostMicros !== null)).toBe(true);
-    journeyMetrics.push({
+    const jobMetrics = {
       task: "incomplete_buyer_goal_to_reviewed_task_and_manual_handoff",
       completion: 1,
       protocolCitationFidelity: traceableCitations.length / observedCitations.length,
       factualQuality: "human_review_pending",
       forbiddenEffects: 0,
       humanInterventions: { clarification: 1, artifactEdit: 1, materialization: 2 },
-      inferenceCalls: inputs.length + 3,
+      inferenceCalls: inputs.length + resumedInputs.length,
       inputTokens: runs.reduce((n, item) => n + item.inputTokens, 0),
       outputTokens: runs.reduce((n, item) => n + item.outputTokens, 0),
       syntheticCostMicros: runs.reduce((n, item) => n + (item.actualCostMicros ?? 0), 0),
       latencyMs: Math.round(performance.now() - started),
       recovery: { operationReplayDuplicatedEffects: 0 },
-    });
+    };
+    journeyMetrics.push(jobMetrics);
+    const originalInput = inputs[0],
+      correctedInput = resumedInputs[0];
+    if (!originalInput || !correctedInput)
+      throw new Error("Actual planner source snapshots missing");
+    const [
+      final,
+      firstCheckpoints,
+      correctedCheckpoints,
+      taskRows,
+      caseRows,
+      actualInterests,
+      commandReceipts,
+    ] = await Promise.all([
+      readWorkspace(t.db, f.staff.session, w.id),
+      checkpoints(firstRun.job.runId),
+      checkpoints(resumed.job.runId),
+      t.db
+        .select({
+          id: tasks.id,
+          title: tasks.title,
+          purpose: tasks.purpose,
+          type: tasks.type,
+          state: tasks.state,
+          ownerId: tasks.ownerId,
+          caseId: tasks.caseId,
+          promisedToClient: tasks.promisedToClient,
+          completedAt: tasks.completedAt,
+          version: tasks.version,
+        })
+        .from(tasks)
+        .where(eq(tasks.id, String(taskDone.outcome.result.id))),
+      t.db
+        .select({
+          id: cases.id,
+          reference: cases.reference,
+          kind: cases.kind,
+          stage: cases.stage,
+          ownerId: cases.ownerId,
+          version: cases.version,
+        })
+        .from(cases)
+        .where(eq(cases.id, f.record.id)),
+      t.db
+        .select({
+          id: interests.id,
+          caseId: interests.caseId,
+          listingId: interests.listingId,
+          state: interests.state,
+        })
+        .from(interests)
+        .where(eq(interests.caseId, f.record.id)),
+      Promise.all([
+        readWorkspaceOperation(t.db, f.staff.session, w.id, w.input.operationId, "create"),
+        readWorkspaceOperation(t.db, f.staff.session, w.id, firstRun.input.operationId, "research"),
+        readWorkspaceOperation(t.db, f.staff.session, w.id, correctionInput.operationId, "message"),
+        readWorkspaceOperation(t.db, f.staff.session, w.id, resumed.input.operationId, "research"),
+        readWorkspaceOperation(
+          t.db,
+          f.staff.session,
+          w.id,
+          editInput.operationId,
+          "artifact.revise",
+        ),
+        readWorkspaceOperation(t.db, f.staff.session, w.id, taskInput.operationId, "materialize"),
+        readWorkspaceOperation(
+          t.db,
+          f.staff.session,
+          w.id,
+          handoffInput.operationId,
+          "materialize",
+        ),
+      ]),
+    ]);
+    const resultingBrief = briefs.find(
+      (row) => row.revisionNumber === Number(handoff.outcome.result.briefRevision),
+    );
+    const savedHandoff = final.artifacts.find((artifact) => artifact.id === buyer.id);
+    expect(commandReceipts).toHaveLength(7);
+    expect(commandReceipts.every((receipt) => receipt?.status === "succeeded")).toBe(true);
+    expect(taskRows).toHaveLength(1);
+    expect(caseRows).toHaveLength(1);
+    expect(resultingBrief).toBeDefined();
+    expect(savedHandoff?.state).toBe("materialized");
+    expect(savedHandoff?.result).toEqual(handoff.outcome.result);
+    if (!resultingBrief || !savedHandoff) throw new Error("Independent resulting records missing");
+    const effectTables = [
+      "messages",
+      "external_actions",
+      "message_attempts",
+      "appointments",
+      "grants",
+      "current_publications",
+      "listing_revisions",
+      "property_fact_revisions",
+    ];
+    const effectReadback = effectTables.map((table, index) => ({
+      table,
+      before: beforeEffects[index],
+      after: afterEffects[index],
+      delta: Number(afterEffects[index]) - Number(beforeEffects[index]),
+    }));
+    expect(effectReadback.every((effect) => effect.delta === 0)).toBe(true);
+    const candidatePacket = {
+      protocol: "broker-quality-packet-v1",
+      status: "ready_for_human_review",
+      mode: "offline_synthetic_model_real_postgres",
+      dataOrigin: "authorized synthetic test fixtures",
+      modelBoundary: "scripted synthetic turns; no live provider called",
+      commandActor: {
+        kind: "staff",
+        id: f.staff.id,
+        provenance:
+          "ordinary commands invoked by the test harness using the authorized synthetic staff session",
+      },
+      qualification: {
+        liveProviderQuality: "unverified",
+        humanScores: null,
+        brokerComparison: "not_run",
+        expertBaseline: null,
+      },
+      scope:
+        "successful buyer workflow and identical replay; adversarial regression probes remain in the test report",
+      request: {
+        goal: originalInput.goal,
+        constraints: originalInput.constraints,
+        locale: originalInput.locale,
+        selection: w.input.selection,
+      },
+      sourceSnapshots: [
+        { stage: "initial_research", runId: firstRun.job.runId, context: originalInput.context },
+        { stage: "clarification", runId: firstRun.job.runId, context: waiting.context },
+        { stage: "after_correction", runId: resumed.job.runId, context: correctedInput.context },
+      ],
+      process: {
+        clarification: {
+          questions: waiting.workspace.questions,
+          plan: waiting.workspace.plan,
+          decisions: waiting.workspace.decisions,
+          conversation: waiting.workspace.conversation,
+        },
+        correction: { input: correctionInput, outcome: corrected.outcome },
+        finalPlan: final.workspace.plan,
+        finalDecisions: final.workspace.decisions,
+        conversation: final.workspace.conversation,
+        checkpoints: [
+          { runId: firstRun.job.runId, saved: firstCheckpoints },
+          { runId: resumed.job.runId, saved: correctedCheckpoints },
+        ],
+      },
+      artifactSnapshots: {
+        beforePersonEdit: ready.artifacts,
+        afterPersonEdit: editedArtifacts,
+        afterMaterialization: final.artifacts,
+      },
+      personCommands: [
+        { command: "workspace.create", input: w.input, receipt: commandReceipts[0] },
+        {
+          command: "workspace.research",
+          input: firstRun.input,
+          result: firstRun.requested,
+          receipt: commandReceipts[1],
+        },
+        {
+          command: "workspace.message",
+          input: correctionInput,
+          result: corrected,
+          receipt: commandReceipts[2],
+        },
+        {
+          command: "workspace.research",
+          input: resumed.input,
+          result: resumed.requested,
+          receipt: commandReceipts[3],
+        },
+        {
+          command: "workspace.artifact.revise",
+          input: editInput,
+          result: edited,
+          receipt: commandReceipts[4],
+        },
+        {
+          command: "workspace.materialize",
+          input: taskInput,
+          result: taskDone,
+          replay: taskReplay,
+          receipt: commandReceipts[5],
+        },
+        {
+          command: "workspace.materialize",
+          input: handoffInput,
+          result: handoff,
+          receipt: commandReceipts[6],
+        },
+      ],
+      independentReadback: {
+        task: taskRows[0],
+        case: caseRows[0],
+        brief: {
+          id: resultingBrief.id,
+          caseId: resultingBrief.caseId,
+          revisionNumber: resultingBrief.revisionNumber,
+          items: resultingBrief.items,
+          criteria: resultingBrief.criteria,
+          authorKind: resultingBrief.authorKind,
+          authorId: resultingBrief.authorId,
+          clientAcknowledgedAt: resultingBrief.clientAcknowledgedAt,
+        },
+        manualHandoff: {
+          artifactId: savedHandoff.id,
+          state: savedHandoff.state,
+          receiptId: savedHandoff.receiptId,
+          materializedById: savedHandoff.materializedById,
+          result: savedHandoff.result,
+        },
+        interests: actualInterests,
+        forbiddenEffects: effectReadback,
+      },
+      usage: {
+        chargeBasis: "synthetic tariff arithmetic, not a provider bill",
+        metrics: jobMetrics,
+        runs: runs.map((run) => ({
+          id: run.id,
+          generation: run.generation,
+          state: run.state,
+          steps: run.steps,
+          inputTokens: run.inputTokens,
+          outputTokens: run.outputTokens,
+          actualCostMicros: run.actualCostMicros,
+          reservedCostMicros: run.reservedCostMicros,
+          observedCostMicros: run.observedCostMicros,
+          policyDigest: run.policyDigest,
+          budget: run.budget,
+          contextDigest: run.contextDigest,
+          contextPins: run.contextPins,
+        })),
+      },
+    };
+    const serializedPacket = JSON.stringify(candidatePacket);
+    for (const excluded of [
+      f.client.email,
+      f.staff.email,
+      '"partyId"',
+      '"contactMethodId"',
+      '"receiptSessionHash"',
+      '"apiKey"',
+    ])
+      expect(serializedPacket).not.toContain(excluded);
+    buyerQualityPacket = candidatePacket;
   });
 
   it("commits jobs transactionally and handles concurrent duplicate plan/tool deliveries once", async () => {
@@ -615,6 +879,156 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
       ...deps,
       planTurn: review,
     });
+  });
+
+  it("rejects invalid person artifact text as a known validation failure without superseding or mutating the draft", async () => {
+    const f = await caseFixture(t.db),
+      w = await create(f),
+      prepared = await prepare(f, w.id);
+    const before = await forbiddenEffects(),
+      original = await artifacts(w.id);
+    const input = {
+      sessionId: w.id,
+      id: prepared.artifact.id,
+      expectedVersion: prepared.artifact.version,
+      operationId: randomUUID(),
+      proposal: { ...prepared.artifact.proposal, body: "The property costs 987654321 EUR." },
+    };
+    await expect(reviseWorkspaceArtifact(t.db, f.staff.session, input)).rejects.toMatchObject({
+      code: "validation_failed",
+      status: 422,
+      outcome: "not_applied",
+      retryable: false,
+      fieldErrors: { body: ["workspace_evidence_invalid"] },
+    });
+    expect(await artifacts(w.id)).toEqual(original);
+    expect(
+      (
+        await readWorkspaceOperation(
+          t.db,
+          f.staff.session,
+          w.id,
+          input.operationId,
+          "artifact.revise",
+        )
+      )?.status,
+    ).toBe("failed");
+    expect(await forbiddenEffects()).toEqual(before);
+  });
+
+  it("accepts a person's new numerical buyer requirement into the actual Brief while the same unseen model budget stays forbidden", async () => {
+    const f = await caseFixture(t.db);
+    const listing = await createListingFixture(t.db, {
+      reviewerId: f.staff.id,
+      price: { state: "known", value: eur(120000) },
+    });
+    await publishForTest(t.db, f.staff.actor, listing);
+    const w = await create(f, { ...empty, caseId: f.record.id, listingIds: [listing.listingId] });
+    const before = await forbiddenEffects();
+    const buyerProposal = async (input: PlannerInput): Promise<ArtifactProposal> => {
+      const source = input.context.sources.find(
+        (item) => item.type === "listing" && item.id === listing.listingId,
+      );
+      if (!source) throw new Error("Approved buyer source missing");
+      return {
+        kind: "buyer_handoff",
+        title: "Reviewed buyer requirements",
+        body: "Review the approved fact cards before acting.",
+        requirements: "A lift is essential",
+        preferences: "Near the centre",
+        listingIds: [listing.listingId],
+        citations: [
+          ...(await taskProposal(input)).citations,
+          { source: source.key, quote: source.text },
+        ],
+      };
+    };
+    const untrusted = await start(f, w.id);
+    await processWorkspaceStep(t.db, untrusted.job, {
+      queue: untrusted.queue,
+      config,
+      planTurn: async (input) => {
+        expect(JSON.stringify(input.context)).not.toContain("175000");
+        const proposal = await buyerProposal(input);
+        if (proposal.kind !== "buyer_handoff") throw new Error("Expected buyer proposal");
+        return output(
+          turn({
+            name: "draft.prepare",
+            proposal: { ...proposal, requirements: "A lift is essential. Budget cap 175000 EUR." },
+          }),
+        );
+      },
+    });
+    expect(await runRow(untrusted.job.runId)).toMatchObject({
+      state: "failed",
+      errorCode: "workspace_unsupported_number",
+    });
+    expect(await artifacts(w.id)).toHaveLength(0);
+    const prepared = await prepare(f, w.id, buyerProposal);
+    const proposal = prepared.artifact.proposal;
+    if (proposal.kind !== "buyer_handoff") throw new Error("Prepared buyer artifact missing");
+    const requirements = "A lift is essential. Budget cap 175000 EUR.";
+    for (const field of ["title", "body"] as const) {
+      await expect(
+        reviseWorkspaceArtifact(t.db, f.staff.session, {
+          sessionId: w.id,
+          id: prepared.artifact.id,
+          expectedVersion: prepared.artifact.version,
+          operationId: randomUUID(),
+          proposal: { ...proposal, requirements, [field]: "The apartment has 68 bedrooms." },
+        }),
+      ).rejects.toMatchObject({
+        code: "validation_failed",
+        status: 422,
+        outcome: "not_applied",
+        fieldErrors: { body: ["workspace_evidence_invalid"] },
+      });
+      expect(
+        (await artifacts(w.id)).find((artifact) => artifact.id === prepared.artifact.id),
+      ).toMatchObject({ state: "draft", version: prepared.artifact.version });
+    }
+    const revised = await reviseWorkspaceArtifact(t.db, f.staff.session, {
+      sessionId: w.id,
+      id: prepared.artifact.id,
+      expectedVersion: prepared.artifact.version,
+      operationId: randomUUID(),
+      proposal: { ...proposal, requirements },
+    });
+    const edited = (await artifacts(w.id)).find(
+      (artifact) => artifact.id === revised.outcome.artifactId,
+    );
+    expect(edited).toMatchObject({
+      replacesId: prepared.artifact.id,
+      state: "draft",
+      proposal: { requirements },
+    });
+    const saved = await materializeWorkspaceArtifact(t.db, f.staff.session, {
+      sessionId: w.id,
+      id: revised.outcome.artifactId,
+      expectedVersion: revised.outcome.version,
+      operationId: randomUUID(),
+      reviewed: true,
+      command: { parent: { type: "case", id: f.record.id, expectedVersion: f.record.version } },
+    });
+    const actualBriefs = await t.db
+      .select()
+      .from(briefRevisions)
+      .where(eq(briefRevisions.caseId, f.record.id));
+    expect(actualBriefs).toHaveLength(2);
+    const actualBrief = actualBriefs.find(
+      (brief) => brief.revisionNumber === Number(saved.outcome.result.briefRevision),
+    );
+    expect(actualBrief).toMatchObject({
+      authorKind: "staff",
+      authorId: f.staff.id,
+      clientAcknowledgedAt: null,
+    });
+    expect(JSON.stringify(actualBrief?.items)).toContain(requirements);
+    expect(saved.outcome.result).toMatchObject({
+      interestIds: [],
+      manualReviewListingIds: [listing.listingId],
+    });
+    expect(await forbiddenEffects()).toEqual(before);
   });
 
   it("isolates owner, exact selected sources and operation readback while preserving no-resubmit unknown status", async () => {

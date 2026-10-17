@@ -12,6 +12,7 @@ import type { Actor } from "@/domain/capabilities";
 import {
   artifactProposalSchema,
   contextSelectionSchema,
+  type ArtifactProposal,
   validateArtifactSources,
   type WorkspaceCheckpoint,
   type WorkspaceContext,
@@ -80,6 +81,33 @@ function assertWorkspaceEdit(
   if (input.expectedGeneration === undefined) return version(row, input.expectedVersion);
   if (row.generation !== input.expectedGeneration)
     throw new AppError("version_conflict", { current: { version: row.version } });
+}
+
+const evidenceErrors = new Set([
+  "workspace_missing_citation",
+  "workspace_invalid_citation",
+  "workspace_unsupported_number",
+  "workspace_unsupported_contact",
+  "workspace_unsupported_currency",
+  "workspace_property_facts_require_structured_view",
+  "workspace_unverified_listing",
+]);
+
+/** Person-entered needs are inputs; approved property narratives remain source-bound. */
+function validateReviewedArtifact(
+  proposal: ArtifactProposal,
+  context: WorkspaceContext,
+  humanRequirements: boolean,
+) {
+  try {
+    validateArtifactSources(proposal, context, { humanRequirements });
+  } catch (error) {
+    if (error instanceof Error && evidenceErrors.has(error.message))
+      throw new AppError("validation_failed", {
+        fieldErrors: { body: ["workspace_evidence_invalid"] },
+      });
+    throw error;
+  }
 }
 
 function withIntent(
@@ -647,6 +675,7 @@ export async function reviseWorkspaceArtifact(
       subject: { type: "workspace", id: input.sessionId },
     },
     async ({ tx }) => {
+      await liveStaff(tx, session);
       const { workspace: row, context } = await workspaceForActor(
         tx,
         live.actor,
@@ -668,9 +697,10 @@ export async function reviseWorkspaceArtifact(
             .where(eq(generativeCheckpoints.runId, artifact.runId))
             .orderBy(generativeCheckpoints.step)
         : [];
-      validateArtifactSources(
+      validateReviewedArtifact(
         proposal,
         workspaceEvidenceContext(context, checkpoints, artifact.runId ?? undefined),
+        true,
       );
       const [saved] = await tx
         .insert(generativeArtifacts)
@@ -757,9 +787,10 @@ export async function materializeWorkspaceArtifact(
             .where(eq(generativeCheckpoints.runId, artifact.runId))
             .orderBy(generativeCheckpoints.step)
         : [];
-      validateArtifactSources(
+      validateReviewedArtifact(
         proposal,
         workspaceEvidenceContext(context, checkpoints, artifact.runId ?? undefined),
+        artifact.replacesId !== null,
       );
       const result = await materializeWorkspaceProposal(ctx.tx, session, {
         ...raw.command,

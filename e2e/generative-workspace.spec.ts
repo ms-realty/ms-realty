@@ -362,6 +362,28 @@ for (const javaScriptEnabled of [true, false]) {
         .fill("Review quiet alternatives with evidence");
       await original
         .getByRole("textbox", { name: copy.body })
+        .fill("The approved listing price is 1 EUR.");
+      await original.getByRole("button", { name: copy.revise, exact: true }).click();
+      const retainedBody = original.getByRole("textbox", { name: copy.body });
+      await expect(retainedBody).toHaveValue("The approved listing price is 1 EUR.");
+      await expect(retainedBody).toHaveAttribute("aria-invalid", "true");
+      await expect(original.getByText(copy.evidenceInvalid, { exact: true })).toBeVisible();
+      await expect(original.getByRole("textbox", { name: copy.draftTitle })).toHaveValue(
+        "Review quiet alternatives with evidence",
+      );
+      const [unchanged] = await db
+        .select()
+        .from(schema.generativeArtifacts)
+        .where(eq(schema.generativeArtifacts.id, f.taskId));
+      expect(unchanged?.state).toBe("draft");
+      expect(
+        await db
+          .select()
+          .from(schema.generativeArtifacts)
+          .where(eq(schema.generativeArtifacts.replacesId, f.taskId)),
+      ).toHaveLength(0);
+      await original
+        .getByRole("textbox", { name: copy.body })
         .fill(
           "Verify street noise using approved evidence. Retain uncertainty. Do not send messages.",
         );
@@ -489,13 +511,20 @@ for (const javaScriptEnabled of [true, false]) {
         "href",
         "/en/cases/" + f.caseId + "/matching",
       );
-      const audit = await new AxeBuilder({ page }).include("main").analyze();
-      expect(audit.violations).toEqual([]);
+      // Axe needs browser timers; the native path keeps scripting disabled throughout.
+      // Audit each JavaScript-enabled browser, while native commands and diagnostics stay strict.
+      if (javaScriptEnabled) {
+        const audit = await new AxeBuilder({ page }).include("main").analyze();
+        expect(audit.violations).toEqual([]);
+      }
       await capture(page, testInfo, "buyer-handoff");
-      await page.screenshot({
-        path: testInfo.outputPath("generative-workspace-390.png"),
-        fullPage: true,
-      });
+      // Playwright's WebKit screenshot helper injects an unnonced temporary stylesheet.
+      // Preserve strict CSP/console checks there; required viewport captures use Chromium.
+      if (testInfo.project.name !== "webkit-mobile")
+        await page.screenshot({
+          path: testInfo.outputPath("generative-workspace-390.png"),
+          fullPage: true,
+        });
     });
   });
 }

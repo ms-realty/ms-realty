@@ -14,8 +14,11 @@ mkdirSync(folder, { recursive: true });
 const metricsFile = resolve(folder, "workspace-offline-metrics.json");
 const reportFile = resolve(folder, "workspace-vitest.json");
 const summaryFile = resolve(folder, "evaluation-summary.json");
+const packetFile = resolve(folder, "broker-quality-packet.json");
+const reviewFile = resolve(folder, "REVIEW-PACKET.md");
 // A setup failure must not inherit a successful metrics/report file from an older run.
-for (const file of [metricsFile, reportFile, summaryFile]) rmSync(file, { force: true });
+for (const file of [metricsFile, reportFile, summaryFile, packetFile, reviewFile])
+  rmSync(file, { force: true });
 const started = performance.now();
 const result = spawnSync(
   process.execPath,
@@ -32,7 +35,11 @@ const result = spawnSync(
     cwd: process.cwd(),
     encoding: "utf8",
     maxBuffer: 16 * 1024 * 1024,
-    env: { ...process.env, GENERATIVE_EVALUATION_OUTPUT: metricsFile },
+    env: {
+      ...process.env,
+      GENERATIVE_EVALUATION_OUTPUT: metricsFile,
+      GENERATIVE_QUALITY_PACKET_OUTPUT: packetFile,
+    },
   },
 );
 writeFileSync(resolve(folder, "workspace.stdout.log"), result.stdout ?? "");
@@ -45,14 +52,71 @@ const read = (file: string) => {
   }
 };
 const tests = read(reportFile);
-const complete =
+const behavioralComplete =
   result.status === 0 &&
   tests?.success === true &&
   tests.numTotalTests > 0 &&
   tests.numPassedTests === tests.numTotalTests &&
   tests.numFailedTests === 0 &&
   tests.numPendingTests === 0;
+const packet = read(packetFile);
+const packetAvailable =
+  packet?.protocol === "broker-quality-packet-v1" &&
+  packet.status === "ready_for_human_review" &&
+  typeof packet.request?.goal === "string" &&
+  Array.isArray(packet.sourceSnapshots) &&
+  packet.sourceSnapshots.length >= 2 &&
+  Array.isArray(packet.personCommands) &&
+  packet.personCommands.length >= 4 &&
+  packet.personCommands.every(
+    (entry: { receipt?: { status?: string } }) => entry.receipt?.status === "succeeded",
+  ) &&
+  Array.isArray(packet.artifactSnapshots?.afterMaterialization) &&
+  packet.artifactSnapshots.afterMaterialization.length >= 4 &&
+  Boolean(
+    packet.independentReadback?.task?.id &&
+      packet.independentReadback?.brief?.id &&
+      packet.independentReadback?.manualHandoff?.result,
+  ) &&
+  Array.isArray(packet.independentReadback?.forbiddenEffects) &&
+  packet.independentReadback.forbiddenEffects.length > 0 &&
+  packet.independentReadback.forbiddenEffects.every(
+    (effect: { delta?: number }) => effect.delta === 0,
+  ) &&
+  packet.qualification?.humanScores === null &&
+  packet.qualification?.expertBaseline === null &&
+  packet.qualification?.brokerComparison === "not_run";
+if (!packetAvailable) rmSync(packetFile, { force: true });
+const complete = behavioralComplete && packetAvailable;
 const exitCode = complete ? 0 : result.status || 1;
+if (packetAvailable) {
+  const artifacts = packet.artifactSnapshots.afterMaterialization as Array<{
+    proposal: { title: string; kind: string };
+    state: string;
+    version: number;
+  }>;
+  const cell = (value: string) => value.replaceAll("|", "\\|").replaceAll("\n", " ");
+  const guide =
+    `# Broker quality review packet\n\n` +
+    `Open [the actual saved job packet](broker-quality-packet.json). It contains authorized synthetic data and scripted model turns from the real-PostgreSQL test. No live provider or real broker review produced this work.\n\n` +
+    `Behavioral suite: ${behavioralComplete ? "passed" : "failed; this packet covers only the successful buyer job"}. Human factual quality, usefulness scores and the expert baseline remain unrun. Synthetic tariff arithmetic is not a provider bill.\n\n` +
+    `Original goal: ${packet.request.goal}\n\n` +
+    `| Saved artifact | Kind | State | Version |\n| --- | --- | --- | --- |\n` +
+    artifacts
+      .map(
+        (artifact) =>
+          `| ${cell(artifact.proposal.title)} | ${artifact.proposal.kind} | ${artifact.state} | ${artifact.version} |`,
+      )
+      .join("\n") +
+    `\n\nRead the JSON in this order:\n\n` +
+    `1. \`request\` and \`sourceSnapshots\`: original constraints, minimized authorized source text, revisions, digests and pins.\n` +
+    `2. \`process\`: actual saved clarification, correction, conversation, plans, decisions and tool checkpoints.\n` +
+    `3. \`artifactSnapshots\`: original, edited, superseded and materialized versions with their exact citations.\n` +
+    `4. \`personCommands\` and \`independentReadback\`: ${packet.personCommands.length} successful ordinary command receipts, identical task replay, saved task, Brief and manual handoff; independently counted forbidden effects.\n` +
+    `5. \`usage\`: actual persisted run counters, reservations and synthetic costs.\n\n` +
+    `For blind broker comparison, retain this original evidence. A coordinator should prepare separately labelled copies of the model deliverable and an experienced broker's deliverable from the same goal, constraints, sources and clarification transcript. No broker baseline currently exists; obtain it before comparing. Consistently pseudonymize all actor/record identifiers and citation references in both copies, hide generator/provider/process labels, and randomize their order. Preserve property facts, source evidence, uncertainties and resulting records. Use a reviewer who did not author the baseline; record independent scores and adjudicate disagreements using [the evaluation rubric](${resolve("docs/delivery/generative-process-evaluation.md")}). Leave scores pending until that review occurs.\n`;
+  writeFileSync(reviewFile, guide);
+}
 const revision = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" });
 const sourceFiles = [
   "src/domain/generative.ts",
@@ -91,6 +155,17 @@ const summary = {
     ? { total: tests.numTotalTests, passed: tests.numPassedTests, failed: tests.numFailedTests }
     : null,
   jobs: read(metricsFile),
+  qualityPacket: {
+    status: packetAvailable ? "available_for_human_review" : "unavailable",
+    json: packetAvailable ? packetFile : null,
+    entrypoint: packetAvailable ? reviewFile : null,
+    sha256: packetAvailable
+      ? createHash("sha256").update(readFileSync(packetFile)).digest("hex")
+      : null,
+    reason: packetAvailable
+      ? null
+      : "The successful buyer job did not export a complete reviewable packet; no packet or expert baseline is fabricated.",
+  },
   qualification: {
     liveExactProvider: "unverified",
     factualQuality: "human_review_pending",

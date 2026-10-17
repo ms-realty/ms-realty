@@ -340,7 +340,7 @@ export function WorkspaceArtifactContent({
           </div>
         </dl>
       ) : null}
-      <section aria-label={copy.citations} className="space-y-3 border-t border-border pt-4">
+      <div className="space-y-3 border-t border-border pt-4">
         <h4 className="font-semibold">{copy.citations}</h4>
         {proposal.citations.length ? (
           <ul className="space-y-4">
@@ -365,7 +365,7 @@ export function WorkspaceArtifactContent({
         ) : (
           <p className="text-compact text-text-muted">{copy.unsupported}</p>
         )}
-      </section>
+      </div>
       <p className="text-compact text-text-muted">{copy.authority}</p>
       <TechnicalDetails locale={locale}>
         {artifact.operationPolicy ? (

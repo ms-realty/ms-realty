@@ -436,11 +436,6 @@ export async function WorkspaceDetailScreen({
           }
         />
       ) : null}
-      {view.sourceChanged ? (
-        <Notice tone="warning" title={copy.sourceChanged}>
-          <p>{copy.sourceChangedHelp}</p>
-        </Notice>
-      ) : null}
       {!view.availability.enabled ? <Notice tone="info" title={copy.disabled} /> : null}
       <nav aria-label={copy.progress} className="space-y-2">
         <a className={buttonClass("secondary")} href={refreshHref}>
@@ -526,7 +521,7 @@ export async function WorkspaceDetailScreen({
                 { artifactId: artifact.id, buyer, available: artifact.state === "draft" },
               )}
               {proposal.kind === "task" || buyer ? (
-                <section aria-label={copy.materialize} className="max-w-reading space-y-4">
+                <div className="max-w-reading space-y-4">
                   {artifact.state === "draft" ? (
                     <h4 className="font-semibold">{copy.materialize}</h4>
                   ) : null}
@@ -545,7 +540,7 @@ export async function WorkspaceDetailScreen({
                       },
                     )
                   )}
-                </section>
+                </div>
               ) : artifact.state === "draft" ? (
                 <p className="text-compact text-text-muted">{copy.manualResearch}</p>
               ) : null}

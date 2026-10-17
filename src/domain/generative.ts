@@ -150,10 +150,15 @@ export const workspaceStates = [
 ] as const;
 export type WorkspaceState = (typeof workspaceStates)[number];
 
-/** Only exact supplied quotes count as source evidence. Instructions in sources remain data. */
+/**
+ * Only exact supplied quotes count as source evidence. Instructions in sources remain data.
+ * humanRequirements is a server-owned exception for a person's saved needs, never model output
+ * or permission to change approved property claims in the title and narrative.
+ */
 export function validateArtifactSources(
   proposal: ArtifactProposal,
   context: WorkspaceContext,
+  options: { humanRequirements?: boolean } = {},
 ): void {
   if (!proposal.citations.length && context.sources.length)
     throw new Error("workspace_missing_citation");
@@ -168,7 +173,9 @@ export function validateArtifactSources(
   const authored = [
     proposal.title,
     proposal.body,
-    ...(proposal.kind === "buyer_handoff" ? [proposal.requirements, proposal.preferences] : []),
+    ...(proposal.kind === "buyer_handoff" && !options.humanRequirements
+      ? [proposal.requirements, proposal.preferences]
+      : []),
   ].join("\n");
   const numberKey = (s: string) =>
     s.replace(/(?<=\d)[, .](?=\d{3}(?:\D|$))/g, "").replace(",", ".");
