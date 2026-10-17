@@ -8,6 +8,7 @@ export * from "./compliance";
 export * from "./coordination";
 export * from "./enums";
 export * from "./files";
+export * from "./generative";
 export * from "./geography";
 export * from "./identity";
 export * from "./inbound";

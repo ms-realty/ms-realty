@@ -39,7 +39,7 @@ try {
     const description = "Synthetic test property. Not a real offer.";
     const fixture = await db.transaction(async (tx) => {
       await tx.execute(statement\`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))\`);
-      const item = await createListingFixture(tx, { reviewerId: staff.id, placeId, title, description, translations: { en: { title, description }, he: { title, description } } });
+      const item = await createListingFixture(tx, { reviewerId: staff.id, placeId, title, description, purpose: input.purpose, translations: { en: { title, description }, he: { title, description } } });
       const number = randomBytes(6).readUIntBE(0, 6).toString();
       const reference = "MS-" + number;
       await tx.update(schema.listings).set({ reference }).where(eq(schema.listings.id, item.listingId));
@@ -94,7 +94,8 @@ try {
     });
 } finally { await sql.end(); }
 `;
-const seed = (count: number): Listing[] => JSON.parse(run(seedProgram, { count }));
+const seed = (count: number, purpose: "sale" | "long_term_rent" = "sale"): Listing[] =>
+  JSON.parse(run(seedProgram, { count, purpose }));
 const older = (id: string, count: number) => run(olderProgram, { id, count });
 const withdraw = (...references: string[]) => run(withdrawProgram, { references });
 const expire = (id: string) => run(expireProgram, { id });
@@ -377,7 +378,13 @@ test("P09: a closed shared property keeps only its reference, and a list with no
   browser,
   baseURL,
 }, testInfo) => {
-  const pair = seed(2) as [Listing, Listing];
+  // Other workers read the sale homepage while this test retires its own publications.
+  // Rentals exercise the same withdrawal rules without invalidating their image requests.
+  const pair = seed(2, "long_term_rent") as [Listing, Listing];
+  const home = await page.request.get("/he");
+  expect(home.status()).toBe(200);
+  const homepage = await home.text();
+  for (const item of pair) expect(homepage).not.toContain(item.reference);
   await ownAddress(page);
   await save(page, pair);
   await enableSharing(page, pair[1]);

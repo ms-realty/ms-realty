@@ -1,5 +1,14 @@
 # Butler bounded assistance
 
+The additive F29 research workbench accepts an incomplete goal, keeps a private working
+session and executes typed read-only tools over currently authorized sources. See the
+[generative process contract](../../../docs/delivery/generative-process.md) and
+[whole-job evaluation](../../../docs/delivery/generative-process-evaluation.md).
+It uses separate workspace tables, schema, qualification and budgets; the original five
+draft tasks below retain their contracts. Both families share spend and actor concurrency.
+New planner output remains draft-only; people materialize reviewed work through ordinary
+commands. No autonomous business effect is enabled.
+
 The durable `ai.draft` job uses one bounded generation request and, when qualified, one typed
 assessment request. Neither receives provider tools. There are no
 application retries and `store: false`. Operator configuration keeps generation disabled by

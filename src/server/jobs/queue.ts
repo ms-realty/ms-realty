@@ -25,6 +25,7 @@ export interface JobPayloads {
   "rate_limit.prune": Record<string, never>;
   "files.process": { kind: "media" | "document"; id: string };
   "ai.draft": { runId: string };
+  "ai.workspace.step": { runId: string; generation: number; step: number; phase: "plan" | "tool" };
   "inbox.reconcile": { afterId?: string };
   "worker.heartbeat": Record<string, never>;
   "search_alerts.sweep": { afterId?: string };
@@ -40,6 +41,8 @@ const queueOptions: Record<JobName, { retryLimit: number; retryDelay?: number; c
   "rate_limit.prune": { retryLimit: 0, cron: "17 * * * *" },
   "files.process": { retryLimit: 3, retryDelay: 60 },
   "ai.draft": { retryLimit: 0 },
+  // A started inference is never blindly replayed; saved read-only tool steps can resume.
+  "ai.workspace.step": { retryLimit: 0 },
   "inbox.reconcile": { retryLimit: 0, cron: "* * * * *" },
   "worker.heartbeat": { retryLimit: 0, cron: "* * * * *" },
   "search_alerts.sweep": { retryLimit: 0, cron: "*/15 * * * *" },
@@ -150,6 +153,10 @@ export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies)
   await queue.work("ai.draft", async ({ runId }) => {
     const { processAssistanceRun } = await import("../ai/assistance");
     await processAssistanceRun(deps.db, runId);
+  });
+  await queue.work("ai.workspace.step", async (job) => {
+    const { processWorkspaceStep } = await import("../ai/workspace-jobs");
+    await processWorkspaceStep(deps.db, job, { queue });
   });
   await queue.work("inbox.reconcile", async ({ afterId }) => {
     const { reconcileResendInbox } = await import("./resend-inbox");

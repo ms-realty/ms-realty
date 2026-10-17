@@ -6,6 +6,7 @@ import { Notice } from "@/ui/notice";
 import { aiCopy } from "./copy";
 import { entryCopy } from "./entry-copy";
 import type { readAssistanceEntry } from "./entry-loader";
+import { workspaceCopy } from "./workspace-copy";
 
 type Entry = Awaited<ReturnType<typeof readAssistanceEntry>>;
 const link = "font-semibold text-accent underline underline-offset-4";
@@ -21,6 +22,7 @@ export function AssistanceEntry({
   const copy = entryCopy(locale);
   const ai = aiCopy(locale);
   const work = workCopy(locale);
+  const research = workspaceCopy(locale);
   const path = `/${locale}/operations/assistance`;
   const pageHref = `${path}?view=${entry.view}`;
   const tasks = [
@@ -44,6 +46,19 @@ export function AssistanceEntry({
         <p className="max-w-reading">{copy.lead}</p>
         <p className="max-w-reading text-text-muted">{copy.boundary}</p>
       </header>
+      {entry.access.inquiryDrafts || entry.access.intakeDrafts || entry.access.localeDrafts ? (
+        <section
+          aria-labelledby="butler-working-goal"
+          className="space-y-3 border-y border-border py-6"
+        >
+          <h2 id="butler-working-goal" className="text-subheading font-semibold">
+            <a className={link} href={`${path}/research`}>
+              {research.entry}
+            </a>
+          </h2>
+          <p className="max-w-reading text-text-muted">{research.entryHelp}</p>
+        </section>
+      ) : null}
       {!providerEnabled ? <Notice tone="info" title={ai.disabled} /> : null}
       {!entry.access.inquiryDrafts && !tasks.length ? <p>{copy.unavailable}</p> : null}
       {entry.access.inquiryDrafts ? (
