@@ -162,6 +162,20 @@
       "when": 1792172238170,
       "tag": "0022_media_renditions",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792261582073,
+      "tag": "0023_generative_workspace",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792264370670,
+      "tag": "0024_generative_source_lineage",
+      "breakpoints": true
     }
   ]
 }

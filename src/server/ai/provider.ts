@@ -77,7 +77,7 @@ export const generateIntakeDraft: IntakeDraftGenerator = async (source, config) 
     "intake_candidates",
   );
 
-async function requestGeneration(
+export async function requestGeneration(
   config: AssistanceConfig,
   instructions: string,
   input: unknown,

@@ -531,6 +531,16 @@ The release manifest pins an evaluated router policy/model pool and response sna
 | `intake.extract` | Selected permissioned property sources and broker notes | Candidate typed facts with document/page/span references, missing/conflicting values; human review before authoritative change |
 | `locale.draft` | Approved BG revision, protected facts and terminology | Draft for one target locale, source binding and warnings; human language approval required |
 | `case.assist` | Permitted Case summary and approved relevant property facts | Internal summary, proposed next action or reply draft; broker decides and sends |
+| `work.research` (F29) | Staff-owned goal, selected minimized history/commitments and current approved listing/CMS sources | Durable conversation, questions, alternatives, plan and source-bound editable work; typed read/compare/calculate/prepare tools only. A person materializes reviewed tasks or buyer handoffs through ordinary commands. |
+
+F29's [generative process](delivery/generative-process.md) adds a separately qualified,
+bounded multi-step workbench. A strict structured planner turn requests one application tool;
+the worker persists inference and tool checkpoints separately. Current authority and source
+freshness are rechecked at each boundary. Both drafting families share actor concurrency and
+the daily spend ceiling. No model tool can execute a business command. The ordinary human
+command path retains current capabilities, revisions, idempotency and attributable receipts.
+See the [whole-job evaluation contract](delivery/generative-process-evaluation.md) for required
+and forbidden resulting states, recovery, cost, latency and independent human usefulness.
 
 Identity documents, financial records, legal evidence and entire mailboxes are not default model inputs. Redact/minimize inputs and require explicit purpose-appropriate permission for any exceptional source. Provider data handling and processing terms must pass the operator's procurement/privacy review before real customer material is used. EU database/object placement is not a claim that every vendor processes all data exclusively in the EU.
 

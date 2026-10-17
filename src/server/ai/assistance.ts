@@ -1,6 +1,6 @@
 // O32 / AT51–AT54: source-bound draft evidence. No application, sending or publication effect.
 import "server-only";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { assistanceRuns, inquiries } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
@@ -16,6 +16,7 @@ import type { JobQueue } from "../jobs/queue";
 import { findOperation, runOperation } from "../operations";
 import { assertRecoveryOpen } from "../recovery/quarantine";
 import { commandEnvelope, inquiryResource, liveStaff, parseInput, version } from "../work/shared";
+import { reserveAiBudget } from "./budget";
 import { type AssistanceConfig, assistanceConfig } from "./config";
 import {
   type AssistanceSource,
@@ -367,32 +368,9 @@ export async function requestAssistance(
       version(source, input.expectedVersion);
       if (!config.enabled || !config.model)
         throw new AppError("unavailable", { fieldErrors: { form: ["assistance_disabled"] } });
-      // One global reservation lock enforces the provider-wide UTC daily ceiling under concurrency.
-      // Keep the persisted legacy namespace while old and Butler deployments can coexist.
-      await ctx.tx.execute(
-        sql`select pg_advisory_xact_lock(hashtextextended('hermes:daily-budget', 0))`,
-      );
-      const busy = await ctx.tx
-        .select({ id: assistanceRuns.id })
-        .from(assistanceRuns)
-        .where(
-          and(
-            eq(assistanceRuns.requestedById, live.actor.id),
-            inArray(assistanceRuns.state, ["queued", "running"]),
-          ),
-        )
-        .limit(1);
-      if (busy.length)
-        throw new AppError("rate_limited", { fieldErrors: { form: ["assistance_in_progress"] } });
-      const [usage] = await ctx.tx.execute<{ used: string }>(
-        sql`select coalesce(sum(coalesce(actual_cost_micros, reserved_cost_micros)), 0)::text as used from assistance_runs where created_at >= date_trunc('day', now() at time zone 'UTC') at time zone 'UTC'`,
-      );
       const reserved = reservation(source, config, input.task);
+      await reserveAiBudget(ctx.tx, live.actor.id, reserved.cost, config.dailyLimitMicros);
       const prompt = versionsFor(input.task);
-      if (Number(usage?.used ?? 0) + reserved.cost > config.dailyLimitMicros)
-        throw new AppError("rate_limited", {
-          fieldErrors: { form: ["assistance_budget_exhausted"] },
-        });
       const [run] = await ctx.tx
         .insert(assistanceRuns)
         .values({
