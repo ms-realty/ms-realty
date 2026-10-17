@@ -83,6 +83,7 @@ export type FormCopy = {
   reference: string;
   recordedAt: string;
   unknown: string;
+  /** Explain that retained entries are a draft; only reconciliation establishes the result. */
   draftRetained: string;
 };
 

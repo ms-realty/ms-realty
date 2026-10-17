@@ -37,6 +37,7 @@ export function InquiryListingSummaries({
   stage: "entry" | "review";
 }) {
   if (!listings.length) return null;
+  const Heading = stage === "entry" ? "h2" : "h3";
   return (
     <ol
       className={cx(
@@ -66,14 +67,14 @@ export function InquiryListingSummaries({
               <p className="text-compact">{locality(listing)}</p>
             </div>
           </div>
-          <h3 className="text-compact font-semibold">
+          <Heading className="text-compact font-semibold">
             <a
               className="text-link underline underline-offset-4"
               href={listingHref(listing, locale)}
             >
               {listing.title || listing.reference}
             </a>
-          </h3>
+          </Heading>
           <ListingFacts listing={listing} locale={locale} copy={copy} />
           <Availability listing={listing} locale={locale} copy={copy} />
         </li>

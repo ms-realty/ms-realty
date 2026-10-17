@@ -33,6 +33,107 @@ function mount(action: FormAction<SpecimenValues>, state = initialState) {
 }
 
 describe("UI07 / S11–S17 progressive form", () => {
+  it("keeps an unavailable idle command mounted for recovery without exposing its controls", () => {
+    const props = {
+      action: vi.fn<FormAction<SpecimenValues>>(async (state) => state),
+      initialState,
+      permalink: "/en/design/forms",
+      reconciliation: { href: "/operation/server-issued-key", label: "Check operation" },
+      copy: copy.form,
+      labels: { subject: "Subject", note: "Note" },
+      submitLabel: "Submit",
+      children: () => <p>Unavailable entry</p>,
+    };
+    const { container, rerender } = render(<ActionForm {...props} commandAvailable={false} />);
+    expect(container).toBeEmptyDOMElement();
+    rerender(<ActionForm {...props} commandAvailable />);
+    expect(screen.getByRole("button", { name: "Submit" })).toBeVisible();
+    expect(props.action).not.toHaveBeenCalled();
+  });
+
+  it("keeps a restored unknown draft and its exact reconciliation when the command becomes unavailable", () => {
+    render(
+      <ActionForm
+        action={vi.fn<FormAction<SpecimenValues>>(async (state) => state)}
+        commandAvailable={false}
+        initialState={{
+          ...initialState,
+          values: { subject: "Exact entered draft", note: "Exact entered note" },
+          outcome: {
+            kind: "unknown",
+            code: "OUTCOME_UNKNOWN",
+            message: copy.form.unknown,
+            status: { href: "/operation/original-request", label: "Check original request" },
+          },
+        }}
+        permalink="/en/design/forms"
+        reconciliation={{ href: "/operation/new-page-key", label: "New page key" }}
+        copy={copy.form}
+        labels={{ subject: "Subject", note: "Note" }}
+        submitLabel="Submit"
+      >
+        {(form) => <input aria-label="Subject" {...form.field("subject")} />}
+      </ActionForm>,
+    );
+    expect(screen.getByRole("textbox", { name: "Subject" })).toHaveValue("Exact entered draft");
+    expect(screen.getByRole("textbox", { name: "Subject" })).toHaveAttribute("readonly");
+    expect(screen.getByRole("link", { name: "Check original request" })).toHaveAttribute(
+      "href",
+      "/operation/original-request",
+    );
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it.each(["validation", "conflict"] as const)(
+    "blocks restored %s resubmission after current command eligibility changes",
+    async (kind) => {
+      const action = vi.fn<FormAction<SpecimenValues>>(async (state) => state);
+      const { container } = render(
+        <ActionForm
+          action={action}
+          commandAvailable={false}
+          initialState={{
+            ...initialState,
+            values: { subject: "Preserved draft", note: "" },
+            outcome:
+              kind === "validation"
+                ? {
+                    kind,
+                    code: "VALIDATION_FAILED",
+                    message: "Review the draft",
+                    fieldErrors: { subject: ["Review this value"] },
+                  }
+                : {
+                    kind,
+                    code: "REVISION_CONFLICT",
+                    message: "Review the revision",
+                    reapply: {
+                      operationId: "reviewed-operation",
+                      expectedRevision: 2,
+                      status: { href: "/operation/reviewed-operation", label: "Reviewed status" },
+                    },
+                  },
+          }}
+          permalink="/en/design/forms"
+          reconciliation={{ href: "/operation/server-issued-key", label: "Check operation" }}
+          copy={copy.form}
+          labels={{ subject: "Subject", note: "Note" }}
+          submitLabel="Submit"
+        >
+          {(form) => <input aria-label="Subject" {...form.field("subject")} />}
+        </ActionForm>,
+      );
+      expect(screen.getByRole("textbox", { name: "Subject" })).toHaveValue("Preserved draft");
+      expect(screen.getByRole("textbox", { name: "Subject" })).toHaveAttribute("readonly");
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(container.querySelector('[name="_reapplyOperationId"]')).toBeNull();
+      const form = container.querySelector("form");
+      if (!form) throw new Error("Missing retained draft");
+      fireEvent.submit(form);
+      expect(action).not.toHaveBeenCalled();
+    },
+  );
+
   it.each([1, 2])(
     "adopts a native radio choice before hydration with %i options and keeps checkbox groups",
     async (count) => {
@@ -341,6 +442,7 @@ describe("UI07 / S11–S17 progressive form", () => {
         "href",
         "/status/same",
       );
+      if (kind === "unknown") expect(screen.getByText(copy.form.draftRetained)).toBeVisible();
     },
   );
 

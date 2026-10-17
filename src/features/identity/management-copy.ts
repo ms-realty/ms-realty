@@ -99,6 +99,13 @@ const staffRoleLabels = {
     manager: "Руководитель",
   },
 };
-export function staffRoleLabel(locale: string, role: keyof typeof staffRoleLabels.en): string {
-  return staffRoleLabels[locale === "bg" || locale === "ru" ? locale : "en"][role];
+export function staffRoleLabel(locale: string, role: string): string {
+  const labels = staffRoleLabels[locale === "bg" || locale === "ru" ? locale : "en"];
+  return Object.hasOwn(labels, role)
+    ? labels[role as keyof typeof labels]
+    : locale === "bg"
+      ? "Записана роля"
+      : locale === "ru"
+        ? "Записанная роль"
+        : "Recorded role";
 }

@@ -1,6 +1,7 @@
 // Thin Cloudflare gateway: no catalogue, user identity, permissions or listing database.
 // Deploy only with the exact reviewed route artifact bound to the release manifest.
 
+import { publicAssetCacheControl, publicMediaCacheControl } from "../src/domain/cache-policy";
 import { type AccessEnv, accessAuthorized } from "./access";
 import { type LegacyMediaEnv, legacyMedia } from "./legacy-media";
 import { type MapAssetsEnv, mapAsset } from "./map-assets";
@@ -66,6 +67,35 @@ const safePath = (path: unknown): path is string =>
   path.startsWith("/") &&
   !path.startsWith("//") &&
   !/[\\\r\n#]/.test(path);
+
+// §7.5: only content-addressed build assets and eligible public media derivatives may be kept by
+// a browser or shared cache. The origin must declare the exact policy on an allowlisted path;
+// HTML, APIs, errors, anything setting a cookie and every other response stays unstored.
+const noStore = "private, no-store";
+const hashedAssetPath = /^\/(?:_next\/static\/|fonts\/[a-z0-9-]+\.[a-f0-9]{12}\.woff2$)/;
+const mapRuntimePath = /^\/map-runtime\/v\d+\.\d+\.\d+\/[^/]+$/;
+const publicMediaPath = /^\/api\/media\/[0-9a-f-]{36}\/[a-f0-9]{64}$/;
+type Surface = "public" | "client" | "staff";
+
+function cacheControl(method: string, surface: Surface, path: string, response: Response) {
+  const declared = response.headers.get("cache-control");
+  if (!["GET", "HEAD"].includes(method) || response.headers.has("set-cookie")) return noStore;
+  if (
+    declared === publicAssetCacheControl &&
+    [200, 304].includes(response.status) &&
+    (hashedAssetPath.test(path) || (surface === "public" && mapRuntimePath.test(path)))
+  )
+    // The same build serves every host; a private host keeps its copies out of shared caches.
+    return surface === "public" ? publicAssetCacheControl : "private, max-age=31536000, immutable";
+  if (
+    declared === publicMediaCacheControl &&
+    surface === "public" &&
+    [200, 206].includes(response.status) &&
+    publicMediaPath.test(path)
+  )
+    return publicMediaCacheControl;
+  return noStore;
+}
 
 async function forward(
   request: Request,
@@ -227,6 +257,9 @@ async function forward(
   }
   const responseHeaders = new Headers(response.headers);
   responseHeaders.delete("x-msr-origin-token");
+  // The gateway owns the final browser/shared-cache policy, including provider overrides.
+  responseHeaders.delete("cdn-cache-control");
+  responseHeaders.delete("cloudflare-cdn-cache-control");
   const location = responseHeaders.get("location");
   if (location) {
     const destination = new URL(location, target);
@@ -236,13 +269,30 @@ async function forward(
       responseHeaders.set("location", destination.toString());
     }
   }
-  responseHeaders.set("Cache-Control", "private, no-store");
-  const surface =
+  const surface: Surface =
     host === new URL(env.STAFF_ORIGIN).host
       ? "staff"
       : host === new URL(env.CLIENT_ORIGIN).host
         ? "client"
         : "public";
+  const policy = cacheControl(request.method, surface, url.pathname, response);
+  responseHeaders.set("Cache-Control", policy);
+  // The media handler always returns image bytes; only Next's router variations are redundant.
+  // Preserve other variations, including content encoding, for downstream caches.
+  if (policy === publicMediaCacheControl) {
+    const vary = responseHeaders
+      .get("vary")
+      ?.split(",")
+      .map((name) => name.trim())
+      .filter(
+        (name) =>
+          !/^(rsc|next-router-state-tree|next-router-prefetch|next-router-segment-prefetch)$/i.test(
+            name,
+          ),
+      );
+    if (vary?.length) responseHeaders.set("vary", vary.join(", "));
+    else responseHeaders.delete("vary");
+  }
   return recoverNotFoundDocument(
     request,
     new Response(response.body, { status: response.status, headers: responseHeaders }),

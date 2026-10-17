@@ -11,6 +11,20 @@
     font-synthesis-weight: none;
   }
 
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+      env(safe-area-inset-left);
+  }
+
+  /* The CSS fallback also protects the no-JavaScript skip link; hydration measures wrapping. */
+  html:has([data-public-header]) {
+    scroll-padding-block-start: calc(
+      var(--public-header-height, 4.5rem) +
+      env(safe-area-inset-top) +
+      0.5rem
+    );
+  }
+
   /* Hebrew text reaches Noto Sans Hebrew first: the metric fallback (local Arial) has Hebrew
      glyphs and would otherwise be used for Hebrew while Noto Sans, which has none, loads. */
   :lang(he) {

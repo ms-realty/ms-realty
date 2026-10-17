@@ -2,10 +2,12 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
 import { accessErrorMessage, fill, identityCopy } from "@/features/identity/copy";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { inspectStaffInvitation } from "@/server/auth/invitations";
 import { currentStaffAccess, requireAuthHost } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 export const metadata = {
   robots: { index: false, follow: false },
@@ -56,16 +58,20 @@ export default async function InvitationPage({
           </p>
           <p>
             {fill(c.invitationValidUntil, {
-              time: invitation.expiresAt?.toLocaleString(locale) ?? "",
+              time: invitation.expiresAt
+                ? formatDateTime(isPublicLocale(locale) ? locale : "bg", invitation.expiresAt, {
+                    zoneLabel: true,
+                  })
+                : "",
             })}
           </p>
-          <form method="post" action={`/${locale}/access/invitation/submit`}>
+          <NativeForm method="post" action={`/${locale}/access/invitation/submit`}>
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="token" value={token} />
             <button type="submit" className={buttonClass()}>
               {c.acceptAndContinue}
             </button>
-          </form>
+          </NativeForm>
         </>
       ) : (
         <Notice tone="warning">{messages[invitation.state]}</Notice>

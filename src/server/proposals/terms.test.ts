@@ -9,6 +9,10 @@ describe("proposal amount and deadline inputs", () => {
     for (const value of ["1e3", "10.001", "-20", "", "9,999.00", "9999999999999999"])
       expect(Number.isNaN(amountToMinor(value))).toBe(true);
   });
+  it("round-trips the schema's largest safe amount without rounding a cent", () => {
+    expect(amountToMinor("90071992547409.91")).toBe(Number.MAX_SAFE_INTEGER);
+    expect(Number.isNaN(amountToMinor("90071992547409.92"))).toBe(true);
+  });
   it("preserves each explicit Sofia autumn offset when round-tripping a deadline", () => {
     for (const value of ["2026-10-25T00:30:00.000Z", "2026-10-25T01:30:00.000Z"]) {
       const date = new Date(value);

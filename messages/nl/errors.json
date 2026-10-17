@@ -9,5 +9,20 @@
     "body": "Probeer het opnieuw. Blijft het gebeuren, bel ons dan en noem de referentie.",
     "reference": "Referentie: {reference}",
     "retry": "Opnieuw proberen"
+  },
+  "recovery": {
+    "staffHome": "Terug naar Vandaag",
+    "clientHome": "Terug naar mijn trajecten",
+    "list": "Terug naar de lijst",
+    "record": "Terug naar het dossier",
+    "deal": "Terug naar het traject",
+    "search": "Woningen zoeken",
+    "access": "Terug naar aanmelden",
+    "tools": "Naar de hulpmiddelen van het kantoor",
+    "call": "Bel ons: {phone}",
+    "loadingList": "De lijst wordt geladen…",
+    "loadingRecord": "Het dossier wordt geladen…",
+    "loadingListing": "De advertentie wordt geladen…",
+    "actionOutcome": "Als u net iets hebt opgeslagen of verstuurd, controleer dan eerst dezelfde bevestiging voordat u die actie opnieuw uitvoert."
   }
 }

@@ -1,7 +1,13 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, expect, it } from "vitest";
 import type { PublicMedia } from "@/server/listings/view-models";
-import { ApprovedMedia, approvedMediaHref } from "./approved-media";
+import {
+  ApprovedGallery,
+  ApprovedMedia,
+  approvedMediaHref,
+  approvedMediaSrcSet,
+} from "./approved-media";
 
 afterEach(cleanup);
 const media: PublicMedia = {
@@ -38,4 +44,50 @@ it("serves the approved digest directly and retains the modification disclosure 
 it("never turns a storage URL or unsupported media type into a public source", () => {
   expect(approvedMediaHref({ ...media, digest: "https://private.invalid/staging" })).toBeNull();
   expect(approvedMediaHref({ ...media, contentType: "text/html" })).toBeNull();
+});
+
+it("renders only real width descriptors, keeps lazy sizes tied to layout and prioritizes the first gallery image", () => {
+  const responsive = {
+    ...media,
+    width: 2400,
+    height: 1350,
+    renditions: [
+      { digest: "b".repeat(64), width: 480, height: 270 },
+      { digest: media.digest, width: 2400, height: 1350 },
+    ],
+  };
+  const view = render(
+    <ApprovedGallery
+      media={[responsive, { ...responsive, relationId: "second" }]}
+      unavailable="Unavailable"
+    />,
+  );
+  const images = screen.getAllByRole("img");
+  expect(images[0]).toHaveAttribute(
+    "srcset",
+    `/api/media/${media.assetId}/${"b".repeat(64)} 480w, /api/media/${media.assetId}/${media.digest} 2400w`,
+  );
+  expect(images[0]).toHaveAttribute("loading", "eager");
+  expect(images[0]).toHaveAttribute("fetchpriority", "high");
+  expect(images[0]?.getAttribute("sizes")).toContain("896px");
+  expect(images[1]).toHaveAttribute("loading", "lazy");
+  expect(images[1]?.getAttribute("sizes")).toMatch(/^auto,/);
+  expect(images[1]).not.toHaveAttribute("fetchpriority");
+  const markup = renderToStaticMarkup(
+    <ApprovedGallery media={[responsive]} unavailable="Unavailable" />,
+  );
+  expect(markup).toContain('rel="preload"');
+  expect(markup).toContain('as="image"');
+  expect(markup).toContain(
+    `imageSrcSet="/api/media/${media.assetId}/${"b".repeat(64)} 480w, /api/media/${media.assetId}/${media.digest} 2400w"`,
+  );
+  view.rerender(<ApprovedMedia media={media} unavailable="Unavailable" />);
+  expect(screen.getByRole("img")).not.toHaveAttribute("srcset");
+  expect(screen.getByRole("img")).not.toHaveAttribute("sizes");
+  expect(
+    approvedMediaSrcSet({
+      ...responsive,
+      renditions: [{ digest: "private/storage", width: 480, height: 270 }],
+    }),
+  ).toBeUndefined();
 });

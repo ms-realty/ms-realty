@@ -11,7 +11,7 @@ const en = {
   classification: "Document class",
   types: "Allowed file types",
   limit: "Maximum bytes",
-  expires: "Request expires (Europe/Sofia)",
+  expires: "Request expires",
   audience:
     "Visible only to the named recipient and authorized agency reviewers. Case participation does not share this file with other participants.",
   upload: "Upload and scan",
@@ -52,7 +52,7 @@ const bg: typeof en = {
   classification: "Вид документ",
   types: "Допустими файлове",
   limit: "Максимален размер в байтове",
-  expires: "Срок на заявката (Europe/Sofia)",
+  expires: "Срок на заявката",
   audience:
     "Видимо само за посочения получател и оправомощените проверяващи от агенцията. Участието в случая не споделя файла с останалите участници.",
   upload: "Качване и проверка",
@@ -92,7 +92,7 @@ const ru: typeof en = {
   classification: "Класс документа",
   types: "Допустимые типы файлов",
   limit: "Максимальный размер в байтах",
-  expires: "Срок запроса (Europe/Sofia)",
+  expires: "Срок запроса",
   audience:
     "Доступ только у указанного получателя и уполномоченных сотрудников агентства. Участие в деле не открывает файл другим участникам.",
   upload: "Загрузить и проверить",

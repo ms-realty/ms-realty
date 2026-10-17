@@ -123,8 +123,9 @@ it("reviews the exact zone/windows/access note, then native Edit retains them an
     />,
   );
   const summary = screen.getByRole("region", { name: "Viewing preferences" });
-  expect(summary).toHaveTextContent("Europe/London");
-  expect(summary).toHaveTextContent("2030-10-27 01:15");
+  expect(summary).toHaveTextContent("United Kingdom Time");
+  expect(summary).toHaveTextContent(/27 October 2030.*01:15.*01:45/);
+  expect(summary).not.toHaveTextContent(/Europe\/|2030-10-27/);
   expect(summary).toHaveTextContent("First occurrence");
   expect(summary).toHaveTextContent("Second occurrence");
   expect(summary).toHaveTextContent(state.values.viewingAccessNeeds);

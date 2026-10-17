@@ -1,6 +1,7 @@
 // Real public intake → authorized staff queue → accountable follow-up and conflict recovery.
 // Identity ceremonies have their own suite; these fixtures seed valid sessions only in this
 // run's disposable database. They never stand in for live acceptance or launch evidence.
+
 import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
 import { type BrowserContext, expect, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
@@ -10,6 +11,7 @@ import * as schema from "../src/db/schema";
 import { inquiryCheckCode } from "../src/domain/inquiry-check-code";
 import { hostUrl, origins } from "./hosts";
 import { openUnassignedQueueAt } from "./inquiry-queue";
+import { fillAgencyInstant } from "./time";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
 if (!databaseUrl || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(databaseUrl).pathname))
@@ -120,20 +122,26 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await expect(page.getByRole("heading", { name: inquiry.reference, exact: true })).toBeVisible();
   const stale = await context.newPage();
   await stale.goto(hostUrl("staff", `/en/inquiries/${inquiry.id}`));
+  await expect(stale.getByRole("radio", { name: "Suspected spam", exact: true })).not.toBeChecked();
+  await stale.getByRole("radio", { name: "Suspected spam", exact: true }).check();
+  await stale
+    .getByRole("checkbox", { name: "I confirm moving this inquiry to review", exact: true })
+    .check();
   await stale.getByLabel("Reason", { exact: true }).fill("Synthetic request held for staff review");
 
   const nextAction = `Review visitor question ${randomUUID().slice(0, 8)}`;
   await page.getByLabel("Next action", { exact: true }).fill(nextAction);
-  await page
-    .getByLabel("Follow-up time (UTC)", { exact: true })
-    .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+  await fillAgencyInstant(
+    page.getByLabel("Follow-up time", { exact: true }),
+    new Date(Date.now() + 86400000),
+  );
   await page.getByRole("button", { name: "Accept and assign to me", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Open updated record", exact: true }).click();
   await expect(page.getByTestId("inquiry-owner")).toHaveText(broker.displayName);
   await expect(page.getByTestId("inquiry-state")).toHaveText("Assigned");
 
-  await stale.getByRole("button", { name: "Record a disposition", exact: true }).click();
+  await stale.getByRole("button", { name: "Record: Suspected spam", exact: true }).click();
   await expect(
     stale.getByText(
       "This record changed. Compare the latest version with your draft before applying it again.",
@@ -143,6 +151,9 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await expect(stale.getByLabel("Reason", { exact: true })).toHaveValue(
     "Synthetic request held for staff review",
   );
+  await stale
+    .getByRole("checkbox", { name: "I confirm moving this inquiry to review", exact: true })
+    .check();
   await stale.getByRole("button", { name: "Apply my reviewed changes", exact: true }).click();
   // A recorded triage continues on its action status, behind the record's pending fence (O02).
   const triageRecorded = async () => {
@@ -167,9 +178,9 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await page.getByRole("button", { name: "Update task", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
   await stale.reload();
-  await stale.getByLabel("Status", { exact: true }).selectOption("resolved_without_case");
+  await stale.getByRole("radio", { name: "Resolved without case", exact: true }).check();
   await stale.getByLabel("Reason", { exact: true }).fill("Synthetic test completed without a case");
-  await stale.getByRole("button", { name: "Record a disposition", exact: true }).click();
+  await stale.getByRole("button", { name: "Record: Resolved without case", exact: true }).click();
   await triageRecorded();
   const [saved] = await db
     .select()
@@ -266,3 +277,31 @@ for (const javaScriptEnabled of [true, false]) {
     }
   });
 }
+
+test("M-003/M-096 staff awaiting grants get guidance and no inaccessible navigation", async ({
+  page,
+  context,
+}) => {
+  const member = await staffSession(context);
+  await db
+    .update(schema.grants)
+    .set({ revokedAt: new Date() })
+    .where(eq(schema.grants.principalId, member.id));
+  const response = await page.goto(hostUrl("staff", "/en/today"));
+  expect(response?.status()).toBe(200);
+  await expect(
+    page.getByRole("heading", { name: "Your access does not include this page", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Your worklist will appear here when the agency assigns your access.", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  for (const name of ["Inquiries", "Cases", "Inventory", "Calendar", "Tasks"])
+    await expect(page.locator("header").getByRole("link", { name, exact: true })).toHaveCount(0);
+  const inventory = await page.goto(hostUrl("staff", "/en/inventory"));
+  expect(inventory?.status()).toBe(200);
+  await expect(
+    page.getByRole("heading", { name: "Your access does not include this page", exact: true }),
+  ).toBeVisible();
+});

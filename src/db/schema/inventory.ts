@@ -23,6 +23,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { allowedMediaContentTypes } from "../../domain/media";
+import type { MediaRendition } from "../../domain/media-rendition";
 import { approvals } from "./approvals";
 import { createdAt, id, instant, mutable, reference, sqlList, tsvector } from "./columns";
 import {
@@ -353,6 +354,10 @@ export const mediaAssets = pgTable(
     derivativeKey: text("derivative_key").unique(),
     derivativeSha256: text("derivative_sha256"),
     derivativeContentType: text("derivative_content_type"),
+    derivativeRenditions: jsonb("derivative_renditions")
+      .$type<readonly MediaRendition[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     processing: processingStateEnum("processing").notNull().default("pending"),
     rights: mediaRightsEnum("rights").notNull().default("unknown"),
     rightsHolder: text("rights_holder"),

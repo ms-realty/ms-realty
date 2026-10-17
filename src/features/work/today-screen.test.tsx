@@ -205,7 +205,7 @@ it("gives each row its reason, owner with coverage, due or age, and one next ste
   const due = within(screen.getByRole("list", { name: "My overdue tasks" })).getByRole("link");
   expect(due).toHaveAttribute("href", "/en/tasks/task-due");
   expect(due).toHaveTextContent("Owner: Maria Example · Overdue since");
-  expect(due).toHaveTextContent("UTC · Promised to a client · Next step: record the outcome");
+  expect(due).toHaveTextContent("at 09:00 · Promised to a client · Next step: record the outcome");
   expect(due.querySelector("time")).toHaveAttribute("datetime", minutesAgo(90).toISOString());
   const offered = within(screen.getByRole("list", { name: "Awaiting my acceptance" })).getByRole(
     "link",
@@ -301,13 +301,7 @@ it("keeps overdue key returns among the due commitments for key managers", async
     ),
   ).toBeVisible();
   expect(row.querySelector("time")).toHaveAttribute("datetime", dueAt.toISOString());
-  expect(row.querySelector("time")).toHaveTextContent(
-    `${new Intl.DateTimeFormat("en", {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Europe/Sofia",
-    }).format(dueAt)} Europe/Sofia`,
-  );
+  expect(row.querySelector("time")).toHaveTextContent("Tue 6 October at 15:00");
   expect(screen.getByRole("link", { name: /^Overdue key returns/ })).toHaveAttribute(
     "href",
     "/en/operations/keys?state=overdue",

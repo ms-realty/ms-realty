@@ -1,6 +1,6 @@
 // O01 Today against real PostgreSQL with synthetic, record-scoped records: contract order,
 // counts that open their queues, rows with reason/owner/time/next step, the draft-only Butler
-// entry, truthful no-work, overload and overdue-follow-up states, and the 20 px phone padding
+// entry, access limits, overload and overdue-follow-up states, and the 20 px phone padding
 // of the Figma 390 frames. JavaScript on and off; BG, EN and RU. The mobile projects run every
 // case at 390 px; the padding case also checks 320 px.
 import { execFileSync } from "node:child_process";
@@ -21,7 +21,7 @@ type Seeds = {
     offered: string;
     offeredTitle: string;
   };
-  quiet: { emptyToken: string; overloadToken: string };
+  quiet: { emptyToken: string; overloadToken: string; managerName: string };
   overdue: { overdueToken: string; overdue: string };
 };
 /** Seeds only the scenario a case reads (see e2e/support/today-seed.ts). */
@@ -188,28 +188,45 @@ for (const javaScriptEnabled of [false, true])
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(f.oldestReference);
     });
 
-    test("O01 separates a day without work from more work than it lists", async ({
+    test("O01 separates staff without access from more work than it lists", async ({
       page,
     }, testInfo) => {
       const f = seed("quiet");
       await open(page, f.emptyToken, "/en/today");
-      await expect(page.getByText("Check the inquiries for new requests.")).toBeVisible();
+      // This staff member has no grants: missing access must never read as an empty queue.
+      const permission = page.locator("[data-permission-state]");
+      await expect(permission.getByRole("heading", { level: 1, name: "Today" })).toBeVisible();
       await expect(
-        page
-          .getByRole("main")
-          .getByRole("heading", { level: 2, name: "Nothing in today's lists needs action" }),
+        permission.getByRole("heading", { name: "Your access does not include this page" }),
       ).toBeVisible();
+      await expect(
+        permission.getByText("Your worklist will appear here when the agency assigns your access."),
+      ).toBeVisible();
+      await expect(
+        permission.getByText(
+          /^Contact .+ through your usual work channel and ask for access to this page\.$/,
+        ),
+      ).toBeVisible();
+      await expect(permission.getByText(f.managerName, { exact: false })).toBeVisible();
+      const callAgency = permission.getByRole("link", { name: "Call the agency", exact: true });
+      await expect(callAgency).toBeVisible();
+      await expect(callAgency).toHaveAttribute("href", "tel:+359879696870");
+      await expect(page.locator('[data-today-state="empty"]')).toHaveCount(0);
+      await expect(page.getByText("Nothing in today's lists needs action")).toHaveCount(0);
+      await expect(page.getByRole("navigation", { name: "Work scope" })).toHaveCount(0);
+      await expect(
+        page.locator(
+          'a[href^="/en/inquiries"], a[href^="/en/tasks"], a[href^="/en/cases"], a[href^="/en/inventory"], a[href^="/en/calendar"]',
+        ),
+      ).toHaveCount(0);
       await expect(page.getByRole("complementary", { name: "Butler" })).toHaveCount(0);
       await expect(groups(page)).toHaveCount(0);
       expect(await noOverflow(page)).toBe(true);
       await expectAccessible(page, javaScriptEnabled);
       await page.screenshot({
-        path: testInfo.outputPath(`today-empty-${javaScriptEnabled}.png`),
+        path: testInfo.outputPath(`today-no-access-${javaScriptEnabled}.png`),
         fullPage: true,
       });
-      await page.getByRole("link", { name: "Open the inquiries" }).click();
-      await expect(page).toHaveURL(hostUrl("staff", "/en/inquiries"));
-
       await open(page, f.overloadToken, "/en/today");
       // The server counts the whole queue; Today loads its first thirty rows.
       await expect(

@@ -48,7 +48,7 @@ const en = {
   publish: "Publish reviewed edition",
   withdraw: "Withdraw public page",
   note: "Review evidence or reason",
-  expiry: "Approval valid until (UTC)",
+  expiry: "Approval valid until",
   reviewed: "I reviewed this exact edition, its scope and this action.",
   sequence:
     "Qualified claim review creates an immutable reviewed edition. Editorial review and publication then bind that exact edition. Saving a draft leaves the existing published edition unchanged.",
@@ -117,7 +117,7 @@ const bg: Copy = {
   publish: "Публикуване на прегледаната версия",
   withdraw: "Оттегляне на страницата",
   note: "Основание или доказателство за преглед",
-  expiry: "Одобрението важи до (UTC)",
+  expiry: "Одобрението важи до",
   reviewed: "Прегледах тази точна версия, обхвата и действието.",
   sequence:
     "Квалифицираният преглед създава неизменяема прегледана версия. Редакционното одобрение и публикуването се отнасят за нея. Черновата не променя текущата публикация.",
@@ -184,7 +184,7 @@ const ru: Copy = {
   publish: "Опубликовать проверенную версию",
   withdraw: "Отозвать страницу",
   note: "Основание или доказательство проверки",
-  expiry: "Одобрение действует до (UTC)",
+  expiry: "Одобрение действует до",
   reviewed: "Я проверил точную версию, её область и это действие.",
   sequence:
     "Квалифицированная проверка создаёт неизменяемую проверенную версию. Редакционное одобрение и публикация привязаны к ней. Черновик не меняет существующую публикацию.",

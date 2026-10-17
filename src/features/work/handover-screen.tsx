@@ -63,7 +63,7 @@ export function TaskHandoverScreen({
               name: "dueAt",
               label: c.reviewAt,
               type: "datetime-local",
-              hint: `${c.zoneNote} ${c.acceptRule}`,
+              hint: c.acceptRule,
               required: true,
             },
           ]
@@ -230,7 +230,7 @@ export function TaskHandoverScreen({
             {decision}
           </>
         ) : null}
-        <h3 className="font-semibold">{c.offerTitle}</h3>
+        <h2 className="font-semibold">{c.offerTitle}</h2>
         <p className="text-text-muted">{c.lead}</p>
         {declinedBy ? <p className="text-text-muted">{fill(c.declinedHidden, { actor })}</p> : null}
         {offerable.length ? form("request", c.request) : <p>{c.none}</p>}

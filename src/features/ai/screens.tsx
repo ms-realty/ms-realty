@@ -2,7 +2,9 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
-import { isStaffLocale } from "@/i18n/config";
+import { workCopy } from "@/features/work/copy";
+import { isPublicLocale, isStaffLocale, localeEndonyms } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import {
   listAssistanceRuns,
   readAssistanceOperation,
@@ -18,12 +20,15 @@ import type { Session } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
 import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { type AiValues, assistanceAction } from "./actions";
 import { aiCopy } from "./copy";
+import { assistanceCost } from "./cost-label";
 import { AssistanceForm } from "./forms";
 import { intakeAiCopy } from "./intake-copy";
 import { IntakeDraftPanel, IntakeSourcePanel } from "./intake-screen";
 import { JevReview } from "./jev-review";
+import { aiLabel } from "./labels";
 import { localeAiCopy } from "./locale-copy";
 import { LocaleSourcePanel } from "./locale-screen";
 
@@ -32,6 +37,7 @@ export function checkAiLocale(locale: string) {
 }
 function sourcePanel(source: AssistanceSource, locale: string) {
   const copy = aiCopy(locale);
+  const purposes: Record<string, string> = workCopy(locale).purposes;
   return (
     <section className="space-y-3">
       <h2 className="text-subheading font-semibold">{copy.source}</h2>
@@ -39,8 +45,25 @@ function sourcePanel(source: AssistanceSource, locale: string) {
       <dl className="space-y-2">
         {Object.entries(source.fields).map(([field, value]) => (
           <div key={field}>
-            <dt className="text-caption text-text-muted">{field}</dt>
-            <dd className="whitespace-pre-wrap break-words">{value}</dd>
+            <dt className="text-caption text-text-muted">{aiLabel("field", field, locale)}</dt>
+            <dd className="whitespace-pre-wrap break-words">
+              {field === "locale"
+                ? isPublicLocale(value)
+                  ? localeEndonyms[value]
+                  : aiLabel("code", null, locale)
+                : field === "purpose"
+                  ? (purposes[value] ?? aiLabel("code", null, locale))
+                  : value}
+            </dd>
+            {field === "purpose" || field === "locale" ? (
+              <dd>
+                <TechnicalDetails locale={locale}>
+                  <bdi>
+                    {field}: {value}
+                  </bdi>
+                </TechnicalDetails>
+              </dd>
+            ) : null}
           </div>
         ))}
       </dl>
@@ -90,7 +113,11 @@ export async function AssistanceScreen({
       {operationKey ? (
         <Notice
           tone="info"
-          title={operation ? `${copy.status}: ${operation.status}` : copy.operationMissing}
+          title={
+            operation
+              ? `${copy.status}: ${aiLabel("operation", operation.status, locale)}`
+              : copy.operationMissing
+          }
         >
           {operation?.id ? (
             <a className="underline" href={`/${locale}/operations/assistance/${operation.id}`}>
@@ -120,8 +147,10 @@ export async function AssistanceScreen({
                 <a className="underline" href={`/${locale}/operations/assistance/${run.id}`}>
                   {copy.open}
                 </a>{" "}
-                · {run.state} · {run.task} ·{" "}
-                <time dateTime={run.createdAt.toISOString()}>{run.createdAt.toISOString()}</time>
+                · {aiLabel("run", run.state, locale)} · {aiLabel("task", run.task, locale)} ·{" "}
+                <time dateTime={run.createdAt.toISOString()}>
+                  {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
+                </time>
               </li>
             ))}
           </ul>
@@ -155,6 +184,7 @@ export async function AssistanceRunScreen({
     : translatedSource
       ? localeDraftSchema.safeParse(run.output)
       : draftSchema.safeParse(run.output);
+  const purposes: Record<string, string> = workCopy(locale).purposes;
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.title}</h1>
@@ -211,7 +241,7 @@ export async function AssistanceRunScreen({
         />
       ) : null}
       <p>
-        {copy.status}: <strong>{run.state}</strong>
+        {copy.status}: <strong>{aiLabel("run", run.state, locale)}</strong>
       </p>
       {extractedSource ? (
         <IntakeSourcePanel source={extractedSource} locale={locale} />
@@ -250,14 +280,41 @@ export async function AssistanceRunScreen({
                       citation,
                     ]),
                   ).values(),
-                ].map((citation) => (
-                  <li key={`${citation.field}:${citation.quote}`}>
-                    <span className="text-caption">{citation.field}</span>
+                ].map((citation) => {
+                  const purposeLabel =
+                    citation.field === "purpose" &&
+                    source.fields.purpose === citation.quote &&
+                    Object.hasOwn(purposes, citation.quote)
+                      ? purposes[citation.quote]
+                      : null;
+                  const quote = (
                     <blockquote className="whitespace-pre-wrap border-s-2 border-border ps-4">
                       {citation.quote}
                     </blockquote>
-                  </li>
-                ))}
+                  );
+                  return (
+                    <li key={`${citation.field}:${citation.quote}`}>
+                      <span className="text-caption">
+                        {aiLabel("field", citation.field, locale)}
+                      </span>
+                      {purposeLabel ? (
+                        <>
+                          <p>{purposeLabel}</p>
+                          <TechnicalDetails locale={locale}>
+                            <p>
+                              <bdi>
+                                {source.id} · {source.version} · {citation.field}
+                              </bdi>
+                            </p>
+                            {quote}
+                          </TechnicalDetails>
+                        </>
+                      ) : (
+                        quote
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </>
           ) : null}
@@ -293,16 +350,24 @@ export async function AssistanceRunScreen({
           action={assistanceAction.bind(null, locale, id, "review")}
         />
       ) : null}
-      <details className="space-y-4">
-        <summary className="min-h-11 cursor-pointer py-2 font-semibold underline underline-offset-4">
-          {copy.evidence}
-        </summary>
+      <TechnicalDetails locale={locale}>
+        <p>{copy.evidence}</p>
+        <p>
+          <bdi>
+            {run.id} · {run.task} · {run.state}
+          </bdi>
+        </p>
         <dl className="grid gap-3 sm:grid-cols-2">
           {[
             [copy.model, run.model],
             [copy.revision, run.sourceVersion],
             [copy.digest, run.sourceDigest],
-            [copy.generated, run.generatedAt?.toISOString() ?? "—"],
+            [
+              copy.generated,
+              run.generatedAt
+                ? formatDateTime(isPublicLocale(locale) ? locale : "bg", run.generatedAt)
+                : "—",
+            ],
             [copy.costs, run.actualCostMicros ?? copy.unknown],
           ].map(([label, value]) => (
             <div key={String(label)}>
@@ -311,7 +376,7 @@ export async function AssistanceRunScreen({
             </div>
           ))}
         </dl>
-      </details>
+      </TechnicalDetails>
     </DiscoveryPage>
   );
 }
@@ -354,11 +419,14 @@ export async function JobsScreen({
         </ul>
       </section>
       <p>
-        {copy.checked}: <time dateTime={status.checkedAt}>{status.checkedAt}</time>
+        {copy.checked}:{" "}
+        <time dateTime={status.checkedAt}>
+          {formatDateTime(isPublicLocale(locale) ? locale : "bg", status.checkedAt)}
+        </time>
       </p>
       <Notice
         tone={status.worker.state === "current" ? "info" : "warning"}
-        title={`Queue worker: ${status.worker.state}`}
+        title={aiLabel("worker", status.worker.state, locale)}
       >
         <p>
           {locale === "bg"
@@ -368,13 +436,25 @@ export async function JobsScreen({
               : "Shows queue progress for this build only; it does not prove provider or backup health."}
         </p>
         <p>
-          {status.worker.reason} · {status.worker.completedAt ?? "—"}
+          {aiLabel("reason", status.worker.reason, locale)} ·{" "}
+          {status.worker.completedAt
+            ? formatDateTime(isPublicLocale(locale) ? locale : "bg", status.worker.completedAt)
+            : "—"}
         </p>
       </Notice>
-      <p>
-        {copy.model}: {status.provider.model ?? "—"} ·{" "}
-        {status.provider.enabled ? copy.enabled : copy.off}
-      </p>
+      <p>{status.provider.enabled ? copy.enabled : copy.off}</p>
+      <TechnicalDetails locale={locale}>
+        <p>
+          {copy.model}: {status.provider.model ?? "—"}
+        </p>
+        <p>
+          {status.worker.state} · {status.worker.reason} · {status.worker.completedAt ?? "—"}
+        </p>
+        <p>
+          {copy.costs}: {status.spend.known} · {status.spend.reserved} ·{" "}
+          {status.provider.dailyLimitMicros}
+        </p>
+      </TechnicalDetails>
       <dl className="grid gap-4 sm:grid-cols-3">
         {[
           [copy.knownCost, status.spend.known],
@@ -383,7 +463,7 @@ export async function JobsScreen({
         ].map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
-            <dd>{value} USD µ</dd>
+            <dd>{assistanceCost(value ?? "", locale)}</dd>
           </div>
         ))}
       </dl>
@@ -406,11 +486,18 @@ export async function JobsScreen({
               {status.jobs.map((job) => (
                 <tr key={`${job.name}-${job.state}`} className="border-t border-border">
                   <th scope="row" className="p-3 text-start font-normal">
-                    {job.name}
+                    {aiLabel("queue", job.name, locale)}
+                    <TechnicalDetails locale={locale}>
+                      <bdi>
+                        {job.name} · {job.state}
+                      </bdi>
+                    </TechnicalDetails>
                   </th>
-                  <td className="p-3">{job.state}</td>
+                  <td className="p-3">{aiLabel("job", job.state, locale)}</td>
                   <td className="p-3">{job.count}</td>
-                  <td className="p-3">{new Date(job.oldest).toISOString()}</td>
+                  <td className="p-3">
+                    {formatDateTime(isPublicLocale(locale) ? locale : "bg", job.oldest)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -430,13 +517,21 @@ export async function JobsScreen({
         <ul className="space-y-3">
           {status.inbox.map((event) => (
             <li key={event.id} className="break-words rounded-control border border-border p-4">
-              <bdi>{event.id}</bdi>
               <p>
-                {event.provider} · {event.eventType} · {event.state} · {event.code ?? "—"}
+                {aiLabel("provider", event.provider, locale)} ·{" "}
+                {aiLabel("event", event.eventType, locale)} ·{" "}
+                {aiLabel("inbox", event.state, locale)}
               </p>
+              {event.code ? <p>{aiLabel("code", event.code, locale)}</p> : null}
               <time dateTime={event.receivedAt.toISOString()}>
-                {event.receivedAt.toISOString()}
+                {formatDateTime(isPublicLocale(locale) ? locale : "bg", event.receivedAt)}
               </time>
+              <TechnicalDetails locale={locale}>
+                <bdi>{event.id}</bdi>
+                <p>
+                  {event.provider} · {event.eventType} · {event.state} · {event.code ?? "—"}
+                </p>
+              </TechnicalDetails>
             </li>
           ))}
         </ul>
@@ -481,13 +576,21 @@ export async function JobsScreen({
               id={`external-action-${event.id}`}
               className="break-words rounded-control border border-border p-4"
             >
-              <bdi>{event.id}</bdi>
               <p>
-                {event.kind} · {event.state} · {event.code ?? "—"}
+                {aiLabel("externalKind", event.kind, locale)} ·{" "}
+                {aiLabel("external", event.state, locale)}
               </p>
+              {event.code ? <p>{aiLabel("code", event.code, locale)}</p> : null}
               <p>
-                {event.at?.toISOString() ?? "—"} · {event.attempts}
+                {event.at ? formatDateTime(isPublicLocale(locale) ? locale : "bg", event.at) : "—"}{" "}
+                · {copy.attempts}: {event.attempts}
               </p>
+              <TechnicalDetails locale={locale}>
+                <bdi>{event.id}</bdi>
+                <p>
+                  {event.kind} · {event.state} · {event.code ?? "—"}
+                </p>
+              </TechnicalDetails>
             </li>
           ))}
         </ul>

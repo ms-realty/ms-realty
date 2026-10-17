@@ -1,7 +1,9 @@
 "use server";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
 import {
   type ContentDecision,
@@ -12,9 +14,10 @@ import {
 } from "@/server/content/commands";
 import { contentBody } from "@/server/content/public";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { contentCopy } from "./copy";
 export type ContentValues = {
   kind: string;
@@ -49,7 +52,7 @@ function state<V extends FormValues>(
       operationId: key,
       expectedRevision: envelope?.expectedRevision ?? null,
       reconciliation: status(locale, kind, id, key),
-      values: readFormValues<V>(data, fields),
+      values: readTimeFormValues<V>(data, fields),
       responseId: randomUUID(),
       outcome: { kind: "idle" },
     } satisfies FormState<V>,
@@ -68,7 +71,10 @@ function saved<V extends FormValues>(
       receipt: {
         title: copy.saved,
         reference: result.id,
-        recordedAt: { dateTime: result.recordedAt, label: result.recordedAt },
+        recordedAt: {
+          dateTime: result.recordedAt,
+          label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.recordedAt),
+        },
         nextStep: copy.next,
         destination: { href: `/${locale}/content/${result.id}`, label: copy.open },
       },
@@ -237,7 +243,7 @@ export async function decideContentAction(
       if (!ctx.session) throw new AppError("unauthenticated");
       if (!envelope?.expectedRevision || base.values.reviewed !== "yes")
         throw new AppError("validation_failed");
-      const expiresAt = base.values.expiresAt ? `${base.values.expiresAt}:00Z` : undefined;
+      const expiresAt = base.values.expiresAt ? formInstant(base.values, "expiresAt") : undefined;
       return (
         await decideContent(ctx.db, ctx.session, {
           id,
@@ -266,6 +272,28 @@ export async function decideContentAction(
       },
     };
   const key = issueFormOperation(scope);
+  if (result.error.code === "VALIDATION_FAILED")
+    return {
+      ...base,
+      operationId: key,
+      reconciliation: status(locale, "decide", id, key),
+      outcome: {
+        kind: "validation",
+        code: "VALIDATION_FAILED",
+        message: copy.validation,
+        fieldErrors: Object.fromEntries(
+          Object.entries(result.error.fieldErrors ?? {})
+            .filter(([field]) => field in base.values)
+            .map(([field, reasons]) => [
+              field,
+              [
+                timeReasonMessage(isPublicLocale(locale) ? locale : "bg", reasons[0]) ??
+                  copy.invalid,
+              ],
+            ]),
+        ),
+      },
+    };
   return {
     ...base,
     operationId: key,

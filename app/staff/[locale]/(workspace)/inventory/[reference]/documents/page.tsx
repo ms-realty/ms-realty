@@ -1,4 +1,5 @@
 // O20/F15: evidence is accepted only for its named purpose and exact current version.
+
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/db/client";
 import {
@@ -8,12 +9,15 @@ import {
 } from "@/domain/document";
 import { fileError, fileLabel, filesCopy } from "@/features/files/copy";
 import { FileButton, FileCheck, FileEnvelope, FileField } from "@/features/files/forms";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDate } from "@/i18n/format";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { documentsForListing } from "@/server/documents/commands";
 import { isAppError } from "@/server/errors";
 import { fileReceipt } from "@/server/files/receipts";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 
 export default async function DocumentsPage({
@@ -62,7 +66,7 @@ export default async function DocumentsPage({
       ) : null}
       {query.error ? <Notice tone="error">{fileError(copy, query.error)}</Notice> : null}
       {data.mayCreate ? (
-        <form
+        <NativeForm
           action={action}
           method="post"
           encType="multipart/form-data"
@@ -94,7 +98,7 @@ export default async function DocumentsPage({
             </select>
           </label>
           <FileButton>{copy.submit}</FileButton>
-        </form>
+        </NativeForm>
       ) : (
         <p>{copy.denied}</p>
       )}
@@ -134,7 +138,7 @@ export default async function DocumentsPage({
             <p>
               {copy.expiry}:{" "}
               <time dateTime={document.expiresAt.toISOString()}>
-                {document.expiresAt.toISOString().slice(0, 10)}
+                {formatDate(isPublicLocale(locale) ? locale : "bg", document.expiresAt)}
               </time>
             </p>
           ) : null}
@@ -144,7 +148,7 @@ export default async function DocumentsPage({
             </a>
           ) : null}
           {upload && !upload.completedAt && upload.expiresAt > new Date() ? (
-            <form
+            <NativeForm
               action={action}
               method="post"
               encType="multipart/form-data"
@@ -154,16 +158,20 @@ export default async function DocumentsPage({
               <input type="hidden" name="uploadId" value={upload.id} />
               {chooser}
               <FileButton>{copy.resume}</FileButton>
-            </form>
+            </NativeForm>
           ) : null}
           {file.sealedKey && file.scan === "failed" ? (
-            <form action={action} method="post">
+            <NativeForm action={action} method="post">
               <FileEnvelope intent="scan" version={file.version} id={file.id} />
               <FileButton>{copy.retry}</FileButton>
-            </form>
+            </NativeForm>
           ) : null}
           {mayReview && isDocumentExposable(file.state, file.scan) ? (
-            <form action={action} method="post" className="grid gap-4 border-t border-divider pt-4">
+            <NativeForm
+              action={action}
+              method="post"
+              className="grid gap-4 border-t border-divider pt-4"
+            >
               <FileEnvelope intent="review" version={file.version} id={file.id} />
               <label className="grid gap-2">
                 <span className={labelClass}>{copy.decision}</span>
@@ -199,11 +207,11 @@ export default async function DocumentsPage({
               />
               <FileCheck name="confirmed">{copy.documentCheck}</FileCheck>
               <FileButton>{copy.reviewAction}</FileButton>
-            </form>
+            </NativeForm>
           ) : null}
           <details>
             <summary className="cursor-pointer underline">{copy.replace}</summary>
-            <form
+            <NativeForm
               action={action}
               method="post"
               encType="multipart/form-data"
@@ -215,7 +223,7 @@ export default async function DocumentsPage({
               <input type="hidden" name="classification" value={document.classification} />
               {chooser}
               <FileButton>{copy.replace}</FileButton>
-            </form>
+            </NativeForm>
           </details>
         </section>
       ))}

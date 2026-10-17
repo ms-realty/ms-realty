@@ -6,7 +6,7 @@ const en = {
   recordStage: "Record stage change",
   reason: "Reason",
   outcome: "Recorded outcome",
-  evidence: "Reviewed completion document version ID",
+  evidence: "Reviewed completion document",
   retention: "Retention disposition",
   aftercare: "Aftercare disposition",
   handoverStatus: "Property handover status",
@@ -16,9 +16,9 @@ const en = {
   active: "Active",
   closed: "Closed",
   waiting: "Waiting for",
-  reviewAt: "Review date (UTC)",
+  reviewAt: "Review date",
   next: "Next action when reopening",
-  due: "Next action due (UTC)",
+  due: "Next action due",
   recordDisposition: "Record disposition",
   handover: "Broker handover",
   receiver: "Receiving broker",
@@ -51,7 +51,8 @@ const en = {
 type Copy = { [K in keyof typeof en]: string };
 const bg: Copy = {
   ...en,
-  title: "Продължаване на случая",
+  title: "Продължаване на сделката",
+  evidence: "Проверен документ за приключване",
   stage: "Промяна на етапа",
   target: "Следващ етап",
   recordStage: "Запис на етапа",
@@ -79,7 +80,8 @@ const bg: Copy = {
 };
 const ru: Copy = {
   ...en,
-  title: "Продолжение дела",
+  title: "Продолжение сделки",
+  evidence: "Проверенный документ о завершении",
   stage: "Изменить этап",
   target: "Следующий этап",
   recordStage: "Записать этап",

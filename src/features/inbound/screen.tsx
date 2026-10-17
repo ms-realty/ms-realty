@@ -1,3 +1,5 @@
+import { NativeForm } from "@/ui/form/native-form";
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { getDb } from "@/db/client";
 import type { Session } from "@/server/auth/sessions";
@@ -129,7 +131,9 @@ export async function InboundDetail({
         </pre>
         {row.htmlOmitted ? <p>{c.omitted}</p> : null}
         <p>{c.auth}</p>
-        <pre className="whitespace-pre-wrap break-all">{JSON.stringify(row.authentication)}</pre>
+        <TechnicalDetails locale={locale}>
+          <pre className="whitespace-pre-wrap break-all">{JSON.stringify(row.authentication)}</pre>
+        </TechnicalDetails>
         {attachments.length ? (
           <section>
             <h3>{c.attachments}</h3>
@@ -210,7 +214,7 @@ export async function InboundDetail({
               </a>
             </p>
           ) : null}
-          <form method="post" action={`${base}/submit`} className="grid min-w-0 gap-4">
+          <NativeForm method="post" action={`${base}/submit`} className="grid min-w-0 gap-4">
             <input
               type="hidden"
               name="operationId"
@@ -240,7 +244,7 @@ export async function InboundDetail({
                     <option value="">—</option>
                     {selected.participants.map((p) => (
                       <option key={p.id} value={p.partyId}>
-                        {p.name} · {p.role}
+                        {p.name} · {workflowLabel(p.role, locale)}
                       </option>
                     ))}
                   </select>
@@ -288,7 +292,7 @@ export async function InboundDetail({
                 {c.reject}
               </button>
             </div>
-          </form>
+          </NativeForm>
         </>
       ) : (
         <p>{row.decisionNote}</p>
@@ -296,3 +300,5 @@ export async function InboundDetail({
     </div>
   );
 }
+
+import { workflowLabel } from "@/i18n/workflow-labels";

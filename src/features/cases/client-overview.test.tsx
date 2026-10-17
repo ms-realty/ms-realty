@@ -193,7 +193,7 @@ it.each([2, 50])(
       "href",
       "/en/overview/case-1",
     );
-    expect(list).toHaveTextContent("Buying · needs agreed · Active");
+    expect(list).toHaveTextContent("Buying · Requirements agreed · Active");
   },
 );
 

@@ -5,12 +5,12 @@ import { isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { requireAuthHost } from "@/server/auth/pages";
 import { decideCaseAccessRequest, requestCaseAccess } from "@/server/cases/access-requests";
 import { revokeCaseParticipant } from "@/server/cases/participants";
-import { processLocalInstant } from "@/server/compliance/local-time";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import { findOperation } from "@/server/operations";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import {
   type AccessBinding,
@@ -32,7 +32,7 @@ export async function caseAccessAction(
     scope = accessScope(binding),
     envelope = readFormEnvelope(form, scope),
     c = caseCopy(locale);
-  const values = readFormValues<FormValues>(form, fields),
+  const values = readTimeFormValues<FormValues>(form, fields),
     operationId = envelope?.operationId ?? issueFormOperation(scope),
     path = accessPath(locale, binding.host, binding.caseId);
   const status = {
@@ -82,9 +82,7 @@ export async function caseAccessAction(
           requestId: binding.targetId ?? "",
           decision: binding.command === "withdraw" ? "withdraw" : (values.decision as "approve"),
           clientOutcome: values.clientOutcome ?? "",
-          accessExpiresAt: values.accessExpiresAt
-            ? processLocalInstant(values.accessExpiresAt)
-            : null,
+          accessExpiresAt: values.accessExpiresAt ? formInstant(values, "accessExpiresAt") : null,
         });
       } catch (error) {
         recorded =

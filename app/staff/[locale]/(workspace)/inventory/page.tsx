@@ -7,6 +7,7 @@ import { getDb } from "@/db/client";
 import { listingPurposes, propertyTypes } from "@/domain/facts";
 import { inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import { rowAction, rowDestination } from "@/features/inventory/row-action";
+import { PermissionState } from "@/features/shell/permission-state";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { isAppError } from "@/server/errors";
@@ -56,14 +57,29 @@ export default async function InventoryPage({
   // A cursor from another filter or a stale list fails closed, and a later page that has
   // emptied (rows=[] while matches remain) is not "no results": both restart at page one.
   let restarted = false;
-  let page = await inventoryListPage(db, session.actor, {
-    ...filters,
-    cursor: query.cursor,
-  }).catch((error) => {
-    if (!query.cursor || !isAppError(error) || error.code !== "validation_failed") throw error;
-    restarted = true;
-    return inventoryListPage(db, session.actor, filters);
-  });
+  let page: Awaited<ReturnType<typeof inventoryListPage>>;
+  try {
+    page = await inventoryListPage(db, session.actor, {
+      ...filters,
+      cursor: query.cursor,
+    }).catch((error) => {
+      if (!query.cursor || !isAppError(error) || error.code !== "validation_failed") throw error;
+      restarted = true;
+      return inventoryListPage(db, session.actor, filters);
+    });
+  } catch (error) {
+    // No listing.read scope (a member without grants yet): say so instead of crashing (M-003).
+    if (isAppError(error) && error.code === "forbidden")
+      return (
+        <PermissionState
+          locale={locale}
+          title={copy.inventory}
+          about={o10.about}
+          session={session}
+        />
+      );
+    throw error;
+  }
   if (query.cursor && !restarted && page.rows.length === 0 && page.total > 0) {
     restarted = true;
     page = await inventoryListPage(db, session.actor, filters);

@@ -2,6 +2,7 @@
 // and the six required human approvals are read from recorded state; the approvals are status,
 // never boxes to tick (O16EL: separate decisions, no shared "verified" mark). Every decision
 // below keeps its own form, actor, permission and revision check.
+
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import type { ReactNode } from "react";
@@ -22,7 +23,8 @@ import type { InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
-import { agencyTimeZone } from "@/i18n/config";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { can } from "@/server/authz";
 import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
@@ -366,11 +368,7 @@ export async function ReviewView({
       reference,
       manifestId: chosen.id,
     }).catch(() => "unavailable" as const);
-    const when = new Intl.DateTimeFormat(locale, {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: agencyTimeZone,
-    });
+    const when = (at: Date) => formatDateTime(isPublicLocale(locale) ? locale : "bg", at);
     const decided = (recorded: PublicationReviewDecision | undefined) => {
       // A failed read is not a missing approval: say which it is.
       if (reviewers === "unavailable") return o16.decisionUnavailable;
@@ -382,7 +380,7 @@ export async function ReviewView({
           decider?.identityState === "resolved" && decider.displayName
             ? `${decider.displayName} ${o16.currentName}`
             : o16.deciderUnknown,
-        when: recorded.decidedAt ? when.format(recorded.decidedAt) : "—",
+        when: recorded.decidedAt ? when(recorded.decidedAt) : "—",
         state: o16.approvalStates[recorded.state],
       });
     };
@@ -440,7 +438,10 @@ export async function ReviewView({
           <p role="alert" className="rounded-control bg-warning-soft p-4 text-dense">
             {fill(o16.notEligibleLocale, {
               locale: chosen.locale.toUpperCase(),
-              reason: local.decision.code.replaceAll("_", " "),
+              reason:
+                inventoryDecisionCopy(locale).blockers[
+                  local.decision.code as keyof ReturnType<typeof inventoryDecisionCopy>["blockers"]
+                ] ?? inventoryDecisionCopy(locale).unavailable,
             })}
           </p>
         ) : null}

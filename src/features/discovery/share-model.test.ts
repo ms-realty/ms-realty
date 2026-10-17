@@ -66,11 +66,12 @@ describe("shared link view", () => {
     expect(view.revoked).toBeNull();
   });
 
-  it("words expiry with the actual date, time and zone", () => {
+  it("words expiry with the actual date, time and zone in words", () => {
     const view = sharedLinkView(share(), context);
     expect(view.expires?.dateTime).toBe(hours(24 * 6));
-    expect(view.expires?.label).toMatch(/2026/);
-    expect(view.expires?.label).toMatch(/EES?T|GMT\+[23]/);
+    expect(view.expires?.label).toMatch(/\d{1,2} [A-Z][a-z]+.* \d{2}:\d{2} \(Sofia time\)$/);
+    expect(view.expires?.label).not.toMatch(/UTC|GMT|EES?T|Europe\//);
+    expect(view.created.label).not.toMatch(/Sofia/);
     expect(moment("he", hours(1)).dateTime).toBe(hours(1));
   });
 

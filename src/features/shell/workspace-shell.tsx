@@ -5,7 +5,7 @@
 import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx } from "@/ui/cx";
@@ -19,10 +19,12 @@ import {
   type AgencyToolGroup,
   linked,
   permittedTools,
+  permittedWorkspaceNav,
+  type WorkspaceNavItem,
   type WorkspaceNavLabel,
-  workspacePrimaryNav,
   workspaceSecondaryNav,
 } from "./navigation";
+import { NavigationLoading } from "./navigation-loading";
 import { WorkspaceContext } from "./workspace-context";
 
 export const workspaceMainId = "main";
@@ -53,6 +55,7 @@ export async function WorkspaceShell({
   account,
   mayManageAccess = false,
   tools,
+  primary: primaryItems = permittedWorkspaceNav(new Set()),
   children,
 }: {
   locale: StaffLocale;
@@ -65,13 +68,14 @@ export async function WorkspaceShell({
   mayManageAccess?: boolean;
   /** X02 rows this person may open (navigation.ts); signed out, only rows anyone may open. */
   tools?: readonly AgencyToolGroup[];
+  primary?: readonly WorkspaceNavItem[];
   children: ReactNode;
 }) {
   const t = await getTranslations({ locale, namespace: "workspace" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
   const common = await getTranslations({ locale, namespace: "common" });
   const toolsCopy = await getTranslations({ locale, namespace: "tools" });
-  const primary = linked(workspacePrimaryNav, locale);
+  const primary = linked(primaryItems, locale);
   const secondary = linked(workspaceSecondaryNav, locale);
   const butler = secondary.find((item) => item.label === "butler");
   const toolsPage = secondary.find((item) => item.label === "moreTools");
@@ -236,7 +240,10 @@ export async function WorkspaceShell({
             {languageSwitcher}
           </section>
           <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
-            {children}
+            <Suspense fallback={null}>
+              <NavigationLoading surface="staff" />
+            </Suspense>
+            <div data-route-content="">{children}</div>
           </main>
         </div>
       </div>

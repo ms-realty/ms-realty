@@ -14,7 +14,7 @@ import {
   type ScreenProps,
   WorkflowPage,
   WorkflowSection,
-  WorkflowTime,
+  WorkflowTimeRange,
   workflowLink,
 } from "../cases/screens";
 import { coverageCopy } from "../work/coverage-copy";
@@ -67,7 +67,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       <p>
         {c.owned}: {row.hostName ?? "—"}
       </p>
-      <p>Europe/Sofia</p>
+
       {row.caseId ? (
         <nav className="flex flex-wrap gap-4" aria-label={hostCopy.links}>
           <a
@@ -103,8 +103,12 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               : c.confirmedTime
           }
         >
-          <WorkflowTime value={row.confirmedStartsAt} locale={props.locale} /> —{" "}
-          <WorkflowTime value={row.confirmedEndsAt} locale={props.locale} />
+          <WorkflowTimeRange
+            start={row.confirmedStartsAt}
+            end={row.confirmedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
           {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
           <p>{c.calendarNote}</p>
           <a className={workflowLink} href={`${path}/calendar`} download>
@@ -114,8 +118,12 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       ) : null}
       {row.proposedStartsAt ? (
         <WorkflowSection title={c.proposedTime}>
-          <WorkflowTime value={row.proposedStartsAt} locale={props.locale} /> —{" "}
-          <WorkflowTime value={row.proposedEndsAt} locale={props.locale} />
+          <WorkflowTimeRange
+            start={row.proposedStartsAt}
+            end={row.proposedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
         </WorkflowSection>
       ) : null}
       {staff && detail.hostOffer ? (
@@ -192,8 +200,11 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           {detail.reservedInterval ? (
             <p>
               {hostCopy.reserved}:{" "}
-              <WorkflowTime value={detail.reservedInterval.startsAt} locale={props.locale} /> —{" "}
-              <WorkflowTime value={detail.reservedInterval.endsAt} locale={props.locale} />
+              <WorkflowTimeRange
+                start={detail.reservedInterval.startsAt}
+                end={detail.reservedInterval.endsAt}
+                locale={props.locale}
+              />
             </p>
           ) : null}
           <BoundWorkflowForm
@@ -241,8 +252,8 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
                   { value: "confirm", label: c.confirm },
                 ],
               },
-              { name: "startsAt", label: c.start, hint: c.offsetHint, required: true },
-              { name: "endsAt", label: c.end, hint: c.offsetHint, required: true },
+              { name: "startsAt", label: c.start, type: "datetime-local", required: true },
+              { name: "endsAt", label: c.end, type: "datetime-local", required: true },
               { name: "bufferMinutes", label: c.buffer, type: "number", required: true },
               { name: "propertyAccessConfirmed", label: c.access, type: "checkbox" },
               { name: "externalBusyChecked", label: c.external, type: "checkbox" },

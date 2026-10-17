@@ -4,7 +4,9 @@
 // never presented as a listing fact. Nothing here derives a fit.
 import type { Money } from "@/domain/facts";
 import { isPublicLocale, type PublicLocale } from "@/i18n/config";
+import { factFieldLabel } from "@/i18n/fact-labels";
 import { formatArea, formatMoney } from "@/i18n/format";
+import { workflowLabel } from "@/i18n/workflow-labels";
 import type { ListingCard, SearchCriteria } from "@/server/listings/view-models";
 import { fill, joinList, type MatchingCopy } from "./matching-copy";
 
@@ -24,7 +26,6 @@ export type MatchCard = Pick<
 type Range = { readonly min?: number; readonly max?: number };
 
 const capitalize = (value: string) => value.charAt(0).toLocaleUpperCase() + value.slice(1);
-const humanize = (key: string) => key.replaceAll("_", " ");
 
 export function placeOf(card: Pick<MatchCard, "place">): string | null {
   return (
@@ -73,25 +74,28 @@ export function matchingPhrases(
   const budget = criteria.price ? span(criteria.price, money) : "";
   const bedrooms = criteria.bedrooms ? countSpan(criteria.bedrooms, f.bedroomsCount) : "";
   const rooms = criteria.rooms ? countSpan(criteria.rooms, f.roomsCount) : "";
-  const areaName = (basis: string) => fill(f.areaNamed, { basis: f.areaBasis[basis] ?? basis });
+  const areaName = (basis: string) =>
+    fill(f.areaNamed, { basis: f.areaBasis[basis] ?? factFieldLabel(`area.${basis}`, locale) });
   const area = criteria.area
     ? `${areaName(criteria.area.basis)} ${span(criteria.area, (n) => formatArea(pl, n))}`
     : "";
-  const types = (criteria.propertyTypes ?? []).map((type) => f.types[type] ?? humanize(type));
+  const types = (criteria.propertyTypes ?? []).map(
+    (type) => f.types[type] ?? f.types.other ?? factFieldLabel("propertyType", locale),
+  );
   const places = (criteria.placeIds ?? []).flatMap((id) => {
     const name = placeNames.get(id);
     return name ? [name] : [];
   });
-  const feature = (key: string) => f.features[key] ?? humanize(key);
+  const feature = (key: string) => f.features[key] ?? factFieldLabel(`feature.${key}`, locale);
   const featureOf = (key: string) => key.slice("feature.".length);
   const status = (card: Pick<MatchCard, "availability">) =>
-    f.status[card.availability.presented] ?? humanize(card.availability.presented);
+    f.status[card.availability.presented] ?? workflowLabel(null, locale);
 
   /** A plain noun: «Не е известно: наличност, асансьор». */
   function name(key: string): string {
     if (key.startsWith("feature.")) return feature(featureOf(key));
     if (key.startsWith("area.")) return areaName(key.slice("area.".length));
-    return f.name[key] ?? humanize(key);
+    return f.name[key] ?? factFieldLabel(key, locale);
   }
 
   /** In a sentence, as an object («потвърдете цената») or a subject («цената не отговаря»). */
@@ -99,7 +103,7 @@ export function matchingPhrases(
     if (key.startsWith("feature."))
       return fill(f.featureQuoted, { label: feature(featureOf(key)) });
     const forms = f.definite[key.startsWith("area.") ? "area" : key];
-    return forms ? forms[subject ? 1 : 0] : humanize(key);
+    return forms ? forms[subject ? 1 : 0] : factFieldLabel(key, locale);
   }
 
   const definites = (keys: readonly string[], subject = false) =>
@@ -168,7 +172,7 @@ export function matchingPhrases(
     }
     if (key === "propertyType")
       return line(
-        f.types[card.propertyType] ?? humanize(card.propertyType),
+        f.types[card.propertyType] ?? f.types.other ?? factFieldLabel("propertyType", locale),
         fill(f.wanted, { value: types.join(` ${f.or} `) }),
       );
     if (key === "place")

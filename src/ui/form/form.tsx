@@ -19,6 +19,7 @@ import { ErrorSummary } from "../error-summary";
 import { Notice } from "../notice";
 import { Receipt } from "../receipt";
 import { ReceiptListings } from "../receipt-listings";
+import { TechnicalDetails } from "../technical-details";
 import {
   type FieldErrors,
   type FormAction,
@@ -28,6 +29,7 @@ import {
   formFields,
   type RecoveryLink,
 } from "./contract";
+import { nativeTimeValue } from "./date-time-value";
 
 type FieldBinding = {
   id: string;
@@ -61,6 +63,8 @@ export type ActionFormProps<V extends FormValues> = {
   permalink: string;
   /** Stable, page-unique business identity for a form in a list that can reorder. */
   nativeIdentity?: string;
+  /** Current server eligibility. Keep the state hook mounted for recovery, never a new command. */
+  commandAvailable?: boolean;
   /** A server-authorized status URL for this logical operation; safe on lost acknowledgment. */
   reconciliation: RecoveryLink;
   /** Preserve a signed operation reference before the request can lose its acknowledgment. */
@@ -68,8 +72,12 @@ export type ActionFormProps<V extends FormValues> = {
   copy: FormCopy;
   labels: Record<keyof V, string>;
   /** Human-facing representations of opaque choices in a reviewed conflict comparison. */
-  formatValue?: (name: string, value: string, state: FormState<V>) => string;
+  formatValue?: (name: string, value: string, state: FormState<V>) => ReactNode;
   submitLabel: ReactNode | ((state: FormState<V>) => ReactNode);
+  /** Native disclosure stays open for restored responses and drafts, including an HTML POST. */
+  disclosure?: string;
+  /** Optional navigation hint: empty in native HTML, yes after hydration. Never an auth gate. */
+  enhancementField?: string;
   /** Public source review can use the page width; entry fields retain their reading width. */
   layout?: "reading" | "full";
   /** Navigation beside the one submit (links only; never a second command). */
@@ -83,7 +91,12 @@ export type ActionFormProps<V extends FormValues> = {
   children: (form: FormController<V>) => ReactNode;
 };
 
-type Snapshot = { operationId: string; values: FormValues; reconciliation: RecoveryLink };
+type Snapshot = {
+  operationId: string;
+  values: FormValues;
+  reconciliation: RecoveryLink;
+  formatValue?: (name: string, value: string) => ReactNode;
+};
 
 export function nativeFormPermalink(
   permalink: string,
@@ -139,6 +152,7 @@ class TransportBoundary extends Component<
     snapshot: RefObject<Snapshot>;
     copy: FormCopy;
     labels: Record<string, string>;
+    locale: string;
   },
   { failed: boolean }
 > {
@@ -148,26 +162,40 @@ class TransportBoundary extends Component<
   }
   render() {
     if (!this.state.failed) return this.props.children;
-    const { values, operationId, reconciliation } = this.props.snapshot.current;
+    const { values, operationId, reconciliation, formatValue } = this.props.snapshot.current;
     return (
       <FocusResult>
         <Notice tone="warning" title={this.props.copy.unknown}>
           <p>{this.props.copy.draftRetained}</p>
-          <p className="break-all">
-            <bdi>{operationId}</bdi>
-          </p>
           <a href={reconciliation.href} className="font-semibold underline">
             {reconciliation.label}
           </a>
         </Notice>
         <dl className="mt-4 space-y-3">
-          {Object.entries(values).map(([name, value]) => (
-            <div key={name}>
-              <dt className="font-semibold">{this.props.labels[name]}</dt>
-              <dd className="whitespace-pre-wrap break-words">{value}</dd>
-            </div>
-          ))}
+          {Object.entries(values)
+            .filter(([name]) => this.props.labels[name]?.trim())
+            .map(([name, value]) => (
+              <div key={name}>
+                <dt className="font-semibold">{this.props.labels[name]}</dt>
+                <dd className="whitespace-pre-wrap break-words">
+                  {formatValue?.(name, value) ?? value}
+                </dd>
+              </div>
+            ))}
         </dl>
+        <TechnicalDetails locale={this.props.locale}>
+          <p className="break-all">
+            <bdi>{operationId}</bdi>
+          </p>
+          {Object.entries(values)
+            .filter(([name]) => !this.props.labels[name]?.trim())
+            .map(([name, value]) => (
+              <dl key={name}>
+                <dt>{name}</dt>
+                <dd className="whitespace-pre-wrap break-words">{value}</dd>
+              </dl>
+            ))}
+        </TechnicalDetails>
       </FocusResult>
     );
   }
@@ -178,9 +206,15 @@ export function ActionForm<V extends FormValues>(props: ActionFormProps<V>) {
     operationId: props.initialState.operationId,
     values: props.initialState.values,
     reconciliation: props.reconciliation,
+    formatValue: (name, value) => props.formatValue?.(name, value, props.initialState) ?? value,
   });
   return (
-    <TransportBoundary snapshot={snapshot} copy={props.copy} labels={props.labels}>
+    <TransportBoundary
+      snapshot={snapshot}
+      copy={props.copy}
+      labels={props.labels}
+      locale={props.permalink.split("/")[1] ?? "en"}
+    >
       <FormSession {...props} snapshot={snapshot} />
     </TransportBoundary>
   );
@@ -191,12 +225,15 @@ function FormSession<V extends FormValues>({
   initialState,
   permalink,
   nativeIdentity,
+  commandAvailable = true,
   reconciliation,
   pendingReferenceCookie,
   copy,
   labels,
   formatValue,
   submitLabel,
+  disclosure,
+  enhancementField,
   layout = "reading",
   secondaryActions,
   formId,
@@ -213,6 +250,9 @@ function FormSession<V extends FormValues>({
   // Fragments never change the route or reach the server as query data. This is only
   // native UI recovery identity; signed operation scope/version checks remain separate.
   const formPermalink = nativeFormPermalink(permalink, prefix, nativeIdentity);
+  // The native response returns to this fragment. Keep a real target so result feedback
+  // is in view even when hydration never runs.
+  const nativeTargetId = decodeURIComponent(formPermalink.slice(formPermalink.indexOf("#") + 1));
   const [state, formAction, pending] = useActionState(action, initialState, formPermalink);
   const [draft, setDraft] = useState({ responseId: state.responseId, values: state.values });
   const inFlight = useRef(false);
@@ -242,6 +282,11 @@ function FormSession<V extends FormValues>({
       const control = nativeForm.current.elements.namedItem(name);
       if (control instanceof HTMLInputElement) {
         if (["hidden", "password", "file", "submit", "button"].includes(control.type)) continue;
+        const timeValue = nativeTimeValue(nativeForm.current, control);
+        if (timeValue !== null) {
+          values[name as keyof V] = timeValue as V[keyof V];
+          continue;
+        }
         if (control.type === "radio") {
           values[name as keyof V] = (control.checked ? control.value : "") as V[keyof V];
           continue;
@@ -278,7 +323,29 @@ function FormSession<V extends FormValues>({
     onSnapshot?.({ state: pending ? (submittedState.current ?? state) : state, values, pending });
   }, [onSnapshot, state, values, pending]);
   const outcome = state.outcome;
+  const disclosureOpen =
+    pending ||
+    outcome.kind !== "idle" ||
+    Object.keys(values).some((name) => values[name] !== initialState.values[name]);
+  const disclose = (content: ReactNode) =>
+    disclosure ? (
+      <details
+        open={disclosureOpen || undefined}
+        // A person can collapse a pending disclosure natively. Reopen on a response before
+        // focus effects run for its errors/receipt, even when React's open prop is unchanged.
+        ref={(node) => {
+          if (node && disclosureOpen) node.open = true;
+        }}
+        className="rounded-control border border-border p-4"
+      >
+        <summary className="min-h-control cursor-pointer font-semibold">{disclosure}</summary>
+        <div className="pt-4">{content}</div>
+      </details>
+    ) : (
+      content
+    );
   const blocked =
+    !commandAvailable ||
     outcome.kind === "unknown" ||
     outcome.kind === "accepted" ||
     (outcome.kind === "rejected" && !outcome.retryable) ||
@@ -296,14 +363,20 @@ function FormSession<V extends FormValues>({
       operationId: state.operationId,
       values,
       reconciliation: state.reconciliation ?? reconciliation,
+      formatValue: (name, value) => formatValue?.(name, value, state) ?? value,
     };
   }
 
+  // An HTML POST can restore its response after the committed command changes eligibility.
+  // Preserve every hook above so React can recover that state before hiding a fresh idle form.
+  if (!commandAvailable && outcome.kind === "idle" && !pending) return null;
+
   if (outcome.kind === "confirmed") {
-    return (
+    return disclose(
       <Receipt
         title={outcome.receipt.title}
         reference={outcome.receipt.reference}
+        locale={permalink.split("/")[1] ?? "bg"}
         referenceLabel={copy.reference}
         recordedAt={outcome.receipt.recordedAt}
         recordedAtLabel={copy.recordedAt}
@@ -318,7 +391,7 @@ function FormSession<V extends FormValues>({
           <ReceiptListings listings={outcome.receipt.listings} headingLevel={3} />
         ) : null}
         <p>{outcome.receipt.nextStep}</p>
-      </Receipt>
+      </Receipt>,
     );
   }
 
@@ -339,7 +412,7 @@ function FormSession<V extends FormValues>({
           {conflict?.reapply
             ? copy.reapply
             : typeof submitLabel === "function"
-              ? submitLabel(state)
+              ? submitLabel({ ...state, values })
               : submitLabel}
         </span>
         <span
@@ -351,10 +424,10 @@ function FormSession<V extends FormValues>({
       </span>
     </button>
   );
-  return (
+  return disclose(
     <form
       ref={nativeForm}
-      id={formId}
+      id={formId ?? nativeTargetId}
       action={formAction}
       noValidate
       aria-busy={pending}
@@ -405,6 +478,9 @@ function FormSession<V extends FormValues>({
         name={formFields.expectedRevision}
         value={state.expectedRevision ?? ""}
       />
+      {enhancementField ? (
+        <input type="hidden" name={enhancementField} value={hydrating ? "" : "yes"} />
+      ) : null}
       <ErrorSummary key={`errors-${state.responseId}`} title={copy.errorSummary} errors={errors} />
       {outcome.kind === "rejected" ? (
         <FocusResult key={`rejected-${state.responseId}`}>
@@ -434,7 +510,9 @@ function FormSession<V extends FormValues>({
                 {outcome.status.label}
               </a>
             }
-          />
+          >
+            {outcome.kind === "unknown" ? <p>{copy.draftRetained}</p> : null}
+          </Notice>
         </FocusResult>
       ) : null}
       {conflict ? (
@@ -442,9 +520,6 @@ function FormSession<V extends FormValues>({
           <Notice tone="warning" title={conflict.message}>
             {conflict.latest ? (
               <div className="flex flex-col gap-3">
-                <p>
-                  {copy.revision}: {conflict.latest.revision}
-                </p>
                 {conflict.latest.details?.map(({ label, value }) => (
                   <dl key={label} className="border-t border-border pt-2">
                     <dt className="font-semibold">{label}</dt>
@@ -452,7 +527,10 @@ function FormSession<V extends FormValues>({
                   </dl>
                 ))}
                 {Object.keys(labels)
-                  .filter((name) => Object.hasOwn(conflict.latest?.values ?? {}, name))
+                  .filter(
+                    (name) =>
+                      labels[name]?.trim() && Object.hasOwn(conflict.latest?.values ?? {}, name),
+                  )
                   .map((name) => (
                     <dl key={name} className="border-t border-border pt-2">
                       <dt className="font-semibold">{labels[name]}</dt>
@@ -467,6 +545,24 @@ function FormSession<V extends FormValues>({
                       </dd>
                     </dl>
                   ))}
+                <TechnicalDetails locale={permalink.split("/")[1] ?? "en"}>
+                  <p>
+                    {copy.revision}: {conflict.latest.revision}
+                  </p>
+                  {Object.entries(conflict.latest.values)
+                    .filter(([name]) => !labels[name]?.trim())
+                    .map(([name, value]) => (
+                      <dl key={name}>
+                        <dt>{name}</dt>
+                        <dd>
+                          {copy.yourValue}: {values[name]}
+                        </dd>
+                        <dd>
+                          {copy.latestValue}: {value}
+                        </dd>
+                      </dl>
+                    ))}
+                </TechnicalDetails>
               </div>
             ) : null}
             {conflict.recovery ? (
@@ -502,7 +598,7 @@ function FormSession<V extends FormValues>({
             }),
         }),
       })}
-      {conflict?.reapply ? (
+      {commandAvailable && conflict?.reapply ? (
         <>
           <input
             type="hidden"
@@ -527,6 +623,6 @@ function FormSession<V extends FormValues>({
       <p className="sr-only" role="status">
         {pending ? copy.pending : ""}
       </p>
-    </form>
+    </form>,
   );
 }

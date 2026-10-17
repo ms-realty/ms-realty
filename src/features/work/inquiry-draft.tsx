@@ -13,7 +13,10 @@ import {
 } from "react";
 import { errorClass, fieldClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
+import { nativeTimeValue } from "@/ui/form/date-time-value";
 import { ActionForm, type ActionFormProps, type FormSnapshot } from "@/ui/form/form";
+import { NativeForm } from "@/ui/form/native-form";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { Notice } from "@/ui/notice";
 import {
   claimInquiryDraftOwner,
@@ -79,9 +82,9 @@ export function InquiryDraftSignOutForm({
   children: ReactNode;
 }) {
   return (
-    <form action={action} method="post" onSubmitCapture={() => releaseInquiryDraftOwner()}>
+    <NativeForm action={action} method="post" onSubmitCapture={() => releaseInquiryDraftOwner()}>
       {children}
-    </form>
+    </NativeForm>
   );
 }
 
@@ -127,9 +130,7 @@ export function InquiryConfirmedReturn({
     </Link>
   ) : (
     <form action={action}>
-      <button type="submit" className={className}>
-        {label}
-      </button>
+      <SubmitButton className={className}>{label}</SubmitButton>
     </form>
   );
 }
@@ -273,7 +274,9 @@ function InquiryDraftSession<V extends FormValues>({
             ? control.checked
               ? control.value
               : ""
-            : control.value;
+            : control instanceof HTMLInputElement && form
+              ? (nativeTimeValue(form, control) ?? control.value)
+              : control.value;
         liveValues[name as keyof V] = value as V[keyof V];
         if (value !== initialResponse.values[name]) values[name as keyof V] = value as V[keyof V];
       }

@@ -1,9 +1,12 @@
 // P08/P09, F04 and AT09: a public-facts link is created from saved properties under this
 // browser's creator cookie, read by someone else with no authority beyond the public facts,
 // managed and revoked only by its creator, and always rechecked on the recipient's request.
+
 import { execFileSync } from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
 import { type Browser, type BrowserContext, expect, type Page, test } from "@playwright/test";
+import { formatDateTime } from "../src/i18n/format";
+import { origins } from "./hosts";
 
 type Listing = { reference: string; title: string };
 type Link = { url: string; id: string; token: string };
@@ -113,12 +116,16 @@ const cards = (page: Page) => page.locator("article[data-share-state]");
 const sharedLinks = (page: Page) => page.getByRole("region", { name: "Shared links" });
 
 async function save(page: Page, items: Listing[]) {
+  // Seed the fresh browser before hydration; a forced reload can interrupt its summary read.
+  // Later navigation must retain real changes made to this browser's saved list.
+  await page.addInitScript(
+    ({ refs, key, origin }) => {
+      if (location.origin === origin && localStorage.getItem(key) === null)
+        localStorage.setItem(key, JSON.stringify(refs));
+    },
+    { refs: items.map((item) => item.reference), key: savedKey, origin: origins.public },
+  );
   await page.goto("/en/saved");
-  await page.evaluate(({ refs, key }) => localStorage.setItem(key, JSON.stringify(refs)), {
-    refs: items.map((item) => item.reference),
-    key: savedKey,
-  });
-  await page.reload();
   await expect(page.getByRole("heading", { name: items.at(-1)?.title, exact: true })).toBeVisible();
 }
 
@@ -263,10 +270,11 @@ test("P08/P09: a creator reviews and creates a link, a recipient sees public fac
   await expect(card.getByRole("link", { name: third.reference })).toHaveCount(0);
   const created = await card.locator("dt:text-is('Created') + dd time").getAttribute("datetime");
   const expires = card.locator("dt:text-is('Expires') + dd time");
-  expect(
-    Date.parse((await expires.getAttribute("datetime")) ?? "") - Date.parse(created ?? ""),
-  ).toBe(7 * 24 * 60 * 60 * 1000);
-  await expect(expires).toHaveText(/20\d\d.*(EES?T|GMT\+\d)/);
+  const expiresAt = await expires.getAttribute("datetime");
+  if (!expiresAt) throw new Error("Missing exact share expiry");
+  expect(Date.parse(expiresAt) - Date.parse(created ?? "")).toBe(7 * 24 * 60 * 60 * 1000);
+  await expect(expires).toHaveText(formatDateTime("en", expiresAt, { zoneLabel: true }));
+  await expect(expires).not.toContainText(/Europe\/|UTC|GMT/);
   await expect(card.getByRole("button", { name: "Copy link" })).toBeVisible();
   await card.getByRole("button", { name: "Copy link" }).click();
   await expect(card.getByRole("status")).toHaveText(/Link copied|Copying is not available here\./);

@@ -4,6 +4,7 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { auditEvents, fileUploads, listings, mediaAssets, mediaRelations } from "@/db/schema";
 import { mediaModifications, moveRelation } from "@/domain/media";
+import { parseMediaRenditions } from "@/domain/media-rendition";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import { can } from "../authz";
@@ -286,6 +287,7 @@ export async function reviewMedia(
           !asset.scannedAt ||
           !asset.scannerVersion ||
           asset.processing !== "ready" ||
+          !parseMediaRenditions(asset.derivativeRenditions, asset.id) ||
           !asset.derivativeKey ||
           !asset.derivativeSha256)
       )
@@ -316,6 +318,7 @@ export async function reviewMedia(
           decision: input.decision,
           sha256: asset.sha256,
           derivativeSha256: asset.derivativeSha256,
+          renditions: asset.derivativeRenditions,
           rightsReference: input.rightsReference,
           privacyReviewed: true,
         },

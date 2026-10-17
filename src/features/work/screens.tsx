@@ -1,3 +1,4 @@
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -5,10 +6,10 @@ import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
-import { type InquiryState, inquiryMachine } from "@/domain/inquiry";
+import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
-import { isStaffLocale } from "@/i18n/config";
+import { isStaffLocale, type StaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
@@ -16,6 +17,7 @@ import { readTaskHandover } from "@/server/work/handover";
 import { listContacts, listTasks, readContact, readInquiry } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { ChevronStartIcon } from "@/ui/icons";
 import {
   acceptAction,
@@ -53,14 +55,18 @@ import { inquiryHref, parseInboxScope, queueHref } from "./inquiry-row";
 import { InquirySelectionContext } from "./inquiry-selection-context";
 import { When } from "./when";
 
-export function checkLocale(locale: string) {
+export function checkLocale(locale: string): asserts locale is StaffLocale {
   if (!isStaffLocale(locale)) notFound();
 }
+/**
+ * One private record read. A record the viewer may not read, or may not use on this page, is
+ * a 404 to them like a missing one (M-003): never a crash, and never a hint that it exists.
+ */
 export async function privateRead<T>(fn: () => Promise<T>) {
   try {
     return await fn();
   } catch (error) {
-    if (isAppError(error) && error.code === "not_found") notFound();
+    if (isAppError(error) && (error.code === "not_found" || error.code === "forbidden")) notFound();
     throw error;
   }
 }
@@ -126,8 +132,9 @@ export function Pagination({
   locale: string;
 }) {
   const copy = workCopy(locale);
+  if (page === 1 && !hasMore) return null;
   return (
-    <nav className="flex gap-6 py-4" aria-label={copy.details}>
+    <nav className="flex gap-6 py-4" aria-label={`${copy.previous} / ${copy.next}`}>
       {page > 1 ? (
         <a className={link} href={`${href}${href.includes("?") ? "&" : "?"}page=${page - 1}`}>
           {copy.previous}
@@ -462,8 +469,9 @@ export async function InquiryScreen({
                   id={id}
                   action={triageAction.bind(null, locale, id)}
                   states={targets}
+                  duplicateCandidates={detail.duplicateCandidates}
                   initialState={inquiryFormState("triage", {
-                    state: targets[0] as InquiryState,
+                    state: "",
                     reason: "",
                     duplicateOfInquiryId: inquiry.duplicateOfInquiryId ?? "",
                   })}
@@ -518,13 +526,16 @@ export async function InquiryScreen({
                 </dd>
               </div>
               <div>
-                <dt className="font-semibold">{copy.revision}</dt>
-                <dd>{inquiry.version}</dd>
-              </div>
-              <div>
-                <dt className="font-semibold">ID</dt>
-                <dd className="break-all text-caption">
-                  <bdi>{id}</bdi>
+                <dt className="sr-only">{copy.revision}</dt>
+                <dd>
+                  <TechnicalDetails locale={locale}>
+                    <p>
+                      {copy.revision}: {inquiry.version}
+                    </p>
+                    <p>
+                      <bdi>{id}</bdi>
+                    </p>
+                  </TechnicalDetails>
                 </dd>
               </div>
               {inquiry.dispositionReason ? (
@@ -911,9 +922,7 @@ export async function OperationScreen({
               true,
             )}
           >
-            <button type="submit" className={link}>
-              {copy.retryDraft}
-            </button>
+            <SubmitButton className={link}>{copy.retryDraft}</SubmitButton>
           </form>
         </div>
       ) : fenced && !task && isInquiryDraftKind(type) ? (

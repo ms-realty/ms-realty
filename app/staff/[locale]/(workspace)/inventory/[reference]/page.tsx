@@ -3,7 +3,6 @@
 // stay distinct.
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { operations, principals } from "@/db/schema";
@@ -18,9 +17,9 @@ import { LeaveControl } from "@/features/inventory/leave-control";
 import { safeNext } from "@/features/inventory/next";
 import { describePriceEvidence } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
+import { privateRead } from "@/features/work/screens";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
-import { isAppError } from "@/server/errors";
 import { inventoryDetail } from "@/server/inventory/commands";
 import { draftSchema } from "@/server/inventory/contracts";
 import { uneditablePriceEvidence, workingDraftFrom } from "@/server/inventory/working-draft";
@@ -107,10 +106,7 @@ export default async function InventoryDetailPage({
   const query = await searchParams;
   const session = await requireStaffPage(locale);
   const db = getDb();
-  const data = await inventoryDetail(db, session.actor, reference).catch((error) => {
-    if (isAppError(error) && error.code === "not_found") notFound();
-    throw error;
-  });
+  const data = await privateRead(() => inventoryDetail(db, session.actor, reference));
   const { listing, property, revision } = data;
   const copy = inventoryCopy(locale);
   const o12 = copy.o12;

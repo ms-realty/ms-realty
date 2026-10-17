@@ -397,40 +397,7 @@ export function roleLabel(locale: string, role: ParticipantRole): string {
   return table[role];
 }
 
-const capabilityLabels: Record<"en" | "bg" | "ru", Record<string, string>> = {
-  en: {
-    "portal.case.read": "See the case overview and its progress",
-    "portal.interest.respond": "Give feedback on suggested properties",
-    "portal.message.write": "Send messages to the agency",
-    "portal.document.upload": "Upload requested documents",
-    "portal.appointment.request": "Request viewings and appointments",
-    "portal.proposal.respond": "Respond to proposals",
-    "portal.listing.acknowledge": "Review the listing preview",
-  },
-  bg: {
-    "portal.case.read": "Преглед на случая и напредъка му",
-    "portal.interest.respond": "Обратна връзка за предложени имоти",
-    "portal.message.write": "Съобщения до агенцията",
-    "portal.document.upload": "Качване на поискани документи",
-    "portal.appointment.request": "Заявки за огледи и срещи",
-    "portal.proposal.respond": "Отговор на предложения",
-    "portal.listing.acknowledge": "Преглед на обявата преди публикуване",
-  },
-  ru: {
-    "portal.case.read": "Просмотр дела и его хода",
-    "portal.interest.respond": "Отзывы о предложенных объектах",
-    "portal.message.write": "Сообщения агентству",
-    "portal.document.upload": "Загрузка запрошенных документов",
-    "portal.appointment.request": "Запросы просмотров и встреч",
-    "portal.proposal.respond": "Ответы на предложения",
-    "portal.listing.acknowledge": "Просмотр объявления перед публикацией",
-  },
-};
-
-export function capabilityLabel(locale: string, capability: string): string {
-  const table = capabilityLabels[locale === "bg" || locale === "ru" ? locale : "en"];
-  return table[capability] ?? capability;
-}
+export { capabilityLabel } from "./capability-copy";
 
 /** Messages for one passkey ceremony button (PasskeyCeremony). */
 export function ceremonyMessages(

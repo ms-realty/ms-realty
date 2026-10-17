@@ -65,3 +65,24 @@ export async function derivative(
     .toBuffer({ resolveWithObject: true });
   return { bytes: result.data, width: result.info.width, height: result.info.height };
 }
+
+/** Bounded sequential encoding: never upscale or hold several decoded originals in parallel. */
+export async function derivatives(
+  bytes: Buffer,
+): Promise<Awaited<ReturnType<typeof derivative>>[]> {
+  const largest = await derivative(bytes);
+  const result: Awaited<ReturnType<typeof derivative>>[] = [];
+  for (const width of [480, 960, 1600]) {
+    if (width >= largest.width) continue;
+    const resized = await sharp(largest.bytes, {
+      limitInputPixels: 40_000_000,
+      failOn: "warning",
+      pages: 1,
+    })
+      .resize({ width, withoutEnlargement: true })
+      .webp({ quality: 85 })
+      .toBuffer({ resolveWithObject: true });
+    result.push({ bytes: resized.data, width: resized.info.width, height: resized.info.height });
+  }
+  return [...result, largest];
+}

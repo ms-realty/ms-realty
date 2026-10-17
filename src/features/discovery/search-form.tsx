@@ -2,6 +2,7 @@ import { getDb } from "@/db/client";
 import { propertyTypes } from "@/domain/facts";
 import { currencyCodes } from "@/domain/ids";
 import type { PublicLocale } from "@/i18n/config";
+import { factFieldLabel } from "@/i18n/fact-labels";
 import { interpretedFeatureKeys } from "@/server/ai/intent";
 import { intentPlaces } from "@/server/ai/intent-source";
 import { searchableAreaBases } from "@/server/search/search";
@@ -29,9 +30,11 @@ export async function SearchForm({
   const places = compact ? [] : await intentPlaces(getDb()).catch(() => []);
   const selected = (value: string) => value.split(",").filter(Boolean);
   const label = (key: string) =>
-    Object.hasOwn(copy, key) ? copy[key as keyof DiscoveryCopy] : `${copy.check}: ${key}`;
+    Object.hasOwn(copy, key) ? copy[key as keyof DiscoveryCopy] : copy.check;
   const featureLabel = (key: string) =>
-    Object.hasOwn(extra, key) ? extra[key as keyof typeof extra] : `${copy.check}: ${key}`;
+    Object.hasOwn(extra, key)
+      ? extra[key as keyof typeof extra]
+      : factFieldLabel(`feature.${key}`, locale);
   const placeLabel = (id: string) => {
     const place = places.find((candidate) => candidate.id === id);
     return place

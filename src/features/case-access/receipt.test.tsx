@@ -71,6 +71,54 @@ it("C17 confirms the actor's operation only after its exact displayed Case/comma
   expect(screen.getByText("The action was recorded.")).toBeVisible();
   expect(mocks.receipt).toHaveBeenCalledWith("db", session.actor, "case.access.request", key);
 });
+
+it.each([
+  ["bg", "Купувач", "Съкупувач", "Упълномощен представител"],
+  ["en", "Buyer", "Co-buyer", "Authorized representative"],
+  ["ru", "Покупатель", "Сопокупатель", "Уполномоченный представитель"],
+])(
+  "labels mixed current and invited participant roles in %s without model codes",
+  async (locale, buyer, coBuyer, representative) => {
+    mocks.view.mockResolvedValue({
+      case: { id: "case-a", reference: "CASE-A", version: 2 },
+      roster: {
+        participants: [
+          { id: "buyer-a", displayName: "Synthetic buyer", role: "buyer", accessExpiresAt: null },
+          {
+            id: "representative-a",
+            displayName: "Synthetic representative",
+            role: "authorized_representative",
+            accessExpiresAt: null,
+          },
+        ],
+        pendingInvitations: [
+          {
+            id: "invitation-a",
+            displayName: "Synthetic co-buyer",
+            role: "co_buyer",
+            invitationExpiresAt: new Date(0),
+            accessExpiresAt: null,
+          },
+        ],
+      },
+      requests: [],
+      canRequest: false,
+    });
+    const { container } = render(
+      await CaseAccessScreen({
+        locale,
+        session: { ...session, actor: { kind: "staff", id: "staff-a" } },
+        id: "case-a",
+        query: {},
+      }),
+    );
+    expect(screen.getByText(`Synthetic buyer · ${buyer}`)).toBeVisible();
+    expect(screen.getByText(`Synthetic representative · ${representative}`)).toBeVisible();
+    expect(screen.getByText(`Synthetic co-buyer · ${coBuyer}`)).toBeVisible();
+    expect(container.textContent).not.toContain("co_buyer");
+    expect(container.textContent).not.toContain("authorized_representative");
+  },
+);
 it.each([
   ["a displayed request", "request-a", true],
   ["a request this screen does not show", "request-z", false],

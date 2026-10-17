@@ -1,12 +1,18 @@
+import { NativeForm } from "@/ui/form/native-form";
 import "server-only";
 import { getDb } from "@/db/client";
+import { readDateTimeEntry } from "@/domain/time";
+import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import type { Session } from "@/server/auth/sessions";
 import { wireCode } from "@/server/errors";
 import { readAlertRule } from "@/server/subscriptions/approval";
 import { configuredAlertRule, currentAlertRule } from "@/server/subscriptions/rule";
 import { alertTemplateCopy } from "@/server/subscriptions/template";
 import { buttonClass } from "@/ui/button-class";
-import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
+import { DateTimeField } from "@/ui/date-time-field";
+import { labelClass, textareaClass } from "@/ui/field-class";
 import { issueFormOperation } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { subscriptionCopy } from "./copy";
@@ -26,6 +32,11 @@ export async function AlertRuleScreen({
   const current = await readAlertRule(getDb(), session, rule);
   const receipt = await alertRuleReceipt(getDb(), session, query.receipt);
   const draft = await retainedAlertRuleDraft(session);
+  const entered = draft?.expiresAt ? readDateTimeEntry(draft.expiresAt, agencyTimeZone) : null;
+  const timeError =
+    query.error && entered && !entered.ok
+      ? timeReasonMessage(isPublicLocale(locale) ? locale : "bg", entered.reason)
+      : undefined;
   return (
     <div className="mx-auto grid max-w-4xl gap-6 px-gutter py-8">
       <h1 className="text-title font-semibold">{copy.title}</h1>
@@ -55,7 +66,7 @@ export async function AlertRuleScreen({
           <p>
             {copy.expires}:{" "}
             <time dateTime={current.approval.expiresAt.toISOString()}>
-              {current.approval.expiresAt.toISOString()}
+              {formatDateTime(isPublicLocale(locale) ? locale : "bg", current.approval.expiresAt)}
             </time>
           </p>
         ) : null}
@@ -91,7 +102,7 @@ export async function AlertRuleScreen({
           </details>
         ))}
       </section>
-      <form
+      <NativeForm
         action={`/${locale}/operations/subscriptions/submit`}
         method="post"
         className="grid gap-4"
@@ -119,15 +130,14 @@ export async function AlertRuleScreen({
             {copy.hint}
           </p>
         </div>
-        <label className="grid gap-2">
-          <span className={labelClass}>{copy.expiry}</span>
-          <input
-            className={controlClass}
-            type="datetime-local"
-            name="expiresAt"
-            defaultValue={draft?.expiresAt ?? ""}
-          />
-        </label>
+        <DateTimeField
+          error={timeError}
+          id="alert-rule-expiry"
+          name="expiresAt"
+          label={copy.expiry}
+          locale={isPublicLocale(locale) ? locale : "bg"}
+          defaultValue={draft?.expiresAt ?? ""}
+        />
         <label className="flex items-start gap-3">
           <input className="mt-1 size-5" type="checkbox" name="reviewed" value="yes" required />
           <span>{copy.review}</span>
@@ -145,7 +155,7 @@ export async function AlertRuleScreen({
             {copy.disable}
           </button>
         </div>
-      </form>
+      </NativeForm>
       <a className="underline" href={`/${locale}/operations/jobs`}>
         {copy.back}
       </a>

@@ -1,5 +1,9 @@
+import { resolveLocalTime } from "@/domain/time";
 import type { ViewingPreferences } from "@/domain/viewing-preferences";
 import type { PublicLocale } from "@/i18n/config";
+import { agencyTimeZone } from "@/i18n/config";
+import { formatDateTimeRange, timeZoneLabel } from "@/i18n/format";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
@@ -17,6 +21,12 @@ export function ViewingPreferenceFields({
 }) {
   const c = viewingCopy(locale),
     copy = discoveryCopy(locale);
+  let timeZone = form.values.viewingTimezone;
+  try {
+    new Intl.DateTimeFormat(locale, { timeZone });
+  } catch {
+    timeZone = agencyTimeZone;
+  }
   const select = (
     name: keyof InquiryValues,
     label: string,
@@ -66,16 +76,22 @@ export function ViewingPreferenceFields({
           {c.window} {index + 1}
         </legend>
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-          <FormField
+          <DateTimeField
             {...form.field(fields.start)}
-            type="datetime-local"
+            locale={locale}
+            timeZone={timeZone}
+            externalOccurrence
+            occurrence={form.values[fields.startChoice]}
             label={`${c.start} ${index + 1}`}
             optionalLabel={copy.optional}
             dir="ltr"
           />
-          <FormField
+          <DateTimeField
             {...form.field(fields.end)}
-            type="datetime-local"
+            locale={locale}
+            timeZone={timeZone}
+            externalOccurrence
+            occurrence={form.values[fields.endChoice]}
             label={`${c.end} ${index + 1}`}
             optionalLabel={copy.optional}
             dir="ltr"
@@ -158,7 +174,7 @@ export function ViewingPreferenceSummary({
         <div>
           <dt className="text-text-muted">{c.timezone}</dt>
           <dd>
-            <bdi>{input.timezone}</bdi>
+            <bdi>{timeZoneLabel(locale, input.timezone)}</bdi>
           </dd>
         </div>
         <div>
@@ -166,15 +182,34 @@ export function ViewingPreferenceSummary({
           <dd>
             {input.windows.length ? (
               <ol className="space-y-2">
-                {input.windows.map((window, index) => (
-                  <li key={viewingWindowFields[index]?.start}>
-                    <span>{index + 1}. </span>
-                    <bdi>{window.startsAtLocal.replace("T", " ")}</bdi>
-                    {window.startOccurrence ? ` (${c[window.startOccurrence]})` : ""} –{" "}
-                    <bdi>{window.endsAtLocal.replace("T", " ")}</bdi>
-                    {window.endOccurrence ? ` (${c[window.endOccurrence]})` : ""}
-                  </li>
-                ))}
+                {input.windows.map((window, index) => {
+                  const start = resolveLocalTime(
+                    window.startsAtLocal,
+                    input.timezone,
+                    window.startOccurrence,
+                  );
+                  const end = resolveLocalTime(
+                    window.endsAtLocal,
+                    input.timezone,
+                    window.endOccurrence,
+                  );
+                  return (
+                    <li key={viewingWindowFields[index]?.start}>
+                      <span>{index + 1}. </span>
+                      {start.outcome === "resolved" && end.outcome === "resolved" ? (
+                        <time dateTime={start.instant}>
+                          {formatDateTimeRange(locale, start.instant, end.instant, {
+                            timeZone: input.timezone,
+                          })}
+                        </time>
+                      ) : (
+                        c.automatic
+                      )}
+                      {window.startOccurrence ? ` · ${c.start}: ${c[window.startOccurrence]}` : ""}
+                      {window.endOccurrence ? ` · ${c.end}: ${c[window.endOccurrence]}` : ""}
+                    </li>
+                  );
+                })}
               </ol>
             ) : (
               c.noPreference

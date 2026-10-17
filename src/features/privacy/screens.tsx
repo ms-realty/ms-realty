@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDate } from "@/i18n/format";
 import type { Session } from "@/server/auth/sessions";
 import { wireCode } from "@/server/errors";
 import { privateReceipt } from "@/server/privacy/native";
@@ -15,6 +17,7 @@ import {
 } from "@/server/privacy/requests";
 import type { NormalizedSearch } from "@/server/search/search";
 import { controlClass, labelClass } from "@/ui/field-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import { privacyCopy, privacyLabel } from "./copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
@@ -71,7 +74,11 @@ export function SearchEditor({
   return (
     <details>
       <summary className="cursor-pointer underline">{c.editSearch}</summary>
-      <form action={`/${locale}/preferences/submit`} method="post" className="mt-4 grid gap-4">
+      <NativeForm
+        action={`/${locale}/preferences/submit`}
+        method="post"
+        className="mt-4 grid gap-4"
+      >
         <Envelope intent="edit_search" id={subscription.id} version={subscription.version} />
         <input type="hidden" name="termsVersionId" value={termsVersionId} />
         <label className="grid gap-2">
@@ -111,7 +118,7 @@ export function SearchEditor({
         </label>
         <Check name="confirmed">{c.consent}</Check>
         <Submit>{c.saveSearch}</Submit>
-      </form>
+      </NativeForm>
     </details>
   );
 }
@@ -130,7 +137,7 @@ export async function ClientPrivacyScreen({
   return (
     <Frame title={c.privacy} lead={c.lead}>
       <Result query={query} locale={locale} session={session} />
-      <form
+      <NativeForm
         method="post"
         action={`/${locale}/privacy/submit`}
         className="grid gap-4 rounded-panel border border-divider bg-surface p-5"
@@ -153,7 +160,7 @@ export async function ClientPrivacyScreen({
         <Area name="description" label={c.scope} required />
         <Check name="confirmed">{c.confirm}</Check>
         <Submit>{c.submit}</Submit>
-      </form>
+      </NativeForm>
       <h2 className="text-section font-semibold">{c.history}</h2>
       {!requests.length ? <p>{c.empty}</p> : null}
       {requests.map((request) => (
@@ -167,7 +174,9 @@ export async function ClientPrivacyScreen({
             {c.owner}: {request.ownerName}
           </p>
           <p>
-            {request.dueAt ? `${c.due}: ${request.dueAt.toISOString().slice(0, 10)}` : c.awaiting}
+            {request.dueAt
+              ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : "bg", request.dueAt)}`
+              : c.awaiting}
           </p>
         </article>
       ))}
@@ -221,7 +230,7 @@ export async function PreferencesScreen({
           </>
         ) : null}
       </section>
-      <form
+      <NativeForm
         method="post"
         action={action}
         className="grid gap-4 rounded-panel border border-divider bg-surface p-5"
@@ -260,7 +269,7 @@ export async function PreferencesScreen({
         </label>
         <TextField name="contactWindow" label={c.window} value={preferences.contactWindow} />
         <Submit>{c.save}</Submit>
-      </form>
+      </NativeForm>
       <h2 className="text-section font-semibold">{c.purposeChoices}</h2>
       {preferencePurposes.map((purpose) => {
         const terms = data.terms[purpose];
@@ -285,7 +294,7 @@ export async function PreferencesScreen({
               <p>{c.noTerms}</p>
             )}
             {terms && verified.length ? (
-              <form action={action} method="post" className="grid gap-4">
+              <NativeForm action={action} method="post" className="grid gap-4">
                 <Envelope intent="opt_in" />
                 <input type="hidden" name="purpose" value={purpose} />
                 <input type="hidden" name="termsVersionId" value={terms.version.id} />
@@ -338,7 +347,7 @@ export async function PreferencesScreen({
                   {purpose === "service_updates" ? c.serviceChoice : c.consent}
                 </Check>
                 <Submit>{purpose === "service_updates" ? c.enableService : c.optIn}</Submit>
-              </form>
+              </NativeForm>
             ) : null}
           </section>
         );
@@ -372,7 +381,7 @@ export async function PreferencesScreen({
                     ? ["active", "withdrawn"]
                     : ["withdrawn"]
                 ).map((state) => (
-                  <form key={state} action={action} method="post">
+                  <NativeForm key={state} action={action} method="post">
                     <Envelope
                       intent="subscription"
                       id={subscription.id}
@@ -382,7 +391,7 @@ export async function PreferencesScreen({
                     <Submit>
                       {state === "paused" ? c.pause : state === "active" ? c.resume : c.withdraw}
                     </Submit>
-                  </form>
+                  </NativeForm>
                 ))
               : null}
           </div>
@@ -443,10 +452,16 @@ export async function StaffPrivacyScreen({
               {c.owner}: {ownerName}
             </p>
             <p>
-              {record.dueAt ? `${c.due}: ${record.dueAt.toISOString().slice(0, 10)}` : c.awaiting}
+              {record.dueAt
+                ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : "bg", record.dueAt)}`
+                : c.awaiting}
             </p>
             {next.length ? (
-              <form method="post" action={submitPath} className="grid min-w-0 grid-cols-1 gap-4">
+              <NativeForm
+                method="post"
+                action={submitPath}
+                className="grid min-w-0 grid-cols-1 gap-4"
+              >
                 <Envelope intent="review" id={record.id} version={record.version} />
                 {/* A wrapping label would add the chosen option to the select's accessible name. */}
                 <div className="grid gap-2">
@@ -509,7 +524,7 @@ export async function StaffPrivacyScreen({
                 <Area name="rejectionReason" label={c.rejection} />
                 <Check name="confirmed">{c.reviewed}</Check>
                 <Submit>{c.record}</Submit>
-              </form>
+              </NativeForm>
             ) : null}
           </section>
         );

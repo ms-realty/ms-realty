@@ -78,6 +78,12 @@ export interface PublicMedia {
   readonly relationId: string;
   readonly assetId: string;
   readonly digest: string;
+  /** Only sealed sizes included in the current approved publication; absent on older assets. */
+  readonly renditions?: readonly {
+    readonly digest: string;
+    readonly width: number;
+    readonly height: number;
+  }[];
   readonly kind: MediaKind;
   readonly contentType: string;
   /** Null when never recorded; unknown is not zero. */

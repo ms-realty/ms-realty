@@ -63,8 +63,8 @@ export function SharedShortlist({
           <p className="text-compact text-text-muted">{labels.checked}</p>
           <p className="text-compact">
             {labels.validUntil}:{" "}
-            <time dateTime={read.expiresAt} className="font-semibold">
-              {formatDateTime(locale, read.expiresAt)}
+            <time dateTime={read.expiresAt} className="font-semibold tabular-nums">
+              {formatDateTime(locale, read.expiresAt, { zoneLabel: true })}
             </time>
           </p>
         </header>

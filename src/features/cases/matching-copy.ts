@@ -3,8 +3,9 @@
 // values are inserted as read and never translated. The UI never says "brief", "interest",
 // "candidate" or "criteria": the staff noun is the deal («Сделка»), the requirements are "what the
 // client is looking for". There is no «Потвърдено» rollup (removed in the follow-ups).
-import { displayLocale, isPublicLocale } from "@/i18n/config";
-import { formatDate, formatTime } from "@/i18n/format";
+import { localInputValue } from "@/domain/time";
+import { agencyTimeZone, displayLocale, isPublicLocale } from "@/i18n/config";
+import { formatDateTime, formatTime } from "@/i18n/format";
 
 type Forms = { one: string; few?: string; many?: string; other: string };
 
@@ -29,20 +30,16 @@ export function joinList(locale: string, items: readonly string[]) {
   return new Intl.ListFormat(tag(locale), { type: "conjunction" }).format(items);
 }
 
-export const agencyZone = "Europe/Sofia";
-
-/** «5 октомври 2026 г., 17:30 · Europe/Sofia»: stored in UTC, shown with the named zone. */
+/** «пн, 5 октомври в 17:30»: stored in UTC, read on the agency's clock like every staff time. */
 export function zonedDateTime(locale: string, instant: string | Date) {
-  const pl = isPublicLocale(locale) ? locale : "en";
-  return `${formatDate(pl, instant, { dateStyle: "long" })}, ${formatTime(pl, instant)} · ${agencyZone}`;
+  return formatDateTime(isPublicLocale(locale) ? locale : "en", instant);
 }
 
-/** «10:20 · Europe/Sofia» for a read of today, else the date as well. */
+/** «10:20» for a read of today, else the date as well. */
 export function zonedTime(locale: string, instant: string | Date, now = new Date()) {
-  const pl = isPublicLocale(locale) ? locale : "en";
-  const day = (value: string | Date) => formatDate(pl, value, { dateStyle: "short" });
+  const day = (value: string | Date) => localInputValue(value, agencyTimeZone).slice(0, 10);
   return day(instant) === day(now)
-    ? `${formatTime(pl, instant)} · ${agencyZone}`
+    ? formatTime(isPublicLocale(locale) ? locale : "en", instant)
     : zonedDateTime(locale, instant);
 }
 

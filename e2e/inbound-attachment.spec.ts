@@ -112,6 +112,7 @@ for (const locale of ["bg", "ru", "en"])
           ),
         });
         await form.getByRole("button", { name: c.submit, exact: true }).click();
+        await page.locator("details:has([data-attachment-receipt]) > summary").click();
         await expect(page.locator("[data-attachment-receipt]")).toBeVisible();
         await expect(page.locator(`[data-imported-attachment="${f.attachmentId}"]`)).toContainText(
           "selected-case-check.pdf",
@@ -119,6 +120,7 @@ for (const locale of ["bg", "ru", "en"])
         await expect(page.locator("[data-attachment-form]")).toHaveCount(0);
         const receiptUrl = page.url();
         await page.reload();
+        await page.locator("details:has([data-attachment-receipt]) > summary").click();
         await expect(page.locator("[data-attachment-receipt]")).toBeVisible();
         const links = await db
           .select({ link: schema.inboundAttachmentImports, file: schema.documentVersions })

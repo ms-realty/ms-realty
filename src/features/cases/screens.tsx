@@ -1,10 +1,13 @@
+import { workflowLabel } from "@/i18n/workflow-labels";
+import { AudienceComposer } from "./audience-composer";
 import "server-only";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { interestMachine } from "@/domain/interest";
-import { displayLocale, isPublicLocale } from "@/i18n/config";
+import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
+import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import type { Session } from "@/server/auth/sessions";
 import { listCases, readCase, readCaseMessages, readInterestContext } from "@/server/cases/queries";
@@ -116,26 +119,51 @@ export function WorkflowSection({
     </section>
   );
 }
+type TimeProps = {
+  locale: string;
+  /** The zone the time is kept in; a zone other than the agency's is always named. */
+  zone?: string;
+  /** Names the zone in words for a client, who could be reading from anywhere (M-050). */
+  zoneLabel?: boolean;
+};
+const timeLocale = (locale: string) => (isPublicLocale(locale) ? locale : "bg");
+
+/** One instant in the shared format; staff read agency times without a zone name. */
 export function WorkflowTime({
   value,
   locale,
-  zone = "Europe/Sofia",
-}: {
-  value: Date | null;
-  locale: string;
-  zone?: string;
-}) {
+  zone = agencyTimeZone,
+  zoneLabel = false,
+}: TimeProps & { value: Date | null }) {
   return value ? (
-    <time dateTime={value.toISOString()}>
-      {new Intl.DateTimeFormat(isPublicLocale(locale) ? displayLocale(locale) : "en-GB", {
-        dateStyle: "medium",
-        timeStyle: "short",
+    <time dateTime={value.toISOString()} className="tabular-nums">
+      {formatDateTime(timeLocale(locale), value, {
         timeZone: zone,
-      }).format(value)}{" "}
-      {zone}
+        zoneLabel: zoneLabel || zone !== agencyTimeZone,
+      })}
     </time>
   ) : (
     <span>—</span>
+  );
+}
+
+/** An appointment interval: its day once and its zone once. */
+export function WorkflowTimeRange({
+  start,
+  end,
+  locale,
+  zone = agencyTimeZone,
+  zoneLabel = false,
+}: TimeProps & { start: Date; end: Date | null }) {
+  if (!end) return <WorkflowTime value={start} locale={locale} zone={zone} zoneLabel={zoneLabel} />;
+  // The machine value is the start; the words carry the end on the same day.
+  return (
+    <time dateTime={start.toISOString()} className="tabular-nums">
+      {formatDateTimeRange(timeLocale(locale), start, end, {
+        timeZone: zone,
+        zoneLabel: zoneLabel || zone !== agencyTimeZone,
+      })}
+    </time>
   );
 }
 export function BoundWorkflowForm({
@@ -233,8 +261,8 @@ export async function CaseIndexScreen(
                   {c.owned}: {row.ownerName ?? "—"}
                 </p>
                 <p className="text-text-muted">
-                  {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
-                  {row.stage.replaceAll("_", " ")} ·{" "}
+                  {row.kind in c ? c[row.kind as "buyer"] : workflowLabel(row.kind, props.locale)} ·{" "}
+                  {workflowLabel(row.stage, props.locale)} ·{" "}
                   {row.disposition === "paused"
                     ? lifecycleCopy(props.locale).pause
                     : lifecycleCopy(props.locale)[row.disposition]}
@@ -318,10 +346,10 @@ export function ClientCaseOverview({
   return (
     <div className="min-w-0 space-y-6 [overflow-wrap:anywhere]">
       <p className="text-body text-text-muted">
-        {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+        {row.kind in c ? c[row.kind as "buyer"] : workflowLabel(row.kind, locale)} ·{" "}
         {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
           ? c.needsReview
-          : row.stage.replaceAll("_", " ")}{" "}
+          : workflowLabel(row.stage, locale)}{" "}
         ·{" "}
         {row.disposition === "paused"
           ? lifecycleCopy(locale).pause
@@ -364,14 +392,14 @@ export function ClientCaseOverview({
                 {row.reviewAt ? (
                   <p>
                     <strong>{c.reviewAt}:</strong>{" "}
-                    <WorkflowTime value={row.reviewAt} locale={locale} />
+                    <WorkflowTime value={row.reviewAt} locale={locale} zoneLabel />
                   </p>
                 ) : null}
               </div>
             ) : null}
             {active && row.dueAt ? (
               <p>
-                <WorkflowTime value={row.dueAt} locale={locale} />
+                <WorkflowTime value={row.dueAt} locale={locale} zoneLabel />
               </p>
             ) : null}
             <div className="flex flex-wrap items-center gap-4">
@@ -433,6 +461,7 @@ export async function CaseScreen(
                 <WorkflowTime
                   value={appointment.confirmedStartsAt ?? appointment.proposedStartsAt}
                   locale={props.locale}
+                  zoneLabel={props.session.account.kind === "client"}
                 />
               </>
             ) : null}
@@ -567,10 +596,10 @@ export async function CaseScreen(
               </strong>
             </p>
             <p>
-              {row.kind in c ? c[row.kind as "buyer"] : row.kind} ·{" "}
+              {row.kind in c ? c[row.kind as "buyer"] : workflowLabel(row.kind, props.locale)} ·{" "}
               {row.stage === "needs_agreed" && !brief?.clientAcknowledgedAt
                 ? c.needsReview
-                : row.stage.replaceAll("_", " ")}{" "}
+                : workflowLabel(row.stage, props.locale)}{" "}
               ·{" "}
               {row.disposition === "paused"
                 ? lifecycleCopy(props.locale).pause
@@ -589,7 +618,11 @@ export async function CaseScreen(
                   {staff ? <strong>{c.next}: </strong> : null}
                   {row.nextAction ?? c.noAction}
                 </p>
-                <WorkflowTime value={row.dueAt} locale={props.locale} />
+                <WorkflowTime
+                  value={row.dueAt}
+                  locale={props.locale}
+                  zoneLabel={props.session.account.kind === "client"}
+                />
               </>
             ) : (
               <div className="space-y-3 rounded-control border border-border p-4">
@@ -612,7 +645,11 @@ export async function CaseScreen(
                 {row.reviewAt ? (
                   <p>
                     <strong>{c.reviewAt}:</strong>{" "}
-                    <WorkflowTime value={row.reviewAt} locale={props.locale} />
+                    <WorkflowTime
+                      value={row.reviewAt}
+                      locale={props.locale}
+                      zoneLabel={props.session.account.kind === "client"}
+                    />
                   </p>
                 ) : null}
               </div>
@@ -644,6 +681,7 @@ export async function CaseScreen(
                   <WorkflowTime
                     value={task.state === "waiting" ? task.followUpAt : task.dueAt}
                     locale={props.locale}
+                    zoneLabel={props.session.account.kind === "client"}
                   />
                 </li>
               ))}
@@ -738,7 +776,7 @@ export async function CaseScreen(
                 ]}
                 values={{
                   nextAction: row.nextAction ?? "",
-                  dueAt: row.dueAt?.toISOString().slice(0, 16) ?? "",
+                  dueAt: row.dueAt?.toISOString() ?? "",
                   clientSummary: row.clientSummary ?? "",
                 }}
                 submit={c.nextSave}
@@ -917,11 +955,31 @@ export async function CaseScreen(
           {thread.length ? (
             <ol className="space-y-5">
               {thread.map((message) => (
-                <li key={message.id} className="rounded-control border border-border p-4">
+                <li
+                  key={message.id}
+                  data-message-audience={message.audience}
+                  className={
+                    message.audience === "internal"
+                      ? "rounded-control border border-dashed border-border bg-subtle p-4"
+                      : "rounded-control border border-border bg-surface p-4"
+                  }
+                >
                   <p className="text-caption">
                     {message.authorName ?? "—"} ·{" "}
-                    {message.audience === "internal" ? c.internal : c.shared} ·{" "}
-                    <WorkflowTime value={message.at} locale={props.locale} />
+                    {message.audience === "internal" ? (
+                      <>
+                        <span aria-hidden="true">🔒 </span>
+                        {c.internal}
+                      </>
+                    ) : (
+                      c.shared
+                    )}{" "}
+                    ·{" "}
+                    <WorkflowTime
+                      value={message.at}
+                      locale={props.locale}
+                      zoneLabel={props.session.account.kind === "client"}
+                    />
                   </p>
                   <p className="whitespace-pre-wrap">{message.body}</p>
                 </li>
@@ -930,35 +988,42 @@ export async function CaseScreen(
           ) : (
             <p>{c.noMessages}</p>
           )}
-          {view.canPost ? (
-            <BoundWorkflowForm
-              {...props}
-              command="message"
-              id={row.id}
-              revision={row.version}
-              path={path}
-              fields={[
-                { name: "body", label: c.message, type: "textarea", required: true },
-                ...(staff
-                  ? [{ name: "reviewed", label: c.reviewPost, type: "checkbox" as const }]
-                  : []),
-              ]}
-              submit={c.post}
-            />
-          ) : null}
-          {view.canNote ? (
-            <WorkflowSection title={c.internal}>
-              <BoundWorkflowForm
-                {...props}
-                command="note"
-                id={row.id}
-                revision={row.version}
-                path={path}
-                fields={[{ name: "body", label: c.internal, type: "textarea", required: true }]}
-                submit={c.note}
-              />
-            </WorkflowSection>
-          ) : null}
+          <AudienceComposer
+            sharedLabel={c.shared}
+            internalLabel={c.internal}
+            recipients={view.participants.map(({ id, name }) => ({ id, name }))}
+            shared={
+              view.canPost ? (
+                <BoundWorkflowForm
+                  {...props}
+                  command="message"
+                  id={row.id}
+                  revision={row.version}
+                  path={path}
+                  fields={[
+                    { name: "body", label: c.message, type: "textarea", required: true },
+                    ...(staff
+                      ? [{ name: "reviewed", label: c.reviewPost, type: "checkbox" as const }]
+                      : []),
+                  ]}
+                  submit={c.post}
+                />
+              ) : null
+            }
+            internal={
+              view.canNote ? (
+                <BoundWorkflowForm
+                  {...props}
+                  command="note"
+                  id={row.id}
+                  revision={row.version}
+                  path={path}
+                  fields={[{ name: "body", label: c.internal, type: "textarea", required: true }]}
+                  submit={c.note}
+                />
+              ) : null
+            }
+          />
         </WorkflowSection>
       ) : null}
       {staff ? (
@@ -966,8 +1031,8 @@ export async function CaseScreen(
           <ul className="space-y-3">
             {view.participants.map((participant) => (
               <li key={participant.id}>
-                {participant.name} · {participant.role.replaceAll("_", " ")} · {c.authority}:{" "}
-                {participant.authority.replaceAll("_", " ")}
+                {participant.name} · {workflowLabel(participant.role, props.locale)} · {c.authority}
+                : {workflowLabel(participant.authority, props.locale)}
               </li>
             ))}
           </ul>
@@ -996,6 +1061,7 @@ export function AppointmentList(
           <WorkflowTime
             value={row.confirmedStartsAt ?? row.proposedStartsAt}
             locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
           />
         </li>
       ))}
@@ -1073,6 +1139,20 @@ export async function WorkflowStatusScreen(
               ? c.statusFailed
               : c.statusUnknown}
       </p>
+      {receipt && receipt.status !== "succeeded" && receipt.status !== "failed" ? (
+        <a
+          className={workflowLink}
+          href={workflowStatus(
+            props.session.account.kind,
+            props.locale,
+            command,
+            id,
+            props.operationKey,
+          )}
+        >
+          {c.checkAgain}
+        </a>
+      ) : null}
       <a className={workflowLink} href={destination}>
         {c.back}
       </a>

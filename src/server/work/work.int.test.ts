@@ -20,6 +20,7 @@ import { createStaff } from "../testing";
 import { acceptInquiry, changeTask, readWorkOperation, triageInquiry } from "./commands";
 import {
   findInquiriesByCheckCode,
+  inquiryIdByReference,
   listContacts,
   listInbox,
   listTasks,
@@ -190,6 +191,11 @@ describe("staff work against durable inquiry intake", () => {
     expect((await listInbox(t.db, scoped.session)).rows.map((r) => r.inquiry.id)).toEqual([
       visible.id,
     ]);
+    expect((await readInquiry(t.db, scoped.session, visible.id)).duplicateCandidates).toEqual([]);
+    expect(await inquiryIdByReference(t.db, scoped.session, visible.reference)).toBe(visible.id);
+    await expect(
+      inquiryIdByReference(t.db, scoped.session, hidden.reference),
+    ).rejects.toMatchObject({ code: "validation_failed" });
     await expect(readInquiry(t.db, scoped.session, hidden.id)).rejects.toMatchObject({
       code: "not_found",
     });

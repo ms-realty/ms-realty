@@ -6,6 +6,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { findCoverageRecord } from "./coverage-helpers";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
 if (!databaseUrl || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(databaseUrl).pathname))
@@ -40,7 +41,7 @@ function seed() {
     keyId: string;
   };
 }
-const reviewAt = () => new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 16);
+const reviewAt = () => new Date(Date.now() + 2 * 86400000);
 const plan = "Review retained commitments and arrange agency coverage.";
 
 for (const javaScriptEnabled of [true, false])
@@ -109,10 +110,11 @@ for (const javaScriptEnabled of [true, false])
       await page.getByRole("link", { name: appointment.reference, exact: true }).click();
       await expect(page.getByTestId("appointment-state")).toHaveText("Confirmed");
       await page.goto(hostUrl("staff", path));
-      await page
-        .getByLabel("Starts at (UTC)", { exact: true })
-        .fill(new Date(endsAt.getTime() + 900000).toISOString().slice(0, 16));
-      await page.getByLabel("Coverage review due (UTC)", { exact: true }).fill(reviewAt());
+      await fillAgencyInstant(
+        page.getByLabel("Starts at", { exact: true }),
+        new Date(endsAt.getTime() + 900000),
+      );
+      await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
       await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
       await page.getByRole("checkbox").check();
       await page.getByRole("button", { name: "Record absence", exact: true }).click();
@@ -209,7 +211,7 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`absence-form-${javaScriptEnabled}-320.png`),
         fullPage: true,
       });
-      await page.getByLabel("Coverage review due (UTC)", { exact: true }).fill(reviewAt());
+      await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
       await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
       await page.getByRole("checkbox").check();
       await page.getByRole("button", { name: "Record absence", exact: true }).click();
@@ -273,10 +275,11 @@ test("O23 planned absence can be cancelled after explicit conflict review", asyn
     },
   ]);
   await page.goto(hostUrl("staff", `/en/access/absence/${f.brokerId}`));
-  await page
-    .getByLabel("Starts at (UTC)", { exact: true })
-    .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
-  await page.getByLabel("Coverage review due (UTC)", { exact: true }).fill(reviewAt());
+  await fillAgencyInstant(
+    page.getByLabel("Starts at", { exact: true }),
+    new Date(Date.now() + 86400000),
+  );
+  await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
   await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
   await page.getByRole("checkbox").check();
   await db
@@ -333,7 +336,7 @@ test("O23 lost absence response reconciles one receipt after leaving and returni
   try {
     await page.goto(url);
     const key = await page.locator('input[name="_operationId"]').inputValue();
-    await page.getByLabel("Coverage review due (UTC)", { exact: true }).fill(reviewAt());
+    await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
     await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "Record absence", exact: true }).click();

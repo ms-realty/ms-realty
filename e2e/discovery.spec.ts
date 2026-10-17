@@ -623,7 +623,8 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
       const summary = page.getByRole("region", { name: "Viewing preferences", exact: true });
       await expect(summary).toContainText("This is a request, not a booking");
-      await expect(summary).toContainText("Europe/London");
+      await expect(summary).toContainText("United Kingdom Time");
+      await expect(summary).not.toContainText("Europe/London");
       await expect(summary).toContainText("First occurrence");
       await expect(summary).toContainText("Second occurrence");
       await expect(summary).toContainText(accessNeeds);

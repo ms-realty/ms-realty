@@ -7,6 +7,7 @@ import type {
   InquiryCaseBlockReason,
   listInquiryCaseCandidates,
 } from "@/server/cases/inquiry-link";
+import { AppError } from "@/server/errors";
 import { InquiryCaseLink, InquiryLinkScreen } from "./inquiry-link";
 import { inquiryLinkCopy } from "./inquiry-link-copy";
 
@@ -134,6 +135,24 @@ describe("O03 Case candidates", () => {
 });
 
 describe("O03L review", () => {
+  it("requires selected Case context instead of opening an unspecified linking action", async () => {
+    mocked.read.mockResolvedValue(detail);
+    mocked.candidates.mockClear();
+    await expect(InquiryLinkScreen({ locale: "en", session, inquiryId })).rejects.toThrow(
+      "NEXT_HTTP_ERROR_FALLBACK;404",
+    );
+    expect(mocked.candidates).not.toHaveBeenCalled();
+  });
+
+  it("checks inquiry access before reading a selected Case's candidate context", async () => {
+    mocked.read.mockRejectedValueOnce(new AppError("not_found"));
+    mocked.candidates.mockClear();
+    await expect(
+      InquiryLinkScreen({ locale: "en", session, inquiryId, caseId: "case-one" }),
+    ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+    expect(mocked.candidates).not.toHaveBeenCalled();
+  });
+
   it("shows C02's basis and refusal instead of the link form", async () => {
     const copy = inquiryLinkCopy("en");
     mocked.read.mockResolvedValue(detail);

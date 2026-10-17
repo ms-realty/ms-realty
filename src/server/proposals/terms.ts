@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { currencyCodes } from "@/domain/ids";
+import { type CurrencyCode, currencyCodes, type PublicLocale } from "@/domain/ids";
+import { decimalToMinor } from "@/domain/money";
+import { parseMoneyInput } from "@/i18n/money";
 import { sofiaInstant } from "../appointments/time";
 
 export const partySnapshotSchema = z.object({
@@ -22,11 +24,14 @@ export const termInputSchema = z.object({
     .refine((value) => Boolean(sofiaInstant(value)), "valid_sofia_offset_required"),
 });
 export type TermInput = z.infer<typeof termInputSchema>;
-export function amountToMinor(value: string) {
-  if (!/^\d{1,13}(?:[.,]\d{1,2})?$/.test(value)) return Number.NaN;
-  const [whole = "", fraction = ""] = value.replace(",", ".").split(".");
-  const result = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
-  return Number.isSafeInteger(result) ? result : Number.NaN;
+export function amountToMinor(
+  value: string,
+  locale?: PublicLocale,
+  currency: CurrencyCode = "EUR",
+) {
+  return locale
+    ? parseMoneyInput(locale, value, currency)
+    : decimalToMinor(value.replace(",", "."), currency);
 }
 export function deadlineInput(value: Date) {
   const parts = new Intl.DateTimeFormat("sv-SE", {

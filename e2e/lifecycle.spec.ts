@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -107,9 +108,10 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     await disposition.getByLabel("Case disposition", { exact: true }).selectOption("paused");
     await disposition.getByLabel("Reason", { exact: true }).fill("Client requested a pause");
     await disposition.getByLabel("Waiting for", { exact: true }).fill("Client availability");
-    await disposition
-      .getByLabel("Review date (UTC)", { exact: true })
-      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      disposition.getByLabel("Review date", { exact: true }),
+      new Date(Date.now() + 86400000),
+    );
     await disposition.getByRole("button", { name: "Record disposition", exact: true }).click();
     await recorded(page);
     await expect(
@@ -137,9 +139,10 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     await disposition
       .getByLabel("Next action when reopening", { exact: true })
       .fill("Review the resumed case with the client");
-    await disposition
-      .getByLabel("Next action due (UTC)", { exact: true })
-      .fill(new Date(Date.now() + 172800000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      disposition.getByLabel("Next action due", { exact: true }),
+      new Date(Date.now() + 172800000),
+    );
     await disposition.getByRole("button", { name: "Record disposition", exact: true }).click();
     await recorded(page);
     await expect(

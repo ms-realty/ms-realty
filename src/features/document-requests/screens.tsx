@@ -1,3 +1,5 @@
+import { NativeForm } from "@/ui/form/native-form";
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
@@ -120,7 +122,11 @@ export async function DocumentRequestsScreen(
                 ? c.failed
                 : c.processing}
           </h2>
-          {receipt ? <p>{receipt.operationId}</p> : null}
+          {receipt ? (
+            <TechnicalDetails locale={locale}>
+              <bdi>{receipt.operationId}</bdi>
+            </TechnicalDetails>
+          ) : null}
           <a className={workflowLink} href={`${path}?refresh=${randomUUID()}`}>
             {caseCopy(locale).back}
           </a>
@@ -150,7 +156,10 @@ export async function DocumentRequestsScreen(
                 required: true,
                 options: [
                   { value: "", label: "—" },
-                  ...view.recipients.map((r) => ({ value: r.id, label: `${r.name} · ${r.role}` })),
+                  ...view.recipients.map((r) => ({
+                    value: r.id,
+                    label: `${r.name} · ${workflowLabel(r.role, locale)}`,
+                  })),
                 ],
               },
               {
@@ -279,7 +288,7 @@ export async function DocumentRequestsScreen(
             </a>
           ) : null}
           {!staff && props.id && row.canUpload ? (
-            <form
+            <NativeForm
               method="post"
               encType="multipart/form-data"
               action={`${path}/submit`}
@@ -303,7 +312,7 @@ export async function DocumentRequestsScreen(
               >
                 {c.upload}
               </button>
-            </form>
+            </NativeForm>
           ) : !staff && props.id && !row.cancelledAt ? (
             <p>{c.unavailable}</p>
           ) : null}
@@ -364,3 +373,5 @@ export async function DocumentRequestsScreen(
     </WorkflowPage>
   );
 }
+
+import { workflowLabel } from "@/i18n/workflow-labels";

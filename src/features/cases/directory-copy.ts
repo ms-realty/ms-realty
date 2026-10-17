@@ -1,5 +1,6 @@
 // O04 cases index copy. Private workspace copy; BG/RU drafts need human language review before
 // catalog adoption, like the rest of src/features/cases.
+import { workflowLabel } from "@/i18n/workflow-labels";
 import { caseCopy } from "./copy";
 import { inquiryLinkCopy } from "./inquiry-link-copy";
 
@@ -87,7 +88,7 @@ export function directoryCopy(locale: string): Copy {
  * unknown value is shown as recorded. */
 export function caseStageLabel(stage: string, locale: string) {
   const stages: Record<string, string> = inquiryLinkCopy(locale).stages;
-  return stages[stage] ?? stage.replaceAll("_", " ");
+  return stages[stage] ?? workflowLabel(stage, locale);
 }
 
 export function caseKindLabel(kind: string, locale: string) {
@@ -95,5 +96,5 @@ export function caseKindLabel(kind: string, locale: string) {
   const c = caseCopy(locale);
   return kind === "buyer" || kind === "tenant" || kind === "seller" || kind === "landlord"
     ? c[kind]
-    : kind.replaceAll("_", " ");
+    : workflowLabel(kind, locale);
 }

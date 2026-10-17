@@ -23,6 +23,7 @@ import {
   caseWorkSnapshot,
   changeCaseDisposition,
   handoverCase,
+  lifecycleView,
   transitionCaseStage,
 } from "./lifecycle";
 import { readCase } from "./queries";
@@ -415,5 +416,63 @@ describe("accountable Case lifecycle", () => {
         aftercare: "Claimed",
       }),
     ).rejects.toMatchObject({ code: "transition_denied" });
+  });
+});
+
+it("offers only accessible current, clean, purpose-reviewed completion versions", async () => {
+  const f = await caseFixture(t.db);
+  const accepted: string[] = [];
+  for (const kind of ["accepted", "digest_changed", "expired", "not_reviewed"] as const) {
+    const [document] = await t.db
+      .insert(documents)
+      .values({
+        reference: await nextReference(t.db, "document"),
+        caseId: f.record.id,
+        purpose: "case_completion",
+        classification: "contract",
+        currentVersionNumber: 1,
+        expiresAt: kind === "expired" ? new Date(Date.now() - 1000) : null,
+      })
+      .returning();
+    if (!document) throw new Error("Missing completion document");
+    const hash = "a".repeat(64);
+    const [file] = await t.db
+      .insert(documentVersions)
+      .values({
+        documentId: document.id,
+        versionNumber: 1,
+        state: kind === "not_reviewed" ? "ready_for_review" : "reviewed",
+        fileName: `${kind}.pdf`,
+        contentType: "application/pdf",
+        byteSize: 10,
+        sealedKey: `sealed/${randomUUID()}`,
+        sha256: hash,
+        scan: "clean",
+        scannedAt: new Date(Date.now() - 1000),
+        scannerVersion: "synthetic-scanner",
+        scannedSha256: kind === "digest_changed" ? "b".repeat(64) : hash,
+        reviewType: "accepted_for_purpose",
+        reviewedAt: new Date(Date.now() - 500),
+        reviewedById: f.staff.id,
+        uploadedByKind: "staff",
+        uploadedById: f.staff.id,
+      })
+      .returning();
+    if (!file) throw new Error("Missing completion version");
+    if (kind === "accepted") accepted.push(file.id);
+  }
+  expect((await lifecycleView(t.db, f.staff.session, f.record.id)).completionEvidence).toEqual([]);
+  await t.db.insert(grants).values({
+    principalId: f.staff.id,
+    capability: "compliance.review",
+    reason: "Synthetic completion evidence access",
+    recordType: "case",
+    recordId: f.record.id,
+  });
+  const view = await lifecycleView(t.db, f.staff.session, f.record.id);
+  expect(view.completionEvidence.map((file) => file.id)).toEqual(accepted);
+  expect(view.completionEvidence[0]?.fileName).toBe("accepted.pdf");
+  await expect(lifecycleView(t.db, f.client.session, f.record.id)).rejects.toMatchObject({
+    code: "not_found",
   });
 });

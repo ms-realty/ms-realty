@@ -2,14 +2,16 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import { changeStaffAbsence, readStaffAbsence } from "@/server/auth/absence";
 import { requireAuthHost } from "@/server/auth/pages";
 import { getEnv } from "@/server/config/env";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import { offboardingCopy } from "../offboarding/copy";
 import { absenceCopy } from "./copy";
@@ -25,7 +27,7 @@ export async function absenceAction(
     path = `/${locale}/access/absence/${id}`,
     c = caseCopy(locale);
   const fields = ["mode", "startsAt", "reviewAt", "reason", "reviewed"] as const,
-    values = readFormValues<FormValues>(form, fields),
+    values = readTimeFormValues<FormValues>(form, fields),
     envelope = readFormEnvelope(form, scope);
   const operationId = envelope?.operationId ?? issueFormOperation(scope);
   const status = { href: `${path}?receipt=${encodeURIComponent(operationId)}`, label: c.status };
@@ -55,8 +57,8 @@ export async function absenceAction(
         principalId: id,
         expectedRevision: envelope.expectedRevision,
         action: values.mode,
-        startsAt: values.startsAt ? `${values.startsAt}:00Z` : null,
-        reviewAt: values.reviewAt ? `${values.reviewAt}:00Z` : null,
+        startsAt: values.startsAt ? formInstant(values, "startsAt") : null,
+        reviewAt: values.reviewAt ? formInstant(values, "reviewAt") : null,
         reason: values.reason,
         reviewed: values.reviewed === "true",
       });
@@ -140,7 +142,17 @@ export async function absenceAction(
         code: "VALIDATION_FAILED",
         message: c.validation,
         fieldErrors: Object.fromEntries(
-          fields.filter((f) => error.fieldErrors?.[f]).map((f) => [f, [c.invalid]]),
+          fields
+            .filter((f) => error.fieldErrors?.[f])
+            .map((f) => [
+              f,
+              [
+                timeReasonMessage(
+                  isPublicLocale(locale) ? locale : "bg",
+                  error.fieldErrors?.[f]?.[0],
+                ) ?? c.invalid,
+              ],
+            ]),
         ),
       },
     };

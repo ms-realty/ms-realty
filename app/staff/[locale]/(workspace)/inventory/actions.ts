@@ -1,6 +1,5 @@
 "use server";
 import { randomUUID } from "node:crypto";
-import { parseDateTime } from "@internationalized/date";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -18,11 +17,13 @@ import type { InventoryValues } from "@/features/inventory/editor";
 import { selects } from "@/features/inventory/fields";
 import { safeNext } from "@/features/inventory/next";
 import { savedAckField, savedOperationCookie } from "@/features/inventory/saved-operation";
-import { agencyTimeZone, isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
 import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
 import { assertCan } from "@/server/authz";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import {
   confirmListingAvailability,
@@ -175,7 +176,7 @@ export async function saveInventory(
           reference: ref,
           recordedAt: {
             dateTime: result.data.completedAt,
-            label: new Date(result.data.completedAt).toLocaleString(locale),
+            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.completedAt),
           },
           nextStep: copy.next,
           destination: { href: `/${locale}/inventory/${ref}`, label: copy.open },
@@ -314,16 +315,10 @@ async function runInventoryDecision(form: FormData, preserveDraft = false) {
             | "authorized_representative",
           note: String(form.get("scope") ?? ""),
         });
+      const timeValues = readTimeFormValues(form, ["agreedAt", "expiresAt"]);
       function localInstant(field: string, optional = false) {
-        const value = String(form.get(field) ?? "");
-        if (!value && optional) return null;
-        try {
-          return parseDateTime(value).toDate(agencyTimeZone, "reject").toISOString();
-        } catch {
-          throw new AppError("validation_failed", {
-            fieldErrors: { [field]: ["Enter a unique valid time in Europe/Sofia."] },
-          });
-        }
+        const value = formInstant(timeValues, field);
+        return !value && optional ? null : value;
       }
       if (intent === "instruction")
         return recordSellerInstruction(db, {
@@ -493,7 +488,10 @@ export async function submitInventoryDecision(
         reference: context.reference,
         recordedAt: {
           dateTime: receipt.data,
-          label: new Date(receipt.data).toLocaleString(context.locale),
+          label: formatDateTime(
+            isPublicLocale(context.locale) ? context.locale : "bg",
+            receipt.data,
+          ),
         },
         nextStep: feedback.next,
         destination: {

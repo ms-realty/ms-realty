@@ -22,7 +22,9 @@ export interface NavItem<Label extends string> {
   readonly path: string | null;
 }
 
-export type WorkspaceNavItem = NavItem<WorkspaceNavLabel>;
+export interface WorkspaceNavItem extends NavItem<WorkspaceNavLabel> {
+  readonly requires?: readonly Capability[];
+}
 
 export interface AgencyToolItem extends NavItem<AgencyToolLabel> {
   /** Shown only to someone holding all of these, as the destination checks; none: any staff. */
@@ -71,14 +73,18 @@ export const journeyHelpNav: NavItem<JourneyNavLabel> = {
 
 /** Saved Figma O01 rail: everyday work stays primary; Butler and tools stay secondary.
  * The route registry preserves working native destinations and leaves unbuilt pages out. */
-export const workspacePrimaryNav: readonly WorkspaceNavItem[] = [
+export const workspacePrimaryNav: readonly (WorkspaceNavItem & { label: AgencyToolLabel })[] = [
   { label: "today", screen: "O01", path: "/today" },
-  { label: "inquiries", screen: "O02", path: "/inquiries" },
-  { label: "cases", screen: "O04", path: "/cases" },
-  { label: "inventory", screen: "O10", path: "/inventory" },
-  { label: "calendar", screen: "O08", path: "/calendar" },
-  { label: "tasks", screen: "O18", path: "/tasks" },
+  { label: "inquiries", screen: "O02", path: "/inquiries", requires: ["inquiry.read"] },
+  { label: "cases", screen: "O04", path: "/cases", requires: ["case.read"] },
+  { label: "inventory", screen: "O10", path: "/inventory", requires: ["listing.read"] },
+  { label: "calendar", screen: "O08", path: "/calendar", requires: ["appointment.manage"] },
+  { label: "tasks", screen: "O18", path: "/tasks", requires: ["task.manage"] },
 ];
+
+export function permittedWorkspaceNav(held: ReadonlySet<Capability>): WorkspaceNavItem[] {
+  return workspacePrimaryNav.filter((item) => (item.requires ?? []).every((c) => held.has(c)));
+}
 
 export const workspaceSecondaryNav: readonly WorkspaceNavItem[] = [
   { label: "butler", screen: "XBUTLER", path: "/operations/assistance" },
@@ -93,13 +99,9 @@ export const workspaceSecondaryNav: readonly WorkspaceNavItem[] = [
  */
 export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyToolItem[]>> = {
   work: [
-    { label: "today", screen: "O01", path: "/today" },
-    { label: "inquiries", screen: "O02", path: "/inquiries" },
-    { label: "cases", screen: "O04", path: "/cases" },
-    { label: "inventory", screen: "O10", path: "/inventory" },
+    ...workspacePrimaryNav.slice(0, 4),
     { label: "imports", screen: "O28", path: null },
-    { label: "calendar", screen: "O08", path: "/calendar" },
-    { label: "tasks", screen: "O18", path: "/tasks" },
+    ...workspacePrimaryNav.slice(4),
     { label: "consultations", screen: "O29", path: null },
     { label: "coverage", screen: "O01", path: "/coverage", requires: ["case.read_internal"] },
     {
@@ -146,10 +148,17 @@ export type AgencyToolGroup = {
 export function permittedTools(
   locale: PublicLocale,
   held: ReadonlySet<Capability>,
+  navigable: ReadonlySet<Capability> = held,
 ): AgencyToolGroup[] {
   return (Object.keys(agencyTools) as AgencyToolSection[]).flatMap((section) => {
     const items = linked(
-      agencyTools[section].filter((item) => (item.requires ?? []).every((c) => held.has(c))),
+      agencyTools[section].filter((item) =>
+        (item.requires ?? []).every((c) =>
+          workspacePrimaryNav.some((primary) => primary.path === item.path)
+            ? navigable.has(c)
+            : held.has(c),
+        ),
+      ),
       locale,
     );
     return items.length > 0 ? [{ section, items }] : [];

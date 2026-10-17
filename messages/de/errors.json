@@ -9,5 +9,20 @@
     "body": "Versuchen Sie es erneut. Wenn es wieder passiert, rufen Sie uns an und nennen Sie die Referenz.",
     "reference": "Referenz: {reference}",
     "retry": "Erneut versuchen"
+  },
+  "recovery": {
+    "staffHome": "Zurück zu Heute",
+    "clientHome": "Zurück zu meinen Vorgängen",
+    "list": "Zurück zur Liste",
+    "record": "Zurück zum Eintrag",
+    "deal": "Zurück zum Vorgang",
+    "search": "Immobilien suchen",
+    "access": "Zurück zur Anmeldung",
+    "tools": "Zu den Agenturwerkzeugen",
+    "call": "Rufen Sie uns an: {phone}",
+    "loadingList": "Die Liste wird geladen…",
+    "loadingRecord": "Der Eintrag wird geladen…",
+    "loadingListing": "Das Inserat wird geladen…",
+    "actionOutcome": "Wenn Sie gerade etwas gespeichert oder gesendet haben, prüfen Sie zuerst die zugehörige Bestätigung, bevor Sie die Aktion wiederholen."
   }
 }

@@ -26,6 +26,7 @@ export default async function WorkspaceLayout({
       account={viewer.account}
       mayManageAccess={viewer.mayManageAccess}
       tools={viewer.tools}
+      primary={viewer.primary}
     >
       {children}
     </WorkspaceShell>

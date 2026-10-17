@@ -5,5 +5,9 @@
   "languageList": "בחירת שפה",
   "currentLanguage": "השפה הנוכחית: {language}",
   "closeMenu": "סגירת התפריט",
-  "openMenu": "פתיחת התפריט"
+  "openMenu": "פתיחת התפריט",
+  "privateAccess": {
+    "checking": "בודקים את הגישה…",
+    "retry": "בדיקת הגישה שוב"
+  }
 }

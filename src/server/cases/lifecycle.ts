@@ -35,7 +35,7 @@ import { assertCan, staffWhoCan } from "../authz";
 import { assertCaseAgreementReady, reviewedEvidence } from "../compliance/agreement-gate";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
-import { AppError } from "../errors";
+import { AppError, isAppError } from "../errors";
 import { documentAccess } from "../files/access";
 import { type OperationContext, runOperation } from "../operations";
 import {
@@ -872,8 +872,40 @@ export async function lifecycleView(db: Executor, session: Session, id: string) 
     .where(eq(caseStageHistory.caseId, id))
     .orderBy(desc(caseStageHistory.occurredAt))
     .limit(30);
+  const completionCandidates = await db
+    .select({
+      id: documentVersions.id,
+      fileName: documentVersions.fileName,
+      versionNumber: documentVersions.versionNumber,
+    })
+    .from(documentVersions)
+    .innerJoin(documents, eq(documents.id, documentVersions.documentId))
+    .where(
+      and(
+        eq(documents.caseId, id),
+        eq(documents.purpose, "case_completion"),
+        eq(documentVersions.state, "reviewed"),
+        eq(documentVersions.versionNumber, documents.currentVersionNumber),
+      ),
+    )
+    .orderBy(desc(documentVersions.createdAt));
+  const completionEvidence = [];
+  for (const candidate of completionCandidates) {
+    try {
+      await documentAccess(db, live, candidate.id);
+      await reviewedEvidence(db, candidate.id, { caseId: id, purpose: "case_completion" });
+      completionEvidence.push(candidate);
+    } catch (error) {
+      if (
+        !isAppError(error) ||
+        !["not_found", "forbidden", "transition_denied"].includes(error.code)
+      )
+        throw error;
+    }
+  }
   return {
     row,
+    completionEvidence,
     snapshotHash: snapshot.hash,
     openTasks: snapshot.commitments.length,
     appointments: snapshot.agenda.length,

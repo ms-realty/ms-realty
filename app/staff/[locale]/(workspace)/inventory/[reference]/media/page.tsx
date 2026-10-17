@@ -1,6 +1,7 @@
 // O13/O14/F23/AT28/AT42: one selected photo, a staged order change that writes nothing until Save,
 // and originals, scan, processing, rights and publication kept separate. Figma O13 11:5356,
 // O13ORDER 46:5049 / 46:5107, O13ORDERSAVED 46:5165 / 46:5184.
+
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
@@ -14,6 +15,7 @@ import { mediaForListing, mediaReceipt } from "@/server/media/commands";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { CheckIcon, DocumentIcon, NoPhotoIcon } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 
@@ -172,7 +174,7 @@ export default async function MediaPage({
           ))}
         </dl>
         <div className="flex flex-wrap gap-3">
-          <form action={action} method="post">
+          <NativeForm action={action} method="post">
             <FileEnvelope intent="place" version={listing.version} />
             <input type="hidden" name="relationId" value={selected.relation.id} />
             <input
@@ -183,7 +185,7 @@ export default async function MediaPage({
             <button type="submit" className={buttonClass("primary")}>
               {copy.saveOrder}
             </button>
-          </form>
+          </NativeForm>
           <a href={cancel} className={buttonClass("tertiary")}>
             {copy.cancel}
           </a>
@@ -278,12 +280,12 @@ export default async function MediaPage({
                 {copy.lastAlready}
               </button>
             )}
-            <form action={action} method="post">
+            <NativeForm action={action} method="post">
               <FileEnvelope intent="place" version={listing.version} />
               <input type="hidden" name="relationId" value={selected.relation.id} />
               <input type="hidden" name="hidden" value={String(!selected.relation.hidden)} />
               <FileButton>{selected.relation.hidden ? copy.show : copy.hide}</FileButton>
-            </form>
+            </NativeForm>
           </div>
           <PhotoChecks row={selected} copy={copy} action={action} fileChooser={fileChooser} />
         </section>
@@ -291,7 +293,7 @@ export default async function MediaPage({
         <p>{copy.empty}</p>
       )}
       <p className="text-dense text-text-muted">{copy.permission}</p>
-      <form
+      <NativeForm
         action={action}
         method="post"
         encType="multipart/form-data"
@@ -312,7 +314,7 @@ export default async function MediaPage({
           </select>
         </label>
         <FileButton>{copy.submit}</FileButton>
-      </form>
+      </NativeForm>
       {total ? (
         <section id="o13-all" aria-labelledby="o13-all-heading" className="space-y-3">
           <h2 id="o13-all-heading" className="text-section font-semibold">
@@ -384,26 +386,35 @@ function PhotoChecks({
       ) : null}
       {upload && !upload.completedAt ? (
         upload.expiresAt > new Date() ? (
-          <form action={action} method="post" encType="multipart/form-data" className="grid gap-3">
+          <NativeForm
+            action={action}
+            method="post"
+            encType="multipart/form-data"
+            className="grid gap-3"
+          >
             <FileEnvelope intent="upload" version={asset.version} />
             <input type="hidden" name="uploadId" value={upload.id} />
             <input type="hidden" name="relationId" value={relation.id} />
             {fileChooser}
             <FileButton>{copy.resume}</FileButton>
-          </form>
+          </NativeForm>
         ) : (
           <p>{copy.expired}</p>
         )
       ) : null}
       {asset.sealedKey && asset.scan === "failed" ? (
-        <form action={action} method="post">
+        <NativeForm action={action} method="post">
           <FileEnvelope intent="scan" version={asset.version} id={asset.id} />
           <input type="hidden" name="relationId" value={relation.id} />
           <FileButton>{copy.retry}</FileButton>
-        </form>
+        </NativeForm>
       ) : null}
       {ready ? (
-        <form action={action} method="post" className="grid gap-4 border-t border-divider pt-4">
+        <NativeForm
+          action={action}
+          method="post"
+          className="grid gap-4 border-t border-divider pt-4"
+        >
           <FileEnvelope intent="review" version={asset.version} id={asset.id} />
           <input type="hidden" name="relationId" value={relation.id} />
           <div className="grid gap-4 lg:grid-cols-2">
@@ -455,7 +466,7 @@ function PhotoChecks({
             </select>
           </label>
           <FileButton>{copy.reviewAction}</FileButton>
-        </form>
+        </NativeForm>
       ) : null}
     </div>
   );

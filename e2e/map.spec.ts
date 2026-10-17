@@ -53,6 +53,7 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await expect(page.getByText("Loading map…", { exact: true })).not.toBeVisible({ timeout: 20000 });
   await expect(page.getByText("The map is unavailable.", { exact: false })).not.toBeVisible();
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await expect(page.getByRole("region", { name: mapCopy("en").title, exact: true })).toHaveCount(1);
   const marker = page.getByRole("button", { name: new RegExp(data.published.reference) });
   await marker.focus();
   await page.keyboard.press("Enter");
@@ -78,6 +79,9 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await expect(page.getByText("Loading map…", { exact: true })).not.toBeVisible({ timeout: 20000 });
   await expect(page.getByText("The map is unavailable.", { exact: false })).not.toBeVisible();
   await expect(page.locator(".msr-map-marker")).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: mapCopy("en", "listing").title, exact: true }),
+  ).toHaveCount(1);
   await page.getByRole("link", { name: "Go to list", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/properties$/);
   await page.goto(url);

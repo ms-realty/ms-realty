@@ -1,6 +1,6 @@
 // biome-ignore-all lint/style/noNonNullAssertion: Missing isolated test fixture rows fail the test on dereference.
 import { randomUUID } from "node:crypto";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
@@ -15,6 +15,7 @@ import {
   grants,
   listings,
   mediaAssets,
+  publicationManifests,
   sessions,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -27,6 +28,8 @@ import { reviewDocument, startDocumentUpload } from "../documents/commands";
 import { reviewMedia, startMediaUpload } from "../media/commands";
 import { mediaAssetEligible } from "../media/eligibility";
 import { verifyPublicationMedia } from "../media/verify";
+import { activateManifest, prepareManifest } from "../publication/commands";
+import { loadPublishedListings } from "../publication/presentation";
 import {
   createListingFixture,
   publicationFixtureStorage,
@@ -793,6 +796,143 @@ describe("AT28/AT42 real storage workflow", () => {
       privateDownload(t.db, store, session, "document", started.versionId),
     ).rejects.toMatchObject({ code: "not_found" });
   });
+  it("M-019 seals real renditions and exposes only exact currently approved manifest descriptors", async () => {
+    const bytes = await sharp({
+      create: { width: 2600, height: 1462, channels: 3, background: "#90a4ae" },
+    })
+      .withMetadata()
+      .webp()
+      .toBuffer();
+    const fixture = await createListingFixture(t.db, {
+      reviewerId: staffId,
+      photoFixture: { bytes, width: 2600, height: 1462 },
+    });
+    const id = fixture.assetIds[0]!;
+    await t.db
+      .update(mediaAssets)
+      .set({ scan: "pending", processing: "pending", review: "pending", reviewedById: null })
+      .where(eq(mediaAssets.id, id));
+    const actual: FileServices = { storage: publicationFixtureStorage, scanner: cleanScanner };
+    await processFile(t.db, actual, session, "media", id);
+    const [processed] = await t.db.select().from(mediaAssets).where(eq(mediaAssets.id, id));
+    if (!processed) throw new Error("Missing processed fixture");
+    const renditions = processed.derivativeRenditions;
+    expect(renditions.map((item) => item.width)).toEqual([480, 960, 1600, 2400]);
+    expect(processed.review).toBe("pending");
+    for (const rendition of renditions) {
+      const sealed = await publicationFixtureStorage.read(rendition.key);
+      expect(rendition.key).toBe(`derivatives/${id}/${rendition.sha256}.webp`);
+      expect(digestOf(sealed)).toBe(rendition.sha256);
+      expect(sealed.length).toBe(rendition.byteSize);
+      const metadata = await sharp(sealed).metadata();
+      expect(metadata).toMatchObject({
+        format: "webp",
+        width: rendition.width,
+        height: rendition.height,
+      });
+      expect(metadata.exif).toBeUndefined();
+      await expect(
+        publicMediaDownload(t.db, publicationFixtureStorage, id, rendition.sha256),
+      ).rejects.toMatchObject({ code: "not_found" });
+    }
+    await reviewMedia(t.db, {
+      session,
+      operationId: randomUUID(),
+      expectedRevision: processed.version,
+      id,
+      input: mediaReview,
+    });
+    await expect(
+      publicMediaDownload(t.db, publicationFixtureStorage, id, renditions[0]!.sha256),
+    ).rejects.toMatchObject({ code: "not_found" });
+    const manifests = await publishForTest(t.db, session.actor, fixture);
+    const [manifest] = await t.db
+      .select()
+      .from(publicationManifests)
+      .where(eq(publicationManifests.id, manifests[0]!));
+    expect(manifest?.media).toMatchObject([{ renditions }]);
+    const [published] = await loadPublishedListings(t.db, { ids: [fixture.listingId] }, "bg");
+    expect(published?.media[0]?.renditions).toEqual(
+      renditions.map(({ sha256, width, height }) => ({ digest: sha256, width, height })),
+    );
+    expect(published?.media[0]?.renditions?.[0]).not.toHaveProperty("key");
+    for (const rendition of renditions) {
+      expect(
+        (await publicMediaDownload(t.db, publicationFixtureStorage, id, rendition.sha256)).bytes,
+      ).toEqual(await publicationFixtureStorage.read(rendition.key));
+    }
+    await expect(
+      publicMediaDownload(t.db, publicationFixtureStorage, id, processed.sha256!),
+    ).rejects.toMatchObject({ code: "not_found" });
+    const smallest = renditions[0]!;
+    const [listing] = await t.db.select().from(listings).where(eq(listings.id, fixture.listingId));
+    const prepare = () =>
+      prepareManifest(
+        t.db,
+        {
+          actor: session.actor,
+          operationId: randomUUID(),
+          expectedRevision: listing!.publicationGeneration,
+          reference: fixture.reference,
+          locale: "bg",
+        },
+        { storage: publicationFixtureStorage },
+      );
+    const candidate = await prepare();
+    const activate = () =>
+      activateManifest(
+        t.db,
+        {
+          actor: session.actor,
+          operationId: randomUUID(),
+          expectedRevision: listing!.publicationGeneration,
+          manifestId: candidate.outcome.manifestId,
+        },
+        { storage: publicationFixtureStorage },
+      );
+    await t.db
+      .update(mediaAssets)
+      .set({
+        derivativeRenditions: renditions.map((item, index) =>
+          index === 0 ? { ...item, width: item.width + 1 } : item,
+        ),
+      })
+      .where(eq(mediaAssets.id, id));
+    await expect(
+      publicMediaDownload(t.db, publicationFixtureStorage, id, smallest.sha256),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await expect(activate()).rejects.toMatchObject({ code: "approval_stale" });
+    const [changed] = await loadPublishedListings(t.db, { ids: [fixture.listingId] }, "bg");
+    expect(changed?.media[0]?.renditions?.map((item) => item.width)).toEqual([960, 1600, 2400]);
+    const [wrongDimensions] = await t.db.select().from(mediaAssets).where(eq(mediaAssets.id, id));
+    await expect(
+      verifyPublicationMedia([wrongDimensions!], publicationFixtureStorage),
+    ).rejects.toMatchObject({ code: "publication_ineligible" });
+    await t.db
+      .update(mediaAssets)
+      .set({ derivativeRenditions: renditions })
+      .where(eq(mediaAssets.id, id));
+    const [reviewed] = await t.db.select().from(mediaAssets).where(eq(mediaAssets.id, id));
+    await verifyPublicationMedia([reviewed!], publicationFixtureStorage);
+    await unlink(join(publicationFixtureStorage.root, smallest.key));
+    await expect(
+      verifyPublicationMedia([reviewed!], publicationFixtureStorage),
+    ).rejects.toMatchObject({ code: "publication_ineligible" });
+    await expect(prepare()).rejects.toMatchObject({ code: "publication_ineligible" });
+    await expect(activate()).rejects.toMatchObject({ code: "publication_ineligible" });
+    await expect(
+      publicMediaDownload(t.db, publicationFixtureStorage, id, smallest.sha256),
+    ).rejects.toThrow();
+    await t.db
+      .update(currentPublications)
+      .set({ state: "restricted", reason: "Synthetic restriction", restrictedAt: new Date() })
+      .where(eq(currentPublications.listingId, fixture.listingId));
+    for (const rendition of renditions) {
+      await expect(
+        publicMediaDownload(t.db, publicationFixtureStorage, id, rendition.sha256),
+      ).rejects.toMatchObject({ code: "not_found" });
+    }
+  });
   it("public derivatives require a current website manifest; original digest and withdrawn media never serve", async () => {
     const fixture = await createListingFixture(t.db, { reviewerId: staffId });
     const id = fixture.assetIds[0]!;
@@ -807,6 +947,10 @@ describe("AT28/AT42 real storage workflow", () => {
       code: "not_found",
     });
     await publishForTest(t.db, session.actor, fixture);
+    expect(
+      (await loadPublishedListings(t.db, { ids: [fixture.listingId] }, "bg"))[0]?.media[0]
+        ?.renditions,
+    ).toBeUndefined();
     expect((await publicMediaDownload(t.db, publicationFixtureStorage, id, digest)).bytes).toEqual(
       bytes,
     );

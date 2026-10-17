@@ -1,14 +1,15 @@
 "use server";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
 import { createComplaint, reviewComplaint } from "@/server/complaints/service";
-import { processLocalInstant } from "@/server/compliance/local-time";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import { type ComplaintCommand, complaintFields, complaintScope } from "./contract";
 export async function complaintAction(
@@ -23,7 +24,7 @@ export async function complaintAction(
   const c = caseCopy(locale),
     scope = complaintScope(command, id),
     fields = complaintFields[command];
-  const values = readFormValues<FormValues>(form, fields),
+  const values = readTimeFormValues<FormValues>(form, fields),
     envelope = readFormEnvelope(form, scope);
   const operationId = envelope?.operationId ?? issueFormOperation(scope),
     path = `/${locale}/operations/complaints${command === "review" ? `/${id}` : ""}`;
@@ -47,7 +48,7 @@ export async function complaintAction(
       const common = {
         operationId: envelope.operationId,
         ownerId: values.ownerId,
-        dueAt: processLocalInstant(values.dueAt ?? ""),
+        dueAt: formInstant(values, "dueAt"),
         reviewed: values.reviewed === "true",
       };
       if (command === "create")
@@ -56,7 +57,7 @@ export async function complaintAction(
           channel: values.channel,
           sourceReference: values.sourceReference,
           description: values.description,
-          receivedAt: processLocalInstant(values.receivedAt ?? ""),
+          receivedAt: formInstant(values, "receivedAt"),
         });
       return reviewComplaint(ctx.db, ctx.session, {
         ...common,
@@ -104,7 +105,17 @@ export async function complaintAction(
         code: "VALIDATION_FAILED",
         message: c.validation,
         fieldErrors: Object.fromEntries(
-          fields.filter((f) => error.fieldErrors?.[f]).map((f) => [f, [c.invalid]]),
+          fields
+            .filter((f) => error.fieldErrors?.[f])
+            .map((f) => [
+              f,
+              [
+                timeReasonMessage(
+                  isPublicLocale(locale) ? locale : "bg",
+                  error.fieldErrors?.[f]?.[0],
+                ) ?? c.invalid,
+              ],
+            ]),
         ),
       },
     };

@@ -1,11 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, expect, it } from "vitest";
-import { auditEvents, grants, sessions } from "@/db/schema";
+import { auditEvents, grants, principals, sessions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { can } from "../authz";
-import { createStaff, type GrantSpec } from "../testing";
-import { grantStaffCapability, revokeStaffGrant } from "./grants";
+import { createClient, createStaff, type GrantSpec } from "../testing";
+import {
+  accessManagerNames,
+  grantStaffCapability,
+  listStaffGrants,
+  revokeStaffGrant,
+} from "./grants";
 import { finishPasskeyRegistration, startPasskeyRegistration } from "./passkeys";
 import { createSession, readSession } from "./sessions";
 import { SoftAuthenticator } from "./testing-authenticator";
@@ -169,4 +174,129 @@ it("canonical session freshness and active authorization are checked before any 
   await expect(
     grantStaffCapability(t.db, unrelated.session, { ...input, operationId: randomUUID() }),
   ).rejects.toMatchObject({ code: "forbidden" });
+});
+
+it("names only the active staff who may grant access, for the permission state (S07)", async () => {
+  const marker = randomUUID().slice(0, 8);
+  const named = async (name: string, options: Parameters<typeof createStaff>[1]) => {
+    const staff = await createStaff(t.db, options);
+    await t.db.update(principals).set({ displayName: name }).where(eq(principals.id, staff.id));
+  };
+  await named(`Manager ${marker}`, { roles: ["manager"] });
+  await named(`Coordinator ${marker}`, { roles: ["coordinator"] });
+  await named(`Former manager ${marker}`, { roles: ["manager"], membership: "ended" });
+  await named(`Suspended manager ${marker}`, { roles: ["manager"], status: "suspended" });
+  const staff = await createStaff(t.db);
+  const { session } = await createSession(t.db, { kind: "staff", id: staff.id });
+  const names = (await accessManagerNames(t.db, session)).filter((name) => name.endsWith(marker));
+  expect(names).toEqual([`Manager ${marker}`]);
+});
+
+it("does not expose access-manager names to client or revoked staff sessions", async () => {
+  const client = await createClient(t.db);
+  const clientSession = await createSession(t.db, { kind: "client", id: client.id });
+  await expect(accessManagerNames(t.db, clientSession.session)).rejects.toMatchObject({
+    code: "forbidden",
+  });
+  const staff = await createStaff(t.db);
+  const { session } = await createSession(t.db, { kind: "staff", id: staff.id });
+  await t.db.update(sessions).set({ revokedAt: new Date() }).where(eq(sessions.id, session.id));
+  await expect(accessManagerNames(t.db, session)).rejects.toMatchObject({
+    code: "unauthenticated",
+  });
+});
+
+it("pages every current staff grant with stable ties and literal name or email search", async () => {
+  const manager = await member();
+  const marker = randomUUID();
+  const people: Awaited<ReturnType<typeof createStaff>>[] = [];
+  for (let index = 0; index < 3; index++) {
+    const person = await createStaff(t.db, {
+      email: `grant-directory-${marker}-${index}@example.test`,
+      membership: index === 2 ? "ended" : "active",
+    });
+    await t.db
+      .update(principals)
+      .set({ displayName: `Directory %_ ${marker}` })
+      .where(eq(principals.id, person.id));
+    people.push(person);
+  }
+  const current = await t.db
+    .insert(grants)
+    .values(
+      people.flatMap((person) =>
+        Array.from({ length: 18 }, () => ({
+          principalId: person.id,
+          capability: "document.review" as const,
+          reason: "Current scoped staff grant for directory qualification",
+        })),
+      ),
+    )
+    .returning();
+  const decoy = await createStaff(t.db, { roles: ["coordinator"] });
+  await t.db
+    .update(principals)
+    .set({ displayName: `Directory XX ${marker}` })
+    .where(eq(principals.id, decoy.id));
+  const client = await createClient(t.db);
+  await t.db
+    .update(principals)
+    .set({ displayName: `Directory %_ ${marker}` })
+    .where(eq(principals.id, client.id));
+  await t.db.insert(grants).values([
+    {
+      principalId: people[0]?.id,
+      capability: "document.review",
+      reason: "Expired grant must not appear",
+      expiresAt: new Date(Date.now() - 60_000),
+    },
+    {
+      principalId: people[0]?.id,
+      capability: "document.review",
+      reason: "Revoked grant must not appear",
+      revokedAt: new Date(),
+    },
+    { principalId: client.id, capability: "document.review", reason: "Client grant is private" },
+  ]);
+  const search = `%_ ${marker}`;
+  const pages = await Promise.all(
+    [1, 2, 3].map((page) => listStaffGrants(t.db, manager.session, { page, search })),
+  );
+  expect(pages.map((page) => page.rows.length)).toEqual([25, 25, 4]);
+  expect(pages.map((page) => page.hasMore)).toEqual([true, true, false]);
+  const expected = [...current].sort(
+    (a, b) => (a.principalId ?? "").localeCompare(b.principalId ?? "") || a.id.localeCompare(b.id),
+  );
+  expect(pages.flatMap((page) => page.rows.map(({ grant }) => grant.id))).toEqual(
+    expected.map((grant) => grant.id),
+  );
+  expect((await listStaffGrants(t.db, manager.session, { search })).rows).toEqual(pages[0]?.rows);
+  const emailSearch = await listStaffGrants(t.db, manager.session, { search: people[1]?.email });
+  expect(emailSearch.rows).toHaveLength(18);
+  expect(emailSearch.rows.every(({ grant }) => grant.principalId === people[1]?.id)).toBe(true);
+  expect(await listStaffGrants(t.db, manager.session, { page: 4, search })).toMatchObject({
+    rows: [],
+    page: 4,
+    hasMore: false,
+  });
+});
+
+it("authorizes grant-directory reads and rejects invalid page or search input", async () => {
+  const manager = await member();
+  for (const page of [0, -1, 1.5, 10001])
+    await expect(listStaffGrants(t.db, manager.session, { page })).rejects.toMatchObject({
+      code: "validation_failed",
+    });
+  await expect(
+    listStaffGrants(t.db, manager.session, { search: "x".repeat(255) }),
+  ).rejects.toMatchObject({ code: "validation_failed" });
+  const staff = await member(false);
+  await expect(listStaffGrants(t.db, staff.session)).rejects.toMatchObject({ code: "forbidden" });
+  await t.db
+    .update(sessions)
+    .set({ revokedAt: new Date() })
+    .where(eq(sessions.id, manager.session.id));
+  await expect(listStaffGrants(t.db, manager.session)).rejects.toMatchObject({
+    code: "unauthenticated",
+  });
 });
