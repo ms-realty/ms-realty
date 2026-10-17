@@ -36,8 +36,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         throw new Error("Protected connectivity response is not valid JSON");
       }
     };
-    // The adapter's containers start after the deploy returns.
-    const runtime = await settle(() => call("runtime"), { ms: 180_000 });
+    // The adapter's containers start after the deploy returns. After an update deploy a role's
+    // first start was refused for about five minutes (run 39030114626: worker up 5 min after its
+    // rollout completed), so allow ten.
+    const runtime = await settle(() => call("runtime"), { ms: 600_000 });
     const before = await settle(
       () =>
         observeRuntimeRollout(input, runtime, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {

@@ -36,7 +36,7 @@ function fixture() {
       type: "durable_object_namespace",
       namespace_id: namespaceId,
     });
-    apps.push({
+    const app = {
       id: `app-${role}`,
       account_id: accountId,
       durable_objects: { namespace_id: namespaceId },
@@ -45,7 +45,10 @@ function fixture() {
       version: 2,
       // Cloudflare clears active_rollout_id once the rollout completes.
       active_rollout_id: null,
-    });
+    };
+    // The list and the application's own read share one object unless a test splits them.
+    apps.push(app);
+    documents.set(`${base}/app-${role}`, { result: app });
     // Shape of GET .../rollouts as observed live: no result_info, versions as current/target.
     documents.set(`${base}/app-${role}/rollouts`, {
       result: [
@@ -107,7 +110,7 @@ test("returns provider observation only after all three actors and completed rol
   );
   assert.equal(result.roles[1].actorId, f.runtime.roles.worker.actorId);
   assert.equal(result.roles[1].namespaceId, "2".repeat(32));
-  assert.equal(f.calls.length, 8);
+  assert.equal(f.calls.length, 11);
   assert.equal("PASS" in result, false);
 });
 test("accepts a newly created application, which Cloudflare records without a rollout", async () => {
@@ -125,6 +128,16 @@ test("accepts a newly created application, which Cloudflare records without a ro
       [1, null, null],
     ],
   );
+});
+test("trusts the application's own read over a stale list snapshot", async () => {
+  const f = fixture();
+  f.apps[2] = {
+    ...structuredClone(f.apps[2]),
+    version: 1,
+    configuration: { image: "registry.cloudflare.com/old@sha256:previous" },
+    active_rollout_id: "rollout-migrator",
+  };
+  assert.equal((await observe(f)).roles[2].applicationVersion, 2);
 });
 test("accepts a completed rollout that is still reported as active", async () => {
   const f = fixture();
@@ -155,6 +168,18 @@ const failures = {
   "old image tag": (f) => {
     f.documents.get(`${f.base}/app-web/instances-v2`).result[0].image =
       "registry.cloudflare.com/old:latest";
+  },
+  "old image in the application's own read": (f) => {
+    f.documents.get(`${f.base}/app-worker`).result = {
+      ...structuredClone(f.apps[1]),
+      configuration: { image: "old:latest" },
+    };
+  },
+  "application read for another namespace": (f) => {
+    f.documents.get(`${f.base}/app-web`).result = {
+      ...structuredClone(f.apps[0]),
+      durable_objects: { namespace_id: "9".repeat(32) },
+    };
   },
   "configured tag": (f) => {
     f.apps[0].configuration.image = "old:latest";

@@ -31,7 +31,7 @@ try {
   // Preparing identities does not start queue jobs or migrations. Config/env pins cannot
   // authorize a migration until the provider actually reports the exact running images.
   // The release deploy returns before its containers start and its rolling update completes.
-  const prepared = await settle(() => call("runtime", "POST"), { ms: 180_000 });
+  const prepared = await settle(() => call("runtime", "POST"), { ms: 600_000 });
   await settle(
     () =>
       observeRuntimeRollout(input, prepared, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {

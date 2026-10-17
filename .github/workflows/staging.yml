@@ -46,8 +46,9 @@ jobs:
     # in staging; an independent fingerprint and staging-only sentinel reject silent fallback.
     environment: staging
     runs-on: ubuntu-latest
-    # Build/tests plus bounded waits for container start (3 min), rollouts (10 min) and migration (10 min).
-    timeout-minutes: 75
+    # Build/tests plus bounded waits for container start (10 min), rollouts (10 min) and migration (10 min),
+    # once for the connectivity deploy and once for the release deploy.
+    timeout-minutes: 90
     permissions:
       contents: read
       id-token: write
