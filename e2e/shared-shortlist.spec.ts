@@ -6,6 +6,7 @@ import { execFileSync } from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
 import { type Browser, type BrowserContext, expect, type Page, test } from "@playwright/test";
 import { formatDateTime } from "../src/i18n/format";
+import { origins } from "./hosts";
 
 type Listing = { reference: string; title: string };
 type Link = { url: string; id: string; token: string };
@@ -115,12 +116,16 @@ const cards = (page: Page) => page.locator("article[data-share-state]");
 const sharedLinks = (page: Page) => page.getByRole("region", { name: "Shared links" });
 
 async function save(page: Page, items: Listing[]) {
+  // Seed the fresh browser before hydration; a forced reload can interrupt its summary read.
+  // Later navigation must retain real changes made to this browser's saved list.
+  await page.addInitScript(
+    ({ refs, key, origin }) => {
+      if (location.origin === origin && localStorage.getItem(key) === null)
+        localStorage.setItem(key, JSON.stringify(refs));
+    },
+    { refs: items.map((item) => item.reference), key: savedKey, origin: origins.public },
+  );
   await page.goto("/en/saved");
-  await page.evaluate(({ refs, key }) => localStorage.setItem(key, JSON.stringify(refs)), {
-    refs: items.map((item) => item.reference),
-    key: savedKey,
-  });
-  await page.reload();
   await expect(page.getByRole("heading", { name: items.at(-1)?.title, exact: true })).toBeVisible();
 }
 
