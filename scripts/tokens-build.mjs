@@ -5,6 +5,7 @@
 // --check writes nothing and exits 1 when a committed output is out of date.
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { formatJson } from "./format-json.mjs";
 
 const root = new URL("../", import.meta.url);
 export const sourcePath = fileURLToPath(new URL("design/tokens.json", root));
@@ -84,11 +85,14 @@ export function buildCss(set = loadTokens()) {
   for (const token of group("color")) {
     theme.push(`  --color-${name(token)}: ${cssColor(set.resolve(token.value))};`);
   }
-  theme.push(
-    "",
-    "  --font-*: initial;",
-    `  --font-sans: ${fontFamily(set.get("font.family.sans"))};`,
-  );
+  theme.push("", "  --font-*: initial;");
+  for (const token of group("font").filter((t) => t.path[1] === "family")) {
+    const property = `  --font-${token.path[2]}:`;
+    const value = `${fontFamily(set.resolve(token.value))};`;
+    theme.push(
+      `${property} ${value}`.length <= 100 ? `${property} ${value}` : `${property}\n    ${value}`,
+    );
+  }
   theme.push("  --font-weight-*: initial;");
   for (const token of group("font").filter((t) => t.path[1] === "weight")) {
     theme.push(`  --font-weight-${weightNames[token.path[2]]}: ${set.resolve(token.value)};`);
@@ -143,6 +147,14 @@ export function buildCss(set = loadTokens()) {
     "@theme {",
     ...theme.filter((line, index, all) => !(line === "" && all[index - 1] === "")),
     "}",
+    "",
+    "/* Text roles keep their source family, including responsive text-* variants. */",
+    ...group("typography").map((token) => {
+      const value = set.resolve(token.value);
+      const family = value.fontFamily.match(/^\{font\.family\.([a-z-]+)\}$/)?.[1];
+      if (!family) throw new Error(`Unsupported typography family for ${name(token)}`);
+      return `@utility text-${name(token)} {\n  font-family: var(--font-${family});\n}`;
+    }),
     "",
     "/* Not Tailwind theme namespaces: use as duration-(--duration-fast), z-(--z-header). */",
     ":root {",
@@ -219,6 +231,9 @@ export function buildFigma(set = loadTokens()) {
     } else if (token.type === "typography") {
       const value = set.resolve(token.value);
       const size = pxNumber(value.fontSize);
+      add("type", `${id}/family`, "STRING", set.resolve(value.fontFamily)[0], {
+        scopes: ["FONT_FAMILY"],
+      });
       add("type", `${id}/size`, "FLOAT", size, { ...description, scopes: ["FONT_SIZE"] });
       add("type", `${id}/line-height`, "FLOAT", Math.round(size * value.lineHeight), {
         scopes: ["LINE_HEIGHT"],
@@ -257,7 +272,7 @@ export function buildFigma(set = loadTokens()) {
 export function buildAll(set = loadTokens()) {
   return [
     [cssPath, buildCss(set)],
-    [figmaPath, `${JSON.stringify(buildFigma(set), null, 2)}\n`],
+    [figmaPath, formatJson(buildFigma(set))],
   ];
 }
 

@@ -1,0 +1,2 @@
+DROP INDEX "case_process_revision_idx";--> statement-breakpoint
+CREATE UNIQUE INDEX "case_process_revision_idx" ON "case_process_reviews" USING btree ("proposal_revision_id") WHERE "case_process_reviews"."invalidated_at" is null;

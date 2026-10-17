@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "scope": "local-synthetic-closed-loop",
+  "source": {
+    "revision": "a77031ce1ee9ec9befe9ca9950052f7850558b83",
+    "dirty": false,
+    "buildSourceRevision": "813a8a3c8bfad6de424933e26409c70d49321900",
+    "buildId": "6p0sEl46C7qZ0viq5GpAt",
+    "replicas": 2,
+    "scope": "Local synthetic closed loop on shared development host; two web processes share one build and native macOS PG18; unchanged budgets. The only change since the fresh build is test discovery and its documentation. Not live HA or cloud capacity.",
+    "exitCode": 1,
+    "reports": [
+      "test-results/a35d1da390ec463d866a69ef341f1b58/agency-load-AT62-catalogue-ad422-ublic-and-10-staff-sessions-synthetic-load/load-report.json"
+    ],
+    "sourceUnchanged": true
+  },
+  "dataset": {
+    "listings": 10000,
+    "projections": 18571,
+    "largeMediaBytes": 747564,
+    "largeMediaSamples": 100,
+    "scanEvidence": "synthetic fixture, not real ClamAV"
+  },
+  "measurements": {
+    "staff-today-html": {
+      "count": 226,
+      "p50": 306.66,
+      "p95": 805.8,
+      "p99": 851.31,
+      "max": 875.48,
+      "budgetMs": 500
+    },
+    "public-search-html": {
+      "count": 2253,
+      "p50": 756.26,
+      "p95": 1109.59,
+      "p99": 1336.09,
+      "max": 1734.46,
+      "budgetMs": 500
+    },
+    "public-detail-html": {
+      "count": 2253,
+      "p50": 435.92,
+      "p95": 689.63,
+      "p99": 796.1,
+      "max": 1321.96,
+      "budgetMs": 500
+    },
+    "public-media": {
+      "count": 2253,
+      "p50": 186.15,
+      "p95": 301.62,
+      "p99": 426.36,
+      "max": 783.98,
+      "budgetMs": null
+    },
+    "staff-task-html": {
+      "count": 226,
+      "p50": 573,
+      "p95": 1101.43,
+      "p99": 1253.86,
+      "max": 1271.91,
+      "budgetMs": 500
+    },
+    "staff-command-post": {
+      "count": 226,
+      "p50": 829.28,
+      "p95": 2018.1,
+      "p99": 2230.6,
+      "max": 2300.78,
+      "budgetMs": 800
+    }
+  },
+  "cycles": {
+    "public": 2253,
+    "staff": 226
+  },
+  "operationFailures": [],
+  "runtime": {
+    "3246": {
+      "samples": 63,
+      "cpuMsPerSecond": 968.66,
+      "eventLoopUtilizationMean": 0.895,
+      "loopDelayP95MsMean": 30.46
+    },
+    "3247": {
+      "samples": 63,
+      "cpuMsPerSecond": 937.34,
+      "eventLoopUtilizationMean": 0.885,
+      "loopDelayP95MsMean": 31.33
+    }
+  },
+  "limits": [
+    "Every unchanged budgeted lane still failed.",
+    "Two local web processes and fixed formatter reuse were measured together; no isolated cause or live HA/capacity proof.",
+    "Shared development host; Linux runner to native macOS PG18; cloud size and frozen launch inventory remain unqualified."
+  ]
+}

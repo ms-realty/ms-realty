@@ -63,7 +63,7 @@ describe("publication (architecture §7.1–§7.4)", () => {
     ).toBe("allowed");
   });
 
-  it("AT22: publishing is a human decision; Hermes and jobs cannot activate", () => {
+  it("AT22: publishing is a human decision; Butler and jobs cannot activate", () => {
     expect(checkActivation(eligible, { kind: "ai_service", id: "hermes" })).toEqual({
       outcome: "denied",
       code: "human_required",

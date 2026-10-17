@@ -36,6 +36,10 @@
       "type": "string",
       "enum": ["local", "ci", "staging", "production"]
     },
+    "evidenceClass": {
+      "type": "string",
+      "enum": ["test", "live", "human", "operator"]
+    },
     "releaseSha": {
       "type": "string",
       "pattern": "^[0-9a-f]{40}$"
@@ -54,9 +58,18 @@
     "policyRevision": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 200
+      "maxLength": 200,
+      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+    },
+    "policyDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
     },
     "dataDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "attestedEvidenceDigest": {
       "anyOf": [
         {
           "type": "string",
@@ -72,17 +85,31 @@
       "format": "date-time",
       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
     },
+    "expiresAt": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "source": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 200
+      "maxLength": 200,
+      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
     },
     "reviewer": {
       "anyOf": [
         {
           "type": "string",
           "minLength": 1,
-          "maxLength": 200
+          "maxLength": 200,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
         },
         {
           "type": "null"
@@ -129,7 +156,7 @@
         },
         "value": {
           "type": "string",
-          "minLength": 1
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
         }
       },
       "required": ["algorithm", "keyId", "value"],
@@ -142,11 +169,15 @@
     "type",
     "gate",
     "environment",
+    "evidenceClass",
     "releaseSha",
     "digests",
     "policyRevision",
+    "policyDigest",
     "dataDigest",
+    "attestedEvidenceDigest",
     "observedAt",
+    "expiresAt",
     "source",
     "reviewer",
     "assertions",

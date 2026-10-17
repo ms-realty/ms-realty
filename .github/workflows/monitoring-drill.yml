@@ -32,12 +32,12 @@ jobs:
       MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ inputs.release_sha }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -385,7 +385,7 @@ jobs:
           steps.canary.outcome == 'success' &&
           steps.alert-probe.outcome == 'failure' &&
           steps.rollback.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           CORRELATION_ID: ${{ steps.identity.outputs.correlation_id }}
           RUN_URL: ${{ steps.identity.outputs.run_url }}
@@ -426,6 +426,12 @@ jobs:
             };
             fs.writeFileSync("monitoring-alert-receipt.json", `${JSON.stringify(receipt, null, 2)}\n`);
             core.setOutput("issue_url", issue.html_url);
+            await github.rest.issues.update({
+              ...context.repo,
+              issue_number: issue.number,
+              state: "closed",
+              state_reason: "completed",
+            });
 
       - name: Build the current monitoring rollback report
         id: monitoring-report
@@ -491,7 +497,7 @@ jobs:
 
       - name: Upload redacted drill evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: monitoring-drill-machine-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: |

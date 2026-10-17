@@ -6,7 +6,7 @@ Scope: the complete first public release of the agency product, including its pu
 
 ## 0. Authority and reading guide
 
-This is the single normative specification for the proposed development program. It resolves the architectural alternatives left open in the 21 September experience specification and 24 September greenfield memo. Those documents are historical reasoning and coverage references; where they disagree with this specification, this specification controls the new design.
+This is the normative product and release specification as amended by [ADR 0002](adr/0002-implementation-deviations.md), [ADR 0003](adr/0003-openrouter-jev.md) and [ADR 0004](adr/0004-cloudflare-staging.md). Those decisions control their named implementation/provider seams. Earlier experience and greenfield notes remain historical reasoning and coverage references.
 
 This document does not authorize deployment, purchases, DNS changes, customer communication, data deletion, or a waiver of an existing launch gate. Existing production approvals and the current launch-authority files remain in force until a named operator approves their explicit transition. Writing a final design does not make the current product production-ready.
 
@@ -38,8 +38,8 @@ The earlier work had useful experience detail but did not constitute a final arc
 | “Current tools” was insufficiently distinguished from proven fit | Beta features or retiring products could become critical dependencies | Use stable documented primitives, pinned versions, qualification tests, and replaceable provider adapters |
 | The first final-draft upload flow did not freeze uploaded bytes before scan | A still-valid upload URL could replace an approved file | Seal a server-only immutable copy first; bind scan, review and serving to its verified digest |
 | The first final-draft restore flow relied on an older snapshot's restrictions | Recovery could resurrect revoked access, consent or publication | Independently retain the newer safety ledger; replay it or fail closed before reopening |
-| Staging identity and outage detection were not isolated explicitly enough | Test identities could share production scope; failed infrastructure could hide its own failure | Separate WorkOS environments and independent external monitoring/heartbeat alerts |
-| “Independent recovery” did not name the restored runtime or failure scenario | Off-site backup could be mistaken for whole-provider failover | Specify fresh DigitalOcean/R2 recovery resources and the available-provider assumption; do not promise a second cloud |
+| Staging identity and outage detection were not isolated explicitly enough | Test identities could share production scope; failed infrastructure could hide its own failure | Separate first-party identity contexts and independent external monitoring/heartbeat alerts |
+| “Independent recovery” did not name the restored runtime or failure scenario | Off-site backup could be mistaken for whole-provider failover | Specify fresh resources for the selected runtime, database and R2 recovery, and the available-provider assumption; do not promise a second cloud |
 
 The final choice is not a claim that custom development is always cheaper. It is a decision that this product's versioned property truth, multilingual authority, and private Case–Listing relationship must remain coherent. The owned scope is deliberately narrower than a general CRM.
 
@@ -47,24 +47,24 @@ The final choice is not a claim that custom development is always cheaper. It is
 
 | ID | Binding decision | Rejected launch alternative |
 |---|---|---|
-| D01 | One TypeScript modular application using Next.js, React, Payload, and PostgreSQL | Independent microservices or a second canonical CRM |
-| D02 | Application modules own business transitions; Payload supplies persistence, admin, access, and draft primitives | Letting generated CRUD, hooks, or UI state independently define business authority |
+| D01 | One TypeScript modular application using Next.js, React, Drizzle and PostgreSQL (ADR 0002) | Independent microservices or a second canonical CRM |
+| D02 | Application modules own business transitions, persistence commands, access and drafts; the staff workspace is the admin (ADR 0002) | Letting generated CRUD, hooks, or UI state independently define business authority |
 | D03 | PostgreSQL owns canonical records, search projections, command receipts, audit references, and durable work | Concurrent authorities in spreadsheets, vendor CRM, search engine, or model memory |
 | D04 | PostgreSQL structured search plus tested aliases/trigram matching | Typesense and Meilisearch as additional required runtime dependencies |
-| D05 | Payload jobs, one dedicated worker process, application-owned outbox and external-action ledger | Inngest/Temporal/n8n plus a competing native queue |
-| D06 | DigitalOcean App Platform Frankfurt web/worker processes and HA Managed PostgreSQL | Edge-only execution of the full Node application; self-managed Kubernetes |
+| D05 | pg-boss on PostgreSQL, one dedicated worker process, application-owned outbox and external-action ledger (ADR 0002) | Inngest/Temporal/n8n plus a competing native queue |
+| D06 | Cloudflare gateway and Containers candidate for web/worker/migration with one image digest; PostgreSQL 16.14 behind a qualified private path (ADR 0004) | Edge-only execution of the full Node application; public database exposure |
 | D07 | Cloudflare edge protection and a thin gateway; R2 EU-jurisdiction object storage | Serving private evidence from a public bucket or relying on a location hint as a residency guarantee |
-| D08 | WorkOS AuthKit with separate staff/client applications; local authorization remains authoritative | Homegrown password/MFA flows or email address as a role |
+| D08 | First-party passwordless identity with separate staff/client contexts, two staff passkeys and local authorization (ADR 0002) | Password/OTP bypass or email address as a role |
 | D09 | Resend for application email and reply ingestion; the application owns conversations and delivery records | Rebuilding a general mailbox or requiring full personal mailbox synchronization |
 | D10 | Application-owned viewing calendar and ICS invitations/updates | Unverified instant booking or mandatory bidirectional Google/Microsoft calendar sync |
-| D11 | MapLibre renderer with MapTiler tiles; list mode always works independently | A map-only interface or a bespoke map stack |
-| D12 | Hermes is a draft-only module, initially using OpenAI Responses API through a small adapter | Autonomous agents with publish/send permissions or a mandatory self-hosted model |
+| D11 | MapLibre with a self-hosted Protomaps extract; list mode always works independently (ADR 0002) | A map-only interface or a bespoke map stack |
+| D12 | Hermes/Butler is draft-only; qualified OpenRouter/Jev adapters with explicit legacy OpenAI selection (ADR 0003) | Autonomous agents with publish/send permissions or a mandatory self-hosted model |
 | D13 | Public/client/staff share domain modules and design tokens, not private caches or authentication contexts | Separate duplicate applications with competing records |
 | D14 | One release manifest and machine-readable gate evaluation generate readiness views | Manually maintained reports that can disagree on the same release |
 | D15 | Better Stack for independent uptime/heartbeat alerting and centralized redacted telemetry, alongside provider-native metrics | Detecting a provider outage only through that provider or through the application email queue |
 | D16 | Independently controlled S3 recovery archive, with rehearsed restoration into clean resources of the selected runtime | Calling an off-site backup a working second cloud or promising automatic whole-provider failover |
 
-Version targets are Node 24 LTS, Next.js 16, React 19, Payload 3, and PostgreSQL 18. Exact compatible patch versions, container digests, SDK versions, schemas, and model snapshot are pinned in the release manifest after qualification. “Latest” tags are forbidden in a release. A failed compatibility test requires an explicit patch/minor adjustment or versioned architecture change, not an undocumented fallback.
+Version targets are Node 24 LTS, Next.js 16, React 19 and PostgreSQL 16.14 for the selected provider contract. Exact compatible patch versions, container digests, SDK versions, schemas, and model policies/snapshots are pinned in the release manifest after qualification. “Latest” tags are forbidden in a release. A failed compatibility test requires an explicit patch/minor adjustment or versioned architecture change, not an undocumented fallback.
 
 The public/customer-facing product is first-party. No purchase of Apimo, Pipedrive, or Attio is required to complete the release. Those products remain alternatives for a future formally approved change, not parallel implementations to maintain.
 
@@ -148,7 +148,7 @@ Store timestamps as UTC instants with the relevant IANA timezone for appointment
 
 ### 4.3 Data ownership rule
 
-The application owns every record above. WorkOS owns authentication credentials and provider sessions, not case permissions. Resend owns observed transport events, not the conversation's business meaning. Object storage owns bytes, not publication eligibility. The model provider owns no canonical business record. The search projection, notification payload, PDF, and portal copy are derived presentations with source versions.
+The application owns every record above, including first-party authentication credentials and sessions; a verified identity never grants Case permission by itself. Resend owns observed transport events, not the conversation's business meaning. Object storage owns bytes, not publication eligibility. The model provider owns no canonical business record. The search projection, notification payload, PDF, and portal copy are derived presentations with source versions.
 
 ## 5. Deep modules and command contracts
 
@@ -156,7 +156,7 @@ Use a small number of deep modules: substantial business behavior behind a narro
 
 | Module | Interface responsibilities | Implementation kept inside |
 |---|---|---|
-| Identity & Access | Resolve Principal; authorize action/resource; invite/revoke scoped access | WorkOS adapter, session mapping, local revocation, capability and audience evaluation |
+| Identity & Access | Resolve Principal; authorize action/resource; invite/revoke scoped access | First-party passkey/email-link verification, separate host sessions, local revocation, capability and audience evaluation |
 | Inventory | Revise facts/listing; record seller instruction; manage media placement | Provenance, units, duplicate candidates, revision guards, material-impact computation |
 | Publication | Submit review; decide approval; publish/restrict/withdraw exact version | Eligibility, locale dependencies, manifests, pointer changes, generation fencing, read-back |
 | Agency Work | Receive inquiry; update Case/Brief/Interest; assign/hand over; record commitment | Dedupe suggestions, private relationships, stage guards, ownership and escalation |
@@ -169,9 +169,9 @@ Use a small number of deep modules: substantial business behavior behind a narro
 
 Each consequential command requires authenticated or explicitly public submission context, a stable logical operation ID, expected record revision where applicable, a validated payload, and a declared purpose. Successful business mutation, audit reference, and required outbox event commit together. Provider calls occur after commit, never inside the database transaction.
 
-Use explicit domain endpoints for publishing, sending, confirming, changing access, material correction, merge, and batch execution. Generated Payload REST/GraphQL must not provide a parallel route to those transitions. Generated ordinary draft forms may be retained with field restrictions and domain enforcement. Client and anonymous users never receive raw internal collections.
+Use explicit domain endpoints for publishing, sending, confirming, changing access, material correction, merge, and batch execution. No generated CRUD route may provide a parallel transition path. Ordinary draft forms remain subject to field restrictions and domain enforcement. Client and anonymous users never receive raw internal collections.
 
-Payload Local API calls that represent a user action must carry request/Principal context and deliberate access settings; privileged defaults are not a permission policy. Joined writes and job enqueueing must use the same awaited transaction context. Payload documents transaction propagation through `req`; integration tests must prove rollback of the complete command, not just its first write. [Payload transactions](https://payloadcms.com/docs/database/transactions)
+Application commands that represent a user action carry the verified Principal, current grants and deliberate access checks; privileged defaults are not a permission policy. Joined writes and pg-boss work enqueueing use the same awaited PostgreSQL transaction. Integration tests must prove rollback of the complete command, not just its first write.
 
 ### 5.1 Mutation envelope and result semantics
 
@@ -270,7 +270,7 @@ Activation requires valid source/fact review at its stated scope, commercial ins
 
 Same-person editing and routine approval are allowed for a small team when that human has both capabilities; record them as separate decisions and do not fabricate an independent reviewer. Privilege changes, production release and destructive restore require the separately designated accountable approver. Legal/tax/process claims require the relevant approved professional-review policy, not a translation reviewer.
 
-Do not use Payload's localized draft status as the sole business gate: current locale-specific status support is experimental. Explicit Approval and Publication records control public eligibility independently. [Payload localization](https://payloadcms.com/docs/configuration/localization)
+Do not use an editorial draft status as the sole business gate. Explicit Approval and Publication records control public eligibility independently.
 
 ### 7.3 Atomic publication and stale-job fencing
 
@@ -304,15 +304,15 @@ Do not add mutable CDN caching later without revision-aware invalidation, a docu
 
 ### 8.1 Identity architecture
 
-Use two WorkOS applications in one production environment: staff and invited clients. They have separate client IDs, callbacks, credentials and session policies. WorkOS documents a shared issuer across applications and a distinct `client_id`; issuer validation alone is insufficient to distinguish the two. [WorkOS applications](https://workos.com/docs/authkit/applications)
+Use separate first-party staff and invited-client authentication contexts. Staff sign in with WebAuthn passkeys and must enrol two; email links are restricted to first enrolment and audited recovery. Clients sign in by verified email link with an explicit confirm POST and may optionally use a passkey. Neither context may authenticate the other host. The implementation and residual independent security-review obligation are in ADR 0002.
 
-Use host-only secure HttpOnly cookies with separate names/contexts for `app.makler-realty.com` and `my.makler-realty.com`; the public host receives neither private session cookie. The WorkOS SDK handles the supported authentication protocol. Server verification requires signature, expiry, expected issuer, exact application context, and the tested audience contract for the configured tokens. Reject missing/mismatched mandatory claims; do not invent an `aud` assumption from another token type.
+Use host-only secure HttpOnly cookies with separate names/contexts for `app.makler-realty.com` and `my.makler-realty.com`; the public host receives neither private session cookie. Every request resolves a hashed server-side session token and rechecks expiry, context, active membership or grant, and revocation. The public host never accepts a private context merely because an email address matches.
 
-Staff access additionally requires the dedicated staff organization and an active local StaffMembership. Require TOTP MFA for staff; social/SSO login is not enabled at launch. WorkOS's MFA policy does not apply to SSO users, so enabling SSO later requires independently enforced IdP MFA and requalification. [WorkOS organization policies](https://workos.com/docs/authkit/organization-policies)
+Staff access additionally requires an active local StaffMembership and the two-passkey policy. A lost-factor recovery revokes prior sessions and passkeys and requires authorized, audited re-enrolment. No password, TOTP, social or SSO fallback is enabled at launch; any later method needs a new qualification and authority decision.
 
-Client access uses verified email authentication through the client application and local invitation/grant matching. A client identity does not join the staff organization. The same person may legitimately be both staff and client, but a client-context token never authenticates the staff interface.
+Client access uses verified email authentication through the client context and local invitation/grant matching. The same person may legitimately be both staff and client, but a client-context token never authenticates the staff interface.
 
-Payload uses a custom authentication strategy with its local password strategy disabled. Mapping to the appropriate internal Principal uses immutable identity, not email-based auto-promotion. The AuthKit-to-Payload bridge, admin login/logout, token context, CSRF and error behavior are implementation work that must be tested; they are not an out-of-box integration claim. [Payload custom strategies](https://payloadcms.com/docs/authentication/custom-strategies)
+Mapping to the internal Principal uses immutable identity, not email-based auto-promotion. Sign-in, invitation acceptance, session rotation, logout, CSRF and recovery behavior are application responsibilities and need real browser, database and independent security checks.
 
 Initial session limits: staff 12-hour absolute/30-minute idle; clients 7-day absolute/24-hour idle. Access grants, exports, production controls and other sensitive staff actions require recent reauthentication within 5 minutes. Sensitive client document actions require recent verification within 15 minutes. Enforce these locally even if a provider session lasts longer.
 
@@ -383,7 +383,7 @@ Default ordering is a documented combination of exact criteria fit and listing f
 
 Natural-language assistance, if enabled, produces only a proposed typed filter object and unresolved terms. The user sees and can correct the interpretation. Enforce hard constraints and eligibility in ordinary server queries, not in a prompt. Timeout or model failure leaves structured search fully functional.
 
-MapLibre and MapTiler provide map rendering/tiles with required attribution and restricted public keys. Store approved public coordinates; no automatic geolocation request or runtime disclosure of private exact addresses. The list remains a task-equivalent alternative when maps are blocked, slow or unavailable. Tile and third-party data-handling terms require procurement acceptance. [MapTiler API](https://docs.maptiler.com/cloud/api/)
+MapLibre renders the self-hosted Protomaps extract with required attribution. Store approved public coordinates; no automatic geolocation request or runtime disclosure of private exact addresses. The list remains a task-equivalent alternative when maps are blocked, slow or unavailable. Map data license and attribution requirements remain release checks.
 
 Property detail shows price basis, availability and last meaningful confirmation, source-supported area/rooms/features, public location precision, authentic media, known limitations, useful guidance and a named contact path. An old listing shows its actual state and legitimate alternatives. A withdrawn or sold listing does not remain in active available search merely to retain traffic.
 
@@ -502,7 +502,7 @@ Private pages and downloads are `no-store`. Sign-out, a revoked-session response
 
 ## 13. Files, media, evidence and imports
 
-Use separate R2 buckets/namespaces for private originals/evidence, quarantined uploads and approved public derivatives. Select EU jurisdiction explicitly; an `eu` location hint alone is not equivalent. Node uses the S3 storage adapter, not the Workers-only native R2 binding. [R2 location rules](https://developers.cloudflare.com/r2/reference/data-location/), [Payload storage adapters](https://payloadcms.com/docs/upload/storage-adapters)
+Use separate R2 buckets/namespaces for private originals/evidence, quarantined uploads and approved public derivatives. Select EU jurisdiction explicitly; an `eu` location hint alone is not equivalent. Node uses its S3-compatible storage adapter, not the Workers-only native R2 binding. [R2 location rules](https://developers.cloudflare.com/r2/reference/data-location/)
 
 Upload flow: authorize purpose and scope → reserve a staging object ID → short-lived staging upload authorization → upload → server seals a copy under a new server-only immutable key → verify that sealed object's size/type/digest → quarantine/scan the sealed bytes → safe processing → human review where required → eligible private document or approved public derivative. A client completion callback is not proof that scanning or processing succeeded.
 
@@ -522,9 +522,9 @@ Duplicate Party/Property merges show both identities, affected private relations
 
 ## 14. Hermes assistance implementation and evaluation
 
-Hermes is a product role implemented by bounded worker tasks, not a separate autonomous agency. Its initial inference provider is OpenAI Responses API. Keep one small adapter for request/response normalization and provider failure; do not build a universal agent framework or model marketplace.
+Hermes/Butler is a product role implemented by bounded worker tasks, not a separate autonomous agency. ADR 0003 selects qualified OpenRouter routing and typed Jev assessment; legacy OpenAI use requires explicit configuration. Keep small adapters for request/response normalization and provider failure; do not build a universal agent framework or model marketplace.
 
-The release manifest pins an evaluated model snapshot, prompt revision, schema revision and budget limits. Model selection is a release-qualification input within this chosen architecture, like a dependency patch version; it does not delegate business authority to the model. A model/provider change reruns the relevant evaluation suite before activation.
+The release manifest pins an evaluated router policy/model pool and response snapshot, prompt revision, schema revision and budget limits. Model selection is a release-qualification input within this chosen architecture, like a dependency patch version; it does not delegate business authority to the model. A model/provider change reruns the relevant evaluation suite before activation.
 
 | Task | Authorized inputs | Output and review |
 |---|---|---|
@@ -534,7 +534,7 @@ The release manifest pins an evaluated model snapshot, prompt revision, schema r
 
 Identity documents, financial records, legal evidence and entire mailboxes are not default model inputs. Redact/minimize inputs and require explicit purpose-appropriate permission for any exceptional source. Provider data handling and processing terms must pass the operator's procurement/privacy review before real customer material is used. EU database/object placement is not a claim that every vendor processes all data exclusively in the EU.
 
-Use schema-constrained outputs and deterministic validation, but never treat schema validity as factual truth. PDF processing and structured outputs are available provider capabilities; the output still requires evidence and review. [OpenAI file inputs](https://developers.openai.com/api/docs/guides/file-inputs), [Structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs)
+Use schema-constrained outputs and deterministic validation, but never treat schema validity as factual truth. Any selected provider's file processing and structured-output behavior requires its own qualification; the output still requires evidence and review.
 
 Treat every uploaded document, incoming message and retrieved excerpt as untrusted data. No document instruction can authorize tools, change recipients, widen access or select a publishing action. The model has no tools for database writes, external sending, permissions or publication. The task handler can create only a draft record after validation, using the initiating actor's recorded authorized scope.
 
@@ -544,13 +544,13 @@ Before accepting a draft, recheck source revision and current actor permission. 
 
 Release evaluation must include at least 20 broker/language-reviewed examples per public locale, 30 source-extraction examples, and 30 adversarial/conflict/authority examples, with categories balanced and overlap recorded. This is coverage, not a statistical guarantee of general accuracy. Require zero unauthorized effects, zero silently altered protected facts, and zero fabricated source pointers in the gate set. Review language quality and correction effort with competent humans; model graders are supplementary and calibrated.
 
-The three bounded workflows must have live provider proof and manual fallback before the full release is accepted. Optional public natural-language filter assistance is disabled until separately evaluated; it cannot block ordinary search. Agent Builder and the hosted Evals dashboard/API are not dependencies: OpenAI currently schedules them for shutdown on 30 November 2026. Keep evaluation cases and prompts in the repository/application-owned tooling. [OpenAI deprecations](https://developers.openai.com/api/docs/deprecations)
+The three bounded workflows must have live provider proof and manual fallback before the full release is accepted. Optional public natural-language filter assistance is disabled until separately evaluated; it cannot block ordinary search. Keep evaluation cases and prompts in the repository/application-owned tooling.
 
 ## 15. Jobs, consistency, and integration recovery
 
-Payload jobs is the sole executable queue. Run a dedicated persistent worker; disable web-process auto-run and reject public/client queue/run/schedule endpoints. The worker checks schedules with a database-backed singleton lease and idempotent period keys. Payload documents separate queues and a standalone jobs runner; application tests must establish the actual recovery behavior used here. [Payload queues](https://payloadcms.com/docs/jobs-queue/queues)
+pg-boss on the canonical PostgreSQL is the sole executable queue. Run a dedicated persistent worker; disable web-process auto-run and reject public/client queue/run/schedule endpoints. The worker checks schedules with a database-backed singleton lease and idempotent period keys. Application tests must establish the actual lease, restart and recovery behavior used here.
 
-OutboxEvent is the durable business intent/journal; Payload's job record is the execution work item. Create the event, unique dispatch binding and queued work in the same awaited transaction as the originating business change. A reconciler repairs missing/cancelled dispatch bindings without creating a second queue or a second logical effect. Keep business approval and delivery outcome in domain records, not only the scheduler's status field.
+OutboxEvent is the durable business intent/journal; the pg-boss job is the execution work item. Create the event, unique dispatch binding and queued work in the same awaited transaction as the originating business change. A reconciler repairs missing/cancelled dispatch bindings without creating a second queue or a second logical effect. Keep business approval and delivery outcome in domain records, not only the scheduler's status field.
 
 Use lanes within the one worker system: urgent delivery/restriction, ordinary notifications, media processing, assistance, and maintenance/import/backup. Bound per-lane concurrency so a large media batch cannot starve an inquiry notification or withdrawal. Long human waits are saved business states; release the worker and enqueue a new task after the human event.
 
@@ -571,43 +571,43 @@ Public / Client / Staff browsers
                 |
 Cloudflare DNS + WAF + thin gateway (no business-state authority)
                 |
-DigitalOcean App Platform, Frankfurt (fra)
-  ├─ Next.js / Payload web processes, at least two production instances
-  ├─ Dedicated Payload worker, one active worker deployment initially
-  └─ One serialized PRE_DEPLOY migration job
+Cloudflare Containers candidate (one immutable image digest)
+  ├─ Next.js web role, scaled after qualification
+  ├─ Dedicated persistent pg-boss worker role
+  └─ One serialized migration role
                 |
-      private VPC (fra1) + TLS
+      qualified private TLS path
                 |
-HA Managed PostgreSQL primary + standby
+Separate PostgreSQL 16.14 provider contract; HA and restore proof pending
 
 R2 EU jurisdiction: quarantine / private originals / public derivatives
-WorkOS: separate staff and client authentication applications
+First-party passwordless identity: separate staff and client contexts
 Resend: application email and authenticated inbound events
-MapTiler: approved public map tiles
-OpenAI Responses: scoped draft inference only
+Protomaps + MapLibre: approved self-hosted public map data
+OpenRouter/Jev: qualified scoped draft inference only
 Better Stack: independent uptime / heartbeat alerts and redacted telemetry
 Separate AWS account, S3 eu-central-1: encrypted recovery-point archive
 ```
 
-App Platform uses region `fra`, whose directly connected VPC location is `fra1`; authorize its private egress as a database trusted source. Keep the database off an unrestricted public access list. App Platform's current VPC support is documented; do not combine it with an incompatible dedicated-egress configuration. [DO VPC](https://docs.digitalocean.com/products/app-platform/how-to/enable-vpc/)
+The selected candidate and provider boundary are detailed in ADR 0004 and `deploy/README.md`. Staging uses a separate database, roles and resources; its private TLS path and Cloudflare-to-database connection need live independent proof. Do not publish the existing database port or substitute local Docker connectivity for that proof.
 
-Choose an HA managed database plan with standby, not the entry single-node plan. PostgreSQL 18 is the target supported major; Payload/driver/migration/jobs compatibility is a required real integration test because provider version availability is not an application certification. [DO PostgreSQL versions](https://docs.digitalocean.com/products/databases/postgresql/how-to/create/), [HA plan distinction](https://docs.digitalocean.com/products/databases/postgresql/details/pricing/)
+The released database needs an approved HA, backup and restore arrangement. PostgreSQL 16.14 is the selected provider major; driver, migration, queue and search compatibility require real integration and provider-path checks. A working local fixture does not certify the remote database.
 
-Use one immutable application release to build distinct runnable web, worker and migration images/commands. Next standalone web output alone is not evidence that Payload config, jobs, migrations, scanners and media tools are packaged for the worker. Pin Node 24 LTS and compatible framework versions; do not select an EOL runtime merely because it satisfies a package's minimum. [Node release schedule](https://nodejs.org/en/about/previous-releases), [Payload installation](https://payloadcms.com/docs/getting-started/installation)
+Use one immutable image digest for distinct runnable web, worker and migration roles. Next standalone web output alone is not evidence that queue jobs, migrations, scanners and media tools are packaged for the other roles. Pin Node 24 LTS and compatible framework versions; do not select an EOL runtime merely because it satisfies a package's minimum. [Node release schedule](https://nodejs.org/en/about/previous-releases)
 
 ### 16.2 Edge and origin controls
 
 The gateway handles approved host/legacy-route mapping, edge abuse controls and origin forwarding; it does not contain a second catalogue, permission model or application database. It strips incoming internal headers and supplies a private rotating origin-authentication secret and validated host context over TLS. The origin rejects requests without that trusted context, except deliberately minimal health endpoints. This transport authentication is separate from user authentication.
 
-Test direct provider/default-origin URLs, forged host/internal headers, alternate HTTP methods and hidden Payload routes. WAF protection alone does not prevent direct-origin bypass. Protect all staff/client endpoints again at the application, including generated CRUD, file download, job runner and internal administrative surfaces. No anonymous GraphQL or unrestricted collection enumeration is exposed.
+Test direct provider/default-origin URLs, forged host/internal headers, alternate HTTP methods and internal routes. WAF protection alone does not prevent direct-origin bypass. Protect all staff/client endpoints again at the application, including record mutation, file download, job runner and administrative surfaces. No unrestricted record enumeration is exposed.
 
 Set appropriate CSP, frame restrictions, MIME sniffing protection, strict HTTPS and route-sensitive referrer policy. Use same-origin CSRF protection for cookie-authenticated mutations, validate Origin/Host, and require intentional POST for state changes. Tokens/IDs are not CSRF protection. Normalize and validate redirect destinations; invitations and login return paths cannot become open redirects.
 
-Secrets belong in provider secret stores/environment configuration, never Git, browser bundles or reports. Separate runtime, migration, backup and provider credentials with least privilege. Staging has separate databases, buckets, mail/model keys and a non-production WorkOS environment with its own applications/users/organizations. Separate applications within the production identity environment are not staging isolation. Staging cannot send to real customers or index copied production data.
+Secrets belong in provider secret stores/environment configuration, never Git, browser bundles or reports. Separate runtime, migration, backup and provider credentials with least privilege. Staging has separate databases, buckets, mail/model keys, identity users, passkey relying-party context and sessions. A second host name against production identity records is not staging isolation. Staging cannot send to real customers or index copied production data.
 
 ### 16.3 Build and migration
 
-Build without production database credentials/network dependence. Apply committed migrations using one authorized `PRE_DEPLOY` job after the build, with a migration lock. App Platform builds cannot access a managed database protected by trusted sources; weakening that protection to make a build pass is not the solution. [DO database integration](https://docs.digitalocean.com/products/app-platform/how-to/manage-databases/)
+Build without production database credentials/network dependence. Apply committed migrations using one serialized, authorized migration role after the image build, with a migration lock. Do not weaken private database controls to make a build pass.
 
 Use expand/backfill/verify/contract migrations. Old and new web/worker versions must coexist safely during rollout; destructive contraction occurs only after rollback is no longer required and an approved backup exists. A backfill is a resumable controlled job, not an unbounded startup hook. Do not run schema auto-push in production.
 
@@ -634,7 +634,7 @@ Capacity targets are explicit qualification assumptions, not traffic forecasts. 
 
 ### 17.2 Signals and operating ownership
 
-Record structured logs and traces with correlation/operation IDs, actor class, module, action, outcome, duration and safe error codes. Redact contact details, tokens, document bodies, prompt contents and sensitive query text. Use OpenTelemetry-compatible instrumentation and Better Stack centralized telemetry, with its Germany data region selected and approved retention; retain provider-native infrastructure metrics. Send through supported application SDK/OTLP or log-drain interfaces, not a privileged host collector unavailable on App Platform. Session replay and automated AI analysis of private logs are off. [Better Stack tracing](https://betterstack.com/docs/logs/tracing/), [Telemetry source regions](https://betterstack.com/docs/logs/api/create-a-source/)
+Record structured logs and traces with correlation/operation IDs, actor class, module, action, outcome, duration and safe error codes. Redact contact details, tokens, document bodies, prompt contents and sensitive query text. Use OpenTelemetry-compatible instrumentation and Better Stack centralized telemetry, with its Germany data region selected and approved retention; retain provider-native infrastructure metrics. Send through supported application SDK/OTLP or log-drain interfaces verified on the selected runtime. Session replay and automated AI analysis of private logs are off. [Better Stack tracing](https://betterstack.com/docs/logs/tracing/), [Telemetry source regions](https://betterstack.com/docs/logs/api/create-a-source/)
 
 Better Stack is also the independent uptime/on-call provider. Configure external HTTP/content checks for the canonical public paths and separately scoped readiness checks; worker progress and sealed-backup completion send heartbeats only after successful work. Exercise the first heartbeat and then an actual missed-heartbeat alert: creating a pending monitor is not proof that it will alert. Select an agency-owned plan that supports the required frequency, retention and escalation. Alerts must reach the on-call person through a tested provider-managed push/phone or equivalent independent channel, not the application's Resend queue alone. [External monitoring and alerting](https://betterstack.com/docs/uptime/monitoring-start/), [Heartbeat behavior](https://betterstack.com/docs/uptime/cron-and-heartbeat-monitor/)
 
@@ -644,7 +644,7 @@ Separate technical measures from service measures: first useful human response w
 
 ### 17.3 Backups and restore
 
-Managed PostgreSQL provides daily backup/WAL-based recovery with a documented seven-day window; its restore procedure creates a new cluster rather than reversing the existing one in place. Verify the purchased configuration and drill it. These provider backups do not by themselves satisfy independent recovery. [DO PostgreSQL backup features](https://docs.digitalocean.com/products/databases/postgresql/details/features/), [Restore procedure](https://docs.digitalocean.com/products/databases/postgresql/how-to/restore-from-backups/)
+Verify the selected PostgreSQL provider's actual backup, point-in-time recovery, retention and restore behavior on the purchased configuration. Rehearse restoration into clean resources. Provider backups do not by themselves satisfy independent recovery.
 
 Create a consistent recovery point every 30 minutes: database snapshot, all referenced private/public/media objects or verified immutable copies, schema/config/release references, authority policy, identity mappings, revocation/deletion ledger, operation/external-action records, and checksums. Copy immutable objects incrementally; each manifest proves completeness against its database snapshot, rather than assuming the latest bucket listing matches it. Prevent retention cleanup from deleting objects still needed by a retained recovery point. Seal the manifest only when every reference is recoverable. Alert when the newest sealed point exceeds 45 minutes; exceeding 60 minutes fails the recovery target and blocks release promotion.
 
@@ -652,7 +652,7 @@ Store encrypted independent copies in a separately controlled AWS account/S3 EU 
 
 Maintain an independently replicated append-only safety ledger for access revocations, deletion/restriction decisions, consent withdrawal and publication withdrawal, with sequence numbers and an acknowledged archive watermark. It is additional to the ledger in each database snapshot. Replicate changes promptly and expose replication lag; a revocation takes effect locally even when its archive copy is pending. A restore must replay the latest verifiable safety tail after the snapshot. If the tail is unavailable or completeness cannot be established, fail closed on potentially affected grants, disclosures and external actions until revalidated; if scope is unknown, that means all restored private grants and public publications. Replaying only the older snapshot's ledger does not establish current permission.
 
-Rehearse an isolated restore with named operator and separate reviewer. The recovery destination is newly provisioned DigitalOcean application/database resources and restored R2 namespaces, using the independently held archive, release artifacts and agency-owned credentials. The eight-hour target covers primary-data loss when those required providers remain available; this release does not maintain a second active cloud or promise an eight-hour recovery during a whole-provider outage. Such an outage invokes the independently monitored maintenance/contact procedure and an explicit incident recovery decision.
+Rehearse an isolated restore with named operator and separate reviewer. The recovery destination uses newly provisioned resources for the selected runtime/database and restored R2 namespaces, with the independently held archive, release artifacts and agency-owned credentials. The eight-hour target covers primary-data loss when those required providers remain available; this release does not maintain a second active cloud or promise an eight-hour recovery during a whole-provider outage. Such an outage invokes the independently monitored maintenance/contact procedure and an explicit incident recovery decision.
 
 Start restored systems with all external effects disabled. Validate records, object digests, the latest safety ledger, current permissions/publication, pending commitments and scheduler state; invalidate restored sessions and require fresh authentication; reconcile provider outcomes after the recovery point before enabling sending/publication. Never replay the entire old outbox automatically. Document the acknowledged data-loss window and any unrecoverable accepted activity rather than asserting zero RPO.
 
@@ -694,7 +694,7 @@ Prefer a short controlled write freeze for the final delta over improvised bidir
 
 Import the final delta, reconcile, seal the pre-cutover recovery point, disable old consequential workers, and switch the approved routing. Test public detail/search, inquiry/receipt, staff access, client access, media, mail and legacy routes immediately. Record exact artifact, schema, policy and infrastructure versions. Keep the old deployment read-only for investigation and rollback compatibility; do not let its delayed jobs send or republish.
 
-Search Console, Yandex Webmaster, backlinks and crawl baselines remain required evidence under the current instructions. Collect pre-cutover ownership/baseline evidence where feasible, then post-cutover routing, sitemap/submission and observed coverage evidence at the appropriate stage. No claim of immediate indexing, ranking recovery or backlink transfer is permitted. Explicitly distinguish candidate acceptance, authorized cutover, and verified public operation.
+Search Console, Yandex Webmaster and backlink exports are optional historical analytics at every lifecycle stage (owner decision, 2026-09-24). They never block readiness, cutover or acceptance. Exact historical URL dispositions, crawl parity on both domains, sitemap correctness and deployed routing checks remain required. No claim of immediate indexing, ranking recovery or backlink transfer is permitted. Distinguish candidate acceptance, authorized cutover, and verified public operation.
 
 Map existing staff identities and authorized client relationships into the new authentication model through an approved migration table. Preserve business IDs and grants; do not auto-promote a newly authenticated user because an email resembles a former administrator's address. Staff must complete the new invitation/MFA flow before cutover. Old sessions and old privileged endpoints are revoked/disabled at the ownership transition.
 
@@ -788,14 +788,14 @@ These are application endpoints, not a promise to expose raw collections. The sa
 | Group | Required endpoints/commands | Contract |
 |---|---|---|
 | Public read | Search, published listing, approved editorial content | Public projection only, locale/eligibility enforced, bounded query |
-| Public submission | Receive Inquiry, reconcile receipt, seller intake, viewing request | Payload-bound idempotency, rate/abuse controls, durable acceptance |
+| Public submission | Receive Inquiry, reconcile receipt, seller intake, viewing request | Application-owned idempotency, rate/abuse controls, durable acceptance |
 | Client read/update | Permitted Cases/Interests; propose Brief/feedback; request change; post Case message | Record/field audience and revision checks |
 | Invitations/preferences | Accept/revoke invitation, verify contact, edit/unsubscribe alert, privacy request | Explicit POST, current recipient identity, purpose-specific state |
 | Agency commands | Assign/handover Case, transition stage, manage Interest/commitment, confirm/change Appointment, version Proposal | Capability, revision, evidence and atomic side-effect intent |
 | Inventory/publication | Revise facts/listing/media, submit review, approve, publish/restrict/withdraw/correct | Exact manifest, source/actor checks, generation fence |
 | Files | Start/finalize upload, request/review document, authorized download/export | Purpose, type/size/digest, scan, audience and no public caching |
 | Jobs/imports | Preview/execute selected batch, inspect Operation, reconcile/retry allowed work | Stable logical identity, no unsafe replay or public queue runner |
-| Provider ingress | WorkOS/Resend webhook receivers | Signature/account checks, durable deduplicated inbox, no untrusted authority |
+| Provider ingress | Resend and other approved provider webhook receivers | Signature/account checks, durable deduplicated inbox, no untrusted authority |
 | Operations | Minimal health; authorized readiness/audit/provider status | No secrets; exact release/evidence identity; permissioned detail |
 
 Produce a versioned OpenAPI/transport-schema artifact for these endpoints during implementation. It must include status/error shapes, pagination, idempotency, authorization class, revisions and representative examples. Do not invent a separate API implementation whose behavior diverges from the UI command path.
@@ -879,7 +879,7 @@ Every evidence artifact records schema version, environment, release SHA/image/g
 | AT65 | Application rollback preserves inquiries and commitments accepted after deployment |
 | AT66 | Provider account custody, budgets, secrets rotation, access revocation and operational runbooks are usable by the agency |
 | AT67 | Readiness JSON, checklist and signed evidence views agree on one release/policy/scope; any blocked gate prevents a pass |
-| AT68 | Post-cutover host/certificate/mail-DNS/search/intake/auth/media checks and required external SEO observations are recorded |
+| AT68 | Post-cutover host/certificate/mail-DNS/search/intake/auth/media and exact URL/crawl checks are recorded; historical SEO analytics are optional |
 
 Cross-cut this portfolio by representative desktop/mobile widths (including 320 px), the three staff languages, seven public/client locales, guest/client/collaborator/staff role contexts, and success/failure/recovery. Do not run every cosmetic combination mechanically; cover every authority/behavior distinction and every advertised complete journey.
 
@@ -925,7 +925,7 @@ Before using a new release verdict, the agency's accountable owner and technical
 
 1. Names the selected architecture and maps every old gate to its retained obligation, explicit replacement proof, or explicitly approved retirement.
 2. Resolves the Typesense/Meilisearch-versus-PostgreSQL evidence conflict. PostgreSQL is the final runtime design; the existing external-report requirement is not silently satisfied or waived by a PostgreSQL report. Until an explicit authority amendment exists, the conflicting required proof remains outstanding.
-3. Retains Search Console, Yandex, backlinks and crawl evidence, assigns feasible pre/post-cutover stages, and documents any later requested change explicitly.
+3. Retains mandatory historical URL/crawl parity and deployed routing evidence. Records Search Console, Yandex Webmaster and backlink exports as optional at every stage, per the owner decision of 2026-09-24.
 4. Reconciles media counts/units and evaluates coverage from the same actual release and object manifest.
 5. Distinguishes source-as-is authorization, factual review, media rights review, translation approval and current availability. Records one valid human-review disposition for every in-scope listing row.
 6. Maps old Payload identity/runtime and Hermes service checks to actual new runtime/identity/task evidence. A renamed component or a stub endpoint is not replacement proof.
@@ -940,7 +940,7 @@ The manifest must contain product/spec version; Git SHA; web/worker/migration/ga
 
 Critical deployed-path checks, provider connectivity and monitoring/rollback evidence must be no older than 24 hours at candidate attestation; repeat the actual routing/auth/intake/media checks at cutover. Recovery-point age follows §17's stricter limit. Human approvals are revision/scope-bound rather than merely “recent”; availability review follows its own policy. Evidence freshness cannot be refreshed by copying a timestamp.
 
-Keep the required human listing review CSV, redacted live search/worker/runtime reports, R2 coverage, recovery report, SEO evidence and release attestations. Preserve the current requirement for operator-authorized Ed25519-signed recovery evidence until a specifically approved successor policy replaces it. The private signing key stays outside committed files and ordinary application runtime. A valid signature establishes the signer and unchanged artifact, not the truth of invented test data.
+Keep the required human listing review CSV, redacted live search/worker/runtime reports, R2 coverage, recovery report, URL/crawl evidence and release attestations. Historical Search Console, Yandex Webmaster and backlink exports remain optional. Preserve the current requirement for operator-authorized Ed25519-signed recovery evidence until a specifically approved successor policy replaces it. The private signing key stays outside committed files and ordinary application runtime. A valid signature establishes the signer and unchanged artifact, not the truth of invented test data.
 
 ### 21.4 Inputs required from the operating business
 
@@ -986,7 +986,7 @@ Definition of done for this public release: all included scope is accepted; all 
 
 ### 22.3 Research and confidence limits
 
-Current capability checks used official documentation for Payload transactions/authentication/jobs/localization/storage, PostgreSQL constraints/search, DigitalOcean runtime/VPC/database/restore, WorkOS application/session/MFA behavior, Resend delivery/ingress, R2 data location, MapTiler maps, OpenAI document/structured-output/lifecycle behavior, Better Stack telemetry/monitoring, AWS recovery storage, and W3C/Google web standards. Links appear beside the claims they support.
+The original capability research included Payload, DigitalOcean, WorkOS, MapTiler and OpenAI provider paths that later ADRs replaced. Those references explain earlier decisions; they are not qualifications of the selected runtime. Current provider checks must use the Cloudflare/Containers, PostgreSQL 16.14, first-party identity, Protomaps and OpenRouter/Jev contracts recorded in ADR 0002–0004 and the deployment evidence.
 
 Accessibility acceptance targets WCAG 2.2 AA across complete tasks, with manual assistive-technology testing; neither chosen components nor this specification establish conformance. [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
 

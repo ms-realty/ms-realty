@@ -20,11 +20,11 @@ jobs:
     steps:
       # The legacy app left main in the rebuild (docs/plan.md). This workflow still serves
       # the live legacy deployment, so it runs the scripts frozen at tag legacy-app-final.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: legacy-app-final
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
@@ -37,7 +37,7 @@ jobs:
             --listing-output "$RUNNER_TEMP/r2-media-objects.json"
 
       - name: Upload credential-free R2 listing
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: r2-media-objects-${{ github.sha }}
           path: ${{ runner.temp }}/r2-media-objects.json

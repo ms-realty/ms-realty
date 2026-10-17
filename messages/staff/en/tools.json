@@ -1,0 +1,36 @@
+{
+  "title": "Agency tools",
+  "openMenu": "Open menu",
+  "close": "Close",
+  "sections": {
+    "work": "Work",
+    "management": "Content and management"
+  },
+  "items": {
+    "today": { "title": "Today", "description": "Next actions" },
+    "inquiries": { "title": "Inquiries", "description": "Conversations and inquiries" },
+    "cases": { "title": "Cases", "description": "Context and next steps" },
+    "inventory": { "title": "Inventory", "description": "Listings and preparation" },
+    "imports": {
+      "title": "Import and batch changes",
+      "description": "Listing table and row checks"
+    },
+    "calendar": { "title": "Calendar", "description": "Viewings and scheduling" },
+    "tasks": { "title": "Tasks", "description": "Tasks you have taken on" },
+    "consultations": {
+      "title": "Consultations",
+      "description": "Consultation requests and who takes them"
+    },
+    "coverage": { "title": "Agency coverage", "description": "Work without an available owner" },
+    "inbound": { "title": "Incoming email", "description": "Untrusted incoming mail" },
+    "keys": { "title": "Key custody", "description": "Who holds keys and until when" },
+    "complaints": { "title": "Complaints", "description": "Owner, due date and outcome" },
+    "pages": { "title": "Pages", "description": "Approved content" },
+    "reports": { "title": "Reports", "description": "Period and verified sources" },
+    "team": { "title": "Team and access", "description": "People and permissions" },
+    "system": { "title": "System status", "description": "Sources and connectivity" },
+    "jobs": { "title": "Jobs and assistance status", "description": "Queue and Butler spend" },
+    "privacy": { "title": "Privacy requests", "description": "Verification, scope and completion" },
+    "alerts": { "title": "Property alert rule", "description": "Template, schedule and approval" }
+  }
+}

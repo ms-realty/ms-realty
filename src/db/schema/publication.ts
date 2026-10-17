@@ -102,6 +102,7 @@ export const currentPublications = pgTable(
   },
   (t) => [
     uniqueIndex("current_publications_pointer_idx").on(t.listingId, t.locale, t.destination),
+    index("current_publications_manifest_idx").on(t.manifestId),
     check("current_publications_reason", sql`${t.state} = 'active' or ${t.reason} is not null`),
   ],
 );
@@ -184,11 +185,30 @@ export const contentPageVersions = pgTable(
  * Public shortlist shares: an unguessable revocable token over public listing references
  * only. No participant, note, budget, contact data or case link is stored here (§8.3, AT09).
  */
-export const publicShares = pgTable("public_shares", {
-  id: id(),
-  tokenHash: text("token_hash").notNull().unique(),
-  listingReferences: text("listing_references").array().notNull(),
-  createdAt: createdAt(),
-  expiresAt: instant("expires_at"),
-  revokedAt: instant("revoked_at"),
-});
+export const publicShares = pgTable(
+  "public_shares",
+  {
+    id: id(),
+    tokenHash: text("token_hash").notNull().unique(),
+    /** Recoverable for the creator's Copy link action; this token grants public facts only. */
+    viewToken: text("view_token"),
+    listingReferences: text("listing_references").array().notNull(),
+    /** Only the original public-host cookie can manage an anonymous share. */
+    creatorSessionHash: text("creator_session_hash"),
+    /** A live client or staff session can manage its own share. */
+    creatorPrincipalId: uuid("creator_principal_id").references(() => principals.id),
+    createdAt: createdAt(),
+    expiresAt: instant("expires_at"),
+    revokedAt: instant("revoked_at"),
+  },
+  (t) => [
+    index("public_shares_creator_session_idx").on(t.creatorSessionHash, t.createdAt),
+    index("public_shares_creator_principal_idx").on(t.creatorPrincipalId, t.createdAt),
+    check(
+      "public_shares_creator_scope",
+      sql`(${t.viewToken} is not null and ${t.creatorSessionHash} is not null and ${t.creatorPrincipalId} is null)
+        or (${t.viewToken} is not null and ${t.creatorSessionHash} is null and ${t.creatorPrincipalId} is not null)
+        or (${t.viewToken} is null and ${t.creatorSessionHash} is null and ${t.creatorPrincipalId} is null and ${t.revokedAt} is not null)`,
+    ),
+  ],
+);

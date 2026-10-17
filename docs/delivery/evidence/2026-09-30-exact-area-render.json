@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "scope": "Paired renderToStaticMarkup of actual ListingFacts before/after source, 12000 high-precision areas and bedroom counts across seven locales; first two waves excluded. No HTTP/RSC/network qualification.",
+  "beforeRevision": "97d28cb6",
+  "afterSourceSha256": {
+    "src/i18n/format.ts": "43ad3d6525f86fa23f943f01bf9f4c2dcabfd20761a057d420a5ce0987510522",
+    "src/features/discovery/listing-card.tsx": "31d061412509bcd8090489216884cd0bfde88ecdd59672e729d4e497aec7275f"
+  },
+  "htmlSha256": "6747169d17399c4c6cf604b49c5f559ca37a3abfa144f54768c37f0f2636d084",
+  "summary": {
+    "before": {
+      "medianMs": 219.7318335,
+      "minMs": 204.71399999999994,
+      "maxMs": 225.93008299999997
+    },
+    "after": {
+      "medianMs": 44.678582999999776,
+      "minMs": 44.028707999999824,
+      "maxMs": 45.48524999999995
+    }
+  },
+  "limits": [
+    "Production React static-markup component benchmark; not Next RSC/HTTP/concurrency capacity.",
+    "The unchanged latest full-load result remains failed; no R08 pass."
+  ],
+  "artifacts": {
+    "root": "/Users/ivan/Code/.artifacts/ms-realty/recovery/20260930",
+    "probe": "listing-facts-source-probe.mts",
+    "pairedCompilation": "prepare-listing-facts-probe.mjs",
+    "samples": "listing-facts-source-probe.json",
+    "profile": "replica-cpu-summary.json"
+  }
+}

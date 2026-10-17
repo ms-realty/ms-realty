@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "environment": "staging",
+  "runtime": "containers",
+  "purpose": "protected_partial_preview",
+  "accountId": "921d0224dcd595c87b7928d2b3c479d1",
+  "zoneId": null,
+  "workerName": "ms-realty-staging",
+  "baseCommit": "e23d17b1ce71fce694e823643ea94a7440dd4912",
+  "sourceCommit": null,
+  "image": null,
+  "origins": {
+    "public": "https://staging.makler-realty.com",
+    "client": "https://staging-my.makler-realty.com",
+    "staff": "https://staging-app.makler-realty.com"
+  },
+  "access": {
+    "applicationId": null,
+    "teamDomain": null,
+    "audience": null,
+    "ownerEmail": null,
+    "controllerEmails": [],
+    "controllerGroupId": null,
+    "serviceTokenId": null,
+    "serviceClientId": null
+  },
+  "database": {
+    "engineVersion": "16.14",
+    "productionName": "ms_realty_payload",
+    "stagingName": null,
+    "stagingHost": "staging-db.makler-realty.com",
+    "roles": {
+      "web": null,
+      "worker": null,
+      "migrator": null
+    },
+    "privateConnectivityReport": null,
+    "privateConnectivitySha256": null,
+    "transport": "cloudflared-access-tcp",
+    "access": {
+      "applicationId": null,
+      "audience": null,
+      "serviceTokenId": null,
+      "serviceClientId": null
+    },
+    "originIsolationReport": "deploy/staging-isolation.generated.json",
+    "originIsolationSha256": null
+  },
+  "buckets": {
+    "productionMedia": "ms-realty-media",
+    "productionCache": "ms-realty-production-opennext-cache",
+    "stagingMedia": null,
+    "stagingCache": null
+  },
+  "email": {
+    "from": null,
+    "allowedRecipients": [],
+    "replyDomain": null,
+    "inquiryCoverageNoticeEnabled": false,
+    "testInboxReviewed": false
+  },
+  "artifacts": {
+    "routes": "data/legacy/migration/staging-legacy-routes.json",
+    "routesSha256": "c5b3938b660ff664bde4da6933c65363191395039394baf19fd04be884c75f80",
+    "routeManifest": "data/legacy/migration/staging-route-manifest.json",
+    "routeManifestSha256": "37564c2c2b8fcdf4c341bd66a8523b9efe50c6ff7dba073d8508724a5f49589e",
+    "exclusionsSha256": "73a5ec30aa84d587c01826726c4ae5f7ef619cb2ce0e613c75566960e447c3e3",
+    "media": "data/legacy/migration/public-media.json",
+    "mediaSha256": "1b8e3f73f375af0a8c1b125133bbd5f6b70da89f48fda7fda82028a7a6adb362"
+  },
+  "runtimeVars": {
+    "WEBAUTHN_RP_NAME": "MS Realty staging",
+    "FILE_SCAN_MODE": "staging-unverified",
+    "R2_JURISDICTION": "default"
+  },
+  "rollback": {
+    "legacyOrigin": null,
+    "retainDays": 90,
+    "evidenceSha256": null
+  }
+}

@@ -8,7 +8,10 @@ import { z } from "zod";
 import type { Capability } from "@/domain/capabilities";
 import { publicLocales } from "@/domain/ids";
 import { inquiryPurposes } from "@/domain/inquiry";
-import { gateIds, gateStatuses } from "@/release/schemas";
+import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
+import { inquiryListingReceiptSchema } from "@/domain/inquiry-selection";
+import { ownerInquiryReceiptSchema } from "@/domain/owner-inquiry";
+import { gateIds, gateStatuses, readinessReportSchema } from "@/release/schemas";
 import type { HostContext } from "../config/hosts";
 import type { ErrorCode } from "../errors";
 import { inquirySchema } from "../inquiries/intake";
@@ -31,17 +34,31 @@ export type TransportGroup = (typeof transportGroups)[number];
 /** Who may call an endpoint; the server derives the Principal, never the payload. */
 export const authorizationClasses = {
   public: "Anyone. No session is read.",
+  anonymous_creator:
+    "An anonymous visitor on the public host. An existing host-only share creator cookie may be reused, or a new one issued.",
   receipt_session:
     "An anonymous visitor holding the receipt-session cookie that made the submission.",
   client_session:
     "A signed-in client on the client host; record and field audience checks apply per record.",
   staff_session:
     "A signed-in staff member with an active membership on the staff host, holding the named capability.",
+  private_session:
+    "A current client or staff session on its own private host, with per-record authorization and audience checks.",
   provider_signature: "A provider webhook whose signature and account are verified.",
 } as const;
 export type AuthorizationClass = keyof typeof authorizationClasses;
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+/** Explicitly inventoried developer tools, unavailable on real hosts and excluded from OpenAPI. */
+export const localTestOperations = [
+  {
+    method: "GET",
+    path: "/api/test-outbox",
+    requiredFlag: "ENABLE_TEST_OUTBOX",
+    hosts: ["client", "staff"],
+  },
+] as const;
 
 export interface ResponseDefinition {
   readonly status: number;
@@ -63,7 +80,7 @@ export interface EndpointDefinition {
   /** OpenAPI path template, e.g. `/api/inquiries/{submission}`. */
   readonly path: string;
   /** The host the endpoint is mounted on; `any` only for the host-neutral health check. */
-  readonly host: HostContext | "any";
+  readonly host: HostContext | "private" | "any";
   readonly authorization: AuthorizationClass;
   readonly capability?: Capability;
   /** Acceptance scenarios (AT01–AT68) the endpoint carries. */
@@ -72,7 +89,7 @@ export interface EndpointDefinition {
    * `submission_key`: a server-issued logical key bound to the payload digest (§5.1).
    * `operation_id`: a client-held operation id bound to the payload digest.
    */
-  readonly idempotency: "none" | "submission_key" | "operation_id";
+  readonly idempotency: "none" | "submission_key" | "operation_id" | "provider_event_id";
   /** `expected_revision`: stale writes answer REVISION_CONFLICT with the latest state. */
   readonly revision: "none" | "expected_revision";
   readonly pagination: "none" | "cursor";
@@ -113,15 +130,31 @@ export const readinessResponseSchema = z.object({
     sha: z.string().nullable().describe("BUILD_SHA of the running process; null when unset"),
   }),
   snapshotState: z
-    .enum(["current", "missing", "other_release", "invalid"])
-    .describe("`current` only when the readiness snapshot was evaluated for this exact build"),
+    .enum([
+      "current",
+      "missing",
+      "other_release",
+      "invalid",
+      "unbound",
+      "other_environment",
+      "other_manifest",
+      "other_policy",
+      "other_snapshot",
+      "expired",
+    ])
+    .describe(
+      "`current` only for an unmodified, unexpired snapshot matching every deployed identity pin",
+    ),
   snapshot: z
     .object({
-      snapshotId: z.string(),
-      evaluatedAt: z.string(),
-      releaseSha: z.string(),
-      environment: z.string(),
-      policyRevision: z.string(),
+      snapshotId: readinessReportSchema.shape.snapshotId,
+      evaluatedAt: readinessReportSchema.shape.evaluatedAt,
+      expiresAt: readinessReportSchema.shape.expiresAt,
+      releaseSha: readinessReportSchema.shape.release.shape.releaseSha,
+      environment: readinessReportSchema.shape.release.shape.environment,
+      policyRevision: readinessReportSchema.shape.policy.shape.policyRevision,
+      manifestDigest: readinessReportSchema.shape.release.shape.manifestDigest,
+      policyDigest: readinessReportSchema.shape.policy.shape.policyDigest,
     })
     .nullable(),
   verdict: z.enum(gateStatuses),
@@ -142,13 +175,19 @@ const submissionKeyExample = `${"A".repeat(43)}.${"0".repeat(32)}`;
 export const submissionKeyResponseSchema = z.object({ submissionKey: z.string() });
 
 export const inquiryReceiptSchema = z.object({
+  content: inquiryContentSnapshotSchema.optional(),
+  ownerInput: ownerInquiryReceiptSchema.optional(),
   receiptId: z.string().describe("The logical submission key"),
   status: z.literal("accepted"),
   reference: z.string().describe("Human reference, e.g. RQ-2026-000042"),
   acceptedAt: z.iso.datetime(),
   purpose: z.enum(inquiryPurposes),
   locale: z.enum(publicLocales),
+  listing: inquiryListingReceiptSchema.nullable(),
+  selectedListings: z.array(inquiryListingReceiptSchema),
   listingReference: z.string().nullable(),
+  selectedListingReferences: z.array(z.string()),
+  comparisonReferences: z.array(z.string()),
 });
 
 export const inquiryAcceptedSchema = z.object({
@@ -158,6 +197,9 @@ export const inquiryAcceptedSchema = z.object({
 
 /** The no-JavaScript form post: the same command with flat fields. */
 const inquiryFormSchema = z.object({
+  contentReference: z.string().max(512).optional(),
+  ownerInput: z.string().max(2048).optional(),
+  viewingPreferences: z.string().max(4096).optional(),
   submissionKey: z.string(),
   purpose: z.enum(inquiryPurposes),
   locale: z.enum(publicLocales),
@@ -166,6 +208,21 @@ const inquiryFormSchema = z.object({
   contactValue: z.string(),
   message: z.string().optional(),
   listingReference: z.string().optional(),
+  observedManifestId: z.uuid().optional(),
+  comparisonReferences: z
+    .string()
+    .max(62)
+    .optional()
+    .describe(
+      "Navigation only: 1–3 comma-separated canonical unique ordered listing references, including the individual inquiry subject",
+    ),
+  selectedListings: z
+    .string()
+    .max(1000)
+    .optional()
+    .describe(
+      "JSON array of 1–3 ordered unique reference/observedManifestId pairs; mutually exclusive with listingReference",
+    ),
   callbackWindow: z.string().optional(),
   privacyNotice: z.literal("on"),
   marketingOptIn: z.literal("on").optional(),
@@ -179,10 +236,100 @@ const receiptExample = {
   acceptedAt: "2026-09-27T09:30:00.000Z",
   purpose: "question",
   locale: "bg",
+  listing: null,
+  selectedListings: [],
   listingReference: null,
+  selectedListingReferences: [],
+  comparisonReferences: [],
 } as const;
 
 export const endpoints = [
+  {
+    id: "files.upload",
+    summary: "Upload and seal scoped staging bytes",
+    group: "files",
+    method: "PUT",
+    path: "/api/files/uploads/{id}",
+    host: "private",
+    authorization: "private_session",
+    acceptance: ["AT42"],
+    idempotency: "operation_id",
+    revision: "none",
+    pagination: "none",
+    description:
+      "Requires x-upload-token for the expiring upload slot, current session and exact same-origin. Repeated bytes reconcile to the same sealed object; different bytes conflict. Raw media maximum 25 MB, documents 20 MB. Scanning is queued, never implied by acceptance.",
+    params: z.object({ id: z.uuid() }),
+    body: { schemas: { "application/octet-stream": z.string().meta({ format: "binary" }) } },
+    responses: [
+      {
+        status: 200,
+        description: "Sealed; scanning pending",
+        schema: z.object({ state: z.literal("sealed"), next: z.literal("scanning") }).passthrough(),
+      },
+    ],
+    errors: [
+      "unauthenticated",
+      "forbidden",
+      "not_found",
+      "cross_origin_request",
+      "validation_failed",
+      "version_conflict",
+      "unavailable",
+    ],
+  },
+  {
+    id: "files.privateDownload",
+    summary: "Read an authorized private file",
+    group: "files",
+    method: "GET",
+    path: "/api/files/private/{kind}/{id}",
+    host: "private",
+    authorization: "private_session",
+    acceptance: ["AT39", "AT42"],
+    idempotency: "none",
+    revision: "none",
+    pagination: "none",
+    description:
+      "Authorization and current byte provenance are rechecked for every full or range request. preview=1 serves only a media derivative. Original documents are attachments; no-store.",
+    params: z.object({ kind: z.enum(["media", "document"]), id: z.uuid() }),
+    responses: [
+      {
+        status: 200,
+        description: "Authorized file bytes",
+        contentType: "application/octet-stream",
+        schema: z.string().meta({ format: "binary" }),
+      },
+      { status: 206, description: "Authorized byte range" },
+      { status: 416, description: "Invalid byte range" },
+    ],
+    errors: ["unauthenticated", "forbidden", "not_found", "unavailable"],
+  },
+  {
+    id: "files.publicMedia",
+    summary: "Read an eligible published image rendition",
+    group: "public_read",
+    method: "GET",
+    path: "/api/media/{id}/{digest}",
+    host: "public",
+    authorization: "public",
+    acceptance: ["AT24", "AT25", "AT42"],
+    idempotency: "none",
+    revision: "none",
+    pagination: "none",
+    description:
+      "Rechecks active website manifest membership, rights, clean scanned sealed bytes and exact derivative digest on every request. Private originals and staging bytes are never served. No-store enables immediate restriction.",
+    params: z.object({ id: z.uuid(), digest: z.string().regex(/^[a-f0-9]{64}$/) }),
+    responses: [
+      {
+        status: 200,
+        description: "Reviewed derivative",
+        contentType: "image/webp",
+        schema: z.string().meta({ format: "binary" }),
+      },
+      { status: 206, description: "Eligible derivative byte range" },
+    ],
+    errors: ["not_found", "unavailable"],
+  },
   {
     id: "operations.health",
     summary: "Minimal health check",
@@ -211,7 +358,7 @@ export const endpoints = [
     summary: "Release readiness for the running build",
     description:
       "Release identity and the R00–R12 gate summary from the readiness snapshot evaluated for " +
-      "this exact build. A missing snapshot, or one for another release, reports every gate " +
+      "this exact build/environment/manifest/policy. A missing, expired, unbound or invalid snapshot reports every gate " +
       "blocked. No secret, evidence content or personal data is returned.",
     group: "operations",
     method: "GET",
@@ -228,6 +375,7 @@ export const endpoints = [
         status: 200,
         description: "Gate summary",
         schema: readinessResponseSchema,
+        headers: { "cache-control": "no-store; never cache operational detail" },
         example: {
           release: { sha: null },
           snapshotState: "missing",
@@ -238,6 +386,37 @@ export const endpoints = [
       },
     ],
     errors: ["unauthenticated", "forbidden", "internal_error"],
+  },
+  {
+    id: "shares.issueCreatorSession",
+    summary: "Enter saved-share management with an anonymous creator session",
+    description:
+      "Public-host entry for a validated locale. Reuses a valid host-only creator cookie or sets a new one before redirecting to the saved page. No viewing token or share row is returned; the response is private and never cached.",
+    group: "public_submission",
+    method: "GET",
+    path: "/api/public-shares/creator-session",
+    host: "public",
+    authorization: "anonymous_creator",
+    acceptance: ["AT09"],
+    idempotency: "none",
+    revision: "none",
+    pagination: "none",
+    responses: [
+      {
+        status: 303,
+        description: "Redirect to the validated locale's saved page",
+        headers: {
+          location: "Public-host saved page for the validated locale",
+          "set-cookie": "Host-only creator cookie, only if this browser lacks a valid one",
+          "cache-control": "private, no-store",
+          "referrer-policy": "no-referrer",
+          "x-robots-tag": "noindex, nofollow",
+        },
+      },
+      { status: 400, description: "Missing or unsupported locale" },
+      { status: 404, description: "Unavailable outside the public host" },
+    ],
+    errors: [],
   },
   {
     id: "inquiries.issueSubmissionKey",
@@ -270,8 +449,10 @@ export const endpoints = [
     summary: "Receive one inquiry",
     description:
       "One logical submission per key: the same key and payload return the same receipt (200), " +
-      "another payload under the key is refused. JSON clients get the receipt; a form post is " +
-      "answered 303 to the receipt page, or back to the form with only the key and error code.",
+      "another payload under the key is refused. JSON clients get the receipt. A form post " +
+      "returns 303 to the receipt page on success. A correctable failure returns 303 to a fresh " +
+      "form with only the key, error code and validated public context; private entries are not " +
+      "retained and must be entered again. Uncertain outcomes go to receipt reconciliation.",
     group: "public_submission",
     method: "POST",
     path: "/api/inquiries",
@@ -309,7 +490,8 @@ export const endpoints = [
       },
       {
         status: 303,
-        description: "Form post: to the receipt page, or back to the form with the error code",
+        description:
+          "Form post: receipt or reconciliation page; correctable failure returns to a fresh form without private entries",
         headers: { location: "/{locale}/requests/{key} or /{locale}/inquire?submission=…&error=…" },
       },
     ],
@@ -348,5 +530,37 @@ export const endpoints = [
       },
     ],
     errors: ["not_found", "internal_error"],
+  },
+  {
+    id: "providers.resend.ingest",
+    summary: "Verify and record a Resend delivery event",
+    group: "provider_ingress",
+    method: "POST",
+    path: "/api/providers/resend/webhook",
+    host: "staff",
+    authorization: "provider_signature",
+    acceptance: ["AT46", "AT47", "AT48"],
+    idempotency: "provider_event_id",
+    revision: "none",
+    pagination: "none",
+    description:
+      "Verify the exact raw UTF-8 body using the account's Svix webhook secret and svix-id, svix-timestamp and svix-signature headers. Deduplicate the signed event, persist only delivery identifiers, and reconcile the external-action ledger. Inbound email never grants identity or Case access. 128 KiB body limit.",
+    body: {
+      schemas: {
+        "application/json": z.object({
+          type: z.string(),
+          created_at: z.string(),
+          data: z.object({ email_id: z.string().optional() }).passthrough(),
+        }),
+      },
+    },
+    responses: [
+      {
+        status: 202,
+        description: "Signed event durably accepted; acceptance does not establish delivery",
+        schema: z.object({ accepted: z.literal(true), duplicate: z.boolean() }),
+      },
+    ],
+    errors: ["unauthenticated", "validation_failed", "unavailable", "internal_error"],
   },
 ] as const satisfies readonly EndpointDefinition[];

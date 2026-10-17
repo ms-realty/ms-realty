@@ -1,4 +1,5 @@
-// Email-link sign-in (F13, AD7, A33, A34).
+// Client email-link sign-in (F13, C01; ADR 0002). Staff never sign in by email: their only
+// email links are enrolment and recovery invitations (invitations.ts).
 // - Requesting a link always answers the same way, whether or not an account exists, and is
 //   rate-limited per client IP and per address from that IP (so nobody can lock another
 //   person's address out). The request path never looks at accounts: it enqueues one job for
@@ -10,7 +11,7 @@
 import "server-only";
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { emailSignInTokens, principals } from "@/db/schema";
+import { contactMethods, emailSignInTokens, principals } from "@/db/schema";
 import type { PublicLocale } from "@/domain/ids";
 import { recordAudit } from "../audit";
 import { getEnv } from "../config/env";
@@ -20,11 +21,19 @@ import { AppError } from "../errors";
 import { enqueueMessage } from "../jobs/outbox";
 import type { JobPayloads, JobQueue } from "../jobs/queue";
 import { enforceRateLimit } from "../rate-limit";
-import { type AccountKind, createSession, type IssuedSession, revokeSession } from "./sessions";
+import { createSession, type IssuedSession, revokeSession } from "./sessions";
 
 export const emailLinkTtlMs = 15 * 60_000;
-/** Route that renders the confirm page (GET) and consumes the token (POST). */
-export const emailLinkPath = "/sign-in/confirm";
+
+/**
+ * The client-host page that renders the confirm step (GET) and consumes the token (its POST).
+ * The token travels in the query string of this one page, which sends no referrer.
+ */
+export function emailLinkUrl(clientOrigin: string, locale: PublicLocale, token: string): string {
+  const url = new URL(`/${locale}/access/confirm`, clientOrigin);
+  url.searchParams.set("token", token);
+  return url.toString();
+}
 
 /**
  * A same-origin path to return to after sign-in, or null. Absolute URLs, protocol-relative
@@ -48,7 +57,6 @@ const emailSchema = z.email().max(254);
 
 export interface EmailLinkRequest {
   readonly email: string;
-  readonly accountKind: AccountKind;
   readonly returnTo?: string | null;
   /** Client IP as seen by the edge, for the per-IP limits. */
   readonly clientIp: string;
@@ -60,22 +68,22 @@ export interface EmailLinkRequest {
 
 export type EmailLinkJob = JobPayloads["auth.email_link"];
 
-/** The active principal of this context with this sign-in address, if any. */
-async function findActivePrincipal(
+/** The active client principal with this sign-in address, if any. */
+async function findActiveClient(
   db: Executor,
-  kind: AccountKind,
   email: string,
-): Promise<{ id: string } | undefined> {
+): Promise<{ id: string; partyId: string } | undefined> {
   const [principal] = await db
-    .select({ id: principals.id })
+    .select({ id: principals.id, partyId: principals.partyId })
     .from(principals)
     .where(
       and(
-        eq(principals.kind, kind),
+        eq(principals.kind, "client"),
         eq(sql`lower(${principals.email})`, email),
         eq(principals.status, "active"),
       ),
-    );
+    )
+    .for("update");
   return principal;
 }
 
@@ -97,7 +105,6 @@ export async function requestEmailLink(
     "auth.email_link",
     {
       email,
-      accountKind: request.accountKind,
       returnTo: request.returnTo ?? null,
       locale: request.locale ?? "bg",
     },
@@ -120,7 +127,7 @@ export async function issueEmailLink(
   const env = getEnv();
   const { email } = job;
   await db.transaction(async (tx) => {
-    const account = await findActivePrincipal(tx, job.accountKind, email);
+    const account = await findActiveClient(tx, email);
     if (!account) return;
 
     const token = randomToken();
@@ -130,16 +137,16 @@ export async function issueEmailLink(
       .values({
         tokenHash: sha256Hex(token),
         purpose: "sign_in",
-        principalKind: job.accountKind,
+        principalKind: "client",
+        principalId: account.id,
         email,
-        returnTo: safeReturnPath(job.returnTo, env.appOrigin),
+        returnTo: safeReturnPath(job.returnTo, env.hosts.client),
         createdAt: now,
         expiresAt,
       })
       .returning({ id: emailSignInTokens.id });
     if (!row) throw new Error("Sign-in token insert returned no row.");
-    const link = new URL(emailLinkPath, env.canonicalOrigin);
-    link.searchParams.set("token", token);
+    const link = emailLinkUrl(env.hosts.client, job.locale, token);
     await enqueueMessage(
       tx,
       {
@@ -148,7 +155,7 @@ export async function issueEmailLink(
         recipient: email,
         template: "auth.email_link",
         params: { locale: job.locale, expiresAt: expiresAt.toISOString() },
-        secretParams: { url: link.toString() },
+        secretParams: { url: link },
       },
       options.queue,
     );
@@ -159,7 +166,6 @@ export type EmailLinkState = "valid" | "invalid" | "expired" | "consumed" | "rev
 
 export interface EmailLinkInspection {
   readonly state: EmailLinkState;
-  readonly accountKind?: AccountKind;
   readonly returnTo?: string | null;
 }
 
@@ -173,11 +179,12 @@ export async function inspectEmailLink(
     .select()
     .from(emailSignInTokens)
     .where(eq(emailSignInTokens.tokenHash, sha256Hex(token)));
-  if (row?.purpose !== "sign_in") return { state: "invalid" };
+  if (row?.purpose !== "sign_in" || row.principalKind !== "client" || !row.principalId)
+    return { state: "invalid" };
   if (row.revokedAt) return { state: "revoked" };
   if (row.consumedAt) return { state: "consumed" };
   if (now >= row.expiresAt) return { state: "expired" };
-  return { state: "valid", accountKind: row.principalKind, returnTo: row.returnTo };
+  return { state: "valid", returnTo: row.returnTo };
 }
 
 const linkErrors = {
@@ -209,6 +216,7 @@ export async function consumeEmailLink(
         and(
           eq(emailSignInTokens.tokenHash, sha256Hex(token)),
           eq(emailSignInTokens.purpose, "sign_in"),
+          eq(emailSignInTokens.principalKind, "client"),
           isNull(emailSignInTokens.consumedAt),
           isNull(emailSignInTokens.revokedAt),
           gt(emailSignInTokens.expiresAt, now),
@@ -217,11 +225,37 @@ export async function consumeEmailLink(
       .returning();
     if (!row) return null;
 
-    const account = await findActivePrincipal(tx, row.principalKind, row.email.toLowerCase());
-    if (!account) throw new AppError("link_invalid");
+    const account = await findActiveClient(tx, row.email.toLowerCase());
+    if (!account || account.id !== row.principalId) throw new AppError("link_invalid");
+
+    // Completing the email challenge proves this contact route only. It never creates
+    // optional consent, subscriptions, case access or additional identity permissions.
+    const matching = and(
+      eq(contactMethods.partyId, account.partyId),
+      eq(contactMethods.kind, "email"),
+      eq(contactMethods.normalizedValue, row.email.toLowerCase()),
+    );
+    const [contact] = await tx
+      .select({ id: contactMethods.id })
+      .from(contactMethods)
+      .where(matching);
+    if (contact)
+      await tx
+        .update(contactMethods)
+        .set({ verification: "verified", verifiedAt: now, lastFailureAt: null })
+        .where(matching);
+    else
+      await tx.insert(contactMethods).values({
+        partyId: account.partyId,
+        kind: "email",
+        value: row.email,
+        normalizedValue: row.email.toLowerCase(),
+        verification: "verified",
+        verifiedAt: now,
+      });
 
     if (options.currentSessionToken) await revokeSession(tx, options.currentSessionToken, now);
-    const issued = await createSession(tx, { kind: row.principalKind, id: account.id }, now);
+    const issued = await createSession(tx, { kind: "client", id: account.id }, now);
     await recordAudit(tx, {
       action: "session.sign_in",
       actor: issued.session.actor,

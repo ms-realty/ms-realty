@@ -16,4 +16,17 @@ describe("AT04 filter semantics (shared case table)", () => {
       "feature.step_free_access",
     ]);
   });
+
+  it("names known hard violations without promoting unknown facts to matches", () => {
+    const listing = filterCases.find((c) => c.id === "AT04-must-have-unknown")?.listing;
+    expect(listing).toBeDefined();
+    if (!listing) return;
+    expect(
+      evaluateListing(listing, {
+        purpose: "sale",
+        propertyTypes: ["house"],
+        mustHave: ["parking", "step_free_access"],
+      }),
+    ).toMatchObject({ result: "no_match", violated: ["propertyType", "feature.parking"] });
+  });
 });

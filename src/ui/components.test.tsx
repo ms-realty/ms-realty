@@ -30,6 +30,7 @@ describe("ErrorSummary (A17)", () => {
         }}
       >
         <ErrorSummary title="There is a problem" errors={errors} />
+        <TextField id="title" label="Listing title" validationBehavior="aria" />
         <TextField id="email" label="Email address" validationBehavior="aria" />
         <button type="submit">Send question to the team</button>
       </form>
@@ -51,6 +52,65 @@ describe("ErrorSummary (A17)", () => {
 
     await user.click(within(summary).getByRole("link", { name: "Enter an email address" }));
     expect(screen.getByLabelText("Email address")).toHaveFocus();
+  });
+
+  it("keeps valid input and lets the keyboard move from the summary to its linked field", async () => {
+    const user = userEvent.setup();
+    render(<Form />);
+    const title = screen.getByLabelText("Listing title");
+    await user.type(title, "Apartment in Sandanski");
+    await user.click(screen.getByRole("button", { name: "Send question to the team" }));
+
+    const summary = screen.getByRole("region", { name: "There is a problem" });
+    expect(summary).toHaveFocus();
+    expect(within(summary).getByRole("heading", { level: 2 })).toHaveAccessibleName(
+      "There is a problem",
+    );
+    expect(title).toHaveValue("Apartment in Sandanski");
+
+    await user.tab();
+    const link = within(summary).getByRole("link", { name: "Enter an email address" });
+    expect(link).toHaveFocus();
+    expect(link).toHaveAttribute("href", "#email");
+    await user.keyboard("{Enter}");
+    expect(screen.getByLabelText("Email address")).toHaveFocus();
+    expect(title).toHaveValue("Apartment in Sandanski");
+  });
+
+  it("exposes every error link and can focus textarea and select controls", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <ErrorSummary
+          title="Check the form"
+          errors={[
+            { fieldId: "source", message: "Source: Fill in this field." },
+            { fieldId: "language", message: "Source language: Choose a value from the list." },
+          ]}
+        />
+        <label htmlFor="source">Source</label>
+        <textarea id="source" defaultValue="Retained source draft" />
+        <label htmlFor="language">Source language</label>
+        <select id="language" defaultValue="">
+          <option value="">Choose…</option>
+          <option value="bg">Bulgarian</option>
+        </select>
+      </>,
+    );
+
+    const summary = screen.getByRole("region", { name: "Check the form" });
+    const sourceLink = within(summary).getByRole("link", { name: "Source: Fill in this field." });
+    const languageLink = within(summary).getByRole("link", {
+      name: "Source language: Choose a value from the list.",
+    });
+    expect(summary).toHaveFocus();
+    expect(within(summary).getAllByRole("listitem")).toHaveLength(2);
+    expect(languageLink).toHaveAttribute("href", "#language");
+    await user.click(sourceLink);
+    expect(screen.getByLabelText("Source")).toHaveFocus();
+    expect(screen.getByLabelText("Source")).toHaveValue("Retained source draft");
+    await user.click(languageLink);
+    expect(screen.getByLabelText("Source language")).toHaveFocus();
   });
 });
 

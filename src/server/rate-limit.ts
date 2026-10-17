@@ -29,6 +29,10 @@ export const rateLimitPolicies = {
   "invitation.ip": { capacity: 20, refillPerSecond: 1 / 30 },
   /** New inquiries (POST /api/inquiries) per client IP: 5 at once, then one every 2 minutes. */
   "inquiry.ip": { capacity: 5, refillPerSecond: 1 / 120 },
+  /** New public shortlist links per creator; retries replay without consuming a token. */
+  "public_share.creator": { capacity: 10, refillPerSecond: 1 / 180 },
+  /** New public shortlist links per edge-observed client IP, even if cookies are rotated. */
+  "public_share.ip": { capacity: 20, refillPerSecond: 1 / 30 },
 } as const satisfies Record<string, RateLimitPolicy>;
 
 export type RateLimitPurpose = keyof typeof rateLimitPolicies;

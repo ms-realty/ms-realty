@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MS Realty application transport",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "description": "Generated from src/server/transport/registry.ts by scripts/openapi.mjs; do not edit. Application endpoints only (architecture §19.3), never raw collections. Mutations follow the §5.1 envelope: server-derived Principal, logical operation identity, expected revision where applicable, and one of the §5.1 results."
   },
   "servers": [
@@ -21,13 +21,536 @@
   ],
   "tags": [
     {
+      "name": "files"
+    },
+    {
+      "name": "public_read"
+    },
+    {
       "name": "operations"
     },
     {
       "name": "public_submission"
+    },
+    {
+      "name": "provider_ingress"
     }
   ],
   "paths": {
+    "/api/files/uploads/{id}": {
+      "put": {
+        "operationId": "files.upload",
+        "summary": "Upload and seal scoped staging bytes",
+        "description": "Requires x-upload-token for the expiring upload slot, current session and exact same-origin. Repeated bytes reconcile to the same sealed object; different bytes conflict. Raw media maximum 25 MB, documents 20 MB. Scanning is queued, never implied by acceptance.",
+        "tags": ["files"],
+        "servers": [
+          {
+            "url": "https://my.makler-realty.com",
+            "description": "Client host"
+          },
+          {
+            "url": "https://app.makler-realty.com",
+            "description": "Staff host"
+          }
+        ],
+        "security": [
+          {
+            "clientSession": []
+          },
+          {
+            "staffSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sealed; scanning pending",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "const": "sealed"
+                    },
+                    "next": {
+                      "type": "string",
+                      "const": "scanning"
+                    }
+                  },
+                  "required": ["state", "next"],
+                  "additionalProperties": {}
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "UNAUTHENTICATED": {
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHENTICATED",
+                        "message": "Please sign in to continue.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["UNAUTHENTICATED"]
+          },
+          "403": {
+            "description": "NOT_AUTHORIZED, CROSS_ORIGIN_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_AUTHORIZED": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_AUTHORIZED",
+                        "message": "You do not have permission for this action.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "CROSS_ORIGIN_REQUEST": {
+                    "value": {
+                      "error": {
+                        "code": "CROSS_ORIGIN_REQUEST",
+                        "message": "This request did not come from this site.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_AUTHORIZED", "CROSS_ORIGIN_REQUEST"]
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "We could not find this item.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_FOUND"]
+          },
+          "409": {
+            "description": "REVISION_CONFLICT",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "REVISION_CONFLICT": {
+                    "value": {
+                      "error": {
+                        "code": "REVISION_CONFLICT",
+                        "message": "Someone else changed this in the meantime. Review the latest version.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["REVISION_CONFLICT"]
+          },
+          "422": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "VALIDATION_FAILED": {
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "Some details need attention.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["VALIDATION_FAILED"]
+          },
+          "503": {
+            "description": "DEPENDENCY_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "DEPENDENCY_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "code": "DEPENDENCY_UNAVAILABLE",
+                        "message": "This service is temporarily unavailable. Please try again shortly.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["DEPENDENCY_UNAVAILABLE"]
+          }
+        },
+        "x-host-context": "private",
+        "x-authorization": {
+          "class": "private_session"
+        },
+        "x-idempotency": "operation_id",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT42"]
+      }
+    },
+    "/api/files/private/{kind}/{id}": {
+      "get": {
+        "operationId": "files.privateDownload",
+        "summary": "Read an authorized private file",
+        "description": "Authorization and current byte provenance are rechecked for every full or range request. preview=1 serves only a media derivative. Original documents are attachments; no-store.",
+        "tags": ["files"],
+        "servers": [
+          {
+            "url": "https://my.makler-realty.com",
+            "description": "Client host"
+          },
+          {
+            "url": "https://app.makler-realty.com",
+            "description": "Staff host"
+          }
+        ],
+        "security": [
+          {
+            "clientSession": []
+          },
+          {
+            "staffSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["media", "document"]
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized file bytes",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Authorized byte range"
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "UNAUTHENTICATED": {
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHENTICATED",
+                        "message": "Please sign in to continue.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["UNAUTHENTICATED"]
+          },
+          "403": {
+            "description": "NOT_AUTHORIZED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_AUTHORIZED": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_AUTHORIZED",
+                        "message": "You do not have permission for this action.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_AUTHORIZED"]
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "We could not find this item.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_FOUND"]
+          },
+          "416": {
+            "description": "Invalid byte range"
+          },
+          "503": {
+            "description": "DEPENDENCY_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "DEPENDENCY_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "code": "DEPENDENCY_UNAVAILABLE",
+                        "message": "This service is temporarily unavailable. Please try again shortly.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["DEPENDENCY_UNAVAILABLE"]
+          }
+        },
+        "x-host-context": "private",
+        "x-authorization": {
+          "class": "private_session"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT39", "AT42"]
+      }
+    },
+    "/api/media/{id}/{digest}": {
+      "get": {
+        "operationId": "files.publicMedia",
+        "summary": "Read an eligible published image rendition",
+        "description": "Rechecks active website manifest membership, rights, clean scanned sealed bytes and exact derivative digest on every request. Private originals and staging bytes are never served. No-store enables immediate restriction.",
+        "tags": ["public_read"],
+        "servers": [
+          {
+            "url": "https://makler-realty.com",
+            "description": "Public host"
+          }
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "name": "digest",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reviewed derivative",
+            "content": {
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Eligible derivative byte range"
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "We could not find this item.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_FOUND"]
+          },
+          "503": {
+            "description": "DEPENDENCY_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "DEPENDENCY_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "code": "DEPENDENCY_UNAVAILABLE",
+                        "message": "This service is temporarily unavailable. Please try again shortly.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["DEPENDENCY_UNAVAILABLE"]
+          }
+        },
+        "x-host-context": "public",
+        "x-authorization": {
+          "class": "public"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT24", "AT25", "AT42"]
+      }
+    },
     "/api/health": {
       "get": {
         "operationId": "operations.health",
@@ -77,7 +600,7 @@
       "get": {
         "operationId": "operations.readiness",
         "summary": "Release readiness for the running build",
-        "description": "Release identity and the R00–R12 gate summary from the readiness snapshot evaluated for this exact build. A missing snapshot, or one for another release, reports every gate blocked. No secret, evidence content or personal data is returned.",
+        "description": "Release identity and the R00–R12 gate summary from the readiness snapshot evaluated for this exact build/environment/manifest/policy. A missing, expired, unbound or invalid snapshot reports every gate blocked. No secret, evidence content or personal data is returned.",
         "tags": ["operations"],
         "servers": [
           {
@@ -93,6 +616,14 @@
         "responses": {
           "200": {
             "description": "Gate summary",
+            "headers": {
+              "cache-control": {
+                "description": "no-store; never cache operational detail",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -111,8 +642,19 @@
                     },
                     "snapshotState": {
                       "type": "string",
-                      "enum": ["current", "missing", "other_release", "invalid"],
-                      "description": "`current` only when the readiness snapshot was evaluated for this exact build"
+                      "enum": [
+                        "current",
+                        "missing",
+                        "other_release",
+                        "invalid",
+                        "unbound",
+                        "other_environment",
+                        "other_manifest",
+                        "other_policy",
+                        "other_snapshot",
+                        "expired"
+                      ],
+                      "description": "`current` only for an unmodified, unexpired snapshot matching every deployed identity pin"
                     },
                     "snapshot": {
                       "anyOf": [
@@ -120,27 +662,51 @@
                           "type": "object",
                           "properties": {
                             "snapshotId": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^sha256:[0-9a-f]{64}$"
                             },
                             "evaluatedAt": {
-                              "type": "string"
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                            },
+                            "expiresAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
                             },
                             "releaseSha": {
-                              "type": "string"
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{40}$"
                             },
                             "environment": {
-                              "type": "string"
+                              "type": "string",
+                              "enum": ["local", "ci", "staging", "production"]
                             },
                             "policyRevision": {
-                              "type": "string"
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 200,
+                              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+                            },
+                            "manifestDigest": {
+                              "type": "string",
+                              "pattern": "^sha256:[0-9a-f]{64}$"
+                            },
+                            "policyDigest": {
+                              "type": "string",
+                              "pattern": "^sha256:[0-9a-f]{64}$"
                             }
                           },
                           "required": [
                             "snapshotId",
                             "evaluatedAt",
+                            "expiresAt",
                             "releaseSha",
                             "environment",
-                            "policyRevision"
+                            "policyRevision",
+                            "manifestDigest",
+                            "policyDigest"
                           ],
                           "additionalProperties": false
                         },
@@ -279,6 +845,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "UNAUTHENTICATED": {
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHENTICATED",
+                        "message": "Please sign in to continue.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -290,6 +869,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_AUTHORIZED": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_AUTHORIZED",
+                        "message": "You do not have permission for this action.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -301,6 +893,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Something went wrong on our side.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -316,6 +921,72 @@
         "x-revision": "none",
         "x-pagination": "none",
         "x-acceptance": ["AT67"]
+      }
+    },
+    "/api/public-shares/creator-session": {
+      "get": {
+        "operationId": "shares.issueCreatorSession",
+        "summary": "Enter saved-share management with an anonymous creator session",
+        "description": "Public-host entry for a validated locale. Reuses a valid host-only creator cookie or sets a new one before redirecting to the saved page. No viewing token or share row is returned; the response is private and never cached.",
+        "tags": ["public_submission"],
+        "servers": [
+          {
+            "url": "https://makler-realty.com",
+            "description": "Public host"
+          }
+        ],
+        "security": [],
+        "responses": {
+          "303": {
+            "description": "Redirect to the validated locale's saved page",
+            "headers": {
+              "location": {
+                "description": "Public-host saved page for the validated locale",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "set-cookie": {
+                "description": "Host-only creator cookie, only if this browser lacks a valid one",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "cache-control": {
+                "description": "private, no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "referrer-policy": {
+                "description": "no-referrer",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-robots-tag": {
+                "description": "noindex, nofollow",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or unsupported locale"
+          },
+          "404": {
+            "description": "Unavailable outside the public host"
+          }
+        },
+        "x-host-context": "public",
+        "x-authorization": {
+          "class": "anonymous_creator"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT09"]
       }
     },
     "/api/inquiries": {
@@ -373,7 +1044,7 @@
       "post": {
         "operationId": "inquiries.submit",
         "summary": "Receive one inquiry",
-        "description": "One logical submission per key: the same key and payload return the same receipt (200), another payload under the key is refused. JSON clients get the receipt; a form post is answered 303 to the receipt page, or back to the form with only the key and error code.",
+        "description": "One logical submission per key: the same key and payload return the same receipt (200), another payload under the key is refused. JSON clients get the receipt. A form post returns 303 to the receipt page on success. A correctable failure returns 303 to a fresh form with only the key, error code and validated public context; private entries are not retained and must be entered again. Uncertain outcomes go to receipt reconciliation.",
         "tags": ["public_submission"],
         "servers": [
           {
@@ -434,6 +1105,168 @@
                     "type": "string",
                     "maxLength": 20
                   },
+                  "selectedListings": {
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reference": {
+                          "type": "string",
+                          "maxLength": 20
+                        },
+                        "observedManifestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": ["reference", "observedManifestId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "comparisonReferences": {
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 20
+                    }
+                  },
+                  "ownerInput": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "number",
+                        "const": 1
+                      },
+                      "provenance": {
+                        "type": "string",
+                        "const": "self_declared"
+                      },
+                      "locality": {
+                        "type": "string",
+                        "maxLength": 160
+                      },
+                      "propertyType": {
+                        "type": "string",
+                        "enum": [
+                          "apartment",
+                          "house",
+                          "plot",
+                          "commercial",
+                          "hotel",
+                          "development",
+                          "other",
+                          "unknown"
+                        ]
+                      },
+                      "transaction": {
+                        "type": "string",
+                        "enum": ["sale", "long_term_rent", "unknown"]
+                      },
+                      "documentArea": {
+                        "type": "string",
+                        "maxLength": 32
+                      },
+                      "relationship": {
+                        "type": "string",
+                        "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                      },
+                      "propertyStatus": {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "documentSource": {
+                        "type": "string",
+                        "maxLength": 200
+                      }
+                    },
+                    "required": ["version", "provenance"],
+                    "additionalProperties": false
+                  },
+                  "viewingPreferences": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "number",
+                        "const": 1
+                      },
+                      "provenance": {
+                        "type": "string",
+                        "const": "self_declared"
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": ["in_person"]
+                      },
+                      "timezone": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "windows": {
+                        "maxItems": 3,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "startsAtLocal": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+                            },
+                            "endsAtLocal": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
+                            },
+                            "startOccurrence": {
+                              "type": "string",
+                              "enum": ["earlier", "later"]
+                            },
+                            "endOccurrence": {
+                              "type": "string",
+                              "enum": ["earlier", "later"]
+                            }
+                          },
+                          "required": ["startsAtLocal", "endsAtLocal"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "accessNeeds": {
+                        "type": "string",
+                        "maxLength": 500
+                      }
+                    },
+                    "required": ["version", "provenance", "timezone", "windows"],
+                    "additionalProperties": false
+                  },
+                  "contentReference": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": ["area", "service", "help"]
+                      },
+                      "slug": {
+                        "type": "string",
+                        "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                      },
+                      "versionId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      }
+                    },
+                    "required": ["kind", "slug", "versionId"],
+                    "additionalProperties": false
+                  },
+                  "observedManifestId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
                   "criteria": {
                     "type": "object",
                     "propertyNames": {
@@ -476,6 +1309,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "contentReference": {
+                    "type": "string",
+                    "maxLength": 512
+                  },
+                  "ownerInput": {
+                    "type": "string",
+                    "maxLength": 2048
+                  },
+                  "viewingPreferences": {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
                   "submissionKey": {
                     "type": "string"
                   },
@@ -509,6 +1354,21 @@
                   },
                   "listingReference": {
                     "type": "string"
+                  },
+                  "observedManifestId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "comparisonReferences": {
+                    "description": "Navigation only: 1–3 comma-separated canonical unique ordered listing references, including the individual inquiry subject",
+                    "type": "string",
+                    "maxLength": 62
+                  },
+                  "selectedListings": {
+                    "description": "JSON array of 1–3 ordered unique reference/observedManifestId pairs; mutually exclusive with listingReference",
+                    "type": "string",
+                    "maxLength": 1000
                   },
                   "callbackWindow": {
                     "type": "string"
@@ -549,6 +1409,78 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["area", "service", "help"]
+                            },
+                            "slug": {
+                              "type": "string",
+                              "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                            },
+                            "versionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "title": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "locale": {
+                              "type": "string",
+                              "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": ["kind", "slug", "versionId", "title", "locale", "sourceUrl"],
+                          "additionalProperties": false
+                        },
+                        "ownerInput": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number",
+                              "const": 1
+                            },
+                            "provenance": {
+                              "type": "string",
+                              "const": "self_declared"
+                            },
+                            "propertyType": {
+                              "type": "string",
+                              "enum": [
+                                "apartment",
+                                "house",
+                                "plot",
+                                "commercial",
+                                "hotel",
+                                "development",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            "transaction": {
+                              "type": "string",
+                              "enum": ["sale", "long_term_rent", "unknown"]
+                            },
+                            "documentArea": {
+                              "type": "string",
+                              "maxLength": 32
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                            }
+                          },
+                          "required": ["version", "provenance"],
+                          "additionalProperties": false
+                        },
                         "receiptId": {
                           "type": "string",
                           "description": "The logical submission key"
@@ -581,8 +1513,130 @@
                           "type": "string",
                           "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
                         },
+                        "listing": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "reference": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "title": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "locale": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "sourceUrl": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "publicNow": {
+                                  "type": ["boolean", "null"]
+                                }
+                              },
+                              "required": [
+                                "reference",
+                                "title",
+                                "locale",
+                                "sourceUrl",
+                                "publicNow"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "selectedListings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reference": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "locale": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "sourceUrl": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "publicNow": {
+                                "type": ["boolean", "null"]
+                              }
+                            },
+                            "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
+                            "additionalProperties": false
+                          }
+                        },
                         "listingReference": {
                           "type": ["string", "null"]
+                        },
+                        "selectedListingReferences": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "comparisonReferences": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       },
                       "required": [
@@ -592,7 +1646,11 @@
                         "acceptedAt",
                         "purpose",
                         "locale",
-                        "listingReference"
+                        "listing",
+                        "selectedListings",
+                        "listingReference",
+                        "selectedListingReferences",
+                        "comparisonReferences"
                       ],
                       "additionalProperties": false
                     },
@@ -616,6 +1674,78 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["area", "service", "help"]
+                            },
+                            "slug": {
+                              "type": "string",
+                              "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                            },
+                            "versionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "title": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "locale": {
+                              "type": "string",
+                              "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": ["kind", "slug", "versionId", "title", "locale", "sourceUrl"],
+                          "additionalProperties": false
+                        },
+                        "ownerInput": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number",
+                              "const": 1
+                            },
+                            "provenance": {
+                              "type": "string",
+                              "const": "self_declared"
+                            },
+                            "propertyType": {
+                              "type": "string",
+                              "enum": [
+                                "apartment",
+                                "house",
+                                "plot",
+                                "commercial",
+                                "hotel",
+                                "development",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            "transaction": {
+                              "type": "string",
+                              "enum": ["sale", "long_term_rent", "unknown"]
+                            },
+                            "documentArea": {
+                              "type": "string",
+                              "maxLength": 32
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                            }
+                          },
+                          "required": ["version", "provenance"],
+                          "additionalProperties": false
+                        },
                         "receiptId": {
                           "type": "string",
                           "description": "The logical submission key"
@@ -648,8 +1778,130 @@
                           "type": "string",
                           "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
                         },
+                        "listing": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "reference": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "title": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "locale": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "sourceUrl": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "publicNow": {
+                                  "type": ["boolean", "null"]
+                                }
+                              },
+                              "required": [
+                                "reference",
+                                "title",
+                                "locale",
+                                "sourceUrl",
+                                "publicNow"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "selectedListings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reference": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "locale": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "sourceUrl": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "publicNow": {
+                                "type": ["boolean", "null"]
+                              }
+                            },
+                            "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
+                            "additionalProperties": false
+                          }
+                        },
                         "listingReference": {
                           "type": ["string", "null"]
+                        },
+                        "selectedListingReferences": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "comparisonReferences": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       },
                       "required": [
@@ -659,7 +1911,11 @@
                         "acceptedAt",
                         "purpose",
                         "locale",
-                        "listingReference"
+                        "listing",
+                        "selectedListings",
+                        "listingReference",
+                        "selectedListingReferences",
+                        "comparisonReferences"
                       ],
                       "additionalProperties": false
                     },
@@ -678,7 +1934,11 @@
                     "acceptedAt": "2026-09-27T09:30:00.000Z",
                     "purpose": "question",
                     "locale": "bg",
-                    "listingReference": null
+                    "listing": null,
+                    "selectedListings": [],
+                    "listingReference": null,
+                    "selectedListingReferences": [],
+                    "comparisonReferences": []
                   },
                   "operationId": "8a7c2f7e-3f0d-4c1e-9d6a-2b1f0e5c4d3a"
                 }
@@ -686,7 +1946,7 @@
             }
           },
           "303": {
-            "description": "Form post: to the receipt page, or back to the form with the error code",
+            "description": "Form post: receipt or reconciliation page; correctable failure returns to a fresh form without private entries",
             "headers": {
               "location": {
                 "description": "/{locale}/requests/{key} or /{locale}/inquire?submission=…&error=…",
@@ -702,6 +1962,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "CROSS_ORIGIN_REQUEST": {
+                    "value": {
+                      "error": {
+                        "code": "CROSS_ORIGIN_REQUEST",
+                        "message": "This request did not come from this site.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -713,6 +1986,41 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "IDEMPOTENCY_KEY_REUSED": {
+                    "value": {
+                      "error": {
+                        "code": "IDEMPOTENCY_KEY_REUSED",
+                        "message": "This request conflicts with an earlier one. Start again from the current page.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "OPERATION_PENDING": {
+                    "value": {
+                      "error": {
+                        "code": "OPERATION_PENDING",
+                        "message": "This request is still being processed.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  },
+                  "OUTCOME_UNKNOWN": {
+                    "value": {
+                      "error": {
+                        "code": "OUTCOME_UNKNOWN",
+                        "message": "We could not confirm whether this went through. We are checking it.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -724,6 +2032,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "VALIDATION_FAILED": {
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "Some details need attention.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -735,6 +2056,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "RATE_LIMITED": {
+                    "value": {
+                      "error": {
+                        "code": "RATE_LIMITED",
+                        "message": "Too many attempts. Please wait a moment and try again.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -746,6 +2080,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Something went wrong on our side.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -801,6 +2148,78 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "type": "string",
+                              "enum": ["area", "service", "help"]
+                            },
+                            "slug": {
+                              "type": "string",
+                              "pattern": "^[a-z\\d][a-z\\d-]{0,100}$"
+                            },
+                            "versionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "title": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "locale": {
+                              "type": "string",
+                              "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": ["kind", "slug", "versionId", "title", "locale", "sourceUrl"],
+                          "additionalProperties": false
+                        },
+                        "ownerInput": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "number",
+                              "const": 1
+                            },
+                            "provenance": {
+                              "type": "string",
+                              "const": "self_declared"
+                            },
+                            "propertyType": {
+                              "type": "string",
+                              "enum": [
+                                "apartment",
+                                "house",
+                                "plot",
+                                "commercial",
+                                "hotel",
+                                "development",
+                                "other",
+                                "unknown"
+                              ]
+                            },
+                            "transaction": {
+                              "type": "string",
+                              "enum": ["sale", "long_term_rent", "unknown"]
+                            },
+                            "documentArea": {
+                              "type": "string",
+                              "maxLength": 32
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "enum": ["owner", "co_owner", "representative", "other", "unknown"]
+                            }
+                          },
+                          "required": ["version", "provenance"],
+                          "additionalProperties": false
+                        },
                         "receiptId": {
                           "type": "string",
                           "description": "The logical submission key"
@@ -833,8 +2252,130 @@
                           "type": "string",
                           "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
                         },
+                        "listing": {
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "reference": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "title": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "locale": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "sourceUrl": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string",
+                                      "format": "uri"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "publicNow": {
+                                  "type": ["boolean", "null"]
+                                }
+                              },
+                              "required": [
+                                "reference",
+                                "title",
+                                "locale",
+                                "sourceUrl",
+                                "publicNow"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "selectedListings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "reference": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "title": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "locale": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "sourceUrl": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "format": "uri"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "publicNow": {
+                                "type": ["boolean", "null"]
+                              }
+                            },
+                            "required": ["reference", "title", "locale", "sourceUrl", "publicNow"],
+                            "additionalProperties": false
+                          }
+                        },
                         "listingReference": {
                           "type": ["string", "null"]
+                        },
+                        "selectedListingReferences": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "comparisonReferences": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       },
                       "required": [
@@ -844,7 +2385,11 @@
                         "acceptedAt",
                         "purpose",
                         "locale",
-                        "listingReference"
+                        "listing",
+                        "selectedListings",
+                        "listingReference",
+                        "selectedListingReferences",
+                        "comparisonReferences"
                       ],
                       "additionalProperties": false
                     }
@@ -860,7 +2405,11 @@
                     "acceptedAt": "2026-09-27T09:30:00.000Z",
                     "purpose": "question",
                     "locale": "bg",
-                    "listingReference": null
+                    "listing": null,
+                    "selectedListings": [],
+                    "listingReference": null,
+                    "selectedListingReferences": [],
+                    "comparisonReferences": []
                   }
                 }
               }
@@ -872,6 +2421,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "We could not find this item.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -883,6 +2445,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Something went wrong on our side.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -897,6 +2472,176 @@
         "x-revision": "none",
         "x-pagination": "none",
         "x-acceptance": ["AT10", "AT11"]
+      }
+    },
+    "/api/providers/resend/webhook": {
+      "post": {
+        "operationId": "providers.resend.ingest",
+        "summary": "Verify and record a Resend delivery event",
+        "description": "Verify the exact raw UTF-8 body using the account's Svix webhook secret and svix-id, svix-timestamp and svix-signature headers. Deduplicate the signed event, persist only delivery identifiers, and reconcile the external-action ledger. Inbound email never grants identity or Case access. 128 KiB body limit.",
+        "tags": ["provider_ingress"],
+        "servers": [
+          {
+            "url": "https://app.makler-realty.com",
+            "description": "Staff host"
+          }
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "type": "string"
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "email_id": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": {}
+                  }
+                },
+                "required": ["type", "created_at", "data"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Signed event durably accepted; acceptance does not establish delivery",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accepted": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "duplicate": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["accepted", "duplicate"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "UNAUTHENTICATED": {
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHENTICATED",
+                        "message": "Please sign in to continue.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["UNAUTHENTICATED"]
+          },
+          "422": {
+            "description": "VALIDATION_FAILED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "VALIDATION_FAILED": {
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "Some details need attention.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["VALIDATION_FAILED"]
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Something went wrong on our side.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["INTERNAL_ERROR"]
+          },
+          "503": {
+            "description": "DEPENDENCY_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "DEPENDENCY_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "code": "DEPENDENCY_UNAVAILABLE",
+                        "message": "This service is temporarily unavailable. Please try again shortly.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["DEPENDENCY_UNAVAILABLE"]
+          }
+        },
+        "x-host-context": "staff",
+        "x-authorization": {
+          "class": "provider_signature"
+        },
+        "x-idempotency": "provider_event_id",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT46", "AT47", "AT48"]
       }
     }
   },
@@ -975,9 +2720,11 @@
   },
   "x-authorization-classes": {
     "public": "Anyone. No session is read.",
+    "anonymous_creator": "An anonymous visitor on the public host. An existing host-only share creator cookie may be reused, or a new one issued.",
     "receipt_session": "An anonymous visitor holding the receipt-session cookie that made the submission.",
     "client_session": "A signed-in client on the client host; record and field audience checks apply per record.",
     "staff_session": "A signed-in staff member with an active membership on the staff host, holding the named capability.",
+    "private_session": "A current client or staff session on its own private host, with per-record authorization and audience checks.",
     "provider_signature": "A provider webhook whose signature and account are verified."
   }
 }

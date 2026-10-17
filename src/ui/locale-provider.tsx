@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { I18nProvider } from "react-aria-components";
+import { I18nProvider } from "react-aria-components/I18nProvider";
 import { displayLocale, type PublicLocale } from "@/i18n/config";
 
 /**

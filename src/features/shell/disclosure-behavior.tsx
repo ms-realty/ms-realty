@@ -12,7 +12,8 @@ function openDisclosures(): HTMLDetailsElement[] {
 /**
  * Progressive enhancement for the shells' native disclosures (menu, language, More). Without
  * JavaScript they open and close with their summary. With it, one is open at a time, Escape
- * closes it and returns focus to its summary, and an outside click or a navigation closes it.
+ * closes it (and only it) and returns focus to its summary, and an outside click or a
+ * navigation closes it.
  * Rendered once per shell; it has no markup of its own.
  */
 export function DisclosureBehavior() {
@@ -37,6 +38,8 @@ export function DisclosureBehavior() {
       const details =
         open.find((element) => element.contains(document.activeElement)) ?? open.at(-1);
       if (!details) return;
+      // Handled: an enclosing modal dialog (the X02 menu) stays open, one layer per Escape.
+      event.preventDefault();
       details.open = false;
       details.querySelector("summary")?.focus();
     }

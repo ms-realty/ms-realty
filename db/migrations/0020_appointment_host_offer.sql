@@ -1,0 +1,6 @@
+ALTER TABLE "appointments" ADD COLUMN "pending_host_id" uuid;--> statement-breakpoint
+ALTER TABLE "appointments" ADD COLUMN "pending_host_version" integer;--> statement-breakpoint
+ALTER TABLE "appointments" ADD COLUMN "pending_host_note" text;--> statement-breakpoint
+ALTER TABLE "appointments" ADD COLUMN "pending_host_offered_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "appointments" ADD CONSTRAINT "appointments_pending_host_id_principals_id_fk" FOREIGN KEY ("pending_host_id") REFERENCES "public"."principals"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "appointments" ADD CONSTRAINT "appointments_host_offer_complete" CHECK (num_nonnulls("appointments"."pending_host_id", "appointments"."pending_host_version", "appointments"."pending_host_note", "appointments"."pending_host_offered_at") in (0, 4) and ("appointments"."pending_host_id" is null or ("appointments"."host_id" is not null and "appointments"."pending_host_id" <> "appointments"."host_id" and "appointments"."pending_host_version" > 0 and "appointments"."pending_host_version" <= "appointments"."version" and char_length("appointments"."pending_host_note") between 10 and 2000)));

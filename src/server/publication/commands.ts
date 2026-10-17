@@ -4,7 +4,7 @@
 //
 // Every command is a recorded human decision by a staff member holding its capability,
 // idempotent through its operation id, guarded by an expected revision, and commits its audit,
-// activity and outbox event with the change. Hermes and system jobs can take none of them.
+// activity and outbox event with the change. Butler and system jobs can take none of them.
 //
 // Activation switches the one CurrentPublication pointer for the listing, locale and destination
 // in the same transaction that re-validates the manifest against current approvals and checks
@@ -34,7 +34,6 @@ import { type LocationPrecision, locationPrecisions } from "@/domain/facts";
 import { type PublicLocale, sourceLocale } from "@/domain/ids";
 import { editorialTransitions } from "@/domain/listing";
 import { type FactRecord, missingRequiredFacts } from "@/domain/listing-readiness";
-import { isMediaPublishable } from "@/domain/media";
 import {
   type ActivationInput,
   checkActivation,
@@ -49,10 +48,14 @@ import { assertCan, type Resource } from "../authz";
 import { hashRequest, sha256Hex } from "../crypto";
 import type { Executor, Transaction } from "../db";
 import { AppError } from "../errors";
+import type { FileStorage } from "../files/storage";
 import { recordOutboxEvent } from "../jobs/outbox";
+import { mediaAssetEligible } from "../media/eligibility";
+import { verifyPublicationMedia } from "../media/verify";
 import { type OperationSuccess, runOperation } from "../operations";
 import { writeSearchDocument } from "../search/projection";
 import { executeTransition, tableStore } from "../transitions";
+import { prepareMapPoint } from "./map-point";
 import {
   loadPublishedListings,
   type ManifestDisclosure,
@@ -60,6 +63,7 @@ import {
   publicDestination,
   termsFacts,
 } from "./presentation";
+import { currentSellerEvidence } from "./seller-evidence";
 
 /**
  * The publication policy the manifest was evaluated under: the §7.2 prerequisites of the final
@@ -81,7 +85,7 @@ export interface CommandEnvelope {
 type ListingRow = typeof listings.$inferSelect;
 
 function requireStaff(actor: Actor): void {
-  // Publishing and approving are human decisions (§7.2); Hermes never receives them (AT52).
+  // Publishing and approving are human decisions (§7.2); Butler never receives them (AT52).
   if (actor.kind !== "staff") throw new AppError("forbidden");
 }
 
@@ -122,6 +126,45 @@ async function run<T>(
   fn: (tx: Transaction, operationId: string, now: Date) => Promise<T>,
 ): Promise<OperationSuccess<T>> {
   requireStaff(command.actor);
+  // Authorization is current even when runOperation can return a previous receipt.
+  if (typeof payload.factRevisionId === "string") {
+    const [revision] = await db
+      .select()
+      .from(propertyFactRevisions)
+      .where(eq(propertyFactRevisions.id, payload.factRevisionId));
+    if (!revision) throw new AppError("not_found");
+    await assertCan(db, command.actor, "listing.review_facts", {
+      type: "property",
+      id: revision.propertyId,
+      propertyId: revision.propertyId,
+    });
+  } else {
+    let listing: ListingRow | undefined;
+    if (typeof payload.reference === "string") {
+      [listing] = await db
+        .select()
+        .from(listings)
+        .where(eq(listings.reference, payload.reference.trim().toUpperCase()));
+    } else if (typeof payload.manifestId === "string") {
+      const [manifest] = await db
+        .select()
+        .from(publicationManifests)
+        .where(eq(publicationManifests.id, payload.manifestId));
+      if (manifest)
+        [listing] = await db.select().from(listings).where(eq(listings.id, manifest.listingId));
+    }
+    if (!listing) throw new AppError("not_found");
+    await assertCan(
+      db,
+      command.actor,
+      type === "listing.revision.submit"
+        ? "listing.edit"
+        : type === "listing.revision.approve"
+          ? "listing.review_facts"
+          : "publication.release",
+      listingResource(listing),
+    );
+  }
   return runOperation(
     db,
     {
@@ -323,6 +366,17 @@ export function approveFactRevision(
           approvedFactRevisionId: property.approvedFactRevisionId,
         });
       }
+      if (property.approvedFactRevisionId !== revision.id) {
+        // Property facts are shared by sale and rental listings. Activation holds a shared
+        // property lock, so this check and pointer activation cannot pass one another.
+        const [exposure] = await tx
+          .select({ id: currentPublications.id })
+          .from(currentPublications)
+          .innerJoin(listings, eq(listings.id, currentPublications.listingId))
+          .where(and(eq(listings.propertyId, property.id), eq(currentPublications.state, "active")))
+          .limit(1);
+        if (exposure) throw ineligible("restrict_affected_publications_first");
+      }
       const approvalId = await insertApproval(tx, command.actor, {
         kind: "factual",
         subjectType: "property_fact_revision",
@@ -482,7 +536,11 @@ export function approveListingRevision(
     readonly note?: string;
   },
 ): Promise<OperationSuccess<ListingRevisionStep & { readonly approvalId: string }>> {
-  const payload = { reference: command.reference, revisionId: command.revisionId };
+  const payload = {
+    reference: command.reference,
+    revisionId: command.revisionId,
+    note: command.note ?? null,
+  };
   return run(db, "listing.revision.approve", command, payload, async (tx, operationId, now) => {
     const listing = await lockListing(tx, { reference: command.reference });
     const revision = await latestRevision(tx, listing, command.revisionId);
@@ -553,7 +611,7 @@ const scopeCovers: Readonly<Record<ListingRow["purpose"], readonly Representatio
  * transaction: the approved listing and fact revisions, the seller instruction, the localized
  * revision, media and regulated-claim review.
  */
-async function currentEligibility(
+export async function currentEligibility(
   tx: Executor,
   listing: ListingRow,
   locale: PublicLocale,
@@ -586,7 +644,8 @@ async function currentEligibility(
   const [property] = await tx
     .select()
     .from(properties)
-    .where(eq(properties.id, listing.propertyId));
+    .where(eq(properties.id, listing.propertyId))
+    .for("share");
   if (!revision || !property) return blocked;
   const [factRevision] = await tx
     .select()
@@ -620,17 +679,38 @@ async function currentEligibility(
     .where(
       and(
         eq(sellerInstructions.propertyId, property.id),
-        or(isNull(sellerInstructions.listingId), eq(sellerInstructions.listingId, listing.id)),
+        or(
+          eq(sellerInstructions.listingId, listing.id),
+          and(
+            isNull(sellerInstructions.listingId),
+            inArray(sellerInstructions.representationScope, scopeCovers[listing.purpose]),
+          ),
+        ),
         eq(sellerInstructions.state, "agreed"),
         isNull(sellerInstructions.invalidatedAt),
       ),
     )
     .orderBy(desc(sellerInstructions.revisionNumber))
     .limit(1);
+  const evidence = instruction
+    ? await tx
+        .select({ id: sellerInstructions.id })
+        .from(sellerInstructions)
+        .where(
+          and(eq(sellerInstructions.id, instruction.id), currentSellerEvidence(now, listing.id)),
+        )
+    : [];
   const instructionValid =
+    evidence.length === 1 &&
     instruction?.publicationPermission === true &&
     (!instruction.expiresAt || instruction.expiresAt > now) &&
-    scopeCovers[listing.purpose].includes(instruction.representationScope);
+    scopeCovers[listing.purpose].includes(instruction.representationScope) &&
+    // Permission belongs to the agreed terms and disclosure, not every later asking price.
+    canonicalJson((instruction.commercialTerms as { price?: unknown }).price ?? null) ===
+      canonicalJson(termsFacts(revision.terms).price?.value ?? null) &&
+    (instruction.disclosure as { publicPrecision?: unknown }).publicPrecision ===
+      (revision.disclosure as { publicPrecision?: unknown }).publicPrecision &&
+    (instruction.mediaUsageRights as { granted?: unknown }).granted === true;
 
   let localized: { id: string; digest: string } | null = null;
   let language: string | null = null;
@@ -663,15 +743,23 @@ async function currentEligibility(
     .innerJoin(mediaAssets, eq(mediaAssets.id, listingRevisionMedia.mediaAssetId))
     .where(eq(listingRevisionMedia.listingRevisionId, revision.id))
     .orderBy(asc(listingRevisionMedia.position));
-  const mediaEligible =
-    placed.length > 0 &&
-    placed.every(({ asset }) => isMediaPublishable({ ...asset, sealedSha256: asset.sha256 }));
+  const mediaEligible = placed.length > 0 && placed.every(({ asset }) => mediaAssetEligible(asset));
   const media: ManifestMedia[] = placed.map(({ placement, asset }) => ({
     relationId: placement.mediaRelationId,
     assetId: asset.id,
     position: placement.position,
     sha256: asset.sha256 ?? "",
+    derivativeKey: asset.derivativeKey ?? "",
+    derivativeSha256: asset.derivativeSha256 ?? "",
+    derivativeContentType: asset.derivativeContentType ?? "",
     rightsReference: asset.rightsReference,
+    kind: asset.kind,
+    width: asset.width,
+    height: asset.height,
+    altText: asset.altText,
+    caption: asset.caption,
+    modification: asset.modification,
+    modificationDisclosure: asset.modificationDisclosure,
   }));
 
   // Legal, tax and process claims the copy declares need their own professional review.
@@ -695,6 +783,7 @@ async function currentEligibility(
     ? (disclosed as LocationPrecision)
     : property.publicPrecision;
   const disclosure: ManifestDisclosure = {
+    mapPoint: await prepareMapPoint(tx, property.placeId, property.country, precision),
     country: property.country,
     placeId: property.placeId,
     precision,
@@ -747,6 +836,30 @@ function manifestDigest(content: ManifestContent): string {
   return sha256Hex(canonicalJson(content));
 }
 
+/** Read-only readiness for the staff workbench. A later release always checks again in its transaction. */
+export async function publicationReadiness(
+  db: Executor,
+  actor: Actor,
+  reference: string,
+  locale: PublicLocale = "bg",
+) {
+  requireStaff(actor);
+  const [listing] = await db
+    .select()
+    .from(listings)
+    .where(eq(listings.reference, reference.trim().toUpperCase()));
+  if (!listing) throw new AppError("not_found");
+  await assertCan(db, actor, "listing.read", listingResource(listing));
+  const eligibility = await currentEligibility(
+    db,
+    listing,
+    locale,
+    listing.publicationGeneration,
+    new Date(),
+  );
+  return { input: eligibility.input, decision: checkActivation(eligibility.input, actor) };
+}
+
 function assertPublishAuthority(tx: Executor, actor: Actor, listing: ListingRow) {
   return assertCan(tx, actor, "publication.release", listingResource(listing));
 }
@@ -773,6 +886,7 @@ export interface PreparedManifest {
 export function prepareManifest(
   db: Executor,
   command: CommandEnvelope & { readonly reference: string; readonly locale: PublicLocale },
+  dependencies: { storage?: FileStorage } = {},
 ): Promise<OperationSuccess<PreparedManifest>> {
   const payload = { reference: command.reference, locale: command.locale };
   return run(db, "publication.manifest.prepare", command, payload, async (tx, operationId, now) => {
@@ -790,6 +904,18 @@ export function prepareManifest(
     if (decision.outcome === "denied") throw ineligible(decision.code);
     const content = eligibility.content;
     if (!content) throw ineligible("approval_stale");
+    await verifyPublicationMedia(
+      await tx
+        .select()
+        .from(mediaAssets)
+        .where(
+          inArray(
+            mediaAssets.id,
+            content.media.map((item) => item.assetId),
+          ),
+        ),
+      dependencies.storage,
+    );
     const contentDigest = manifestDigest(content);
     const [manifest] = await tx
       .insert(publicationManifests)
@@ -850,6 +976,7 @@ export interface ActivatedPublication {
 export function activateManifest(
   db: Executor,
   command: CommandEnvelope & { readonly manifestId: string },
+  dependencies: { storage?: FileStorage } = {},
 ): Promise<OperationSuccess<ActivatedPublication>> {
   const payload = { manifestId: command.manifestId };
   return run(db, "publication.activate", command, payload, async (tx, operationId, now) => {
@@ -883,6 +1010,18 @@ export function activateManifest(
         fieldErrors: { publication: ["manifest_superseded"] },
       });
     }
+    await verifyPublicationMedia(
+      await tx
+        .select()
+        .from(mediaAssets)
+        .where(
+          inArray(
+            mediaAssets.id,
+            eligibility.content.media.map((item) => item.assetId),
+          ),
+        ),
+      dependencies.storage,
+    );
 
     const approvalId = await insertApproval(tx, command.actor, {
       kind: "publication",

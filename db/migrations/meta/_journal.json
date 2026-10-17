@@ -29,6 +29,132 @@
       "when": 1790514332989,
       "tag": "0003_search_projection_per_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790520374206,
+      "tag": "0004_invitations",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790521689419,
+      "tag": "0005_bind_email_link_principal",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790524227969,
+      "tag": "0006_file_intake_provenance",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790524925075,
+      "tag": "0007_source_bound_assistance",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790526618917,
+      "tag": "0008_worker_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790527590750,
+      "tag": "0009_case_operating_evidence",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790528624560,
+      "tag": "0010_review_replacement",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790529186949,
+      "tag": "0011_intake_and_review_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1790534100843,
+      "tag": "0012_purpose_bound_client_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790623267089,
+      "tag": "0013_inbound_email_triage",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790640690324,
+      "tag": "0014_complaint_register",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790664972234,
+      "tag": "0015_key_custody",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790678070090,
+      "tag": "0016_recovery_quarantine",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1790683066474,
+      "tag": "0017_publication_read_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790708392020,
+      "tag": "0018_staff_absence",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790782395457,
+      "tag": "0019_inbound_attachment_imports",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790793649048,
+      "tag": "0020_appointment_host_offer",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791235261888,
+      "tag": "0021_public-share-creator",
+      "breakpoints": true
     }
   ]
 }

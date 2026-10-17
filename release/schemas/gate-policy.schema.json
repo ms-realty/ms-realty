@@ -12,12 +12,19 @@
     "policyRevision": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 200
+      "maxLength": 200,
+      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
     },
     "specVersion": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 200
+      "maxLength": 200,
+      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+    },
+    "snapshotMaxAgeMinutes": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "maximum": 1440
     },
     "trustedKeys": {
       "type": "array",
@@ -31,11 +38,12 @@
           "owner": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           },
           "publicKey": {
             "type": "string",
-            "minLength": 1
+            "pattern": "^MCowBQYDK2VwAyEA[A-Za-z0-9+/]{43}=$"
           },
           "evidenceTypes": {
             "minItems": 1,
@@ -62,7 +70,8 @@
           "description": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           },
           "environments": {
             "minItems": 1,
@@ -70,6 +79,23 @@
             "items": {
               "type": "string",
               "enum": ["local", "ci", "staging", "production", "release"]
+            }
+          },
+          "classes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["test", "live", "human", "operator"]
+            }
+          },
+          "requiredAssertions": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
             }
           },
           "maxAgeMinutes": {
@@ -98,6 +124,8 @@
           "id",
           "description",
           "environments",
+          "classes",
+          "requiredAssertions",
           "maxAgeMinutes",
           "signatureRequired",
           "reviewerRequired",
@@ -132,7 +160,8 @@
           "title": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           },
           "stage": {
             "type": "string",
@@ -175,7 +204,8 @@
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^AT(0[1-9]|[1-5]\\d|6[0-8])$"
+              "minLength": 1,
+              "maxLength": 80
             }
           },
           "requiresCompleteManifest": {
@@ -265,7 +295,8 @@
                   "approvedBy": {
                     "type": "string",
                     "minLength": 1,
-                    "maxLength": 200
+                    "maxLength": 200,
+                    "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
                   },
                   "approvedAt": {
                     "type": "string",
@@ -295,6 +326,7 @@
     "schemaVersion",
     "policyRevision",
     "specVersion",
+    "snapshotMaxAgeMinutes",
     "trustedKeys",
     "evidenceTypes",
     "gates",

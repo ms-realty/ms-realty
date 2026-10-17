@@ -1,0 +1,104 @@
+{
+  "scope": "sequential local synthetic runs on shared uncontrolled host, not target infrastructure qualification",
+  "runs": [
+    {
+      "report": "load-10000-report.json",
+      "p95Ms": {
+        "staff-today-html": 1279.4,
+        "public-search-html": 1797.29,
+        "staff-task-html": 1282.8,
+        "public-detail-html": 888.42,
+        "public-media": 377.5,
+        "staff-command-post": 2017.99
+      },
+      "sessions": {
+        "public": 50,
+        "staff": 10
+      },
+      "listings": 10000,
+      "elapsedMs": 61459.212457999995,
+      "completedCycles": {
+        "public": 1469,
+        "staff": 161
+      },
+      "failures": [],
+      "qualification": {
+        "performanceBudgetsPassed": false,
+        "minimumInventory": true,
+        "minimumDuration": true,
+        "everySessionCompleted": true,
+        "frozenLaunchInventory": false,
+        "queueStarvation": false,
+        "liveInfrastructure": false,
+        "fieldWebVitals": false,
+        "releaseGatePass": false
+      }
+    },
+    {
+      "report": "load-count-report.json",
+      "p95Ms": {
+        "staff-today-html": 987.94,
+        "public-search-html": 1247.48,
+        "public-detail-html": 671.61,
+        "staff-task-html": 872.11,
+        "public-media": 376.34,
+        "staff-command-post": 1574.3
+      },
+      "sessions": {
+        "public": 50,
+        "staff": 10
+      },
+      "listings": 10000,
+      "elapsedMs": 60705.032833000005,
+      "completedCycles": {
+        "public": 1902,
+        "staff": 190
+      },
+      "failures": [],
+      "qualification": {
+        "performanceBudgetsPassed": false,
+        "minimumInventory": true,
+        "minimumDuration": true,
+        "everySessionCompleted": true,
+        "frozenLaunchInventory": false,
+        "queueStarvation": false,
+        "liveInfrastructure": false,
+        "fieldWebVitals": false,
+        "releaseGatePass": false
+      }
+    },
+    {
+      "report": "load-optimized-report.json",
+      "p95Ms": {
+        "staff-today-html": 1077.96,
+        "public-search-html": 1304.55,
+        "public-detail-html": 749.04,
+        "staff-task-html": 947.04,
+        "public-media": 322.44,
+        "staff-command-post": 1794.34
+      },
+      "sessions": {
+        "public": 50,
+        "staff": 10
+      },
+      "listings": 10000,
+      "elapsedMs": 60953.540749999986,
+      "completedCycles": {
+        "public": 1908,
+        "staff": 195
+      },
+      "failures": [],
+      "qualification": {
+        "performanceBudgetsPassed": false,
+        "minimumInventory": true,
+        "minimumDuration": true,
+        "everySessionCompleted": true,
+        "frozenLaunchInventory": false,
+        "queueStarvation": false,
+        "liveInfrastructure": false,
+        "fieldWebVitals": false,
+        "releaseGatePass": false
+      }
+    }
+  ]
+}

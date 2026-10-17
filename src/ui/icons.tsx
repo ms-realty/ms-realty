@@ -35,6 +35,7 @@ export const CheckIcon = icon(<path d="M5 12.5l4.5 4.5L19 7.5" />, "CheckIcon");
 export const MinusIcon = icon(<path d="M5 12h14" />, "MinusIcon");
 export const PlusIcon = icon(<path d="M12 5v14M5 12h14" />, "PlusIcon");
 export const CloseIcon = icon(<path d="M6 6l12 12M18 6L6 18" />, "CloseIcon");
+export const MenuIcon = icon(<path d="M4 6h16M4 12h16M4 18h16" />, "MenuIcon");
 export const ChevronDownIcon = icon(<path d="M6 9l6 6 6-6" />, "ChevronDownIcon");
 export const ChevronUpIcon = icon(<path d="M6 15l6-6 6 6" />, "ChevronUpIcon");
 /** Points to the inline start; pass `directional` so it mirrors in RTL. */
@@ -86,6 +87,31 @@ export const ErrorIcon = icon(
   </>,
   "ErrorIcon",
 );
+
+/** Exact 20 px circle-alert vector from Figma UI26 (6:411). */
+export function CircleAlertIcon({ className, ...props }: Omit<IconProps, "directional">) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      className={cx("size-5 shrink-0", className)}
+      {...props}
+    >
+      <path d="M10 18.3333C14.6024 18.3333 18.3333 14.6024 18.3333 10C18.3333 5.39763 14.6024 1.66667 10 1.66667C5.39763 1.66667 1.66667 5.39763 1.66667 10C1.66667 14.6024 5.39763 18.3333 10 18.3333Z" />
+      <path d="M10 6.66667V10" />
+      <path d="M10 13.3333H10.0083" />
+    </svg>
+  );
+}
+
 export const PendingIcon = icon(
   <>
     <circle cx="12" cy="12" r="8.5" strokeDasharray="3 3" />
@@ -97,6 +123,10 @@ export const NeutralIcon = icon(<circle cx="12" cy="12" r="4" />, "NeutralIcon")
 export const ExternalIcon = icon(
   <path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />,
   "ExternalIcon",
+);
+export const DocumentIcon = icon(
+  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 9h1M9 13h6M9 17h6" />,
+  "DocumentIcon",
 );
 export const SaveIcon = icon(
   <path d="M12 19.5s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.6-7.5 10-7.5 10z" />,

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "Private original WordPress listing-attachment review packet; archived source relationships only, not rendered or target-site parity",
+  "productionAllowed": false,
+  "humanReviewComplete": false,
+  "packetLocation": "Operator backup: MS-Realty/Reconciliation",
+  "sourceArchiveSha256": "fc0ac4723c942039e1f8390e6f39a2097222489f21aaf4fe20627b85b3c4592a",
+  "files": {
+    "r07-original-media-review.html": {
+      "sha256": "e58034b9d3c4b8a0562e56725406d69cd97ab6559a692603e2cc7af810ff4e53",
+      "bytes": 227459,
+      "content": "Static private index of published WordPress listing thumbnails with local original-image links; no scripts or remote resources"
+    },
+    "r07-original-media-review.csv": {
+      "sha256": "7ef6b6934f78d2c7ae30ec42557f774a0ab4d2df6c30e6e6473c25fc9d1bf44e",
+      "bytes": 520850,
+      "content": "Attachment relationships with blank photo-equivalence, reviewer and decision cells"
+    },
+    "r07-original-media-files.jsonl": {
+      "sha256": "35c89ab00933826a7437855613f619d01930d55a49c4efc28da74b8edc3e39cc",
+      "bytes": 326566,
+      "content": "Private archive path, extracted relative path, byte count and SHA-256 for each original image"
+    },
+    "r07-build-media-packet.py": {
+      "sha256": "c8ceeb9bc7720bfdc8dd3274e264fb514d1be3a5dacd5d28e1da10e006fec8e4",
+      "content": "Private extraction builder using restored WordPress metadata and the archive index"
+    }
+  },
+  "counts": {
+    "publishedWordPressListingsRu": 51,
+    "publishedWordPressListingsCom": 105,
+    "metadataThumbnailAndGalleryRelationships": 1681,
+    "distinctSiteAttachmentPairs": 1482,
+    "siteAttachmentPairsWithMetadataAndExactArchivedFile": 1474,
+    "unresolvedGallerySiteAttachmentPairs": 8,
+    "extractedOriginalImages": 1474,
+    "extractedOriginalBytes": 444414370,
+    "imageDecodeFailures": 0,
+    "humanReviewedRelationships": 0
+  },
+  "limitations": [
+    "The selected relationships come from WordPress thumbnail and gallery metadata on published listing posts; they are not a rendered-page capture.",
+    "The eight unresolved gallery IDs have no attachment metadata; no image or substitute was inferred.",
+    "Archived image existence and decode do not establish consent, rights, current listing facts, target image equivalence or human approval.",
+    "The original URL decision CSV remains unsigned; no redirect, deletion or publication decision follows from this packet."
+  ]
+}

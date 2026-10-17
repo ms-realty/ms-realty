@@ -6,9 +6,9 @@ import { hostUrl, origins } from "./hosts";
 
 test.describe("each host serves its own routes (§11.1)", () => {
   for (const { context, path, heading } of [
-    { context: "public", path: "/bg", heading: "MS Realty" },
-    { context: "client", path: "/bg/access", heading: "Вход към „Моят път“" },
-    { context: "staff", path: "/bg/today", heading: "Днес" },
+    { context: "public", path: "/bg", heading: "Имоти" },
+    { context: "client", path: "/bg/access", heading: "Вашият клиентски профил в MS Realty" },
+    { context: "staff", path: "/bg/access", heading: "Вход за служители" },
     { context: "staff", path: "/en/access", heading: "Staff sign-in" },
   ] as const) {
     test(`${context} ${path} renders its screen`, async ({ page }) => {
@@ -30,28 +30,20 @@ test.describe("each host serves its own routes (§11.1)", () => {
       await page.goto(hostUrl("public", "/"));
       expect(page.url()).toBe(hostUrl("public", "/he"));
       await page.goto(hostUrl("client", "/"));
-      expect(page.url()).toBe(hostUrl("client", "/he/access"));
+      // C-06: the anonymous client home keeps its return path to the overview.
+      expect(page.url()).toBe(hostUrl("client", "/he/access?returnTo=%2Fhe%2Foverview"));
       // Staff interface languages are BG/EN/RU; the browser's Hebrew is not one of them.
       await page.goto(hostUrl("staff", "/"));
-      expect(page.url()).toBe(hostUrl("staff", "/bg/today"));
+      expect(page.url()).toBe(hostUrl("staff", "/bg/access"));
       await page.goto(hostUrl("staff", "/ru"));
-      expect(page.url()).toBe(hostUrl("staff", "/ru/today"));
+      expect(page.url()).toBe(hostUrl("staff", "/ru/access"));
     });
   });
 
-  test("the workspace links only routes that exist and marks the current one", async ({ page }) => {
+  test("the workspace redirects anonymous visitors to staff sign-in", async ({ page }) => {
     await page.goto(hostUrl("staff", "/bg/today"));
-    const today = page.getByRole("link", { name: "Днес" }).filter({ visible: true }).first();
-    await expect(today).toHaveAttribute("aria-current", "page");
-    await expect(today).toHaveAttribute("href", "/bg/today");
-    const hrefs = await page
-      .locator("nav a[href]")
-      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-    expect(hrefs.length).toBeGreaterThan(0);
-    for (const href of new Set(hrefs)) {
-      const response = await page.goto(hostUrl("staff", href ?? ""));
-      expect(response?.status(), href ?? "").toBe(200);
-    }
+    await expect(page).toHaveURL(hostUrl("staff", "/bg/access"));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вход за служители");
   });
 });
 
@@ -70,11 +62,11 @@ test.describe("cross-host isolation (§11.1, §8.1)", () => {
     }) => {
       for (const { owner, path } of routes) {
         if (owner === context) continue;
-        const response = await page.goto(hostUrl(context, path));
+        const response = await page.goto(hostUrl(context, path), { waitUntil: "domcontentloaded" });
         expect(response?.status(), `${context} ${path}`).toBe(404);
       }
       for (const path of ["/public/bg", "/client/bg/access", "/staff/bg/today", "/_not-found"]) {
-        const response = await page.goto(hostUrl(context, path));
+        const response = await page.goto(hostUrl(context, path), { waitUntil: "domcontentloaded" });
         expect(response?.status(), `${context} ${path}`).toBe(404);
       }
     });
@@ -82,7 +74,9 @@ test.describe("cross-host isolation (§11.1, §8.1)", () => {
 
   test("a path both private hosts serve opens each host's own screen", async ({ page }) => {
     await page.goto(hostUrl("client", "/bg/access"));
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вход към „Моят път“");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Вашият клиентски профил в MS Realty",
+    );
     await page.goto(hostUrl("staff", "/bg/access"));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вход за служители");
     const response = await page.goto(hostUrl("public", "/bg/access"));
@@ -102,7 +96,7 @@ test.describe("cross-host isolation (§11.1, §8.1)", () => {
 
   test("a locale choice stays on the host where it was made", async ({ page, context }) => {
     await page.goto(hostUrl("public", "/bg"));
-    await page.locator("summary", { hasText: /Език/ }).click();
+    await page.getByRole("button", { name: /Език/ }).click();
     await page.getByRole("link", { name: "English", exact: true }).click();
     await expect(page).toHaveURL(hostUrl("public", "/en"));
     const choice = (await context.cookies(origins.public)).find(
@@ -124,7 +118,7 @@ test.describe("lang and dir follow the URL locale on every host (§03.1)", () =>
     { context: "public", path: "/el", lang: "el", dir: "ltr" },
     { context: "client", path: "/he/access", lang: "he", dir: "rtl" },
     { context: "client", path: "/de/access", lang: "de", dir: "ltr" },
-    { context: "staff", path: "/ru/today", lang: "ru", dir: "ltr" },
+    { context: "staff", path: "/ru/access", lang: "ru", dir: "ltr" },
     { context: "staff", path: "/en/access", lang: "en", dir: "ltr" },
   ] as const) {
     test(`${context} ${path} is lang=${lang} dir=${dir}`, async ({ page }) => {
@@ -137,7 +131,10 @@ test.describe("lang and dir follow the URL locale on every host (§03.1)", () =>
 
   test("staff routes do not exist in public-only locales", async ({ page }) => {
     for (const locale of ["de", "nl", "el", "he"]) {
-      const response = await page.goto(hostUrl("staff", `/${locale}/today`));
+      // This routing contract needs the new HTML document, not completion of its assets.
+      const response = await page.goto(hostUrl("staff", `/${locale}/today`), {
+        waitUntil: "domcontentloaded",
+      });
       expect(response?.status(), locale).toBe(404);
       await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
     }
@@ -152,13 +149,19 @@ test.describe("unknown query parameters never error (§03.3)", () => {
     { context: "public", path: "/" },
     { context: "client", path: "/en/access" },
     { context: "client", path: "/" },
-    { context: "staff", path: "/bg/today" },
+    { context: "staff", path: "/bg/access" },
     { context: "staff", path: "/ru/access" },
   ] as const) {
     test(`${context} ${path} keeps working with unknown parameters`, async ({ page }) => {
       const response = await page.goto(hostUrl(context, `${path}${query}`));
       expect(response?.status()).toBe(200);
-      expect(new URL(page.url()).searchParams.get("unknown")).toBe("1");
+      // Canonical locale redirects preserve query context. A private-home sign-in
+      // boundary deliberately drops untrusted query payloads before showing access.
+      if (context === "client" && path === "/") {
+        expect(new URL(page.url()).pathname).toMatch(/^\/[a-z]{2}\/access$/);
+      } else {
+        expect(new URL(page.url()).searchParams.get("unknown")).toBe("1");
+      }
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     });
   }

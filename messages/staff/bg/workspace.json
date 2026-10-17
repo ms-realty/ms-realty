@@ -1,19 +1,24 @@
 {
   "label": "Работно пространство",
   "secondaryLabel": "Управление",
+  "currentPage": "Текуща страница",
   "today": "Днес",
   "inquiries": "Запитвания",
   "cases": "Случаи",
   "calendar": "Календар",
   "inventory": "Имоти",
+  "tasks": "Задачи",
+  "butler": "Butler",
+  "moreTools": "Още инструменти",
   "reviews": "Прегледи",
   "content": "Съдържание",
   "operations": "Операции",
   "settings": "Настройки",
-  "more": "Още",
   "search": "Търсене в записите",
   "interfaceLanguage": "Език на интерфейса",
   "todayHeading": "Днес",
   "account": "Профил",
-  "session": "Сесия"
+  "session": "Сесия",
+  "manageAccess": "Управление на достъпа",
+  "signOut": "Изход"
 }

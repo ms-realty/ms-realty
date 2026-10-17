@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { connection } from "next/server";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
+import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
 import { JourneyShell } from "@/features/shell/journey-shell";
 import { NotFoundContent } from "@/features/shell/not-found-content";
 import { PublicShell } from "@/features/shell/public-shell";
@@ -39,7 +40,7 @@ async function notFoundSurface(): Promise<{ context: HostContext; locale: Public
 export async function generateMetadata(): Promise<Metadata> {
   const { locale } = await notFoundSurface();
   const t = await getTranslations({ locale, namespace: "errors.notFound" });
-  return { title: t("title"), robots: privateRobots, icons: { icon: "/brand/favicon.svg" } };
+  return { title: t("title"), robots: privateRobots, icons: { icon: "/brand/logo-ms-realty.png" } };
 }
 
 export default async function GlobalNotFound() {
@@ -47,6 +48,7 @@ export default async function GlobalNotFound() {
   await connection();
   const { context, locale } = await notFoundSurface();
   setRequestLocale(locale);
+  preloadFonts(locale);
   const content = <NotFoundContent locale={locale} homeHref={`/${locale}${homePaths[context]}`} />;
   let page: ReactNode;
   if (context === "staff" && isStaffLocale(locale)) {
@@ -56,11 +58,11 @@ export default async function GlobalNotFound() {
   } else {
     page = <PublicShell locale={locale}>{content}</PublicShell>;
   }
-  preloadFonts(locale);
   return (
     <html lang={locale} dir={localeDirection(locale)}>
       <body>
         <CspNonceMeta />
+        <DisclosureBehavior />
         <LocaleProvider locale={locale}>{page}</LocaleProvider>
       </body>
     </html>

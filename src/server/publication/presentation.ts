@@ -19,6 +19,7 @@ import {
   properties,
   propertyFacts,
   publicationManifests,
+  sellerInstructions,
 } from "@/db/schema";
 import type {
   Area,
@@ -35,7 +36,8 @@ import type {
 import { locationPrecisions } from "@/domain/facts";
 import type { PublicLocale } from "@/domain/ids";
 import { assessFreshness, type CommercialState, type FreshnessState } from "@/domain/listing";
-import { isMediaPublishable, type MediaKind } from "@/domain/media";
+import type { MediaKind, MediaModification } from "@/domain/media";
+import { type PublicMapPoint, parsePublicMapPoint } from "@/domain/public-map";
 import { derivePublicPresentation, type PublicPresentation } from "@/domain/publication";
 import { localePolicy } from "@/i18n/config";
 import type { Executor } from "../db";
@@ -48,6 +50,8 @@ import type {
   PublicMedia,
   PublicPlace,
 } from "../listings/view-models";
+import { mediaAssetEligible } from "../media/eligibility";
+import { currentSellerEvidence } from "./seller-evidence";
 
 /** The local website; manual portals are separate destinations with their own outcomes. */
 export const publicDestination = "website";
@@ -57,6 +61,21 @@ export const publicDestination = "website";
  * on listing id (and manifest id, for projections) wherever public inventory is read.
  */
 export function eligiblePublications(db: Executor, locale: PublicLocale) {
+  // Keep consent evaluation bound to this manifest and listing. Flattening its evidence
+  // joins into the whole catalogue caused severe cardinality underestimation and repeated
+  // full-table joins. LIMIT keeps the lateral boundary; the unique instruction ID already
+  // means at most one match, so it does not choose between or truncate permissions.
+  const consent = db
+    .select({ id: sellerInstructions.id })
+    .from(sellerInstructions)
+    .where(
+      and(
+        sql`${sellerInstructions.id}::text = ${publicationManifests.decisions}->>'sellerInstruction'`,
+        currentSellerEvidence(undefined, listings.id),
+      ),
+    )
+    .limit(1)
+    .as("public_consent");
   return db
     .select({
       listingId: currentPublications.listingId,
@@ -72,6 +91,7 @@ export function eligiblePublications(db: Executor, locale: PublicLocale) {
       ),
     )
     .innerJoin(publicationManifests, eq(publicationManifests.id, currentPublications.manifestId))
+    .innerJoinLateral(consent, sql`true`)
     .leftJoin(
       localizedRevisions,
       eq(localizedRevisions.id, publicationManifests.localizedRevisionId),
@@ -201,6 +221,7 @@ export function publicPlace(
     settlement: settlementPrecisions.includes(precision) ? at("settlement") : null,
     neighborhood: neighborhoodPrecisions.includes(precision) ? disclosure.neighborhood : null,
     precision,
+    mapPoint: parsePublicMapPoint(disclosure.mapPoint, precision),
   };
 }
 
@@ -208,6 +229,7 @@ export function publicPlace(
 
 /** What the manifest discloses about the location; the exact address and point never do. */
 export interface ManifestDisclosure {
+  readonly mapPoint?: PublicMapPoint | null;
   readonly country: string;
   readonly placeId: string | null;
   readonly precision: LocationPrecision;
@@ -220,7 +242,17 @@ export interface ManifestMedia {
   readonly assetId: string;
   readonly position: number;
   readonly sha256: string;
+  readonly derivativeKey: string;
+  readonly derivativeSha256: string;
+  readonly derivativeContentType: string;
   readonly rightsReference: string | null;
+  readonly kind: MediaKind;
+  readonly width: number | null;
+  readonly height: number | null;
+  readonly altText: string | null;
+  readonly caption: string | null;
+  readonly modification: MediaModification;
+  readonly modificationDisclosure: string | null;
 }
 
 export function parseDisclosure(value: unknown): ManifestDisclosure {
@@ -233,6 +265,7 @@ export function parseDisclosure(value: unknown): ManifestDisclosure {
     placeId: typeof d.placeId === "string" ? d.placeId : null,
     precision,
     neighborhood: typeof d.neighborhood === "string" ? d.neighborhood : null,
+    mapPoint: parsePublicMapPoint(d.mapPoint, precision),
   };
 }
 
@@ -466,21 +499,29 @@ export async function loadPublishedListings(
       if (
         !asset ||
         asset.sha256 !== item.sha256 ||
-        !isMediaPublishable({ ...asset, sealedSha256: asset.sha256 })
+        asset.derivativeKey !== item.derivativeKey ||
+        asset.derivativeSha256 !== item.derivativeSha256 ||
+        asset.derivativeContentType !== item.derivativeContentType ||
+        // Old manifests without a complete media snapshot require renewed publication.
+        !("altText" in item) ||
+        !("caption" in item) ||
+        !item.kind ||
+        !item.modification ||
+        !mediaAssetEligible(asset)
       ) {
         continue;
       }
       media.push({
         relationId: item.relationId,
         assetId: asset.id,
-        digest: item.sha256,
-        kind: asset.kind as MediaKind,
-        contentType: asset.contentType,
-        width: asset.width,
-        height: asset.height,
-        alt: asset.altText,
-        caption: asset.caption,
-        modificationDisclosure: asset.modification === "none" ? null : asset.modificationDisclosure,
+        digest: item.derivativeSha256,
+        kind: item.kind,
+        contentType: item.derivativeContentType,
+        width: item.width,
+        height: item.height,
+        alt: item.altText,
+        caption: item.caption,
+        modificationDisclosure: item.modification === "none" ? null : item.modificationDisclosure,
         position: item.position,
       });
     }

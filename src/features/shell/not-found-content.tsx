@@ -1,6 +1,5 @@
 import { getTranslations } from "next-intl/server";
 import type { PublicLocale } from "@/i18n/config";
-import { Link } from "@/ui";
 
 /** 404 body in the visitor's language, with a way back home. */
 export async function NotFoundContent({
@@ -16,9 +15,12 @@ export async function NotFoundContent({
       <h1 className="text-title font-semibold">{t("title")}</h1>
       <p className="text-body text-text-muted">{t("body")}</p>
       <p>
-        <Link href={homeHref} variant="standalone">
+        <a
+          href={homeHref}
+          className="inline-flex min-h-control items-center rounded-control font-semibold text-link underline"
+        >
           {t("home")}
-        </Link>
+        </a>
       </p>
     </div>
   );

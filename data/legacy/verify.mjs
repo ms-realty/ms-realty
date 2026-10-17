@@ -5,13 +5,15 @@
 //
 // Run: node data/legacy/verify.mjs
 import fs from "node:fs";
+import { createHash } from "node:crypto";
+import { gunzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(DIR, "..", "..");
 
-/** The only phone number that may appear anywhere: the public brand line. */
+/** Brand-only historical base extraction; current public-source pages preserve published contacts. */
 const ALLOWED_PHONE = "+359879696870";
 /** Business addresses allowed by data/legacy/README.md § Data-protection rules. */
 const ALLOWED_EMAILS = new Set(["ms.realty.bg@gmail.com"]);
@@ -36,6 +38,8 @@ function readJson(name) {
 
 const listings = readJson("listings.json");
 const urlDecisions = readJson("url-decisions.json");
+const migration = readJson("migration/route-manifest.json");
+const sourcePages = readJson("migration/source-pages.json");
 const media = readJson("media-manifest.json");
 const geography = readJson("geography.json");
 const content = readJson("content.json");
@@ -69,6 +73,31 @@ check("url decisions 410", urlDecisions.summary.by_status["410"], 268);
 check("url decisions 200", urlDecisions.summary.by_status["200"], 10);
 check("listing 301s", urlDecisions.summary.listing_301s, 165);
 check("listing 301s from makler-realty.ru", urlDecisions.summary.listing_301s_from_ru, 52);
+assert("historical terminal decisions are not operative", urlDecisions.current_authority?.historical_only === true);
+check("earlier 410 approvals revoked by current owner directive", urlDecisions.current_authority?.previous_410_approvals_revoked, 268);
+check("current individually approved removals", urlDecisions.current_authority?.current_approved_removals?.length, 0);
+check("current migration source rows", migration.sourceRows, 457);
+check("current normalized source identities", migration.uniqueSources, 454);
+assert("blocked parity cannot supply a deployable route artifact", migration.status !== "blocked" ||
+  (!migration.routeArtifactSha256 && !fs.existsSync(path.join(DIR, "migration", "legacy-routes.json"))));
+assert("public source main text keeps its exact captured hash", sourcePages.pages.every((page) =>
+  page.bodyText && createHash("sha256").update(page.bodyText).digest("hex") === page.sourceHash));
+const liveDelta = readJson("migration/live-delta.json");
+assert("current public response archives keep exact source bytes", liveDelta.captures.every((capture) =>
+  !capture.response_artifact ||
+  createHash("sha256").update(gunzipSync(fs.readFileSync(path.resolve(DIR, "../..", capture.response_artifact)))).digest("hex") === capture.response_sha256));
+assert("current discovered URL delta stays explicitly incomplete", migration.liveDelta.completeSiteDelta === false &&
+  liveDelta.completeSiteDelta === false);
+const stagingRoutes = fs.readFileSync(path.join(DIR, "migration", "staging-legacy-routes.json"), "utf8");
+const stagingManifest = readJson("migration/staging-route-manifest.json");
+assert("partial source map is isolated from production acceptance", stagingManifest.status === "ready_partial" &&
+  stagingManifest.scope === "staging_only" && stagingManifest.productionAllowed === false &&
+  stagingManifest.launchGate.status === "blocked");
+assert("partial staging route digest binds exact bytes", createHash("sha256").update(stagingRoutes).digest("hex") === stagingManifest.routeArtifactSha256);
+assert("partial route count keeps normalized sources separate from spellings", JSON.parse(stagingRoutes).length === stagingManifest.uniqueSources &&
+  stagingManifest.sourceRows >= stagingManifest.uniqueSources);
+assert("partial source reviews never fabricate human or served status approval", stagingManifest.reviews.every((review) =>
+  review.humanApproval === false && review.servedTargetStatus === null));
 
 check("R2 media objects", media.objects.length, 1725);
 check("R2 media objects reported present", media.r2_evidence.present_count, 1725);

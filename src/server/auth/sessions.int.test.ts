@@ -106,7 +106,7 @@ describe("sessions", () => {
     const start = new Date();
     const issued = await createSession(t.db, { kind: "staff", id: staff.id }, start);
     expect(() => requireFreshAuth(issued.session, at(start, 60_000))).not.toThrow();
-    const later = at(start, sessionPolicy.stepUpMaxAgeMs + 1);
+    const later = at(start, sessionPolicy.staff.stepUpMs + 1);
     expect(() => requireFreshAuth(issued.session, later)).toThrow(
       expect.objectContaining({ code: "step_up_required" }),
     );

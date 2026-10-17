@@ -100,13 +100,13 @@ export function ComboBox({
           ) : null}
         </span>
       </Text>
-      <FieldError>{errorMessage}</FieldError>
       <div className="relative">
-        <Input placeholder={placeholder} className={cx(controlClass, "py-2 pe-12")} />
+        <Input placeholder={placeholder} className={cx(controlClass, "pe-12")} />
         <Button className="absolute inset-y-0 end-0 flex w-control cursor-pointer items-center justify-center rounded-e-control text-text-muted data-hovered:text-text">
           <ChevronDownIcon />
         </Button>
       </div>
+      <FieldError>{errorMessage}</FieldError>
       <ListPopover>
         <ListBox items={options} className="py-1 outline-none">
           {(option) => (

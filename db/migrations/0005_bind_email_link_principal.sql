@@ -1,0 +1,2 @@
+ALTER TABLE "email_sign_in_tokens" ADD COLUMN "principal_id" uuid;--> statement-breakpoint
+ALTER TABLE "email_sign_in_tokens" ADD CONSTRAINT "email_sign_in_tokens_principal_id_principals_id_fk" FOREIGN KEY ("principal_id") REFERENCES "public"."principals"("id") ON DELETE no action ON UPDATE no action;

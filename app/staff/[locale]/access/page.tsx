@@ -1,29 +1,47 @@
-// O23 Staff sign-in entry — placeholder until the identity stage (provider handoff,
-// enrolment, challenge, denial and recovery; F13 staff variant). Outside the workspace shell:
-// nobody is signed in here yet.
-import type { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+// O23 / F13 staff access: passkeys only; email is for enrollment and audited recovery.
+import { notFound, redirect } from "next/navigation";
+import { AccessFrame } from "@/features/identity/access-frame";
+import { ceremonyMessages, identityCopy } from "@/features/identity/copy";
+import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
+import { privacyQueueReturn } from "@/features/privacy/access";
+import { SignedOutInquiryDraftBoundary } from "@/features/work/inquiry-draft";
 import { isStaffLocale } from "@/i18n/config";
-
-export async function generateMetadata({
+import { currentStaffAccess, staffAccessPath } from "@/server/auth/pages";
+import { beginStaffPasskey, completeStaffPasskey } from "./actions";
+export const metadata = {
+  robots: { index: false, follow: false },
+  referrer: "no-referrer" as const,
+};
+export default async function StaffAccessPage({
   params,
-}: PageProps<"/staff/[locale]/access">): Promise<Metadata> {
-  const { locale } = await params;
-  if (!isStaffLocale(locale)) return {};
-  const t = await getTranslations({ locale, namespace: "common" });
-  return { title: t("staffAccessHeading") };
-}
-
-export default async function StaffAccessPage({ params }: PageProps<"/staff/[locale]/access">) {
+  searchParams,
+}: PageProps<"/staff/[locale]/access">) {
   const { locale } = await params;
   if (!isStaffLocale(locale)) notFound();
-  const t = await getTranslations({ locale, namespace: "common" });
+  // C-12: only a validated privacy queue position survives sign-in; never an action.
+  const query = await searchParams;
+  const returnTo = privacyQueueReturn(
+    locale,
+    typeof query.returnTo === "string" ? query.returnTo : null,
+  );
+  const access = await currentStaffAccess();
+  if (access.state !== "signed_out")
+    redirect(
+      access.state === "ready" && returnTo ? returnTo : staffAccessPath(locale, access.state),
+    );
+  const c = identityCopy(locale);
   return (
-    <main className="mx-auto flex min-h-dvh max-w-prose flex-col justify-center gap-6 px-gutter py-12">
-      <Image src="/brand/logo-ms-realty.png" alt={t("brand")} width={86} height={44} priority />
-      <h1 className="text-title font-semibold">{t("staffAccessHeading")}</h1>
-    </main>
+    <AccessFrame title={c.staffSignInTitle} lead={c.staffSignInLead} standalone>
+      <SignedOutInquiryDraftBoundary />
+      <PasskeyCeremony
+        kind="authenticate"
+        begin={beginStaffPasskey}
+        complete={completeStaffPasskey.bind(null, locale, returnTo)}
+        messages={ceremonyMessages(c, c.signInWithPasskey)}
+      />
+      <a href={`/${locale}/access/recovery`} className="text-action underline">
+        {c.lostAccessLink}
+      </a>
+    </AccessFrame>
   );
 }

@@ -48,7 +48,7 @@ jobs:
     steps:
       # The legacy app left main in the rebuild (docs/plan.md). This workflow still serves
       # the live legacy deployment, so it runs the scripts frozen at tag legacy-app-final.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: legacy-app-final
 
@@ -116,7 +116,7 @@ jobs:
 
       - name: Preserve holding route receipts
         if: ${{ always() && inputs.restore_construction_hold }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: public-hold-routes
           path: public-hold-*.json
@@ -134,7 +134,7 @@ jobs:
 
       - name: Preserve released route receipts
         if: ${{ always() && inputs.release_construction_hold }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: public-release-routes
           path: public-release-*.json

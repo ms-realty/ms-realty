@@ -16,7 +16,8 @@
     "specVersion": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 200
+      "maxLength": 200,
+      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
     },
     "releaseSha": {
       "type": "string",
@@ -96,7 +97,8 @@
             {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
             },
             {
               "type": "null"
@@ -108,7 +110,8 @@
             {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
             },
             {
               "type": "null"
@@ -120,7 +123,8 @@
             {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
             },
             {
               "type": "null"
@@ -142,7 +146,8 @@
           {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           },
           {
             "type": "null"
@@ -169,7 +174,8 @@
             {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
             },
             {
               "type": "null"
@@ -239,7 +245,8 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           }
         },
         "regions": {
@@ -247,7 +254,8 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           }
         },
         "locales": {
@@ -255,7 +263,8 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           }
         },
         "channels": {
@@ -263,7 +272,8 @@
           "items": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           }
         }
       },
@@ -276,14 +286,16 @@
         "policyRevision": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 200
+          "maxLength": 200,
+          "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
         },
         "roles": {
           "anyOf": [
             {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
             },
             {
               "type": "null"
@@ -295,7 +307,8 @@
             {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
             },
             {
               "type": "null"
@@ -307,7 +320,8 @@
             {
               "type": "string",
               "minLength": 1,
-              "maxLength": 200
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
             },
             {
               "type": "null"
@@ -325,6 +339,17 @@
         "pattern": "^[A-Za-z0-9._:-]{3,128}$"
       }
     },
+    "evidenceDigests": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      }
+    },
     "approvals": {
       "type": "array",
       "items": {
@@ -337,7 +362,8 @@
           "name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 200
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
           },
           "approvedAt": {
             "type": "string",
@@ -346,11 +372,14 @@
           },
           "scope": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 200
+            "const": "release"
+          },
+          "evidenceId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{3,128}$"
           }
         },
-        "required": ["role", "name", "approvedAt", "scope"],
+        "required": ["role", "name", "approvedAt", "scope", "evidenceId"],
         "additionalProperties": false
       }
     },
@@ -388,7 +417,8 @@
                 "ref": {
                   "type": "string",
                   "minLength": 1,
-                  "maxLength": 200
+                  "maxLength": 200,
+                  "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
                 },
                 "digest": {
                   "type": "string",
@@ -411,7 +441,8 @@
                 "ref": {
                   "type": "string",
                   "minLength": 1,
-                  "maxLength": 200
+                  "maxLength": 200,
+                  "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
                 },
                 "digest": {
                   "type": "string",
@@ -445,6 +476,7 @@
     "scope",
     "policies",
     "evidenceIds",
+    "evidenceDigests",
     "approvals",
     "recoveryPoint",
     "procedures"

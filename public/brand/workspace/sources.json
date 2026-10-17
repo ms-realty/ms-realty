@@ -1,0 +1,118 @@
+{
+  "fileKey": "PxfBJ2tdrj9A923fpgqzDn",
+  "nodeId": "10:203",
+  "assets": [
+    {
+      "file": "today.svg",
+      "source": "https://www.figma.com/api/mcp/asset/deaee7e2-0d39-4aae-836f-08539fed79a7.svg",
+      "sha256": "c5b72b5b44ccc2991c385f0395c64b3e91ae6ccc4b8580d1f3c241f54121fc59",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "inquiries.svg",
+      "source": "https://www.figma.com/api/mcp/asset/ddd9bdbd-f253-42b7-b6f7-29249774dc19.svg",
+      "sha256": "acb639f1e7e9f0db4232beaf2f076b8d3f64646cd04baca2305b0be6a64400bb",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "cases.svg",
+      "source": "https://www.figma.com/api/mcp/asset/eb1f7a89-ad8b-461a-afe8-74caefabc854.svg",
+      "sha256": "bb5d095e1078e3f6900ca8846aa31040f0b99f535349cd058424d4dd07249fe0",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "inventory.svg",
+      "source": "https://www.figma.com/api/mcp/asset/b839d795-1acc-44dd-b486-c349452d4b56.svg",
+      "sha256": "a015b1c29c822717c189829be424ac7e8b6859a6877514f997f15db8b9e96bc9",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "calendar.svg",
+      "source": "https://www.figma.com/api/mcp/asset/624af83b-5d3a-4317-84fd-f267b6136267.svg",
+      "sha256": "28f5963e102ac4a3f5330ce2f92293c45b512ceeaec57797c6ddd557eca47794",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "tasks.svg",
+      "source": "https://www.figma.com/api/mcp/asset/d5d3b45b-45ca-496b-ab91-f0c6aa21f4f4.svg",
+      "sha256": "bbf104476f271f3f548bd57a2175e4bd38b3606321f3c6aa0bdc4e75942c6cca",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "butler.svg",
+      "source": "https://www.figma.com/api/mcp/asset/22e73b46-c072-4281-a010-32312c048f42.svg",
+      "sha256": "a52641fc6cf11dffb1edefcb550f66f8f71ec3072208f10c72d893f9d1306329",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "more-tools.svg",
+      "source": "https://www.figma.com/api/mcp/asset/832e5ef4-30fb-40d0-8a9f-9400ea6912ff.svg",
+      "sha256": "8f98ee8f44da3ab2a8e210903f344bdc3aaf20c09e2d0524e87b849231de2e10",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "sparkles.svg",
+      "nodeId": "618:73474",
+      "source": "https://www.figma.com/api/mcp/asset/2f8bc3e1-8abd-4888-a60d-b584c46bb9e8.svg",
+      "sha256": "32d6520a7ed21c6dcdb0ef4581620b1a1d3e10cd24058a04fa272b85a69ebd6b",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "panel-left.svg",
+      "nodeId": "18:2912",
+      "source": "https://www.figma.com/api/mcp/asset/e6b85d41-0904-4123-aab5-b1f4a03b6a19.svg",
+      "sha256": "43955de09b54af7ab6edff3140696bf168f51d3c9595381e04143cfa5ac84d81",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "folder.svg",
+      "nodeId": "23:4664",
+      "source": "https://www.figma.com/api/mcp/asset/07864fb7-5587-4537-852f-1e599cd56780.svg",
+      "sha256": "4031bdbe07182592d0fb624e7801e05b8a8a77c298234a62ed587c771ec02af3",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "chevron-right.svg",
+      "nodeId": "23:4669",
+      "source": "https://www.figma.com/api/mcp/asset/1fc5e309-f645-4cda-9658-aa63061810c6.svg",
+      "sha256": "7daf07c4e5ae2ae81dfa13c7f101e825ebbed0aae5ef8ecd13ccae003dd5f560",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "x.svg",
+      "nodeId": "23:4656",
+      "source": "https://www.figma.com/api/mcp/asset/ad3a184d-0d86-4458-80cd-df1e38fe785c.svg",
+      "sha256": "48a41d4daec37f660011b547585d53bfdea7cc44dd3bd3465816e670d5c08678",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "circle-alert.svg",
+      "nodeId": "6:397",
+      "source": "https://www.figma.com/api/mcp/asset/37c9bfa3-88f0-446f-ab48-f0380d51fda4.svg",
+      "sha256": "7ebd7d6c58beb928f1208b7f3f4b178be8cebe90b425f31ec6423e15ed738893",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "file": "list-todo.svg",
+      "nodeId": "20:1265",
+      "source": "https://www.figma.com/api/mcp/asset/81061fe0-466e-4232-82e2-0ec1a63a107a.svg",
+      "sha256": "9cac72d06e40455603bced3d601a7a55228bf2d320a698334cfea1cd067b7f56",
+      "width": 20,
+      "height": 20
+    }
+  ]
+}
