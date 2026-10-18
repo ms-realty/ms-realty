@@ -83,7 +83,7 @@ describe("InquiryQueueView", () => {
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute("href", "/en/inquiries/one?view=all");
     expect(links[0]).toHaveTextContent(
-      "Synthetic one · MS-00202Assigned · Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Agency coverage",
+      "Synthetic one · MS-00202Assigned · Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Work without an owner",
     );
     // Without a listing or purpose the reference names the conversation.
     expect(links[1]).toHaveTextContent("Synthetic two · RQ-TEST-two");

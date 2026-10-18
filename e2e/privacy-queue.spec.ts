@@ -15,6 +15,54 @@ test.afterAll(async () => {
   await connection.end();
 });
 
+async function readyPrivatePage(page: import("@playwright/test").Page) {
+  await page.waitForLoadState("load");
+  await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1, { timeout: 30_000 });
+}
+
+async function findReview(page: import("@playwright/test").Page, id: string, limit = 40) {
+  const form = page
+    .locator("form")
+    .filter({ has: page.locator(`input[name="id"][value="${id}"]`) });
+  for (let pages = 0; pages < limit; pages++) {
+    // A plain link can finish its click at navigation commit. Inspect the new page only
+    // after its streamed document and private-page hydration have completed.
+    await readyPrivatePage(page);
+    if ((await form.count()) !== 0) break;
+    const next = page.getByRole("link", { name: "Next requests", exact: true });
+    await expect(next).toBeVisible();
+    const href = await next.getAttribute("href");
+    if (!href) throw new Error("Missing privacy queue continuation");
+    await Promise.all([
+      page.waitForURL(new URL(href, page.url()).toString(), { waitUntil: "load" }),
+      next.click(),
+    ]);
+  }
+  await readyPrivatePage(page);
+  await expect(form).toHaveCount(1);
+  await expect(
+    form.getByRole("button", { name: "Record human review", exact: true }),
+  ).toBeEnabled();
+  return form;
+}
+
+async function expectKeptReview(
+  page: import("@playwright/test").Page,
+  fixture: { sessionId: string; targetId: string },
+  form: import("@playwright/test").Locator,
+) {
+  const operationId = await form.locator('input[name="operationId"]').inputValue();
+  const version = Number(await form.locator('input[name="expectedVersion"]').inputValue());
+  await expect
+    .poll(() =>
+      page.evaluate(({ sessionId, targetId }) => {
+        const saved = window.sessionStorage.getItem(`privacy-review:${sessionId}:${targetId}`);
+        return saved ? JSON.parse(saved) : null;
+      }, fixture),
+    )
+    .toMatchObject({ operationId, version, values: expect.arrayContaining([["to", "verifying"]]) });
+}
+
 async function restorePrivateTab(page: import("@playwright/test").Page) {
   await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
   await page.evaluate(() => {
@@ -294,7 +342,7 @@ test("C-11: a dirty privacy review keeps its reviewed version through a page ref
         encoding: "utf8",
       },
     ),
-  ) as { token: string; targetId: string };
+  ) as { token: string; sessionId: string; targetId: string };
   await page.context().addCookies([
     {
       name: "msr_staff_session",
@@ -308,12 +356,7 @@ test("C-11: a dirty privacy review keeps its reviewed version through a page ref
   // This run's own older record, on a cursor page that newer records from other projects (they
   // share the database) cannot shift.
   const id = fixture.targetId;
-  const form = page
-    .locator("form")
-    .filter({ has: page.locator(`input[name="id"][value="${id}"]`) });
-  for (let pages = 0; (await form.count()) === 0 && pages < 10; pages++)
-    await page.getByRole("link", { name: "Next requests", exact: true }).click();
-  await expect(form).toHaveCount(1);
+  const form = await findReview(page, id, 10);
   const version = await form.locator('input[name="expectedVersion"]').inputValue();
   const operation = await form.locator('input[name="operationId"]').inputValue();
   const [before] = await db
@@ -322,6 +365,7 @@ test("C-11: a dirty privacy review keeps its reviewed version through a page ref
     .where(eq(schema.privacyRequests.id, id));
   await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
   await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  await expectKeptReview(page, fixture, form);
   // Another operator advances the record; this tab refreshes its server render when visible.
   await db
     .update(schema.privacyRequests)
@@ -394,7 +438,7 @@ test("C-11: another staff member never inherits a dirty review or its operation"
           encoding: "utf8",
         },
       ),
-    ) as { token: string; targetId: string };
+    ) as { token: string; sessionId: string; targetId: string };
   // B first, so A's records are the newer ones on A's pages.
   const b = seedQueue(),
     a = seedQueue();
@@ -410,14 +454,11 @@ test("C-11: another staff member never inherits a dirty review or its operation"
     ]);
   await signIn(a.token);
   await page.goto(hostUrl("staff", "/en/operations/privacy"));
-  const form = page
-    .locator("form")
-    .filter({ has: page.locator(`input[name="id"][value="${a.targetId}"]`) });
-  for (let pages = 0; (await form.count()) === 0 && pages < 40; pages++)
-    await page.getByRole("link", { name: "Next requests", exact: true }).click();
+  const form = await findReview(page, a.targetId);
   const operation = await form.locator('input[name="operationId"]').inputValue();
   await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
   await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  await expectKeptReview(page, a, form);
   // Staff member B takes over this tab; the refreshed page belongs to B alone.
   await signIn(b.token);
   await restorePrivateTab(page);
@@ -454,12 +495,7 @@ async function ownReview(page: import("@playwright/test").Page) {
     },
   ]);
   await page.goto(hostUrl("staff", "/en/operations/privacy"));
-  const form = page
-    .locator("form")
-    .filter({ has: page.locator(`input[name="id"][value="${fixture.targetId}"]`) });
-  for (let pages = 0; (await form.count()) === 0 && pages < 40; pages++)
-    await page.getByRole("link", { name: "Next requests", exact: true }).click();
-  await expect(form).toHaveCount(1);
+  const form = await findReview(page, fixture.targetId);
   return { fixture, form, position: page.url() };
 }
 const restoredText = "Your unsent review is restored below";
@@ -469,6 +505,7 @@ test("C-11: a recorded review whose answer was lost is cleared, not restored", a
   const { fixture, form, position } = await ownReview(page);
   await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
   await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  await expectKeptReview(page, fixture, form);
   // The server records the review; the browser never sees the answer.
   await page.route("**/operations/privacy/submit**", async (route) => {
     await route.fetch();
@@ -521,6 +558,7 @@ test("C-11: pending and unknown saved keys remain fenced until exact reconciliat
   const { fixture, form, position } = await ownReview(page);
   await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
   await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  await expectKeptReview(page, fixture, form);
   const operationId = await form.locator('input[name="operationId"]').inputValue();
   const version = Number(await form.locator('input[name="expectedVersion"]').inputValue());
   const [session] = await db
@@ -582,8 +620,11 @@ test("C-11: an unrelated receipt in the address does not clear an unsent review"
   page,
 }) => {
   test.setTimeout(120_000);
-  const { form, position } = await ownReview(page);
+  const { fixture, form, position } = await ownReview(page);
   await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
+  const policy = "Synthetic unsent policy reference for this browser test";
+  await form.getByLabel("Approved policy reference", { exact: true }).fill(policy);
+  await expectKeptReview(page, fixture, form);
   const withReceipt = new URL(position);
   withReceipt.searchParams.set("receipt", crypto.randomUUID());
   await page.goto(withReceipt.toString());
@@ -591,6 +632,7 @@ test("C-11: an unrelated receipt in the address does not clear an unsent review"
   await expect(form.getByLabel("Where the request goes next", { exact: true })).toHaveValue(
     "verifying",
   );
+  await expect(form.getByLabel("Approved policy reference", { exact: true })).toHaveValue(policy);
 });
 
 test("C-11: a verified same-principal session rotation keeps the unsent review without confirmation", async ({
@@ -600,6 +642,7 @@ test("C-11: a verified same-principal session rotation keeps the unsent review w
   const { fixture, form, position } = await ownReview(page);
   await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
   await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  await expectKeptReview(page, fixture, form);
   const prepared = passkeyHandoff("prepare", fixture.token);
   await db
     .update(schema.sessions)

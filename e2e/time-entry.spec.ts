@@ -111,6 +111,8 @@ for (const javaScriptEnabled of [true, false]) {
       if (!inquiry) throw new Error("Inquiry fixture missing");
       const page = await context.newPage();
       await page.goto(hostUrl("staff", `/en/inquiries/${inquiry.id}`));
+      if (javaScriptEnabled)
+        await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
       const accept = page
         .locator("form")
         .filter({ has: page.getByRole("button", { name: "Accept and assign to me" }) });
@@ -189,10 +191,14 @@ for (const javaScriptEnabled of [true, false]) {
       const page = await staff.newPage();
       const proposal = proposalCopy("en");
       await page.goto(hostUrl("staff", `/en/proposals/${f.proposalId}`));
+      // The enhanced receipt is asserted below. Before hydration, the same valid command
+      // follows the native redirect directly to its current record instead.
+      await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
       await page.getByLabel(proposal.reviewCheck, { exact: true }).check();
       await page.getByRole("button", { name: proposal.review, exact: true }).click();
       await recorded(page);
       await page.getByRole("link", { name: "Open current record", exact: true }).click();
+      await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
       await page.getByLabel(proposal.submitCheck, { exact: true }).check();
       await page.getByRole("button", { name: proposal.submit, exact: true }).click();
       await recorded(page);
@@ -205,6 +211,8 @@ for (const javaScriptEnabled of [true, false]) {
       if (!current) throw new Error("Missing proposal revision");
       const client = await clients.newPage();
       await client.goto(hostUrl("client", `/en/proposals/${f.proposalId}`));
+      if (javaScriptEnabled)
+        await expect(client.locator('[data-private-ready="true"]')).toHaveCount(1);
       // The agreed deadline reads in words with its zone named once for the client.
       await expect(
         client.locator(`time[datetime="${current.deadlineAt.toISOString()}"]`).first(),

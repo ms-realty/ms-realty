@@ -86,7 +86,7 @@ describe("inquiryRowView", () => {
       name: null,
       context: null,
       language: null,
-      state: "Resolved without case",
+      state: "Closed without a deal",
       owner: { name: "Former broker", needsCoverage: false },
     });
     const open = inquiryRowView(
