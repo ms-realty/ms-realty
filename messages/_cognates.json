@@ -17,7 +17,10 @@
     "workspace.operations": "Операции",
     "workspace.secondaryLabel": "Управление",
     "workspace.settings": "Настройки",
-    "workspace.tasks": "Задачи"
+    "workspace.tasks": "Задачи",
+    "auditHistory.values.yes": "Да",
+    "auditHistory.technical.operation": "Операция",
+    "auditHistory.technical.manifest": "Пакет"
   },
   "de": {
     "discovery.hotel": "Hotel",

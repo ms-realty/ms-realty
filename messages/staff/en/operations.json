@@ -1,0 +1,104 @@
+{
+  "title": "Release checks",
+  "lead": "See which checks and reviews are confirmed for this running version, then open what still needs evidence.",
+  "allChecks": "All release checks",
+  "recordedPass": "The recorded checks passed",
+  "blocked": "Release checks are not complete",
+  "unconfirmed": "The current result is not confirmed",
+  "boundary": "These recorded checks do not replace the required human and release approvals.",
+  "noCurrentReport": "There is no confirmed, current set of reports for this running version. This does not prove that a connected service has stopped.",
+  "checkAgain": "Check current result",
+  "checkOnly": "This reads the latest saved reports. It does not repeat a delivery, restart a service or release a version.",
+  "confirmed": "Confirmed for this version",
+  "needsEvidence": "Confirmation is still needed",
+  "openRequirement": "Open required checks",
+  "requiredReports": "Reports needed for this check",
+  "report": "Required report",
+  "affected": "Checks that depend on this",
+  "noDependentChecks": "No further dependent check is listed in the current rules.",
+  "openExceptions": "Open delivery problems",
+  "seeImpact": "See what this affects",
+  "results": {
+    "confirmed": "Confirmed",
+    "not_confirmed": "No qualifying report is confirmed for this version.",
+    "rejected": "A report was received but did not meet the required checks."
+  },
+  "gates": {
+    "R00": {
+      "title": "Responsibilities and release rules",
+      "help": "The release scope, responsible people and required proof must be agreed."
+    },
+    "R01": {
+      "title": "Runtime and access",
+      "help": "Check the running application, database changes, staff and client access."
+    },
+    "R02": {
+      "title": "Listing facts and publication",
+      "help": "People must review the source facts, availability, photos and publication decision."
+    },
+    "R03": {
+      "title": "Search and inquiries",
+      "help": "Check approved search results and that an inquiry reaches its responsible person."
+    },
+    "R04": {
+      "title": "Client work and next steps",
+      "help": "Check requirements, viewings, proposals, documents and continuity of the deal."
+    },
+    "R05": {
+      "title": "Messages and privacy",
+      "help": "Check real delivery, access changes, consent and requests about personal information."
+    },
+    "R06": {
+      "title": "Butler and manual fallback",
+      "help": "Check Butler with the connected model and keep the manual workflow available."
+    },
+    "R07": {
+      "title": "Source pages and photos",
+      "help": "Check every old address, source record and photo, including the final transfer."
+    },
+    "R08": {
+      "title": "Reliability and recovery",
+      "help": "Check load, security, alerts, protected backups and return to the previous version."
+    },
+    "R09": {
+      "title": "Journeys, language and accessibility",
+      "help": "Review the complete journeys, approved content, languages and accessible controls."
+    },
+    "R10": {
+      "title": "Release evidence and approval",
+      "help": "The exact version needs current proof and the required release approvals."
+    },
+    "R11": {
+      "title": "Checks after public routing changes",
+      "help": "Check actual domains, secure connections, inquiries, access, photos and old addresses."
+    },
+    "R12": {
+      "title": "Agency operating review",
+      "help": "A complete operating cycle and the responsible owner must confirm the handover."
+    }
+  },
+  "requirements": {
+    "authority_decision_record": "Agreed release responsibilities and rules",
+    "ci_test_report": "Automated application checks",
+    "migration_report": "Database change checks",
+    "deployed_check": "Checks of the running application",
+    "successor_provisioning_report": "Runtime and database setup",
+    "first_party_runtime_report": "Staff and client access checks",
+    "listing_review_report": "Human listing review",
+    "postgres_search_sync": "Search source synchronization",
+    "postgres_search_query": "Live search results",
+    "provider_check": "Connected service checks",
+    "ai_evaluation_report": "Butler task quality",
+    "hermes_draft_worker": "Butler background service",
+    "migration_rehearsal_report": "Source and photo transfer rehearsal",
+    "human_review": "Human journey and content review",
+    "load_security_report": "Load and security checks",
+    "monitoring_check": "Monitoring and alerts",
+    "rollback_drill": "Return to the previous version",
+    "recovery_drill": "Backup restore rehearsal",
+    "recovery_point": "Current protected backup",
+    "release_attestation": "Approved release evidence",
+    "external_observation": "Checks of public domains",
+    "operational_acceptance": "Agency operating review"
+  }
+}

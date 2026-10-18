@@ -33,6 +33,10 @@
     "team": { "title": "Team and access", "description": "People and permissions" },
     "system": { "title": "System status", "description": "Sources and connectivity" },
     "jobs": { "title": "Jobs and assistance status", "description": "Queue and Butler spend" },
+    "history": {
+      "title": "Listing history",
+      "description": "Recorded changes, actors and publications"
+    },
     "privacy": { "title": "Privacy requests", "description": "Verification, scope and completion" },
     "alerts": { "title": "Property alert rule", "description": "Template, schedule and approval" }
   }

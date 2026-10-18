@@ -117,6 +117,7 @@ describe("navigation registry (§06)", () => {
       "team",
       "system",
       "jobs",
+      "history",
       "privacy",
       "alerts",
     ]);
@@ -132,6 +133,7 @@ describe("navigation registry (§06)", () => {
       "/operations/complaints",
       "/operations/inbound",
       "/operations/jobs",
+      "/operations/history",
       "/operations/privacy",
       "/operations/subscriptions",
       "/access/manage",
@@ -177,6 +179,7 @@ describe("navigation registry (§06)", () => {
           "/en/inquiries",
           "/en/cases",
           "/en/inventory",
+          "/en/operations/imports",
           "/en/calendar",
           "/en/tasks",
           "/en/coverage",
@@ -190,7 +193,9 @@ describe("navigation registry (§06)", () => {
         [
           "/en/content",
           "/en/access/manage",
+          "/en/operations/readiness",
           "/en/operations/jobs",
+          "/en/operations/history",
           "/en/operations/privacy",
           "/en/operations/subscriptions",
         ],
@@ -209,6 +214,16 @@ describe("navigation registry (§06)", () => {
         group.items.map((item) => item.href),
       ),
     ).toEqual(["/bg/today", "/bg/cases"]);
+    expect(
+      permittedTools("bg", new Set(), new Set(["audit.read", "listing.read"])).flatMap((group) =>
+        group.items.map((item) => item.href),
+      ),
+    ).toEqual(["/bg/today", "/bg/inventory", "/bg/operations/history"]);
+    expect(
+      permittedTools("bg", new Set(), new Set(["audit.read"])).flatMap((group) =>
+        group.items.map((item) => item.href),
+      ),
+    ).toEqual(["/bg/today"]);
   });
 
   it("prefixes public items with the locale and leaves unbuilt items out", () => {
