@@ -83,6 +83,11 @@ a host, prepare a fresh private directory using `login --database --dir PRIVATE_
 the saved destination host will be used for consent. A mismatch is rejected rather than
 silently changing the registered host.
 
+Production and private staging transports also require the reviewed
+`BUTLER_CHATGPT_DATABASE_ROLE`, or `BUTLER_CHATGPT_OPERATOR_DATABASE_ROLE` for operator commands.
+The adapter passes the supplied environment and this explicit role to the existing transport;
+it never infers a privileged role from a credential URL or reuses the application role.
+
 ```sh
 mise exec node@24.16.0 -- node --conditions=react-server --import tsx scripts/butler-chatgpt-oauth.ts import --account REGISTRATION_ID --dir PRIVATE_DIRECTORY --database
 ```
@@ -104,6 +109,7 @@ The runtime secret/configuration boundary is:
 | `BUTLER_MODEL` | Slug observed in this account's current catalog |
 | `BUTLER_CHATGPT_CREDENTIAL_ID` | Validated registration's 64-hex ID |
 | `BUTLER_CHATGPT_DATABASE_URL` | Constrained runtime SQL identity |
+| `BUTLER_CHATGPT_DATABASE_ROLE` | Independently reviewed credential runtime SQL role |
 | `BUTLER_CHATGPT_HOST_KEY` | Stable durable installation key |
 | `BUTLER_CHATGPT_ENCRYPTION_KEY` | Separate encryption secret |
 | `BUTLER_CHATGPT_QUALIFIED=1` | Operator records actual connection/entitlement qualification |

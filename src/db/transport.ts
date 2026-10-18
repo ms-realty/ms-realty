@@ -1,6 +1,7 @@
 import { X509Certificate } from "node:crypto";
 import { isIP } from "node:net";
 import type { ConnectionOptions } from "node:tls";
+import { productionDatabaseTransport } from "./production-transport";
 
 export type DatabaseTransportEnv = Readonly<Record<string, string | undefined>>;
 
@@ -55,6 +56,12 @@ export function databaseTransport(
   canonicalRoleUrl: string,
   env: DatabaseTransportEnv = process.env,
 ): DatabaseTransportConfig {
+  if (env.STAGING === "false" && env.RELEASE_ENVIRONMENT === "production")
+    return productionDatabaseTransport(canonicalRoleUrl, env);
+  if (env.RELEASE_ENVIRONMENT === "production")
+    throw new Error(
+      "Production database transport requires STAGING=false and explicit production identity.",
+    );
   const mode = env.DATABASE_TRANSPORT;
   if (mode === undefined || mode === "direct")
     return {

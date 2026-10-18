@@ -32,6 +32,44 @@ const accepted = () =>
 afterEach(() => vi.unstubAllEnvs());
 
 describe("Cloudflare email relay boundary", () => {
+  it("accepts only the exact production staff release relay and keeps credentials on that origin", async () => {
+    const hosts = {
+      public: "https://makler-realty.com",
+      client: "https://my.makler-realty.com",
+      staff: "https://app.makler-realty.com",
+    };
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async () => accepted());
+    const provider = new CloudflareMessageProvider(
+      { ...config, hosts, relayUrl: `${hosts.staff}/__release/email` },
+      fetcher,
+    );
+    const input = {
+      ...message(),
+      secretParams: { url: `${hosts.client}/bg/access/confirm?token=synthetic` },
+    };
+    expect((await provider.send(input)).status).toBe("accepted");
+    expect(fetcher.mock.calls[0]?.[0]).toBe("https://app.makler-realty.com/__release/email");
+    expect(new Headers(fetcher.mock.calls[0]?.[1]?.headers).get("CF-Access-Client-Secret")).toBe(
+      config.accessClientSecret,
+    );
+    for (const relayUrl of [
+      "https://makler-realty.com/__release/email",
+      "https://app.makler-realty.ru/__release/email",
+      "https://app.example.test/__release/email",
+      `${hosts.staff}/__release/email?forward=1`,
+      "https://staging-app.makler-realty.com/__release/email",
+    ])
+      expect(() => new CloudflareMessageProvider({ ...config, hosts, relayUrl }, fetcher)).toThrow(
+        "Invalid Cloudflare email configuration",
+      );
+    expect(
+      () =>
+        new CloudflareMessageProvider(
+          { ...config, relayUrl: `${hosts.staff}/__release/email` },
+          fetcher,
+        ),
+    ).toThrow();
+  });
   it("sends one authenticated plaintext request using the immutable outbox key", async () => {
     const input = message();
     const before = structuredClone(input);
