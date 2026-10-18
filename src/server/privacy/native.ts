@@ -1,7 +1,7 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { operations } from "@/db/schema";
+import { auditEvents, operations, sessions } from "@/db/schema";
 import type { PublicLocale } from "@/domain/ids";
 import { nativeAuthRoute } from "../auth/native";
 import { currentClientSession, currentStaffAccess } from "../auth/pages";
@@ -9,6 +9,7 @@ import type { Session } from "../auth/sessions";
 import { getEnv } from "../config/env";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
+import { privacyOperator } from "./access";
 import {
   changeSubscription,
   editSearchSubscription,
@@ -41,26 +42,118 @@ export async function privateReceipt(db: Executor, session: Session, id: unknown
   return receipt && /^(privacy|preferences)\./.test(receipt.type) ? receipt.id : null;
 }
 
-/**
- * C-11: the operation keys of this actor's recent recorded privacy reviews. A review kept in
- * the browser whose key is here was recorded (even if its answer was lost) and is cleared;
- * nothing else is inferred from a receipt in the address.
- */
-export async function recordedPrivacyReviewKeys(db: Executor, session: Session) {
-  const rows = await db
-    .select({ key: operations.idempotencyKey })
-    .from(operations)
-    .where(
-      and(
-        eq(operations.actorKind, session.actor.kind),
-        eq(operations.actorId, session.actor.id),
-        eq(operations.operationType, "privacy.review"),
-        eq(operations.status, "succeeded"),
-      ),
+/** Only a verified same-principal step-up may hand a tab's draft to its successor session. */
+export async function privacyReviewSessionKeys(db: Executor, session: Session): Promise<string[]> {
+  const live = await privacyOperator(db, session);
+  const keys = [live.id];
+  let childId = live.id;
+  while (true) {
+    const edges = await db
+      .select()
+      .from(auditEvents)
+      .where(
+        and(
+          eq(auditEvents.action, "session.reauthenticate"),
+          eq(auditEvents.actorKind, live.actor.kind),
+          eq(auditEvents.actorId, live.actor.id),
+          eq(auditEvents.recordType, "principal"),
+          eq(auditEvents.recordId, live.account.id),
+          sql`${auditEvents.payload}->>'sessionId' = ${childId}`,
+        ),
+      )
+      .limit(2);
+    if (!edges.length) return keys;
+    const edge = edges[0];
+    const proof = z
+      .object({ method: z.literal("passkey"), passkeyId: z.uuid(), previousSessionId: z.uuid() })
+      .safeParse(edge?.payload);
+    if (
+      edges.length !== 1 ||
+      !edge ||
+      !proof.success ||
+      keys.includes(proof.data.previousSessionId)
     )
-    .orderBy(desc(operations.createdAt))
-    .limit(50);
-  return rows.map((row) => row.key);
+      return [live.id];
+    const [child] = await db.select().from(sessions).where(eq(sessions.id, childId));
+    const [parent] = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.id, proof.data.previousSessionId));
+    const at = edge.occurredAt.getTime();
+    if (
+      !child ||
+      !parent ||
+      child.principalKind !== live.account.kind ||
+      child.principalId !== live.account.id ||
+      parent.principalKind !== live.account.kind ||
+      parent.principalId !== live.account.id ||
+      parent.revokedAt?.getTime() !== at ||
+      child.createdAt.getTime() !== at ||
+      child.reverifiedAt?.getTime() !== at ||
+      parent.createdAt.getTime() > at ||
+      parent.expiresAt.getTime() !== child.expiresAt.getTime() ||
+      parent.expiresAt.getTime() <= at
+    )
+      return [live.id];
+    keys.push(parent.id);
+    childId = parent.id;
+  }
+}
+
+export type PrivacyReviewStatus = "absent" | "failed" | "succeeded" | "pending" | "unknown";
+
+/** Exact own-key reconciliation; no receipt contents leave the current read authority. */
+export async function reconcilePrivacyReview(
+  db: Executor,
+  session: Session,
+  input: { id: string; operationId: string; version?: number },
+): Promise<PrivacyReviewStatus> {
+  const value = z
+    .object({ id: z.uuid(), operationId: z.uuid(), version: z.int().positive().optional() })
+    .parse(input);
+  return db.transaction(async (tx) => {
+    const live = await privacyOperator(tx, session, value.id);
+    // The writer holds this same lock while its receipt is uncommitted. No visible row
+    // without the lock is not evidence that the operation never reached the server.
+    const lockKey = JSON.stringify([
+      live.actor.kind,
+      live.actor.id,
+      "privacy.review",
+      value.operationId,
+    ]);
+    const [lock] = await tx.execute<{ locked: boolean }>(
+      sql`select pg_try_advisory_xact_lock(hashtextextended(${lockKey}, 0)) as locked`,
+    );
+    if (!lock?.locked) return "pending";
+    const [receipt] = await tx
+      .select()
+      .from(operations)
+      .where(
+        and(
+          eq(operations.actorKind, live.actor.kind),
+          eq(operations.actorId, live.actor.id),
+          eq(operations.operationType, "privacy.review"),
+          eq(operations.idempotencyKey, value.operationId),
+        ),
+      );
+    if (!receipt) return "absent";
+    const bound =
+      receipt.resultType === "privacy_request" &&
+      receipt.resultId === value.id &&
+      value.version !== undefined &&
+      receipt.expectedRevision === value.version;
+    // Historical successful reviews predate subject/version binding, but their stored
+    // result identifies the request. A legacy failure or uncertain result stays fenced.
+    const legacySuccess =
+      receipt.resultType === null &&
+      receipt.resultId === null &&
+      receipt.expectedRevision === null &&
+      receipt.status === "succeeded" &&
+      z.object({ id: z.literal(value.id) }).safeParse(receipt.outcome).success;
+    if (!bound && !legacySuccess) return "unknown";
+    if (receipt.status === "succeeded" || receipt.status === "failed") return receipt.status;
+    return receipt.status === "outcome_unknown" ? "unknown" : "pending";
+  });
 }
 
 export function privacyFormRoute(area: "privacy" | "preferences" | "operations/privacy") {

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { passkeys, principals, staffMemberships } from "@/db/schema";
+import { auditEvents, passkeys, principals, staffMemberships } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { getEnv } from "../config/env";
 import { createClient, createStaff } from "../testing";
@@ -65,6 +65,13 @@ describe("AT36–AT39: passkey ceremonies with real P-256 signatures", () => {
       { expectedChallenge: options.challenge },
     );
     expect((await readSession(t.db, signedIn.token))?.actor).toEqual(account.actor);
+    const signIn = (
+      await t.db.select().from(auditEvents).where(eq(auditEvents.recordId, account.id))
+    ).find((event) => event.action === "session.sign_in");
+    expect(signIn).toMatchObject({
+      payload: { sessionId: signedIn.session.id, method: "passkey" },
+    });
+    expect(signIn?.payload).not.toHaveProperty("previousSessionId");
   });
   it("a second registration of the same credential cannot satisfy the minimum", async () => {
     const { issued, key } = await enrolled();
@@ -147,6 +154,15 @@ describe("AT36–AT39: passkey ceremonies with real P-256 signatures", () => {
     expect(await readSession(t.db, old.token)).toBeNull();
     expect(signedIn.session.expiresAt).toEqual(old.session.expiresAt);
     expect(signedIn.session.reverifiedAt?.getTime()).toBeGreaterThan(start.getTime());
+    expect(signedIn.session.id).not.toBe(old.session.id);
+    const event = (
+      await t.db.select().from(auditEvents).where(eq(auditEvents.recordId, account.id))
+    ).find((row) => row.action === "session.reauthenticate");
+    expect(event?.payload).toMatchObject({
+      sessionId: signedIn.session.id,
+      previousSessionId: old.session.id,
+      method: "passkey",
+    });
     const other = await enrolled();
     const next = await begin();
     await expect(

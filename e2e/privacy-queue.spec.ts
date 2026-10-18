@@ -15,6 +15,79 @@ test.afterAll(async () => {
   await connection.end();
 });
 
+async function restorePrivateTab(page: import("@playwright/test").Page) {
+  await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(page.locator("[data-private-content]")).toBeHidden();
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
+
+// A real software-authenticator assertion exercises production verification and session
+// rotation on every browser engine. The browser ceremony prompt itself is outside this test.
+function passkeyHandoff(mode: "prepare" | "complete", token: string, prepared?: unknown) {
+  return JSON.parse(
+    execFileSync(
+      process.execPath,
+      [
+        "--conditions=react-server",
+        "--import",
+        "tsx",
+        "--input-type=module",
+        "--eval",
+        `
+      import { readFileSync } from "node:fs";
+      import postgres from "postgres";
+      import { drizzle } from "drizzle-orm/postgres-js";
+      import * as schema from "./src/db/schema/index.ts";
+      import { readSession } from "./src/server/auth/sessions.ts";
+      import { startPasskeyRegistration, finishPasskeyRegistration, startPasskeyAuthentication,
+        finishPasskeyAuthentication } from "./src/server/auth/passkeys.ts";
+      import { SoftAuthenticator } from "./src/server/auth/testing-authenticator.ts";
+      const input = JSON.parse(readFileSync(0, "utf8"));
+      const connection = postgres(process.env.E2E_DATABASE_URL, { max: 1, onnotice: () => {} });
+      const db = drizzle(connection, { schema });
+      try {
+        const session = await readSession(db, input.token);
+        if (!session) throw new Error("Expected live synthetic session");
+        if (input.mode === "prepare") {
+          const key = new SoftAuthenticator("staff");
+          const registration = await startPasskeyRegistration(db, session);
+          await finishPasskeyRegistration(db, session, key.register(registration.challenge), {
+            expectedChallenge: registration.challenge, label: "Synthetic recovery key" });
+          const options = await startPasskeyAuthentication(db, "staff", { clientIp: "192.0.2.233" });
+          console.log(JSON.stringify({ challenge: options.challenge, response: key.authenticate(options.challenge) }));
+        } else {
+          const issued = await finishPasskeyAuthentication(db, "staff", input.prepared.response, {
+            expectedChallenge: input.prepared.challenge, currentSessionToken: input.token, reauthenticate: session });
+          console.log(JSON.stringify({ token: issued.token, sessionId: issued.session.id }));
+        }
+      } finally { await connection.end(); }
+    `,
+      ],
+      {
+        env: {
+          ...process.env,
+          AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+          DATABASE_URL: url,
+          APP_ORIGIN: origins.public,
+          PUBLIC_ORIGIN: origins.public,
+          CLIENT_ORIGIN: origins.client,
+          STAFF_ORIGIN: origins.staff,
+        },
+        input: JSON.stringify({ mode, token, prepared }),
+        encoding: "utf8",
+        timeout: 30_000,
+      },
+    ),
+  );
+}
+
 test("privacy queue reaches and reviews an unresolved request beyond 100 without JavaScript", async ({
   browser,
 }, testInfo) => {
@@ -255,7 +328,7 @@ test("C-11: a dirty privacy review keeps its reviewed version through a page ref
     .set({ version: Number(version) + 1 })
     .where(eq(schema.privacyRequests.id, id));
   // The guard conceals the page synchronously and reveals it after a new authorized render.
-  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await restorePrivateTab(page);
   const record = form.getByRole("button", { name: "Record human review", exact: true });
   await expect(record).toBeVisible({ timeout: 30_000 });
   await expect(form.locator('input[name="expectedVersion"]')).toHaveValue(version);
@@ -347,7 +420,7 @@ test("C-11: another staff member never inherits a dirty review or its operation"
   await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
   // Staff member B takes over this tab; the refreshed page belongs to B alone.
   await signIn(b.token);
-  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await restorePrivateTab(page);
   await expect(page.getByRole("heading", { level: 1, name: "Privacy review" })).toBeVisible({
     timeout: 30_000,
   });
@@ -412,9 +485,97 @@ test("C-11: a recorded review whose answer was lost is cleared, not restored", a
     })
     .toBe("verifying");
   await page.unrouteAll({ behavior: "ignoreErrors" });
+  const [session] = await db
+    .select()
+    .from(schema.sessions)
+    .where(eq(schema.sessions.id, fixture.sessionId));
+  if (!session) throw new Error("Missing synthetic session");
+  // The exact saved success remains recoverable even after more than 50 newer reviews.
+  await db.insert(schema.operations).values(
+    Array.from({ length: 55 }, () => ({
+      actorKind: "staff" as const,
+      actorId: session.principalId,
+      operationType: "privacy.review",
+      idempotencyKey: crypto.randomUUID(),
+      requestHash: "synthetic later receipt",
+      status: "succeeded" as const,
+      resultType: "privacy_request",
+      resultId: fixture.targetId,
+      expectedRevision: 1,
+      outcome: { id: fixture.targetId },
+    })),
+  );
   await page.goto(position);
   await expect(form).toHaveCount(1);
   await expect(form.getByText(restoredText, { exact: false })).toHaveCount(0);
+  await expect(form.getByText("The action was recorded.", { exact: true })).toBeVisible();
+  await expect(
+    form.getByRole("button", { name: "Record human review", exact: true }),
+  ).toBeDisabled();
+});
+
+test("C-11: pending and unknown saved keys remain fenced until exact reconciliation permits fresh review", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  const { fixture, form, position } = await ownReview(page);
+  await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
+  await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  const operationId = await form.locator('input[name="operationId"]').inputValue();
+  const version = Number(await form.locator('input[name="expectedVersion"]').inputValue());
+  const [session] = await db
+    .select()
+    .from(schema.sessions)
+    .where(eq(schema.sessions.id, fixture.sessionId));
+  if (!session) throw new Error("Missing synthetic session");
+  const [receipt] = await db
+    .insert(schema.operations)
+    .values({
+      actorKind: "staff",
+      actorId: session.principalId,
+      operationType: "privacy.review",
+      idempotencyKey: operationId,
+      requestHash: "synthetic unresolved receipt",
+      status: "in_progress",
+      resultType: "privacy_request",
+      resultId: fixture.targetId,
+      expectedRevision: version,
+    })
+    .returning();
+  if (!receipt) throw new Error("Missing synthetic receipt");
+  for (const status of ["in_progress", "outcome_unknown"] as const) {
+    await db.update(schema.operations).set({ status }).where(eq(schema.operations.id, receipt.id));
+    await page.goto(position);
+    await expect(
+      form.getByRole("button", { name: "Check this action again", exact: true }),
+    ).toBeEnabled();
+    await expect(
+      form.getByRole("button", { name: "Record human review", exact: true }),
+    ).toBeDisabled();
+    const saved = await page.evaluate(
+      ({ sessionId, targetId }) =>
+        JSON.parse(
+          window.sessionStorage.getItem(`privacy-review:${sessionId}:${targetId}`) ?? "null",
+        ),
+      fixture,
+    );
+    expect(saved).toMatchObject({ operationId, version });
+    const [request] = await db
+      .select()
+      .from(schema.privacyRequests)
+      .where(eq(schema.privacyRequests.id, fixture.targetId));
+    expect(request).toMatchObject({ state: "received", version });
+  }
+  await db
+    .update(schema.operations)
+    .set({ status: "failed", outcome: { code: "validation_failed" } })
+    .where(eq(schema.operations.id, receipt.id));
+  await form.getByRole("button", { name: "Check this action again", exact: true }).click();
+  await expect(form.getByText(restoredText, { exact: false })).toBeVisible();
+  await expect(
+    form.getByRole("button", { name: "Record human review", exact: true }),
+  ).toBeEnabled();
+  await expect(form.getByRole("checkbox", { name: /I reviewed the policy/ })).not.toBeChecked();
 });
 
 test("C-11: an unrelated receipt in the address does not clear an unsent review", async ({
@@ -432,25 +593,47 @@ test("C-11: an unrelated receipt in the address does not clear an unsent review"
   );
 });
 
-test("C-11: a passive reauthorization keeps the unsent review for this session", async ({
+test("C-11: a verified same-principal session rotation keeps the unsent review without confirmation", async ({
   page,
 }) => {
   test.setTimeout(120_000);
   const { fixture, form, position } = await ownReview(page);
   await form.getByLabel("Where the request goes next", { exact: true }).selectOption("verifying");
   await form.getByRole("checkbox", { name: /I reviewed the policy/ }).check();
+  const prepared = passkeyHandoff("prepare", fixture.token);
   await db
     .update(schema.sessions)
     .set({ reverifiedAt: new Date(Date.now() - 3600_000) })
     .where(eq(schema.sessions.id, fixture.sessionId));
-  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await restorePrivateTab(page);
   await expect(page).toHaveURL((current) => current.pathname === "/en/access/reauth", {
     timeout: 30_000,
   });
-  await db
-    .update(schema.sessions)
-    .set({ reverifiedAt: new Date() })
+  const successor = passkeyHandoff("complete", fixture.token, prepared) as {
+    token: string;
+    sessionId: string;
+  };
+  expect(successor.sessionId).not.toBe(fixture.sessionId);
+  const [old] = await db
+    .select()
+    .from(schema.sessions)
     .where(eq(schema.sessions.id, fixture.sessionId));
+  const [next] = await db
+    .select()
+    .from(schema.sessions)
+    .where(eq(schema.sessions.id, successor.sessionId));
+  expect(old?.revokedAt).not.toBeNull();
+  expect(next?.principalId).toBe(old?.principalId);
+  expect(next?.expiresAt).toEqual(old?.expiresAt);
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: successor.token,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
   await page.goto(position);
   await expect(form.getByText(restoredText, { exact: false })).toBeVisible();
   await expect(form.getByLabel("Where the request goes next", { exact: true })).toHaveValue(
