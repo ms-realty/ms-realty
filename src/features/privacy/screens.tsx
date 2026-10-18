@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
@@ -6,7 +7,7 @@ import { isPublicLocale } from "@/i18n/config";
 import { formatDate } from "@/i18n/format";
 import type { Session } from "@/server/auth/sessions";
 import { wireCode } from "@/server/errors";
-import { privateReceipt } from "@/server/privacy/native";
+import { privateReceipt, recordedPrivacyReviewKeys } from "@/server/privacy/native";
 import { getPreferences, preferencePurposes } from "@/server/privacy/preferences";
 import {
   clientPrivacyRequests,
@@ -21,6 +22,7 @@ import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import { privacyCopy, privacyLabel } from "./copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
+import { ReviewEnvelope } from "./review-envelope";
 
 type Query = { error?: string; receipt?: string; after?: string; before?: string };
 function Frame({ title, lead, children }: { title: string; lead: string; children: ReactNode }) {
@@ -428,6 +430,7 @@ export async function StaffPrivacyScreen({
   const search = privacyQueuePath(locale, position).split("?")[1];
   const submitPath = `/${locale}/operations/privacy/submit${search ? `?${search}` : ""}`;
   const owners = await privacyOwners(getDb());
+  const recorded = await recordedPrivacyReviewKeys(getDb(), session);
   return (
     <Frame title={c.operations} lead={c.staffLead}>
       <Result query={query} locale={locale} session={session} />
@@ -437,7 +440,7 @@ export async function StaffPrivacyScreen({
         const next = privacyRequestMachine.transitions[record.state];
         return (
           <section
-            key={record.id}
+            key={`${record.id}:${session.id}`}
             className="grid min-w-0 grid-cols-1 gap-4 rounded-panel border border-divider bg-surface p-5 wrap-anywhere"
           >
             <h2 className="text-section font-semibold">
@@ -462,7 +465,15 @@ export async function StaffPrivacyScreen({
                 action={submitPath}
                 className="grid min-w-0 grid-cols-1 gap-4"
               >
-                <Envelope intent="review" id={record.id} version={record.version} />
+                <ReviewEnvelope
+                  id={record.id}
+                  version={record.version}
+                  operationId={randomUUID()}
+                  sessionKey={session.id}
+                  recorded={recorded}
+                  restoredLabel={c.restoredReview}
+                  unkeptLabel={c.unkeptReview}
+                />
                 {/* A wrapping label would add the chosen option to the select's accessible name. */}
                 <div className="grid gap-2">
                   <label htmlFor={`${record.id}-to`} className={labelClass}>

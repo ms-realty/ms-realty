@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { operations } from "@/db/schema";
 import type { PublicLocale } from "@/domain/ids";
@@ -39,6 +39,28 @@ export async function privateReceipt(db: Executor, session: Session, id: unknown
       ),
     );
   return receipt && /^(privacy|preferences)\./.test(receipt.type) ? receipt.id : null;
+}
+
+/**
+ * C-11: the operation keys of this actor's recent recorded privacy reviews. A review kept in
+ * the browser whose key is here was recorded (even if its answer was lost) and is cleared;
+ * nothing else is inferred from a receipt in the address.
+ */
+export async function recordedPrivacyReviewKeys(db: Executor, session: Session) {
+  const rows = await db
+    .select({ key: operations.idempotencyKey })
+    .from(operations)
+    .where(
+      and(
+        eq(operations.actorKind, session.actor.kind),
+        eq(operations.actorId, session.actor.id),
+        eq(operations.operationType, "privacy.review"),
+        eq(operations.status, "succeeded"),
+      ),
+    )
+    .orderBy(desc(operations.createdAt))
+    .limit(50);
+  return rows.map((row) => row.key);
 }
 
 export function privacyFormRoute(area: "privacy" | "preferences" | "operations/privacy") {
