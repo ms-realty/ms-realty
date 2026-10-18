@@ -56,6 +56,9 @@ describe("production runtime role boundary", () => {
     expect(worker.DATABASE_URL).toBe(env.WORKER_DATABASE_URL);
     expect(migrator.DATABASE_URL).toBe(env.MIGRATOR_DATABASE_URL);
     expect(worker.EMAIL_RELAY_URL).toBe("https://app.makler-realty.com/__release/email");
+    expect(web.JOB_QUEUE_SCHEMA_PRECREATED).toBe("true");
+    expect(worker.JOB_QUEUE_SCHEMA_PRECREATED).toBe("true");
+    expect(migrator).not.toHaveProperty("JOB_QUEUE_SCHEMA_PRECREATED");
     for (const role of [web, worker, migrator]) {
       for (const name of [
         "BUILD_SHA",

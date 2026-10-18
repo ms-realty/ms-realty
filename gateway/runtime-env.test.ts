@@ -46,6 +46,9 @@ describe("Staging image role isolation", () => {
       expect(role.EXPECTED_SOURCE_COMMIT).toBe(env.BUILD_SHA);
     }
     expect(worker.EMAIL_RELAY_URL).toBe("https://staging.makler-realty.com/__staging/email");
+    expect(web.JOB_QUEUE_SCHEMA_PRECREATED).toBe("true");
+    expect(worker.JOB_QUEUE_SCHEMA_PRECREATED).toBe("true");
+    expect(migrator).not.toHaveProperty("JOB_QUEUE_SCHEMA_PRECREATED");
     expect(() => runtimeEnvironment({ ...env, STAGING: "1" }, "web")).toThrow();
     expect(() =>
       runtimeEnvironment(

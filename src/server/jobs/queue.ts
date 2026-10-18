@@ -66,6 +66,8 @@ export class JobQueue {
   constructor(connectionString: string, options: { producer?: boolean } = {}) {
     this.#boss = new PgBoss({
       ...databaseTransport(connectionString).pgOptions,
+      // Hosted roles own a precreated queue schema, without CREATE on the database.
+      createSchema: process.env.JOB_QUEUE_SCHEMA_PRECREATED !== "true",
       ...(options.producer ? { supervise: false, schedule: false } : {}),
     });
     this.#boss.on("error", (error) => console.error("[jobs]", error));

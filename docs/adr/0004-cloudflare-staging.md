@@ -50,6 +50,12 @@ are revoked; none is re-approved by this ADR. Sold listings and all legacy conte
 stay in scope. Missing content or equivalent targets must block parity, never manufacture
 a homepage redirect or a launch PASS.
 
-The inventory records the actual GitHub HTTP 403 on staging-branch push and on Environment
-creation, with no fallback identity. No staging URL or provider delivery proof exists yet.
-This ADR records the owner's implementation decisions, not R00 or any release-gate acceptance.
+The initial inventory preserves the GitHub HTTP 403 on staging-branch push and Environment
+creation. Later protected staging runs reached the three-role private TLS database and an
+explicitly completed migration; a failed queue startup still prevented runtime qualification.
+These delivery observations do not establish staging parity, R00 or production acceptance.
+
+Hosted web and worker roles set `JOB_QUEUE_SCHEMA_PRECREATED=true`. The existing `pgboss`
+schema is owned by the worker, which can install its queue tables without database `CREATE`.
+pg-boss must skip `CREATE SCHEMA`, even when the schema already exists. Local disposable
+databases retain automatic schema creation. Runtime startup does not widen database grants.

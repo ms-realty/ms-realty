@@ -114,6 +114,7 @@ export function productionRuntimeEnvironment(
     HOSTNAME: "0.0.0.0",
     PORT: "3000",
     RUNTIME_DEFER_WEB_START: "true",
+    JOB_QUEUE_SCHEMA_PRECREATED: "true",
     APP_ORIGIN: productionOrigins.public,
     CANONICAL_ORIGIN: productionOrigins.public,
     PUBLIC_ORIGIN: productionOrigins.public,
