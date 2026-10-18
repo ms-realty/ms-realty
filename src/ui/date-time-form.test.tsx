@@ -49,7 +49,7 @@ describe("UI11 progressive exact-instant entry", () => {
     expect(input).toHaveAttribute("step", "1");
     expect(input).toHaveValue("2026-10-25T03:30:42");
     fireEvent.change(input, { target: { value: "2026-10-25T03:30:43" } });
-    fireEvent.change(screen.getByLabelText("Which occurrence?"), { target: { value: "earlier" } });
+    fireEvent.change(screen.getByLabelText("Which of the two?"), { target: { value: "earlier" } });
     expect(container.querySelector("output")?.textContent).toBe("2026-10-25T00:30:43.000Z");
     expect(container.querySelector('[id$="-readback"]')).toHaveTextContent("03:30:43");
     const form = container.querySelector("form");
@@ -91,7 +91,7 @@ describe("UI11 progressive exact-instant entry", () => {
       "2026-10-25T03:30",
     );
   });
-  it("does not preselect an autumn choice for a prefilled ordinary time", () => {
+  it("offers no autumn choice for an ordinary time; the server asks after a native post", () => {
     const container = document.createElement("div");
     container.innerHTML = renderToString(
       <form>
@@ -107,9 +107,23 @@ describe("UI11 progressive exact-instant entry", () => {
     const input = container.querySelector<HTMLInputElement>('input[name="dueAt"]');
     const form = container.querySelector("form");
     if (!input || !form) throw new Error("Missing native time form");
+    expect(container.querySelector('select[name="dueAtOccurrence"]')).toBeNull();
     input.value = "2026-10-25T03:30";
-    expect(new FormData(form).get("dueAtOccurrence")).toBe("");
+    expect(new FormData(form).get("dueAtOccurrence")).toBeNull();
     expect(() => formInstant(readTimeFormValues(new FormData(form), ["dueAt"]), "dueAt")).toThrow();
+    // The rejected value comes back with the choice it now needs.
+    const again = document.createElement("div");
+    again.innerHTML = renderToString(
+      <DateTimeField
+        id="due"
+        name="dueAt"
+        label="Follow-up"
+        locale="en"
+        defaultValue="2026-10-25T03:30"
+        error="This time happens twice: the clocks go back one hour that night. Choose which one you mean."
+      />,
+    );
+    expect(again.querySelector('select[name="dueAtOccurrence"]')).not.toBeNull();
   });
   it("native HTML posts the agency wall time, selected fold and exact prefill without JavaScript", () => {
     const container = document.createElement("div");
@@ -161,12 +175,13 @@ describe("UI11 progressive exact-instant entry", () => {
     }
   });
 
-  it("stores the chosen fold, then clears it when another wall time is entered", () => {
+  it("stores the chosen fold, then drops the choice when another wall time is entered", () => {
     const { container } = render(<TimeForm />);
-    fireEvent.change(screen.getByLabelText("Which occurrence?"), { target: { value: "earlier" } });
+    fireEvent.change(screen.getByLabelText("Which of the two?"), { target: { value: "earlier" } });
     expect(container.querySelector("output")?.textContent).toBe("2026-10-25T00:30:00.000Z");
     fireEvent.change(screen.getByLabelText("Follow-up"), { target: { value: "2026-10-25T04:30" } });
-    expect(screen.getByLabelText("Which occurrence?")).toHaveValue("");
+    // 04:30 happens once that night, so there is nothing to choose.
+    expect(screen.queryByLabelText("Which of the two?")).toBeNull();
     const form = container.querySelector("form");
     if (!form) throw new Error("Missing form");
     expect(formInstant(readTimeFormValues(new FormData(form), ["dueAt"]), "dueAt")).toBe(

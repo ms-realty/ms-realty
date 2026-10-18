@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { formatDateTime } from "@/i18n/format";
 import { type RelayEnv, type RelayStore, relayEmail } from "../../../gateway/email-relay";
 import { CloudflareMessageProvider } from "./cloudflare-email";
 import type { OutboundMessage } from "./provider";
@@ -57,8 +58,12 @@ describe("Cloudflare email relay boundary", () => {
       from: config.from,
       to: [input.recipient],
       subject: "Вход в MS Realty",
-      text: "MS Realty\n\nОтворете връзката, за да продължите. Не я препращайте. Ако не очаквате това писмо, можете да го игнорирате.\n\nhttps://my.example.test/bg/access/confirm?token=synthetic\n\n2099-01-01T00:00:00.000Z (UTC)",
+      text: `MS Realty\n\nОтворете връзката, за да продължите. Не я препращайте. Ако не очаквате това писмо, можете да го игнорирате.\n\nhttps://my.example.test/bg/access/confirm?token=synthetic\n\nВръзката е валидна до: ${formatDateTime("bg", "2099-01-01T00:00:00.000Z", { zoneLabel: true })}`,
     });
+    // M-050: the expiry reads on the agency's clock with its zone in words, never UTC or ISO.
+    expect(JSON.parse(String(options?.body)).text).toMatch(
+      /1 януари 2099 г\..*02:00 \(софийско време\)$/,
+    );
     expect(input).toEqual(before);
     // Persisted relay state, not this adapter, decides whether a later call can send.
     await provider.send(input);

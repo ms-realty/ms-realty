@@ -36,9 +36,7 @@ export async function fillAgencyInstant(
         ? "earlier"
         : "";
   if (!occurrence) return;
-  const field = input.locator("xpath=..");
-  const disclosure = field.locator("details");
-  if (!(await disclosure.evaluate((element) => element.hasAttribute("open"))))
-    await disclosure.locator("summary").click();
-  await field.locator('select[name$="Occurrence"]').selectOption(occurrence);
+  // The choice appears only once the entered time is in the repeated hour (after hydration;
+  // without JavaScript the server asks for it after the first post).
+  await input.locator("xpath=..").locator('select[name$="Occurrence"]').selectOption(occurrence);
 }

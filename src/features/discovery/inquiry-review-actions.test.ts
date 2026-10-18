@@ -230,11 +230,9 @@ it("P13 retains ranked viewing preferences through Edit, changed sources, Refres
     listingReference: "MS-00001",
     observedManifestId: manifestId,
     viewingFormat: "in_person",
-    viewingTimezone: "Europe/London",
-    viewingStart1: "2030-10-27T01:15",
-    viewingEnd1: "2030-10-27T01:45",
-    viewingStartChoice1: "earlier",
-    viewingEndChoice1: "later",
+    // 2030-10-27: Sofia repeats 03:00–03:59; the visitor is never asked which one.
+    viewingStart1: "2030-10-27T03:15",
+    viewingEnd1: "2030-10-27T03:45",
     viewingStart2: "2030-10-26T10:00",
     viewingEnd2: "2030-10-26T11:00",
     viewingStart3: "2030-10-28T10:00",
@@ -254,13 +252,13 @@ it("P13 retains ranked viewing preferences through Edit, changed sources, Refres
     version: 1,
     provenance: "self_declared",
     format: "in_person",
-    timezone: "Europe/London",
+    timezone: "Europe/Sofia",
     windows: [
       {
         startsAtLocal: state.values.viewingStart1,
         endsAtLocal: state.values.viewingEnd1,
         startOccurrence: "earlier",
-        endOccurrence: "later",
+        endOccurrence: "earlier",
       },
       { startsAtLocal: state.values.viewingStart2, endsAtLocal: state.values.viewingEnd2 },
       { startsAtLocal: state.values.viewingStart3, endsAtLocal: state.values.viewingEnd3 },
@@ -300,9 +298,9 @@ it("P13 rechecks future windows at final submission even while the review token 
       ...state.values,
       purpose: "viewing_request",
       listingReference: "MS-00001",
-      viewingTimezone: "UTC",
-      viewingStart1: "2030-04-01T10:05",
-      viewingEnd1: "2030-04-01T10:15",
+      // Sofia wall times (UTC+3 in April): 10:05–10:15 UTC.
+      viewingStart1: "2030-04-01T13:05",
+      viewingEnd1: "2030-04-01T13:15",
     };
     mocks.source.mockResolvedValue({
       status: "listing",

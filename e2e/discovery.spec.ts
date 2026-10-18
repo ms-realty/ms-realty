@@ -596,26 +596,35 @@ for (const javaScriptEnabled of [true, false]) {
         day.setUTCDate(day.getUTCDate() + offset);
         return day.toISOString().slice(0, 10);
       };
+      // M-065: Sofia time, named in words; 03:15–03:45 on the autumn night happens twice and
+      // is read as its first occurrence without asking the visitor.
       const windows = [
         {
-          startsAtLocal: `${date(0)}T01:15`,
-          endsAtLocal: `${date(0)}T01:45`,
+          startsAtLocal: `${date(0)}T03:15`,
+          endsAtLocal: `${date(0)}T03:45`,
           startOccurrence: "earlier",
-          endOccurrence: "later",
+          endOccurrence: "earlier",
         },
         { startsAtLocal: `${date(-1)}T10:00`, endsAtLocal: `${date(-1)}T11:00` },
         { startsAtLocal: `${date(1)}T10:00`, endsAtLocal: `${date(1)}T11:00` },
       ];
+      const viewing = page.getByRole("group", { name: "Viewing preferences", exact: true });
+      await expect(viewing.getByLabel(/time ?zone/i)).toHaveCount(0);
+      await expect(viewing.getByRole("combobox")).toHaveCount(1);
+      await expect(viewing).not.toContainText(/Europe\/|occurrence|Repeated-clock/);
+      await expect(viewing.getByLabel(/^From date and time 1/)).toHaveAccessibleDescription(
+        /^Sofia time/,
+      );
       await page.getByLabel("Preferred format", { exact: true }).selectOption("in_person");
-      await page.getByLabel("Timezone for preferred times", { exact: true }).fill("Europe/London");
-      await page.locator('details:has([name="viewingStartChoice1"]) > summary').click();
-      await page.locator('[name="viewingStartChoice1"]').selectOption("earlier");
-      await page.locator('[name="viewingEndChoice1"]').selectOption("later");
       await page.locator('details:has([name="viewingStart2"]) > summary').click();
       for (const [index, preferred] of windows.entries()) {
         await page.locator(`[name="viewingStart${index + 1}"]`).fill(preferred.startsAtLocal);
         await page.locator(`[name="viewingEnd${index + 1}"]`).fill(preferred.endsAtLocal);
       }
+      if (javaScriptEnabled)
+        await expect(viewing.getByLabel(/^From date and time 1/)).toHaveAccessibleDescription(
+          /03:15.*The clocks go back one hour that night/,
+        );
       const accessNeeds = "Synthetic private step-free access request";
       await page.getByLabel(/^Practical access needs/).fill(accessNeeds);
       await page.getByLabel("Email", { exact: true }).fill("synthetic-viewer@example.test");
@@ -623,10 +632,9 @@ for (const javaScriptEnabled of [true, false]) {
       await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
       const summary = page.getByRole("region", { name: "Viewing preferences", exact: true });
       await expect(summary).toContainText("This is a request, not a booking");
-      await expect(summary).toContainText("United Kingdom Time");
-      await expect(summary).not.toContainText("Europe/London");
-      await expect(summary).toContainText("First occurrence");
-      await expect(summary).toContainText("Second occurrence");
+      await expect(summary).toContainText("Sofia time");
+      await expect(summary).toContainText("We'll use the first one, before the change.");
+      await expect(summary).not.toContainText(/Europe\/|UTC|GMT|\d{4}-\d{2}-\d{2}/);
       await expect(summary).toContainText(accessNeeds);
       expect(
         await db.select().from(schema.inquiries).where(eq(schema.inquiries.submissionKey, key)),
@@ -663,7 +671,7 @@ for (const javaScriptEnabled of [true, false]) {
           version: 1,
           provenance: "self_declared",
           format: "in_person",
-          timezone: "Europe/London",
+          timezone: "Europe/Sofia",
           windows,
           accessNeeds,
         },

@@ -13,7 +13,7 @@ import {
   inquiryStatus,
   inquiryUnknownMessage,
 } from "@/features/discovery/inquiry-state";
-import { viewingCopy } from "@/features/discovery/viewing-copy";
+import { viewingTimeMessage } from "@/features/discovery/viewing-copy";
 import { viewingErrorField } from "@/features/discovery/viewing-fields";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
@@ -187,7 +187,7 @@ export async function sendInquiry(
         if (field in emptyInquiry)
           fields[field] = [
             name.startsWith("viewingPreferences.windows")
-              ? viewingCopy(locale).invalidTime
+              ? viewingTimeMessage(locale, error.fieldErrors?.[name]?.[0])
               : copy.invalid,
           ];
       }

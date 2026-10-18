@@ -22,13 +22,15 @@ export type DateTimeFieldProps = Omit<
   optionalLabel?: string;
   /** IANA zone the wall time is entered in (the agency's by default); shown in words only. */
   timeZone?: string;
-  /** A commitment needs an explicit autumn occurrence; a preference may take its first one. */
+  /**
+   * A commitment ("reject") asks which occurrence of a repeated autumn hour is meant, and only
+   * when the entered time is one; a visitor's preference ("first") takes the first one.
+   */
   repeatedHour?: "reject" | "first";
   /** Keep the resolved occurrence in an ActionForm's existing logical field value. */
   onValueChange?: (value: string) => void;
-  /** A caller with its own clock-choice controls (viewing preferences) supplies them. */
-  occurrence?: string;
-  externalOccurrence?: boolean;
+  /** The form keeps the wall time itself (viewing preferences) rather than an instant. */
+  localValue?: boolean;
 };
 
 const noSubscription = () => () => {};
@@ -49,8 +51,7 @@ export function DateTimeField({
   timeZone = agencyTimeZone,
   repeatedHour = "reject",
   onValueChange,
-  occurrence,
-  externalOccurrence = false,
+  localValue = false,
   className,
   onChange,
   ...props
@@ -58,7 +59,7 @@ export function DateTimeField({
   const controlled = props.value !== undefined;
   const [typed, setTyped] = useState(String(props.defaultValue ?? ""));
   const raw = controlled ? String(props.value ?? "") : typed;
-  const original = isInstantInput(raw) ? raw : "";
+  const original = !localValue && isInstantInput(raw) ? raw : "";
   const seconds = props.step === "any" || (props.step !== undefined && Number(props.step) < 60);
   const value = original ? localInputValue(original, timeZone, seconds ? "second" : "minute") : raw;
   const [choice, setChoice] = useState("");
@@ -69,7 +70,7 @@ export function DateTimeField({
         ? "earlier"
         : "later"
       : "";
-  const selected = occurrence ?? (original ? savedChoice : choice);
+  const selected = original ? savedChoice : choice;
   // The read-back is the browser's ICU wording; render it after hydration only.
   const hydrated = useSyncExternalStore(
     noSubscription,
@@ -144,19 +145,18 @@ export function DateTimeField({
           onChange?.(event);
         }}
       />
-      {props.name && !externalOccurrence ? (
+      {props.name && !localValue ? (
         <>
           <input type="hidden" name={`${props.name}WallTime`} value="yes" />
           <input type="hidden" name={`${props.name}Original`} value={original} />
         </>
       ) : null}
-      {repeatedHour === "reject" && !externalOccurrence ? (
-        <details
-          open={Boolean(read && (read.ok ? read.repeated : read.reason === "ambiguous_local_time"))}
-        >
-          <summary className="cursor-pointer py-2 text-caption underline">
-            {copy.occurrence}
-          </summary>
+      {/* The repeated-hour choice exists only while the entered time is one (ux-spec §18.5). */}
+      {repeatedHour === "reject" &&
+      !localValue &&
+      read &&
+      (read.ok ? read.repeated : read.reason === "ambiguous_local_time") ? (
+        <div className="flex flex-col gap-2">
           <label htmlFor={`${id}-occurrence`} className={labelClass}>
             {copy.occurrence}
           </label>
@@ -179,7 +179,7 @@ export function DateTimeField({
             <option value="earlier">{copy.earlier}</option>
             <option value="later">{copy.later}</option>
           </select>
-        </details>
+        </div>
       ) : null}
       {hydrated ? (
         <p

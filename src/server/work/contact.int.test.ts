@@ -118,6 +118,12 @@ describe("O03 / AT14 human-attested contact and owned follow-up", () => {
     expect(view.inquiry.acknowledgedAt).toEqual(before?.acknowledgedAt);
     expect(view.inquiry.firstResponseAt).toBeNull();
     expect((await inquiryTasks(f.input.id)).map((task) => task.state)).toEqual(["open", "open"]);
+    expect(
+      (await inquiryTasks(f.input.id)).find((task) => task.id === saved.outcome.taskId),
+    ).toMatchObject({
+      dueAt: new Date(f.input.dueAt),
+      dueTimezone: "Europe/Sofia",
+    });
     expect(view.activity.find((entry) => entry.contact)?.contact).toMatchObject({
       result: "unanswered",
       contactedAt: f.input.contactedAt,
