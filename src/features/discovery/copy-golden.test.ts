@@ -46,6 +46,19 @@ const golden = {
   },
 } as const;
 
+// The intent question was deliberately rewritten after migration. Restore only its old
+// value for this historical equivalence check; every other key/value keeps its frozen hash.
+// Catalog tests still enforce its presence, nonempty translation, script and placeholders.
+const originalPurpose = {
+  bg: "Цел",
+  en: "Purpose",
+  ru: "Цель",
+  de: "Zweck",
+  nl: "Doel",
+  el: "Σκοπός",
+  he: "מטרה",
+} as const;
+
 function hash(copy: Readonly<Record<string, string>>): string {
   return createHash("sha256")
     .update(
@@ -56,9 +69,11 @@ function hash(copy: Readonly<Record<string, string>>): string {
     .digest("hex");
 }
 
-describe.each([...publicLocales])("%s accessors retain their pre-migration output", (locale) => {
-  it("preserves every discovery and intent key and value", () => {
-    expect(hash(discoveryCopy(locale))).toBe(golden.discovery[locale]);
+describe.each([...publicLocales])("%s accessors preserve the catalog migration", (locale) => {
+  it("preserves discovery except the revised intent question, and every intent key and value", () => {
+    const discovery = discoveryCopy(locale);
+    expect(Object.hasOwn(discovery, "purpose")).toBe(true);
+    expect(hash({ ...discovery, purpose: originalPurpose[locale] })).toBe(golden.discovery[locale]);
     expect(hash(intentCopy(locale))).toBe(golden.intent[locale]);
   });
   it("preserves the search and listing map text independently", () => {
