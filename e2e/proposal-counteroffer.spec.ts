@@ -329,11 +329,33 @@ test("C08 native lost acknowledgement retains the exact draft after the committe
     });
     await form.getByRole("link", { name: copy.status, exact: true }).click();
     await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
-    await expect(client.getByRole("link", { name: copy.checkAgain, exact: true })).toHaveAttribute(
-      "href",
-      statusHref,
+    const checkAgain = client.getByRole("link", { name: copy.checkAgain, exact: true });
+    const currentRecord = client.getByRole("link", { name: copy.back, exact: true });
+    await expect(checkAgain).toHaveAttribute("href", statusHref);
+    const recheckBox = await checkAgain.boundingBox();
+    const recordBox = await currentRecord.boundingBox();
+    expect(recheckBox).not.toBeNull();
+    expect(recordBox).not.toBeNull();
+    if (!recheckBox || !recordBox) throw new Error("Recovery controls must be visible.");
+    for (const box of [recheckBox, recordBox]) {
+      expect(box.width).toBeGreaterThanOrEqual(24);
+      expect(box.height).toBeGreaterThanOrEqual(24);
+    }
+    expect(
+      Math.max(
+        recordBox.x - (recheckBox.x + recheckBox.width),
+        recordBox.y - (recheckBox.y + recheckBox.height),
+      ),
+    ).toBeGreaterThanOrEqual(12);
+    await checkAgain.focus();
+    // macOS WebKit's default link-navigation key is Option-Tab; other profiles use Tab.
+    await client.keyboard.press(
+      process.platform === "darwin" && browser.browserType().name() === "webkit"
+        ? "Alt+Tab"
+        : "Tab",
     );
-    await client.getByRole("link", { name: copy.checkAgain, exact: true }).click();
+    await expect(currentRecord).toBeFocused();
+    await checkAgain.click();
     await expect(client.getByText(copy.statusUnknown, { exact: true })).toBeVisible();
     expect(nativePosts).toBe(1);
     await client.screenshot({
@@ -351,7 +373,8 @@ test("C08 native lost acknowledgement retains the exact draft after the committe
           eq(schema.operations.idempotencyKey, operationId),
         ),
       );
-    await client.reload();
+    // A same-operation GET, rather than another submission, discovers the reconciled result.
+    await checkAgain.click();
     await expect(client.getByText(copy.statusSaved, { exact: true })).toBeVisible();
     await client.screenshot({
       path: info.outputPath("operation-status-saved.png"),

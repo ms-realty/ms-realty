@@ -12,6 +12,7 @@ import { caseFor } from "@/server/cases/shared";
 import { isAppError } from "@/server/errors";
 import { findOperation } from "@/server/operations";
 import { listProposals, proposalContext, readProposal } from "@/server/proposals/queries";
+import { buttonClass } from "@/ui/button-class";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { caseCopy } from "../cases/copy";
@@ -556,17 +557,19 @@ export async function ProposalStatusScreen(
               ? c.statusFailed
               : c.statusUnknown}
       </p>
-      {receipt && receipt.status !== "succeeded" && receipt.status !== "failed" ? (
-        <a
-          className={workflowLink}
-          href={proposalStatus(props.locale, command, id, props.keyValue)}
-        >
-          {c.checkAgain}
+      <div className="flex flex-wrap items-center gap-4">
+        {receipt && receipt.status !== "succeeded" && receipt.status !== "failed" ? (
+          <a
+            className={buttonClass("primary")}
+            href={proposalStatus(props.locale, command, id, props.keyValue)}
+          >
+            {c.checkAgain}
+          </a>
+        ) : null}
+        <a className={buttonClass("secondary")} href={href}>
+          {c.back}
         </a>
-      ) : null}
-      <a className={workflowLink} href={href}>
-        {c.back}
-      </a>
+      </div>
     </WorkflowPage>
   );
 }
