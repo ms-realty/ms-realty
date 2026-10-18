@@ -63,6 +63,7 @@ for (const javascript of [true, false])
         c = copy.imports;
       await page.goto(hostUrl("staff", "/en/operations/imports"));
       await expect(page.getByRole("heading", { name: c.title, exact: true })).toBeVisible();
+      await expect(page.getByRole("main")).toHaveCount(1);
       if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page.getByLabel(c.file, { exact: true }).setInputFiles({
         name: "unsupported.xlsx",
@@ -136,6 +137,17 @@ for (const javascript of [true, false])
       );
       await expect(page.locator("[data-duplicate-review]")).toContainText(d.scope);
       if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      const operationId = await page.locator('input[name="operationId"]').inputValue();
+      await page.goto(
+        hostUrl(
+          "staff",
+          `/en/operations/duplicates/status?left=${f.left}&right=${f.right}&key=${encodeURIComponent(operationId)}`,
+        ),
+      );
+      await expect(page.getByRole("main")).toHaveCount(1);
+      await expect(page.getByText(d.failure, { exact: true })).toBeVisible();
+      if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      await page.getByRole("link", { name: d.compare, exact: true }).click();
       await page
         .getByLabel(d.nextStep, { exact: true })
         .fill("Ask the responsible broker to verify identity against the original contact source");
