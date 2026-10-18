@@ -115,6 +115,9 @@ for (const javascript of [true, false]) {
       await page.goto(hostUrl("staff", `/en/operations/history/${f.publishedEventId}`));
       await expect(detail).toContainText(copy.published);
       await expect(detail).toContainText(copy.current.restricted);
+      await expect(page.getByText(copy.current.restricted, { exact: true })).toBeInViewport({
+        ratio: 1,
+      });
       await expect(detail).toContainText(copy.boundary);
       await expect(detail).toContainText(f.publicationReference);
       const [event] = await db

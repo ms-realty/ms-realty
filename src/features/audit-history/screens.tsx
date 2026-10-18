@@ -154,14 +154,19 @@ export function HistoryDetailScreen({ locale, view }: { locale: string; view: Hi
         </header>
         <Notice
           tone={
-            view.publication.state === "published"
-              ? "info"
-              : view.publication.state === "unconfirmed"
-                ? "warning"
-                : "info"
+            view.publication.state === "unconfirmed" ||
+            (view.publication.current && view.publication.current !== "active")
+              ? "warning"
+              : "info"
           }
           title={copy[view.publication.state]}
         >
+          {view.publication.current ? (
+            <dl className="mb-3 space-y-1" data-history-current-status>
+              <dt className="text-caption">{copy.currentState}</dt>
+              <dd className="font-semibold">{copy.current[view.publication.current]}</dd>
+            </dl>
+          ) : null}
           <p>{copy.boundary}</p>
         </Notice>
         <section className="space-y-4" aria-labelledby="history-what">
@@ -209,7 +214,7 @@ export function HistoryDetailScreen({ locale, view }: { locale: string; view: Hi
             </dd>
           </div>
         </dl>
-        {view.publication.locale || view.publication.verifiedAt || view.publication.current ? (
+        {view.publication.locale || view.publication.verifiedAt ? (
           <section
             className="space-y-4 border-t border-border pt-6"
             aria-labelledby="history-publication"
@@ -232,12 +237,6 @@ export function HistoryDetailScreen({ locale, view }: { locale: string; view: Hi
                   <dd>
                     <RecordTime locale={locale} at={view.publication.verifiedAt} />
                   </dd>
-                </div>
-              ) : null}
-              {view.publication.current ? (
-                <div className="sm:col-span-2">
-                  <dt className="font-semibold">{copy.currentState}</dt>
-                  <dd>{copy.current[view.publication.current]}</dd>
                 </div>
               ) : null}
             </dl>
