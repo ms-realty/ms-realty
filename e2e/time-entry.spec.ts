@@ -8,6 +8,8 @@ import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { proposalCopy } from "../src/features/proposals/copy";
+import { counterofferCopy } from "../src/features/proposals/counteroffer-copy";
 import { hostUrl, origins } from "./hosts";
 import { agencyWallTime } from "./time";
 
@@ -185,25 +187,14 @@ for (const javaScriptEnabled of [true, false]) {
         },
       ]);
       const page = await staff.newPage();
+      const proposal = proposalCopy("en");
       await page.goto(hostUrl("staff", `/en/proposals/${f.proposalId}`));
-      await page
-        .getByLabel(
-          "I reviewed these exact parties, terms, source and deadline. This is a coordination record, not legal approval.",
-          { exact: true },
-        )
-        .check();
-      await page.getByRole("button", { name: "Record exact-terms review", exact: true }).click();
+      await page.getByLabel(proposal.reviewCheck, { exact: true }).check();
+      await page.getByRole("button", { name: proposal.review, exact: true }).click();
       await recorded(page);
       await page.getByRole("link", { name: "Open current record", exact: true }).click();
-      await page
-        .getByLabel(
-          "I reviewed the exact revision and its audience. Make it available to these parties in their client workspace.",
-          { exact: true },
-        )
-        .check();
-      await page
-        .getByRole("button", { name: "Make available to these parties", exact: true })
-        .click();
+      await page.getByLabel(proposal.submitCheck, { exact: true }).check();
+      await page.getByRole("button", { name: proposal.submit, exact: true }).click();
       await recorded(page);
 
       const [current] = await db
@@ -218,10 +209,12 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(
         client.locator(`time[datetime="${current.deadlineAt.toISOString()}"]`).first(),
       ).toContainText("(Sofia time)");
-      const counter = client
-        .locator("form")
-        .filter({ has: client.getByRole("button", { name: "Propose revised terms" }) });
-      const field = counter.getByLabel("Response deadline", { exact: true });
+      const disclosure = client.locator("details").filter({
+        has: client.locator('form input[name="amount"]'),
+      });
+      await disclosure.locator(":scope > summary").click();
+      const counter = disclosure.locator("form");
+      const field = counter.getByLabel(proposal.deadline, { exact: true });
       await expect(field).toHaveAttribute("type", "datetime-local");
       await expect(field).toHaveValue(agencyWallTime(current.deadlineAt));
       await expect(field).toHaveAccessibleDescription(/^Sofia time/);
@@ -229,9 +222,9 @@ for (const javaScriptEnabled of [true, false]) {
       await field.fill(agencyWallTime(deadline));
       expect(agencyWallTime(deadline)).toBe(`${year}-01-20T18:30`);
       await counter
-        .getByLabel("Reason or response note", { exact: true })
+        .getByLabel(proposal.reason, { exact: true })
         .fill("Synthetic counter-offer with a later reply date.");
-      await counter.getByRole("button", { name: "Propose revised terms" }).click();
+      await counter.getByRole("button", { name: counterofferCopy("en").submit }).click();
       if (javaScriptEnabled) await recorded(client);
       await expect
         .poll(async () => {

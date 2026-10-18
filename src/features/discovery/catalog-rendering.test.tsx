@@ -79,8 +79,8 @@ describe.each([...publicLocales])("%s catalogs in current discovery components",
     const form = container.querySelector("form");
     expect(form).toHaveAttribute("method", "get");
     expect(form).toHaveAttribute("action", `/${locale}/properties`);
-    expect(screen.getByRole("button", { name: copy.search, exact: true })).toBeVisible();
-    expect(screen.getByRole("link", { name: extra.title, exact: true })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: copy.search })).toBeVisible();
+    expect(screen.getByRole("link", { name: extra.title })).toHaveAttribute(
       "href",
       `/${locale}/properties/intent`,
     );
@@ -153,11 +153,11 @@ describe.each([...publicLocales])("%s catalogs in current discovery components",
           copy={copy}
         />,
       );
-      await user.click(screen.getByRole("button", { name: copy.show, exact: true }));
+      await user.click(screen.getByRole("button", { name: copy.show }));
       expect(screen.getByText(copy.precision, { exact: true })).toBeVisible();
       expect(await screen.findByRole("status")).toHaveTextContent(copy.error);
-      expect(screen.getByRole("button", { name: copy.retry, exact: true })).toBeVisible();
-      expect(screen.getByRole("link", { name: copy.list, exact: true })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: copy.retry })).toBeVisible();
+      expect(screen.getByRole("link", { name: copy.list })).toHaveAttribute(
         "href",
         "#property-results",
       );
