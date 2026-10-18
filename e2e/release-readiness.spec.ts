@@ -123,6 +123,13 @@ for (const javascript of [true, false])
       if (javascript)
         for (const locale of ["bg", "en", "ru"]) {
           const localized = operationsCopy(locale);
+          await page.goto(hostUrl("staff", `/${locale}/operations/readiness`));
+          await expect(
+            page.getByRole("link", {
+              name: `${localized.openRequirement}: ${localized.gates.R01.title}`,
+              exact: true,
+            }),
+          ).toBeInViewport({ ratio: 1 });
           for (const gate of ["R01", "R02", "R06"] as const) {
             await page.goto(hostUrl("staff", `/${locale}/operations/readiness/${gate}`));
             await expect(

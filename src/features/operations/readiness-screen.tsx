@@ -76,7 +76,7 @@ export function ReleaseReadinessScreen({
                   </a>
                 </h2>
               ) : null}
-              <p className="max-w-reading">{text.help}</p>
+              {selected ? <p className="max-w-reading">{text.help}</p> : null}
               <p className="font-semibold">
                 {current && gate.status === "pass" ? copy.confirmed : copy.needsEvidence}
               </p>
@@ -164,16 +164,18 @@ export function ReleaseReadinessScreen({
                   )}
                 </>
               ) : null}
-              <TechnicalDetails locale={locale}>
-                <bdi>{gate.id}</bdi>
-                <ul>
-                  {[...new Set(gate.blockers)].map((blocker) => (
-                    <li key={blocker} className="break-all">
-                      <bdi>{blocker}</bdi>
-                    </li>
-                  ))}
-                </ul>
-              </TechnicalDetails>
+              {selected ? (
+                <TechnicalDetails locale={locale}>
+                  <bdi>{gate.id}</bdi>
+                  <ul>
+                    {[...new Set(gate.blockers)].map((blocker) => (
+                      <li key={blocker} className="break-all">
+                        <bdi>{blocker}</bdi>
+                      </li>
+                    ))}
+                  </ul>
+                </TechnicalDetails>
+              ) : null}
             </section>
           );
         })}
