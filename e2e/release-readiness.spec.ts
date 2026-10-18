@@ -65,8 +65,10 @@ for (const javascript of [true, false])
       });
       await expect(runtimeCheck).toBeInViewport({ ratio: 1 });
       await runtimeCheck.click();
-      const runtimeReport = page.locator('[data-release-report="first_party_runtime_report"]');
-      await runtimeReport.locator("summary").first().click();
+      const runtimeReport = page.locator('[data-release-report="deployed_check"]');
+      const runtimeReportControl = runtimeReport.locator("summary").first();
+      await expect(runtimeReportControl).toHaveAccessibleName(copy.requirements.deployed_check);
+      await runtimeReportControl.click();
       await expect(runtimeReport).toHaveAttribute("open", "");
       await expect(
         runtimeReport.getByText(copy.results.not_confirmed, { exact: true }),
