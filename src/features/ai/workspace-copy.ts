@@ -1,7 +1,7 @@
 import type { WorkspaceState } from "@/domain/generative";
-import bgWorkspace from "../../../messages/staff/bg/workspace.json";
-import enWorkspace from "../../../messages/staff/en/workspace.json";
-import ruWorkspace from "../../../messages/staff/ru/workspace.json";
+import bgWorkspace from "../../../messages/staff/bg/workspace.json" with { type: "json" };
+import enWorkspace from "../../../messages/staff/en/workspace.json" with { type: "json" };
+import ruWorkspace from "../../../messages/staff/ru/workspace.json" with { type: "json" };
 
 const en = {
   ...enWorkspace.butlerBilling,
