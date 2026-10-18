@@ -48,15 +48,11 @@ export function ReleaseReadinessScreen({
       >
         <p>{current ? copy.boundary : copy.noCurrentReport}</p>
       </Notice>
-      {selected ? (
-        <a
-          className={buttonClass("secondary")}
-          href={`${root}/${selected}${impact ? "?view=impact" : ""}`}
-        >
+      {selected && !impact ? (
+        <a className={buttonClass("secondary")} href={`${root}/${selected}`}>
           {copy.checkAgain}
         </a>
       ) : null}
-      {impact ? <p className="max-w-reading">{copy.checkOnly}</p> : null}
       <div className="grid min-w-0 gap-5">
         {gates.map((gate) => {
           const text = copy.gates[gate.id];
@@ -168,12 +164,23 @@ export function ReleaseReadinessScreen({
                       ) : (
                         <p>{copy.noDependentChecks}</p>
                       )}
-                      <a
-                        className={buttonClass("secondary")}
-                        href={`/${locale}/operations/jobs?view=exceptions`}
-                      >
-                        {copy.openExceptions}
-                      </a>
+                      <div className="space-y-3">
+                        <a
+                          className={buttonClass("secondary")}
+                          href={`${root}/${gate.id}?view=impact`}
+                        >
+                          {copy.checkAgain}
+                        </a>
+                        <p className="max-w-reading">{copy.checkOnly}</p>
+                      </div>
+                      <div className="border-t border-border pt-4">
+                        <a
+                          className={buttonClass("tertiary")}
+                          href={`/${locale}/operations/jobs?view=exceptions`}
+                        >
+                          {copy.openExceptions}
+                        </a>
+                      </div>
                     </>
                   ) : (
                     <a className={buttonClass("secondary")} href={`${root}/${gate.id}?view=impact`}>

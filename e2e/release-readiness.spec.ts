@@ -103,6 +103,12 @@ for (const javascript of [true, false])
         .screenshot({ path: testInfo.outputPath(`w14-required-reports-${javascript}.png`) });
       await page.getByRole("link", { name: copy.seeImpact, exact: true }).click();
       await expect(page.getByRole("heading", { name: copy.affected, exact: true })).toBeVisible();
+      await page
+        .getByRole("heading", { name: copy.affected, exact: true })
+        .scrollIntoViewIfNeeded();
+      await expect(page.getByRole("link", { name: copy.checkAgain, exact: true })).toBeInViewport({
+        ratio: 1,
+      });
       await expect(page.getByText(copy.checkOnly, { exact: true })).toBeVisible();
       await expect(
         page.getByRole("link", { name: copy.openExceptions, exact: true }),

@@ -7,7 +7,7 @@
   "unconfirmed": "The current result is not confirmed",
   "boundary": "These recorded checks do not replace the required human and release approvals.",
   "noCurrentReport": "There is no confirmed, current set of reports for this running version. This does not prove that a connected service has stopped.",
-  "checkAgain": "Check current result",
+  "checkAgain": "Read saved result",
   "checkOnly": "This reads the latest saved reports. It does not repeat a delivery, restart a service or release a version.",
   "confirmed": "Confirmed for this version",
   "needsEvidence": "Confirmation is still needed",
