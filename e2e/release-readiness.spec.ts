@@ -59,6 +59,21 @@ for (const javascript of [true, false])
       await expect(page.getByRole("heading", { level: 2 })).toHaveCount(13);
       await expect(page.getByText(copy.unconfirmed, { exact: true })).toBeVisible();
       await expect(page.getByText(copy.recordedPass, { exact: true })).toHaveCount(0);
+      const runtimeCheck = page.getByRole("link", {
+        name: `${copy.openRequirement}: ${copy.gates.R01.title}`,
+        exact: true,
+      });
+      await expect(runtimeCheck).toBeInViewport({ ratio: 1 });
+      await runtimeCheck.click();
+      const runtimeReport = page.locator('[data-release-report="first_party_runtime_report"]');
+      await runtimeReport.locator("summary").first().click();
+      await expect(runtimeReport).toHaveAttribute("open", "");
+      await expect(
+        runtimeReport.getByText(copy.results.not_confirmed, { exact: true }),
+      ).toBeVisible();
+      await expect(runtimeReport.getByText(copy.missingReportHelp, { exact: true })).toBeVisible();
+      if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      await page.goto(hostUrl("staff", "/en/operations/readiness"));
       await page
         .getByRole("link", {
           name: `${copy.openRequirement}: ${copy.gates.R07.title}`,

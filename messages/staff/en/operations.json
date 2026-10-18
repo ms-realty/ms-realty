@@ -14,6 +14,7 @@
   "openRequirement": "Open required checks",
   "requiredReports": "Reports needed for this check",
   "report": "Required report",
+  "missingReportHelp": "No report has been confirmed for this running version yet. Ask the person responsible for release to provide the matching report before treating this check as complete.",
   "affected": "Checks that depend on this",
   "noDependentChecks": "No further dependent check is listed in the current rules.",
   "openExceptions": "Open delivery problems",

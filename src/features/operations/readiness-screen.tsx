@@ -47,12 +47,14 @@ export function ReleaseReadinessScreen({
       >
         <p>{current ? copy.boundary : copy.noCurrentReport}</p>
       </Notice>
-      <a
-        className={buttonClass("secondary")}
-        href={selected ? `${root}/${selected}${impact ? "?view=impact" : ""}` : root}
-      >
-        {copy.checkAgain}
-      </a>
+      {selected ? (
+        <a
+          className={buttonClass("secondary")}
+          href={`${root}/${selected}${impact ? "?view=impact" : ""}`}
+        >
+          {copy.checkAgain}
+        </a>
+      ) : null}
       {impact ? <p className="max-w-reading">{copy.checkOnly}</p> : null}
       <div className="grid min-w-0 gap-5">
         {gates.map((gate) => {
@@ -65,36 +67,64 @@ export function ReleaseReadinessScreen({
             >
               {!selected ? (
                 <h2 id={`release-${gate.id}`} className="text-subheading font-semibold">
-                  {text.title}
+                  <a
+                    href={`${root}/${gate.id}`}
+                    aria-label={`${copy.openRequirement}: ${text.title}`}
+                    className="inline-flex min-h-control items-center text-action underline decoration-border underline-offset-4"
+                  >
+                    {text.title}
+                  </a>
                 </h2>
               ) : null}
               <p className="max-w-reading">{text.help}</p>
               <p className="font-semibold">
                 {current && gate.status === "pass" ? copy.confirmed : copy.needsEvidence}
               </p>
-              {!selected ? (
-                <a className={buttonClass("tertiary")} href={`${root}/${gate.id}`}>
-                  {copy.openRequirement}: {text.title}
-                </a>
-              ) : (
+              {selected ? (
                 <>
                   <h2 className="text-subheading font-semibold">{copy.requiredReports}</h2>
                   {gate.requirements.length ? (
                     <ul className="space-y-3">
                       {gate.requirements.map((requirement) => (
-                        <li key={requirement.type} className="rounded-control bg-subtle p-4">
-                          <p className="font-semibold">{names[requirement.type] ?? copy.report}</p>
-                          <p>{copy.results[requirement.result]}</p>
-                          <TechnicalDetails locale={locale}>
-                            <bdi className="break-all">{requirement.type}</bdi>
-                            {requirement.evidence.map((evidence) => (
-                              <p key={evidence.digest}>
-                                <bdi className="break-all">
-                                  {evidence.id} · {evidence.digest}
-                                </bdi>
-                              </p>
-                            ))}
-                          </TechnicalDetails>
+                        <li key={requirement.type}>
+                          <details
+                            data-release-report={requirement.type}
+                            className="min-w-0 rounded-control bg-subtle"
+                          >
+                            <summary
+                              aria-labelledby={`report-${gate.id}-${requirement.type}-name`}
+                              aria-describedby={`report-${gate.id}-${requirement.type}-result`}
+                              className="min-h-control cursor-pointer p-4"
+                            >
+                              <span
+                                id={`report-${gate.id}-${requirement.type}-name`}
+                                className="font-semibold"
+                              >
+                                {names[requirement.type] ?? copy.report}
+                              </span>
+                              <span
+                                id={`report-${gate.id}-${requirement.type}-result`}
+                                className="mt-2 block"
+                              >
+                                {copy.results[requirement.result]}
+                              </span>
+                            </summary>
+                            <div className="space-y-4 px-4 pb-4">
+                              {requirement.result === "not_confirmed" ? (
+                                <p>{copy.missingReportHelp}</p>
+                              ) : null}
+                              <TechnicalDetails locale={locale}>
+                                <bdi className="break-all">{requirement.type}</bdi>
+                                {requirement.evidence.map((evidence) => (
+                                  <p key={evidence.digest}>
+                                    <bdi className="break-all">
+                                      {evidence.id} · {evidence.digest}
+                                    </bdi>
+                                  </p>
+                                ))}
+                              </TechnicalDetails>
+                            </div>
+                          </details>
                         </li>
                       ))}
                     </ul>
@@ -133,7 +163,7 @@ export function ReleaseReadinessScreen({
                     </a>
                   )}
                 </>
-              )}
+              ) : null}
               <TechnicalDetails locale={locale}>
                 <bdi>{gate.id}</bdi>
                 <ul>
@@ -148,6 +178,11 @@ export function ReleaseReadinessScreen({
           );
         })}
       </div>
+      {!selected ? (
+        <a className={buttonClass("secondary")} href={root}>
+          {copy.checkAgain}
+        </a>
+      ) : null}
       <TechnicalDetails locale={locale}>
         <p className="break-all">
           <bdi>{view.summary.release.sha ?? "—"}</bdi>
