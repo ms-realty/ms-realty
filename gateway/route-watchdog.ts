@@ -3,9 +3,9 @@
 // Off-runner write-ahead custody for one account-wide routing operation.
 // No business host is enabled by deploying this private control service.
 
-import { connect } from "cloudflare:sockets";
 import { DurableObject } from "cloudflare:workers";
 import { createHash, createPublicKey, timingSafeEqual, verify } from "node:crypto";
+import { Container } from "@cloudflare/containers";
 
 const accountId = "921d0224dcd595c87b7928d2b3c479d1";
 const comZone = "f0ac7af0721419e8129e5d10ff547372";
@@ -177,84 +177,71 @@ function independentKeys(env: Env) {
       .equals(controller.export({ format: "der", type: "spki" })),
   );
 }
-class OriginProbeFailure extends Error {
-  constructor(readonly diagnostic: { host: string; phase: string; reason: string }) {
-    super("Original origin could not be verified");
-  }
-}
-async function originalOrigin(host: string) {
-  demand(["makler-realty.com", "makler-realty.ru"].includes(host));
-  let phase = "connect";
-  try {
-    return await originSocket(host, (next) => {
-      phase = next;
-    });
-  } catch (error) {
-    throw new OriginProbeFailure({
-      host,
-      phase,
-      reason: error instanceof Error ? error.message.slice(0, 240) : "unverified",
-    });
-  }
-}
-async function originSocket(host: string, phase: (next: string) => void) {
-  const address = "185.80.2.102";
-  const socket = connect(
-    { hostname: address, port: 443 },
-    { secureTransport: "starttls", allowHalfOpen: false },
-  ).startTls({ expectedServerHostname: host });
-  const closed = socket.closed.catch(() => {});
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    return await Promise.race([
-      (async () => {
-        phase("tls");
-        await socket.opened;
-        phase("request");
-        const writer = socket.writable.getWriter();
-        await writer.write(
-          new TextEncoder().encode(
-            `GET / HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\nAccept: text/html\r\nUser-Agent: MS-Realty-Route-Recovery\r\n\r\n`,
-          ),
-        );
-        writer.releaseLock();
-        phase("response");
-        const reader = socket.readable.getReader(),
-          chunks: Uint8Array[] = [];
-        let bytes = 0;
-        while (true) {
-          const chunk = await reader.read();
-          demand(!chunk.done);
-          bytes += chunk.value.byteLength;
-          demand(bytes <= 128 * 1024);
-          chunks.push(chunk.value);
-          const text = Buffer.concat(chunks).toString("latin1"),
-            end = text.indexOf("\r\n\r\n");
-          if (end < 0) {
-            demand(bytes <= 16 * 1024);
-            continue;
-          }
-          const headers = text.slice(0, end);
-          phase("verify-http");
-          demand(
-            /^HTTP\/1\.[01] 200(?: |\r)/u.test(headers) &&
-              /\r\ncontent-type:\s*text\/html(?:;|\r|$)/iu.test(headers),
-          );
-          return { host, address, strictTls: true as const, status: 200 };
-        }
-      })(),
-      new Promise<never>((_resolve, reject) => {
-        timer = setTimeout(() => reject(new Error("Strict origin probe timed out")), 10_000);
-      }),
-    ]);
-  } finally {
-    clearTimeout(timer);
-    await socket.close().catch(() => {});
-    await closed;
+export class OriginProbe extends Container<Env> {
+  defaultPort = 3000;
+  sleepAfter = "20m";
+  envVars = {};
+  async probe(host: string) {
+    demand(["makler-realty.com", "makler-realty.ru"].includes(host));
+    await this.startAndWaitForPorts([3000]);
+    const result = await this.containerFetch(
+      `http://origin-probe/origin?host=${host}`,
+      { method: "GET" },
+      3000,
+    );
+    demand(result.ok);
+    const row = (await result.json()) as {
+      host: string;
+      serverName: string;
+      address: string;
+      port: number;
+      httpStatus: number;
+      tlsVerified: boolean;
+      publicDnsPathObserved: boolean;
+      bodySha256: string;
+      bytes: number;
+      sourceCommit: string;
+    };
+    demand(
+      row.host === host &&
+        row.serverName === host &&
+        row.address === "185.80.2.102" &&
+        row.port === 443 &&
+        row.httpStatus === 200 &&
+        row.tlsVerified === true &&
+        row.publicDnsPathObserved === false &&
+        hex(64, row.bodySha256) &&
+        Number.isSafeInteger(row.bytes) &&
+        row.bytes > 0 &&
+        row.bytes <= 2 * 1024 * 1024 &&
+        row.sourceCommit === this.env.WATCHDOG_PROBE_SOURCE_COMMIT,
+    );
+    return {
+      ...row,
+      strictTls: true as const,
+      status: 200,
+      actorId: this.ctx.id.toString(),
+      runtime: "isolated-native-node-container",
+    };
   }
 }
 
 export class RouteWatchdog extends DurableObject<Env> {
+  private async originalOrigin(host: string) {
+    demand(["makler-realty.com", "makler-realty.ru"].includes(host));
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        this.env.ORIGIN_PROBE.getByName("original-wordpress").probe(host),
+        new Promise<never>((_resolve, reject) => {
+          timer = setTimeout(() => reject(new Error("Native origin probe is not ready")), 25_000);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   private async provider(zone: string, suffix = "", method = "GET", body?: unknown) {
     demand(hex(32, zone) && /^\/?[a-f0-9]*$/u.test(suffix));
     // This service intentionally controls the provider API: a Worker binding cannot replace
@@ -296,6 +283,12 @@ export class RouteWatchdog extends DurableObject<Env> {
   }
   private async reserve(scope: Scope) {
     demand(
+      hex(40, this.env.WATCHDOG_PROBE_SOURCE_COMMIT) &&
+        hex(64, this.env.WATCHDOG_PROBE_IMAGE_DIGEST) &&
+        typeof this.env.WATCHDOG_ROUTE_TOKEN === "string" &&
+        this.env.WATCHDOG_ROUTE_TOKEN.length > 0,
+    );
+    demand(
       uuid(scope.operationId) &&
         uuid(scope.leaseId) &&
         hex(40, scope.sourceCommit) &&
@@ -334,6 +327,11 @@ export class RouteWatchdog extends DurableObject<Env> {
       custody: "account-wide-durable-object",
       writes: "signed-plan-only",
       serviceVersion: this.env.WATCHDOG_VERSION.id,
+      originProbe: {
+        sourceCommit: this.env.WATCHDOG_PROBE_SOURCE_COMMIT,
+        imageDigest: this.env.WATCHDOG_PROBE_IMAGE_DIGEST,
+        runtime: "isolated-native-node-container",
+      },
     };
     await this.save({
       scope,
@@ -678,7 +676,7 @@ export class RouteWatchdog extends DurableObject<Env> {
     const host = ["makler-realty.com", "makler-realty.ru"][state.originIndex ?? 0];
     if (host && state.mode !== "rehearsal") {
       try {
-        state.originChecks?.push(await originalOrigin(host));
+        state.originChecks?.push(await this.originalOrigin(host));
       } catch {
         state.roundFailed = true;
       }
@@ -722,15 +720,10 @@ export class RouteWatchdog extends DurableObject<Env> {
         if (request.method === "GET" && path === "/origin") {
           try {
             return response(
-              await originalOrigin(new URL(request.url).searchParams.get("host") ?? ""),
+              await this.originalOrigin(new URL(request.url).searchParams.get("host") ?? ""),
             );
-          } catch (error) {
-            if (error instanceof OriginProbeFailure)
-              return response(
-                { code: "original_origin_unverified", diagnostic: error.diagnostic },
-                502,
-              );
-            throw error;
+          } catch {
+            return response({ code: "native_original_origin_unverified" }, 502);
           }
         }
         demand(request.method === "POST");

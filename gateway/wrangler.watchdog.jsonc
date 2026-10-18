@@ -1,4 +1,4 @@
-// Private authenticated controller only; no zone routes or business-host bindings.
+// Private configuration template; generate an immutable image-bound config before provisioning.
 {
   "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
   "name": "ms-realty-route-watchdog",
@@ -17,6 +17,10 @@
       {
         "name": "ROUTE_WATCHDOG",
         "class_name": "RouteWatchdog"
+      },
+      {
+        "name": "ORIGIN_PROBE",
+        "class_name": "OriginProbe"
       }
     ]
   },
@@ -24,6 +28,10 @@
     {
       "tag": "v1",
       "new_sqlite_classes": ["RouteWatchdog"]
+    },
+    {
+      "tag": "v2-native-origin",
+      "new_sqlite_classes": ["OriginProbe"]
     }
   ],
   "version_metadata": {
@@ -34,6 +42,8 @@
     "WATCHDOG_SOURCE_SHA256": "",
     "WATCHDOG_ORIGIN": "https://ms-realty-route-watchdog.invalid",
     "WATCHDOG_OWNER_PUBLIC_KEY": "",
-    "WATCHDOG_CONTROLLER_PUBLIC_KEY": ""
+    "WATCHDOG_CONTROLLER_PUBLIC_KEY": "",
+    "WATCHDOG_PROBE_SOURCE_COMMIT": "",
+    "WATCHDOG_PROBE_IMAGE_DIGEST": ""
   }
 }

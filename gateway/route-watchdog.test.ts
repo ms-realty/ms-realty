@@ -11,28 +11,9 @@ vi.mock("cloudflare:workers", () => ({
     ) {}
   },
 }));
-vi.mock("cloudflare:sockets", () => ({
-  connect: vi.fn(() => ({
-    startTls: vi.fn(() => ({
-      opened: Promise.resolve(),
-      closed: Promise.resolve(),
-      close: async () => {},
-      readable: new ReadableStream({
-        start(controller) {
-          controller.enqueue(
-            new TextEncoder().encode(
-              "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html>Unit origin response</html>",
-            ),
-          );
-          controller.close();
-        },
-      }),
-      writable: new WritableStream(),
-    })),
-  })),
-}));
+vi.mock("@cloudflare/containers", () => ({ Container: class {} }));
 
-import worker, { RouteWatchdog } from "./route-watchdog";
+import worker, { OriginProbe, RouteWatchdog } from "./route-watchdog";
 
 function required<T>(x: T | undefined): T {
   if (x === undefined) throw new Error("Missing unit fixture value");
@@ -157,6 +138,19 @@ function fixture() {
     },
   };
   const env = {
+    WATCHDOG_PROBE_SOURCE_COMMIT: "a".repeat(40),
+    WATCHDOG_PROBE_IMAGE_DIGEST: "b".repeat(64),
+    ORIGIN_PROBE: {
+      getByName: () => ({
+        probe: async (host: string) => ({
+          host,
+          address: "185.80.2.102",
+          strictTls: true as const,
+          status: 200,
+          runtime: "unit-native-probe-substitute",
+        }),
+      }),
+    },
     WATCHDOG_SOURCE_COMMIT: "a".repeat(40),
     WATCHDOG_SOURCE_SHA256: "b".repeat(64),
     WATCHDOG_OWNER_PUBLIC_KEY: owner.publicKey.export({ type: "spki", format: "pem" }).toString(),
@@ -272,6 +266,48 @@ afterEach(() => {
 });
 
 describe("off-runner route custody unit boundaries", () => {
+  it("accepts only native original-host TLS evidence from the pinned source", async () => {
+    const f = fixture();
+    const proof = {
+      host: "makler-realty.com",
+      serverName: "makler-realty.com",
+      address: "185.80.2.102",
+      port: 443,
+      httpStatus: 200,
+      tlsVerified: true,
+      publicDnsPathObserved: false,
+      bodySha256: "d".repeat(64),
+      bytes: 1000,
+      sourceCommit: "a".repeat(40),
+    };
+    const value = { ...proof };
+    const self = {
+      env: f.env,
+      ctx: { id: { toString: () => "unit-actor" } },
+      startAndWaitForPorts: vi.fn(async () => {}),
+      containerFetch: vi.fn(async () => Response.json(value)),
+    };
+    expect(
+      (await OriginProbe.prototype.probe.call(self as never, "makler-realty.com")).strictTls,
+    ).toBe(true);
+    for (const invalid of [
+      { tlsVerified: false },
+      { serverName: "foreign.test" },
+      { address: "127.0.0.1" },
+      { sourceCommit: "c".repeat(40) },
+      { bytes: 0 },
+    ]) {
+      Object.assign(value, proof, invalid);
+      await expect(
+        OriginProbe.prototype.probe.call(self as never, "makler-realty.com"),
+      ).rejects.toThrow();
+    }
+    const before = self.containerFetch.mock.calls.length;
+    await expect(
+      OriginProbe.prototype.probe.call(self as never, "private-db.internal"),
+    ).rejects.toThrow();
+    expect(self.containerFetch.mock.calls).toHaveLength(before);
+  });
   it("authenticates the exact private origin and does not expose the namespace", async () => {
     const f = fixture();
     const stub = vi.fn(async () => new Response("private"));
