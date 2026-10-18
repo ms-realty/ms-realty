@@ -9,6 +9,8 @@ await build({
     bootstrap: "scripts/bootstrap-staff.ts",
     transport: "src/db/transport.ts",
     connectivity: "src/db/connectivity.ts",
+    "production-transport": "src/db/production-transport.ts",
+    "production-connectivity": "src/db/production-connectivity.ts",
   },
   outdir: "dist-runtime",
   outExtension: { ".js": ".mjs" },

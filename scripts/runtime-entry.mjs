@@ -50,8 +50,49 @@ export async function startDatabaseCompanion(
     !env.TUNNEL_SERVICE_TOKEN_SECRET?.trim()
   )
     throw new Error("Explicit reviewed staging Access TCP companion inputs are required");
-  if (await probe()) throw new Error("Staging Access TCP listener is already occupied");
-  if (signal?.aborted) throw new Error("Staging Access TCP companion startup interrupted");
+  return supervisedCompanion(env, onFailure, { spawnProcess, probe, timeoutMs, pollMs, signal });
+}
+
+export function runtimeEnvironmentMode(env) {
+  if (env.STAGING === "true" && (!env.RELEASE_ENVIRONMENT || env.RELEASE_ENVIRONMENT === "staging"))
+    return "staging";
+  if (env.STAGING === "false" && env.RELEASE_ENVIRONMENT === "production") return "production";
+  throw new Error("Explicit matching runtime environment markers are required");
+}
+
+export async function startProductionDatabaseCompanion(env, onFailure, options = {}) {
+  if (runtimeEnvironmentMode(env) !== "production")
+    throw new Error("Production companion rejects staging inputs");
+  if (env.DATABASE_TRANSPORT === "direct") return;
+  if (
+    env.DATABASE_TRANSPORT !== "cloudflared-access-tcp" ||
+    env.PRODUCTION_DATABASE_NAME !== "ms_realty_payload" ||
+    !/^(?=.{1,253}$)[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/.test(env.PRODUCTION_DATABASE_HOST ?? "") ||
+    !(env.PRODUCTION_DATABASE_HOST ?? "").includes(".") ||
+    /(?:^|[.-])(?:stage|staging|localhost)(?:[.-]|$)/.test(env.PRODUCTION_DATABASE_HOST) ||
+    env.TUNNEL_SERVICE_HOSTNAME !== env.PRODUCTION_DATABASE_HOST ||
+    env.TUNNEL_SERVICE_URL !== "127.0.0.1:15432" ||
+    !env.TUNNEL_SERVICE_TOKEN_ID?.trim() ||
+    !env.TUNNEL_SERVICE_TOKEN_SECRET?.trim()
+  )
+    throw new Error("Explicit reviewed production Access TCP companion inputs are required");
+  return supervisedCompanion(
+    env,
+    onFailure,
+    { spawnProcess: spawn, probe: loopbackReady, timeoutMs: 10_000, pollMs: 100, ...options },
+    "Production",
+  );
+}
+
+async function supervisedCompanion(
+  env,
+  onFailure,
+  { spawnProcess, probe, timeoutMs, pollMs, signal },
+  label = "Staging",
+) {
+  if (signal?.aborted) throw new Error(`${label} Access TCP companion startup interrupted`);
+  if (await probe()) throw new Error(`${label} Access TCP listener is already occupied`);
+  if (signal?.aborted) throw new Error(`${label} Access TCP companion startup interrupted`);
   const child = spawnProcess("/usr/local/bin/cloudflared", ["access", "tcp"], {
     // Credentials exist only in this child environment and never command arguments or output.
     env: Object.fromEntries(
@@ -96,10 +137,10 @@ export async function startDatabaseCompanion(
       }
       await delay(pollMs);
     }
-    throw new Error("Staging Access TCP companion readiness failed");
+    throw new Error(`${label} Access TCP companion readiness failed`);
   } catch {
     stop();
-    throw new Error("Staging Access TCP companion readiness failed");
+    throw new Error(`${label} Access TCP companion readiness failed`);
   }
 }
 
@@ -204,13 +245,21 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
       process.env.EXPECTED_SOURCE_COMMIT,
     );
     process.env.BUILD_SHA = image.sourceCommit;
-    if (process.env.DATABASE_TRANSPORT === "cloudflared-access-tcp") {
+    const mode = runtimeEnvironmentMode(process.env);
+    if (mode === "production") {
+      const { productionDatabaseTransport } = await import(
+        pathToFileURL("/app/dist-runtime/production-transport.mjs").href
+      );
+      productionDatabaseTransport(process.env.DATABASE_URL, process.env);
+    } else if (process.env.DATABASE_TRANSPORT === "cloudflared-access-tcp") {
       const { databaseTransport } = await import(
         pathToFileURL("/app/dist-runtime/transport.mjs").href
       );
       databaseTransport(process.env.DATABASE_URL, process.env);
     }
-    companion = await startDatabaseCompanion(
+    companion = await (mode === "production"
+      ? startProductionDatabaseCompanion
+      : startDatabaseCompanion)(
       process.env,
       () => {
         terminate();
@@ -223,11 +272,14 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     if (startup.signal.aborted) throw new Error("Staging role startup interrupted");
     delete process.env.TUNNEL_SERVICE_TOKEN_ID;
     delete process.env.TUNNEL_SERVICE_TOKEN_SECRET;
-    const { probeStagingDatabase } = await import(
-      pathToFileURL("/app/dist-runtime/connectivity.mjs").href
-    );
+    const probeDatabase =
+      mode === "production"
+        ? (await import(pathToFileURL("/app/dist-runtime/production-connectivity.mjs").href))
+            .probeProductionDatabase
+        : (await import(pathToFileURL("/app/dist-runtime/connectivity.mjs").href))
+            .probeStagingDatabase;
     runtime = roleRuntime(role, image, async () => {
-      await probeStagingDatabase(process.env);
+      await probeDatabase(process.env);
       if (role === "web") await import(pathToFileURL("/app/server.js").href);
       else if (role === "worker") await import(pathToFileURL("/app/dist-runtime/worker.mjs").href);
       else {
@@ -236,7 +288,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
         await runMigrations(process.env.DATABASE_URL);
       }
     });
-    server = identityServer(runtime, role, () => probeStagingDatabase(process.env));
+    server = identityServer(runtime, role, () => probeDatabase(process.env));
     server.listen(3001, "0.0.0.0");
     if (role === "web" && process.env.RUNTIME_DEFER_WEB_START !== "true") await runtime.start();
   } catch {
