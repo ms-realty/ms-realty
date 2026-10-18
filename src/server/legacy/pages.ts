@@ -1,7 +1,7 @@
 import "server-only";
 import { isPublicLocale, type PublicLocale } from "@/domain/ids";
 import snapshots from "../../../data/legacy/migration/source-pages.json";
-import { primaryScopes, sha256 } from "./manifest";
+import { type Capture, verifiedSourceBody } from "./manifest";
 
 export interface LegacyPage {
   id: string;
@@ -19,7 +19,19 @@ export interface LegacyPage {
   sourceHash: string;
   capturedAt: string;
   contentScope: string;
-  provenance: { kind: "archived" | "live"; artifact: string; gitTag?: string; gitCommit?: string };
+  contentState?: "text" | "verified_empty_archive";
+  sourceResponseHash?: string;
+  provenance: {
+    kind: "archived" | "live";
+    artifact: string;
+    gitTag?: string;
+    gitCommit?: string;
+    transport?: string | null;
+    publicDnsPathObserved?: boolean | null;
+    originObservation?: Capture["originObservation"] | null;
+    sourceIndexSha256?: string | null;
+    sourceReceiptSha256?: string | null;
+  };
   equivalenceReview: {
     status: "pending" | "reviewed";
     reviewer: string | null;
@@ -65,9 +77,16 @@ export function selectLegacyPage(
   const page = pages.find((candidate) => candidate.id === id && candidate.locale === locale);
   if (
     !page?.title ||
-    !page.bodyText.trim() ||
-    !primaryScopes.includes(page.contentScope as (typeof primaryScopes)[number]) ||
-    sha256(page.bodyText) !== page.sourceHash ||
+    !verifiedSourceBody({
+      url: page.sourceUrl,
+      content_scope: page.contentScope,
+      content_state: page.contentState,
+      extracted_body_text: page.bodyText,
+      text_sha256: page.sourceHash,
+      response_sha256: page.sourceResponseHash ?? "",
+      response_artifact: page.provenance.artifact,
+      provenance: page.provenance.kind,
+    }) ||
     page.canonicalPath !== `/${locale}/legacy/${id}`
   )
     return null;

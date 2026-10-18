@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { sha256, sourceIdentity } from "./manifest";
+import { measuredEmptyArchiveUrl, sha256, sourceIdentity } from "./manifest";
 
 // Use only the public constructor, standard DOM and explicit window teardown.
 // No scripts or network resources are enabled.
@@ -40,6 +40,22 @@ function extractDocument(document: Document, url: string) {
   const articleColumn = article?.parentElement?.parentElement?.classList.contains("col-lg-9")
     ? article.parentElement
     : null;
+  const identity = sourceIdentity(url);
+  const tagContent = document.querySelector(".col-lg-9 > #content");
+  const tagColumn =
+    /^\/tag\/[^/]+\/(?:page\/\d+\/)?$/u.test(identity.path) &&
+    identity.query === "" &&
+    tagContent?.querySelector(".post h2 a[href]")
+      ? tagContent
+      : null;
+  const emptyArchiveColumn =
+    measuredEmptyArchiveUrl(url) &&
+    archive?.parentElement?.classList.contains("col-lg-9") &&
+    archive.childElementCount === 0 &&
+    archive.parentElement.childElementCount === 1 &&
+    !archive.parentElement.textContent?.trim()
+      ? archive.parentElement
+      : null;
   const sitemapHeaders = [...document.querySelectorAll("#content > table th")].map((header) =>
     header.textContent?.trim(),
   );
@@ -55,11 +71,13 @@ function extractDocument(document: Document, url: string) {
     : (document.querySelector(".post_content, .post_content_default") ??
       archiveColumn ??
       articleColumn ??
+      tagColumn ??
+      emptyArchiveColumn ??
       sitemapMain);
   primary?.querySelectorAll("script,style,noscript").forEach((element) => {
     element.remove();
   });
-  if (primary === archiveColumn || primary === articleColumn)
+  if (primary === archiveColumn || primary === articleColumn || primary === tagColumn)
     primary?.querySelectorAll("form").forEach((element) => {
       element.remove();
     });
@@ -78,9 +96,13 @@ function extractDocument(document: Document, url: string) {
         ? "column:archive_main"
         : primary === articleColumn && primary
           ? "column:articles_main"
-          : primary === sitemapMain && primary
-            ? "column:sitemap_main"
-            : "missing_main_content";
+          : primary === tagColumn && primary
+            ? "column:tag_articles"
+            : primary === emptyArchiveColumn && primary
+              ? "column:empty_archive"
+              : primary === sitemapMain && primary
+                ? "column:sitemap_main"
+                : "missing_main_content";
   const links = [...document.querySelectorAll<HTMLAnchorElement>("a[href]")].flatMap((link) => {
     try {
       const identity = sourceIdentity(link.href);
@@ -132,7 +154,8 @@ function extractDocument(document: Document, url: string) {
           .trim() ?? "",
     }))
     .filter((field) => field.label && field.value);
-  const reference = fields.find((field) => /^(?:ID\s*)?№\s*:/u.test(field.label))?.value ?? null;
+  const reference =
+    fields.find((field) => /^(?:(?:ID|Лот)\s*)?№\s*:/u.test(field.label))?.value ?? null;
   const contentLinks = [...(primary?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? [])].flatMap(
     (link) => {
       try {
@@ -160,6 +183,8 @@ function extractDocument(document: Document, url: string) {
     locale: document.documentElement.lang || null,
     parked,
     content_scope: scope,
+    content_state:
+      scope === "column:empty_archive" ? ("verified_empty_archive" as const) : ("text" as const),
     extracted_body_text: body,
     text_sha256: sha256(body),
     images: images.filter(

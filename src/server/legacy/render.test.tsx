@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => ({
   schema: vi.fn(),
 }));
 vi.mock("./pages", () => ({ getLegacyPage: mocks.page }));
+vi.mock("next-intl/server", () => ({
+  getTranslations: async () => () => "Нет результатов по этим условиям",
+}));
 vi.mock("@/server/seo/public-metadata", () => ({
   publicPageMetadata: mocks.metadata,
   publicPageUrl: mocks.url,
@@ -46,6 +49,14 @@ const source = {
     { url: "https://makler-realty.ru/listing/original/", text: "Original listing summary" },
   ],
 };
+it("renders measured empty archives with honest interface copy separate from the unchanged empty source", async () => {
+  mocks.page.mockReturnValue({ ...source, bodyText: "", contentState: "verified_empty_archive" });
+  render(await Page({ params }));
+  expect(document.querySelector("[data-legacy-source-body]")?.textContent).toBe("");
+  expect(screen.getByRole("status")).toHaveTextContent("Нет результатов по этим условиям");
+  expect(document.querySelector("article script, article form")).toBeNull();
+  expect(mocks.schema).not.toHaveBeenCalled();
+});
 it("renders actual source text without executing source HTML, recreating WordPress forms or inventing translations", async () => {
   mocks.page.mockReturnValue(source);
   render(await Page({ params }));

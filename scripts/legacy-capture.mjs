@@ -25,14 +25,7 @@ const known = new Set(
     (row) => sourceIdentity(row.source_url).id,
   ),
 );
-const captures = values.append
-  ? JSON.parse(readFileSync(values.output, "utf8")).captures.filter(
-      (capture) =>
-        !requestedUrls.some(
-          (requested) => sourceIdentity(requested).id === sourceIdentity(capture.url).id,
-        ),
-    )
-  : [];
+const captures = values.append ? JSON.parse(readFileSync(values.output, "utf8")).captures : [];
 for (const requested of requestedUrls) {
   sourceIdentity(requested);
   const capturedAt = new Date().toISOString();
@@ -69,8 +62,9 @@ for (const requested of requestedUrls) {
       response_sha256: responseHash,
       response_artifact: html.trim() && !extracted.parked ? artifact : null,
       provenance: "live",
-      extractor: "legacy-main-v5",
+      extractor: "legacy-main-v6",
       transport: "python_urllib_public_get",
+      publicDnsPathObserved: true,
       response_encoding: response.charset,
       redirects: response.redirects,
       ...extracted,

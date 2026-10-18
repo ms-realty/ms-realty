@@ -63,3 +63,29 @@ it("request queries retain byte spelling and a foreign/credentialled source neve
   expect(() => sourceIdentity("https://private.example.test/a")).toThrow();
   expect(() => sourceIdentity("https://user:secret@makler-realty.com/a")).toThrow();
 });
+
+it("accepts a measured empty archive only with its exact live raw-response binding", () => {
+  const empty: Capture = {
+    ...capture,
+    url: "https://makler-realty.ru/category-type/studio/",
+    final_url: "https://makler-realty.ru/category-type/studio/",
+    content_scope: "column:empty_archive",
+    content_state: "verified_empty_archive",
+    extracted_body_text: "",
+    text_sha256: sha256(""),
+    provenance: "live",
+    response_artifact: `data/legacy/migration/live-source-html/${capture.response_sha256}.html.gz`,
+  };
+  expect(verifiedPrimaryCapture(empty)).toBe(true);
+  for (const invalid of [
+    { ...empty, content_state: undefined },
+    { ...empty, response_artifact: undefined },
+    { ...empty, provenance: "archived" as const },
+    { ...empty, url: "https://makler-realty.ru/missing/" },
+    { ...empty, content_scope: "class:post_content" },
+  ])
+    expect(verifiedPrimaryCapture(invalid)).toBe(false);
+  expect(buildLegacyManifest([decision(empty.url)], [empty]).sources[0]?.candidate?.status).toBe(
+    200,
+  );
+});
