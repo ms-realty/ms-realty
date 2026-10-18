@@ -79,6 +79,46 @@ export function ReleaseReadinessScreen({
               </p>
               {selected ? (
                 <>
+                  {impact ? (
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h2 className="flex min-h-control items-center text-subheading font-semibold">
+                          {copy.affected}
+                        </h2>
+                        <a
+                          className={buttonClass("secondary")}
+                          href={`${root}/${gate.id}?view=impact`}
+                        >
+                          {copy.checkAgain}
+                        </a>
+                      </div>
+                      {gate.affects.length ? (
+                        <ul className="space-y-2">
+                          {gate.affects.map((id) => (
+                            <li key={id}>
+                              <a
+                                className="inline-flex min-h-11 items-center underline"
+                                href={`${root}/${id}`}
+                              >
+                                {copy.gates[id].title}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>{copy.noDependentChecks}</p>
+                      )}
+                      <p className="max-w-reading">{copy.checkOnly}</p>
+                      <div className="border-t border-border pt-4">
+                        <a
+                          className={buttonClass("tertiary")}
+                          href={`/${locale}/operations/jobs?view=exceptions`}
+                        >
+                          {copy.openExceptions}
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
                   <h2 className="text-subheading font-semibold">{copy.requiredReports}</h2>
                   {gate.requirements.length ? (
                     <ul className="space-y-3">
@@ -145,48 +185,11 @@ export function ReleaseReadinessScreen({
                   ) : (
                     <p>{copy.noCurrentReport}</p>
                   )}
-                  {impact ? (
-                    <>
-                      <h3 className="font-semibold">{copy.affected}</h3>
-                      {gate.affects.length ? (
-                        <ul className="space-y-2">
-                          {gate.affects.map((id) => (
-                            <li key={id}>
-                              <a
-                                className="inline-flex min-h-11 items-center underline"
-                                href={`${root}/${id}`}
-                              >
-                                {copy.gates[id].title}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>{copy.noDependentChecks}</p>
-                      )}
-                      <div className="space-y-3">
-                        <a
-                          className={buttonClass("secondary")}
-                          href={`${root}/${gate.id}?view=impact`}
-                        >
-                          {copy.checkAgain}
-                        </a>
-                        <p className="max-w-reading">{copy.checkOnly}</p>
-                      </div>
-                      <div className="border-t border-border pt-4">
-                        <a
-                          className={buttonClass("tertiary")}
-                          href={`/${locale}/operations/jobs?view=exceptions`}
-                        >
-                          {copy.openExceptions}
-                        </a>
-                      </div>
-                    </>
-                  ) : (
+                  {!impact ? (
                     <a className={buttonClass("secondary")} href={`${root}/${gate.id}?view=impact`}>
                       {copy.seeImpact}
                     </a>
-                  )}
+                  ) : null}
                 </>
               ) : null}
               {selected ? (
