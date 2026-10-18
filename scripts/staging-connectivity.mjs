@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { readStagingInputs, sha256, validateStaging } from "./staging-config.mjs";
 import { validateConnectionProof } from "./staging-connection-proof.mjs";
 import { observeRuntimeRollout } from "./staging-rollout-proof.mjs";
-import { settle } from "./staging-settle.mjs";
+import { permanent, settle } from "./staging-settle.mjs";
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const reportPath = "deploy/staging-connectivity.generated.json";
@@ -27,7 +27,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         },
       });
       if (!response.ok || !response.headers.get("x-robots-tag")?.includes("noindex"))
-        throw new Error(
+        throw (response.status === 401 || response.status === 403 ? permanent : Error)(
           `Protected noindex connectivity control is unavailable (HTTP ${response.status})`,
         );
       try {
@@ -36,8 +36,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         throw new Error("Protected connectivity response is not valid JSON");
       }
     };
-    // The adapter's containers start after the deploy returns.
-    const runtime = await settle(() => call("runtime"), { ms: 180_000 });
+    // The adapter's containers start after the deploy returns. After an update deploy a role's
+    // first start was refused for about five minutes (run 39030114626: worker up 5 min after its
+    // rollout completed), so allow ten.
+    const runtime = await settle(() => call("runtime"), { ms: 600_000 });
     const before = await settle(
       () =>
         observeRuntimeRollout(input, runtime, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {

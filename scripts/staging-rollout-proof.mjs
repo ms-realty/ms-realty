@@ -162,8 +162,20 @@ export async function observeRuntimeRollout(
     const matches = applications.filter(
       (app) => app.durable_objects?.namespace_id === namespaceByRole[role],
     );
-    demand(matches.length === 1, `${role} unique namespace application`);
-    const app = matches[0];
+    demand(
+      matches.length === 1 && identifier(matches[0].id),
+      `${role} unique namespace application`,
+    );
+    // The list can serve a stale snapshot of an application (seen 2026-10-17: version 1, the
+    // previous image and an "active" rollout three days after that rollout completed), so it
+    // only locates the application. Its own read is authoritative.
+    const app = (await read(`${base}/${encodeURIComponent(matches[0].id)}`)).result;
+    demand(
+      object(app) &&
+        app.id === matches[0].id &&
+        app.durable_objects?.namespace_id === namespaceByRole[role],
+      `${role} application read`,
+    );
     demand(
       identifier(app.id) &&
         app.account_id === input.accountId &&
@@ -180,6 +192,17 @@ export async function observeRuntimeRollout(
     // completes. The rollout list carries no pagination metadata.
     const rollouts = (await read(`${appPath}/rollouts`)).result;
     demand(Array.isArray(rollouts) && rollouts.every(object), `${role} rollout list shape`);
+    // active_rollout_id alone cannot reveal an unfinished update, so no rollout may be pending,
+    // still progressing or aimed past the version the application reports.
+    demand(
+      rollouts.every(
+        (candidate) =>
+          Number.isInteger(candidate.target_version) &&
+          candidate.target_version <= app.version &&
+          !["pending", "progressing"].includes(candidate.status),
+      ),
+      `${role} no unfinished or later rollout`,
+    );
     const current = rollouts.filter((candidate) => candidate.target_version === app.version);
     let rollout = null;
     if (current.length === 0)

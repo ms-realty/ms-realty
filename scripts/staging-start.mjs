@@ -2,7 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 import { readStagingInputs, validateStaging } from "./staging-config.mjs";
 import { observeRuntimeRollout } from "./staging-rollout-proof.mjs";
-import { settle } from "./staging-settle.mjs";
+import { permanent, settle } from "./staging-settle.mjs";
 
 try {
   const { input, artifacts } = await readStagingInputs(process.argv[2]);
@@ -23,7 +23,7 @@ try {
       signal: AbortSignal.timeout(20000),
     });
     if (!response.ok || !response.headers.get("x-robots-tag")?.includes("noindex"))
-      throw new Error(
+      throw (response.status === 401 || response.status === 403 ? permanent : Error)(
         `Protected noindex staging control endpoint unavailable (HTTP ${response.status})`,
       );
     return response.json();
@@ -31,7 +31,7 @@ try {
   // Preparing identities does not start queue jobs or migrations. Config/env pins cannot
   // authorize a migration until the provider actually reports the exact running images.
   // The release deploy returns before its containers start and its rolling update completes.
-  const prepared = await settle(() => call("runtime", "POST"), { ms: 180_000 });
+  const prepared = await settle(() => call("runtime", "POST"), { ms: 600_000 });
   await settle(
     () =>
       observeRuntimeRollout(input, prepared, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {
