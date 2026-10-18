@@ -6,7 +6,7 @@ const result = spawnSync(
   "npx",
   [
     "--yes",
-    "wrangler@4.143.0",
+    "wrangler@4.151.1",
     "types",
     "gateway/worker-configuration.d.ts",
     "--config",
