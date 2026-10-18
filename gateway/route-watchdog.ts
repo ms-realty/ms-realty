@@ -177,8 +177,27 @@ function independentKeys(env: Env) {
       .equals(controller.export({ format: "der", type: "spki" })),
   );
 }
+class OriginProbeFailure extends Error {
+  constructor(readonly diagnostic: { host: string; phase: string; reason: string }) {
+    super("Original origin could not be verified");
+  }
+}
 async function originalOrigin(host: string) {
   demand(["makler-realty.com", "makler-realty.ru"].includes(host));
+  let phase = "connect";
+  try {
+    return await originSocket(host, (next) => {
+      phase = next;
+    });
+  } catch (error) {
+    throw new OriginProbeFailure({
+      host,
+      phase,
+      reason: error instanceof Error ? error.message.slice(0, 240) : "unverified",
+    });
+  }
+}
+async function originSocket(host: string, phase: (next: string) => void) {
   const address = "185.80.2.102";
   const socket = connect(
     { hostname: address, port: 443 },
@@ -189,7 +208,9 @@ async function originalOrigin(host: string) {
   try {
     return await Promise.race([
       (async () => {
+        phase("tls");
         await socket.opened;
+        phase("request");
         const writer = socket.writable.getWriter();
         await writer.write(
           new TextEncoder().encode(
@@ -197,6 +218,7 @@ async function originalOrigin(host: string) {
           ),
         );
         writer.releaseLock();
+        phase("response");
         const reader = socket.readable.getReader(),
           chunks: Uint8Array[] = [];
         let bytes = 0;
@@ -213,6 +235,7 @@ async function originalOrigin(host: string) {
             continue;
           }
           const headers = text.slice(0, end);
+          phase("verify-http");
           demand(
             /^HTTP\/1\.[01] 200(?: |\r)/u.test(headers) &&
               /\r\ncontent-type:\s*text\/html(?:;|\r|$)/iu.test(headers),
@@ -696,10 +719,20 @@ export class RouteWatchdog extends DurableObject<Env> {
           state = await this.ctx.storage.get<State>("active");
         if (request.method === "GET" && path === "/status")
           return response(state ? { ...state, journal: undefined } : { status: "empty" });
-        if (request.method === "GET" && path === "/origin")
-          return response(
-            await originalOrigin(new URL(request.url).searchParams.get("host") ?? ""),
-          );
+        if (request.method === "GET" && path === "/origin") {
+          try {
+            return response(
+              await originalOrigin(new URL(request.url).searchParams.get("host") ?? ""),
+            );
+          } catch (error) {
+            if (error instanceof OriginProbeFailure)
+              return response(
+                { code: "original_origin_unverified", diagnostic: error.diagnostic },
+                502,
+              );
+            throw error;
+          }
+        }
         demand(request.method === "POST");
         const input = await boundedJson(request);
         if (path === "/reserve") return response(await this.reserve(input));
