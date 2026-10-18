@@ -93,7 +93,7 @@ export async function DuplicateReviewScreen({
       ? await privateRead(() => readContact(getDb(), session, query.left as string))
       : null;
   return (
-    <main className="mx-auto grid w-full max-w-5xl min-w-0 gap-6 p-4 md:p-8" data-duplicate-review>
+    <div className="mx-auto grid w-full max-w-5xl min-w-0 gap-6 p-4 md:p-8" data-duplicate-review>
       <h1 className="text-h1 font-semibold">{c.title}</h1>
       <p>{c.intro}</p>
       <p className="rounded-panel border border-border bg-subtle p-4 font-semibold">{c.boundary}</p>
@@ -204,7 +204,7 @@ export async function DuplicateReviewScreen({
       <a className={link} href={`/${locale}/operations`}>
         {copy.tools}
       </a>
-    </main>
+    </div>
   );
 }
 export async function DeferredReviewScreen({
@@ -219,7 +219,7 @@ export async function DeferredReviewScreen({
   const result = await privateRead(() => readDeferredContactReview(getDb(), session, id));
   const copy = dataReviewCopy(locale).duplicates;
   return (
-    <main
+    <div
       className="mx-auto grid w-full max-w-5xl min-w-0 gap-6 p-4 md:p-8"
       data-contact-review-receipt
     >
@@ -245,6 +245,6 @@ export async function DeferredReviewScreen({
       <a className={link} href={`/${locale}/operations/duplicates`}>
         {copy.newPair}
       </a>
-    </main>
+    </div>
   );
 }

@@ -119,9 +119,12 @@ for (const javascript of [true, false])
           ).violations,
         ).toEqual([]);
       const d = copy.duplicates;
+      await page.goto(hostUrl("staff", "/en/operations/duplicates"));
+      await expect(page.getByRole("main")).toHaveCount(1);
       await page.goto(
         hostUrl("staff", `/en/operations/duplicates?left=${f.left}&right=${f.right}`),
       );
+      await expect(page.getByRole("main")).toHaveCount(1);
       await expect(page.locator(`[data-contact-comparison="${f.left}"]`)).toContainText(
         f.leftEmail,
       );
@@ -129,6 +132,7 @@ for (const javascript of [true, false])
         f.rightEmail,
       );
       await expect(page.locator("[data-duplicate-review]")).toContainText(d.scope);
+      if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page
         .getByLabel(d.nextStep, { exact: true })
         .fill("Ask the responsible broker to verify identity against the original contact source");
@@ -138,10 +142,12 @@ for (const javascript of [true, false])
         .screenshot({ path: testInfo.outputPath(`w12-comparison-${javascript}.png`) });
       await page.getByRole("button", { name: d.defer, exact: true }).click();
       await expect(page.getByRole("heading", { name: d.pending, exact: true })).toBeVisible();
+      await expect(page.getByRole("main")).toHaveCount(1);
       await expect(page.locator("[data-contact-review-receipt]")).toContainText(
         "Synthetic data reviewer",
       );
       await expect(page.locator("[data-contact-review-receipt]")).toContainText(d.saved);
+      if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       const ownTasks = await db
         .select()
         .from(schema.tasks)
