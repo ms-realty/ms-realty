@@ -1,3 +1,5 @@
+import { settle } from "./staging-settle.mjs";
+
 const bindingsByRole = {
   web: "MS_REALTY",
   worker: "MS_REALTY_WORKER",
@@ -22,6 +24,25 @@ const timestamp = (value, now) =>
   Number.isFinite(Date.parse(value)) &&
   Date.parse(value) <= now &&
   new Date(value).toISOString().slice(0, 19) === value.slice(0, 19);
+
+/** Prepare only identities, then require independent provider proof of the running roles. */
+export async function prepareRuntimeRollout(
+  input,
+  prepare,
+  token,
+  { transport = fetch, allowPreparedWeb = false, retry = { ms: 600_000 } } = {},
+) {
+  // A provider rollout can stop actors after preparation. Wake them on every bounded
+  // attempt, then recheck the exact image, namespace, actor and completed rollout.
+  // The prepare callback must only obtain identities; it must never run a migration/job.
+  return settle(async () => {
+    const runtime = await prepare();
+    const observation = await observeRuntimeRollout(input, runtime, token, transport, {
+      allowPreparedWeb,
+    });
+    return { runtime, observation };
+  }, retry);
+}
 
 export function validateRuntimeIdentity(input, runtime, { allowPreparedWeb = false } = {}) {
   demand(

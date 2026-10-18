@@ -2,8 +2,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { readStagingInputs, sha256, validateStaging } from "./staging-config.mjs";
 import { validateConnectionProof } from "./staging-connection-proof.mjs";
-import { observeRuntimeRollout } from "./staging-rollout-proof.mjs";
-import { permanent, settle } from "./staging-settle.mjs";
+import { observeRuntimeRollout, prepareRuntimeRollout } from "./staging-rollout-proof.mjs";
+import { permanent } from "./staging-settle.mjs";
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const reportPath = "deploy/staging-connectivity.generated.json";
@@ -39,13 +39,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     // The adapter's containers start after the deploy returns. After an update deploy a role's
     // first start was refused for about five minutes (run 39030114626: worker up 5 min after its
     // rollout completed), so allow ten.
-    const runtime = await settle(() => call("runtime"), { ms: 600_000 });
-    const before = await settle(
-      () =>
-        observeRuntimeRollout(input, runtime, process.env.STAGING_CLOUDFLARE_READ_TOKEN, fetch, {
-          allowPreparedWeb: true,
-        }),
-      { ms: 600_000 },
+    const { runtime, observation: before } = await prepareRuntimeRollout(
+      input,
+      () => call("runtime"),
+      process.env.STAGING_CLOUDFLARE_READ_TOKEN,
+      { allowPreparedWeb: true, retry: { ms: 600_000 } },
     );
     const packet = validateConnectionProof(input, runtime, await call("connectivity"));
     const afterRuntime = await call("runtime");
