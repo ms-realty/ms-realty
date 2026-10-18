@@ -1,5 +1,5 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, expect, it, onTestFinished, vi } from "vitest";
 import { StickyHeader } from "./sticky-header";
 
 afterEach(() => {
@@ -48,4 +48,71 @@ it("updates the focus offset when the header wraps and releases it when the shel
   view.unmount();
   expect(disconnect).toHaveBeenCalledOnce();
   expect(document.documentElement.style.getPropertyValue("--public-header-height")).toBe("");
+});
+
+it("reveals a focused page field that the browser left under the header", () => {
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  );
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
+  });
+  const tops = new Map<string, number>([
+    ["header", 0],
+    ["under", 20],
+    ["below", 200],
+    ["menu", 10],
+  ]);
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    const top = tops.get(this.dataset.probe ?? "") ?? 0;
+    const height = this.dataset.probe === "header" ? 73 : 40;
+    return {
+      x: 0,
+      y: top,
+      top,
+      bottom: top + height,
+      left: 0,
+      right: 390,
+      width: 390,
+      height,
+    } as DOMRect;
+  });
+  // jsdom has no layout, so it implements no scrollIntoView to spy on.
+  const scrollIntoView = vi.fn();
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    value: scrollIntoView,
+    configurable: true,
+  });
+  onTestFinished(() => {
+    Reflect.deleteProperty(Element.prototype, "scrollIntoView");
+  });
+  render(
+    <>
+      <StickyHeader>
+        <a href="/bg" data-probe="menu">
+          Menu
+        </a>
+      </StickyHeader>
+      <main>
+        <input aria-label="Under the header" data-probe="under" />
+        <input aria-label="Below the header" data-probe="below" />
+      </main>
+    </>,
+  );
+  screen.getByRole("banner").dataset.probe = "header";
+  screen.getByLabelText("Below the header").focus();
+  screen.getByRole("link", { name: "Menu" }).focus();
+  expect(scrollIntoView).not.toHaveBeenCalled();
+  const under = screen.getByLabelText("Under the header");
+  under.focus();
+  expect(scrollIntoView).toHaveBeenCalledOnce();
+  expect(scrollIntoView.mock.contexts[0]).toBe(under);
+  expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
 });

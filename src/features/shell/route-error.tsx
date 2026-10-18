@@ -53,7 +53,8 @@ export function ErrorRecoveryContent({
         }
         reference={reference ? copy.generic.reference.replace("{reference}", reference) : undefined}
       >
-        <p>{copy.generic.body}</p>
+        {/* Visitors and clients call the agency; staff hand the reference to their manager. */}
+        <p>{surface === "staff" ? copy.generic.staffBody : copy.generic.body}</p>
         <p className="mt-3">{copy.recovery.actionOutcome}</p>
       </EmptyState>
       <RecoveryNavigation

@@ -2,11 +2,19 @@
   "notFound": {
     "title": "Pagina niet gevonden",
     "body": "Het adres is mogelijk verkeerd getypt of de pagina is verplaatst.",
-    "home": "Naar de startpagina"
+    "home": "Naar de startpagina",
+    "items": {
+      "deal": "We hebben dit traject niet gevonden. De link klopt misschien niet, of u hebt er geen toegang meer toe.",
+      "inquiry": "We hebben deze aanvraag niet gevonden. De link klopt misschien niet, of u hebt er geen toegang meer toe.",
+      "listing": "We hebben deze advertentie niet gevonden. De link klopt misschien niet, of u hebt er geen toegang meer toe.",
+      "appointment": "We hebben deze afspraak niet gevonden. De link klopt misschien niet, of u hebt er geen toegang meer toe.",
+      "property": "We hebben deze woning niet gevonden. Het adres is misschien verkeerd getypt, of de advertentie is verwijderd."
+    }
   },
   "generic": {
     "title": "Deze pagina kan niet worden getoond",
     "body": "Probeer het opnieuw. Blijft het gebeuren, bel ons dan en noem de referentie.",
+    "staffBody": "Probeer het opnieuw. Gebeurt het vaker, geef de referentie dan door aan uw leidinggevende.",
     "reference": "Referentie: {reference}",
     "retry": "Opnieuw proberen"
   },
@@ -16,6 +24,8 @@
     "list": "Terug naar de lijst",
     "record": "Terug naar het dossier",
     "deal": "Terug naar het traject",
+    "listing": "Terug naar de advertentie",
+    "inquiry": "Terug naar de aanvraag",
     "search": "Woningen zoeken",
     "access": "Terug naar aanmelden",
     "tools": "Naar de hulpmiddelen van het kantoor",
@@ -23,6 +33,17 @@
     "loadingList": "De lijst wordt geladen…",
     "loadingRecord": "Het dossier wordt geladen…",
     "loadingListing": "De advertentie wordt geladen…",
-    "actionOutcome": "Als u net iets hebt opgeslagen of verstuurd, controleer dan eerst dezelfde bevestiging voordat u die actie opnieuw uitvoert."
+    "actionOutcome": "Als u net iets hebt opgeslagen of verstuurd, controleer dan eerst dezelfde bevestiging voordat u die actie opnieuw uitvoert.",
+    "sections": {
+      "inquiries": "Terug naar aanvragen",
+      "cases": "Terug naar trajecten",
+      "inventory": "Terug naar het aanbod",
+      "calendar": "Terug naar de agenda",
+      "tasks": "Terug naar taken",
+      "appointments": "Terug naar afspraken",
+      "messages": "Terug naar berichten",
+      "documents": "Terug naar documenten",
+      "properties": "Terug naar woningen"
+    }
   }
 }

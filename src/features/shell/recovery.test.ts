@@ -6,14 +6,14 @@ const id = "00000000-0000-4000-8000-000000000001";
 describe("safe parent recovery (M-140)", () => {
   it("returns Inventory receipts to the list and names Today as the staff home", () => {
     expect(recoveryLinks("staff", "en", `/en/inventory/operations/${id}`)).toEqual({
-      parent: { href: "/en/inventory", label: "list" },
+      parent: { href: "/en/inventory", label: "section:inventory" },
       home: { href: "/en/today", label: "staffHome" },
     });
   });
   it("returns nested staff pages to their record without putting its identity in the label", () => {
     expect(recoveryLinks("staff", "bg", "/bg/inventory/MS-00001/evidence").parent).toEqual({
       href: "/bg/inventory/MS-00001",
-      label: "record",
+      label: "listing",
     });
   });
   it("recovers a client receipt without a key to the deal named by its bounded command", () => {
@@ -37,6 +37,25 @@ describe("safe parent recovery (M-140)", () => {
       home: { href: "/he/overview", label: "clientHome" },
     });
     expect(JSON.stringify(links)).not.toContain("private-token");
+  });
+  it("never offers a failing list as its own way back", () => {
+    expect(recoveryLinks("staff", "en", "/en/inventory?view=mine")).toEqual({
+      parent: undefined,
+      home: { href: "/en/today", label: "staffHome" },
+    });
+    expect(recoveryLinks("client", "en", "/en/documents").parent).toBeUndefined();
+  });
+  it("names what a record URL was, never what a page inside it was", () => {
+    expect(recoveryLinks("staff", "en", `/en/cases/${id}`)).toEqual({
+      parent: { href: "/en/cases", label: "section:cases" },
+      home: { href: "/en/today", label: "staffHome" },
+      item: "deal",
+    });
+    expect(recoveryLinks("staff", "en", `/en/cases/${id}/participants`).item).toBeUndefined();
+    expect(recoveryLinks("staff", "en", "/en/cases/new").item).toBeUndefined();
+    expect(recoveryLinks("client", "bg", `/bg/overview/${id}`).item).toBe("deal");
+    expect(recoveryLinks("public", "he", "/he/properties/MS-00001/slug").item).toBe("property");
+    expect(recoveryLinks("public", "en", "/en/properties/intent").item).toBeUndefined();
   });
   it("returns listing failures to public search", () => {
     expect(recoveryLinks("public", "he", "/he/properties/MS-00001/property").parent).toEqual({

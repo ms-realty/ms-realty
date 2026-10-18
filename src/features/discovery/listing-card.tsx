@@ -89,7 +89,12 @@ export function ListingCard({
       className="flex min-w-0 flex-col gap-4 rounded-panel border border-border bg-surface p-5"
       data-listing-reference={listing.reference}
     >
-      <ApprovedMedia media={listing.cover} unavailable={copy.noPhoto} />
+      {/* ListingGrid: one column, two from sm, three from xl; the card adds 2.5 rem padding. */}
+      <ApprovedMedia
+        media={listing.cover}
+        unavailable={copy.noPhoto}
+        sizes="auto, (min-width: 90rem) 25rem, (min-width: 40rem) calc(50vw - 4.5rem), calc(100vw - 5rem)"
+      />
       <div>
         <p className="text-caption text-text-muted">
           <bdi>{listing.reference}</bdi> · {copy[listing.propertyType]}

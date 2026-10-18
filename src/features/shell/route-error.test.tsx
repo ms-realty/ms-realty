@@ -24,7 +24,7 @@ it("keeps the staff shell, focuses the error title, retries the read and offers 
   await waitFor(() => expect(screen.getByRole("heading", { level: 1 })).toHaveFocus());
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(retry).toHaveBeenCalledOnce();
-  expect(screen.getByRole("link", { name: "Back to list" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Back to inventory" })).toHaveAttribute(
     "href",
     "/en/inventory",
   );
@@ -32,6 +32,8 @@ it("keeps the staff shell, focuses the error title, retries the read and offers 
   expect(screen.getByText("Reference: 1234567890")).toBeInTheDocument();
   expect(screen.queryByText(/secret record/)).not.toBeInTheDocument();
   expect(screen.getByText(/check the same receipt/)).toBeInTheDocument();
+  expect(screen.getByText(/give the reference to your manager/)).toBeInTheDocument();
+  expect(screen.queryByText(/call us/)).not.toBeInTheDocument();
 });
 
 it("renders Hebrew recovery without a translation provider and keeps phone text isolated", () => {
@@ -53,4 +55,12 @@ it("provides a main landmark when an access or shell layout fails", () => {
   render(<StaffShellError error={{ digest: "secret@example.test" }} retry={vi.fn()} />);
   expect(screen.getByRole("main")).toHaveAttribute("id", "main");
   expect(screen.queryByText(/secret@example/)).not.toBeInTheDocument();
+});
+
+it("does not offer the failing page itself as the way out", () => {
+  location.pathname = "/en/overview";
+  render(<ClientRouteError error={{ digest: "42" }} retry={vi.fn()} />);
+  expect(screen.queryByRole("link", { name: "Back to my deals" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /359 879 696 870/ })).toBeInTheDocument();
 });

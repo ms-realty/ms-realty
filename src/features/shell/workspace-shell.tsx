@@ -219,7 +219,7 @@ export async function WorkspaceShell({
         <dialog
           id={toolsMenuId}
           aria-labelledby={`${toolsMenuId}-title`}
-          className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto overscroll-contain bg-subtle p-5 text-text backdrop:bg-transparent sm:p-16"
+          className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto overscroll-contain bg-subtle p-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] text-text backdrop:bg-transparent sm:p-16"
         >
           {toolsMenu}
         </dialog>

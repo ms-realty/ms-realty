@@ -17,8 +17,29 @@ export function StickyHeader({ children }: { children: ReactNode }) {
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(header);
+    // WebKit's focus scrolling ignores scroll-padding: once the browser has scrolled, reveal a
+    // page target that still sits under the header (dialogs and the header itself excepted).
+    const reveal = (event: FocusEvent) => {
+      const target = event.target;
+      if (
+        !(target instanceof Element) ||
+        header.contains(target) ||
+        !target.closest("main") ||
+        target.closest("dialog, [role=dialog], [aria-modal=true]")
+      )
+        return;
+      requestAnimationFrame(() => {
+        if (
+          document.activeElement === target &&
+          target.getBoundingClientRect().top < header.getBoundingClientRect().bottom
+        )
+          target.scrollIntoView({ block: "nearest" });
+      });
+    };
+    document.addEventListener("focusin", reveal);
     return () => {
       observer.disconnect();
+      document.removeEventListener("focusin", reveal);
       root.style.removeProperty("--public-header-height");
     };
   }, []);
