@@ -125,14 +125,18 @@ export interface PlannerInput {
   checkpoints: WorkspaceCheckpoint[];
   remainingSteps: number;
 }
+export type AiBillingMode = "metered_usd" | "chatgpt_subscription";
+export type InferenceOutcome = "not_started" | "pending" | "settled" | "unknown";
 export interface WorkspaceBudget {
+  /** Absent on historical budgets, which remain metered in USD. */
+  billingMode?: AiBillingMode;
   maxSteps: number;
   maxTotalTokens: number;
   maxOutputTokens: number;
   maxInputBytes: number;
   timeoutMs: number;
   maxElapsedMs: number;
-  maxCostMicros: number;
+  maxCostMicros: number | null;
   readRetries: number;
 }
 export const workspaceStates = [

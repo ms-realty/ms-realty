@@ -7,12 +7,19 @@ import {
   generativeRuns,
   generativeSessions,
 } from "@/db/schema";
-import { type PlannerInput, type WorkspaceState, workspaceProtocol } from "@/domain/generative";
+import {
+  type InferenceOutcome,
+  type PlannerInput,
+  type WorkspaceState,
+  workspaceProtocol,
+} from "@/domain/generative";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import type { JobPayloads } from "../jobs/queue";
 import { assertRecoveryOpen } from "../recovery/quarantine";
+import { addKnownCosts, billingMode, generationCost, reserveGenerationCost } from "./billing";
+import { ChatGptError } from "./chatgpt/types";
 import {
   type WorkspaceQueue,
   type WorkspaceRun,
@@ -32,11 +39,13 @@ export interface WorkspaceJobDependencies {
   executeTool?: typeof executeWorkspaceTool;
 }
 const safeCode = (error: unknown) =>
-  error instanceof AppError
-    ? "workspace_access_changed"
-    : error instanceof Error && /^workspace_[a-z_]{1,70}$/.test(error.message)
-      ? error.message
-      : "workspace_step_failed";
+  error instanceof ChatGptError && /^(provider_|chatgpt_)[a-z_0-9]{1,80}$/.test(error.code)
+    ? `workspace_${error.code.replace(/^provider_/, "")}`
+    : error instanceof AppError
+      ? "workspace_access_changed"
+      : error instanceof Error && /^workspace_[a-z_]{1,70}$/.test(error.message)
+        ? error.message
+        : "workspace_step_failed";
 
 /** All mutators lock the workspace before its run, including failure settlement. */
 async function lockedRun(db: Executor, id: string) {
@@ -90,7 +99,8 @@ export async function processWorkspaceStep(
   let claim:
     | { run: WorkspaceRun; claimId: string; input: PlannerInput; context: PlannerInput["context"] }
     | undefined;
-  let charge: number | null = 0;
+  let charge: number | null = billingMode(config.generation) === "chatgpt_subscription" ? null : 0;
+  let inferenceOutcome: InferenceOutcome = "not_started";
   let tokens = { input: 0, output: 0 };
   try {
     claim = await db.transaction(async (tx) => {
@@ -117,7 +127,14 @@ export async function processWorkspaceStep(
         return;
       let failure: WorkspaceState | null = null,
         code: string | null = null;
-      if (!config.enabled || config.policyDigest !== run.policyDigest) {
+      if (run.inferenceOutcome === "unknown") {
+        failure = "unknown_provider";
+        code = "workspace_unknown_provider";
+      } else if (
+        !config.enabled ||
+        config.policyDigest !== run.policyDigest ||
+        run.billingMode !== billingMode(config.generation)
+      ) {
         failure = "failed";
         code = "workspace_configuration_changed";
       } else if (context.digest !== run.contextDigest) {
@@ -159,9 +176,10 @@ export async function processWorkspaceStep(
         const bytes = new TextEncoder().encode(JSON.stringify(input)).byteLength;
         const tokenBound =
           bytes + new TextEncoder().encode(workspaceInstructions).byteLength + 2048;
-        const reserve = Math.ceil(
-          tokenBound * config.generation.inputCostMicros +
-            config.generation.maxOutputTokens * config.generation.outputCostMicros,
+        const reserve = reserveGenerationCost(
+          config.generation,
+          tokenBound,
+          config.generation.maxOutputTokens,
         );
         if (bytes > run.budget.maxInputBytes) {
           failure = "budget_exhausted";
@@ -172,7 +190,12 @@ export async function processWorkspaceStep(
         ) {
           failure = "budget_exhausted";
           code = "workspace_token_budget";
-        } else if (run.observedCostMicros + reserve > run.reservedCostMicros) {
+        } else if (
+          reserve !== null &&
+          (run.observedCostMicros === null ||
+            run.reservedCostMicros === null ||
+            run.observedCostMicros + reserve > run.reservedCostMicros)
+        ) {
           failure = "budget_exhausted";
           code = "workspace_cost_budget";
         }
@@ -180,7 +203,12 @@ export async function processWorkspaceStep(
       if (failure) {
         await tx
           .update(generativeRuns)
-          .set({ state: failure, errorCode: code, actualCostMicros: run.observedCostMicros })
+          .set({
+            state: failure,
+            errorCode: code,
+            actualCostMicros: run.inferenceOutcome === "unknown" ? null : run.observedCostMicros,
+            inferenceOutcome: run.inferenceOutcome === "unknown" ? "unknown" : "settled",
+          })
           .where(eq(generativeRuns.id, run.id));
         await updateSessionState(tx, run, failure, code);
         return;
@@ -190,6 +218,7 @@ export async function processWorkspaceStep(
         .update(generativeRuns)
         .set({
           state: "running",
+          inferenceOutcome: job.phase === "plan" ? "pending" : "not_started",
           claimId,
           claimedAt: new Date(),
           startedAt: run.startedAt ?? new Date(),
@@ -204,22 +233,11 @@ export async function processWorkspaceStep(
     if (job.phase === "plan") {
       // The reservation remains charged if the transport outcome or bill cannot be established.
       charge = null;
+      inferenceOutcome = "pending";
       const generated = await (deps.planTurn ?? generateWorkspaceTurn)(claim.input, config);
-      const amount =
-        config.generation.provider === "openrouter"
-          ? generated.actualCostMicros
-          : Math.ceil(
-              generated.inputTokens * config.generation.inputCostMicros +
-                generated.outputTokens * config.generation.outputCostMicros,
-            );
-      if (
-        typeof amount !== "number" ||
-        !Number.isSafeInteger(amount) ||
-        amount < 0 ||
-        amount > 2_000_000_000
-      )
-        throw new Error("workspace_provider_cost_unknown");
+      const amount = generationCost(config.generation, generated);
       charge = amount;
+      inferenceOutcome = "settled";
       tokens = { input: generated.inputTokens, output: generated.outputTokens };
       const tokenBound =
         new TextEncoder().encode(JSON.stringify(claim.input)).byteLength +
@@ -234,7 +252,12 @@ export async function processWorkspaceStep(
         tokens.output > config.generation.maxOutputTokens
       )
         throw new Error("workspace_usage_limit");
-      if (run.observedCostMicros + amount > run.reservedCostMicros)
+      if (
+        amount !== null &&
+        (run.observedCostMicros === null ||
+          run.reservedCostMicros === null ||
+          run.observedCostMicros + amount > run.reservedCostMicros)
+      )
         throw new Error("workspace_cost_budget");
       const turn = validatePlannerTurn(generated.output, claim.context);
       await db.transaction(async (tx) => {
@@ -246,7 +269,7 @@ export async function processWorkspaceStep(
           run.sessionId,
           true,
         );
-        const total = latest.observedCostMicros + amount;
+        const total = addKnownCosts(run.billingMode, latest.observedCostMicros, amount);
         if (
           workspace.activeRunId !== run.id ||
           workspace.generation !== run.generation ||
@@ -258,6 +281,7 @@ export async function processWorkspaceStep(
               state: "cancelled",
               observedCostMicros: total,
               actualCostMicros: total,
+              inferenceOutcome: "settled",
               inputTokens: latest.inputTokens + tokens.input,
               outputTokens: latest.outputTokens + tokens.output,
               claimId: null,
@@ -283,6 +307,7 @@ export async function processWorkspaceStep(
           step,
           turn,
           costMicros: amount,
+          billingMode: run.billingMode,
           toolResult: turn.tool ? null : { prepared: true, businessEffects: 0 },
         });
         const state =
@@ -300,6 +325,7 @@ export async function processWorkspaceStep(
             state,
             observedCostMicros: total,
             actualCostMicros: state === "queued" ? null : total,
+            inferenceOutcome: state === "queued" ? "not_started" : "settled",
             inputTokens: latest.inputTokens + tokens.input,
             outputTokens: latest.outputTokens + tokens.output,
             claimId: null,
@@ -372,6 +398,7 @@ export async function processWorkspaceStep(
           .set({
             state: "cancelled",
             actualCostMicros: latest.observedCostMicros,
+            inferenceOutcome: "settled",
             claimId: null,
             claimedAt: null,
           })
@@ -403,7 +430,7 @@ export async function processWorkspaceStep(
         });
       await tx
         .update(generativeRuns)
-        .set({ state: "queued", claimId: null, claimedAt: null })
+        .set({ state: "queued", inferenceOutcome: "not_started", claimId: null, claimedAt: null })
         .where(eq(generativeRuns.id, run.id));
       await updateSessionState(tx, run, "queued");
       const queued = await deps.queue.send(
@@ -414,18 +441,29 @@ export async function processWorkspaceStep(
       if (!queued) throw new Error("workspace_queue_unavailable");
     });
   } catch (error) {
+    if (inferenceOutcome === "pending")
+      inferenceOutcome = error instanceof ChatGptError ? error.inferenceOutcome : "unknown";
+    if (error instanceof ChatGptError && error.usage)
+      tokens = { input: error.usage.inputTokens, output: error.usage.outputTokens };
     const code = safeCode(error);
     await db.transaction(async (tx) => {
       const run = await lockedRun(tx, job.runId);
       if (!run || (claim ? run.claimId !== claim.claimId : run.state !== "queued")) return;
-      const sum = charge === null ? null : run.observedCostMicros + charge;
+      let sum: number | null = null;
+      if (inferenceOutcome !== "unknown") {
+        try {
+          sum = addKnownCosts(run.billingMode, run.observedCostMicros, charge);
+        } catch {
+          inferenceOutcome = "unknown";
+        }
+      }
       const total = sum !== null && Number.isSafeInteger(sum) && sum <= 2_000_000_000 ? sum : null;
       const state: WorkspaceState =
         run.state === "cancelled"
           ? "cancelled"
           : code === "workspace_source_changed" || code === "workspace_access_changed"
             ? "stale"
-            : charge === null
+            : inferenceOutcome === "unknown"
               ? "unknown_provider"
               : code.includes("budget") || code === "workspace_input_oversize"
                 ? "budget_exhausted"
@@ -436,6 +474,7 @@ export async function processWorkspaceStep(
           state,
           errorCode: code,
           actualCostMicros: total,
+          inferenceOutcome,
           observedCostMicros: total ?? run.observedCostMicros,
           inputTokens:
             run.inputTokens +

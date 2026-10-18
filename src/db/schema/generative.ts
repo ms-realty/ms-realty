@@ -11,8 +11,10 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import type {
+  AiBillingMode,
   ArtifactProposal,
   ContextSelection,
+  InferenceOutcome,
   PlannerTurn,
   SourcePin,
   WorkspaceBudget,
@@ -73,9 +75,14 @@ export const generativeRuns = pgTable(
     contextPins: jsonb("context_pins").$type<SourcePin[]>().notNull().default([]),
     inputTokens: integer("input_tokens").notNull().default(0),
     outputTokens: integer("output_tokens").notNull().default(0),
-    reservedCostMicros: integer("reserved_cost_micros").notNull(),
+    billingMode: text("billing_mode").$type<AiBillingMode>().notNull().default("metered_usd"),
+    inferenceOutcome: text("inference_outcome")
+      .$type<InferenceOutcome>()
+      .notNull()
+      .default("not_started"),
+    reservedCostMicros: integer("reserved_cost_micros"),
     actualCostMicros: integer("actual_cost_micros"),
-    observedCostMicros: integer("observed_cost_micros").notNull().default(0),
+    observedCostMicros: integer("observed_cost_micros").default(0),
     claimId: uuid("claim_id"),
     claimedAt: instant("claimed_at"),
     startedAt: instant("started_at"),
@@ -87,7 +94,15 @@ export const generativeRuns = pgTable(
     check("generative_runs_state", sql`${t.state} in (${sqlList(workspaceStates)})`),
     check(
       "generative_runs_usage",
-      sql`${t.steps} >= 0 and ${t.inputTokens} >= 0 and ${t.outputTokens} >= 0 and ${t.reservedCostMicros} >= 0 and ${t.observedCostMicros} >= 0 and (${t.actualCostMicros} is null or ${t.actualCostMicros} >= 0)`,
+      sql`${t.steps} >= 0 and ${t.inputTokens} >= 0 and ${t.outputTokens} >= 0`,
+    ),
+    check(
+      "generative_runs_billing",
+      sql`(${t.billingMode} = 'metered_usd' and ${t.reservedCostMicros} is not null and ${t.reservedCostMicros} >= 0 and ${t.observedCostMicros} is not null and ${t.observedCostMicros} >= 0 and (${t.actualCostMicros} is null or ${t.actualCostMicros} >= 0)) or (${t.billingMode} = 'chatgpt_subscription' and ${t.reservedCostMicros} is null and ${t.observedCostMicros} is null and ${t.actualCostMicros} is null)`,
+    ),
+    check(
+      "generative_runs_inference",
+      sql`${t.inferenceOutcome} in ('not_started','pending','settled','unknown') and (${t.inferenceOutcome} <> 'pending' or (${t.state} in ('queued','running') and ${t.claimId} is not null)) and (${t.inferenceOutcome} <> 'settled' or ${t.billingMode} = 'chatgpt_subscription' or ${t.actualCostMicros} is not null)`,
     ),
   ],
 );
@@ -103,11 +118,16 @@ export const generativeCheckpoints = pgTable(
     step: integer("step").notNull(),
     turn: jsonb("turn").$type<PlannerTurn>().notNull(),
     toolResult: jsonb("tool_result"),
-    costMicros: integer("cost_micros").notNull(),
+    billingMode: text("billing_mode").$type<AiBillingMode>().notNull().default("metered_usd"),
+    costMicros: integer("cost_micros"),
   },
   (t) => [
     uniqueIndex("generative_checkpoints_step_idx").on(t.runId, t.step),
-    check("generative_checkpoints_step", sql`${t.step} > 0 and ${t.costMicros} >= 0`),
+    check("generative_checkpoints_step", sql`${t.step} > 0`),
+    check(
+      "generative_checkpoints_billing",
+      sql`(${t.billingMode} = 'metered_usd' and ${t.costMicros} is not null and ${t.costMicros} >= 0) or (${t.billingMode} = 'chatgpt_subscription' and ${t.costMicros} is null)`,
+    ),
   ],
 );
 

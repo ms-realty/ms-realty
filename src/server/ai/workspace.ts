@@ -24,6 +24,7 @@ import { AppError } from "../errors";
 import type { JobQueue } from "../jobs/queue";
 import { findOperation, type OperationView, runOperation } from "../operations";
 import { commandEnvelope, liveStaff, parseInput, version } from "../work/shared";
+import { billingMode } from "./billing";
 import { reserveAiBudget } from "./budget";
 import { type WorkspaceConfig, workspaceConfig } from "./workspace-config";
 import {
@@ -325,7 +326,7 @@ export async function readWorkspace(db: Executor, session: Session, id: string) 
       canResume: Boolean(expired),
       requiresUnknownAck: Boolean(
         (expired && !savedTool) ||
-          (latest?.actualCostMicros === null && !["queued", "running"].includes(latest.state)),
+          (latest?.inferenceOutcome === "unknown" && !["queued", "running"].includes(latest.state)),
       ),
     },
     availability: { enabled: config.enabled, budget: config.budget },
@@ -395,7 +396,12 @@ async function stopActive(db: Executor, row: Workspace) {
     .update(generativeRuns)
     .set({
       state: "cancelled",
-      actualCostMicros: run.claimId ? null : run.observedCostMicros,
+      actualCostMicros: ["pending", "unknown"].includes(run.inferenceOutcome)
+        ? null
+        : run.observedCostMicros,
+      inferenceOutcome: ["pending", "unknown"].includes(run.inferenceOutcome)
+        ? "unknown"
+        : "settled",
       updatedAt: new Date(),
     })
     .where(eq(generativeRuns.id, run.id));
@@ -538,7 +544,7 @@ export async function requestWorkspaceRun(
         .for("update");
       if (
         previous &&
-        previous.actualCostMicros === null &&
+        previous.inferenceOutcome === "unknown" &&
         !["queued", "running"].includes(previous.state) &&
         !input.acknowledgeUnknown
       )
@@ -568,7 +574,12 @@ export async function requestWorkspaceRun(
           const phase = pendingTool ? ("tool" as const) : ("plan" as const);
           await tx
             .update(generativeRuns)
-            .set({ state: "queued", claimId: null, claimedAt: null })
+            .set({
+              state: "queued",
+              inferenceOutcome: "not_started",
+              claimId: null,
+              claimedAt: null,
+            })
             .where(eq(generativeRuns.id, previous.id));
           await deps.queue.send(
             "ai.workspace.step",
@@ -591,7 +602,8 @@ export async function requestWorkspaceRun(
         }
         // A saved tool only reads or prepares a draft; abandoning it has known provider cost.
         // Source/policy drift requires a new reviewed run, not an unknown inference charge.
-        const unknownInference = previous.claimId !== null && !pendingTool;
+        const unknownInference =
+          previous.inferenceOutcome === "unknown" || (previous.claimId !== null && !pendingTool);
         if (unknownInference && !input.acknowledgeUnknown) throw new AppError("outcome_unknown");
         await tx
           .update(generativeRuns)
@@ -600,6 +612,7 @@ export async function requestWorkspaceRun(
             claimId: null,
             claimedAt: null,
             actualCostMicros: unknownInference ? null : previous.observedCostMicros,
+            inferenceOutcome: unknownInference ? "unknown" : "settled",
           })
           .where(eq(generativeRuns.id, previous.id));
       }
@@ -608,6 +621,7 @@ export async function requestWorkspaceRun(
         live.actor.id,
         config.budget.maxCostMicros,
         config.generation.dailyLimitMicros,
+        billingMode(config.generation),
       );
       const generation = row.generation + 1;
       const [run] = await tx
@@ -620,6 +634,8 @@ export async function requestWorkspaceRun(
           budget: config.budget,
           contextDigest: context.digest,
           reservedCostMicros: config.budget.maxCostMicros,
+          observedCostMicros: billingMode(config.generation) === "chatgpt_subscription" ? null : 0,
+          billingMode: billingMode(config.generation),
           contextPins: context.pins,
         })
         .returning();

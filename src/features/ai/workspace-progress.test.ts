@@ -14,6 +14,7 @@ function view(actualCostMicros: number | null = null): WorkspaceView {
       {
         state: "running",
         steps: 2,
+        billingMode: "metered_usd",
         budget: { maxSteps: 8, maxCostMicros: 25000, maxTotalTokens: 10000 },
         reservedCostMicros: 25000,
         actualCostMicros,
@@ -36,6 +37,7 @@ describe("F29 isolated progress projection", () => {
       state: "running",
       steps: 2,
       maxSteps: 8,
+      billingMode: "metered_usd",
       reservedCostMicros: 25000,
       actualCostMicros: cost,
       hasRun: true,
@@ -52,10 +54,32 @@ describe("F29 isolated progress projection", () => {
     expect(projectWorkspaceProgress(current)).toMatchObject({
       steps: 0,
       maxSteps: 6,
+      billingMode: "metered_usd",
       reservedCostMicros: 15000,
       actualCostMicros: null,
       hasRun: false,
     });
+  });
+
+  it("retains subscription billing when the current provider has a dollar ceiling", () => {
+    const current = view();
+    const run = current.runs[0];
+    if (!run) throw new Error("Missing fixture run");
+    run.billingMode = "chatgpt_subscription";
+    run.reservedCostMicros = null;
+    run.actualCostMicros = null;
+    const progress = projectWorkspaceProgress(current);
+    expect(progress).toMatchObject({
+      billingMode: "chatgpt_subscription",
+      reservedCostMicros: null,
+      actualCostMicros: null,
+    });
+    expect(workspaceProgressSchema.safeParse({ ...progress, actualCostMicros: 0 }).success).toBe(
+      false,
+    );
+    expect(
+      workspaceProgressSchema.safeParse({ ...progress, reservedCostMicros: 15000 }).success,
+    ).toBe(false);
   });
 
   it("rejects malformed or expanded progress responses", () => {

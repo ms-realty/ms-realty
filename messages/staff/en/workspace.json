@@ -20,5 +20,12 @@
   "account": "Account",
   "session": "Session",
   "manageAccess": "Manage access",
-  "signOut": "Sign out"
+  "signOut": "Sign out",
+  "butlerBilling": {
+    "unknownReview": "I understand that the previous request may have used my plan allowance or incurred a charge. Start a new bounded run after checking its progress.",
+    "stopHelp": "Stop prevents subsequent steps. A request already in progress may finish and still use your plan allowance or incur a charge.",
+    "modelAccess": "Model access",
+    "subscription": "ChatGPT subscription",
+    "subscriptionLimits": "ChatGPT usage limits still apply."
+  }
 }

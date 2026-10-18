@@ -1,6 +1,10 @@
 import type { WorkspaceState } from "@/domain/generative";
+import bgWorkspace from "../../../messages/staff/bg/workspace.json";
+import enWorkspace from "../../../messages/staff/en/workspace.json";
+import ruWorkspace from "../../../messages/staff/ru/workspace.json";
 
 const en = {
+  ...enWorkspace.butlerBilling,
   title: "Research workspace",
   entry: "Work from a goal",
   entryHelp: "Investigate a question, compare options and prepare editable work with Butler.",
@@ -68,11 +72,7 @@ const en = {
   research: "Prepare research",
   resume: "Continue research",
   reviewed: "I have reviewed the goal and the current sources for this research run.",
-  unknownReview:
-    "I understand that the previous provider request may have incurred a cost. Start a new bounded run after checking its progress.",
   stop: "Stop next steps",
-  stopHelp:
-    "Stop prevents subsequent steps. A provider request already in progress may finish and its cost is still accounted for.",
   stopSaved: "Next steps stopped",
   refresh: "Refresh progress",
   refreshHelp:
@@ -188,6 +188,7 @@ const en = {
 };
 type WorkspaceCopy = typeof en;
 const bg: WorkspaceCopy = {
+  ...bgWorkspace.butlerBilling,
   liveProgress: "Текущ напредък",
   resultsReady:
     "Напредъкът е променен. Отворете последното състояние, въпросите и черновите за преглед.",
@@ -263,11 +264,7 @@ const bg: WorkspaceCopy = {
   research: "Подготовка на проучване",
   resume: "Продължаване на проучването",
   reviewed: "Прегледах целта и текущите източници за това проучване.",
-  unknownReview:
-    "Разбирам, че предишната заявка може да е довела до разход. След проверка на напредъка започвам ново ограничено проучване.",
   stop: "Спиране на следващите стъпки",
-  stopHelp:
-    "Спирането отменя следващите стъпки. Текуща заявка към доставчика може да завърши и разходът ѝ се отчита.",
   stopSaved: "Следващите стъпки са спрени",
   refresh: "Обновяване на напредъка",
   refreshHelp:
@@ -373,6 +370,7 @@ const bg: WorkspaceCopy = {
   },
 };
 const ru: WorkspaceCopy = {
+  ...ruWorkspace.butlerBilling,
   title: "Рабочее исследование",
   entry: "Начните с цели",
   entryHelp: "Исследуйте вопрос, сравните варианты и подготовьте редактируемые черновики с Butler.",
@@ -440,11 +438,7 @@ const ru: WorkspaceCopy = {
   research: "Подготовить исследование",
   resume: "Продолжить исследование",
   reviewed: "Я проверил цель и текущие источники для этого исследования.",
-  unknownReview:
-    "Я понимаю, что предыдущий запрос мог повлечь расходы. После проверки прогресса начинаю новый ограниченный запуск.",
   stop: "Остановить следующие шаги",
-  stopHelp:
-    "Остановка отменяет последующие шаги. Текущий запрос к поставщику может завершиться, и его стоимость учитывается.",
   stopSaved: "Следующие шаги остановлены",
   refresh: "Обновить прогресс",
   refreshHelp:

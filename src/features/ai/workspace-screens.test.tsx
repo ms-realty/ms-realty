@@ -56,7 +56,14 @@ function view(canResume: boolean, requiresUnknownAck = false): WorkspaceView {
     context: { sources: [], pins: [], digest: "current", truncated: false },
     artifacts: [],
     runs: [
-      { state: "running", steps: 1, budget, reservedCostMicros: 25000, actualCostMicros: null },
+      {
+        state: "running",
+        billingMode: "metered_usd",
+        steps: 1,
+        budget,
+        reservedCostMicros: 25000,
+        actualCostMicros: null,
+      },
     ],
     checkpoints: [],
     sourceChanged: false,

@@ -101,6 +101,7 @@ describe.each(["bg", "ru", "en"])("F29 goal-first staff work in %s", (locale) =>
           steps: 3,
           budget: { maxSteps: 8 },
           reservedCostMicros: 25000,
+          billingMode: "metered_usd",
           actualCostMicros: null,
           errorCode: null,
         },
@@ -112,6 +113,31 @@ describe.each(["bg", "ru", "en"])("F29 goal-first staff work in %s", (locale) =>
     expect(screen.getByRole("status")).toHaveTextContent(workspaceCopy(locale).states.completed);
     expect(screen.getByText(workspaceCopy(locale).costUnknown)).toBeVisible();
     expect(screen.queryByText("completed")).not.toBeInTheDocument();
+  });
+
+  it("shows subscription limits without inventing a dollar charge", () => {
+    const copy = workspaceCopy(locale);
+    const { container } = render(
+      <WorkspaceProgress
+        locale={locale}
+        view={{
+          state: "running",
+          steps: 2,
+          maxSteps: 8,
+          billingMode: "chatgpt_subscription",
+          reservedCostMicros: null,
+          actualCostMicros: null,
+          hasRun: true,
+          recovery: { canResume: false, requiresUnknownAck: false },
+          sourceChanged: false,
+        }}
+      />,
+    );
+    expect(screen.getByText(copy.subscription, { exact: true })).toBeVisible();
+    expect(screen.getByText(copy.subscriptionLimits, { exact: true })).toBeVisible();
+    expect(screen.queryByText(copy.costUnknown)).not.toBeInTheDocument();
+    expect(screen.queryByText(copy.ceiling)).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/USD|\$/);
   });
 });
 

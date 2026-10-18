@@ -27,6 +27,7 @@ const progress = {
   state: "running",
   steps: 2,
   maxSteps: 8,
+  billingMode: "metered_usd",
   reservedCostMicros: 25000,
   actualCostMicros: null,
   hasRun: true,
@@ -35,7 +36,15 @@ const progress = {
 };
 const readView = {
   workspace: { state: "running", goal: "Private goal", errorCode: "Private provider detail" },
-  runs: [{ steps: 2, budget: { maxSteps: 8 }, reservedCostMicros: 25000, actualCostMicros: null }],
+  runs: [
+    {
+      steps: 2,
+      billingMode: "metered_usd",
+      budget: { maxSteps: 8 },
+      reservedCostMicros: 25000,
+      actualCostMicros: null,
+    },
+  ],
   availability: { budget: { maxSteps: 6, maxCostMicros: 15000 } },
   recovery: progress.recovery,
   sourceChanged: false,

@@ -182,10 +182,16 @@ export function WorkspaceProgress({
           <dd>{view.maxSteps}</dd>
         </div>
         <div>
-          <dt className="text-text-muted">{copy.ceiling}</dt>
-          <dd>{assistanceCost(view.reservedCostMicros, locale)}</dd>
+          <dt className="text-text-muted">
+            {view.billingMode === "chatgpt_subscription" ? copy.modelAccess : copy.ceiling}
+          </dt>
+          <dd>
+            {view.billingMode === "chatgpt_subscription"
+              ? copy.subscription
+              : assistanceCost(view.reservedCostMicros, locale)}
+          </dd>
         </div>
-        {view.hasRun ? (
+        {view.billingMode === "metered_usd" && view.hasRun ? (
           <div className="col-span-2">
             <dt className="text-text-muted">{copy.cost}</dt>
             <dd>
@@ -196,6 +202,9 @@ export function WorkspaceProgress({
           </div>
         ) : null}
       </dl>
+      {view.billingMode === "chatgpt_subscription" ? (
+        <p className="text-compact text-text-muted">{copy.subscriptionLimits}</p>
+      ) : null}
     </section>
   );
 }

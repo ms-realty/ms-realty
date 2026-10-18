@@ -7,11 +7,14 @@ import type { WorkspaceProgressView } from "./workspace-progress";
 const id = "10000000-0000-4000-8000-000000000001";
 const latestUrl = `/en/operations/assistance/research/${id}`;
 const fetchProgress = vi.fn<typeof fetch>();
-function progress(changes: Partial<WorkspaceProgressView> = {}): WorkspaceProgressView {
+function progress(
+  changes: Partial<Extract<WorkspaceProgressView, { billingMode: "metered_usd" }>> = {},
+): WorkspaceProgressView {
   return {
     state: "queued",
     steps: 0,
     maxSteps: 8,
+    billingMode: "metered_usd",
     reservedCostMicros: 25000,
     actualCostMicros: null,
     hasRun: true,

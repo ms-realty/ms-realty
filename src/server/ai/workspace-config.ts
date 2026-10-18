@@ -1,6 +1,7 @@
 import "server-only";
 import { type WorkspaceBudget, workspaceProtocol } from "@/domain/generative";
 import { hashRequest } from "../crypto";
+import { billingMode } from "./billing";
 import { type AssistanceConfig, assistanceConfig } from "./config";
 
 export interface WorkspaceConfig {
@@ -25,6 +26,7 @@ export function workspaceConfig(
   baseConfig: AssistanceConfig = assistanceConfig(env),
 ): WorkspaceConfig {
   const base = baseConfig;
+  const subscription = billingMode(base) === "chatgpt_subscription";
   const setting = (key: string) => env[`BUTLER_WORKSPACE_${key}`] ?? env[`HERMES_WORKSPACE_${key}`];
   const values = {
     maxSteps: integer(setting("MAX_STEPS"), 8, 1, 24),
@@ -33,22 +35,27 @@ export function workspaceConfig(
     maxInputBytes: integer(setting("MAX_INPUT_BYTES"), 49_152, 1024, 131_072),
     timeoutMs: integer(setting("TIMEOUT_MS"), 30_000, 1000, 120_000),
     maxElapsedMs: integer(setting("MAX_ELAPSED_MS"), 180_000, 1000, 900_000),
-    maxCostMicros: integer(setting("MAX_COST_USD_MICROS"), 0, 1, base.dailyLimitMicros),
+    maxCostMicros: subscription
+      ? null
+      : integer(setting("MAX_COST_USD_MICROS"), 0, 1, base.dailyLimitMicros ?? 0),
     readRetries: integer(setting("READ_RETRIES"), 2, 0, 2),
   };
   const valid =
-    Object.values(values).every((value) => value !== null) &&
-    (values.maxCostMicros ?? 0) > 0 &&
+    Object.entries(values).every(
+      ([key, value]) => value !== null || (subscription && key === "maxCostMicros"),
+    ) &&
+    (subscription || (values.maxCostMicros ?? 0) > 0) &&
     (values.maxElapsedMs ?? 0) >= (values.timeoutMs ?? Number.POSITIVE_INFINITY);
   // Invalid operator settings remain safely bounded in disabled status projections.
   const budget: WorkspaceBudget = {
+    ...(subscription ? { billingMode: "chatgpt_subscription" as const } : {}),
     maxSteps: values.maxSteps ?? 8,
     maxTotalTokens: values.maxTotalTokens ?? 100_000,
     maxOutputTokens: values.maxOutputTokens ?? 4096,
     maxInputBytes: values.maxInputBytes ?? 49_152,
     timeoutMs: values.timeoutMs ?? 30_000,
     maxElapsedMs: values.maxElapsedMs ?? 180_000,
-    maxCostMicros: values.maxCostMicros ?? 0,
+    maxCostMicros: subscription ? null : (values.maxCostMicros ?? 0),
     readRetries: values.readRetries ?? 2,
   };
   const enabled = base.enabled && setting("QUALIFIED") === "1" && valid;
@@ -62,6 +69,7 @@ export function workspaceConfig(
     protocol: workspaceProtocol,
     revision: workspacePolicyRevision,
     provider: generation.provider,
+    ...(subscription ? { chatGptRegistrationId: generation.chatGptRegistrationId } : {}),
     model: generation.model,
     routing: generation.routing ?? null,
     jev: generation.jev ?? null,

@@ -38,6 +38,7 @@ import { caseFixture } from "../cases/testing";
 import { JobQueue } from "../jobs/queue";
 import { createListingFixture, defaultFacts, eur, publishForTest } from "../publication/testing";
 import { requestAssistance } from "./assistance";
+import { ChatGptError } from "./chatgpt/types";
 import type { AssistanceConfig } from "./config";
 import {
   appendWorkspaceMessage,
@@ -256,6 +257,183 @@ async function prepare(f: Fixture, id: string, build = taskProposal) {
 }
 
 describe("F29 complete generative jobs on durable PostgreSQL", () => {
+  it("retains subscription usage and settled inference independently of non-applicable money", async () => {
+    const limits = configured(
+      {},
+      {
+        ...baseConfig,
+        provider: "chatgpt_oauth",
+        chatGptRegistrationId: "a".repeat(64),
+        inputCostMicros: null,
+        outputCostMicros: null,
+        dailyLimitMicros: null,
+      },
+    );
+    const f = await caseFixture(t.db),
+      w = await create(f),
+      run = await start(f, w.id, tapQueue(), limits);
+    expect(limits.budget.maxCostMicros).toBeNull();
+    expect(await runRow(run.job.runId)).toMatchObject({
+      billingMode: "chatgpt_subscription",
+      inferenceOutcome: "not_started",
+      reservedCostMicros: null,
+      observedCostMicros: null,
+      actualCostMicros: null,
+    });
+    const before = await forbiddenEffects();
+    await processWorkspaceStep(t.db, run.job, {
+      queue: run.queue,
+      config: limits,
+      planTurn: async () => ({ ...output(turn()), billingMode: "chatgpt_subscription" }),
+    });
+    expect(await runRow(run.job.runId)).toMatchObject({
+      state: "review",
+      inferenceOutcome: "settled",
+      reservedCostMicros: null,
+      observedCostMicros: null,
+      actualCostMicros: null,
+      inputTokens: 100,
+      outputTokens: 40,
+    });
+    expect(await checkpoints(run.job.runId)).toEqual([
+      expect.objectContaining({ billingMode: "chatgpt_subscription", costMicros: null }),
+    ]);
+    expect((await readWorkspace(t.db, f.staff.session, w.id)).recovery).toEqual({
+      canResume: false,
+      requiresUnknownAck: false,
+    });
+    expect(await forbiddenEffects()).toEqual(before);
+    // The retained NULL is not an unknown request: a reviewed continuation needs no unknown acknowledgement.
+    const next = await start(f, w.id, tapQueue(), limits);
+    expect(next.job.runId).not.toBe(run.job.runId);
+    await processWorkspaceStep(t.db, next.job, {
+      queue: next.queue,
+      config: limits,
+      planTurn: async () => ({ ...output(turn()), billingMode: "chatgpt_subscription" }),
+    });
+  });
+
+  it("keeps an interrupted subscription request unknown and never converts a plan limit into a USD charge", async () => {
+    const limits = configured(
+      {},
+      {
+        ...baseConfig,
+        provider: "chatgpt_oauth",
+        chatGptRegistrationId: "b".repeat(64),
+        inputCostMicros: null,
+        outputCostMicros: null,
+        dailyLimitMicros: null,
+      },
+    );
+    const f = await caseFixture(t.db),
+      w = await create(f),
+      run = await start(f, w.id, tapQueue(), limits);
+    const interrupted = vi.fn<PlanTurn>(async () => {
+      throw new ChatGptError("provider_chatgpt_interrupted", "unknown", "unknown");
+    });
+    await processWorkspaceStep(t.db, run.job, {
+      queue: run.queue,
+      config: limits,
+      planTurn: interrupted,
+    });
+    await processWorkspaceStep(t.db, run.job, {
+      queue: run.queue,
+      config: limits,
+      planTurn: interrupted,
+    });
+    expect(interrupted).toHaveBeenCalledOnce();
+    expect(await runRow(run.job.runId)).toMatchObject({
+      state: "unknown_provider",
+      inferenceOutcome: "unknown",
+      reservedCostMicros: null,
+      observedCostMicros: null,
+      actualCostMicros: null,
+    });
+    await expect(start(f, w.id, tapQueue(), limits)).rejects.toMatchObject({
+      code: "outcome_unknown",
+    });
+    const current = await readWorkspace(t.db, f.staff.session, w.id);
+    const next = tapQueue();
+    await requestWorkspaceRun(
+      t.db,
+      f.staff.session,
+      {
+        id: w.id,
+        expectedVersion: current.workspace.version,
+        operationId: randomUUID(),
+        reviewed: true,
+        acknowledgeUnknown: true,
+      },
+      { queue: next.queue, config: limits },
+    );
+    const nextJob = next.jobs.at(-1);
+    if (!nextJob) throw new Error("Missing acknowledged subscription job");
+    await processWorkspaceStep(t.db, nextJob, {
+      queue: next.queue,
+      config: limits,
+      planTurn: async () => {
+        throw new ChatGptError(
+          "provider_subscription_sharing_usage_limit_exceeded",
+          "usage",
+          "settled",
+        );
+      },
+    });
+    expect(await runRow(nextJob.runId)).toMatchObject({
+      state: "failed",
+      inferenceOutcome: "settled",
+      actualCostMicros: null,
+      errorCode: "workspace_subscription_sharing_usage_limit_exceeded",
+    });
+    expect((await readWorkspace(t.db, f.staff.session, w.id)).recovery.requiresUnknownAck).toBe(
+      false,
+    );
+    expect(await checkpoints(nextJob.runId)).toHaveLength(0);
+  });
+
+  it("shares the actor concurrency lock across subscription workspace and metered assistance requests", async () => {
+    const limits = configured(
+      {},
+      {
+        ...baseConfig,
+        provider: "chatgpt_oauth",
+        chatGptRegistrationId: "c".repeat(64),
+        inputCostMicros: null,
+        outputCostMicros: null,
+        dailyLimitMicros: null,
+      },
+    );
+    const f = await caseFixture(t.db),
+      w = await create(f),
+      run = await start(f, w.id, tapQueue(), limits);
+    const inquiry = (await t.db.select().from(inquiries).where(eq(inquiries.id, f.inquiry.id)))[0];
+    if (!inquiry) throw new Error("Missing concurrency source");
+    const input = {
+      id: inquiry.id,
+      expectedVersion: inquiry.version,
+      operationId: randomUUID(),
+      task: "reply_draft" as const,
+      sourceReviewed: true as const,
+    };
+    await expect(
+      requestAssistance(t.db, f.staff.session, input, { queue, config: baseConfig }),
+    ).rejects.toMatchObject({ code: "rate_limited" });
+    await processWorkspaceStep(t.db, run.job, {
+      queue: run.queue,
+      config: limits,
+      planTurn: async () => ({ ...output(turn()), billingMode: "chatgpt_subscription" }),
+    });
+    await requestAssistance(
+      t.db,
+      f.staff.session,
+      { ...input, operationId: randomUUID() },
+      { queue, config: baseConfig },
+    );
+    await expect(start(f, w.id, tapQueue(), limits)).rejects.toMatchObject({
+      code: "rate_limited",
+    });
+  });
+
   it("starts from the person's goal without selecting a business task and carries derived arithmetic into a reviewed artifact", async () => {
     const f = await caseFixture(t.db),
       before = await forbiddenEffects();
@@ -2115,11 +2293,13 @@ describe("F29 complete generative jobs on durable PostgreSQL", () => {
       select coalesce(actual_cost_micros, reserved_cost_micros) cost from assistance_runs
       union all select coalesce(actual_cost_micros, reserved_cost_micros) cost from generative_runs
     ) charges`;
+    const meteredCeiling = config.budget.maxCostMicros;
+    if (meteredCeiling === null) throw new Error("Metered fixture requires a USD ceiling");
     const tight = configured(
       {},
       {
         ...baseConfig,
-        dailyLimitMicros: Number(usage?.used ?? 0) + config.budget.maxCostMicros - 1,
+        dailyLimitMicros: Number(usage?.used ?? 0) + meteredCeiling - 1,
       },
     );
     await expect(start(other, otherWorkspace.id, tapQueue(), tight)).rejects.toMatchObject({

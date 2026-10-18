@@ -1,5 +1,10 @@
 import "server-only";
 import { z } from "zod";
+import type { AiBillingMode } from "@/domain/generative";
+import { accessToken } from "./chatgpt/oauth";
+import { runtimeChatGptStore } from "./chatgpt/runtime";
+import { chatGptGeneration } from "./chatgpt/transport";
+import { ChatGptError } from "./chatgpt/types";
 import type { AssistanceConfig } from "./config";
 import {
   type AssistanceSource,
@@ -17,6 +22,7 @@ export interface Generation {
   readonly inputTokens: number;
   readonly outputTokens: number;
   readonly actualCostMicros?: number;
+  readonly billingMode?: AiBillingMode;
   readonly routing?: {
     requested: string;
     model: string;
@@ -84,7 +90,48 @@ export async function requestGeneration(
   schema: unknown,
   name: string,
 ): Promise<Generation> {
-  if (!config.enabled || !config.model || !config.apiKey) throw new Error("provider_disabled");
+  if (!config.enabled || !config.model) throw new Error("provider_disabled");
+  if (config.provider === "chatgpt_oauth") {
+    if (!config.chatGptRegistrationId) throw new Error("provider_disabled");
+    const startedAt = Date.now();
+    let bearer: string;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      // A timed-out caller never sends inference. An in-flight rotating refresh still saves
+      // its replacement under the store lock, rather than losing the renewed session.
+      bearer = await Promise.race([
+        accessToken(runtimeChatGptStore(), config.chatGptRegistrationId),
+        new Promise<never>((_resolve, reject) => {
+          timer = setTimeout(
+            () => reject(new ChatGptError("provider_chatgpt_timeout", "later", "not_started")),
+            config.timeoutMs,
+          );
+        }),
+      ]);
+    } catch (error) {
+      throw new ChatGptError(
+        error instanceof ChatGptError ? error.code : "provider_chatgpt_authorization",
+        error instanceof ChatGptError ? error.recovery : "reauthorize",
+        "not_started",
+      );
+    } finally {
+      clearTimeout(timer);
+    }
+    const remainingMs = config.timeoutMs - (Date.now() - startedAt);
+    if (remainingMs <= 0)
+      throw new ChatGptError("provider_chatgpt_timeout", "later", "not_started");
+    return chatGptGeneration({
+      model: config.model,
+      bearer,
+      instructions,
+      input,
+      schema,
+      name,
+      maxOutputTokens: config.maxOutputTokens,
+      timeoutMs: remainingMs,
+    });
+  }
+  if (!config.apiKey) throw new Error("provider_disabled");
   if (config.provider === "openrouter")
     return routedGeneration(config, instructions, input, schema, name);
   const response = await fetch("https://api.openai.com/v1/responses", {
