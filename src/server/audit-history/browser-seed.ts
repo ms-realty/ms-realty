@@ -1,13 +1,15 @@
 // Synthetic authenticated browser fixture in a task-owned disposable database only.
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
+import { formatListingReference } from "@/domain/ids";
 import { recordAudit } from "../audit";
 import { staffFixture } from "../cases/testing";
 import { restrictPublication } from "../publication/commands";
 import { createListingFixture, listingVersion, publishForTest } from "../publication/testing";
+import { nextReference } from "../references";
 import { historyListingFixture } from "./testing";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -20,7 +22,14 @@ try {
     denied = await staffFixture(db);
   const f = await historyListingFixture(db),
     hidden = await historyListingFixture(db);
-  const published = await createListingFixture(db, { reviewerId: reader.id });
+  const published = await createListingFixture(db, {
+    reviewerId: reader.id,
+    fixtureReferences: {
+      property: await nextReference(db, "property"),
+      listing: formatListingReference(randomInt(1_000_000_000, 1_000_000_000_000)),
+      sellerInstruction: await nextReference(db, "seller_instruction"),
+    },
+  });
   await db.insert(schema.grants).values([
     ...[f.listing.id, published.listingId].map((recordId) => ({
       principalId: reader.id,

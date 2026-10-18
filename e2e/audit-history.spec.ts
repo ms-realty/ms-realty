@@ -76,7 +76,7 @@ for (const javascript of [true, false]) {
         .select({ count: sql<number>`count(*)::int` })
         .from(schema.operations);
       await page.goto(hostUrl("staff", "/en/operations"));
-      await page.locator('a[href="/en/operations/history"]').first().click();
+      await page.locator('main a[href="/en/operations/history"]:visible').click();
       await expect(page.getByRole("heading", { level: 1, name: copy.title })).toBeVisible();
       await page.getByLabel(copy.reference, { exact: true }).fill(f.reference);
       await page.getByRole("button", { name: copy.search, exact: true }).click();
@@ -176,7 +176,7 @@ for (const javascript of [true, false]) {
         (await page.goto(hostUrl("staff", `/en/operations/history/${f.hiddenEventId}`)))?.status(),
       );
       await expect(page.locator("[data-history-detail]")).toHaveCount(0);
-      await expect(page.locator("main")).not.toContainText("PRIVATE_OTHER_LISTING");
+      await expect(page.locator("body")).not.toContainText("PRIVATE_OTHER_LISTING");
       await page.goto(hostUrl("staff", "/en/operations/history?cursor=invalid-cursor"));
       await expect(page.getByText(copy.invalidHelp)).toBeVisible();
       await context.addCookies([cookie(f.deniedToken)]);
@@ -208,7 +208,9 @@ for (const javascript of [true, false]) {
       expect(after).toEqual(before);
       expect(writes).toEqual([]);
     } finally {
-      await context.close();
+      await context.close().catch((error: unknown) => {
+        if (!String(error).includes("has been closed")) throw error;
+      });
     }
   });
 }
