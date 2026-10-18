@@ -1,0 +1,44 @@
+{
+  "$comment": "Exact shared vocabulary retained from current source, pinned by locale, key and value. This copy-detection inventory is unreviewed and confers no translation or indexing approval.",
+  "ru": {
+    "discovery.checkedAt": "Проверено: {time}",
+    "discovery.development": "Проект",
+    "discovery.reference": "Номер",
+    "discovery.unknown": "Неизвестно",
+    "intent.amount": "Цена",
+    "intent.locations": "Местоположение",
+    "intent.maximum": "Максимум",
+    "intent.minimum": "Минимум",
+    "nav.menu": "Меню",
+    "states.success.title": "Готово",
+    "tools.items.tasks.title": "Задачи",
+    "tools.sections.work": "Работа",
+    "workspace.cases": "Сделки",
+    "workspace.operations": "Операции",
+    "workspace.secondaryLabel": "Управление",
+    "workspace.settings": "Настройки",
+    "workspace.tasks": "Задачи"
+  },
+  "de": {
+    "discovery.hotel": "Hotel",
+    "discovery.name": "Name",
+    "discovery.optional": "(optional)",
+    "forms.optional": "Optional",
+    "intent.maximum": "Maximum",
+    "intent.minimum": "Minimum",
+    "intent.pool": "Pool"
+  },
+  "nl": {
+    "discovery.filters": "Filters",
+    "discovery.hotel": "Hotel",
+    "footer.privacy": "Privacy",
+    "intent.lift": "Lift",
+    "intent.maximum": "Maximum",
+    "intent.minimum": "Minimum",
+    "nav.contact": "Contact",
+    "nav.menu": "Menu"
+  },
+  "el": {
+    "discovery.email": "Email"
+  }
+}
