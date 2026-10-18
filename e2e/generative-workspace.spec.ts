@@ -708,13 +708,16 @@ test("F29 live progress updates without navigating or replacing a dirty correcti
       .where(eq(schema.generativeSessions.id, f.id));
   });
   const read = await response;
-  expect(Object.keys((await read.json()) as Record<string, unknown>).sort()).toEqual(
+  const payload = (await read.json()) as Record<string, unknown>;
+  expect(payload.billingMode).toBe("metered_usd");
+  expect(Object.keys(payload).sort()).toEqual(
     [
       "state",
       "steps",
       "maxSteps",
       "reservedCostMicros",
       "actualCostMicros",
+      "billingMode",
       "hasRun",
       "recovery",
       "sourceChanged",

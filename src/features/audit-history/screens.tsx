@@ -169,6 +169,31 @@ export function HistoryDetailScreen({ locale, view }: { locale: string; view: Hi
           ) : null}
           <p>{copy.boundary}</p>
         </Notice>
+        <dl className="grid min-w-0 gap-6 sm:grid-cols-2">
+          <div className="min-w-0 space-y-2">
+            <dt className="font-semibold">{copy.actor}</dt>
+            <dd className="wrap-anywhere">{actorName(locale, view)}</dd>
+            {view.actor.currentName ? (
+              <dd className="text-caption text-text-muted">{copy.currentName}</dd>
+            ) : null}
+          </div>
+          <div className="min-w-0 space-y-2" data-history-reason>
+            <dt className="font-semibold">{copy.reason}</dt>
+            <dd className="wrap-anywhere">
+              {view.change.reason ??
+                (view.change.reasonDecision ? copy.retainUnknown : copy.noReason)}
+            </dd>
+            {view.change.reason ? (
+              <dd className="text-caption text-text-muted">{copy.redaction}</dd>
+            ) : null}
+          </div>
+          <div className="space-y-2">
+            <dt className="font-semibold">{copy.recordedAt}</dt>
+            <dd>
+              <RecordTime locale={locale} at={view.occurredAt} />
+            </dd>
+          </div>
+        </dl>
         <section className="space-y-4" aria-labelledby="history-what">
           <h2 id="history-what" className="text-subheading font-semibold">
             {copy.whatChanged}
@@ -189,31 +214,6 @@ export function HistoryDetailScreen({ locale, view }: { locale: string; view: Hi
             <p className="max-w-reading text-text-muted">{copy.noOldValues}</p>
           ) : null}
         </section>
-        <dl className="grid min-w-0 gap-6 sm:grid-cols-2">
-          <div className="min-w-0 space-y-2">
-            <dt className="font-semibold">{copy.actor}</dt>
-            <dd className="wrap-anywhere">{actorName(locale, view)}</dd>
-            {view.actor.currentName ? (
-              <dd className="text-caption text-text-muted">{copy.currentName}</dd>
-            ) : null}
-          </div>
-          <div className="min-w-0 space-y-2">
-            <dt className="font-semibold">{copy.reason}</dt>
-            <dd className="wrap-anywhere">
-              {view.change.reason ??
-                (view.change.reasonDecision ? copy.retainUnknown : copy.noReason)}
-            </dd>
-            {view.change.reason ? (
-              <dd className="text-caption text-text-muted">{copy.redaction}</dd>
-            ) : null}
-          </div>
-          <div className="space-y-2">
-            <dt className="font-semibold">{copy.recordedAt}</dt>
-            <dd>
-              <RecordTime locale={locale} at={view.occurredAt} />
-            </dd>
-          </div>
-        </dl>
         {view.publication.locale || view.publication.verifiedAt ? (
           <section
             className="space-y-4 border-t border-border pt-6"

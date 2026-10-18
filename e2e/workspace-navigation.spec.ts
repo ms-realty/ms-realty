@@ -390,7 +390,9 @@ test("X02 offers every working destination to a permitted user, and each answers
   const work = tools.getByRole("navigation", { name: "Work", exact: true });
   const management = tools.getByRole("navigation", { name: "Content and management" });
   expect(await hrefs(work.getByRole("link"))).toEqual([
-    ...everyday,
+    ...everyday.slice(0, 4),
+    "/en/operations/imports",
+    ...everyday.slice(4),
     "/en/coverage",
     "/en/operations/inbound",
     "/en/operations/keys",
@@ -399,7 +401,9 @@ test("X02 offers every working destination to a permitted user, and each answers
   expect(await hrefs(management.getByRole("link"))).toEqual([
     "/en/content",
     "/en/access/manage",
+    "/en/operations/readiness",
     "/en/operations/jobs",
+    "/en/operations/history",
     "/en/operations/privacy",
     "/en/operations/subscriptions",
   ]);

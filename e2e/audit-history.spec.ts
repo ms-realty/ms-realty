@@ -74,7 +74,10 @@ for (const javascript of [true, false]) {
       });
       const [before] = await db
         .select({ count: sql<number>`count(*)::int` })
-        .from(schema.operations);
+        .from(schema.operations)
+        .where(
+          and(eq(schema.operations.actorKind, "staff"), eq(schema.operations.actorId, f.readerId)),
+        );
       await page.goto(hostUrl("staff", "/en/operations"));
       await page.locator('main a[href="/en/operations/history"]:visible').click();
       await expect(page.getByRole("heading", { level: 1, name: copy.title })).toBeVisible();
@@ -113,6 +116,7 @@ for (const javascript of [true, false]) {
       });
 
       await page.goto(hostUrl("staff", `/en/operations/history/${f.publishedEventId}`));
+      await expect(page.locator("[data-history-reason]")).toBeInViewport({ ratio: 1 });
       await expect(detail).toContainText(copy.published);
       await expect(detail).toContainText(copy.current.restricted);
       await expect(page.getByText(copy.current.restricted, { exact: true })).toBeInViewport({
@@ -207,7 +211,10 @@ for (const javascript of [true, false]) {
       await expect(page).toHaveURL(/\/en\/access(?:\?|$)/u);
       const [after] = await db
         .select({ count: sql<number>`count(*)::int` })
-        .from(schema.operations);
+        .from(schema.operations)
+        .where(
+          and(eq(schema.operations.actorKind, "staff"), eq(schema.operations.actorId, f.readerId)),
+        );
       expect(after).toEqual(before);
       expect(writes).toEqual([]);
     } finally {
