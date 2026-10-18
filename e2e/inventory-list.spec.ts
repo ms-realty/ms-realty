@@ -91,7 +91,7 @@ for (const javaScriptEnabled of [false, true])
       await views.getByRole("link", { name: "All" }).click();
       await expect(rows(page)).toHaveCount(4);
       await page.getByText("Filters", { exact: true }).click();
-      await page.getByLabel("Purpose", { exact: true }).selectOption("long_term_rent");
+      await page.getByLabel("Sale or rent", { exact: true }).selectOption("long_term_rent");
       await page.getByRole("button", { name: "Show", exact: true }).last().click();
       await expect(rows(page)).toHaveCount(1);
       await expect(rows(page)).toContainText(f.availability);

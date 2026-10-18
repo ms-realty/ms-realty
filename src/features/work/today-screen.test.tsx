@@ -697,7 +697,7 @@ it("opens each newly read record in its own workspace with its reason and next s
     "Translations to reviewIn the queue: 1",
     "Email delivery to checkIn the queue: 1",
     "Publication delivery to checkIn the queue: 1",
-    "Delivery operations to checkIn the queue: 1",
+    "Deliveries to checkIn the queue: 1",
     "My dealsIn the queue: 1",
     "My listing draftsIn the queue: 1",
   ]);
@@ -713,7 +713,7 @@ it("omits role-gated queues that the read model withholds", async () => {
     operatorDeliveryExceptions: null,
   });
   await show();
-  for (const name of ["Overdue key returns", "Delivery operations to check"]) {
+  for (const name of ["Overdue key returns", "Deliveries to check"]) {
     expect(screen.queryByRole("heading", { name: new RegExp(`^${name}`) })).toBeNull();
     expect(quiet("attention")).not.toHaveTextContent(name);
   }
@@ -746,7 +746,7 @@ it("opens each operator exception itself and counts the same queue that O27 page
     queuePage,
   ]);
   expect(operations.getByRole("heading", { level: 3 })).toHaveTextContent(
-    "Delivery operations to checkIn the queue: 31",
+    "Deliveries to checkIn the queue: 31",
   );
   expect(operations.getByRole("link", { name: "More in this queue" })).toBeVisible();
   expect(operations.queryByText(/full list is not available/)).toBeNull();

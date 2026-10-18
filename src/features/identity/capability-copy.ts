@@ -70,9 +70,9 @@ const labels = {
     "Изменение этапа и исхода сделки",
   ],
   "task.manage": [
-    "Manage tasks and commitments",
-    "Управление на задачи и ангажименти",
-    "Управление задачами и обязательствами",
+    "Manage tasks and next steps",
+    "Управление на задачи и следващи стъпки",
+    "Управление задачами и следующими шагами",
   ],
   "interest.manage": [
     "Manage properties suggested for a deal",

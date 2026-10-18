@@ -9,7 +9,7 @@
   "items": {
     "today": { "title": "Сегодня", "description": "Следующие действия" },
     "inquiries": { "title": "Запросы", "description": "Переписка и запросы" },
-    "cases": { "title": "Дела", "description": "Контекст и следующие шаги" },
+    "cases": { "title": "Сделки", "description": "Контекст и следующие шаги" },
     "inventory": { "title": "Объекты", "description": "Объявления и подготовка" },
     "imports": {
       "title": "Импорт и пакетные изменения",

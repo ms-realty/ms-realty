@@ -45,7 +45,7 @@
   "currentState": "Current status of this package",
   "current": {
     "active": "This package is currently active on the website.",
-    "restricted": "The listing is currently restricted.",
+    "restricted": "The listing is restricted. Its details are hidden on this website.",
     "withdrawn": "The listing is currently withdrawn.",
     "replaced": "This package is no longer the current publication.",
     "none": "No current publication pointer is recorded."

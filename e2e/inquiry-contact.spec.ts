@@ -637,7 +637,7 @@ for (const kind of ["accept", "contact", "triage"] as const) {
             kind === "contact"
               ? copy.submit
               : kind === "triage"
-                ? "Record selected disposition"
+                ? "Save this decision"
                 : work.accept,
           exact: true,
         })
@@ -1182,7 +1182,7 @@ test("O02 native triage submits its reason with a stable inquiry form identity",
     await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
     await page.getByRole("radio", { name: work.states.contact_unreachable, exact: true }).check();
     await page.getByLabel(work.reason, { exact: true }).fill(reason);
-    await page.getByRole("button", { name: "Record selected disposition", exact: true }).click();
+    await page.getByRole("button", { name: "Save this decision", exact: true }).click();
     await expect(page.getByText(work.statusSucceeded, { exact: true })).toBeVisible();
     const [record] = await db
       .select()

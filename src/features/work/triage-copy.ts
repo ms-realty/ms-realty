@@ -11,8 +11,8 @@ const catalogs = {
     review: "Потвърждавам преместването за проверка",
   },
   en: {
-    choose: "Choose a disposition",
-    recordSelected: "Record selected disposition",
+    choose: "Choose what happens next",
+    recordSelected: "Save this decision",
     save: "Record",
     original: "Original inquiry",
     select: "Choose an inquiry",

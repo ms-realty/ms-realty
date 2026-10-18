@@ -298,7 +298,7 @@ const en: SpecimenCopy = {
     groupHint: "Only properties where this is confirmed will match.",
     options: ["Lift", "Parking space", "Step-free entrance"],
     error: "Choose at least one requirement",
-    radio: "Purpose",
+    radio: "What would you like to do?",
     radioOptions: ["Buy", "Rent long-term", "Sell or let"],
     switchLabel: "Show approximate map areas",
   },

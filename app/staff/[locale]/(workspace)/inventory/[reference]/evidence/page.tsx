@@ -47,7 +47,7 @@ export default async function SellerEvidencePage({
         <option value="">{copy.choose}</option>
         {items.map((d) => (
           <option key={d.versionId} value={d.versionId}>
-            {d.reference} · {d.fileName} · v{d.version}
+            {d.reference} · {d.fileName}
           </option>
         ))}
       </>

@@ -72,7 +72,7 @@ test("O01 operator rows open their exact exception and the same queue reaches th
     const today = page.locator('[data-today-group="delivery-operations"]');
     // The count opens the queue that O27 pages: the same failed and unknown actions.
     const heading = today.getByRole("heading", { level: 3 });
-    await expect(heading).toHaveText(`Delivery operations to checkIn the queue: ${total}`);
+    await expect(heading).toHaveText(`Deliveries to checkIn the queue: ${total}`);
     await expect(heading.getByRole("link")).toHaveAttribute(
       "href",
       "/en/operations/jobs?view=exceptions#external-action-exceptions",

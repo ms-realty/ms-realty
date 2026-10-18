@@ -150,9 +150,9 @@ export function todayCopy(locale: string) {
         "Publication delivery to check",
       ),
       operatorDeliveryExceptions: s(
-        "Операции по доставка за проверка",
-        "Операции доставки: проверить",
-        "Delivery operations to check",
+        "Доставяния за проверка",
+        "Доставка: проверить",
+        "Deliveries to check",
       ),
       draftContinue: s("Моите чернови на обяви", "Мои черновики объявлений", "My listing drafts"),
     },

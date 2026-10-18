@@ -192,7 +192,9 @@ test("P05/F06/AT27: phone contact works without JavaScript and records the exact
     await panel.getByRole("link", { name: "Request a viewing", exact: true }).click();
     await expect(page.locator('[name="listingReference"]')).toHaveValue(listing.reference);
     await expect(page.locator('[name="observedManifestId"]')).toHaveValue(listing.manifestId);
-    await expect(page.getByLabel("Purpose", { exact: true })).toHaveValue("viewing_request");
+    await expect(page.getByLabel("What would you like to do?", { exact: true })).toHaveValue(
+      "viewing_request",
+    );
     const key = await page.locator('[name="_operationId"]').inputValue();
     const message = `Synthetic property viewing preference ${randomUUID()}`;
     await page.getByLabel(/^Your inquiry/).fill(message);
