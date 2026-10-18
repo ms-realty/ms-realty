@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:unit": "vitest run --project 'unit*'",
     "test:integration": "vitest run --project integration",
+    "test:release": "node --test scripts/staging*.test.mjs scripts/production*.test.mjs",
     "e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",

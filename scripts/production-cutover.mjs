@@ -7,6 +7,7 @@ import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { gates, promotionGate, signedPayload } from "./launch-gate.mjs";
+import { routeWatchdog } from "./production-watchdog.mjs";
 import { accountId, sha256 } from "./staging-config.mjs";
 import { observeRuntimeRollout, validateRuntimeIdentity } from "./staging-rollout-proof.mjs";
 
@@ -1208,12 +1209,48 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       console.log("Read-only routing/DNS/SSL snapshot retained; no readiness claim.");
     } else {
       const { bundle, recheck } = await readBundle(input);
+      const plan = parsed(bundle.plan, "reviewed cutover plan"),
+        ownership = parsed(bundle.artifacts.ownership, "off-runner custody binding"),
+        recovery = parsed(bundle.artifacts.recovery, "off-runner recovery binding");
+      const watchdog = routeWatchdog({
+        secret: process.env.PRODUCTION_WATCHDOG_CONTROL_SECRET,
+        operationId: plan.operationId,
+        leaseId: ownership.routeLease?.id,
+      });
+      const custody = await watchdog.status();
+      const receiptHash = sha256(canonical(custody.receipt));
+      demand(
+        custody.scope?.sourceCommit === plan.sourceCommit &&
+          custody.scope.digest === plan.digest &&
+          custody.scope.baselineSha256 === plan.baselineSha256 &&
+          custody.receipt.holder === plan.operationId &&
+          custody.receipt.id === ownership.routeLease.id &&
+          same([...custody.receipt.zoneIds].sort(), [...ownership.routeLease.zoneIds].sort()) &&
+          custody.receipt.expiresAt === ownership.routeLease.expiresAt &&
+          custody.receipt.expiresAt === recovery.watchdog.expiresAt &&
+          receiptHash === ownership.routeLease.evidenceSha256 &&
+          receiptHash === recovery.watchdog.evidenceSha256,
+        "actual independently retained watchdog receipt matches signed custody artifacts",
+      );
+      if (mode === "apply") {
+        validateProductionCutover(bundle);
+        await watchdog.bind(bundle);
+      }
       let first = mode === "apply";
       const persist = async (value) => {
-        await writeJournal(output, value, { exclusive: first });
+        const retained =
+          value.status === "accepted"
+            ? { ...value, status: "awaiting_watchdog_acceptance" }
+            : value;
+        await writeJournal(output, retained, { exclusive: first });
         first = false;
+        await watchdog.persist(retained);
       };
-      const options = { provider, providerToken: process.env.CLOUDFLARE_API_TOKEN, persist };
+      const options = {
+        provider: watchdog.provider(provider, plan.workerName),
+        providerToken: process.env.CLOUDFLARE_API_TOKEN,
+        persist,
+      };
       let result;
       if (mode === "restore")
         result = await restoreProductionRoutes(
@@ -1236,6 +1273,17 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
             }
           },
         });
+        if (result.status === "accepted") {
+          const envelope = parsed(await readFile(recheck), "independent production envelope");
+          const receipt = await watchdog.accept(envelope);
+          demand(
+            receipt.status === "accepted" && receipt.reportSha256 === sha256(envelope.payload),
+            "independent durable acceptance acknowledgement",
+          );
+          const final = { ...result, watchdog: receipt };
+          await writeJournal(output, final);
+          await watchdog.persist(final);
+        }
       }
       console.log(`Routing operation ${result.status}; receipt retained privately.`);
       if (
