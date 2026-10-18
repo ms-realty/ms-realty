@@ -26,6 +26,9 @@
     "stopHelp": "Stop prevents subsequent steps. A request already in progress may finish and still use your plan allowance or incur a charge.",
     "modelAccess": "Model access",
     "subscription": "ChatGPT subscription",
-    "subscriptionLimits": "ChatGPT usage limits still apply."
+    "subscriptionLimits": "ChatGPT usage limits still apply.",
+    "planLimitTitle": "ChatGPT plan usage has reached its limit",
+    "planLimitHelp": "Your drafts and saved progress remain available. Check usage in the connected account before starting new research. You can continue the work manually.",
+    "openPlanUsage": "Check usage in ChatGPT"
   }
 }

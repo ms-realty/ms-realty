@@ -7,6 +7,7 @@ import { workspaceCopy } from "./workspace-copy";
 import { WorkspaceForm } from "./workspace-forms";
 import {
   WorkspaceArtifactContent,
+  WorkspaceCheckpoints,
   WorkspaceProgress,
   WorkspaceSources,
   workspaceSourceTitle,
@@ -138,6 +139,26 @@ describe.each(["bg", "ru", "en"])("F29 goal-first staff work in %s", (locale) =>
     expect(screen.queryByText(copy.costUnknown)).not.toBeInTheDocument();
     expect(screen.queryByText(copy.ceiling)).not.toBeInTheDocument();
     expect(container.textContent).not.toMatch(/USD|\$/);
+  });
+  it("explains an observed plan limit with its real account recovery and preserved manual path", () => {
+    const copy = workspaceCopy(locale);
+    const view = {
+      workspace: {
+        state: "failed",
+        errorCode: "workspace_subscription_sharing_usage_limit_exceeded",
+      },
+      runs: [],
+      checkpoints: [],
+    } as unknown as WorkspaceView;
+    const { container } = render(<WorkspaceCheckpoints locale={locale} view={view} />);
+    expect(screen.getByText(copy.planLimitTitle, { exact: true })).toBeVisible();
+    expect(screen.getByText(copy.planLimitHelp, { exact: true })).toBeVisible();
+    expect(screen.getByRole("link", { name: copy.openPlanUsage })).toHaveAttribute(
+      "href",
+      "https://chatgpt.com/settings/usage",
+    );
+    expect(primaryText(container)).not.toContain("subscription_sharing_usage_limit_exceeded");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
 

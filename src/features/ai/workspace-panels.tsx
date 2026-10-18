@@ -212,8 +212,18 @@ export function WorkspaceProgress({
 /** Private saved text stays server-rendered; the live status endpoint never returns it. */
 export function WorkspaceCheckpoints({ locale, view }: { locale: string; view: WorkspaceView }) {
   const run = view.runs[0];
+  const copy = workspaceCopy(locale);
+  const errorCode = view.workspace.errorCode ?? run?.errorCode;
   return (
     <div className="space-y-3">
+      {errorCode === "workspace_subscription_sharing_usage_limit_exceeded" ? (
+        <Notice tone="warning" title={copy.planLimitTitle}>
+          <p>{copy.planLimitHelp}</p>
+          <a className={workspaceLink} href="https://chatgpt.com/settings/usage">
+            {copy.openPlanUsage}
+          </a>
+        </Notice>
+      ) : null}
       {view.workspace.errorCode || run?.errorCode ? (
         <TechnicalDetails locale={locale}>
           <p>{view.workspace.errorCode ?? run?.errorCode}</p>
