@@ -105,6 +105,31 @@ for (const javascript of [true, false])
       await page
         .locator("main")
         .screenshot({ path: testInfo.outputPath(`w14-impact-${javascript}.png`) });
+      if (javascript)
+        for (const locale of ["bg", "en", "ru"]) {
+          const localized = operationsCopy(locale);
+          for (const gate of ["R01", "R02", "R06"] as const) {
+            await page.goto(hostUrl("staff", `/${locale}/operations/readiness/${gate}`));
+            await expect(
+              page.getByRole("heading", { name: localized.gates[gate].title, exact: true }),
+            ).toBeVisible();
+            await expect(
+              page.getByRole("heading", { name: localized.requiredReports, exact: true }),
+            ).toBeVisible();
+            const report =
+              gate === "R01"
+                ? "first_party_runtime_report"
+                : gate === "R02"
+                  ? "listing_review_report"
+                  : "ai_evaluation_report";
+            await expect(
+              page.getByText(localized.requirements[report], { exact: true }),
+            ).toBeVisible();
+            await page
+              .locator("main")
+              .screenshot({ path: testInfo.outputPath(`w14-${gate}-${locale}.png`) });
+          }
+        }
       await db
         .delete(schema.grants)
         .where(
