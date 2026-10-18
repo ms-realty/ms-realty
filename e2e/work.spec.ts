@@ -9,6 +9,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { inquiryCheckCode } from "../src/domain/inquiry-check-code";
+import { workCopy } from "../src/features/work/copy";
 import { hostUrl, origins } from "./hosts";
 import { openUnassignedQueueAt } from "./inquiry-queue";
 import { fillAgencyInstant } from "./time";
@@ -157,7 +158,9 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await stale.getByRole("button", { name: "Apply my reviewed changes", exact: true }).click();
   // A recorded triage continues on its action status, behind the record's pending fence (O02).
   const triageRecorded = async () => {
-    await expect(stale.getByRole("heading", { name: "Action status", exact: true })).toBeVisible();
+    await expect(
+      stale.getByRole("heading", { name: workCopy("en").statusTitle, exact: true }),
+    ).toBeVisible();
     await expect(
       stale.getByText("This action was recorded successfully.", { exact: true }),
     ).toBeVisible();
@@ -178,9 +181,16 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await page.getByRole("button", { name: "Update task", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
   await stale.reload();
-  await stale.getByRole("radio", { name: "Resolved without a deal", exact: true }).check();
+  await stale
+    .getByRole("radio", { name: workCopy("en").states.resolved_without_case, exact: true })
+    .check();
   await stale.getByLabel("Reason", { exact: true }).fill("Synthetic test completed without a case");
-  await stale.getByRole("button", { name: "Record: Resolved without a deal", exact: true }).click();
+  await stale
+    .getByRole("button", {
+      name: `Record: ${workCopy("en").states.resolved_without_case}`,
+      exact: true,
+    })
+    .click();
   await triageRecorded();
   const [saved] = await db
     .select()

@@ -12,6 +12,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import sharp from "sharp";
 import * as schema from "../src/db/schema";
+import { privacyCopy } from "../src/features/privacy/copy";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -492,7 +493,7 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
   const privacyForm = page
     .locator("form")
     .filter({ has: page.locator(`input[name="id"][value="${privacy.id}"]`) });
-  await privacyForm.getByLabel("Next state").selectOption("verifying");
+  await privacyForm.getByLabel(privacyCopy("en").state, { exact: true }).selectOption("verifying");
   await privacyForm
     .getByLabel(
       "I reviewed the policy, scope, owner, due condition and evidence for this transition.",
@@ -500,7 +501,16 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
     .check();
   await privacyForm.getByRole("button", { name: "Record human review" }).click();
   await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("receipt")));
-  await privacyForm.getByLabel("Next state").selectOption("in_progress");
+  await expect(privacyForm.getByText("The action was recorded.", { exact: true })).toBeVisible();
+  await privacyForm.getByRole("link", { name: "Open current record", exact: true }).click();
+  await expect(page).toHaveURL((url) => !url.searchParams.has("receipt"));
+  await expect(page.locator("[data-private-content]")).toHaveAttribute(
+    "data-private-ready",
+    "true",
+  );
+  await privacyForm
+    .getByLabel(privacyCopy("en").state, { exact: true })
+    .selectOption("in_progress");
   await privacyForm
     .getByLabel("Approved policy reference")
     .fill("Synthetic reviewed test policy reference");

@@ -6,6 +6,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { caseCopy } from "../src/features/cases/copy";
 import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -77,7 +78,7 @@ for (const javaScriptEnabled of [true, false])
       await expect(page.getByRole("button", { name: "End staff access", exact: true })).toHaveCount(
         0,
       );
-      const statusLink = page.getByRole("link", { name: "Action status", exact: true });
+      const statusLink = page.getByRole("link", { name: caseCopy("en").status, exact: true });
       await expect(statusLink).toHaveAttribute("href", unknownPath);
       const statusResponse = page.waitForResponse(hostUrl("staff", unknownPath));
       await statusLink.click();

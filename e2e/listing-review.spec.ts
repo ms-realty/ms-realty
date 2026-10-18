@@ -11,6 +11,7 @@ import { asc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { inventoryCopy } from "../src/features/inventory/copy";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -264,13 +265,17 @@ test("O16 shows an unconfirmed activation as still being checked, then its resul
 test("O16 keeps a rental draft price monthly before any frozen revision", async ({ page }) => {
   const f = seed();
   await open(page, f, "/en/inventory/new");
-  await page.getByLabel("Purpose", { exact: true }).selectOption("long_term_rent");
+  await page
+    .getByLabel(inventoryCopy("en").labels.purpose, { exact: true })
+    .selectOption("long_term_rent");
   await page.getByLabel("Region", { exact: true }).fill("Благоевград");
   await page.getByLabel("Settlement", { exact: true }).fill("Сандански");
   await page.getByLabel("Bulgarian title", { exact: true }).fill("Синтетичен наем");
   await page.getByLabel("Bulgarian description", { exact: true }).fill("Синтетичен тест.");
   await page.getByLabel("Source or evidence reference", { exact: true }).fill("synthetic-rent");
-  await page.getByLabel("Price status", { exact: true }).selectOption("known");
+  await page
+    .getByLabel(inventoryCopy("en").labels.priceState, { exact: true })
+    .selectOption("known");
   await page.getByLabel("Price in EUR", { exact: true }).fill("900");
   await page.getByRole("button", { name: "New listing", exact: true }).click();
   await page.getByRole("link", { name: "Open listing", exact: true }).click();

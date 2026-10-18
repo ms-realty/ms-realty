@@ -69,7 +69,9 @@ for (const javascript of [true, false])
         buffer: Buffer.from("not parsed"),
       });
       await page.getByRole("button", { name: c.choose, exact: true }).click();
-      await expect(page.getByRole("alert")).toContainText(c.failure);
+      await expect(page.locator("[data-import-review]").getByRole("alert")).toContainText(
+        c.failure,
+      );
       await expect(page.locator("[data-import-problems]")).toHaveCount(0);
       await page.getByLabel(c.file, { exact: true }).setInputFiles({
         name: "synthetic-listings.csv",

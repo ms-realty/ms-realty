@@ -9,6 +9,8 @@ import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { caseCopy } from "../src/features/cases/copy";
+import { directoryCopy } from "../src/features/cases/directory-copy";
 import { hostUrl, origins } from "./hosts";
 
 type Case = { id: string; reference: string; title: string };
@@ -181,21 +183,21 @@ test("O04 keeps BG and RU labels, and a first-use empty state", async ({ page })
   for (const [locale, title, label, apply, list, row, count] of [
     [
       "bg",
-      "Случаи",
+      caseCopy("bg").cases,
       "Търсене",
       "Покажете",
       "Списък със сделки",
       `${buyer.reference} · Покупка ${buyer.title} · Уточняване на изискванията Отговорен брокер: ${f.ownerName}`,
-      "Случаи: 6",
+      directoryCopy("bg").count.replace("{n}", "6"),
     ],
     [
       "ru",
-      "Дела",
+      caseCopy("ru").cases,
       "Поиск",
       "Показать",
       "Список сделок",
       `${buyer.reference} · Покупка ${buyer.title} · Согласование требований Ответственный брокер: ${f.ownerName}`,
-      "Всего дел: 6",
+      directoryCopy("ru").count.replace("{n}", "6"),
     ],
   ] as const) {
     await open(page, f.viewer.token, `/${locale}/cases`);

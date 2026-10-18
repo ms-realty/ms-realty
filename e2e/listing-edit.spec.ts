@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { inventoryCopy } from "../src/features/inventory/copy";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -638,7 +639,7 @@ test.describe("JavaScript on", () => {
       inPair: (page.viewportSize()?.width ?? 1440) < 640 ? 16 : 24,
     });
     // UI06 (6:74): a native select is as tall as an input, 52 px.
-    for (const name of ["Price status", "Price in EUR"])
+    for (const name of [inventoryCopy("en").labels.priceState, "Price in EUR"])
       expect((await panel.getByLabel(name, { exact: true }).boundingBox())?.height).toBe(52);
   });
 });

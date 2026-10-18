@@ -11,6 +11,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import * as schema from "../src/db/schema";
+import { todayCopy } from "../src/features/work/today-copy";
 import { hostUrl } from "./hosts";
 import { noOverflow, staffSession, todayDatabase } from "./today-helpers";
 
@@ -138,7 +139,9 @@ for (const javaScriptEnabled of [false, true])
         viewings.getByRole("link", { name: new RegExp(`^Proposed viewing time · ${reference}`) });
       await expect(row(first.reference)).toBeVisible();
       await expect(row(first.reference)).toContainText("Host: Today broker · ");
-      await expect(row(first.reference)).toContainText(`Case ${allowed.reference}`);
+      await expect(row(first.reference)).toContainText(
+        todayCopy("en").caseRef.replace("{reference}", allowed.reference),
+      );
       await expect(row(first.reference)).toContainText("Next step: confirm or change the time");
       await expect(row(sixth.reference)).toBeHidden();
       // The rest of what Today read opens in place, with or without JavaScript.
