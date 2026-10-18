@@ -67,13 +67,20 @@ for (const javascript of [true, false])
       await runtimeCheck.click();
       const runtimeReport = page.locator('[data-release-report="deployed_check"]');
       const runtimeReportControl = runtimeReport.locator("summary").first();
-      await expect(runtimeReportControl).toHaveAccessibleName(copy.requirements.deployed_check);
+      await expect(runtimeReportControl).toHaveAccessibleName(
+        `View report status: ${copy.requirements.deployed_check}`,
+      );
       await runtimeReportControl.click();
       await expect(runtimeReport).toHaveAttribute("open", "");
+      const reportStatus = runtimeReport.getByRole("region", {
+        name: `Report status: ${copy.requirements.deployed_check}`,
+        exact: true,
+      });
+      await expect(reportStatus).toBeVisible();
       await expect(
-        runtimeReport.getByText(copy.results.not_confirmed, { exact: true }),
+        reportStatus.getByText(copy.results.not_confirmed, { exact: true }),
       ).toBeVisible();
-      await expect(runtimeReport.getByText(copy.missingReportHelp, { exact: true })).toBeVisible();
+      await expect(reportStatus.getByText(copy.missingReportHelp, { exact: true })).toBeVisible();
       if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page.goto(hostUrl("staff", "/en/operations/readiness"));
       await page

@@ -1,6 +1,7 @@
 import type { GateId } from "@/release/schemas";
 import type { ReleaseOverview } from "@/server/ops/readiness-view";
 import { buttonClass } from "@/ui/button-class";
+import { ChevronDownIcon } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { DiscoveryPage } from "../discovery/page";
@@ -89,27 +90,44 @@ export function ReleaseReadinessScreen({
                         <li key={requirement.type}>
                           <details
                             data-release-report={requirement.type}
-                            className="min-w-0 rounded-control bg-subtle"
+                            className="group/report min-w-0 rounded-control border border-border bg-subtle"
                           >
                             <summary
-                              aria-labelledby={`report-${gate.id}-${requirement.type}-name`}
+                              aria-labelledby={`report-${gate.id}-${requirement.type}-action report-${gate.id}-${requirement.type}-name`}
                               aria-describedby={`report-${gate.id}-${requirement.type}-result`}
-                              className="min-h-control cursor-pointer p-4"
+                              className="grid min-h-control cursor-pointer list-none gap-3 rounded-control p-4 hover:bg-selected focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center [&::-webkit-details-marker]:hidden"
                             >
-                              <span
-                                id={`report-${gate.id}-${requirement.type}-name`}
-                                className="font-semibold"
-                              >
-                                {names[requirement.type] ?? copy.report}
+                              <span className="min-w-0">
+                                <span
+                                  id={`report-${gate.id}-${requirement.type}-name`}
+                                  className="font-semibold"
+                                >
+                                  {names[requirement.type] ?? copy.report}
+                                </span>
+                                <span
+                                  id={`report-${gate.id}-${requirement.type}-result`}
+                                  className="mt-2 block"
+                                >
+                                  {copy.results[requirement.result]}
+                                </span>
                               </span>
                               <span
-                                id={`report-${gate.id}-${requirement.type}-result`}
-                                className="mt-2 block"
+                                id={`report-${gate.id}-${requirement.type}-action`}
+                                className="flex items-center gap-2 text-compact font-semibold text-action underline underline-offset-4"
                               >
-                                {copy.results[requirement.result]}
+                                <span className="group-open/report:hidden">{copy.showReport}:</span>
+                                <span className="hidden group-open/report:inline">
+                                  {copy.hideReport}:
+                                </span>
+                                <ChevronDownIcon className="size-5 shrink-0 group-open/report:rotate-180" />
                               </span>
                             </summary>
-                            <div className="space-y-4 px-4 pb-4">
+                            <section
+                              aria-label={`${copy.reportStatus}: ${names[requirement.type] ?? copy.report}`}
+                              className="space-y-4 rounded-b-control border-t border-border bg-surface px-4 py-5"
+                            >
+                              <h3 className="font-semibold">{copy.reportStatus}</h3>
+                              <p>{copy.results[requirement.result]}</p>
                               {requirement.result === "not_confirmed" ? (
                                 <p>{copy.missingReportHelp}</p>
                               ) : null}
@@ -123,7 +141,7 @@ export function ReleaseReadinessScreen({
                                   </p>
                                 ))}
                               </TechnicalDetails>
-                            </div>
+                            </section>
                           </details>
                         </li>
                       ))}
