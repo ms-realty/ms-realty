@@ -111,7 +111,7 @@ const en = {
     recordedAt: "Recorded at",
     unknown: "Result not confirmed",
     draftRetained:
-      "The values below are your draft. They do not confirm that anything was saved. Open Action status to check the same request before trying again.",
+      "The values below are your draft. They do not confirm that anything was saved. Use the link below to check this same request before trying again.",
   },
   states: {
     received: "Received",
@@ -313,7 +313,7 @@ const bg: Copy = {
     recordedAt: "Записано на",
     unknown: "Непотвърден резултат",
     draftRetained:
-      "Стойностите по-долу са вашата чернова. Те не потвърждават, че промяната е записана. Отворете статуса на действието, за да проверите същата заявка преди нов опит.",
+      "Стойностите по-долу са вашата чернова. Те не потвърждават, че промяната е записана. Използвайте връзката по-долу, за да проверите същата заявка преди нов опит.",
   },
   states: {
     received: "Получено",
@@ -508,7 +508,7 @@ const ru: Copy = {
     recordedAt: "Записано",
     unknown: "Результат не подтверждён",
     draftRetained:
-      "Значения ниже — ваш черновик. Они не подтверждают, что изменение записано. Откройте статус действия, чтобы проверить тот же запрос перед новой попыткой.",
+      "Значения ниже — ваш черновик. Они не подтверждают, что изменение записано. Используйте ссылку ниже, чтобы проверить тот же запрос перед новой попыткой.",
   },
   states: {
     received: "Получено",
