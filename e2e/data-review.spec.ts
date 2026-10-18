@@ -63,6 +63,7 @@ for (const javascript of [true, false])
         c = copy.imports;
       await page.goto(hostUrl("staff", "/en/operations/imports"));
       await expect(page.getByRole("heading", { name: c.title, exact: true })).toBeVisible();
+      if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page.getByLabel(c.file, { exact: true }).setInputFiles({
         name: "unsupported.xlsx",
         mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -84,6 +85,7 @@ for (const javascript of [true, false])
       await expect(page.getByRole("heading", { name: c.mapping, exact: true })).toBeVisible();
       await page.getByLabel(c.fields.reference, { exact: true }).selectOption("0");
       await page.getByLabel(c.fields.title, { exact: true }).selectOption("1");
+      if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page
         .locator("[data-import-review]")
         .screenshot({ path: testInfo.outputPath(`w12-mapping-${javascript}.png`) });
@@ -121,6 +123,7 @@ for (const javascript of [true, false])
       const d = copy.duplicates;
       await page.goto(hostUrl("staff", "/en/operations/duplicates"));
       await expect(page.getByRole("main")).toHaveCount(1);
+      if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
       await page.goto(
         hostUrl("staff", `/en/operations/duplicates?left=${f.left}&right=${f.right}`),
       );

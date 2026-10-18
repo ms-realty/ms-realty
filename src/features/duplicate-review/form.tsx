@@ -1,6 +1,7 @@
 "use client";
 import { useActionState } from "react";
 import { dataReviewCopy } from "@/features/import-review/copy";
+import { buttonClass } from "@/ui/button-class";
 import { fieldClass, labelClass, textareaClass } from "@/ui/field-class";
 import type { ContactReviewState } from "./state";
 export function ContactReviewForm({
@@ -87,11 +88,7 @@ export function ContactReviewForm({
         />
         <span>{copy.reviewed}</span>
       </label>
-      <button
-        type="submit"
-        className="min-h-control rounded-control bg-accent px-5 py-3 font-semibold text-on-accent disabled:opacity-60"
-        disabled={pending || Boolean(state.error)}
-      >
+      <button type="submit" className={buttonClass()} disabled={pending || Boolean(state.error)}>
         {pending ? copy.saving : copy.defer}
       </button>
     </form>

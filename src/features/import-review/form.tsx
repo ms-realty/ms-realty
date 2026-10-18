@@ -1,12 +1,11 @@
 "use client";
 import { useActionState } from "react";
 import { importFields } from "@/server/import-review/csv";
+import { buttonClass } from "@/ui/button-class";
 import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
 import { dataReviewCopy } from "./copy";
 import type { ImportReviewState } from "./state";
 
-const button =
-  "min-h-control rounded-control bg-accent px-5 py-3 font-semibold text-on-accent disabled:opacity-60";
 export function ImportReviewForm({
   locale,
   action,
@@ -85,7 +84,7 @@ export function ImportReviewForm({
                   ))}
                 </dl>
               </details>
-              <button type="submit" className={button} disabled={pending}>
+              <button type="submit" className={buttonClass()} disabled={pending}>
                 {pending ? copy.pending : copy.check}
               </button>
             </form>
@@ -193,7 +192,7 @@ export function ImportReviewForm({
               <option value=";">{copy.semicolon}</option>
             </select>
           </div>
-          <button type="submit" className={button} disabled={pending}>
+          <button type="submit" className={buttonClass()} disabled={pending}>
             {pending ? copy.pending : copy.choose}
           </button>
         </form>

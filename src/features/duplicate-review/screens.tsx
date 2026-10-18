@@ -9,6 +9,7 @@ import {
   readDeferredContactReview,
 } from "@/server/duplicate-review/review";
 import { listContacts, readContact } from "@/server/work/queries";
+import { buttonClass } from "@/ui/button-class";
 import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
 import { issueFormOperation } from "@/ui/form/server";
 import { deferContactReviewAction } from "./actions";
@@ -172,10 +173,7 @@ export async function DuplicateReviewScreen({
                 </div>
               ))}
             </div>
-            <button
-              type="submit"
-              className="min-h-control rounded-control bg-accent px-5 py-3 font-semibold text-on-accent"
-            >
+            <button type="submit" className={buttonClass()}>
               {first ? c.compare : c.chooseFirst}
             </button>
           </form>
