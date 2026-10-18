@@ -37,11 +37,13 @@ try {
     process.env.STAGING_CLOUDFLARE_READ_TOKEN,
     { allowPreparedWeb: true, retry: { ms: 600_000 } },
   );
-  await call("migrate", "POST");
+  const initial = await call("migrate?reconcile=1", "GET");
+  // Resume observations of an existing operation. Only an absent receipt permits a new start.
+  if (initial.status === "absent") await call("migrate", "POST");
   const deadline = Date.now() + 600000;
   let completed;
   for (;;) {
-    const receipt = await call("migrate", "GET");
+    const receipt = await call("migrate?reconcile=1", "GET");
     if (
       receipt.configuredDigest !== input.image.split("@")[1] ||
       receipt.digestVerification !== "unqualified" ||
@@ -53,7 +55,7 @@ try {
       completed = receipt;
       break;
     }
-    if (receipt.status !== "running" || Date.now() > deadline)
+    if (!["running", "unknown"].includes(receipt.status) || Date.now() > deadline)
       throw new Error("Migration failed or is uncertain; operator reconciliation required");
     await setTimeout(5000);
   }

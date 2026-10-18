@@ -18,6 +18,7 @@ export type MigrationReceipt = {
   sourceCommit?: string;
   buildNonce?: string;
   completedAt?: string;
+  reconciledFrom?: "unknown";
 };
 const uuid = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 export function runtimeProof(
@@ -74,4 +75,15 @@ export function migrationStopped(
     ...receipt,
     status: stop.reason === "exit" && stop.exitCode !== 0 ? "failed" : "unknown",
   };
+}
+
+export function reconcileMigrationCompletion(
+  receipt: MigrationReceipt,
+  proof: RuntimeProof,
+): MigrationReceipt {
+  if (receipt.status !== "unknown") return receipt;
+  // A status lookup may recover a lost acknowledgement. It never starts a migration,
+  // accepts a caller's completion claim or treats a different execution as the original.
+  const observed = migrationCompletion({ ...receipt, status: "running" }, proof);
+  return observed.status === "completed" ? { ...observed, reconciledFrom: "unknown" } : receipt;
 }

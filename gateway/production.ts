@@ -15,6 +15,7 @@ import {
   type MigrationReceipt,
   migrationCompletion,
   migrationStopped,
+  reconcileMigrationCompletion,
   runtimeProof,
 } from "./runtime-proof";
 // Same immutable logical route/media bytes qualified on staging; fixture modules cannot run.
@@ -120,19 +121,24 @@ export class ProductionMigrator extends ProductionRole {
   protected role: RuntimeRole = "migrator";
   envVars = productionRuntimeEnvironment(this.env, "migrator");
   entrypoint = ["node", "--conditions=react-server", "runtime-entry.mjs", "migrator"];
-  async result(): Promise<MigrationReceipt | undefined> {
+  async result(reconcileUnknown = false): Promise<MigrationReceipt | undefined> {
     return this.ctx.blockConcurrencyWhile(async () => {
       const previous = await this.ctx.storage.get<MigrationReceipt>("migration");
-      if (previous?.status !== "running") return previous;
-      let next: MigrationReceipt;
+      if (previous?.status !== "running" && !(reconcileUnknown && previous?.status === "unknown"))
+        return previous;
       try {
-        if (!this.ctx.container?.running) throw new Error();
-        next = migrationCompletion(previous, await this.readIdentity());
+        const proof = await this.readIdentity();
+        const current = await this.ctx.storage.get<MigrationReceipt>("migration");
+        if (!current) return current;
+        const next =
+          current.status === "unknown" && reconcileUnknown
+            ? reconcileMigrationCompletion(current, proof)
+            : migrationCompletion(current, proof);
+        if (next !== current) await this.ctx.storage.put("migration", next);
+        return next;
       } catch {
-        next = { ...previous, status: "unknown" };
+        return this.ctx.storage.get<MigrationReceipt>("migration");
       }
-      await this.ctx.storage.put("migration", next);
-      return next;
     });
   }
   async runMigration(operationId: string): Promise<MigrationReceipt> {
@@ -333,7 +339,12 @@ export async function productionRequest(request: Request, env: ProductionEnv): P
     }
     if (url.pathname === "/__release/migrate") {
       if (request.method === "GET")
-        return noStore(200, (await migration(env).result()) ?? { status: "absent" });
+        return noStore(
+          200,
+          (await migration(env).result(url.searchParams.get("reconcile") === "1")) ?? {
+            status: "absent",
+          },
+        );
       if (request.method !== "POST") return noStore(405);
       const grant = await productionGrant(await envelope(request), "migrate", env);
       return noStore(202, await migration(env).runMigration(grant.operationId));

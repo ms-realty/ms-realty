@@ -9,6 +9,7 @@ import {
   type MigrationReceipt,
   migrationCompletion,
   migrationStopped,
+  reconcileMigrationCompletion,
   runtimeProof,
 } from "./runtime-proof";
 import { stagingArtifacts } from "./staging-artifacts.generated";
@@ -96,19 +97,26 @@ export class MsRealtyMigratorContainer extends StagingRoleContainer {
   protected role: RuntimeRole = "migrator";
   envVars = runtimeEnvironment(this.env, "migrator");
   entrypoint = ["node", "--conditions=react-server", "runtime-entry.mjs", "migrator"];
-  async result(): Promise<MigrationReceipt | undefined> {
+  async result(reconcileUnknown = false): Promise<MigrationReceipt | undefined> {
     return this.ctx.blockConcurrencyWhile(async () => {
       const receipt = await this.ctx.storage.get<MigrationReceipt>("migration");
-      if (receipt?.status !== "running") return receipt;
-      let next: MigrationReceipt;
+      if (receipt?.status !== "running" && !(reconcileUnknown && receipt?.status === "unknown"))
+        return receipt;
       try {
-        if (!this.ctx.container?.running) throw new Error("Migration process disappeared");
-        next = migrationCompletion(receipt, await this.readIdentity());
+        const proof = await this.readIdentity();
+        // The SDK may deliver an earlier stop while the private status read is pending.
+        const current = await this.ctx.storage.get<MigrationReceipt>("migration");
+        if (!current) return current;
+        const next =
+          current.status === "unknown" && reconcileUnknown
+            ? reconcileMigrationCompletion(current, proof)
+            : migrationCompletion(current, proof);
+        if (next !== current) await this.ctx.storage.put("migration", next);
+        return next;
       } catch {
-        next = { ...receipt, status: "unknown" };
+        // A failed read says nothing about whether the original operation completed.
+        return this.ctx.storage.get<MigrationReceipt>("migration");
       }
-      await this.ctx.storage.put("migration", next);
-      return next;
     });
   }
   async runMigration(): Promise<MigrationReceipt> {
@@ -219,7 +227,11 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
     if (!(await authenticated(request, env.STAGING_CONTROL_SECRET)))
       return new Response(null, { status: 403 });
     if (request.method === "GET")
-      return Response.json((await migrator(env).result()) ?? { status: "absent" });
+      return Response.json(
+        (await migrator(env).result(url.searchParams.get("reconcile") === "1")) ?? {
+          status: "absent",
+        },
+      );
     if (request.method !== "POST") return new Response(null, { status: 405 });
     return Response.json(await migrator(env).runMigration(), { status: 202 });
   }

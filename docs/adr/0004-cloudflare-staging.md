@@ -1,5 +1,22 @@
 # ADR 0004: Cloudflare staging and the existing PostgreSQL engine
 
+## Migration outcome recovery
+
+An unknown migration receipt holds application startup. For the same qualified candidate,
+the protected `GET /__staging/migrate?reconcile=1` reads the original migrator's completion.
+The production control equivalent is `GET /__release/migrate?reconcile=1`, under its existing
+Access and control-secret checks. Reconciliation never starts or repeats a migration.
+
+Completion requires the original operation identifier, immutable source and build nonce,
+plus a valid completion time from the live private role. The receipt retains
+`reconciledFrom: "unknown"`. Missing, restarted, different, running or failed proof keeps
+the uncertainty held. Ordinary status reads do not reconcile an unknown receipt.
+
+The staging controller reads the existing receipt before starting and only issues a start
+when no receipt exists. It can wait for the original completion through bounded status reads.
+A failed status read is not proof that an operation failed. Independent provider image
+observation and launch approvals remain separate requirements.
+
 Status: owner-directed hosting/engine decision; deployment and launch acceptance pending.
 
 The owner's 1 October 2026 launch gate supersedes DigitalOcean App Platform and earlier
