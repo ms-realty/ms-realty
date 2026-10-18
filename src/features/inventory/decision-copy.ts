@@ -71,7 +71,7 @@ export function inventoryDecisionCopy(locale: string) {
       "Проверенная запись изменилась. Примечание сохранено; откройте текущий раздел и проверьте его перед новым решением.",
     ),
     unavailable: t(
-      "This decision is temporarily unavailable. No change was recorded; keep this operation receipt when retrying.",
+      "This decision is temporarily unavailable. No change was recorded; keep the receipt for this request when retrying.",
       "Решението временно не е достъпно. Не е записана промяна; запазете това потвърждение при повторен опит.",
       "Решение временно недоступно. Изменение не записано; сохраните это подтверждение при повторе.",
     ),

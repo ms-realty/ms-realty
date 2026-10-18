@@ -169,7 +169,7 @@ test("native client service-email choice enables only reviewed case mail and can
     await page.goto(hostUrl("client", "/bg/preferences"));
     const choice = page
       .locator("section")
-      .filter({ has: page.getByRole("heading", { name: "Имейли по случаите", exact: true }) });
+      .filter({ has: page.getByRole("heading", { name: "Имейли за сделките", exact: true }) });
     await choice.locator("summary").click();
     await expect(
       choice.getByText(
@@ -178,7 +178,9 @@ test("native client service-email choice enables only reviewed case mail and can
       ),
     ).toBeVisible();
     await choice.getByRole("checkbox").check();
-    await choice.getByRole("button", { name: "Включи имейли по случаите", exact: true }).click();
+    await choice
+      .getByRole("button", { name: "Включете имейлите за моите сделки", exact: true })
+      .click();
     await expect(page).toHaveURL(/\/bg\/preferences\?receipt=/);
     const subscriptions = await db
       .select()
@@ -187,7 +189,7 @@ test("native client service-email choice enables only reviewed case mail and can
     expect(subscriptions).toHaveLength(1);
     expect(subscriptions[0]?.purpose).toBe("service_updates");
     const active = page.locator("section").filter({
-      has: page.getByRole("heading", { name: "Имейли по случаите · Активен", exact: true }),
+      has: page.getByRole("heading", { name: "Имейли за сделките · Активен", exact: true }),
     });
     await expect(active).toBeVisible();
     await active.getByRole("button", { name: "Отпишете се", exact: true }).click();
@@ -213,7 +215,7 @@ test("native client service-email choice enables only reviewed case mail and can
     await page.goto(hostUrl("staff", `/en/cases/${f.caseId}/email`));
     await expect(
       page.getByText(
-        "No eligible recipient. A current case participant needs a verified email address and recorded service-message eligibility.",
+        "No eligible recipient. A current deal participant needs a verified email address and recorded service-message eligibility.",
         { exact: true },
       ),
     ).toBeVisible();

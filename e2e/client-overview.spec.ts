@@ -287,7 +287,7 @@ for (const javaScriptEnabled of [true, false]) {
         await relate(db, { partyId: data.clientPartyId, caseId: data.second.id, role: "buyer" });
         await page.goto(overview);
         await expect(
-          page.getByRole("heading", { level: 1, name: caseCopy("en").cases }),
+          page.getByRole("heading", { level: 1, name: caseCopy("en").overview }),
         ).toBeVisible();
         const rows = page.getByRole("main").getByRole("listitem");
         await expect(rows).toHaveCount(2);

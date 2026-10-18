@@ -344,20 +344,20 @@ export async function InquiryScreen({
           {inquiry.caseId ? (
             <a className={link} href={`/${locale}/cases/${inquiry.caseId}`}>
               {locale === "bg"
-                ? "Отваряне на случая"
+                ? "Отворете сделката"
                 : locale === "ru"
-                  ? "Открыть дело"
-                  : "Open case"}
+                  ? "Откройте сделку"
+                  : "Open the deal"}
             </a>
           ) : detail.canCreateCase &&
             inquiry.ownerId === session.account.id &&
             inquiry.state === "assigned" ? (
             <a className={link} href={`/${locale}/cases/new?inquiry=${inquiry.id}`}>
               {locale === "bg"
-                ? "Създаване на случай"
+                ? "Създаване на сделка"
                 : locale === "ru"
-                  ? "Создать дело"
-                  : "Create a case"}
+                  ? "Создать сделку"
+                  : "Create a deal"}
             </a>
           ) : null}
         </nav>

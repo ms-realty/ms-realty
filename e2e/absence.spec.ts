@@ -114,17 +114,22 @@ for (const javaScriptEnabled of [true, false])
         page.getByLabel("Starts at", { exact: true }),
         new Date(endsAt.getTime() + 900000),
       );
-      await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
-      await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
+      await fillAgencyInstant(
+        page.getByLabel("Date to check who takes over", { exact: true }),
+        reviewAt(),
+      );
+      await page
+        .getByLabel("Plan for who takes over, or for the return", { exact: true })
+        .fill(plan);
       await page.getByRole("checkbox").check();
       await page.getByRole("button", { name: "Record absence", exact: true }).click();
       await expect(
         page.getByRole("heading", { name: "Absence scheduled", exact: true }),
       ).toBeVisible();
-      await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
+      await page.getByRole("link", { name: "Work without an owner", exact: true }).click();
       await page.getByRole("link", { name: appointment.reference, exact: true }).click();
       await expect(
-        page.getByRole("link", { name: "Appointments needing coverage", exact: true }),
+        page.getByRole("link", { name: "Appointments without an owner", exact: true }),
       ).toBeVisible();
       for (const locale of ["bg", "ru", "en"]) {
         await page.goto(hostUrl("staff", `/${locale}/calendar/${appointment.id}`));
@@ -151,7 +156,7 @@ for (const javaScriptEnabled of [true, false])
       ).toEqual([reservation]);
       await page.goto(hostUrl("staff", path));
       await page
-        .getByLabel("Coverage or return plan", { exact: true })
+        .getByLabel("Plan for who takes over, or for the return", { exact: true })
         .fill("The absence is cancelled; retain the original appointment.");
       await page.getByRole("checkbox").check();
       await page.getByRole("button", { name: "Cancel scheduled absence", exact: true }).click();
@@ -160,7 +165,7 @@ for (const javaScriptEnabled of [true, false])
       ).toBeVisible();
       await page.goto(hostUrl("staff", `/en/calendar/${appointment.id}`));
       await expect(
-        page.getByRole("link", { name: "Appointments needing coverage", exact: true }),
+        page.getByRole("link", { name: "Appointments without an owner", exact: true }),
       ).toHaveCount(0);
     } finally {
       await context.close();
@@ -211,8 +216,13 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`absence-form-${javaScriptEnabled}-320.png`),
         fullPage: true,
       });
-      await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
-      await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
+      await fillAgencyInstant(
+        page.getByLabel("Date to check who takes over", { exact: true }),
+        reviewAt(),
+      );
+      await page
+        .getByLabel("Plan for who takes over, or for the return", { exact: true })
+        .fill(plan);
       await page.getByRole("checkbox").check();
       await page.getByRole("button", { name: "Record absence", exact: true }).click();
       await expect(page.getByText("Availability change recorded", { exact: false })).toBeVisible();
@@ -228,7 +238,7 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`absence-${javaScriptEnabled}-320.png`),
         fullPage: true,
       });
-      await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
+      await page.getByRole("link", { name: "Work without an owner", exact: true }).click();
       expect(await findCoverageRecord(page, `/en/tasks/${task.id}`)).toBe(true);
       expect(
         (await db.select().from(schema.keySets).where(eq(schema.keySets.id, f.keyId)))[0],
@@ -243,7 +253,7 @@ for (const javaScriptEnabled of [true, false])
       ).toBe("active");
       await page.goto(hostUrl("staff", `/en/access/absence/${f.brokerId}`));
       await page
-        .getByLabel("Coverage or return plan", { exact: true })
+        .getByLabel("Plan for who takes over, or for the return", { exact: true })
         .fill("Staff member returned; review retained commitments.");
       await page.getByRole("checkbox").check();
       await page.getByRole("button", { name: "Confirm return", exact: true }).click();
@@ -253,7 +263,7 @@ for (const javaScriptEnabled of [true, false])
       expect(await db.select().from(schema.tasks).where(eq(schema.tasks.id, task.id))).toEqual([
         task,
       ]);
-      await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
+      await page.getByRole("link", { name: "Work without an owner", exact: true }).click();
       expect(await findCoverageRecord(page, `/en/tasks/${task.id}`)).toBe(false);
     } finally {
       await context.close();
@@ -279,21 +289,26 @@ test("O23 planned absence can be cancelled after explicit conflict review", asyn
     page.getByLabel("Starts at", { exact: true }),
     new Date(Date.now() + 86400000),
   );
-  await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
-  await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
+  await fillAgencyInstant(
+    page.getByLabel("Date to check who takes over", { exact: true }),
+    reviewAt(),
+  );
+  await page.getByLabel("Plan for who takes over, or for the return", { exact: true }).fill(plan);
   await page.getByRole("checkbox").check();
   await db
     .update(schema.staffMemberships)
     .set({ version: sql`${schema.staffMemberships.version} + 1` })
     .where(eq(schema.staffMemberships.principalId, f.brokerId));
   await page.getByRole("button", { name: "Record absence", exact: true }).click();
-  await expect(page.getByLabel("Coverage or return plan", { exact: true })).toHaveValue(plan);
+  await expect(
+    page.getByLabel("Plan for who takes over, or for the return", { exact: true }),
+  ).toHaveValue(plan);
   await expect(page.getByRole("checkbox")).not.toBeChecked();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Apply my reviewed changes", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Absence scheduled", exact: true })).toBeVisible();
   await page
-    .getByLabel("Coverage or return plan", { exact: true })
+    .getByLabel("Plan for who takes over, or for the return", { exact: true })
     .fill("The scheduled absence is cancelled; work remains assigned.");
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Cancel scheduled absence", exact: true }).click();
@@ -336,8 +351,11 @@ test("O23 lost absence response reconciles one receipt after leaving and returni
   try {
     await page.goto(url);
     const key = await page.locator('input[name="_operationId"]').inputValue();
-    await fillAgencyInstant(page.getByLabel("Coverage review due", { exact: true }), reviewAt());
-    await page.getByLabel("Coverage or return plan", { exact: true }).fill(plan);
+    await fillAgencyInstant(
+      page.getByLabel("Date to check who takes over", { exact: true }),
+      reviewAt(),
+    );
+    await page.getByLabel("Plan for who takes over, or for the return", { exact: true }).fill(plan);
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "Record absence", exact: true }).click();
     await expect.poll(() => settled).toBe(true);

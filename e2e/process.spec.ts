@@ -24,7 +24,9 @@ const later = (days: number) => new Date(Date.now() + days * 86400000);
 const section = (page: Page, name: string) =>
   page.locator("section").filter({ has: page.getByRole("heading", { name, exact: true }) });
 async function receipt(page: Page) {
-  await expect(page.getByRole("heading", { name: "Operation result", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Result of the request", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("status")).toHaveText("Review recorded");
   await page.getByRole("link", { name: "Agreements and checks", exact: true }).click();
 }
@@ -83,7 +85,7 @@ test("qualified policy, signed agreement and revocation retain exact evidence th
     .getByLabel("Transaction checks, one per line", { exact: true })
     .fill("Synthetic title evidence review");
   await policy
-    .getByLabel("Checks for each party, one per line", { exact: true })
+    .getByLabel("Checks for each person or company, one per line", { exact: true })
     .fill("Synthetic identity review");
   await policy.getByLabel("Policy withdrawal period, days", { exact: true }).fill("14");
   await policy.getByLabel("Policy retention period, days", { exact: true }).fill("1826");

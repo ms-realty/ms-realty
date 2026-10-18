@@ -107,7 +107,7 @@ async function uploadDocument(
     mimeType: "application/pdf",
     buffer: bytes,
   });
-  await upload.getByLabel("Purpose", { exact: false }).selectOption(purpose);
+  await upload.getByLabel("What the document is for", { exact: false }).selectOption(purpose);
   await upload.getByRole("button", { name: "Upload and scan", exact: true }).click();
   await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("saved")));
   let versionId = "";
@@ -211,11 +211,11 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   await page
     .getByLabel("Source or evidence reference", { exact: true })
     .fill("synthetic joined publication acceptance only");
-  await page.getByLabel("Price status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the price", { exact: true }).selectOption("known");
   await page.getByLabel("Price in EUR", { exact: true }).fill("95000.03");
-  await page.getByLabel("Area status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the area", { exact: true }).selectOption("known");
   await page.getByLabel("Area in m²", { exact: true }).fill("74.5");
-  await page.getByLabel("Bedroom status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the bedrooms", { exact: true }).selectOption("known");
   await page.getByLabel("Bedrooms", { exact: true }).fill("2");
   await page.getByRole("button", { name: "New listing", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Draft saved", exact: true })).toBeVisible();

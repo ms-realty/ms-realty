@@ -13,7 +13,7 @@ const en = {
   limit: "Maximum bytes",
   expires: "Request expires",
   audience:
-    "Visible only to the named recipient and authorized agency reviewers. Case participation does not share this file with other participants.",
+    "Visible only to the named recipient and authorized agency reviewers. Taking part in the deal does not share this file with other participants.",
   upload: "Upload and scan",
   file: "Choose a file",
   review: "Record review",
@@ -22,7 +22,7 @@ const en = {
   confirm: "I reviewed this exact version for the stated purpose.",
   cancel: "Cancel request and file access",
   refresh: "Refresh status",
-  back: "Open case",
+  back: "Open the deal",
   pending: "No file supplied yet",
   cancelled: "This request was cancelled. File access has ended.",
   expired: "This request has expired. Ask your broker to review what is still needed.",
@@ -37,6 +37,7 @@ const en = {
   requests: "Open document requests",
   download: "Download current permitted file",
   current: "Open current record",
+  technical: "Technical details",
 };
 const bg: typeof en = {
   ...en,
@@ -54,7 +55,7 @@ const bg: typeof en = {
   limit: "Максимален размер в байтове",
   expires: "Срок на заявката",
   audience:
-    "Видимо само за посочения получател и оправомощените проверяващи от агенцията. Участието в случая не споделя файла с останалите участници.",
+    "Видимо само за посочения получател и оправомощените проверяващи от агенцията. Участието в сделката не споделя файла с останалите участници.",
   upload: "Качване и проверка",
   file: "Избор на файл",
   review: "Запис на прегледа",
@@ -63,7 +64,7 @@ const bg: typeof en = {
   confirm: "Прегледах точно тази версия за посочената цел.",
   cancel: "Отмяна на заявката и достъпа до файла",
   refresh: "Обновяване на състоянието",
-  back: "Отваряне на случая",
+  back: "Отворете сделката",
   pending: "Още няма предоставен файл",
   cancelled: "Заявката е отменена. Достъпът до файла е прекратен.",
   expired: "Срокът е изтекъл. Свържете се с брокера за преглед на необходимото.",
@@ -77,6 +78,7 @@ const bg: typeof en = {
   requests: "Отваряне на заявките за документи",
   download: "Изтегляне на текущия разрешен файл",
   current: "Отваряне на текущия запис",
+  technical: "Технически подробности",
 };
 const ru: typeof en = {
   ...en,
@@ -94,7 +96,7 @@ const ru: typeof en = {
   limit: "Максимальный размер в байтах",
   expires: "Срок запроса",
   audience:
-    "Доступ только у указанного получателя и уполномоченных сотрудников агентства. Участие в деле не открывает файл другим участникам.",
+    "Доступ только у указанного получателя и уполномоченных сотрудников агентства. Участие в сделке не открывает файл другим участникам.",
   upload: "Загрузить и проверить",
   file: "Выбрать файл",
   review: "Записать результат проверки",
@@ -103,12 +105,12 @@ const ru: typeof en = {
   confirm: "Я проверил именно эту версию для указанной цели.",
   cancel: "Отменить запрос и доступ к файлу",
   refresh: "Обновить статус",
-  back: "Открыть дело",
+  back: "Откройте сделку",
   pending: "Файл ещё не предоставлен",
   cancelled: "Запрос отменён. Доступ к файлу прекращён.",
   expired: "Срок запроса истёк. Обсудите с брокером, что ещё нужно.",
   safety:
-    "Передача файла, антивирусная проверка, проверка для указанной цели и профессиональное заключение — отдельные этапы. Уход со страницы не гарантирует фоновую загрузку.",
+    "Передача файла, антивирусная проверка, проверка для указанной цели и профессиональное заключение — отдельные шаги. Уход со страницы не гарантирует фоновую загрузку.",
   saved: "Передача записана. Текущие статусы проверки показаны ниже.",
   failed:
     "Результат не подтверждён. Проверьте статус перед повтором. После неудачной передачи файл нужно выбрать заново.",
@@ -117,6 +119,7 @@ const ru: typeof en = {
   requests: "Открыть запросы документов",
   download: "Скачать текущий разрешённый файл",
   current: "Открыть текущую запись",
+  technical: "Технические подробности",
 };
 export const documentRequestCopy = (locale: string) =>
   locale === "bg" ? bg : locale === "ru" ? ru : en;

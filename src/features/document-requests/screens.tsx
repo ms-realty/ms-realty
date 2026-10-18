@@ -256,9 +256,13 @@ export async function DocumentRequestsScreen(
           ) : null}
           {row.file ? (
             <div className="space-y-2">
-              <p>
-                {row.file.fileName} · {fc.version} {row.file.number}
-              </p>
+              <p>{row.file.fileName}</p>
+              <details>
+                <summary className="cursor-pointer font-semibold">{c.technical}</summary>
+                <p>
+                  {fc.version} {row.file.number}
+                </p>
+              </details>
               <p>
                 {fc.state}: {fileLabel(fc, row.file.state)}
               </p>

@@ -420,7 +420,7 @@ test("X02 hides what a restricted user may not open", async ({ context, page }) 
   const tools = page.getByRole("main");
   expect(await rowHrefs(tools)).toEqual(everyday);
   await expect(tools.getByRole("navigation")).toHaveCount(1);
-  for (const hidden of ["Team and access", "Pages", "Agency coverage", "Incoming email"])
+  for (const hidden of ["Team and access", "Pages", "Work without an owner", "Incoming email"])
     await expect(tools.getByRole("link", { name: new RegExp(`^${hidden}`) })).toHaveCount(0);
 });
 

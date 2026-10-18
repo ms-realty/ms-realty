@@ -126,9 +126,15 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                             {file.fileName}
                           </a>
                           <p>
-                            v{file.versionNumber} · {file.byteSize} B · {file.contentType}
+                            {file.byteSize} B · {file.contentType}
                           </p>
-                          <p className="break-all text-compact">SHA-256: {file.sha256}</p>
+                          <details>
+                            <summary className="cursor-pointer font-semibold">
+                              {c.technical}
+                            </summary>
+                            <p>v{file.versionNumber}</p>
+                            <p className="break-all text-compact">SHA-256: {file.sha256}</p>
+                          </details>
                         </li>
                       ))}
                     </ul>

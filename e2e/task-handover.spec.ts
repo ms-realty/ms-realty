@@ -124,12 +124,12 @@ for (const javaScriptEnabled of [true, false])
         ? page.getByRole("dialog", { name: "Agency tools", exact: true })
         : page.getByRole("main");
       await expect(tools.getByRole("heading", { name: "Agency tools", exact: true })).toBeVisible();
-      await tools.getByRole("link", { name: /^Agency coverage/ }).click();
+      await tools.getByRole("link", { name: /^Work without an owner/ }).click();
       await expect(page).toHaveURL(hostUrl("staff", "/en/coverage"));
       for (const [locale, heading] of [
-        ["bg", "Дежурна опашка"],
-        ["ru", "Очередь подхвата"],
-        ["en", "Agency coverage"],
+        ["bg", "Работа без отговорник"],
+        ["ru", "Работа без ответственного"],
+        ["en", "Work without an owner"],
       ]) {
         await page.goto(hostUrl("staff", `/${locale}/coverage`));
         await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
@@ -151,7 +151,7 @@ for (const javaScriptEnabled of [true, false])
         await expect(page.locator(`a[href="${href}"]`)).toBeVisible();
       }
       await expect(
-        page.getByRole("region", { name: "Tasks needing coverage", exact: true }),
+        page.getByRole("region", { name: "Tasks without an owner", exact: true }),
       ).toContainText("Promised to a client");
       expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(true);
       expect(await findCoverageRecord(page, `/en/operations/keys/${f.keyId}`)).toBe(true);

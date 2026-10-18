@@ -58,9 +58,9 @@ test("additional proposal parties survive native validation and require review o
   await expect(terms).toContainText("Synthetic additional buyer");
   await expect(terms).toContainText("EUR 110,000.00");
   await expect(terms).toContainText("Draft · not shared");
-  await expect(
-    page.getByRole("button", { name: "Make available to these parties", exact: true }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Show to these people", exact: true })).toHaveCount(
+    0,
+  );
   await expect(
     page.getByRole("button", { name: "Record exact-terms review", exact: true }),
   ).toBeVisible();

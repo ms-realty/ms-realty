@@ -52,7 +52,7 @@ test("F05: native exact-rule approval, retained error inputs, durable receipt an
       page.getByRole("heading", { name: "Saved-search alert rule", exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByText("Runtime delivery is disabled. Recording approval does not enable it.", {
+      page.getByText("Live sending is disabled. Recording approval does not enable it.", {
         exact: true,
       }),
     ).toBeVisible();
@@ -76,7 +76,7 @@ test("F05: native exact-rule approval, retained error inputs, durable receipt an
     await expect(page.locator("[data-rule-receipt]")).toBeVisible();
     await expect(page.getByText("Human approval is current", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("Runtime delivery is disabled. Recording approval does not enable it.", {
+      page.getByText("Live sending is disabled. Recording approval does not enable it.", {
         exact: true,
       }),
     ).toBeVisible();
@@ -89,7 +89,7 @@ test("F05: native exact-rule approval, retained error inputs, durable receipt an
       .fill("Synthetic operator disable after review");
     await page.getByRole("checkbox").check();
     await page
-      .getByRole("button", { name: "Disable rule and cancel queued digests", exact: true })
+      .getByRole("button", { name: "Disable rule and cancel pending summary emails", exact: true })
       .click();
     await expect(page.locator("[data-rule-receipt]")).toBeVisible();
     await expect(page.getByText("No current human approval", { exact: true })).toBeVisible();

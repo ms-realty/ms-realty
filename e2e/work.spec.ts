@@ -115,7 +115,7 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   const row = page.locator(`[data-inquiry-id="${inquiry.id}"]`);
   await expect(row).toContainText("Synthetic visitor · ");
   await expect(row).toContainText(
-    /Received \d+ minutes? ago · Preferred language: English · Accountable owner: Agency coverage/,
+    /Received \d+ minutes? ago · Preferred language: English · Accountable owner: Work without an owner/,
   );
   await row.getByRole("link").click();
   await expect(page).toHaveURL(new RegExp(`/en/inquiries/${inquiry.id}\\?view=unassigned`));
@@ -144,7 +144,7 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await stale.getByRole("button", { name: "Record: Suspected spam", exact: true }).click();
   await expect(
     stale.getByText(
-      "This record changed. Compare the latest version with your draft before applying it again.",
+      "Someone changed this in the meantime. Compare the latest version with your draft before applying it again.",
       { exact: true },
     ),
   ).toBeVisible();
@@ -171,16 +171,16 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   await expect(page.getByText(email, { exact: true })).toBeVisible();
   await page.getByRole("link", { name: inquiry.reference, exact: true }).click();
   await page.getByRole("link", { name: nextAction, exact: true }).click();
-  await page.getByLabel("Status", { exact: true }).selectOption("done");
+  await page.getByLabel("Where it stands", { exact: true }).selectOption("done");
   await page
     .getByLabel("Outcome, dependency or cancellation reason", { exact: true })
     .fill("Reviewed the original inquiry and confirmed the synthetic test outcome");
   await page.getByRole("button", { name: "Update task", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Change recorded", exact: true })).toBeVisible();
   await stale.reload();
-  await stale.getByRole("radio", { name: "Resolved without case", exact: true }).check();
+  await stale.getByRole("radio", { name: "Resolved without a deal", exact: true }).check();
   await stale.getByLabel("Reason", { exact: true }).fill("Synthetic test completed without a case");
-  await stale.getByRole("button", { name: "Record: Resolved without case", exact: true }).click();
+  await stale.getByRole("button", { name: "Record: Resolved without a deal", exact: true }).click();
   await triageRecorded();
   const [saved] = await db
     .select()
@@ -297,7 +297,7 @@ test("M-003/M-096 staff awaiting grants get guidance and no inaccessible navigat
       exact: true,
     }),
   ).toBeVisible();
-  for (const name of ["Inquiries", "Cases", "Inventory", "Calendar", "Tasks"])
+  for (const name of ["Inquiries", "Deals", "Inventory", "Calendar", "Tasks"])
     await expect(page.locator("header").getByRole("link", { name, exact: true })).toHaveCount(0);
   const inventory = await page.goto(hostUrl("staff", "/en/inventory"));
   expect(inventory?.status()).toBe(200);

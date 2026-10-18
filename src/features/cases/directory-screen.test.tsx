@@ -23,7 +23,7 @@ const row = (overrides: Record<string, unknown> = {}) => ({
   needsCoverage: false,
   ...overrides,
 });
-const caseList = () => screen.getByRole("list", { name: "Case list" });
+const caseList = () => screen.getByRole("list", { name: "Deal list" });
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -37,16 +37,16 @@ afterEach(() => {
 it("lists each visible case as one link with its type, purpose, stage and owner", async () => {
   render(await CaseDirectoryScreen({ locale: "en", session }));
   expect(listCases).toHaveBeenCalledWith("test-db", session, "");
-  expect(screen.getByRole("heading", { level: 1, name: "Cases" })).toBeVisible();
+  expect(screen.getByRole("heading", { level: 1, name: "Deals" })).toBeVisible();
   expect(screen.getByLabelText("Search")).toHaveValue("");
-  expect(screen.getByLabelText("Search")).toHaveAccessibleDescription("Case number or title");
+  expect(screen.getByLabelText("Search")).toHaveAccessibleDescription("Deal number or title");
   expect(within(caseList()).getByRole("link")).toBe(
     screen.getByRole("link", {
       name: "CS-2026-000142 · Buying Synthetic family home search · Agreeing requirements Accountable broker: Synthetic broker",
     }),
   );
   expect(within(caseList()).getByRole("link")).toHaveAttribute("href", "/en/cases/case-one");
-  expect(screen.getByText("Cases: 1")).toBeVisible();
+  expect(screen.getByText("Deals: 1")).toBeVisible();
   expect(screen.getByRole("link", { name: "More tools" })).toHaveAttribute(
     "href",
     "/en/operations",
@@ -71,10 +71,10 @@ it("shows paused and closed apart from the stage, and agency coverage for an una
   expect(links.map((link) => link.textContent)).toEqual([
     "CS-2026-000142 · Selling Synthetic family home search · Preparing the listing Paused · Accountable broker: Synthetic broker",
     "CS-2026-000142 · Letting Synthetic family home search · Completion and handover Closed · Accountable broker: Synthetic broker",
-    "CS-2026-000142 · Buying Synthetic family home search · Viewings Agency coverage · Last accepted owner: Former broker",
+    "CS-2026-000142 · Buying Synthetic family home search · Viewings Work without an owner · Last accepted owner: Former broker",
     "CS-2026-000142 · Service consultation Synthetic family home search · Consultation Accountable broker: No named owner",
   ]);
-  expect(screen.getByText("Cases: 4")).toBeVisible();
+  expect(screen.getByText("Deals: 4")).toBeVisible();
 });
 
 it("searches the trimmed term and says when the address held more than 120 characters", async () => {
@@ -100,10 +100,10 @@ it("states the 50-row bound instead of a count when the read may hold more cases
   expect(within(caseList()).getAllByRole("link")).toHaveLength(50);
   expect(
     screen.getByText(
-      "Showing the 50 most recently updated cases you can access. To find another case, search by its number or title.",
+      "Showing the 50 most recently updated deals you can access. To find another deal, search by its number or title.",
     ),
   ).toBeVisible();
-  expect(screen.queryByText(/^Cases: /)).toBeNull();
+  expect(screen.queryByText(/^Deals: /)).toBeNull();
 });
 
 it("tells a search with 50 matches to narrow the search, not to start one", async () => {
@@ -113,7 +113,7 @@ it("tells a search with 50 matches to narrow the search, not to start one", asyn
   render(await CaseDirectoryScreen({ locale: "en", session, search: "CS-2026" }));
   expect(
     screen.getByText(
-      "Showing the 50 most recently updated matches. Narrow the search to find another case.",
+      "Showing the 50 most recently updated matches. Narrow the search to find another deal.",
     ),
   ).toBeVisible();
   expect(screen.queryByText(/search by its number or title/)).toBeNull();
@@ -123,25 +123,25 @@ it("keeps first-use empty and a search without matches apart", async () => {
   listCases.mockResolvedValue([]);
   render(await CaseDirectoryScreen({ locale: "en", session }));
   expect(
-    screen.getByRole("heading", { level: 2, name: "No cases are available to you." }),
+    screen.getByRole("heading", { level: 2, name: "No deals are available to you." }),
   ).toBeVisible();
   expect(screen.getByRole("link", { name: "Open inquiries" })).toHaveAttribute(
     "href",
     "/en/inquiries",
   );
-  expect(screen.queryByRole("list", { name: "Case list" })).toBeNull();
+  expect(screen.queryByRole("list", { name: "Deal list" })).toBeNull();
   cleanup();
 
   render(await CaseDirectoryScreen({ locale: "en", session, search: "no such case" }));
   expect(
-    screen.getByRole("heading", { level: 2, name: "No case matches this search." }),
+    screen.getByRole("heading", { level: 2, name: "No deal matches this search." }),
   ).toBeVisible();
   expect(screen.getByText("no such case")).toBeVisible();
   expect(screen.getByRole("link", { name: "Clear the search" })).toHaveAttribute(
     "href",
     "/en/cases",
   );
-  expect(screen.queryByText("No cases are available to you.")).toBeNull();
+  expect(screen.queryByText("No deals are available to you.")).toBeNull();
 });
 
 it("shows a failed read as a failure with a retry, never as an empty list", async () => {
@@ -149,17 +149,17 @@ it("shows a failed read as a failure with a retry, never as an empty list", asyn
   listCases.mockRejectedValue(new Error("connection refused at synthetic host"));
   render(await CaseDirectoryScreen({ locale: "en", session, search: "CS-2026" }));
   expect(
-    screen.getByRole("heading", { level: 2, name: "The case list could not be loaded." }),
+    screen.getByRole("heading", { level: 2, name: "The deal list could not be loaded." }),
   ).toBeVisible();
   expect(
-    screen.getByText("This does not mean there are no cases. Try again in a moment."),
+    screen.getByText("This does not mean there are no deals. Try again in a moment."),
   ).toBeVisible();
   expect(screen.getByRole("link", { name: "Try again" })).toHaveAttribute(
     "href",
     "/en/cases?q=CS-2026",
   );
-  expect(screen.queryByRole("list", { name: "Case list" })).toBeNull();
-  expect(screen.queryByText(/No case|No cases|Cases: /)).toBeNull();
+  expect(screen.queryByRole("list", { name: "Deal list" })).toBeNull();
+  expect(screen.queryByText(/No case|No deals|Deals: /)).toBeNull();
   expect(screen.queryByText(/connection refused/)).toBeNull();
   // The search stays available, and the log names the error type without its details.
   expect(screen.getByLabelText("Search")).toHaveValue("CS-2026");
@@ -190,19 +190,19 @@ it("lets Next.js control flow from the read through instead of calling it a fail
 it.each([
   [
     "bg",
-    "Случаи",
+    "Сделки",
     "Търсене",
     "Покажете",
     "CS-2026-000142 · Покупка Synthetic family home search · Уточняване на изискванията Отговорен брокер: Synthetic broker",
-    "Случаи: 1",
+    "Сделки: 1",
   ],
   [
     "ru",
-    "Дела",
+    "Сделки",
     "Поиск",
     "Показать",
     "CS-2026-000142 · Покупка Synthetic family home search · Согласование требований Ответственный брокер: Synthetic broker",
-    "Всего дел: 1",
+    "Всего сделок: 1",
   ],
 ])("keeps %s labels", async (locale, title, search, apply, rowText, count) => {
   render(await CaseDirectoryScreen({ locale, session }));

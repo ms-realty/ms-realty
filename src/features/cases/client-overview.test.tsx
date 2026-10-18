@@ -79,7 +79,7 @@ it("opens a compact authorized Case summary and links into its full manual workf
     "href",
     "/en/messages/case-one",
   );
-  expect(screen.queryByRole("link", { name: "Open case" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Open the deal" })).not.toBeInTheDocument();
   expect(screen.getByRole("complementary", { name: "Accountable broker" })).toHaveTextContent(
     row.ownerName,
   );
@@ -214,7 +214,11 @@ it("preserves the empty state and never selects a Case for another destination",
   cleanup();
   reads.list.mockResolvedValue([]);
   render(await CaseIndexScreen({ locale: "en", session, openSingleCase: true }));
-  expect(screen.getByText("No cases are available to this account.")).toBeVisible();
+  expect(
+    screen.getByText(
+      "You don't have access to a deal yet. When a broker invites you, it will appear here.",
+    ),
+  ).toBeVisible();
   expect(reads.detail).not.toHaveBeenCalled();
 });
 
@@ -254,7 +258,7 @@ it.each(["paused", "closed"])(
     expect(screen.queryByText(baseView.record.nextAction)).not.toBeInTheDocument();
     expect(document.querySelector("time")).toBeNull();
     expect(
-      screen.getByRole("heading", { name: new RegExp(`This case is ${disposition}`) }),
+      screen.getByRole("heading", { name: new RegExp(`This deal is ${disposition}`) }),
     ).toBeVisible();
   },
 );

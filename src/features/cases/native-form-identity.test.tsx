@@ -152,7 +152,7 @@ it("gives ordinary bound commands a stable record identity independent of issued
       path="/en/overview/case-one"
       fields={[{ name: "body", label: "Message" }]}
       values={{ body }}
-      submit="Post in this case"
+      submit="Post in this deal"
     />
   );
   render(form(1, "First draft"));

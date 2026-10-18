@@ -21,7 +21,7 @@
       "title": "Consultations",
       "description": "Consultation requests and who takes them"
     },
-    "coverage": { "title": "Agency coverage", "description": "Work without an available owner" },
+    "coverage": { "title": "Work without an owner", "description": "Work without an available owner" },
     "inbound": { "title": "Incoming email", "description": "Untrusted incoming mail" },
     "keys": { "title": "Key custody", "description": "Who holds keys and until when" },
     "complaints": { "title": "Complaints", "description": "Owner, due date and outcome" },

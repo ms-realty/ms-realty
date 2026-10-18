@@ -100,9 +100,9 @@ test("O12/O16 native decisions retain drafts and operation identity with mobile 
   await page
     .getByLabel("Source or evidence reference", { exact: true })
     .fill("synthetic-source-record");
-  await page.getByLabel("Price status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the price", { exact: true }).selectOption("known");
   await page.getByLabel("Price in EUR", { exact: true }).fill("95000.03");
-  await page.getByLabel("Area status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the area", { exact: true }).selectOption("known");
   await page.getByLabel("Area in m²", { exact: true }).fill("74.5");
   await page.getByRole("button", { name: "New listing", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Draft saved", exact: true })).toBeVisible();
@@ -236,7 +236,7 @@ test("O12/O16 native decisions retain drafts and operation identity with mobile 
     release.getByRole("link", { name: "Review seller evidence", exact: true }),
   ).toHaveAttribute("href", `/en/inventory/${reference}/evidence`);
   await expect(
-    release.getByRole("link", { name: "Operation receipt", exact: true }),
+    release.getByRole("link", { name: "Receipt for this request", exact: true }),
   ).toHaveAttribute("href", `/en/inventory/operations/${releaseKey}?reference=${reference}`);
   await expect(
     release.getByRole("button", { name: "Prepare publication", exact: true }),

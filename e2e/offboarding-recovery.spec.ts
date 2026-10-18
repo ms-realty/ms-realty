@@ -345,7 +345,7 @@ for (const conflict of [false, true])
       );
       if (conflict) {
         await expect(
-          page.getByText("This operation did not change access.", { exact: true }),
+          page.getByText("This request did not change access.", { exact: true }),
         ).toBeVisible();
         await page.getByRole("link", { name: "Review again before acting", exact: true }).click();
         await expect(

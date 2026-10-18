@@ -100,7 +100,7 @@ test("C12 / AT18 exact owner preview, private reviewed images and current consen
       owner.getByRole("heading", { name: "Current approved Bulgarian source", exact: true }),
     ).toBeVisible();
     // Returning from a seller preview keeps the current client Case and host.
-    await owner.getByRole("link", { name: "Open case", exact: true }).click();
+    await owner.getByRole("link", { name: "Open the deal", exact: true }).click();
     await expect(owner).toHaveURL(hostUrl("client", `/en/overview/${f.caseId}`));
     await owner.getByRole("link", { name: /Review owner listing preview/ }).click();
     await expect(owner).toHaveURL(preview);
@@ -117,7 +117,7 @@ test("C12 / AT18 exact owner preview, private reviewed images and current consen
     const acknowledge = async () => {
       await owner
         .getByLabel(
-          "I reviewed the exact displayed terms, facts, Bulgarian copy, images and public disclosure and acknowledge them for this case.",
+          "I reviewed the exact displayed terms, facts, Bulgarian copy, images and public disclosure and acknowledge them for this deal.",
           { exact: true },
         )
         .check();
@@ -154,12 +154,12 @@ test("C12 / AT18 exact owner preview, private reviewed images and current consen
       await page.goto(continuity);
       const stage = page
         .locator("form")
-        .filter({ has: page.getByRole("button", { name: "Record stage change", exact: true }) });
-      await stage.getByLabel("Next stage", { exact: true }).selectOption(next);
+        .filter({ has: page.getByRole("button", { name: "Record the move", exact: true }) });
+      await stage.getByLabel("Where the work should go next", { exact: true }).selectOption(next);
       await stage
         .getByLabel("Reason", { exact: true })
         .fill("Reviewed exact instructions and current owner preview acknowledgment.");
-      await stage.getByRole("button", { name: "Record stage change", exact: true }).click();
+      await stage.getByRole("button", { name: "Record the move", exact: true }).click();
       await recorded(page);
     }
     expect(

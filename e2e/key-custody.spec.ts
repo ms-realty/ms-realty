@@ -99,7 +99,7 @@ for (const javaScriptEnabled of [true, false])
       const detail = page.url();
       const [key] = await db.select().from(schema.keySets).where(eq(schema.keySets.keyTag, tag));
       if (!key) throw new Error("No durable key set");
-      await page.getByLabel("State", { exact: true }).selectOption("checked_out");
+      await page.getByLabel("Where the keys are", { exact: true }).selectOption("checked_out");
       await page.getByLabel("Staff holder", { exact: true }).selectOption(f.brokerId);
       // Missing due-back must preserve the reviewed facts and require a fresh confirmation.
       await page
@@ -207,7 +207,7 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`key-deadline-${javaScriptEnabled}.png`),
         fullPage: true,
       });
-      await page.getByLabel("State", { exact: true }).selectOption("stored");
+      await page.getByLabel("Where the keys are", { exact: true }).selectOption("stored");
       await page.getByLabel("Storage label", { exact: true }).fill("Synthetic cabinet B");
       await page
         .getByLabel("Handover evidence and reason", { exact: true })

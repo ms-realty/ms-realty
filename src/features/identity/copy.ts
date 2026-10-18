@@ -99,7 +99,7 @@ const en = {
   clientReauthLead:
     "This action needs a recent sign-in. Request a new email link for your current account, confirm it, then return to review the action.",
   signedInAs: "Signed in as {email}.",
-  noCasesYet: "When your broker shares a case with you, you receive an invitation by email.",
+  noCasesYet: "When a broker shares a deal with you, you'll get an invitation by email.",
   addPasskeyTitle: "Faster sign-in (optional)",
   addPasskeyLead: "Add a passkey on this device to sign in without an email link.",
   addPasskey: "Add a passkey",
@@ -112,7 +112,7 @@ const en = {
     "Sign in with the email address this invitation was sent to. Its details are shown only to that account.",
   invitationUnavailable:
     "This invitation is not available to the account you are signed in with. If it was sent to another address, sign out and sign in with that one.",
-  invitationFrom: "{inviter} invites you to take part in case {reference}: {title}.",
+  invitationFrom: "{inviter} has invited you to the deal “{title}” (No. {reference}).",
   invitationRole: "Your role",
   invitationAccess: "What you will be able to do",
   invitationRecipient: "Sent to {email}. Valid until {time}.",
@@ -211,7 +211,7 @@ const bg: IdentityCopy = {
   clientReauthLead:
     "Това действие изисква скорошен вход. Поискайте нова връзка за текущия профил, потвърдете я и прегледайте действието отново.",
   signedInAs: "Влезли сте като {email}.",
-  noCasesYet: "Когато брокерът ви сподели случай с вас, ще получите покана по имейл.",
+  noCasesYet: "Когато брокерът сподели сделка с Вас, ще получите покана по имейл.",
   addPasskeyTitle: "По-бърз вход (по избор)",
   addPasskeyLead: "Добавете ключ за достъп на това устройство, за да влизате без връзка по имейл.",
   addPasskey: "Добавяне на ключ за достъп",
@@ -223,7 +223,7 @@ const bg: IdentityCopy = {
     "Влезте с имейл адреса, на който е изпратена поканата. Подробностите се показват само на този профил.",
   invitationUnavailable:
     "Тази покана не е достъпна за профила, с който сте влезли. Ако е изпратена на друг адрес, излезте и влезте с него.",
-  invitationFrom: "{inviter} ви кани да участвате в случай {reference}: {title}.",
+  invitationFrom: "{inviter} Ви кани в сделката „{title}“ (№ {reference}).",
   invitationRole: "Вашата роля",
   invitationAccess: "Какво ще можете да правите",
   invitationRecipient: "Изпратена до {email}. Валидна до {time}.",
@@ -320,7 +320,7 @@ const ru: IdentityCopy = {
   clientReauthLead:
     "Для этого действия нужен недавний вход. Запросите новую ссылку для текущего аккаунта, подтвердите её и проверьте действие снова.",
   signedInAs: "Вы вошли как {email}.",
-  noCasesYet: "Когда брокер откроет вам доступ к делу, вы получите приглашение по почте.",
+  noCasesYet: "Когда брокер откроет Вам доступ к сделке, Вы получите приглашение по почте.",
   addPasskeyTitle: "Быстрый вход (необязательно)",
   addPasskeyLead: "Добавьте ключ доступа на этом устройстве, чтобы входить без ссылки по почте.",
   addPasskey: "Добавить ключ доступа",
@@ -332,7 +332,7 @@ const ru: IdentityCopy = {
     "Войдите с адресом, на который отправлено приглашение. Подробности видны только этому аккаунту.",
   invitationUnavailable:
     "Это приглашение недоступно аккаунту, в который вы вошли. Если оно отправлено на другой адрес, выйдите и войдите с ним.",
-  invitationFrom: "{inviter} приглашает вас участвовать в деле {reference}: {title}.",
+  invitationFrom: "{inviter} приглашает Вас в сделку «{title}» (№ {reference}).",
   invitationRole: "Ваша роль",
   invitationAccess: "Что вы сможете делать",
   invitationRecipient: "Отправлено на {email}. Действует до {time}.",

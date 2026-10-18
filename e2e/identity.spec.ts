@@ -364,7 +364,9 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
     .getByLabel("Choose a file", { exact: true })
     .first()
     .setInputFiles({ name: "synthetic-instruction.png", mimeType: "image/png", buffer: bytes });
-  await page.getByLabel("Purpose", { exact: false }).selectOption("seller_instruction");
+  await page
+    .getByLabel("What the document is for", { exact: false })
+    .selectOption("seller_instruction");
   await page.getByRole("button", { name: "Upload and scan", exact: true }).click();
   await expect(page).toHaveURL(
     (url) => url.pathname.endsWith("/documents") && Boolean(url.searchParams.get("saved")),
@@ -431,7 +433,9 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
     .getByLabel("Choose a file", { exact: true })
     .first()
     .setInputFiles({ name: "synthetic-case-agreement.png", mimeType: "image/png", buffer: bytes });
-  await page.getByLabel("Purpose", { exact: false }).selectOption("service_agreement");
+  await page
+    .getByLabel("What the document is for", { exact: false })
+    .selectOption("service_agreement");
   await page.getByRole("button", { name: "Upload and scan", exact: true }).click();
   await expect(page).toHaveURL(
     (url) => url.pathname.endsWith("/documents") && Boolean(url.searchParams.get("saved")),
@@ -637,10 +641,9 @@ test("AT37/AT38: client email link and invitation need confirm POST, including w
     );
     await expect(page.locator(`a[href="/en/invitations/${invitation.id}"]`)).toHaveCount(0);
     await expect(
-      page.getByText(
-        "When your broker shares a case with you, you receive an invitation by email.",
-        { exact: true },
-      ),
+      page.getByText("When a broker shares a deal with you, you'll get an invitation by email.", {
+        exact: true,
+      }),
     ).toHaveCount(0);
     await sql`update sessions set reverified_at = now() - interval '16 minutes' where principal_id = ${account.id} and revoked_at is null`;
     await page.goto(hostUrl("client", "/en/access/reauth?returnTo=%2Fen%2Faccess"));

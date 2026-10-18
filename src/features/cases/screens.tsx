@@ -18,6 +18,7 @@ import { listTasks, readInquiry } from "@/server/work/queries";
 import { buttonClass } from "@/ui/button-class";
 import type { FormReceipt } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { caseAccessCopy } from "../case-access/copy";
 import { documentRequestCopy } from "../document-requests/copy";
 import { CoverageOwner } from "../work/coverage-owner";
@@ -67,7 +68,7 @@ export function WorkflowPage({
           {title}
         </h1>
         {!clientOverview ? (
-          <nav className="flex flex-wrap gap-5" aria-label={c.cases}>
+          <nav className="flex flex-wrap gap-5" aria-label={staff ? c.cases : c.overview}>
             <a className={workflowLink} href={`/${locale}/${staff ? "cases" : "overview"}`}>
               {staff ? c.cases : c.overview}
             </a>
@@ -240,7 +241,15 @@ export async function CaseIndexScreen(
     <WorkflowPage
       {...props}
       clientOverview={root === "overview"}
-      title={root === "properties" ? c.interests : root === "messages" ? c.messages : c.cases}
+      title={
+        root === "properties"
+          ? c.interests
+          : root === "messages"
+            ? c.messages
+            : props.session.account.kind === "staff"
+              ? c.cases
+              : c.overview
+      }
     >
       <p>{c.scope}</p>
       {root === "overview" ? (
@@ -272,7 +281,7 @@ export async function CaseIndexScreen(
           </ul>
         </>
       ) : (
-        <p>{c.empty}</p>
+        <p>{props.session.account.kind === "staff" ? c.empty : c.emptyClient}</p>
       )}
     </WorkflowPage>
   );
@@ -575,7 +584,7 @@ export async function CaseScreen(
                 ? "Преглед на процеса"
                 : props.locale === "ru"
                   ? "Проверка процесса"
-                  : "Case process review"}
+                  : "Deal process review"}
             </a>
           ) : null}
         </div>
@@ -705,7 +714,15 @@ export async function CaseScreen(
               </a>
             ) : null}
             <p>{brief?.clientAcknowledgedAt ? c.agreedBrief : c.draftBrief}</p>
-            <p>Revision {brief?.revision ?? "—"}</p>
+            <p>
+              {c.lastChanged}:{" "}
+              <WorkflowTime value={brief?.createdAt ?? null} locale={props.locale} />
+            </p>
+            <TechnicalDetails locale={props.locale}>
+              <p>
+                {c.revision}: {brief?.revision ?? "—"}
+              </p>
+            </TechnicalDetails>
             <ul className="space-y-3">
               {items.map((item) => (
                 <li key={`${item.kind}-${item.text}`}>

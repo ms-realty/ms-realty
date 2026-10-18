@@ -60,7 +60,7 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
   ]);
   await page.goto(hostUrl("staff", `/en/cases/new?inquiry=${f.inquiryId}`));
   const title = `S4 buyer journey ${randomUUID().slice(0, 8)}`;
-  await page.getByLabel("Case title (visible to participants)", { exact: true }).fill(title);
+  await page.getByLabel("Deal title (visible to participants)", { exact: true }).fill(title);
   await page
     .getByLabel("Requirements to review", { exact: true })
     .fill("Step-free access is essential");
@@ -74,7 +74,7 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     page.getByLabel("Next action due", { exact: true }),
     new Date(Date.now() + 86400000),
   );
-  await page.getByRole("button", { name: "Create a case", exact: true }).click();
+  await page.getByRole("button", { name: "Create a deal", exact: true }).click();
   await recorded(page);
   const [inquiry] = await db
     .select()
@@ -273,7 +273,7 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     await client
       .getByLabel("Message", { exact: true })
       .fill("Please revise my requirements to include a lift");
-    await client.getByRole("button", { name: "Post in this case", exact: true }).click();
+    await client.getByRole("button", { name: "Post in this deal", exact: true }).click();
     await recorded(client);
     await page.goto(hostUrl("staff", `/en/cases/${caseId}`));
     await expect(

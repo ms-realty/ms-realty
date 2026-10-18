@@ -56,7 +56,7 @@ async function open(page: Page, session: string, path: string) {
   ]);
   await page.goto(hostUrl("staff", path));
 }
-const rows = (page: Page, list = "Case list") =>
+const rows = (page: Page, list = "Deal list") =>
   page.getByRole("list", { name: list }).getByRole("link");
 async function fitsWidth(page: Page) {
   const { scroll, width } = await page.evaluate(() => ({
@@ -81,9 +81,9 @@ for (const javaScriptEnabled of [false, true])
       const f = seed();
       const { buyer, tenant, paused, closed, covered, long } = f.cases;
       await open(page, f.viewer.token, "/en/cases");
-      await expect(page.getByRole("heading", { level: 1, name: "Cases" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Deals" })).toBeVisible();
       await expect(rows(page)).toHaveCount(6);
-      await expect(page.getByText("Cases: 6", { exact: true })).toBeVisible();
+      await expect(page.getByText("Deals: 6", { exact: true })).toBeVisible();
       // One link per case; its name carries type, purpose, stage, disposition and owner.
       await expect(
         page.getByRole("link", {
@@ -101,7 +101,7 @@ for (const javaScriptEnabled of [false, true])
         `${closed.reference} · Letting ${closed.title} · On the market Closed · Accountable broker: ${f.ownerName}`,
       );
       await expect(rows(page).filter({ hasText: covered.reference })).toHaveText(
-        `${covered.reference} · Buying ${covered.title} · Viewings Agency coverage · Last accepted owner: ${f.formerName}`,
+        `${covered.reference} · Buying ${covered.title} · Viewings Work without an owner · Last accepted owner: ${f.formerName}`,
       );
       await fitsWidth(page);
       await page.screenshot({ path: info.outputPath("o04-cases.png"), fullPage: true });
@@ -116,11 +116,11 @@ for (const javaScriptEnabled of [false, true])
       await expect(page).toHaveURL(hostUrl("staff", `/en/cases?q=${buyer.reference}`));
       await expect(page.getByLabel("Search", { exact: true })).toHaveValue(buyer.reference);
       await expect(rows(page)).toHaveCount(1);
-      await expect(page.getByText("Cases: 1", { exact: true })).toBeVisible();
+      await expect(page.getByText("Deals: 1", { exact: true })).toBeVisible();
 
       await search(page, `${f.token}-none`);
       await expect(
-        page.getByRole("heading", { level: 2, name: "No case matches this search." }),
+        page.getByRole("heading", { level: 2, name: "No deal matches this search." }),
       ).toBeVisible();
       await expect(rows(page)).toHaveCount(0);
       await page.getByRole("link", { name: "Clear the search", exact: true }).click();
@@ -164,11 +164,11 @@ test("O04 states the 50-case bound and finds an older case by its number", async
   await expect(rows(page)).toHaveCount(50);
   await expect(
     page.getByText(
-      "Showing the 50 most recently updated cases you can access. To find another case, search by its number or title.",
+      "Showing the 50 most recently updated deals you can access. To find another deal, search by its number or title.",
       { exact: true },
     ),
   ).toBeVisible();
-  await expect(page.getByText(/^Cases: /)).toHaveCount(0);
+  await expect(page.getByText(/^Deals: /)).toHaveCount(0);
   await expect(page.getByText(f.oldest)).toHaveCount(0);
   await search(page, f.oldest);
   await expect(rows(page)).toHaveCount(1);
@@ -184,7 +184,7 @@ test("O04 keeps BG and RU labels, and a first-use empty state", async ({ page })
       "Случаи",
       "Търсене",
       "Покажете",
-      "Списък със случаи",
+      "Списък със сделки",
       `${buyer.reference} · Покупка ${buyer.title} · Уточняване на изискванията Отговорен брокер: ${f.ownerName}`,
       "Случаи: 6",
     ],
@@ -193,7 +193,7 @@ test("O04 keeps BG and RU labels, and a first-use empty state", async ({ page })
       "Дела",
       "Поиск",
       "Показать",
-      "Список дел",
+      "Список сделок",
       `${buyer.reference} · Покупка ${buyer.title} · Согласование требований Ответственный брокер: ${f.ownerName}`,
       "Всего дел: 6",
     ],
@@ -209,11 +209,11 @@ test("O04 keeps BG and RU labels, and a first-use empty state", async ({ page })
 
   await open(page, f.empty, "/en/cases");
   await expect(
-    page.getByRole("heading", { level: 2, name: "No cases are available to you." }),
+    page.getByRole("heading", { level: 2, name: "No deals are available to you." }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Open inquiries", exact: true })).toHaveAttribute(
     "href",
     "/en/inquiries",
   );
-  await expect(page.getByRole("list", { name: "Case list" })).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Deal list" })).toHaveCount(0);
 });

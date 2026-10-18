@@ -7,7 +7,7 @@ export const ownerPreviewCopy = (locale: string) =>
         binding: "Свързване на инструкциите на продавача",
         instruction: "Прегледани инструкции",
         bindCheck:
-          "Проверих точния имот, страна, търговски условия и текущото пълномощие за този случай.",
+          "Проверих точния имот, човека или фирмата, търговските условия и текущото пълномощие за тази сделка.",
         bind: "Свързване на инструкциите",
         source: "Текущ одобрен български източник",
         facts: "Данни и условия",
@@ -18,13 +18,15 @@ export const ownerPreviewCopy = (locale: string) =>
         consequences:
           "Потвърждавате точно този преглед за агенцията. Това не публикува обява, не подписва договор и не дава правно заключение. Промени в съдържанието изискват ново потвърждение.",
         check:
-          "Прегледах показаните точни условия, данни, български текст, изображения и ниво на публично разкриване и ги потвърждавам за този случай.",
+          "Прегледах показаните точни условия, данни, български текст, изображения и ниво на публично разкриване и ги потвърждавам за тази сделка.",
         acknowledge: "Потвърждение на точния преглед",
         recorded: "Потвърждението е валидно за този точен преглед.",
         unavailable:
           "Прегледът още не е достъпен или източникът се е променил. Свържете се с брокера.",
-        back: "Отваряне на случая",
+        back: "Отворете сделката",
         ownerLink: "Преглед на обявата за потвърждение",
+        technical: "Технически подробности",
+        authorised: "Какво сте възложили на агенцията по тази сделка",
       }
     : locale === "ru"
       ? {
@@ -32,7 +34,7 @@ export const ownerPreviewCopy = (locale: string) =>
           binding: "Связать инструкции продавца",
           instruction: "Проверенные инструкции",
           bindCheck:
-            "Я проверил точный объект, сторону, условия и действующие полномочия для этого дела.",
+            "Я проверил точный объект, человека или компанию, условия и действующие полномочия для этой сделки.",
           bind: "Связать инструкции",
           source: "Текущий утверждённый болгарский источник",
           facts: "Характеристики и условия",
@@ -43,19 +45,21 @@ export const ownerPreviewCopy = (locale: string) =>
           consequences:
             "Вы подтверждаете именно этот предпросмотр для агентства. Это не публикует объявление, не подписывает договор и не даёт юридического заключения. Изменения требуют нового подтверждения.",
           check:
-            "Я проверил показанные точные условия, факты, болгарский текст, изображения и публичное раскрытие и подтверждаю их для этого дела.",
+            "Я проверил показанные точные условия, факты, болгарский текст, изображения и публичное раскрытие и подтверждаю их для этой сделки.",
           acknowledge: "Подтвердить точный предпросмотр",
           recorded: "Подтверждение действительно для этого точного предпросмотра.",
           unavailable: "Предпросмотр ещё недоступен или источник изменился. Свяжитесь с брокером.",
-          back: "Открыть дело",
+          back: "Откройте сделку",
           ownerLink: "Проверить объявление для подтверждения",
+          technical: "Технические подробности",
+          authorised: "Что Вы поручили агентству по этой сделке",
         }
       : {
           title: "Owner listing preview",
           binding: "Bind seller instructions",
           instruction: "Reviewed seller instruction",
           bindCheck:
-            "I reviewed the exact property, party, terms and current authority for this case.",
+            "I reviewed the exact property, the person or company, terms and current authority for this deal.",
           bind: "Bind reviewed instruction",
           source: "Current approved Bulgarian source",
           facts: "Facts and terms",
@@ -66,13 +70,15 @@ export const ownerPreviewCopy = (locale: string) =>
           consequences:
             "You acknowledge this exact preview for the agency. This does not publish a listing, sign a contract or certify title. Changes to the content require a new acknowledgment.",
           check:
-            "I reviewed the exact displayed terms, facts, Bulgarian copy, images and public disclosure and acknowledge them for this case.",
+            "I reviewed the exact displayed terms, facts, Bulgarian copy, images and public disclosure and acknowledge them for this deal.",
           acknowledge: "Acknowledge exact listing preview",
           recorded: "Your acknowledgment is current for this exact preview.",
           unavailable:
             "The preview is not available yet or its source changed. Contact your broker.",
-          back: "Open case",
+          back: "Open the deal",
           ownerLink: "Review owner listing preview",
+          technical: "Technical details",
+          authorised: "What you've authorised the agency to do for this deal",
         };
 
 const previewLabels: Record<string, [string, string, string]> = {

@@ -24,7 +24,8 @@ const copy = (locale: string) =>
         empty: "Няма документи, споделени изрично с този профил.",
         download: "Изтегляне на текущия файл",
         version: "Версия",
-        purpose: "Предназначение",
+        technical: "Технически подробности",
+        purpose: "За какво е документът",
         review: "Преглед за посочената цел",
         professional: "Професионална проверка",
         not_requested: "Не е поискана",
@@ -37,7 +38,7 @@ const copy = (locale: string) =>
         unsafe: "Файлът не е безопасен и не може да бъде изтеглен.",
         needs_replacement: "Необходим е заместващ файл. Свържете се с брокера.",
         unavailable: "Файлът още не е достъпен за изтегляне.",
-        back: "Отваряне на случая",
+        back: "Отворете сделката",
         note: "Показана е текущата версия. Прегледът за определена цел е отделен от професионалното заключение.",
       }
     : locale === "ru"
@@ -46,7 +47,8 @@ const copy = (locale: string) =>
           empty: "Нет документов, явно открытых этому профилю.",
           download: "Скачать текущий файл",
           version: "Версия",
-          purpose: "Назначение",
+          technical: "Технические подробности",
+          purpose: "Для чего этот документ",
           review: "Проверка для указанной цели",
           professional: "Профессиональная проверка",
           not_requested: "Не запрошена",
@@ -59,7 +61,7 @@ const copy = (locale: string) =>
           unsafe: "Файл небезопасен и недоступен для скачивания.",
           needs_replacement: "Нужен заменяющий файл. Свяжитесь с брокером.",
           unavailable: "Файл пока недоступен для скачивания.",
-          back: "Открыть дело",
+          back: "Откройте сделку",
           note: "Показана текущая версия. Проверка для конкретной цели отличается от профессионального заключения.",
         }
       : {
@@ -67,7 +69,8 @@ const copy = (locale: string) =>
           empty: "No documents have been explicitly shared with this account.",
           download: "Download current file",
           version: "Version",
-          purpose: "Purpose",
+          technical: "Technical details",
+          purpose: "What the document is for",
           review: "Review for the stated purpose",
           professional: "Professional review",
           not_requested: "Not requested",
@@ -80,7 +83,7 @@ const copy = (locale: string) =>
           unsafe: "The file is unsafe and cannot be downloaded.",
           needs_replacement: "A replacement file is needed. Contact your broker.",
           unavailable: "This file is not available for download yet.",
-          back: "Open case",
+          back: "Open the deal",
           note: "This is the current version. Review for a stated purpose is separate from a professional conclusion.",
         };
 
@@ -100,9 +103,12 @@ function FileDetail({ locale, document }: { locale: string; document: ClientDocu
     file = document.version;
   return (
     <WorkflowSection title={`${document.reference} · ${file.fileName}`}>
-      <p>
-        {c.version}: {file.number}
-      </p>
+      <details>
+        <summary className="cursor-pointer font-semibold">{c.technical}</summary>
+        <p>
+          {c.version}: {file.number}
+        </p>
+      </details>
       <p>
         {c.purpose}: {fileLabel(labels, document.purpose)}
       </p>

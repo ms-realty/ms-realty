@@ -180,14 +180,14 @@ for (const javaScriptEnabled of [true, false])
       await expect(rows(page)).toHaveCount(5);
       await expect(rows(page).nth(0)).toContainText(`${f.name("Alex")} · ${f.listing}`);
       await expect(rows(page).nth(0)).toContainText(
-        "Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Agency coverage",
+        "Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Work without an owner",
       );
       await expect(rows(page).nth(1)).toContainText(`${f.name("Nikol")} · Question`);
       await expect(rows(page).nth(1)).toContainText(
         `Assigned · Received 2 hours ago · Preferred language: English · Accountable owner: ${f.broker.name}`,
       );
       await expect(rows(page).nth(3)).toContainText(
-        `${f.name("Petar")} · QuestionSuspected spam · Received 1 hour ago · Accountable owner: Agency coverage`,
+        `${f.name("Petar")} · QuestionSuspected spam · Received 1 hour ago · Accountable owner: Work without an owner`,
       );
       await expect(rows(page).nth(4)).toContainText(`Accountable owner: ${f.colleague.name}`);
       await expect(rows(page).nth(1).getByRole("link")).toHaveAttribute(
