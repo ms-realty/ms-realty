@@ -1,5 +1,10 @@
+import workStatesBg from "../../../messages/staff/bg/workspaceStates.json" with { type: "json" };
+import workStatesEn from "../../../messages/staff/en/workspaceStates.json" with { type: "json" };
+import workStatesRu from "../../../messages/staff/ru/workspaceStates.json" with { type: "json" };
+
 // Staff-only copy. BG and RU are drafts for human language review; never public/indexable.
 const en = {
+  ...workStatesEn.work,
   today: "Today",
   inbox: "Inquiries",
   tasks: "Tasks",
@@ -26,7 +31,7 @@ const en = {
   noDate: "No date recorded",
   noOwner: "No named owner",
   details: "Details",
-  reference: "Inquiry reference",
+
   submitted: "Original inquiry",
   preferredLocale: "Preferred language",
   contact: "Contact",
@@ -35,15 +40,10 @@ const en = {
   contactScope:
     "Only inquiries you can access are shown here. Verified contact details do not establish authority to act.",
   methods: "Contact methods",
-  noMethods: "No contact methods have been recorded.",
-  contactUnverified: "Channel not verified",
-  contactPending: "Channel verification pending",
-  contactVerified: "Channel verified",
-  contactFailed: "Channel verification failed",
+
   linkedInquiries: "Related inquiries",
   activity: "Recent activity",
-  noActivity: "No activity has been recorded for this inquiry yet.",
-  noInquiryTasks: "No tasks have been recorded for this inquiry yet.",
+
   actor: "Recorded by",
   revision: "Last changed",
   accept: "Accept and assign to me",
@@ -212,6 +212,7 @@ type Copy = {
     : { [S in keyof (typeof en)[K]]: string };
 };
 const bg: Copy = {
+  ...workStatesBg.work,
   today: "Днес",
   inbox: "Запитвания",
   tasks: "Задачи",
@@ -238,7 +239,7 @@ const bg: Copy = {
   noDate: "Няма записана дата",
   noOwner: "Няма определен отговорник",
   details: "Подробности",
-  reference: "Номер на запитването",
+
   submitted: "Оригинално запитване",
   preferredLocale: "Предпочитан език",
   contact: "Контакт",
@@ -247,15 +248,10 @@ const bg: Copy = {
   contactScope:
     "Показани са само достъпните за вас запитвания. Потвърденият контакт не означава представителна власт.",
   methods: "Начини за контакт",
-  noMethods: "Няма записани начини за контакт.",
-  contactUnverified: "Каналът не е потвърден",
-  contactPending: "Очаква се потвърждение на канала",
-  contactVerified: "Каналът е потвърден",
-  contactFailed: "Неуспешно потвърждение на канала",
+
   linkedInquiries: "Свързани запитвания",
   activity: "Последни действия",
-  noActivity: "Все още няма записани действия по това запитване.",
-  noInquiryTasks: "Все още няма записани задачи по това запитване.",
+
   actor: "Записано от",
   revision: "Последна промяна",
   accept: "Приемам отговорността",
@@ -415,6 +411,7 @@ const bg: Copy = {
   },
 };
 const ru: Copy = {
+  ...workStatesRu.work,
   today: "Сегодня",
   inbox: "Запросы",
   tasks: "Задачи",
@@ -441,7 +438,7 @@ const ru: Copy = {
   noDate: "Дата не указана",
   noOwner: "Ответственный не назначен",
   details: "Подробности",
-  reference: "Номер обращения",
+
   submitted: "Исходное обращение",
   preferredLocale: "Предпочитаемый язык",
   contact: "Контакт",
@@ -450,15 +447,10 @@ const ru: Copy = {
   contactScope:
     "Показаны только доступные вам обращения. Подтверждение контакта не даёт полномочий действовать от имени клиента.",
   methods: "Способы связи",
-  noMethods: "Способы связи не записаны.",
-  contactUnverified: "Канал не подтверждён",
-  contactPending: "Ожидает подтверждения канала",
-  contactVerified: "Канал подтверждён",
-  contactFailed: "Подтверждение канала не удалось",
+
   linkedInquiries: "Связанные обращения",
   activity: "Последние действия",
-  noActivity: "По этому обращению пока нет записанных действий.",
-  noInquiryTasks: "По этому обращению пока нет записанных задач.",
+
   actor: "Записал",
   revision: "Последнее изменение",
   accept: "Принять и назначить себе",

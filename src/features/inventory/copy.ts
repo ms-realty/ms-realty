@@ -1,3 +1,4 @@
+import { isPublicLocale, localeEndonyms } from "@/i18n/config";
 import type { FormCopy } from "@/ui/form/contract";
 
 const en = {
@@ -939,15 +940,6 @@ export const inventoryCopy = (locale: string): Copy =>
   locale === "bg" ? bg : locale === "ru" ? ru : en;
 
 const options = {
-  BG: ["Bulgaria", "България", "Болгария"],
-  GR: ["Greece", "Гърция", "Греция"],
-  bg: ["Български", "Български", "Български"],
-  en: ["English", "English", "English"],
-  ru: ["Русский", "Русский", "Русский"],
-  de: ["Deutsch", "Deutsch", "Deutsch"],
-  nl: ["Nederlands", "Nederlands", "Nederlands"],
-  el: ["Ελληνικά", "Ελληνικά", "Ελληνικά"],
-  he: ["עברית", "עברית", "עברית"],
   known: ["Known", "Известно", "Известно"],
   unknown: ["Unknown", "Неизвестно", "Неизвестно"],
   not_supplied: ["Not supplied", "Непредоставено", "Не предоставлено"],
@@ -1021,6 +1013,13 @@ const options = {
   legacy_import: ["Legacy import", "Стар импорт", "Прежний импорт"],
 } satisfies Record<string, [string, string, string]>;
 export function optionLabel(value: string, locale: string) {
+  if (isPublicLocale(value)) return localeEndonyms[value];
+  if (value === "BG" || value === "GR")
+    return (
+      new Intl.DisplayNames([isPublicLocale(locale) ? locale : "en"], {
+        type: "region",
+      }).of(value) ?? value
+    );
   const labels = options[value as keyof typeof options];
   return (
     labels?.[locale === "bg" ? 1 : locale === "ru" ? 2 : 0] ??

@@ -1,11 +1,12 @@
+import workflowBg from "../../../messages/bg/workflow.json" with { type: "json" };
+import workflowEn from "../../../messages/en/workflow.json" with { type: "json" };
+import workflowRu from "../../../messages/ru/workflow.json" with { type: "json" };
+
 // Private workspace copy; translated drafts require human review before catalog adoption.
 const en = {
+  ...workflowEn.cases,
   cases: "Deals",
-  inquiries: "Inquiries",
-  sections: "In this deal",
-  relatedTools: "Documents, participants and deal tools",
-  reviewSelection: "Review property selection and feedback",
-  chooseAction: "Choose an action",
+
   proposals: "Proposals",
   documents: "Documents",
   prepareProposal: "Prepare a proposal",
@@ -14,10 +15,9 @@ const en = {
   empty: "No deals are available to this account.",
   emptyClient:
     "You don't have access to a deal yet. When a broker invites you, it will appear here.",
-  bounded: "Showing up to 50 recently updated deals you can access.",
+
   create: "Create a deal",
-  createLead:
-    "Link this inquiry and the person or company named in it explicitly. Seller authority remains self-declared. Requirements are recorded as the broker's interpretation until reviewed.",
+
   title: "Deal title (visible to participants)",
   kind: "What the client wants",
   buyer: "Buying",
@@ -74,8 +74,7 @@ const en = {
   note: "Save internal note",
   reviewPost:
     "I reviewed the audience and exact message. Make this available in the client workspace.",
-  messageNote:
-    "In-app messages are available in this deal. Email delivery and read receipts are not implied.",
+
   noMessages: "No messages are available to this account in this deal.",
   shared: "Deal participants",
   appointments: "Appointments",
@@ -84,7 +83,7 @@ const en = {
   preferredWindow: "Preferred window (not a confirmed booking)",
   participant: "Participating client",
   noAppointments: "No appointments are available in this scope.",
-  calendarBounded: "Showing up to 100 recently updated appointments you can access.",
+
   requested: "Requested",
   proposed: "Proposed",
   confirmed: "Confirmed",
@@ -116,9 +115,7 @@ const en = {
   confirmedTime: "Confirmed arrangement",
   previousTime: "Previous arrangement",
   proposedTime: "Proposed arrangement",
-  requestNote: "Your preferred window is a request. Wait for an explicit confirmation.",
-  policyNote:
-    "Confirmation requires current listing availability, active participants, approved Sofia service hours, manual access/external-busy checks and free resources. No external calendar sync is claimed.",
+
   status: "What happened with this action",
   lastChanged: "Last changed",
   revision: "Revision",
@@ -145,24 +142,19 @@ const en = {
 };
 type Copy = { [K in keyof typeof en]: string };
 const bg: Copy = {
-  createLead:
-    "Свържете изрично това запитване с посоченото в него лице или дружество. Правомощията на продавача остават заявени от него. Изискванията се записват като интерпретация на брокера до прегледа им.",
+  ...workflowBg.cases,
+
   offsetHint:
     "Изберете дата и час по софийско време. Ако часът се повтаря, изберете първото или второто настъпване.",
   calendarNote:
     "Календарният файл отразява записаната уговорка. Той не изпраща покана и не потвърждава присъствие.",
-  policyNote:
-    "За потвърждение са нужни актуална наличност на имота, активни участници, одобрено работно време в София, ръчни проверки за достъп и заетост и свободни ресурси. Няма автоматична синхронизация с външен календар.",
+
   statusAbsent:
     "Няма намерен потвърден резултат. Проверете текущия запис, преди да опитате отново.",
   statusFailed: "Действието не е приложено. Прегледайте текущия запис, преди да опитате отново.",
   statusSaved: "Действието е записано.",
   cases: "Сделки",
-  inquiries: "Запитвания",
-  sections: "В тази сделка",
-  relatedTools: "Документи, участници и инструменти по сделката",
-  reviewSelection: "Преглед на избора на имот и обратната връзка",
-  chooseAction: "Изберете действие",
+
   proposals: "Предложения",
   documents: "Документи",
   prepareProposal: "Подготовка на предложение",
@@ -170,7 +162,7 @@ const bg: Copy = {
   nextSteps: "Следващи стъпки",
   empty: "Няма достъпни сделки за този профил.",
   emptyClient: "Още нямате достъп до сделка. Когато брокерът Ви покани, ще я видите тук.",
-  bounded: "Показани са до 50 достъпни наскоро обновени сделки.",
+
   create: "Създаване на сделка",
   title: "Заглавие на сделката (видимо за участниците)",
   kind: "Какво иска клиентът",
@@ -227,8 +219,7 @@ const bg: Copy = {
   post: "Публикуване в сделката",
   note: "Запазване на вътрешна бележка",
   reviewPost: "Прегледах аудиторията и точния текст. Да стане видимо в клиентския профил.",
-  messageNote:
-    "Съобщенията са достъпни в тази сделка. Това не потвърждава доставка по имейл или прочитане.",
+
   noMessages: "Няма достъпни съобщения по тази сделка.",
   shared: "Участници в сделката",
   appointments: "Срещи",
@@ -237,7 +228,7 @@ const bg: Copy = {
   preferredWindow: "Предпочитан период (не е потвърдена среща)",
   participant: "Участващ клиент",
   noAppointments: "Няма достъпни срещи.",
-  calendarBounded: "Показани са до 100 достъпни наскоро обновени срещи.",
+
   requested: "Заявена",
   proposed: "Предложена",
   confirmed: "Потвърдена",
@@ -265,7 +256,7 @@ const bg: Copy = {
   confirmedTime: "Потвърден час",
   previousTime: "Предишна уговорка",
   proposedTime: "Предложен час",
-  requestNote: "Предпочитаният период е заявка. Изчакайте изрично потвърждение.",
+
   statusUnknown:
     "Все още не знаем дали промяната ви е запазена. Възможно е вече да е записана. Не я изпращайте отново.",
   checkAgain: "Проверете това действие отново",
@@ -287,25 +278,19 @@ const bg: Copy = {
     "Поискайте промяна на изискванията в разговора. Това не променя автоматично предишните уговорки.",
 };
 const ru: Copy = {
-  bounded: "Показано до 50 недавно обновлённых сделок, доступных вам.",
-  createLead:
-    "Явно свяжите этот запрос с указанным в нём лицом или компанией. Полномочия продавца остаются заявленными им. Требования записываются как интерпретация брокера до их проверки.",
+  ...workflowRu.cases,
+
   offsetHint:
     "Выберите дату и время по Софии. Если час повторяется, выберите первое или второе наступление.",
   calendarNote:
     "Календарный файл отражает записанную договорённость. Он не отправляет приглашение и не подтверждает присутствие.",
-  policyNote:
-    "Для подтверждения нужны актуальная доступность объекта, активные участники, утверждённые рабочие часы по Софии, ручные проверки доступа и занятости и свободные ресурсы. Автоматическая синхронизация с внешним календарём не предусмотрена.",
+
   statusAbsent:
     "Подтверждённый результат не найден. Проверьте текущую запись перед повторной попыткой.",
   statusFailed: "Действие не применено. Проверьте текущую запись перед повторной попыткой.",
   statusSaved: "Действие записано.",
   cases: "Сделки",
-  inquiries: "Запросы",
-  sections: "В этой сделке",
-  relatedTools: "Документы, участники и инструменты сделки",
-  reviewSelection: "Проверить выбор объекта и отзыв",
-  chooseAction: "Выберите действие",
+
   proposals: "Предложения",
   documents: "Документы",
   prepareProposal: "Подготовить предложение",
@@ -370,8 +355,7 @@ const ru: Copy = {
   note: "Сохранить внутреннюю заметку",
   reviewPost:
     "Я проверил аудиторию и точный текст. Сделать сообщение доступным в кабинете клиента.",
-  messageNote:
-    "Сообщения доступны в этой сделке. Это не подтверждает доставку по электронной почте или прочтение.",
+
   noMessages: "Нет доступных сообщений по этой сделке.",
   shared: "Участники сделки",
   appointments: "Встречи",
@@ -380,7 +364,7 @@ const ru: Copy = {
   preferredWindow: "Предпочтительное время (не подтверждённая встреча)",
   participant: "Участвующий клиент",
   noAppointments: "Нет доступных встреч.",
-  calendarBounded: "Показано до 100 доступных недавно обновлённых встреч.",
+
   requested: "Запрошена",
   proposed: "Предложена",
   confirmed: "Подтверждена",
@@ -408,7 +392,7 @@ const ru: Copy = {
   confirmedTime: "Подтверждённое время",
   previousTime: "Прежняя договорённость",
   proposedTime: "Предложенное время",
-  requestNote: "Предпочтительное время — запрос. Дождитесь явного подтверждения.",
+
   statusUnknown:
     "Мы пока не знаем, сохранено ли изменение. Возможно, оно уже записано. Не отправляйте его повторно.",
   checkAgain: "Проверить это действие ещё раз",

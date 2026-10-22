@@ -1,0 +1,42 @@
+{
+  "cases": {
+    "inquiries": "Inquiries",
+    "sections": "In this deal",
+    "relatedTools": "Documents, participants and deal tools",
+    "reviewSelection": "Review property selection and feedback",
+    "chooseAction": "Choose an action",
+    "createLead": "Link this inquiry and the person or company named in it explicitly. Seller authority remains self-declared. Requirements are recorded as the broker's interpretation until reviewed.",
+    "messageNote": "In-app messages are available in this deal. Email delivery and read receipts are not implied.",
+    "calendarBounded": "Showing up to 100 recently updated appointments you can access.",
+    "policyNote": "Confirmation requires current listing availability, active participants, approved Sofia service hours, manual access/external-busy checks and free resources. No external calendar sync is claimed.",
+    "requestNote": "Your preferred window is a request. Wait for an explicit confirmation.",
+    "bounded": "Showing up to 50 recently updated deals you can access."
+  },
+  "lifecycle": {
+    "waiting": "Waiting for",
+    "reviewAt": "Review date",
+    "next": "Next action when reopening",
+    "due": "Next action due",
+    "openTasks": "Open tasks",
+    "appointments": "Active appointments",
+    "proposals": "Open proposals",
+    "documents": "Restricted document records",
+    "approvals": "Pending proposal approvals",
+    "messages": "Recent messages (up to 20)",
+    "pending": "A handover is awaiting the named receiver's acceptance."
+  },
+  "proposals": {
+    "reviewCheck": "I reviewed these exact people and companies, terms, source and deadline. This is a coordination record, not legal approval.",
+    "submitCheck": "I reviewed the exact revision and its audience. Show it to these people in their client workspace.",
+    "responseNote": "Your response applies to this revision only. Everyone whose agreement is required must agree, and the required checks for this deal must be current, before an overall agreement is recorded.",
+    "boundary": "This proposal coordinates the next step. It is not a legal signature, payment instruction or completed transaction. Your broker coordinates the required professional review.",
+    "notCurrent": "A newer draft is under review. This earlier revision remains visible as history and cannot receive a new response.",
+    "expiredNotice": "The response deadline has passed. This revision cannot be accepted or countered.",
+    "changed": "The approved source or proposal terms changed. A new review is required.",
+    "pending": "Your response is recorded. Overall agreement still waits for the other people whose agreement is required and for the required checks for this deal.",
+    "agreementBlocked": "Your agreement was not recorded. Ask your broker to complete the required checks for this deal before trying again.",
+    "noResponses": "No responses have been recorded for this revision.",
+    "reverifyNotice": "Confirm your identity again before recording this response. Your draft is retained.",
+    "bounded": "Showing up to 50 proposals you can access."
+  }
+}

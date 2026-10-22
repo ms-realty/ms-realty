@@ -1,0 +1,42 @@
+{
+  "cases": {
+    "inquiries": "Anfragen",
+    "sections": "In diesem Vorgang",
+    "relatedTools": "Dokumente, Beteiligte und Werkzeuge zum Vorgang",
+    "reviewSelection": "Immobilienauswahl und Rückmeldung prüfen",
+    "chooseAction": "Eine Aktion wählen",
+    "createLead": "Verknüpfen Sie diese Anfrage ausdrücklich mit der darin genannten Person oder Firma. Die Befugnis des Verkäufers bleibt eine Selbstauskunft. Anforderungen werden bis zur Prüfung als Interpretation des Maklers erfasst.",
+    "messageNote": "Nachrichten sind innerhalb dieses Vorgangs verfügbar. Daraus folgen keine E-Mail-Zustellung oder Lesebestätigungen.",
+    "calendarBounded": "Es werden bis zu 100 kürzlich aktualisierte Termine angezeigt, auf die Sie Zugriff haben.",
+    "policyNote": "Eine Bestätigung erfordert aktuelle Immobilienverfügbarkeit, aktive Beteiligte, freigegebene Servicezeiten in Sofia, manuelle Prüfungen von Zutritt und externer Belegung sowie freie Ressourcen. Eine Synchronisierung mit externen Kalendern wird nicht zugesichert.",
+    "requestNote": "Ihr bevorzugtes Zeitfenster ist eine Anfrage. Warten Sie auf eine ausdrückliche Bestätigung.",
+    "bounded": "Es werden bis zu 50 kürzlich aktualisierte Vorgänge angezeigt, auf die Sie Zugriff haben."
+  },
+  "lifecycle": {
+    "waiting": "Wartet auf",
+    "reviewAt": "Prüfdatum",
+    "next": "Nächste Aktion bei Wiedereröffnung",
+    "due": "Nächste Aktion fällig",
+    "openTasks": "Offene Aufgaben",
+    "appointments": "Aktive Termine",
+    "proposals": "Offene Vorschläge",
+    "documents": "Zugriffsbeschränkte Dokumenteinträge",
+    "approvals": "Ausstehende Vorschlagsfreigaben",
+    "messages": "Letzte Nachrichten (bis zu 20)",
+    "pending": "Eine Übergabe wartet auf die Annahme durch die benannte empfangende Person."
+  },
+  "proposals": {
+    "reviewCheck": "Ich habe genau diese Personen und Firmen, Bedingungen, Quelle und Frist geprüft. Dies ist eine Koordinationsaufzeichnung, keine rechtliche Freigabe.",
+    "submitCheck": "Ich habe die genaue Version und ihren Empfängerkreis geprüft. Zeigen Sie sie diesen Personen in ihrem Kundenbereich.",
+    "responseNote": "Ihre Antwort gilt nur für diese Version. Bevor eine gemeinsame Einigung erfasst wird, müssen alle erforderlichen Personen zustimmen und die notwendigen Prüfungen dieses Vorgangs aktuell sein.",
+    "boundary": "Dieser Vorschlag koordiniert den nächsten Schritt. Er ist keine rechtsverbindliche Unterschrift, Zahlungsanweisung oder abgeschlossene Transaktion. Ihr Makler koordiniert die erforderliche fachliche Prüfung.",
+    "notCurrent": "Ein neuerer Entwurf wird geprüft. Diese frühere Version bleibt als Verlauf sichtbar und kann keine neue Antwort erhalten.",
+    "expiredNotice": "Die Antwortfrist ist abgelaufen. Diese Version kann weder angenommen noch mit einem Gegenvorschlag beantwortet werden.",
+    "changed": "Die freigegebene Quelle oder die Bedingungen des Vorschlags haben sich geändert. Eine neue Prüfung ist erforderlich.",
+    "pending": "Ihre Antwort ist erfasst. Eine gemeinsame Einigung wartet weiterhin auf die übrigen erforderlichen Zustimmungen und die notwendigen Prüfungen dieses Vorgangs.",
+    "agreementBlocked": "Ihre Zustimmung wurde nicht erfasst. Bitten Sie Ihren Makler, die notwendigen Prüfungen dieses Vorgangs vor einem erneuten Versuch abzuschließen.",
+    "noResponses": "Für diese Version wurden keine Antworten erfasst.",
+    "reverifyNotice": "Bestätigen Sie Ihre Identität erneut, bevor Sie diese Antwort erfassen. Ihr Entwurf bleibt erhalten.",
+    "bounded": "Es werden bis zu 50 Vorschläge angezeigt, auf die Sie Zugriff haben."
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "cases": {
+    "inquiries": "Aanvragen",
+    "sections": "In dit dossier",
+    "relatedTools": "Documenten, deelnemers en dossierhulpmiddelen",
+    "reviewSelection": "Objectselectie en feedback beoordelen",
+    "chooseAction": "Kies een handeling",
+    "createLead": "Koppel deze aanvraag expliciet aan de daarin genoemde persoon of onderneming. De bevoegdheid van de verkoper blijft zelf verklaard. Eisen worden tot de beoordeling vastgelegd als interpretatie van de makelaar.",
+    "messageNote": "Berichten binnen de app zijn beschikbaar in dit dossier. Dit houdt geen e-mailbezorging of leesbevestigingen in.",
+    "calendarBounded": "Er worden maximaal 100 onlangs bijgewerkte afspraken getoond waartoe u toegang hebt.",
+    "policyNote": "Bevestiging vereist actuele objectbeschikbaarheid, actieve deelnemers, goedgekeurde servicetijden in Sofia, handmatige controles van toegang en externe bezetting en vrije middelen. Er wordt geen synchronisatie met externe agenda’s toegezegd.",
+    "requestNote": "Uw gewenste tijdvak is een verzoek. Wacht op uitdrukkelijke bevestiging.",
+    "bounded": "Er worden maximaal 50 onlangs bijgewerkte dossiers getoond waartoe u toegang hebt."
+  },
+  "lifecycle": {
+    "waiting": "Wacht op",
+    "reviewAt": "Beoordelingsdatum",
+    "next": "Volgende handeling bij heropening",
+    "due": "Termijn voor volgende handeling",
+    "openTasks": "Openstaande taken",
+    "appointments": "Actieve afspraken",
+    "proposals": "Openstaande voorstellen",
+    "documents": "Afgeschermde documentregistraties",
+    "approvals": "Nog te geven voorstelgoedkeuringen",
+    "messages": "Recente berichten (maximaal 20)",
+    "pending": "Een overdracht wacht op aanvaarding door de genoemde ontvanger."
+  },
+  "proposals": {
+    "reviewCheck": "Ik heb precies deze personen en ondernemingen, voorwaarden, bron en termijn beoordeeld. Dit is een coördinatieregistratie, geen juridische goedkeuring.",
+    "submitCheck": "Ik heb de exacte versie en de doelgroep beoordeeld. Toon deze aan die personen in hun klantomgeving.",
+    "responseNote": "Uw antwoord geldt alleen voor deze versie. Iedereen van wie instemming nodig is, moet akkoord gaan en de vereiste controles voor dit dossier moeten actueel zijn voordat algemene overeenstemming wordt vastgelegd.",
+    "boundary": "Dit voorstel coördineert de volgende stap. Het is geen juridische ondertekening, betalingsopdracht of afgeronde transactie. Uw makelaar coördineert de vereiste professionele beoordeling.",
+    "notCurrent": "Een nieuwer concept wordt beoordeeld. Deze eerdere versie blijft zichtbaar als geschiedenis en kan geen nieuw antwoord ontvangen.",
+    "expiredNotice": "De antwoordtermijn is verstreken. Deze versie kan niet worden aanvaard of met een tegenvoorstel worden beantwoord.",
+    "changed": "De goedgekeurde bron of voorstelvoorwaarden zijn gewijzigd. Een nieuwe beoordeling is nodig.",
+    "pending": "Uw antwoord is vastgelegd. Algemene overeenstemming wacht nog op de overige vereiste instemmingen en de noodzakelijke controles voor dit dossier.",
+    "agreementBlocked": "Uw instemming is niet vastgelegd. Vraag uw makelaar eerst de vereiste controles voor dit dossier af te ronden voordat u het opnieuw probeert.",
+    "noResponses": "Voor deze versie zijn geen antwoorden vastgelegd.",
+    "reverifyNotice": "Bevestig uw identiteit opnieuw voordat u dit antwoord vastlegt. Uw concept blijft bewaard.",
+    "bounded": "Er worden maximaal 50 voorstellen getoond waartoe u toegang hebt."
+  }
+}

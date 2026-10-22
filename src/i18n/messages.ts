@@ -12,8 +12,10 @@ import type forms from "../../messages/bg/forms.json";
 import type intent from "../../messages/bg/intent.json";
 import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
+import type privacy from "../../messages/bg/privacy.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
+import type workflow from "../../messages/bg/workflow.json";
 import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
 import type operations from "../../messages/staff/bg/operations.json";
@@ -33,8 +35,10 @@ export const publicNamespaces = [
   "intent",
   "map",
   "nav",
+  "privacy",
   "server",
   "states",
+  "workflow",
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
 export const staffNamespaces = [
@@ -57,8 +61,10 @@ export interface PublicMessages {
   intent: typeof intent;
   map: typeof map;
   nav: typeof nav;
+  privacy: typeof privacy;
   server: typeof server;
   states: typeof states;
+  workflow: typeof workflow;
 }
 export interface StaffMessages {
   auditHistory: typeof auditHistory;

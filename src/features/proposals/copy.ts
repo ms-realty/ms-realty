@@ -1,5 +1,10 @@
+import workflowBg from "../../../messages/bg/workflow.json" with { type: "json" };
+import workflowEn from "../../../messages/en/workflow.json" with { type: "json" };
+import workflowRu from "../../../messages/ru/workflow.json" with { type: "json" };
+
 // Private workflow translations are drafts, not human language acceptance.
 const en = {
+  ...workflowEn.proposals,
   title: "Proposals",
   empty: "No proposals are available in your current scope.",
   create: "Prepare a proposal",
@@ -27,35 +32,18 @@ const en = {
   submit: "Show to these people",
   withdraw: "Withdraw this revision",
   expire: "Record expiry",
-  reviewCheck:
-    "I reviewed these exact people and companies, terms, source and deadline. This is a coordination record, not legal approval.",
-  submitCheck:
-    "I reviewed the exact revision and its audience. Show it to these people in their client workspace.",
+
   response: "Your response",
   agree: "Record my agreement for the next step",
   decline: "Decline this revision",
   record: "Record my response",
-  responseNote:
-    "Your response applies to this revision only. Everyone whose agreement is required must agree, and the required checks for this deal must be current, before an overall agreement is recorded.",
-  boundary:
-    "This proposal coordinates the next step. It is not a legal signature, payment instruction or completed transaction. Your broker coordinates the required professional review.",
-  notCurrent:
-    "A newer draft is under review. This earlier revision remains visible as history and cannot receive a new response.",
-  expiredNotice: "The response deadline has passed. This revision cannot be accepted or countered.",
-  changed: "The approved source or proposal terms changed. A new review is required.",
-  pending:
-    "Your response is recorded. Overall agreement still waits for the other people whose agreement is required and for the required checks for this deal.",
-  agreementBlocked:
-    "Your agreement was not recorded. Ask your broker to complete the required checks for this deal before trying again.",
-  noResponses: "No responses have been recorded for this revision.",
+
   history: "Earlier revisions",
   responses: "Recorded responses",
   revision: "Revision",
   source: "Source listing revision",
   reverify: "Confirm your identity",
-  reverifyNotice:
-    "Confirm your identity again before recording this response. Your draft is retained.",
-  bounded: "Showing up to 50 proposals you can access.",
+
   draft: "Draft · not shared",
   reviewed: "Reviewed · not shared",
   submitted: "Submitted",
@@ -68,27 +56,8 @@ const en = {
 };
 type Copy = { [K in keyof typeof en]: string };
 const bg: Copy = {
-  reviewCheck:
-    "Прегледах точно тези хора и фирми, условия, източник и срок. Това е запис за координация, а не правно одобрение.",
-  submitCheck:
-    "Прегледах точната версия и нейната аудитория. Покажете я на тези хора в клиентските им профили.",
-  responseNote:
-    "Отговорът ви се отнася само за тази версия. За да се запише общо съгласие, е нужно съгласието на всички необходими участници и актуални задължителни проверки по сделката.",
-  boundary:
-    "Това предложение координира следващата стъпка. То не е правен подпис, нареждане за плащане или завършена сделка. Брокерът ви координира необходимия професионален преглед.",
-  notCurrent:
-    "По-нова чернова е в процес на преглед. Тази предишна версия остава видима в историята и не приема нови отговори.",
-  expiredNotice:
-    "Срокът за отговор е изтекъл. Тази версия не може да бъде приета и по нея не може да се прави насрещно предложение.",
-  changed: "Одобреният източник или условията на предложението са променени. Нужен е нов преглед.",
-  pending:
-    "Отговорът ви е записан. Общото съгласие все още изчаква останалите необходими участници и задължителните проверки по сделката.",
-  agreementBlocked:
-    "Съгласието ви не е записано. Поискайте брокерът ви да завърши задължителните проверки по сделката, преди да опитате отново.",
-  noResponses: "Все още няма записани отговори за тази версия.",
-  reverifyNotice:
-    "Потвърдете отново самоличността си, преди да запишете този отговор. Черновата ви е запазена.",
-  bounded: "Показани са до 50 предложения, до които имате достъп.",
+  ...workflowBg.proposals,
+
   title: "Предложения",
   empty: "Няма достъпни предложения за текущия ви достъп.",
   create: "Подготовка на предложение",
@@ -136,26 +105,8 @@ const bg: Copy = {
   agreed_for_next_step: "Съгласие за следваща стъпка",
 };
 const ru: Copy = {
-  reviewCheck:
-    "Я проверил именно этих людей и компании, условия, источник и срок. Это запись для координации, а не юридическое одобрение.",
-  submitCheck:
-    "Я проверил точную версию и её аудиторию. Показать её этим людям в их клиентских кабинетах.",
-  responseNote:
-    "Ваш ответ относится только к этой версии. Для записи общего согласия нужны согласие всех необходимых участников и актуальные обязательные проверки по сделке.",
-  boundary:
-    "Это предложение координирует следующий шаг. Оно не является юридической подписью, платёжным поручением или завершённой сделкой. Ваш брокер координирует необходимую профессиональную проверку.",
-  notCurrent:
-    "Более новый черновик находится на проверке. Эта предыдущая версия остаётся в истории и не принимает новые ответы.",
-  expiredNotice:
-    "Срок ответа истёк. Эту версию нельзя принять или предложить по ней встречные условия.",
-  changed: "Утверждённый источник или условия предложения изменились. Нужна новая проверка.",
-  pending:
-    "Ваш ответ записан. Для общего согласия ещё нужны остальные необходимые участники и обязательные проверки по сделке.",
-  agreementBlocked:
-    "Ваше согласие не записано. Попросите брокера завершить обязательные проверки по сделке перед повторной попыткой.",
-  noResponses: "Для этой версии ответы ещё не записаны.",
-  reverifyNotice: "Снова подтвердите личность перед записью этого ответа. Ваш черновик сохранён.",
-  bounded: "Показано до 50 предложений, доступных вам.",
+  ...workflowRu.proposals,
+
   title: "Предложения",
   empty: "Нет предложений в рамках вашего текущего доступа.",
   create: "Подготовить предложение",

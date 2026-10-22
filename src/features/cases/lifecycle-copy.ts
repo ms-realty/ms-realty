@@ -1,5 +1,10 @@
+import workflowBg from "../../../messages/bg/workflow.json" with { type: "json" };
+import workflowEn from "../../../messages/en/workflow.json" with { type: "json" };
+import workflowRu from "../../../messages/ru/workflow.json" with { type: "json" };
+
 // Draft private-workspace copy. Human language acceptance is tracked separately.
 const en = {
+  ...workflowEn.lifecycle,
   title: "Deal continuity",
   stage: "Move the deal forward",
   target: "Where the work should go next",
@@ -15,10 +20,7 @@ const en = {
   pause: "Paused",
   active: "Active",
   closed: "Closed",
-  waiting: "Waiting for",
-  reviewAt: "Review date",
-  next: "Next action when reopening",
-  due: "Next action due",
+
   recordDisposition: "Record the change",
   handover: "Broker handover",
   receiver: "Receiving broker",
@@ -32,12 +34,7 @@ const en = {
   completionNote:
     "Completion records an agency outcome. It requires a current review of the deal, agreement of the exact people involved, reviewed completion evidence, the applicable listing status, handover, record keeping and aftercare. It does not certify legal completion.",
   history: "Recorded history",
-  openTasks: "Open tasks",
-  appointments: "Active appointments",
-  proposals: "Open proposals",
-  documents: "Restricted document records",
-  approvals: "Pending proposal approvals",
-  messages: "Recent messages (up to 20)",
+
   acknowledge: "Acknowledge these requirements",
   ackCheck: "I reviewed these exact requirements and confirm them as what I am looking for.",
   requestProposal: "Request proposal preparation",
@@ -45,22 +42,13 @@ const en = {
     "Ask my broker to prepare terms for this property. This does not accept a price or bind me legally.",
   stageBlocked: "A move forward needs recorded evidence; a selection alone cannot establish it.",
   noReceivers: "No other active broker with access to this deal is available.",
-  pending: "A handover is awaiting the named receiver's acceptance.",
+
   back: "Open the deal",
 };
 type Copy = { [K in keyof typeof en]: string };
 const bg: Copy = {
-  waiting: "Изчаква",
-  reviewAt: "Време за преглед",
-  next: "Следващо действие при възобновяване",
-  due: "Срок за следващото действие",
-  openTasks: "Отворени задачи",
-  appointments: "Срещи",
-  proposals: "Предложения",
-  documents: "Документи",
-  approvals: "Одобрения",
-  messages: "Последни съобщения (до 20)",
-  pending: "Предаването очаква приемане от посочения получател.",
+  ...workflowBg.lifecycle,
+
   title: "Продължаване на сделката",
   stage: "Преместване на сделката напред",
   target: "Докъде да стигне работата",
@@ -100,17 +88,8 @@ const bg: Copy = {
   back: "Отваряне на сделката",
 };
 const ru: Copy = {
-  waiting: "Ожидает",
-  reviewAt: "Время проверки",
-  next: "Следующее действие при возобновлении",
-  due: "Срок следующего действия",
-  openTasks: "Открытые задачи",
-  appointments: "Встречи",
-  proposals: "Предложения",
-  documents: "Документы",
-  approvals: "Одобрения",
-  messages: "Последние сообщения (до 20)",
-  pending: "Передача ожидает принятия указанным получателем.",
+  ...workflowRu.lifecycle,
+
   title: "Продолжение сделки",
   stage: "Продвинуть сделку",
   target: "До какого момента довести работу",

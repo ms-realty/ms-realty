@@ -21,7 +21,9 @@
     "workspace.tasks": "Задачи",
     "auditHistory.values.yes": "Да",
     "auditHistory.technical.operation": "Операция",
-    "auditHistory.technical.manifest": "Пакет"
+    "auditHistory.technical.manifest": "Пакет",
+    "privacy.labels.phone": "Телефон",
+    "privacy.names.received": "Получено"
   },
   "de": {
     "discovery.hotel": "Hotel",
