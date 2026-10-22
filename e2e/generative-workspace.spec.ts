@@ -653,6 +653,15 @@ for (const javaScriptEnabled of [true, false]) {
         const audit = await new AxeBuilder({ page }).include("main").analyze();
         expect(audit.violations).toEqual([]);
       }
+      // Opening a workspace must not speculatively load the separate Butler operations page.
+      // The CI WebKit trace showed its queued prefetch escaping during locale navigation.
+      expect(
+        browserDiagnostics
+          .get(page)
+          ?.observedRscRequests.filter((request) =>
+            /^\/(bg|en|ru)\/operations\/assistance$/.test(new URL(request.url).pathname),
+          ),
+      ).toEqual([]);
       await capture(page, testInfo, "buyer-handoff");
       // Playwright's WebKit screenshot helper injects an unnonced temporary stylesheet.
       // Preserve strict CSP/console checks there; required viewport captures use Chromium.

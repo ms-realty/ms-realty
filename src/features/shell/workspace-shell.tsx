@@ -117,6 +117,7 @@ export async function WorkspaceShell({
           <li key={item.label}>
             <NavLink
               href={item.href}
+              prefetch={item.label === "butler" ? false : undefined}
               className={className}
               {...(item.label === "moreTools"
                 ? { excludePaths: [`/${locale}/operations/assistance`] }
@@ -191,6 +192,7 @@ export async function WorkspaceShell({
             {butler ? (
               <NavLink
                 href={butler.href}
+                prefetch={false}
                 className="inline-flex h-control items-center gap-2 rounded-control p-3 text-dense text-text-muted no-underline hover:bg-subtle aria-[current=page]:bg-selected aria-[current=page]:text-text"
               >
                 <Image
