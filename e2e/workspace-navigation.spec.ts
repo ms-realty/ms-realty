@@ -288,6 +288,8 @@ for (const javaScriptEnabled of [true, false]) {
           width >= 1024 ? 0 : 1,
         );
         await noHorizontalScroll(page, width);
+        // The streamed route heading can appear before its document metadata settles.
+        await expect(page).toHaveTitle("MS Realty workspace");
         if (javaScriptEnabled)
           expect(
             (

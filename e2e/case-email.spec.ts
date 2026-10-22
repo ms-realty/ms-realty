@@ -173,7 +173,7 @@ test("native client service-email choice enables only reviewed case mail and can
     await choice.locator("summary").click();
     await expect(
       choice.getByText(
-        "Само тест: изричен избор за имейли по случай. Това не е реална правна политика.",
+        "Само тест: изричен избор за имейли по сделка. Това не е реална правна политика.",
         { exact: true },
       ),
     ).toBeVisible();
