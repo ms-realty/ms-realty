@@ -186,6 +186,8 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     ).toBe(404);
     // P14: the requested viewing names the property it is about.
     await client.goto(hostUrl("client", `/en/appointments/${appointment.id}`));
+    await expect(client.getByRole("heading", { level: 1 })).toHaveText("Property viewing");
+    await expect(client.locator("[data-workflow-reference]")).toHaveText(appointment.reference);
     await expect(client.getByText(f.listingReference, { exact: true })).toBeVisible();
 
     await page.goto(hostUrl("staff", `/en/calendar/${appointment.id}`));
@@ -210,6 +212,9 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     await expect(page.getByTestId("appointment-state")).toHaveText("Confirmed");
     await client.reload();
     await expect(client.getByTestId("appointment-state")).toHaveText("Confirmed");
+    await expect(client.getByRole("heading", { name: "Proposed time", exact: true })).toHaveCount(
+      0,
+    );
     await expect(
       client.getByText("Private synthetic key collection instructions", { exact: true }),
     ).toHaveCount(0);

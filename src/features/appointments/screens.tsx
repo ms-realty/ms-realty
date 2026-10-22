@@ -51,7 +51,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       (staff || ["reschedule_requested", "cancelled"].includes(target)),
   );
   return (
-    <WorkflowPage {...props} title={row.reference}>
+    <WorkflowPage {...props} title={c.appointmentTitle} reference={row.reference}>
       <p data-testid="appointment-state" className="font-semibold">
         {c[row.state]}
       </p>
@@ -76,7 +76,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           </a>
         </WorkflowSection>
       ) : null}
-      {row.proposedStartsAt ? (
+      {row.proposedStartsAt && ["proposed", "reschedule_requested"].includes(row.state) ? (
         <WorkflowSection title={c.proposedTime}>
           <WorkflowTimeRange
             start={row.proposedStartsAt}

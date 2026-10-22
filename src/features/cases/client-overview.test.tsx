@@ -67,9 +67,8 @@ it("opens a compact authorized Case summary and links into its full manual workf
   render(await CaseScreen(entry.props));
   expect(reads.list).toHaveBeenCalledWith("test-db", session);
   expect(reads.detail).toHaveBeenCalledWith("test-db", session, "case-one");
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-    "CA-ONE · Recorded home search",
-  );
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Recorded home search");
+  expect(screen.getByText("CA-ONE", { exact: true })).toBeVisible();
   expect(screen.getByRole("heading", { name: baseView.record.nextAction })).toBeVisible();
   expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute(
     "href",
@@ -204,7 +203,7 @@ it.each([2, 50])(
     expect(reads.detail).not.toHaveBeenCalled();
     const list = screen.getByRole("list");
     expect(within(list).getAllByRole("listitem")).toHaveLength(count);
-    expect(within(list).getByRole("link", { name: "CA-1 · Visible case 1" })).toHaveAttribute(
+    expect(within(list).getByRole("link", { name: "Visible case 1 · CA-1" })).toHaveAttribute(
       "href",
       "/en/overview/case-1",
     );
@@ -221,7 +220,7 @@ it("preserves the empty state and never selects a Case for another destination",
       openSingleCase: true,
     }),
   );
-  expect(screen.getByRole("link", { name: "CA-ONE · Recorded home search" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Recorded home search · CA-ONE" })).toHaveAttribute(
     "href",
     "/en/properties/case-one",
   );

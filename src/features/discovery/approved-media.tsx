@@ -55,6 +55,9 @@ export function ApprovedMedia({
         {available ? (
           // biome-ignore lint/performance/noImgElement: sealed responsive sources use the authorized digest route; Next's unoptimized Image discards srcset.
           <img
+            ref={(image) => {
+              if (image?.complete && image.naturalWidth === 0) setFailedSource(source);
+            }}
             src={source}
             srcSet={srcSet}
             alt={media?.alt ?? ""}

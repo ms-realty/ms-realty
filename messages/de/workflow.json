@@ -10,7 +10,8 @@
     "calendarBounded": "Es werden bis zu 100 kürzlich aktualisierte Termine angezeigt, auf die Sie Zugriff haben.",
     "policyNote": "Eine Bestätigung erfordert aktuelle Immobilienverfügbarkeit, aktive Beteiligte, freigegebene Servicezeiten in Sofia, manuelle Prüfungen von Zutritt und externer Belegung sowie freie Ressourcen. Eine Synchronisierung mit externen Kalendern wird nicht zugesichert.",
     "requestNote": "Ihr bevorzugtes Zeitfenster ist eine Anfrage. Warten Sie auf eine ausdrückliche Bestätigung.",
-    "bounded": "Es werden bis zu 50 kürzlich aktualisierte Vorgänge angezeigt, auf die Sie Zugriff haben."
+    "bounded": "Es werden bis zu 50 kürzlich aktualisierte Vorgänge angezeigt, auf die Sie Zugriff haben.",
+    "appointmentTitle": "Immobilienbesichtigung"
   },
   "lifecycle": {
     "waiting": "Wartet auf",
@@ -37,6 +38,7 @@
     "agreementBlocked": "Ihre Zustimmung wurde nicht erfasst. Bitten Sie Ihren Makler, die notwendigen Prüfungen dieses Vorgangs vor einem erneuten Versuch abzuschließen.",
     "noResponses": "Für diese Version wurden keine Antworten erfasst.",
     "reverifyNotice": "Bestätigen Sie Ihre Identität erneut, bevor Sie diese Antwort erfassen. Ihr Entwurf bleibt erhalten.",
-    "bounded": "Es werden bis zu 50 Vorschläge angezeigt, auf die Sie Zugriff haben."
+    "bounded": "Es werden bis zu 50 Vorschläge angezeigt, auf die Sie Zugriff haben.",
+    "detailTitle": "Angebotsbedingungen"
   }
 }

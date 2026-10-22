@@ -297,7 +297,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
     }
   }
   return (
-    <WorkflowPage {...props} title={view.proposal.reference}>
+    <WorkflowPage {...props} title={c.detailTitle} reference={view.proposal.reference}>
       <p>{c.boundary}</p>
       <a
         className={workflowLink}

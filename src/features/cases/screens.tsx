@@ -70,7 +70,9 @@ export function WorkflowPage({
           {title}
         </h1>
         {reference ? (
-          <p className="text-caption text-text-muted wrap-anywhere">{reference}</p>
+          <p data-workflow-reference className="text-caption text-text-muted wrap-anywhere">
+            <bdi>{reference}</bdi>
+          </p>
         ) : null}
       </header>
       {children}
@@ -249,7 +251,7 @@ export async function CaseIndexScreen(
             {rows.map((row) => (
               <li key={row.id} className="min-w-0 space-y-2 py-5">
                 <a className={workflowLink} href={`/${props.locale}/${root}/${row.id}`}>
-                  <bdi>{row.reference}</bdi> · {row.title}
+                  <bdi>{row.title}</bdi> · <bdi>{row.reference}</bdi>
                 </a>
                 <p>
                   {c.owned}: {row.ownerName ?? "—"}
@@ -479,7 +481,7 @@ export async function CaseScreen(
       { label: c.documents, href: `/${props.locale}/documents`, detail: null },
     ];
     return (
-      <WorkflowPage {...props} title={`${row.reference} · ${row.title}`} clientOverview>
+      <WorkflowPage {...props} title={row.title} reference={row.reference} clientOverview>
         <ClientCaseOverview
           locale={props.locale}
           view={view}
@@ -533,8 +535,8 @@ export async function CaseScreen(
   return (
     <WorkflowPage
       {...props}
-      title={focusedConversation ? c.messages : `${row.reference} · ${row.title}`}
-      reference={focusedConversation ? `${row.reference} · ${row.title}` : undefined}
+      title={focusedConversation ? c.messages : row.title}
+      reference={focusedConversation ? `${row.reference} · ${row.title}` : row.reference}
       clientOverview={!staff && showOverview}
     >
       {!staff && showOverview ? <ClientCaseOverview locale={props.locale} view={view} /> : null}
@@ -618,7 +620,7 @@ export async function CaseScreen(
         ) : null}
       </div>
       {!focusedConversation ? (
-        <nav aria-label={c.sections} className="flex flex-wrap gap-2">
+        <nav aria-label={c.sections} className="flex flex-wrap gap-x-5">
           {(commitments ? [{ href: "#case-tasks", label: c.tasks }] : [])
             .concat(showOverview ? [{ href: "#case-brief", label: c.brief }] : [])
             .concat(view.canManageNext ? [{ href: "#case-next", label: c.next }] : [])
@@ -626,7 +628,11 @@ export async function CaseScreen(
             .concat([{ href: "#case-appointments", label: c.appointments }])
             .concat(showMessages ? [{ href: "#case-conversation", label: c.messages }] : [])
             .map(({ href, label }) => (
-              <a key={href} href={href} className={buttonClass("secondary", "text-dense")}>
+              <a
+                key={href}
+                href={href}
+                className={`${workflowLink} inline-flex min-h-control items-center text-dense`}
+              >
                 {label}
               </a>
             ))}

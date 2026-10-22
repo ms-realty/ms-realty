@@ -149,9 +149,8 @@ for (const javaScriptEnabled of [true, false]) {
         for (const width of [320, 390, 1440]) {
           await page.setViewportSize({ width, height: 900 });
           expect((await page.goto(overview))?.status()).toBe(200);
-          await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-            `${data.first.reference} · ${data.first.title}`,
-          );
+          await expect(page.getByRole("heading", { level: 1 })).toHaveText(data.first.title);
+          await expect(page.locator("[data-workflow-reference]")).toHaveText(data.first.reference);
           await expect(
             page.getByRole("heading", { name: data.summary, exact: true }),
           ).toBeVisible();
@@ -293,13 +292,13 @@ for (const javaScriptEnabled of [true, false]) {
         await expect(rows).toHaveCount(2);
         await expect(
           page.getByRole("link", {
-            name: `${data.first.reference} · ${data.first.title}`,
+            name: `${data.first.title} · ${data.first.reference}`,
             exact: true,
           }),
         ).toHaveAttribute("href", `/en/overview/${data.first.id}`);
         await expect(
           page.getByRole("link", {
-            name: `${data.second.reference} · ${data.second.title}`,
+            name: `${data.second.title} · ${data.second.reference}`,
             exact: true,
           }),
         ).toHaveAttribute("href", `/en/overview/${data.second.id}`);

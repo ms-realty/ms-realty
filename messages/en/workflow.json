@@ -10,7 +10,8 @@
     "calendarBounded": "Showing up to 100 recently updated appointments you can access.",
     "policyNote": "Confirmation requires current listing availability, active participants, approved Sofia service hours, manual access/external-busy checks and free resources. No external calendar sync is claimed.",
     "requestNote": "Your preferred window is a request. Wait for an explicit confirmation.",
-    "bounded": "Showing up to 50 recently updated deals you can access."
+    "bounded": "Showing up to 50 recently updated deals you can access.",
+    "appointmentTitle": "Property viewing"
   },
   "lifecycle": {
     "waiting": "Waiting for",
@@ -37,6 +38,7 @@
     "agreementBlocked": "Your agreement was not recorded. Ask your broker to complete the required checks for this deal before trying again.",
     "noResponses": "No responses have been recorded for this revision.",
     "reverifyNotice": "Confirm your identity again before recording this response. Your draft is retained.",
-    "bounded": "Showing up to 50 proposals you can access."
+    "bounded": "Showing up to 50 proposals you can access.",
+    "detailTitle": "Proposal terms"
   }
 }

@@ -10,7 +10,8 @@
     "calendarBounded": "Er worden maximaal 100 onlangs bijgewerkte afspraken getoond waartoe u toegang hebt.",
     "policyNote": "Bevestiging vereist actuele objectbeschikbaarheid, actieve deelnemers, goedgekeurde servicetijden in Sofia, handmatige controles van toegang en externe bezetting en vrije middelen. Er wordt geen synchronisatie met externe agenda’s toegezegd.",
     "requestNote": "Uw gewenste tijdvak is een verzoek. Wacht op uitdrukkelijke bevestiging.",
-    "bounded": "Er worden maximaal 50 onlangs bijgewerkte dossiers getoond waartoe u toegang hebt."
+    "bounded": "Er worden maximaal 50 onlangs bijgewerkte dossiers getoond waartoe u toegang hebt.",
+    "appointmentTitle": "Woningbezichtiging"
   },
   "lifecycle": {
     "waiting": "Wacht op",
@@ -37,6 +38,7 @@
     "agreementBlocked": "Uw instemming is niet vastgelegd. Vraag uw makelaar eerst de vereiste controles voor dit dossier af te ronden voordat u het opnieuw probeert.",
     "noResponses": "Voor deze versie zijn geen antwoorden vastgelegd.",
     "reverifyNotice": "Bevestig uw identiteit opnieuw voordat u dit antwoord vastlegt. Uw concept blijft bewaard.",
-    "bounded": "Er worden maximaal 50 voorstellen getoond waartoe u toegang hebt."
+    "bounded": "Er worden maximaal 50 voorstellen getoond waartoe u toegang hebt.",
+    "detailTitle": "Voorstelvoorwaarden"
   }
 }
