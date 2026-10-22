@@ -17,6 +17,8 @@ import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
 import type workflow from "../../messages/bg/workflow.json";
 import type auditHistory from "../../messages/staff/bg/auditHistory.json";
+import type calendar from "../../messages/staff/bg/calendar.json";
+import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
 import type operations from "../../messages/staff/bg/operations.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
@@ -42,6 +44,8 @@ export const publicNamespaces = [
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
 export const staffNamespaces = [
+  "calendar",
+  "caseDirectory",
   "serverStaff",
   "tools",
   "workspace",
@@ -67,6 +71,8 @@ export interface PublicMessages {
   workflow: typeof workflow;
 }
 export interface StaffMessages {
+  calendar: typeof calendar;
+  caseDirectory: typeof caseDirectory;
   auditHistory: typeof auditHistory;
   operations: typeof operations;
   dataReview: typeof dataReview;

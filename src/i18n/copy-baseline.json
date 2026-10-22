@@ -17,7 +17,6 @@
     "src/features/ai/workspace-copy.ts": 465,
     "src/features/appointments/host-copy.ts": 60,
     "src/features/cases/actions.ts": 2,
-    "src/features/cases/directory-copy.ts": 57,
     "src/features/cases/email-copy.ts": 126,
     "src/features/cases/email-screen.tsx": 2,
     "src/features/cases/form.tsx": 14,

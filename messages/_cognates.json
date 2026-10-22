@@ -57,7 +57,12 @@
     "workflow.ownerPreviewValues.known": "Записано",
     "workflow.ownerPreviewValues.unknown": "Неизвестно",
     "workflow.ownerPreviewValues.true": "Да",
-    "workflow.ownerPreviewValues.street": "Улица"
+    "workflow.ownerPreviewValues.street": "Улица",
+    "calendar.date": "Дата",
+    "calendar.itinerary": "Маршрут",
+    "calendar.deal": "Сделка",
+    "caseDirectory.dispositions.active": "Активна",
+    "caseDirectory.dueAt": "Срок"
   },
   "de": {
     "discovery.hotel": "Hotel",
