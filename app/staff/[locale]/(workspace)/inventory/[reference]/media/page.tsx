@@ -370,14 +370,14 @@ export default async function MediaPage({
       {selected ? (
         <section
           aria-labelledby="o13-heading"
-          className="grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(19rem,24rem)] lg:gap-8"
+          className="grid items-start gap-5 min-[48rem]:grid-cols-[minmax(0,1fr)_minmax(19rem,24rem)] lg:gap-8"
         >
           <div className="min-w-0 space-y-4">
             <div className="relative">
               <Preview
                 row={selected}
                 label={workspace.noPhoto}
-                className="aspect-4/3 max-h-[24dvh] bg-subtle md:max-h-[60dvh]"
+                className="aspect-4/3 max-h-[20dvh] bg-subtle min-[48rem]:max-h-[60dvh]"
               />
               {previewable(selected) ? (
                 <a
@@ -419,7 +419,7 @@ export default async function MediaPage({
           </div>
           <div
             id="photo-review-panel"
-            className="min-w-0 scroll-mt-4 space-y-4 md:col-start-2 md:row-span-2 md:row-start-1 md:border-s md:border-divider md:ps-5"
+            className="min-w-0 scroll-mt-4 space-y-4 min-[48rem]:col-start-2 min-[48rem]:row-span-2 min-[48rem]:row-start-1 min-[48rem]:border-s min-[48rem]:border-divider min-[48rem]:ps-5"
           >
             <nav
               aria-label={workspace.imageDetails}
@@ -462,7 +462,7 @@ export default async function MediaPage({
               guard={guard}
             />
           </div>
-          <div className="min-w-0 space-y-4 md:col-start-1">
+          <div className="min-w-0 space-y-4 min-[48rem]:col-start-1">
             <details className="border-t border-divider pt-2">
               <summary className="min-h-control cursor-pointer py-2 text-dense font-semibold">
                 {copy.orderTitle}

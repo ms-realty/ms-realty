@@ -100,7 +100,7 @@ test("M-004 staff: a failed Inventory read keeps the workspace shell and recover
   await expect(page.getByRole("main")).toContainText("give the reference to your manager");
   await page.screenshot({ path: info.outputPath("error-staff-en.png"), fullPage: true });
   await page.getByRole("button", { name: "Try again" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Inventory" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Listings" })).toBeVisible();
 });
 
 test("M-004 client: a failed deal list keeps the journey shell and recovers", async ({
