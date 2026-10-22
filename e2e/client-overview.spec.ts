@@ -303,6 +303,7 @@ for (const javaScriptEnabled of [true, false]) {
         }
 
         // A second current relationship makes an explicit chooser; no guessed current Case.
+        await page.setViewportSize({ width: 320, height: 900 });
         await relate(db, { partyId: data.clientPartyId, caseId: data.second.id, role: "buyer" });
         await page.goto(overview);
         await expect(
