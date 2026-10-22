@@ -1,16 +1,18 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
 import { isPublicLocale } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
-import { listAppointments, readAppointment } from "@/server/appointments/service";
+import { type CalendarData, readCalendar } from "@/server/appointments/calendar";
+import { readAppointment } from "@/server/appointments/service";
+import { isAppError } from "@/server/errors";
 import { Notice } from "@/ui/notice";
 import { workflowScope } from "../cases/contract";
 import { caseCopy } from "../cases/copy";
 import { caseEmailCopy } from "../cases/email-copy";
 import {
-  AppointmentList,
   BoundWorkflowForm,
   type ScreenProps,
   WorkflowPage,
@@ -20,16 +22,33 @@ import {
 } from "../cases/screens";
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
+import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
+import { CalendarView } from "./calendar-view";
 import { hostHandoverCopy } from "./host-copy";
 import { AppointmentListingContext } from "./listing-context";
-export async function CalendarScreen(props: ScreenProps) {
+export async function CalendarScreen(props: ScreenProps & { search?: CalendarSearch }) {
   const c = caseCopy(props.locale);
-  const rows = await listAppointments(getDb(), props.session);
+  const { query, adjusted } = parseCalendarQuery(props.search);
+  let data: CalendarData | null = null;
+  try {
+    data = await privateRead(() => readCalendar(getDb(), props.session, query));
+  } catch (error) {
+    // Preserve authentication/access routing. Read failures keep the user's filters and never
+    // become a reassuring empty calendar or an availability result.
+    unstable_rethrow(error);
+    if (
+      isAppError(error) &&
+      ["unauthenticated", "forbidden", "not_found", "step_up_required"].includes(error.code)
+    )
+      throw error;
+    console.error(
+      "[O08] calendar unavailable:",
+      isAppError(error) ? error.code : error instanceof Error ? error.name : typeof error,
+    );
+  }
   return (
     <WorkflowPage {...props} title={c.calendar}>
-      <p>{props.session.account.kind === "staff" ? c.policyNote : c.requestNote}</p>
-      <p>{c.calendarBounded}</p>
-      <AppointmentList {...props} rows={rows} />
+      <CalendarView locale={props.locale} query={query} data={data} adjusted={adjusted} />
     </WorkflowPage>
   );
 }
