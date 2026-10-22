@@ -217,8 +217,9 @@ for (const javaScriptEnabled of [true, false])
       await rows(page).nth(0).getByRole("link").click();
       await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${f.ids[0]}?view=unassigned`));
       await expect(
-        page.getByRole("heading", { level: 1, name: `RQ-O02-${f.key}-0`, exact: true }),
+        page.getByRole("heading", { level: 1, name: f.name("Alex"), exact: true }),
       ).toBeVisible();
+      await expect(page.locator("[data-inquiry-reference]")).toContainText(`RQ-O02-${f.key}-0`);
       const queue = page.locator("[data-inquiry-queue]");
       const back = page.getByRole("link", { name: en.queue.back, exact: true });
       if (wide(page)) {
@@ -246,8 +247,9 @@ for (const javaScriptEnabled of [true, false])
         await queue.getByRole("link", { name: "All", exact: true }).click();
         await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${f.ids[3]}?view=all`));
         await expect(
-          page.getByRole("heading", { level: 1, name: `RQ-O02-${f.key}-3`, exact: true }),
+          page.getByRole("heading", { level: 1, name: f.name("Petar"), exact: true }),
         ).toBeVisible();
+        await expect(page.locator("[data-inquiry-reference]")).toContainText(`RQ-O02-${f.key}-3`);
         await expect(queue.locator("[data-inquiry-id]")).toHaveCount(5);
       } else {
         // Narrow screens: the conversation is its own route and returns to the same row.
@@ -330,8 +332,9 @@ for (const javaScriptEnabled of [true, false])
         .click();
       await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${f.ids[1]}?view=mine`));
       await expect(
-        page.getByRole("heading", { level: 1, name: `RQ-O02-${f.key}-1`, exact: true }),
+        page.getByRole("heading", { level: 1, name: f.name("Nikol"), exact: true }),
       ).toBeVisible();
+      await expect(page.locator("[data-inquiry-reference]")).toContainText(`RQ-O02-${f.key}-1`);
       expect(requests.filter((request) => request.url().includes(f.key))).toEqual([]);
     });
   });

@@ -17,7 +17,7 @@ import { LeaveControl } from "@/features/inventory/leave-control";
 import { safeNext } from "@/features/inventory/next";
 import { describePriceEvidence } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
-import { ListingIdentity, listingSections } from "@/features/inventory/workspace";
+import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { requireStaffPage } from "@/server/auth/pages";
@@ -280,13 +280,10 @@ export default async function InventoryDetailPage({
       {error}
       {/* Text and Facts are one form; the tabs switch panels in place (group/o12). */}
       <div data-o12 className="group/o12 flex flex-col gap-5 sm:gap-6">
+        <ListingNavigation locale={locale} reference={reference} current={tab} formId={formId} />
         <EditTabs
           tab={tab === "facts" ? "facts" : "text"}
           formId={formId}
-          photosHref={`${path}/media`}
-          sections={listingSections(locale, reference).filter(
-            (section) => !["text", "facts", "media"].includes(section.id),
-          )}
           labels={{
             tabs: o12.tabs,
             facts: o12.facts,

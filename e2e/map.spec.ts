@@ -47,6 +47,10 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
       page.waitForResponse((r) => r.url().endsWith(`/map-runtime/v6.11.2/${name}`)),
     ),
   );
+  const mapId = await page
+    .getByRole("button", { name: "Show map", exact: true })
+    .getAttribute("aria-controls");
+  expect(mapId).toBeTruthy();
   await page.getByRole("button", { name: "Show map" }).click();
   expect((await archive).status()).toBe(206);
   for (const response of await modules) expect(response.status()).toBe(200);
@@ -67,7 +71,7 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
   await page
-    .getByRole("region", { name: mapCopy("en").title, exact: true })
+    .locator(`[id="${mapId}"]`)
     .getByRole("link", { name: "Go to list", exact: true })
     .click();
   await expect(page.locator("#property-results")).toBeFocused();

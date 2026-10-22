@@ -6,6 +6,7 @@ import { cx } from "@/ui/cx";
 import { ChevronStartIcon } from "@/ui/icons";
 import { inventoryCopy } from "./copy";
 import { inventorySections } from "./decision-contract";
+import { LeaveControl } from "./leave-control";
 
 export function listingSections(locale: string, reference: string) {
   const copy = inventoryCopy(locale);
@@ -33,27 +34,59 @@ export function ListingNavigation({
   locale,
   reference,
   current,
+  formId,
 }: {
   locale: string;
   reference: string;
   current: string;
+  formId?: string;
 }) {
   const labels = workflowCopy(locale, "listingWorkspace");
   return (
-    <nav aria-label={labels.navigation} className="border-b border-divider">
-      <ul className="flex flex-wrap gap-x-1">
-        {listingSections(locale, reference).map((section) => (
-          <li key={section.id}>
-            <a
-              href={section.href}
-              aria-current={section.id === current ? "page" : undefined}
-              className={listingSectionClass}
-            >
-              {section.label}
-            </a>
-          </li>
+    <nav
+      aria-label={labels.navigation}
+      className="flex flex-wrap items-start border-b border-divider"
+    >
+      {listingSections(locale, reference)
+        .filter((section) => ["text", "media", "review"].includes(section.id))
+        .map((section) => (
+          <LeaveControl
+            key={section.id}
+            href={section.href}
+            formId={formId}
+            current={section.id === (current === "facts" ? "text" : current)}
+            className={listingSectionClass}
+          >
+            {section.id === "text"
+              ? labels.listing
+              : section.id === "review"
+                ? labels.reviewShort
+                : section.label}
+          </LeaveControl>
         ))}
-      </ul>
+      <details className="group open:basis-full">
+        <summary
+          className={`${listingSectionClass} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}
+        >
+          {labels.more}
+        </summary>
+        <ul className="mb-3 flex flex-wrap gap-1 rounded-control bg-subtle p-2">
+          {listingSections(locale, reference)
+            .filter((section) => ["documents", "evidence", "translations"].includes(section.id))
+            .map((section) => (
+              <li key={section.id}>
+                <LeaveControl
+                  href={section.href}
+                  formId={formId}
+                  current={section.id === current}
+                  className={listingSectionClass}
+                >
+                  {section.label}
+                </LeaveControl>
+              </li>
+            ))}
+        </ul>
+      </details>
     </nav>
   );
 }

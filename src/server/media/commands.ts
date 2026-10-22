@@ -1,8 +1,16 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
-import { auditEvents, fileUploads, listings, mediaAssets, mediaRelations } from "@/db/schema";
+import {
+  auditEvents,
+  fileUploads,
+  listingRevisions,
+  listings,
+  mediaAssets,
+  mediaRelations,
+  properties,
+} from "@/db/schema";
 import { mediaModifications, moveRelation } from "@/domain/media";
 import { parseMediaRenditions } from "@/domain/media-rendition";
 import { recordAudit } from "../audit";
@@ -149,7 +157,33 @@ export async function mediaForListing(db: Executor, session: Session, reference:
       return { ...row, upload };
     }),
   );
-  return { listing, assets };
+  let identity: { title: string; settlement: string } | null = null;
+  if (
+    await can(db, session.actor, "listing.read", {
+      type: "listing",
+      id: listing.id,
+      propertyId: listing.propertyId,
+    })
+  ) {
+    const [source] = await db
+      .select({ copy: listingRevisions.sourceCopy })
+      .from(listingRevisions)
+      .where(eq(listingRevisions.listingId, listing.id))
+      .orderBy(desc(listingRevisions.revisionNumber))
+      .limit(1);
+    const [property] = await db
+      .select({ settlement: properties.settlement })
+      .from(properties)
+      .where(eq(properties.id, listing.propertyId));
+    const title = (listing.draft as { title?: unknown }).title;
+    const sourceCopy = source?.copy as { locale?: unknown; text?: { title?: unknown } } | undefined;
+    const sourceTitle = sourceCopy?.locale === "bg" ? sourceCopy.text?.title : undefined;
+    identity = {
+      title: typeof title === "string" ? title : typeof sourceTitle === "string" ? sourceTitle : "",
+      settlement: property?.settlement ?? "",
+    };
+  }
+  return { listing, assets, identity };
 }
 
 /**
@@ -173,11 +207,11 @@ export async function mediaReceipt(
     .select({ id: mediaRelations.id, assetId: mediaRelations.mediaAssetId })
     .from(mediaRelations)
     .where(and(eq(mediaRelations.listingId, listingId), isNull(mediaRelations.removedAt)));
-  const photo = (assetId: string) => {
+  const photo = (assetId: string, action?: string) => {
     const relation =
       relations.find((row) => row.id === placement && row.assetId === assetId) ??
       relations.find((row) => row.assetId === assetId);
-    return relation ? { id, relationId: relation.id, move: false, order: null } : null;
+    return relation ? { id, relationId: relation.id, move: false, order: null, action } : null;
   };
   const [event] = await db
     .select({
@@ -193,6 +227,7 @@ export async function mediaReceipt(
         inArray(auditEvents.action, [
           "media.placement.changed",
           "media.reviewed",
+          "media.details.saved",
           "file.scan.requested",
         ]),
         eq(auditEvents.actorKind, session.actor.kind),
@@ -215,6 +250,7 @@ export async function mediaReceipt(
     if (!payload.move && !relationId) return null;
     return {
       id,
+      action: event.action,
       relationId,
       move: Boolean(payload.move),
       order:
@@ -223,12 +259,81 @@ export async function mediaReceipt(
           : null,
     };
   }
-  if (event) return event.recordType === "media" && event.recordId ? photo(event.recordId) : null;
+  if (event)
+    return event.recordType === "media" && event.recordId
+      ? photo(event.recordId, event.action)
+      : null;
   const [upload] = await db
     .select({ targetType: fileUploads.targetType, targetId: fileUploads.targetId })
     .from(fileUploads)
     .where(eq(fileUploads.id, id));
   return upload?.targetType === "media" && upload.targetId ? photo(upload.targetId) : null;
+}
+
+const mediaDetailsSchema = z.object({
+  caption: z.string().trim().max(2000),
+  altText: z.string().trim().max(1000),
+  modification: z.enum(mediaModifications),
+  modificationDisclosure: z.string().trim().max(2000),
+});
+
+/** A working draft only. The approved asset and existing public manifests stay intact. */
+export async function saveMediaDetails(
+  db: Executor,
+  command: FileCommand & { id: string; input: unknown },
+) {
+  parseFileInput(envelope, command);
+  const input = parseFileInput(
+    z.union([mediaDetailsSchema, z.object({ discard: z.literal(true) })]),
+    command.input,
+  );
+  await fileSession(db, command.session, true);
+  await mediaAccess(db, command.session, command.id);
+  return runOperation(
+    db,
+    {
+      actor: command.session.actor,
+      type: "media.details.save",
+      idempotencyKey: command.operationId,
+      requestHash: hashRequest({
+        id: command.id,
+        input,
+        expectedRevision: command.expectedRevision,
+      }),
+    },
+    async ({ tx, operationId }) => {
+      await fileSession(tx, command.session, true);
+      const [asset] = await tx
+        .select()
+        .from(mediaAssets)
+        .where(eq(mediaAssets.id, command.id))
+        .for("update");
+      if (!asset) throw new AppError("not_found");
+      await mediaAccess(tx, command.session, asset.id);
+      expectVersion(asset.version, command.expectedRevision);
+      const approved = {
+        caption: asset.caption ?? "",
+        altText: asset.altText ?? "",
+        modification: asset.modification,
+        modificationDisclosure: asset.modificationDisclosure ?? "",
+      };
+      const next =
+        "discard" in input || JSON.stringify(input) === JSON.stringify(approved) ? null : input;
+      await tx
+        .update(mediaAssets)
+        .set({ detailsDraft: next, version: asset.version + 1 })
+        .where(eq(mediaAssets.id, asset.id));
+      await recordAudit(tx, {
+        actor: command.session.actor,
+        action: "media.details.saved",
+        recordType: "media",
+        recordId: asset.id,
+        operationId,
+        payload: { version: asset.version + 1, pendingReview: next !== null },
+      });
+      return { id: asset.id, version: asset.version + 1 };
+    },
+  );
 }
 
 export async function reviewMedia(
@@ -240,18 +345,26 @@ export async function reviewMedia(
     z
       .object({
         decision: z.enum(["approve", "reject"]),
-        rightsHolder: z.string().trim().min(1).max(300),
-        rightsReference: z.string().trim().min(1).max(1000),
+        rightsHolder: z.string().trim().max(300),
+        rightsReference: z.string().trim().max(1000),
         caption: z.string().trim().max(2000),
-        altText: z.string().trim().min(1).max(1000),
+        altText: z.string().trim().max(1000),
         modification: z.enum(mediaModifications),
         modificationDisclosure: z.string().trim().max(2000),
-        privacyReviewed: z.literal(true),
-        rightsConfirmed: z.literal(true),
+        privacyReviewed: z.boolean(),
+        rightsConfirmed: z.boolean(),
       })
-      .refine((value) => value.modification === "none" || value.modificationDisclosure.length > 0, {
-        message: "Describe the visible modification.",
-      }),
+      .refine(
+        (value) =>
+          value.decision === "reject" ||
+          Boolean(
+            value.rightsHolder &&
+              value.rightsReference &&
+              value.privacyReviewed &&
+              value.rightsConfirmed,
+          ),
+        { message: "Confirm the stated usage rights and privacy review before approving." },
+      ),
     command.input,
   );
   await fileSession(db, command.session, true);
@@ -278,6 +391,15 @@ export async function reviewMedia(
       if (!asset) throw new AppError("not_found");
       await mediaAccess(tx, command.session, asset.id);
       expectVersion(asset.version, command.expectedRevision);
+      // A review applies the persisted working text it was opened against. The asset version
+      // binds this draft; request fields cannot silently replace or discard another draft.
+      const details = asset.detailsDraft ?? input;
+      if (
+        input.decision === "approve" &&
+        (!details.altText.trim() ||
+          (details.modification !== "none" && !details.modificationDisclosure.trim()))
+      )
+        throw new AppError("validation_failed");
       if (
         input.decision === "approve" &&
         (!asset.sealedKey ||
@@ -296,12 +418,17 @@ export async function reviewMedia(
         .update(mediaAssets)
         .set({
           rights: input.decision === "approve" ? "cleared" : "rejected",
-          rightsHolder: input.rightsHolder,
-          rightsReference: input.rightsReference,
-          caption: input.caption || null,
-          altText: input.altText,
-          modification: input.modification,
-          modificationDisclosure: input.modificationDisclosure || null,
+          ...(input.decision === "approve"
+            ? {
+                rightsHolder: input.rightsHolder,
+                rightsReference: input.rightsReference,
+                caption: details.caption || null,
+                altText: details.altText,
+                detailsDraft: null,
+                modification: details.modification,
+                modificationDisclosure: details.modificationDisclosure || null,
+              }
+            : {}),
           audience: input.decision === "approve" ? "public_candidate" : "private",
           review: input.decision === "approve" ? "approved" : "rejected",
           reviewedById: command.session.actor.id,
@@ -319,8 +446,9 @@ export async function reviewMedia(
           sha256: asset.sha256,
           derivativeSha256: asset.derivativeSha256,
           renditions: asset.derivativeRenditions,
-          rightsReference: input.rightsReference,
-          privacyReviewed: true,
+          rightsReference:
+            input.decision === "approve" ? input.rightsReference : asset.rightsReference,
+          privacyReviewed: input.privacyReviewed,
         },
       });
       return { id: asset.id, version: asset.version + 1 };
@@ -421,6 +549,66 @@ export async function placeMedia(
         },
       });
       return { version: listing.version + 1 };
+    },
+  );
+}
+
+/** One reviewed gallery change, regardless of how many local moves produced it. */
+export async function reorderMedia(
+  db: Executor,
+  command: FileCommand & { reference: string; order: unknown },
+) {
+  parseFileInput(envelope, command);
+  const order = parseFileInput(z.array(z.uuid()).min(1).max(1000), command.order);
+  await managedListing(db, command.session, command.reference);
+  return runOperation(
+    db,
+    {
+      actor: command.session.actor,
+      type: "media.place",
+      idempotencyKey: command.operationId,
+      requestHash: hashRequest({
+        reference: command.reference,
+        order,
+        expectedRevision: command.expectedRevision,
+      }),
+    },
+    async ({ tx, operationId }) => {
+      const listing = await managedListing(tx, command.session, command.reference, true);
+      expectVersion(listing.version, command.expectedRevision);
+      const current = await tx
+        .select()
+        .from(mediaRelations)
+        .where(and(eq(mediaRelations.listingId, listing.id), isNull(mediaRelations.removedAt)))
+        .orderBy(asc(mediaRelations.position));
+      const before = current.map((row) => row.id);
+      if (
+        order.length !== before.length ||
+        new Set(order).size !== order.length ||
+        order.some((id) => !before.includes(id))
+      )
+        throw new AppError("validation_failed");
+      for (const [position, id] of order.entries())
+        await tx.update(mediaRelations).set({ position }).where(eq(mediaRelations.id, id));
+      await tx
+        .update(listings)
+        .set({ version: listing.version + 1 })
+        .where(eq(listings.id, listing.id));
+      await recordAudit(tx, {
+        actor: command.session.actor,
+        action: "media.placement.changed",
+        recordType: "listing",
+        recordId: listing.id,
+        operationId,
+        payload: {
+          relationId: order.find((id, index) => before[index] !== id) ?? order[0],
+          move: { order },
+          before,
+          after: order,
+          version: listing.version + 1,
+        },
+      });
+      return { reference: listing.reference, version: listing.version + 1 };
     },
   );
 }

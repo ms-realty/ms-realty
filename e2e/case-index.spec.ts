@@ -131,9 +131,8 @@ for (const javaScriptEnabled of [false, true])
 
       await rows(page).filter({ hasText: buyer.reference }).click();
       await expect(page).toHaveURL(hostUrl("staff", `/en/cases/${buyer.id}`));
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-        `${buyer.reference} · ${buyer.title}`,
-      );
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(buyer.title);
+      await expect(page.getByText(buyer.reference, { exact: true })).toBeVisible();
 
       // Access withdrawn after the list was read: the drill-down is denied without the case's
       // content, and the next list read drops the case.

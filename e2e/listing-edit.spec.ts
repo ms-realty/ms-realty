@@ -98,9 +98,12 @@ for (const javaScriptEnabled of [false, true])
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
 
       await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
-      await expect(
-        page.getByText(`${f.reference} · Sandanski · €95,000 · 74.5 m² · 2 bedrooms`),
-      ).toBeVisible();
+      await expect(page.getByText(f.reference, { exact: true })).toBeVisible();
+      const summary = page
+        .locator("header")
+        .filter({ has: page.getByRole("heading", { level: 1, name: "Edit listing" }) });
+      for (const fact of ["Sandanski", "€95,000", "74.5 m²", "2 bedrooms"])
+        await expect(summary).toContainText(fact);
       await expect(page.getByRole("radio", { name: "Text" })).toBeChecked();
       // Photos is a link with JavaScript and a submit control of the form without it.
       const photos = page.getByRole(javaScriptEnabled ? "link" : "button", {

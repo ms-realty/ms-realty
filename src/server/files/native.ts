@@ -20,7 +20,13 @@ import {
   requireSession,
 } from "../http/request";
 import { getJobQueue } from "../jobs/web";
-import { expectVersion, placeMedia, reviewMedia, startMediaUpload } from "../media/commands";
+import {
+  expectVersion,
+  placeMedia,
+  reorderMedia,
+  reviewMedia,
+  startMediaUpload,
+} from "../media/commands";
 import { runOperation } from "../operations";
 import { documentAccess, type FileKind, targetAccess } from "./access";
 import { fileServices } from "./config";
@@ -187,6 +193,14 @@ export function fileFormRoute(kind: FileKind, context: "listing" | "case" = "lis
             expiresAt: expiry ? new Date(expiry).toISOString() : null,
           },
         });
+      } else if (intent === "order" && kind === "media") {
+        let order: unknown;
+        try {
+          order = JSON.parse(text(form, "order"));
+        } catch {
+          throw new AppError("validation_failed");
+        }
+        await reorderMedia(db, { ...command, reference, order });
       } else if (intent === "place" && kind === "media")
         await placeMedia(db, {
           ...command,
@@ -247,6 +261,7 @@ export function fileFormRoute(kind: FileKind, context: "listing" | "case" = "lis
       }
       if (!saved) throw new Error("Successful file action has no durable receipt");
       location = `${path}?saved=${saved}${photo ? `&photo=${encodeURIComponent(photo)}` : ""}`;
+      if (kind === "media" && intent === "order") location += "&inline=1";
     } catch (error) {
       if (isAppError(error) && error.code === "cross_origin_request")
         return new Response(null, { status: 403, headers: { "cache-control": "no-store" } });
