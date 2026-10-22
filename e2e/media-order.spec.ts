@@ -212,6 +212,7 @@ for (const javaScriptEnabled of [false, true])
       await page.getByRole("button", { name: "Hide from next gallery", exact: true }).click();
       await expect(page.getByRole("status").first()).toContainText("Saved.");
       await expect(heading(2)).toBeVisible();
+      await openPlacement(page);
       await expect(
         page.getByRole("button", { name: "Include in next gallery", exact: true }),
       ).toBeVisible();
