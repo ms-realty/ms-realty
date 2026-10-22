@@ -8,6 +8,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { caseCopy } from "../src/features/cases/copy";
 import { lifecycleCopy } from "../src/features/cases/lifecycle-copy";
+import { publicLocales } from "../src/i18n/config";
 import { workflowCopy } from "../src/i18n/workflow-copy";
 import { createCase, createClient, createStaff, relate } from "../src/server/testing";
 import { hostUrl, origins } from "./hosts";
@@ -283,7 +284,7 @@ for (const javaScriptEnabled of [true, false]) {
           fullPage: true,
         });
 
-        for (const locale of ["de", "nl", "el", "he"]) {
+        for (const locale of publicLocales) {
           await page.setViewportSize({ width: 390, height: 844 });
           await page.goto(hostUrl("client", `/${locale}/overview`));
           await expect(page.getByRole("heading", { level: 1 })).toHaveText(data.first.title);
