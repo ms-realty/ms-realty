@@ -27,7 +27,9 @@ export async function fillAgencyInstant(
   precision: "minute" | "second" = "minute",
 ) {
   const date = instant instanceof Date ? instant : new Date(instant);
-  await input.fill(agencyWallTime(instant, precision));
+  const value = agencyWallTime(instant, precision);
+  // Native inputs omit zero seconds; Playwright requires that canonical form.
+  await input.fill(precision === "second" && value.endsWith(":00") ? value.slice(0, -3) : value);
   const wall = agencyWallTime(date, "second");
   const occurrence =
     agencyWallTime(new Date(date.getTime() - 3_600_000), "second") === wall
