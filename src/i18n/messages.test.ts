@@ -60,6 +60,8 @@ const sampleValues = {
   total: 3,
   order: "2, 1, 3",
   direction: "down",
+  photo: "Photo 1",
+  position: 2,
 };
 
 /** What a reader sees: no ICU syntax, placeholders or names that every locale shares. */

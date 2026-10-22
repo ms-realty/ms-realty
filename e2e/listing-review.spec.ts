@@ -106,8 +106,12 @@ for (const javaScriptEnabled of [false, true])
         .getByRole("listitem")
         .filter({ hasText: "Missing" });
       expect(await missing.count()).toBeGreaterThan(0);
-      await page.getByRole("link", { name: "Review the missing approvals" }).click();
-      await expect(page.getByRole("navigation", { name: "Listing sections" })).toBeInViewport();
+      // The primary action leads to the first missing task this operator may perform.
+      const nextHref = await missing.getByRole("link").first().getAttribute("href");
+      expect(nextHref).toMatch(/^#listing-(facts|approval)-decision$/);
+      const nextTask = page.locator(`a[href="${nextHref}"]`).first();
+      await nextTask.click();
+      await expect(page.locator(nextHref ?? "#missing-task")).toBeInViewport();
     });
   });
 
@@ -461,7 +465,9 @@ test("O16 selects a readable preview and preserves the recorded photo order", as
   expect(order.map((row) => row.assetId)).toEqual([first.asset.id, secondId]);
 });
 
-test("O16 reads before deciding, and the decision stands alone on its canvas", async ({ page }) => {
+test("O16 leads with eligibility, and the decision stands alone on its canvas", async ({
+  page,
+}) => {
   const f = seed();
   await open(page, f, `/en/inventory/${f.reference}?tab=review`);
   const before = page.getByRole("heading", { level: 2, name: "Before you decide" });
@@ -469,8 +475,9 @@ test("O16 reads before deciding, and the decision stands alone on its canvas", a
   const width = page.viewportSize()?.width ?? 1440;
   const top = async (locator: typeof before) => (await locator.boundingBox())?.y ?? 0;
   if (width < 1024) {
-    // Phones: the evidence comes after the preview and before the decision (18:3002).
-    expect(await top(before)).toBeLessThan(await top(toDecision));
+    // Phones lead with eligibility and the next action; source detail remains available below.
+    expect(await top(toDecision)).toBeLessThan(await top(before));
+    expect(await top(page.getByRole("status").first())).toBeLessThan(await top(toDecision));
   }
   if (width < 640) {
     // The phone preview keeps the approved 3:2 frame (350 × 233, 164:14942).

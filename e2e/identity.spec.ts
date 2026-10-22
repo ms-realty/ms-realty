@@ -325,7 +325,7 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
       )
       .check();
     await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
-    await page.getByRole("button", { name: "Record review", exact: true }).click();
+    await page.getByRole("button", { name: "Approve as a public candidate", exact: true }).click();
     await showPhotoChecks(page);
     await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
     const original = await page.evaluate(

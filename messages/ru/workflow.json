@@ -582,6 +582,17 @@
     "reviewShort": "Проверка",
     "editPermissions": "Изменить записанные разрешения",
     "reviewNeedsDetails": "Перед одобрением добавьте описание изображения и пояснение о внесённых изменениях.",
-    "photoNumber": "Фото {n} из {total}"
+    "photoNumber": "Фото {n} из {total}",
+    "directoryTitle": "Объявления",
+    "sourceVersionHint": "Вы редактируете последнюю сохранённую версию. Сохраните рабочий черновик.",
+    "photoReviewShort": "Проверка фото",
+    "reviewSaved": "Проверить сохранённые изменения",
+    "currentCover": "Текущая обложка",
+    "proposedCover": "Предлагаемая обложка",
+    "enlargePhoto": "Увеличить фото",
+    "opensNewTab": "Откроется в новой вкладке",
+    "photoMoved": "{photo}: позиция {position} из {total} в предлагаемом порядке.",
+    "draftDiscarded": "Черновик фото удалён",
+    "detailsUnchanged": "Данные фото совпадают с одобренной версией"
   }
 }

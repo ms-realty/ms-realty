@@ -582,6 +582,17 @@
     "reviewShort": "בדיקה",
     "editPermissions": "שינוי ההרשאות הרשומות",
     "reviewNeedsDetails": "לפני האישור הוסיפו תיאור תמונה וגילוי על שינויים שבוצעו בה.",
-    "photoNumber": "תמונה {n} מתוך {total}"
+    "photoNumber": "תמונה {n} מתוך {total}",
+    "directoryTitle": "נכסים",
+    "sourceVersionHint": "עריכת הגרסה האחרונה שנשמרה. שמירה תיצור טיוטת עבודה.",
+    "photoReviewShort": "בדיקת תמונה",
+    "reviewSaved": "בדיקת פרטי התמונה שנשמרו",
+    "currentCover": "תמונת שער נוכחית",
+    "proposedCover": "תמונת שער מוצעת",
+    "enlargePhoto": "הגדלת התמונה",
+    "opensNewTab": "נפתח בכרטיסייה חדשה",
+    "photoMoved": "{photo}: מיקום {position} מתוך {total} בסדר המוצע.",
+    "draftDiscarded": "טיוטת התמונה בוטלה",
+    "detailsUnchanged": "פרטי התמונה תואמים לגרסה המאושרת"
   }
 }

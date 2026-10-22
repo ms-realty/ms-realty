@@ -52,7 +52,7 @@ for (const javaScriptEnabled of [false, true])
     test("O10 searches, filters and splits All / Needs action / Mine", async ({ page }) => {
       const f = seed();
       await open(page, f, "/en/inventory");
-      await expect(page.getByRole("heading", { level: 1, name: "Inventory" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: "Listings" })).toBeVisible();
 
       await page.getByLabel("Search", { exact: true }).fill(f.token);
       await page.getByRole("button", { name: "Show", exact: true }).first().click();
@@ -129,15 +129,15 @@ for (const javaScriptEnabled of [false, true])
 
       await open(page, f, `/en/inventory?q=${f.token}`);
       await rows(page).filter({ hasText: f.review }).click();
-      await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: /Синтетич/ })).toBeVisible();
     });
   });
 
 test("O10 keeps BG and RU view labels", async ({ page }) => {
   const f = seed();
   for (const [locale, title, needs, list] of [
-    ["bg", "Имоти и обяви", "Нужно действие", "Обяви"],
-    ["ru", "Объекты и объявления", "Нужно действие", "Объявления"],
+    ["bg", "Обяви", "Нужно действие", "Обяви"],
+    ["ru", "Объявления", "Нужно действие", "Объявления"],
   ] as const) {
     await open(page, f, `/${locale}/inventory?view=needs&q=${f.token}`);
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();

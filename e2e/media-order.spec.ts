@@ -311,6 +311,9 @@ for (const javaScriptEnabled of [false, true])
       await page.getByRole("button", { name: "Save photo details", exact: true }).click();
       await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Photo 1 of 3", exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Review saved photo details", exact: true }),
+      ).toHaveAttribute("href", /panel=review#photo-review-panel$/);
       await expect(page.getByLabel("Visible caption", { exact: true })).toHaveValue(
         "Synthetic caption draft",
       );
@@ -332,7 +335,9 @@ for (const javaScriptEnabled of [false, true])
         "Synthetic caption draft",
       );
       await page.getByRole("button", { name: "Discard photo draft", exact: true }).click();
-      await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
+      await expect(
+        page.getByRole("status").filter({ hasText: "Photo draft discarded" }),
+      ).toBeVisible();
       await expect(page.getByLabel("Visible caption", { exact: true })).toHaveValue(
         original.asset.caption ?? "",
       );
@@ -509,7 +514,27 @@ test("O13 staged arrow order survives reload and is saved only after review", as
   const [first, second, third] = f.relations;
   await openGallery(page, f);
   await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Upload", exact: true })).toHaveCount(0);
+  const thirdTile = page.locator(`[data-photo="${third}"]`);
   await page.getByRole("button", { name: "Move up · 3", exact: true }).click();
+  await expect(thirdTile.getByRole("button", { name: "Move up · 2", exact: true })).toBeFocused();
+  await expect(page.getByRole("status")).toHaveText(
+    "Photograph 3: position 2 of 3 in the proposed order.",
+  );
+  await page.keyboard.press("Enter");
+  await expect(thirdTile).toBeFocused();
+  await expect(thirdTile.getByRole("button", { name: "Move up · 1", exact: true })).toBeDisabled();
+  await thirdTile.getByRole("button", { name: "Move down · 1", exact: true }).click();
+  await expect(thirdTile.getByRole("button", { name: "Move down · 2", exact: true })).toBeFocused();
+  await expect(page.getByRole("status")).toHaveText(
+    "Photograph 3: position 2 of 3 in the proposed order.",
+  );
+  await page.keyboard.press("Enter");
+  await expect(thirdTile).toBeFocused();
+  await expect(
+    thirdTile.getByRole("button", { name: "Move down · 3", exact: true }),
+  ).toBeDisabled();
+  await thirdTile.getByRole("button", { name: "Move up · 3", exact: true }).click();
   expect(await workingOrder(f.listingId)).toEqual(f.relations);
   await page.reload();
   await expect(
@@ -521,4 +546,21 @@ test("O13 staged arrow order survives reload and is saved only after review", as
     page.getByRole("status").filter({ hasText: "New photo order: 1, 3, 2." }),
   ).toBeVisible();
   expect(await workingOrder(f.listingId)).toEqual([first, third, second]);
+});
+
+test("O13 tablet keeps the contextual photo beside visible editing fields", async ({ page }) => {
+  const f = seed();
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await openMedia(page, f);
+  const region = page.getByRole("region", { name: "Photo 1 of 3", exact: true });
+  const preview = await region.getByRole("img").first().boundingBox();
+  const caption = await page.getByLabel("Visible caption", { exact: true }).boundingBox();
+  const description = await page.getByLabel("Image description", { exact: true }).boundingBox();
+  expect(preview).not.toBeNull();
+  expect(caption).not.toBeNull();
+  expect(description).not.toBeNull();
+  if (!preview || !caption || !description) throw new Error("Missing photo editing surface");
+  expect(caption.x).toBeGreaterThan(preview.x + preview.width - 1);
+  expect(caption.y + caption.height).toBeLessThan(1024);
+  expect(description.y + description.height).toBeLessThan(1024);
 });

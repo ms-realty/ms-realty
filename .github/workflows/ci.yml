@@ -40,12 +40,19 @@ jobs:
   browsers:
     name: Browser / ${{ matrix.profile }}
     needs: source
-    runs-on: ubuntu-latest
+    # Keep browser OS dependencies reproducible across ubuntu-latest image migrations.
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        profile: [chromium-desktop, chromium-mobile, webkit-mobile]
+        include:
+          - profile: chromium-desktop
+            engine: chromium
+          - profile: chromium-mobile
+            engine: chromium
+          - profile: webkit-mobile
+            engine: webkit
     env:
       TEST_DATABASE_URL: postgres://postgres:pg@127.0.0.1:5432/postgres
       PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/${{ matrix.profile }}
@@ -57,11 +64,16 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
-      - name: Install locked dependencies and browser runtimes
+      - name: Install locked dependencies
+        timeout-minutes: 5
         run: |
           npm ci --no-audit --no-fund
           npm ci --prefix gateway --ignore-scripts --no-audit --no-fund
-          npx playwright install --with-deps chromium webkit
+      - name: Install the profile browser runtime
+        timeout-minutes: 10
+        env:
+          BROWSER_ENGINE: ${{ matrix.engine }}
+        run: npx playwright install --with-deps "$BROWSER_ENGINE"
       - name: Start disposable PostgreSQL and build the candidate
         run: |
           docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:16.14-alpine -c max_locks_per_transaction=256

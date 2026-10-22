@@ -97,10 +97,12 @@ for (const javaScriptEnabled of [false, true])
       await signIn(page, f.token);
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
 
-      await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
-      const summary = page
-        .locator("header")
-        .filter({ has: page.getByRole("heading", { level: 1, name: "Edit listing" }) });
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
+      ).toBeVisible();
+      const summary = page.locator("header").filter({
+        has: page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
+      });
       await expect(
         page.getByRole("paragraph").getByText(f.reference, { exact: true }),
       ).toBeVisible();
@@ -183,7 +185,9 @@ for (const javaScriptEnabled of [false, true])
       // A receipt from another listing shows nothing on this one.
       const id = new URL(receipt).searchParams.get("saved") ?? "";
       await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}?saved=${id}`));
-      await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Синтетична обява без чернова" }),
+      ).toBeVisible();
       await expect(page.getByText("Working draft saved")).toHaveCount(0);
     });
 
@@ -772,7 +776,11 @@ test("O12 without a saved draft asks for the source and does not write", async (
   const f = seed();
   await signIn(page, f.token);
   await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}`));
-  await expect(page.getByText("No working draft is saved yet.", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("Editing the last saved version. Save to create a working draft.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   const source = page.getByLabel("Source or evidence reference", { exact: true });
   await expect(source).toBeVisible();
   const before = await listing(f.blank.listingId);
@@ -781,24 +789,24 @@ test("O12 without a saved draft asks for the source and does not write", async (
   const summary = page.getByRole("region", { name: "Check the form" });
   await expect(summary).toBeVisible();
   await expect(source).toHaveAttribute("aria-invalid", "true");
-  // 694:13318: the error summary leads the work column, then the no-draft alert.
+  // Correction leads back to an editable field, with the error summary before the fields.
   const summaryTop = (await summary.boundingBox())?.y ?? Number.POSITIVE_INFINITY;
-  const alertTop =
-    (await page.getByText("No working draft is saved yet.", { exact: false }).boundingBox())?.y ??
-    0;
-  expect(summaryTop).toBeLessThan(alertTop);
+  const fieldTop = (await page.getByLabel("Listing title", { exact: true }).boundingBox())?.y ?? 0;
+  expect(summaryTop).toBeLessThan(fieldTop);
   expect(await listing(f.blank.listingId)).toEqual(before);
 });
 
 test("O12 keeps BG and RU labels and a read-only role cannot edit", async ({ page }) => {
   const f = seed();
   await signIn(page, f.token);
-  for (const [locale, title, text, save] of [
-    ["bg", "Редактиране на обява", "Текст", "Запишете описанието"],
-    ["ru", "Редактирование объявления", "Текст", "Сохранить описание"],
+  for (const [locale, text, save] of [
+    ["bg", "Текст", "Запишете описанието"],
+    ["ru", "Текст", "Сохранить описание"],
   ] as const) {
     await page.goto(hostUrl("staff", `/${locale}/inventory/${f.reference}`));
-    await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
+    ).toBeVisible();
     await expect(page.getByRole("radio", { name: text, exact: true })).toBeChecked();
     await expect(page.getByRole("button", { name: save, exact: true })).toBeVisible();
   }

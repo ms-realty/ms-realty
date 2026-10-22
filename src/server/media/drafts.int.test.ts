@@ -106,6 +106,7 @@ describe("O13 photo drafts, approval and gallery order", () => {
     );
     expect(await mediaReceipt(t.db, staff.session, f.listingId, saved.operationId)).toMatchObject({
       action: "media.details.saved",
+      details: { pendingReview: true, discarded: false },
     });
     await expect(prepare(f)).rejects.toMatchObject({ code: "publication_ineligible" });
     await expect(activate(f, preparedBeforeEdit.outcome.manifestId)).rejects.toMatchObject({
@@ -170,7 +171,16 @@ describe("O13 photo drafts, approval and gallery order", () => {
       saveMediaDetails(t.db, { ...command, operationId: randomUUID() }),
     ).rejects.toMatchObject({ code: "version_conflict" });
     expect((await asset(id)).detailsDraft).toEqual(draft);
-    await save(id, { discard: true });
+    const discarded = await save(id, { discard: true });
+    expect(
+      await mediaReceipt(t.db, staff.session, f.listingId, discarded.operationId),
+    ).toMatchObject({
+      details: { pendingReview: false, discarded: true },
+    });
+    // An older receipt describes its own outcome, even after a later discard.
+    expect(await mediaReceipt(t.db, staff.session, f.listingId, first.operationId)).toMatchObject({
+      details: { pendingReview: true, discarded: false },
+    });
     expect(await asset(id)).toMatchObject({
       detailsDraft: null,
       review: "approved",

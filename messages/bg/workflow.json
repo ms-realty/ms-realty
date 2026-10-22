@@ -582,6 +582,17 @@
     "reviewShort": "Преглед",
     "editPermissions": "Променете записаните разрешения",
     "reviewNeedsDetails": "Добавете описание на изображението и пояснение за промените, преди да одобрите.",
-    "photoNumber": "Снимка {n} от {total}"
+    "photoNumber": "Снимка {n} от {total}",
+    "directoryTitle": "Обяви",
+    "sourceVersionHint": "Редактирате последната запазена версия. Запазете, за да създадете работна чернова.",
+    "photoReviewShort": "Преглед на снимка",
+    "reviewSaved": "Преглед на запазените промени",
+    "currentCover": "Текуща корица",
+    "proposedCover": "Предложена корица",
+    "enlargePhoto": "Увеличаване на снимката",
+    "opensNewTab": "Отваря се в нов раздел",
+    "photoMoved": "{photo}: позиция {position} от {total} в предложения ред.",
+    "draftDiscarded": "Черновата на снимката е отхвърлена",
+    "detailsUnchanged": "Данните на снимката съвпадат с одобрената версия"
   }
 }

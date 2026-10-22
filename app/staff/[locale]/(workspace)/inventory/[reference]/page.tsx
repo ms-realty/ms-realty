@@ -27,7 +27,7 @@ import { draftSchema } from "@/server/inventory/contracts";
 import { uneditablePriceEvidence, workingDraftFrom } from "@/server/inventory/working-draft";
 import { publicationReadiness } from "@/server/publication/commands";
 import { buttonClass } from "@/ui/button-class";
-import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon, WarningIcon } from "@/ui/icons";
+import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon } from "@/ui/icons";
 import { saveInventory } from "../actions";
 import { ReviewView } from "./review-view";
 
@@ -254,50 +254,36 @@ export default async function InventoryDetailPage({
   ];
 
   return (
-    <div className="flex flex-col gap-6 px-gutter py-5 sm:gap-8 sm:px-gutter-wide sm:py-8">
-      <ListingIdentity locale={locale} reference={reference} title={values.title}>
-        <p className="rounded-control bg-subtle px-3 py-2 text-dense font-semibold">
-          {optionLabel(listing.editorialState, locale)}
-        </p>
-      </ListingIdentity>
-      <header className="flex flex-col gap-3">
-        <h1 className="text-heading font-semibold sm:text-title">{o12.title}</h1>
-        <p className="text-text-muted">
-          {property.settlement}
-          {summary.length ? (
-            <>
-              {/* O12 Mobile keeps the listing identity above the recorded numbers (14:4947). */}
-              <span className="hidden sm:inline"> · </span>
-              <br className="sm:hidden" />
-              {summary.join(" · ")}
-            </>
-          ) : null}
-          <br />
-          {o12.sourceLine}
-        </p>
-        <p className="text-text-muted">{o12.instruction}</p>
-      </header>
+    <div className="flex flex-col gap-4 px-gutter py-5 sm:gap-6 sm:px-gutter-wide sm:py-6">
+      <ListingIdentity
+        locale={locale}
+        reference={reference}
+        title={values.title}
+        heading
+        meta={optionLabel(listing.editorialState, locale)}
+        summary={[property.settlement, ...summary].join(" · ")}
+      />
       {error}
       {/* Text and Facts are one form; the tabs switch panels in place (group/o12). */}
       <div data-o12 className="group/o12 flex flex-col gap-5 sm:gap-6">
         <ListingNavigation locale={locale} reference={reference} current={tab} formId={formId} />
-        <EditTabs
-          tab={tab === "facts" ? "facts" : "text"}
-          formId={formId}
-          labels={{
-            tabs: o12.tabs,
-            facts: o12.facts,
-            text: o12.text,
-            photos: o12.photos,
-            noscript: o12.noscriptLeave,
-          }}
-        />
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <section
             id="listing-text"
             aria-label={o12.text}
             className="flex min-w-0 flex-1 flex-col gap-6"
           >
+            <EditTabs
+              tab={tab === "facts" ? "facts" : "text"}
+              formId={formId}
+              labels={{
+                tabs: o12.tabs,
+                facts: o12.facts,
+                text: o12.text,
+                photos: o12.photos,
+                noscript: o12.noscriptLeave,
+              }}
+            />
             {mayEdit ? (
               <div data-o12-editor className="[&>form]:gap-6">
                 <InventoryEditor
@@ -306,12 +292,10 @@ export default async function InventoryDetailPage({
                   view="edit"
                   formId={formId}
                   draftKey={draftKey}
-                  // 647:12802: the no-draft alert leads the work column (under any error summary).
                   lead={
                     parsed.success ? null : (
-                      <p className="flex items-start gap-3 rounded-control bg-warning-soft p-4 text-dense">
-                        <WarningIcon className="size-5 shrink-0 text-warning" />
-                        {o12.noDraft}
+                      <p className="text-caption text-text-muted">
+                        {workflowCopy(locale, "listingWorkspace").sourceVersionHint}
                       </p>
                     )
                   }

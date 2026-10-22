@@ -96,17 +96,21 @@ export function ListingIdentity({
   reference,
   title,
   meta,
+  heading = false,
+  summary,
   children,
 }: {
   locale: string;
   reference: string;
   title?: string | null;
   meta?: string | null;
+  heading?: boolean;
+  summary?: ReactNode;
   children?: ReactNode;
 }) {
   const copy = inventoryCopy(locale);
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-divider pb-4">
+    <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-divider pb-4">
       <div className="flex min-w-0 items-start gap-3">
         <a
           href={`/${locale}/inventory`}
@@ -116,7 +120,11 @@ export function ListingIdentity({
           <ChevronStartIcon directional className="size-5" />
         </a>
         <div className="min-w-0 py-1">
-          {title ? (
+          {heading ? (
+            <h1 lang={title ? "bg" : undefined} className="text-heading font-semibold text-text">
+              {title || reference}
+            </h1>
+          ) : title ? (
             <p lang="bg" className="font-semibold text-text">
               {title}
             </p>
@@ -125,9 +133,10 @@ export function ListingIdentity({
             <bdi>{reference}</bdi>
             {meta ? <> · {meta}</> : null}
           </p>
+          {summary ? <p className="mt-1 text-dense text-text-muted">{summary}</p> : null}
         </div>
       </div>
       {children}
-    </div>
+    </header>
   );
 }

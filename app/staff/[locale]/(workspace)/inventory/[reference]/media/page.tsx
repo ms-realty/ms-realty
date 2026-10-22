@@ -287,7 +287,7 @@ export default async function MediaPage({
     </a>
   );
   return (
-    <div className="mx-auto flex max-w-[96rem] flex-col gap-5 px-gutter py-5 sm:px-gutter-wide sm:py-6">
+    <div className="mx-auto flex max-w-[96rem] flex-col group/media gap-5 px-gutter py-5 sm:px-gutter-wide sm:py-6">
       <ListingIdentity
         locale={locale}
         reference={listing.reference}
@@ -336,8 +336,20 @@ export default async function MediaPage({
                 ref,
               )
             : receipt.action === "media.details.saved"
-              ? workspace.detailsSaved
+              ? receipt.details?.pendingReview
+                ? workspace.detailsSaved
+                : receipt.details?.discarded
+                  ? workspace.draftDiscarded
+                  : workspace.detailsUnchanged
               : copy.saved}
+          {receipt.details?.pendingReview && receipt.relationId ? (
+            <a
+              href={`${photoHref(receipt.relationId)}&panel=review#photo-review-panel`}
+              className="inline-flex min-h-control items-center font-semibold text-action underline"
+            >
+              {workspace.reviewSaved}
+            </a>
+          ) : null}
           <details>
             <summary className="cursor-pointer text-caption">
               {inventoryCopy(locale).operation}
@@ -358,14 +370,27 @@ export default async function MediaPage({
       {selected ? (
         <section
           aria-labelledby="o13-heading"
-          className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,24rem)] lg:gap-8"
+          className="grid items-start gap-5 min-[48rem]:grid-cols-[minmax(0,1fr)_minmax(19rem,24rem)] lg:gap-8"
         >
           <div className="min-w-0 space-y-4">
-            <Preview
-              row={selected}
-              label={workspace.noPhoto}
-              className="aspect-4/3 max-h-[60vh] bg-subtle"
-            />
+            <div className="relative">
+              <Preview
+                row={selected}
+                label={workspace.noPhoto}
+                className="aspect-4/3 max-h-[20dvh] bg-subtle min-[48rem]:max-h-[60dvh]"
+              />
+              {previewable(selected) ? (
+                <a
+                  href={`/api/files/private/media/${selected.asset.id}?preview=1`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-2 end-2 inline-flex min-h-control items-center rounded-control bg-canvas px-3 text-caption font-semibold text-action shadow-sm"
+                >
+                  {workspace.enlargePhoto}
+                  <span className="sr-only"> · {workspace.opensNewTab}</span>
+                </a>
+              ) : null}
+            </div>
             <nav aria-label={fillCopy(copy.allPhotos, { total })}>
               <ol className="flex gap-2 overflow-x-auto pb-2">
                 {assets.map((row, index) => (
@@ -392,7 +417,10 @@ export default async function MediaPage({
               </ol>
             </nav>
           </div>
-          <div className="min-w-0 space-y-5 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:border-s lg:border-divider lg:ps-6">
+          <div
+            id="photo-review-panel"
+            className="min-w-0 scroll-mt-4 space-y-4 min-[48rem]:col-start-2 min-[48rem]:row-span-2 min-[48rem]:row-start-1 min-[48rem]:border-s min-[48rem]:border-divider min-[48rem]:ps-5"
+          >
             <nav
               aria-label={workspace.imageDetails}
               className="flex flex-wrap border-b border-divider"
@@ -407,13 +435,13 @@ export default async function MediaPage({
                 <span aria-hidden="true">{inventoryCopy(locale).o12.text}</span>
               </LeaveControl>
               <LeaveControl
-                href={`${detailsHref}&panel=review`}
+                href={`${detailsHref}&panel=review#photo-review-panel`}
                 formId={detailsFormId}
                 current={review}
                 className="inline-flex min-h-control items-center border-b-2 border-transparent px-3 py-2 text-dense font-semibold text-text-muted aria-[current=page]:border-action aria-[current=page]:text-action"
               >
                 <span className="sr-only">{workspace.reviewPhoto}</span>
-                <span aria-hidden="true">{workspace.reviewShort}</span>
+                <span aria-hidden="true">{workspace.photoReviewShort}</span>
               </LeaveControl>
             </nav>
             {selected.asset.detailsDraft ? (
@@ -434,7 +462,7 @@ export default async function MediaPage({
               guard={guard}
             />
           </div>
-          <div className="min-w-0 space-y-4 lg:col-start-1">
+          <div className="min-w-0 space-y-4 min-[48rem]:col-start-1">
             <details className="border-t border-divider pt-2">
               <summary className="min-h-control cursor-pointer py-2 text-dense font-semibold">
                 {copy.orderTitle}
@@ -543,6 +571,7 @@ export default async function MediaPage({
               }
               items={assets.map((row, index) => ({
                 id: row.relation.id,
+                label: `${fileLabel(copy, "photo")} ${index + 1}`,
                 hidden: row.relation.hidden,
                 content: tile(row, index),
                 preview: (
@@ -564,11 +593,12 @@ export default async function MediaPage({
                 review: copy.reviewOrder,
                 save: copy.saveOrder,
                 cancel: copy.cancel,
-                before: copy.before,
-                after: copy.proposal,
+                before: workspace.currentCover,
+                after: workspace.proposedCover,
                 up: copy.moveUp,
                 down: copy.moveDown,
                 cover: workspace.coverShort,
+                moved: workspace.photoMoved,
                 conflict: copy.conflict,
                 guard,
               }}

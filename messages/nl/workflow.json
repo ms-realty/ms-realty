@@ -582,6 +582,17 @@
     "reviewShort": "Controle",
     "editPermissions": "Vastgelegde toestemmingen wijzigen",
     "reviewNeedsDetails": "Voeg vóór goedkeuring een afbeeldingsbeschrijving en toelichting op eventuele bewerkingen toe.",
-    "photoNumber": "Foto {n} van {total}"
+    "photoNumber": "Foto {n} van {total}",
+    "directoryTitle": "Objecten",
+    "sourceVersionHint": "U bewerkt de laatst opgeslagen versie. Sla op om een werkconcept te maken.",
+    "photoReviewShort": "Fotocontrole",
+    "reviewSaved": "Opgeslagen fotogegevens controleren",
+    "currentCover": "Huidige omslag",
+    "proposedCover": "Voorgestelde omslag",
+    "enlargePhoto": "Foto vergroten",
+    "opensNewTab": "Opent in een nieuw tabblad",
+    "photoMoved": "{photo}: positie {position} van {total} in de voorgestelde volgorde.",
+    "draftDiscarded": "Fotoconcept verworpen",
+    "detailsUnchanged": "Fotogegevens komen overeen met de goedgekeurde versie"
   }
 }
