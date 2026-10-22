@@ -145,7 +145,7 @@ export function MediaGallery({
       className={cx(
         "grid gap-3",
         reviewing
-          ? "grid-cols-3 sm:grid-cols-4 xl:grid-cols-6"
+          ? "grid-cols-2 min-[24rem]:grid-cols-3 sm:grid-cols-4 xl:grid-cols-6"
           : "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4",
       )}
       onDragStart={(event) => {
@@ -195,14 +195,10 @@ export function MediaGallery({
             )}
           >
             <div inert={editing}>{item.content}</div>
-            <span className="pointer-events-none absolute start-2 top-2 rounded-control bg-canvas px-2 py-1 text-caption font-semibold tabular-nums">
-              {index + 1}
+            <span className="pointer-events-none absolute start-2 top-2 inline-flex max-w-[calc(100%_-_1rem)] flex-wrap gap-x-1 rounded-control bg-canvas px-2 py-1 text-caption font-semibold">
+              <span className="tabular-nums">{index + 1}</span>
+              {after?.id === id ? <span>{copy.cover}</span> : null}
             </span>
-            {after?.id === id ? (
-              <span className="pointer-events-none absolute end-2 top-2 rounded-control bg-canvas px-2 py-1 text-caption font-semibold">
-                {copy.cover}
-              </span>
-            ) : null}
             {editing && !reviewing ? (
               <div className="mt-2 flex justify-between gap-2">
                 <button
