@@ -3,6 +3,7 @@ import { setTimeout } from "node:timers/promises";
 import { readStagingInputs, validateStaging } from "./staging-config.mjs";
 import { prepareRuntimeRollout } from "./staging-rollout-proof.mjs";
 import { permanent } from "./staging-settle.mjs";
+import { waitForStagingWebHealth } from "./staging-web-health.mjs";
 
 try {
   const { input, artifacts } = await readStagingInputs(process.argv[2]);
@@ -59,15 +60,9 @@ try {
       throw new Error("Migration failed or is uncertain; operator reconciliation required");
     await setTimeout(5000);
   }
-  const response = await fetch(`${input.origins.public}/api/health`, {
-    headers: accessHeaders,
-    redirect: "error",
-    signal: AbortSignal.timeout(20000),
-  });
-  if (!response.ok || !response.headers.get("x-robots-tag")?.includes("noindex"))
-    throw new Error("Staging web/noindex health unavailable");
-  const health = await response.json();
-  if (health.build !== input.sourceCommit) throw new Error("Staging web build identity mismatch");
+  // Migration completion starts the web role asynchronously. Only health observations
+  // settle here; access, noindex and source-identity failures remain terminal.
+  const webHealth = await waitForStagingWebHealth(input, accessHeaders);
   const { runtime, observation } = await prepareRuntimeRollout(
     input,
     () => call("runtime", "POST"),
@@ -76,7 +71,7 @@ try {
   );
   await writeFile(
     "deploy/staging-runtime.generated.json",
-    `${JSON.stringify({ schemaVersion: 1, runtime, migration: completed, provider: observation }, null, 2)}\n`,
+    `${JSON.stringify({ schemaVersion: 1, runtime, migration: completed, provider: observation, webHealth }, null, 2)}\n`,
   );
   console.log(
     "Explicit migration completion and immutable role sources checked; provider-reported digest/rollouts observed. Independent launch, parity and delivery remain unqualified.",
