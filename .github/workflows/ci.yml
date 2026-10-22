@@ -73,7 +73,11 @@ jobs:
         timeout-minutes: 10
         env:
           BROWSER_ENGINE: ${{ matrix.engine }}
-        run: npx playwright install --with-deps "$BROWSER_ENGINE"
+        run: |
+          # The hosted Azure HTTP mirror can stall on small OS packages. Keep the
+          # same signed Ubuntu archive and package set through its HTTPS endpoint.
+          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+          npx playwright install --with-deps "$BROWSER_ENGINE"
       - name: Start disposable PostgreSQL and build the candidate
         run: |
           docker run -d --name ci-postgres -e POSTGRES_PASSWORD=pg -p 5432:5432 postgres:16.14-alpine -c max_locks_per_transaction=256

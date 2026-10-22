@@ -79,6 +79,9 @@ inputs, empty trusted-key configuration and missing approvals remain blocked; te
 alignment supplies no signed R00 authority or evidence-owner assignment.
 
 Browser CI uses a pinned Ubuntu browser runner and installs the engine for each profile with
-bounded dependency/setup steps. The required gate still includes desktop Chromium, mobile
+bounded dependency/setup steps. OS packages use Ubuntu's HTTPS archive after the hosted
+Azure HTTP mirror exhausted setup time on slow package transfers. The package set and
+signature checks remain unchanged; see [Ubuntu package management](https://ubuntu.com/server/docs/how-to/software/package-management/).
+The required gate still includes desktop Chromium, mobile
 Chromium, mobile WebKit, real scanner-backed journeys, isolated recovery, analytics isolation,
 visual comparisons and the delivery container.
