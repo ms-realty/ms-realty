@@ -66,7 +66,10 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await page.screenshot({ path: test.info().outputPath("real-map.png"), fullPage: true });
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
-  await page.getByRole("link", { name: "Go to list", exact: true }).click();
+  await page
+    .getByRole("region", { name: mapCopy("en").title, exact: true })
+    .getByRole("link", { name: "Go to list", exact: true })
+    .click();
   await expect(page.locator("#property-results")).toBeFocused();
   await page.goto(
     `/en/properties/${data.published.reference}/${data.published.reference.toLowerCase()}`,

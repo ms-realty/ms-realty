@@ -105,7 +105,9 @@ for (const width of [320, 390, 1440]) {
     await page.goto(propertyHref());
     const main = page.getByRole("main");
     const heading = main.getByRole("heading", { level: 1, name: listing.title, exact: true });
-    const gallery = main.locator("ul").filter({ has: page.locator('img[src*="/api/media/"]') });
+    // The cover leads; the remaining photos are disclosed on demand. A failed image
+    // still has a visible figure and must not make the geometry assertion wait for an img.
+    const gallery = main.locator("figure").first();
     const facts = main.locator("dl").first();
     const price = main.locator("header > p").last();
     const panel = main.getByRole("complementary");

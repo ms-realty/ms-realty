@@ -89,21 +89,21 @@ for (const javaScriptEnabled of [false, true])
       // One link per case; its name carries type, purpose, stage, disposition and owner.
       await expect(
         page.getByRole("link", {
-          name: `${buyer.reference} · Buying ${buyer.title} · Agreeing requirements Accountable broker: ${f.ownerName}`,
+          name: `${buyer.title} ${buyer.reference} · Buying · Agreeing requirements Accountable broker: ${f.ownerName}`,
           exact: true,
         }),
       ).toHaveAttribute("href", `/en/cases/${buyer.id}`);
       await expect(rows(page).filter({ hasText: tenant.reference })).toHaveText(
-        `${tenant.reference} · Renting ${tenant.title} · Selecting properties Accountable broker: ${f.ownerName}`,
+        `${tenant.title} ${tenant.reference} · Renting · Selecting properties Accountable broker: ${f.ownerName}`,
       );
       await expect(rows(page).filter({ hasText: paused.reference })).toHaveText(
-        `${paused.reference} · Selling ${paused.title} · Preparing the listing Paused · Accountable broker: ${f.ownerName}`,
+        `${paused.title} ${paused.reference} · Selling · Preparing the listing Paused · Accountable broker: ${f.ownerName}`,
       );
       await expect(rows(page).filter({ hasText: closed.reference })).toHaveText(
-        `${closed.reference} · Letting ${closed.title} · On the market Closed · Accountable broker: ${f.ownerName}`,
+        `${closed.title} ${closed.reference} · Letting · On the market Closed · Accountable broker: ${f.ownerName}`,
       );
       await expect(rows(page).filter({ hasText: covered.reference })).toHaveText(
-        `${covered.reference} · Buying ${covered.title} · Viewings Work without an owner · Last accepted owner: ${f.formerName}`,
+        `${covered.title} ${covered.reference} · Buying · Viewings Work without an owner · Last accepted owner: ${f.formerName}`,
       );
       await fitsWidth(page);
       await page.screenshot({ path: info.outputPath("o04-cases.png"), fullPage: true });
@@ -187,7 +187,7 @@ test("O04 keeps BG and RU labels, and a first-use empty state", async ({ page })
       "Търсене",
       "Покажете",
       "Списък със сделки",
-      `${buyer.reference} · Покупка ${buyer.title} · Уточняване на изискванията Отговорен брокер: ${f.ownerName}`,
+      `${buyer.title} ${buyer.reference} · Покупка · Уточняване на изискванията Отговорен брокер: ${f.ownerName}`,
       directoryCopy("bg").count.replace("{n}", "6"),
     ],
     [
@@ -196,7 +196,7 @@ test("O04 keeps BG and RU labels, and a first-use empty state", async ({ page })
       "Поиск",
       "Показать",
       "Список сделок",
-      `${buyer.reference} · Покупка ${buyer.title} · Согласование требований Ответственный брокер: ${f.ownerName}`,
+      `${buyer.title} ${buyer.reference} · Покупка · Согласование требований Ответственный брокер: ${f.ownerName}`,
       directoryCopy("ru").count.replace("{n}", "6"),
     ],
   ] as const) {

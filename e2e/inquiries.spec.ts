@@ -187,7 +187,7 @@ for (const javaScriptEnabled of [true, false])
         `Assigned · Received 2 hours ago · Preferred language: English · Accountable owner: ${f.broker.name}`,
       );
       await expect(rows(page).nth(3)).toContainText(
-        `${f.name("Petar")} · QuestionSuspected spam · Received 1 hour ago · Accountable owner: Work without an owner`,
+        `${f.name("Petar")} · Question RQ-O02-${f.key}-3 Suspected spam · Received 1 hour ago · Accountable owner: Work without an owner`,
       );
       await expect(rows(page).nth(4)).toContainText(`Accountable owner: ${f.colleague.name}`);
       await expect(rows(page).nth(1).getByRole("link")).toHaveAttribute(
@@ -295,7 +295,7 @@ for (const javaScriptEnabled of [true, false])
       ).toBeVisible();
       const found = page.getByRole("list", { name: en.queue.results }).getByRole("listitem");
       await expect(found).toHaveCount(1);
-      await expect(found).toContainText(`${f.name("Nikol")} · RQ-O02-${f.key}-1`);
+      await expect(found).toContainText(`${f.name("Nikol")} RQ-O02-${f.key}-1`);
       await expect(found.getByRole("link")).toHaveAttribute(
         "href",
         `/en/inquiries/${f.ids[1]}?view=mine`,

@@ -11,6 +11,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import * as schema from "../src/db/schema";
+import { caseCopy } from "../src/features/cases/copy";
 import { todayCopy } from "../src/features/work/today-copy";
 import { hostUrl } from "./hosts";
 import { noOverflow, staffSession, todayDatabase } from "./today-helpers";
@@ -184,7 +185,10 @@ for (const javaScriptEnabled of [false, true])
       await row(first.reference).click();
       await expect(page).toHaveURL(hostUrl("staff", `/en/calendar/${first.id}`));
       await expect(
-        page.getByRole("heading", { name: first.reference, exact: false }),
+        page.getByRole("heading", { level: 1, name: caseCopy("en").appointmentTitle, exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("main").getByText(first.reference, { exact: true }),
       ).toBeVisible();
     });
 
