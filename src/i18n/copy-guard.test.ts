@@ -22,6 +22,14 @@ const migratedScreens: string[] = [
   "src/features/discovery/intent-copy.ts",
   "src/features/discovery/map-copy.ts",
   "src/features/privacy/copy.ts",
+  "src/features/case-access/copy.ts",
+  "src/features/cases/copy.ts",
+  "src/features/cases/lifecycle-copy.ts",
+  "src/features/cases/owner-preview-copy.ts",
+  "src/features/document-requests/copy.ts",
+  "src/features/files/copy.ts",
+  "src/features/proposals/copy.ts",
+  "src/i18n/fact-labels.ts",
 ];
 
 describe("copy guard rules", () => {

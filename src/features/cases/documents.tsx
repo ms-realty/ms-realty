@@ -1,3 +1,4 @@
+import { workflowCopy } from "@/i18n/workflow-copy";
 import "server-only";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/db/client";
@@ -17,75 +18,7 @@ import {
   workflowLink,
 } from "./screens";
 
-const copy = (locale: string) =>
-  locale === "bg"
-    ? {
-        title: "Документи",
-        empty: "Няма документи, споделени изрично с този профил.",
-        download: "Изтегляне на текущия файл",
-        version: "Версия",
-        technical: "Технически подробности",
-        purpose: "За какво е документът",
-        review: "Преглед за посочената цел",
-        professional: "Професионална проверка",
-        not_requested: "Не е поискана",
-        requested: "Поискана · очаква се резултат",
-        validated: "Записано е професионално заключение",
-        declined: "Отказана",
-        expiry: "Валиден до",
-        scan_pending: "Файлът се проверява. Проверете отново по-късно.",
-        scan_failed: "Проверката не завърши. Свържете се с брокера.",
-        unsafe: "Файлът не е безопасен и не може да бъде изтеглен.",
-        needs_replacement: "Необходим е заместващ файл. Свържете се с брокера.",
-        unavailable: "Файлът още не е достъпен за изтегляне.",
-        back: "Отворете сделката",
-        note: "Показана е текущата версия. Прегледът за определена цел е отделен от професионалното заключение.",
-      }
-    : locale === "ru"
-      ? {
-          title: "Документы",
-          empty: "Нет документов, явно открытых этому профилю.",
-          download: "Скачать текущий файл",
-          version: "Версия",
-          technical: "Технические подробности",
-          purpose: "Для чего этот документ",
-          review: "Проверка для указанной цели",
-          professional: "Профессиональная проверка",
-          not_requested: "Не запрошена",
-          requested: "Запрошена · ожидается результат",
-          validated: "Записано профессиональное заключение",
-          declined: "Отклонена",
-          expiry: "Действителен до",
-          scan_pending: "Файл проверяется. Повторите позже.",
-          scan_failed: "Проверка не завершена. Свяжитесь с брокером.",
-          unsafe: "Файл небезопасен и недоступен для скачивания.",
-          needs_replacement: "Нужен заменяющий файл. Свяжитесь с брокером.",
-          unavailable: "Файл пока недоступен для скачивания.",
-          back: "Откройте сделку",
-          note: "Показана текущая версия. Проверка для конкретной цели отличается от профессионального заключения.",
-        }
-      : {
-          title: "Documents",
-          empty: "No documents have been explicitly shared with this account.",
-          download: "Download current file",
-          version: "Version",
-          technical: "Technical details",
-          purpose: "What the document is for",
-          review: "Review for the stated purpose",
-          professional: "Professional review",
-          not_requested: "Not requested",
-          requested: "Requested · awaiting a result",
-          validated: "Professional conclusion recorded",
-          declined: "Declined",
-          expiry: "Valid until",
-          scan_pending: "The file is being checked. Check again later.",
-          scan_failed: "The file check did not complete. Contact your broker.",
-          unsafe: "The file is unsafe and cannot be downloaded.",
-          needs_replacement: "A replacement file is needed. Contact your broker.",
-          unavailable: "This file is not available for download yet.",
-          back: "Open the deal",
-          note: "This is the current version. Review for a stated purpose is separate from a professional conclusion.",
-        };
+const copy = (locale: string) => workflowCopy(locale, "documents");
 
 async function documentRead<T>(locale: string, path: string, run: () => Promise<T>): Promise<T> {
   try {

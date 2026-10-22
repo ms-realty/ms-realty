@@ -56,6 +56,10 @@ const sampleValues = {
   names: "Test Manager",
   code: "RQ-TEST-000042",
   seconds: 30,
+  n: 1,
+  total: 3,
+  order: "2, 1, 3",
+  direction: "down",
 };
 
 /** What a reader sees: no ICU syntax, placeholders or names that every locale shares. */

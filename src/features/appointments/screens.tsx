@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
 import { isPublicLocale } from "@/i18n/config";
+import { workflowCopy } from "@/i18n/workflow-copy";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import { Notice } from "@/ui/notice";
 import { workflowScope } from "../cases/contract";
@@ -100,7 +101,10 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       </p>
 
       {row.caseId ? (
-        <nav className="flex flex-wrap gap-4" aria-label={hostCopy.links}>
+        <nav
+          className="flex flex-wrap gap-4"
+          aria-label={workflowCopy(props.locale, "viewing").links}
+        >
           <a
             className={`${workflowLink} inline-flex min-h-control items-center`}
             href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.caseId}`}

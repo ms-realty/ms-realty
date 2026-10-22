@@ -443,7 +443,6 @@ export async function CaseScreen(
     // Its links need no conversation history or signed manual-action forms.
     const agenda = await listAppointments(getDb(), props.session, row.id);
     const appointment = agenda.length === 1 ? agenda[0] : undefined;
-    const copyLocale = props.locale === "bg" || props.locale === "ru" ? props.locale : "en";
     const links = [
       {
         label: c.appointments,
@@ -463,20 +462,13 @@ export async function CaseScreen(
             ) : null}
           </>
         ) : agenda.length === 0 ? (
-          <span lang={copyLocale} dir="ltr">
-            {c.noAppointments}
-          </span>
+          <span>{c.noAppointments}</span>
         ) : null,
       },
       {
         label: c.interests,
         href: `/${props.locale}/properties/${row.id}`,
-        detail:
-          view.interests.length === 0 ? (
-            <span lang={copyLocale} dir="ltr">
-              {c.noInterests}
-            </span>
-          ) : null,
+        detail: view.interests.length === 0 ? <span>{c.noInterests}</span> : null,
       },
       { label: c.documents, href: `/${props.locale}/documents`, detail: null },
     ];

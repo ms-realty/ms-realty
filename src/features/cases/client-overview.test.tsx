@@ -123,7 +123,7 @@ it("uses only the supplied authorized appointment and sends the hero conversatio
   expect(reads.messages).not.toHaveBeenCalled();
 });
 
-it("isolates a recorded English action and English empty-state copy inside the Hebrew overview", async () => {
+it("isolates a recorded English action while Hebrew interface copy inherits the reading direction", async () => {
   const nextAction = "Review the recorded step-free requirement with your broker.";
   reads.detail.mockResolvedValue({
     ...baseView,
@@ -143,18 +143,12 @@ it("isolates a recorded English action and English empty-state copy inside the H
     </div>,
   );
   expect(screen.getByRole("heading", { name: nextAction })).toHaveAttribute("dir", "auto");
-  for (const text of [
-    "No appointments are available in this scope.",
-    "No properties have been suggested yet.",
-  ]) {
-    const fallback = screen.getByText(text);
-    expect(fallback).toHaveAttribute("lang", "en");
-    expect(fallback).toHaveAttribute("dir", "ltr");
+  for (const text of ["אין מפגשים זמינים במסגרת גישה זו.", "טרם הוצעו נכסים."]) {
+    const translated = screen.getByText(text);
+    expect(translated.closest("[lang]")).toHaveAttribute("lang", "he");
+    expect(translated.closest("[dir]")).toHaveAttribute("dir", "rtl");
   }
-  expect(screen.getByRole("link", { name: /Appointments/ })).toHaveAttribute(
-    "href",
-    "/he/appointments",
-  );
+  expect(screen.getByRole("link", { name: /מפגשים/ })).toHaveAttribute("href", "/he/appointments");
 });
 
 it("keeps the full Case route and its requirements section outside the compact entry", async () => {

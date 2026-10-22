@@ -8,6 +8,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { caseCopy } from "../src/features/cases/copy";
 import { lifecycleCopy } from "../src/features/cases/lifecycle-copy";
+import { workflowCopy } from "../src/i18n/workflow-copy";
 import { createCase, createClient, createStaff, relate } from "../src/server/testing";
 import { hostUrl, origins } from "./hosts";
 
@@ -281,6 +282,25 @@ for (const javaScriptEnabled of [true, false]) {
           path: info.outputPath(`client-overview-he-320-${javaScriptEnabled}.png`),
           fullPage: true,
         });
+
+        for (const locale of ["de", "nl", "el", "he"]) {
+          await page.setViewportSize({ width: 390, height: 844 });
+          await page.goto(hostUrl("client", `/${locale}/overview`));
+          await expect(page.getByRole("heading", { level: 1 })).toHaveText(data.first.title);
+          await expect(
+            page.getByText(caseCopy(locale).noAppointments, { exact: true }),
+          ).toBeVisible();
+          await expect(page.getByText(caseCopy(locale).noInterests, { exact: true })).toBeVisible();
+          for (const [destination, title] of [
+            ["appointments", caseCopy(locale).calendar],
+            ["documents", workflowCopy(locale, "documents").title],
+            ["proposals", caseCopy(locale).proposals],
+          ]) {
+            await page.goto(hostUrl("client", `/${locale}/${destination}`));
+            await expect(page.getByRole("heading", { level: 1 })).toHaveText(title ?? "");
+            await fitsViewport(page, 390);
+          }
+        }
 
         // A second current relationship makes an explicit chooser; no guessed current Case.
         await relate(db, { partyId: data.clientPartyId, caseId: data.second.id, role: "buyer" });
