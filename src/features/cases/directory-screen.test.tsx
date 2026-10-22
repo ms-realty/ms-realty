@@ -1,176 +1,377 @@
-// O04 cases index markup: rows from listCases only, search pass-through and its 120-character
-// limit, the 50-row bound, and first-use empty, no-match and failed reads kept apart.
+// O04, F20, L16: the paged authorized read seam, native controls and truthful recovery.
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { notFound } from "next/navigation";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { Session } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
+import { directoryCopy } from "./directory-copy";
 import { CaseDirectoryScreen } from "./directory-screen";
 
-const listCases = vi.hoisted(() => vi.fn());
+const queryCaseIndex = vi.hoisted(() => vi.fn());
 vi.mock("@/db/client", () => ({ getDb: () => "test-db" }));
-vi.mock("@/server/cases/queries", () => ({ listCases }));
+vi.mock("@/server/cases/index-query", () => ({ queryCaseIndex }));
+vi.mock("./directory-actions", () => ({ applyCaseDirectoryFilters: vi.fn() }));
 
 const session = { account: { kind: "staff", id: "current-broker" } } as Session;
+const filter = "9de056a5-8740-4280-af12-a541bf01edb5";
 const row = (overrides: Record<string, unknown> = {}) => ({
   id: "case-one",
-  reference: "CS-2026-000142",
+  reference: "CS-SYN-142",
   title: "Synthetic family home search",
   kind: "buyer",
   stage: "needs_agreed",
   disposition: "active",
+  ownerId: "a34f47e5-a325-4983-b757-e1008b6448d3",
   ownerName: "Synthetic broker",
+  partyLabel: "Synthetic participant",
   needsCoverage: false,
+  nextAction: "Review synthetic requirements",
+  nextActionState: "unscheduled",
+  needsReasons: ["next_action_unscheduled"],
   ...overrides,
 });
-const caseList = () => screen.getByRole("list", { name: "Deal list" });
+const page = (rows = [row()], extra: Record<string, unknown> = {}) => ({
+  rows,
+  total: rows.length,
+  nextCursor: null,
+  ...extra,
+});
+const table = () => screen.getByRole("table", { name: "Deal list" });
 
 beforeEach(() => {
   vi.clearAllMocks();
-  listCases.mockResolvedValue([row()]);
+  queryCaseIndex.mockResolvedValue(page());
 });
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
 
-it("lists each visible case as one link with its type, purpose, stage and owner", async () => {
+it("uses the paged read and shows stable identity, all seven columns and the authorized next step", async () => {
   render(await CaseDirectoryScreen({ locale: "en", session }));
-  expect(listCases).toHaveBeenCalledWith("test-db", session, "");
-  expect(screen.getByRole("heading", { level: 1, name: "Deals" })).toBeVisible();
-  expect(screen.getByLabelText("Search")).toHaveValue("");
-  expect(screen.getByLabelText("Search")).toHaveAccessibleDescription("Deal number or title");
-  expect(within(caseList()).getByRole("link")).toBe(
-    screen.getByRole("link", {
-      name: "Synthetic family home search CS-2026-000142 · Buying · Agreeing requirements Accountable broker: Synthetic broker",
-    }),
+  expect(queryCaseIndex).toHaveBeenCalledWith(
+    "test-db",
+    session,
+    expect.objectContaining({ collection: "all", search: "", pageSize: 25 }),
   );
-  expect(within(caseList()).getByRole("link")).toHaveAttribute("href", "/en/cases/case-one");
+  expect(screen.getByRole("heading", { level: 1, name: "Deals" })).toBeVisible();
+  expect(
+    within(table())
+      .getAllByRole("columnheader")
+      .map((cell) => cell.textContent),
+  ).toEqual([
+    "Purpose",
+    "Party",
+    "Type",
+    "Stage",
+    "Disposition",
+    "Accountable broker",
+    "Next action",
+  ]);
+  expect(
+    within(table()).getByRole("link", { name: "Synthetic family home search" }),
+  ).toHaveAttribute("href", "/en/cases/case-one");
+  for (const value of [
+    "CS-SYN-142",
+    "Synthetic participant",
+    "Buying",
+    "Agreeing requirements",
+    "Active",
+    "Review synthetic requirements",
+    "Next action needs a due date",
+  ])
+    expect(within(table()).getByText(value, { exact: true })).toBeVisible();
   expect(screen.getByText("Deals: 1")).toBeVisible();
+  expect(screen.getByRole("link", { name: directoryCopy("en").openWaiting })).toHaveAttribute(
+    "href",
+    "/en/cases/case-one",
+  );
   expect(screen.getByRole("link", { name: "More tools" })).toHaveAttribute(
     "href",
     "/en/operations",
   );
 });
 
-it("shows paused and closed apart from the stage, and agency coverage for an unavailable owner", async () => {
-  listCases.mockResolvedValue([
-    row({ id: "paused", kind: "seller", stage: "preparing", disposition: "paused" }),
-    row({
-      id: "closed",
-      kind: "landlord",
-      stage: "completion_handover",
-      disposition: "closed",
-      needsCoverage: true,
+it("passes every filter to the server and preserves opaque context when changing scope or owner", async () => {
+  render(
+    await CaseDirectoryScreen({
+      locale: "en",
+      session,
+      query: {
+        filter,
+        q: "  CS-SYN  ",
+        purpose: "home",
+        party: "Synthetic",
+        kind: "buyer",
+        stage: "needs_agreed",
+        disposition: "active",
+        owner: "me",
+        nextAction: "requirements",
+        actionState: "unscheduled",
+        size: "10",
+        cursor: "oldcursor",
+        view: "needs",
+      },
     }),
-    row({ id: "covered", stage: "viewing", needsCoverage: true, ownerName: "Former broker" }),
-    row({ id: "service", kind: "service_intake", stage: "consultation", ownerName: null }),
-  ]);
-  render(await CaseDirectoryScreen({ locale: "en", session }));
-  const links = within(caseList()).getAllByRole("link");
-  expect(links.map((link) => link.textContent)).toEqual([
-    "Synthetic family home search CS-2026-000142 · Selling · Preparing the listing Paused · Accountable broker: Synthetic broker",
-    "Synthetic family home search CS-2026-000142 · Letting · Completion and handover Closed · Accountable broker: Synthetic broker",
-    "Synthetic family home search CS-2026-000142 · Buying · Viewings Work without an owner · Last accepted owner: Former broker",
-    "Synthetic family home search CS-2026-000142 · Service consultation · Consultation Accountable broker: No named owner",
-  ]);
-  expect(screen.getByText("Deals: 4")).toBeVisible();
+  );
+  expect(queryCaseIndex).toHaveBeenCalledWith(
+    "test-db",
+    session,
+    expect.objectContaining({
+      collection: "needs",
+      search: "CS-SYN",
+      purpose: "home",
+      party: "Synthetic",
+      kind: "buyer",
+      stage: "needs_agreed",
+      disposition: "active",
+      ownerId: session.account.id,
+      nextAction: "requirements",
+      nextActionState: "unscheduled",
+      pageSize: 10,
+      cursor: "oldcursor",
+    }),
+  );
+  expect(screen.getByLabelText("Search")).toHaveValue("CS-SYN");
+  expect(screen.getByLabelText("Search")).toHaveAccessibleDescription(
+    "Deal number, purpose or linked party",
+  );
+  expect(screen.getByLabelText("Purpose")).toHaveValue("home");
+  expect(screen.getByLabelText("Party")).toHaveValue("Synthetic");
+  expect(screen.getByLabelText("Next action")).toHaveValue("requirements");
+  expect(screen.getByLabelText("Accountable broker")).toHaveValue("me");
+  const mine = within(screen.getByRole("navigation", { name: "Deal scope" })).getByRole("link", {
+    name: "Mine",
+  });
+  const target = new URL(mine.getAttribute("href") ?? "", "https://example.test");
+  expect(target.searchParams.get("filter")).toBe(filter);
+  expect(target.searchParams.get("view")).toBe("mine");
+  expect(target.searchParams.get("kind")).toBe("buyer");
+  for (const field of ["q", "purpose", "party", "nextAction", "cursor"])
+    expect(target.searchParams.has(field)).toBe(false);
+  const owner = within(table()).getByRole("link", { name: "Accountable broker: Synthetic broker" });
+  const ownerTarget = new URL(owner.getAttribute("href") ?? "", "https://example.test");
+  expect(ownerTarget.searchParams.get("owner")).toBe(row().ownerId);
+  expect(ownerTarget.searchParams.get("filter")).toBe(filter);
+  expect(ownerTarget.searchParams.has("cursor")).toBe(false);
 });
 
-it("searches the trimmed term and says when the address held more than 120 characters", async () => {
-  render(await CaseDirectoryScreen({ locale: "en", session, search: "  CS-2026  " }));
-  expect(listCases).toHaveBeenCalledWith("test-db", session, "CS-2026");
-  expect(screen.getByLabelText("Search")).toHaveValue("CS-2026");
-  expect(screen.queryByRole("status")).toBeNull();
-  cleanup();
-
-  render(await CaseDirectoryScreen({ locale: "en", session, search: "x".repeat(130) }));
-  expect(listCases).toHaveBeenLastCalledWith("test-db", session, "x".repeat(120));
-  expect(screen.getByLabelText("Search")).toHaveAttribute("maxlength", "120");
-  expect(screen.getByRole("status")).toHaveTextContent(
-    "Search uses up to 120 characters; the rest was left out.",
-  );
-});
-
-it("states the 50-row bound instead of a count when the read may hold more cases", async () => {
-  listCases.mockResolvedValue(
-    Array.from({ length: 50 }, (_, index) => row({ id: `case-${index}` })),
-  );
-  render(await CaseDirectoryScreen({ locale: "en", session }));
-  expect(within(caseList()).getAllByRole("link")).toHaveLength(50);
-  expect(
-    screen.getByText(
-      "Showing the 50 most recently updated deals you can access. To find another deal, search by its number or title.",
+it("uses exact authorized totals independently of page size, with next and first page links", async () => {
+  queryCaseIndex.mockResolvedValue(
+    page(
+      Array.from({ length: 25 }, (_, index) => row({ id: `case-${index}` })),
+      { total: 51, nextCursor: "nextcursor" },
     ),
-  ).toBeVisible();
-  expect(screen.queryByText(/^Deals: /)).toBeNull();
-});
-
-it("tells a search with 50 matches to narrow the search, not to start one", async () => {
-  listCases.mockResolvedValue(
-    Array.from({ length: 50 }, (_, index) => row({ id: `case-${index}` })),
   );
-  render(await CaseDirectoryScreen({ locale: "en", session, search: "CS-2026" }));
-  expect(
-    screen.getByText(
-      "Showing the 50 most recently updated matches. Narrow the search to find another deal.",
-    ),
-  ).toBeVisible();
-  expect(screen.queryByText(/search by its number or title/)).toBeNull();
+  render(
+    await CaseDirectoryScreen({
+      locale: "en",
+      session,
+      query: { filter, q: "private", view: "needs", cursor: "previouscursor" },
+    }),
+  );
+  expect(screen.getByText("Deals: 51")).toBeVisible();
+  expect(screen.getByText("On this page: 25")).toBeVisible();
+  const pagination = screen.getByRole("navigation", { name: "Deal pages" });
+  expect(within(pagination).getByRole("link", { name: "Next page" })).toHaveAttribute(
+    "href",
+    `/en/cases?view=needs&cursor=nextcursor&filter=${filter}`,
+  );
+  expect(within(pagination).getByRole("link", { name: "Back to the first page" })).toHaveAttribute(
+    "href",
+    `/en/cases?view=needs&filter=${filter}`,
+  );
 });
 
-it("keeps first-use empty and a search without matches apart", async () => {
-  listCases.mockResolvedValue([]);
+it("keeps closed, paused, unavailable-owner and restricted-action projections truthful", async () => {
+  queryCaseIndex.mockResolvedValue(
+    page([
+      row({
+        id: "paused",
+        disposition: "paused",
+        needsCoverage: true,
+        ownerName: "Former broker",
+        nextAction: null,
+        waitingOn: "Synthetic dependency",
+        reviewAt: new Date("2030-01-01T08:00:00Z"),
+        nextActionState: "review_due",
+        needsReasons: ["paused_review_due"],
+      }),
+      row({
+        id: "closed",
+        disposition: "closed",
+        needsCoverage: true,
+        nextAction: null,
+        nextActionState: "none",
+        needsReasons: [],
+      }),
+      row({
+        id: "restricted",
+        partyLabel: null,
+        nextAction: undefined,
+        nextActionState: "restricted",
+        needsReasons: [],
+      }),
+    ]),
+  );
   render(await CaseDirectoryScreen({ locale: "en", session }));
+  expect(within(table()).getByText("Paused", { exact: true })).toBeVisible();
+  expect(within(table()).getByText("Closed", { exact: true })).toBeVisible();
   expect(
-    screen.getByRole("heading", { level: 2, name: "No deals are available to you." }),
+    within(table()).getByText("Work without an owner · Last accepted owner: Former broker"),
   ).toBeVisible();
+  expect(within(table()).getByText("Synthetic dependency").closest("p")).toHaveTextContent(
+    "Waiting on: Synthetic dependency",
+  );
+  expect(within(table()).getByText("Paused deal needs review")).toBeVisible();
+  expect(within(table()).getByText("Internal action unavailable")).toBeVisible();
+  expect(within(table()).getByText("No linked party")).toBeVisible();
+  expect(within(table()).getByText("No active action")).toBeVisible();
+  expect(table().querySelector("time")).toHaveAttribute("datetime", "2030-01-01T08:00:00.000Z");
+});
+
+it("keeps first-use, filtered, Mine and Needs empty states apart", async () => {
+  queryCaseIndex.mockResolvedValue(page([]));
+  render(await CaseDirectoryScreen({ locale: "en", session }));
+  expect(screen.getByRole("heading", { level: 2, name: directoryCopy("en").empty })).toBeVisible();
   expect(screen.getByRole("link", { name: "Open inquiries" })).toHaveAttribute(
     "href",
     "/en/inquiries",
   );
-  expect(screen.queryByRole("list", { name: "Deal list" })).toBeNull();
   cleanup();
-
-  render(await CaseDirectoryScreen({ locale: "en", session, search: "no such case" }));
+  render(
+    await CaseDirectoryScreen({
+      locale: "en",
+      session,
+      query: { view: "mine", filter, q: "private no match", kind: "buyer" },
+    }),
+  );
+  expect(screen.getByRole("heading", { name: directoryCopy("en").noMatch })).toBeVisible();
+  expect(screen.getByText("private no match")).toBeVisible();
   expect(
-    screen.getByRole("heading", { level: 2, name: "No deal matches this search." }),
-  ).toBeVisible();
-  expect(screen.getByText("no such case")).toBeVisible();
-  expect(screen.getByRole("link", { name: "Clear the search" })).toHaveAttribute(
+    screen
+      .getAllByRole("link", { name: "Clear filters" })
+      .every((link) => link.getAttribute("href") === "/en/cases?view=mine"),
+  ).toBe(true);
+  cleanup();
+  for (const view of ["mine", "needs"] as const) {
+    render(await CaseDirectoryScreen({ locale: "en", session, query: { view } }));
+    expect(
+      screen.getByRole("heading", {
+        name: view === "mine" ? directoryCopy("en").noMine : directoryCopy("en").noNeeds,
+      }),
+    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "Show all accessible deals" })).toHaveAttribute(
+      "href",
+      "/en/cases",
+    );
+    cleanup();
+  }
+});
+
+it("does not call an exhausted later page a no-match result", async () => {
+  queryCaseIndex.mockResolvedValue(page([], { total: 3 }));
+  render(await CaseDirectoryScreen({ locale: "en", session, query: { cursor: "tail" } }));
+  expect(screen.getByRole("heading", { name: directoryCopy("en").pageEmpty })).toBeVisible();
+  expect(screen.getByText("Deals: 3")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Back to the first page" })).toHaveAttribute(
     "href",
     "/en/cases",
   );
-  expect(screen.queryByText("No deals are available to you.")).toBeNull();
+  expect(screen.queryByText(directoryCopy("en").noMatch)).toBeNull();
 });
 
-it("shows a failed read as a failure with a retry, never as an empty list", async () => {
+it("keeps a failed read separate and retries the exact opaque page without exposing error detail", async () => {
   const log = vi.spyOn(console, "error").mockImplementation(() => {});
-  listCases.mockRejectedValue(new Error("connection refused at synthetic host"));
-  render(await CaseDirectoryScreen({ locale: "en", session, search: "CS-2026" }));
-  expect(
-    screen.getByRole("heading", { level: 2, name: "The deal list could not be loaded." }),
-  ).toBeVisible();
-  expect(
-    screen.getByText("This does not mean there are no deals. Try again in a moment."),
-  ).toBeVisible();
+  queryCaseIndex.mockRejectedValue(new Error("private database host"));
+  render(
+    await CaseDirectoryScreen({
+      locale: "en",
+      session,
+      query: { filter, q: "private", view: "needs", cursor: "tail" },
+    }),
+  );
+  expect(screen.getByRole("heading", { name: directoryCopy("en").failed })).toBeVisible();
   expect(screen.getByRole("link", { name: "Try again" })).toHaveAttribute(
     "href",
-    "/en/cases?q=CS-2026",
+    `/en/cases?view=needs&cursor=tail&filter=${filter}`,
   );
-  expect(screen.queryByRole("list", { name: "Deal list" })).toBeNull();
-  expect(screen.queryByText(/No case|No deals|Deals: /)).toBeNull();
-  expect(screen.queryByText(/connection refused/)).toBeNull();
-  // The search stays available, and the log names the error type without its details.
-  expect(screen.getByLabelText("Search")).toHaveValue("CS-2026");
+  expect(screen.queryByRole("table")).toBeNull();
+  expect(screen.queryByText(/^Deals: /)).toBeNull();
+  expect(screen.queryByText("private database host")).toBeNull();
   expect(log).toHaveBeenCalledWith("[O04] case list unavailable:", "Error");
 });
 
-it.each(["not_found", "forbidden"] as const)(
-  "answers lost staff access (%s) with not found, not a failed read",
+it("rejects an invalid cursor with first-page recovery and never silently retries unfiltered", async () => {
+  queryCaseIndex.mockRejectedValue(
+    new AppError("validation_failed", { fieldErrors: { cursor: ["Invalid"] } }),
+  );
+  render(
+    await CaseDirectoryScreen({
+      locale: "en",
+      session,
+      query: { filter, q: "private", kind: "buyer", cursor: "tampered" },
+    }),
+  );
+  expect(screen.getByRole("heading", { name: directoryCopy("en").invalidPage })).toBeVisible();
+  expect(screen.getByRole("link", { name: "Back to the first page" })).toHaveAttribute(
+    "href",
+    `/en/cases?kind=buyer&filter=${filter}`,
+  );
+  expect(queryCaseIndex).toHaveBeenCalledTimes(1);
+  expect(screen.queryByText(/^Deals: /)).toBeNull();
+});
+
+it("keeps unsupported filters visible for correction rather than widening the read", async () => {
+  queryCaseIndex.mockRejectedValue(
+    new AppError("validation_failed", { fieldErrors: { kind: ["Invalid"] } }),
+  );
+  render(await CaseDirectoryScreen({ locale: "en", session, query: { kind: "unsupported" } }));
+  expect(screen.getByRole("heading", { name: directoryCopy("en").invalidFilters })).toBeVisible();
+  expect(screen.getByLabelText("Type")).toHaveAttribute("aria-invalid", "true");
+  expect(screen.getByLabelText("Type")).toHaveValue("unsupported");
+  expect(screen.queryByRole("table")).toBeNull();
+});
+
+it("requires legacy private search to be applied by POST before any scope/page links can widen it", async () => {
+  render(
+    await CaseDirectoryScreen({ locale: "en", session, query: { q: "legacy private search" } }),
+  );
+  expect(screen.getByRole("heading", { name: directoryCopy("en").legacySearch })).toBeVisible();
+  expect(screen.getByLabelText("Search")).toHaveValue("legacy private search");
+  expect(
+    within(screen.getByRole("navigation", { name: "Deal scope" })).queryByRole("link"),
+  ).toBeNull();
+  expect(queryCaseIndex).not.toHaveBeenCalled();
+  for (const anchor of document.querySelectorAll("a"))
+    expect(anchor.getAttribute("href")).not.toContain("legacy");
+});
+
+it("fails closed on an unavailable private context and offers explicit clearing", async () => {
+  render(
+    await CaseDirectoryScreen({
+      locale: "en",
+      session,
+      query: { filter, view: "mine" },
+      privateFilterUnavailable: true,
+    }),
+  );
+  expect(
+    screen.getByRole("heading", { name: directoryCopy("en").privateUnavailable }),
+  ).toBeVisible();
+  expect(queryCaseIndex).not.toHaveBeenCalled();
+  expect(
+    screen
+      .getAllByRole("link", { name: "Clear filters" })
+      .every((link) => link.getAttribute("href") === "/en/cases?view=mine"),
+  ).toBe(true);
+});
+
+it.each(["not_found", "forbidden", "unauthenticated"] as const)(
+  "answers lost access (%s) with not found",
   async (code) => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    listCases.mockRejectedValue(new AppError(code));
+    queryCaseIndex.mockRejectedValue(new AppError(code));
     await expect(CaseDirectoryScreen({ locale: "en", session })).rejects.toMatchObject({
       digest: expect.stringContaining("404"),
     });
@@ -178,40 +379,19 @@ it.each(["not_found", "forbidden"] as const)(
   },
 );
 
-it("lets Next.js control flow from the read through instead of calling it a failed read", async () => {
-  const log = vi.spyOn(console, "error").mockImplementation(() => {});
-  listCases.mockImplementation(async () => notFound());
+it("lets Next.js control flow pass through", async () => {
+  queryCaseIndex.mockImplementation(async () => notFound());
   await expect(CaseDirectoryScreen({ locale: "en", session })).rejects.toMatchObject({
     digest: expect.stringContaining("404"),
   });
-  expect(log).not.toHaveBeenCalled();
 });
 
-it.each([
-  [
-    "bg",
-    "Сделки",
-    "Търсене",
-    "Покажете",
-    "Synthetic family home search CS-2026-000142 · Покупка · Уточняване на изискванията Отговорен брокер: Synthetic broker",
-    "Сделки: 1",
-  ],
-  [
-    "ru",
-    "Сделки",
-    "Поиск",
-    "Показать",
-    "Synthetic family home search CS-2026-000142 · Покупка · Согласование требований Ответственный брокер: Synthetic broker",
-    "Всего сделок: 1",
-  ],
-])("keeps %s labels", async (locale, title, search, apply, rowText, count) => {
+it.each(["bg", "ru"])("keeps %s private workspace labels", async (locale) => {
+  const copy = directoryCopy(locale);
   render(await CaseDirectoryScreen({ locale, session }));
-  expect(screen.getByRole("heading", { level: 1, name: title })).toBeVisible();
-  expect(screen.getByLabelText(search)).toBeVisible();
-  expect(screen.getByRole("button", { name: apply })).toBeVisible();
-  expect(screen.getByRole("link", { name: rowText })).toHaveAttribute(
-    "href",
-    `/${locale}/cases/case-one`,
-  );
-  expect(screen.getByText(count)).toBeVisible();
+  expect(screen.getByRole("heading", { level: 1, name: "Сделки" })).toBeVisible();
+  expect(screen.getByLabelText(copy.search)).toBeVisible();
+  expect(screen.getByRole("button", { name: copy.apply })).toBeVisible();
+  expect(screen.getByRole("table", { name: copy.list })).toBeVisible();
+  expect(screen.getByText(copy.count.replace("{n}", "1"))).toBeVisible();
 });
