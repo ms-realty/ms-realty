@@ -263,19 +263,24 @@ export default async function MediaPage({
           label={workspace.noPhoto}
           className={cx("h-full rounded-none object-cover!", row.relation.hidden && "opacity-50")}
         />
-        <div className="absolute inset-x-2 bottom-2 flex flex-wrap gap-1 text-caption font-semibold">
+      </div>
+      {row.relation.hidden || row.asset.detailsDraft || row.asset.review !== "approved" ? (
+        <div
+          data-photo-status
+          className="flex flex-wrap gap-1 px-1 pt-2 text-caption font-semibold"
+        >
           {row.relation.hidden ? (
-            <span className="rounded-control bg-canvas px-2 py-1">{workspace.excluded}</span>
+            <span className="rounded-control bg-subtle px-2 py-1">{workspace.excluded}</span>
           ) : null}
           {row.asset.detailsDraft || row.asset.review !== "approved" ? (
-            <span className="rounded-control bg-canvas px-2 py-1">
+            <span className="rounded-control bg-subtle px-2 py-1">
               {row.asset.detailsDraft
                 ? workspace.detailsPending
                 : fileLabel(copy, row.asset.review)}
             </span>
           ) : null}
         </div>
-      </div>
+      ) : null}
       <span
         id={`photo-${row.relation.id}-description`}
         title={row.asset.caption || row.asset.altText || fileLabel(copy, row.asset.kind)}

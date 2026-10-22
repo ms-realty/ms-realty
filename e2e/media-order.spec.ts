@@ -512,7 +512,26 @@ test("O13 desktop drag stages several moves, reviews the cover, cancels and save
 test("O13 staged arrow order survives reload and is saved only after review", async ({ page }) => {
   const f = seed();
   const [first, second, third] = f.relations;
+  const [relation] = await db
+    .select({ assetId: schema.mediaRelations.mediaAssetId })
+    .from(schema.mediaRelations)
+    .where(eq(schema.mediaRelations.id, first ?? ""));
+  if (!relation) throw new Error("Missing fixture photo");
+  await db
+    .update(schema.mediaAssets)
+    .set({
+      detailsDraft: {
+        caption: "Synthetic pending caption",
+        altText: "Synthetic pending image description",
+        modification: "none",
+        modificationDisclosure: "",
+      },
+    })
+    .where(eq(schema.mediaAssets.id, relation.assetId));
   await openGallery(page, f);
+  const pendingTile = page.locator(`[data-photo="${first}"]`);
+  const pendingStatus = pendingTile.getByText("Details awaiting review", { exact: true });
+  await expect(pendingStatus).toBeVisible();
   const upload = page.getByRole("link", { name: "Upload a file", exact: true });
   await expect(upload).toBeVisible();
   await upload.click();
@@ -546,6 +565,16 @@ test("O13 staged arrow order survives reload and is saved only after review", as
     page.getByRole("button", { name: "Review the new order", exact: true }),
   ).toBeEnabled();
   await page.getByRole("button", { name: "Review the new order", exact: true }).click();
+  // Pending text stays below the image even in the compact phone review grid; it cannot
+  // collide with the position/cover badges that occupy the image's top corners.
+  const image = await pendingTile.getByRole("img").first().boundingBox();
+  const status = await pendingStatus.boundingBox();
+  expect(image).not.toBeNull();
+  expect(status).not.toBeNull();
+  if (!image || !status) throw new Error("Missing pending photo review state");
+  expect(status.y).toBeGreaterThanOrEqual(image.y + image.height);
+  expect(status.x).toBeGreaterThanOrEqual(image.x);
+  expect(status.x + status.width).toBeLessThanOrEqual(image.x + image.width + 1);
   await page.getByRole("button", { name: "Save the order", exact: true }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "New photo order: 1, 3, 2." }),
