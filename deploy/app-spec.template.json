@@ -1,0 +1,151 @@
+{
+  "name": "ms-realty-candidate",
+  "region": "fra",
+  "disable_edge_cache": true,
+  "vpc": { "id": "__APPROVED_FRA_VPC_UUID__" },
+  "services": [
+    {
+      "name": "web",
+      "image": {
+        "registry_type": "DOCR",
+        "registry": "__AGENCY_REGISTRY__",
+        "repository": "ms-realty",
+        "digest": "sha256:__CANDIDATE_IMAGE_DIGEST__",
+        "deploy_on_push": { "enabled": false }
+      },
+      "run_command": "node server.js",
+      "http_port": 3000,
+      "instance_count": 2,
+      "instance_size_slug": "__QUALIFIED_WEB_SIZE__",
+      "health_check": {
+        "http_path": "/api/health",
+        "initial_delay_seconds": 20,
+        "period_seconds": 10,
+        "timeout_seconds": 5,
+        "success_threshold": 1,
+        "failure_threshold": 3
+      },
+      "envs": [
+        {
+          "key": "DATABASE_URL",
+          "value": "__RUNTIME_ROLE_PRIVATE_TLS_URL__",
+          "type": "SECRET",
+          "scope": "RUN_TIME"
+        }
+      ]
+    }
+  ],
+  "workers": [
+    {
+      "name": "worker",
+      "image": {
+        "registry_type": "DOCR",
+        "registry": "__AGENCY_REGISTRY__",
+        "repository": "ms-realty",
+        "digest": "sha256:__CANDIDATE_IMAGE_DIGEST__",
+        "deploy_on_push": { "enabled": false }
+      },
+      "run_command": "node --conditions=react-server dist-runtime/worker.mjs",
+      "instance_count": 1,
+      "instance_size_slug": "__QUALIFIED_WORKER_SIZE__",
+      "envs": [
+        {
+          "key": "DATABASE_URL",
+          "value": "__WORKER_ROLE_PRIVATE_TLS_URL__",
+          "type": "SECRET",
+          "scope": "RUN_TIME"
+        }
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "name": "migrate",
+      "kind": "PRE_DEPLOY",
+      "image": {
+        "registry_type": "DOCR",
+        "registry": "__AGENCY_REGISTRY__",
+        "repository": "ms-realty",
+        "digest": "sha256:__CANDIDATE_IMAGE_DIGEST__",
+        "deploy_on_push": { "enabled": false }
+      },
+      "run_command": "node --conditions=react-server dist-runtime/migrate.mjs",
+      "instance_count": 1,
+      "instance_size_slug": "__QUALIFIED_MIGRATOR_SIZE__",
+      "envs": [
+        {
+          "key": "DATABASE_URL",
+          "value": "__MIGRATION_ROLE_PRIVATE_TLS_URL__",
+          "type": "SECRET",
+          "scope": "RUN_TIME"
+        }
+      ]
+    }
+  ],
+  "envs": [
+    { "key": "BUILD_SHA", "value": "__CANDIDATE_GIT_SHA__", "scope": "RUN_TIME" },
+    { "key": "APP_ORIGIN", "value": "__STAFF_HTTPS_ORIGIN__", "scope": "RUN_TIME" },
+    { "key": "PUBLIC_ORIGIN", "value": "__PUBLIC_HTTPS_ORIGIN__", "scope": "RUN_TIME" },
+    { "key": "CANONICAL_ORIGIN", "value": "__PUBLIC_HTTPS_ORIGIN__", "scope": "RUN_TIME" },
+    {
+      "key": "MEDIA_PUBLIC_BASE_URL",
+      "value": "__PUBLIC_HTTPS_ORIGIN__/api/media",
+      "scope": "RUN_TIME"
+    },
+    { "key": "CLIENT_ORIGIN", "value": "__CLIENT_HTTPS_ORIGIN__", "scope": "RUN_TIME" },
+    { "key": "STAFF_ORIGIN", "value": "__STAFF_HTTPS_ORIGIN__", "scope": "RUN_TIME" },
+    {
+      "key": "AUTH_SECRET",
+      "value": "__AGENCY_AUTH_SECRET__",
+      "type": "SECRET",
+      "scope": "RUN_TIME"
+    },
+    {
+      "key": "ORIGIN_VERIFY_SECRET",
+      "value": "__GATEWAY_ORIGIN_SECRET__",
+      "type": "SECRET",
+      "scope": "RUN_TIME"
+    },
+    { "key": "EMAIL_PROVIDER", "value": "resend", "scope": "RUN_TIME" },
+    { "key": "EMAIL_FROM", "value": "__VERIFIED_SENDER__", "scope": "RUN_TIME" },
+    {
+      "key": "RESEND_API_KEY",
+      "value": "__AGENCY_MAIL_KEY__",
+      "type": "SECRET",
+      "scope": "RUN_TIME"
+    },
+    {
+      "key": "RESEND_WEBHOOK_SECRET",
+      "value": "__AGENCY_WEBHOOK_SECRET__",
+      "type": "SECRET",
+      "scope": "RUN_TIME"
+    },
+    { "key": "FILE_STORAGE", "value": "r2", "scope": "RUN_TIME" },
+    { "key": "R2_ACCOUNT_ID", "value": "__AGENCY_R2_ACCOUNT__", "scope": "RUN_TIME" },
+    { "key": "R2_BUCKET", "value": "__EU_PRIVATE_BUCKET__", "scope": "RUN_TIME" },
+    {
+      "key": "R2_ACCESS_KEY_ID",
+      "value": "__OBJECT_STORE_KEY__",
+      "type": "SECRET",
+      "scope": "RUN_TIME"
+    },
+    {
+      "key": "R2_SECRET_ACCESS_KEY",
+      "value": "__OBJECT_STORE_SECRET__",
+      "type": "SECRET",
+      "scope": "RUN_TIME"
+    },
+    { "key": "CLAMAV_HOST", "value": "__PRIVATE_SCANNER_HOST__", "scope": "RUN_TIME" },
+    { "key": "CLAMAV_PORT", "value": "3310", "scope": "RUN_TIME" },
+    {
+      "key": "WORKER_HEARTBEAT_URL",
+      "value": "__BETTERSTACK_WORKER_HEARTBEAT__",
+      "type": "SECRET",
+      "scope": "RUN_TIME"
+    }
+  ],
+  "ingress": {
+    "rules": [{ "match": { "path": { "prefix": "/" } }, "component": { "name": "web" } }]
+  },
+  "alerts": [{ "rule": "DEPLOYMENT_FAILED" }, { "rule": "DOMAIN_FAILED" }]
+}

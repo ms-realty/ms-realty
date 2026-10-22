@@ -32,12 +32,12 @@ jobs:
       MS_REALTY_ORIGIN_TOKEN: ${{ secrets.MS_REALTY_ORIGIN_TOKEN }}
       RELEASE_SHA: ${{ inputs.release_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ inputs.release_sha }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -145,7 +145,7 @@ jobs:
           DRILL_URL: ${{ steps.workers-dev.outputs.url }}
           DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |
-          npx --yes wrangler@4.117.0 deploy \
+          npx --yes wrangler@4.151.1 deploy \
             --config wrangler.jsonc \
             --name "$DRILL_WORKER" \
             --strict \
@@ -157,8 +157,8 @@ jobs:
             --var "MS_REALTY_WORKER_PUBLIC_ORIGIN:$DRILL_URL"
           echo "created=true" >> "$GITHUB_OUTPUT"
           printf '%s' "$MS_REALTY_ORIGIN_TOKEN" |
-            npx --yes wrangler@4.117.0 secret put MS_REALTY_ORIGIN_TOKEN --name "$DRILL_WORKER"
-          status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
+            npx --yes wrangler@4.151.1 secret put MS_REALTY_ORIGIN_TOKEN --name "$DRILL_WORKER"
+          status="$(npx --yes wrangler@4.151.1 deployments status --name "$DRILL_WORKER" --json)"
           baseline_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
           echo "version=$baseline_version" >> "$GITHUB_OUTPUT"
 
@@ -199,7 +199,7 @@ jobs:
           if (config.split(process.env.RELEASE_SHA).length !== 3) throw new Error("Expected edge and Container exact-release image markers");
           fs.writeFileSync(configPath, config.replaceAll(process.env.RELEASE_SHA, process.env.FAULT_MARKER));
           NODE
-          npx --yes wrangler@4.117.0 deploy \
+          npx --yes wrangler@4.151.1 deploy \
             --config wrangler.jsonc \
             --name "$DRILL_WORKER" \
             --strict \
@@ -209,7 +209,7 @@ jobs:
             --var 'PAYLOAD_SECRET:monitoring-drill-only-secret-not-for-production-0123456789' \
             --var 'DATABASE_URL:postgresql://monitoring:monitoring@db-monitoring.invalid:5432/monitoring' \
             --var "MS_REALTY_WORKER_PUBLIC_ORIGIN:$DRILL_URL"
-          status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
+          status="$(npx --yes wrangler@4.151.1 deployments status --name "$DRILL_WORKER" --json)"
           fault_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
           test "$fault_version" != "$BASELINE_VERSION"
           echo "version=$fault_version" >> "$GITHUB_OUTPUT"
@@ -269,8 +269,8 @@ jobs:
           MS_REALTY_PRODUCTION_URL: ${{ steps.workers-dev.outputs.url }}
         run: |
           baseline_version="${{ steps.baseline.outputs.version }}"
-          npx --yes wrangler@4.117.0 rollback "$baseline_version" --name "$DRILL_WORKER" --message "Monitoring drill rollback ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" --yes
-          status="$(npx --yes wrangler@4.117.0 deployments status --name "$DRILL_WORKER" --json)"
+          npx --yes wrangler@4.151.1 rollback "$baseline_version" --name "$DRILL_WORKER" --message "Monitoring drill rollback ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}" --yes
+          status="$(npx --yes wrangler@4.151.1 deployments status --name "$DRILL_WORKER" --json)"
           restored_version="$(node -e 'const d=JSON.parse(process.argv[1]); const v=d.versions.find(({ percentage }) => percentage === 100); if (!v?.version_id) process.exit(1); process.stdout.write(v.version_id)' "$status")"
           test "$restored_version" = "$baseline_version"
 
@@ -385,7 +385,7 @@ jobs:
           steps.canary.outcome == 'success' &&
           steps.alert-probe.outcome == 'failure' &&
           steps.rollback.outcome == 'success'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           CORRELATION_ID: ${{ steps.identity.outputs.correlation_id }}
           RUN_URL: ${{ steps.identity.outputs.run_url }}
@@ -426,6 +426,12 @@ jobs:
             };
             fs.writeFileSync("monitoring-alert-receipt.json", `${JSON.stringify(receipt, null, 2)}\n`);
             core.setOutput("issue_url", issue.html_url);
+            await github.rest.issues.update({
+              ...context.repo,
+              issue_number: issue.number,
+              state: "closed",
+              state_reason: "completed",
+            });
 
       - name: Build the current monitoring rollback report
         id: monitoring-report
@@ -486,12 +492,12 @@ jobs:
           DRILL_WORKER: ${{ steps.identity.outputs.worker }}
         run: |
           if [ -n "$DRILL_WORKER" ]; then
-            npx --yes wrangler@4.117.0 delete "$DRILL_WORKER" --force
+            npx --yes wrangler@4.151.1 delete "$DRILL_WORKER" --force
           fi
 
       - name: Upload redacted drill evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: monitoring-drill-machine-evidence-${{ github.run_id }}-${{ github.run_attempt }}
           path: |

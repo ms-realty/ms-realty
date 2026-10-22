@@ -1,7 +1,9 @@
 // Transport registry and its OpenAPI artifact (architecture §19.3, §5.1).
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
+import { NextRequest } from "next/server";
+import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import type { z } from "zod";
 import { config as proxyConfig } from "../../../proxy";
 import { hostContexts, servesApi } from "../config/hosts";
@@ -13,6 +15,7 @@ import {
   endpoints,
   errorEnvelopeSchema,
   type inquiryReceiptSchema,
+  localTestOperations,
 } from "./registry";
 
 const registered = endpoints as readonly EndpointDefinition[];
@@ -35,10 +38,14 @@ function routeFileOperations(): string[] {
 }
 
 describe("transport registry", () => {
-  it("registers exactly the endpoints that app/api implements", () => {
+  it("inventories exactly the application endpoints and explicit local tools app/api implements", () => {
     const implemented = routeFileOperations().sort();
-    const declared = registered.map((entry) => `${entry.method} ${entry.path}`).sort();
+    const declared = [...registered, ...localTestOperations]
+      .map((entry) => `${entry.method} ${entry.path}`)
+      .sort();
     expect(declared).toEqual(implemented);
+    for (const tool of localTestOperations)
+      expect(buildOpenApiDocument().paths[tool.path]).toBeUndefined();
   });
 
   it("has unique operation ids and a capability on every staff endpoint", () => {
@@ -50,18 +57,52 @@ describe("transport registry", () => {
     }
   });
 
-  it("mounts each endpoint on its own host only (proxy API families)", () => {
+  it("mounts each endpoint on its registered host while protecting host-neutral health transport", () => {
     for (const entry of registered) {
       if (entry.host === "any") {
-        // Host-neutral: excluded from the proxy, so it answers on every host.
-        expect(proxyConfig.matcher[0]).toContain(`${entry.path.slice(1)}$`);
+        expect(entry.path).toBe("/api/health");
+        expect(unstable_doesMiddlewareMatch({ config: proxyConfig, url: entry.path })).toBe(true);
         continue;
       }
       for (const context of hostContexts) {
         expect(servesApi(context, entry.path), `${entry.id} on ${context}`).toBe(
-          context === entry.host,
+          entry.host === "private" ? context !== "public" : context === entry.host,
         );
       }
+    }
+  });
+
+  it("serves health on all three authenticated hosts and denies direct-origin health access", async () => {
+    const hosts = ["makler-realty.com", "my.makler-realty.com", "app.makler-realty.com"];
+    const proof = crypto.randomUUID();
+    try {
+      vi.stubEnv("PUBLIC_ORIGIN", `https://${hosts[0]}`);
+      vi.stubEnv("CLIENT_ORIGIN", `https://${hosts[1]}`);
+      vi.stubEnv("STAFF_ORIGIN", `https://${hosts[2]}`);
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("STAGING", "false");
+      vi.stubEnv("ORIGIN_VERIFY_SECRET", proof);
+      // Host configuration is cached on first use. Exercise a fresh production process.
+      vi.resetModules();
+      const { proxy } = await import("../../../proxy");
+      for (const host of hosts) {
+        expect(
+          proxy(new NextRequest(`https://${host}/api/health`, { headers: { host } })).status,
+        ).toBe(404);
+        const response = proxy(
+          new NextRequest("https://origin.invalid/api/health", {
+            headers: {
+              host: "origin.invalid",
+              "x-msr-public-host": host,
+              "x-msr-origin-token": proof,
+            },
+          }),
+        );
+        expect(response.status, host).toBe(200);
+        expect(response.headers.get("x-middleware-next"), host).toBe("1");
+      }
+    } finally {
+      vi.unstubAllEnvs();
     }
   });
 
@@ -100,6 +141,30 @@ describe("transport registry", () => {
 
   it("keeps the receipt schema in step with the intake receipt type", () => {
     expectTypeOf<InquiryReceipt>().toExtend<z.infer<typeof inquiryReceiptSchema>>();
+  });
+
+  it("describes the bounded native viewing preference field accepted by inquiry intake", () => {
+    const inquiry = registered.find((entry) => entry.id === "inquiries.submit");
+    const native = inquiry?.body?.schemas["application/x-www-form-urlencoded"];
+    expect(native).toBeDefined();
+    const values = {
+      submissionKey: "issued-by-server",
+      purpose: "viewing_request",
+      locale: "bg",
+      contactKind: "email",
+      contactValue: "visitor@example.test",
+      privacyNotice: "on",
+      viewingPreferences: JSON.stringify({
+        version: 1,
+        provenance: "self_declared",
+        timezone: "Europe/Sofia",
+        windows: [],
+      }),
+    };
+    expect(native?.safeParse(values).success).toBe(true);
+    expect(native?.safeParse({ ...values, viewingPreferences: "x".repeat(4097) }).success).toBe(
+      false,
+    );
   });
 
   it("docs/api/openapi.json is current (regenerate: tsx --conditions=react-server scripts/openapi.mjs)", () => {

@@ -20,6 +20,11 @@
   --color-border: #687a6f;
   --color-focus: #174ea6;
   --color-focus-inverse: #ffffff;
+  --color-on-action: #ffffff;
+  --color-brand: #214f3c;
+  --color-brand-tint: #e4eee7;
+  --color-accent: #214f3c;
+  --color-rule: #d9dfd8;
   --color-action: #214f3c;
   --color-action-hover: #1a3f30;
   --color-action-pressed: #133024;
@@ -36,15 +41,17 @@
   --color-error-hover: #86221e;
   --color-error-pressed: #6b1b18;
   --color-error-soft: #fbeae8;
+  --color-danger-tint: #fef0ef;
   --color-info: #245a86;
   --color-info-soft: #e6eef6;
   --color-assist: #5b45a0;
   --color-assist-soft: #f1edf9;
-  --color-assist-line: #a796d6;
+  --color-assist-line: #5b45a0;
   --color-overlay: rgb(25 46 39 / 0.5);
 
   --font-*: initial;
   --font-sans: "Noto Sans", "Noto Sans Hebrew", "Noto Sans Fallback", system-ui, sans-serif;
+  --font-display: "Noto Sans", "Noto Sans Hebrew", "Noto Sans Fallback", system-ui, sans-serif;
   --font-weight-*: initial;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -58,6 +65,8 @@
   --text-page--line-height: 2.25rem;
   --text-heading: 1.375rem;
   --text-heading--line-height: 1.875rem;
+  --text-section: 1.375rem;
+  --text-section--line-height: 1.875rem;
   --text-subheading: 1.125rem;
   --text-subheading--line-height: 1.625rem;
   --text-price: 1.375rem;
@@ -75,12 +84,14 @@
 
   --spacing: 0.25rem;
   --spacing-control: 2.75rem;
-  --spacing-gutter: 1rem;
+  --spacing-input: 3.25rem;
+  --spacing-gutter: 1.25rem;
   --spacing-gutter-medium: 1.5rem;
   --spacing-gutter-wide: 2rem;
 
   --container-page: 90rem;
   --container-form: 40rem;
+  --container-reading: 42.5rem;
   --container-rail: 14rem;
   --container-filter-rail: 16.5rem;
   --container-inspector: 21rem;
@@ -88,6 +99,7 @@
   --radius-*: initial;
   --radius-control: 0.375rem;
   --radius-panel: 0.5rem;
+  --radius-card: 0.5rem;
 
   --shadow-*: initial;
   --shadow-raised: 0px 1px 2px 0px rgb(25 46 39 / 0.08);
@@ -95,6 +107,41 @@
 
   --ease-*: initial;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Text roles keep their source family, including responsive text-* variants. */
+@utility text-title {
+  font-family: var(--font-sans);
+}
+@utility text-page {
+  font-family: var(--font-sans);
+}
+@utility text-heading {
+  font-family: var(--font-sans);
+}
+@utility text-section {
+  font-family: var(--font-sans);
+}
+@utility text-subheading {
+  font-family: var(--font-sans);
+}
+@utility text-price {
+  font-family: var(--font-sans);
+}
+@utility text-body {
+  font-family: var(--font-sans);
+}
+@utility text-compact {
+  font-family: var(--font-sans);
+}
+@utility text-operational {
+  font-family: var(--font-sans);
+}
+@utility text-dense {
+  font-family: var(--font-sans);
+}
+@utility text-caption {
+  font-family: var(--font-sans);
 }
 
 /* Not Tailwind theme namespaces: use as duration-(--duration-fast), z-(--z-header). */

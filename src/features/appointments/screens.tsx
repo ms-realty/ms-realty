@@ -1,0 +1,344 @@
+import "server-only";
+import { unstable_rethrow } from "next/navigation";
+import { z } from "zod";
+import { getDb } from "@/db/client";
+import { appointmentMachine } from "@/domain/appointment";
+import { isPublicLocale } from "@/i18n/config";
+import { workflowCopy } from "@/i18n/workflow-copy";
+import { type CalendarData, readCalendar } from "@/server/appointments/calendar";
+import { listAppointments, readAppointment } from "@/server/appointments/service";
+import { isAppError } from "@/server/errors";
+import { Notice } from "@/ui/notice";
+import { workflowScope } from "../cases/contract";
+import { caseCopy } from "../cases/copy";
+import { caseEmailCopy } from "../cases/email-copy";
+import {
+  AppointmentList,
+  BoundWorkflowForm,
+  type ScreenProps,
+  WorkflowPage,
+  WorkflowSection,
+  WorkflowTimeRange,
+  workflowLink,
+} from "../cases/screens";
+import { coverageCopy } from "../work/coverage-copy";
+import { privateRead } from "../work/screens";
+import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
+import { CalendarView } from "./calendar-view";
+import { hostHandoverCopy } from "./host-copy";
+import { AppointmentListingContext } from "./listing-context";
+/** The client journey retains its relationship-scoped list in every public locale. */
+export async function ClientCalendarScreen(props: ScreenProps) {
+  const c = caseCopy(props.locale);
+  const rows = await privateRead(() => listAppointments(getDb(), props.session));
+  return (
+    <WorkflowPage {...props} title={c.calendar}>
+      <p>{c.requestNote}</p>
+      <p>{c.calendarBounded}</p>
+      <AppointmentList {...props} rows={rows} />
+    </WorkflowPage>
+  );
+}
+
+export async function CalendarScreen(props: ScreenProps & { search?: CalendarSearch }) {
+  const c = caseCopy(props.locale);
+  const { query, adjusted } = parseCalendarQuery(props.search);
+  let data: CalendarData | null = null;
+  try {
+    data = await privateRead(() => readCalendar(getDb(), props.session, query));
+  } catch (error) {
+    // Preserve authentication/access routing. Read failures keep the user's filters and never
+    // become a reassuring empty calendar or an availability result.
+    unstable_rethrow(error);
+    if (
+      isAppError(error) &&
+      ["unauthenticated", "forbidden", "not_found", "step_up_required"].includes(error.code)
+    )
+      throw error;
+    console.error(
+      "[O08] calendar unavailable:",
+      isAppError(error) ? error.code : error instanceof Error ? error.name : typeof error,
+    );
+  }
+  return (
+    <WorkflowPage {...props} title={c.calendar}>
+      <CalendarView locale={props.locale} query={query} data={data} adjusted={adjusted} />
+    </WorkflowPage>
+  );
+}
+export async function AppointmentScreen(props: ScreenProps & { id: string }) {
+  const locale = isPublicLocale(props.locale) ? props.locale : "bg";
+  const detail = await privateRead(() => readAppointment(getDb(), props.session, props.id, locale));
+  const { appointment: row } = detail;
+  const c = caseCopy(props.locale);
+  const staff = props.session.account.kind === "staff";
+  const hostCopy = hostHandoverCopy(props.locale);
+  const path = `/${props.locale}/${staff ? "calendar" : "appointments"}/${row.id}`;
+  const windows = z.array(z.object({ text: z.string() })).safeParse(row.requestedWindows);
+  const canArrange =
+    detail.canManage && ["requested", "proposed", "reschedule_requested"].includes(row.state);
+  const targets = (
+    ["reschedule_requested", "cancelled", "completed", "no_show", "declined"] as const
+  ).filter(
+    (target) =>
+      appointmentMachine.check(row.state, target).outcome === "allowed" &&
+      (staff || ["reschedule_requested", "cancelled"].includes(target)),
+  );
+  return (
+    <WorkflowPage {...props} title={c.appointmentTitle} reference={row.reference}>
+      <p data-testid="appointment-state" className="font-semibold">
+        {c[row.state]}
+      </p>
+      {row.confirmedStartsAt ? (
+        <WorkflowSection
+          title={
+            ["cancelled", "completed", "no_show"].includes(row.state)
+              ? c.previousTime
+              : c.confirmedTime
+          }
+        >
+          <WorkflowTimeRange
+            start={row.confirmedStartsAt}
+            end={row.confirmedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
+          {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
+          <p>{c.calendarNote}</p>
+          <a className={workflowLink} href={`${path}/calendar`} download>
+            {c.download}
+          </a>
+        </WorkflowSection>
+      ) : null}
+      {row.proposedStartsAt && ["proposed", "reschedule_requested"].includes(row.state) ? (
+        <WorkflowSection title={c.proposedTime}>
+          <WorkflowTimeRange
+            start={row.proposedStartsAt}
+            end={row.proposedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
+        </WorkflowSection>
+      ) : null}
+      <AppointmentListingContext listing={detail.listing} locale={locale} />
+      {staff && detail.needsCoverage ? (
+        <Notice tone="warning">
+          <a href={`/${props.locale}/coverage`} className={workflowLink}>
+            {coverageCopy(props.locale).appointments}
+          </a>
+          <p>{coverageCopy(props.locale).appointmentNote}</p>
+        </Notice>
+      ) : null}
+      <p>
+        {c.owned}: {row.hostName ?? "—"}
+      </p>
+
+      {row.caseId ? (
+        <nav
+          className="flex flex-wrap gap-4"
+          aria-label={workflowCopy(props.locale, "viewing").links}
+        >
+          <a
+            className={`${workflowLink} inline-flex min-h-control items-center`}
+            href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.caseId}`}
+          >
+            {c.cases}
+          </a>
+          {detail.canManage ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/cases/${row.caseId}/email`}
+            >
+              {caseEmailCopy(props.locale).title}
+            </a>
+          ) : null}
+        </nav>
+      ) : null}
+      {windows.success && windows.data.length ? (
+        <WorkflowSection title={c.preferredWindow}>
+          <ul>
+            {windows.data.map((window) => (
+              <li key={window.text}>{window.text}</li>
+            ))}
+          </ul>
+        </WorkflowSection>
+      ) : null}
+      {staff && detail.hostOffer ? (
+        <WorkflowSection title={hostCopy.pending}>
+          <p>{detail.hostOffer.name}</p>
+          <p className="whitespace-pre-wrap">{detail.hostOffer.note}</p>
+          {!detail.hostOffer.current ? <Notice tone="warning">{hostCopy.stale}</Notice> : null}
+          {detail.canWithdrawHost ? (
+            <BoundWorkflowForm
+              {...props}
+              command="appointmentHostHandover"
+              nativeIdentity={`${workflowScope("appointmentHostHandover", row.id)}:cancel`}
+              id={row.id}
+              revision={row.version}
+              path={path}
+              values={{ action: "cancel" }}
+              fields={[
+                { name: "action", label: "", type: "hidden" },
+                { name: "reason", label: hostCopy.reason, type: "textarea", required: true },
+                {
+                  name: "reviewed",
+                  label: hostCopy.withdrawReviewed,
+                  type: "checkbox",
+                  required: true,
+                },
+              ]}
+              submit={hostCopy.withdraw}
+            />
+          ) : null}
+        </WorkflowSection>
+      ) : null}
+      {staff && detail.canOfferHost ? (
+        <WorkflowSection title={hostCopy.offerTitle}>
+          <p>{hostCopy.offerLead}</p>
+          {detail.hostReceivers.length ? (
+            <BoundWorkflowForm
+              {...props}
+              command="appointmentHostHandover"
+              nativeIdentity={`${workflowScope("appointmentHostHandover", row.id)}:request`}
+              id={row.id}
+              revision={row.version}
+              path={path}
+              values={{ action: "request" }}
+              fields={[
+                { name: "action", label: "", type: "hidden" },
+                {
+                  name: "receiverId",
+                  label: hostCopy.receiver,
+                  type: "select",
+                  required: true,
+                  options: detail.hostReceivers.map((person) => ({
+                    value: person.id,
+                    label: person.name,
+                  })),
+                },
+                { name: "reason", label: hostCopy.reason, type: "textarea", required: true },
+                {
+                  name: "reviewed",
+                  label: hostCopy.offerReviewed,
+                  type: "checkbox",
+                  required: true,
+                },
+              ]}
+              submit={hostCopy.offerSubmit}
+            />
+          ) : (
+            <Notice tone="info">{hostCopy.none}</Notice>
+          )}
+        </WorkflowSection>
+      ) : null}
+      {staff && detail.canAcceptHost ? (
+        <WorkflowSection title={hostCopy.title}>
+          <p>{detail.needsCoverage ? hostCopy.lead : hostCopy.plannedLead}</p>
+          {detail.reservedInterval ? (
+            <p>
+              {hostCopy.reserved}:{" "}
+              <WorkflowTimeRange
+                start={detail.reservedInterval.startsAt}
+                end={detail.reservedInterval.endsAt}
+                locale={props.locale}
+              />
+            </p>
+          ) : null}
+          <BoundWorkflowForm
+            {...props}
+            command="appointmentHost"
+            id={row.id}
+            revision={row.version}
+            path={path}
+            fields={[
+              { name: "reason", label: hostCopy.reason, type: "textarea", required: true },
+              {
+                name: "propertyAccessConfirmed",
+                label: c.access,
+                type: "checkbox",
+                required: true,
+              },
+              {
+                name: "externalBusyChecked",
+                label: hostCopy.external,
+                type: "checkbox",
+                required: true,
+              },
+              { name: "reviewed", label: hostCopy.reviewed, type: "checkbox", required: true },
+            ]}
+            submit={hostCopy.submit}
+          />
+        </WorkflowSection>
+      ) : null}
+      {canArrange ? (
+        <WorkflowSection title={c.arrangement}>
+          <p>{c.policyNote}</p>
+          <BoundWorkflowForm
+            {...props}
+            command="arrange"
+            id={row.id}
+            revision={row.version}
+            path={path}
+            fields={[
+              {
+                name: "action",
+                label: c.action,
+                type: "select",
+                options: [
+                  ...(row.state !== "proposed" ? [{ value: "propose", label: c.propose }] : []),
+                  { value: "confirm", label: c.confirm },
+                ],
+              },
+              { name: "startsAt", label: c.start, type: "datetime-local", required: true },
+              { name: "endsAt", label: c.end, type: "datetime-local", required: true },
+              { name: "bufferMinutes", label: c.buffer, type: "number", required: true },
+              { name: "propertyAccessConfirmed", label: c.access, type: "checkbox" },
+              { name: "externalBusyChecked", label: c.external, type: "checkbox" },
+              { name: "accessNotes", label: c.logistics, type: "textarea" },
+            ]}
+            values={{
+              action: row.state === "proposed" ? "confirm" : "propose",
+              bufferMinutes: "30",
+            }}
+            submit={c.change}
+          />
+        </WorkflowSection>
+      ) : null}
+      {detail.canRespond && targets.length ? (
+        <WorkflowSection title={c.change}>
+          <BoundWorkflowForm
+            {...props}
+            command="appointment"
+            id={row.id}
+            revision={row.version}
+            path={path}
+            fields={[
+              {
+                name: "state",
+                label: c.action,
+                type: "select",
+                options: targets.map((value) => ({
+                  value,
+                  label:
+                    value === "reschedule_requested"
+                      ? c.reschedule
+                      : value === "cancelled"
+                        ? c.cancel
+                        : value === "completed"
+                          ? c.complete
+                          : value === "no_show"
+                            ? c.noShow
+                            : c.decline,
+                })),
+              },
+              { name: "reason", label: c.reason, type: "textarea", required: true },
+            ]}
+            values={{ state: targets[0] ?? "" }}
+            submit={c.change}
+          />
+        </WorkflowSection>
+      ) : null}
+      {row.cancelReason || row.outcomeNote ? <p>{row.cancelReason ?? row.outcomeNote}</p> : null}
+    </WorkflowPage>
+  );
+}

@@ -2,6 +2,9 @@
 
 import { type ReactNode, useEffect, useId, useRef } from "react";
 import { SuccessIcon } from "./icons";
+import { TechnicalDetails } from "./technical-details";
+
+const opaqueReference = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 
 export type ReceiptProps = {
   /** The confirmed outcome only, e.g. "Your request was received". */
@@ -9,6 +12,7 @@ export type ReceiptProps = {
   referenceLabel: string;
   /** Stable reference the person can quote; isolated so it reads correctly in RTL. */
   reference: string;
+  locale?: string;
   /** When the outcome was recorded. */
   recordedAt: { dateTime: string; label: string };
   recordedAtLabel: string;
@@ -27,6 +31,7 @@ export function Receipt({
   title,
   referenceLabel,
   reference,
+  locale = "en",
   recordedAt,
   recordedAtLabel,
   status,
@@ -60,15 +65,29 @@ export function Receipt({
         </Heading>
       </div>
       <dl className="grid gap-x-6 gap-y-2 rounded-control bg-subtle p-4 text-compact sm:grid-cols-[auto_1fr]">
-        <dt className="text-text-muted">{referenceLabel}</dt>
-        <dd className="font-semibold tabular-nums text-text">
-          <bdi>{reference}</bdi>
-        </dd>
+        {!opaqueReference.test(reference) ? (
+          <>
+            <dt className="text-text-muted">{referenceLabel}</dt>
+            <dd className="font-semibold tabular-nums text-text">
+              <bdi>{reference}</bdi>
+            </dd>
+          </>
+        ) : null}
         <dt className="text-text-muted">{recordedAtLabel}</dt>
         <dd className="text-text">
           <time dateTime={recordedAt.dateTime}>{recordedAt.label}</time>
         </dd>
       </dl>
+      {opaqueReference.test(reference) ? (
+        <TechnicalDetails locale={locale}>
+          <dl>
+            <dt>{referenceLabel}</dt>
+            <dd>
+              <bdi>{reference}</bdi>
+            </dd>
+          </dl>
+        </TechnicalDetails>
+      ) : null}
       {status}
       {children ? (
         <div className="flex flex-col gap-2 text-compact text-text">{children}</div>

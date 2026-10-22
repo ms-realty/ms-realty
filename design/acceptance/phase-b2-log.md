@@ -1,0 +1,20 @@
+# Phase B2 log — DEMO markers out of the UI (visibility + layer name, annotations outside screens)
+
+Scope: standalone DEMO tag nodes inside screen frames (top-level frames in sections; page 14 has no sections, so its top-level frames count) on pages 03–09, 12, 13, 14. Each tag is set `visible = false` and renamed `[annotation] DEMO data`. Each screen frame gets one `[annotation] DEMO data · <frame name>` frame in the same parent, 24 px gap above its top-left, text style `MSR / caption`, fill bound to `color/muted` (MSR / Semantic). Sections `0 · Prototype indexes` and `Harness, demo and shared pieces` (pages 12, 13) are prototype tooling, not screens, and are skipped. Mixed text (DEMO codes, names, buttons, sentences with real content) belongs to the text agent and is not touched.
+
+Standalone tags (exact whole text): «Демонстрационен сценарий», «Демо среда · Измислени частни записи», «Демонстрационен профил», «Демо данни · Мария Д.», «Фиксирано DEMO · без реална услуга или доказана визуална паритетност.», «Фиксирано DEMO · Брокер / Редактор / Координатор · само четене», «DEMO · Синтетичен сценарий · без реални ефекти», «ДЕМО · Измислени участници, права и частно предложение.», the Enquiry / Collective DEMO notices («DEMO · Примерни данни. …», «DEMO · Празна форма за попълване. …», «DEMO · Нищо не се изпраща до екипа.», «DEMO · Примерен преглед. …», HE «DEMO · נתוני דוגמה…»), «DEMO пример · Измислени данни, без реално изпращане.», «Само демонстрационна обява. …»; plus the block frame `Eligible / Демонстрационен преход`. Not hidden (heading, needs new text from the text agent): «ДЕМО · Примерен резултат» on P12 (hidden once on page 03, then restored with its name `Enquiry / result status`); «Демонстрационен запис; няма реално разкрити лични данни» is the value of the «Статус» row on O26 (hiding left an empty row, so 12 nodes on 09/12/13 were restored with their original name).
+
+| Page | Screens | Frames with tags | Hidden | Annotations added | New clipping | Shots (before/after) |
+|---|---|---|---|---|---|---|
+| 04 / Client · Desktop | 17 | 15 | 30 | 17 | 0 | 11:2456 11:2846 14:2498 18:2009 11:2591 — ok |
+| 03 / Website · Desktop | 28 | 5 | 4 (5 hidden, P12 heading 11:1570 restored) | 28 | 0 | 11:1469 11:2263 527:515 11:1545 527:624 — ok |
+| 05 / Agency OS · Desktop | 36 | 36 | 72 | 36 | 0 | 10:203 11:4823 11:5103 14:1979 14:1157 — ok |
+| 06 / Website · Mobile | 30 | 5 | 5 | 30 | 0 | 11:8704 12:771 529:412 11:8773 602:18566 — ok |
+| 07 / Client · Mobile | 17 | 15 | 15 | 17 | 0 | 11:671 12:1057 14:3222 18:3349 12:921 — ok |
+| 08 / Agency OS · Mobile | 36 | 36 | 36 | 36 | 0 | 14:4343 14:4583 14:4820 15:436 15:657 — ok |
+| 14 / Responsive & localization (no sections; top-level frames, annotations on the page) | 6 | 3 | 5 | 6 | 0 | 40:157 40:364 40:95 40:5 56:114 — ok |
+| 09 / Interaction states | 708 | 656 | 795 (801 hidden, 6 status values restored) | 708 | 0 | 244:9058 327:15031 553:5319 45:4789 21:1612 — ok; O23OFF* frames use absolute layout, so hiding `Demo eyebrow` leaves ~34 px extra space under the title (no overlap, no clipping) |
+| 12 / Prototype · Desktop (indexes + harness sections skipped) | 387 | 348 | 472 (475 hidden, 3 status values restored) | 387 | 0 | 244:18392 63:7361 63:10026 63:10734 63:12217 — ok |
+| 13 / Prototype · Mobile (indexes + harness sections skipped) | 389 | 349 | 352 (355 hidden, 3 status values restored) | 389 | 0 | 244:19185 66:53214 66:57523 66:40873 66:41178 — ok |
+
+Final verification (one read pass over all ten pages): 1786 tags hidden and named `[annotation] DEMO data`; 0 standalone tags still visible inside screens; 1654 annotations, exactly one per screen frame, 0 missing, 0 duplicates, 0 overlaps with siblings, 0 outside their section, all use `MSR / caption` with `color/muted`. Mixed DEMO text still visible inside screens (text agent's scope: codes, names, buttons, sentences with real content): 2891 nodes (03: 15, 04: 17, 05: 76, 06: 16, 07: 17, 08: 75, 09: 1278, 12: 706, 13: 688, 14: 3). Not touched: harness frames and prototype indexes on 12/13 («MS REALTY · DEMO PROTOTYPE», «DEMO harness …», «Начало на демонстрацията»).

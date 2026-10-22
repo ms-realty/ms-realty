@@ -48,7 +48,7 @@ describe("messages (architecture §9)", () => {
     ).toEqual({ outcome: "denied", code: "internal_note_not_sendable" });
   });
 
-  it("AT52: Hermes drafts; only a human approves, and approval binds the exact payload", () => {
+  it("AT52: Butler drafts; only a human approves, and approval binds the exact payload", () => {
     expect(
       guardMessageTransition("draft", "approved", { ...caseMessage, payloadDigest: "h" }, hermes),
     ).toEqual({ outcome: "denied", code: "human_required" });

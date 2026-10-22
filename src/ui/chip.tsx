@@ -88,7 +88,7 @@ export function Chip({ kind, label, onRemove, removeLabel, onPress, isSelected }
         <RACButton
           onPress={onRemove}
           aria-label={`${removeLabel ?? "Remove"}: ${label}`}
-          className="-my-px inline-flex size-control cursor-pointer items-center justify-center rounded-full data-hovered:bg-black/5 data-pressed:bg-black/10"
+          className="-my-px inline-flex size-control cursor-pointer items-center justify-center rounded-full data-hovered:bg-action/10 data-pressed:bg-action/20"
         >
           <CloseIcon className="size-4" />
         </RACButton>

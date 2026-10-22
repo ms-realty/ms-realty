@@ -366,6 +366,8 @@ export const sellerInstructions = pgTable(
   },
   (t) => [
     uniqueIndex("seller_instructions_revision_idx").on(t.propertyId, t.revisionNumber),
+    // Public eligibility compares text IDs so malformed imported evidence fails closed.
+    index("seller_instructions_text_id_idx").on(sql`(${t.id}::text)`),
     check(
       "seller_instructions_agreed_evidence",
       sql`${t.state} <> 'agreed' or (${t.agreedAt} is not null and ${t.recordedById} is not null and ${t.commissionTerms} is not null and jsonb_array_length(${t.evidenceDocumentIds}) > 0)`,

@@ -1,3 +1,22 @@
+> Historical S1b snapshot, preserved from main commit
+> `5651039c7d3fe8a47fd43b7822c8cc9659b3a105` (PR #291).
+> The sections below describe the interrupted "Project end-to-end audit" session and
+> its own validation. They are not current launch authority or fresh release evidence.
+>
+> The delivery candidate is draft #280. Its completed identity, Butler, case operations,
+> seven-locale SEO, zero-loss migration and approved Claude UI are retained during this
+> integration. The common `0000` migration and snapshot are unchanged. CI retains the
+> provider-supported PostgreSQL **16.14**, plus S1b's test lock-table capacity of 256;
+> the PostgreSQL 18 instructions below are historical.
+>
+> Current operator contracts are `deploy/README.md`,
+> `deploy/cloudflare-private-postgres.md`, `production/data/launch-readiness.json` and
+> `production/data/launch-input-checklist.md`, together with the controller's
+> `output/msr-launch/LAUNCH-GATE.md`. Cloudflare staging, isolated resources, independent
+> parity and owner/controller sign-off remain required. DigitalOcean App Platform,
+> historical model selections, merge instructions and credential commands below do
+> not override those contracts or the active user's instructions.
+
 # MS Realty rebuild — handoff
 
 Written 2026-10-03 by the "Project end-to-end audit" Claude Code session, which ran out of
@@ -123,7 +142,7 @@ requirements precisely:
      recovery; `npm run staff:bootstrap` for the first manager;
    - clients: invitation and e-mail-link sign-in with a confirm POST; 7 d / 24 h; step-up
      within 15 min for documents.
-   
+
    Partial files: `src/server/auth/{access,invitations,pages}.ts`,
    `db/migrations/0004_invitations.sql`, `app/staff/[locale]/access/`,
    `app/client/[locale]/(journey)/access/`, `src/features/identity/`.
@@ -237,5 +256,5 @@ Full list in `docs/plan.md` §8. In short:
 - Known live security issues in the legacy origin (not redeployed on purpose):
   - a shared Basic-auth password grants full admin;
   - media ingest accepts any `Content-Type`.
-  
+
   The rebuild fixes both by construction.

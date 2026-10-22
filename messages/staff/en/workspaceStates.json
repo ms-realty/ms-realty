@@ -1,0 +1,20 @@
+{
+  "today": "Back to Today",
+  "permission": {
+    "title": "Your access does not include this page",
+    "managers": "Contact {names} through your usual work channel and ask for access to this page.",
+    "noManagers": "Ask your manager to give you access.",
+    "workAbout": "Your worklist will appear here when the agency assigns your access.",
+    "callAgency": "Call the agency"
+  },
+  "work": {
+    "reference": "Inquiry reference",
+    "noMethods": "No contact methods have been recorded.",
+    "contactUnverified": "Channel not verified",
+    "contactPending": "Channel verification pending",
+    "contactVerified": "Channel verified",
+    "contactFailed": "Channel verification failed",
+    "noActivity": "No activity has been recorded for this inquiry yet.",
+    "noInquiryTasks": "No tasks have been recorded for this inquiry yet."
+  }
+}

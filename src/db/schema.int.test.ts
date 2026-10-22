@@ -5,7 +5,7 @@ import { firstPartyIssuers } from "../domain/records";
 import * as s from "./schema";
 import { createTestDatabase, type TestDatabase } from "./test-utils";
 
-// Architecture §4 records on PostgreSQL 18. All data here is fictional; the only phone number
+// Architecture §4 records on provider-pinned PostgreSQL 16.14. All data here is fictional; the only phone number
 // allowed in the repository is the brand line.
 let t: TestDatabase;
 
@@ -37,6 +37,14 @@ async function roundTrip<T extends PgTable>(
     .where(eq(column, key))) as T["$inferSelect"][];
   expect(rows).toEqual([inserted]);
   for (const [field, value] of Object.entries(values as Record<string, unknown>)) {
+    if (field === "during" && typeof value === "string") {
+      // tstzrange text uses the server timezone; equal instants need not have equal
+      // offset strings. Test the stored interval itself in either UTC or local time.
+      const [comparison] = await t.sql<{ same: boolean }[]>`
+        select ${String((rows[0] as Record<string, unknown>)[field])}::tstzrange = ${value}::tstzrange as same`;
+      expect(comparison?.same, field).toBe(true);
+      continue;
+    }
     expect((rows[0] as Record<string, unknown>)[field], field).toEqual(value);
   }
   return inserted as T["$inferSelect"];
@@ -90,7 +98,7 @@ describe("database schema (architecture §4)", () => {
     );
     const [version] = await t.sql<{ major: number }[]>`
       select current_setting('server_version_num')::int / 10000 as major`;
-    expect(version?.major).toBeGreaterThanOrEqual(18);
+    expect(version?.major).toBe(16);
   });
 
   it("has no retired scope: reservations, statements, service dispatch, short stays, partner feed", async () => {
@@ -103,12 +111,13 @@ describe("database schema (architecture §4)", () => {
       "statements",
       "statement_lines",
       "service_requests",
-      "service_agreements",
       "shortlists",
       "matches",
     ]) {
       expect(names).not.toContain(retired);
     }
+    // docs/plan.md §7 reintroduces service_agreements for the agency/client signed
+    // contract and withdrawal evidence. It is independent of retired service dispatch.
     const labels = async (type: string) =>
       (
         await t.sql<{ label: string }[]>`
@@ -509,8 +518,11 @@ describe("database schema (architecture §4)", () => {
       state: "processed",
       processedAt: at,
     });
+    // An active share is bound to its creator (public_shares_creator_scope): synthetic values.
     await roundTrip(s.publicShares, {
       tokenHash: "share-hash",
+      viewToken: "synthetic-view-token",
+      creatorSessionHash: "synthetic-creator-session-hash",
       listingReferences: ["MS-00100"],
       expiresAt: later,
     });

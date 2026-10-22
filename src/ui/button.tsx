@@ -68,7 +68,9 @@ export function Button({
   ...props
 }: ButtonProps) {
   const reasonId = useId();
-  const describedBy = cx(props["aria-describedby"], disabledReason ? reasonId : undefined);
+  const describedBy = [props["aria-describedby"], disabledReason ? reasonId : undefined]
+    .filter(Boolean)
+    .join(" ");
 
   if (!disabledReason) {
     return (

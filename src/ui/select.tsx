@@ -54,16 +54,16 @@ export function Select({
         {label}
       </Label>
       <Description>{description}</Description>
-      <FieldError>{errorMessage}</FieldError>
       <Button
         className={cx(
           controlClass,
-          "flex cursor-pointer items-center justify-between gap-2 py-2 text-start",
+          "flex cursor-pointer items-center justify-between gap-2 text-start",
         )}
       >
         <SelectValue className="truncate data-placeholder:text-text-muted" />
         <ChevronDownIcon className="text-text-muted" />
       </Button>
+      <FieldError>{errorMessage}</FieldError>
       <ListPopover>
         <ListBox items={options} className="py-1 outline-none">
           {(option) => (

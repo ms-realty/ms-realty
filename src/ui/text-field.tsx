@@ -8,7 +8,7 @@ import {
   type TextFieldProps as RACTextFieldProps,
 } from "react-aria-components";
 import { cx } from "./cx";
-import { controlClass, Description, FieldError, fieldClass, Label } from "./field";
+import { controlClass, Description, FieldError, fieldClass, Label, textareaClass } from "./field";
 
 type SharedProps = Omit<RACTextFieldProps, "children" | "className"> & {
   label: ReactNode;
@@ -40,8 +40,8 @@ export function TextField({
         {label}
       </Label>
       <Description>{description}</Description>
+      <Input placeholder={placeholder} dir={inputDir} className={controlClass} />
       <FieldError>{errorMessage}</FieldError>
-      <Input placeholder={placeholder} dir={inputDir} className={cx(controlClass, "py-2")} />
     </RACTextField>
   );
 }
@@ -55,7 +55,8 @@ export function TextArea({
   optionalLabel,
   placeholder,
   inputDir,
-  rows = 5,
+  // UI07 draws 144 px, which four rows fill.
+  rows = 4,
   className,
   ...props
 }: TextAreaProps) {
@@ -65,13 +66,8 @@ export function TextArea({
         {label}
       </Label>
       <Description>{description}</Description>
+      <RACTextArea rows={rows} placeholder={placeholder} dir={inputDir} className={textareaClass} />
       <FieldError>{errorMessage}</FieldError>
-      <RACTextArea
-        rows={rows}
-        placeholder={placeholder}
-        dir={inputDir}
-        className={cx(controlClass, "resize-y py-2 leading-6")}
-      />
     </RACTextField>
   );
 }

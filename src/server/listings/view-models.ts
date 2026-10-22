@@ -14,6 +14,7 @@ import type {
 import type { PublicLocale } from "@/domain/ids";
 import type { CommercialState, FreshnessState } from "@/domain/listing";
 import type { MediaKind } from "@/domain/media";
+import type { PublicMapPoint } from "@/domain/public-map";
 import type { PrimaryAction } from "@/domain/publication";
 import type { SearchCriteria } from "@/domain/search/filters";
 
@@ -56,6 +57,7 @@ export interface PlaceName {
 }
 
 export interface PublicPlace {
+  readonly mapPoint?: PublicMapPoint | null;
   /** ISO 3166-1 alpha-2. */
   readonly country: string;
   readonly district: PlaceName | null;
@@ -76,6 +78,12 @@ export interface PublicMedia {
   readonly relationId: string;
   readonly assetId: string;
   readonly digest: string;
+  /** Only sealed sizes included in the current approved publication; absent on older assets. */
+  readonly renditions?: readonly {
+    readonly digest: string;
+    readonly width: number;
+    readonly height: number;
+  }[];
   readonly kind: MediaKind;
   readonly contentType: string;
   /** Null when never recorded; unknown is not zero. */

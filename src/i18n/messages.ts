@@ -5,36 +5,81 @@
 //   messages/staff/<locale>/<namespace>.json  staff host only, bg/en/ru
 import type a11y from "../../messages/bg/a11y.json";
 import type common from "../../messages/bg/common.json";
+import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
 import type footer from "../../messages/bg/footer.json";
 import type forms from "../../messages/bg/forms.json";
+import type intent from "../../messages/bg/intent.json";
+import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
+import type privacy from "../../messages/bg/privacy.json";
+import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
+import type workflow from "../../messages/bg/workflow.json";
+import type auditHistory from "../../messages/staff/bg/auditHistory.json";
+import type calendar from "../../messages/staff/bg/calendar.json";
+import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
+import type dataReview from "../../messages/staff/bg/dataReview.json";
+import type operations from "../../messages/staff/bg/operations.json";
+import type serverStaff from "../../messages/staff/bg/serverStaff.json";
+import type tools from "../../messages/staff/bg/tools.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
+import type workspaceStates from "../../messages/staff/bg/workspaceStates.json";
 import { isStaffLocale, type PublicLocale } from "./config";
 
 export const publicNamespaces = [
   "a11y",
   "common",
+  "discovery",
   "errors",
   "footer",
   "forms",
+  "intent",
+  "map",
   "nav",
+  "privacy",
+  "server",
   "states",
+  "workflow",
 ] as const;
-export const staffNamespaces = ["workspace"] as const;
+/** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
+export const staffNamespaces = [
+  "calendar",
+  "caseDirectory",
+  "serverStaff",
+  "tools",
+  "workspace",
+  "workspaceStates",
+  "operations",
+  "dataReview",
+  "auditHistory",
+] as const;
 
 export interface PublicMessages {
   a11y: typeof a11y;
   common: typeof common;
+  discovery: typeof discovery;
   errors: typeof errors;
   footer: typeof footer;
   forms: typeof forms;
+  intent: typeof intent;
+  map: typeof map;
   nav: typeof nav;
+  privacy: typeof privacy;
+  server: typeof server;
   states: typeof states;
+  workflow: typeof workflow;
 }
 export interface StaffMessages {
+  calendar: typeof calendar;
+  caseDirectory: typeof caseDirectory;
+  auditHistory: typeof auditHistory;
+  operations: typeof operations;
+  dataReview: typeof dataReview;
+  serverStaff: typeof serverStaff;
+  tools: typeof tools;
   workspace: typeof workspace;
+  workspaceStates: typeof workspaceStates;
 }
 /** Staff namespaces are present only for staff locales (bg, en, ru). */
 export type Messages = PublicMessages & StaffMessages;

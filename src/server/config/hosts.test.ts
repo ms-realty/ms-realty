@@ -89,9 +89,22 @@ describe("host resolution", () => {
   it("serves each API family on its own host only", () => {
     expect(servesApi("public", "/api/inquiries")).toBe(true);
     expect(servesApi("public", "/api/inquiries/abc")).toBe(true);
+    expect(servesApi("public", "/api/public-shares/creator-session")).toBe(true);
+    expect(servesApi("client", "/api/public-shares/creator-session")).toBe(false);
+    expect(servesApi("staff", "/api/public-shares/creator-session")).toBe(false);
     expect(servesApi("client", "/api/inquiries")).toBe(false);
     expect(servesApi("staff", "/api/inquiries/abc")).toBe(false);
     expect(servesApi("public", "/api/unknown")).toBe(false);
     expect(servesApi("public", "/api/constructor")).toBe(false);
+  });
+
+  it("never exposes the development mail capture on a real host", () => {
+    const local = parseHostOrigins({ PORT: "3161" });
+    expect(servesApi("staff", "/api/test-outbox", local)).toBe(true);
+    expect(servesApi("client", "/api/test-outbox", local)).toBe(true);
+    expect(servesApi("public", "/api/test-outbox", local)).toBe(false);
+    for (const surface of ["public", "client", "staff"] as const) {
+      expect(servesApi(surface, "/api/test-outbox", origins)).toBe(false);
+    }
   });
 });

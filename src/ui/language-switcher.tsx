@@ -17,6 +17,8 @@ export type LanguageSwitcherProps = {
   wide?: boolean;
   /** Which edge the list aligns to. */
   align?: "start" | "end";
+  /** Where the list opens: below the control, or above it at the foot of a panel. */
+  side?: "bottom" | "top";
   className?: string;
 };
 
@@ -31,12 +33,15 @@ export function LanguageSwitcher({
   options,
   wide = false,
   align = "end",
+  side = "bottom",
   className,
 }: LanguageSwitcherProps) {
   const currentOption = options.find((option) => option.locale === current);
   return (
     <details data-dismissible="" className={cx("group/lang relative", className)}>
+      {/* biome-ignore lint/a11y/useSemanticElements: summary is the native no-JS disclosure control; explicit role fixes its observed generic accessibility mapping. */}
       <summary
+        role="button"
         className={cx(
           "inline-flex min-h-control items-center gap-1.5 rounded-control px-2.5 text-compact font-semibold text-text",
           "transition-colors duration-(--duration-fast) hover:bg-subtle group-open/lang:bg-selected",
@@ -57,7 +62,8 @@ export function LanguageSwitcher({
       </summary>
       <ul
         className={cx(
-          "absolute top-full z-(--z-popover) mt-1 min-w-48 rounded-panel border border-divider bg-surface py-1 shadow-overlay",
+          "absolute z-(--z-popover) min-w-48 rounded-panel border border-divider bg-surface py-1 shadow-overlay",
+          side === "top" ? "bottom-full mb-1" : "top-full mt-1",
           align === "end" ? "end-0" : "start-0",
         )}
       >

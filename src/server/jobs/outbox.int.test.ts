@@ -46,6 +46,78 @@ describe("outbox", () => {
     expect(b).toEqual({ id: a.id, created: false });
   });
 
+  it("AT46: an existing send key cannot silently accept another recipient, content or secret", async () => {
+    const input = message({ secretParams: { url: "https://example.test/first-token" } });
+    const first = await enqueueMessage(t.db, input);
+    for (const change of [
+      { recipient: "another@example.test" },
+      { params: { locale: "bg" } },
+      { template: "different.notice" },
+      { messageId: "b68f5b89-8c16-4d10-8c58-e874157af49d" },
+      { secretParams: { url: "https://example.test/replacement-token" } },
+    ]) {
+      await expect(enqueueMessage(t.db, { ...input, ...change })).rejects.toMatchObject({
+        code: "idempotency_key_reused",
+      });
+    }
+    const provider = new TestMessageProvider();
+    await dispatchMessage(t.db, provider, first.id);
+    expect(await enqueueMessage(t.db, input)).toEqual({ id: first.id, created: false });
+    await expect(
+      enqueueMessage(t.db, {
+        ...input,
+        secretParams: { url: "https://example.test/replacement-token" },
+      }),
+    ).rejects.toMatchObject({ code: "idempotency_key_reused" });
+    expect(provider.sent).toHaveLength(1);
+  });
+
+  it("AT47: a definite rejection is not replayed after the provider key window", async () => {
+    const provider = new TestMessageProvider();
+    provider.script({ status: "rejected", code: "throttled", retryable: true });
+    const { id } = await enqueueMessage(t.db, message());
+    const now = new Date();
+    expect(await dispatchMessage(t.db, provider, id, now)).toBe("queued");
+    expect(await dispatchMessage(t.db, provider, id, new Date(now.getTime() + 86_400_000))).toBe(
+      "cancelled",
+    );
+    expect(provider.sent).toHaveLength(1);
+    expect(await stateOf(id)).toMatchObject({
+      lastErrorCode: "retry_window_expired",
+      secretPayload: null,
+    });
+  });
+
+  it("rejects replacement of a queued access-link secret before any provider call", async () => {
+    const provider = new TestMessageProvider();
+    const { id } = await enqueueMessage(
+      t.db,
+      message({ secretParams: { url: "https://example.test/original" } }),
+    );
+    await t.db
+      .update(externalActions)
+      .set({ secretPayload: { url: "https://example.test/replaced" } })
+      .where(eq(externalActions.id, id));
+    expect(await dispatchMessage(t.db, provider, id)).toBe("cancelled");
+    expect(await stateOf(id)).toMatchObject({
+      lastErrorCode: "secret_digest_mismatch",
+      secretPayload: null,
+    });
+    expect(provider.sent).toHaveLength(0);
+  });
+
+  it("concurrent conflicting enqueues commit exactly one payload", async () => {
+    const input = message();
+    const results = await Promise.allSettled([
+      enqueueMessage(t.db, input),
+      enqueueMessage(t.db, { ...input, recipient: "other@example.test" }),
+    ]);
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    expect(results.find((r) => r.status === "rejected")).toMatchObject({
+      reason: { code: "idempotency_key_reused" },
+    });
+  });
+
   it("records provider acceptance separately from delivery", async () => {
     const provider = new TestMessageProvider();
     const { id } = await enqueueMessage(

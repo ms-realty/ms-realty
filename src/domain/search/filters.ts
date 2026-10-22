@@ -56,6 +56,8 @@ export type FilterResult = "match" | "needs_confirmation" | "no_match";
 
 export interface FilterEvaluation {
   readonly result: FilterResult;
+  /** Explicit hard criteria contradicted by known listing facts. */
+  readonly violated: readonly string[];
   /** Criteria the listing could not be shown to satisfy because a value is not known. */
   readonly unconfirmed: readonly string[];
 }
@@ -132,12 +134,12 @@ export function evaluateListing(
     checks.push([`feature.${key}`, featureCheck(view.features[key])]);
   }
 
-  if (checks.some(([, check]) => check === "no_match"))
-    return { result: "no_match", unconfirmed: [] };
+  const violated = checks.filter(([, check]) => check === "no_match").map(([name]) => name);
+  if (violated.length > 0) return { result: "no_match", violated, unconfirmed: [] };
   const unconfirmed = checks
     .filter(([, check]) => check === "needs_confirmation")
     .map(([name]) => name);
-  return { result: unconfirmed.length > 0 ? "needs_confirmation" : "match", unconfirmed };
+  return { result: unconfirmed.length > 0 ? "needs_confirmation" : "match", violated, unconfirmed };
 }
 
 export function matchesSearch(view: ListingSearchView, criteria: SearchCriteria): boolean {

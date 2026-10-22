@@ -1,7 +1,15 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { emailSignInTokens, externalActions, rateLimitBuckets } from "@/db/schema";
+import {
+  consentEvents,
+  contactMethods,
+  emailSignInTokens,
+  externalActions,
+  principals,
+  rateLimitBuckets,
+  subscriptions,
+} from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { dispatchMessage } from "../jobs/outbox";
 import { TestMessageProvider } from "../jobs/provider";
@@ -52,8 +60,8 @@ const ip = () => {
 };
 
 /** Requests a link and returns the token from the outbox, as the email would carry it. */
-async function linkFor(email: string, kind: "staff" | "client", returnTo?: string) {
-  await requestEmailLink(t.db, { email, accountKind: kind, clientIp: ip(), returnTo, queue });
+async function linkFor(email: string, returnTo?: string) {
+  await requestEmailLink(t.db, { email, clientIp: ip(), returnTo, queue });
   await runJobs();
   const provider = new TestMessageProvider();
   const rows = await t.db.select().from(externalActions).where(eq(externalActions.state, "queued"));
@@ -70,20 +78,18 @@ describe("requesting a link", () => {
     const tokensBefore = before.length;
     const known = await requestEmailLink(t.db, {
       email: client.email,
-      accountKind: "client",
       clientIp: ip(),
       queue,
     });
     const unknown = await requestEmailLink(t.db, {
       email: "nobody@example.test",
-      accountKind: "client",
       clientIp: ip(),
       queue,
     });
-    // A staff lookup for a client address is just as silent.
+    // Staff addresses cannot request client authentication.
+    const staff = await createStaff(t.db);
     const wrongKind = await requestEmailLink(t.db, {
-      email: client.email,
-      accountKind: "staff",
+      email: staff.email,
       clientIp: ip(),
       queue,
     });
@@ -92,7 +98,7 @@ describe("requesting a link", () => {
     expect(wrongKind).toEqual(known);
     // No timing oracle: the request path looks at no account and writes nothing account-
     // specific; each request enqueues exactly one job, whatever the address.
-    expect(jobs.map((j) => j.email)).toEqual([client.email, "nobody@example.test", client.email]);
+    expect(jobs.map((j) => j.email)).toEqual([client.email, "nobody@example.test", staff.email]);
     expect(await t.db.select().from(emailSignInTokens)).toHaveLength(tokensBefore);
     await runJobs();
     const after = await t.db.select().from(emailSignInTokens);
@@ -105,7 +111,7 @@ describe("requesting a link", () => {
 
   it("stores only the token hash and puts the link in a secret that dispatch clears", async () => {
     const client = await createClient(t.db);
-    const { token } = await linkFor(client.email, "client");
+    const { token } = await linkFor(client.email);
     const rows = await t.db.select().from(emailSignInTokens);
     expect(JSON.stringify(rows)).not.toContain(token);
     const outbox = await t.db.select().from(externalActions);
@@ -116,11 +122,12 @@ describe("requesting a link", () => {
     for (const email of ["limited@example.test", (await createClient(t.db)).email]) {
       const clientIp = ip();
       for (let i = 0; i < 5; i += 1) {
-        await requestEmailLink(t.db, { email, accountKind: "client", clientIp, queue });
+        await requestEmailLink(t.db, { email, clientIp, queue });
       }
-      await expect(
-        requestEmailLink(t.db, { email, accountKind: "client", clientIp, queue }),
-      ).rejects.toMatchObject({ code: "rate_limited", retryAfterSeconds: expect.any(Number) });
+      await expect(requestEmailLink(t.db, { email, clientIp, queue })).rejects.toMatchObject({
+        code: "rate_limited",
+        retryAfterSeconds: expect.any(Number),
+      });
     }
   });
 
@@ -130,13 +137,12 @@ describe("requesting a link", () => {
     for (let i = 0; i < 5; i += 1) {
       await requestEmailLink(t.db, {
         email: client.email,
-        accountKind: "client",
         clientIp: attacker,
         queue,
       });
     }
     await expect(
-      requestEmailLink(t.db, { email: client.email, accountKind: "client", clientIp: ip(), queue }),
+      requestEmailLink(t.db, { email: client.email, clientIp: ip(), queue }),
     ).resolves.toEqual({ status: "sent" });
   });
 
@@ -145,7 +151,6 @@ describe("requesting a link", () => {
     for (let i = 0; i < 20; i += 1) {
       await requestEmailLink(t.db, {
         email: `spray${i}@example.test`,
-        accountKind: "client",
         clientIp: shared,
         queue,
       });
@@ -153,7 +158,6 @@ describe("requesting a link", () => {
     await expect(
       requestEmailLink(t.db, {
         email: "spray99@example.test",
-        accountKind: "client",
         clientIp: shared,
         queue,
       }),
@@ -164,7 +168,6 @@ describe("requesting a link", () => {
     await expect(
       requestEmailLink(t.db, {
         email: "not-an-email",
-        accountKind: "client",
         clientIp: ip(),
         queue,
       }),
@@ -175,7 +178,7 @@ describe("requesting a link", () => {
 describe("using a link", () => {
   it("GET inspection never consumes; only the explicit POST does, exactly once", async () => {
     const client = await createClient(t.db);
-    const { token } = await linkFor(client.email, "client", "/en/journey/cases?tab=messages");
+    const { token } = await linkFor(client.email, "/en/journey/cases?tab=messages");
     // A mail scanner or link preview opening the URL, repeatedly.
     for (let i = 0; i < 3; i += 1) {
       expect(await inspectEmailLink(t.db, token)).toMatchObject({
@@ -183,7 +186,19 @@ describe("using a link", () => {
         returnTo: "/en/journey/cases?tab=messages",
       });
     }
+    expect(
+      await t.db.select().from(contactMethods).where(eq(contactMethods.partyId, client.partyId)),
+    ).toEqual([]);
     const signedIn = await consumeEmailLink(t.db, token);
+    expect(
+      await t.db.select().from(contactMethods).where(eq(contactMethods.partyId, client.partyId)),
+    ).toMatchObject([
+      { normalizedValue: client.email, verification: "verified", verifiedAt: expect.any(Date) },
+    ]);
+    expect(
+      await t.db.select().from(subscriptions).where(eq(subscriptions.partyId, client.partyId)),
+    ).toEqual([]);
+    expect(await t.db.select().from(consentEvents)).toEqual([]);
     expect(signedIn.returnTo).toBe("/en/journey/cases?tab=messages");
     expect((await readSession(t.db, signedIn.token))?.actor).toEqual(client.actor);
     await expect(consumeEmailLink(t.db, token)).rejects.toMatchObject({ code: "link_consumed" });
@@ -191,13 +206,24 @@ describe("using a link", () => {
   });
 
   it("expires after 15 minutes with a distinct recovery code", async () => {
-    const staff = await createStaff(t.db);
-    const { token } = await linkFor(staff.email, "staff");
+    const client = await createClient(t.db);
+    const { token } = await linkFor(client.email);
     const later = new Date(Date.now() + emailLinkTtlMs + 1000);
     expect((await inspectEmailLink(t.db, token, later)).state).toBe("expired");
     await expect(consumeEmailLink(t.db, token, { now: later })).rejects.toMatchObject({
       code: "link_expired",
     });
+  });
+
+  it("AT36: a sign-in link stays bound to its immutable principal when an address changes", async () => {
+    const client = await createClient(t.db);
+    const { token } = await linkFor(client.email);
+    await t.db
+      .update(principals)
+      .set({ email: `moved-${client.email}` })
+      .where(eq(principals.id, client.id));
+    await createClient(t.db, { email: client.email });
+    await expect(consumeEmailLink(t.db, token)).rejects.toMatchObject({ code: "link_invalid" });
   });
 
   it("rejects unknown tokens", async () => {
@@ -207,7 +233,7 @@ describe("using a link", () => {
 
   it("consumes once under concurrent confirmation", async () => {
     const client = await createClient(t.db);
-    const { token } = await linkFor(client.email, "client");
+    const { token } = await linkFor(client.email);
     const results = await Promise.allSettled([
       consumeEmailLink(t.db, token),
       consumeEmailLink(t.db, token),
@@ -219,7 +245,7 @@ describe("using a link", () => {
   it("replaces a session the browser already had (no fixation)", async () => {
     const client = await createClient(t.db);
     const planted = await createSession(t.db, { kind: "client", id: client.id });
-    const { token } = await linkFor(client.email, "client");
+    const { token } = await linkFor(client.email);
     const signedIn = await consumeEmailLink(t.db, token, { currentSessionToken: planted.token });
     expect(await readSession(t.db, planted.token)).toBeNull();
     expect(await readSession(t.db, signedIn.token)).not.toBeNull();
@@ -227,7 +253,7 @@ describe("using a link", () => {
 
   it("drops a cross-origin return path and keeps the link usable", async () => {
     const client = await createClient(t.db);
-    const { token } = await linkFor(client.email, "client", "//evil.example/steal");
+    const { token } = await linkFor(client.email, "//evil.example/steal");
     expect((await consumeEmailLink(t.db, token)).returnTo).toBeNull();
   });
 });

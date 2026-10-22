@@ -1,0 +1,25 @@
+# Inactive contract. This is deliberately outside .github/workflows. It cannot deploy.
+# The controller must supply independently maintained cutover/rollback/checker adapters,
+# exact live route identities, trusted signing custody and production secret ownership first.
+name: Promote the independently accepted staging digest
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-evidence:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          persist-credentials: false
+      - name: Require signed independent PASS and owner/controller screenshots signoff
+        env:
+          LAUNCH_OWNER_PUBLIC_KEY: ${{ vars.LAUNCH_OWNER_PUBLIC_KEY }}
+          LAUNCH_CONTROLLER_PUBLIC_KEY: ${{ vars.LAUNCH_CONTROLLER_PUBLIC_KEY }}
+        run: node scripts/launch-gate.mjs report.signed.json owner.signed.json controller.signed.json expected-pins.json
+      - name: Hold until exact production cutover and automatic rollback adapters are qualified
+        run: |
+          echo 'No production adapter is approved. Same digest promotion, migration compatibility, gateway cutover, independent recheck within 10 minutes and automatic legacy rollback must be wired and rehearsed.' >&2
+          exit 1

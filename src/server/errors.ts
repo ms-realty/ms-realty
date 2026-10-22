@@ -47,6 +47,12 @@ const definitions = {
     retryable: false,
     outcome: "not_applied",
   },
+  butler_approval_required: {
+    status: 409,
+    message: "Butler did not take this step. An authorized staff member must do it manually.",
+    retryable: false,
+    outcome: "not_applied",
+  },
   // An unauthorized read of a private record uses this too, so existence is never revealed.
   not_found: {
     status: 404,

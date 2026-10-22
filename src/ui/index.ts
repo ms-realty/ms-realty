@@ -7,6 +7,7 @@ export { Chip, type ChipKind, ChipList, type ChipProps } from "./chip";
 export { ComboBox, type ComboBoxProps, type PlaceOption } from "./combobox";
 export { cx } from "./cx";
 export { DateField, type DateFieldProps, DatePicker, type DatePickerProps } from "./date-picker";
+export { DateTimeField, type DateTimeFieldProps } from "./date-time-field";
 export { Dialog, type DialogProps, DialogTrigger } from "./dialog";
 export { type EmptyKind, EmptyState, type EmptyStateProps } from "./empty-state";
 export { ErrorSummary, type ErrorSummaryItem, type ErrorSummaryProps } from "./error-summary";

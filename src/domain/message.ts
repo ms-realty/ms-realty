@@ -80,7 +80,7 @@ export function guardMessageTransition(
   switch (to) {
     case "approved":
       return firstDenial(
-        // Hermes drafts; approving is a human act. Service messages carry their rule approval.
+        // Butler drafts; approving is a human act. Service messages carry their rule approval.
         evidence.kind === "service_message"
           ? allowed
           : need(actor.kind === "staff", "human_required"),

@@ -1,0 +1,1 @@
+ALTER TABLE "media_assets" ADD COLUMN "derivative_renditions" jsonb DEFAULT '[]'::jsonb NOT NULL;

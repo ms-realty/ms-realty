@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { publicAssetCacheControl } from "./src/domain/cache-policy";
 
 // The Content-Security-Policy needs a per-request nonce, so it is set in proxy.ts.
 const securityHeaders = [
@@ -14,12 +15,28 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  ...(process.env.BUILD_STANDALONE === "1" ? { output: "standalone" as const } : {}),
+  // Node tracing selects pg-cloudflare's empty Node export. The Worker bundle needs
+  // its workerd export too (pg-boss imports pg), so include these small runtime files.
+  ...(process.env.CLOUDFLARE_BUILD === "1"
+    ? {
+        outputFileTracingIncludes: {
+          "/*": ["./node_modules/pg-cloudflare/dist/**", "./node_modules/pg-cloudflare/esm/**"],
+        },
+      }
+    : {}),
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   reactStrictMode: true,
+  // Listing renditions already come from the sealed-media pipeline; the small bundled
+  // brand asset needs no optimizer. Internal optimizer fetches lack the gateway identity.
+  images: { unoptimized: true },
   // No typedRoutes: proxy.ts rewrites each host's URLs to app/{public,client,staff}, so the
   // generated route types would describe internal paths, not the hrefs pages link to.
   experimental: {
+    // Native media intake is bounded at 25 MiB (+ multipart overhead) by its handler.
+    // Proxy must buffer that whole request; its 10 MiB default silently truncates it.
+    proxyClientMaxBodySize: "26mb",
     // Also type-checks page/layout props. With it, next-env.d.ts imports the route types
     // from whichever NEXT_DIST_DIR is active, so tsconfig.json never has to be rewritten.
     strictRouteTypes: true,
@@ -28,7 +45,17 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/fonts/:file([a-z0-9-]+\\.[a-f0-9]{12}\\.woff2)",
+        headers: [{ key: "Cache-Control", value: publicAssetCacheControl }],
+      },
+      {
+        source: "/map-runtime/v6.11.2/:file(maplibre-gl-worker\\.mjs|maplibre-gl-shared\\.mjs)",
+        headers: [{ key: "Cache-Control", value: publicAssetCacheControl }],
+      },
+    ];
   },
 };
 

@@ -5,6 +5,8 @@ export const capabilities = [
   // Visitors and clients (always record-scoped for clients).
   "inquiry.submit",
   "portal.case.read",
+  "portal.access.request",
+  "portal.brief.acknowledge",
   "portal.interest.respond",
   "portal.message.write",
   "portal.document.upload",
@@ -30,6 +32,9 @@ export const capabilities = [
   "content.edit",
   // Legal/tax/process claims: granted individually to qualified people, never by a preset.
   "claim.approve",
+  // Individually granted qualified-review and suspicion-register access; no role preset.
+  "compliance.review",
+  "compliance.suspicion",
   "message.draft",
   "message.send_external",
   "appointment.manage",
@@ -41,6 +46,8 @@ export const capabilities = [
   "settings.manage",
   "import.run",
   "privacy.manage",
+  "complaint.manage",
+  "key.manage",
   "audit.read",
   "ai.draft",
 ] as const;
@@ -79,6 +86,8 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
   verified_client: [
     "inquiry.submit",
     "portal.case.read",
+    "portal.access.request",
+    "portal.brief.acknowledge",
     "portal.interest.respond",
     "portal.message.write",
     "portal.document.upload",
@@ -139,6 +148,8 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
     "settings.manage",
     "import.run",
     "privacy.manage",
+    "complaint.manage",
+    "key.manage",
     "audit.read",
   ],
   external_specialist: ["portal.case.read", "portal.document.upload"],
@@ -153,6 +164,7 @@ export const rolePresets: Record<Role, readonly Capability[]> = {
 export const systemJobCapabilities: Readonly<Record<string, readonly Capability[]>> = {
   "publication-delivery": ["publication.release"],
   "document-scanner": ["portal.document.upload", "document.review"],
+  "file-scanner": ["media.manage", "document.review"],
   "message-outbox": ["message.send_external"],
   "message-provider-callback": ["message.send_external"],
   "freshness-timer": ["listing.review_facts"],

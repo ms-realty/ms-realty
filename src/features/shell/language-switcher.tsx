@@ -41,7 +41,7 @@ export function LocaleSwitcher({
   locale: PublicLocale;
   locales: readonly PublicLocale[];
   label: string;
-} & Pick<LanguageSwitcherProps, "wide" | "align" | "className">) {
+} & Pick<LanguageSwitcherProps, "wide" | "align" | "side" | "className">) {
   const pathname = usePathname();
   const suffix = useQueryAndHash();
   return (

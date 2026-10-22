@@ -1,114 +1,111 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { publicLocales } from "./config";
 import {
   canonicalOrigin,
   isCanonicalHost,
   localizedMetadata,
   localizedPath,
   requestHost,
+  stagingEnabled,
 } from "./seo";
 
 const origin = new URL("https://makler-realty.com");
-const canonicalHost = "makler-realty.com";
-
-describe("crawl and index metadata (§20.4)", () => {
-  it("reads the canonical origin from the environment and treats unset as none", () => {
-    expect(canonicalOrigin({ CANONICAL_ORIGIN: "https://makler-realty.com" })?.host).toBe(
-      canonicalHost,
+afterEach(() => vi.unstubAllEnvs());
+describe("zero-loss public crawl policy", () => {
+  it("requires a bare trusted HTTPS origin, with HTTP reserved for local development", () => {
+    expect(canonicalOrigin({ CANONICAL_ORIGIN: origin.origin })?.origin).toBe(origin.origin);
+    expect(canonicalOrigin({ CANONICAL_ORIGIN: "http://localhost:3100" })?.host).toBe(
+      "localhost:3100",
     );
-    expect(canonicalOrigin({})).toBeNull();
-    expect(canonicalOrigin({ CANONICAL_ORIGIN: "not a url" })).toBeNull();
-  });
-
-  it("uses the forwarded host when a proxy sits in front", () => {
-    const headers = new Headers({
-      host: "origin.internal:3000",
-      "x-forwarded-host": canonicalHost,
-    });
-    expect(requestHost(headers)).toBe(canonicalHost);
-    expect(requestHost(new Headers({ host: "preview.workers.dev" }))).toBe("preview.workers.dev");
-  });
-
-  it("matches hosts exactly", () => {
-    expect(isCanonicalHost(canonicalHost, origin)).toBe(true);
-    expect(isCanonicalHost("makler-realty.ru", origin)).toBe(false);
-    expect(isCanonicalHost(canonicalHost, null)).toBe(false);
-  });
-
-  it("builds locale paths without query strings", () => {
-    expect(localizedPath("bg", "/")).toBe("/bg");
-    expect(localizedPath("en", "/areas?utm_source=x#top")).toBe("/en/areas");
-  });
-
-  it("noindexes every non-canonical host, even for the source locale", () => {
-    for (const host of ["preview.workers.dev", "127.0.0.1:3102", null]) {
-      expect(localizedMetadata({ locale: "bg", path: "/", host, origin })).toEqual({
-        robots: { index: false, follow: false },
-      });
+    for (const value of [
+      undefined,
+      "not a url",
+      "http://makler-realty.com",
+      "https://user:pass@makler-realty.com",
+      "https://makler-realty.com/sub",
+      "https://makler-realty.com?host=x",
+      "https://makler-realty.com#x",
+    ]) {
+      expect(canonicalOrigin({ CANONICAL_ORIGIN: value })).toBeNull();
     }
+  });
+  it("never adopts forwarded headers as canonical identity", () => {
     expect(
-      localizedMetadata({ locale: "bg", path: "/", host: canonicalHost, origin: null }),
-    ).toEqual({
-      robots: { index: false, follow: false },
-    });
+      requestHost(
+        new Headers({ host: "origin.internal:3000", "x-forwarded-host": "makler-realty.com" }),
+      ),
+    ).toBe("origin.internal:3000");
+    expect(isCanonicalHost("MAKLER-REALTY.COM", origin)).toBe(true);
+    expect(isCanonicalHost("makler-realty.com.attacker.test", origin)).toBe(false);
+    expect(isCanonicalHost(null, origin)).toBe(false);
   });
-
-  it("noindexes non-indexable locales on the canonical host without canonical tags", () => {
-    expect(localizedMetadata({ locale: "en", path: "/", host: canonicalHost, origin })).toEqual({
-      robots: { index: false, follow: true },
-    });
+  it("rejects ambiguous staging flags rather than accidentally indexing staging", () => {
+    expect(stagingEnabled({})).toBe(false);
+    expect(stagingEnabled({ STAGING: "false" })).toBe(false);
+    expect(stagingEnabled({ STAGING: "true" })).toBe(true);
+    for (const flag of ["1", "0", "TRUE", "", " true "])
+      expect(() => stagingEnabled({ STAGING: flag })).toThrow("STAGING");
   });
-
-  it("gives indexable pages a canonical and hreflang among indexable locales plus x-default", () => {
-    expect(localizedMetadata({ locale: "bg", path: "/", host: canonicalHost, origin })).toEqual({
-      alternates: {
-        canonical: "https://makler-realty.com/bg",
-        languages: {
-          bg: "https://makler-realty.com/bg",
-          "x-default": "https://makler-realty.com/bg",
-        },
-      },
-      robots: { index: true, follow: true },
-    });
-
-    const withEnglish = localizedMetadata({
-      locale: "en",
-      path: "/areas",
-      host: canonicalHost,
-      origin,
-      indexable: ["bg", "en"],
-    });
-    expect(withEnglish.alternates).toEqual({
-      canonical: "https://makler-realty.com/en/areas",
-      languages: {
-        bg: "https://makler-realty.com/bg/areas",
-        en: "https://makler-realty.com/en/areas",
-        "x-default": "https://makler-realty.com/bg/areas",
-      },
-    });
+  it("only the explicit staging flag adds public noindex, independently of hostname and locale", () => {
+    vi.stubEnv("STAGING", "false");
+    for (const host of [origin.host, "makler-realty.ru", "preview.workers.dev", null]) {
+      for (const locale of publicLocales)
+        expect(localizedMetadata({ locale, path: "/", host, origin }).robots).toEqual({
+          index: true,
+          follow: true,
+        });
+    }
+    vi.stubEnv("STAGING", "true");
+    expect(
+      localizedMetadata({ locale: "bg", path: "/", host: origin.host, origin }).robots,
+    ).toEqual({ index: false, follow: false });
   });
-
-  it("lists only locales that hold an approved version of the page", () => {
+  it("gives each locale its own canonical and all real static locale siblings", () => {
     const metadata = localizedMetadata({
-      locale: "bg",
-      path: "/areas/x",
-      host: canonicalHost,
+      locale: "he",
+      path: "/properties",
+      host: origin.host,
       origin,
-      indexable: ["bg", "en"],
-      availableIn: ["bg"],
+      staging: false,
     });
-    expect(Object.keys(metadata.alternates?.languages ?? {})).toEqual(["bg", "x-default"]);
+    expect(metadata.alternates?.canonical).toBe(`${origin.origin}/he/properties`);
+    expect(metadata.alternates?.languages).toEqual({
+      bg: `${origin.origin}/bg/properties`,
+      en: `${origin.origin}/en/properties`,
+      ru: `${origin.origin}/ru/properties`,
+      de: `${origin.origin}/de/properties`,
+      nl: `${origin.origin}/nl/properties`,
+      el: `${origin.origin}/el/properties`,
+      he: `${origin.origin}/he/properties`,
+      "x-default": `${origin.origin}/bg/properties`,
+    });
   });
-
-  it("a locale without an approved version of the page is neither indexed nor canonical", () => {
+  it("never advertises missing or unapproved listing/content translations", () => {
+    const metadata = localizedMetadata({
+      locale: "ru",
+      path: "/legacy/source",
+      host: origin.host,
+      origin,
+      availableIn: ["ru"],
+      staging: true,
+    });
+    expect(metadata.alternates).toEqual({
+      canonical: `${origin.origin}/ru/legacy/source`,
+      languages: { ru: `${origin.origin}/ru/legacy/source` },
+    });
     expect(
       localizedMetadata({
-        locale: "en",
+        locale: "bg",
         path: "/areas/x",
-        host: canonicalHost,
+        host: origin.host,
         origin,
-        indexable: ["bg", "en"],
         availableIn: ["bg"],
-      }),
-    ).toEqual({ robots: { index: false, follow: true } });
+        staging: false,
+      }).alternates?.languages,
+    ).toEqual({ bg: `${origin.origin}/bg/areas/x`, "x-default": `${origin.origin}/bg/areas/x` });
+  });
+  it("normalizes localized paths without indexing tracking strings or fragments", () => {
+    expect(localizedPath("bg", "/")).toBe("/bg");
+    expect(localizedPath("en", "/areas?utm_source=x#top")).toBe("/en/areas");
   });
 });

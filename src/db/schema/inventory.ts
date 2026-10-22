@@ -22,7 +22,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { allowedMediaContentTypes } from "../../domain/media";
+import { allowedMediaContentTypes, type MediaDetailsDraft } from "../../domain/media";
+import type { MediaRendition } from "../../domain/media-rendition";
 import { approvals } from "./approvals";
 import { createdAt, id, instant, mutable, reference, sqlList, tsvector } from "./columns";
 import {
@@ -347,6 +348,16 @@ export const mediaAssets = pgTable(
     width: integer("width"),
     height: integer("height"),
     scan: scanStateEnum("scan").notNull().default("pending"),
+    scannedAt: instant("scanned_at"),
+    scannerVersion: text("scanner_version"),
+    scannedSha256: text("scanned_sha256"),
+    derivativeKey: text("derivative_key").unique(),
+    derivativeSha256: text("derivative_sha256"),
+    derivativeContentType: text("derivative_content_type"),
+    derivativeRenditions: jsonb("derivative_renditions")
+      .$type<readonly MediaRendition[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     processing: processingStateEnum("processing").notNull().default("pending"),
     rights: mediaRightsEnum("rights").notNull().default("unknown"),
     rightsHolder: text("rights_holder"),
@@ -360,6 +371,8 @@ export const mediaAssets = pgTable(
     originalAssetId: uuid("original_asset_id").references((): AnyPgColumn => mediaAssets.id),
     caption: text("caption"),
     altText: text("alt_text"),
+    /** Saving editorial text does not rewrite approved metadata or withdraw live images. */
+    detailsDraft: jsonb("details_draft").$type<MediaDetailsDraft>(),
     capturedAt: instant("captured_at"),
     legacyReference: text("legacy_reference"),
   },

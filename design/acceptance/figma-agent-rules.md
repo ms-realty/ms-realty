@@ -1,0 +1,11 @@
+## Common rules for MS Realty Figma agents (read fully)
+- Access: `cd ~/.local/share/msr-figma-bridge && python3 fig.py /path/job.js 180` runs an async plugin-API function body in the design file "MS Realty — AI-native OS & Website · 2027" (PxfBJ2tdrj9A923fpgqzDn) and prints JSON (`return` a value). `await shot(node, 0.5)` exports a PNG to ~/.local/share/msr-figma-bridge/shots/ (path in "shots"; view with the Read tool). dynamic-page: `await page.loadAsync()` before reading a page's children; `await figma.getNodeByIdAsync(id)`; before editing text load every font in it (`node.getRangeAllFontNames(0, node.characters.length)`), then set characters.
+- Never pass a third argument to fig.py (that routes to the FigJam board). Never use UI/computer-use. Never change the user's current page or viewport. Never delete nodes.
+- Other agents write to the same file in parallel on DIFFERENT aspects (listed in your task). Stay strictly inside your aspect; jobs are atomic, so parallel jobs are safe if you don't touch the same properties.
+- Network is flaky: on "Unable to establish connection to Figma" or a timeout, wait 30 s and retry. Make writes idempotent (check current state before changing).
+- Progress log: after each page/batch, append a line to your log file (path in your task). On start, read the log and skip work already logged; the task may be a resumed retry.
+- Design system: reuse components from page 02 and variables "MSR / Primitive|Semantic" (palette B), text styles "MSR / <role>", Noto Sans; no raw hex or unbound radii in new work.
+- Binding rule D39: no calendar dates as plan bindings in what you write (fact timestamps and dates inside UI scenarios are fine).
+- Bulgarian is the source locale; keep copy short, plain and natural; never invent property facts; never call Sandanski a sea destination.
+- Inputs: /Users/ivan/Code/MS-Realty/.claude/worktrees/ms-realty-redesign-2cd16e/design/acceptance/{coverage-matrix.md,g2-terms.md}, design/zero-learning/{GATE.md,W03-expected-path-key.md}, design/audit.md §7A and §9.
+- Do not commit. Final message under 300 words: counts, ids, anything not done and why.

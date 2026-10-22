@@ -1,9 +1,10 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
+import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
 import { JourneyShell } from "@/features/shell/journey-shell";
 import { NotFoundContent } from "@/features/shell/not-found-content";
 import { PublicShell } from "@/features/shell/public-shell";
@@ -17,10 +18,11 @@ import {
 } from "@/i18n/config";
 import { requestLocale } from "@/i18n/request-locale";
 import { privateRobots } from "@/i18n/seo";
-import { type HostContext, homePaths } from "@/server/config/hosts";
+import type { HostContext } from "@/server/config/hosts";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
 import { LocaleProvider } from "@/ui/locale-provider";
+import { appViewport } from "@/ui/viewport";
 
 // Every unknown URL lands here: proxy.ts rewrites a path whose first segment is not a locale
 // of its host to Next's not-found route, and an unknown path under a locale matches no route
@@ -36,10 +38,12 @@ async function notFoundSurface(): Promise<{ context: HostContext; locale: Public
   return { context, locale };
 }
 
+export const viewport: Viewport = appViewport;
+
 export async function generateMetadata(): Promise<Metadata> {
   const { locale } = await notFoundSurface();
   const t = await getTranslations({ locale, namespace: "errors.notFound" });
-  return { title: t("title"), robots: privateRobots, icons: { icon: "/brand/favicon.svg" } };
+  return { title: t("title"), robots: privateRobots, icons: { icon: "/brand/logo-ms-realty.png" } };
 }
 
 export default async function GlobalNotFound() {
@@ -47,7 +51,8 @@ export default async function GlobalNotFound() {
   await connection();
   const { context, locale } = await notFoundSurface();
   setRequestLocale(locale);
-  const content = <NotFoundContent locale={locale} homeHref={`/${locale}${homePaths[context]}`} />;
+  preloadFonts(locale);
+  const content = <NotFoundContent locale={locale} surface={context} />;
   let page: ReactNode;
   if (context === "staff" && isStaffLocale(locale)) {
     page = <WorkspaceShell locale={locale}>{content}</WorkspaceShell>;
@@ -56,11 +61,11 @@ export default async function GlobalNotFound() {
   } else {
     page = <PublicShell locale={locale}>{content}</PublicShell>;
   }
-  preloadFonts(locale);
   return (
     <html lang={locale} dir={localeDirection(locale)}>
       <body>
         <CspNonceMeta />
+        <DisclosureBehavior />
         <LocaleProvider locale={locale}>{page}</LocaleProvider>
       </body>
     </html>

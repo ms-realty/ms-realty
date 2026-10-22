@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ms-realty-staging-types-local",
+  "main": "cloudflare.ts",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  // Local type generation and dry-run only. Contains no routes, container images or credentials.
+  "durable_objects": {
+    "bindings": [
+      { "name": "MS_REALTY", "class_name": "MsRealtyContainer" },
+      { "name": "MS_REALTY_WORKER", "class_name": "MsRealtyWorkerContainer" },
+      { "name": "MS_REALTY_MIGRATOR", "class_name": "MsRealtyMigratorContainer" },
+      { "name": "EMAIL_RECEIPTS", "class_name": "EmailReceipt" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "types-local",
+      "new_sqlite_classes": [
+        "MsRealtyContainer",
+        "MsRealtyWorkerContainer",
+        "MsRealtyMigratorContainer",
+        "EmailReceipt"
+      ]
+    }
+  ],
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "ms-realty-staging-types-local-media" },
+    { "binding": "NEXT_CACHE", "bucket_name": "ms-realty-staging-types-local-cache" }
+  ],
+  "send_email": [{ "name": "EMAIL", "allowed_destination_addresses": ["fixture@example.invalid"] }],
+  "vars": { "STAGING": "true" }
+}

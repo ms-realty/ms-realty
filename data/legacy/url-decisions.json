@@ -16072,5 +16072,18 @@
         "crawl_observed_status": 200
       }
     }
-  ]
+  ],
+  "current_authority": {
+    "directive": "2026-10-01 owner zero-loss launch gate",
+    "historical_only": true,
+    "operative_terminal_authority": "data/legacy/migration/route-manifest.json",
+    "previous_410_approvals_revoked": 268,
+    "current_approved_removals": [],
+    "allowed_terminal_outcomes": [
+      "equivalent_same_path_200",
+      "one_hop_301_to_equivalent_200"
+    ],
+    "migration_state": "blocked_pending_actual_source_and_target_equivalence",
+    "source_contacts_policy": "Preserve facts already published on public WordPress pages under the explicit owner zero-loss directive; never import private records."
+  }
 }
