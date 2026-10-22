@@ -617,6 +617,7 @@ export async function currentEligibility(
   locale: PublicLocale,
   generation: number,
   now: Date,
+  lockMedia = false,
 ): Promise<Eligibility> {
   const base = {
     locale,
@@ -737,13 +738,31 @@ export async function currentEligibility(
     }
   }
 
+  if (lockMedia) {
+    const placements = await tx
+      .select({ id: listingRevisionMedia.mediaAssetId })
+      .from(listingRevisionMedia)
+      .where(eq(listingRevisionMedia.listingRevisionId, revision.id));
+    const ids = [...new Set(placements.map((row) => row.id))];
+    if (ids.length)
+      await tx
+        .select({ id: mediaAssets.id })
+        .from(mediaAssets)
+        .where(inArray(mediaAssets.id, ids))
+        .orderBy(asc(mediaAssets.id))
+        .for("update");
+  }
   const placed = await tx
     .select({ placement: listingRevisionMedia, asset: mediaAssets })
     .from(listingRevisionMedia)
     .innerJoin(mediaAssets, eq(mediaAssets.id, listingRevisionMedia.mediaAssetId))
     .where(eq(listingRevisionMedia.listingRevisionId, revision.id))
     .orderBy(asc(listingRevisionMedia.position));
-  const mediaEligible = placed.length > 0 && placed.every(({ asset }) => mediaAssetEligible(asset));
+  // Pending editorial photo text must be reviewed before preparing a new publication.
+  // Existing public manifests keep their approved snapshot and serving eligibility.
+  const mediaEligible =
+    placed.length > 0 &&
+    placed.every(({ asset }) => mediaAssetEligible(asset) && !asset.detailsDraft);
   const media: ManifestMedia[] = placed.map(({ placement, asset }) => ({
     relationId: placement.mediaRelationId,
     assetId: asset.id,
@@ -900,6 +919,7 @@ export function prepareManifest(
       command.locale,
       listing.publicationGeneration,
       now,
+      true,
     );
     const decision = checkActivation(eligibility.input, command.actor);
     if (decision.outcome === "denied") throw ineligible(decision.code);
@@ -997,6 +1017,7 @@ export function activateManifest(
       manifest.locale,
       manifest.generation,
       now,
+      true,
     );
     const decision = checkActivation(eligibility.input, command.actor);
     if (decision.outcome === "denied") {

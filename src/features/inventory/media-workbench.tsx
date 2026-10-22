@@ -2,63 +2,272 @@
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/ui/button-class";
-import { PhotoIcon } from "@/ui/icons";
+import { cx } from "@/ui/cx";
+import { NativeForm } from "@/ui/form/native-form";
+import { ArrowDownIcon, ArrowUpIcon, PhotoIcon } from "@/ui/icons";
+import { savedAckField, savedOperationCookie } from "./saved-operation";
 
-/** Drag only stages a move. The server shows the same review as the native position form. */
+/** Local ordering has one review and one version-checked save, with a native manual path. */
 export function MediaGallery({
-  path,
-  ids,
-  children,
+  items,
+  action,
+  envelope,
+  version,
+  draftKey,
+  confirmedOrder,
+  copy,
 }: {
-  path: string;
-  ids: string[];
-  children: ReactNode;
+  items: { id: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
+  action: string;
+  envelope: ReactNode;
+  version: number;
+  draftKey: string;
+  confirmedOrder?: string[];
+  copy: {
+    reorder: string;
+    hint: string;
+    review: string;
+    save: string;
+    cancel: string;
+    before: string;
+    after: string;
+    up: string;
+    down: string;
+    cover: string;
+    conflict: string;
+    guard: { title: string; body: string; stay: string; discard: string };
+  };
 }) {
+  const [initial] = useState(() => items.map((item) => item.id));
+  const confirmed = confirmedOrder?.join();
+  const [order, setOrder] = useState(initial);
+  const [editing, setEditing] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
   const [dragged, setDragged] = useState<string | null>(null);
   const [over, setOver] = useState<string | null>(null);
-  return (
+  const [restored, setRestored] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const changed = order.join() !== initial.join();
+  useEffect(() => {
+    setHydrated(true);
+    try {
+      const raw = window.sessionStorage.getItem(draftKey);
+      if (!raw) return;
+      const stored = JSON.parse(raw) as { version?: unknown; order?: unknown };
+      if (
+        !Array.isArray(stored.order) ||
+        stored.order.length !== initial.length ||
+        new Set(stored.order).size !== initial.length ||
+        stored.order.some((id) => !initial.includes(id))
+      )
+        return;
+      if (confirmed === stored.order.join() || initial.join() === stored.order.join()) {
+        window.sessionStorage.removeItem(draftKey);
+        return;
+      }
+      setOrder(stored.order);
+      setEditing(true);
+      setReviewing(false);
+      setRestored(stored.version !== version);
+    } catch {}
+  }, [initial, confirmed, draftKey, version]);
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      if (changed) window.sessionStorage.setItem(draftKey, JSON.stringify({ version, order }));
+      else window.sessionStorage.removeItem(draftKey);
+    } catch {}
+  }, [order, changed, hydrated, draftKey, version]);
+  const move = (source: string, target: string) => {
+    if (source === target) return;
+    const next = order.filter((id) => id !== source);
+    next.splice(next.indexOf(target), 0, source);
+    setOrder(next);
+    setReviewing(false);
+  };
+  const cover = (ids: string[]) =>
+    ids.map((id) => items.find((item) => item.id === id)).find((item) => item && !item.hidden);
+  const before = cover(initial),
+    after = cover(order);
+  const cancel = () => {
+    setOrder(initial);
+    setEditing(false);
+    setReviewing(false);
+    setRestored(false);
+  };
+  const gallery = (
     <ol
-      className="grid grid-cols-2 items-start gap-3 min-[360px]:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3"
-      data-dragging={dragged ?? undefined}
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"
       onDragStart={(event) => {
         const id = (event.target as Element).closest<HTMLElement>("[data-photo]")?.dataset.photo;
-        if (!id || !ids.includes(id)) return;
+        if (!editing || reviewing || !id) {
+          event.preventDefault();
+          return;
+        }
         setDragged(id);
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("text/plain", id);
       }}
       onDragOver={(event) => {
-        const tile = (event.target as Element).closest<HTMLElement>("[data-photo]");
-        if (!dragged || !tile || tile.dataset.photo === dragged) return;
+        const id = (event.target as Element).closest<HTMLElement>("[data-photo]")?.dataset.photo;
+        if (!dragged || !id || id === dragged) return;
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
-        if (over !== tile.dataset.photo) {
-          event.currentTarget.querySelectorAll("[data-drop-target]").forEach((el) => {
-            el.removeAttribute("data-drop-target");
-          });
-          tile.setAttribute("data-drop-target", "true");
-          setOver(tile.dataset.photo ?? null);
-        }
+        setOver(id);
       }}
-      onDragEnd={(event) => {
+      onDragEnd={() => {
         setDragged(null);
         setOver(null);
-        event.currentTarget.querySelectorAll("[data-drop-target]").forEach((el) => {
-          el.removeAttribute("data-drop-target");
-        });
       }}
       onDrop={(event) => {
-        const target = (event.target as Element).closest<HTMLElement>("[data-photo]")?.dataset
-          .photo;
-        const source = event.dataTransfer.getData("text/plain");
-        if (!dragged || source !== dragged || !target || source === target || !ids.includes(target))
-          return;
+        const id = (event.target as Element).closest<HTMLElement>("[data-photo]")?.dataset.photo;
+        if (!dragged || !id || event.dataTransfer.getData("text/plain") !== dragged) return;
         event.preventDefault();
-        window.location.assign(`${path}?${new URLSearchParams({ photo: source, before: target })}`);
+        move(dragged, id);
+        setOver(null);
+        setDragged(null);
       }}
     >
-      {children}
+      {order.map((id, index) => {
+        const item = items.find((item) => item.id === id);
+        if (!item) return null;
+        return (
+          <li
+            key={id}
+            data-photo={id}
+            draggable={editing && !reviewing}
+            className={cx(
+              "relative min-w-0 rounded-panel",
+              over === id && "outline-2 outline-action",
+              dragged === id && "opacity-50",
+            )}
+          >
+            <div inert={editing}>{item.content}</div>
+            <span className="pointer-events-none absolute start-2 top-2 rounded-control bg-canvas px-2 py-1 text-caption font-semibold tabular-nums">
+              {index + 1}
+            </span>
+            {after?.id === id ? (
+              <span className="pointer-events-none absolute end-2 top-2 rounded-control bg-canvas px-2 py-1 text-caption font-semibold">
+                {copy.cover}
+              </span>
+            ) : null}
+            {editing && !reviewing ? (
+              <div className="mt-2 flex justify-between gap-2">
+                <button
+                  type="button"
+                  disabled={index === 0}
+                  aria-label={`${copy.up} · ${index + 1}`}
+                  className={buttonClass("tertiary", "px-3")}
+                  onClick={() => move(id, order[index - 1] ?? id)}
+                >
+                  <ArrowUpIcon className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  disabled={index === order.length - 1}
+                  aria-label={`${copy.down} · ${index + 1}`}
+                  className={buttonClass("tertiary", "px-3")}
+                  onClick={() => {
+                    const target = order[index + 1];
+                    if (!target) return;
+                    move(target, id);
+                  }}
+                >
+                  <ArrowDownIcon className="size-4" />
+                </button>
+              </div>
+            ) : null}
+          </li>
+        );
+      })}
     </ol>
+  );
+  return (
+    <div className="space-y-4">
+      {!editing ? (
+        <>
+          {hydrated && items.length > 1 ? (
+            <button
+              type="button"
+              className={buttonClass("secondary")}
+              onClick={() => setEditing(true)}
+            >
+              {copy.reorder}
+            </button>
+          ) : null}
+          {gallery}
+        </>
+      ) : (
+        <>
+          <p className="text-dense text-text-muted">{copy.hint}</p>
+          {restored ? (
+            <p role="status" className="rounded-control bg-warning-soft p-3 text-dense">
+              {copy.conflict}
+            </p>
+          ) : null}
+          <MediaReviewGuard copy={copy.guard}>
+            <NativeForm action={action} method="post" className="space-y-4">
+              {envelope}
+              <input type="hidden" name="order" value={JSON.stringify(order)} />
+              <div className="sticky top-0 z-10 flex flex-wrap gap-2 border-b border-divider bg-canvas py-3">
+                {reviewing ? (
+                  <>
+                    <button type="submit" className={buttonClass("primary")}>
+                      {copy.save}
+                    </button>
+                    <button
+                      type="button"
+                      className={buttonClass("secondary")}
+                      onClick={() => setReviewing(false)}
+                    >
+                      {copy.reorder}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!changed}
+                    className={buttonClass("primary")}
+                    onClick={() => setReviewing(true)}
+                  >
+                    {copy.review}
+                  </button>
+                )}
+                <button type="button" className={buttonClass("tertiary")} onClick={cancel}>
+                  {copy.cancel}
+                </button>
+              </div>
+              {reviewing ? (
+                <>
+                  <h3 className="text-section font-semibold">{copy.review}</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      [copy.before, before],
+                      [copy.after, after],
+                    ].map(([label, item]) => {
+                      const photo = item as typeof before;
+                      return (
+                        <figure key={label as string} className="space-y-2">
+                          <figcaption className="text-dense font-semibold">
+                            {label as string}
+                          </figcaption>
+                          <div className="aspect-4/3 overflow-hidden rounded-control bg-subtle">
+                            {photo?.preview}
+                          </div>
+                        </figure>
+                      );
+                    })}
+                  </div>
+                  {gallery}
+                </>
+              ) : (
+                gallery
+              )}
+            </NativeForm>
+          </MediaReviewGuard>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -143,8 +352,10 @@ export function MediaFilePicker({
 export function MediaReviewGuard({
   children,
   copy,
+  requireAcknowledgment = false,
 }: {
   children: ReactNode;
+  requireAcknowledgment?: boolean;
   copy: { title: string; body: string; stay: string; discard: string };
 }) {
   const root = useRef<HTMLDivElement>(null);
@@ -155,11 +366,23 @@ export function MediaReviewGuard({
     const form = root.current?.querySelector("form");
     if (!form) return;
     const snapshot = (of: HTMLFormElement) =>
-      JSON.stringify([...new FormData(of)].map(([key, value]) => [key, String(value)]));
+      JSON.stringify(
+        [...new FormData(of)]
+          .filter(([key]) => !key.startsWith("_"))
+          .map(([key, value]) => [key, String(value)]),
+      );
     const original = form.cloneNode(true) as HTMLFormElement;
     original.reset();
     const initial = snapshot(original);
-    const dirty = () => !leaving.current && snapshot(form) !== initial;
+    let submitted: { snapshot: string; ack: string } | null = null;
+    const dirty = () => {
+      const now = snapshot(form);
+      const acknowledged =
+        submitted &&
+        now === submitted.snapshot &&
+        document.cookie.split("; ").includes(`${savedOperationCookie}=${submitted.ack}`);
+      return !leaving.current && now !== initial && !acknowledged;
+    };
     const click = (event: MouseEvent) => {
       if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = (event.target as Element)?.closest<HTMLAnchorElement>("a[href]");
@@ -183,7 +406,21 @@ export function MediaReviewGuard({
       }
     };
     const submit = () => {
-      leaving.current = true;
+      if (!requireAcknowledgment) {
+        leaving.current = true;
+        return;
+      }
+      const now = snapshot(form);
+      const ack = submitted?.snapshot === now ? submitted.ack : crypto.randomUUID();
+      let field = form.querySelector<HTMLInputElement>(`input[name="${savedAckField}"]`);
+      if (!field) {
+        field = document.createElement("input");
+        field.type = "hidden";
+        field.name = savedAckField;
+        form.append(field);
+      }
+      field.value = ack;
+      submitted = { snapshot: now, ack };
     };
     const otherSubmit = (event: SubmitEvent) => {
       const other = event.target;
@@ -196,15 +433,15 @@ export function MediaReviewGuard({
     };
     document.addEventListener("click", click, true);
     window.addEventListener("beforeunload", unload);
-    form.addEventListener("submit", submit);
+    form.addEventListener("submit", submit, true);
     document.addEventListener("submit", otherSubmit, true);
     return () => {
       document.removeEventListener("click", click, true);
       window.removeEventListener("beforeunload", unload);
-      form.removeEventListener("submit", submit);
+      form.removeEventListener("submit", submit, true);
       document.removeEventListener("submit", otherSubmit, true);
     };
-  }, []);
+  }, [requireAcknowledgment]);
   return (
     <div ref={root}>
       {children}

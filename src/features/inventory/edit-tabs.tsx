@@ -5,21 +5,16 @@
 // to the chosen tab natively. With JavaScript the address keeps the deep link (?tab=facts) and
 // a field the server rejected brings its panel forward.
 import { useEffect, useState } from "react";
-import { LeaveControl } from "./leave-control";
 import { listingSectionClass } from "./workspace";
 
 export function EditTabs({
   tab,
   formId,
-  photosHref,
   labels,
-  sections = [],
 }: {
   tab: "text" | "facts";
   formId?: string;
-  photosHref: string;
   labels: { tabs: string; facts: string; text: string; photos: string; noscript: string };
-  sections?: { id: string; href: string; label: string }[];
 }) {
   // Shown until JavaScript runs: only then can the editor ask before leaving unsaved work.
   const [enhanced, setEnhanced] = useState(false);
@@ -57,8 +52,8 @@ export function EditTabs({
   }, []);
   const option = `${listingSectionClass} cursor-pointer has-checked:border-action has-checked:text-action has-focus-visible:outline-2 has-focus-visible:outline-focus`;
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-x-1 border-b border-divider">
+    <div className="flex flex-col gap-2 overflow-x-auto">
+      <div className="flex w-max min-w-full gap-x-1 border-b border-divider lg:w-auto lg:flex-wrap">
         <fieldset className="contents">
           <legend className="sr-only">{labels.tabs}</legend>
           {(
@@ -81,19 +76,6 @@ export function EditTabs({
             </label>
           ))}
         </fieldset>
-        <LeaveControl href={photosHref} formId={formId} className={`${option} no-underline`}>
-          {labels.photos}
-        </LeaveControl>
-        {sections.map((section) => (
-          <LeaveControl
-            key={section.id}
-            href={section.href}
-            formId={formId}
-            className={listingSectionClass}
-          >
-            {section.label}
-          </LeaveControl>
-        ))}
       </div>
       {enhanced ? null : <p className="text-caption text-text-muted">{labels.noscript}</p>}
     </div>

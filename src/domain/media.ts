@@ -28,6 +28,14 @@ export const mediaModifications = [
 ] as const;
 export type MediaModification = (typeof mediaModifications)[number];
 
+/** Working photo text, separate from the metadata a person already approved. */
+export type MediaDetailsDraft = {
+  caption: string;
+  altText: string;
+  modification: MediaModification;
+  modificationDisclosure: string;
+};
+
 export const mediaReviewStates = ["pending", "approved", "rejected"] as const;
 export type MediaReviewState = (typeof mediaReviewStates)[number];
 

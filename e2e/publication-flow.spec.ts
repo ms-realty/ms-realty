@@ -278,25 +278,31 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   const mediaPath = `/api/media/${assetId}/${asset?.derivative_sha256}`;
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
   await page.reload();
+  await page
+    .getByLabel("Image description", { exact: true })
+    .fill("Синтетично изображение за тест");
+  await page.getByRole("button", { name: "Save photo details", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
+  await page.getByRole("button", { name: "Review this photo", exact: true }).click();
   await page.getByLabel("Rights holder", { exact: true }).fill("Synthetic image author");
   await page
     .getByLabel("Rights evidence / permission reference", { exact: true })
     .fill("Synthetic fixture rights only; no external photograph");
-  await page
-    .getByLabel("Image description", { exact: true })
-    .fill("Синтетично изображение за тест");
   await page
     .getByLabel(
       "I reviewed private addresses, people, documents and location details in the visible image.",
     )
     .check();
   await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
-  await page.getByLabel("Decision", { exact: true }).selectOption("approve");
   const mediaUploadReceipt = new URL(page.url()).searchParams.get("saved");
-  await page.getByRole("button", { name: "Record review", exact: true }).click();
+  await page.getByRole("button", { name: "Approve as a public candidate", exact: true }).click();
   await expect(page).toHaveURL((url) =>
     Boolean(url.searchParams.get("saved") && url.searchParams.get("saved") !== mediaUploadReceipt),
   );
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Photo checks$/ })
+    .click();
   await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
 
