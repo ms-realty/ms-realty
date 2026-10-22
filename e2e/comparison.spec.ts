@@ -3,6 +3,8 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import type { InquiryPurpose } from "@/domain/inquiry";
+import { workCopy } from "@/features/work/copy";
 import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -89,7 +91,7 @@ try {
   const broker = await createStaff(db, {roles:["assigned_broker"]});
   await db.insert(schema.passkeys).values([0,1].map(() => ({principalId:broker.id,credentialId:randomUUID(),publicKey:Buffer.from([1]),deviceType:"singleDevice",backedUp:false})));
   const session = await createSession(db, {kind:"staff",id:broker.id});
-  console.log(JSON.stringify({id:rows[0].id, reference:rows[0].reference, context:rows[0].context, token:session.token}));
+  console.log(JSON.stringify({id:rows[0].id, reference:rows[0].reference, purpose:rows[0].purpose, context:rows[0].context, token:session.token}));
 } finally { await sql.end(); }
 `;
 
@@ -458,6 +460,7 @@ test("P07: native three-property inquiry carries every ordered identity through 
   ) as {
     id: string;
     reference: string;
+    purpose: InquiryPurpose;
     token: string;
     context: { selection: { reference: string; manifestId: string }[] };
   };
@@ -486,8 +489,9 @@ test("P07: native three-property inquiry carries every ordered identity through 
     const broker = await staff.newPage();
     await broker.goto(hostUrl("staff", `/en/inquiries/${stored.id}`));
     await expect(
-      broker.getByRole("heading", { name: stored.reference, exact: true }),
+      broker.getByRole("heading", { name: workCopy("en").purposes[stored.purpose], exact: true }),
     ).toBeVisible();
+    await expect(broker.locator("[data-inquiry-reference]")).toContainText(stored.reference);
     const selected = broker.getByRole("region", {
       name: "Properties selected at submission",
       exact: true,

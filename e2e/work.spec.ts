@@ -120,7 +120,8 @@ test("durable public inquiry is accepted, stale triage is reviewed, and the owne
   );
   await row.getByRole("link").click();
   await expect(page).toHaveURL(new RegExp(`/en/inquiries/${inquiry.id}\\?view=unassigned`));
-  await expect(page.getByRole("heading", { name: inquiry.reference, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Synthetic visitor", exact: true })).toBeVisible();
+  await expect(page.locator("[data-inquiry-reference]")).toContainText(inquiry.reference);
   const stale = await context.newPage();
   await stale.goto(hostUrl("staff", `/en/inquiries/${inquiry.id}`));
   await expect(stale.getByRole("radio", { name: "Suspected spam", exact: true })).not.toBeChecked();

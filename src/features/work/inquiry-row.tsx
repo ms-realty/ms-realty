@@ -50,8 +50,10 @@ export function InquiryRow({
   locale: string;
 }) {
   const copy = workCopy(locale);
-  const detail =
-    row.context ?? (row.name ? { kind: "reference" as const, value: row.reference } : null);
+  const identity = row.name ?? row.context?.value ?? row.reference;
+  const detail = row.name
+    ? (row.context ?? { kind: "reference" as const, value: row.reference })
+    : null;
   return (
     <li
       id={`inquiry-${row.id}`}
@@ -63,10 +65,10 @@ export function InquiryRow({
         aria-current={current ? "page" : undefined}
         className="flex min-h-19 items-center gap-4 p-4 text-dense text-text no-underline hover:bg-subtle aria-[current=page]:bg-selected"
       >
-        <InboxIcon className="size-5" />
+        <InboxIcon className="size-5 shrink-0" />
         <span className="flex min-w-0 flex-1 flex-col gap-1 wrap-anywhere">
           <span className="font-semibold">
-            <bdi>{row.name ?? row.reference}</bdi>
+            <bdi>{identity}</bdi>
             {detail ? (
               <>
                 {" · "}
@@ -74,6 +76,11 @@ export function InquiryRow({
               </>
             ) : null}
           </span>
+          {!row.name && identity !== row.reference ? (
+            <span className="text-caption text-text-muted wrap-anywhere">
+              <bdi>{row.reference}</bdi>
+            </span>
+          ) : null}
           <span className="font-medium text-text-muted">
             {row.state ? `${row.state} · ` : null}
             <time dateTime={row.received.dateTime}>{row.received.label}</time>
@@ -94,7 +101,7 @@ export function InquiryRow({
             />
           </span>
         </span>
-        <ChevronEndIcon directional className="size-5" />
+        <ChevronEndIcon directional className="size-5 shrink-0" />
       </a>
     </li>
   );
