@@ -513,8 +513,13 @@ test("O13 staged arrow order survives reload and is saved only after review", as
   const f = seed();
   const [first, second, third] = f.relations;
   await openGallery(page, f);
+  const upload = page.getByRole("link", { name: "Upload a file", exact: true });
+  await expect(upload).toBeVisible();
+  await upload.click();
+  await expect(page.locator("#media-upload")).toBeVisible();
   await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
-  await expect(page.getByRole("link", { name: "Upload", exact: true })).toHaveCount(0);
+  await expect(upload).toBeHidden();
+  await expect(page.locator("#media-upload")).toBeHidden();
   const thirdTile = page.locator(`[data-photo="${third}"]`);
   await page.getByRole("button", { name: "Move up · 3", exact: true }).click();
   await expect(thirdTile.getByRole("button", { name: "Move up · 2", exact: true })).toBeFocused();
@@ -546,6 +551,7 @@ test("O13 staged arrow order survives reload and is saved only after review", as
     page.getByRole("status").filter({ hasText: "New photo order: 1, 3, 2." }),
   ).toBeVisible();
   expect(await workingOrder(f.listingId)).toEqual([first, third, second]);
+  await expect(upload).toBeVisible();
 });
 
 test("O13 tablet keeps the contextual photo beside visible editing fields", async ({ page }) => {

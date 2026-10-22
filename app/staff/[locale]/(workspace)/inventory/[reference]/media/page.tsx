@@ -287,7 +287,7 @@ export default async function MediaPage({
     </a>
   );
   return (
-    <div className="mx-auto flex max-w-[96rem] flex-col group/media gap-5 px-gutter py-5 sm:px-gutter-wide sm:py-6">
+    <div className="group/media mx-auto flex max-w-[96rem] flex-col gap-4 px-gutter py-5 sm:px-gutter-wide sm:py-6">
       <ListingIdentity
         locale={locale}
         reference={listing.reference}
@@ -311,7 +311,10 @@ export default async function MediaPage({
             <span aria-hidden="true">{inventoryCopy(locale).o12.photos}</span>
           </LeaveControl>
         ) : (
-          <a href={`${path}?upload=1#media-upload`} className={buttonClass("primary")}>
+          <a
+            href={`${path}?upload=1#media-upload`}
+            className={buttonClass("primary", "group-has-[[data-reordering]]/media:hidden")}
+          >
             <PlusIcon className="size-5" />
             {copy.upload}
           </a>
@@ -612,7 +615,10 @@ export default async function MediaPage({
             </div>
           )}
           {query.upload === "1" || !total ? (
-            <section id="media-upload" className="max-w-xl space-y-4 border-t border-divider pt-5">
+            <section
+              id="media-upload"
+              className="max-w-xl space-y-4 border-t border-divider pt-5 group-has-[[data-reordering]]/media:hidden"
+            >
               <h2 className="text-section font-semibold">{copy.upload}</h2>
               <NativeForm
                 action={action}
