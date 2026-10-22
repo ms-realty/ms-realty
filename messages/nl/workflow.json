@@ -535,5 +535,34 @@
   "factLabels": {
     "additional": "Aanvullend woningkenmerk",
     "stepFree": "Drempelvrije toegang"
+  },
+  "listingWorkspace": {
+    "navigation": "Onderdelen van de advertentie",
+    "documents": "Documenten",
+    "evidence": "Bron en bewijs",
+    "translations": "Talen",
+    "review": "Controleren en publiceren",
+    "gallery": "Werkgalerij",
+    "galleryHint": "Selecteer een foto om de gegevens te bewerken. Sleep een foto vóór een andere of gebruik de positiekeuze. Controleer elke nieuwe volgorde voordat u opslaat.",
+    "cover": "Omslag van de volgende galerij",
+    "included": "Opgenomen",
+    "excluded": "Verborgen",
+    "imageDetails": "Bijschrift en beschrijving",
+    "rightsReview": "Rechten en privacy controleren",
+    "reviewHint": "Uw besluit geldt voor deze foto en de bijbehorende gegevens. De advertentie wordt hierdoor niet gepubliceerd.",
+    "chooseDecision": "Kies een beoordelingsbesluit",
+    "position": "Vóór foto plaatsen",
+    "choosePosition": "Kies een positie",
+    "uploadHint": "Voeg een originele foto, plattegrond of visualisatie toe. Controleer na het uploaden de voorbeeldweergave en de rechten.",
+    "clearFile": "Geselecteerd bestand verwijderen",
+    "unsavedTitle": "Niet-opgeslagen fotogegevens",
+    "unsavedBody": "Bewerk verder om uw beoordeling vast te leggen, of verwerp de wijzigingen en verlaat de pagina.",
+    "stay": "Verder bewerken",
+    "discard": "Verwerpen en verlaten",
+    "noPhoto": "Geen voorbeeld beschikbaar",
+    "workingState": "Redactionele status",
+    "nextAction": "Volgende actie",
+    "noAction": "Werkconcept openen",
+    "facts": "Vastgelegde gegevens"
   }
 }

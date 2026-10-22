@@ -58,9 +58,9 @@ for (const javaScriptEnabled of [false, true])
       await page.getByRole("button", { name: "Show", exact: true }).first().click();
       await expect(rows(page)).toHaveCount(4);
       const review = rows(page).filter({ hasText: f.review });
-      await expect(review).toContainText(
-        `${f.review} · Синтетичен преглед ${f.token}Sandanski · €95,000 · 74.5 m² · Review needed`,
-      );
+      await expect(review).toContainText(`Синтетичен преглед ${f.token}`);
+      for (const fact of [f.review, "Sandanski", "€95,000", "74.5 m²", "Review needed"])
+        await expect(review).toContainText(fact);
       await expect(rows(page).filter({ hasText: f.availability })).toContainText(
         "Availability to confirm",
       );

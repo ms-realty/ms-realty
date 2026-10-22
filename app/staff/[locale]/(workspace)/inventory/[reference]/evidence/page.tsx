@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "@/db/client";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
+import { ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
 import { isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
@@ -62,7 +63,7 @@ export default async function SellerEvidencePage({
     );
   }
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-8">
+    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-8">
       <a href={`/${locale}/inventory/${reference}`} className="text-action underline">
         {copy.back}
       </a>
@@ -72,6 +73,7 @@ export default async function SellerEvidencePage({
           <bdi>{reference}</bdi>
         </p>
       </header>
+      <ListingNavigation locale={locale} reference={reference} current="evidence" />
       <p>{copy.missing}</p>
       <a href={`/${locale}/inventory/${reference}/documents`} className="text-action underline">
         {locale === "bg"

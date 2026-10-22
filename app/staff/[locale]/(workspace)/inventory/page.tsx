@@ -3,11 +3,15 @@
 // paged query (inventoryListPage). No manufactured totals or readiness claims: a row's next
 // step and its destination come only from recorded states.
 
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { getDb } from "@/db/client";
+import { mediaAssets, mediaRelations } from "@/db/schema";
 import { listingPurposes, propertyTypes } from "@/domain/facts";
 import { inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import { rowAction, rowDestination } from "@/features/inventory/row-action";
+import { InventoryThumbnail } from "@/features/inventory/thumbnail";
 import { PermissionState } from "@/features/shell/permission-state";
+import { workflowCopy } from "@/i18n/workflow-copy";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { isAppError } from "@/server/errors";
@@ -15,7 +19,7 @@ import { inventoryListPage } from "@/server/inventory/queries";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
-import { ChevronDownIcon, ChevronEndIcon, HomeIcon } from "@/ui/icons";
+import { ChevronDownIcon, ChevronEndIcon, PlusIcon } from "@/ui/icons";
 
 type Query = { q?: string; view?: string; purpose?: string; type?: string; cursor?: string };
 type RawQuery = Record<string, string | string[] | undefined>;
@@ -46,6 +50,7 @@ export default async function InventoryPage({
   const db = getDb();
   const copy = inventoryCopy(locale);
   const o10 = copy.o10;
+  const workspace = workflowCopy(locale, "listingWorkspace");
   const mayCreate = await can(db, session.actor, "listing.edit");
   const view = query.view === "needs" || query.view === "mine" ? query.view : "all";
   const purpose = listingPurposes.find((value) => value === query.purpose);
@@ -84,6 +89,41 @@ export default async function InventoryPage({
     restarted = true;
     page = await inventoryListPage(db, session.actor, filters);
   }
+  // Resolve media access independently from listing.read. A list preview never widens the
+  // private file endpoint's capability boundary, and unsafe originals are never requested.
+  const previewListings = (
+    await Promise.all(
+      page.rows.map(async (row) =>
+        (await can(db, session.actor, "media.manage", {
+          type: "listing",
+          id: row.listing.id,
+          propertyId: row.property.id,
+        }))
+          ? row.listing.id
+          : null,
+      ),
+    )
+  ).filter((id): id is string => Boolean(id));
+  const previews = previewListings.length
+    ? await db
+        .select({ listingId: mediaRelations.listingId, id: mediaAssets.id })
+        .from(mediaRelations)
+        .innerJoin(mediaAssets, eq(mediaAssets.id, mediaRelations.mediaAssetId))
+        .where(
+          and(
+            inArray(mediaRelations.listingId, previewListings),
+            isNull(mediaRelations.removedAt),
+            eq(mediaRelations.hidden, false),
+            eq(mediaAssets.scan, "clean"),
+            eq(mediaAssets.processing, "ready"),
+          ),
+        )
+        .orderBy(asc(mediaRelations.position))
+    : [];
+  const previewByListing = new Map<string, string>();
+  for (const preview of previews)
+    if (!previewByListing.has(preview.listingId))
+      previewByListing.set(preview.listingId, preview.id);
   const q = filters.q;
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
@@ -132,9 +172,17 @@ export default async function InventoryPage({
           : o10.noneMine;
   return (
     <div className="flex flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
-      <header className="flex flex-col gap-6 sm:gap-8">
-        <h1 className="text-heading font-semibold sm:text-title">{copy.inventory}</h1>
-        <p className="text-text-muted">{o10.instruction}</p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-heading font-semibold sm:text-title">{copy.inventory}</h1>
+          <p className="max-w-prose text-dense text-text-muted">{o10.instruction}</p>
+        </div>
+        {mayCreate ? (
+          <a href={`/${locale}/inventory/new`} className={buttonClass("primary")}>
+            <PlusIcon className="size-5" />
+            {copy.create}
+          </a>
+        ) : null}
       </header>
       <form method="get" className="flex flex-col gap-3">
         {view !== "all" ? <input type="hidden" name="view" value={view} /> : null}
@@ -203,7 +251,7 @@ export default async function InventoryPage({
         </details>
       </form>
       <nav aria-label={o10.views}>
-        <ul className="grid grid-cols-3 gap-1 rounded-control bg-subtle p-1">
+        <ul className="flex flex-wrap gap-x-4 border-b border-divider">
           {(
             [
               ["all", o10.all],
@@ -216,10 +264,10 @@ export default async function InventoryPage({
                 href={href({ view: id })}
                 aria-current={id === view ? "page" : undefined}
                 className={cx(
-                  "flex min-h-[2.875rem] w-full items-center justify-center rounded-control p-3 text-center text-dense font-semibold no-underline",
+                  "flex min-h-control items-center justify-center border-b-2 p-3 text-center text-dense font-semibold no-underline",
                   id === view
-                    ? "bg-canvas text-text"
-                    : "text-text-muted hover:bg-canvas/60 hover:text-text",
+                    ? "border-action text-action"
+                    : "border-transparent text-text-muted hover:bg-subtle hover:text-text",
                 )}
               >
                 {label}
@@ -238,34 +286,67 @@ export default async function InventoryPage({
           ) : null}
         </div>
       ) : (
-        <ul aria-label={o10.list} className="divide-y divide-divider border-b border-divider">
-          {shown.map((item) => (
-            <li key={item.listing.id}>
-              <a
-                href={item.href}
-                className="flex min-h-19 items-center gap-4 p-4 text-dense text-text no-underline hover:bg-subtle"
-              >
-                <HomeIcon className="size-5" />
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="font-semibold">
-                    <bdi>{item.listing.reference}</bdi> ·{" "}
-                    {item.title ? (
-                      <span lang="bg">{item.title}</span>
-                    ) : (
-                      optionLabel(item.property.propertyType, locale)
-                    )}
-                  </span>
-                  <span className="font-medium text-text-muted">
-                    {[item.property.settlement, ...item.detail, item.actionLabel]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                </span>
-                <ChevronEndIcon directional className="size-5" />
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <div
+            aria-hidden="true"
+            className="hidden grid-cols-[minmax(0,1fr)_10rem_12rem] gap-5 border-b border-divider px-3 pb-3 text-caption font-semibold text-text-muted xl:grid"
+          >
+            <span>{o10.list}</span>
+            <span>{workspace.facts}</span>
+            <span>{workspace.nextAction}</span>
+          </div>
+          <ul aria-label={o10.list} className="divide-y divide-divider border-b border-divider">
+            {shown.map((item) => {
+              const preview = previewByListing.get(item.listing.id);
+              return (
+                <li key={item.listing.id}>
+                  <a
+                    href={item.href}
+                    className="group grid min-w-0 gap-x-5 gap-y-3 py-4 text-dense text-text no-underline hover:bg-subtle sm:px-3 xl:grid-cols-[minmax(0,1fr)_10rem_12rem] xl:items-center"
+                  >
+                    <span className="flex min-w-0 items-start gap-3 sm:gap-4">
+                      <InventoryThumbnail
+                        source={
+                          preview ? `/api/files/private/media/${preview}?preview=1` : undefined
+                        }
+                        label={workspace.noPhoto}
+                      />
+                      <span className="grid min-w-0 gap-1">
+                        <span lang="bg" className="font-semibold group-hover:text-action">
+                          {item.title || optionLabel(item.property.propertyType, locale)}
+                        </span>
+                        <span className="text-text-muted">
+                          {[item.property.settlement, optionLabel(item.listing.purpose, locale)]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                        <span className="break-words text-caption text-text-muted">
+                          <bdi>{item.listing.reference}</bdi> ·{" "}
+                          {optionLabel(item.listing.editorialState, locale)}
+                        </span>
+                      </span>
+                    </span>
+                    <span className="flex flex-wrap gap-x-3 gap-y-1 font-medium tabular-nums xl:grid xl:gap-1">
+                      {item.detail.filter(Boolean).map((value) => (
+                        <span key={value}>{value}</span>
+                      ))}
+                    </span>
+                    <span className="flex min-w-0 items-center justify-between gap-3">
+                      <span
+                        className={
+                          item.needsAction ? "font-semibold text-action" : "text-text-muted"
+                        }
+                      >
+                        {item.actionLabel || workspace.noAction}
+                      </span>
+                      <ChevronEndIcon directional className="size-5 shrink-0 text-text-muted" />
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
       {restarted ? <p className="text-dense text-text-muted">{o10.restarted}</p> : null}
       {shortened ? (
@@ -294,11 +375,6 @@ export default async function InventoryPage({
         {next ? (
           <a href={next.href} className={buttonClass("primary")}>
             {o10.open.replace("{reference}", next.listing.reference)}
-          </a>
-        ) : null}
-        {mayCreate ? (
-          <a href={`/${locale}/inventory/new`} className={buttonClass("tertiary", "text-text")}>
-            {copy.create}
           </a>
         ) : null}
       </div>

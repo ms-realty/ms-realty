@@ -1,3 +1,4 @@
+import { ListingNavigation } from "@/features/inventory/workspace";
 // O20/F15: evidence is accepted only for its named purpose and exact current version.
 
 import { notFound, redirect } from "next/navigation";
@@ -59,6 +60,7 @@ export default async function DocumentsPage({
       <h1 className="text-title font-semibold">
         {copy.documents} · <bdi>{data.listing.reference}</bdi>
       </h1>
+      <ListingNavigation locale={locale} reference={data.listing.reference} current="documents" />
       <p>{copy.documentLimit}</p>
       {saved ? (
         <Notice tone="success">

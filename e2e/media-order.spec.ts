@@ -237,6 +237,27 @@ for (const javaScriptEnabled of [false, true])
       expect(await workingOrder(f.other.listingId)).toEqual(f.other.relations);
     });
 
+    test("O13 arbitrary position is staged and saved once without publishing", async ({ page }) => {
+      const f = seed();
+      const [first, second, third] = f.relations;
+      const version = await listingVersion(f.listingId);
+      const published = await publicMedia(f.listingId);
+      await openMedia(page, f);
+      await page.getByRole("link", { name: "Show photo 3", exact: true }).click();
+      await page.getByLabel("Place before photo", { exact: true }).selectOption(first ?? "");
+      await page.getByRole("button", { name: "Review the new order", exact: true }).click();
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Review the new order" }),
+      ).toBeVisible();
+      await expect(page.locator("dl").getByText("3, 1, 2", { exact: true })).toBeVisible();
+      expect(await workingOrder(f.listingId)).toEqual(f.relations);
+      await page.getByRole("button", { name: "Save the order", exact: true }).click();
+      await expect(page.getByRole("status")).toContainText("New photo order: 3, 1, 2.");
+      expect(await workingOrder(f.listingId)).toEqual([third, first, second]);
+      expect(await listingVersion(f.listingId)).toBe((version ?? 0) + 1);
+      expect(await publicMedia(f.listingId)).toBe(published);
+    });
+
     test("O13 checks on a twice-placed photo read back the placement used", async ({ page }) => {
       test.setTimeout(90_000);
       const f = seed();
@@ -262,6 +283,7 @@ for (const javaScriptEnabled of [false, true])
           .fill("synthetic-permission");
         await page.getByRole("checkbox", { name: /private addresses, people/ }).check();
         await page.getByRole("checkbox", { name: /usage rights and permission/ }).check();
+        await page.getByLabel("Decision", { exact: true }).selectOption("approve");
         await page.getByRole("button", { name: "Record review", exact: true }).click();
       };
       await review();
@@ -315,5 +337,44 @@ test("O13 order review keeps BG and RU staff labels", async ({ page }) => {
     await page.goto(hostUrl("staff", `/${locale}/inventory/${f.reference}/media`));
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   }
+  expect(await workingOrder(f.listingId)).toEqual(f.relations);
+});
+
+// The enhanced editor must not lose a review when another photo or placement action is chosen.
+test("O13 protects unsaved photo details and requires an explicit review decision", async ({
+  page,
+}) => {
+  const f = seed();
+  await openMedia(page, f);
+  await expect(page.getByLabel("Decision", { exact: true })).toHaveValue("");
+  await page.getByLabel("Visible caption", { exact: true }).fill("Unsaved synthetic caption");
+  await page.getByRole("link", { name: "Show photo 2", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Unsaved photo details" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Keep editing", exact: true }).click();
+  await expect(page.getByLabel("Visible caption", { exact: true })).toHaveValue(
+    "Unsaved synthetic caption",
+  );
+  await page.getByRole("button", { name: "Hide from next gallery", exact: true }).click();
+  await expect(dialog).toBeVisible();
+  expect(await workingOrder(f.listingId)).toEqual(f.relations);
+  await dialog.getByRole("button", { name: "Keep editing", exact: true }).click();
+  await page.getByRole("link", { name: "Show photo 2", exact: true }).click();
+  await dialog.getByRole("button", { name: "Discard and leave", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: `Listing ${f.reference} · Photo 2 of 3` }),
+  ).toBeVisible();
+  expect(await workingOrder(f.listingId)).toEqual(f.relations);
+});
+
+test("O13 desktop drag stages the same reviewed move", async ({ page, isMobile }) => {
+  test.skip(isMobile, "The native position control covers touch and keyboard use.");
+  const f = seed();
+  await openMedia(page, f);
+  await page
+    .getByRole("link", { name: "Show photo 3", exact: true })
+    .dragTo(page.getByRole("link", { name: "Show photo 1", exact: true }));
+  await expect(page.getByRole("heading", { level: 1, name: "Review the new order" })).toBeVisible();
+  await expect(page.locator("dl").getByText("3, 1, 2", { exact: true })).toBeVisible();
   expect(await workingOrder(f.listingId)).toEqual(f.relations);
 });

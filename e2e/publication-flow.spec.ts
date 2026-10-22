@@ -291,6 +291,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     )
     .check();
   await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
+  await page.getByLabel("Decision", { exact: true }).selectOption("approve");
   const mediaUploadReceipt = new URL(page.url()).searchParams.get("saved");
   await page.getByRole("button", { name: "Record review", exact: true }).click();
   await expect(page).toHaveURL((url) =>

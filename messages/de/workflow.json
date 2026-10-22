@@ -535,5 +535,34 @@
   "factLabels": {
     "additional": "Weitere Objektangabe",
     "stepFree": "Stufenloser Zugang"
+  },
+  "listingWorkspace": {
+    "navigation": "Bereiche des Angebots",
+    "documents": "Unterlagen",
+    "evidence": "Quelle und Nachweise",
+    "translations": "Sprachen",
+    "review": "Prüfen und veröffentlichen",
+    "gallery": "Arbeitsgalerie",
+    "galleryHint": "Wählen Sie ein Foto zum Bearbeiten. Ziehen Sie es vor ein anderes oder nutzen Sie die Positionsauswahl. Prüfen Sie jede neue Reihenfolge vor dem Speichern.",
+    "cover": "Titelbild der nächsten Galerie",
+    "included": "Enthalten",
+    "excluded": "Ausgeblendet",
+    "imageDetails": "Bildunterschrift und Beschreibung",
+    "rightsReview": "Rechte und Datenschutz prüfen",
+    "reviewHint": "Ihre Entscheidung gilt für dieses Foto und seine Angaben. Das Angebot wird dadurch nicht veröffentlicht.",
+    "chooseDecision": "Prüfentscheidung wählen",
+    "position": "Vor Foto platzieren",
+    "choosePosition": "Position wählen",
+    "uploadHint": "Fügen Sie ein Originalfoto, einen Grundriss oder eine Visualisierung hinzu. Prüfen Sie danach die Vorschau und die Nutzungsrechte.",
+    "clearFile": "Ausgewählte Datei entfernen",
+    "unsavedTitle": "Ungespeicherte Fotodaten",
+    "unsavedBody": "Bearbeiten Sie weiter, um Ihre Prüfung zu speichern, oder verwerfen Sie die Änderungen und verlassen Sie die Seite.",
+    "stay": "Weiter bearbeiten",
+    "discard": "Verwerfen und verlassen",
+    "noPhoto": "Keine Vorschau verfügbar",
+    "workingState": "Redaktioneller Status",
+    "nextAction": "Nächster Schritt",
+    "noAction": "Arbeitsentwurf öffnen",
+    "facts": "Erfasste Angaben"
   }
 }

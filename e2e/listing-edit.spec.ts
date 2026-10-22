@@ -112,7 +112,8 @@ for (const javaScriptEnabled of [false, true])
         `/en/inventory/${f.reference}/media`,
       );
       // Butler stays draft-only and cannot draft listing text yet; the manual path is primary.
-      const butler = page.getByRole("complementary", { name: "Butler" });
+      const butler = page.locator("details").filter({ has: page.locator("#butler-heading") });
+      await butler.locator("summary").click();
       await expect(butler.getByRole("button", { name: "Prepare a proposal" })).toBeDisabled();
       await expect(butler.getByText("Butler cannot draft listing text yet.")).toBeVisible();
       await expect(butler.getByRole("link", { name: "Continue without Butler" })).toHaveAttribute(
@@ -152,14 +153,11 @@ for (const javaScriptEnabled of [false, true])
 
       // Facts save keeps the text, returns to Facts and shows the new value.
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`));
-      // Facts keeps Save and Review (647:12680); phones still show the contextual Butler
-      // block under the work column (659:12922), wide screens keep it beside Text only.
+      // Context and assistance remain available on either tab without dominating the work.
       await expect(page.getByText("Correct the published listing", { exact: true })).toBeHidden();
-      if (test.info().project.name === "chromium-desktop") await expect(butler).toBeHidden();
-      else {
-        await expect(butler.getByRole("button", { name: "Prepare a proposal" })).toBeDisabled();
-        await expect(butler.getByText("Butler cannot draft listing text yet.")).toBeVisible();
-      }
+      await butler.locator("summary").click();
+      await expect(butler.getByRole("button", { name: "Prepare a proposal" })).toBeDisabled();
+      await expect(butler.getByText("Butler cannot draft listing text yet.")).toBeVisible();
       await page.getByLabel("Price in EUR", { exact: true }).fill("96000");
       await page.getByRole("button", { name: "Save the facts", exact: true }).click();
       await expect(

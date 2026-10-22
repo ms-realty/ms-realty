@@ -535,5 +535,34 @@
   "factLabels": {
     "additional": "Additional property detail",
     "stepFree": "Step-free access"
+  },
+  "listingWorkspace": {
+    "navigation": "Listing sections",
+    "documents": "Documents",
+    "evidence": "Source and evidence",
+    "translations": "Languages",
+    "review": "Review and publish",
+    "gallery": "Working gallery",
+    "galleryHint": "Select a photo to edit its details. Drag a photo before another, or use the position controls. Every order change is reviewed before saving.",
+    "cover": "Next gallery cover",
+    "included": "Included",
+    "excluded": "Hidden",
+    "imageDetails": "Caption and description",
+    "rightsReview": "Rights and privacy review",
+    "reviewHint": "Your decision applies to this photo and its details. It does not publish the listing.",
+    "chooseDecision": "Choose a review decision",
+    "position": "Place before photo",
+    "choosePosition": "Choose a position",
+    "uploadHint": "Add an original photo, floor plan or render. Review its preview and permissions after uploading.",
+    "clearFile": "Remove selected file",
+    "unsavedTitle": "Unsaved photo details",
+    "unsavedBody": "Keep editing to record your review, or discard these changes and leave.",
+    "stay": "Keep editing",
+    "discard": "Discard and leave",
+    "noPhoto": "No preview available",
+    "workingState": "Editorial state",
+    "nextAction": "Next action",
+    "noAction": "Open working draft",
+    "facts": "Recorded facts"
   }
 }

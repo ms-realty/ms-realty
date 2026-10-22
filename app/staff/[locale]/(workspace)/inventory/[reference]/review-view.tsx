@@ -23,6 +23,7 @@ import type { InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
+import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
 import { isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { can } from "@/server/authz";
@@ -473,10 +474,12 @@ export async function ReviewView({
 
   return (
     <div className="flex flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
-      <header className="flex flex-col gap-6 sm:gap-8">
+      <ListingIdentity locale={locale} reference={reference} title={values.title} />
+      <header className="flex flex-col gap-3">
         <h1 className="text-heading font-semibold sm:text-title">{copy.o12.reviewTitle}</h1>
         <p className="text-text-muted">{o16.instruction}</p>
       </header>
+      <ListingNavigation locale={locale} reference={reference} current="review" />
       {error}
       {/* Read, then decide: on phones the evidence sits between the preview and the approvals
           and actions (18:3002); from lg it is the right-hand column (18:1471). */}
