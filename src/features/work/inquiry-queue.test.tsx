@@ -20,6 +20,7 @@ const session = { account: { kind: "staff", id: "staff-one" } } as Session;
 const row = (id: string, overrides: Partial<InquiryRowView> = {}): InquiryRowView => ({
   id,
   name: `Synthetic ${id}`,
+  purpose: "Viewing request",
   reference: `RQ-TEST-${id}`,
   context: { kind: "listing", value: "MS-00202" },
   state: "Assigned",
@@ -83,15 +84,33 @@ describe("InquiryQueueView", () => {
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute("href", "/en/inquiries/one?view=all");
     expect(links[0]).toHaveTextContent(
-      "Synthetic one · MS-00202Assigned · Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Agency coverage",
+      "Synthetic one · MS-00202 RQ-TEST-one Assigned · Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Work without an owner",
     );
-    // Without a listing or purpose the reference names the conversation.
-    expect(links[1]).toHaveTextContent("Synthetic two · RQ-TEST-two");
+    expect(links[1]).toHaveTextContent("Synthetic two RQ-TEST-two");
     expect(links[0]).not.toHaveAttribute("aria-current");
     expect(screen.getByRole("link", { name: "All" })).toHaveAttribute("aria-current", "page");
     expect(
       screen.getByText("Open a conversation to see its context, owner and next action."),
     ).toBeVisible();
+  });
+
+  it("names an unnamed inquiry by its stated purpose and retains both exact references", () => {
+    render(
+      <InquiryQueueView
+        locale="en"
+        scope="all"
+        page={1}
+        read={{
+          ok: true,
+          rows: [row("unnamed", { name: null, purpose: "Question" })],
+          hasMore: false,
+        }}
+      />,
+    );
+    const item = screen.getByRole("list", { name: "Conversations" });
+    const inquiry = within(item).getByRole("link");
+    expect(inquiry).toHaveTextContent("Question · MS-00202 RQ-TEST-unnamed");
+    expect(inquiry).toHaveAttribute("href", "/en/inquiries/unnamed?view=all");
   });
 
   it("beside an open conversation keeps its scope and page and marks the selection", () => {

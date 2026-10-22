@@ -1,16 +1,20 @@
+import { workflowLabel } from "@/i18n/workflow-labels";
 import "server-only";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { currencyCodes } from "@/domain/ids";
-import { displayLocale, isPublicLocale } from "@/i18n/config";
+import { isPublicLocale } from "@/i18n/config";
+import { formatExactMoney, formatMoneyInput } from "@/i18n/money";
+import { moneyCopy } from "@/i18n/money-copy";
 import { readCase } from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
 import { isAppError } from "@/server/errors";
 import { findOperation } from "@/server/operations";
 import { listProposals, proposalContext, readProposal } from "@/server/proposals/queries";
-import { deadlineInput } from "@/server/proposals/terms";
+import { buttonClass } from "@/ui/button-class";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { caseCopy } from "../cases/copy";
 import { type WorkflowField, WorkflowForm } from "../cases/form";
 import {
@@ -24,12 +28,14 @@ import { privateRead } from "../work/screens";
 import { proposalAction } from "./actions";
 import {
   type ProposalCommand,
+  proposalEnhancementField,
   proposalFields,
   proposalScope,
   proposalStatus,
   proposalTypes,
 } from "./contract";
 import { proposalCopy } from "./copy";
+import { counterofferCopy } from "./counteroffer-copy";
 
 function ProposalForm(
   props: ScreenProps & {
@@ -40,6 +46,8 @@ function ProposalForm(
     values?: Record<string, string>;
     path: string;
     label: string;
+    disclosure?: string;
+    commandAvailable?: boolean;
   },
 ) {
   const initial = initialFormState(
@@ -62,21 +70,36 @@ function ProposalForm(
       initialState={initial}
       fields={props.fields}
       path={props.path}
+      nativeIdentity={proposalScope(props.command, props.id)}
+      commandAvailable={props.commandAvailable}
       status={{
         href: proposalStatus(props.locale, props.command, props.id, initial.operationId),
         label: caseCopy(props.locale).status,
       }}
       submit={props.label}
+      disclosure={props.disclosure}
+      enhancementField={
+        props.session.account.kind === "client" && props.command === "revise"
+          ? proposalEnhancementField
+          : undefined
+      }
     />
   );
 }
 function termFields(locale: string): WorkflowField[] {
   const c = proposalCopy(locale);
+  const money = moneyCopy(isPublicLocale(locale) ? locale : "bg");
   return [
-    { name: "amount", label: c.amount, required: true },
+    {
+      name: "amount",
+      label: money.amount,
+      type: "money",
+      currencyField: "currency",
+      required: true,
+    },
     {
       name: "currency",
-      label: c.currency,
+      label: money.currency,
       type: "select",
       required: true,
       options: currencyCodes.map((value) => ({ value, label: value })),
@@ -94,7 +117,7 @@ function termFields(locale: string): WorkflowField[] {
     { name: "paymentBasis", label: c.paymentBasis, type: "textarea", required: true },
     { name: "conditions", label: c.conditions, type: "textarea" },
     { name: "inclusions", label: c.inclusions, type: "textarea" },
-    { name: "deadline", label: c.deadline, hint: caseCopy(locale).offsetHint, required: true },
+    { name: "deadline", label: c.deadline, type: "datetime-local", required: true },
   ];
 }
 export async function ProposalIndexScreen(props: ScreenProps & { caseId?: string }) {
@@ -194,14 +217,14 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
   return (
     <div className="space-y-3" data-proposal-revision={row.number}>
       <p>
-        {c.revision} {row.number} · <strong>{c[row.state]}</strong>
+        <strong>{c[row.state]}</strong>
       </p>
+      <TechnicalDetails locale={locale}>
+        {c.revision} {row.number}
+      </TechnicalDetails>
       <p className="text-subheading font-semibold">
         <bdi>
-          {new Intl.NumberFormat(isPublicLocale(locale) ? displayLocale(locale) : "en-GB", {
-            style: "currency",
-            currency: row.currency,
-          }).format(row.amountMinor / 100)}
+          {formatExactMoney(isPublicLocale(locale) ? locale : "bg", row.amountMinor, row.currency)}
         </bdi>{" "}
         · {row.period === "month" ? c.month : c.total}
       </p>
@@ -209,13 +232,13 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
         {c.paymentBasis}: {row.paymentBasis}
       </p>
       <p>
-        {c.deadline}: <WorkflowTime value={row.deadlineAt} locale={locale} />
+        {c.deadline}: <WorkflowTime value={row.deadlineAt} locale={locale} zoneLabel />
       </p>
       <h3 className="font-semibold">{c.parties}</h3>
       <ul>
         {row.parties.map((p) => (
           <li key={p.partyId}>
-            {p.name} · {p.role.replaceAll("_", " ")}
+            {p.name} · {workflowLabel(p.role, locale)}
           </li>
         ))}
       </ul>
@@ -248,11 +271,16 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
     copy = caseCopy(props.locale),
     row = view.revision,
     staff = props.session.account.kind === "staff";
+  const counter = counterofferCopy(isPublicLocale(props.locale) ? props.locale : "bg");
   const path = `/${props.locale}/proposals/${view.proposal.id}`;
   const common = { ...props, id: view.proposal.id, version: view.proposal.version, path };
   const hidden: WorkflowField[] = [{ name: "revisionId", label: "", type: "hidden" }];
   const revisionValues = { revisionId: row.id };
   const buyer = row.parties.find((p) => ["buyer", "co_buyer", "tenant"].includes(p.role));
+  const canRevise =
+    view.current &&
+    view.intact &&
+    (view.canRespond || (staff && row.state !== "agreed_for_next_step"));
   let buyers = [{ partyId: buyer?.partyId ?? "", name: buyer?.name ?? "" }];
   if (staff && view.proposal.interestId) {
     try {
@@ -269,7 +297,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
     }
   }
   return (
-    <WorkflowPage {...props} title={view.proposal.reference}>
+    <WorkflowPage {...props} title={c.detailTitle} reference={view.proposal.reference}>
       <p>{c.boundary}</p>
       <a
         className={workflowLink}
@@ -281,9 +309,12 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
       {view.expired ? <p role="status">{c.expiredNotice}</p> : null}
       {!view.intact || view.source?.changed ? <p role="status">{c.changed}</p> : null}
       {view.source ? (
-        <p>
-          {view.source.reference} · {c.source} {view.source.revision}
-        </p>
+        <div>
+          <p>{view.source.reference}</p>
+          <TechnicalDetails locale={props.locale}>
+            {c.source} {view.source.revision}
+          </TechnicalDetails>
+        </div>
       ) : null}
       <WorkflowSection title={c.terms}>
         <Terms row={row} locale={props.locale} />
@@ -302,7 +333,11 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
                       : c.countered}
                 </p>
                 <p>{response.reason}</p>
-                <WorkflowTime value={response.at} locale={props.locale} />
+                <WorkflowTime
+                  value={response.at}
+                  locale={props.locale}
+                  zoneLabel={props.session.account.kind === "client"}
+                />
               </li>
             ))}
           </ul>
@@ -396,14 +431,23 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
           />
         </WorkflowSection>
       ) : null}
-      {view.current &&
-      view.intact &&
-      (view.canRespond || (staff && row.state !== "agreed_for_next_step")) ? (
-        <WorkflowSection title={staff ? c.revise : c.counter}>
+      {canRevise || !staff ? (
+        // Keep the client hook mounted when a committed counteroffer makes the visible
+        // submitted revision historical. Only a restored response can reveal this form.
+        <section
+          className={
+            canRevise ? "space-y-4 rounded-card border border-border bg-surface p-5" : undefined
+          }
+        >
+          {canRevise ? (
+            <h2 className="text-subheading font-semibold">{staff ? c.revise : counter.open}</h2>
+          ) : null}
           <ProposalForm
             {...common}
             command="revise"
-            label={staff ? c.revise : c.counter}
+            commandAvailable={canRevise}
+            label={staff ? c.revise : counter.submit}
+            disclosure={staff ? undefined : counter.open}
             fields={[
               ...hidden,
               staff
@@ -438,16 +482,20 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
                 )
                 .map((p) => p.partyId)
                 .join("\n"),
-              amount: (row.amountMinor / 100).toFixed(2),
+              amount: formatMoneyInput(
+                isPublicLocale(props.locale) ? props.locale : "bg",
+                row.amountMinor,
+                row.currency,
+              ),
               currency: row.currency,
               period: row.period,
               paymentBasis: row.paymentBasis,
               conditions: row.conditions.join("\n"),
               inclusions: row.inclusions.join("\n"),
-              deadline: deadlineInput(row.deadlineAt),
+              deadline: row.deadlineAt.toISOString(),
             }}
           />
-        </WorkflowSection>
+        </section>
       ) : null}
       {view.history.length ? (
         <WorkflowSection title={c.history}>
@@ -509,9 +557,19 @@ export async function ProposalStatusScreen(
               ? c.statusFailed
               : c.statusUnknown}
       </p>
-      <a className={workflowLink} href={href}>
-        {c.back}
-      </a>
+      <div className="flex flex-wrap items-center gap-4">
+        {receipt && receipt.status !== "succeeded" && receipt.status !== "failed" ? (
+          <a
+            className={buttonClass("primary")}
+            href={proposalStatus(props.locale, command, id, props.keyValue)}
+          >
+            {c.checkAgain}
+          </a>
+        ) : null}
+        <a className={buttonClass("secondary")} href={href}>
+          {c.back}
+        </a>
+      </div>
     </WorkflowPage>
   );
 }

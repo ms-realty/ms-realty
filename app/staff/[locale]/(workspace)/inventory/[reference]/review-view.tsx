@@ -2,6 +2,7 @@
 // and the six required human approvals are read from recorded state; the approvals are status,
 // never boxes to tick (O16EL: separate decisions, no shared "verified" mark). Every decision
 // below keeps its own form, actor, permission and revision check.
+
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import type { ReactNode } from "react";
@@ -22,7 +23,9 @@ import type { InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
-import { agencyTimeZone } from "@/i18n/config";
+import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { can } from "@/server/authz";
 import { getEnv } from "@/server/config/env";
 import type { inventoryDetail } from "@/server/inventory/commands";
@@ -272,16 +275,42 @@ export async function ReviewView({
     areaLines.length === 0 ? o16.area : null,
     bedroomsValue === null ? copy.o12.bedroomsLabel : null,
   ].filter(Boolean);
-  const checks: [string, boolean][] = [
-    [o16.checks.facts, input.factReviewValid],
-    [o16.checks.photos, input.mediaEligible],
-    [o16.checks.language, input.localeApprovedForSource],
-    [o16.checks.version, input.revisionApprovalValid],
-    [o16.checks.seller, input.sellerInstructionValid],
+  const evidenceHref = mayReadSourcePreview ? `${path}/evidence` : undefined;
+  const approvalHref =
+    revision && mayReview
+      ? "#listing-approval-decision"
+      : mayEdit
+        ? `#${inventorySections.draft}`
+        : undefined;
+  const approvalTask = revision && mayReview ? copy.approve : copy.prepare;
+  const checks: [string, boolean, string, string | undefined][] = [
+    [
+      o16.checks.facts,
+      input.factReviewValid,
+      revision && mayReview ? copy.reviewFacts : evidence.title,
+      revision && mayReview ? "#listing-facts-decision" : evidenceHref,
+    ],
+    [
+      o16.checks.photos,
+      input.mediaEligible,
+      copy.o12.photos,
+      mayManageMedia ? `${path}/media` : undefined,
+    ],
+    [o16.checks.language, input.localeApprovedForSource, approvalTask, approvalHref],
+    [o16.checks.version, input.revisionApprovalValid, approvalTask, approvalHref],
+    [o16.checks.seller, input.sellerInstructionValid, evidence.title, evidenceHref],
     ...(input.regulatedClaimsReviewed === false
-      ? ([[o16.checks.claims, false]] as [string, boolean][])
+      ? [
+          [o16.checks.claims, false, evidence.title, evidenceHref] as [
+            string,
+            boolean,
+            string,
+            string | undefined,
+          ],
+        ]
       : []),
   ];
+  const nextTask = checks.find(([, okay, , href]) => !okay && href);
 
   const host = getEnv().hosts.public;
   const review = `${path}?tab=review`;
@@ -366,11 +395,7 @@ export async function ReviewView({
       reference,
       manifestId: chosen.id,
     }).catch(() => "unavailable" as const);
-    const when = new Intl.DateTimeFormat(locale, {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: agencyTimeZone,
-    });
+    const when = (at: Date) => formatDateTime(isPublicLocale(locale) ? locale : "bg", at);
     const decided = (recorded: PublicationReviewDecision | undefined) => {
       // A failed read is not a missing approval: say which it is.
       if (reviewers === "unavailable") return o16.decisionUnavailable;
@@ -382,7 +407,7 @@ export async function ReviewView({
           decider?.identityState === "resolved" && decider.displayName
             ? `${decider.displayName} ${o16.currentName}`
             : o16.deciderUnknown,
-        when: recorded.decidedAt ? when.format(recorded.decidedAt) : "—",
+        when: recorded.decidedAt ? when(recorded.decidedAt) : "—",
         state: o16.approvalStates[recorded.state],
       });
     };
@@ -440,7 +465,10 @@ export async function ReviewView({
           <p role="alert" className="rounded-control bg-warning-soft p-4 text-dense">
             {fill(o16.notEligibleLocale, {
               locale: chosen.locale.toUpperCase(),
-              reason: local.decision.code.replaceAll("_", " "),
+              reason:
+                inventoryDecisionCopy(locale).blockers[
+                  local.decision.code as keyof ReturnType<typeof inventoryDecisionCopy>["blockers"]
+                ] ?? inventoryDecisionCopy(locale).unavailable,
             })}
           </p>
         ) : null}
@@ -471,15 +499,88 @@ export async function ReviewView({
   }
 
   return (
-    <div className="flex flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
-      <header className="flex flex-col gap-6 sm:gap-8">
-        <h1 className="text-heading font-semibold sm:text-title">{copy.o12.reviewTitle}</h1>
-        <p className="text-text-muted">{o16.instruction}</p>
-      </header>
+    <div className="flex flex-col gap-4 px-gutter py-5 sm:gap-6 sm:px-gutter-wide sm:py-6">
+      <ListingIdentity locale={locale} reference={reference} title={values.title} />
+      <h1 className="text-heading font-semibold sm:text-title">{copy.o12.reviewTitle}</h1>
+      <ListingNavigation locale={locale} reference={reference} current="review" />
       {error}
-      {/* Read, then decide: on phones the evidence sits between the preview and the approvals
-          and actions (18:3002); from lg it is the right-hand column (18:1471). */}
+      {/* Lead with the recorded blocker and the next permitted task; preview and source stay
+          available below it. Each approval remains a separate, version-checked decision. */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,46.8rem)_23.2rem] lg:items-start lg:gap-x-8">
+        <div className="flex min-w-0 flex-col gap-6 lg:col-start-1">
+          <p
+            role="status"
+            className={`flex items-start gap-3 rounded-control p-4 text-dense ${eligible ? "bg-success-soft" : "bg-warning-soft"}`}
+          >
+            {eligible ? (
+              <CheckIcon className="size-5 text-success" />
+            ) : (
+              <WarningIcon className="size-5 text-warning" />
+            )}
+            {eligible ? o16.eligible : o16.blocked}
+          </p>
+          {eligible && !mayPublish ? (
+            <p className="text-text-muted">{o16.decisionByPublisher}</p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* The decision step exists only for someone who may publish; others never loop to it. */}
+            {eligible && !mayPublish ? null : (
+              <a
+                href={
+                  eligible
+                    ? manifests[0]
+                      ? `${review}&step=publish&manifest=${manifests[0].id}`
+                      : `#${inventorySections.review}`
+                    : (nextTask?.[3] ?? `#${inventorySections.navigation}`)
+                }
+                className={buttonClass("primary")}
+              >
+                {eligible ? o16.toDecision : (nextTask?.[2] ?? o16.reviewMissing)}
+              </a>
+            )}
+            <a href={path} className={buttonClass("secondary", "text-text")}>
+              {o16.editText}
+            </a>
+            <a href={`/${locale}/inventory`} className={buttonClass("tertiary", "text-text")}>
+              {o16.back}
+            </a>
+          </div>
+          <section aria-labelledby="o16-approvals" className="flex flex-col gap-1">
+            <h2 id="o16-approvals" className="text-dense font-semibold">
+              {approved ? fill(o16.approvalsFor, { n: approved.revisionNumber }) : o16.approvals}
+            </h2>
+            <ul className="flex flex-col">
+              {checks.map(([label, okay, task, href]) => (
+                <li key={label} className="flex min-h-control items-center gap-3 p-3 text-dense">
+                  {okay ? (
+                    <CheckIcon className="size-5 text-success" />
+                  ) : (
+                    <span
+                      aria-hidden="true"
+                      className="size-5 rounded-control border border-border"
+                    />
+                  )}
+                  <span className="flex-1">
+                    {!okay && href ? (
+                      <a
+                        href={href}
+                        className="text-action underline"
+                        aria-label={`${label} · ${task}`}
+                      >
+                        {label}
+                      </a>
+                    ) : (
+                      label
+                    )}
+                  </span>
+                  <span className={okay ? "text-success" : "text-text-muted"}>
+                    {okay ? o16.done : o16.missing}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
         <div className="flex min-w-0 flex-col gap-6 lg:col-start-1">
           <section
             aria-labelledby="o16-candidate"
@@ -497,7 +598,9 @@ export async function ReviewView({
                   })
                 : o16.publicNone}
             </p>
-            <p className="bg-brand-tint p-3 text-brand">
+            <p
+              className={`p-3 ${approved ? "bg-success-soft text-success" : "bg-warning-soft text-text"}`}
+            >
               {approved
                 ? fill(o16.candidateApproved, { n: approved.revisionNumber })
                 : revision
@@ -604,68 +707,6 @@ export async function ReviewView({
             </>
           ) : null}
         </aside>
-        <div className="flex min-w-0 flex-col gap-6 lg:col-start-1">
-          <section aria-labelledby="o16-approvals" className="flex flex-col gap-1">
-            <h2 id="o16-approvals" className="text-dense font-semibold">
-              {approved ? fill(o16.approvalsFor, { n: approved.revisionNumber }) : o16.approvals}
-            </h2>
-            <ul className="flex flex-col">
-              {checks.map(([label, okay]) => (
-                <li key={label} className="flex min-h-control items-center gap-3 p-3 text-dense">
-                  {okay ? (
-                    <CheckIcon className="size-5 text-success" />
-                  ) : (
-                    <span
-                      aria-hidden="true"
-                      className="size-5 rounded-control border border-border"
-                    />
-                  )}
-                  <span className="flex-1">{label}</span>
-                  <span className={okay ? "text-success" : "text-text-muted"}>
-                    {okay ? o16.done : o16.missing}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-          <p
-            role="status"
-            className={`flex items-start gap-3 rounded-control p-4 text-dense ${eligible ? "bg-success-soft" : "bg-warning-soft"}`}
-          >
-            {eligible ? (
-              <CheckIcon className="size-5 text-success" />
-            ) : (
-              <WarningIcon className="size-5 text-warning" />
-            )}
-            {eligible ? o16.eligible : o16.blocked}
-          </p>
-          {eligible && !mayPublish ? (
-            <p className="text-text-muted">{o16.decisionByPublisher}</p>
-          ) : null}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* The decision step exists only for someone who may publish; others never loop to it. */}
-            {eligible && !mayPublish ? null : (
-              <a
-                href={
-                  eligible
-                    ? manifests[0]
-                      ? `${review}&step=publish&manifest=${manifests[0].id}`
-                      : `#${inventorySections.review}`
-                    : `#${inventorySections.navigation}`
-                }
-                className={buttonClass("primary")}
-              >
-                {eligible ? o16.toDecision : o16.reviewMissing}
-              </a>
-            )}
-            <a href={path} className={buttonClass("secondary", "text-text")}>
-              {o16.editText}
-            </a>
-            <a href={`/${locale}/inventory`} className={buttonClass("tertiary", "text-text")}>
-              {o16.back}
-            </a>
-          </div>
-        </div>
       </div>
 
       <h2 className="text-section font-semibold">{o16.remaining}</h2>
@@ -774,9 +815,17 @@ export async function ReviewView({
               facts={data.facts}
             />
             <div className="grid gap-4 lg:grid-cols-2">
-              {mayReview ? decision("facts", copy.reviewFacts, property.version) : null}
+              {mayReview ? (
+                <div id="listing-facts-decision" className="scroll-mt-6">
+                  {decision("facts", copy.reviewFacts, property.version)}
+                </div>
+              ) : null}
               {mayEdit ? decision("submit", copy.submit, listing.version) : null}
-              {mayReview ? decision("approve", copy.approve, listing.version) : null}
+              {mayReview ? (
+                <div id="listing-approval-decision" className="scroll-mt-6">
+                  {decision("approve", copy.approve, listing.version)}
+                </div>
+              ) : null}
               {mayPublish
                 ? decision("prepare", copy.prepareManifest, listing.publicationGeneration)
                 : null}

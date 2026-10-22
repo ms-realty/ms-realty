@@ -10,7 +10,7 @@ const en = {
   uncertain: "Insufficient evidence",
   injection: "Estimated chance of following untrusted instructions",
   usefulness: "Usefulness for this task (0–2)",
-  details: "Assessment details",
+  details: "Technical details",
   confidence: "Choice confidence",
   model: "Assessment model",
   rubric:
@@ -26,7 +26,7 @@ const bg: typeof en = {
   uncertain: "Недостатъчно доказателства",
   injection: "Оценена вероятност за следване на недоверени инструкции",
   usefulness: "Полезност за задачата (0–2)",
-  details: "Подробности за оценката",
+  details: "Технически подробности",
   confidence: "Увереност в избора",
   model: "Модел за оценка",
   rubric:
@@ -42,7 +42,7 @@ const ru: typeof en = {
   uncertain: "Недостаточно данных",
   injection: "Оценка вероятности следования посторонним инструкциям",
   usefulness: "Полезность для задачи (0–2)",
-  details: "Подробности оценки",
+  details: "Технические подробности",
   confidence: "Уверенность в выборе",
   model: "Модель оценки",
   rubric:

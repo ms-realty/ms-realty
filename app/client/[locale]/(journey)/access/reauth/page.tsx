@@ -7,6 +7,7 @@ import { identityCopy } from "@/features/identity/copy";
 import { isRoutableLocale } from "@/i18n/config";
 import { currentClientSession, localReturnPath } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
+import { NativeForm } from "@/ui/form/native-form";
 
 export const metadata = {
   robots: { index: false, follow: false },
@@ -36,7 +37,7 @@ export default async function ClientReauthPage({
       title={query.sent === "1" ? copy.linkSentTitle : copy.reauthTitle}
       lead={query.sent === "1" ? copy.linkSent : copy.clientReauthLead}
     >
-      <form action={`/${locale}/access/reauth/request`} method="post" className="grid gap-4">
+      <NativeForm action={`/${locale}/access/reauth/request`} method="post" className="grid gap-4">
         <input type="hidden" name="returnTo" value={returnTo} />
         <p>
           {copy.emailLabel}: <bdi>{account?.email ?? ""}</bdi>
@@ -44,7 +45,7 @@ export default async function ClientReauthPage({
         <button type="submit" className={buttonClass()}>
           {copy.sendLink}
         </button>
-      </form>
+      </NativeForm>
       <a href={`/${locale}/access`} className="underline">
         {copy.clientAccessTitle}
       </a>

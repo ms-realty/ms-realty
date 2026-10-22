@@ -1,8 +1,10 @@
 // O21 / AT22: synthetic authoring and explicit review through the deployed application.
+
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 for (const javaScriptEnabled of [true, false]) {
   test.describe(`Content lifecycle with JavaScript ${javaScriptEnabled}`, () => {
@@ -66,9 +68,10 @@ for (const javaScriptEnabled of [true, false]) {
         await section
           .getByLabel("Review evidence or reason", { exact: true })
           .fill("Explicit synthetic human decision");
-        await section
-          .getByLabel("Approval valid until (UTC)", { exact: true })
-          .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+        await fillAgencyInstant(
+          section.getByLabel("Approval valid until", { exact: true }),
+          new Date(Date.now() + 86400000),
+        );
         await section.getByRole("checkbox").check();
         await section.getByRole("button", { name: action, exact: true }).click();
         await expect(page).toHaveURL((url) => url.pathname === "/en/content/operations");

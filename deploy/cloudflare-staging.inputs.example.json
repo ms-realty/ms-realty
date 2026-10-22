@@ -61,10 +61,10 @@
   },
   "artifacts": {
     "routes": "data/legacy/migration/staging-legacy-routes.json",
-    "routesSha256": "c5b3938b660ff664bde4da6933c65363191395039394baf19fd04be884c75f80",
+    "routesSha256": "574ec49459ce28017abd375554d7f6450369e4a9b08d5d9ac346ebd932bc0819",
     "routeManifest": "data/legacy/migration/staging-route-manifest.json",
-    "routeManifestSha256": "37564c2c2b8fcdf4c341bd66a8523b9efe50c6ff7dba073d8508724a5f49589e",
-    "exclusionsSha256": "73a5ec30aa84d587c01826726c4ae5f7ef619cb2ce0e613c75566960e447c3e3",
+    "routeManifestSha256": "6501fefd3c5b2365f63a8231deb163f9659b5da0213a765919e38552ffad38a3",
+    "exclusionsSha256": "dd1ba920769768a42456bf91697e279ab7056c6748e37f1d22365da2072fcf22",
     "media": "data/legacy/migration/public-media.json",
     "mediaSha256": "1b8e3f73f375af0a8c1b125133bbd5f6b70da89f48fda7fda82028a7a6adb362"
   },

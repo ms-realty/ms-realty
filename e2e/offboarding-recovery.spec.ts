@@ -4,6 +4,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { caseCopy } from "../src/features/cases/copy";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -138,12 +139,20 @@ test("offboarding keeps an unresolved operation after leaving and returning", as
   ]);
   const url = hostUrl("staff", `/en/access/offboard/${fixture.brokerId}`);
   let held: Route | undefined;
+  let nativePosts = 0;
+  page.on("request", (request) => {
+    if (request.method() === "POST" && request.url() === url) nativePosts += 1;
+  });
   await page.route(url, async (route) => {
     if (route.request().method() === "POST") held = route;
     else await route.continue();
   });
   try {
     await page.goto(url);
+    const operationKey = await page.locator('input[name="_operationId"]').inputValue(),
+      statusPath = `/en/access/offboard/${fixture.brokerId}?receipt=${encodeURIComponent(operationKey)}`,
+      unknownWarning =
+        "We do not yet know whether your change was saved. It may already be recorded. Do not submit it again.";
     await page
       .getByLabel("Reason and handover plan", { exact: true })
       .fill("Manager reviewed the retained keys and case handover.");
@@ -152,16 +161,24 @@ test("offboarding keeps an unresolved operation after leaving and returning", as
     await expect.poll(() => Boolean(held)).toBe(true);
     await page.goto(hostUrl("staff", "/en/access/manage"));
     await page.goto(url);
+    await expect(page).toHaveURL(hostUrl("staff", statusPath));
     await expect(page.getByRole("button", { name: "End staff access", exact: true })).toHaveCount(
       0,
     );
-    await expect(
-      page.getByText(
-        "The result is not confirmed. Keep this reference and check again before retrying.",
-        { exact: true },
-      ),
-    ).toBeVisible();
+    await expect(page.getByText(unknownWarning, { exact: true })).toBeVisible();
     await expect(page.getByText("Access removal recorded:", { exact: false })).toHaveCount(0);
+    const statusLink = page.getByRole("link", { name: caseCopy("en").status, exact: true });
+    await expect(statusLink).toHaveAttribute("href", statusPath);
+    const statusResponse = page.waitForResponse(hostUrl("staff", statusPath));
+    await statusLink.click();
+    expect((await statusResponse).request().method()).toBe("GET");
+    await expect(page).toHaveURL(hostUrl("staff", statusPath));
+    await expect(page.getByText(unknownWarning, { exact: true })).toBeVisible();
+    await expect(page.getByText("Access removal recorded:", { exact: false })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "End staff access", exact: true })).toHaveCount(
+      0,
+    );
+    expect(nativePosts).toBe(1);
     const nativeContext = await browser.newContext({ javaScriptEnabled: false });
     try {
       await nativeContext.addCookies(await context.cookies());
@@ -170,10 +187,31 @@ test("offboarding keeps an unresolved operation after leaving and returning", as
       await expect(
         nativePage.getByRole("button", { name: "End staff access", exact: true }),
       ).toHaveCount(0);
-      await expect(nativePage).toHaveURL(/\?receipt=/);
+      await expect(nativePage).toHaveURL(hostUrl("staff", statusPath));
+      await expect(nativePage.getByText(unknownWarning, { exact: true })).toBeVisible();
+      await expect(nativePage.getByText("Access removal recorded:", { exact: false })).toHaveCount(
+        0,
+      );
+      await expect(
+        nativePage.getByRole("link", { name: caseCopy("en").status, exact: true }),
+      ).toHaveAttribute("href", statusPath);
     } finally {
       await nativeContext.close();
     }
+    expect(
+      await db
+        .select()
+        .from(schema.operations)
+        .where(eq(schema.operations.idempotencyKey, operationKey)),
+    ).toHaveLength(0);
+    expect(
+      (
+        await db
+          .select()
+          .from(schema.staffMemberships)
+          .where(eq(schema.staffMemberships.principalId, fixture.brokerId))
+      )[0]?.state,
+    ).toBe("active");
   } finally {
     await held?.abort().catch(() => {});
   }
@@ -308,7 +346,7 @@ for (const conflict of [false, true])
       );
       if (conflict) {
         await expect(
-          page.getByText("This operation did not change access.", { exact: true }),
+          page.getByText("This request did not change access.", { exact: true }),
         ).toBeVisible();
         await page.getByRole("link", { name: "Review again before acting", exact: true }).click();
         await expect(

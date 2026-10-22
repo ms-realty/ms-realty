@@ -17,7 +17,7 @@ const en = {
   document: "Document",
   listing: "Listing",
   property: "Property",
-  case: "Case",
+  case: "Deal",
 };
 export const grantManagementCopy = (locale: string) =>
   locale === "bg"
@@ -41,7 +41,7 @@ export const grantManagementCopy = (locale: string) =>
         document: "Документ",
         listing: "Обява",
         property: "Имот",
-        case: "Случай",
+        case: "Сделка",
       }
     : locale === "ru"
       ? {
@@ -64,6 +64,6 @@ export const grantManagementCopy = (locale: string) =>
           document: "Документ",
           listing: "Объявление",
           property: "Объект",
-          case: "Дело",
+          case: "Сделка",
         }
       : en;

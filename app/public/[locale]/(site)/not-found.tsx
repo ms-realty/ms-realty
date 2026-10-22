@@ -9,7 +9,7 @@ export default async function PublicNotFound() {
     <>
       {/* The page title says what happened (WCAG 2.4.2); not-found cannot export metadata. */}
       <title>{t("title")}</title>
-      <NotFoundContent locale={locale} homeHref={`/${locale}`} />
+      <NotFoundContent locale={locale} surface="public" />
     </>
   );
 }

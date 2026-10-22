@@ -38,6 +38,7 @@ export default async function FormReceiptPage({
     >
       {receipt ? (
         <Receipt
+          locale={locale}
           title={receipt.title}
           reference={receipt.reference}
           referenceLabel={copy.form.reference}

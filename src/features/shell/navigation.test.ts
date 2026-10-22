@@ -12,6 +12,7 @@ import {
   linked,
   myJourneyNav,
   permittedTools,
+  permittedWorkspaceNav,
   publicPrimaryNav,
   publicUtilityNav,
   workspacePrimaryNav,
@@ -116,6 +117,7 @@ describe("navigation registry (§06)", () => {
       "team",
       "system",
       "jobs",
+      "history",
       "privacy",
       "alerts",
     ]);
@@ -131,6 +133,7 @@ describe("navigation registry (§06)", () => {
       "/operations/complaints",
       "/operations/inbound",
       "/operations/jobs",
+      "/operations/history",
       "/operations/privacy",
       "/operations/subscriptions",
       "/access/manage",
@@ -144,15 +147,15 @@ describe("navigation registry (§06)", () => {
         group.section,
         group.items.map((item) => item.href),
       ]);
-    // Anyone with a workspace session: the everyday destinations, never unbuilt rows.
-    expect(rows([])).toEqual([
+    // No grants: the safe overview, with no inaccessible collection links.
+    expect(rows([])).toEqual([["work", ["/en/today"]]]);
+    // A coordinator reads no internal case notes: no coverage or incoming email.
+    expect(rows(rolePresets.coordinator)).toEqual([
       [
         "work",
         ["/en/today", "/en/inquiries", "/en/cases", "/en/inventory", "/en/calendar", "/en/tasks"],
       ],
     ]);
-    // A coordinator reads no internal case notes: no coverage or incoming email.
-    expect(rows(rolePresets.coordinator)).toEqual(rows([]));
     expect(rows(rolePresets.assigned_broker)).toEqual([
       [
         "work",
@@ -176,6 +179,7 @@ describe("navigation registry (§06)", () => {
           "/en/inquiries",
           "/en/cases",
           "/en/inventory",
+          "/en/operations/imports",
           "/en/calendar",
           "/en/tasks",
           "/en/coverage",
@@ -189,12 +193,37 @@ describe("navigation registry (§06)", () => {
         [
           "/en/content",
           "/en/access/manage",
+          "/en/operations/readiness",
           "/en/operations/jobs",
+          "/en/operations/history",
           "/en/operations/privacy",
           "/en/operations/subscriptions",
         ],
       ],
     ]);
+  });
+
+  it("hides ungranted collections and keeps a record-scoped capability navigable", () => {
+    expect(permittedWorkspaceNav(new Set()).map((item) => item.label)).toEqual(["today"]);
+    expect(permittedWorkspaceNav(new Set(["case.read"])).map((item) => item.label)).toEqual([
+      "today",
+      "cases",
+    ]);
+    expect(
+      permittedTools("bg", new Set(), new Set(["case.read"])).flatMap((group) =>
+        group.items.map((item) => item.href),
+      ),
+    ).toEqual(["/bg/today", "/bg/cases"]);
+    expect(
+      permittedTools("bg", new Set(), new Set(["audit.read", "listing.read"])).flatMap((group) =>
+        group.items.map((item) => item.href),
+      ),
+    ).toEqual(["/bg/today", "/bg/inventory", "/bg/operations/history"]);
+    expect(
+      permittedTools("bg", new Set(), new Set(["audit.read"])).flatMap((group) =>
+        group.items.map((item) => item.href),
+      ),
+    ).toEqual(["/bg/today"]);
   });
 
   it("prefixes public items with the locale and leaves unbuilt items out", () => {

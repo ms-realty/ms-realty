@@ -30,14 +30,10 @@ export function complaintCopy(locale: string) {
       "Source / external reference",
     ),
     description: s("Получено съдържание", "Полученное содержание", "Received description"),
-    receivedAt: s(
-      "Получена на · Europe/Sofia",
-      "Получена · Europe/Sofia",
-      "Received at · Europe/Sofia",
-    ),
-    dueAt: s("Срок · Europe/Sofia", "Срок · Europe/Sofia", "Due at · Europe/Sofia"),
+    receivedAt: s("Получена на", "Получена", "Received at"),
+    dueAt: s("Срок", "Срок", "Due at"),
     ownerId: s("Отговорен служител", "Ответственный", "Responsible staff member"),
-    state: s("Състояние", "Состояние", "State"),
+    state: s("Докъде е стигнало", "Как продвигается", "Where it stands"),
     note: s("Основание и следваща стъпка", "Основание и следующий шаг", "Reason and next step"),
     outcome: s(
       "Действителен резултат и външно потвърждение",

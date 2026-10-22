@@ -11,7 +11,7 @@ import {
   sourceLocale,
   staffLocales,
 } from "@/domain/ids";
-import catalogStatus from "../../messages/_status.json";
+import catalogStatus from "../../messages/_status.json" with { type: "json" };
 
 export type { PublicLocale, StaffLocale };
 export { isPublicLocale, publicLocales, staffLocales };

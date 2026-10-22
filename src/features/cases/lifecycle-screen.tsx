@@ -1,3 +1,4 @@
+import { workflowLabel } from "@/i18n/workflow-labels";
 import "server-only";
 import { getDb } from "@/db/client";
 import { type CaseStage, caseStageTransitions, stagesByKind } from "@/domain/case";
@@ -37,7 +38,18 @@ export async function LifecycleScreen(props: ScreenProps & { id: string }) {
       caseStageTransitions(row.kind).machine.check(row.stage as CaseStage, s).outcome === "allowed",
   );
   const completionFields: WorkflowField[] = [
-    { name: "completionEvidenceId", label: c.evidence },
+    {
+      name: "completionEvidenceId",
+      label: c.evidence,
+      type: "select",
+      options: [
+        { value: "", label: "—" },
+        ...view.completionEvidence.map((file) => ({
+          value: file.id,
+          label: `${file.fileName} · ${file.versionNumber}`,
+        })),
+      ],
+    },
     { name: "outcome", label: c.outcome, type: "textarea" },
     { name: "handover", label: c.handoverStatus, type: "textarea" },
     { name: "retention", label: c.retention, type: "textarea" },
@@ -174,7 +186,10 @@ export async function LifecycleScreen(props: ScreenProps & { id: string }) {
                 required: true,
                 options: [
                   { value: "", label: "—" },
-                  ...stages.map((stage) => ({ value: stage, label: stage.replaceAll("_", " ") })),
+                  ...stages.map((stage) => ({
+                    value: stage,
+                    label: workflowLabel(stage, props.locale),
+                  })),
                 ],
               },
               reason,
@@ -222,7 +237,7 @@ export async function LifecycleScreen(props: ScreenProps & { id: string }) {
         {view.history.map((entry) => (
           <article key={entry.id} className="space-y-2 border-b border-rule py-4">
             <p>
-              {entry.from?.replaceAll("_", " ")} → {entry.to.replaceAll("_", " ")}
+              {workflowLabel(entry.from, props.locale)} → {workflowLabel(entry.to, props.locale)}
             </p>
             <p>{entry.reason}</p>
             <WorkflowTime value={entry.at} locale={props.locale} />

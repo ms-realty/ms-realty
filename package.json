@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:unit": "vitest run --project 'unit*'",
     "test:integration": "vitest run --project integration",
+    "test:release": "node --test scripts/staging*.test.mjs scripts/production*.test.mjs",
     "e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
@@ -48,6 +49,7 @@
     "@simplewebauthn/browser": "14.0.0",
     "@simplewebauthn/server": "14.0.3",
     "drizzle-orm": "0.45.3",
+    "jose": "6.2.12",
     "maplibre-gl": "6.11.2",
     "next": "16.3.8",
     "next-intl": "4.14.9",
@@ -61,10 +63,12 @@
     "server-only": "0.0.1",
     "sharp": "0.35.5",
     "svix": "2.5.0",
+    "tailwind-merge": "3.7.0",
     "zod": "4.6.5"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@babel/parser": "7.29.9",
     "@biomejs/biome": "2.5.15",
     "@opennextjs/cloudflare": "1.20.7",
     "@playwright/test": "1.63.0",
@@ -88,7 +92,7 @@
     "typescript": "7.0.2",
     "vite": "8.3.3",
     "vitest": "5.0.3",
-    "wrangler": "4.143.0"
+    "wrangler": "4.151.1"
   },
   "overrides": {
     "miniflare": {

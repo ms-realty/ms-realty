@@ -5,10 +5,12 @@ import {
   formatArea,
   formatDate,
   formatDateTime,
+  formatDateTimeRange,
   formatExactArea,
   formatMoney,
   formatNumber,
   formatTime,
+  timeZoneLabel,
 } from "./format";
 
 // Intl output uses no-break and narrow no-break spaces; compare with plain spaces.
@@ -31,11 +33,10 @@ describe("formatting (ux-spec §19.3)", () => {
   it("formats instants in the agency time zone, not the server's", () => {
     // 22:30 UTC on 31 Dec is already 1 Jan in Sofia (UTC+2).
     const instant = "2026-12-31T22:30:00Z";
-    expect(formatDate("en", instant, { dateStyle: "long" })).toBe("1 January 2027");
+    const now = "2026-06-01T00:00:00Z";
+    expect(formatDate("en", instant, { now })).toBe("1 January 2027");
     expect(plain(formatTime("en", instant))).toBe("00:30");
-    expect(formatDate("en", instant, { dateStyle: "long", timeZone: "UTC" })).toBe(
-      "31 December 2026",
-    );
+    expect(formatDate("en", instant, { now, timeZone: "UTC" })).toBe("31 December");
   });
 
   it("keeps number and area rounding separate across every locale and later values", () => {
@@ -73,17 +74,110 @@ describe("formatting (ux-spec §19.3)", () => {
       }
   });
 
-  it("names the zone when showing a date and time people act on", () => {
-    expect(plain(formatDateTime("en", "2026-07-01T09:00:00Z"))).toBe("1 Jul 2026, 12:00 EEST");
-    expect(formatDateTime("en", "2026-07-01T09:00:00Z", { timeZone: "Asia/Jerusalem" })).toMatch(
-      /12:00 GMT\+3|12:00 IDT/,
+  // Output differs slightly between ICU builds (Node, Chromium, WebKit: "at" or a comma, narrow
+  // or regular spaces), so these compare meaning rather than whole strings (ux-spec §19.3).
+  const forbidden =
+    /UTC|GMT|EES?T|Гринуич|Europe\/|Asia\/|\d{4}-\d{2}-\d{2}|T\d{2}:\d{2}|[+-]0\d:?00/;
+
+  it("prints one human date-time in every locale, never a zone id, offset or ISO text", () => {
+    const instant = "2026-10-15T15:16:00Z";
+    const now = "2026-10-14T09:00:00Z";
+    const expected: Record<string, RegExp[]> = {
+      bg: [/чт/, /15 октомври/, /18:16/],
+      en: [/Thu/, /15 October/, /18:16/],
+      ru: [/чт/, /15 октября/, /18:16/],
+      de: [/Do/, /15\. Oktober/, /18:16/],
+      nl: [/do/, /15 oktober/, /18:16/],
+      el: [/Πέμ/, /15 Οκτωβρίου/, /6:16/],
+      he: [/ה׳/, /15 באוקטובר/, /18:16/],
+    };
+    for (const locale of publicLocales) {
+      const text = plain(formatDateTime(locale, instant, { now }));
+      for (const part of expected[locale] ?? []) expect(text).toMatch(part);
+      expect(text).not.toMatch(forbidden);
+      expect(text).not.toMatch(/2026/);
+    }
+  });
+
+  it("shows the year only when it is not the year of reading, in the zone shown", () => {
+    const instant = "2026-12-31T22:30:00Z"; // 00:30 on 1 January 2027 in Sofia
+    expect(plain(formatDateTime("en", instant, { now: "2027-01-10T12:00:00Z" }))).not.toMatch(
+      /2027/,
     );
+    expect(plain(formatDateTime("en", instant, { now: "2026-12-31T21:00:00Z" }))).toMatch(
+      /1 January 2027.*00:30/,
+    );
+    expect(formatDate("bg", "2025-03-04T12:00:00Z", { now: "2026-10-14T09:00:00Z" })).toMatch(
+      /4 март 2025/,
+    );
+  });
+
+  it("follows Sofia across both daylight-saving changes", () => {
+    // 2026-03-29: 03:00 EET becomes 04:00 EEST.
+    expect(formatTime("bg", "2026-03-29T00:59:00Z")).toBe("02:59");
+    expect(formatTime("bg", "2026-03-29T01:00:00Z")).toBe("04:00");
+    // 2026-10-25: 04:00 EEST becomes 03:00 EET; both 03:30s read 03:30 on the wall clock.
+    expect(formatTime("bg", "2026-10-25T00:30:00Z")).toBe("03:30");
+    expect(formatTime("bg", "2026-10-25T01:30:00Z")).toBe("03:30");
+    expect(formatTime("bg", "2026-10-25T02:00:00Z")).toBe("04:00");
+    expect(formatDate("ru", "2026-10-24T22:30:00Z", { now: "2026-10-01T00:00:00Z" })).toBe(
+      "25 октября",
+    );
+  });
+
+  it("names the zone in words once, for a reader who could be elsewhere", () => {
+    const now = "2026-10-14T09:00:00Z";
+    const instant = "2026-10-17T07:00:00Z"; // Saturday 10:00 in Sofia
+    expect(plain(formatDateTime("en", instant, { now, zoneLabel: true }))).toMatch(
+      /^Sat.*17 October.*10:00 \(Sofia time\)$/,
+    );
+    expect(formatDateTime("bg", instant, { now, zoneLabel: true })).toMatch(
+      /10:00 \(софийско време\)$/,
+    );
+    expect(formatDateTime("ru", instant, { now, zoneLabel: true })).toMatch(
+      /10:00 \(по софийскому времени\)$/,
+    );
+    expect(formatDateTime("de", instant, { now, zoneLabel: true })).toMatch(/\(Ortszeit Sofia\)$/);
+    expect(formatDateTime("he", instant, { now, zoneLabel: true })).toMatch(/\(שעון סופיה\)$/);
+    expect(formatDateTime("en", instant, { now })).not.toMatch(/Sofia/);
+    // A viewer reading a time kept in another zone gets that zone's wall time and its name.
+    const elsewhere = plain(
+      formatDateTime("en", instant, { now, timeZone: "Asia/Jerusalem", zoneLabel: true }),
+    );
+    expect(elsewhere).toMatch(/10:00 \(Israel/);
+    expect(elsewhere).not.toMatch(forbidden);
+    expect(
+      plain(formatTime("en", instant, { timeZone: "Europe/London", zoneLabel: true })),
+    ).toMatch(/^08:00 \(\D+\)$/);
+    for (const locale of publicLocales) {
+      expect(timeZoneLabel(locale, "UTC")).not.toMatch(forbidden);
+      expect(timeZoneLabel(locale, "Europe/Athens")).not.toMatch(forbidden);
+    }
+  });
+
+  it("formats an appointment interval with its date and zone once", () => {
+    const now = "2026-10-14T09:00:00Z";
+    const text = plain(
+      formatDateTimeRange("en", "2026-10-17T07:00:00Z", "2026-10-17T08:00:00Z", {
+        now,
+        zoneLabel: true,
+      }),
+    );
+    expect(text).toMatch(/^Sat.*17 October.*10:00\s?–\s?11:00 \(Sofia time\)$/);
+    expect(text.match(/October/g)).toHaveLength(1);
+    expect(text.match(/Sofia/g)).toHaveLength(1);
+    const overnight = plain(
+      formatDateTimeRange("bg", "2026-10-17T19:00:00Z", "2026-10-18T07:00:00Z", { now }),
+    );
+    expect(overnight).toMatch(/17 октомври.*22:00.*18 октомври.*10:00/);
   });
 
   it("formats with the route locale's regional tag, not the bare language", () => {
     // en is en-GB: day before month and a 24-hour clock, not US conventions.
-    expect(formatDate("en", "2026-03-04T12:00:00Z", { dateStyle: "short" })).toBe("04/03/2026");
-    expect(formatDate("he", "2026-03-04T12:00:00Z", { dateStyle: "short" })).toBe("4.3.2026");
+    const now = "2026-01-01T00:00:00Z";
+    expect(formatDate("en", "2026-03-04T12:00:00Z", { now })).toBe("4 March");
+    expect(plain(formatTime("en", "2026-03-04T15:05:00Z"))).toBe("17:05");
+    expect(formatDate("he", "2026-03-04T12:00:00Z", { now })).toMatch(/4 במרץ/);
     expect(displayLocale("he")).toBe("he-IL");
     for (const locale of publicLocales)
       expect(displayLocales[locale]).toMatch(/^[a-z]{2}-[A-Z]{2}$/);
@@ -105,9 +199,13 @@ describe("formatting (ux-spec §19.3)", () => {
       expect(plain(formatMoney("de", 123450, "EUR"))).toBe("1.234,50 €");
       expect(plain(formatMoney("en", 123450, "USD"))).toBe("US$1,234.50");
       expect(plain(formatMoney("en", 123450, "EUR"))).toBe("€1,234.50");
-      expect(plain(formatDateTime("en", "2026-07-01T09:00:00Z"))).toBe("1 Jul 2026, 12:00 EEST");
-      expect(plain(formatDateTime("en", "2026-07-01T10:00:00Z", { timeZone: "UTC" }))).toBe(
-        "1 Jul 2026, 10:00 UTC",
+      const now = "2026-01-01T00:00:00Z";
+      expect(plain(formatDateTime("en", "2026-07-01T09:00:00Z", { now }))).toMatch(/12:00$/);
+      expect(plain(formatDateTime("en", "2026-07-01T10:00:00Z", { now, timeZone: "UTC" }))).toMatch(
+        /10:00$/,
+      );
+      expect(plain(formatDateTime("en", "2026-07-01T10:00:00Z", { timeZone: "UTC" }))).not.toMatch(
+        /UTC/,
       );
     }
   });

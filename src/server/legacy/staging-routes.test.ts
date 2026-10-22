@@ -67,6 +67,55 @@ it("a source-reviewed partial RU staging route is a single-hop exact-content can
     servedTargetStatus: null,
   });
 });
+
+it("routes a measured empty archive only with an exact live response binding and keeps staging-only authority", () => {
+  const url = "https://makler-realty.ru/category-type/studio/",
+    emptyId = sourceIdentity(url).id,
+    responseHash = "b".repeat(64);
+  const emptyCapture = {
+    url,
+    final_url: url,
+    status: 200,
+    captured_at_utc: new Date(0).toISOString(),
+    content_scope: "column:empty_archive",
+    content_state: "verified_empty_archive" as const,
+    extracted_body_text: "",
+    text_sha256: sha256(""),
+    response_sha256: responseHash,
+    response_artifact: `data/legacy/migration/live-source-html/${responseHash}.html.gz`,
+    provenance: "live" as const,
+  };
+  const emptyManifest = buildLegacyManifest(
+    [
+      {
+        source_url: url,
+        url_type: "archive",
+        listing_reference: null,
+        decision: "approved_410",
+        status: 410,
+        target: { path: null },
+      },
+    ],
+    [emptyCapture],
+  );
+  const emptyPage = {
+    ...page,
+    id: emptyId,
+    canonicalPath: `/ru/legacy/${emptyId}`,
+    bodyText: "",
+    sourceHash: sha256(""),
+    contentScope: "column:empty_archive",
+    contentState: "verified_empty_archive" as const,
+    sourceResponseHash: responseHash,
+    provenance: { kind: "live" as const, artifact: emptyCapture.response_artifact },
+  };
+  const output = exportStagingRoutes(emptyManifest, [emptyPage]);
+  expect(JSON.parse(output.json)).toHaveLength(1);
+  expect(output.manifest.productionAllowed).toBe(false);
+  expect(() =>
+    exportStagingRoutes(emptyManifest, [{ ...emptyPage, contentState: undefined }]),
+  ).toThrow(/No source-backed/);
+});
 it("a missing or changed source/render projection cannot enter the staging artifact", () => {
   expect(() => exportStagingRoutes(manifest, [{ ...page, bodyText: "Changed facts" }])).toThrow(
     /No source-backed/,

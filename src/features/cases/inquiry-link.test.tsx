@@ -7,6 +7,7 @@ import type {
   InquiryCaseBlockReason,
   listInquiryCaseCandidates,
 } from "@/server/cases/inquiry-link";
+import { AppError } from "@/server/errors";
 import { InquiryCaseLink, InquiryLinkScreen } from "./inquiry-link";
 import { inquiryLinkCopy } from "./inquiry-link-copy";
 
@@ -125,7 +126,7 @@ describe("O03 Case candidates", () => {
       // Never sent by C02; a contact route must still name no one.
       candidate("route", { partyLabel: "Synthetic Leak" }),
     ]);
-    expect(row("party")).toHaveTextContent("Същата страна: Synthetic Party");
+    expect(row("party")).toHaveTextContent("Същият човек или същата фирма: Synthetic Party");
     expect(within(row("party")).getByText("Synthetic Party").tagName).toBe("BDI");
     expect(row("unnamed")).toHaveTextContent(copy.basisPartyUnnamed);
     expect(row("route")).toHaveTextContent(copy.basisContact);
@@ -134,6 +135,24 @@ describe("O03 Case candidates", () => {
 });
 
 describe("O03L review", () => {
+  it("requires selected Case context instead of opening an unspecified linking action", async () => {
+    mocked.read.mockResolvedValue(detail);
+    mocked.candidates.mockClear();
+    await expect(InquiryLinkScreen({ locale: "en", session, inquiryId })).rejects.toThrow(
+      "NEXT_HTTP_ERROR_FALLBACK;404",
+    );
+    expect(mocked.candidates).not.toHaveBeenCalled();
+  });
+
+  it("checks inquiry access before reading a selected Case's candidate context", async () => {
+    mocked.read.mockRejectedValueOnce(new AppError("not_found"));
+    mocked.candidates.mockClear();
+    await expect(
+      InquiryLinkScreen({ locale: "en", session, inquiryId, caseId: "case-one" }),
+    ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+    expect(mocked.candidates).not.toHaveBeenCalled();
+  });
+
   it("shows C02's basis and refusal instead of the link form", async () => {
     const copy = inquiryLinkCopy("en");
     mocked.read.mockResolvedValue(detail);
@@ -145,7 +164,7 @@ describe("O03L review", () => {
     ]);
     render(await InquiryLinkScreen({ locale: "en", session, inquiryId, caseId: "case-one" }));
     expect(screen.getByText(copy.factBasis).nextElementSibling).toHaveTextContent(
-      "Same party: Synthetic Party",
+      "Same person or company: Synthetic Party",
     );
     expect(screen.getByText(copy.reasons.staff_unavailable)).toBeVisible();
     expect(screen.queryByRole("button", { name: copy.submit })).not.toBeInTheDocument();

@@ -561,6 +561,7 @@ export function Specimen({ locale }: { locale: PublicLocale }) {
           </Banner>
           <div className="max-w-2xl">
             <Receipt
+              locale={locale}
               title={copy.receipt.title}
               referenceLabel={copy.receipt.referenceLabel}
               reference="INQ-EX-58213"

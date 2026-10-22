@@ -1,5 +1,10 @@
+import workStatesBg from "../../../messages/staff/bg/workspaceStates.json" with { type: "json" };
+import workStatesEn from "../../../messages/staff/en/workspaceStates.json" with { type: "json" };
+import workStatesRu from "../../../messages/staff/ru/workspaceStates.json" with { type: "json" };
+
 // Staff-only copy. BG and RU are drafts for human language review; never public/indexable.
 const en = {
+  ...workStatesEn.work,
   today: "Today",
   inbox: "Inquiries",
   tasks: "Tasks",
@@ -12,20 +17,21 @@ const en = {
   due: "My overdue tasks",
   mineInquiries: "My open inquiries",
   queueNote:
-    "These lists show the work you can access: inquiries, tasks, key returns, viewings, Cases, listings, translations and delivery problems. Each record opens in its own workspace.",
+    "These lists show the work you can access: inquiries, tasks, key returns, viewings, deals, listings, translations and delivery problems. Each record opens in its own workspace.",
   empty: "No matching items in this queue.",
   noContacts: "No contacts linked to inquiries you can access.",
   previous: "Previous page",
   next: "Next page",
   owner: "Accountable owner",
-  coverage: "Coverage queue",
-  state: "Status",
+  coverage: "Work without an owner",
+  state: "Where it stands",
   received: "Received",
   followUp: "Follow-up",
   nextReview: "Next review",
   noDate: "No date recorded",
   noOwner: "No named owner",
   details: "Details",
+
   submitted: "Original inquiry",
   preferredLocale: "Preferred language",
   contact: "Contact",
@@ -34,35 +40,37 @@ const en = {
   contactScope:
     "Only inquiries you can access are shown here. Verified contact details do not establish authority to act.",
   methods: "Contact methods",
+
   linkedInquiries: "Related inquiries",
   activity: "Recent activity",
+
   actor: "Recorded by",
-  revision: "Revision",
+  revision: "Last changed",
   accept: "Accept and assign to me",
   acceptLead:
     "Accept responsibility and record your next internal follow-up. This does not record a response to the client.",
   nextAction: "Next action",
-  dueAt: "Follow-up time (UTC)",
-  utcHint: "Enter a date and time in UTC. Your chosen time is stored with the commitment.",
+  dueAt: "Follow-up time",
+  utcHint: "Choose the date and time in Sofia. The chosen time is stored with the next step.",
   reason: "Reason",
   duplicateOfInquiryId: "Original inquiry ID (for duplicate review)",
   duplicateHint:
     "Open the original inquiry and use its ID. Both inquiries must be accessible to you.",
-  disposition: "Record a disposition",
+  disposition: "Record the outcome",
   dispositionLead:
-    "Review states keep the request visible. Resolution requires every open task to be completed or explicitly cancelled.",
+    "Inquiries under review stay visible. To close an inquiry, complete or explicitly cancel every open task.",
   taskChange: "Update task",
   note: "Outcome, dependency or cancellation reason",
-  followUpAt: "Dependency review time (UTC)",
+  followUpAt: "Dependency review time",
   guardedTask: "Completion needs the evidence and controls in the workspace that owns this task.",
-  purpose: "Purpose",
+  purpose: "What the client wants",
   outcome: "Recorded outcome",
   dependency: "Waiting on",
   changeSaved: "Change recorded",
   nextStep: "Open the updated record to continue.",
   openRecord: "Open updated record",
   statusLink: "Check this action",
-  statusTitle: "Action status",
+  statusTitle: "What happened with this action",
   statusMissing:
     "No completed action was found. Return to the record and check its current state before submitting again.",
   retryDraft: "Review retained draft",
@@ -80,12 +88,12 @@ const en = {
     after_deadline:
       "This time is after the deadline promised to the client. Choose an earlier time.",
     invalid_local_time:
-      "This time does not exist in Europe/Sofia (the clocks move forward). Choose another time.",
+      "This time does not exist in Sofia (the clocks move forward). Choose another time.",
     ambiguous_local_time:
-      "This time occurs twice in Europe/Sofia (the clocks move back). Choose another time.",
+      "This time occurs twice in Sofia (the clocks move back). Choose another time.",
   } as Record<string, string>,
   conflict:
-    "This record changed. Compare the latest version with your draft before applying it again.",
+    "Someone changed this in the meantime. Compare the latest version with your draft before applying it again.",
   denied: "Your current access does not allow this action.",
   unavailable: "This action is not available in the current state.",
   commitments: "Resolve the open follow-up tasks before closing this inquiry.",
@@ -110,14 +118,15 @@ const en = {
     reference: "Reference",
     recordedAt: "Recorded at",
     unknown: "Result not confirmed",
-    draftRetained: "Your draft is retained. Check the action status before trying again.",
+    draftRetained:
+      "The values below are your draft. They do not confirm that anything was saved. Use the link below to check this same request before trying again.",
   },
   states: {
     received: "Received",
     assigned: "Assigned",
     awaiting_client: "Awaiting client",
-    linked_to_case: "Linked to case",
-    resolved_without_case: "Resolved without case",
+    linked_to_case: "Linked to a deal",
+    resolved_without_case: "Closed without a deal",
     suspected_spam: "Suspected spam",
     duplicate_candidate: "Possible duplicate",
     contact_unreachable: "Contact unreachable",
@@ -137,7 +146,7 @@ const en = {
   },
   events: {
     "work.inquiry.accepted": "Responsibility accepted and follow-up recorded",
-    "work.inquiry.triaged": "Inquiry disposition updated",
+    "work.inquiry.triaged": "The outcome of the inquiry is saved",
     "inquiry.received": "Inquiry received",
   },
   // O02 queue (Figma 11:4257, O02MINE 66:34585, O02UNCLAIMED 66:34531).
@@ -203,6 +212,7 @@ type Copy = {
     : { [S in keyof (typeof en)[K]]: string };
 };
 const bg: Copy = {
+  ...workStatesBg.work,
   today: "Днес",
   inbox: "Запитвания",
   tasks: "Задачи",
@@ -215,20 +225,21 @@ const bg: Copy = {
   due: "Моите просрочени задачи",
   mineInquiries: "Моите отворени запитвания",
   queueNote:
-    "Тук е работата, до която имате достъп: запитвания, задачи, връщане на ключове, огледи, случаи, обяви, преводи и проблеми с доставката. Всеки запис се отваря в своя раздел.",
+    "Тук е работата, до която имате достъп: запитвания, задачи, връщане на ключове, огледи, сделки, обяви, преводи и проблеми с доставката. Всеки запис се отваря в своя раздел.",
   empty: "Няма съответстващи записи.",
   noContacts: "Няма контакти към достъпни за вас запитвания.",
   previous: "Предишна страница",
   next: "Следваща страница",
   owner: "Отговорник",
-  coverage: "Дежурен екип",
-  state: "Статус",
+  coverage: "Работа без отговорник",
+  state: "Докъде е стигнало",
   received: "Получено",
   followUp: "Следващо действие",
   nextReview: "Следващ преглед",
   noDate: "Няма записана дата",
   noOwner: "Няма определен отговорник",
   details: "Подробности",
+
   submitted: "Оригинално запитване",
   preferredLocale: "Предпочитан език",
   contact: "Контакт",
@@ -237,36 +248,38 @@ const bg: Copy = {
   contactScope:
     "Показани са само достъпните за вас запитвания. Потвърденият контакт не означава представителна власт.",
   methods: "Начини за контакт",
+
   linkedInquiries: "Свързани запитвания",
   activity: "Последни действия",
+
   actor: "Записано от",
-  revision: "Версия",
+  revision: "Последна промяна",
   accept: "Приемам отговорността",
   acceptLead:
     "Поемете запитването и запишете следващото вътрешно действие. Това не отбелязва отговор до клиента.",
   nextAction: "Следващо действие",
-  dueAt: "Срок за действие (UTC)",
-  utcHint: "Въведете дата и час в UTC. Избраният час се записва към ангажимента.",
+  dueAt: "Срок за действие",
+  utcHint: "Изберете дата и час по софийско време. Избраният час се записва към следващата стъпка.",
   reason: "Причина",
   duplicateOfInquiryId: "ID на първоначалното запитване (при дубликат)",
   duplicateHint:
     "Отворете първоначалното запитване и използвайте неговия ID. Трябва да имате достъп и до двете.",
-  disposition: "Запис на решение",
+  disposition: "Запишете резултата",
   dispositionLead:
     "Запитванията за преглед остават видими. За приключване завършете или изрично отменете всички отворени задачи.",
   taskChange: "Обновяване на задача",
   note: "Резултат, зависимост или причина за отмяна",
-  followUpAt: "Час за преглед на зависимостта (UTC)",
+  followUpAt: "Час за преглед на зависимостта",
   guardedTask:
     "Завършването изисква доказателствата и проверките в раздела, който управлява тази задача.",
-  purpose: "Цел",
+  purpose: "Какво иска клиентът",
   outcome: "Записан резултат",
   dependency: "Изчаква",
   changeSaved: "Промяната е записана",
   nextStep: "Отворете обновения запис, за да продължите.",
   openRecord: "Отваряне на обновения запис",
   statusLink: "Проверка на действието",
-  statusTitle: "Статус на действието",
+  statusTitle: "Какво стана с действието",
   statusMissing:
     "Няма намерено завършено действие. Проверете текущото състояние на записа преди ново изпращане.",
   retryDraft: "Преглед на запазената чернова",
@@ -282,11 +295,12 @@ const bg: Copy = {
     future_required: "Изберете час в бъдещето.",
     after_deadline: "Този час е след срока, обещан на клиента. Изберете по-ранен час.",
     invalid_local_time:
-      "Този час не съществува в Europe/Sofia (часовникът се мести напред). Изберете друг час.",
+      "Този час не съществува по софийско време (часовникът се мести напред). Изберете друг час.",
     ambiguous_local_time:
-      "Този час се повтаря в Europe/Sofia (часовникът се мести назад). Изберете друг час.",
+      "Този час се повтаря по софийско време (часовникът се мести назад). Изберете друг час.",
   } as Record<string, string>,
-  conflict: "Записът е променен. Сравнете новата версия с черновата преди повторно прилагане.",
+  conflict:
+    "Някой е променил това междувременно. Сравнете новата версия с черновата преди повторно прилагане.",
   denied: "Текущият ви достъп не позволява това действие.",
   unavailable: "Действието не е налично в текущото състояние.",
   commitments: "Приключете отворените задачи преди затваряне на запитването.",
@@ -310,14 +324,15 @@ const bg: Copy = {
     reference: "Номер",
     recordedAt: "Записано на",
     unknown: "Непотвърден резултат",
-    draftRetained: "Черновата е запазена. Проверете статуса преди повторен опит.",
+    draftRetained:
+      "Стойностите по-долу са вашата чернова. Те не потвърждават, че промяната е записана. Използвайте връзката по-долу, за да проверите същата заявка преди нов опит.",
   },
   states: {
     received: "Получено",
     assigned: "Разпределено",
     awaiting_client: "Изчаква клиент",
-    linked_to_case: "Свързано със случай",
-    resolved_without_case: "Приключено без случай",
+    linked_to_case: "Свързано със сделка",
+    resolved_without_case: "Приключено без сделка",
     suspected_spam: "Предполагаем спам",
     duplicate_candidate: "Възможен дубликат",
     contact_unreachable: "Недостъпен контакт",
@@ -337,7 +352,7 @@ const bg: Copy = {
   },
   events: {
     "work.inquiry.accepted": "Отговорността е приета и е записана следваща задача",
-    "work.inquiry.triaged": "Решението по запитването е обновено",
+    "work.inquiry.triaged": "Резултатът по запитването е записан",
     "inquiry.received": "Запитването е получено",
   },
   scopes: {
@@ -396,6 +411,7 @@ const bg: Copy = {
   },
 };
 const ru: Copy = {
+  ...workStatesRu.work,
   today: "Сегодня",
   inbox: "Запросы",
   tasks: "Задачи",
@@ -408,20 +424,21 @@ const ru: Copy = {
   due: "Мои просроченные задачи",
   mineInquiries: "Мои открытые обращения",
   queueNote:
-    "Здесь работа, к которой у вас есть доступ: обращения, задачи, возвраты ключей, показы, дела, объявления, переводы и проблемы доставки. Каждая запись открывается в своём разделе.",
+    "Здесь работа, к которой у вас есть доступ: обращения, задачи, возвраты ключей, показы, сделки, объявления, переводы и проблемы доставки. Каждая запись открывается в своём разделе.",
   empty: "Нет подходящих записей.",
   noContacts: "Нет контактов по доступным вам обращениям.",
   previous: "Предыдущая страница",
   next: "Следующая страница",
   owner: "Ответственный",
-  coverage: "Дежурная команда",
-  state: "Статус",
+  coverage: "Работа без ответственного",
+  state: "Как продвигается",
   received: "Получено",
   followUp: "Следующее действие",
   nextReview: "Следующая проверка",
   noDate: "Дата не указана",
   noOwner: "Ответственный не назначен",
   details: "Подробности",
+
   submitted: "Исходное обращение",
   preferredLocale: "Предпочитаемый язык",
   contact: "Контакт",
@@ -430,36 +447,38 @@ const ru: Copy = {
   contactScope:
     "Показаны только доступные вам обращения. Подтверждение контакта не даёт полномочий действовать от имени клиента.",
   methods: "Способы связи",
+
   linkedInquiries: "Связанные обращения",
   activity: "Последние действия",
+
   actor: "Записал",
-  revision: "Версия",
+  revision: "Последнее изменение",
   accept: "Принять и назначить себе",
   acceptLead:
     "Примите ответственность и запишите следующий внутренний шаг. Это не отмечает ответ клиенту.",
   nextAction: "Следующее действие",
-  dueAt: "Срок следующего действия (UTC)",
-  utcHint: "Введите дату и время в UTC. Выбранное время сохранится в задаче.",
+  dueAt: "Срок следующего действия",
+  utcHint: "Выберите дату и время по софийскому времени. Выбранное время сохранится в задаче.",
   reason: "Причина",
   duplicateOfInquiryId: "ID исходного обращения (для дубликата)",
   duplicateHint:
     "Откройте исходное обращение и используйте его ID. Вам должны быть доступны обе записи.",
-  disposition: "Записать решение",
+  disposition: "Записать результат",
   dispositionLead:
     "Обращения на проверке остаются видимыми. Перед закрытием завершите или явно отмените все открытые задачи.",
   taskChange: "Обновить задачу",
   note: "Результат, зависимость или причина отмены",
-  followUpAt: "Время проверки зависимости (UTC)",
+  followUpAt: "Время проверки зависимости",
   guardedTask:
     "Завершение требует доказательств и проверок в разделе, который управляет этой задачей.",
-  purpose: "Цель",
+  purpose: "Что хочет клиент",
   outcome: "Записанный результат",
   dependency: "Ожидается",
   changeSaved: "Изменение записано",
   nextStep: "Откройте обновлённую запись, чтобы продолжить.",
   openRecord: "Открыть обновлённую запись",
   statusLink: "Проверить действие",
-  statusTitle: "Статус действия",
+  statusTitle: "Что произошло с действием",
   statusMissing:
     "Завершённое действие не найдено. Проверьте текущее состояние записи перед повторной отправкой.",
   retryDraft: "Проверить сохранённый черновик",
@@ -475,12 +494,12 @@ const ru: Copy = {
     future_required: "Выберите время в будущем.",
     after_deadline: "Это время позже срока, обещанного клиенту. Выберите более раннее время.",
     invalid_local_time:
-      "Такого времени нет в Europe/Sofia (часы переводятся вперёд). Выберите другое время.",
+      "Такого времени нет по софийскому времени (часы переводятся вперёд). Выберите другое время.",
     ambiguous_local_time:
-      "Это время повторяется в Europe/Sofia (часы переводятся назад). Выберите другое время.",
+      "Это время повторяется по софийскому времени (часы переводятся назад). Выберите другое время.",
   } as Record<string, string>,
   conflict:
-    "Запись изменилась. Сравните последнюю версию с черновиком перед повторным применением.",
+    "Кто-то изменил это в это время. Сравните последнюю версию с черновиком перед повторным применением.",
   denied: "Ваш текущий доступ не позволяет это действие.",
   unavailable: "Действие недоступно в текущем состоянии.",
   commitments: "Завершите открытые задачи перед закрытием обращения.",
@@ -504,14 +523,15 @@ const ru: Copy = {
     reference: "Номер",
     recordedAt: "Записано",
     unknown: "Результат не подтверждён",
-    draftRetained: "Черновик сохранён. Проверьте статус перед повтором.",
+    draftRetained:
+      "Значения ниже — ваш черновик. Они не подтверждают, что изменение записано. Используйте ссылку ниже, чтобы проверить тот же запрос перед новой попыткой.",
   },
   states: {
     received: "Получено",
     assigned: "Назначено",
     awaiting_client: "Ожидает клиента",
-    linked_to_case: "Связано с делом",
-    resolved_without_case: "Закрыто без дела",
+    linked_to_case: "Связано со сделкой",
+    resolved_without_case: "Закрыто без сделки",
     suspected_spam: "Возможный спам",
     duplicate_candidate: "Возможный дубликат",
     contact_unreachable: "Контакт недоступен",
@@ -531,7 +551,7 @@ const ru: Copy = {
   },
   events: {
     "work.inquiry.accepted": "Ответственность принята и следующий шаг записан",
-    "work.inquiry.triaged": "Решение по обращению обновлено",
+    "work.inquiry.triaged": "Результат по запросу сохранён",
     "inquiry.received": "Обращение получено",
   },
   scopes: {

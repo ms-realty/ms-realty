@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 test.use({ javaScriptEnabled: false });
 test("client requests bounded specialist access; staff approves and later revokes case access without JavaScript", async ({
@@ -53,6 +54,7 @@ test("client requests bounded specialist access; staff approves and later revoke
       clientPath = hostUrl("client", `/en/overview/${f.caseId}/participants`),
       staffPath = hostUrl("staff", `/en/cases/${f.caseId}/participants`);
     await client.goto(hostUrl("client", `/en/overview/${f.caseId}`));
+    await client.getByText("Documents, participants and deal tools", { exact: true }).click();
     await client.getByRole("link", { name: "Participants and access", exact: true }).click();
     const invite = client
       .locator("section")
@@ -79,9 +81,10 @@ test("client requests bounded specialist access; staff approves and later revoke
       }),
     });
     await request.getByLabel("Decision", { exact: true }).selectOption("approve");
-    await request
-      .getByLabel("Access expires (Europe/Sofia)", { exact: true })
-      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+    await fillAgencyInstant(
+      request.getByLabel("Access expires", { exact: true }),
+      new Date(Date.now() + 86400000),
+    );
     await request
       .getByLabel("Outcome shown to the requester", { exact: true })
       .fill("Approved for a time limited specialist review");
@@ -98,7 +101,7 @@ test("client requests bounded specialist access; staff approves and later revoke
       client.getByRole("heading", { name: "Pending invitations", exact: true }),
     ).toHaveCount(0);
     await expect(
-      client.getByRole("button", { name: "Revoke case access", exact: true }),
+      client.getByRole("button", { name: "Remove access to the deal", exact: true }),
     ).toHaveCount(0);
     await client.screenshot({
       path: info.outputPath("client-participant-request.png"),
@@ -114,7 +117,7 @@ test("client requests bounded specialist access; staff approves and later revoke
     await roster
       .getByLabel("Reason", { exact: true })
       .fill("The client requested closure of this case access");
-    await roster.getByRole("button", { name: "Revoke case access", exact: true }).click();
+    await roster.getByRole("button", { name: "Remove access to the deal", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "The action was recorded.", exact: true }),
     ).toBeVisible();

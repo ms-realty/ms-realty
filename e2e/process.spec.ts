@@ -1,5 +1,6 @@
 // Native forms bind human operating-policy and signed-document evidence. Synthetic metadata
 // exercises workflow only; actual bytes/ClamAV are qualified separately by files scenarios.
+
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, type Page, test } from "@playwright/test";
@@ -8,6 +9,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 test.use({ javaScriptEnabled: false });
 const url = process.env.E2E_DATABASE_URL;
@@ -18,11 +20,13 @@ const connection = postgres(url, { max: 2 }),
 test.afterAll(async () => {
   await connection.end();
 });
-const later = (days: number) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 16);
+const later = (days: number) => new Date(Date.now() + days * 86400000);
 const section = (page: Page, name: string) =>
   page.locator("section").filter({ has: page.getByRole("heading", { name, exact: true }) });
 async function receipt(page: Page) {
-  await expect(page.getByRole("heading", { name: "Operation result", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Result of the request", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("status")).toHaveText("Review recorded");
   await page.getByRole("link", { name: "Agreements and checks", exact: true }).click();
 }
@@ -81,7 +85,7 @@ test("qualified policy, signed agreement and revocation retain exact evidence th
     .getByLabel("Transaction checks, one per line", { exact: true })
     .fill("Synthetic title evidence review");
   await policy
-    .getByLabel("Checks for each party, one per line", { exact: true })
+    .getByLabel("Checks for each person or company, one per line", { exact: true })
     .fill("Synthetic identity review");
   await policy.getByLabel("Policy withdrawal period, days", { exact: true }).fill("14");
   await policy.getByLabel("Policy retention period, days", { exact: true }).fill("1826");
@@ -91,7 +95,7 @@ test("qualified policy, signed agreement and revocation retain exact evidence th
   await policy
     .getByLabel("Responsible professional", { exact: true })
     .fill("Synthetic test reviewer");
-  await policy.getByLabel("Valid until", { exact: true }).fill(later(30));
+  await fillAgencyInstant(policy.getByLabel("Valid until", { exact: true }), later(30));
   await policy.getByRole("button", { name: "Record", exact: true }).click();
   await receipt(page);
   const [savedPolicy] = await db
@@ -108,7 +112,7 @@ test("qualified policy, signed agreement and revocation retain exact evidence th
     .selectOption(f.versions.service_agreement ?? "");
   await agreement.getByLabel("Agreement channel", { exact: true }).selectOption("distance");
   for (const name of ["Signed at", "Withdrawal information given at", "Express start requested at"])
-    await agreement.getByLabel(name, { exact: true }).fill(later(-1));
+    await fillAgencyInstant(agreement.getByLabel(name, { exact: true }), later(-1));
   await agreement
     .getByLabel("Start request evidence", { exact: true })
     .selectOption(f.versions.express_start ?? "");
@@ -116,7 +120,7 @@ test("qualified policy, signed agreement and revocation retain exact evidence th
     .getByLabel("Commission basis", { exact: true })
     .fill("Synthetic agreed fixed fee EUR 100.00; no tax conclusion");
   await agreement.getByLabel("Commission payer", { exact: true }).selectOption(f.clientPartyId);
-  await agreement.getByLabel("Valid until", { exact: true }).fill(later(20));
+  await fillAgencyInstant(agreement.getByLabel("Valid until", { exact: true }), later(20));
   await agreement.getByRole("button", { name: "Record", exact: true }).click();
   await receipt(page);
   const [savedAgreement] = await db

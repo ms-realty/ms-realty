@@ -6,21 +6,29 @@ import { getDb } from "@/db/client";
 import { principals } from "@/db/schema";
 import type { StaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
-import { heldCapabilities } from "@/server/authz";
-import { agencyToolCapabilities, permittedTools } from "./navigation";
+import { heldCapabilities, resolveGrants } from "@/server/authz";
+import { agencyToolCapabilities, permittedTools, permittedWorkspaceNav } from "./navigation";
 
 export async function workspaceViewer(locale: StaffLocale, session: Session) {
   const db = getDb();
-  const [[principal], held] = await Promise.all([
+  const [[principal], held, grants] = await Promise.all([
     db
       .select({ name: principals.displayName })
       .from(principals)
       .where(eq(principals.id, session.account.id)),
     heldCapabilities(db, session.actor, [...agencyToolCapabilities, "access.grant"]),
+    resolveGrants(db, session.actor),
   ]);
+  // A scoped grant still opens its filtered collection. Navigation never grants record access.
+  const navigable = new Set(
+    grants
+      .filter((grant) => !grant.scope?.locales || grant.scope.locales.includes(locale))
+      .map((grant) => grant.capability),
+  );
   return {
     account: { name: principal?.name ?? "MS Realty" },
-    tools: permittedTools(locale, held),
+    primary: permittedWorkspaceNav(navigable),
+    tools: permittedTools(locale, held, navigable),
     mayManageAccess: held.has("access.grant"),
   };
 }

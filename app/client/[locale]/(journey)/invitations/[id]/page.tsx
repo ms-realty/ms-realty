@@ -1,4 +1,5 @@
 // C02 / AT37: no private scope before the recipient authenticates; acceptance is an explicit POST.
+
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
@@ -9,10 +10,12 @@ import {
   identityCopy,
   roleLabel,
 } from "@/features/identity/copy";
-import { isRoutableLocale } from "@/i18n/config";
+import { isPublicLocale, isRoutableLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { viewClientInvitation } from "@/server/auth/invitations";
 import { currentClientSession } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 export default async function InvitationPage({
   params,
@@ -61,13 +64,15 @@ export default async function InvitationPage({
           <p>
             {fill(c.invitationRecipient, {
               email: view.details.recipientEmail,
-              time: view.details.expiresAt.toLocaleString(locale),
+              time: formatDateTime(isPublicLocale(locale) ? locale : "bg", view.details.expiresAt, {
+                zoneLabel: true,
+              }),
             })}
           </p>
           {view.status === "accepted" ? (
             <Notice tone="success">{c.invitationAccepted}</Notice>
           ) : (
-            <form
+            <NativeForm
               method="post"
               action={`/${locale}/invitations/${id}/respond`}
               className="flex flex-wrap gap-3"
@@ -85,7 +90,7 @@ export default async function InvitationPage({
               >
                 {c.decline}
               </button>
-            </form>
+            </NativeForm>
           )}
         </>
       ) : (

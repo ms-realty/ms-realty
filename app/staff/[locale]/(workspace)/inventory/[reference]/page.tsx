@@ -3,7 +3,6 @@
 // stay distinct.
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { operations, principals } from "@/db/schema";
@@ -18,15 +17,17 @@ import { LeaveControl } from "@/features/inventory/leave-control";
 import { safeNext } from "@/features/inventory/next";
 import { describePriceEvidence } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
+import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
+import { privateRead } from "@/features/work/screens";
+import { workflowCopy } from "@/i18n/workflow-copy";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
-import { isAppError } from "@/server/errors";
 import { inventoryDetail } from "@/server/inventory/commands";
 import { draftSchema } from "@/server/inventory/contracts";
 import { uneditablePriceEvidence, workingDraftFrom } from "@/server/inventory/working-draft";
 import { publicationReadiness } from "@/server/publication/commands";
 import { buttonClass } from "@/ui/button-class";
-import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon, WarningIcon } from "@/ui/icons";
+import { AssistIcon, CheckIcon, DocumentIcon, ExternalIcon } from "@/ui/icons";
 import { saveInventory } from "../actions";
 import { ReviewView } from "./review-view";
 
@@ -107,13 +108,11 @@ export default async function InventoryDetailPage({
   const query = await searchParams;
   const session = await requireStaffPage(locale);
   const db = getDb();
-  const data = await inventoryDetail(db, session.actor, reference).catch((error) => {
-    if (isAppError(error) && error.code === "not_found") notFound();
-    throw error;
-  });
+  const data = await privateRead(() => inventoryDetail(db, session.actor, reference));
   const { listing, property, revision } = data;
   const copy = inventoryCopy(locale);
   const o12 = copy.o12;
+  const workspace = workflowCopy(locale, "listingWorkspace");
   const path = `/${locale}/inventory/${reference}`;
   const ref = <bdi>{listing.reference}</bdi>;
   const parsed = draftSchema.safeParse(listing.draft);
@@ -255,46 +254,36 @@ export default async function InventoryDetailPage({
   ];
 
   return (
-    <div className="flex flex-col gap-6 px-gutter py-5 sm:gap-8 sm:px-gutter-wide sm:py-8">
-      <header className="flex flex-col gap-6 sm:gap-8">
-        <h1 className="text-heading font-semibold sm:text-title">{o12.title}</h1>
-        <p className="text-text-muted">
-          {ref}
-          {property.settlement ? ` · ${property.settlement}` : null}
-          {summary.length ? (
-            <>
-              {/* O12 Mobile keeps the listing identity above the recorded numbers (14:4947). */}
-              <span className="hidden sm:inline"> · </span>
-              <br className="sm:hidden" />
-              {summary.join(" · ")}
-            </>
-          ) : null}
-          <br />
-          {o12.sourceLine}
-        </p>
-        <p className="text-text-muted">{o12.instruction}</p>
-      </header>
+    <div className="flex flex-col gap-4 px-gutter py-5 sm:gap-6 sm:px-gutter-wide sm:py-6">
+      <ListingIdentity
+        locale={locale}
+        reference={reference}
+        title={values.title}
+        heading
+        meta={optionLabel(listing.editorialState, locale)}
+        summary={[property.settlement, ...summary].join(" · ")}
+      />
       {error}
       {/* Text and Facts are one form; the tabs switch panels in place (group/o12). */}
-      <div data-o12 className="group/o12 flex flex-col gap-6 sm:gap-8">
-        <EditTabs
-          tab={tab === "facts" ? "facts" : "text"}
-          formId={formId}
-          photosHref={`${path}/media`}
-          labels={{
-            tabs: o12.tabs,
-            facts: o12.facts,
-            text: o12.text,
-            photos: o12.photos,
-            noscript: o12.noscriptLeave,
-          }}
-        />
+      <div data-o12 className="group/o12 flex flex-col gap-5 sm:gap-6">
+        <ListingNavigation locale={locale} reference={reference} current={tab} formId={formId} />
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <section
             id="listing-text"
             aria-label={o12.text}
-            className="flex min-w-0 flex-1 flex-col gap-6 lg:max-w-[46.8rem]"
+            className="flex min-w-0 flex-1 flex-col gap-6"
           >
+            <EditTabs
+              tab={tab === "facts" ? "facts" : "text"}
+              formId={formId}
+              labels={{
+                tabs: o12.tabs,
+                facts: o12.facts,
+                text: o12.text,
+                photos: o12.photos,
+                noscript: o12.noscriptLeave,
+              }}
+            />
             {mayEdit ? (
               <div data-o12-editor className="[&>form]:gap-6">
                 <InventoryEditor
@@ -303,12 +292,10 @@ export default async function InventoryDetailPage({
                   view="edit"
                   formId={formId}
                   draftKey={draftKey}
-                  // 647:12802: the no-draft alert leads the work column (under any error summary).
                   lead={
                     parsed.success ? null : (
-                      <p className="flex items-start gap-3 rounded-control bg-warning-soft p-4 text-dense">
-                        <WarningIcon className="size-5 shrink-0 text-warning" />
-                        {o12.noDraft}
+                      <p className="text-caption text-text-muted">
+                        {workflowCopy(locale, "listingWorkspace").sourceVersionHint}
                       </p>
                     )
                   }
@@ -408,60 +395,85 @@ export default async function InventoryDetailPage({
                   </label>
                 ) : null}
               </div>
-              <dl aria-labelledby="listing-terms-heading" className="grid gap-6 sm:grid-cols-2">
+              <dl
+                aria-labelledby="listing-terms-heading"
+                className="grid gap-x-6 gap-y-4 sm:grid-cols-2"
+              >
                 {terms.map(([label, value]) => (
                   <div key={label} className="flex flex-col gap-2">
                     <dt className="text-dense font-semibold">{label}</dt>
                     {/* O12 UI06 terms use the canvas and control border (11:455, 14:4961).
                         They remain recorded context; the explicit Facts path owns editing. */}
-                    <dd className="min-h-input rounded-control border border-border bg-canvas p-3 text-body">
-                      {value}
-                    </dd>
+                    <dd className="border-b border-divider pb-3 text-body">{value}</dd>
                   </div>
                 ))}
               </dl>
             </div>
           </section>
-          {/* Contextual Butler: beside the text on wide screens; on phones it follows the work
-              column on both tabs (659:12922, 661:13158). Drafting stays disabled and explained. */}
           <aside
-            aria-labelledby="butler-heading"
-            className="flex flex-col gap-5 rounded-card bg-subtle p-5 lg:w-[23.2rem] lg:shrink-0 lg:group-has-[#o12-facts:checked]/o12:hidden"
+            aria-labelledby="listing-context-heading"
+            className="grid gap-5 border-t border-divider pt-5 lg:sticky lg:top-6 lg:w-72 lg:shrink-0 lg:border-s lg:border-t-0 lg:ps-6 lg:pt-0"
           >
-            <h2
-              id="butler-heading"
-              className="flex items-center gap-3 text-subheading font-semibold"
-            >
-              <AssistIcon className="size-5 text-assist" />
-              {o12.butler}
+            <h2 id="listing-context-heading" className="text-section font-semibold">
+              {copy.state}
             </h2>
-            <p className="rounded-control bg-assist-soft p-2 text-caption font-medium text-assist">
-              {o12.butlerStatus}
-            </p>
-            <p>{o12.butlerOffer}</p>
-            <SourceReference
-              href={`${path}/evidence`}
-              title={o12.butlerRecord}
-              detail={o12.butlerScope}
-            />
-            <p className="text-caption text-text-muted">{o12.butlerNote}</p>
-            <button
-              type="button"
-              disabled
-              aria-describedby="butler-unavailable"
-              className={buttonClass("tertiary", "self-start bg-assist-soft text-assist")}
-            >
-              <AssistIcon className="size-[1.125rem]" />
-              {o12.butlerPrepare}
-            </button>
-            <p id="butler-unavailable" className="text-caption text-text-muted">
-              {o12.butlerUnavailable}
-            </p>
-            <hr className="border-divider" />
-            <p className="text-dense font-semibold">{o12.manualHeading}</p>
-            <a href="#listing-text" className={buttonClass("secondary", "self-start")}>
-              {o12.manual}
-            </a>
+            <dl className="grid gap-4 text-dense">
+              <div className="space-y-1">
+                <dt className="text-text-muted">{workspace.workingState}</dt>
+                <dd className="font-semibold">{optionLabel(listing.editorialState, locale)}</dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-text-muted">{copy.source}</dt>
+                <dd>
+                  {readiness.input.factReviewValid ? o12.sourceReviewed : o12.sourceUnreviewed}
+                </dd>
+              </div>
+              <div className="space-y-1">
+                <dt className="text-text-muted">{copy.review}</dt>
+                <dd>
+                  {data.publications.length
+                    ? data.publications
+                        .map((p) => `${p.locale.toUpperCase()} · ${optionLabel(p.state, locale)}`)
+                        .join("; ")
+                    : copy.noPublication}
+                </dd>
+              </div>
+            </dl>
+            <p className="text-caption text-text-muted">{copy.draftNotice}</p>
+            <details className="border-t border-divider pt-3">
+              <summary
+                id="butler-heading"
+                className="min-h-control cursor-pointer text-dense font-semibold"
+              >
+                {o12.butler}
+              </summary>
+              <div className="mt-3 grid gap-4">
+                <p className="text-caption font-medium text-assist">{o12.butlerStatus}</p>
+                <p className="text-dense">{o12.butlerOffer}</p>
+                <SourceReference
+                  href={`${path}/evidence`}
+                  title={o12.butlerRecord}
+                  detail={o12.butlerScope}
+                />
+                <p className="text-caption text-text-muted">{o12.butlerNote}</p>
+                <button
+                  type="button"
+                  disabled
+                  aria-describedby="butler-unavailable"
+                  className={buttonClass("assist", "justify-self-start")}
+                >
+                  <AssistIcon className="size-5" />
+                  {o12.butlerPrepare}
+                </button>
+                <p id="butler-unavailable" className="text-caption text-text-muted">
+                  {o12.butlerUnavailable}
+                </p>
+                <p className="text-dense font-semibold">{o12.manualHeading}</p>
+                <a href="#listing-text" className="text-dense text-action underline">
+                  {o12.manual}
+                </a>
+              </div>
+            </details>
           </aside>
         </div>
       </div>

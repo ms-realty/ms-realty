@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { homePaths } from "@/server/config/hosts";
@@ -11,6 +11,7 @@ import { SkipLink } from "@/ui/skip-link";
 import { LocaleSwitcher } from "./language-switcher";
 import { NavLink } from "./nav-link";
 import { journeyHelpNav, journeyNav, linked } from "./navigation";
+import { NavigationLoading } from "./navigation-loading";
 
 export const journeyMainId = "main";
 const linkClass =
@@ -136,7 +137,10 @@ export async function JourneyShell({
             </div>
           </header>
           <main id={journeyMainId} tabIndex={-1} className="min-w-0 flex-1 outline-none">
-            {children}
+            <Suspense fallback={null}>
+              <NavigationLoading surface="client" />
+            </Suspense>
+            <div data-route-content="">{children}</div>
           </main>
         </div>
       </div>

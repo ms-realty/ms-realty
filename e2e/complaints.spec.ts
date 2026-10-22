@@ -48,7 +48,7 @@ for (const javaScriptEnabled of [true, false])
       await page
         .getByLabel("Received description", { exact: true })
         .fill("Synthetic complaint about a missed follow-up. No real customer.");
-      await page.getByLabel("Due at · Europe/Sofia", { exact: true }).fill("2027-01-15T14:00");
+      await page.getByLabel("Due at", { exact: true }).fill("2027-01-15T14:00");
       await page
         .getByLabel("I reviewed the record, owner, due date and outcome", { exact: true })
         .check();
@@ -58,7 +58,7 @@ for (const javaScriptEnabled of [true, false])
       ).toBeVisible();
       await page.getByRole("link", { name: "Open current record", exact: true }).click();
       await expect(page.getByText(source, { exact: true })).toBeVisible();
-      await page.getByLabel("State", { exact: true }).selectOption("resolved");
+      await page.getByLabel("Where it stands", { exact: true }).selectOption("resolved");
       await page
         .getByLabel("Reason and next step", { exact: true })
         .fill("Checked original source and recorded a synthetic response.");

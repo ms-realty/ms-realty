@@ -1,19 +1,34 @@
 // O01 focus state markup contract: the status wrapper over listTranslationReviews, the pages it
 // draws (first, later, failed, refused cursor, nothing waiting) and the route that chooses
 // between Today, the focus view and a 404.
+
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { PermissionState } from "@/features/shell/permission-state";
 import type { Session } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
 import { readTranslationReviews, TranslationReviewsScreen } from "./today-focus";
 import { TodayScreen } from "./today-screen";
 
-const reads = vi.hoisted(() => ({ page: vi.fn() }));
+const reads = vi.hoisted(() => ({ page: vi.fn(), grants: vi.fn() }));
 const { db, session } = vi.hoisted(() => ({
   // The route reads the signed-in person's name for Today's greeting.
   db: { select: () => ({ from: () => ({ where: async () => [{ name: "Maria Example" }] }) }) },
   session: { account: { kind: "staff", id: "staff-one" }, actor: { kind: "staff" } } as Session,
 }));
+vi.mock("@/server/authz", async (original) => ({
+  ...(await original<typeof import("@/server/authz")>()),
+  resolveGrants: reads.grants,
+}));
+vi.mock("next-intl/server", async () => {
+  const { default: catalog } = await import("../../../messages/staff/en/workspaceStates.json");
+  return {
+    getTranslations: async () => (key: string) =>
+      key
+        .split(".")
+        .reduce<unknown>((value, part) => (value as Record<string, unknown>)[part], catalog),
+  };
+});
 vi.mock("@/db/client", () => ({ getDb: () => db }));
 vi.mock("@/server/work/queries", () => ({
   listTranslationReviews: reads.page,
@@ -62,6 +77,7 @@ const focus = () => document.querySelector("[data-today-focus]") as HTMLElement;
 beforeEach(() => {
   vi.clearAllMocks();
   reads.page.mockResolvedValue(page(3));
+  reads.grants.mockResolvedValue([{ capability: "inquiry.read" }]);
 });
 afterEach(cleanup);
 
@@ -265,4 +281,13 @@ it("titles the focus view after its queue", async () => {
     title: "Преводи за преглед",
   });
   await expect(generateMetadata(route({}))).resolves.toEqual({ title: "Today" });
+});
+
+it("guides an active staff member awaiting grants without claiming an empty worklist", async () => {
+  reads.grants.mockResolvedValue([]);
+  const view = await WorkPage(route({}));
+  expect(view.type).toBe(PermissionState);
+  expect(view.props).toMatchObject({ locale: "en", session, showToday: false });
+  expect(reads.page).not.toHaveBeenCalled();
+  await expect(WorkPage(route({ queue: "unknown" }))).rejects.toThrow("NOT_FOUND");
 });

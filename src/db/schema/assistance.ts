@@ -1,6 +1,7 @@
 // Restricted, source-bound drafting evidence. Acceptance never authorizes sending or publication.
 import { sql } from "drizzle-orm";
 import { check, index, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import type { AiBillingMode, InferenceOutcome } from "@/domain/generative";
 import { instant, mutable } from "./columns";
 import { publicLocaleEnum } from "./enums";
 import { principals } from "./identity";
@@ -28,7 +29,12 @@ export const assistanceRuns = pgTable(
     errorCode: text("error_code"),
     inputTokens: integer("input_tokens").notNull().default(0),
     outputTokens: integer("output_tokens").notNull().default(0),
-    reservedCostMicros: integer("reserved_cost_micros").notNull().default(0),
+    billingMode: text("billing_mode").$type<AiBillingMode>().notNull().default("metered_usd"),
+    inferenceOutcome: text("inference_outcome")
+      .$type<InferenceOutcome>()
+      .notNull()
+      .default("not_started"),
+    reservedCostMicros: integer("reserved_cost_micros").default(0),
     actualCostMicros: integer("actual_cost_micros"),
     generatedAt: instant("generated_at"),
     reviewedAt: instant("reviewed_at"),
@@ -49,9 +55,14 @@ export const assistanceRuns = pgTable(
       sql`${t.state} in ('queued', 'running', 'draft', 'failed', 'stale', 'rejected', 'accepted')`,
     ),
     check("assistance_runs_source_version", sql`${t.sourceVersion} > 0`),
+    check("assistance_runs_usage", sql`${t.inputTokens} >= 0 and ${t.outputTokens} >= 0`),
     check(
-      "assistance_runs_usage",
-      sql`${t.inputTokens} >= 0 and ${t.outputTokens} >= 0 and ${t.reservedCostMicros} >= 0 and (${t.actualCostMicros} is null or ${t.actualCostMicros} >= 0)`,
+      "assistance_runs_billing",
+      sql`(${t.billingMode} = 'metered_usd' and ${t.reservedCostMicros} is not null and ${t.reservedCostMicros} >= 0 and (${t.actualCostMicros} is null or ${t.actualCostMicros} >= 0)) or (${t.billingMode} = 'chatgpt_subscription' and ${t.reservedCostMicros} is null and ${t.actualCostMicros} is null)`,
+    ),
+    check(
+      "assistance_runs_inference",
+      sql`${t.inferenceOutcome} in ('not_started','pending','settled','unknown') and (${t.inferenceOutcome} <> 'pending' or ${t.state} = 'running') and (${t.inferenceOutcome} <> 'settled' or ${t.billingMode} = 'chatgpt_subscription' or ${t.actualCostMicros} is not null)`,
     ),
     check(
       "assistance_runs_review",

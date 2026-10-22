@@ -113,7 +113,7 @@ for (const javaScriptEnabled of [true, false]) {
         .locator("header:visible")
         .screenshot({ path: testInfo.outputPath("authentic-workspace-header-320.png") });
       await expect(panel).toContainText("Insufficient evidence");
-      await panel.getByText("Assessment details", { exact: true }).click();
+      await panel.getByText("Technical details", { exact: true }).click();
       await expect(panel).toContainText("typesafe/jev-1.13-20260917");
       await expect(panel).toContainText("10%");
       await expect(panel).toContainText("1.50");
@@ -155,7 +155,7 @@ test("O32: human review stays source-bound; disabled provider and real queue sta
     page.getByText("Draft generation is unavailable. Continue the manual workflow."),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Request a draft" })).toHaveCount(0);
-  await page.getByRole("link", { name: "Open draft status" }).click();
+  await page.getByRole("link", { name: "Open the draft" }).click();
   await expect(
     page.getByText("Synthetic draft: you asked about 2 bedrooms.", { exact: true }),
   ).toBeVisible();
@@ -174,7 +174,11 @@ test("O32: human review stays source-bound; disabled provider and real queue sta
     fullPage: true,
   });
   await expect(page.getByText("synthetic-fixture-model", { exact: true })).toBeHidden();
-  await page.getByText("Generation details", { exact: true }).click();
+  await page
+    .locator("details")
+    .filter({ has: page.getByText("synthetic-fixture-model", { exact: true }) })
+    .locator(":scope > summary")
+    .click();
   await expect(page.getByText("synthetic-fixture-model", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Open the inquiry", exact: true }).click();
   await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${data.sourceId}`));
@@ -200,8 +204,14 @@ test("O32: human review stays source-bound; disabled provider and real queue sta
       ?.state,
   ).toBe("draft");
   await page.goto(hostUrl("staff", "/en/operations/jobs"));
-  await expect(page.getByRole("heading", { name: "Jobs and assistance status" })).toBeVisible();
-  await expect(page.getByRole("row", { name: /ai.draft/ }).first()).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Background tasks and assistance" }),
+  ).toBeVisible();
+  const draftQueue = page.getByRole("row", { name: /Butler draft generation/ }).first();
+  await expect(draftQueue).toBeVisible();
+  await expect(draftQueue.getByText(/ai\.draft/)).toBeHidden();
+  await draftQueue.locator("summary").click();
+  await expect(draftQueue.getByText(/ai\.draft/)).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath("synthetic-operations-status.png"),
     fullPage: true,
@@ -270,7 +280,7 @@ for (const variant of ["locale", "intake"] as const) {
       page.getByText("Draft generation is unavailable. Continue the manual workflow."),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "Request a draft" })).toHaveCount(0);
-    await page.getByRole("link", { name: "Open draft status", exact: true }).click();
+    await page.getByRole("link", { name: "Open the draft", exact: true }).click();
     if (variant === "locale") {
       await expect(
         page.getByRole("heading", { name: "Synthetic apartment translation", exact: true }),
@@ -283,7 +293,10 @@ for (const variant of ["locale", "intake"] as const) {
         page.getByRole("heading", { name: "Candidate facts — not approved facts", exact: true }),
       ).toBeVisible();
       await expect(page.getByText("2 bedrooms", { exact: true })).toBeVisible();
-      await expect(page.getByText("note [0, 10)", { exact: true })).toBeVisible();
+      const citation = page.getByText("note [0, 10)", { exact: true });
+      await expect(citation).toBeHidden();
+      await page.locator("details").filter({ has: citation }).locator(":scope > summary").click();
+      await expect(citation).toBeVisible();
       await expect(page.getByText("private@example.test", { exact: false })).toHaveCount(0);
     }
     await page.getByRole("checkbox").check();

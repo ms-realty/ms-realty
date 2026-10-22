@@ -14,7 +14,7 @@ const en = {
   confirm: "I verified this person’s identity and reviewed the access change.",
   recover: "Revoke old access and queue recovery",
   clientTitle: "Invite a client",
-  case: "Case",
+  case: "Deal",
   participant: "Participant role",
   success:
     "The change was recorded and the invitation was queued. Email delivery is a separate step.",
@@ -39,7 +39,7 @@ const bg: Copy = {
   confirm: "Проверих самоличността на човека и прегледах промяната на достъпа.",
   recover: "Отмяна на стария достъп и възстановяване",
   clientTitle: "Покана за клиент",
-  case: "Случай",
+  case: "Сделка",
   participant: "Роля на участника",
   success:
     "Промяната е записана, а поканата е добавена за изпращане. Доставката на имейла е отделна стъпка.",
@@ -63,7 +63,7 @@ const ru: Copy = {
   confirm: "Я проверил личность человека и изменение доступа.",
   recover: "Отозвать старый доступ и восстановить",
   clientTitle: "Пригласить клиента",
-  case: "Дело",
+  case: "Сделка",
   participant: "Роль участника",
   success: "Изменение записано, приглашение поставлено в очередь. Доставка письма — отдельный шаг.",
   choose: "Выберите…",
@@ -99,6 +99,13 @@ const staffRoleLabels = {
     manager: "Руководитель",
   },
 };
-export function staffRoleLabel(locale: string, role: keyof typeof staffRoleLabels.en): string {
-  return staffRoleLabels[locale === "bg" || locale === "ru" ? locale : "en"][role];
+export function staffRoleLabel(locale: string, role: string): string {
+  const labels = staffRoleLabels[locale === "bg" || locale === "ru" ? locale : "en"];
+  return Object.hasOwn(labels, role)
+    ? labels[role as keyof typeof labels]
+    : locale === "bg"
+      ? "Записана роля"
+      : locale === "ru"
+        ? "Записанная роль"
+        : "Recorded role";
 }

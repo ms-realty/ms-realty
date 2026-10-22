@@ -39,9 +39,10 @@ O01 focus view of translation reviews (`/today?queue=translation-reviews`). That
 `listTranslationReviews` 30 at a time with its opaque `after` cursor; a cursor the server
 refuses (`validation_failed`) reads as a page link that is no longer valid, and any other
 `queue` is a 404.
-Exact times name their zone: UTC for inquiries, tasks, Cases and listings, the agency zone
-(Europe/Sofia) for key returns and the recorded zone for viewings; ages are relative to the
-read. BG/RU staff copy is draft translation.
+Times are entered and read on the agency's clock (Europe/Sofia) in the one shared format of
+`src/i18n/format.ts`; a time kept in another zone (a viewing's recorded zone) names that zone
+in words, never as an id, UTC or an offset. Ages are relative to the read. BG/RU staff copy is
+draft translation.
 
 Verification on disposable PostgreSQL:
 

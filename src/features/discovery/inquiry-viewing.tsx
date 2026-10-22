@@ -1,8 +1,11 @@
+import { resolveLocalTime } from "@/domain/time";
 import type { ViewingPreferences } from "@/domain/viewing-preferences";
-import type { PublicLocale } from "@/i18n/config";
+import { agencyTimeZone, type PublicLocale } from "@/i18n/config";
+import { formatDateTimeRange, timeZoneLabel } from "@/i18n/format";
+import { timeCopy } from "@/i18n/time-copy";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormController } from "@/ui/form/form";
-import { FormField } from "@/ui/form/form-field";
 import { discoveryCopy } from "./copy";
 import type { InquiryValues } from "./inquiry-state";
 import { viewingCopy } from "./viewing-copy";
@@ -17,86 +20,31 @@ export function ViewingPreferenceFields({
 }) {
   const c = viewingCopy(locale),
     copy = discoveryCopy(locale);
-  const select = (
-    name: keyof InquiryValues,
-    label: string,
-    options: readonly (readonly [string, string])[],
-  ) => {
-    const field = form.field(name);
-    return (
-      <div className={fieldClass} key={name} data-invalid={field.error ? "true" : undefined}>
-        <label htmlFor={field.id} className={labelClass}>
-          {label}
-        </label>
-        <select
-          id={field.id}
-          name={name}
-          value={field.value}
-          disabled={field.readOnly}
-          onChange={field.onChange}
-          className={controlClass}
-          aria-invalid={Boolean(field.error) || undefined}
-          aria-describedby={field.error ? `${field.id}-error` : undefined}
-        >
-          {options.map(([value, text]) => (
-            <option key={value} value={value}>
-              {text}
-            </option>
-          ))}
-        </select>
-        {field.error ? (
-          <p id={`${field.id}-error`} className={errorClass}>
-            {field.error}
-          </p>
-        ) : null}
-      </div>
-    );
-  };
+  const format = form.field("viewingFormat");
+  // M-065: times are on the agency's clock, named in words by each field; a repeated autumn
+  // hour takes its first occurrence and the field says so, so there is no zone or clock choice.
   const window = (index: number) => {
     const fields = viewingWindowFields[index];
     if (!fields) return null;
-    const choices = [
-      ["", c.automatic],
-      ["earlier", c.earlier],
-      ["later", c.later],
-    ] as const;
     return (
       <fieldset key={index} className="min-w-0 space-y-4">
         <legend className="font-semibold">
           {c.window} {index + 1}
         </legend>
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-          <FormField
-            {...form.field(fields.start)}
-            type="datetime-local"
-            label={`${c.start} ${index + 1}`}
-            optionalLabel={copy.optional}
-            dir="ltr"
-          />
-          <FormField
-            {...form.field(fields.end)}
-            type="datetime-local"
-            label={`${c.end} ${index + 1}`}
-            optionalLabel={copy.optional}
-            dir="ltr"
-          />
+          {([fields.start, fields.end] as const).map((name, position) => (
+            <DateTimeField
+              key={name}
+              {...form.field(name)}
+              locale={locale}
+              timeZone={agencyTimeZone}
+              localValue
+              repeatedHour="first"
+              label={`${position === 0 ? c.start : c.end} ${index + 1}`}
+              optionalLabel={copy.optional}
+            />
+          ))}
         </div>
-        <details
-          open={Boolean(
-            form.values[fields.startChoice] ||
-              form.values[fields.endChoice] ||
-              form.field(fields.start).error ||
-              form.field(fields.end).error,
-          )}
-          className="space-y-3"
-        >
-          <summary className="cursor-pointer py-2 text-dense underline">
-            {c.clockChoice} {index + 1}
-          </summary>
-          <p className="text-dense text-text-muted">{c.clockHint}</p>
-          {select(fields.startChoice, `${c.start} ${index + 1} · ${c.clockChoice}`, choices)}
-          {select(fields.endChoice, `${c.end} ${index + 1} · ${c.clockChoice}`, choices)}
-        </details>
       </fieldset>
     );
   };
@@ -104,18 +52,29 @@ export function ViewingPreferenceFields({
     <fieldset className="min-w-0 space-y-5 rounded-panel border border-divider p-4">
       <legend className="px-1 text-heading font-semibold">{c.title}</legend>
       <p>{c.note}</p>
-      {select("viewingFormat", c.format, [
-        ["", c.noPreference],
-        ["in_person", c.inPerson],
-      ])}
-      <FormField
-        {...form.field("viewingTimezone")}
-        label={c.timezone}
-        hint={c.timezoneHint}
-        maxLength={100}
-        required
-        dir="ltr"
-      />
+      <div className={fieldClass} data-invalid={format.error ? "true" : undefined}>
+        <label htmlFor={format.id} className={labelClass}>
+          {c.format}
+        </label>
+        <select
+          id={format.id}
+          name="viewingFormat"
+          value={format.value}
+          disabled={format.readOnly}
+          onChange={format.onChange}
+          className={controlClass}
+          aria-invalid={Boolean(format.error) || undefined}
+          aria-describedby={format.error ? `${format.id}-error` : undefined}
+        >
+          <option value="">{c.noPreference}</option>
+          <option value="in_person">{c.inPerson}</option>
+        </select>
+        {format.error ? (
+          <p id={`${format.id}-error`} className={errorClass}>
+            {format.error}
+          </p>
+        ) : null}
+      </div>
       {window(0)}
       <details
         open={viewingWindowFields
@@ -143,6 +102,10 @@ export function ViewingPreferenceSummary({
   locale: PublicLocale;
 }) {
   const c = viewingCopy(locale);
+  // The form takes the first of a repeated hour; say so where the visitor reviews it.
+  const firstTaken = input.windows.some(
+    (window) => window.startOccurrence === "earlier" || window.endOccurrence === "earlier",
+  );
   return (
     <section
       className="min-w-0 space-y-3 rounded-panel border border-divider p-4 wrap-anywhere"
@@ -158,7 +121,7 @@ export function ViewingPreferenceSummary({
         <div>
           <dt className="text-text-muted">{c.timezone}</dt>
           <dd>
-            <bdi>{input.timezone}</bdi>
+            <bdi>{timeZoneLabel(locale, input.timezone)}</bdi>
           </dd>
         </div>
         <div>
@@ -166,19 +129,39 @@ export function ViewingPreferenceSummary({
           <dd>
             {input.windows.length ? (
               <ol className="space-y-2">
-                {input.windows.map((window, index) => (
-                  <li key={viewingWindowFields[index]?.start}>
-                    <span>{index + 1}. </span>
-                    <bdi>{window.startsAtLocal.replace("T", " ")}</bdi>
-                    {window.startOccurrence ? ` (${c[window.startOccurrence]})` : ""} –{" "}
-                    <bdi>{window.endsAtLocal.replace("T", " ")}</bdi>
-                    {window.endOccurrence ? ` (${c[window.endOccurrence]})` : ""}
-                  </li>
-                ))}
+                {input.windows.map((window, index) => {
+                  const start = resolveLocalTime(
+                    window.startsAtLocal,
+                    input.timezone,
+                    window.startOccurrence,
+                  );
+                  const end = resolveLocalTime(
+                    window.endsAtLocal,
+                    input.timezone,
+                    window.endOccurrence,
+                  );
+                  return (
+                    <li key={viewingWindowFields[index]?.start}>
+                      <span>{index + 1}. </span>
+                      {start.outcome === "resolved" && end.outcome === "resolved" ? (
+                        <time dateTime={start.instant} className="tabular-nums">
+                          {formatDateTimeRange(locale, start.instant, end.instant, {
+                            timeZone: input.timezone,
+                          })}
+                        </time>
+                      ) : (
+                        "—"
+                      )}
+                    </li>
+                  );
+                })}
               </ol>
             ) : (
               c.noPreference
             )}
+            {firstTaken ? (
+              <p className="mt-2 text-dense text-text-muted">{timeCopy(locale).repeatedFirst}</p>
+            ) : null}
           </dd>
         </div>
         {input.accessNeeds ? (

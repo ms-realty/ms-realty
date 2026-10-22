@@ -12,6 +12,7 @@ import {
   requestAssistance,
   reviewAssistance,
 } from "./assistance";
+import { ChatGptError } from "./chatgpt/types";
 import type { AssistanceConfig } from "./config";
 import { syntheticAssessment, syntheticJevPolicy } from "./jev-testing";
 import type { DraftGenerator } from "./provider";
@@ -84,7 +85,93 @@ const generate: DraftGenerator = async () => ({
 });
 
 describe("source-bound Butler drafts on PostgreSQL", () => {
+  it("keeps subscription drafting review-bound with NULL money and recorded token usage", async () => {
+    const subscription: AssistanceConfig = {
+      ...config,
+      provider: "chatgpt_oauth",
+      chatGptRegistrationId: "d".repeat(64),
+      apiKey: null,
+      inputCostMicros: null,
+      outputCostMicros: null,
+      dailyLimitMicros: null,
+    };
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, {
+      queue,
+      config: subscription,
+    });
+    await processAssistanceRun(t.db, result.outcome.id, {
+      config: subscription,
+      generate: async (...args) => ({
+        ...(await generate(...args)),
+        billingMode: "chatgpt_subscription",
+      }),
+    });
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({
+      state: "draft",
+      billingMode: "chatgpt_subscription",
+      inferenceOutcome: "settled",
+      reservedCostMicros: null,
+      actualCostMicros: null,
+      inputTokens: 100,
+      outputTokens: 60,
+      reviewedAt: null,
+    });
+    expect(run.validation).toMatchObject({
+      generationCostMicros: null,
+      factualApproval: "human_required",
+    });
+  });
+  it("records interrupted subscription inference as unknown independently of its NULL monetary fields", async () => {
+    const subscription: AssistanceConfig = {
+      ...config,
+      provider: "chatgpt_oauth",
+      chatGptRegistrationId: "e".repeat(64),
+      apiKey: null,
+      inputCostMicros: null,
+      outputCostMicros: null,
+      dailyLimitMicros: null,
+    };
+    const f = await fixture(),
+      model = vi.fn<DraftGenerator>(async () => {
+        throw new ChatGptError("provider_chatgpt_interrupted", "unknown", "unknown");
+      });
+    const result = await requestAssistance(t.db, f.session, f.input, {
+      queue,
+      config: subscription,
+    });
+    await expect(
+      processAssistanceRun(t.db, result.outcome.id, { config: subscription, generate: model }),
+    ).rejects.toThrow("provider_chatgpt_interrupted");
+    await processAssistanceRun(t.db, result.outcome.id, { config: subscription, generate: model });
+    expect(model).toHaveBeenCalledOnce();
+    expect((await readAssistanceRun(t.db, f.session, result.outcome.id)).run).toMatchObject({
+      state: "failed",
+      inferenceOutcome: "unknown",
+      actualCostMicros: null,
+      reservedCostMicros: null,
+    });
+  });
   const judged = { ...config, jev: syntheticJevPolicy };
+  it("retains unknown metered cost when a terminal second-call total cannot be represented", async () => {
+    const f = await fixture();
+    const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });
+    await expect(
+      processAssistanceRun(t.db, result.outcome.id, {
+        config: judged,
+        generate,
+        assess: async () => ({ ...syntheticAssessment(), costMicros: 2_000_000_000 }),
+      }),
+    ).rejects.toThrow("provider_cost_unknown");
+    const { run } = await readAssistanceRun(t.db, f.session, result.outcome.id);
+    expect(run).toMatchObject({
+      state: "failed",
+      inferenceOutcome: "unknown",
+      actualCostMicros: null,
+    });
+    expect(run.reservedCostMicros).toBeGreaterThan(0);
+  });
   it("reserves both calls, retains uncertain judgments for human review and charges both actual costs", async () => {
     const f = await fixture();
     const result = await requestAssistance(t.db, f.session, f.input, { queue, config: judged });

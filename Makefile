@@ -8,9 +8,9 @@
 # `npm test` runs the integration project only when TEST_DATABASE_URL is set (see
 # AGENTS.md); CI sets it and starts Postgres.
 
-.PHONY: check lint typecheck typecheck-gateway test build e2e
+.PHONY: check lint typecheck typecheck-gateway test test-release build e2e
 
-check: lint typecheck typecheck-gateway test build
+check: lint typecheck typecheck-gateway test test-release build
 
 lint typecheck test build e2e: node_modules/.package-lock.json
 	npm run $@
@@ -20,6 +20,9 @@ typecheck-gateway: node_modules/.package-lock.json gateway/node_modules/.package
 
 # Gateway tests run in the root Vitest project but resolve package-local dependencies.
 test: gateway/node_modules/.package-lock.json
+
+test-release: node_modules/.package-lock.json
+	npm run test:release
 
 # npm writes node_modules/.package-lock.json on install, so this reinstalls only when
 # package-lock.json is newer than the installed tree.

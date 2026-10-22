@@ -1366,6 +1366,8 @@ Stable MediaRelation identity supports duplicate asset placements and hidden/uns
 
 **Draw:** upload/seal/scan/processing, failed derivative, missing rights, modified image disclosure, paginated/hidden media, concurrent reorder, deleted/superseded and missing object. Approval binds exact bytes and placement version.
 
+The implemented task hierarchy, responsive composition and private photo-draft handoff are recorded in [Listing workspace composition](design/listing-workspace.md). Photo Save, photo review, gallery-order Save and listing publication remain distinct decisions.
+
 ### O14 — Facts and source evidence
 
 **Layout/flows:** L10/L13; F11/F23/F31. **Order:** typed fact/value/unit/basis → source/excerpt/date/language → unknown/conflicting status → human review scope/result → affected presentation dependencies.

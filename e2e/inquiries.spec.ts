@@ -180,14 +180,14 @@ for (const javaScriptEnabled of [true, false])
       await expect(rows(page)).toHaveCount(5);
       await expect(rows(page).nth(0)).toContainText(`${f.name("Alex")} · ${f.listing}`);
       await expect(rows(page).nth(0)).toContainText(
-        "Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Agency coverage",
+        "Received 3 hours ago · Preferred language: Bulgarian · Accountable owner: Work without an owner",
       );
       await expect(rows(page).nth(1)).toContainText(`${f.name("Nikol")} · Question`);
       await expect(rows(page).nth(1)).toContainText(
         `Assigned · Received 2 hours ago · Preferred language: English · Accountable owner: ${f.broker.name}`,
       );
       await expect(rows(page).nth(3)).toContainText(
-        `${f.name("Petar")} · QuestionSuspected spam · Received 1 hour ago · Accountable owner: Agency coverage`,
+        `${f.name("Petar")} · Question RQ-O02-${f.key}-3 Suspected spam · Received 1 hour ago · Accountable owner: Work without an owner`,
       );
       await expect(rows(page).nth(4)).toContainText(`Accountable owner: ${f.colleague.name}`);
       await expect(rows(page).nth(1).getByRole("link")).toHaveAttribute(
@@ -217,8 +217,9 @@ for (const javaScriptEnabled of [true, false])
       await rows(page).nth(0).getByRole("link").click();
       await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${f.ids[0]}?view=unassigned`));
       await expect(
-        page.getByRole("heading", { level: 1, name: `RQ-O02-${f.key}-0`, exact: true }),
+        page.getByRole("heading", { level: 1, name: f.name("Alex"), exact: true }),
       ).toBeVisible();
+      await expect(page.locator("[data-inquiry-reference]")).toContainText(`RQ-O02-${f.key}-0`);
       const queue = page.locator("[data-inquiry-queue]");
       const back = page.getByRole("link", { name: en.queue.back, exact: true });
       if (wide(page)) {
@@ -246,8 +247,9 @@ for (const javaScriptEnabled of [true, false])
         await queue.getByRole("link", { name: "All", exact: true }).click();
         await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${f.ids[3]}?view=all`));
         await expect(
-          page.getByRole("heading", { level: 1, name: `RQ-O02-${f.key}-3`, exact: true }),
+          page.getByRole("heading", { level: 1, name: f.name("Petar"), exact: true }),
         ).toBeVisible();
+        await expect(page.locator("[data-inquiry-reference]")).toContainText(`RQ-O02-${f.key}-3`);
         await expect(queue.locator("[data-inquiry-id]")).toHaveCount(5);
       } else {
         // Narrow screens: the conversation is its own route and returns to the same row.
@@ -295,7 +297,7 @@ for (const javaScriptEnabled of [true, false])
       ).toBeVisible();
       const found = page.getByRole("list", { name: en.queue.results }).getByRole("listitem");
       await expect(found).toHaveCount(1);
-      await expect(found).toContainText(`${f.name("Nikol")} · RQ-O02-${f.key}-1`);
+      await expect(found).toContainText(`${f.name("Nikol")} RQ-O02-${f.key}-1`);
       await expect(found.getByRole("link")).toHaveAttribute(
         "href",
         `/en/inquiries/${f.ids[1]}?view=mine`,
@@ -330,8 +332,9 @@ for (const javaScriptEnabled of [true, false])
         .click();
       await expect(page).toHaveURL(hostUrl("staff", `/en/inquiries/${f.ids[1]}?view=mine`));
       await expect(
-        page.getByRole("heading", { level: 1, name: `RQ-O02-${f.key}-1`, exact: true }),
+        page.getByRole("heading", { level: 1, name: f.name("Nikol"), exact: true }),
       ).toBeVisible();
+      await expect(page.locator("[data-inquiry-reference]")).toContainText(`RQ-O02-${f.key}-1`);
       expect(requests.filter((request) => request.url().includes(f.key))).toEqual([]);
     });
   });

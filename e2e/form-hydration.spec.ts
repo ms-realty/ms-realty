@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, type Page, test } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
+import { agencyWallTime, fillAgencyInstant } from "./time";
 
 // A slow connection must not erase a usable server-rendered form when its JavaScript arrives.
 test("UI07: typing before hydration survives later edits and submission", async ({ page }) => {
@@ -97,8 +98,12 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
       await section
         .getByLabel("Review evidence or reason", { exact: true })
         .fill("Explicit synthetic review before JavaScript");
-      const expiry = new Date(Date.now() + 86400000).toISOString().slice(0, 16);
-      await section.getByLabel("Approval valid until (UTC)", { exact: true }).fill(expiry);
+      const expiryAt = new Date(Date.now() + 86400000);
+      const expiry = agencyWallTime(expiryAt);
+      await fillAgencyInstant(
+        section.getByLabel("Approval valid until", { exact: true }),
+        expiryAt,
+      );
       await section.getByRole("checkbox").check();
       releaseReview();
       await review.waitForLoadState("networkidle");
@@ -106,9 +111,7 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
         .getByLabel("Review evidence or reason", { exact: true })
         .fill("Explicit synthetic review after JavaScript");
       await expect(section.getByRole("checkbox")).toBeChecked();
-      await expect(section.getByLabel("Approval valid until (UTC)", { exact: true })).toHaveValue(
-        expiry,
-      );
+      await expect(section.getByLabel("Approval valid until", { exact: true })).toHaveValue(expiry);
       await section
         .getByRole("button", { name: "Record qualified claim review", exact: true })
         .click();

@@ -5,17 +5,15 @@
 // to the chosen tab natively. With JavaScript the address keeps the deep link (?tab=facts) and
 // a field the server rejected brings its panel forward.
 import { useEffect, useState } from "react";
-import { LeaveControl } from "./leave-control";
+import { listingSectionClass } from "./workspace";
 
 export function EditTabs({
   tab,
   formId,
-  photosHref,
   labels,
 }: {
   tab: "text" | "facts";
   formId?: string;
-  photosHref: string;
   labels: { tabs: string; facts: string; text: string; photos: string; noscript: string };
 }) {
   // Shown until JavaScript runs: only then can the editor ask before leaving unsaved work.
@@ -52,17 +50,16 @@ export function EditTabs({
       invalid.disconnect();
     };
   }, []);
-  const option =
-    "flex min-h-[2.875rem] cursor-pointer items-center justify-center rounded-control p-3 text-center text-dense font-semibold text-text-muted hover:text-text has-checked:bg-canvas has-checked:text-text has-focus-visible:outline-2 has-focus-visible:outline-focus";
+  const option = `${listingSectionClass} cursor-pointer has-checked:border-action has-checked:text-action has-focus-visible:outline-2 has-focus-visible:outline-focus`;
   return (
-    <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-3 gap-1 rounded-control bg-subtle p-1">
+    <div className="flex flex-col gap-2 overflow-x-auto">
+      <div className="flex w-max min-w-full gap-x-1 border-b border-divider lg:w-auto lg:flex-wrap">
         <fieldset className="contents">
           <legend className="sr-only">{labels.tabs}</legend>
           {(
             [
-              ["facts", labels.facts],
               ["text", labels.text],
+              ["facts", labels.facts],
             ] as const
           ).map(([id, label]) => (
             <label key={id} className={option}>
@@ -79,9 +76,6 @@ export function EditTabs({
             </label>
           ))}
         </fieldset>
-        <LeaveControl href={photosHref} formId={formId} className={`${option} no-underline`}>
-          {labels.photos}
-        </LeaveControl>
       </div>
       {enhanced ? null : <p className="text-caption text-text-muted">{labels.noscript}</p>}
     </div>

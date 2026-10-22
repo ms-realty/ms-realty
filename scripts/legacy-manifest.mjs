@@ -61,7 +61,7 @@ for (const capture of liveDelta?.captures ?? []) {
   liveCaptures.push({
     ...capture,
     ...extracted,
-    source_extractor: "legacy-main-v5",
+    source_extractor: "legacy-main-v6",
     recorded_body_hash: capture.text_sha256,
   });
   // Let jsdom's queued document lifecycle work drain between bounded batches.
@@ -73,6 +73,46 @@ const captures = [...historicalCaptures, ...liveCaptures].sort((a, b) =>
 );
 const urls = JSON.parse(readFileSync("data/legacy/url-decisions.json", "utf8"));
 const listings = JSON.parse(readFileSync("data/legacy/listings.json", "utf8")).listings;
+const sourceProposalPath = "data/legacy/migration/wordpress-source-proposal.json";
+const sourceProposalRaw = existsSync(sourceProposalPath)
+  ? readFileSync(sourceProposalPath, "utf8")
+  : null;
+const sourceProposal = sourceProposalRaw ? JSON.parse(sourceProposalRaw) : null;
+if (sourceProposal) {
+  if (
+    sha256(sourceProposalRaw) !==
+      readFileSync("data/legacy/migration/wordpress-source-proposal.sha256", "utf8").trim() ||
+    sourceProposal.frozenCatalogSha256 !== sha256(readFileSync("data/legacy/listings.json")) ||
+    sourceProposal.completeCurrentDelta !== false ||
+    sourceProposal.productionAllowed !== false ||
+    sourceProposal.authorityGranted !== false ||
+    sourceProposal.records.length !== sourceProposal.currentPublishedListingIdentities ||
+    new Set(sourceProposal.records.map((row) => `${row.sourceHost}:${row.sourcePostId}`)).size !==
+      sourceProposal.records.length
+  )
+    throw new Error("Public source proposal is not a pinned non-authoritative inventory");
+  const fields = new Set([
+    "wtf_pid",
+    "wtf_price",
+    "wtf_area",
+    "wtf_total_area",
+    "wtf_bath",
+    "wtf_garage",
+    "wtf_period",
+  ]);
+  for (const row of sourceProposal.records)
+    if (
+      sourceIdentity(row.sourceUrl).host !== row.sourceHost ||
+      !Number.isInteger(row.sourcePostId) ||
+      row.sourcePostId <= 0 ||
+      row.recordedPostStatus !== "publish" ||
+      row.availabilityVerified !== false ||
+      row.mediaRightsVerified !== false ||
+      row.publicationDecision !== "not_made_by_source_recovery" ||
+      !row.sourceFacts.every((fact) => fields.has(fact.field) && typeof fact.value === "string")
+    )
+      throw new Error("Public source proposal scope or approval invariant failed");
+}
 const listingByUrl = new Map(
   listings.flatMap((listing) =>
     listing.legacy_urls.map((url) => [sourceIdentity(url.url).id, listing]),
@@ -80,8 +120,14 @@ const listingByUrl = new Map(
 );
 const manifest = buildLegacyManifest(urls.decisions, captures);
 const baselineIds = new Set(manifest.sources.map((source) => source.id));
-const liveSources = liveCaptures
+const liveSources = [...liveCaptures]
   .filter(verifiedPrimaryCapture)
+  .sort((a, b) => b.captured_at_utc.localeCompare(a.captured_at_utc))
+  .filter(
+    (capture, index, all) =>
+      all.findIndex((other) => sourceIdentity(other.url).id === sourceIdentity(capture.url).id) ===
+      index,
+  )
   .filter((capture) => !baselineIds.has(sourceIdentity(capture.url).id));
 manifest.liveDelta = {
   artifact: livePath,
@@ -167,8 +213,10 @@ const pages = captures
       sourcePath: identity.path,
       sourceType: capture.listing_reference ? "listing" : (meta?.url_type ?? "page"),
       sourceHash: capture.text_sha256,
+      sourceResponseHash: capture.response_sha256,
       capturedAt: capture.captured_at_utc,
       contentScope: capture.content_scope,
+      contentState: capture.content_state ?? "text",
       provenance:
         capture.provenance === "live"
           ? {
@@ -176,6 +224,11 @@ const pages = captures
               artifact: capture.response_artifact,
               extractor: capture.source_extractor,
               recordedBodyHash: capture.recorded_body_hash,
+              transport: capture.transport ?? null,
+              publicDnsPathObserved: capture.publicDnsPathObserved ?? null,
+              originObservation: capture.originObservation ?? null,
+              sourceIndexSha256: capture.source_index_sha256 ?? null,
+              sourceReceiptSha256: capture.source_receipt_sha256 ?? null,
             }
           : { kind: "archived", artifact: sourcePath, gitTag: tag, gitCommit: tagCommit },
       equivalenceReview: { status: "pending", reviewer: null, reviewedAt: null },
@@ -235,10 +288,22 @@ const listingManifest = {
   authority: manifest.authority.directive,
   status: "blocked",
   frozenListings: listings.length,
+  currentSourceProposal: sourceProposal
+    ? {
+        artifact: sourceProposalPath,
+        sha256: sha256(sourceProposalRaw),
+        publishedSourceIdentities: sourceProposal.currentPublishedListingIdentities,
+        bySourceHost: sourceProposal.bySourceHost,
+        authorityGranted: false,
+        completeCurrentDelta: false,
+      }
+    : null,
   liveDeltaReconciled: false,
   archivedMeansSold: false,
   blockers: [
-    "current_listing_delta_missing",
+    sourceProposal
+      ? "current_listing_delta_reconciliation_pending"
+      : "current_listing_delta_missing",
     "source_status_verification_missing",
     "all_photo_loads_and_counts_unverified",
   ],
@@ -336,6 +401,14 @@ const outputs = {
     baselineSourceRows: manifest.sourceRows,
     baselineUniqueSources: manifest.uniqueSources,
     currentDeltaComplete: false,
+    currentSourceProposal: sourceProposal
+      ? {
+          artifact: sourceProposalPath,
+          sha256: sha256(sourceProposalRaw),
+          status: "proposal_requires_reconciliation",
+          authorityGranted: false,
+        }
+      : null,
     unresolvedBaselineSources: manifest.sources
       .filter((source) => !source.source?.bodyVerified)
       .map((source) => ({
@@ -350,7 +423,7 @@ const outputs = {
         sourceUrls: source.sourceRows.map((row) => row.sourceUrl),
         existingTextScope: source.source?.contentScope ?? null,
         existingBodyHash: source.source?.bodyHash ?? null,
-        reason: "historical_raw_response_HTML_unavailable_and_current_domain_is_NIC_parking",
+        reason: "verified_original_primary_body_not_yet_available_for_this_source",
       })),
     discoveredLiveSources: (liveDelta?.discoveredOutsideFrozenUrls ?? []).map((source) => ({
       ...source,

@@ -9,6 +9,7 @@ import { type FileKind, targetAccess } from "./access";
 
 export const fileOperationTypes = [
   "media.review",
+  "media.details.save",
   "media.place",
   "document.review",
   "file.scan.request",

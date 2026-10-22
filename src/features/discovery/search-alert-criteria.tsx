@@ -1,5 +1,5 @@
 import { getDb } from "@/db/client";
-import type { PublicLocale } from "@/i18n/config";
+import { localeEndonyms, type PublicLocale } from "@/i18n/config";
 import { formatExactArea, formatMoney, formatNumber } from "@/i18n/format";
 import { intentPlaces } from "@/server/ai/intent-source";
 import { discoveryCopy } from "./copy";
@@ -89,7 +89,7 @@ export async function SearchAlertCriteria({
         ))}
       </dl>
       <p lang={searchAlertCopyLocale(locale)} dir="ltr">
-        {copy.source}: <bdi>{search.normalized.locale.toUpperCase()}</bdi>
+        {copy.source}: <bdi>{localeEndonyms[search.normalized.locale]}</bdi>
       </p>
       <p>
         {criteria.includeNeedsConfirmation ? (

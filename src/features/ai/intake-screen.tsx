@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import type { z } from "zod";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
+import { optionLabel } from "@/features/inventory/copy";
+import { isPublicLocale } from "@/i18n/config";
+import { factFieldLabel } from "@/i18n/fact-labels";
+import { formatDateTime } from "@/i18n/format";
 import { listIntakeAssistanceRuns, readIntakeAssistanceOperation } from "@/server/ai/assistance";
 import { assistanceAvailability } from "@/server/ai/config";
 import type { IntakeSource, intakeDraftSchema } from "@/server/ai/intake-draft";
@@ -12,10 +16,12 @@ import { AppError } from "@/server/errors";
 import { controlClass, labelClass } from "@/ui/field-class";
 import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { type AiValues, intakeAssistanceAction } from "./actions";
 import { aiCopy } from "./copy";
 import { IntakeAssistanceForm } from "./forms";
 import { intakeAiCopy } from "./intake-copy";
+import { aiLabel } from "./labels";
 import { localeAiCopy } from "./locale-copy";
 export function IntakeSourcePanel({ source, locale }: { source: IntakeSource; locale: string }) {
   const copy = intakeAiCopy(locale);
@@ -23,13 +29,16 @@ export function IntakeSourcePanel({ source, locale }: { source: IntakeSource; lo
     <section className="space-y-4">
       <h2 className="text-subheading font-semibold">{copy.source}</h2>
       <p>{copy.excluded}</p>
-      <p>
-        {source.reference} · {source.version}
-      </p>
+      <p>{source.reference}</p>
       <p className="whitespace-pre-wrap break-words rounded-panel border border-border p-5">
         {source.fields.note}
       </p>
-      <p className="break-all text-caption">SHA-256: {source.noteDigest}</p>
+      <TechnicalDetails locale={locale}>
+        <p>
+          {aiCopy(locale).revision}: {source.version}
+        </p>
+        <p>SHA-256: {source.noteDigest}</p>
+      </TechnicalDetails>
     </section>
   );
 }
@@ -49,19 +58,32 @@ export function IntakeDraftPanel({
         {output.candidates.map((candidate) => (
           <li key={candidate.field} className="space-y-2 rounded-panel border border-border p-4">
             <p className="font-semibold">
-              {candidate.field} · {candidate.state}
+              {factFieldLabel(candidate.field, locale)} · {optionLabel(candidate.state, locale)}
             </p>
             {candidate.values.map((value) => (
               <div key={`${value.source.start}:${value.source.end}:${value.value}`}>
                 <p>
-                  {value.value} {value.unit} · {value.basis}
+                  {value.value}{" "}
+                  {value.unit === "count"
+                    ? ""
+                    : value.unit === "m2"
+                      ? "m²"
+                      : value.unit === "unspecified"
+                        ? optionLabel("unspecified", locale)
+                        : value.unit}{" "}
+                  · {optionLabel(value.basis === "plot" ? "land" : value.basis, locale)}
                 </p>
                 <blockquote className="whitespace-pre-wrap border-s-2 border-border ps-3">
                   {value.source.quote}
                 </blockquote>
-                <p className="text-caption">
-                  note [{value.source.start}, {value.source.end})
-                </p>
+                <TechnicalDetails locale={locale}>
+                  <p>
+                    {candidate.field} · {candidate.state} · {value.unit} · {value.basis}
+                  </p>
+                  <p>
+                    note [{value.source.start}, {value.source.end})
+                  </p>
+                </TechnicalDetails>
               </div>
             ))}
             {candidate.warning ? <p>{candidate.warning}</p> : null}
@@ -69,7 +91,8 @@ export function IntakeDraftPanel({
         ))}
       </ul>
       <p>
-        {copy.missing}: {output.missing.join(", ") || "—"}
+        {copy.missing}:{" "}
+        {output.missing.map((field) => factFieldLabel(field, locale)).join(", ") || "—"}
       </p>
     </div>
   );
@@ -136,7 +159,10 @@ export async function IntakeAssistanceScreen({
       </a>
       <IntakeSourcePanel source={source} locale={locale} />
       {operation ? (
-        <Notice tone="info" title={result ? result.status : common.operationMissing}>
+        <Notice
+          tone="info"
+          title={result ? aiLabel("operation", result.status, locale) : common.operationMissing}
+        >
           {result?.id ? (
             <a className="underline" href={`/${locale}/operations/assistance/${result.id}`}>
               {common.open}
@@ -172,7 +198,8 @@ export async function IntakeAssistanceScreen({
               <a className="underline" href={`/${locale}/operations/assistance/${run.id}`}>
                 {common.open}
               </a>{" "}
-              · {run.state} · {run.createdAt.toISOString()}
+              · {aiLabel("run", run.state, locale)} ·{" "}
+              {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
             </li>
           ))}
         </ul>

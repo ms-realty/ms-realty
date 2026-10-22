@@ -1,3 +1,5 @@
+import { NativeForm } from "@/ui/form/native-form";
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { getDb } from "@/db/client";
 import { documentClassifications } from "@/domain/document";
@@ -64,7 +66,10 @@ export async function InboundAttachments({
       {saved && view.imports.some((i) => i.file.id === saved.versionId) ? (
         <div role="status">
           <Notice tone="success">
-            {c.receipt}: <bdi data-attachment-receipt>{saved.id}</bdi>
+            {c.receipt}
+            <TechnicalDetails locale={locale}>
+              <bdi data-attachment-receipt>{saved.id}</bdi>
+            </TechnicalDetails>
           </Notice>
         </div>
       ) : null}
@@ -88,7 +93,7 @@ export async function InboundAttachments({
       ) : view.record.disposition === "closed" ? (
         <p>{c.closed}</p>
       ) : pending.length ? (
-        <form
+        <NativeForm
           method="post"
           action={`${base}/attachments/submit`}
           className="grid min-w-0 gap-4"
@@ -116,12 +121,22 @@ export async function InboundAttachments({
               aria-describedby="attachment-limit"
             >
               <option value="">—</option>
-              {pending.map((a) => (
+              {pending.map((a, index) => (
                 <option key={a.id} value={a.id}>
-                  {a.filename ?? a.id} · {a.contentType}
+                  {a.filename || `${c.unnamed} ${index + 1}`}
                 </option>
               ))}
             </select>
+            <TechnicalDetails locale={locale}>
+              <ul>
+                {pending.map((a, index) => (
+                  <li key={a.id}>
+                    {a.filename || `${c.unnamed} ${index + 1}`} · <bdi>{a.id}</bdi> ·{" "}
+                    <bdi>{a.contentType}</bdi>
+                  </li>
+                ))}
+              </ul>
+            </TechnicalDetails>
           </div>
           <div className="grid min-w-0 gap-2">
             <label htmlFor="attachment-filename" className={labelClass}>
@@ -196,7 +211,7 @@ export async function InboundAttachments({
           <button type="submit" className={buttonClass("primary")}>
             {c.submit}
           </button>
-        </form>
+        </NativeForm>
       ) : null}
     </section>
   );

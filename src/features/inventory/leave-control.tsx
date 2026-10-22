@@ -9,20 +9,29 @@ export function LeaveControl({
   formId,
   className,
   children,
+  current,
 }: {
   href: string;
   formId?: string;
   className?: string;
   children: ReactNode;
+  current?: boolean;
 }) {
   const [enhanced, setEnhanced] = useState(false);
   useEffect(() => setEnhanced(true), []);
   return enhanced || !formId ? (
-    <a href={href} className={className}>
+    <a href={href} className={className} aria-current={current ? "page" : undefined}>
       {children}
     </a>
   ) : (
-    <button type="submit" form={formId} name="_leave" value={href} className={className}>
+    <button
+      type="submit"
+      form={formId}
+      name="_leave"
+      value={href}
+      className={className}
+      aria-current={current ? "page" : undefined}
+    >
       {children}
     </button>
   );

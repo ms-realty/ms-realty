@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { test } from "node:test";
-import { observeRuntimeRollout } from "./staging-rollout-proof.mjs";
+import { observeRuntimeRollout, prepareRuntimeRollout } from "./staging-rollout-proof.mjs";
 
 // Injected provider responses are contract fixtures, never live launch evidence.
 function fixture() {
@@ -97,6 +97,76 @@ function fixture() {
   return { input, runtime, documents, calls, transport, apps, base, bindings, ephemeral };
 }
 const observe = (f) => observeRuntimeRollout(f.input, f.runtime, f.ephemeral, f.transport);
+
+test("prepares identities again when a provider rollout stops the prepared actors", async () => {
+  const f = fixture();
+  let preparations = 0,
+    at = 0;
+  f.runtime.roles.web.state = "prepared";
+  const stopped = f.documents.get(`${f.base}/app-web/instances-v2`).result[0];
+  const { runtime, observation } = await prepareRuntimeRollout(
+    f.input,
+    async () => {
+      preparations++;
+      stopped.status.state = "running";
+      return structuredClone(f.runtime);
+    },
+    f.ephemeral,
+    {
+      allowPreparedWeb: true,
+      transport: async (url, options) => {
+        // The deployment can stop a prepared actor after its identity endpoint returns.
+        if (preparations === 1) stopped.status.state = "inactive";
+        return f.transport(url, options);
+      },
+      retry: {
+        ms: 10_000,
+        every: 5_000,
+        now: () => at,
+        wait: async (ms) => {
+          at += ms;
+        },
+        log: () => {},
+      },
+    },
+  );
+  assert.equal(preparations, 2);
+  assert.equal(at, 5_000);
+  assert.deepEqual(runtime, f.runtime);
+  assert.equal(observation.status, "observed");
+  assert.equal(observation.roles[0].actorId, stopped.id);
+});
+
+test("preparation never substitutes for provider proof of a running actor", async () => {
+  const f = fixture();
+  let preparations = 0,
+    at = 0;
+  f.documents.get(`${f.base}/app-web/instances-v2`).result[0].status.state = "inactive";
+  await assert.rejects(
+    prepareRuntimeRollout(
+      f.input,
+      async () => {
+        preparations++;
+        return f.runtime;
+      },
+      f.ephemeral,
+      {
+        transport: f.transport,
+        retry: {
+          ms: 10_000,
+          every: 5_000,
+          now: () => at,
+          wait: async (ms) => {
+            at += ms;
+          },
+          log: () => {},
+        },
+      },
+    ),
+    /web running exact actor digest coverage/,
+  );
+  assert.equal(preparations, 3);
+});
 
 test("returns provider observation only after all three actors and completed rollouts match", async () => {
   const f = fixture(),

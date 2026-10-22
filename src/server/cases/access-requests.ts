@@ -89,7 +89,7 @@ export async function requestCaseAccess(
           caseId: row.id,
           ownerId: row.ownerId,
           type: "general",
-          title: "Review requested Case access",
+          title: "Review requested access to the deal",
           purpose: "Client access request",
           dueAt: new Date(Date.now() + 86400000),
           dueTimezone: "Europe/Sofia",

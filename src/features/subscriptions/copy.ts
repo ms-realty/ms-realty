@@ -3,30 +3,30 @@ const en = {
   lead: "Review the fixed service template, subscriber schedule and link destinations before approving this rule. Separate verified search-alert consent is required for every recipient.",
   active: "Human approval is current",
   inactive: "No current human approval",
-  gateOn: "Runtime delivery is enabled; all per-message checks still apply.",
-  gateOff: "Runtime delivery is disabled. Recording approval does not enable it.",
+  gateOn: "Live sending is enabled; all per-message checks still apply.",
+  gateOff: "Live sending is disabled. Recording approval does not enable it.",
   schedule:
-    "Daily by default; weekly when selected. At most one digest per subscriber-local calendar day or Monday-starting week. No fixed delivery hour is promised.",
+    "Daily by default; weekly when selected. At most one summary email per subscriber-local calendar day or Monday-starting week. No fixed delivery hour is promised.",
   content:
-    "A digest contains up to 20 currently approved listing titles, references and links. Criteria needing confirmation are labelled. Empty periods produce no email. No marketing, AI copy, media or tracking is included.",
+    "A summary email contains up to 20 currently approved listing titles, references and links. Criteria needing confirmation are labelled. Empty periods produce no email. No marketing, AI copy, media or tracking is included.",
   fences:
-    "Pause, edits, withdrawal, changed terms, revoked permissions and changed publications stop queued work. Provider acceptance is not delivery; unknown outcomes are never automatically resent.",
+    "Pause, edits, withdrawal, changed terms, revoked permissions and changed publications stop work that is waiting to be sent. Provider acceptance is not delivery; unknown outcomes are never automatically resent.",
   destinations: "Link destinations",
   template: "Exact fixed text by language",
   entry: "Each listing entry",
   placeholder: "[approved listing reference] — [approved title]\n[current canonical listing URL]",
   review: "I reviewed this exact template, schedule and destinations.",
   note: "Review note",
-  expiry: "Approval expires at (UTC)",
+  expiry: "Approval expires at",
   approve: "Approve fixed rule",
-  disable: "Disable rule and cancel queued digests",
+  disable: "Disable rule and cancel pending summary emails",
   receipt: "Decision recorded",
   error:
     "This submission did not return a confirmed result. Review the current state and retained inputs before submitting again.",
   conflict: "The rule or approval changed. Review the current state before making a new decision.",
   reauth: "Verify your identity again before deciding.",
   openReauth: "Verify identity",
-  back: "Queue and delivery status",
+  back: "Background tasks and delivery",
   expires: "Expires",
   hint: "The note records your review; it does not change the message text.",
   disabledBoundary:
@@ -38,8 +38,8 @@ const bg: typeof en = {
   active: "Има валидно човешко одобрение",
   inactive: "Няма валидно човешко одобрение",
   gateOn:
-    "Изпращането е разрешено в средата; всички проверки за всяко съобщение остават задължителни.",
-  gateOff: "Изпращането е изключено в средата. Записването на одобрение не го включва.",
+    "Изпращането на живо е включено; всички проверки за всяко съобщение остават задължителни.",
+  gateOff: "Изпращането на живо е изключено. Записването на одобрение не го включва.",
   schedule:
     "Ежедневно по подразбиране; седмично при избор. Най-много едно обобщение за календарен ден или седмица от понеделник в часовата зона на абоната. Не се обещава точен час на доставка.",
   content:
@@ -52,7 +52,7 @@ const bg: typeof en = {
   placeholder: "[одобрена референция] — [одобрено заглавие]\n[актуален каноничен адрес на обявата]",
   review: "Прегледах този точен шаблон, график и адреси.",
   note: "Бележка от прегледа",
-  expiry: "Одобрението изтича на (UTC)",
+  expiry: "Одобрението изтича на",
   approve: "Одобри фиксираното правило",
   disable: "Изключи правилото и отмени чакащите обобщения",
   receipt: "Решението е записано",
@@ -62,7 +62,7 @@ const bg: typeof en = {
     "Правилото или одобрението е променено. Прегледайте текущото състояние преди ново решение.",
   reauth: "Потвърдете отново самоличността си преди решение.",
   openReauth: "Потвърди самоличност",
-  back: "Състояние на опашката и доставките",
+  back: "Фонови задачи и доставки",
   expires: "Изтича",
   hint: "Бележката записва прегледа ви; тя не променя текста на съобщението.",
   disabledBoundary:
@@ -73,14 +73,15 @@ const ru: typeof en = {
   lead: "Перед одобрением проверьте точный служебный шаблон, расписание и адреса ссылок. Для каждого получателя требуется отдельное подтверждённое согласие на уведомления поиска.",
   active: "Одобрение человека действует",
   inactive: "Нет действующего одобрения человека",
-  gateOn: "Отправка включена в среде; все проверки каждого сообщения остаются обязательными.",
-  gateOff: "Отправка отключена в среде. Запись одобрения её не включает.",
+  gateOn:
+    "Отправка в рабочем режиме включена; все проверки каждого сообщения остаются обязательными.",
+  gateOff: "Отправка в рабочем режиме отключена. Запись одобрения её не включает.",
   schedule:
     "Ежедневно по умолчанию; еженедельно по выбору. Не более одной сводки за календарный день или неделю с понедельника в часовом поясе подписчика. Точный час доставки не обещается.",
   content:
     "Сводка содержит до 20 актуально одобренных заголовков, референций и ссылок. Критерии для подтверждения отмечены. При отсутствии совпадений письма нет. Без маркетинга, AI текста, медиа и отслеживания.",
   fences:
-    "Пауза, изменения, отказ, смена условий, отзыв прав и изменения публикаций останавливают очередь. Принятие провайдером не означает доставку; неизвестный результат не повторяется автоматически.",
+    "Пауза, изменения, отказ, смена условий, отзыв прав и изменения публикаций останавливают ожидающие отправки. Принятие провайдером не означает доставку; неизвестный результат не повторяется автоматически.",
   destinations: "Адреса ссылок",
   template: "Точный фиксированный текст по языкам",
   entry: "Каждая запись объявления",
@@ -88,7 +89,7 @@ const ru: typeof en = {
     "[одобренная референция] — [одобренный заголовок]\n[текущий канонический адрес объявления]",
   review: "Я проверил этот точный шаблон, расписание и адреса.",
   note: "Примечание к проверке",
-  expiry: "Одобрение истекает (UTC)",
+  expiry: "Одобрение истекает",
   approve: "Одобрить фиксированное правило",
   disable: "Отключить правило и отменить ожидающие сводки",
   receipt: "Решение записано",
@@ -97,7 +98,7 @@ const ru: typeof en = {
   conflict: "Правило или одобрение изменилось. Проверьте текущее состояние перед новым решением.",
   reauth: "Повторно подтвердите личность перед решением.",
   openReauth: "Подтвердить личность",
-  back: "Состояние очереди и доставки",
+  back: "Фоновые задачи и доставка",
   expires: "Истекает",
   hint: "Примечание фиксирует проверку и не меняет текст сообщения.",
   disabledBoundary:

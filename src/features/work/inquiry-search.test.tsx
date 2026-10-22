@@ -12,6 +12,7 @@ const term = "Synthetic Ni";
 const found: InquiryRowView = {
   id: "two",
   name: "Synthetic Nikol",
+  purpose: null,
   reference: "RQ-TEST-two",
   context: null,
   state: "Assigned",
@@ -63,7 +64,7 @@ it("posts the term, replaces the queue with results and keeps the term out of ev
   expect(screen.queryByText("Nothing is listed in this scope")).toBeNull();
   const results = screen.getByRole("list", { name: "Search results" });
   expect(within(results).getByRole("link")).toHaveAttribute("href", "/en/inquiries/two?view=mine");
-  expect(within(results).getByRole("link")).toHaveTextContent("Synthetic Nikol · RQ-TEST-two");
+  expect(within(results).getByRole("link")).toHaveTextContent("Synthetic Nikol RQ-TEST-two");
   for (const link of screen.getAllByRole("link"))
     expect(link.getAttribute("href")).not.toMatch(/Synthetic|Ni\b/);
   expect(screen.getByRole("link", { name: "Back to the queue" })).toHaveAttribute(

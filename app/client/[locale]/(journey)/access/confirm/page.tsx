@@ -6,6 +6,7 @@ import { isRoutableLocale } from "@/i18n/config";
 import { inspectEmailLink } from "@/server/auth/email-link";
 import { requireAuthHost } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 export const metadata = {
   robots: { index: false, follow: false },
@@ -32,13 +33,13 @@ export default async function ConfirmPage({
   return (
     <AccessFrame title={c.confirmTitle} lead={c.confirmLead}>
       {state === "valid" ? (
-        <form method="post" action={`/${locale}/access/confirm/submit`}>
+        <NativeForm method="post" action={`/${locale}/access/confirm/submit`}>
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="token" value={token} />
           <button className={buttonClass()} type="submit">
             {c.confirmButton}
           </button>
-        </form>
+        </NativeForm>
       ) : (
         <Notice tone="warning">{error ?? messages[state]}</Notice>
       )}

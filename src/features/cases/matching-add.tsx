@@ -1,4 +1,5 @@
 "use client";
+
 // O07 single-property check and add (design/contracts/o07.md §3–4). The server renders the check
 // frames from its current reads; this component owns only what the add command answered:
 // ADDSEND, ADDED (readback only), ADDCONFLICT, ADDOFFLINE, ADDUNKNOWN and the safe refusals.
@@ -16,6 +17,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { buttonClass } from "@/ui/button-class";
 import { ErrorSummary } from "@/ui/error-summary";
 import { type FormAction, type FormState, type FormValues, formFields } from "@/ui/form/contract";
@@ -277,7 +280,8 @@ function AddSession({
   if (kind === "added" && state.outcome.kind === "confirmed") {
     // ADDED: only the command's readback; the recorder comes from the saved row's own event.
     const at = state.outcome.receipt.recordedAt.dateTime;
-    const zoned = `${new Intl.DateTimeFormat(props.localeTag, { dateStyle: "long", timeZone: "Europe/Sofia" }).format(new Date(at))}, ${new Intl.DateTimeFormat(props.localeTag, { timeStyle: "short", timeZone: "Europe/Sofia" }).format(new Date(at))} · Europe/Sofia`;
+    const language = props.localeTag.split("-")[0] ?? "bg";
+    const zoned = formatDateTime(isPublicLocale(language) ? language : "bg", at);
     const next = props.added.next;
     return (
       <section className="min-w-0 space-y-5">

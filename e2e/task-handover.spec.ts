@@ -5,7 +5,9 @@ import { eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { timeCopy } from "../src/i18n/time-copy";
 import { findCoverageRecord, findPaginatedRecord, moveQueuePage } from "./coverage-helpers";
+import { agencyWallTime, fillAgencyInstant } from "./time";
 
 /** 03:30 on next year's last Sunday of March: Europe/Sofia skips 03:00–04:00 that night. */
 function springGap() {
@@ -13,20 +15,6 @@ function springGap() {
   const day = new Date(Date.UTC(year, 2, 31));
   day.setUTCDate(31 - day.getUTCDay());
   return `${day.toISOString().slice(0, 10)}T03:30`;
-}
-
-/** A future review time as the native datetime-local value in the agency zone. */
-function reviewInput(at = new Date(Date.now() + 1_800_000)) {
-  return new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "Europe/Sofia",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
-    .format(at)
-    .replace(" ", "T");
 }
 
 import { hostUrl, origins } from "./hosts";
@@ -136,12 +124,12 @@ for (const javaScriptEnabled of [true, false])
         ? page.getByRole("dialog", { name: "Agency tools", exact: true })
         : page.getByRole("main");
       await expect(tools.getByRole("heading", { name: "Agency tools", exact: true })).toBeVisible();
-      await tools.getByRole("link", { name: /^Agency coverage/ }).click();
+      await tools.getByRole("link", { name: /^Work without an owner/ }).click();
       await expect(page).toHaveURL(hostUrl("staff", "/en/coverage"));
       for (const [locale, heading] of [
-        ["bg", "Дежурна опашка"],
-        ["ru", "Очередь подхвата"],
-        ["en", "Agency coverage"],
+        ["bg", "Работа без отговорник"],
+        ["ru", "Работа без ответственного"],
+        ["en", "Work without an owner"],
       ]) {
         await page.goto(hostUrl("staff", `/${locale}/coverage`));
         await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
@@ -163,7 +151,7 @@ for (const javaScriptEnabled of [true, false])
         await expect(page.locator(`a[href="${href}"]`)).toBeVisible();
       }
       await expect(
-        page.getByRole("region", { name: "Tasks needing coverage", exact: true }),
+        page.getByRole("region", { name: "Tasks without an owner", exact: true }),
       ).toContainText("Promised to a client");
       expect(await findCoverageRecord(page, `/en/cases/${f.caseId}`)).toBe(true);
       expect(await findCoverageRecord(page, `/en/operations/keys/${f.keyId}`)).toBe(true);
@@ -202,12 +190,17 @@ for (const javaScriptEnabled of [true, false])
       // A wall time inside the spring DST gap does not exist in Europe/Sofia.
       await accept.getByLabel("When will you review it again?", { exact: true }).fill(springGap());
       await accept.getByRole("button", { name: "Accept the work", exact: true }).click();
-      await expect(page.getByText(/does not exist in Europe\/Sofia/).first()).toBeVisible();
+      await expect(
+        page.getByText(timeCopy("en").nonexistent, { exact: true }).first(),
+      ).toBeVisible();
       await expect(accept.getByLabel("Your next step", { exact: true })).toHaveValue(
         "Call the client about the unchanged promise",
       );
-      const reviewAt = reviewInput();
-      await accept.getByLabel("When will you review it again?", { exact: true }).fill(reviewAt);
+      const reviewAt = new Date(Date.now() + 1_800_000);
+      await fillAgencyInstant(
+        accept.getByLabel("When will you review it again?", { exact: true }),
+        reviewAt,
+      );
       await accept.getByRole("button", { name: "Accept the work", exact: true }).click();
       await expect(
         page.getByText("This action was recorded successfully.", { exact: true }),
@@ -352,9 +345,10 @@ for (const javaScriptEnabled of [true, false])
         .getByLabel("Your next step", { exact: true })
         .fill("Confirm the promised date with the client");
       const reviewAt = new Date(Math.floor((Date.now() + 1_800_000) / 60_000) * 60_000);
-      await accept
-        .getByLabel("When will you review it again?", { exact: true })
-        .fill(reviewInput(reviewAt));
+      await fillAgencyInstant(
+        accept.getByLabel("When will you review it again?", { exact: true }),
+        reviewAt,
+      );
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         320,
       );
@@ -381,7 +375,8 @@ for (const javaScriptEnabled of [true, false])
       await page.goto(hostUrl("staff", taskHref));
       const nextReview = page.locator("dt", { hasText: "Next review" }).locator("xpath=..");
       await expect(nextReview.locator("time")).toHaveAttribute("datetime", reviewAt.toISOString());
-      await expect(nextReview).toContainText("Europe/Sofia");
+      await expect(nextReview).toContainText(agencyWallTime(reviewAt).slice(11));
+      await expect(nextReview).not.toContainText(/Europe\/|UTC|GMT/);
       await page.goto(hostUrl("staff", "/en/tasks?view=handovers"));
       expect(await findPaginatedRecord(page, taskHref, { viewportWidth: 320 })).toBe(false);
       const lastPending = pending.reduce((last, row) => (row.id > last.id ? row : last));

@@ -29,7 +29,7 @@ export function SearchMap({
   const [open, setOpen] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const container = useRef<HTMLElement>(null);
+  const container = useRef<HTMLDivElement>(null);
   const id = useId();
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt explicitly retries the renderer and its requests.
   useEffect(() => {
@@ -85,7 +85,7 @@ export function SearchMap({
   if (!release) return null;
   if (items.length === 0) return <p className="text-compact text-text-muted">{copy.empty}</p>;
   return (
-    <section className="space-y-3" aria-label={copy.title}>
+    <div className="space-y-3">
       <button
         className={buttonClass("secondary")}
         type="button"
@@ -115,14 +115,13 @@ export function SearchMap({
               {copy.retry}
             </button>
           )}
-          <section
+          <div
             ref={container}
-            aria-label={copy.title}
             aria-busy={state === "loading"}
             className="h-[min(65vh,34rem)] min-h-64 w-full overflow-hidden rounded-panel border border-border"
           />
         </div>
       )}
-    </section>
+    </div>
   );
 }

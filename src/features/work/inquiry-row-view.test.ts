@@ -28,11 +28,12 @@ function source(
 }
 
 describe("inquiryRowView", () => {
-  it("names the listing before the purpose and words the received age, language and coverage", () => {
+  it("retains the stated purpose and listing and words the received age, language and coverage", () => {
     const row = source();
     expect(inquiryRowView(row, "en", now)).toEqual({
       id: "inquiry-one",
       name: "Synthetic Alex",
+      purpose: "Viewing request",
       reference: "RQ-TEST-000001",
       context: { kind: "listing", value: "MS-00202" },
       state: null,
@@ -86,7 +87,7 @@ describe("inquiryRowView", () => {
       name: null,
       context: null,
       language: null,
-      state: "Resolved without case",
+      state: "Closed without a deal",
       owner: { name: "Former broker", needsCoverage: false },
     });
     const open = inquiryRowView(

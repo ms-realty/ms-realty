@@ -5,5 +5,9 @@
   "languageList": "Επιλέξτε γλώσσα",
   "currentLanguage": "Τρέχουσα γλώσσα: {language}",
   "closeMenu": "Κλείσιμο μενού",
-  "openMenu": "Άνοιγμα μενού"
+  "openMenu": "Άνοιγμα μενού",
+  "privateAccess": {
+    "checking": "Έλεγχος πρόσβασης…",
+    "retry": "Ελέγξτε ξανά την πρόσβαση"
+  }
 }

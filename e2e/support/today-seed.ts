@@ -129,12 +129,23 @@ async function ordinary() {
 
 async function quiet() {
   const empty = await person("Synthetic quiet broker");
+  const managerName = `Synthetic${"A".repeat(111)}`;
+  const manager = await person(managerName);
+  await db.insert(schema.grants).values({
+    principalId: manager.id,
+    capability: "access.grant",
+    reason: "Synthetic manager-name wrapping regression",
+  });
   const overloaded = await person("Synthetic covering broker");
   for (let index = 0; index < 31; index++) {
     const waiting = await inquiry({ createdAt: ago(240 - index) });
     await grant(overloaded.id, "inquiry.read", "inquiry", waiting.id);
   }
-  return { emptyToken: await token(empty.id), overloadToken: await token(overloaded.id) };
+  return {
+    emptyToken: await token(empty.id),
+    overloadToken: await token(overloaded.id),
+    managerName,
+  };
 }
 
 // Only my own inquiry, its follow-up already due: the headline must not read as a clear day.

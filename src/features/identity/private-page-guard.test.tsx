@@ -1,9 +1,12 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrivatePageGuard } from "./private-page-guard";
 
 const refresh = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
+beforeEach(() => {
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+});
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -30,6 +33,7 @@ describe("AT39 private page restoration", () => {
     );
     const { rerender } = render(page("initial"));
     const draft = screen.getByRole("textbox", { name: "Draft" });
+    draft.focus();
     fireEvent.change(draft, { target: { value: "Unsaved note" } });
     visibility.mockReturnValue("hidden");
     act(() => {
@@ -50,6 +54,8 @@ describe("AT39 private page restoration", () => {
     expect(screen.getByText("Private case")).toBeVisible();
     expect(screen.getByRole("textbox", { name: "Draft" })).toBe(draft);
     expect(draft).toHaveValue("Unsaved note");
+    expect(draft).toHaveFocus();
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
   });
   it("a back-forward cache restoration also reauthorizes before showing private content", async () => {
     let finish: () => void = () => {};
@@ -89,7 +95,9 @@ describe("AT39 private page restoration", () => {
     );
     const { rerender } = render(page("initial"));
     await act(async () => {
-      document.dispatchEvent(new Event("visibilitychange"));
+      const restored = new Event("pageshow");
+      Object.defineProperty(restored, "persisted", { value: true });
+      window.dispatchEvent(restored);
     });
     expect(screen.getByText("Protected work")).not.toBeVisible();
     expect(screen.getByRole("button", { name: "Check access again" })).toBeVisible();
@@ -101,4 +109,18 @@ describe("AT39 private page restoration", () => {
     rerender(page("authorized-response"));
     expect(screen.getByText("Protected work")).toBeVisible();
   });
+});
+
+it("ignores duplicate visible notifications that did not follow a hidden page", () => {
+  vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+  render(
+    <PrivatePageGuard locale="en" verification="initial">
+      <p>Private content</p>
+    </PrivatePageGuard>,
+  );
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  expect(refresh).not.toHaveBeenCalled();
+  expect(screen.getByText("Private content")).toBeVisible();
 });

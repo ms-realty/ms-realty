@@ -106,6 +106,34 @@ test.describe("public locales (AT03)", () => {
     });
   }
 
+  test("footer links remain readable at tablet widths in every public locale", async ({ page }) => {
+    const variants = [
+      ...publicLocales.map(({ locale }) => ({ locale, width: 768 })),
+      { locale: "ru", width: 640 },
+      { locale: "ru", width: 1024 },
+    ];
+    for (const { locale, width } of variants) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${locale}`);
+      await page.evaluate(() => document.fonts.ready);
+      const links = await page
+        .getByRole("contentinfo")
+        .getByRole("link")
+        .evaluateAll((items) =>
+          items.map((item) => {
+            const bounds = item.getBoundingClientRect();
+            return { text: item.textContent?.trim(), left: bounds.left, right: bounds.right };
+          }),
+        );
+      expect(links.length).toBeGreaterThan(1);
+      for (const link of links) {
+        expect(link.left, `${locale}/${width}: ${link.text}`).toBeGreaterThanOrEqual(0);
+        expect(link.right, `${locale}/${width}: ${link.text}`).toBeLessThanOrEqual(width);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    }
+  });
+
   test("he sets Hebrew in Noto Sans Hebrew, not the Latin fallback face", async ({ page }) => {
     await page.goto("/he");
     const family = await page

@@ -1,12 +1,17 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "@/db/client";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
+import { ListingNavigation } from "@/features/inventory/workspace";
+import { privateRead } from "@/features/work/screens";
+import { isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { inventoryDetail, inventoryEvidence } from "@/server/inventory/commands";
 import { listContacts } from "@/server/work/queries";
 import { buttonClass } from "@/ui/button-class";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { inventoryDecision } from "../../actions";
 
 export default async function SellerEvidencePage({
@@ -18,8 +23,8 @@ export default async function SellerEvidencePage({
   const session = await requireStaffPage(locale),
     db = getDb(),
     copy = evidenceCopy(locale);
-  const detail = await inventoryDetail(db, session.actor, reference);
-  const evidence = await inventoryEvidence(db, session.actor, reference);
+  const detail = await privateRead(() => inventoryDetail(db, session.actor, reference));
+  const evidence = await privateRead(() => inventoryEvidence(db, session.actor, reference));
   const contactPage = await listContacts(db, session).catch(() => ({ rows: [] }));
   const resource = { type: "listing", id: detail.listing.id, propertyId: detail.property.id };
   const edit = await can(db, session.actor, "listing.edit", resource);
@@ -43,7 +48,7 @@ export default async function SellerEvidencePage({
         <option value="">{copy.choose}</option>
         {items.map((d) => (
           <option key={d.versionId} value={d.versionId}>
-            {d.reference} · {d.fileName} · v{d.version}
+            {d.reference} · {d.fileName}
           </option>
         ))}
       </>
@@ -58,7 +63,7 @@ export default async function SellerEvidencePage({
     );
   }
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-8">
+    <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-8">
       <a href={`/${locale}/inventory/${reference}`} className="text-action underline">
         {copy.back}
       </a>
@@ -68,6 +73,7 @@ export default async function SellerEvidencePage({
           <bdi>{reference}</bdi>
         </p>
       </header>
+      <ListingNavigation locale={locale} reference={reference} current="evidence" />
       <p>{copy.missing}</p>
       <a href={`/${locale}/inventory/${reference}/documents`} className="text-action underline">
         {locale === "bg"
@@ -121,13 +127,13 @@ export default async function SellerEvidencePage({
             />
           </label>
           {confirm(copy.authorityConfirm)}
-          <button
+          <SubmitButton
             type="submit"
             className={buttonClass("primary")}
             disabled={!authorityDocs.length || !contactPage.rows.length}
           >
             {copy.authority}
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
       {edit ? (
@@ -144,7 +150,7 @@ export default async function SellerEvidencePage({
               <option value="">{copy.choose}</option>
               {evidence.relationships.map((p) => (
                 <option key={p.id} value={p.partyId}>
-                  {p.name} · {p.role in copy ? copy[p.role as "seller"] : p.role}
+                  {p.name} · {workflowLabel(p.role, locale)}
                 </option>
               ))}
             </select>
@@ -169,14 +175,19 @@ export default async function SellerEvidencePage({
             <span className={labelClass}>{copy.commission}</span>
             <textarea name="commissionTerms" required maxLength={4000} className={textareaClass} />
           </label>
-          <label className="grid gap-2">
-            <span className={labelClass}>{copy.agreedAt}</span>
-            <input name="agreedAt" type="datetime-local" required className={controlClass} />
-          </label>
-          <label className="grid gap-2">
-            <span className={labelClass}>{copy.expiresAt}</span>
-            <input name="expiresAt" type="datetime-local" className={controlClass} />
-          </label>
+          <DateTimeField
+            id="instruction-agreedAt"
+            name="agreedAt"
+            label={copy.agreedAt}
+            locale={isPublicLocale(locale) ? locale : "bg"}
+            required
+          />
+          <DateTimeField
+            id="instruction-expiresAt"
+            name="expiresAt"
+            label={copy.expiresAt}
+            locale={isPublicLocale(locale) ? locale : "bg"}
+          />
           <label className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -191,13 +202,13 @@ export default async function SellerEvidencePage({
             {copy.rights}
           </label>
           {confirm(copy.instructionConfirm)}
-          <button
+          <SubmitButton
             type="submit"
             className={buttonClass("primary")}
             disabled={!agreementDocs.length || !evidence.relationships.length || !detail.revision}
           >
             {copy.instruction}
-          </button>
+          </SubmitButton>
         </form>
       ) : null}
       <section>
@@ -213,3 +224,5 @@ export default async function SellerEvidencePage({
     </div>
   );
 }
+
+import { workflowLabel } from "@/i18n/workflow-labels";

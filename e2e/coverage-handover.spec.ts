@@ -7,6 +7,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { findCoverageRecord, findCoverageRecords } from "./coverage-helpers";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
 if (!databaseUrl || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(databaseUrl).pathname))
@@ -131,14 +132,14 @@ for (const javaScriptEnabled of [true, false])
       await context.addCookies([cookie(receiver.brokerToken)]);
       await page.goto(hostUrl("staff", `/en/cases/${f.caseId}/continuity`));
       const accept = page.locator("form").filter({
-        has: page.getByRole("button", { name: "Accept case and commitments", exact: true }),
+        has: page.getByRole("button", { name: "Accept the deal and its next steps", exact: true }),
       });
       await accept
         .getByLabel("Reason", { exact: true })
         .fill("I accept the Case and its existing promises without changing their deadlines.");
       await accept.getByRole("checkbox").check();
       await accept
-        .getByRole("button", { name: "Accept case and commitments", exact: true })
+        .getByRole("button", { name: "Accept the deal and its next steps", exact: true })
         .click();
       await expect(
         page.getByRole("heading", { name: "Change recorded", exact: true }),
@@ -169,9 +170,10 @@ for (const javaScriptEnabled of [true, false])
       await page
         .getByLabel("Next action", { exact: true })
         .fill("Contact the client about the retained request.");
-      await page
-        .getByLabel("Follow-up time (UTC)", { exact: true })
-        .fill(new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 16));
+      await fillAgencyInstant(
+        page.getByLabel("Follow-up time", { exact: true }),
+        new Date(Date.now() + 2 * 86400000),
+      );
       await page.getByRole("button", { name: "Accept and assign to me", exact: true }).click();
       await expect(
         page.getByRole("heading", { name: "Change recorded", exact: true }),
@@ -198,7 +200,7 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`retained-key-${javaScriptEnabled}-320.png`),
         fullPage: true,
       });
-      await page.getByLabel("State", { exact: true }).selectOption("stored");
+      await page.getByLabel("Where the keys are", { exact: true }).selectOption("stored");
       await page
         .getByLabel("Storage label", { exact: true })
         .fill("Synthetic checked return cabinet");

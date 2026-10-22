@@ -1,5 +1,22 @@
 # ADR 0004: Cloudflare staging and the existing PostgreSQL engine
 
+## Migration outcome recovery
+
+An unknown migration receipt holds application startup. For the same qualified candidate,
+the protected `GET /__staging/migrate?reconcile=1` reads the original migrator's completion.
+The production control equivalent is `GET /__release/migrate?reconcile=1`, under its existing
+Access and control-secret checks. Reconciliation never starts or repeats a migration.
+
+Completion requires the original operation identifier, immutable source and build nonce,
+plus a valid completion time from the live private role. The receipt retains
+`reconciledFrom: "unknown"`. Missing, restarted, different, running or failed proof keeps
+the uncertainty held. Ordinary status reads do not reconcile an unknown receipt.
+
+The staging controller reads the existing receipt before starting and only issues a start
+when no receipt exists. It can wait for the original completion through bounded status reads.
+A failed status read is not proof that an operation failed. Independent provider image
+observation and launch approvals remain separate requirements.
+
 Status: owner-directed hosting/engine decision; deployment and launch acceptance pending.
 
 The owner's 1 October 2026 launch gate supersedes DigitalOcean App Platform and earlier
@@ -33,6 +50,12 @@ are revoked; none is re-approved by this ADR. Sold listings and all legacy conte
 stay in scope. Missing content or equivalent targets must block parity, never manufacture
 a homepage redirect or a launch PASS.
 
-The inventory records the actual GitHub HTTP 403 on staging-branch push and on Environment
-creation, with no fallback identity. No staging URL or provider delivery proof exists yet.
-This ADR records the owner's implementation decisions, not R00 or any release-gate acceptance.
+The initial inventory preserves the GitHub HTTP 403 on staging-branch push and Environment
+creation. Later protected staging runs reached the three-role private TLS database and an
+explicitly completed migration; a failed queue startup still prevented runtime qualification.
+These delivery observations do not establish staging parity, R00 or production acceptance.
+
+Hosted web and worker roles set `JOB_QUEUE_SCHEMA_PRECREATED=true`. The existing `pgboss`
+schema is owned by the worker, which can install its queue tables without database `CREATE`.
+pg-boss must skip `CREATE SCHEMA`, even when the schema already exists. Local disposable
+databases retain automatic schema creation. Runtime startup does not widen database grants.

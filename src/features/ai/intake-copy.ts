@@ -14,7 +14,9 @@ const en = {
   changed:
     "The selected source changed. Open the inventory workbench before requesting a fresh proposal.",
   inspect: "Inspect saved note",
-  workflow: "intake.extract — selected broker-note candidates; PDF/document extraction unavailable",
+  checkCode: "Check code",
+  workflow:
+    "Fact proposals from a selected broker note; PDF and document extraction is unavailable",
 };
 type Copy = Record<keyof typeof en, string>;
 const bg: Copy = {
@@ -32,7 +34,8 @@ const bg: Copy = {
   provenance: "Вид източник: брокерска бележка",
   changed: "Избраният източник е променен. Отворете редактора преди нова заявка.",
   inspect: "Преглед на запазената бележка",
-  workflow: "intake.extract — стойности от избрана брокерска бележка; PDF/документи недостъпни",
+  checkCode: "Контролен код",
+  workflow: "Стойности от избрана брокерска бележка; PDF и документи не се обработват",
 };
 const ru: Copy = {
   title: "Предложение извлечения из заметки",
@@ -49,7 +52,8 @@ const ru: Copy = {
   provenance: "Класс источника: заметка брокера",
   changed: "Выбранный источник изменился. Откройте редактор перед новым запросом.",
   inspect: "Проверить сохранённую заметку",
-  workflow: "intake.extract — значения из выбранной заметки брокера; PDF/документы недоступны",
+  checkCode: "Контрольный код",
+  workflow: "Значения из выбранной заметки брокера; PDF и документы не обрабатываются",
 };
 export const intakeAiCopy = (locale: string): Copy =>
   locale === "bg" ? bg : locale === "ru" ? ru : en;

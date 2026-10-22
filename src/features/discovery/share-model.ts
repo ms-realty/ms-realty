@@ -17,8 +17,9 @@ export type RecipientItem = RecipientReady["items"][number];
 /** An instant already worded for its reader, so client components never format dates. */
 export type Moment = { dateTime: string; label: string };
 
-export function moment(locale: PublicLocale, instant: string): Moment {
-  return { dateTime: instant, label: formatDateTime(locale, instant) };
+/** A deadline names the agency's zone in words; a past event reads without it. */
+export function moment(locale: PublicLocale, instant: string, deadline = false): Moment {
+  return { dateTime: instant, label: formatDateTime(locale, instant, { zoneLabel: deadline }) };
 }
 
 export type SharedLinkState = "active" | "expiring" | "expired" | "revoked";
@@ -69,7 +70,7 @@ export function sharedLinkView(
     references: share.references,
     state: sharedLinkState(share, now),
     created: moment(locale, share.createdAt),
-    expires: share.expiresAt ? moment(locale, share.expiresAt) : null,
+    expires: share.expiresAt ? moment(locale, share.expiresAt, true) : null,
     revoked: share.revokedAt ? moment(locale, share.revokedAt) : null,
     revokeKey,
   };

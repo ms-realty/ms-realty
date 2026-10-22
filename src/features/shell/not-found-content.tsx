@@ -1,27 +1,29 @@
-import { getTranslations } from "next-intl/server";
-import type { PublicLocale } from "@/i18n/config";
+import { headers } from "next/headers";
+import { type PublicLocale, requestPathHeader } from "@/i18n/config";
+import type { HostContext } from "@/server/config/hosts";
+import { recoveryLinks } from "./recovery";
+import { recoveryCopy } from "./recovery-copy";
+import { RecoveryNavigation } from "./recovery-navigation";
 
-/** 404 body in the visitor's language, with a way back home. */
+/** A private 404 never confirms existence; its safe parent rechecks access on arrival. */
 export async function NotFoundContent({
   locale,
-  homeHref,
+  surface,
 }: {
   locale: PublicLocale;
-  homeHref: string;
+  surface: HostContext;
 }) {
-  const t = await getTranslations({ locale, namespace: "errors.notFound" });
+  const copy = recoveryCopy(locale);
+  const requested = (await headers()).get(requestPathHeader);
+  // Named by the URL alone (a deal, a listing…), the same whether it is missing or hidden.
+  const { item } = recoveryLinks(surface, locale, requested);
   return (
-    <div className="mx-auto flex max-w-prose flex-col gap-4 px-gutter py-16">
-      <h1 className="text-title font-semibold">{t("title")}</h1>
-      <p className="text-body text-text-muted">{t("body")}</p>
-      <p>
-        <a
-          href={homeHref}
-          className="inline-flex min-h-control items-center rounded-control font-semibold text-link underline"
-        >
-          {t("home")}
-        </a>
+    <div className="flex flex-col items-start gap-5 px-gutter py-8 sm:px-gutter-wide">
+      <h1 className="text-heading font-semibold sm:text-title">{copy.notFound.title}</h1>
+      <p className="max-w-prose text-body text-text-muted">
+        {item ? copy.notFound.items[item] : copy.notFound.body}
       </p>
+      <RecoveryNavigation locale={locale} surface={surface} requested={requested} primary />
     </div>
   );
 }

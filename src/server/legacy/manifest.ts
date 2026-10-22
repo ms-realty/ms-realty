@@ -6,6 +6,8 @@ export const primaryScopes = [
   "class:post_content_default",
   "column:archive_main",
   "column:articles_main",
+  "column:tag_articles",
+  "column:empty_archive",
   "column:sitemap_main",
 ] as const;
 export const sha256 = (value: string | Uint8Array) =>
@@ -37,6 +39,23 @@ export interface Capture {
   provenance?: "live" | "archived";
   response_artifact?: string;
   h1?: string | null;
+  content_state?: "text" | "verified_empty_archive";
+  transport?: string;
+  publicDnsPathObserved?: boolean;
+  originObservation?: {
+    originIp: string;
+    hostAndSniPreserved: true;
+    publicDnsPathObserved: false;
+    requestMethod: "GET";
+    hops: {
+      url: string;
+      status: number;
+      responseSha256: string;
+      remoteIp: string;
+      sslVerifyResult: number;
+      observedAtUnix: number;
+    }[];
+  };
 }
 
 /** Percent-case and the bare-host slash vary spelling, not source identity. Queries stay exact. */
@@ -71,14 +90,52 @@ export function sourceLocale(raw: string, recorded?: string): string | null {
       : "bg";
 }
 
-export function verifiedPrimaryCapture(capture: Capture | undefined): capture is Capture {
+/** Only these measured RU taxonomy routes have a source with a deliberately empty results column. */
+export function measuredEmptyArchiveUrl(raw: string): boolean {
+  try {
+    const source = sourceIdentity(raw);
+    return (
+      source.host === "makler-realty.ru" &&
+      source.query === "" &&
+      /^\/(?:category-type|location|resort)\/[^/]+\/$/u.test(source.path)
+    );
+  } catch {
+    return false;
+  }
+}
+
+type SourceBodyEvidence = Pick<
+  Capture,
+  | "url"
+  | "content_scope"
+  | "extracted_body_text"
+  | "text_sha256"
+  | "response_sha256"
+  | "response_artifact"
+  | "provenance"
+  | "content_state"
+>;
+
+export function verifiedSourceBody(capture: SourceBodyEvidence): boolean {
+  if (
+    !primaryScopes.includes(capture.content_scope as (typeof primaryScopes)[number]) ||
+    sha256(capture.extracted_body_text) !== capture.text_sha256
+  )
+    return false;
+  if (capture.content_scope !== "column:empty_archive") return !!capture.extracted_body_text.trim();
   return (
-    !!capture &&
-    capture.status === 200 &&
-    primaryScopes.includes(capture.content_scope as (typeof primaryScopes)[number]) &&
-    !!capture.extracted_body_text.trim() &&
-    sha256(capture.extracted_body_text) === capture.text_sha256
+    capture.extracted_body_text === "" &&
+    capture.content_state === "verified_empty_archive" &&
+    capture.provenance === "live" &&
+    measuredEmptyArchiveUrl(capture.url) &&
+    /^[a-f0-9]{64}$/u.test(capture.response_sha256) &&
+    capture.response_artifact ===
+      `data/legacy/migration/live-source-html/${capture.response_sha256}.html.gz`
   );
+}
+
+export function verifiedPrimaryCapture(capture: Capture | undefined): capture is Capture {
+  return !!capture && capture.status === 200 && verifiedSourceBody(capture);
 }
 
 export function buildLegacyManifest(
@@ -139,6 +196,9 @@ export function buildLegacyManifest(
               responseHash: capture.response_sha256,
               bodyVerified,
               provenance: capture.provenance ?? "archived",
+              contentState: capture.content_state ?? "text",
+              transport: capture.transport ?? null,
+              publicDnsPathObserved: capture.publicDnsPathObserved ?? null,
             }
           : null,
         latestLiveObservation: available.find((capture) => capture.provenance === "live")
@@ -147,6 +207,11 @@ export function buildLegacyManifest(
               error: available.find((capture) => capture.provenance === "live")?.error ?? null,
               capturedAt: available.find((capture) => capture.provenance === "live")
                 ?.captured_at_utc,
+              transport:
+                available.find((capture) => capture.provenance === "live")?.transport ?? null,
+              publicDnsPathObserved:
+                available.find((capture) => capture.provenance === "live")?.publicDnsPathObserved ??
+                null,
             }
           : null,
         candidate:

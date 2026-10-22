@@ -1,7 +1,9 @@
+import { TechnicalDetails } from "@/ui/technical-details";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { getDb } from "@/db/client";
+import { workflowLabel } from "@/i18n/workflow-labels";
 import { isFresh } from "@/server/auth/sessions";
 import { caseAccessWorkbench } from "@/server/cases/access-requests";
 import { findOperation } from "@/server/operations";
@@ -96,7 +98,7 @@ export async function CaseAccessScreen(
       ? await findOperation(db, session.actor, accessOperationType(command), key)
       : null;
   const base = { caseId: id, host } as const;
-  const roleLabel = (role: string) => c.roles[role as keyof typeof c.roles] ?? role;
+  const roleLabel = (role: string) => workflowLabel(role, locale);
   return (
     <WorkflowPage {...props} title={`${c.title} · ${view.case.reference}`}>
       <p>{staff ? c.staffLead : c.lead}</p>
@@ -109,7 +111,11 @@ export async function CaseAccessScreen(
                 ? cc.conflict
                 : cc.statusUnknown}
           </h2>
-          {receipt ? <p>{receipt.operationId}</p> : null}
+          {receipt ? (
+            <TechnicalDetails locale={props.locale}>
+              <bdi>{receipt.operationId}</bdi>
+            </TechnicalDetails>
+          ) : null}
         </section>
       ) : null}
       <div className="flex flex-wrap gap-5">

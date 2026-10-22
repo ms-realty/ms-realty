@@ -58,3 +58,124 @@ export function resolveLocalTime(
   if (choose) return { outcome: "resolved", instant: choose === "earlier" ? earlier : later };
   return { outcome: "ambiguous", candidates: [earlier, later] };
 }
+
+const localInputPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/;
+
+/** An instant on the zone's wall clock; minute controls retain their existing precision. */
+export function localInputValue(
+  instant: Date | string | null | undefined,
+  timeZone: string,
+  precision: "minute" | "second" = "minute",
+): string {
+  if (instant === null || instant === undefined || instant === "") return "";
+  const ms = instant instanceof Date ? instant.getTime() : Date.parse(instant);
+  if (!Number.isFinite(ms)) return "";
+  return new Date(wallClockAsUtc(ms, timeZone))
+    .toISOString()
+    .slice(0, precision === "second" ? 19 : 16);
+}
+
+export type LocalInputReason =
+  | "invalid_local_time"
+  | "nonexistent_local_time"
+  | "ambiguous_local_time";
+
+export type LocalInput =
+  | {
+      readonly ok: true;
+      /** The UTC instant to store. */
+      readonly instant: string;
+      /** The zone's offset at that instant, such as "+03:00". */
+      readonly offset: string;
+      /** The wall time occurs twice and an occurrence was selected. */
+      readonly repeated: boolean;
+    }
+  | { readonly ok: false; readonly reason: LocalInputReason };
+
+/**
+ * Reads a `datetime-local` value (YYYY-MM-DDTHH:mm[:ss]) as a wall time in `timeZone`. A time in
+ * the spring-forward gap is rejected. A repeated autumn time is rejected where one exact
+ * instant is committed (`"reject"`); a visitor's viewing preference takes its first
+ * occurrence (`"first"`) and says so, instead of asking the visitor to choose.
+ */
+export function readLocalInput(
+  value: string,
+  timeZone: string,
+  repeated: "reject" | "first" | "earlier" | "later" = "reject",
+): LocalInput {
+  const wall = Date.parse(`${value}${value.length === 16 ? ":00" : ""}Z`);
+  if (
+    !localInputPattern.test(value) ||
+    !Number.isFinite(wall) ||
+    new Date(wall).toISOString().slice(0, value.length) !== value
+  )
+    return { ok: false, reason: "invalid_local_time" };
+  const resolved = resolveLocalTime(value, timeZone);
+  if (resolved.outcome === "nonexistent") return { ok: false, reason: "nonexistent_local_time" };
+  if (resolved.outcome === "ambiguous" && repeated === "reject")
+    return { ok: false, reason: "ambiguous_local_time" };
+  const instant =
+    resolved.outcome === "resolved"
+      ? resolved.instant
+      : resolved.candidates[repeated === "later" ? 1 : 0];
+  const minutes = Math.abs(wall - Date.parse(instant)) / 60_000;
+  const offset = `${wall < Date.parse(instant) ? "-" : "+"}${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  return { ok: true, instant, offset, repeated: resolved.outcome === "ambiguous" };
+}
+
+const explicitInstant =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/;
+
+/** A recorded instant can prefill a wall-time control without losing seconds or its fold. */
+export function isInstantInput(value: string): boolean {
+  if (!explicitInstant.test(value) || !Number.isFinite(Date.parse(value))) return false;
+  const wall = value.replace(/(?:Z|[+-]\d{2}:\d{2})$/, "");
+  const utcWall = Date.parse(`${wall}Z`);
+  const canonical = `${wall.length === 16 ? `${wall}:00` : wall.split(".")[0]}.${(wall.split(".")[1] ?? "").padEnd(3, "0")}Z`;
+  return Number.isFinite(utcWall) && new Date(utcWall).toISOString() === canonical;
+}
+
+/** Reads the native wall time and its explicit autumn choice. Never guesses an occurrence. */
+export function readDateTimeEntry(
+  value: string,
+  timeZone: string,
+  occurrence = "",
+  original = "",
+): LocalInput {
+  if (isInstantInput(value)) {
+    const local = localInputValue(value, timeZone, "second");
+    const first = readLocalInput(local, timeZone, "earlier");
+    if (!first.ok) return first;
+    const later = readLocalInput(local, timeZone, "later");
+    const originalSecond = Math.floor(Date.parse(value) / 1000);
+    const resolved =
+      later.ok && Math.floor(Date.parse(later.instant) / 1000) === originalSecond ? later : first;
+    return { ...resolved, instant: new Date(value).toISOString() };
+  }
+  if (occurrence && occurrence !== "earlier" && occurrence !== "later")
+    return { ok: false, reason: "invalid_local_time" };
+  const read = readLocalInput(
+    value,
+    timeZone,
+    occurrence === "earlier" || occurrence === "later" ? occurrence : "reject",
+  );
+  if (!read.ok) return read;
+  const precision = value.length === 19 ? "second" : "minute";
+  const unit = precision === "second" ? 1000 : 60_000;
+  // An unchanged prefill keeps finer precision. An edited second or occurrence never keeps it.
+  if (
+    isInstantInput(original) &&
+    localInputValue(original, timeZone, precision) === value &&
+    Math.floor(Date.parse(original) / unit) === Math.floor(Date.parse(read.instant) / unit)
+  )
+    return { ...read, instant: new Date(original).toISOString() };
+  return read;
+}
+
+/** Offset form for appointment/proposal contracts, whose zone remains Europe/Sofia. */
+export function offsetInputValue(value: string, timeZone: string): string {
+  const read = readDateTimeEntry(value, timeZone);
+  return read.ok && Date.parse(read.instant) % 60_000 === 0
+    ? `${localInputValue(read.instant, timeZone)}${read.offset}`
+    : "";
+}

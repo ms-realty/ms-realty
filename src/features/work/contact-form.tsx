@@ -1,11 +1,16 @@
 "use client";
 
+import { contactMethodKinds } from "@/domain/parties";
+import { isInstantInput } from "@/domain/time";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { ContactState, ContactValues } from "./actions";
-import { contactCopy } from "./contact-copy";
+import { contactCopy, contactMethodLabel } from "./contact-copy";
 import { workCopy } from "./copy";
 import { InquiryDraftForm } from "./inquiry-draft";
 import type { InquiryDraftOwner } from "./inquiry-draft-storage";
@@ -135,15 +140,24 @@ export function ContactForm({
         reviewed: copy.confirm,
       }}
       formatValue={(name, value, state) => {
+        if (["contactedAt", "dueAt"].includes(name) && isInstantInput(value))
+          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, {
+            zoneLabel: true,
+            seconds: name === "contactedAt",
+          });
         if (name === "contactChoice") {
           const typed = state as ContactState;
           const method = [typed.previousContact, typed.currentContact, contact].find(
             (item) => item && value === `${item.id}:${item.version}`,
           );
           return method
-            ? `${method.kind} · ${method.value}`
+            ? `${contactMethodLabel(method.kind, locale)} · ${method.value}`
             : value.includes(" · ")
-              ? value
+              ? value.replace(/^[^·]+(?= · )/, (kind) =>
+                  contactMethodKinds.some((item) => item === kind)
+                    ? contactMethodLabel(kind, locale)
+                    : kind,
+                )
               : copy.chooseContact;
         }
         if (name === "result")
@@ -177,7 +191,7 @@ export function ContactForm({
                   ? [
                       {
                         value: `${current.id}:${current.version}`,
-                        label: `${current.kind} · ${current.value}`,
+                        label: `${contactMethodLabel(current.kind, locale)} · ${current.value}`,
                       },
                     ]
                   : []),
@@ -192,12 +206,13 @@ export function ContactForm({
                 { value: "useful_response", label: copy.useful_response },
               ]}
             />
-            <FormField
+            <DateTimeField
               {...form.field("contactedAt")}
+              step={1}
               label={copy.contactedAt}
               hint={copy.timeHint}
-              type="datetime-local"
-              step={1}
+              locale={isPublicLocale(locale) ? locale : "bg"}
+              onValueChange={(value) => form.setValue("contactedAt", value)}
               required
             />
             <FormField
@@ -215,11 +230,12 @@ export function ContactForm({
               maxLength={500}
               required
             />
-            <FormField
+            <DateTimeField
               {...form.field("dueAt")}
               label={copy.dueAt}
               hint={work.utcHint}
-              type="datetime-local"
+              locale={isPublicLocale(locale) ? locale : "bg"}
+              onValueChange={(value) => form.setValue("dueAt", value)}
               required
             />
             <Confirmation form={form} name="promisedToClient" label={copy.promise} />

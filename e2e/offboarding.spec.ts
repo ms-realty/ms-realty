@@ -6,6 +6,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { caseCopy } from "../src/features/cases/copy";
 import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -68,13 +69,22 @@ for (const javaScriptEnabled of [true, false])
         0,
       );
       // An unconfirmed receipt cannot become a success banner or a fresh submit opportunity.
-      await page.goto(hostUrl("staff", `${path}?receipt=unknown-synthetic-operation`));
-      await expect(
-        page.getByText(
-          "The result is not confirmed. Keep this reference and check again before retrying.",
-          { exact: true },
-        ),
-      ).toBeVisible();
+      const unknownPath = `${path}?receipt=unknown-synthetic-operation`,
+        unknownWarning =
+          "We do not yet know whether your change was saved. It may already be recorded. Do not submit it again.";
+      await page.goto(hostUrl("staff", unknownPath));
+      await expect(page.getByText(unknownWarning, { exact: true })).toBeVisible();
+      await expect(page.getByText("Access removal recorded:", { exact: false })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "End staff access", exact: true })).toHaveCount(
+        0,
+      );
+      const statusLink = page.getByRole("link", { name: caseCopy("en").status, exact: true });
+      await expect(statusLink).toHaveAttribute("href", unknownPath);
+      const statusResponse = page.waitForResponse(hostUrl("staff", unknownPath));
+      await statusLink.click();
+      expect((await statusResponse).request().method()).toBe("GET");
+      await expect(page).toHaveURL(hostUrl("staff", unknownPath));
+      await expect(page.getByText(unknownWarning, { exact: true })).toBeVisible();
       await expect(page.getByText("Access removal recorded:", { exact: false })).toHaveCount(0);
       await expect(page.getByRole("button", { name: "End staff access", exact: true })).toHaveCount(
         0,

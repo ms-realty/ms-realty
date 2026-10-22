@@ -55,3 +55,65 @@ it("submits every checked party and restores the selection after a hydrated vali
     "true",
   );
 });
+
+it("compares exact repeated-hour instants in words without exposing ISO values", () => {
+  const { container } = render(
+    <WorkflowForm
+      locale="en"
+      action={async (state) => state}
+      initialState={{
+        operationId: "time-compare",
+        expectedRevision: 1,
+        responseId: "conflict",
+        values: { dueAt: "2026-10-25T00:30:00.000Z" },
+        outcome: {
+          kind: "conflict",
+          code: "REVISION_CONFLICT",
+          message: "Review the changed time",
+          latest: { revision: 2, values: { dueAt: "2026-10-25T01:30:00.000Z" } },
+        },
+      }}
+      fields={[{ name: "dueAt", label: "Follow-up", type: "datetime-local" }]}
+      path="/en/cases/example"
+      status={{ href: "/status", label: "Status" }}
+      submit="Save"
+    />,
+  );
+  expect(container.textContent).toMatch(/First, before the clocks change/);
+  expect(container.textContent).toMatch(/Second, after the clocks change/);
+  expect(container.textContent).not.toMatch(/2026-10-25T|Europe\/|UTC|GMT/);
+});
+
+it("retains a readable exact time when the transport response is lost", async () => {
+  const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  try {
+    const { container } = render(
+      <WorkflowForm
+        locale="en"
+        action={async () => {
+          throw new Error("Synthetic lost response");
+        }}
+        initialState={{
+          operationId: "time-unknown",
+          expectedRevision: 1,
+          responseId: "initial",
+          values: { dueAt: "2026-10-25T01:30:42.125Z" },
+          outcome: { kind: "idle" },
+        }}
+        fields={[{ name: "dueAt", label: "Follow-up", type: "datetime-local" }]}
+        path="/en/cases/example"
+        status={{ href: "/status", label: "Status" }}
+        submit="Save"
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText(/Second, after the clocks change/)).toBeVisible();
+    expect(container.textContent).not.toMatch(
+      /2026-10-25T|Europe\/|UTC|GMT|Synthetic lost response/,
+    );
+    expect(screen.getByRole("link", { name: "Status" })).toHaveAttribute("href", "/status");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  } finally {
+    error.mockRestore();
+  }
+});

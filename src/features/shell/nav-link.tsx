@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { cx } from "@/ui/cx";
+import { navigationStartEvent } from "./navigation-loading-state";
 
 /** A navigation link that marks itself as the current page. */
 export function NavLink({
@@ -11,6 +12,7 @@ export function NavLink({
   children,
   className,
   exact = false,
+  prefetch,
   excludePaths = [],
 }: {
   /** Must come from the navigation registry, which checks that the route exists. */
@@ -19,6 +21,7 @@ export function NavLink({
   className?: string;
   /** Match only this path, not its descendants (for section roots). */
   exact?: boolean;
+  prefetch?: boolean;
   /** A separately navigable child section owns its own active item. */
   excludePaths?: readonly string[];
 }) {
@@ -30,6 +33,10 @@ export function NavLink({
   return (
     <Link
       href={href}
+      prefetch={prefetch}
+      onNavigate={() =>
+        window.dispatchEvent(new CustomEvent(navigationStartEvent, { detail: { href } }))
+      }
       aria-current={current ? "page" : undefined}
       className={cx("group", className)}
       data-current={current || undefined}

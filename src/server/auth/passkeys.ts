@@ -351,7 +351,12 @@ export async function finishPasskeyAuthentication(
       recordType: "principal",
       recordId: principalId,
       ...(options.correlationId ? { correlationId: options.correlationId } : {}),
-      payload: { method: "passkey", passkeyId: passkey.id, sessionId: issued.session.id },
+      payload: {
+        method: "passkey",
+        passkeyId: passkey.id,
+        sessionId: issued.session.id,
+        ...(options.reauthenticate ? { previousSessionId: options.reauthenticate.id } : {}),
+      },
       at: now,
     });
     return issued;

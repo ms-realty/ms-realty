@@ -1,9 +1,10 @@
 // O32 / AT51–AT54: source-bound draft evidence. No application, sending or publication effect.
 import "server-only";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { assistanceRuns, inquiries } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
+import type { InferenceOutcome } from "@/domain/generative";
 import type { PublicLocale } from "@/domain/ids";
 import { recordAudit } from "../audit";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
@@ -16,6 +17,9 @@ import type { JobQueue } from "../jobs/queue";
 import { findOperation, runOperation } from "../operations";
 import { assertRecoveryOpen } from "../recovery/quarantine";
 import { commandEnvelope, inquiryResource, liveStaff, parseInput, version } from "../work/shared";
+import { billingMode, generationCost, reserveGenerationCost } from "./billing";
+import { reserveAiBudget } from "./budget";
+import { ChatGptError } from "./chatgpt/types";
 import { type AssistanceConfig, assistanceConfig } from "./config";
 import {
   type AssistanceSource,
@@ -320,12 +324,10 @@ function reservation(
       JSON.stringify(source) + prompt.instructions + JSON.stringify(prompt.jsonSchema),
       "utf8",
     ) + 1024;
-  const cost = Math.ceil(
-    inputTokens * config.inputCostMicros +
-      config.maxOutputTokens * config.outputCostMicros +
-      (config.jev?.maxCostMicros ?? 0),
-  );
-  if (!Number.isSafeInteger(cost) || cost > 2_000_000_000) throw new AppError("unavailable");
+  const generation = reserveGenerationCost(config, inputTokens, config.maxOutputTokens);
+  const cost = generation === null ? null : generation + (config.jev?.maxCostMicros ?? 0);
+  if (cost !== null && (!Number.isSafeInteger(cost) || cost > 2_000_000_000))
+    throw new AppError("unavailable");
   return { inputTokens, cost };
 }
 
@@ -367,32 +369,15 @@ export async function requestAssistance(
       version(source, input.expectedVersion);
       if (!config.enabled || !config.model)
         throw new AppError("unavailable", { fieldErrors: { form: ["assistance_disabled"] } });
-      // One global reservation lock enforces the provider-wide UTC daily ceiling under concurrency.
-      // Keep the persisted legacy namespace while old and Butler deployments can coexist.
-      await ctx.tx.execute(
-        sql`select pg_advisory_xact_lock(hashtextextended('hermes:daily-budget', 0))`,
-      );
-      const busy = await ctx.tx
-        .select({ id: assistanceRuns.id })
-        .from(assistanceRuns)
-        .where(
-          and(
-            eq(assistanceRuns.requestedById, live.actor.id),
-            inArray(assistanceRuns.state, ["queued", "running"]),
-          ),
-        )
-        .limit(1);
-      if (busy.length)
-        throw new AppError("rate_limited", { fieldErrors: { form: ["assistance_in_progress"] } });
-      const [usage] = await ctx.tx.execute<{ used: string }>(
-        sql`select coalesce(sum(coalesce(actual_cost_micros, reserved_cost_micros)), 0)::text as used from assistance_runs where created_at >= date_trunc('day', now() at time zone 'UTC') at time zone 'UTC'`,
-      );
       const reserved = reservation(source, config, input.task);
+      await reserveAiBudget(
+        ctx.tx,
+        live.actor.id,
+        reserved.cost,
+        config.dailyLimitMicros,
+        billingMode(config),
+      );
       const prompt = versionsFor(input.task);
-      if (Number(usage?.used ?? 0) + reserved.cost > config.dailyLimitMicros)
-        throw new AppError("rate_limited", {
-          fieldErrors: { form: ["assistance_budget_exhausted"] },
-        });
       const [run] = await ctx.tx
         .insert(assistanceRuns)
         .values({
@@ -408,12 +393,16 @@ export async function requestAssistance(
           schemaVersion: prompt.schemaVersion,
           model: config.model,
           reservedCostMicros: reserved.cost,
+          billingMode: billingMode(config),
           validation: {
             inputTokenBound: reserved.inputTokens,
             inputCostMicros: config.inputCostMicros,
             outputCostMicros: config.outputCostMicros,
             maxOutputTokens: config.maxOutputTokens,
             provider: config.provider ?? "openai",
+            ...(config.provider === "chatgpt_oauth"
+              ? { chatGptRegistrationId: config.chatGptRegistrationId }
+              : {}),
             routingDigest: routingDigest(config.routing),
             jevDigest: jevDigest(config.jev),
             jevReservedCostMicros: config.jev?.maxCostMicros ?? 0,
@@ -462,7 +451,12 @@ export async function processAssistanceRun(
   await assertRecoveryOpen(db);
   const [run] = await db
     .update(assistanceRuns)
-    .set({ state: "running", updatedAt: new Date(), version: sql`${assistanceRuns.version} + 1` })
+    .set({
+      state: "running",
+      inferenceOutcome: "pending",
+      updatedAt: new Date(),
+      version: sql`${assistanceRuns.version} + 1`,
+    })
     .where(
       and(eq(assistanceRuns.id, parseInput(z.uuid(), runId)), eq(assistanceRuns.state, "queued")),
     )
@@ -471,6 +465,7 @@ export async function processAssistanceRun(
   const config = deps.config ?? assistanceConfig();
   const actor: Actor = { kind: "staff", id: run.requestedById };
   let started = false;
+  let inferenceOutcome: InferenceOutcome = "not_started";
   let actualCostMicros: number | null = null;
   let generationCostMicros: number | null = null;
   let assessment: JevAssessment | null = null;
@@ -490,12 +485,13 @@ export async function processAssistanceRun(
       throw new Error("budget_period_changed");
     const pinned = run.validation as {
       inputTokenBound: number;
-      inputCostMicros: number;
-      outputCostMicros: number;
+      inputCostMicros: number | null;
+      outputCostMicros: number | null;
       maxOutputTokens: number;
       provider?: string;
       routingDigest?: string | null;
       jevDigest?: string | null;
+      chatGptRegistrationId?: string;
     };
     if (
       pinned.inputCostMicros !== config.inputCostMicros ||
@@ -503,7 +499,9 @@ export async function processAssistanceRun(
       pinned.maxOutputTokens !== config.maxOutputTokens ||
       (pinned.provider ?? "openai") !== (config.provider ?? "openai") ||
       (pinned.routingDigest ?? null) !== routingDigest(config.routing) ||
-      (pinned.jevDigest ?? null) !== jevDigest(config.jev)
+      (pinned.jevDigest ?? null) !== jevDigest(config.jev) ||
+      run.billingMode !== billingMode(config) ||
+      pinned.chatGptRegistrationId !== config.chatGptRegistrationId
     )
       throw new Error("configuration_changed");
     const current = await sourceForRun(db, actor, run);
@@ -512,6 +510,7 @@ export async function processAssistanceRun(
       throw new Error("source_changed");
     }
     started = true;
+    inferenceOutcome = "pending";
     const generated =
       run.task === "intake.extract"
         ? await (deps.generateIntake ?? generateIntakeDraft)(current.source as IntakeSource, config)
@@ -527,15 +526,15 @@ export async function processAssistanceRun(
             );
     inputTokens = generated.inputTokens;
     outputTokens = generated.outputTokens;
-    const cost =
-      config.provider === "openrouter"
-        ? generated.actualCostMicros
-        : Math.ceil(inputTokens * config.inputCostMicros + outputTokens * config.outputCostMicros);
-    if (typeof cost !== "number" || !Number.isSafeInteger(cost) || cost < 0 || cost > 2_000_000_000)
-      throw new Error("provider_cost_unknown");
+    const cost = generationCost(config, generated);
     actualCostMicros = cost;
     generationCostMicros = cost;
-    if (cost > run.reservedCostMicros - (config.jev?.maxCostMicros ?? 0))
+    inferenceOutcome = "settled";
+    if (
+      cost !== null &&
+      (run.reservedCostMicros === null ||
+        cost > run.reservedCostMicros - (config.jev?.maxCostMicros ?? 0))
+    )
       throw new Error("cost_limit_exceeded");
     if (
       !Number.isSafeInteger(inputTokens) ||
@@ -553,6 +552,7 @@ export async function processAssistanceRun(
           ? validateLocaleDraft(generated.output, current.source as LocaleSource)
           : validateDraft(generated.output, current.source as AssistanceSource);
     if (config.jev) {
+      if (cost === null) throw new Error("provider_billing_mismatch");
       if (run.createdAt.toISOString().slice(0, 10) !== new Date().toISOString().slice(0, 10))
         throw new Error("budget_period_changed");
       const latest = await sourceForRun(db, actor, run);
@@ -568,12 +568,15 @@ export async function processAssistanceRun(
       // A second call with unknown outcome must not release its reserved cost merely because
       // the first call returned a known bill. No automatic retry of either provider call.
       actualCostMicros = null;
+      inferenceOutcome = "pending";
       assessment = jevAssessmentSchema.parse(
         await (deps.assess ?? assessDraft)(assessmentInput, config),
       );
       actualCostMicros = cost + assessment.costMicros;
+      inferenceOutcome = "settled";
       if (actualCostMicros > 2_000_000_000) {
         actualCostMicros = null;
+        inferenceOutcome = "unknown";
         throw new Error("provider_cost_unknown");
       }
       if (
@@ -597,6 +600,7 @@ export async function processAssistanceRun(
           inputTokens,
           outputTokens,
           actualCostMicros,
+          inferenceOutcome: "settled",
           generatedAt: new Date(),
           updatedAt: new Date(),
           version: sql`${assistanceRuns.version} + 1`,
@@ -613,6 +617,12 @@ export async function processAssistanceRun(
         .where(and(eq(assistanceRuns.id, run.id), eq(assistanceRuns.state, "running")));
     });
   } catch (error) {
+    if (inferenceOutcome === "pending")
+      inferenceOutcome = error instanceof ChatGptError ? error.inferenceOutcome : "unknown";
+    if (error instanceof ChatGptError && error.usage) {
+      inputTokens = error.usage.inputTokens;
+      outputTokens = error.usage.outputTokens;
+    }
     const code =
       error instanceof AppError
         ? "source_access_changed"
@@ -624,7 +634,9 @@ export async function processAssistanceRun(
       .set({
         state,
         errorCode: code,
-        actualCostMicros: started ? actualCostMicros : 0,
+        actualCostMicros:
+          run.billingMode === "chatgpt_subscription" ? null : started ? actualCostMicros : 0,
+        inferenceOutcome,
         validation: {
           ...(run.validation as Record<string, unknown>),
           assessment,

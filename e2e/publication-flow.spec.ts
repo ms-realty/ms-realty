@@ -107,7 +107,7 @@ async function uploadDocument(
     mimeType: "application/pdf",
     buffer: bytes,
   });
-  await upload.getByLabel("Purpose", { exact: false }).selectOption(purpose);
+  await upload.getByLabel("What the document is for", { exact: false }).selectOption(purpose);
   await upload.getByRole("button", { name: "Upload and scan", exact: true }).click();
   await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("saved")));
   let versionId = "";
@@ -211,11 +211,11 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   await page
     .getByLabel("Source or evidence reference", { exact: true })
     .fill("synthetic joined publication acceptance only");
-  await page.getByLabel("Price status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the price", { exact: true }).selectOption("known");
   await page.getByLabel("Price in EUR", { exact: true }).fill("95000.03");
-  await page.getByLabel("Area status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the area", { exact: true }).selectOption("known");
   await page.getByLabel("Area in m²", { exact: true }).fill("74.5");
-  await page.getByLabel("Bedroom status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the bedrooms", { exact: true }).selectOption("known");
   await page.getByLabel("Bedrooms", { exact: true }).fill("2");
   await page.getByRole("button", { name: "New listing", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Draft saved", exact: true })).toBeVisible();
@@ -227,7 +227,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   if (!listing) throw new Error("Missing browser-created listing");
 
   const source = await sharp({
-    create: { width: 96, height: 60, channels: 3, background: "#1b6776" },
+    create: { width: 1600, height: 1000, channels: 3, background: "#1b6776" },
   })
     .png()
     .toBuffer();
@@ -262,20 +262,32 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   expect(digest(derivative)).toBe(asset?.derivative_sha256);
   expect(await sharp(derivative).metadata()).toMatchObject({
     format: "webp",
-    width: 96,
-    height: 60,
+    width: 1600,
+    height: 1000,
   });
   expect((await sharp(derivative).metadata()).exif).toBeUndefined();
+  const renditions = asset?.derivative_renditions as {
+    key: string;
+    sha256: string;
+    width: number;
+    height: number;
+    byteSize: number;
+  }[];
+  expect(renditions.map(({ width }) => width)).toEqual([480, 960, 1600]);
+  const renditionPath = (sha256: string) => `/api/media/${assetId}/${sha256}`;
   const mediaPath = `/api/media/${assetId}/${asset?.derivative_sha256}`;
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
   await page.reload();
+  await page
+    .getByLabel("Image description", { exact: true })
+    .fill("Синтетично изображение за тест");
+  await page.getByRole("button", { name: "Save photo details", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
+  await page.getByRole("button", { name: "Review this photo", exact: true }).click();
   await page.getByLabel("Rights holder", { exact: true }).fill("Synthetic image author");
   await page
     .getByLabel("Rights evidence / permission reference", { exact: true })
     .fill("Synthetic fixture rights only; no external photograph");
-  await page
-    .getByLabel("Image description", { exact: true })
-    .fill("Синтетично изображение за тест");
   await page
     .getByLabel(
       "I reviewed private addresses, people, documents and location details in the visible image.",
@@ -283,10 +295,14 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     .check();
   await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
   const mediaUploadReceipt = new URL(page.url()).searchParams.get("saved");
-  await page.getByRole("button", { name: "Record review", exact: true }).click();
+  await page.getByRole("button", { name: "Approve as a public candidate", exact: true }).click();
   await expect(page).toHaveURL((url) =>
     Boolean(url.searchParams.get("saved") && url.searchParams.get("saved") !== mediaUploadReceipt),
   );
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Checks and rights for this photo$/ })
+    .click();
   await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
 
@@ -345,7 +361,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     .fill("Synthetic test agreement only; no real commission or financial obligation.");
   // A previous day avoids machine timezone/DST ambiguity; the UI interprets Europe/Sofia.
   await instructionForm
-    .getByLabel("Agreed at (Europe/Sofia)", { exact: true })
+    .getByLabel("Agreed at", { exact: true })
     .fill(`${new Date(Date.now() - 86400000).toISOString().slice(0, 10)}T12:00`);
   await instructionForm.getByLabel("The agreement permits publication").check();
   await instructionForm.getByLabel("The agreement grants the stated media usage rights").check();
@@ -391,9 +407,50 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   ).toHaveCount(0);
   const publicImage = publicPage.locator(`img[src="${mediaPath}"]`);
   await expect(publicImage).toBeVisible();
+  await expect(publicImage).toHaveAttribute("width", "1600");
+  await expect(publicImage).toHaveAttribute("height", "1000");
+  await expect(publicImage).toHaveAttribute(
+    "srcset",
+    renditions.map(({ sha256, width }) => `${renditionPath(sha256)} ${width}w`).join(", "),
+  );
+  await expect(publicImage).toHaveAttribute("sizes", /vw/);
   await expect
-    .poll(() => publicImage.evaluate((image) => (image as HTMLImageElement).naturalWidth))
-    .toBe(96);
+    .poll(() =>
+      publicImage.evaluate((element) => {
+        const image = element as HTMLImageElement;
+        return image.complete && image.naturalWidth > 0 ? new URL(image.currentSrc).pathname : null;
+      }),
+    )
+    .toBeTruthy();
+  const selected = await publicImage.evaluate((element) => {
+    const image = element as HTMLImageElement;
+    return { path: new URL(image.currentSrc).pathname, width: image.naturalWidth };
+  });
+  expect(renditions.map(({ sha256 }) => renditionPath(sha256))).toContain(selected.path);
+  const deliveryEvidence = [];
+  for (const rendition of renditions) {
+    const response = await request.get(hostUrl("public", renditionPath(rendition.sha256)));
+    expect(response.status()).toBe(200);
+    // This harness is protected staging: eligible photos must still obey its no-store override.
+    expect(response.headers()["cache-control"]).toContain("no-store");
+    const bytes = await response.body();
+    expect(bytes.byteLength).toBe(rendition.byteSize);
+    expect(digest(bytes)).toBe(rendition.sha256);
+    expect(bytes).toEqual(await storedObject(rendition.key));
+    expect(await sharp(bytes).metadata()).toMatchObject({
+      format: "webp",
+      width: rendition.width,
+      height: rendition.height,
+    });
+    deliveryEvidence.push({ path: renditionPath(rendition.sha256), width: rendition.width });
+  }
+  expect(
+    (await request.get(hostUrl("public", renditionPath(String(asset?.sha256))))).status(),
+  ).toBe(404);
+  await info.attach("responsive-media-delivery.json", {
+    body: JSON.stringify({ selected, renditions: deliveryEvidence }),
+    contentType: "application/json",
+  });
   const imageResponse = await request.get(hostUrl("public", mediaPath));
   expect(imageResponse.status()).toBe(200);
   expect(imageResponse.headers()["content-type"]).toContain("image/webp");
@@ -417,6 +474,13 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
       })
     ).status(),
   ).toBe(404);
+  for (const rendition of renditions) {
+    const response = await request.get(hostUrl("public", renditionPath(rendition.sha256)), {
+      headers: { "if-none-match": `"${rendition.sha256}"` },
+    });
+    expect(response.status()).toBe(404);
+    expect(response.headers()["cache-control"]).toContain("no-store");
+  }
   await publicPage.screenshot({
     path: info.outputPath("withdrawn-safe-identity.png"),
     fullPage: true,

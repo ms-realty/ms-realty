@@ -1,5 +1,6 @@
 // F04/F05 and AT28–AT32: explicit qualification, client continuity and booking semantics.
 // Fixtures are synthetic and isolated. This is product-path evidence, not live release proof.
+
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, type Page, test } from "@playwright/test";
@@ -8,6 +9,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -58,7 +60,7 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
   ]);
   await page.goto(hostUrl("staff", `/en/cases/new?inquiry=${f.inquiryId}`));
   const title = `S4 buyer journey ${randomUUID().slice(0, 8)}`;
-  await page.getByLabel("Case title (visible to participants)", { exact: true }).fill(title);
+  await page.getByLabel("Deal title (visible to participants)", { exact: true }).fill(title);
   await page
     .getByLabel("Requirements to review", { exact: true })
     .fill("Step-free access is essential");
@@ -68,10 +70,11 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
   await page
     .getByLabel("Next internal action", { exact: true })
     .fill("Internal negotiation limit check");
-  await page
-    .getByLabel("Next action due (UTC)", { exact: true })
-    .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
-  await page.getByRole("button", { name: "Create a case", exact: true }).click();
+  await fillAgencyInstant(
+    page.getByLabel("Next action due", { exact: true }),
+    new Date(Date.now() + 86400000),
+  );
+  await page.getByRole("button", { name: "Create a deal", exact: true }).click();
   await recorded(page);
   const [inquiry] = await db
     .select()
@@ -156,6 +159,9 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     await expect(
       client.getByRole("button", { name: "Record next action", exact: true }),
     ).toHaveCount(0);
+    await client.getByText("Review property selection and feedback", { exact: true }).click();
+    await expect(client.getByLabel("Action", { exact: true })).toHaveValue("");
+    await client.getByLabel("Action", { exact: true }).selectOption("shortlisted");
     await client
       .getByLabel("Feedback or reason", { exact: true })
       .fill("I would like to see this property");
@@ -180,6 +186,8 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     ).toBe(404);
     // P14: the requested viewing names the property it is about.
     await client.goto(hostUrl("client", `/en/appointments/${appointment.id}`));
+    await expect(client.getByRole("heading", { level: 1 })).toHaveText("Property viewing");
+    await expect(client.locator("[data-workflow-reference]")).toHaveText(appointment.reference);
     await expect(client.getByText(f.listingReference, { exact: true })).toBeVisible();
 
     await page.goto(hostUrl("staff", `/en/calendar/${appointment.id}`));
@@ -188,12 +196,8 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
       .filter({ has: page.getByRole("heading", { name: "Arrange appointment", exact: true }) });
     await arrange.getByLabel("Action", { exact: true }).selectOption("confirm");
     const year = new Date().getUTCFullYear() + 1;
-    await arrange
-      .getByLabel("Start in Sofia with UTC offset", { exact: true })
-      .fill(`${year}-01-15T10:00+02:00`);
-    await arrange
-      .getByLabel("End in Sofia with UTC offset", { exact: true })
-      .fill(`${year}-01-15T11:00+02:00`);
+    await arrange.getByLabel("Start", { exact: true }).fill(`${year}-01-15T10:00`);
+    await arrange.getByLabel("End", { exact: true }).fill(`${year}-01-15T11:00`);
     await arrange
       .getByLabel("I confirmed property access for this appointment", { exact: true })
       .check();
@@ -208,6 +212,9 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     await expect(page.getByTestId("appointment-state")).toHaveText("Confirmed");
     await client.reload();
     await expect(client.getByTestId("appointment-state")).toHaveText("Confirmed");
+    await expect(client.getByRole("heading", { name: "Proposed time", exact: true })).toHaveCount(
+      0,
+    );
     await expect(
       client.getByText("Private synthetic key collection instructions", { exact: true }),
     ).toHaveCount(0);
@@ -274,12 +281,13 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     await client
       .getByLabel("Message", { exact: true })
       .fill("Please revise my requirements to include a lift");
-    await client.getByRole("button", { name: "Post in this case", exact: true }).click();
+    await client.getByRole("button", { name: "Post in this deal", exact: true }).click();
     await recorded(client);
     await page.goto(hostUrl("staff", `/en/cases/${caseId}`));
     await expect(
       page.getByText("Please revise my requirements to include a lift", { exact: true }),
     ).toBeVisible();
+    await page.getByRole("button", { name: "Internal note · staff only", exact: true }).click();
     await page
       .getByLabel("Internal note · staff only", { exact: true })
       .fill("Private synthetic broker note");

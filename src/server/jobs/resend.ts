@@ -1,6 +1,7 @@
 // Resend's fixed API, with no provider-side template fetching or arbitrary message rendering.
 import "server-only";
 import { z } from "zod";
+import { formatDateTime } from "@/i18n/format";
 import { caseEmailConfig, renderCaseEmail } from "../cases/email-contract";
 import type { HostOrigins } from "../config/hosts";
 import { renderInquiryCoverageNotice } from "../inquiries/notifications";
@@ -84,10 +85,16 @@ function authEmail(message: OutboundMessage, hosts: HostOrigins, now: Date) {
       : displayLanguage === "ru"
         ? "Откройте ссылку, чтобы продолжить. Не пересылайте её. Если вы не ожидали это письмо, его можно проигнорировать."
         : "Open the link to continue. Do not forward it. If you were not expecting this message, you can ignore it.";
+  const validUntil =
+    displayLanguage === "bg"
+      ? "Връзката е валидна до"
+      : displayLanguage === "ru"
+        ? "Ссылка действует до"
+        : "The link works until";
   // Plain text avoids provider tracking pixels and has no interpolated HTML or customer data.
   return {
     subject: subject[displayLanguage][template],
-    text: `MS Realty\n\n${instructions}\n\n${url.toString()}\n\n${expiresAt} (UTC)`,
+    text: `MS Realty\n\n${instructions}\n\n${url.toString()}\n\n${validUntil}: ${formatDateTime(displayLanguage, expiresAt, { zoneLabel: true, now })}`,
   };
 }
 

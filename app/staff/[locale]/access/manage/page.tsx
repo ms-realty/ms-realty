@@ -11,12 +11,18 @@ import { participantRoles } from "@/domain/parties";
 import { absenceCopy } from "@/features/absence/copy";
 import { WorkflowTime } from "@/features/cases/screens";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
-import { accessErrorMessage, identityCopy, roleLabel } from "@/features/identity/copy";
+import {
+  accessErrorMessage,
+  capabilityLabel,
+  identityCopy,
+  roleLabel,
+} from "@/features/identity/copy";
 import { grantManagementCopy } from "@/features/identity/grant-copy";
 import { managementCopy, staffRoleLabel } from "@/features/identity/management-copy";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { offboardingCopy } from "@/features/offboarding/copy";
-import { isStaffLocale } from "@/i18n/config";
+import { workCopy } from "@/features/work/copy";
+import { isPublicLocale, isStaffLocale, localeEndonyms } from "@/i18n/config";
 import { listStaffGrants } from "@/server/auth/grants";
 import { staffRoles } from "@/server/auth/invitations";
 import { requireStaffPage } from "@/server/auth/pages";
@@ -26,7 +32,9 @@ import { caseVisibility } from "@/server/cases/shared";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
+import { TechnicalDetails } from "@/ui/technical-details";
 
 const field = cx("block min-w-0 max-w-full", controlClass);
 const writingField = cx("block min-w-0 max-w-full", textareaClass);
@@ -79,14 +87,41 @@ export default async function ManagePage({
     .orderBy(desc(staffMemberships.endedAt))
     .limit(50);
 
-  const currentGrants = await listStaffGrants(db, session);
+  const query = await searchParams;
+  const grantPage =
+    typeof query.grantsPage === "string" && /^[1-9]\d*$/.test(query.grantsPage)
+      ? Number(query.grantsPage)
+      : 1;
+  const grantSearch =
+    typeof query.grantsSearch === "string" ? query.grantsSearch.trim().slice(0, 254) : "";
+  const currentGrants = await listStaffGrants(db, session, {
+    page: Number.isSafeInteger(grantPage) && grantPage <= 10000 ? grantPage : 1,
+    search: grantSearch,
+  });
   const grantCopy = grantManagementCopy(locale);
+  const directoryCopy =
+    locale === "bg"
+      ? {
+          search: "Търсене на текущи права по име или имейл",
+          apply: "Търсене",
+          empty: "Няма съвпадащи текущи права.",
+        }
+      : locale === "ru"
+        ? {
+            search: "Поиск текущих прав по имени или адресу почты",
+            apply: "Найти",
+            empty: "Нет подходящих текущих прав.",
+          }
+        : {
+            search: "Search current grants by name or email",
+            apply: "Search",
+            empty: "No matching current grants.",
+          };
   const availableCases = await db
     .select({ id: cases.id, reference: cases.reference, title: cases.title })
     .from(cases)
     .where(await caseVisibility(db, session))
     .limit(200);
-  const query = await searchParams;
   const receiptId = z.uuid().safeParse(query.receipt);
   const [receipt] = receiptId.success
     ? await db
@@ -106,6 +141,13 @@ export default async function ManagePage({
         )
         .limit(1)
     : [];
+  const grantHref = (page: number) => {
+    const parameters = new URLSearchParams({ grantsPage: String(page) });
+    if (currentGrants.search) parameters.set("grantsSearch", currentGrants.search);
+    if (receipt) parameters.set("receipt", receipt.id);
+    if (typeof query.saved === "string") parameters.set("saved", query.saved);
+    return `/${locale}/access/manage?${parameters}#current-staff-grants`;
+  };
   const shared = identityCopy(locale);
   const error = typeof query.error === "string" ? accessErrorMessage(shared, query.error) : null;
   const hidden = (intent: string) => (
@@ -177,7 +219,7 @@ export default async function ManagePage({
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{c.staffTitle}</h2>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -202,7 +244,7 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass()}>
               {c.invite}
             </button>
-          </form>
+          </NativeForm>
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{offboardingCopy(locale).title}</h2>
@@ -239,7 +281,7 @@ export default async function ManagePage({
           ) : null}
           <h2 className="text-section font-semibold">{c.recoveryTitle}</h2>
           <p>{c.recoveryNote}</p>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -281,11 +323,11 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass("destructive")} disabled={!members.length}>
               {c.recover}
             </button>
-          </form>
+          </NativeForm>
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{c.clientTitle}</h2>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -329,12 +371,12 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass()} disabled={!availableCases.length}>
               {c.invite}
             </button>
-          </form>
+          </NativeForm>
         </section>
         <section className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]">
           <h2 className="text-section font-semibold">{grantCopy.title}</h2>
           <p>{grantCopy.lead}</p>
-          <form
+          <NativeForm
             method="post"
             action={`/${locale}/access/manage/submit`}
             className="grid min-w-0 grid-cols-1 gap-4 [overflow-wrap:anywhere]"
@@ -366,7 +408,7 @@ export default async function ManagePage({
               >
                 {capabilities.map((capability) => (
                   <option key={capability} value={capability}>
-                    {capability}
+                    {capabilityLabel(locale, capability)}
                   </option>
                 ))}
               </AccessSelect>
@@ -402,7 +444,7 @@ export default async function ManagePage({
                 <option value="">{grantCopy.allLocales}</option>
                 {publicLocales.map((value) => (
                   <option key={value} value={value}>
-                    {value.toUpperCase()}
+                    {localeEndonyms[value]}
                   </option>
                 ))}
               </AccessSelect>
@@ -428,10 +470,36 @@ export default async function ManagePage({
             <button type="submit" className={buttonClass()}>
               {grantCopy.grant}
             </button>
+          </NativeForm>
+          <h3 id="current-staff-grants" className="font-semibold">
+            {grantCopy.existing}
+          </h3>
+          <form
+            method="get"
+            action={`/${locale}/access/manage#current-staff-grants`}
+            className="grid min-w-0 gap-3"
+          >
+            {receipt ? <input type="hidden" name="receipt" value={receipt.id} /> : null}
+            {typeof query.saved === "string" ? (
+              <input type="hidden" name="saved" value={query.saved} />
+            ) : null}
+            <label className="grid min-w-0 gap-2">
+              <span className={labelClass}>{directoryCopy.search}</span>
+              <input
+                name="grantsSearch"
+                className={field}
+                defaultValue={currentGrants.search}
+                maxLength={254}
+                type="search"
+              />
+            </label>
+            <button type="submit" className={buttonClass()}>
+              {directoryCopy.apply}
+            </button>
           </form>
-          <h3 className="font-semibold">{grantCopy.existing}</h3>
-          {currentGrants.map(({ grant, name }) => (
-            <form
+          {!currentGrants.rows.length ? <p>{directoryCopy.empty}</p> : null}
+          {currentGrants.rows.map(({ grant, name }) => (
+            <NativeForm
               key={grant.id}
               method="post"
               action={`/${locale}/access/manage/submit`}
@@ -443,14 +511,37 @@ export default async function ManagePage({
               <input type="hidden" name="expectedRevision" value={grant.version} />
               <p>
                 <strong>{name}</strong> ·{" "}
-                {grant.capability ??
-                  (grant.role
-                    ? staffRoleLabel(locale, grant.role as Parameters<typeof staffRoleLabel>[1])
-                    : "")}{" "}
-                · {grant.recordType ?? grantCopy.global}
-                {grant.recordId ? ` · ${grant.recordId}` : ""}
-                {grant.locales?.length ? ` · ${grant.locales.join(", ")}` : ""}
+                {grant.capability
+                  ? capabilityLabel(locale, grant.capability)
+                  : grant.role
+                    ? staffRoleLabel(locale, grant.role)
+                    : ""}{" "}
+                ·{" "}
+                {grant.recordType &&
+                ["document", "listing", "property", "case"].includes(grant.recordType)
+                  ? grantCopy[grant.recordType as "document" | "listing" | "property" | "case"]
+                  : grant.recordType
+                    ? grantCopy.scope
+                    : grantCopy.global}
+                {grant.locales?.length
+                  ? ` · ${grant.locales.map((value) => (isPublicLocale(value) ? localeEndonyms[value] : grantCopy.locale)).join(", ")}`
+                  : ""}
               </p>
+              <TechnicalDetails locale={locale}>
+                <p>
+                  <bdi>{grant.capability ?? grant.role}</bdi>
+                </p>
+                <p>
+                  <bdi>
+                    {grant.recordType} {grant.recordId}
+                  </bdi>
+                </p>
+                {grant.locales?.length ? (
+                  <p>
+                    <bdi>{grant.locales.join(", ")}</bdi>
+                  </p>
+                ) : null}
+              </TechnicalDetails>
               <p>{grant.reason}</p>
               <label className="grid min-w-0 grid-cols-1 gap-2">
                 <span className={labelClass}>{grantCopy.reason}</span>
@@ -465,8 +556,22 @@ export default async function ManagePage({
               <button type="submit" className={buttonClass("destructive")}>
                 {grantCopy.revoke}
               </button>
-            </form>
+            </NativeForm>
           ))}
+          {currentGrants.page > 1 || currentGrants.hasMore ? (
+            <nav aria-label={grantCopy.existing} className="flex flex-wrap gap-6 py-4">
+              {currentGrants.page > 1 ? (
+                <a className="min-h-control underline" href={grantHref(currentGrants.page - 1)}>
+                  {workCopy(locale).previous}
+                </a>
+              ) : null}
+              {currentGrants.hasMore ? (
+                <a className="min-h-control underline" href={grantHref(currentGrants.page + 1)}>
+                  {workCopy(locale).next}
+                </a>
+              ) : null}
+            </nav>
+          ) : null}
         </section>
         <a href={`/${locale}/today`} className="text-action underline">
           {c.back}

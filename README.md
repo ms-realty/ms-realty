@@ -10,6 +10,10 @@ are recorded in [the delivery ledger](docs/delivery/2026-09-27-recovery.md). The
 preserved at git tag `legacy-app-final`; the facts it held that are imported once live in
 [`data/legacy/`](data/legacy/README.md).
 
+Phase 1 completes the O04 case directory and O08 calendar source workflows.
+Their behavior and remaining release boundaries are recorded in the
+[completion note](docs/delivery/phase-one-completion.md).
+
 ## Local setup
 
 Requires Node.js 22.13 or newer (CI uses Node 24) and Docker for the database.

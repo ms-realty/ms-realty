@@ -1,9 +1,26 @@
 "use client";
+import { isCurrencyCode } from "@/domain/ids";
+import { isInstantInput } from "@/domain/time";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState, FormValues } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
+import { MoneyField } from "@/ui/money-field";
+import { TechnicalDetails } from "@/ui/technical-details";
 import { workCopy } from "../work/copy";
+
+const booleanLabels = {
+  bg: ["Да", "Не"],
+  en: ["Yes", "No"],
+  ru: ["Да", "Нет"],
+  de: ["Ja", "Nein"],
+  nl: ["Ja", "Nee"],
+  el: ["Ναι", "Όχι"],
+  he: ["כן", "לא"],
+} as const;
 export type WorkflowField = {
   name: string;
   label: string;
@@ -12,6 +29,7 @@ export type WorkflowField = {
     | "text"
     | "datetime-local"
     | "number"
+    | "money"
     | "checkbox"
     | "checkbox-group"
     | "select"
@@ -19,6 +37,8 @@ export type WorkflowField = {
   hint?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
+  /** The declared ISO currency field; changing it never converts the entered amount. */
+  currencyField?: string;
 };
 export function WorkflowForm({
   locale,
@@ -27,9 +47,12 @@ export function WorkflowForm({
   action,
   path,
   nativeIdentity,
+  commandAvailable,
   status,
   submit,
   pendingReferenceCookie,
+  disclosure,
+  enhancementField,
 }: {
   locale: string;
   initialState: FormState<FormValues>;
@@ -37,18 +60,44 @@ export function WorkflowForm({
   action: FormAction<FormValues>;
   path: string;
   nativeIdentity?: string;
+  commandAvailable?: boolean;
   status: { href: string; label: string };
   submit: string;
   pendingReferenceCookie?: string;
+  disclosure?: string;
+  enhancementField?: string;
 }) {
   return (
     <ActionForm
+      formatValue={(name, value) => {
+        const definition = fields.find((field) => field.name === name);
+        if (definition?.type === "datetime-local" && isInstantInput(value))
+          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true });
+        if (definition?.type === "select" || definition?.type === "checkbox-group") {
+          const selected =
+            definition.type === "checkbox-group" ? value.split("\n").filter(Boolean) : [value];
+          const labels = selected.map(
+            (item) => definition.options?.find((option) => option.value === item)?.label,
+          );
+          if (labels.every((label) => label !== undefined)) return labels.join(", ");
+          return <TechnicalDetails locale={locale}>{value}</TechnicalDetails>;
+        }
+        if (definition?.type === "checkbox") {
+          if (["true", "false", ""].includes(value))
+            return booleanLabels[isPublicLocale(locale) ? locale : "bg"][value === "true" ? 0 : 1];
+          return <TechnicalDetails locale={locale}>{value}</TechnicalDetails>;
+        }
+        return value;
+      }}
       action={action}
       initialState={initialState}
       permalink={path}
       nativeIdentity={nativeIdentity}
+      commandAvailable={commandAvailable}
       reconciliation={status}
       pendingReferenceCookie={pendingReferenceCookie}
+      disclosure={disclosure}
+      enhancementField={enhancementField}
       copy={workCopy(locale).form}
       labels={Object.fromEntries(fields.map((field) => [field.name, field.label]))}
       submitLabel={submit}
@@ -59,6 +108,33 @@ export function WorkflowForm({
             const field = form.field(definition.name);
             if (definition.type === "hidden")
               return <input key={field.name} type="hidden" name={field.name} value={field.value} />;
+            if (definition.type === "money") {
+              const currency = form.values[definition.currencyField ?? "currency"] ?? "";
+              return (
+                <MoneyField
+                  key={field.name}
+                  {...field}
+                  locale={isPublicLocale(locale) ? locale : "bg"}
+                  currency={isCurrencyCode(currency) ? currency : undefined}
+                  label={definition.label}
+                  hint={definition.hint}
+                  required={definition.required}
+                  onValueChange={(value) => form.setValue(field.name, value)}
+                />
+              );
+            }
+            if (definition.type === "datetime-local")
+              return (
+                <DateTimeField
+                  key={field.name}
+                  {...field}
+                  locale={isPublicLocale(locale) ? locale : "bg"}
+                  label={definition.label}
+                  hint={definition.hint}
+                  required={definition.required}
+                  onValueChange={(value) => form.setValue(field.name, value)}
+                />
+              );
             const errorId = field.error ? `${field.id}-error` : undefined;
             const hintId = definition.hint ? `${field.id}-hint` : undefined;
             const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;

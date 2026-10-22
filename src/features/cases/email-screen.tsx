@@ -1,5 +1,7 @@
 import "server-only";
 import { getDb } from "@/db/client";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { calendarEmailFile } from "@/server/appointments/calendar-contract";
 import { caseEmailWorkbench } from "@/server/cases/email";
 import { emailRecipient } from "@/server/cases/email-contract";
@@ -60,7 +62,7 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                   { value: "", label: c.noCalendar },
                   ...view.calendarOptions.map((a) => ({
                     value: a.id,
-                    label: `${a.reference} · ${a.state === "cancelled" ? "CANCEL" : "REQUEST"} · ${new Intl.DateTimeFormat(props.locale, { timeZone: "Europe/Sofia", dateStyle: "medium", timeStyle: "short" }).format(a.confirmedStartsAt ?? new Date())} Europe/Sofia`,
+                    label: `${a.reference} · ${a.state === "cancelled" ? "CANCEL" : "REQUEST"} · ${formatDateTime(isPublicLocale(props.locale) ? props.locale : "bg", a.confirmedStartsAt ?? new Date())}`,
                   })),
                 ],
               },
@@ -124,9 +126,15 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                             {file.fileName}
                           </a>
                           <p>
-                            v{file.versionNumber} · {file.byteSize} B · {file.contentType}
+                            {file.byteSize} B · {file.contentType}
                           </p>
-                          <p className="break-all text-compact">SHA-256: {file.sha256}</p>
+                          <details>
+                            <summary className="cursor-pointer font-semibold">
+                              {c.technical}
+                            </summary>
+                            <p>v{file.versionNumber}</p>
+                            <p className="break-all text-compact">SHA-256: {file.sha256}</p>
+                          </details>
                         </li>
                       ))}
                     </ul>
@@ -139,17 +147,11 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                     </h4>
                     <p>
                       {content.calendar.cancelled ? "CANCEL" : "REQUEST"} ·{" "}
-                      {new Intl.DateTimeFormat(props.locale, {
-                        timeZone: "Europe/Sofia",
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      }).format(new Date(content.calendar.startsAt))}{" "}
-                      –{" "}
-                      {new Intl.DateTimeFormat(props.locale, {
-                        timeZone: "Europe/Sofia",
-                        timeStyle: "short",
-                      }).format(new Date(content.calendar.endsAt))}{" "}
-                      Europe/Sofia
+                      {formatDateTimeRange(
+                        isPublicLocale(props.locale) ? props.locale : "bg",
+                        content.calendar.startsAt,
+                        content.calendar.endsAt,
+                      )}
                     </p>
                     <p>{c.calendarBoundary}</p>
                     <details>
@@ -208,7 +210,10 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                                 reference: view.record.reference,
                                 recordedAt: {
                                   dateTime: approvedAt.toISOString(),
-                                  label: `${new Intl.DateTimeFormat(props.locale === "bg" ? "bg-BG" : props.locale === "ru" ? "ru-RU" : "en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Sofia" }).format(approvedAt)} Europe/Sofia`,
+                                  label: formatDateTime(
+                                    isPublicLocale(props.locale) ? props.locale : "bg",
+                                    approvedAt,
+                                  ),
                                 },
                                 nextStep:
                                   message.state === "draft" ? c.draftState : c[message.state],

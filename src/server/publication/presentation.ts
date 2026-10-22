@@ -37,6 +37,7 @@ import { locationPrecisions } from "@/domain/facts";
 import type { PublicLocale } from "@/domain/ids";
 import { assessFreshness, type CommercialState, type FreshnessState } from "@/domain/listing";
 import type { MediaKind, MediaModification } from "@/domain/media";
+import { type MediaRendition, publishedMediaRenditions } from "@/domain/media-rendition";
 import { type PublicMapPoint, parsePublicMapPoint } from "@/domain/public-map";
 import { derivePublicPresentation, type PublicPresentation } from "@/domain/publication";
 import { localePolicy } from "@/i18n/config";
@@ -245,6 +246,7 @@ export interface ManifestMedia {
   readonly derivativeKey: string;
   readonly derivativeSha256: string;
   readonly derivativeContentType: string;
+  readonly renditions?: readonly MediaRendition[];
   readonly rightsReference: string | null;
   readonly kind: MediaKind;
   readonly width: number | null;
@@ -495,9 +497,13 @@ export async function loadPublishedListings(
       (a, b) => a.position - b.position,
     )) {
       const asset = assetById.get(item.assetId);
+      const renditions = asset
+        ? publishedMediaRenditions(asset.derivativeRenditions, item.renditions, asset.id)
+        : null;
       // Eligibility is re-checked on every read: a withdrawn asset disappears at once.
       if (
         !asset ||
+        !renditions ||
         asset.sha256 !== item.sha256 ||
         asset.derivativeKey !== item.derivativeKey ||
         asset.derivativeSha256 !== item.derivativeSha256 ||
@@ -517,6 +523,15 @@ export async function loadPublishedListings(
         digest: item.derivativeSha256,
         kind: item.kind,
         contentType: item.derivativeContentType,
+        ...(renditions.length
+          ? {
+              renditions: renditions.map(({ sha256, width, height }) => ({
+                digest: sha256,
+                width,
+                height,
+              })),
+            }
+          : {}),
         width: item.width,
         height: item.height,
         alt: item.altText,

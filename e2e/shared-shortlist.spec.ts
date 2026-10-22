@@ -1,9 +1,12 @@
 // P08/P09, F04 and AT09: a public-facts link is created from saved properties under this
 // browser's creator cookie, read by someone else with no authority beyond the public facts,
 // managed and revoked only by its creator, and always rechecked on the recipient's request.
+
 import { execFileSync } from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
 import { type Browser, type BrowserContext, expect, type Page, test } from "@playwright/test";
+import { formatDateTime } from "../src/i18n/format";
+import { origins } from "./hosts";
 
 type Listing = { reference: string; title: string };
 type Link = { url: string; id: string; token: string };
@@ -36,7 +39,7 @@ try {
     const description = "Synthetic test property. Not a real offer.";
     const fixture = await db.transaction(async (tx) => {
       await tx.execute(statement\`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))\`);
-      const item = await createListingFixture(tx, { reviewerId: staff.id, placeId, title, description, translations: { en: { title, description }, he: { title, description } } });
+      const item = await createListingFixture(tx, { reviewerId: staff.id, placeId, title, description, purpose: input.purpose, translations: { en: { title, description }, he: { title, description } } });
       const number = randomBytes(6).readUIntBE(0, 6).toString();
       const reference = "MS-" + number;
       await tx.update(schema.listings).set({ reference }).where(eq(schema.listings.id, item.listingId));
@@ -91,7 +94,8 @@ try {
     });
 } finally { await sql.end(); }
 `;
-const seed = (count: number): Listing[] => JSON.parse(run(seedProgram, { count }));
+const seed = (count: number, purpose: "sale" | "long_term_rent" = "sale"): Listing[] =>
+  JSON.parse(run(seedProgram, { count, purpose }));
 const older = (id: string, count: number) => run(olderProgram, { id, count });
 const withdraw = (...references: string[]) => run(withdrawProgram, { references });
 const expire = (id: string) => run(expireProgram, { id });
@@ -113,12 +117,16 @@ const cards = (page: Page) => page.locator("article[data-share-state]");
 const sharedLinks = (page: Page) => page.getByRole("region", { name: "Shared links" });
 
 async function save(page: Page, items: Listing[]) {
+  // Seed the fresh browser before hydration; a forced reload can interrupt its summary read.
+  // Later navigation must retain real changes made to this browser's saved list.
+  await page.addInitScript(
+    ({ refs, key, origin }) => {
+      if (location.origin === origin && localStorage.getItem(key) === null)
+        localStorage.setItem(key, JSON.stringify(refs));
+    },
+    { refs: items.map((item) => item.reference), key: savedKey, origin: origins.public },
+  );
   await page.goto("/en/saved");
-  await page.evaluate(({ refs, key }) => localStorage.setItem(key, JSON.stringify(refs)), {
-    refs: items.map((item) => item.reference),
-    key: savedKey,
-  });
-  await page.reload();
   await expect(page.getByRole("heading", { name: items.at(-1)?.title, exact: true })).toBeVisible();
 }
 
@@ -263,10 +271,11 @@ test("P08/P09: a creator reviews and creates a link, a recipient sees public fac
   await expect(card.getByRole("link", { name: third.reference })).toHaveCount(0);
   const created = await card.locator("dt:text-is('Created') + dd time").getAttribute("datetime");
   const expires = card.locator("dt:text-is('Expires') + dd time");
-  expect(
-    Date.parse((await expires.getAttribute("datetime")) ?? "") - Date.parse(created ?? ""),
-  ).toBe(7 * 24 * 60 * 60 * 1000);
-  await expect(expires).toHaveText(/20\d\d.*(EES?T|GMT\+\d)/);
+  const expiresAt = await expires.getAttribute("datetime");
+  if (!expiresAt) throw new Error("Missing exact share expiry");
+  expect(Date.parse(expiresAt) - Date.parse(created ?? "")).toBe(7 * 24 * 60 * 60 * 1000);
+  await expect(expires).toHaveText(formatDateTime("en", expiresAt, { zoneLabel: true }));
+  await expect(expires).not.toContainText(/Europe\/|UTC|GMT/);
   await expect(card.getByRole("button", { name: "Copy link" })).toBeVisible();
   await card.getByRole("button", { name: "Copy link" }).click();
   await expect(card.getByRole("status")).toHaveText(/Link copied|Copying is not available here\./);
@@ -369,7 +378,13 @@ test("P09: a closed shared property keeps only its reference, and a list with no
   browser,
   baseURL,
 }, testInfo) => {
-  const pair = seed(2) as [Listing, Listing];
+  // Other workers read the sale homepage while this test retires its own publications.
+  // Rentals exercise the same withdrawal rules without invalidating their image requests.
+  const pair = seed(2, "long_term_rent") as [Listing, Listing];
+  const home = await page.request.get("/he");
+  expect(home.status()).toBe(200);
+  const homepage = await home.text();
+  for (const item of pair) expect(homepage).not.toContain(item.reference);
   await ownAddress(page);
   await save(page, pair);
   await enableSharing(page, pair[1]);

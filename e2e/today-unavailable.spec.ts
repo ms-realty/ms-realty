@@ -4,8 +4,11 @@
 // and appointment pages: a page loaded in parallel would fail too. The case therefore runs
 // only in a separate single-worker run (the parallel suite skips it), in one project:
 //   E2E_TODAY_UNAVAILABLE=1 npx playwright test e2e/today-unavailable.spec.ts --workers=1 --project chromium-desktop
+
+import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { grants } from "../src/db/schema";
 import { hostUrl } from "./hosts";
 import { noOverflow, staffSession, todayDatabase } from "./today-helpers";
 
@@ -30,9 +33,16 @@ for (const javaScriptEnabled of [false, true])
     });
     try {
       const page = await context.newPage();
-      await staffSession(db, context);
+      const principal = await staffSession(db, context);
+      await db.insert(grants).values({
+        principalId: principal.id,
+        capability: "task.manage",
+        recordType: "task",
+        recordId: randomUUID(),
+        reason: "Synthetic isolated empty Today queue",
+      });
       await page.goto(hostUrl("staff", "/en/today"));
-      // Without grants every list loads empty: a day without work.
+      // An authorized empty queue is a clear day; no grants would show access guidance.
       await expect(page.locator("[data-today-state=empty]")).toBeVisible();
 
       await connection.unsafe(

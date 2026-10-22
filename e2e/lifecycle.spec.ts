@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { fillAgencyInstant } from "./time";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -73,16 +74,16 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     await client.goto(hostUrl("client", `/en/overview/${f.caseId}`));
     await client
       .getByLabel(
-        "I reviewed this exact requirements revision and acknowledge it as the current brief.",
+        "I reviewed these exact requirements and confirm them as what I am looking for.",
         { exact: true },
       )
       .check();
     await client
-      .getByRole("button", { name: "Acknowledge this requirements revision", exact: true })
+      .getByRole("button", { name: "Acknowledge these requirements", exact: true })
       .click();
     await recorded(client);
     await expect(
-      client.getByText("Client acknowledgment is recorded for this requirements revision", {
+      client.getByText("The client's confirmation is recorded for these requirements", {
         exact: true,
       }),
     ).toBeVisible();
@@ -90,12 +91,14 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     await page.goto(continuity);
     const stage = page
       .locator("form")
-      .filter({ has: page.getByRole("button", { name: "Record stage change", exact: true }) });
-    await stage.getByLabel("Next stage", { exact: true }).selectOption("evaluating");
+      .filter({ has: page.getByRole("button", { name: "Record the move", exact: true }) });
+    await stage
+      .getByLabel("Where the work should go next", { exact: true })
+      .selectOption("evaluating");
     await stage
       .getByLabel("Reason", { exact: true })
       .fill("Client acknowledged the current brief and the reviewed option.");
-    await stage.getByRole("button", { name: "Record stage change", exact: true }).click();
+    await stage.getByRole("button", { name: "Record the move", exact: true }).click();
     await recorded(page);
     const [beforePause] = await db.select().from(schema.cases).where(eq(schema.cases.id, f.caseId));
     if (!beforePause?.nextAction || !beforePause.nextActionDueAt)
@@ -103,18 +106,21 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     await page.goto(continuity);
     const disposition = page
       .locator("form")
-      .filter({ has: page.getByRole("button", { name: "Record disposition", exact: true }) });
-    await disposition.getByLabel("Case disposition", { exact: true }).selectOption("paused");
+      .filter({ has: page.getByRole("button", { name: "Record the change", exact: true }) });
+    await disposition
+      .getByLabel("What is happening with the deal?", { exact: true })
+      .selectOption("paused");
     await disposition.getByLabel("Reason", { exact: true }).fill("Client requested a pause");
     await disposition.getByLabel("Waiting for", { exact: true }).fill("Client availability");
-    await disposition
-      .getByLabel("Review date (UTC)", { exact: true })
-      .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
-    await disposition.getByRole("button", { name: "Record disposition", exact: true }).click();
+    await fillAgencyInstant(
+      disposition.getByLabel("Review date", { exact: true }),
+      new Date(Date.now() + 86400000),
+    );
+    await disposition.getByRole("button", { name: "Record the change", exact: true }).click();
     await recorded(page);
     await expect(
       page.getByText(
-        "This case is paused. Requirements and property actions can resume after reopening.",
+        "This deal is paused. Requirements and property actions can resume after reopening.",
         {
           exact: true,
         },
@@ -126,24 +132,27 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
       page.locator(`time[datetime="${beforePause.nextActionDueAt.toISOString()}"]`),
     ).toHaveCount(0);
     await expect(
-      page.getByRole("button", { name: "Record a new requirements revision", exact: true }),
+      page.getByRole("button", { name: "Record updated requirements", exact: true }),
     ).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Record next action", exact: true })).toHaveCount(
       0,
     );
     await page.getByRole("link", { name: "Review reopening", exact: true }).click();
-    await disposition.getByLabel("Case disposition", { exact: true }).selectOption("active");
+    await disposition
+      .getByLabel("What is happening with the deal?", { exact: true })
+      .selectOption("active");
     await disposition.getByLabel("Reason", { exact: true }).fill("Client asked to resume");
     await disposition
       .getByLabel("Next action when reopening", { exact: true })
       .fill("Review the resumed case with the client");
-    await disposition
-      .getByLabel("Next action due (UTC)", { exact: true })
-      .fill(new Date(Date.now() + 172800000).toISOString().slice(0, 16));
-    await disposition.getByRole("button", { name: "Record disposition", exact: true }).click();
+    await fillAgencyInstant(
+      disposition.getByLabel("Next action due", { exact: true }),
+      new Date(Date.now() + 172800000),
+    );
+    await disposition.getByRole("button", { name: "Record the change", exact: true }).click();
     await recorded(page);
     await expect(
-      page.getByRole("button", { name: "Record a new requirements revision", exact: true }),
+      page.getByRole("button", { name: "Record updated requirements", exact: true }),
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Record next action", exact: true }),
@@ -172,14 +181,17 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     const receiver = await other.newPage();
     await receiver.goto(continuity);
     const acceptance = receiver.locator("form").filter({
-      has: receiver.getByRole("button", { name: "Accept case and commitments", exact: true }),
+      has: receiver.getByRole("button", {
+        name: "Accept the deal and its next steps",
+        exact: true,
+      }),
     });
     await acceptance
       .getByLabel("Reason", { exact: true })
       .fill("I reviewed and accept all current commitments.");
     await acceptance.getByRole("checkbox").check();
     await acceptance
-      .getByRole("button", { name: "Accept case and commitments", exact: true })
+      .getByRole("button", { name: "Accept the deal and its next steps", exact: true })
       .click();
     await recorded(receiver);
     await expect(
@@ -191,20 +203,22 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     await receiver.goto(continuity);
     const closure = receiver
       .locator("form")
-      .filter({ has: receiver.getByRole("button", { name: "Record disposition", exact: true }) });
+      .filter({ has: receiver.getByRole("button", { name: "Record the change", exact: true }) });
     const fillClosure = async () => {
-      await closure.getByLabel("Case disposition", { exact: true }).selectOption("closed");
+      await closure
+        .getByLabel("What is happening with the deal?", { exact: true })
+        .selectOption("closed");
       await closure.getByLabel("Reason", { exact: true }).fill("Client chose not to proceed");
       await closure.getByLabel("Recorded outcome", { exact: true }).fill("No transaction occurred");
       await closure
-        .getByLabel("Retention disposition", { exact: true })
+        .getByLabel("How the records are kept afterwards", { exact: true })
         .fill("Retain under the recorded current policy");
       await closure
-        .getByLabel("Aftercare disposition", { exact: true })
+        .getByLabel("What aftercare is planned", { exact: true })
         .fill("No outstanding obligations after task resolution");
     };
     await fillClosure();
-    await closure.getByRole("button", { name: "Record disposition", exact: true }).click();
+    await closure.getByRole("button", { name: "Record the change", exact: true }).click();
     await expect(
       receiver.getByText(
         "This step is not available. Check the current state and required evidence.",
@@ -215,7 +229,7 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
       (await db.select().from(schema.cases).where(eq(schema.cases.id, f.caseId)))[0]?.disposition,
     ).toBe("active");
     await receiver.goto(hostUrl("staff", `/en/tasks/${f.taskId}`));
-    await receiver.getByLabel("Status", { exact: true }).selectOption("cancelled");
+    await receiver.getByLabel("Where it stands", { exact: true }).selectOption("cancelled");
     await receiver
       .getByLabel("Outcome, dependency or cancellation reason", { exact: true })
       .fill("Client withdrew the request; follow-up is no longer required.");
@@ -225,7 +239,7 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     ).toBeVisible();
     await receiver.goto(continuity);
     await fillClosure();
-    await closure.getByRole("button", { name: "Record disposition", exact: true }).click();
+    await closure.getByRole("button", { name: "Record the change", exact: true }).click();
     await recorded(receiver);
     const [closed] = await db.select().from(schema.cases).where(eq(schema.cases.id, f.caseId));
     expect(closed).toMatchObject({
@@ -236,7 +250,7 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     expect(closed?.commitmentDispositions).toHaveProperty(f.taskId);
     await expect(
       receiver.getByText(
-        "This case is closed. Its requirements and recorded activity remain available.",
+        "This deal is closed. Its requirements and recorded activity remain available.",
         {
           exact: true,
         },
@@ -249,7 +263,7 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
       receiver.getByRole("link", { name: "Review reopening", exact: true }),
     ).toHaveAttribute("href", `/en/cases/${f.caseId}/continuity`);
     for (const name of [
-      "Record a new requirements revision",
+      "Record updated requirements",
       "Record next action",
       "Suggest a property",
       "Record feedback",
@@ -257,12 +271,12 @@ test("exact Brief acknowledgement, accepted broker handover and individually res
     ])
       await expect(receiver.getByRole("button", { name, exact: true })).toHaveCount(0);
     await expect(
-      receiver.getByRole("button", { name: "Post in this case", exact: true }),
+      receiver.getByRole("button", { name: "Post in this deal", exact: true }),
     ).toBeVisible();
     await client.reload();
     await expect(
       client.getByText(
-        "This case is closed. Its requirements and recorded activity remain available.",
+        "This deal is closed. Its requirements and recorded activity remain available.",
         { exact: true },
       ),
     ).toBeVisible();

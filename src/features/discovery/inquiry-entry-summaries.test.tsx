@@ -7,7 +7,7 @@ import type { ListingCard } from "@/server/listings/view-models";
 import InquiryPage from "../../../app/public/[locale]/(site)/inquire/page";
 import { discoveryCopy } from "./copy";
 import { InquiryForm } from "./inquiry-form";
-import { inquiryListingSummary } from "./inquiry-listing-summaries";
+import { InquiryListingSummaries, inquiryListingSummary } from "./inquiry-listing-summaries";
 import { emptyInquiry, type InquiryState } from "./inquiry-state";
 
 const source = vi.hoisted(() => vi.fn());
@@ -101,10 +101,13 @@ it("shows each already-read approved photo/fact summary in chosen order before t
   expect(source.mock.calls.map((call) => call[1].reference)).toEqual(
     cards.map((card) => card.reference),
   );
-  const purpose = screen.getByRole("combobox", { name: "Purpose" });
+  const purpose = screen.getByRole("combobox", { name: "What would you like to do?" });
   for (const [index, node] of summaries.entries()) {
     const card = cards[index];
     if (!card) throw new Error("Summary has no selected source");
+    expect(
+      within(node as HTMLElement).getByRole("heading", { level: 2, name: card.title ?? "" }),
+    ).toBeVisible();
     expect(node.compareDocumentPosition(purpose) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(within(node as HTMLElement).getByText(copy.unknown)).toBeVisible();
     expect(within(node as HTMLElement).getByText("Built area")).toBeVisible();
@@ -116,6 +119,17 @@ it("shows each already-read approved photo/fact summary in chosen order before t
   }
   expect(screen.getByText(/Property context loaded with this page/)).toBeVisible();
   expect(view.container.querySelector('[name="selectedListings"]')).toHaveValue(selection);
+});
+
+it("keeps reviewed listing headings below the review section heading", () => {
+  render(
+    <section>
+      <h2>Review your inquiry</h2>
+      <InquiryListingSummaries listings={cards} locale="en" copy={copy} stage="review" />
+    </section>,
+  );
+  for (const card of cards)
+    expect(screen.getByRole("heading", { level: 3, name: card.title ?? "" })).toBeVisible();
 });
 
 it.each(["changed", "unavailable", "ambiguous"])(
@@ -162,7 +176,12 @@ it("removes page-loaded summaries after a source conflict while retaining the or
     operationId: "issued-operation",
     expectedRevision: null,
     responseId: "initial",
-    values: { ...emptyInquiry, selectedListings: selection },
+    values: {
+      ...emptyInquiry,
+      selectedListings: selection,
+      message: "Keep my exact inquiry after the source changes",
+      contactValue: "visitor@example.test",
+    },
     outcome: { kind: "idle" },
   };
   const view = render(
@@ -186,8 +205,11 @@ it("removes page-loaded summaries after a source conflict while retaining the or
   );
   expect(view.container.querySelectorAll("[data-entry-listing]")).toHaveLength(3);
   await user.click(screen.getByRole("button", { name: "Review inquiry" }));
+  expect(await screen.findByRole("button", { name: "Review current sources" })).toBeVisible();
   expect(view.container.querySelectorAll("[data-entry-listing]")).toHaveLength(0);
   expect(view.container.querySelector('[name="selectedListings"]')).toHaveValue(selection);
+  expect(screen.getByRole("textbox", { name: "Your inquiry" })).toHaveValue(state.values.message);
+  expect(screen.getByRole("textbox", { name: "Email" })).toHaveValue(state.values.contactValue);
 });
 
 it("passes only the public card projection rather than arbitrary source details", () => {

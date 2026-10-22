@@ -1,6 +1,59 @@
 import { expect, it } from "vitest";
 import { extractLiveSource } from "./capture";
 
+it("recognizes the measured Russian source reference label without accepting unrelated labels", () => {
+  const html = (label: string) =>
+    `<html lang="ru"><title>Source</title><div class="post_content"><div class="propslist"><span class="proptitle">${label}</span><span class="propval">791</span></div></div></html>`;
+  expect(
+    extractLiveSource(html("Лот №:"), "https://makler-realty.ru/listing/source/").listing_reference,
+  ).toBe("791");
+  expect(
+    extractLiveSource(html("Order №:"), "https://makler-realty.ru/listing/source/")
+      .listing_reference,
+  ).toBeNull();
+});
+
+it("selects measured tag posts only within the guarded content column and source route", () => {
+  const html =
+    '<html lang="ru"><title>Tag source</title><nav>Navigation</nav><div class="col-lg-9"><div id="content"><div class="post"><h2><a href="/original-post/">Original post</a></h2><p>Source excerpt.</p></div><form>Search controls</form></div></div><aside>Sidebar</aside></html>';
+  const source = extractLiveSource(html, "https://makler-realty.ru/tag/source/");
+  expect(source.content_scope).toBe("column:tag_articles");
+  expect(source.extracted_body_text).toBe("Original post Source excerpt.");
+  expect(extractLiveSource(html, "https://makler-realty.ru/unknown/").content_scope).toBe(
+    "missing_main_content",
+  );
+});
+
+it("declares only the measured empty RU taxonomy shape as an empty source, never a failed selector", () => {
+  const html =
+    '<html lang="ru"><title>Studio source</title><nav>Navigation</nav><div class="col-lg-9"><div class="row" id="scroll-to"></div></div><aside>Sidebar</aside></html>';
+  const source = extractLiveSource(html, "https://makler-realty.ru/category-type/studio/");
+  expect(source).toMatchObject({
+    content_scope: "column:empty_archive",
+    content_state: "verified_empty_archive",
+    extracted_body_text: "",
+  });
+  for (const url of [
+    "https://makler-realty.ru/unknown/",
+    "https://makler-realty.com/category-type/studio/",
+    "https://makler-realty.ru/category-type/studio/?s=unknown",
+  ]) {
+    expect(extractLiveSource(html, url).content_scope).toBe("missing_main_content");
+  }
+  expect(
+    extractLiveSource(
+      html.replace('id="scroll-to"', 'id="unknown"'),
+      "https://makler-realty.ru/category-type/studio/",
+    ).content_scope,
+  ).toBe("missing_main_content");
+  expect(
+    extractLiveSource(
+      html.replace("</div></div><aside>", "<p>Unrecognized content</p></div></div><aside>"),
+      "https://makler-realty.ru/category-type/studio/",
+    ).content_scope,
+  ).toBe("missing_main_content");
+});
+
 it("retains the recorded WordPress sitemap HTML and its source URLs without executing content", () => {
   const html =
     '<title>XML Sitemap</title><div id="intro"><h1>XML Sitemap</h1><p>Original source explanation</p></div><div id="content"><table><tr><th>URL</th><th>Priority</th><th>Change frequency</th><th>Last modified (GMT)</th></tr><tr><td><a href="/original-page/">https://makler-realty.com/original-page/</a></td><td>60%</td><td>Weekly</td><td>2026-10-01 06:47</td></tr></table></div><div id="footer">Source attribution</div><script>throw Error("executed")</script>';

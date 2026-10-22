@@ -4,6 +4,8 @@ import { getDb } from "@/db/client";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { translationCopy } from "@/features/inventory/translation-copy";
 import { TranslationEditor } from "@/features/inventory/translation-editor";
+import { ListingNavigation } from "@/features/inventory/workspace";
+import { privateRead } from "@/features/work/screens";
 import { isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
@@ -20,7 +22,9 @@ export default async function TranslationPage({
   const session = await requireStaffPage(locale),
     db = getDb(),
     copy = translationCopy(locale);
-  const data = await translationWorkbench(db, session.actor, reference, language),
+  const data = await privateRead(() =>
+      translationWorkbench(db, session.actor, reference, language),
+    ),
     row = data.translation;
   const resource = {
     type: "listing",
@@ -39,9 +43,11 @@ export default async function TranslationPage({
       <h1 className="text-title font-semibold">
         {copy.heading} · <bdi>{language.toUpperCase()}</bdi>
       </h1>
+      <ListingNavigation locale={locale} reference={reference} current="translations" />
       <p>{copy.next}</p>
       <div className="grid items-start gap-8 lg:grid-cols-2">
         <FrozenPreview
+          headingLevel={2}
           locale={locale}
           reference={reference}
           revision={data.revision}

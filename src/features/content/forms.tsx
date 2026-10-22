@@ -1,7 +1,11 @@
 "use client";
 import { useState, useSyncExternalStore } from "react";
+import { isInstantInput } from "@/domain/time";
 import { workCopy } from "@/features/work/copy";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import type { ContentPlaceOption } from "@/server/content/commands";
+import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
@@ -225,6 +229,11 @@ export function ContentReviewForm({
   const copy = contentCopy(locale);
   return (
     <ActionForm
+      formatValue={(name, value) =>
+        name === "expiresAt" && isInstantInput(value)
+          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
+          : value
+      }
       initialState={initialState}
       action={action}
       permalink={`/${locale}/content/${id}`}
@@ -241,10 +250,11 @@ export function ContentReviewForm({
         <>
           <FormField {...form.field("note")} label={copy.note} required maxLength={1500} />
           {decision !== "withdraw" ? (
-            <FormField
+            <DateTimeField
               {...form.field("expiresAt")}
               label={copy.expiry}
-              type="datetime-local"
+              locale={isPublicLocale(locale) ? locale : "bg"}
+              onValueChange={(value) => form.setValue("expiresAt", value)}
               required
             />
           ) : null}

@@ -49,6 +49,7 @@ export function inquiryRowView(
   return {
     id: inquiry.id,
     name: inquiry.preferredName?.trim() || null,
+    purpose: inquiry.purpose ? copy.purposes[inquiry.purpose] : null,
     reference: inquiry.reference,
     context: listing
       ? { kind: "listing", value: listing }

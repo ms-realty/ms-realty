@@ -5,5 +5,9 @@
   "languageList": "Выберите язык",
   "currentLanguage": "Текущий язык: {language}",
   "closeMenu": "Закрыть меню",
-  "openMenu": "Открыть меню"
+  "openMenu": "Открыть меню",
+  "privateAccess": {
+    "checking": "Проверка доступа…",
+    "retry": "Проверить доступ снова"
+  }
 }

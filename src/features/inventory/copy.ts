@@ -1,3 +1,4 @@
+import { isPublicLocale, localeEndonyms } from "@/i18n/config";
 import type { FormCopy } from "@/ui/form/contract";
 
 const en = {
@@ -32,21 +33,25 @@ const en = {
   blocked:
     "This action could not be completed. Review the current revision, required evidence and your access before trying again.",
   succeeded: "The action was recorded.",
-  operation: "Operation receipt",
+  operation: "Receipt for this request",
   recorded: "Recorded",
   pending: "Outcome not yet confirmed",
   revision: "Revision",
-  state: "Status",
+  lastChanged: "Last changed",
+  checkCode: "Check code",
+  technical: "Technical details",
+  state: "Where it stands",
   location: "Location",
   reference: "Reference",
-  purpose: "Purpose",
+  purpose: "Sale or rent",
   permissions: "Your role cannot edit this record.",
   o10: {
     instruction: "Open the listing that is waiting for action, or search for a property by number.",
+    about: "The properties and listings the agency works with.",
     search: "Search",
     searchHint: "Listing number, title or settlement",
     filters: "Filters",
-    purpose: "Purpose",
+    purpose: "Sale or rent",
     type: "Property type",
     any: "Any",
     apply: "Show",
@@ -269,12 +274,11 @@ const en = {
     requiredError: "Fill in this field.",
     chooseError: "Choose a value from the list.",
     invalidError: "Check this value.",
-    noscriptLeave:
-      "Without JavaScript, save before opening Photos or Review, or your changes are lost.",
+    noscriptLeave: "Save your changes before opening Photos or Review.",
   },
   labels: {
     propertyType: "Property type",
-    purpose: "Purpose",
+    purpose: "Sale or rent",
     country: "Country",
     region: "Region",
     settlement: "Settlement",
@@ -283,12 +287,12 @@ const en = {
     description: "Bulgarian description",
     brokerNote:
       "Private broker intake note (optional; never published or sent to Butler automatically)",
-    priceState: "Price status",
+    priceState: "What we know about the price",
     price: "Price in EUR",
-    areaState: "Area status",
+    areaState: "What we know about the area",
     area: "Area in m²",
     areaBasis: "Area basis",
-    bedroomsState: "Bedroom status",
+    bedroomsState: "What we know about the bedrooms",
     bedrooms: "Bedrooms",
     sourceReference: "Source or evidence reference",
     sourceClass: "Source type",
@@ -304,7 +308,8 @@ const en = {
     reference: "Reference",
     recordedAt: "Recorded at",
     unknown: "We could not confirm the result",
-    draftRetained: "Your entered values are retained below. Check the operation before retrying.",
+    draftRetained:
+      "Your entered values are retained below. Check the same request before retrying.",
   } satisfies FormCopy,
 };
 type Copy = typeof en;
@@ -341,21 +346,25 @@ const bg: Copy = {
   blocked:
     "Действието не е завършено. Проверете текущата версия, нужните доказателства и вашия достъп.",
   succeeded: "Действието е записано.",
-  operation: "Потвърждение за действие",
+  operation: "Потвърждение за заявката",
   recorded: "Записано",
   pending: "Резултатът още не е потвърден",
   revision: "Версия",
-  state: "Състояние",
+  lastChanged: "Последна промяна",
+  checkCode: "Контролен код",
+  technical: "Технически подробности",
+  state: "Докъде е стигнало",
   location: "Местоположение",
   reference: "Референция",
-  purpose: "Цел",
+  purpose: "Продажба или наем",
   permissions: "Вашата роля няма право да редактира този запис.",
   o10: {
     instruction: "Отворете обявата, която чака действие, или потърсете имот по номер.",
+    about: "Имотите и обявите, с които работи агенцията.",
     search: "Търсене",
     searchHint: "Номер на обявата, заглавие или населено място",
     filters: "Филтри",
-    purpose: "Цел",
+    purpose: "Продажба или наем",
     type: "Вид имот",
     any: "Всички",
     apply: "Покажете",
@@ -578,12 +587,11 @@ const bg: Copy = {
     requiredError: "Попълнете това поле.",
     chooseError: "Изберете стойност от списъка.",
     invalidError: "Проверете тази стойност.",
-    noscriptLeave:
-      "Без JavaScript запишете, преди да отворите „Снимки“ или прегледа, иначе промените се губят.",
+    noscriptLeave: "Запишете промените, преди да отворите „Снимки“ или прегледа.",
   },
   labels: {
     propertyType: "Вид имот",
-    purpose: "Цел",
+    purpose: "Продажба или наем",
     country: "Държава",
     region: "Област",
     settlement: "Населено място",
@@ -592,12 +600,12 @@ const bg: Copy = {
     description: "Описание на български",
     brokerNote:
       "Частна бележка за въвеждане (по избор; не се публикува или изпраща автоматично към Butler)",
-    priceState: "Състояние на цената",
+    priceState: "Какво знаем за цената",
     price: "Цена в EUR",
-    areaState: "Състояние на площта",
+    areaState: "Какво знаем за площта",
     area: "Площ в m²",
     areaBasis: "Вид площ",
-    bedroomsState: "Състояние на спалните",
+    bedroomsState: "Какво знаем за спалните",
     bedrooms: "Спални",
     sourceReference: "Източник или доказателство",
     sourceClass: "Вид източник",
@@ -613,7 +621,7 @@ const bg: Copy = {
     reference: "Референция",
     recordedAt: "Записано на",
     unknown: "Резултатът не е потвърден",
-    draftRetained: "Въведеното е запазено по-долу. Проверете действието преди повторен опит.",
+    draftRetained: "Въведеното е запазено по-долу. Проверете същата заявка преди повторен опит.",
   },
 };
 const ru: Copy = {
@@ -648,21 +656,25 @@ const ru: Copy = {
     "Сохраняйте неизвестные значения. Противоречащие числа разделяйте знаком |. Не выбирайте значение без доказательств.",
   blocked: "Действие не завершено. Проверьте текущую версию, доказательства и ваши права.",
   succeeded: "Действие записано.",
-  operation: "Подтверждение действия",
+  operation: "Подтверждение заявки",
   recorded: "Записано",
   pending: "Результат ещё не подтверждён",
   revision: "Версия",
-  state: "Статус",
+  lastChanged: "Последнее изменение",
+  checkCode: "Контрольный код",
+  technical: "Технические подробности",
+  state: "Как продвигается",
   location: "Местоположение",
   reference: "Референция",
-  purpose: "Цель",
+  purpose: "Продажа или аренда",
   permissions: "Ваша роль не может редактировать эту запись.",
   o10: {
     instruction: "Откройте объявление, которое ждёт действия, или найдите объект по номеру.",
+    about: "Объекты и объявления, с которыми работает агентство.",
     search: "Поиск",
     searchHint: "Номер объявления, заголовок или населённый пункт",
     filters: "Фильтры",
-    purpose: "Цель",
+    purpose: "Продажа или аренда",
     type: "Вид объекта",
     any: "Любой",
     apply: "Показать",
@@ -887,12 +899,11 @@ const ru: Copy = {
     requiredError: "Заполните это поле.",
     chooseError: "Выберите значение из списка.",
     invalidError: "Проверьте это значение.",
-    noscriptLeave:
-      "Без JavaScript сохраните перед переходом в «Фото» или к проверке, иначе изменения пропадут.",
+    noscriptLeave: "Сохраните изменения перед переходом в «Фото» или к проверке.",
   },
   labels: {
     propertyType: "Вид объекта",
-    purpose: "Цель",
+    purpose: "Продажа или аренда",
     country: "Страна",
     region: "Регион",
     settlement: "Населённый пункт",
@@ -901,12 +912,12 @@ const ru: Copy = {
     description: "Описание на болгарском",
     brokerNote:
       "Частная заметка для ввода (необязательно; не публикуется и не передаётся Butler автоматически)",
-    priceState: "Статус цены",
+    priceState: "Что известно о цене",
     price: "Цена в EUR",
-    areaState: "Статус площади",
+    areaState: "Что известно о площади",
     area: "Площадь в m²",
     areaBasis: "Вид площади",
-    bedroomsState: "Статус спален",
+    bedroomsState: "Что известно о спальнях",
     bedrooms: "Спальни",
     sourceReference: "Источник или доказательство",
     sourceClass: "Вид источника",
@@ -922,7 +933,7 @@ const ru: Copy = {
     reference: "Референция",
     recordedAt: "Записано",
     unknown: "Результат не подтверждён",
-    draftRetained: "Введённые значения сохранены ниже. Проверьте действие перед повтором.",
+    draftRetained: "Введённые значения сохранены ниже. Проверьте ту же заявку перед повтором.",
   },
 };
 export const inventoryCopy = (locale: string): Copy =>
@@ -944,6 +955,45 @@ const options = {
   other: ["Other", "Друг", "Другой"],
   sale: ["Sale", "Продажба", "Продажа"],
   long_term_rent: ["Long-term rent", "Дългосрочен наем", "Долгосрочная аренда"],
+  month: ["Per month", "На месец", "В месяц"],
+  asking: ["Asking price", "Офертна цена", "Цена предложения"],
+  negotiable: ["Negotiable price", "Цена по договаряне", "Цена по согласованию"],
+  fixed: ["Fixed price", "Фиксирана цена", "Фиксированная цена"],
+  indicative: ["Indicative price", "Ориентировъчна цена", "Ориентировочная цена"],
+  unspecified: ["Not specified", "Не е уточнено", "Не указано"],
+  asking_total: ["Total asking price", "Обща офертна цена", "Полная цена предложения"],
+  asking_monthly: ["Monthly asking price", "Месечна офертна цена", "Ежемесячная цена предложения"],
+  built_up: ["Built area", "Застроена площ", "Застроенная площадь"],
+  available: ["Available", "Свободен", "Доступен"],
+  confirmation_required: [
+    "Availability needs confirmation",
+    "Наличността чака потвърждение",
+    "Доступность требует подтверждения",
+  ],
+  negotiating: ["Under negotiation", "В процес на договаряне", "Ведутся переговоры"],
+  reserved_with_recorded_basis: [
+    "Reservation recorded",
+    "Записана резервация",
+    "Бронирование зафиксировано",
+  ],
+  sold: ["Sold", "Продаден", "Продан"],
+  let: ["Let", "Отдаден под наем", "Сдан в аренду"],
+  withdrawn: ["Withdrawn", "Оттеглен", "Снят"],
+  draft: ["Draft", "Чернова", "Черновик"],
+  needs_facts: [
+    "Property facts need review",
+    "Данните за имота чакат преглед",
+    "Сведения об объекте требуют проверки",
+  ],
+  in_review: ["Under review", "В процес на преглед", "На проверке"],
+  approved_revision: ["Revision approved", "Версията е одобрена", "Версия одобрена"],
+  changes_requested: ["Changes requested", "Поискани промени", "Запрошены изменения"],
+  active: ["Public version active", "Публичната версия е активна", "Публичная версия активна"],
+  restricted: [
+    "Public visibility restricted",
+    "Публичната видимост е ограничена",
+    "Публичная видимость ограничена",
+  ],
   living: ["Living area", "Жилищна площ", "Жилая площадь"],
   usable: ["Usable area", "Полезна площ", "Полезная площадь"],
   built: ["Built area", "Застроена площ", "Застроенная площадь"],
@@ -963,8 +1013,22 @@ const options = {
   legacy_import: ["Legacy import", "Стар импорт", "Прежний импорт"],
 } satisfies Record<string, [string, string, string]>;
 export function optionLabel(value: string, locale: string) {
+  if (isPublicLocale(value)) return localeEndonyms[value];
+  if (value === "BG" || value === "GR")
+    return (
+      new Intl.DisplayNames([isPublicLocale(locale) ? locale : "en"], {
+        type: "region",
+      }).of(value) ?? value
+    );
   const labels = options[value as keyof typeof options];
-  return labels?.[locale === "bg" ? 1 : locale === "ru" ? 2 : 0] ?? value.replaceAll("_", " ");
+  return (
+    labels?.[locale === "bg" ? 1 : locale === "ru" ? 2 : 0] ??
+    (locale === "bg"
+      ? "Друга записана стойност"
+      : locale === "ru"
+        ? "Другое записанное значение"
+        : "Other recorded value")
+  );
 }
 
 /** "1 спалня", "2 спални": the count with its plural form for the page locale. */

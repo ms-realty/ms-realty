@@ -1,7 +1,8 @@
 "use server";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
-import { isStaffLocale } from "@/i18n/config";
+import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
 import {
   approveCaseProcess,
@@ -13,11 +14,11 @@ import {
   revokeCaseEvidence,
   startCaseProcessReview,
 } from "@/server/compliance/commands";
-import { processLocalInstant } from "@/server/compliance/local-time";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import { type ProcessBinding, processFields, processPath, processScope } from "./contract";
 
@@ -32,7 +33,7 @@ export async function processAction(
   const scope = processScope(binding),
     c = caseCopy(locale),
     fields = processFields[binding.command];
-  const values = readFormValues<FormValues>(form, fields),
+  const values = readTimeFormValues<FormValues>(form, fields),
     envelope = readFormEnvelope(form, scope);
   const operationId = envelope?.operationId ?? issueFormOperation(scope);
   const basePath = processPath(locale, binding.caseId);
@@ -60,7 +61,7 @@ export async function processAction(
         expectedVersion: envelope.expectedRevision ?? 0,
       };
       const value = (name: string) => values[name] ?? "";
-      const instant = (name: string) => processLocalInstant(value(name));
+      const instant = (name: string) => formInstant(values, name);
       const nullableInstant = (name: string) => (value(name) ? instant(name) : null);
       switch (binding.command) {
         case "policy": {
@@ -196,7 +197,17 @@ export async function processAction(
         code: "VALIDATION_FAILED",
         message: c.validation,
         fieldErrors: Object.fromEntries(
-          fields.filter((f) => error.fieldErrors?.[f]).map((f) => [f, [c.invalid]]),
+          fields
+            .filter((f) => error.fieldErrors?.[f])
+            .map((f) => [
+              f,
+              [
+                timeReasonMessage(
+                  isPublicLocale(locale) ? locale : "bg",
+                  error.fieldErrors?.[f]?.[0],
+                ) ?? c.invalid,
+              ],
+            ]),
         ),
       },
     };

@@ -3,6 +3,8 @@ import { and, eq, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { caseParticipants, operations, parties, proposalRevisions, proposals } from "@/db/schema";
+import { isPublicLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
 import { can } from "@/server/authz";
 import { caseFor } from "@/server/cases/shared";
 import { assertCaseAgreementReady } from "@/server/compliance/agreement-gate";
@@ -32,7 +34,7 @@ export function processCopy(locale: string) {
       "Работа ведётся по предоставленной и утверждённой политике. Приложение не удостоверяет законность или завершение сделки.",
       "Use a supplied, approved operating policy. This application does not certify legal sufficiency or a completed transaction.",
     ),
-    documents: s("Документи по случая", "Документы дела", "Case documents"),
+    documents: s("Документи по сделката", "Документы сделки", "Deal documents"),
     policy: s("Утвърждаване на политика", "Утверждение политики", "Approve an operating policy"),
     policyHint: s(
       "Въведете само условията от проверения документ. Всеки ред изисква собствено доказателство и посочен специалист.",
@@ -42,7 +44,8 @@ export function processCopy(locale: string) {
     choose: s("Изберете", "Выберите", "Choose"),
     save: s("Запис", "Записать", "Record"),
     refresh: s("Обновяване", "Обновить", "Refresh"),
-    status: s("Резултат от операцията", "Результат операции", "Operation result"),
+    status: s("Резултат от заявката", "Результат заявки", "Result of the request"),
+    lastChanged: s("Последна промяна", "Последнее изменение", "Last changed"),
     review: s("Проверка на предложението", "Проверка предложения", "Proposal review"),
     start: s("Започване на проверка", "Начать проверку", "Start review"),
     approve: s("Потвърждаване на проверката", "Подтвердить проверку", "Approve reviewed evidence"),
@@ -69,7 +72,7 @@ export function processCopy(locale: string) {
       "Утверждённой политики нет. Сначала загрузите и проверьте документ.",
       "No approved policy. Upload and review the supplied document first.",
     ),
-    time: s("Часова зона Europe/Sofia", "Часовой пояс Europe/Sofia", "Time zone: Europe/Sofia"),
+    time: s("Софийско време", "По софийскому времени", "Sofia time"),
     yes: s("Да", "Да", "Yes"),
     no: s("Не", "Нет", "No"),
     policies: s("Утвърдени политики", "Утверждённые политики", "Approved policies"),
@@ -107,9 +110,9 @@ export function processCopy(locale: string) {
         "Transaction checks, one per line",
       ),
       partyItems: s(
-        "Проверки на всяка страна — по една на ред",
-        "Проверки каждой стороны — по одной на строку",
-        "Checks for each party, one per line",
+        "Проверки за всеки човек или фирма — по една на ред",
+        "Проверки для каждого человека или компании — по одной на строку",
+        "Checks for each person or company, one per line",
       ),
       withdrawalDays: s(
         "Срок за отказ по политиката, дни",
@@ -266,6 +269,8 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
         .where(inArray(parties.id, partyIds))
     : [];
   const blank = { value: "", label: c.choose };
+  const changed = (date: Date) =>
+    `${c.lastChanged}: ${formatDateTime(isPublicLocale(props.locale) ? props.locale : "bg", date)}`;
   const opts = (values: string[]) => [
     blank,
     ...values.map((value) => ({ value, label: c.values[value as keyof typeof c.values] ?? value })),
@@ -290,7 +295,7 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
       )
       .map(({ document, file }) => ({
         value: file.id,
-        label: `${document.reference} · v${file.versionNumber} · ${file.fileName}`,
+        label: `${document.reference} · ${file.fileName} · ${changed(file.updatedAt)}`,
       })),
   ];
   const people = [
@@ -310,7 +315,6 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
     type,
     required,
     ...(options ? { options } : {}),
-    ...(type === "datetime-local" ? { hint: c.time } : {}),
   });
   const bind = (command: ProcessBinding["command"], rest = {}): ProcessBinding => ({
     caseId: id,
@@ -442,7 +446,7 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
               blank,
               ...offered.map(({ proposal, revision }) => ({
                 value: revision.id,
-                label: `${proposal.reference} · v${revision.revisionNumber}`,
+                label: `${proposal.reference} · ${changed(revision.updatedAt)}`,
               })),
             ]),
             field("policyId", "select", policies),
@@ -668,7 +672,6 @@ export async function RestrictedProcessScreen(props: ScreenProps & { id: string 
               name: "reportedAt",
               label: c.fields.reportedAt,
               type: "datetime-local",
-              hint: c.time,
             },
           ]}
         />

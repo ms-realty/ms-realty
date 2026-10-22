@@ -1,8 +1,15 @@
 "use server";
 import { randomUUID } from "node:crypto";
-import { displayLocale, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import { redirect } from "next/navigation";
+import { isCurrencyCode } from "@/domain/ids";
+import { offsetInputValue } from "@/domain/time";
+import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import { formatDateTime } from "@/i18n/format";
+import { moneyCopy } from "@/i18n/money-copy";
+import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
 import { AppError } from "@/server/errors";
+import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import {
   createProposal,
@@ -12,10 +19,11 @@ import {
 } from "@/server/proposals/service";
 import { amountToMinor } from "@/server/proposals/terms";
 import type { FormState, FormValues } from "@/ui/form/contract";
-import { issueFormOperation, readFormEnvelope, readFormValues } from "@/ui/form/server";
+import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import {
   type ProposalCommand,
+  proposalEnhancementField,
   proposalFields,
   proposalScope,
   proposalStatus,
@@ -46,7 +54,7 @@ export async function proposalAction(
     p = proposalCopy(locale),
     scope = proposalScope(command, id);
   const fields = proposalFields[command],
-    values = readFormValues<FormValues>(data, fields),
+    values = readTimeFormValues<FormValues>(data, fields),
     envelope = readFormEnvelope(data, scope);
   if (command === "create" || command === "revise")
     values.additionalPartyIds = data
@@ -75,16 +83,22 @@ export async function proposalAction(
         operationId: envelope.operationId,
         expectedVersion: envelope.expectedRevision,
       };
+      const currency = values.currency ?? "";
       const terms = {
         clientPartyId: values.clientPartyId ?? "",
         additionalPartyIds: (values.additionalPartyIds ?? "").split("\n").filter(Boolean),
-        amountMinor: amountToMinor(values.amount ?? ""),
+        amountMinor: isCurrencyCode(currency)
+          ? amountToMinor(values.amount ?? "", isPublicLocale(locale) ? locale : "bg", currency)
+          : Number.NaN,
         currency: values.currency as "EUR",
         period: values.period as "total",
         paymentBasis: values.paymentBasis ?? "",
         conditions: lines(values.conditions),
         inclusions: lines(values.inclusions),
-        deadline: values.deadline ?? "",
+        deadline:
+          command === "create" || command === "revise"
+            ? offsetInputValue(formInstant(values, "deadline"), agencyTimeZone)
+            : "",
       };
       if (command === "create")
         return (
@@ -124,7 +138,16 @@ export async function proposalAction(
     },
     { requireSession: true },
   );
-  if (result.ok)
+  if (result.ok) {
+    const enhancement = data.getAll(proposalEnhancementField);
+    if (
+      context === "client" &&
+      command === "revise" &&
+      !(enhancement.length === 1 && enhancement[0] === "yes")
+    )
+      // The new unsubmitted revision hides this form from the client on the HTML response.
+      // Its existing signed, actor-scoped operation status survives that visibility change.
+      redirect(status.href);
     return {
       ...state,
       outcome: {
@@ -134,13 +157,16 @@ export async function proposalAction(
           reference: result.data.reference,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: `${new Intl.DateTimeFormat(isPublicLocale(locale) ? displayLocale(locale) : "en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Sofia" }).format(new Date(result.data.recordedAt))} Europe/Sofia`,
+            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt, {
+              zoneLabel: context === "client",
+            }),
           },
           nextStep: c.nextStep,
           destination: { href: `/${locale}/proposals/${result.data.id}`, label: c.back },
         },
       },
     };
+  }
   const error = result.error;
   if (error.outcome === "unknown")
     return {
@@ -160,7 +186,17 @@ export async function proposalAction(
           (field) =>
             error.fieldErrors?.[field] || (field === "amount" && error.fieldErrors?.amountMinor),
         )
-        .map((field) => [field, [c.invalid]]),
+        .map((field) => [
+          field,
+          [
+            field === "amount"
+              ? moneyCopy(isPublicLocale(locale) ? locale : "bg").invalid
+              : (timeReasonMessage(
+                  isPublicLocale(locale) ? locale : "bg",
+                  error.fieldErrors?.[field]?.[0],
+                ) ?? c.invalid),
+          ],
+        ]),
     );
     return {
       ...state,

@@ -1,11 +1,22 @@
 import { execFileSync } from "node:child_process";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { publicLocales } from "../src/domain/ids";
 import { mapCopy } from "../src/features/discovery/map-copy";
 import { origins } from "./hosts";
 
 // Covers two bounded map attempts plus database setup and the native fallback journey.
 test.setTimeout(60_000);
+
+async function returnFromOpenMap(page: Page) {
+  const toggle = page.getByRole("button", { name: "Hide map", exact: true });
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const panelId = await toggle.getAttribute("aria-controls");
+  expect(panelId).toBeTruthy();
+  await page
+    .locator(`[id="${panelId}"]`)
+    .getByRole("link", { name: "Go to list", exact: true })
+    .click();
+}
 
 function fixture(command = "map", reference?: string) {
   return JSON.parse(
@@ -53,6 +64,7 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await expect(page.getByText("Loading map…", { exact: true })).not.toBeVisible({ timeout: 20000 });
   await expect(page.getByText("The map is unavailable.", { exact: false })).not.toBeVisible();
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
+  await expect(page.getByRole("region", { name: mapCopy("en").title, exact: true })).toHaveCount(1);
   const marker = page.getByRole("button", { name: new RegExp(data.published.reference) });
   await marker.focus();
   await page.keyboard.press("Enter");
@@ -65,7 +77,7 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await page.screenshot({ path: test.info().outputPath("real-map.png"), fullPage: true });
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
-  await page.getByRole("link", { name: "Go to list", exact: true }).click();
+  await returnFromOpenMap(page);
   await expect(page.locator("#property-results")).toBeFocused();
   await page.goto(
     `/en/properties/${data.published.reference}/${data.published.reference.toLowerCase()}`,
@@ -78,7 +90,10 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await expect(page.getByText("Loading map…", { exact: true })).not.toBeVisible({ timeout: 20000 });
   await expect(page.getByText("The map is unavailable.", { exact: false })).not.toBeVisible();
   await expect(page.locator(".msr-map-marker")).toBeVisible();
-  await page.getByRole("link", { name: "Go to list", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: mapCopy("en", "listing").title, exact: true }),
+  ).toHaveCount(1);
+  await returnFromOpenMap(page);
   await expect(page).toHaveURL(/\/en\/properties$/);
   await page.goto(url);
 
