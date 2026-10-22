@@ -186,9 +186,7 @@ for (const javaScriptEnabled of [false, true])
       }
       await unassigned.first().click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Synthetic visitor");
-      await expect(
-        page.getByRole("main").getByText(f.oldestReference, { exact: true }),
-      ).toBeVisible();
+      await expect(page.locator("[data-inquiry-reference]")).toContainText(f.oldestReference);
     });
 
     test("O01 separates staff without access from more work than it lists", async ({
