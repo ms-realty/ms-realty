@@ -301,7 +301,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   );
   await page
     .locator("summary")
-    .filter({ hasText: /^Photo checks$/ })
+    .filter({ hasText: /^Checks and rights for this photo$/ })
     .click();
   await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);

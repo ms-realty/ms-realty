@@ -285,6 +285,67 @@ for (const javaScriptEnabled of [false, true])
       expect(await publicMedia(f.listingId)).toBe(published);
     });
 
+    test("O13 saves and discards photo text independently of rights and publication", async ({
+      page,
+    }) => {
+      const f = seed();
+      const published = await publicMedia(f.listingId);
+      const [original] = await db
+        .select({ asset: schema.mediaAssets })
+        .from(schema.mediaRelations)
+        .innerJoin(
+          schema.mediaAssets,
+          eq(schema.mediaAssets.id, schema.mediaRelations.mediaAssetId),
+        )
+        .where(eq(schema.mediaRelations.id, f.relations[0] ?? ""));
+      if (!original) throw new Error("Missing fixture photo");
+      await openMedia(page, f);
+      await expect(page.getByRole("checkbox", { name: /usage rights and permission/ })).toHaveCount(
+        0,
+      );
+      await page.getByLabel("Visible caption", { exact: true }).fill("Synthetic caption draft");
+      await page
+        .getByLabel("Image description", { exact: true })
+        .fill("Synthetic room description");
+      await page.getByRole("button", { name: "Save photo details", exact: true }).click();
+      await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Photo 1 of 3", exact: true })).toBeVisible();
+      await expect(page.getByLabel("Visible caption", { exact: true })).toHaveValue(
+        "Synthetic caption draft",
+      );
+      const [edited] = await db
+        .select()
+        .from(schema.mediaAssets)
+        .where(eq(schema.mediaAssets.id, original.asset.id));
+      expect(edited).toMatchObject({
+        caption: original.asset.caption,
+        altText: original.asset.altText,
+        rights: original.asset.rights,
+        audience: original.asset.audience,
+        review: original.asset.review,
+        detailsDraft: { caption: "Synthetic caption draft", altText: "Synthetic room description" },
+      });
+      expect(await publicMedia(f.listingId)).toBe(published);
+      await page.reload();
+      await expect(page.getByLabel("Visible caption", { exact: true })).toHaveValue(
+        "Synthetic caption draft",
+      );
+      await page.getByRole("button", { name: "Discard photo draft", exact: true }).click();
+      await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
+      await expect(page.getByLabel("Visible caption", { exact: true })).toHaveValue(
+        original.asset.caption ?? "",
+      );
+      expect(
+        (
+          await db
+            .select()
+            .from(schema.mediaAssets)
+            .where(eq(schema.mediaAssets.id, original.asset.id))
+        )[0]?.detailsDraft,
+      ).toBeNull();
+      expect(await publicMedia(f.listingId)).toBe(published);
+    });
+
     test("O13 checks on a twice-placed photo read back the placement used", async ({ page }) => {
       test.setTimeout(90_000);
       const f = seed();

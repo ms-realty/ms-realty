@@ -31,7 +31,14 @@ import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
 import { NativeForm } from "@/ui/form/native-form";
-import { ArrowDownIcon, ArrowUpIcon, CheckIcon, DocumentIcon, PlusIcon } from "@/ui/icons";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  CheckIcon,
+  ChevronStartIcon,
+  DocumentIcon,
+  PlusIcon,
+} from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 
 import { savePhotoDetails } from "./actions";
@@ -281,11 +288,12 @@ export default async function MediaPage({
   );
   return (
     <div className="mx-auto flex max-w-[96rem] flex-col gap-5 px-gutter py-5 sm:px-gutter-wide sm:py-6">
-      <ListingIdentity locale={locale} reference={listing.reference} title={identity?.title}>
-        {identity?.settlement ? (
-          <p className="text-dense text-text-muted">{identity.settlement}</p>
-        ) : null}
-      </ListingIdentity>
+      <ListingIdentity
+        locale={locale}
+        reference={listing.reference}
+        title={identity?.title}
+        meta={identity?.settlement}
+      />
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 id="o13-heading" className="text-heading font-semibold sm:text-title">
           {selected
@@ -296,9 +304,11 @@ export default async function MediaPage({
           <LeaveControl
             href={galleryHref}
             formId={detailsFormId}
-            className={buttonClass("secondary")}
+            className={buttonClass("tertiary", "px-2")}
           >
-            {workspace.backPhotos}
+            <ChevronStartIcon directional className="size-4" />
+            <span className="sr-only">{workspace.backPhotos}</span>
+            <span aria-hidden="true">{inventoryCopy(locale).o12.photos}</span>
           </LeaveControl>
         ) : (
           <a href={`${path}?upload=1#media-upload`} className={buttonClass("primary")}>
@@ -381,6 +391,50 @@ export default async function MediaPage({
                 ))}
               </ol>
             </nav>
+          </div>
+          <div className="min-w-0 space-y-5 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:border-s lg:border-divider lg:ps-6">
+            <nav
+              aria-label={workspace.imageDetails}
+              className="flex flex-wrap border-b border-divider"
+            >
+              <LeaveControl
+                href={detailsHref}
+                formId={detailsFormId}
+                current={!review}
+                className="inline-flex min-h-control items-center border-b-2 border-transparent px-3 py-2 text-dense font-semibold text-text-muted aria-[current=page]:border-action aria-[current=page]:text-action"
+              >
+                <span className="sr-only">{workspace.imageDetails}</span>
+                <span aria-hidden="true">{inventoryCopy(locale).o12.text}</span>
+              </LeaveControl>
+              <LeaveControl
+                href={`${detailsHref}&panel=review`}
+                formId={detailsFormId}
+                current={review}
+                className="inline-flex min-h-control items-center border-b-2 border-transparent px-3 py-2 text-dense font-semibold text-text-muted aria-[current=page]:border-action aria-[current=page]:text-action"
+              >
+                <span className="sr-only">{workspace.reviewPhoto}</span>
+                <span aria-hidden="true">{workspace.reviewShort}</span>
+              </LeaveControl>
+            </nav>
+            {selected.asset.detailsDraft ? (
+              <p role="status" className="text-dense font-semibold text-warning">
+                {workspace.detailsPending}
+              </p>
+            ) : null}
+            <PhotoEditor
+              row={selected}
+              copy={copy}
+              workspace={workspace}
+              action={action}
+              fileChooser={fileChooser}
+              locale={locale}
+              reference={reference}
+              path={detailsHref}
+              review={review}
+              guard={guard}
+            />
+          </div>
+          <div className="min-w-0 space-y-4 lg:col-start-1">
             <details className="border-t border-divider pt-2">
               <summary className="min-h-control cursor-pointer py-2 text-dense font-semibold">
                 {copy.orderTitle}
@@ -476,55 +530,17 @@ export default async function MediaPage({
               </a>
             ) : null}
           </div>
-          <div className="min-w-0 space-y-5 lg:border-s lg:border-divider lg:ps-6">
-            <nav
-              aria-label={workspace.imageDetails}
-              className="flex flex-wrap border-b border-divider"
-            >
-              <LeaveControl
-                href={detailsHref}
-                formId={detailsFormId}
-                current={!review}
-                className="inline-flex min-h-control items-center border-b-2 border-transparent px-3 py-2 text-dense font-semibold text-text-muted aria-[current=page]:border-action aria-[current=page]:text-action"
-              >
-                {workspace.imageDetails}
-              </LeaveControl>
-              <LeaveControl
-                href={`${detailsHref}&panel=review`}
-                formId={detailsFormId}
-                current={review}
-                className="inline-flex min-h-control items-center border-b-2 border-transparent px-3 py-2 text-dense font-semibold text-text-muted aria-[current=page]:border-action aria-[current=page]:text-action"
-              >
-                {workspace.reviewPhoto}
-              </LeaveControl>
-            </nav>
-            {selected.asset.detailsDraft ? (
-              <p role="status" className="text-dense font-semibold text-warning">
-                {workspace.detailsPending}
-              </p>
-            ) : null}
-            <PhotoEditor
-              row={selected}
-              copy={copy}
-              workspace={workspace}
-              action={action}
-              fileChooser={fileChooser}
-              locale={locale}
-              reference={reference}
-              path={detailsHref}
-              review={review}
-              guard={guard}
-            />
-          </div>
         </section>
       ) : (
         <section id="o13-all" aria-labelledby="o13-all-heading" className="min-w-0 space-y-4">
-          <h2 id="o13-all-heading" className="text-section font-semibold">
-            {fillCopy(copy.allPhotos, { total })}
-          </h2>
           {total ? (
             <MediaGallery
               key={`${listing.id}:${listing.version}`}
+              heading={
+                <h2 id="o13-all-heading" className="text-section font-semibold">
+                  {fillCopy(copy.allPhotos, { total })}
+                </h2>
+              }
               items={assets.map((row, index) => ({
                 id: row.relation.id,
                 hidden: row.relation.hidden,
@@ -558,7 +574,12 @@ export default async function MediaPage({
               }}
             />
           ) : (
-            <p className="rounded-panel bg-subtle p-6">{copy.empty}</p>
+            <div>
+              <h2 id="o13-all-heading" className="mb-4 text-section font-semibold">
+                {fillCopy(copy.allPhotos, { total })}
+              </h2>
+              <p className="rounded-panel bg-subtle p-6">{copy.empty}</p>
+            </div>
           )}
           {query.upload === "1" || !total ? (
             <section id="media-upload" className="max-w-xl space-y-4 border-t border-divider pt-5">

@@ -10,6 +10,7 @@ import { savedAckField, savedOperationCookie } from "./saved-operation";
 /** Local ordering has one review and one version-checked save, with a native manual path. */
 export function MediaGallery({
   items,
+  heading,
   action,
   envelope,
   version,
@@ -18,6 +19,7 @@ export function MediaGallery({
   copy,
 }: {
   items: { id: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
+  heading: ReactNode;
   action: string;
   envelope: ReactNode;
   version: number;
@@ -184,19 +186,20 @@ export function MediaGallery({
   );
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {heading}
+        {!editing && hydrated && items.length > 1 ? (
+          <button
+            type="button"
+            className={buttonClass("secondary")}
+            onClick={() => setEditing(true)}
+          >
+            {copy.reorder}
+          </button>
+        ) : null}
+      </div>
       {!editing ? (
-        <>
-          {hydrated && items.length > 1 ? (
-            <button
-              type="button"
-              className={buttonClass("secondary")}
-              onClick={() => setEditing(true)}
-            >
-              {copy.reorder}
-            </button>
-          ) : null}
-          {gallery}
-        </>
+        gallery
       ) : (
         <>
           <p className="text-dense text-text-muted">{copy.hint}</p>

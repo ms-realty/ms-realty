@@ -95,11 +95,13 @@ export function ListingIdentity({
   locale,
   reference,
   title,
+  meta,
   children,
 }: {
   locale: string;
   reference: string;
   title?: string | null;
+  meta?: string | null;
   children?: ReactNode;
 }) {
   const copy = inventoryCopy(locale);
@@ -121,6 +123,7 @@ export function ListingIdentity({
           ) : null}
           <p className={cx("text-dense text-text-muted", !title && "pt-2")}>
             <bdi>{reference}</bdi>
+            {meta ? <> · {meta}</> : null}
           </p>
         </div>
       </div>
