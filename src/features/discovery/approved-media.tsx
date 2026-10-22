@@ -84,27 +84,40 @@ export function ApprovedMedia({
 export function ApprovedGallery({
   media,
   unavailable,
+  morePhotos,
 }: {
   media: readonly PublicMedia[];
   unavailable: string;
+  morePhotos: string;
 }) {
   if (!media.length) return <ApprovedMedia media={null} unavailable={unavailable} />;
+  const [cover, ...remaining] = media;
   return (
-    <ul className="grid gap-4 sm:grid-cols-2">
-      {media.map((item, index) => (
-        <li key={item.relationId} className={index === 0 ? "sm:col-span-2" : undefined}>
-          <ApprovedMedia
-            media={item}
-            unavailable={unavailable}
-            priority={index === 0}
-            sizes={
-              index === 0
-                ? "(min-width: 1440px) 896px, (min-width: 1024px) calc(66.667vw - 4rem), calc(100vw - 2.5rem)"
-                : "auto, (min-width: 1440px) 440px, (min-width: 1024px) calc(33.333vw - 2.5rem), (min-width: 640px) calc(50vw - 1.75rem), calc(100vw - 2.5rem)"
-            }
-          />
-        </li>
-      ))}
-    </ul>
+    <div className="min-w-0 space-y-4">
+      <ApprovedMedia
+        media={cover ?? null}
+        unavailable={unavailable}
+        priority
+        sizes="(min-width: 1440px) 896px, (min-width: 1024px) calc(66.667vw - 4rem), calc(100vw - 2.5rem)"
+      />
+      {remaining.length ? (
+        <details>
+          <summary className="min-h-control cursor-pointer py-3 font-semibold underline underline-offset-4">
+            {morePhotos.replace("{count}", String(remaining.length))}
+          </summary>
+          <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+            {remaining.map((item) => (
+              <li key={item.relationId} className="min-w-0">
+                <ApprovedMedia
+                  media={item}
+                  unavailable={unavailable}
+                  sizes="auto, (min-width: 1440px) 440px, (min-width: 1024px) calc(33.333vw - 2.5rem), (min-width: 640px) calc(50vw - 1.75rem), calc(100vw - 2.5rem)"
+                />
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </div>
   );
 }

@@ -24,7 +24,7 @@ export default async function Page({
   const copy = dataReviewCopy(locale).duplicates;
   return (
     <div className="mx-auto grid w-full max-w-5xl gap-5 p-4 md:p-8">
-      <h1 className="text-h1 font-semibold">{copy.title}</h1>
+      <h1 className="text-title font-semibold">{copy.title}</h1>
       <p>{status.state === "unknown" ? copy.uncertain : copy.failure}</p>
       <p>{copy.boundary}</p>
       <a

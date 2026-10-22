@@ -162,7 +162,22 @@ it("keeps the full Case route and its requirements section outside the compact e
   render(await CaseScreen({ locale: "en", session, id: row.id, pane: "overview" }));
   expect(reads.messages).toHaveBeenCalledWith("test-db", session, row.id);
   expect(document.querySelector("#case-brief")).toBeVisible();
-  expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute("href", "#case-brief");
+  const sections = screen.getByRole("navigation", { name: "In this deal" });
+  expect(within(sections).getByRole("link", { name: "Requirements" })).toHaveAttribute(
+    "href",
+    "#case-brief",
+  );
+});
+
+it("opens the client conversation with its case identity and without an appointment workflow", async () => {
+  render(await CaseScreen({ locale: "en", session, id: row.id, pane: "messages" }));
+  expect(screen.getByRole("heading", { level: 1, name: "Conversation" })).toBeVisible();
+  expect(screen.getByText("CA-ONE · Recorded home search", { exact: true })).toBeVisible();
+  expect(screen.getByRole("region", { name: "Conversation" })).toBeVisible();
+  expect(screen.getByText("No messages are available to this account in this deal.")).toBeVisible();
+  expect(reads.messages).toHaveBeenCalledWith("test-db", session, row.id);
+  expect(reads.appointments).not.toHaveBeenCalled();
+  expect(screen.queryByRole("heading", { name: "Appointments" })).toBeNull();
 });
 
 it("does not fall back to cached Case content when detail authorization changes after listing", async () => {

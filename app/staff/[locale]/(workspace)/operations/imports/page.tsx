@@ -16,7 +16,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const copy = dataReviewCopy(locale);
   return (
     <div className="mx-auto grid w-full max-w-5xl min-w-0 gap-6 p-4 md:p-8">
-      <h1 className="text-h1 font-semibold">{copy.imports.title}</h1>
+      <h1 className="text-title font-semibold">{copy.imports.title}</h1>
       <p>{copy.imports.intro}</p>
       <ImportReviewForm
         locale={locale}

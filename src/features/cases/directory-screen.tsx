@@ -142,14 +142,15 @@ export async function CaseDirectoryScreen({
                   href={`/${locale}/cases/${row.id}`}
                   className="flex min-h-19 items-center gap-4 p-4 text-dense text-text no-underline hover:bg-subtle"
                 >
-                  <FolderIcon className="size-5 text-text-muted" />
+                  <FolderIcon className="size-5 shrink-0 text-text-muted" />
                   {/* The spaces between the lines keep them apart in the link's accessible name. */}
                   <span className="flex min-w-0 flex-1 flex-col gap-1 wrap-anywhere">
                     <span className="font-semibold">
-                      <bdi>{row.reference}</bdi> · {caseKindLabel(row.kind, locale)}
+                      <bdi>{row.title}</bdi>
                     </span>{" "}
                     <span className="font-medium text-text-muted">
-                      <bdi>{row.title}</bdi> · {caseStageLabel(row.stage, locale)}
+                      <bdi>{row.reference}</bdi> · {caseKindLabel(row.kind, locale)} ·{" "}
+                      {caseStageLabel(row.stage, locale)}
                     </span>{" "}
                     <span className="font-medium text-text-muted">
                       {row.disposition !== "active" ? (
@@ -165,7 +166,7 @@ export async function CaseDirectoryScreen({
                       <Owner row={row} locale={locale} />
                     </span>
                   </span>
-                  <ChevronEndIcon directional className="size-5 text-text-muted" />
+                  <ChevronEndIcon directional className="size-5 shrink-0 text-text-muted" />
                 </a>
               </li>
             ))}

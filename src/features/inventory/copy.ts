@@ -273,8 +273,7 @@ const en = {
     requiredError: "Fill in this field.",
     chooseError: "Choose a value from the list.",
     invalidError: "Check this value.",
-    noscriptLeave:
-      "Without JavaScript, save before opening Photos or Review, or your changes are lost.",
+    noscriptLeave: "Save your changes before opening Photos or Review.",
   },
   labels: {
     propertyType: "Property type",
@@ -587,8 +586,7 @@ const bg: Copy = {
     requiredError: "Попълнете това поле.",
     chooseError: "Изберете стойност от списъка.",
     invalidError: "Проверете тази стойност.",
-    noscriptLeave:
-      "Без JavaScript запишете, преди да отворите „Снимки“ или прегледа, иначе промените се губят.",
+    noscriptLeave: "Запишете промените, преди да отворите „Снимки“ или прегледа.",
   },
   labels: {
     propertyType: "Вид имот",
@@ -900,8 +898,7 @@ const ru: Copy = {
     requiredError: "Заполните это поле.",
     chooseError: "Выберите значение из списка.",
     invalidError: "Проверьте это значение.",
-    noscriptLeave:
-      "Без JavaScript сохраните перед переходом в «Фото» или к проверке, иначе изменения пропадут.",
+    noscriptLeave: "Сохраните изменения перед переходом в «Фото» или к проверке.",
   },
   labels: {
     propertyType: "Вид объекта",
@@ -942,6 +939,15 @@ export const inventoryCopy = (locale: string): Copy =>
   locale === "bg" ? bg : locale === "ru" ? ru : en;
 
 const options = {
+  BG: ["Bulgaria", "България", "Болгария"],
+  GR: ["Greece", "Гърция", "Греция"],
+  bg: ["Български", "Български", "Български"],
+  en: ["English", "English", "English"],
+  ru: ["Русский", "Русский", "Русский"],
+  de: ["Deutsch", "Deutsch", "Deutsch"],
+  nl: ["Nederlands", "Nederlands", "Nederlands"],
+  el: ["Ελληνικά", "Ελληνικά", "Ελληνικά"],
+  he: ["עברית", "עברית", "עברית"],
   known: ["Known", "Известно", "Известно"],
   unknown: ["Unknown", "Неизвестно", "Неизвестно"],
   not_supplied: ["Not supplied", "Непредоставено", "Не предоставлено"],

@@ -41,14 +41,16 @@ import { ownerPreviewCopy } from "./owner-preview-copy";
 export const workflowLink = "font-semibold text-accent underline underline-offset-4";
 export type ScreenProps = { locale: string; session: Session };
 export function WorkflowPage({
-  locale,
-  session,
   title,
   children,
   clientOverview = false,
-}: ScreenProps & { title: string; children: ReactNode; clientOverview?: boolean }) {
-  const c = caseCopy(locale),
-    staff = session.account.kind === "staff";
+  reference,
+}: ScreenProps & {
+  title: string;
+  children: ReactNode;
+  clientOverview?: boolean;
+  reference?: string;
+}) {
   return (
     <div
       className={
@@ -67,37 +69,8 @@ export function WorkflowPage({
         >
           {title}
         </h1>
-        {!clientOverview ? (
-          <nav className="flex flex-wrap gap-5" aria-label={staff ? c.cases : c.overview}>
-            <a className={workflowLink} href={`/${locale}/${staff ? "cases" : "overview"}`}>
-              {staff ? c.cases : c.overview}
-            </a>
-            <a className={workflowLink} href={`/${locale}/${staff ? "calendar" : "appointments"}`}>
-              {c.appointments}
-            </a>
-            <a className={workflowLink} href={`/${locale}/proposals`}>
-              {c.proposals}
-            </a>
-            {!staff ? (
-              <a className={workflowLink} href={`/${locale}/documents`}>
-                {c.documents}
-              </a>
-            ) : null}
-            {staff ? (
-              <a className={workflowLink} href={`/${locale}/inquiries`}>
-                Inbox
-              </a>
-            ) : (
-              <>
-                <a className={workflowLink} href={`/${locale}/properties`}>
-                  {c.interests}
-                </a>
-                <a className={workflowLink} href={`/${locale}/messages`}>
-                  {c.messages}
-                </a>
-              </>
-            )}
-          </nav>
+        {reference ? (
+          <p className="text-caption text-text-muted wrap-anywhere">{reference}</p>
         ) : null}
       </header>
       {children}
@@ -108,14 +81,26 @@ export function WorkflowSection({
   title,
   children,
   id,
+  showTitle = true,
 }: {
   title: string;
   children: ReactNode;
   id?: string;
+  showTitle?: boolean;
 }) {
   return (
-    <section id={id} className="space-y-4 rounded-card border border-border bg-surface p-5">
-      <h2 className="text-subheading font-semibold">{title}</h2>
+    <section
+      id={id}
+      aria-labelledby={showTitle && id ? `${id}-heading` : undefined}
+      aria-label={!showTitle ? title : undefined}
+      tabIndex={id ? -1 : undefined}
+      className="scroll-mt-6 space-y-4 rounded-card border border-border bg-surface p-5"
+    >
+      {showTitle ? (
+        <h2 id={id ? `${id}-heading` : undefined} className="text-subheading font-semibold">
+          {title}
+        </h2>
+      ) : null}
       {children}
     </section>
   );
@@ -533,8 +518,10 @@ export async function CaseScreen(
     .array(z.object({ kind: z.string(), text: z.string(), origin: z.string() }))
     .safeParse(brief?.items ?? []);
   const items = parsedItems.success ? parsedItems.data : [];
+  const focusedConversation = !staff && props.pane === "messages";
+  const showAppointments = !focusedConversation;
   const thread = await readCaseMessages(getDb(), props.session, row.id);
-  const agenda = await listAppointments(getDb(), props.session, row.id);
+  const agenda = showAppointments ? await listAppointments(getDb(), props.session, row.id) : [];
   const commitments = staff ? await listTasks(getDb(), props.session, { caseId: row.id }) : null;
   const matching =
     staff && view.canAddInterest && ["buyer", "tenant"].includes(row.kind)
@@ -546,48 +533,12 @@ export async function CaseScreen(
   return (
     <WorkflowPage
       {...props}
-      title={`${row.reference} · ${row.title}`}
+      title={focusedConversation ? c.messages : `${row.reference} · ${row.title}`}
+      reference={focusedConversation ? `${row.reference} · ${row.title}` : undefined}
       clientOverview={!staff && showOverview}
     >
       {!staff && showOverview ? <ClientCaseOverview locale={props.locale} view={view} /> : null}
       <div className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
-        <div className="flex flex-wrap gap-5">
-          <a className={workflowLink} href={`/${props.locale}/proposals?case=${row.id}`}>
-            {c.proposals}
-          </a>
-          {staff ? (
-            <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/documents`}>
-              {c.documents}
-            </a>
-          ) : null}
-          {!staff || view.canManageAccess ? (
-            <a
-              className={workflowLink}
-              href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.id}/participants`}
-            >
-              {caseAccessCopy(props.locale).title}
-            </a>
-          ) : null}
-          {view.canReadRequestedDocuments ? (
-            <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/document-requests`}>
-              {documentRequestCopy(props.locale).title}
-            </a>
-          ) : null}
-          {view.canNote ? (
-            <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/email`}>
-              {caseEmailCopy(props.locale).title}
-            </a>
-          ) : null}
-          {view.canReviewProcess ? (
-            <a className={workflowLink} href={`/${props.locale}/cases/${row.id}/process`}>
-              {props.locale === "bg"
-                ? "Преглед на процеса"
-                : props.locale === "ru"
-                  ? "Проверка процесса"
-                  : "Deal process review"}
-            </a>
-          ) : null}
-        </div>
         {staff || !showOverview ? (
           <>
             <p>
@@ -666,6 +617,78 @@ export async function CaseScreen(
           </>
         ) : null}
       </div>
+      {!focusedConversation ? (
+        <nav aria-label={c.sections} className="flex flex-wrap gap-2">
+          {(commitments ? [{ href: "#case-tasks", label: c.tasks }] : [])
+            .concat(showOverview ? [{ href: "#case-brief", label: c.brief }] : [])
+            .concat(view.canManageNext ? [{ href: "#case-next", label: c.next }] : [])
+            .concat(showProperties ? [{ href: "#case-properties", label: c.interests }] : [])
+            .concat([{ href: "#case-appointments", label: c.appointments }])
+            .concat(showMessages ? [{ href: "#case-conversation", label: c.messages }] : [])
+            .map(({ href, label }) => (
+              <a key={href} href={href} className={buttonClass("secondary", "text-dense")}>
+                {label}
+              </a>
+            ))}
+        </nav>
+      ) : null}
+      <details className="border-t border-divider pt-3">
+        <summary className="min-h-control cursor-pointer py-3 font-semibold text-action underline underline-offset-4">
+          {c.relatedTools}
+        </summary>
+        <nav aria-label={c.relatedTools} className="flex flex-wrap gap-x-5 gap-y-2 pb-3">
+          <a
+            className={`${workflowLink} inline-flex min-h-control items-center`}
+            href={`/${props.locale}/proposals?case=${row.id}`}
+          >
+            {c.proposals}
+          </a>
+          {staff ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/cases/${row.id}/documents`}
+            >
+              {c.documents}
+            </a>
+          ) : null}
+          {!staff || view.canManageAccess ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.id}/participants`}
+            >
+              {caseAccessCopy(props.locale).title}
+            </a>
+          ) : null}
+          {view.canReadRequestedDocuments ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/cases/${row.id}/document-requests`}
+            >
+              {documentRequestCopy(props.locale).title}
+            </a>
+          ) : null}
+          {view.canNote ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/cases/${row.id}/email`}
+            >
+              {caseEmailCopy(props.locale).title}
+            </a>
+          ) : null}
+          {view.canReviewProcess ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/cases/${row.id}/process`}
+            >
+              {props.locale === "bg"
+                ? "Преглед на процеса"
+                : props.locale === "ru"
+                  ? "Проверка процесса"
+                  : "Deal process review"}
+            </a>
+          ) : null}
+        </nav>
+      </details>
       {view.ownerPreviews.map((reference) => (
         <a
           key={reference}
@@ -676,7 +699,7 @@ export async function CaseScreen(
         </a>
       ))}
       {commitments ? (
-        <WorkflowSection title={c.tasks}>
+        <WorkflowSection title={c.tasks} id="case-tasks">
           {commitments.rows.length ? (
             <ul className="space-y-4">
               {commitments.rows.map(({ task, ownerName }) => (
@@ -779,7 +802,7 @@ export async function CaseScreen(
             ) : null}
           </WorkflowSection>
           {view.canManageNext ? (
-            <WorkflowSection title={c.next}>
+            <WorkflowSection title={c.next} id="case-next">
               <BoundWorkflowForm
                 {...props}
                 command="next"
@@ -803,7 +826,7 @@ export async function CaseScreen(
         </>
       ) : null}
       {showProperties ? (
-        <WorkflowSection title={c.interests}>
+        <WorkflowSection title={c.interests} id="case-properties">
           {view.interests.length ? (
             <ul className="space-y-7">
               {view.interests.map((interest) => (
@@ -871,37 +894,44 @@ export async function CaseScreen(
                       interestMachine.check(interest.state, state as "shortlisted").outcome ===
                       "allowed",
                   ) ? (
-                    <BoundWorkflowForm
-                      {...props}
-                      command="feedback"
-                      id={interest.id}
-                      revision={interest.version}
-                      path={path}
-                      fields={[
-                        {
-                          name: "state",
-                          label: c.action,
-                          type: "select",
-                          options: (["shortlisted", "declined"] as const)
-                            .filter(
-                              (state) =>
-                                interestMachine.check(interest.state, state).outcome === "allowed",
-                            )
-                            .map((value) => ({
-                              value,
-                              label: value === "shortlisted" ? c.shortlist : c.decline,
-                            })),
-                        },
-                        { name: "reason", label: c.feedback, type: "textarea" },
-                      ]}
-                      values={{
-                        state:
-                          interestMachine.check(interest.state, "shortlisted").outcome === "allowed"
-                            ? "shortlisted"
-                            : "declined",
-                      }}
-                      submit={c.respond}
-                    />
+                    <details className="border-t border-divider pt-2">
+                      <summary className="min-h-control cursor-pointer py-3 font-semibold text-action underline underline-offset-4">
+                        {c.reviewSelection}
+                      </summary>
+                      <BoundWorkflowForm
+                        {...props}
+                        command="feedback"
+                        id={interest.id}
+                        revision={interest.version}
+                        path={path}
+                        fields={[
+                          {
+                            name: "state",
+                            label: c.action,
+                            type: "select",
+                            required: true,
+                            options: [
+                              { value: "", label: c.chooseAction },
+                              ...(["shortlisted", "declined"] as const)
+                                .filter(
+                                  (state) =>
+                                    interestMachine.check(interest.state, state).outcome ===
+                                    "allowed",
+                                )
+                                .map((value) => ({
+                                  value,
+                                  label: value === "shortlisted" ? c.shortlist : c.decline,
+                                })),
+                            ],
+                          },
+                          { name: "reason", label: c.feedback, type: "textarea" },
+                        ]}
+                        values={{
+                          state: "",
+                        }}
+                        submit={c.respond}
+                      />
+                    </details>
                   ) : null}
                 </li>
               ))}
@@ -916,58 +946,61 @@ export async function CaseScreen(
           ) : null}
         </WorkflowSection>
       ) : null}
-      <WorkflowSection title={c.appointments}>
-        <AppointmentList {...props} rows={agenda} />
-        {view.canRequest && view.interests.some((interest) => interest.state === "shortlisted") ? (
-          <>
-            <p>{c.requestNote}</p>
-            <BoundWorkflowForm
-              {...props}
-              command="request"
-              id={row.id}
-              revision={row.version}
-              path={path}
-              fields={[
-                {
-                  name: "interestId",
-                  label: c.interests,
-                  type: "select",
-                  options: view.interests
-                    .filter((interest) => interest.state === "shortlisted")
-                    .map((interest) => ({ value: interest.id, label: interest.reference })),
-                },
-                {
-                  name: "preferredWindow",
-                  label: c.preferredWindow,
-                  type: "textarea",
-                  required: true,
-                },
-                ...(staff
-                  ? [
-                      {
-                        name: "participantPartyId",
-                        label: c.participant,
-                        type: "select" as const,
-                        options: view.participants.map((participant) => ({
-                          value: participant.partyId,
-                          label: participant.name,
-                        })),
-                      },
-                    ]
-                  : []),
-              ]}
-              values={{
-                interestId:
-                  view.interests.find((interest) => interest.state === "shortlisted")?.id ?? "",
-                participantPartyId: view.participants[0]?.partyId ?? "",
-              }}
-              submit={c.request}
-            />
-          </>
-        ) : null}
-      </WorkflowSection>
+      {showAppointments ? (
+        <WorkflowSection title={c.appointments} id="case-appointments">
+          <AppointmentList {...props} rows={agenda} />
+          {view.canRequest &&
+          view.interests.some((interest) => interest.state === "shortlisted") ? (
+            <>
+              <p>{c.requestNote}</p>
+              <BoundWorkflowForm
+                {...props}
+                command="request"
+                id={row.id}
+                revision={row.version}
+                path={path}
+                fields={[
+                  {
+                    name: "interestId",
+                    label: c.interests,
+                    type: "select",
+                    options: view.interests
+                      .filter((interest) => interest.state === "shortlisted")
+                      .map((interest) => ({ value: interest.id, label: interest.reference })),
+                  },
+                  {
+                    name: "preferredWindow",
+                    label: c.preferredWindow,
+                    type: "textarea",
+                    required: true,
+                  },
+                  ...(staff
+                    ? [
+                        {
+                          name: "participantPartyId",
+                          label: c.participant,
+                          type: "select" as const,
+                          options: view.participants.map((participant) => ({
+                            value: participant.partyId,
+                            label: participant.name,
+                          })),
+                        },
+                      ]
+                    : []),
+                ]}
+                values={{
+                  interestId:
+                    view.interests.find((interest) => interest.state === "shortlisted")?.id ?? "",
+                  participantPartyId: view.participants[0]?.partyId ?? "",
+                }}
+                submit={c.request}
+              />
+            </>
+          ) : null}
+        </WorkflowSection>
+      ) : null}
       {showMessages ? (
-        <WorkflowSection title={c.messages} id="case-conversation">
+        <WorkflowSection title={c.messages} id="case-conversation" showTitle={!focusedConversation}>
           <p>{c.messageNote}</p>
           {thread.length ? (
             <ol className="space-y-5">

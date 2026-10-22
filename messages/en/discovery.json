@@ -55,6 +55,7 @@
   "noTranslation": "An approved version in this language is not available.",
   "mapUnavailable": "The map is unavailable. The list and filters remain available.",
   "noPhoto": "Photos unavailable",
+  "morePhotos": "More photos ({count})",
   "bedrooms": "Bedrooms",
   "area": "Area",
   "reference": "Reference",

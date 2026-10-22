@@ -112,9 +112,11 @@ export function Page({
     <div className="mx-auto min-w-0 max-w-page space-y-8 break-words px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <header className="space-y-4">
         <h1 className="text-title font-semibold">{title}</h1>
-        <WorkNav locale={locale} />
       </header>
       {children}
+      <footer className="border-t border-divider pt-6">
+        <WorkNav locale={locale} />
+      </footer>
     </div>
   );
 }
@@ -814,12 +816,22 @@ export async function ContactScreen({
       <p>{copy.contactScope}</p>
       <section className="space-y-3">
         <h2 className="text-subheading font-semibold">{copy.methods}</h2>
+        {contact.methods.length === 0 ? <p className="text-text-muted">{copy.noMethods}</p> : null}
         <ul className="space-y-3">
           {contact.methods.map((method) => (
             <li key={method.id}>
               <bdi>{method.value}</bdi>{" "}
               <span className="text-text-muted">
-                ({method.kind}, {method.verification})
+                ({contactMethodLabel(method.kind, locale)},{" "}
+                {
+                  {
+                    unverified: copy.contactUnverified,
+                    pending: copy.contactPending,
+                    verified: copy.contactVerified,
+                    failed: copy.contactFailed,
+                  }[method.verification]
+                }
+                )
               </span>
             </li>
           ))}

@@ -60,8 +60,12 @@ it("renders only real width descriptors, keeps lazy sizes tied to layout and pri
     <ApprovedGallery
       media={[responsive, { ...responsive, relationId: "second" }]}
       unavailable="Unavailable"
+      morePhotos="More photos ({count})"
     />,
   );
+  const disclosure = screen.getByText("More photos (1)").closest("details");
+  expect(disclosure).not.toHaveAttribute("open");
+  disclosure?.setAttribute("open", "");
   const images = screen.getAllByRole("img");
   expect(images[0]).toHaveAttribute(
     "srcset",
@@ -74,7 +78,11 @@ it("renders only real width descriptors, keeps lazy sizes tied to layout and pri
   expect(images[1]?.getAttribute("sizes")).toMatch(/^auto,/);
   expect(images[1]).not.toHaveAttribute("fetchpriority");
   const markup = renderToStaticMarkup(
-    <ApprovedGallery media={[responsive]} unavailable="Unavailable" />,
+    <ApprovedGallery
+      media={[responsive]}
+      unavailable="Unavailable"
+      morePhotos="More photos ({count})"
+    />,
   );
   expect(markup).toContain('rel="preload"');
   expect(markup).toContain('as="image"');

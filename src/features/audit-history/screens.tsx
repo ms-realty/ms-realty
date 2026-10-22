@@ -81,7 +81,7 @@ export function HistoryListScreen({ locale, view }: { locale: string; view: Hist
               <li key={entry.id} data-history-event={entry.id} className="min-w-0 space-y-3 py-5">
                 <h2 className="text-subheading font-semibold">
                   <a
-                    className="inline-flex min-h-control max-w-full items-center wrap-anywhere underline underline-offset-4"
+                    className="inline-block min-h-control max-w-full wrap-anywhere underline underline-offset-4"
                     href={`/${locale}/operations/history/${entry.id}`}
                   >
                     {copy.actions[entry.change.action]} ·{" "}

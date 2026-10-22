@@ -108,7 +108,11 @@ export default async function PropertyPage({
             </p>
             <Availability listing={listing} locale={locale} copy={copy} />
           </header>
-          <ApprovedGallery media={listing.media} unavailable={copy.noPhoto} />
+          <ApprovedGallery
+            media={listing.media}
+            unavailable={copy.noPhoto}
+            morePhotos={copy.morePhotos}
+          />
           <ListingFacts listing={listing} locale={locale} copy={copy} />
         </div>
         <aside className="flex min-w-0 flex-col gap-5 self-start rounded-panel border border-border bg-surface p-5 lg:col-start-2 lg:row-span-2 lg:row-start-1">

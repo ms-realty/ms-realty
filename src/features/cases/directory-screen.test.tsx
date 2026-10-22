@@ -42,7 +42,7 @@ it("lists each visible case as one link with its type, purpose, stage and owner"
   expect(screen.getByLabelText("Search")).toHaveAccessibleDescription("Deal number or title");
   expect(within(caseList()).getByRole("link")).toBe(
     screen.getByRole("link", {
-      name: "CS-2026-000142 · Buying Synthetic family home search · Agreeing requirements Accountable broker: Synthetic broker",
+      name: "Synthetic family home search CS-2026-000142 · Buying · Agreeing requirements Accountable broker: Synthetic broker",
     }),
   );
   expect(within(caseList()).getByRole("link")).toHaveAttribute("href", "/en/cases/case-one");
@@ -69,10 +69,10 @@ it("shows paused and closed apart from the stage, and agency coverage for an una
   render(await CaseDirectoryScreen({ locale: "en", session }));
   const links = within(caseList()).getAllByRole("link");
   expect(links.map((link) => link.textContent)).toEqual([
-    "CS-2026-000142 · Selling Synthetic family home search · Preparing the listing Paused · Accountable broker: Synthetic broker",
-    "CS-2026-000142 · Letting Synthetic family home search · Completion and handover Closed · Accountable broker: Synthetic broker",
-    "CS-2026-000142 · Buying Synthetic family home search · Viewings Work without an owner · Last accepted owner: Former broker",
-    "CS-2026-000142 · Service consultation Synthetic family home search · Consultation Accountable broker: No named owner",
+    "Synthetic family home search CS-2026-000142 · Selling · Preparing the listing Paused · Accountable broker: Synthetic broker",
+    "Synthetic family home search CS-2026-000142 · Letting · Completion and handover Closed · Accountable broker: Synthetic broker",
+    "Synthetic family home search CS-2026-000142 · Buying · Viewings Work without an owner · Last accepted owner: Former broker",
+    "Synthetic family home search CS-2026-000142 · Service consultation · Consultation Accountable broker: No named owner",
   ]);
   expect(screen.getByText("Deals: 4")).toBeVisible();
 });
@@ -193,7 +193,7 @@ it.each([
     "Сделки",
     "Търсене",
     "Покажете",
-    "CS-2026-000142 · Покупка Synthetic family home search · Уточняване на изискванията Отговорен брокер: Synthetic broker",
+    "Synthetic family home search CS-2026-000142 · Покупка · Уточняване на изискванията Отговорен брокер: Synthetic broker",
     "Сделки: 1",
   ],
   [
@@ -201,7 +201,7 @@ it.each([
     "Сделки",
     "Поиск",
     "Показать",
-    "CS-2026-000142 · Покупка Synthetic family home search · Согласование требований Ответственный брокер: Synthetic broker",
+    "Synthetic family home search CS-2026-000142 · Покупка · Согласование требований Ответственный брокер: Synthetic broker",
     "Всего сделок: 1",
   ],
 ])("keeps %s labels", async (locale, title, search, apply, rowText, count) => {

@@ -54,6 +54,7 @@ test("client requests bounded specialist access; staff approves and later revoke
       clientPath = hostUrl("client", `/en/overview/${f.caseId}/participants`),
       staffPath = hostUrl("staff", `/en/cases/${f.caseId}/participants`);
     await client.goto(hostUrl("client", `/en/overview/${f.caseId}`));
+    await client.getByText("Documents, participants and deal tools", { exact: true }).click();
     await client.getByRole("link", { name: "Participants and access", exact: true }).click();
     const invite = client
       .locator("section")

@@ -55,6 +55,37 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       <p data-testid="appointment-state" className="font-semibold">
         {c[row.state]}
       </p>
+      {row.confirmedStartsAt ? (
+        <WorkflowSection
+          title={
+            ["cancelled", "completed", "no_show"].includes(row.state)
+              ? c.previousTime
+              : c.confirmedTime
+          }
+        >
+          <WorkflowTimeRange
+            start={row.confirmedStartsAt}
+            end={row.confirmedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
+          {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
+          <p>{c.calendarNote}</p>
+          <a className={workflowLink} href={`${path}/calendar`} download>
+            {c.download}
+          </a>
+        </WorkflowSection>
+      ) : null}
+      {row.proposedStartsAt ? (
+        <WorkflowSection title={c.proposedTime}>
+          <WorkflowTimeRange
+            start={row.proposedStartsAt}
+            end={row.proposedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
+        </WorkflowSection>
+      ) : null}
       <AppointmentListingContext listing={detail.listing} locale={locale} />
       {staff && detail.needsCoverage ? (
         <Notice tone="warning">
@@ -93,37 +124,6 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               <li key={window.text}>{window.text}</li>
             ))}
           </ul>
-        </WorkflowSection>
-      ) : null}
-      {row.confirmedStartsAt ? (
-        <WorkflowSection
-          title={
-            ["cancelled", "completed", "no_show"].includes(row.state)
-              ? c.previousTime
-              : c.confirmedTime
-          }
-        >
-          <WorkflowTimeRange
-            start={row.confirmedStartsAt}
-            end={row.confirmedEndsAt}
-            locale={props.locale}
-            zoneLabel={props.session.account.kind === "client"}
-          />
-          {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
-          <p>{c.calendarNote}</p>
-          <a className={workflowLink} href={`${path}/calendar`} download>
-            {c.download}
-          </a>
-        </WorkflowSection>
-      ) : null}
-      {row.proposedStartsAt ? (
-        <WorkflowSection title={c.proposedTime}>
-          <WorkflowTimeRange
-            start={row.proposedStartsAt}
-            end={row.proposedEndsAt}
-            locale={props.locale}
-            zoneLabel={props.session.account.kind === "client"}
-          />
         </WorkflowSection>
       ) : null}
       {staff && detail.hostOffer ? (

@@ -55,6 +55,7 @@
   "noTranslation": "Eine freigegebene Fassung in dieser Sprache ist nicht verfügbar.",
   "mapUnavailable": "Die Karte ist nicht verfügbar. Liste und Filter bleiben nutzbar.",
   "noPhoto": "Fotos nicht verfügbar",
+  "morePhotos": "Weitere Fotos ({count})",
   "bedrooms": "Schlafzimmer",
   "area": "Fläche",
   "reference": "Referenz",

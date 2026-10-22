@@ -15,7 +15,7 @@ import { inventoryListPage } from "@/server/inventory/queries";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
-import { ChevronEndIcon, HomeIcon } from "@/ui/icons";
+import { ChevronDownIcon, ChevronEndIcon, HomeIcon } from "@/ui/icons";
 
 type Query = { q?: string; view?: string; purpose?: string; type?: string; cursor?: string };
 type RawQuery = Record<string, string | string[] | undefined>;
@@ -168,6 +168,7 @@ export default async function InventoryPage({
             )}
           >
             {o10.filters}
+            <ChevronDownIcon className="size-5 shrink-0 group-open:rotate-180" />
           </summary>
           <div className="mt-3 flex flex-wrap items-end gap-4 rounded-control bg-subtle p-4">
             {(

@@ -32,8 +32,8 @@ function ContactCard({
       className="grid min-w-0 content-start gap-4 rounded-panel border border-border p-4"
       data-contact-comparison={contact.party.id}
     >
-      <h2 className="text-h2 font-semibold">{label}</h2>
-      <p className="break-words text-h3 font-semibold">{contact.party.displayName}</p>
+      <h2 className="text-heading font-semibold">{label}</h2>
+      <p className="break-words text-subheading font-semibold">{contact.party.displayName}</p>
       <a href={`/${locale}/contacts/${contact.party.id}`} className={link}>
         {copy.openContact}
       </a>
@@ -95,7 +95,7 @@ export async function DuplicateReviewScreen({
       : null;
   return (
     <div className="mx-auto grid w-full max-w-5xl min-w-0 gap-6 p-4 md:p-8" data-duplicate-review>
-      <h1 className="text-h1 font-semibold">{c.title}</h1>
+      <h1 className="text-title font-semibold">{c.title}</h1>
       <p>{c.intro}</p>
       <p className="rounded-panel border border-border bg-subtle p-4 font-semibold">{c.boundary}</p>
       {query.error ? (
@@ -221,7 +221,7 @@ export async function DeferredReviewScreen({
       className="mx-auto grid w-full max-w-5xl min-w-0 gap-6 p-4 md:p-8"
       data-contact-review-receipt
     >
-      <h1 className="text-h1 font-semibold">{copy.pending}</h1>
+      <h1 className="text-title font-semibold">{copy.pending}</h1>
       <p>{copy.saved}</p>
       <div className="grid gap-4 md:grid-cols-2">
         <ContactCard locale={locale} contact={result.pair.left} label={copy.left} />

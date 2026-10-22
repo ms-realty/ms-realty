@@ -103,6 +103,13 @@ function FileDetail({ locale, document }: { locale: string; document: ClientDocu
     file = document.version;
   return (
     <WorkflowSection title={`${document.reference} · ${file.fileName}`}>
+      {file.canDownload ? (
+        <a className={workflowLink} href={`/api/files/private/document/${file.id}`} download>
+          {c.download}
+        </a>
+      ) : (
+        <p role="status">{c[file.downloadUnavailableReason ?? "unavailable"]}</p>
+      )}
       <details>
         <summary className="cursor-pointer font-semibold">{c.technical}</summary>
         <p>
@@ -125,13 +132,6 @@ function FileDetail({ locale, document }: { locale: string; document: ClientDocu
           {c.expiry}: <WorkflowTime value={document.expiresAt} locale={locale} />
         </p>
       ) : null}
-      {file.canDownload ? (
-        <a className={workflowLink} href={`/api/files/private/document/${file.id}`} download>
-          {c.download}
-        </a>
-      ) : (
-        <p role="status">{c[file.downloadUnavailableReason ?? "unavailable"]}</p>
-      )}
       {document.caseId ? (
         <p>
           <a className={workflowLink} href={`/${locale}/overview/${document.caseId}`}>

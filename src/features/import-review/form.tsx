@@ -39,7 +39,7 @@ export function ImportReviewForm({
           <p className="break-all font-semibold">{source.filename}</p>
           {state.stage === "mapping" ? (
             <form action={submit} className="grid gap-6">
-              <h2 className="text-h2 font-semibold">{copy.mapping}</h2>
+              <h2 className="text-heading font-semibold">{copy.mapping}</h2>
               <p>{copy.mappingHint}</p>
               <input type="hidden" name="intent" value="check" />
               <input type="hidden" name="source" value={source.token} />
@@ -90,15 +90,15 @@ export function ImportReviewForm({
             </form>
           ) : (
             <section className="grid min-w-0 gap-5" data-import-problems>
-              <h2 className="text-h2 font-semibold">{copy.problems}</h2>
+              <h2 className="text-heading font-semibold">{copy.problems}</h2>
               <dl className="flex flex-wrap gap-6">
                 <div>
                   <dt>{copy.checked}</dt>
-                  <dd className="text-h2 font-semibold">{state.rows?.length ?? 0}</dd>
+                  <dd className="text-heading font-semibold">{state.rows?.length ?? 0}</dd>
                 </div>
                 <div>
                   <dt>{copy.problemCount}</dt>
-                  <dd className="text-h2 font-semibold">{problems.length}</dd>
+                  <dd className="text-heading font-semibold">{problems.length}</dd>
                 </div>
               </dl>
               <p>{copy.limited}</p>

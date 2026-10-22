@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
-import { isPublicLocale } from "@/i18n/config";
+import { isPublicLocale, localeEndonyms } from "@/i18n/config";
 import { formatDate } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
 import type { Session } from "@/server/auth/sessions";
@@ -254,7 +254,7 @@ export async function PreferencesScreen({
           >
             {publicLocales.map((value) => (
               <option key={value} value={value}>
-                {value.toUpperCase()}
+                {localeEndonyms[value]}
               </option>
             ))}
           </select>

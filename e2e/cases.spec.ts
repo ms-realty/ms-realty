@@ -159,6 +159,9 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
     await expect(
       client.getByRole("button", { name: "Record next action", exact: true }),
     ).toHaveCount(0);
+    await client.getByText("Review property selection and feedback", { exact: true }).click();
+    await expect(client.getByLabel("Action", { exact: true })).toHaveValue("");
+    await client.getByLabel("Action", { exact: true }).selectOption("shortlisted");
     await client
       .getByLabel("Feedback or reason", { exact: true })
       .fill("I would like to see this property");
