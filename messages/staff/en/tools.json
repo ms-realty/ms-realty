@@ -21,7 +21,10 @@
       "title": "Consultations",
       "description": "Consultation requests and who takes them"
     },
-    "coverage": { "title": "Agency coverage", "description": "Work without an available owner" },
+    "coverage": {
+      "title": "Work without an owner",
+      "description": "Work without an available owner"
+    },
     "inbound": { "title": "Incoming email", "description": "Untrusted incoming mail" },
     "keys": { "title": "Key custody", "description": "Who holds keys and until when" },
     "complaints": { "title": "Complaints", "description": "Owner, due date and outcome" },
@@ -30,6 +33,10 @@
     "team": { "title": "Team and access", "description": "People and permissions" },
     "system": { "title": "System status", "description": "Sources and connectivity" },
     "jobs": { "title": "Jobs and assistance status", "description": "Queue and Butler spend" },
+    "history": {
+      "title": "Listing history",
+      "description": "Recorded changes, actors and publications"
+    },
     "privacy": { "title": "Privacy requests", "description": "Verification, scope and completion" },
     "alerts": { "title": "Property alert rule", "description": "Template, schedule and approval" }
   }

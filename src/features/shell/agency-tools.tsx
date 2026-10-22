@@ -91,9 +91,9 @@ export async function AgencyTools({
           >
             {t(`sections.${group.section}`)}
           </SectionTitle>
-          <ul className="flex flex-col gap-4">
+          <ul className="divide-y divide-divider">
             {group.items.map((item) => (
-              <li key={item.label} className="border-b border-divider pb-4">
+              <li key={item.label}>
                 <NavLink href={item.href} className={rowClass}>
                   {icon("/brand/workspace/folder.svg")}
                   <span className="flex min-w-0 flex-1 flex-col gap-1 wrap-anywhere">

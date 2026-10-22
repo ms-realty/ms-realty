@@ -54,9 +54,11 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
       </a>
       <p>{c.consequences}</p>
       <WorkflowSection title={c.source}>
-        <p>
-          {view.caseReference} · Revision {view.revision}
-        </p>
+        <p>{view.caseReference}</p>
+        <details>
+          <summary className="cursor-pointer font-semibold">{c.technical}</summary>
+          <p>Revision {view.revision}</p>
+        </details>
         <div lang="bg">
           <h2 className="font-semibold">{view.title}</h2>
           <p className="whitespace-pre-wrap">{view.description}</p>
@@ -112,7 +114,8 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
           ))}
         </div>
       </WorkflowSection>
-      <WorkflowSection title={view.instruction.reference}>
+      <WorkflowSection title={c.authorised}>
+        <p>{view.instruction.reference}</p>
         <p>{view.instruction.scope}</p>
         <p>{view.instruction.commissionTerms}</p>
         <p>

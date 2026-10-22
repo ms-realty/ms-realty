@@ -51,7 +51,7 @@ it("shows exact money/area precision and explicit unknown policy in review", asy
   expect(screen.getByText(/950\.03/)).toBeVisible();
   expect(screen.getByText(/74\.51/)).toBeVisible();
   expect(screen.getByText(/unknown facts do not match/)).toBeVisible();
-  expect(screen.getByText(/Search language:/)).toHaveTextContent("BG");
+  expect(screen.getByText(/Search language:/)).toHaveTextContent("Български");
 });
 it("shows complete verified emails with a deliberate native choice and unchecked alert-only consent", () => {
   const longEmail = `${"synthetic-contact-".repeat(4)}@example.test`;

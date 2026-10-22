@@ -2,11 +2,19 @@
   "notFound": {
     "title": "Seite nicht gefunden",
     "body": "Die Adresse ist vielleicht falsch geschrieben oder die Seite wurde verschoben.",
-    "home": "Zur Startseite"
+    "home": "Zur Startseite",
+    "items": {
+      "deal": "Wir haben diesen Vorgang nicht gefunden. Der Link ist vielleicht falsch, oder Sie haben keinen Zugriff mehr darauf.",
+      "inquiry": "Wir haben diese Anfrage nicht gefunden. Der Link ist vielleicht falsch, oder Sie haben keinen Zugriff mehr darauf.",
+      "listing": "Wir haben dieses Inserat nicht gefunden. Der Link ist vielleicht falsch, oder Sie haben keinen Zugriff mehr darauf.",
+      "appointment": "Wir haben diesen Termin nicht gefunden. Der Link ist vielleicht falsch, oder Sie haben keinen Zugriff mehr darauf.",
+      "property": "Wir haben diese Immobilie nicht gefunden. Die Adresse ist vielleicht falsch geschrieben, oder das Inserat wurde entfernt."
+    }
   },
   "generic": {
     "title": "Diese Seite konnte nicht angezeigt werden",
     "body": "Versuchen Sie es erneut. Wenn es wieder passiert, rufen Sie uns an und nennen Sie die Referenz.",
+    "staffBody": "Versuchen Sie es erneut. Wenn es weiter passiert, geben Sie die Referenz an Ihre Leitung weiter.",
     "reference": "Referenz: {reference}",
     "retry": "Erneut versuchen"
   },
@@ -16,6 +24,8 @@
     "list": "Zurück zur Liste",
     "record": "Zurück zum Eintrag",
     "deal": "Zurück zum Vorgang",
+    "listing": "Zurück zum Inserat",
+    "inquiry": "Zurück zur Anfrage",
     "search": "Immobilien suchen",
     "access": "Zurück zur Anmeldung",
     "tools": "Zu den Agenturwerkzeugen",
@@ -23,6 +33,17 @@
     "loadingList": "Die Liste wird geladen…",
     "loadingRecord": "Der Eintrag wird geladen…",
     "loadingListing": "Das Inserat wird geladen…",
-    "actionOutcome": "Wenn Sie gerade etwas gespeichert oder gesendet haben, prüfen Sie zuerst die zugehörige Bestätigung, bevor Sie die Aktion wiederholen."
+    "actionOutcome": "Wenn Sie gerade etwas gespeichert oder gesendet haben, prüfen Sie zuerst die zugehörige Bestätigung, bevor Sie die Aktion wiederholen.",
+    "sections": {
+      "inquiries": "Zurück zu den Anfragen",
+      "cases": "Zurück zu den Vorgängen",
+      "inventory": "Zurück zum Bestand",
+      "calendar": "Zurück zum Kalender",
+      "tasks": "Zurück zu den Aufgaben",
+      "appointments": "Zurück zu den Terminen",
+      "messages": "Zurück zu den Nachrichten",
+      "documents": "Zurück zu den Dokumenten",
+      "properties": "Zurück zu den Immobilien"
+    }
   }
 }

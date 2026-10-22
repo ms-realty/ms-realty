@@ -79,6 +79,7 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
     STAGING_DATABASE_NAME: value(env, "STAGING_DATABASE_NAME"),
     STAGING_DATABASE_ROLE: value(env, `STAGING_${role.toUpperCase()}_DATABASE_ROLE`),
     RUNTIME_DEFER_WEB_START: "true",
+    JOB_QUEUE_SCHEMA_PRECREATED: "true",
     // This is a comparison target, never a claim about the running image's identity.
     EXPECTED_SOURCE_COMMIT: expectedSource,
     ...transport,

@@ -24,6 +24,10 @@ afterEach(() => {
 function content() {
   return (
     <>
+      <form method="get" action="/en/inventory">
+        <input name="q" defaultValue="MS-1" aria-label="Search" />
+        <button type="submit">Show</button>
+      </form>
       <a href="/en/inventory">Inventory</a>
       <a href="/en/cases" onClick={(event) => event.preventDefault()}>
         Cancelled navigation
@@ -128,4 +132,55 @@ it("reveals recovery when a render error replaces the destination", () => {
   act(() => window.dispatchEvent(new Event(navigationErrorEvent)));
   expect(screen.queryByRole("status")).toBeNull();
   expect(screen.getByText("Authorized content")).toBeVisible();
+});
+
+it("shows the list skeleton for a GET search and keeps a POST or a cancelled submit untouched", () => {
+  const stopSubmit = (event: Event) => event.preventDefault();
+  window.addEventListener("submit", stopSubmit);
+  try {
+    render(content());
+    // The suite cancels clicks (no real navigation in jsdom), so submit the form directly.
+    const form = screen.getByRole("button", { name: "Show" }).closest("form");
+    if (!form) throw new Error("Missing search form");
+    fireEvent.submit(form);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading the list…");
+    act(() => window.dispatchEvent(new Event("pageshow")));
+    form.setAttribute("method", "post");
+    fireEvent.submit(form);
+    expect(screen.queryByRole("status")).toBeNull();
+    form.setAttribute("method", "get");
+    form.addEventListener("submit", stopSubmit, { once: true });
+    fireEvent.submit(form);
+    expect(screen.queryByRole("status")).toBeNull();
+  } finally {
+    window.removeEventListener("submit", stopSubmit);
+  }
+});
+
+it("shows the page again when a leave prompt keeps the person here, or on Escape", async () => {
+  vi.useFakeTimers();
+  try {
+    render(content());
+    fireEvent.click(screen.getByRole("link", { name: "Inventory" }));
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    const prompt = new Event("beforeunload", { cancelable: true });
+    prompt.preventDefault();
+    act(() => {
+      window.dispatchEvent(prompt);
+      vi.runAllTimers();
+    });
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByText("Authorized content")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("link", { name: "Inventory" }));
+    act(() => {
+      window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+      vi.runAllTimers();
+    });
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("status")).toBeNull();
+  } finally {
+    vi.useRealTimers();
+  }
 });

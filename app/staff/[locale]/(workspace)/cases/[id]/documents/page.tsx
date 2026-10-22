@@ -10,7 +10,7 @@ import {
 import { fileError, fileLabel, filesCopy } from "@/features/files/copy";
 import { FileButton, FileCheck, FileEnvelope, FileField } from "@/features/files/forms";
 import { isPublicLocale } from "@/i18n/config";
-import { formatDate } from "@/i18n/format";
+import { formatDate, formatDateTime } from "@/i18n/format";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { caseDocumentPurposes, listCaseDocuments } from "@/server/documents/case";
@@ -19,6 +19,7 @@ import { fileReceipt } from "@/server/files/receipts";
 import { controlClass, labelClass, textareaClass } from "@/ui/field-class";
 import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
+import { TechnicalDetails } from "@/ui/technical-details";
 
 export default async function DocumentsPage({
   params,
@@ -115,7 +116,10 @@ export default async function DocumentsPage({
           <dl className="grid gap-2 sm:grid-cols-2">
             {[
               [copy.purpose, fileLabel(copy, document.purpose)],
-              [copy.version, String(file.versionNumber)],
+              [
+                copy.lastChanged,
+                formatDateTime(isPublicLocale(locale) ? locale : "bg", file.updatedAt),
+              ],
               [copy.scan, fileLabel(copy, file.scan)],
               [copy.state, fileLabel(copy, file.state)],
               [
@@ -132,6 +136,11 @@ export default async function DocumentsPage({
               </div>
             ))}
           </dl>
+          <TechnicalDetails locale={locale}>
+            <p>
+              {copy.version}: {file.versionNumber}
+            </p>
+          </TechnicalDetails>
           {document.expiresAt ? (
             <p>
               {copy.expiry}:{" "}

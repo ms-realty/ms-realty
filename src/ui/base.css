@@ -110,11 +110,16 @@
 
   /* Disclosures (details/summary) are the no-JavaScript baseline for menus and pickers. */
   summary {
-    list-style: none;
     cursor: pointer;
   }
 
-  summary::-webkit-details-marker {
+  /* Custom flex controls supply their own icon. Plain disclosures keep the browser's
+     expanded/collapsed marker, so they remain recognisable without a bespoke component. */
+  summary:where(.flex, .inline-flex) {
+    list-style: none;
+  }
+
+  summary:where(.flex, .inline-flex)::-webkit-details-marker {
     display: none;
   }
 

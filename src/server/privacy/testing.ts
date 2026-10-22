@@ -35,7 +35,7 @@ export async function syntheticServiceEmailTerms(db: Executor) {
       kind: "help",
       slug: "service-email-preferences",
       title: "Синтетични условия за имейл",
-      text: "Само тест: изричен избор за имейли по случай. Това не е реална правна политика.",
+      text: "Само тест: изричен избор за имейли по сделка. Това не е реална правна политика.",
       jurisdiction: "Synthetic test only",
       reviewScope: "Disposable fixture only",
     });

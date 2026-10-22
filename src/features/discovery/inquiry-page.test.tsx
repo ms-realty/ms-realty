@@ -102,7 +102,7 @@ describe("native inquiry correction loader", () => {
       });
       const view = render(result);
       expect(screen.queryByRole("button", { name: review.confirmAction })).not.toBeInTheDocument();
-      expect(screen.getByRole("combobox", { name: "Purpose" })).toBeEnabled();
+      expect(screen.getByRole("combobox", { name: "What would you like to do?" })).toBeEnabled();
       expect(view.container.querySelector('input[name="inquiryStage"]')).toHaveValue("review");
       expect(screen.getByRole("button", { name: review.refreshSources })).toBeInTheDocument();
       expect(view.container.querySelector('input[name="listingReference"]')).toHaveValue(reference);

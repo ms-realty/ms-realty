@@ -5,7 +5,8 @@ const en = {
   fileReview: "Exact document attachments",
   fileApproval: "I reviewed the recipient, complete email and every attached file shown above",
 
-  title: "Case email",
+  title: "Deal email",
+  technical: "Technical details",
   draft: "New email draft",
   recipient: "Recipient",
   recipients: "Recipients (up to 10)",
@@ -31,7 +32,7 @@ const en = {
   disabled:
     "Email sending is not enabled. You can prepare drafts; sending will remain unavailable until the service is configured.",
   noRecipients:
-    "No eligible recipient. A current case participant needs a verified email address and recorded service-message eligibility.",
+    "No eligible recipient. A current deal participant needs a verified email address and recorded service-message eligibility.",
   empty: "No email drafts yet.",
   history: "Drafts and delivery",
   immutable:
@@ -44,9 +45,9 @@ const en = {
   delivered: "Delivery reported by provider",
   bounced: "Bounced — delivery failed",
   failed: "Not delivered",
-  outcome_unknown: "Result unknown — requires reconciliation before any further send",
-  blocked: "Approval unavailable. Refresh the case to review its current information.",
-  back: "Back to case",
+  outcome_unknown: "Result unknown — check it before any further send",
+  blocked: "Approval unavailable. Refresh the deal to review its current information.",
+  back: "Back to the deal",
   limited: "Showing the latest 50 email records.",
 };
 const bg: typeof en = {
@@ -56,7 +57,8 @@ const bg: typeof en = {
   fileReview: "Точни приложения към писмото",
   fileApproval: "Проверих получателя, цялото писмо и всеки приложен файл по-горе",
 
-  title: "Имейл по случая",
+  title: "Имейл по сделката",
+  technical: "Технически подробности",
   draft: "Нов имейл — чернова",
   recipient: "Получател",
   recipients: "Получатели (до 10)",
@@ -94,8 +96,8 @@ const bg: typeof en = {
   bounced: "Върнат — не е доставен",
   failed: "Не е доставен",
   outcome_unknown: "Неизвестен резултат — необходима е проверка преди следващо изпращане",
-  blocked: "Одобрението е недостъпно. Обновете случая и прегледайте текущите данни.",
-  back: "Обратно към случая",
+  blocked: "Одобрението е недостъпно. Обновете сделката и прегледайте текущите данни.",
+  back: "Обратно към сделката",
   limited: "Показани са последните 50 имейла.",
 };
 const ru: typeof en = {
@@ -105,7 +107,8 @@ const ru: typeof en = {
   fileReview: "Точные вложения письма",
   fileApproval: "Я проверил получателя, всё письмо и каждый приложенный файл выше",
 
-  title: "Письма по делу",
+  title: "Письма по сделке",
+  technical: "Технические подробности",
   draft: "Новый черновик письма",
   recipient: "Получатель",
   recipients: "Получатели (до 10)",
@@ -130,7 +133,7 @@ const ru: typeof en = {
   disabled:
     "Отправка писем не включена. Можно подготовить черновики; для отправки требуется настроенная служба.",
   noRecipients:
-    "Нет доступного получателя. Нужен действующий участник дела с подтверждённым email и записанным основанием для служебных сообщений.",
+    "Нет доступного получателя. Нужен действующий участник сделки с подтверждённым email и записанным основанием для служебных сообщений.",
   empty: "Черновиков пока нет.",
   history: "Черновики и доставка",
   immutable:
@@ -143,9 +146,9 @@ const ru: typeof en = {
   delivered: "Провайдер сообщил о доставке",
   bounced: "Возврат — доставка не удалась",
   failed: "Не доставлено",
-  outcome_unknown: "Результат неизвестен — нужна сверка перед дальнейшей отправкой",
-  blocked: "Утверждение недоступно. Обновите дело и проверьте актуальные данные.",
-  back: "Вернуться к делу",
+  outcome_unknown: "Результат неизвестен — проверьте его перед дальнейшей отправкой",
+  blocked: "Утверждение недоступно. Обновите сделку и проверьте актуальные данные.",
+  back: "Вернуться к сделке",
   limited: "Показаны последние 50 писем.",
 };
 export const caseEmailCopy = (locale: string) => (locale === "bg" ? bg : locale === "ru" ? ru : en);

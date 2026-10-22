@@ -107,7 +107,7 @@ async function uploadDocument(
     mimeType: "application/pdf",
     buffer: bytes,
   });
-  await upload.getByLabel("Purpose", { exact: false }).selectOption(purpose);
+  await upload.getByLabel("What the document is for", { exact: false }).selectOption(purpose);
   await upload.getByRole("button", { name: "Upload and scan", exact: true }).click();
   await expect(page).toHaveURL((url) => Boolean(url.searchParams.get("saved")));
   let versionId = "";
@@ -211,11 +211,11 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   await page
     .getByLabel("Source or evidence reference", { exact: true })
     .fill("synthetic joined publication acceptance only");
-  await page.getByLabel("Price status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the price", { exact: true }).selectOption("known");
   await page.getByLabel("Price in EUR", { exact: true }).fill("95000.03");
-  await page.getByLabel("Area status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the area", { exact: true }).selectOption("known");
   await page.getByLabel("Area in m²", { exact: true }).fill("74.5");
-  await page.getByLabel("Bedroom status", { exact: true }).selectOption("known");
+  await page.getByLabel("What we know about the bedrooms", { exact: true }).selectOption("known");
   await page.getByLabel("Bedrooms", { exact: true }).fill("2");
   await page.getByRole("button", { name: "New listing", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Draft saved", exact: true })).toBeVisible();
@@ -278,13 +278,16 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   const mediaPath = `/api/media/${assetId}/${asset?.derivative_sha256}`;
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
   await page.reload();
+  await page
+    .getByLabel("Image description", { exact: true })
+    .fill("Синтетично изображение за тест");
+  await page.getByRole("button", { name: "Save photo details", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
+  await page.getByRole("button", { name: "Review this photo", exact: true }).click();
   await page.getByLabel("Rights holder", { exact: true }).fill("Synthetic image author");
   await page
     .getByLabel("Rights evidence / permission reference", { exact: true })
     .fill("Synthetic fixture rights only; no external photograph");
-  await page
-    .getByLabel("Image description", { exact: true })
-    .fill("Синтетично изображение за тест");
   await page
     .getByLabel(
       "I reviewed private addresses, people, documents and location details in the visible image.",
@@ -292,10 +295,14 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     .check();
   await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
   const mediaUploadReceipt = new URL(page.url()).searchParams.get("saved");
-  await page.getByRole("button", { name: "Record review", exact: true }).click();
+  await page.getByRole("button", { name: "Approve as a public candidate", exact: true }).click();
   await expect(page).toHaveURL((url) =>
     Boolean(url.searchParams.get("saved") && url.searchParams.get("saved") !== mediaUploadReceipt),
   );
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Checks and rights for this photo$/ })
+    .click();
   await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
   expect((await request.get(hostUrl("public", mediaPath))).status()).toBe(404);
 

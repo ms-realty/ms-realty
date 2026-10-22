@@ -30,7 +30,7 @@ it("native editing keeps the stored rental selected and targets its existing str
   const disclosure = screen.getByText("Edit saved search").closest("details");
   if (!disclosure) throw new Error("Missing search editor");
   const field = within(disclosure).getByRole("combobox", {
-    name: "Property purpose",
+    name: "Buy or rent",
     hidden: true,
   });
   expect(field).toHaveValue("long_term_rent");

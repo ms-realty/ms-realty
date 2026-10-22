@@ -145,7 +145,7 @@ for (const javaScriptEnabled of [true, false])
       await context.addCookies([cookie(receiver.brokerToken)]);
       await page.goto(continuity);
       const accept = page.locator("form").filter({
-        has: page.getByRole("button", { name: "Accept case and commitments", exact: true }),
+        has: page.getByRole("button", { name: "Accept the deal and its next steps", exact: true }),
       });
       await accept
         .getByLabel("Reason", { exact: true })
@@ -155,7 +155,7 @@ for (const javaScriptEnabled of [true, false])
         320,
       );
       await accept
-        .getByRole("button", { name: "Accept case and commitments", exact: true })
+        .getByRole("button", { name: "Accept the deal and its next steps", exact: true })
         .click();
       await expect(
         page.getByRole("heading", { name: "Change recorded", exact: true }),

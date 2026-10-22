@@ -67,9 +67,8 @@ it("opens a compact authorized Case summary and links into its full manual workf
   render(await CaseScreen(entry.props));
   expect(reads.list).toHaveBeenCalledWith("test-db", session);
   expect(reads.detail).toHaveBeenCalledWith("test-db", session, "case-one");
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-    "CA-ONE · Recorded home search",
-  );
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Recorded home search");
+  expect(screen.getByText("CA-ONE", { exact: true })).toBeVisible();
   expect(screen.getByRole("heading", { name: baseView.record.nextAction })).toBeVisible();
   expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute(
     "href",
@@ -79,7 +78,7 @@ it("opens a compact authorized Case summary and links into its full manual workf
     "href",
     "/en/messages/case-one",
   );
-  expect(screen.queryByRole("link", { name: "Open case" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Open the deal" })).not.toBeInTheDocument();
   expect(screen.getByRole("complementary", { name: "Accountable broker" })).toHaveTextContent(
     row.ownerName,
   );
@@ -124,7 +123,7 @@ it("uses only the supplied authorized appointment and sends the hero conversatio
   expect(reads.messages).not.toHaveBeenCalled();
 });
 
-it("isolates a recorded English action and English empty-state copy inside the Hebrew overview", async () => {
+it("isolates a recorded English action while Hebrew interface copy inherits the reading direction", async () => {
   const nextAction = "Review the recorded step-free requirement with your broker.";
   reads.detail.mockResolvedValue({
     ...baseView,
@@ -144,25 +143,34 @@ it("isolates a recorded English action and English empty-state copy inside the H
     </div>,
   );
   expect(screen.getByRole("heading", { name: nextAction })).toHaveAttribute("dir", "auto");
-  for (const text of [
-    "No appointments are available in this scope.",
-    "No properties have been suggested yet.",
-  ]) {
-    const fallback = screen.getByText(text);
-    expect(fallback).toHaveAttribute("lang", "en");
-    expect(fallback).toHaveAttribute("dir", "ltr");
+  for (const text of ["אין מפגשים זמינים במסגרת גישה זו.", "טרם הוצעו נכסים."]) {
+    const translated = screen.getByText(text);
+    expect(translated.closest("[lang]")).toHaveAttribute("lang", "he");
+    expect(translated.closest("[dir]")).toHaveAttribute("dir", "rtl");
   }
-  expect(screen.getByRole("link", { name: /Appointments/ })).toHaveAttribute(
-    "href",
-    "/he/appointments",
-  );
+  expect(screen.getByRole("link", { name: /מפגשים/ })).toHaveAttribute("href", "/he/appointments");
 });
 
 it("keeps the full Case route and its requirements section outside the compact entry", async () => {
   render(await CaseScreen({ locale: "en", session, id: row.id, pane: "overview" }));
   expect(reads.messages).toHaveBeenCalledWith("test-db", session, row.id);
   expect(document.querySelector("#case-brief")).toBeVisible();
-  expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute("href", "#case-brief");
+  const sections = screen.getByRole("navigation", { name: "In this deal" });
+  expect(within(sections).getByRole("link", { name: "Requirements" })).toHaveAttribute(
+    "href",
+    "#case-brief",
+  );
+});
+
+it("opens the client conversation with its case identity and without an appointment workflow", async () => {
+  render(await CaseScreen({ locale: "en", session, id: row.id, pane: "messages" }));
+  expect(screen.getByRole("heading", { level: 1, name: "Conversation" })).toBeVisible();
+  expect(screen.getByText("CA-ONE · Recorded home search", { exact: true })).toBeVisible();
+  expect(screen.getByRole("region", { name: "Conversation" })).toBeVisible();
+  expect(screen.getByText("No messages are available to this account in this deal.")).toBeVisible();
+  expect(reads.messages).toHaveBeenCalledWith("test-db", session, row.id);
+  expect(reads.appointments).not.toHaveBeenCalled();
+  expect(screen.queryByRole("heading", { name: "Appointments" })).toBeNull();
 });
 
 it("does not fall back to cached Case content when detail authorization changes after listing", async () => {
@@ -189,7 +197,7 @@ it.each([2, 50])(
     expect(reads.detail).not.toHaveBeenCalled();
     const list = screen.getByRole("list");
     expect(within(list).getAllByRole("listitem")).toHaveLength(count);
-    expect(within(list).getByRole("link", { name: "CA-1 · Visible case 1" })).toHaveAttribute(
+    expect(within(list).getByRole("link", { name: "Visible case 1 · CA-1" })).toHaveAttribute(
       "href",
       "/en/overview/case-1",
     );
@@ -206,7 +214,7 @@ it("preserves the empty state and never selects a Case for another destination",
       openSingleCase: true,
     }),
   );
-  expect(screen.getByRole("link", { name: "CA-ONE · Recorded home search" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Recorded home search · CA-ONE" })).toHaveAttribute(
     "href",
     "/en/properties/case-one",
   );
@@ -214,7 +222,11 @@ it("preserves the empty state and never selects a Case for another destination",
   cleanup();
   reads.list.mockResolvedValue([]);
   render(await CaseIndexScreen({ locale: "en", session, openSingleCase: true }));
-  expect(screen.getByText("No cases are available to this account.")).toBeVisible();
+  expect(
+    screen.getByText(
+      "You don't have access to a deal yet. When a broker invites you, it will appear here.",
+    ),
+  ).toBeVisible();
   expect(reads.detail).not.toHaveBeenCalled();
 });
 
@@ -254,7 +266,7 @@ it.each(["paused", "closed"])(
     expect(screen.queryByText(baseView.record.nextAction)).not.toBeInTheDocument();
     expect(document.querySelector("time")).toBeNull();
     expect(
-      screen.getByRole("heading", { name: new RegExp(`This case is ${disposition}`) }),
+      screen.getByRole("heading", { name: new RegExp(`This deal is ${disposition}`) }),
     ).toBeVisible();
   },
 );

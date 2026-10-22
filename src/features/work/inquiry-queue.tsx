@@ -136,22 +136,15 @@ export function InquiryQueueView({
       aside={nested ? undefined : status}
     >
       <nav aria-label={text.views}>
-        <ul className="grid grid-cols-6 gap-1 rounded-control bg-subtle p-1 sm:grid-cols-5 lg:grid-cols-6">
-          {inboxScopes.map((key, index) => (
-            <li
-              key={key}
-              className={
-                index < 3
-                  ? "col-span-2 flex sm:col-span-1 lg:col-span-2"
-                  : "col-span-3 flex sm:col-span-1 lg:col-span-3"
-              }
-            >
+        <ul className="flex flex-wrap gap-1 rounded-control bg-subtle p-1">
+          {inboxScopes.map((key) => (
+            <li key={key} className="flex grow">
               <a
                 href={queueHref(base, key)}
                 // Beside an open conversation the scope is current, but it is not this page.
                 aria-current={key === scope ? (nested ? "true" : "page") : undefined}
                 className={cx(
-                  "flex min-h-[2.875rem] w-full items-center justify-center rounded-control px-2 py-3 text-center text-dense font-semibold no-underline wrap-anywhere",
+                  "flex min-h-[2.875rem] w-full items-center justify-center rounded-control px-2 py-3 text-center text-dense font-semibold no-underline break-normal",
                   key === scope
                     ? "bg-canvas text-text"
                     : "text-text-muted hover:bg-canvas/60 hover:text-text",

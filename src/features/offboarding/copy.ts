@@ -17,9 +17,9 @@ export function offboardingCopy(locale: string) {
     next: s("Следващи записи", "Следующие записи", "Next records"),
     previous: s("Предишни записи", "Предыдущие записи", "Previous records"),
     notApplied: s(
-      "Достъпът не е променен от тази операция.",
-      "Эта операция не изменила доступ.",
-      "This operation did not change access.",
+      "Тази заявка не промени достъпа.",
+      "Эта заявка не изменила доступ.",
+      "This request did not change access.",
     ),
     reviewAgain: s(
       "Нов преглед преди действие",
@@ -43,9 +43,9 @@ export function offboardingCopy(locale: string) {
     ),
     retained: s("Остава за предаване", "Остаётся передать", "Retained for handover"),
     warning: s(
-      "Достъпът може да бъде спрян незабавно. Отворената работа влиза в дежурната опашка. Последният потвърден отговорник и държателят на ключове се запазват до отделно потвърдено предаване.",
-      "Доступ можно отключить немедленно. Открытая работа попадает в очередь подхвата. Последний подтверждённый ответственный и держатель ключей сохраняются до отдельного подтверждения передачи.",
-      "Access can end immediately. Open work enters agency coverage. The last accepted owner and physical key holder stay recorded until an individually confirmed handover.",
+      "Достъпът може да бъде спрян незабавно. Отворената работа няма наличен отговорник и се показва в „Работа без отговорник“. Последният потвърден отговорник и държателят на ключове се запазват до отделно потвърдено предаване.",
+      "Доступ можно отключить немедленно. У открытой работы нет доступного ответственного, и она показывается в разделе «Работа без ответственного». Последний подтверждённый ответственный и держатель ключей сохраняются до отдельного подтверждения передачи.",
+      "Access can end immediately. Open work has no available owner and shows under “Work without an owner”. The last accepted owner and physical key holder stay recorded until an individually confirmed handover.",
     ),
     keys: s(
       "Комплекти ключове при служителя",
@@ -53,9 +53,9 @@ export function offboardingCopy(locale: string) {
       "Key sets still held",
     ),
     cases: s(
-      "Отворени и спрени случаи",
-      "Открытые и приостановленные дела",
-      "Active and paused Cases",
+      "Отворени и спрени сделки",
+      "Открытые и приостановленные сделки",
+      "Active and paused deals",
     ),
     tasks: s("Неприключени задачи", "Незавершённые задачи", "Unfinished tasks"),
     appointments: s("Неприключени срещи", "Незавершённые встречи", "Open appointments"),

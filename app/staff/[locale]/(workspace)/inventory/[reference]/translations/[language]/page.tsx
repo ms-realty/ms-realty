@@ -4,6 +4,7 @@ import { getDb } from "@/db/client";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { translationCopy } from "@/features/inventory/translation-copy";
 import { TranslationEditor } from "@/features/inventory/translation-editor";
+import { ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
 import { isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
@@ -42,6 +43,7 @@ export default async function TranslationPage({
       <h1 className="text-title font-semibold">
         {copy.heading} · <bdi>{language.toUpperCase()}</bdi>
       </h1>
+      <ListingNavigation locale={locale} reference={reference} current="translations" />
       <p>{copy.next}</p>
       <div className="grid items-start gap-8 lg:grid-cols-2">
         <FrozenPreview

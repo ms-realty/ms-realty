@@ -637,7 +637,7 @@ for (const kind of ["accept", "contact", "triage"] as const) {
             kind === "contact"
               ? copy.submit
               : kind === "triage"
-                ? "Record selected disposition"
+                ? "Save this decision"
                 : work.accept,
           exact: true,
         })
@@ -1182,7 +1182,7 @@ test("O02 native triage submits its reason with a stable inquiry form identity",
     await page.goto(hostUrl("staff", `/en/inquiries/${fixture.id}`));
     await page.getByRole("radio", { name: work.states.contact_unreachable, exact: true }).check();
     await page.getByLabel(work.reason, { exact: true }).fill(reason);
-    await page.getByRole("button", { name: "Record selected disposition", exact: true }).click();
+    await page.getByRole("button", { name: "Save this decision", exact: true }).click();
     await expect(page.getByText(work.statusSucceeded, { exact: true })).toBeVisible();
     const [record] = await db
       .select()
@@ -1388,9 +1388,10 @@ for (const javaScriptEnabled of [true, false]) {
       });
       await signIn(context, broker.token);
       await openUnassignedQueueAt(page, received.id);
-      // O02 row: no name was given, so the reference names it beside the listing it came from.
+      // An unnamed inquiry keeps its stated purpose and both exact references visible.
       const row = page.locator(`[data-inquiry-id="${received.id}"]`);
-      await expect(row).toContainText(`${received.reference} · ${listing.reference}`);
+      await expect(row).toContainText(`${work.purposes.question} · ${listing.reference}`);
+      await expect(row).toContainText(received.reference);
       // O02 keeps the queue scope and page in the conversation URL through every recorded step.
       const opened = new URL(
         (await row.getByRole("link").getAttribute("href")) ?? "",
@@ -1399,8 +1400,9 @@ for (const javaScriptEnabled of [true, false]) {
       expect(opened.searchParams.get("view")).toBe("unassigned");
       await row.getByRole("link").click();
       await expect(
-        page.getByRole("heading", { name: received.reference, exact: true }),
+        page.getByRole("heading", { name: work.purposes.question, exact: true }),
       ).toBeVisible();
+      await expect(page.locator("[data-inquiry-reference]")).toContainText(received.reference);
       await page
         .getByLabel(work.nextAction, { exact: true })
         .fill("Review and answer this specific inquiry");

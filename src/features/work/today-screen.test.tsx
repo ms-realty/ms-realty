@@ -137,7 +137,7 @@ const ordinary = () => ({
 const show = async (locale = "en") =>
   render(await TodayScreen({ locale, session, name: "Maria Example", now }));
 const scopeNote =
-  "These lists show the work you can access: inquiries, tasks, key returns, viewings, Cases, listings, translations and delivery problems. Each record opens in its own workspace.";
+  "These lists show the work you can access: inquiries, tasks, key returns, viewings, deals, listings, translations and delivery problems. Each record opens in its own workspace.";
 const groupOf = (id: string) => document.querySelector(`[data-today-group="${id}"]`) as HTMLElement;
 const quiet = (section: string) => document.querySelector(`[data-today-quiet="${section}"]`);
 
@@ -172,7 +172,7 @@ it("orders the worklist by the contract and links every count to its real queue"
   expect(quiet("attention")).toHaveTextContent(
     "Nothing waiting: Viewings · Listing corrections and reviews · Translations to review · Email delivery to check · Publication delivery to check",
   );
-  expect(quiet("continue")).toHaveTextContent("Nothing waiting: My cases · My listing drafts");
+  expect(quiet("continue")).toHaveTextContent("Nothing waiting: My deals · My listing drafts");
   expect(screen.getByText(scopeNote)).toBeVisible();
   for (const [name, href] of [
     [/^Unassigned requests/, "/en/inquiries?view=unassigned"],
@@ -200,7 +200,7 @@ it("gives each row its reason, owner with coverage, due or age, and one next ste
   const unassigned = within(screen.getByRole("list", { name: "Unassigned requests" }));
   expect(unassigned.getByRole("link")).toHaveAttribute("href", "/en/inquiries/in-new");
   expect(unassigned.getByRole("link")).toHaveTextContent(
-    "Viewing request · Synthetic visitor · MS-00202Owner: Agency coverage · Received 12 min. ago · Next step: accept and reply",
+    "Viewing request · Synthetic visitor · MS-00202Owner: Work without an owner · Received 12 min. ago · Next step: accept and reply",
   );
   const due = within(screen.getByRole("list", { name: "My overdue tasks" })).getByRole("link");
   expect(due).toHaveAttribute("href", "/en/tasks/task-due");
@@ -211,7 +211,7 @@ it("gives each row its reason, owner with coverage, due or age, and one next ste
     "link",
   );
   expect(offered).toHaveTextContent(
-    "Owner: Agency coverage (Last accepted owner: Former broker) · Due",
+    "Owner: Work without an owner (Last accepted owner: Former broker) · Due",
   );
   expect(offered).toHaveTextContent("Next step: accept or decline");
   const mine = within(screen.getByRole("list", { name: "My open inquiries" })).getByRole("link");
@@ -293,7 +293,7 @@ it("keeps overdue key returns among the due commitments for key managers", async
   const row = within(reminders as HTMLElement).getByRole("link", { name: /KS-ONE/ });
   expect(row).toHaveAttribute("href", "/en/operations/keys/key-one");
   expect(row).toHaveTextContent(
-    "Property PR-ONE · Holder: Synthetic custody holder (Agency coverage) · Overdue since",
+    "Property PR-ONE · Holder: Synthetic custody holder (Work without an owner) · Overdue since",
   );
   expect(
     within(reminders as HTMLElement).getByText(
@@ -326,13 +326,13 @@ it("shows overload with its total, aging and an escalation route, never a celebr
   );
   const overload = screen.getByText("Requests without an owner: 34").parentElement;
   expect(overload).toHaveTextContent(
-    "The oldest arrived 3 hr. ago. Agency coverage holds them until someone accepts them. Ask a manager to share out the work.",
+    "The oldest arrived 3 hr. ago. These requests have no available owner. Ask a manager to share out the work.",
   );
   expect(overload?.querySelector("time")).toHaveAttribute(
     "datetime",
     minutesAgo(180).toISOString(),
   );
-  expect(screen.getByRole("link", { name: "Agency coverage" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Work without an owner" })).toHaveAttribute(
     "href",
     "/en/coverage",
   );
@@ -644,9 +644,9 @@ it("opens each newly read record in its own workspace with its reason and next s
     [
       /^Viewing offered to you to host · AP-offered/,
       "/en/calendar/offered",
-      "Host: Agency coverage (Last accepted owner: Maria Example)",
+      "Host: Work without an owner (Last accepted owner: Maria Example)",
     ],
-    [/^Viewing to arrange · AP-open/, "/en/calendar/open", "No time agreed yet · Case CS-ONE"],
+    [/^Viewing to arrange · AP-open/, "/en/calendar/open", "No time agreed yet · Deal CS-ONE"],
     [/^Review needed · MS-REVIEW/, "/en/inventory/MS-REVIEW?tab=review", "Overdue since"],
     [/^Facts needed · MS-FACTS/, "/en/inventory/MS-FACTS?tab=facts", "add the missing facts"],
     [
@@ -655,7 +655,7 @@ it("opens each newly read record in its own workspace with its reason and next s
       "Requested 30 min. ago",
     ],
     [
-      /^Result unknown — requires reconciliation before any further send · CS-EMAIL/,
+      /^Result unknown — check it before any further send · CS-EMAIL/,
       "/en/cases/case-email/email",
       "Next step: confirm the result before trying again",
     ],
@@ -697,8 +697,8 @@ it("opens each newly read record in its own workspace with its reason and next s
     "Translations to reviewIn the queue: 1",
     "Email delivery to checkIn the queue: 1",
     "Publication delivery to checkIn the queue: 1",
-    "Delivery operations to checkIn the queue: 1",
-    "My casesIn the queue: 1",
+    "Deliveries to checkIn the queue: 1",
+    "My dealsIn the queue: 1",
     "My listing draftsIn the queue: 1",
   ]);
   // Today only links: nothing here approves, sends or publishes.
@@ -713,7 +713,7 @@ it("omits role-gated queues that the read model withholds", async () => {
     operatorDeliveryExceptions: null,
   });
   await show();
-  for (const name of ["Overdue key returns", "Delivery operations to check"]) {
+  for (const name of ["Overdue key returns", "Deliveries to check"]) {
     expect(screen.queryByRole("heading", { name: new RegExp(`^${name}`) })).toBeNull();
     expect(quiet("attention")).not.toHaveTextContent(name);
   }
@@ -746,7 +746,7 @@ it("opens each operator exception itself and counts the same queue that O27 page
     queuePage,
   ]);
   expect(operations.getByRole("heading", { level: 3 })).toHaveTextContent(
-    "Delivery operations to checkIn the queue: 31",
+    "Deliveries to checkIn the queue: 31",
   );
   expect(operations.getByRole("link", { name: "More in this queue" })).toBeVisible();
   expect(operations.queryByText(/full list is not available/)).toBeNull();
@@ -992,14 +992,14 @@ it.each([
     "Добро утро, Maria Example.",
     ["За действие", "Моите задачи", "Екип"],
     "Неразпределени запитвания",
-    "Отговорник: Дежурна опашка",
+    "Отговорник: Работа без отговорник",
   ],
   [
     "ru",
     "Доброе утро, Maria Example.",
     ["К действию", "Мои задачи", "Команда"],
     "Запросы без исполнителя",
-    "Ответственный: Очередь подхвата",
+    "Ответственный: Работа без ответственного",
   ],
 ])("speaks %s", async (locale, title, tabs, group, owner) => {
   await show(locale);
@@ -1036,7 +1036,7 @@ it.each([
       "Публикуване · MS-PUBLISH",
       "Неуспешно · Уебсайт · BG",
       "Изпращане на имейл",
-      "Моите случаи",
+      "Моите сделки",
       "Чернова · MS-DRAFT",
     ],
   ],
@@ -1051,7 +1051,7 @@ it.each([
       "Публикация · MS-PUBLISH",
       "Не удалось · Сайт · BG",
       "Отправка письма",
-      "Мои дела",
+      "Мои сделки",
       "Черновик · MS-DRAFT",
     ],
   ],

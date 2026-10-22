@@ -252,6 +252,8 @@ export async function reviewPrivacyRequest(db: Executor, session: Session, input
       type: "privacy.review",
       idempotencyKey: value.operationId,
       requestHash: hashRequest(value),
+      expectedVersion: value.expectedVersion,
+      subject: { type: "privacy_request", id: value.id },
     },
     async ({ tx, operationId }) => {
       await privacyOperator(tx, session, value.id);

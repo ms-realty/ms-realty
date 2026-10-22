@@ -73,7 +73,7 @@ test("reviewed exact revision needs both named parties; client document access r
     await page.goto(hostUrl("staff", `/en/proposals/${f.proposalId}`));
     await page
       .getByLabel(
-        "I reviewed these exact parties, terms, source and deadline. This is a coordination record, not legal approval.",
+        "I reviewed these exact people and companies, terms, source and deadline. This is a coordination record, not legal approval.",
         { exact: true },
       )
       .check();
@@ -81,13 +81,11 @@ test("reviewed exact revision needs both named parties; client document access r
     await recorded(page);
     await page
       .getByLabel(
-        "I reviewed the exact revision and its audience. Make it available to these parties in their client workspace.",
+        "I reviewed the exact revision and its audience. Show it to these people in their client workspace.",
         { exact: true },
       )
       .check();
-    await page
-      .getByRole("button", { name: "Make available to these parties", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Show to these people", exact: true }).click();
     await recorded(page);
     await client.goto(hostUrl("client", `/en/proposals/${f.proposalId}`));
     await expect(client.getByRole("heading", { name: "Exact terms", exact: true })).toBeVisible();
@@ -102,7 +100,7 @@ test("reviewed exact revision needs both named parties; client document access r
     await recorded(client);
     await expect(
       client.getByText(
-        "Your response is recorded. Overall agreement is still pending the remaining required parties and case review.",
+        "Your response is recorded. Overall agreement still waits for the other people whose agreement is required and for the required checks for this deal.",
         { exact: true },
       ),
     ).toBeVisible();

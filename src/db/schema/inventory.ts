@@ -22,7 +22,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { allowedMediaContentTypes } from "../../domain/media";
+import { allowedMediaContentTypes, type MediaDetailsDraft } from "../../domain/media";
 import type { MediaRendition } from "../../domain/media-rendition";
 import { approvals } from "./approvals";
 import { createdAt, id, instant, mutable, reference, sqlList, tsvector } from "./columns";
@@ -371,6 +371,8 @@ export const mediaAssets = pgTable(
     originalAssetId: uuid("original_asset_id").references((): AnyPgColumn => mediaAssets.id),
     caption: text("caption"),
     altText: text("alt_text"),
+    /** Saving editorial text does not rewrite approved metadata or withdraw live images. */
+    detailsDraft: jsonb("details_draft").$type<MediaDetailsDraft>(),
     capturedAt: instant("captured_at"),
     legacyReference: text("legacy_reference"),
   },

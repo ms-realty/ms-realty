@@ -31,13 +31,18 @@ export class CloudflareMessageProvider implements MessageProvider {
     let relay: URL;
     try {
       relay = new URL(config.relayUrl);
+      const productionRelay =
+        config.hosts.public === "https://makler-realty.com" &&
+        config.hosts.client === "https://my.makler-realty.com" &&
+        config.hosts.staff === "https://app.makler-realty.com" &&
+        relay.href === "https://app.makler-realty.com/__release/email";
       if (
         relay.protocol !== "https:" ||
         relay.username ||
         relay.password ||
         relay.search ||
         relay.hash ||
-        relay.href !== new URL("/__staging/email", config.hosts.public).href
+        (!productionRelay && relay.href !== new URL("/__staging/email", config.hosts.public).href)
       )
         throw new Error();
     } catch {

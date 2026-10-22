@@ -1,5 +1,5 @@
 import { isPublicLocale } from "@/domain/ids";
-import { type LegacyManifest, primaryScopes, sha256, sourceIdentity } from "./manifest";
+import { type LegacyManifest, sha256, sourceIdentity, verifiedSourceBody } from "./manifest";
 
 interface PageProjection {
   id: string;
@@ -9,6 +9,9 @@ interface PageProjection {
   bodyText: string;
   sourceHash: string;
   contentScope: string;
+  contentState?: "text" | "verified_empty_archive";
+  sourceResponseHash?: string;
+  provenance?: { kind: "live" | "archived"; artifact: string };
 }
 interface LiveSourceBinding {
   id: string;
@@ -43,9 +46,17 @@ export function exportStagingRoutes(
       !page?.title.trim() ||
       !isPublicLocale(page.locale) ||
       !/^[a-f0-9]{24}$/u.test(page.id) ||
-      !primaryScopes.includes(page.contentScope as (typeof primaryScopes)[number]) ||
       binding.candidate.status !== 200 ||
-      !page.bodyText.trim() ||
+      !verifiedSourceBody({
+        url: binding.sourceUrl,
+        content_scope: page.contentScope,
+        content_state: page.contentState,
+        extracted_body_text: page.bodyText,
+        text_sha256: page.sourceHash,
+        response_sha256: page.sourceResponseHash ?? "",
+        response_artifact: page.provenance?.artifact,
+        provenance: page.provenance?.kind,
+      }) ||
       page.sourceHash !== binding.sourceBodyHash ||
       sha256(page.bodyText) !== page.sourceHash ||
       page.canonicalPath !== binding.candidate.path ||

@@ -4,6 +4,7 @@ import {
   migrationCompletion,
   migrationStopped,
   type RuntimeProof,
+  reconcileMigrationCompletion,
   runtimeProof,
 } from "./runtime-proof";
 
@@ -28,6 +29,34 @@ const completed: RuntimeProof = {
   completedAt: "2026-10-01T12:00:00.000Z",
 };
 describe("Explicit migration completion and immutable source proof", () => {
+  it("reconciles a lost acknowledgement only from the original operation's live completion", () => {
+    const unknown = migrationStopped(running, { exitCode: 0, reason: "exit" });
+    expect(reconcileMigrationCompletion(unknown, completed)).toMatchObject({
+      ...running,
+      status: "completed",
+      completedAt: completed.completedAt,
+      reconciledFrom: "unknown",
+    });
+  });
+  it("keeps uncertain or failed migrations held when original completion is not proven", () => {
+    const unknown = migrationStopped(running, { exitCode: 0, reason: "exit" });
+    for (const changed of [
+      { state: "prepared", operationId: undefined },
+      { state: "running" },
+      { state: "failed" },
+      { role: "web" },
+      { operationId: "87654321-5678-4321-9876-123456789abc" },
+      { sourceCommit: "c".repeat(40) },
+      { buildNonce: "87654321-1234-4321-9876-123456789abc" },
+      { completedAt: undefined },
+      { completedAt: "invalid" },
+    ])
+      expect(
+        reconcileMigrationCompletion(unknown, { ...completed, ...changed } as RuntimeProof),
+      ).toEqual(unknown);
+    const failed = { ...unknown, status: "failed" as const };
+    expect(reconcileMigrationCompletion(failed, completed)).toEqual(failed);
+  });
   it("holds a synthesized SDK exit zero and cannot promote uncertainty on later polling", () => {
     const unknown = migrationStopped(running, { exitCode: 0, reason: "exit" });
     expect(unknown.status).toBe("unknown");

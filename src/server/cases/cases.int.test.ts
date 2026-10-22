@@ -25,7 +25,7 @@ afterAll(async () => {
   await t?.drop();
 });
 
-describe("Case continuity", () => {
+describe("Deal continuity", () => {
   it("qualifies a durable owned inquiry with explicit party, revisioned Brief and next action", async () => {
     const f = await caseFixture(t.db);
     const [source] = await t.db.select().from(inquiries).where(eq(inquiries.id, f.inquiry.id));

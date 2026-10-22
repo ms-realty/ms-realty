@@ -1,3 +1,4 @@
+import { workflowCopy } from "@/i18n/workflow-copy";
 import "server-only";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/db/client";
@@ -17,72 +18,7 @@ import {
   workflowLink,
 } from "./screens";
 
-const copy = (locale: string) =>
-  locale === "bg"
-    ? {
-        title: "Документи",
-        empty: "Няма документи, споделени изрично с този профил.",
-        download: "Изтегляне на текущия файл",
-        version: "Версия",
-        purpose: "Предназначение",
-        review: "Преглед за посочената цел",
-        professional: "Професионална проверка",
-        not_requested: "Не е поискана",
-        requested: "Поискана · очаква се резултат",
-        validated: "Записано е професионално заключение",
-        declined: "Отказана",
-        expiry: "Валиден до",
-        scan_pending: "Файлът се проверява. Проверете отново по-късно.",
-        scan_failed: "Проверката не завърши. Свържете се с брокера.",
-        unsafe: "Файлът не е безопасен и не може да бъде изтеглен.",
-        needs_replacement: "Необходим е заместващ файл. Свържете се с брокера.",
-        unavailable: "Файлът още не е достъпен за изтегляне.",
-        back: "Отваряне на случая",
-        note: "Показана е текущата версия. Прегледът за определена цел е отделен от професионалното заключение.",
-      }
-    : locale === "ru"
-      ? {
-          title: "Документы",
-          empty: "Нет документов, явно открытых этому профилю.",
-          download: "Скачать текущий файл",
-          version: "Версия",
-          purpose: "Назначение",
-          review: "Проверка для указанной цели",
-          professional: "Профессиональная проверка",
-          not_requested: "Не запрошена",
-          requested: "Запрошена · ожидается результат",
-          validated: "Записано профессиональное заключение",
-          declined: "Отклонена",
-          expiry: "Действителен до",
-          scan_pending: "Файл проверяется. Повторите позже.",
-          scan_failed: "Проверка не завершена. Свяжитесь с брокером.",
-          unsafe: "Файл небезопасен и недоступен для скачивания.",
-          needs_replacement: "Нужен заменяющий файл. Свяжитесь с брокером.",
-          unavailable: "Файл пока недоступен для скачивания.",
-          back: "Открыть дело",
-          note: "Показана текущая версия. Проверка для конкретной цели отличается от профессионального заключения.",
-        }
-      : {
-          title: "Documents",
-          empty: "No documents have been explicitly shared with this account.",
-          download: "Download current file",
-          version: "Version",
-          purpose: "Purpose",
-          review: "Review for the stated purpose",
-          professional: "Professional review",
-          not_requested: "Not requested",
-          requested: "Requested · awaiting a result",
-          validated: "Professional conclusion recorded",
-          declined: "Declined",
-          expiry: "Valid until",
-          scan_pending: "The file is being checked. Check again later.",
-          scan_failed: "The file check did not complete. Contact your broker.",
-          unsafe: "The file is unsafe and cannot be downloaded.",
-          needs_replacement: "A replacement file is needed. Contact your broker.",
-          unavailable: "This file is not available for download yet.",
-          back: "Open case",
-          note: "This is the current version. Review for a stated purpose is separate from a professional conclusion.",
-        };
+const copy = (locale: string) => workflowCopy(locale, "documents");
 
 async function documentRead<T>(locale: string, path: string, run: () => Promise<T>): Promise<T> {
   try {
@@ -100,9 +36,19 @@ function FileDetail({ locale, document }: { locale: string; document: ClientDocu
     file = document.version;
   return (
     <WorkflowSection title={`${document.reference} · ${file.fileName}`}>
-      <p>
-        {c.version}: {file.number}
-      </p>
+      {file.canDownload ? (
+        <a className={workflowLink} href={`/api/files/private/document/${file.id}`} download>
+          {c.download}
+        </a>
+      ) : (
+        <p role="status">{c[file.downloadUnavailableReason ?? "unavailable"]}</p>
+      )}
+      <details>
+        <summary className="cursor-pointer font-semibold">{c.technical}</summary>
+        <p>
+          {c.version}: {file.number}
+        </p>
+      </details>
       <p>
         {c.purpose}: {fileLabel(labels, document.purpose)}
       </p>
@@ -119,13 +65,6 @@ function FileDetail({ locale, document }: { locale: string; document: ClientDocu
           {c.expiry}: <WorkflowTime value={document.expiresAt} locale={locale} />
         </p>
       ) : null}
-      {file.canDownload ? (
-        <a className={workflowLink} href={`/api/files/private/document/${file.id}`} download>
-          {c.download}
-        </a>
-      ) : (
-        <p role="status">{c[file.downloadUnavailableReason ?? "unavailable"]}</p>
-      )}
       {document.caseId ? (
         <p>
           <a className={workflowLink} href={`/${locale}/overview/${document.caseId}`}>

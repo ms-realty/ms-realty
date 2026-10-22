@@ -288,6 +288,8 @@ for (const javaScriptEnabled of [true, false]) {
           width >= 1024 ? 0 : 1,
         );
         await noHorizontalScroll(page, width);
+        // The streamed route heading can appear before its document metadata settles.
+        await expect(page).toHaveTitle("MS Realty workspace");
         if (javaScriptEnabled)
           expect(
             (
@@ -390,7 +392,9 @@ test("X02 offers every working destination to a permitted user, and each answers
   const work = tools.getByRole("navigation", { name: "Work", exact: true });
   const management = tools.getByRole("navigation", { name: "Content and management" });
   expect(await hrefs(work.getByRole("link"))).toEqual([
-    ...everyday,
+    ...everyday.slice(0, 4),
+    "/en/operations/imports",
+    ...everyday.slice(4),
     "/en/coverage",
     "/en/operations/inbound",
     "/en/operations/keys",
@@ -399,7 +403,9 @@ test("X02 offers every working destination to a permitted user, and each answers
   expect(await hrefs(management.getByRole("link"))).toEqual([
     "/en/content",
     "/en/access/manage",
+    "/en/operations/readiness",
     "/en/operations/jobs",
+    "/en/operations/history",
     "/en/operations/privacy",
     "/en/operations/subscriptions",
   ]);
@@ -420,7 +426,7 @@ test("X02 hides what a restricted user may not open", async ({ context, page }) 
   const tools = page.getByRole("main");
   expect(await rowHrefs(tools)).toEqual(everyday);
   await expect(tools.getByRole("navigation")).toHaveCount(1);
-  for (const hidden of ["Team and access", "Pages", "Agency coverage", "Incoming email"])
+  for (const hidden of ["Team and access", "Pages", "Work without an owner", "Incoming email"])
     await expect(tools.getByRole("link", { name: new RegExp(`^${hidden}`) })).toHaveCount(0);
 });
 

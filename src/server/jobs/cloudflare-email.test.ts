@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { formatDateTime } from "@/i18n/format";
 import { type RelayEnv, type RelayStore, relayEmail } from "../../../gateway/email-relay";
 import { CloudflareMessageProvider } from "./cloudflare-email";
 import type { OutboundMessage } from "./provider";
@@ -31,6 +32,44 @@ const accepted = () =>
 afterEach(() => vi.unstubAllEnvs());
 
 describe("Cloudflare email relay boundary", () => {
+  it("accepts only the exact production staff release relay and keeps credentials on that origin", async () => {
+    const hosts = {
+      public: "https://makler-realty.com",
+      client: "https://my.makler-realty.com",
+      staff: "https://app.makler-realty.com",
+    };
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(async () => accepted());
+    const provider = new CloudflareMessageProvider(
+      { ...config, hosts, relayUrl: `${hosts.staff}/__release/email` },
+      fetcher,
+    );
+    const input = {
+      ...message(),
+      secretParams: { url: `${hosts.client}/bg/access/confirm?token=synthetic` },
+    };
+    expect((await provider.send(input)).status).toBe("accepted");
+    expect(fetcher.mock.calls[0]?.[0]).toBe("https://app.makler-realty.com/__release/email");
+    expect(new Headers(fetcher.mock.calls[0]?.[1]?.headers).get("CF-Access-Client-Secret")).toBe(
+      config.accessClientSecret,
+    );
+    for (const relayUrl of [
+      "https://makler-realty.com/__release/email",
+      "https://app.makler-realty.ru/__release/email",
+      "https://app.example.test/__release/email",
+      `${hosts.staff}/__release/email?forward=1`,
+      "https://staging-app.makler-realty.com/__release/email",
+    ])
+      expect(() => new CloudflareMessageProvider({ ...config, hosts, relayUrl }, fetcher)).toThrow(
+        "Invalid Cloudflare email configuration",
+      );
+    expect(
+      () =>
+        new CloudflareMessageProvider(
+          { ...config, relayUrl: `${hosts.staff}/__release/email` },
+          fetcher,
+        ),
+    ).toThrow();
+  });
   it("sends one authenticated plaintext request using the immutable outbox key", async () => {
     const input = message();
     const before = structuredClone(input);
@@ -57,8 +96,12 @@ describe("Cloudflare email relay boundary", () => {
       from: config.from,
       to: [input.recipient],
       subject: "Вход в MS Realty",
-      text: "MS Realty\n\nОтворете връзката, за да продължите. Не я препращайте. Ако не очаквате това писмо, можете да го игнорирате.\n\nhttps://my.example.test/bg/access/confirm?token=synthetic\n\n2099-01-01T00:00:00.000Z (UTC)",
+      text: `MS Realty\n\nОтворете връзката, за да продължите. Не я препращайте. Ако не очаквате това писмо, можете да го игнорирате.\n\nhttps://my.example.test/bg/access/confirm?token=synthetic\n\nВръзката е валидна до: ${formatDateTime("bg", "2099-01-01T00:00:00.000Z", { zoneLabel: true })}`,
     });
+    // M-050: the expiry reads on the agency's clock with its zone in words, never UTC or ISO.
+    expect(JSON.parse(String(options?.body)).text).toMatch(
+      /1 януари 2099 г\..*02:00 \(софийско време\)$/,
+    );
     expect(input).toEqual(before);
     // Persisted relay state, not this adapter, decides whether a later call can send.
     await provider.send(input);

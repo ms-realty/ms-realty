@@ -156,6 +156,11 @@ export const defaultFacts: Readonly<Record<string, FactFixture>> = {
 };
 
 export interface ListingFixtureOptions {
+  readonly fixtureReferences?: {
+    readonly property: string;
+    readonly listing: string;
+    readonly sellerInstruction?: string;
+  };
   readonly country?: "BG" | "GR";
   readonly reviewerId: string;
   readonly placeId?: string | null;
@@ -224,7 +229,7 @@ export async function createListingFixture(
   const [property] = await db
     .insert(properties)
     .values({
-      reference: `PR-2026-${String(900_000 + n)}`,
+      reference: options.fixtureReferences?.property ?? `PR-2026-${String(900_000 + n)}`,
       propertyType: options.propertyType ?? "apartment",
       placeId: options.placeId ?? null,
       country: options.country ?? "BG",
@@ -257,7 +262,8 @@ export async function createListingFixture(
   );
   if (factRows.length) await db.insert(propertyFacts).values(factRows);
 
-  const reference = `MS-${String(70_000 + n).padStart(5, "0")}`;
+  const reference =
+    options.fixtureReferences?.listing ?? `MS-${String(70_000 + n).padStart(5, "0")}`;
   const [listing] = await db
     .insert(listings)
     .values({
@@ -431,7 +437,7 @@ export async function createListingFixture(
       .returning();
     if (!relationship) throw new Error("relationship insert failed");
     await db.insert(sellerInstructions).values({
-      reference: `SI-2026-${String(900_000 + n)}`,
+      reference: options.fixtureReferences?.sellerInstruction ?? `SI-2026-${String(900_000 + n)}`,
       propertyId: property.id,
       listingId: listing.id,
       revisionNumber: 1,

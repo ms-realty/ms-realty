@@ -120,7 +120,11 @@ export async function SearchForm({
         >
           {extra.title}
         </a>
-        {!compact ? (
+        {!compact &&
+        (filtersOpen ||
+          rules.length > 0 ||
+          values.q ||
+          (values.purpose && values.purpose !== "sale")) ? (
           <a href={`/${locale}/properties`} className="inline-flex min-h-11 items-center underline">
             {copy.clear}
           </a>

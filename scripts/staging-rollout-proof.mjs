@@ -1,3 +1,5 @@
+import { settle } from "./staging-settle.mjs";
+
 const bindingsByRole = {
   web: "MS_REALTY",
   worker: "MS_REALTY_WORKER",
@@ -22,6 +24,25 @@ const timestamp = (value, now) =>
   Number.isFinite(Date.parse(value)) &&
   Date.parse(value) <= now &&
   new Date(value).toISOString().slice(0, 19) === value.slice(0, 19);
+
+/** Prepare only identities, then require independent provider proof of the running roles. */
+export async function prepareRuntimeRollout(
+  input,
+  prepare,
+  token,
+  { transport = fetch, allowPreparedWeb = false, retry = { ms: 600_000 } } = {},
+) {
+  // A provider rollout can stop actors after preparation. Wake them on every bounded
+  // attempt, then recheck the exact image, namespace, actor and completed rollout.
+  // The prepare callback must only obtain identities; it must never run a migration/job.
+  return settle(async () => {
+    const runtime = await prepare();
+    const observation = await observeRuntimeRollout(input, runtime, token, transport, {
+      allowPreparedWeb,
+    });
+    return { runtime, observation };
+  }, retry);
+}
 
 export function validateRuntimeIdentity(input, runtime, { allowPreparedWeb = false } = {}) {
   demand(
@@ -162,8 +183,20 @@ export async function observeRuntimeRollout(
     const matches = applications.filter(
       (app) => app.durable_objects?.namespace_id === namespaceByRole[role],
     );
-    demand(matches.length === 1, `${role} unique namespace application`);
-    const app = matches[0];
+    demand(
+      matches.length === 1 && identifier(matches[0].id),
+      `${role} unique namespace application`,
+    );
+    // The list can serve a stale snapshot of an application (seen 2026-10-17: version 1, the
+    // previous image and an "active" rollout three days after that rollout completed), so it
+    // only locates the application. Its own read is authoritative.
+    const app = (await read(`${base}/${encodeURIComponent(matches[0].id)}`)).result;
+    demand(
+      object(app) &&
+        app.id === matches[0].id &&
+        app.durable_objects?.namespace_id === namespaceByRole[role],
+      `${role} application read`,
+    );
     demand(
       identifier(app.id) &&
         app.account_id === input.accountId &&
@@ -180,6 +213,17 @@ export async function observeRuntimeRollout(
     // completes. The rollout list carries no pagination metadata.
     const rollouts = (await read(`${appPath}/rollouts`)).result;
     demand(Array.isArray(rollouts) && rollouts.every(object), `${role} rollout list shape`);
+    // active_rollout_id alone cannot reveal an unfinished update, so no rollout may be pending,
+    // still progressing or aimed past the version the application reports.
+    demand(
+      rollouts.every(
+        (candidate) =>
+          Number.isInteger(candidate.target_version) &&
+          candidate.target_version <= app.version &&
+          !["pending", "progressing"].includes(candidate.status),
+      ),
+      `${role} no unfinished or later rollout`,
+    );
     const current = rollouts.filter((candidate) => candidate.target_version === app.version);
     let rollout = null;
     if (current.length === 0)

@@ -95,7 +95,7 @@ for (const javaScriptEnabled of [false, true])
         "Nothing waiting: Viewings · Listing corrections and reviews · Translations to review · Email delivery to check · Publication delivery to check",
       );
       await expect(page.locator('[data-today-quiet="continue"]')).toHaveText(
-        "Nothing waiting: My cases · My listing drafts",
+        "Nothing waiting: My deals · My listing drafts",
       );
       // Record-scoped access only: the team scope is not offered.
       const scope = page.getByRole("navigation", { name: "Work scope" });
@@ -112,7 +112,7 @@ for (const javaScriptEnabled of [false, true])
         `Viewing request · Synthetic visitor · ${f.listing}`,
       );
       await expect(unassigned.first()).toContainText(
-        "Owner: Agency coverage · Received 3 hr. ago · Next step: accept and reply",
+        "Owner: Work without an owner · Received 3 hr. ago · Next step: accept and reply",
       );
       // The seed wrote it 12 minutes before the read; allow the seconds the run itself takes.
       await expect(unassigned.last()).toContainText(/Received 1[23] min\. ago/);
@@ -124,7 +124,7 @@ for (const javaScriptEnabled of [false, true])
       const offered = page.getByRole("list", { name: "Awaiting my acceptance" }).getByRole("link");
       await expect(offered).toContainText(f.offeredTitle);
       await expect(offered).toContainText(
-        "Owner: Agency coverage (Last accepted owner: Former synthetic broker) · Due",
+        "Owner: Work without an owner (Last accepted owner: Former synthetic broker) · Due",
       );
       await expect(offered).toContainText("Next step: accept or decline");
       await expect(
@@ -185,7 +185,8 @@ for (const javaScriptEnabled of [false, true])
         await page.goBack();
       }
       await unassigned.first().click();
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(f.oldestReference);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Synthetic visitor");
+      await expect(page.locator("[data-inquiry-reference]")).toContainText(f.oldestReference);
     });
 
     test("O01 separates staff without access from more work than it lists", async ({
@@ -237,7 +238,7 @@ for (const javaScriptEnabled of [false, true])
       );
       await expect(page.getByText("Requests without an owner: 31")).toBeVisible();
       await expect(
-        page.getByText("Agency coverage holds them until someone accepts them.", { exact: false }),
+        page.getByText("These requests have no available owner.", { exact: false }),
       ).toContainText("The oldest arrived 4 hr. ago.");
       // The oldest five stay in view; the count and the queue link carry the rest.
       await expect(
@@ -254,7 +255,7 @@ for (const javaScriptEnabled of [false, true])
         path: testInfo.outputPath(`today-overload-${javaScriptEnabled}.png`),
         fullPage: true,
       });
-      await page.getByRole("link", { name: "Agency coverage", exact: true }).click();
+      await page.getByRole("link", { name: "Work without an owner", exact: true }).click();
       await expect(page).toHaveURL(hostUrl("staff", "/en/coverage"));
     });
 

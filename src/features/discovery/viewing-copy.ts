@@ -1,4 +1,5 @@
 import type { PublicLocale } from "@/i18n/config";
+import { timeCopy } from "@/i18n/time-copy";
 
 // Interface copy only; this does not approve listing translations or promise a service slot.
 const locales = ["bg", "en", "ru", "de", "nl", "el", "he"] as const;
@@ -42,22 +43,13 @@ const rows = {
     "אין העדפה",
   ],
   timezone: [
-    "Часова зона на предпочитаните часове",
-    "Timezone for preferred times",
-    "Часовой пояс желаемого времени",
-    "Zeitzone der gewünschten Zeiten",
-    "Tijdzone voor voorkeurstijden",
-    "Ζώνη ώρας προτιμώμενων ωρών",
-    "אזור זמן למועדים המועדפים",
-  ],
-  timezoneHint: [
-    "Използвайте именувана зона, напр. Europe/Sofia, Europe/London или Asia/Jerusalem.",
-    "Use a named zone, such as Europe/Sofia, Europe/London or Asia/Jerusalem.",
-    "Укажите именованный пояс: Europe/Sofia, Europe/London или Asia/Jerusalem.",
-    "Benannte Zone verwenden, z. B. Europe/Sofia, Europe/London oder Asia/Jerusalem.",
-    "Gebruik een benoemde zone, zoals Europe/Sofia, Europe/London of Asia/Jerusalem.",
-    "Χρησιμοποιήστε ονομασμένη ζώνη, π.χ. Europe/Sofia, Europe/London ή Asia/Jerusalem.",
-    "השתמשו באזור בעל שם, כגון Europe/Sofia, Europe/London או Asia/Jerusalem.",
+    "Часова зона",
+    "Time zone",
+    "Часовой пояс",
+    "Zeitzone",
+    "Tijdzone",
+    "Ζώνη ώρας",
+    "אזור זמן",
   ],
   window: [
     "Предпочитан интервал",
@@ -95,51 +87,6 @@ const rows = {
     "Περισσότερα διαστήματα (έως 3)",
     "טווחים מועדפים נוספים (עד 3)",
   ],
-  clockChoice: [
-    "Избор при повторен час",
-    "Repeated-clock choice",
-    "Выбор повторяющегося времени",
-    "Auswahl bei doppelter Uhrzeit",
-    "Keuze bij herhaalde kloktijd",
-    "Επιλογή επαναλαμβανόμενης ώρας",
-    "בחירה בשעה שחוזרת",
-  ],
-  automatic: [
-    "Само ако часът е еднозначен",
-    "Only if the time is unambiguous",
-    "Только если время однозначно",
-    "Nur bei eindeutiger Uhrzeit",
-    "Alleen bij eenduidige tijd",
-    "Μόνο εάν η ώρα είναι σαφής",
-    "רק אם השעה חד משמעית",
-  ],
-  earlier: [
-    "Първата поява",
-    "First occurrence",
-    "Первое вхождение",
-    "Erstes Vorkommen",
-    "Eerste keer",
-    "Πρώτη εμφάνιση",
-    "המופע הראשון",
-  ],
-  later: [
-    "Втората поява",
-    "Second occurrence",
-    "Второе вхождение",
-    "Zweites Vorkommen",
-    "Tweede keer",
-    "Δεύτερη εμφάνιση",
-    "המופע השני",
-  ],
-  clockHint: [
-    "При връщане на часовника изберете първата или втората поява за всеки повторен час. Несъществуващите часове се отхвърлят.",
-    "When clocks go back, choose the first or second occurrence of each repeated time. Nonexistent times are rejected.",
-    "При переводе часов назад выберите первое или второе вхождение повторённого времени. Несуществующее время отклоняется.",
-    "Bei der Zeitumstellung das erste oder zweite Vorkommen wählen. Nicht existierende Zeiten werden abgelehnt.",
-    "Kies bij terugzetten van de klok de eerste of tweede keer. Niet-bestaande tijden worden geweigerd.",
-    "Όταν το ρολόι γυρίζει πίσω, επιλέξτε την πρώτη ή δεύτερη εμφάνιση. Οι ανύπαρκτες ώρες απορρίπτονται.",
-    "כשהשעון חוזר אחורה, בחרו במופע הראשון או השני. שעות שאינן קיימות יידחו.",
-  ],
   accessNeeds: [
     "Практически нужди за достъп",
     "Practical access needs",
@@ -159,13 +106,31 @@ const rows = {
     "רשות, למשל גישה ללא מדרגות. אין לכלול מידע רפואי, כתובות או קודי כניסה. ההערה מיועדת לצוות המטפל ולא תופיע באישור הציבורי.",
   ],
   invalidTime: [
-    "Проверете датата, бъдещия интервал и избора при повторен час.",
-    "Check the date, future time window and repeated-clock choice.",
-    "Проверьте дату, будущий интервал и выбор повторённого времени.",
-    "Datum, zukünftigen Zeitraum und Auswahl der doppelten Uhrzeit prüfen.",
-    "Controleer datum, toekomstige periode en keuze bij herhaalde tijd.",
-    "Ελέγξτε ημερομηνία, μελλοντικό διάστημα και επιλογή επαναλαμβανόμενης ώρας.",
-    "בדקו את התאריך, הטווח העתידי והבחירה בשעה החוזרת.",
+    "Проверете датата и часа.",
+    "Check the date and time.",
+    "Проверьте дату и время.",
+    "Datum und Uhrzeit prüfen.",
+    "Controleer datum en tijd.",
+    "Ελέγξτε την ημερομηνία και την ώρα.",
+    "בדקו את התאריך והשעה.",
+  ],
+  pastTime: [
+    "Този час вече е минал. Изберете бъдещ час.",
+    "This time has already passed. Choose a future time.",
+    "Это время уже прошло. Выберите время в будущем.",
+    "Diese Uhrzeit liegt in der Vergangenheit. Bitte eine zukünftige Uhrzeit wählen.",
+    "Deze tijd is al voorbij. Kies een tijd in de toekomst.",
+    "Αυτή η ώρα έχει ήδη περάσει. Επιλέξτε μελλοντική ώρα.",
+    "השעה הזו כבר עברה. בחרו שעה עתידית.",
+  ],
+  endBeforeStart: [
+    "Краят трябва да е след началото.",
+    "The end must be after the start.",
+    "Окончание должно быть позже начала.",
+    "Das Ende muss nach dem Beginn liegen.",
+    "Het einde moet na het begin liggen.",
+    "Η λήξη πρέπει να είναι μετά την έναρξη.",
+    "הסיום חייב להיות אחרי ההתחלה.",
   ],
   unavailable: [
     "Няма текущи одобрени публични данни за този имот на избрания език. Статусът на уговорката е показан отделно.",
@@ -183,4 +148,16 @@ export function viewingCopy(locale: PublicLocale) {
     keyof typeof rows,
     string
   >;
+}
+
+/** The plain reason for a rejected window time (viewing-preferences and intake issue codes). */
+export function viewingTimeMessage(locale: PublicLocale, reason: string | undefined) {
+  const c = viewingCopy(locale);
+  return reason === "past_time"
+    ? c.pastTime
+    : reason === "end_before_start"
+      ? c.endBeforeStart
+      : reason === "nonexistent"
+        ? timeCopy(locale).nonexistent
+        : c.invalidTime;
 }

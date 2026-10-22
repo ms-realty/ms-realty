@@ -1,0 +1,1 @@
+ALTER TABLE "generative_runs" ADD COLUMN "context_pins" jsonb DEFAULT '[]'::jsonb NOT NULL;

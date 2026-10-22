@@ -56,10 +56,30 @@ export default async function PropertiesPage({
       <h1 className="text-title font-semibold">{copy.search}</h1>
       {result ? (
         <div className="space-y-2">
-          <h2 id="results-heading" tabIndex={-1} className="text-heading font-semibold">
-            {copy.results}: {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
-            {formatNumber(locale, result.count.value)}
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
+            <h2 id="results-heading" tabIndex={-1} className="text-heading font-semibold">
+              {copy.results}: {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
+              {formatNumber(locale, result.count.value)}
+            </h2>
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              {result.items.length ? (
+                <a
+                  className="inline-flex min-h-control items-center font-semibold text-action underline underline-offset-4"
+                  href="#property-results"
+                >
+                  {mapCopy(locale).list}
+                </a>
+              ) : null}
+              <a
+                className="inline-flex min-h-control items-center text-action underline underline-offset-4"
+                href={alertSearch(locale, values).publicHref}
+                lang={searchAlertCopyLocale(locale)}
+                dir="ltr"
+              >
+                {searchAlertCopy(locale).entry}
+              </a>
+            </div>
+          </div>
           {!result.items.length ? <p>{copy.none}</p> : null}
           {result.partial || result.stale ? <Notice tone="warning" title={copy.partial} /> : null}
         </div>
@@ -69,16 +89,6 @@ export default async function PropertiesPage({
         </Notice>
       )}
       <SearchForm locale={locale} copy={copy} values={values} filtersOpen={!result} />
-      {result ? (
-        <a
-          className={buttonClass("secondary", "self-start")}
-          href={alertSearch(locale, values).publicHref}
-          lang={searchAlertCopyLocale(locale)}
-          dir="ltr"
-        >
-          {searchAlertCopy(locale).entry}
-        </a>
-      ) : null}
       {result ? (
         <>
           <SearchMap

@@ -58,7 +58,7 @@ for (const javaScriptEnabled of [true, false])
       ).toBeVisible();
       await page.getByRole("link", { name: "Open current record", exact: true }).click();
       await expect(page.getByText(source, { exact: true })).toBeVisible();
-      await page.getByLabel("State", { exact: true }).selectOption("resolved");
+      await page.getByLabel("Where it stands", { exact: true }).selectOption("resolved");
       await page
         .getByLabel("Reason and next step", { exact: true })
         .fill("Checked original source and recorded a synthetic response.");

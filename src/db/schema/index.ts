@@ -2,12 +2,14 @@
 // and inbox events here are the business journal.
 export * from "./approvals";
 export * from "./assistance";
+export * from "./chatgpt";
 export * from "./collaboration";
 export * from "./complaints";
 export * from "./compliance";
 export * from "./coordination";
 export * from "./enums";
 export * from "./files";
+export * from "./generative";
 export * from "./geography";
 export * from "./identity";
 export * from "./inbound";

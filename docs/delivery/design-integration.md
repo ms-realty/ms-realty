@@ -72,3 +72,8 @@ with separate retained-work counts and a durable receipt. Native-browser verific
 and repaired Manage access mobile overflow and overlapping former-staff links. The new
 functional contract is `contracts/staff-offboarding.md`; this does not close broader Figma
 parity, seven-locale acceptance or the full agency handover workflow.
+
+
+## Listing workspace simplification
+
+The existing W08 media step and authority note now distinguish private photo-text saving, review of the saved version and rights/privacy, one gallery-order save, and publication eligibility. Live board readback confirmed nodes `4:728` and `4:812` in section `4:709`; the existing canonical workflow was updated in place. The implementation composition is recorded in [Listing workspace composition](../design/listing-workspace.md). This board synchronization does not establish production deployment, real listing approval or owner acceptance.

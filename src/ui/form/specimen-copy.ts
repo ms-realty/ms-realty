@@ -17,14 +17,14 @@ const en = {
   conflict:
     "This practice draft changed elsewhere. Your text is retained. Review both versions before reapplying.",
   reused:
-    "This operation already checked different text. Open its receipt or start a deliberate new practice form.",
+    "This request already checked different text. Open its receipt or start a deliberate new practice form.",
   confirmed: "Practice form checked",
   next: "Only the practice check completed. No inquiry was sent. You can reopen this receipt in this browser for one hour.",
   receipt: "Open practice receipt",
-  status: "Check this operation",
+  status: "Check the same request",
   start: "Start a new practice form",
-  conflictLink: "Practice a revision conflict",
-  receiptMissing: "No confirmed practice receipt is available for this operation in this browser.",
+  conflictLink: "Practice a change made in the meantime",
+  receiptMissing: "No confirmed practice receipt is available for this request in this browser.",
   noJs: "This form also works without JavaScript. Submit returns the result and any retained input on this page.",
   form: {
     errorSummary: "Check the form",
@@ -37,7 +37,7 @@ const en = {
     recordedAt: "Checked at",
     unknown: "We could not confirm the result.",
     draftRetained:
-      "Your text is retained below. Check this same operation before starting another attempt.",
+      "Your text is retained below. Check this same request before starting another attempt.",
   } satisfies FormCopy,
 };
 
@@ -57,14 +57,14 @@ const bg: typeof en = {
   conflict:
     "Учебната чернова е променена другаде. Текстът ви е запазен. Прегледайте двете версии, преди да го приложите отново.",
   reused:
-    "Тази операция вече провери друг текст. Отворете разписката или започнете нов учебен формуляр.",
+    "Тази заявка вече провери друг текст. Отворете разписката или започнете нов учебен формуляр.",
   confirmed: "Учебният формуляр е проверен",
   next: "Завърши само учебната проверка. Не е изпратено запитване. Разписката е достъпна в този браузър за един час.",
   receipt: "Отворете учебната разписка",
-  status: "Проверете тази операция",
+  status: "Проверете същата заявка",
   start: "Започнете нов учебен формуляр",
-  conflictLink: "Упражнете конфликт на версии",
-  receiptMissing: "В този браузър няма потвърдена учебна разписка за тази операция.",
+  conflictLink: "Упражнете промяна, направена междувременно",
+  receiptMissing: "В този браузър няма потвърдена учебна разписка за тази заявка.",
   noJs: "Формулярът работи и без JavaScript. След изпращане резултатът и въведените данни се показват на тази страница.",
   form: {
     errorSummary: "Проверете формуляра",
@@ -77,7 +77,7 @@ const bg: typeof en = {
     recordedAt: "Проверено на",
     unknown: "Не успяхме да потвърдим резултата.",
     draftRetained:
-      "Текстът ви е запазен по-долу. Проверете същата операция, преди да започнете нов опит.",
+      "Текстът Ви е запазен по-долу. Проверете същата заявка, преди да започнете нов опит.",
   },
 };
 
@@ -101,7 +101,7 @@ const he: typeof en = {
   receipt: "פתיחת אישור התרגול",
   status: "בדיקת הפעולה הזו",
   start: "התחלת טופס תרגול חדש",
-  conflictLink: "תרגול התנגשות בין גרסאות",
+  conflictLink: "תרגול שינוי שמישהו עשה בינתיים",
   receiptMissing: "אין בדפדפן זה אישור תרגול מאומת לפעולה הזו.",
   noJs: "הטופס פועל גם ללא JavaScript. לאחר השליחה התוצאה והקלט שנשמר מוצגים בעמוד זה.",
   form: {

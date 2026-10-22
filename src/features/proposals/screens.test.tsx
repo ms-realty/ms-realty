@@ -10,6 +10,7 @@ import type { FormState } from "@/ui/form/contract";
 import { initialFormState } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import { proposalEnhancementField, proposalStatus } from "./contract";
+import { proposalCopy } from "./copy";
 import { counterofferCopy } from "./counteroffer-copy";
 import { ProposalScreen } from "./screens";
 
@@ -76,6 +77,12 @@ it.each(publicLocales)(
       await ProposalScreen({ locale, session: session("client"), id: "proposal-one" }),
     );
     const copy = counterofferCopy(locale);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      proposalCopy(locale).detailTitle,
+    );
+    expect(container.querySelector("[data-workflow-reference]")).toHaveTextContent(
+      "SYNTHETIC-PROPOSAL",
+    );
     const details = screen.getByLabelText(`${moneyCopy(locale).amount} (BGN)`).closest("details");
     expect(details?.open).toBe(false);
     expect(details?.querySelector("summary")).toHaveTextContent(copy.open);

@@ -126,7 +126,7 @@ describe("O03 Case candidates", () => {
       // Never sent by C02; a contact route must still name no one.
       candidate("route", { partyLabel: "Synthetic Leak" }),
     ]);
-    expect(row("party")).toHaveTextContent("Същата страна: Synthetic Party");
+    expect(row("party")).toHaveTextContent("Същият човек или същата фирма: Synthetic Party");
     expect(within(row("party")).getByText("Synthetic Party").tagName).toBe("BDI");
     expect(row("unnamed")).toHaveTextContent(copy.basisPartyUnnamed);
     expect(row("route")).toHaveTextContent(copy.basisContact);
@@ -164,7 +164,7 @@ describe("O03L review", () => {
     ]);
     render(await InquiryLinkScreen({ locale: "en", session, inquiryId, caseId: "case-one" }));
     expect(screen.getByText(copy.factBasis).nextElementSibling).toHaveTextContent(
-      "Same party: Synthetic Party",
+      "Same person or company: Synthetic Party",
     );
     expect(screen.getByText(copy.reasons.staff_unavailable)).toBeVisible();
     expect(screen.queryByRole("button", { name: copy.submit })).not.toBeInTheDocument();

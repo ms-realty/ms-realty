@@ -102,7 +102,9 @@ describe("staff work against durable inquiry intake", () => {
       coverageQueue: null,
       firstResponseAt: null,
     });
-    expect(await t.db.select().from(tasks).where(eq(tasks.inquiryId, row.id))).toHaveLength(1);
+    expect(await t.db.select().from(tasks).where(eq(tasks.inquiryId, row.id))).toMatchObject([
+      { dueAt: new Date(input.dueAt), dueTimezone: "Europe/Sofia" },
+    ]);
     for (const table of [activityEvents, auditEvents, outboxEvents]) {
       expect(
         await t.db.select().from(table).where(eq(table.operationId, accepted.operationId)),

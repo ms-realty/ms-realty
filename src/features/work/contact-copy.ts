@@ -24,7 +24,7 @@ const en = {
   internal: "Internal follow-up",
   clientPromise: "Recorded client promise",
   observed: "Contact observed at",
-  followUp: "Next commitment",
+  followUp: "Next step",
 };
 type Copy = { [K in keyof typeof en]: string };
 const bg: Copy = {
@@ -49,7 +49,7 @@ const bg: Copy = {
   internal: "Вътрешно следващо действие",
   clientPromise: "Записано обещание към клиента",
   observed: "Контактът е осъществен на",
-  followUp: "Следващ ангажимент",
+  followUp: "Следваща стъпка",
 };
 const ru: Copy = {
   title: "Записать контакт с клиентом",
@@ -73,7 +73,7 @@ const ru: Copy = {
   internal: "Внутреннее следующее действие",
   clientPromise: "Записанное обещание клиенту",
   observed: "Контакт состоялся",
-  followUp: "Следующее обязательство",
+  followUp: "Следующий шаг",
 };
 export function contactCopy(locale: string): Copy {
   return locale === "bg" ? bg : locale === "ru" ? ru : en;

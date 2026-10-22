@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import type { PublicMedia } from "@/server/listings/view-models";
 import {
   ApprovedGallery,
@@ -9,7 +9,10 @@ import {
   approvedMediaSrcSet,
 } from "./approved-media";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 const media: PublicMedia = {
   relationId: "relation",
   assetId: "00000000-0000-4000-8000-000000000001",
@@ -41,6 +44,14 @@ it("serves the approved digest directly and retains the modification disclosure 
     new URL(screen.getByRole("img").getAttribute("src") ?? "", "http://localhost:3000").pathname,
   ).toBe(`/api/media/${media.assetId}/${"b".repeat(64)}`);
 });
+it("recovers an image that finished failing before its client handler was attached", () => {
+  vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(true);
+  vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(0);
+  render(<ApprovedMedia media={media} unavailable="Photos unavailable" />);
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  expect(screen.getByText("Photos unavailable")).toBeVisible();
+  expect(screen.getByText("Synthetic test caption")).toBeVisible();
+});
 it("never turns a storage URL or unsupported media type into a public source", () => {
   expect(approvedMediaHref({ ...media, digest: "https://private.invalid/staging" })).toBeNull();
   expect(approvedMediaHref({ ...media, contentType: "text/html" })).toBeNull();
@@ -60,8 +71,12 @@ it("renders only real width descriptors, keeps lazy sizes tied to layout and pri
     <ApprovedGallery
       media={[responsive, { ...responsive, relationId: "second" }]}
       unavailable="Unavailable"
+      morePhotos="More photos ({count})"
     />,
   );
+  const disclosure = screen.getByText("More photos (1)").closest("details");
+  expect(disclosure).not.toHaveAttribute("open");
+  disclosure?.setAttribute("open", "");
   const images = screen.getAllByRole("img");
   expect(images[0]).toHaveAttribute(
     "srcset",
@@ -74,7 +89,11 @@ it("renders only real width descriptors, keeps lazy sizes tied to layout and pri
   expect(images[1]?.getAttribute("sizes")).toMatch(/^auto,/);
   expect(images[1]).not.toHaveAttribute("fetchpriority");
   const markup = renderToStaticMarkup(
-    <ApprovedGallery media={[responsive]} unavailable="Unavailable" />,
+    <ApprovedGallery
+      media={[responsive]}
+      unavailable="Unavailable"
+      morePhotos="More photos ({count})"
+    />,
   );
   expect(markup).toContain('rel="preload"');
   expect(markup).toContain('as="image"');

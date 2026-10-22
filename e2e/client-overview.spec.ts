@@ -8,6 +8,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { caseCopy } from "../src/features/cases/copy";
 import { lifecycleCopy } from "../src/features/cases/lifecycle-copy";
+import { workflowCopy } from "../src/i18n/workflow-copy";
 import { createCase, createClient, createStaff, relate } from "../src/server/testing";
 import { hostUrl, origins } from "./hosts";
 
@@ -149,9 +150,8 @@ for (const javaScriptEnabled of [true, false]) {
         for (const width of [320, 390, 1440]) {
           await page.setViewportSize({ width, height: 900 });
           expect((await page.goto(overview))?.status()).toBe(200);
-          await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-            `${data.first.reference} · ${data.first.title}`,
-          );
+          await expect(page.getByRole("heading", { level: 1 })).toHaveText(data.first.title);
+          await expect(page.locator("[data-workflow-reference]")).toHaveText(data.first.reference);
           await expect(
             page.getByRole("heading", { name: data.summary, exact: true }),
           ).toBeVisible();
@@ -283,23 +283,43 @@ for (const javaScriptEnabled of [true, false]) {
           fullPage: true,
         });
 
+        for (const locale of ["de", "nl", "el", "he"]) {
+          await page.setViewportSize({ width: 390, height: 844 });
+          await page.goto(hostUrl("client", `/${locale}/overview`));
+          await expect(page.getByRole("heading", { level: 1 })).toHaveText(data.first.title);
+          await expect(
+            page.getByText(caseCopy(locale).noAppointments, { exact: true }),
+          ).toBeVisible();
+          await expect(page.getByText(caseCopy(locale).noInterests, { exact: true })).toBeVisible();
+          for (const [destination, title] of [
+            ["appointments", caseCopy(locale).calendar],
+            ["documents", workflowCopy(locale, "documents").title],
+            ["proposals", caseCopy(locale).proposals],
+          ]) {
+            await page.goto(hostUrl("client", `/${locale}/${destination}`));
+            await expect(page.getByRole("heading", { level: 1 })).toHaveText(title ?? "");
+            await fitsViewport(page, 390);
+          }
+        }
+
         // A second current relationship makes an explicit chooser; no guessed current Case.
+        await page.setViewportSize({ width: 320, height: 900 });
         await relate(db, { partyId: data.clientPartyId, caseId: data.second.id, role: "buyer" });
         await page.goto(overview);
         await expect(
-          page.getByRole("heading", { level: 1, name: caseCopy("en").cases }),
+          page.getByRole("heading", { level: 1, name: caseCopy("en").overview }),
         ).toBeVisible();
         const rows = page.getByRole("main").getByRole("listitem");
         await expect(rows).toHaveCount(2);
         await expect(
           page.getByRole("link", {
-            name: `${data.first.reference} · ${data.first.title}`,
+            name: `${data.first.title} · ${data.first.reference}`,
             exact: true,
           }),
         ).toHaveAttribute("href", `/en/overview/${data.first.id}`);
         await expect(
           page.getByRole("link", {
-            name: `${data.second.reference} · ${data.second.title}`,
+            name: `${data.second.title} · ${data.second.reference}`,
             exact: true,
           }),
         ).toHaveAttribute("href", `/en/overview/${data.second.id}`);

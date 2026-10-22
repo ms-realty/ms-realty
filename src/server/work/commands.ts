@@ -4,6 +4,7 @@ import { z } from "zod";
 import { inquiries, tasks } from "@/db/schema";
 import { guardInquiryTransition, inquiryMachine, inquiryTransitions } from "@/domain/inquiry";
 import { guardTaskTransition, highImpactTaskTypes, taskMachine } from "@/domain/task";
+import { agencyTimeZone } from "@/i18n/config";
 import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
@@ -113,7 +114,7 @@ export async function acceptInquiry(db: Executor, session: Session, raw: AcceptI
           type: "follow_up",
           ownerId: live.account.id,
           dueAt,
-          dueTimezone: "UTC",
+          dueTimezone: agencyTimeZone,
           inquiryId: row.id,
           caseId: row.caseId,
         })

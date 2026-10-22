@@ -52,6 +52,8 @@ export async function routedGeneration(
   const policy = config.routing;
   if (!config.enabled || !config.apiKey || !policy || config.model !== policy.router)
     throw new Error("provider_disabled");
+  if (config.inputCostMicros === null || config.outputCostMicros === null)
+    throw new Error("provider_metered_rates_missing");
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {

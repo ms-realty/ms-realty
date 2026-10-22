@@ -4,6 +4,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { caseCopy } from "../src/features/cases/copy";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -166,7 +167,7 @@ test("offboarding keeps an unresolved operation after leaving and returning", as
     );
     await expect(page.getByText(unknownWarning, { exact: true })).toBeVisible();
     await expect(page.getByText("Access removal recorded:", { exact: false })).toHaveCount(0);
-    const statusLink = page.getByRole("link", { name: "Action status", exact: true });
+    const statusLink = page.getByRole("link", { name: caseCopy("en").status, exact: true });
     await expect(statusLink).toHaveAttribute("href", statusPath);
     const statusResponse = page.waitForResponse(hostUrl("staff", statusPath));
     await statusLink.click();
@@ -192,7 +193,7 @@ test("offboarding keeps an unresolved operation after leaving and returning", as
         0,
       );
       await expect(
-        nativePage.getByRole("link", { name: "Action status", exact: true }),
+        nativePage.getByRole("link", { name: caseCopy("en").status, exact: true }),
       ).toHaveAttribute("href", statusPath);
     } finally {
       await nativeContext.close();
@@ -345,7 +346,7 @@ for (const conflict of [false, true])
       );
       if (conflict) {
         await expect(
-          page.getByText("This operation did not change access.", { exact: true }),
+          page.getByText("This request did not change access.", { exact: true }),
         ).toBeVisible();
         await page.getByRole("link", { name: "Review again before acting", exact: true }).click();
         await expect(

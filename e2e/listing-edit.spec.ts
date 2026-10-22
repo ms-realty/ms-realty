@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { inventoryCopy } from "../src/features/inventory/copy";
 import { hostUrl, origins } from "./hosts";
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
@@ -82,9 +83,7 @@ async function holdScripts(page: Page) {
   return release;
 }
 const hydrated = (page: Page) =>
-  expect(
-    page.getByText("Without JavaScript, save before opening Photos or Review", { exact: false }),
-  ).toHaveCount(0);
+  expect(page.getByText(inventoryCopy("en").o12.noscriptLeave, { exact: false })).toHaveCount(0);
 
 for (const javaScriptEnabled of [false, true])
   test.describe(`JavaScript ${javaScriptEnabled ? "on" : "off"}`, () => {
@@ -98,10 +97,17 @@ for (const javaScriptEnabled of [false, true])
       await signIn(page, f.token);
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
 
-      await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
       await expect(
-        page.getByText(`${f.reference} · Sandanski · €95,000 · 74.5 m² · 2 bedrooms`),
+        page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
       ).toBeVisible();
+      const summary = page.locator("header").filter({
+        has: page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
+      });
+      await expect(
+        page.getByRole("paragraph").getByText(f.reference, { exact: true }),
+      ).toBeVisible();
+      for (const fact of ["Sandanski", "€95,000", "74.5 m²", "2 bedrooms"])
+        await expect(summary).toContainText(fact);
       await expect(page.getByRole("radio", { name: "Text" })).toBeChecked();
       // Photos is a link with JavaScript and a submit control of the form without it.
       const photos = page.getByRole(javaScriptEnabled ? "link" : "button", {
@@ -113,7 +119,8 @@ for (const javaScriptEnabled of [false, true])
         `/en/inventory/${f.reference}/media`,
       );
       // Butler stays draft-only and cannot draft listing text yet; the manual path is primary.
-      const butler = page.getByRole("complementary", { name: "Butler" });
+      const butler = page.locator("details").filter({ has: page.locator("#butler-heading") });
+      await butler.locator("summary").click();
       await expect(butler.getByRole("button", { name: "Prepare a proposal" })).toBeDisabled();
       await expect(butler.getByText("Butler cannot draft listing text yet.")).toBeVisible();
       await expect(butler.getByRole("link", { name: "Continue without Butler" })).toHaveAttribute(
@@ -153,14 +160,11 @@ for (const javaScriptEnabled of [false, true])
 
       // Facts save keeps the text, returns to Facts and shows the new value.
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`));
-      // Facts keeps Save and Review (647:12680); phones still show the contextual Butler
-      // block under the work column (659:12922), wide screens keep it beside Text only.
+      // Context and assistance remain available on either tab without dominating the work.
       await expect(page.getByText("Correct the published listing", { exact: true })).toBeHidden();
-      if (test.info().project.name === "chromium-desktop") await expect(butler).toBeHidden();
-      else {
-        await expect(butler.getByRole("button", { name: "Prepare a proposal" })).toBeDisabled();
-        await expect(butler.getByText("Butler cannot draft listing text yet.")).toBeVisible();
-      }
+      await butler.locator("summary").click();
+      await expect(butler.getByRole("button", { name: "Prepare a proposal" })).toBeDisabled();
+      await expect(butler.getByText("Butler cannot draft listing text yet.")).toBeVisible();
       await page.getByLabel("Price in EUR", { exact: true }).fill("96000");
       await page.getByRole("button", { name: "Save the facts", exact: true }).click();
       await expect(
@@ -181,7 +185,9 @@ for (const javaScriptEnabled of [false, true])
       // A receipt from another listing shows nothing on this one.
       const id = new URL(receipt).searchParams.get("saved") ?? "";
       await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}?saved=${id}`));
-      await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Синтетична обява без чернова" }),
+      ).toBeVisible();
       await expect(page.getByText("Working draft saved")).toHaveCount(0);
     });
 
@@ -203,7 +209,7 @@ for (const javaScriptEnabled of [false, true])
       expect((await listing(f.listingId)).draft.description).not.toBe("Незаписан текст.");
       if (!javaScriptEnabled)
         await expect(
-          page.getByText("Without JavaScript, save before opening Photos or Review", {
+          page.getByText(inventoryCopy("en").o12.noscriptLeave, {
             exact: false,
           }),
         ).toBeVisible();
@@ -240,7 +246,7 @@ test.describe("JavaScript on", () => {
     await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
     // The leave guard runs once hydrated, when the no-JavaScript note is gone.
     await expect(
-      page.getByText("Without JavaScript, save before opening Photos or Review", { exact: false }),
+      page.getByText(inventoryCopy("en").o12.noscriptLeave, { exact: false }),
     ).toHaveCount(0);
     await page.getByLabel("Description", { exact: true }).fill("Незаписана промяна.");
     const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
@@ -638,7 +644,7 @@ test.describe("JavaScript on", () => {
       inPair: (page.viewportSize()?.width ?? 1440) < 640 ? 16 : 24,
     });
     // UI06 (6:74): a native select is as tall as an input, 52 px.
-    for (const name of ["Price status", "Price in EUR"])
+    for (const name of [inventoryCopy("en").labels.priceState, "Price in EUR"])
       expect((await panel.getByLabel(name, { exact: true }).boundingBox())?.height).toBe(52);
   });
 });
@@ -770,7 +776,11 @@ test("O12 without a saved draft asks for the source and does not write", async (
   const f = seed();
   await signIn(page, f.token);
   await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}`));
-  await expect(page.getByText("No working draft is saved yet.", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("Editing the last saved version. Save to create a working draft.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   const source = page.getByLabel("Source or evidence reference", { exact: true });
   await expect(source).toBeVisible();
   const before = await listing(f.blank.listingId);
@@ -779,24 +789,24 @@ test("O12 without a saved draft asks for the source and does not write", async (
   const summary = page.getByRole("region", { name: "Check the form" });
   await expect(summary).toBeVisible();
   await expect(source).toHaveAttribute("aria-invalid", "true");
-  // 694:13318: the error summary leads the work column, then the no-draft alert.
+  // Correction leads back to an editable field, with the error summary before the fields.
   const summaryTop = (await summary.boundingBox())?.y ?? Number.POSITIVE_INFINITY;
-  const alertTop =
-    (await page.getByText("No working draft is saved yet.", { exact: false }).boundingBox())?.y ??
-    0;
-  expect(summaryTop).toBeLessThan(alertTop);
+  const fieldTop = (await page.getByLabel("Listing title", { exact: true }).boundingBox())?.y ?? 0;
+  expect(summaryTop).toBeLessThan(fieldTop);
   expect(await listing(f.blank.listingId)).toEqual(before);
 });
 
 test("O12 keeps BG and RU labels and a read-only role cannot edit", async ({ page }) => {
   const f = seed();
   await signIn(page, f.token);
-  for (const [locale, title, text, save] of [
-    ["bg", "Редактиране на обява", "Текст", "Запишете описанието"],
-    ["ru", "Редактирование объявления", "Текст", "Сохранить описание"],
+  for (const [locale, text, save] of [
+    ["bg", "Текст", "Запишете описанието"],
+    ["ru", "Текст", "Сохранить описание"],
   ] as const) {
     await page.goto(hostUrl("staff", `/${locale}/inventory/${f.reference}`));
-    await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
+    ).toBeVisible();
     await expect(page.getByRole("radio", { name: text, exact: true })).toBeChecked();
     await expect(page.getByRole("button", { name: save, exact: true })).toBeVisible();
   }

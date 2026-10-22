@@ -59,20 +59,49 @@ export function NavigationLoading({ surface }: { surface: HostContext }) {
         return;
       start(link.href);
     }
+    function nativeSubmit(event: SubmitEvent) {
+      const form = event.target;
+      if (event.defaultPrevented || !(form instanceof HTMLFormElement) || form.method !== "get")
+        return;
+      if (form.target && form.target !== "_self") return;
+      const action = new URL(form.action, window.location.href);
+      const fields = new FormData(form, event.submitter);
+      action.search = new URLSearchParams(
+        [...fields].filter((field): field is [string, string] => typeof field[1] === "string"),
+      ).toString();
+      start(action.href);
+    }
     function clientNavigation(event: Event) {
       if (event instanceof CustomEvent && typeof event.detail?.href === "string")
         start(event.detail.href);
     }
     const clear = () => setPending(null);
+    // A page that asks before leaving (unsaved work) may keep the person here. The check runs
+    // once every listener has answered, and after the browser's prompt when there is one.
+    function beforeUnload(event: BeforeUnloadEvent) {
+      setTimeout(() => {
+        if (event.defaultPrevented) clear();
+      });
+    }
+    // Escape also stops a document navigation in the browser: show the page again.
+    function key(event: KeyboardEvent) {
+      if (event.key === "Escape") clear();
+    }
     document.addEventListener("click", nativeClick);
+    document.addEventListener("submit", nativeSubmit);
     window.addEventListener(navigationStartEvent, clientNavigation);
     window.addEventListener(navigationErrorEvent, clear);
     window.addEventListener("pageshow", clear);
+    window.addEventListener("beforeunload", beforeUnload);
+    window.addEventListener("keydown", key);
     return () => {
       document.removeEventListener("click", nativeClick);
+      document.removeEventListener("submit", nativeSubmit);
       window.removeEventListener(navigationStartEvent, clientNavigation);
       window.removeEventListener(navigationErrorEvent, clear);
       window.removeEventListener("pageshow", clear);
+      window.removeEventListener("beforeunload", beforeUnload);
+      window.removeEventListener("keydown", key);
     };
   }, [surface]);
 
@@ -94,7 +123,7 @@ export function NavigationLoading({ surface }: { surface: HostContext }) {
 
   return active ? (
     <div ref={container} data-navigation-loading="">
-      <RouteLoading locale={active.locale} kind={active.kind} />
+      <RouteLoading locale={active.locale} kind={active.kind} shape={active.shape} />
     </div>
   ) : null;
 }

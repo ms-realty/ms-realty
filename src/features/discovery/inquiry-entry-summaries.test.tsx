@@ -101,7 +101,7 @@ it("shows each already-read approved photo/fact summary in chosen order before t
   expect(source.mock.calls.map((call) => call[1].reference)).toEqual(
     cards.map((card) => card.reference),
   );
-  const purpose = screen.getByRole("combobox", { name: "Purpose" });
+  const purpose = screen.getByRole("combobox", { name: "What would you like to do?" });
   for (const [index, node] of summaries.entries()) {
     const card = cards[index];
     if (!card) throw new Error("Summary has no selected source");

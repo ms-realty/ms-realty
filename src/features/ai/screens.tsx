@@ -430,10 +430,10 @@ export async function JobsScreen({
       >
         <p>
           {locale === "bg"
-            ? "Показва само напредъка на опашката за текущата версия; не доказва състоянието на доставчици или резервни копия."
+            ? "Показва само напредъка на фоновите задачи за текущата версия; не доказва, че доставчиците или резервните копия работят."
             : locale === "ru"
-              ? "Показывает только выполнение очереди для текущей версии; не подтверждает состояние провайдеров или резервных копий."
-              : "Shows queue progress for this build only; it does not prove provider or backup health."}
+              ? "Показывает только выполнение фоновых задач для текущей версии; не подтверждает, что провайдеры или резервные копии работают."
+              : "Shows the progress of background tasks for the current version only; it does not prove that providers or backups are working."}
         </p>
         <p>
           {aiLabel("reason", status.worker.reason, locale)} ·{" "}

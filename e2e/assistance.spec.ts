@@ -113,7 +113,7 @@ for (const javaScriptEnabled of [true, false]) {
         .locator("header:visible")
         .screenshot({ path: testInfo.outputPath("authentic-workspace-header-320.png") });
       await expect(panel).toContainText("Insufficient evidence");
-      await panel.getByText("Assessment details", { exact: true }).click();
+      await panel.getByText("Technical details", { exact: true }).click();
       await expect(panel).toContainText("typesafe/jev-1.13-20260917");
       await expect(panel).toContainText("10%");
       await expect(panel).toContainText("1.50");
@@ -155,7 +155,7 @@ test("O32: human review stays source-bound; disabled provider and real queue sta
     page.getByText("Draft generation is unavailable. Continue the manual workflow."),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Request a draft" })).toHaveCount(0);
-  await page.getByRole("link", { name: "Open draft status" }).click();
+  await page.getByRole("link", { name: "Open the draft" }).click();
   await expect(
     page.getByText("Synthetic draft: you asked about 2 bedrooms.", { exact: true }),
   ).toBeVisible();
@@ -204,7 +204,9 @@ test("O32: human review stays source-bound; disabled provider and real queue sta
       ?.state,
   ).toBe("draft");
   await page.goto(hostUrl("staff", "/en/operations/jobs"));
-  await expect(page.getByRole("heading", { name: "Jobs and assistance status" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Background tasks and assistance" }),
+  ).toBeVisible();
   const draftQueue = page.getByRole("row", { name: /Butler draft generation/ }).first();
   await expect(draftQueue).toBeVisible();
   await expect(draftQueue.getByText(/ai\.draft/)).toBeHidden();
@@ -278,7 +280,7 @@ for (const variant of ["locale", "intake"] as const) {
       page.getByText("Draft generation is unavailable. Continue the manual workflow."),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "Request a draft" })).toHaveCount(0);
-    await page.getByRole("link", { name: "Open draft status", exact: true }).click();
+    await page.getByRole("link", { name: "Open the draft", exact: true }).click();
     if (variant === "locale") {
       await expect(
         page.getByRole("heading", { name: "Synthetic apartment translation", exact: true }),

@@ -26,7 +26,7 @@ import {
   taskAction,
   triageAction,
 } from "./actions";
-import { contactCopy } from "./contact-copy";
+import { contactCopy, contactMethodLabel } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
 import { coverageCopy } from "./coverage-copy";
@@ -112,9 +112,11 @@ export function Page({
     <div className="mx-auto min-w-0 max-w-page space-y-8 break-words px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <header className="space-y-4">
         <h1 className="text-title font-semibold">{title}</h1>
-        <WorkNav locale={locale} />
       </header>
       {children}
+      <footer className="border-t border-divider pt-6">
+        <WorkNav locale={locale} />
+      </footer>
     </div>
   );
 }
@@ -152,9 +154,11 @@ export function Pagination({
 function TaskList({
   rows,
   locale,
+  emptyText,
 }: {
   rows: Awaited<ReturnType<typeof listTasks>>["rows"];
   locale: string;
+  emptyText?: string;
 }) {
   const copy = workCopy(locale);
   return rows.length ? (
@@ -185,7 +189,7 @@ function TaskList({
       ))}
     </ul>
   ) : (
-    <p className="rounded-card border border-border p-5 text-text-muted">{copy.empty}</p>
+    <p className="text-text-muted">{emptyText ?? copy.empty}</p>
   );
 }
 
@@ -327,9 +331,14 @@ export async function InquiryScreen({
           <ChevronStartIcon directional className="size-4" />
           {copy.queue.back}
         </a>
-        <header className="space-y-4">
-          <h1 className="text-title font-semibold">{inquiry.reference}</h1>
-          <WorkNav locale={locale} />
+        <header className="space-y-2">
+          <h1 className="text-title font-semibold">
+            {inquiry.preferredName?.trim() || copy.purposes[inquiry.purpose]}
+          </h1>
+          <p data-inquiry-reference className="text-caption text-text-muted wrap-anywhere">
+            {inquiry.preferredName?.trim() ? `${copy.purposes[inquiry.purpose]} · ` : null}
+            {copy.reference}: <bdi>{inquiry.reference}</bdi>
+          </p>
         </header>
         <nav className="flex flex-wrap gap-5" aria-label={`${copy.details}: ${inquiry.reference}`}>
           {detail.canAssist ? (
@@ -344,20 +353,20 @@ export async function InquiryScreen({
           {inquiry.caseId ? (
             <a className={link} href={`/${locale}/cases/${inquiry.caseId}`}>
               {locale === "bg"
-                ? "Отваряне на случая"
+                ? "Отворете сделката"
                 : locale === "ru"
-                  ? "Открыть дело"
-                  : "Open case"}
+                  ? "Откройте сделку"
+                  : "Open the deal"}
             </a>
           ) : detail.canCreateCase &&
             inquiry.ownerId === session.account.id &&
             inquiry.state === "assigned" ? (
             <a className={link} href={`/${locale}/cases/new?inquiry=${inquiry.id}`}>
               {locale === "bg"
-                ? "Създаване на случай"
+                ? "Създаване на сделка"
                 : locale === "ru"
-                  ? "Создать дело"
-                  : "Create a case"}
+                  ? "Создать сделку"
+                  : "Create a deal"}
             </a>
           ) : null}
         </nav>
@@ -381,7 +390,7 @@ export async function InquiryScreen({
               ) : null}
               <InquirySelectionContext context={inquiry.context} locale={locale} />
               <InquiryOwnerContext context={inquiry.context} locale={locale} />
-              <dl className="space-y-2">
+              <dl className="grid grid-cols-2 gap-x-5 gap-y-3 text-dense">
                 <div>
                   <dt className="font-semibold">{copy.purpose}</dt>
                   <dd>{copy.purposes[inquiry.purpose]}</dd>
@@ -394,11 +403,21 @@ export async function InquiryScreen({
                 </div>
                 <div>
                   <dt className="font-semibold">{copy.preferredLocale}</dt>
-                  <dd>{inquiry.preferredLocale ?? "—"}</dd>
+                  <dd>
+                    {inquiry.preferredLocale
+                      ? new Intl.DisplayNames([locale], { type: "language" }).of(
+                          inquiry.preferredLocale,
+                        )
+                      : "—"}
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-semibold">{copy.channel}</dt>
-                  <dd>{inquiry.preferredChannel ?? "—"}</dd>
+                  <dd>
+                    {inquiry.preferredChannel
+                      ? contactMethodLabel(inquiry.preferredChannel, locale)
+                      : "—"}
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-semibold">{copy.contact}</dt>
@@ -414,7 +433,6 @@ export async function InquiryScreen({
                 </div>
               </dl>
             </section>
-            <InquiryCaseLink locale={locale} session={session} detail={detail} />
             {canAccept ? (
               <section className="space-y-4 rounded-card border border-border p-5">
                 <h2 className="text-subheading font-semibold">{copy.accept}</h2>
@@ -459,6 +477,7 @@ export async function InquiryScreen({
                 />
               </section>
             ) : null}
+            <InquiryCaseLink locale={locale} session={session} detail={detail} />
             {targets.length ? (
               <section className="space-y-4 rounded-card border border-border p-5">
                 <h2 className="text-subheading font-semibold">{copy.disposition}</h2>
@@ -480,7 +499,7 @@ export async function InquiryScreen({
             ) : null}
             <section className="space-y-4">
               <h2 className="text-subheading font-semibold">{copy.tasks}</h2>
-              <TaskList rows={detail.tasks} locale={locale} />
+              <TaskList rows={detail.tasks} locale={locale} emptyText={copy.noInquiryTasks} />
             </section>
           </div>
           <aside className="space-y-6">
@@ -520,7 +539,7 @@ export async function InquiryScreen({
                 </dd>
               </div>
               <div>
-                <dt className="font-semibold">{copy.followUp}</dt>
+                <dt className="font-semibold">{copy.dueAt}</dt>
                 <dd>
                   <When date={inquiry.followUpAt} locale={locale} />
                 </dd>
@@ -547,6 +566,9 @@ export async function InquiryScreen({
             </dl>
             <section className="space-y-3">
               <h2 className="text-subheading font-semibold">{copy.activity}</h2>
+              {detail.activity.length === 0 ? (
+                <p className="text-text-muted">{copy.noActivity}</p>
+              ) : null}
               <ol className="space-y-4">
                 {detail.activity.map((entry) => (
                   <li key={entry.id}>
@@ -601,6 +623,9 @@ export async function InquiryScreen({
               </ol>
             </section>
           </aside>
+        </div>
+        <div className="border-t border-divider pt-5">
+          <WorkNav locale={locale} />
         </div>
       </div>
     </div>
@@ -791,12 +816,22 @@ export async function ContactScreen({
       <p>{copy.contactScope}</p>
       <section className="space-y-3">
         <h2 className="text-subheading font-semibold">{copy.methods}</h2>
+        {contact.methods.length === 0 ? <p className="text-text-muted">{copy.noMethods}</p> : null}
         <ul className="space-y-3">
           {contact.methods.map((method) => (
             <li key={method.id}>
               <bdi>{method.value}</bdi>{" "}
               <span className="text-text-muted">
-                ({method.kind}, {method.verification})
+                ({contactMethodLabel(method.kind, locale)},{" "}
+                {
+                  {
+                    unverified: copy.contactUnverified,
+                    pending: copy.contactPending,
+                    verified: copy.contactVerified,
+                    failed: copy.contactFailed,
+                  }[method.verification]
+                }
+                )
               </span>
             </li>
           ))}

@@ -1,9 +1,13 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
 import { isPublicLocale } from "@/i18n/config";
+import { workflowCopy } from "@/i18n/workflow-copy";
+import { type CalendarData, readCalendar } from "@/server/appointments/calendar";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
+import { isAppError } from "@/server/errors";
 import { Notice } from "@/ui/notice";
 import { workflowScope } from "../cases/contract";
 import { caseCopy } from "../cases/copy";
@@ -19,16 +23,46 @@ import {
 } from "../cases/screens";
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
+import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
+import { CalendarView } from "./calendar-view";
 import { hostHandoverCopy } from "./host-copy";
 import { AppointmentListingContext } from "./listing-context";
-export async function CalendarScreen(props: ScreenProps) {
+/** The client journey retains its relationship-scoped list in every public locale. */
+export async function ClientCalendarScreen(props: ScreenProps) {
   const c = caseCopy(props.locale);
-  const rows = await listAppointments(getDb(), props.session);
+  const rows = await privateRead(() => listAppointments(getDb(), props.session));
   return (
     <WorkflowPage {...props} title={c.calendar}>
-      <p>{props.session.account.kind === "staff" ? c.policyNote : c.requestNote}</p>
+      <p>{c.requestNote}</p>
       <p>{c.calendarBounded}</p>
       <AppointmentList {...props} rows={rows} />
+    </WorkflowPage>
+  );
+}
+
+export async function CalendarScreen(props: ScreenProps & { search?: CalendarSearch }) {
+  const c = caseCopy(props.locale);
+  const { query, adjusted } = parseCalendarQuery(props.search);
+  let data: CalendarData | null = null;
+  try {
+    data = await privateRead(() => readCalendar(getDb(), props.session, query));
+  } catch (error) {
+    // Preserve authentication/access routing. Read failures keep the user's filters and never
+    // become a reassuring empty calendar or an availability result.
+    unstable_rethrow(error);
+    if (
+      isAppError(error) &&
+      ["unauthenticated", "forbidden", "not_found", "step_up_required"].includes(error.code)
+    )
+      throw error;
+    console.error(
+      "[O08] calendar unavailable:",
+      isAppError(error) ? error.code : error instanceof Error ? error.name : typeof error,
+    );
+  }
+  return (
+    <WorkflowPage {...props} title={c.calendar}>
+      <CalendarView locale={props.locale} query={query} data={data} adjusted={adjusted} />
     </WorkflowPage>
   );
 }
@@ -51,10 +85,41 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       (staff || ["reschedule_requested", "cancelled"].includes(target)),
   );
   return (
-    <WorkflowPage {...props} title={row.reference}>
+    <WorkflowPage {...props} title={c.appointmentTitle} reference={row.reference}>
       <p data-testid="appointment-state" className="font-semibold">
         {c[row.state]}
       </p>
+      {row.confirmedStartsAt ? (
+        <WorkflowSection
+          title={
+            ["cancelled", "completed", "no_show"].includes(row.state)
+              ? c.previousTime
+              : c.confirmedTime
+          }
+        >
+          <WorkflowTimeRange
+            start={row.confirmedStartsAt}
+            end={row.confirmedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
+          {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
+          <p>{c.calendarNote}</p>
+          <a className={workflowLink} href={`${path}/calendar`} download>
+            {c.download}
+          </a>
+        </WorkflowSection>
+      ) : null}
+      {row.proposedStartsAt && ["proposed", "reschedule_requested"].includes(row.state) ? (
+        <WorkflowSection title={c.proposedTime}>
+          <WorkflowTimeRange
+            start={row.proposedStartsAt}
+            end={row.proposedEndsAt}
+            locale={props.locale}
+            zoneLabel={props.session.account.kind === "client"}
+          />
+        </WorkflowSection>
+      ) : null}
       <AppointmentListingContext listing={detail.listing} locale={locale} />
       {staff && detail.needsCoverage ? (
         <Notice tone="warning">
@@ -69,7 +134,10 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       </p>
 
       {row.caseId ? (
-        <nav className="flex flex-wrap gap-4" aria-label={hostCopy.links}>
+        <nav
+          className="flex flex-wrap gap-4"
+          aria-label={workflowCopy(props.locale, "viewing").links}
+        >
           <a
             className={`${workflowLink} inline-flex min-h-control items-center`}
             href={`/${props.locale}/${staff ? "cases" : "overview"}/${row.caseId}`}
@@ -93,37 +161,6 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               <li key={window.text}>{window.text}</li>
             ))}
           </ul>
-        </WorkflowSection>
-      ) : null}
-      {row.confirmedStartsAt ? (
-        <WorkflowSection
-          title={
-            ["cancelled", "completed", "no_show"].includes(row.state)
-              ? c.previousTime
-              : c.confirmedTime
-          }
-        >
-          <WorkflowTimeRange
-            start={row.confirmedStartsAt}
-            end={row.confirmedEndsAt}
-            locale={props.locale}
-            zoneLabel={props.session.account.kind === "client"}
-          />
-          {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
-          <p>{c.calendarNote}</p>
-          <a className={workflowLink} href={`${path}/calendar`} download>
-            {c.download}
-          </a>
-        </WorkflowSection>
-      ) : null}
-      {row.proposedStartsAt ? (
-        <WorkflowSection title={c.proposedTime}>
-          <WorkflowTimeRange
-            start={row.proposedStartsAt}
-            end={row.proposedEndsAt}
-            locale={props.locale}
-            zoneLabel={props.session.account.kind === "client"}
-          />
         </WorkflowSection>
       ) : null}
       {staff && detail.hostOffer ? (

@@ -2,11 +2,19 @@
   "notFound": {
     "title": "Page not found",
     "body": "The address may be mistyped, or the page may have moved.",
-    "home": "Go to the home page"
+    "home": "Go to the home page",
+    "items": {
+      "deal": "We could not find this deal. The link may be wrong, or you may no longer have access to it.",
+      "inquiry": "We could not find this inquiry. The link may be wrong, or you may no longer have access to it.",
+      "listing": "We could not find this listing. The link may be wrong, or you may no longer have access to it.",
+      "appointment": "We could not find this appointment. The link may be wrong, or you may no longer have access to it.",
+      "property": "We could not find this property. The address may be mistyped, or the listing may have been removed."
+    }
   },
   "generic": {
     "title": "This page could not be shown",
     "body": "Try again. If it keeps happening, call us and quote the reference.",
+    "staffBody": "Try again. If it keeps happening, give the reference to your manager.",
     "reference": "Reference: {reference}",
     "retry": "Try again"
   },
@@ -15,7 +23,9 @@
     "clientHome": "Back to my deals",
     "list": "Back to list",
     "record": "Back to record",
-    "deal": "Back to deal",
+    "deal": "Back to the deal",
+    "listing": "Back to the listing",
+    "inquiry": "Back to the inquiry",
     "search": "Search properties",
     "access": "Back to sign in",
     "tools": "Back to agency tools",
@@ -23,6 +33,17 @@
     "loadingList": "Loading the list…",
     "loadingRecord": "Loading the record…",
     "loadingListing": "Loading the listing…",
-    "actionOutcome": "If you just saved or sent something, check the same receipt before trying that action again."
+    "actionOutcome": "If you just saved or sent something, check the same receipt before trying that action again.",
+    "sections": {
+      "inquiries": "Back to inquiries",
+      "cases": "Back to deals",
+      "inventory": "Back to inventory",
+      "calendar": "Back to the calendar",
+      "tasks": "Back to tasks",
+      "appointments": "Back to appointments",
+      "messages": "Back to messages",
+      "documents": "Back to documents",
+      "properties": "Back to properties"
+    }
   }
 }

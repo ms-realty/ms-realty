@@ -3,6 +3,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { contactMethods, inquiries, tasks } from "@/db/schema";
 import { type InquiryContactObservation, inquiryContactResults } from "@/domain/inquiry-contact";
+import { agencyTimeZone } from "@/i18n/config";
 import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
@@ -122,7 +123,7 @@ export async function recordInquiryContact(db: Executor, session: Session, raw: 
                 type: "follow_up",
                 ownerId: live.account.id,
                 dueAt,
-                dueTimezone: "UTC",
+                dueTimezone: agencyTimeZone,
                 promisedToClient: input.promisedToClient,
                 inquiryId: row.id,
                 caseId: row.caseId,

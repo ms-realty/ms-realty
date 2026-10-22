@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { legacyListingStructuredData } from "@/i18n/structured-data";
@@ -32,6 +33,10 @@ export default async function LegacyPage({ params }: Props) {
   const page = getLegacyPage(locale, id);
   if (!page) notFound();
   const copy = discoveryCopy(page.locale);
+  const emptyMessage =
+    page.contentState === "verified_empty_archive"
+      ? (await getTranslations({ locale: page.locale, namespace: "states.emptyFiltered" }))("title")
+      : null;
   const structuredData = page.listing
     ? legacyListingStructuredData(page, await publicPageUrl(page.locale, `/legacy/${page.id}`))
     : null;
@@ -53,6 +58,11 @@ export default async function LegacyPage({ params }: Props) {
           <div data-legacy-source-body className="whitespace-pre-wrap text-body">
             {page.bodyText}
           </div>
+          {emptyMessage ? (
+            <p data-legacy-interface-copy role="status" className="text-body text-text-muted">
+              {emptyMessage}
+            </p>
+          ) : null}
           {page.contentLinks?.length ? (
             <ul className="flex flex-wrap gap-x-4 text-dense">
               {page.contentLinks.map((link) => (

@@ -411,18 +411,18 @@ test("database Access denies human allow, bypass, foreign tokens, broad apps and
     /database TCP hostname/,
   );
 });
-test("the independently prepared public projection satisfies the protected-preview artifact contract only", () => {
+test("the checked-in preview template pins the public projection and cannot qualify complete parity", () => {
   const { input, artifacts } = fixture();
-  const root = new URL("../data/legacy/migration/", import.meta.url);
-  artifacts.routes = readFileSync(new URL("staging-legacy-routes.json", root), "utf8");
-  artifacts.manifest = readFileSync(new URL("staging-route-manifest.json", root), "utf8");
-  artifacts.media = readFileSync(new URL("public-media.json", root), "utf8");
+  const root = new URL("../", import.meta.url);
+  const template = JSON.parse(
+    readFileSync(new URL("deploy/cloudflare-staging.inputs.example.json", root), "utf8"),
+  );
+  artifacts.routes = readFileSync(new URL(template.artifacts.routes, root), "utf8");
+  artifacts.manifest = readFileSync(new URL(template.artifacts.routeManifest, root), "utf8");
+  artifacts.media = readFileSync(new URL(template.artifacts.media, root), "utf8");
   const manifest = JSON.parse(artifacts.manifest);
-  input.purpose = "protected_partial_preview";
-  input.artifacts.routesSha256 = sha256(artifacts.routes);
-  input.artifacts.routeManifestSha256 = sha256(artifacts.manifest);
-  input.artifacts.exclusionsSha256 = sha256(JSON.stringify(manifest.exclusions));
-  input.artifacts.mediaSha256 = sha256(artifacts.media);
+  input.purpose = template.purpose;
+  input.artifacts = template.artifacts;
   validateStaging(input, artifacts);
   assert.equal(manifest.productionAllowed, false);
   assert(manifest.exclusions.length > 0);

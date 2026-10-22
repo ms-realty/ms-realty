@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { test } from "node:test";
-import { observeRuntimeRollout } from "./staging-rollout-proof.mjs";
+import { observeRuntimeRollout, prepareRuntimeRollout } from "./staging-rollout-proof.mjs";
 
 // Injected provider responses are contract fixtures, never live launch evidence.
 function fixture() {
@@ -36,7 +36,7 @@ function fixture() {
       type: "durable_object_namespace",
       namespace_id: namespaceId,
     });
-    apps.push({
+    const app = {
       id: `app-${role}`,
       account_id: accountId,
       durable_objects: { namespace_id: namespaceId },
@@ -45,7 +45,10 @@ function fixture() {
       version: 2,
       // Cloudflare clears active_rollout_id once the rollout completes.
       active_rollout_id: null,
-    });
+    };
+    // The list and the application's own read share one object unless a test splits them.
+    apps.push(app);
+    documents.set(`${base}/app-${role}`, { result: app });
     // Shape of GET .../rollouts as observed live: no result_info, versions as current/target.
     documents.set(`${base}/app-${role}/rollouts`, {
       result: [
@@ -95,6 +98,76 @@ function fixture() {
 }
 const observe = (f) => observeRuntimeRollout(f.input, f.runtime, f.ephemeral, f.transport);
 
+test("prepares identities again when a provider rollout stops the prepared actors", async () => {
+  const f = fixture();
+  let preparations = 0,
+    at = 0;
+  f.runtime.roles.web.state = "prepared";
+  const stopped = f.documents.get(`${f.base}/app-web/instances-v2`).result[0];
+  const { runtime, observation } = await prepareRuntimeRollout(
+    f.input,
+    async () => {
+      preparations++;
+      stopped.status.state = "running";
+      return structuredClone(f.runtime);
+    },
+    f.ephemeral,
+    {
+      allowPreparedWeb: true,
+      transport: async (url, options) => {
+        // The deployment can stop a prepared actor after its identity endpoint returns.
+        if (preparations === 1) stopped.status.state = "inactive";
+        return f.transport(url, options);
+      },
+      retry: {
+        ms: 10_000,
+        every: 5_000,
+        now: () => at,
+        wait: async (ms) => {
+          at += ms;
+        },
+        log: () => {},
+      },
+    },
+  );
+  assert.equal(preparations, 2);
+  assert.equal(at, 5_000);
+  assert.deepEqual(runtime, f.runtime);
+  assert.equal(observation.status, "observed");
+  assert.equal(observation.roles[0].actorId, stopped.id);
+});
+
+test("preparation never substitutes for provider proof of a running actor", async () => {
+  const f = fixture();
+  let preparations = 0,
+    at = 0;
+  f.documents.get(`${f.base}/app-web/instances-v2`).result[0].status.state = "inactive";
+  await assert.rejects(
+    prepareRuntimeRollout(
+      f.input,
+      async () => {
+        preparations++;
+        return f.runtime;
+      },
+      f.ephemeral,
+      {
+        transport: f.transport,
+        retry: {
+          ms: 10_000,
+          every: 5_000,
+          now: () => at,
+          wait: async (ms) => {
+            at += ms;
+          },
+          log: () => {},
+        },
+      },
+    ),
+    /web running exact actor digest coverage/,
+  );
+  assert.equal(preparations, 3);
+});
+
 test("returns provider observation only after all three actors and completed rollouts match", async () => {
   const f = fixture(),
     result = await observe(f);
@@ -107,7 +180,7 @@ test("returns provider observation only after all three actors and completed rol
   );
   assert.equal(result.roles[1].actorId, f.runtime.roles.worker.actorId);
   assert.equal(result.roles[1].namespaceId, "2".repeat(32));
-  assert.equal(f.calls.length, 8);
+  assert.equal(f.calls.length, 11);
   assert.equal("PASS" in result, false);
 });
 test("accepts a newly created application, which Cloudflare records without a rollout", async () => {
@@ -125,6 +198,16 @@ test("accepts a newly created application, which Cloudflare records without a ro
       [1, null, null],
     ],
   );
+});
+test("trusts the application's own read over a stale list snapshot", async () => {
+  const f = fixture();
+  f.apps[2] = {
+    ...structuredClone(f.apps[2]),
+    version: 1,
+    configuration: { image: "registry.cloudflare.com/old@sha256:previous" },
+    active_rollout_id: "rollout-migrator",
+  };
+  assert.equal((await observe(f)).roles[2].applicationVersion, 2);
 });
 test("accepts a completed rollout that is still reported as active", async () => {
   const f = fixture();
@@ -156,6 +239,18 @@ const failures = {
     f.documents.get(`${f.base}/app-web/instances-v2`).result[0].image =
       "registry.cloudflare.com/old:latest";
   },
+  "old image in the application's own read": (f) => {
+    f.documents.get(`${f.base}/app-worker`).result = {
+      ...structuredClone(f.apps[1]),
+      configuration: { image: "old:latest" },
+    };
+  },
+  "application read for another namespace": (f) => {
+    f.documents.get(`${f.base}/app-web`).result = {
+      ...structuredClone(f.apps[0]),
+      durable_objects: { namespace_id: "9".repeat(32) },
+    };
+  },
   "configured tag": (f) => {
     f.apps[0].configuration.image = "old:latest";
   },
@@ -183,6 +278,37 @@ const failures = {
     f.apps[0].version = 1;
     f.apps[0].active_rollout_id = "rollout-next";
     f.documents.set(`${f.base}/app-web/rollouts`, { result: [] });
+  },
+  "pending rollout to a later version without an active ID": (f) => {
+    f.documents.get(`${f.base}/app-web/rollouts`).result.push({
+      id: "rollout-next",
+      status: "progressing",
+      current_version: 2,
+      target_version: 3,
+      target_configuration: { image: "old:latest" },
+      last_updated_at: new Date(Date.now() - 1_000).toISOString(),
+    });
+  },
+  "new application with only a progressing rollout": (f) => {
+    f.apps[1].version = 1;
+    f.documents.set(`${f.base}/app-worker/rollouts`, {
+      result: [
+        {
+          id: "rollout-worker-next",
+          status: "progressing",
+          current_version: 1,
+          target_version: 2,
+          target_configuration: { image: "old:latest" },
+          last_updated_at: new Date(Date.now() - 1_000).toISOString(),
+        },
+      ],
+    });
+  },
+  "reverted rollout to the current version": (f) => {
+    f.documents.get(`${f.base}/app-migrator/rollouts`).result[0].status = "reverted";
+  },
+  "replaced rollout to the current version": (f) => {
+    f.documents.get(`${f.base}/app-web/rollouts`).result[0].status = "replaced";
   },
   "wrong rollout version": (f) => {
     f.documents.get(`${f.base}/app-web/rollouts`).result[0].target_version = 1;

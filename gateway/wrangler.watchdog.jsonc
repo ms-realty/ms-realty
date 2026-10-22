@@ -1,0 +1,49 @@
+// Private configuration template; generate an immutable image-bound config before provisioning.
+{
+  "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
+  "name": "ms-realty-route-watchdog",
+  "main": "route-watchdog.ts",
+  "account_id": "921d0224dcd595c87b7928d2b3c479d1",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ROUTE_WATCHDOG",
+        "class_name": "RouteWatchdog"
+      },
+      {
+        "name": "ORIGIN_PROBE",
+        "class_name": "OriginProbe"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["RouteWatchdog"]
+    },
+    {
+      "tag": "v2-native-origin",
+      "new_sqlite_classes": ["OriginProbe"]
+    }
+  ],
+  "version_metadata": {
+    "binding": "WATCHDOG_VERSION"
+  },
+  "vars": {
+    "WATCHDOG_SOURCE_COMMIT": "",
+    "WATCHDOG_SOURCE_SHA256": "",
+    "WATCHDOG_ORIGIN": "https://ms-realty-route-watchdog.invalid",
+    "WATCHDOG_OWNER_PUBLIC_KEY": "",
+    "WATCHDOG_CONTROLLER_PUBLIC_KEY": "",
+    "WATCHDOG_PROBE_SOURCE_COMMIT": "",
+    "WATCHDOG_PROBE_IMAGE_DIGEST": ""
+  }
+}

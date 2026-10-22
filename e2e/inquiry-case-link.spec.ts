@@ -273,8 +273,9 @@ for (const javaScriptEnabled of [true, false]) {
         // A linked inquiry offers no second link.
         await page.getByRole("link", { name: copy.backToInquiry, exact: true }).click();
         await expect(
-          page.getByRole("heading", { level: 1, name: f.inquiryReference }),
+          page.getByRole("heading", { level: 1, name: "Synthetic returning visitor" }),
         ).toBeVisible();
+        await expect(page.locator("[data-inquiry-reference]")).toContainText(f.inquiryReference);
         await expect(page.locator("[data-inquiry-case-link]")).toHaveCount(0);
       });
     } finally {
@@ -714,7 +715,10 @@ test("O03 / F18: a failed candidate read never reads as no matching Case", async
     });
     await expect(section.getByText(copy.emptyTitle, { exact: true })).toHaveCount(0);
     await expect(section.locator("[data-case-candidate]")).toHaveCount(0);
-    await expect(page.getByRole("heading", { level: 1, name: f.inquiryReference })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Synthetic returning visitor" }),
+    ).toBeVisible();
+    await expect(page.locator("[data-inquiry-reference]")).toContainText(f.inquiryReference);
     await accessible(page);
     await section.screenshot({ path: info.outputPath("o03-failed.png") });
 

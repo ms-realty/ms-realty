@@ -1,12 +1,19 @@
+import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
-import { isPublicLocale } from "@/i18n/config";
+import { isPublicLocale, localeEndonyms } from "@/i18n/config";
 import { formatDate } from "@/i18n/format";
+import { currentStaffAccess } from "@/server/auth/pages";
 import type { Session } from "@/server/auth/sessions";
-import { wireCode } from "@/server/errors";
-import { privateReceipt } from "@/server/privacy/native";
+import { AppError, wireCode } from "@/server/errors";
+import { action } from "@/server/http/next";
+import {
+  privacyReviewSessionKeys,
+  privateReceipt,
+  reconcilePrivacyReview,
+} from "@/server/privacy/native";
 import { getPreferences, preferencePurposes } from "@/server/privacy/preferences";
 import {
   clientPrivacyRequests,
@@ -19,8 +26,10 @@ import type { NormalizedSearch } from "@/server/search/search";
 import { controlClass, labelClass } from "@/ui/field-class";
 import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
+import { caseCopy } from "../cases/copy";
 import { privacyCopy, privacyLabel } from "./copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
+import { ReviewEnvelope } from "./review-envelope";
 
 type Query = { error?: string; receipt?: string; after?: string; before?: string };
 function Frame({ title, lead, children }: { title: string; lead: string; children: ReactNode }) {
@@ -245,7 +254,7 @@ export async function PreferencesScreen({
           >
             {publicLocales.map((value) => (
               <option key={value} value={value}>
-                {value.toUpperCase()}
+                {localeEndonyms[value]}
               </option>
             ))}
           </select>
@@ -406,6 +415,19 @@ export async function PreferencesScreen({
 
 const queueLink = "inline-flex min-h-11 items-center underline";
 
+async function reconcileReview(id: string, operationId: string, version?: number) {
+  "use server";
+  const result = await action(
+    async ({ db }) => {
+      const access = await currentStaffAccess();
+      if (access.state !== "ready") throw new AppError("unauthenticated");
+      return reconcilePrivacyReview(db, access.session, { id, operationId, version });
+    },
+    { requireSession: true },
+  );
+  return result.ok ? result.data : ("unknown" as const);
+}
+
 export async function StaffPrivacyScreen({
   locale,
   session,
@@ -428,6 +450,8 @@ export async function StaffPrivacyScreen({
   const search = privacyQueuePath(locale, position).split("?")[1];
   const submitPath = `/${locale}/operations/privacy/submit${search ? `?${search}` : ""}`;
   const owners = await privacyOwners(getDb());
+  const sessionKeys = await privacyReviewSessionKeys(getDb(), session);
+  const recovery = caseCopy(locale);
   return (
     <Frame title={c.operations} lead={c.staffLead}>
       <Result query={query} locale={locale} session={session} />
@@ -437,7 +461,7 @@ export async function StaffPrivacyScreen({
         const next = privacyRequestMachine.transitions[record.state];
         return (
           <section
-            key={record.id}
+            key={`${record.id}:${session.id}`}
             className="grid min-w-0 grid-cols-1 gap-4 rounded-panel border border-divider bg-surface p-5 wrap-anywhere"
           >
             <h2 className="text-section font-semibold">
@@ -462,68 +486,90 @@ export async function StaffPrivacyScreen({
                 action={submitPath}
                 className="grid min-w-0 grid-cols-1 gap-4"
               >
-                <Envelope intent="review" id={record.id} version={record.version} />
-                {/* A wrapping label would add the chosen option to the select's accessible name. */}
-                <div className="grid gap-2">
-                  <label htmlFor={`${record.id}-to`} className={labelClass}>
-                    {c.state}
-                  </label>
-                  <select
-                    id={`${record.id}-to`}
-                    name="to"
-                    className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
-                  >
-                    {next.map((state) => (
-                      <option key={state} value={state}>
-                        {privacyLabel(locale, state)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid gap-2">
-                  <label htmlFor={`${record.id}-owner`} className={labelClass}>
-                    {c.owner}
-                  </label>
-                  <select
-                    id={`${record.id}-owner`}
-                    name="responsibleId"
-                    className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
-                    defaultValue={record.responsibleId ?? ""}
-                  >
-                    {owners.map((owner) => (
-                      <option key={owner.id} value={owner.id}>
-                        {owner.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <TextField name="policyReference" label={c.policy} value={scope.policyReference} />
-                <TextField
-                  name="dueAt"
-                  label={c.due}
-                  type="date"
-                  value={record.dueAt?.toISOString().slice(0, 10)}
-                />
-                <Check name="identityReviewed" required={false}>
-                  {c.identity}
-                </Check>
-                <Area name="legalHoldReason" label={c.hold} value={record.legalHoldReason ?? ""} />
-                <Area
-                  name="legalHoldDisposition"
-                  label={c.disposition}
-                  value={record.legalHoldDisposition ?? ""}
-                />
-                <Check name="holdResolved" required={false}>
-                  {c.resolved}
-                </Check>
-                <Area
-                  name="completionEvidence"
-                  label={c.completion}
-                  value={record.completionEvidence ?? ""}
-                />
-                <Area name="rejectionReason" label={c.rejection} />
-                <Check name="confirmed">{c.reviewed}</Check>
-                <Submit>{c.record}</Submit>
+                <ReviewEnvelope
+                  id={record.id}
+                  version={record.version}
+                  operationId={randomUUID()}
+                  sessionKeys={sessionKeys}
+                  reconcile={reconcileReview.bind(null, record.id)}
+                  restoredLabel={c.restoredReview}
+                  unkeptLabel={c.unkeptReview}
+                  unknownLabel={recovery.statusUnknown}
+                  savedLabel={recovery.statusSaved}
+                  checkLabel={recovery.checkAgain}
+                  currentLabel={recovery.back}
+                  currentHref={privacyQueuePath(locale, position)}
+                >
+                  {/* A wrapping label would add the chosen option to the select's accessible name. */}
+                  <div className="grid gap-2">
+                    <label htmlFor={`${record.id}-to`} className={labelClass}>
+                      {c.state}
+                    </label>
+                    <select
+                      id={`${record.id}-to`}
+                      name="to"
+                      className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                    >
+                      {next.map((state) => (
+                        <option key={state} value={state}>
+                          {privacyLabel(locale, state)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor={`${record.id}-owner`} className={labelClass}>
+                      {c.owner}
+                    </label>
+                    <select
+                      id={`${record.id}-owner`}
+                      name="responsibleId"
+                      className={`${controlClass} min-w-0 max-w-full overflow-hidden text-ellipsis`}
+                      defaultValue={record.responsibleId ?? ""}
+                    >
+                      {owners.map((owner) => (
+                        <option key={owner.id} value={owner.id}>
+                          {owner.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <TextField
+                    name="policyReference"
+                    label={c.policy}
+                    value={scope.policyReference}
+                  />
+                  <TextField
+                    name="dueAt"
+                    label={c.due}
+                    type="date"
+                    value={record.dueAt?.toISOString().slice(0, 10)}
+                  />
+                  <Check name="identityReviewed" required={false}>
+                    {c.identity}
+                  </Check>
+                  <Area
+                    name="legalHoldReason"
+                    label={c.hold}
+                    value={record.legalHoldReason ?? ""}
+                  />
+                  <Area
+                    name="legalHoldDisposition"
+                    label={c.disposition}
+                    value={record.legalHoldDisposition ?? ""}
+                  />
+                  <Check name="holdResolved" required={false}>
+                    {c.resolved}
+                  </Check>
+                  <Area
+                    name="completionEvidence"
+                    label={c.completion}
+                    value={record.completionEvidence ?? ""}
+                  />
+                  <Area name="rejectionReason" label={c.rejection} />
+                  <Check name="confirmed">{c.reviewed}</Check>
+                  <Submit>{c.record}</Submit>
+                </ReviewEnvelope>
               </NativeForm>
             ) : null}
           </section>

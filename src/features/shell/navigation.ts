@@ -7,9 +7,12 @@ import type { PublicLocale } from "@/i18n/config";
 
 type Nav = typeof import("../../../messages/bg/nav.json");
 type Tools = typeof import("../../../messages/staff/bg/tools.json");
+type WorkspaceMessages = typeof import("../../../messages/staff/bg/workspace.json");
 export type PublicNavLabel = Exclude<keyof Nav, "journey" | "workspace">;
 export type JourneyNavLabel = keyof Nav["journey"];
-export type WorkspaceNavLabel = keyof typeof import("../../../messages/staff/bg/workspace.json");
+export type WorkspaceNavLabel = {
+  [Key in keyof WorkspaceMessages]: WorkspaceMessages[Key] extends string ? Key : never;
+}[keyof WorkspaceMessages];
 export type AgencyToolLabel = keyof Tools["items"];
 export type AgencyToolSection = keyof Tools["sections"];
 export type FooterLabel = "help" | "privacy" | "accessibility";
@@ -100,7 +103,7 @@ export const workspaceSecondaryNav: readonly WorkspaceNavItem[] = [
 export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyToolItem[]>> = {
   work: [
     ...workspacePrimaryNav.slice(0, 4),
-    { label: "imports", screen: "O28", path: null },
+    { label: "imports", screen: "O28", path: "/operations/imports", requires: ["import.run"] },
     ...workspacePrimaryNav.slice(4),
     { label: "consultations", screen: "O29", path: null },
     { label: "coverage", screen: "O01", path: "/coverage", requires: ["case.read_internal"] },
@@ -122,8 +125,14 @@ export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyTool
     { label: "pages", screen: "O21", path: "/content", requires: ["content.edit"] },
     { label: "reports", screen: "O22", path: null },
     { label: "team", screen: "O23", path: "/access/manage", requires: ["access.grant"] },
-    { label: "system", screen: "O24", path: null },
+    { label: "system", screen: "O24", path: "/operations/readiness", requires: ["report.read"] },
     { label: "jobs", screen: "O25", path: "/operations/jobs", requires: ["report.read"] },
+    {
+      label: "history",
+      screen: "O26",
+      path: "/operations/history",
+      requires: ["audit.read", "listing.read"],
+    },
     { label: "privacy", screen: "O26", path: "/operations/privacy", requires: ["privacy.manage"] },
     {
       label: "alerts",
@@ -154,7 +163,8 @@ export function permittedTools(
     const items = linked(
       agencyTools[section].filter((item) =>
         (item.requires ?? []).every((c) =>
-          workspacePrimaryNav.some((primary) => primary.path === item.path)
+          workspacePrimaryNav.some((primary) => primary.path === item.path) ||
+          item.path === "/operations/history"
             ? navigable.has(c)
             : held.has(c),
         ),

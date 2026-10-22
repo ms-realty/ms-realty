@@ -132,14 +132,14 @@ for (const javaScriptEnabled of [true, false])
       await context.addCookies([cookie(receiver.brokerToken)]);
       await page.goto(hostUrl("staff", `/en/cases/${f.caseId}/continuity`));
       const accept = page.locator("form").filter({
-        has: page.getByRole("button", { name: "Accept case and commitments", exact: true }),
+        has: page.getByRole("button", { name: "Accept the deal and its next steps", exact: true }),
       });
       await accept
         .getByLabel("Reason", { exact: true })
         .fill("I accept the Case and its existing promises without changing their deadlines.");
       await accept.getByRole("checkbox").check();
       await accept
-        .getByRole("button", { name: "Accept case and commitments", exact: true })
+        .getByRole("button", { name: "Accept the deal and its next steps", exact: true })
         .click();
       await expect(
         page.getByRole("heading", { name: "Change recorded", exact: true }),
@@ -200,7 +200,7 @@ for (const javaScriptEnabled of [true, false])
         path: testInfo.outputPath(`retained-key-${javaScriptEnabled}-320.png`),
         fullPage: true,
       });
-      await page.getByLabel("State", { exact: true }).selectOption("stored");
+      await page.getByLabel("Where the keys are", { exact: true }).selectOption("stored");
       await page
         .getByLabel("Storage label", { exact: true })
         .fill("Synthetic checked return cabinet");

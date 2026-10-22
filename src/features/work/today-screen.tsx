@@ -501,7 +501,7 @@ function QueueGroup({ locale, group }: { locale: string; group: Group }) {
       ) : (
         <>
           {notice}
-          <ul aria-label={title} className="flex flex-col gap-4">
+          <ul aria-label={title} className="divide-y divide-divider">
             {rows.slice(0, rowsPerGroup)}
           </ul>
           {href ? (
@@ -518,7 +518,7 @@ function QueueGroup({ locale, group }: { locale: string; group: Group }) {
                   <summary className={cx(inlineLink, "w-fit cursor-pointer text-dense")}>
                     {t.showMore.replace("{n}", number.format(rows.length - rowsPerGroup))}
                   </summary>
-                  <ul className="mt-4 flex flex-col gap-4">{rows.slice(rowsPerGroup)}</ul>
+                  <ul className="mt-4 divide-y divide-divider">{rows.slice(rowsPerGroup)}</ul>
                 </details>
               ) : null}
               {/* Beyond the loaded page only a focus view continues this list; without one, say
@@ -595,7 +595,7 @@ function Row({
   data: Record<`data-${string}`, string>;
 }) {
   return (
-    <li className="border-b border-divider pb-4" {...data}>
+    <li {...data}>
       <a
         href={href}
         className="flex min-h-19 items-center gap-4 p-4 text-dense text-text no-underline hover:bg-subtle"
