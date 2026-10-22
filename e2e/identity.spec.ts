@@ -26,6 +26,11 @@ test.afterAll(async () => {
 });
 const address = () => `browser-${randomUUID()}@example.test`;
 
+async function showPhotoChecks(page: Page) {
+  const summary = page.locator("summary").filter({ hasText: /^Checks and rights for this photo$/ });
+  if ((await summary.locator("..").getAttribute("open")) === null) await summary.click();
+}
+
 async function principal(kind: "client" | "staff") {
   const email = address();
   const [party] = await db
@@ -285,7 +290,7 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
     .poll(
       async () => {
         const [asset] =
-          await sql`select id, scan, sealed_key, sha256, scanned_sha256, scanner_version from media_assets where property_id = ${property.id}`;
+          await sql`select id, scan, processing, sealed_key, sha256, scanned_sha256, scanner_version from media_assets where property_id = ${property.id}`;
         assetId = String(asset?.id ?? "");
         if (asset?.scan === expectedScan) {
           expect(asset.sealed_key).toBeTruthy();
@@ -295,26 +300,33 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
             expect(asset.scanner_version).toMatch(/^ClamAV /);
           }
         }
-        return asset?.scan;
+        return { scan: asset?.scan, processing: asset?.processing };
       },
       { timeout: 25_000 },
     )
-    .toBe(expectedScan);
+    .toMatchObject(realScan ? { scan: expectedScan, processing: "ready" } : { scan: expectedScan });
   await page.reload();
+  await showPhotoChecks(page);
   if (realScan) {
+    await expect(page.getByText("Clean", { exact: true })).toBeVisible();
+    await page.getByLabel("Image description", { exact: true }).fill("Synthetic blue rectangle");
+    await page.getByRole("button", { name: "Save photo details", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
+    await page.getByRole("link", { name: "Review this photo", exact: true }).click();
+    await showPhotoChecks(page);
     await expect(page.getByText("Clean", { exact: true })).toBeVisible();
     await page.getByLabel("Rights holder", { exact: true }).fill("Synthetic image creator");
     await page
       .getByLabel("Rights evidence / permission reference", { exact: true })
       .fill("Synthetic test permission");
-    await page.getByLabel("Image description", { exact: true }).fill("Synthetic blue rectangle");
     await page
       .getByLabel(
         "I reviewed private addresses, people, documents and location details in the visible image.",
       )
       .check();
     await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
-    await page.getByRole("button", { name: "Record review", exact: true }).click();
+    await page.getByRole("button", { name: "Approve as a public candidate", exact: true }).click();
+    await showPhotoChecks(page);
     await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
     const original = await page.evaluate(
       async (id) =>

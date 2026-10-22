@@ -6,13 +6,14 @@ import { appointmentMachine } from "@/domain/appointment";
 import { isPublicLocale } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { type CalendarData, readCalendar } from "@/server/appointments/calendar";
-import { readAppointment } from "@/server/appointments/service";
+import { listAppointments, readAppointment } from "@/server/appointments/service";
 import { isAppError } from "@/server/errors";
 import { Notice } from "@/ui/notice";
 import { workflowScope } from "../cases/contract";
 import { caseCopy } from "../cases/copy";
 import { caseEmailCopy } from "../cases/email-copy";
 import {
+  AppointmentList,
   BoundWorkflowForm,
   type ScreenProps,
   WorkflowPage,
@@ -26,6 +27,19 @@ import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
 import { CalendarView } from "./calendar-view";
 import { hostHandoverCopy } from "./host-copy";
 import { AppointmentListingContext } from "./listing-context";
+/** The client journey retains its relationship-scoped list in every public locale. */
+export async function ClientCalendarScreen(props: ScreenProps) {
+  const c = caseCopy(props.locale);
+  const rows = await privateRead(() => listAppointments(getDb(), props.session));
+  return (
+    <WorkflowPage {...props} title={c.calendar}>
+      <p>{c.requestNote}</p>
+      <p>{c.calendarBounded}</p>
+      <AppointmentList {...props} rows={rows} />
+    </WorkflowPage>
+  );
+}
+
 export async function CalendarScreen(props: ScreenProps & { search?: CalendarSearch }) {
   const c = caseCopy(props.locale);
   const { query, adjusted } = parseCalendarQuery(props.search);

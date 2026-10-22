@@ -42,6 +42,21 @@ and is explicitly incomplete as an availability decision. Private access notes a
 identifiers are not projected. Manual external-busy checks remain explicit. O09's ordinary
 guarded confirmation, rescheduling, cancellation and notification actions retain authority.
 
+The client appointment journey uses a separate relationship-scoped list, retaining all seven
+public locales and client navigation. It does not enter the staff period/calendar reader.
+
+## Listing and photo workflow continuity
+
+The retained listing workspace includes saved private photo-text drafts and staged gallery
+ordering. Draft text preserves approved metadata and the existing public manifest until a
+person reviews the saved revision and publishes it. New publication is blocked while placed
+photo text is awaiting review. Discard, conflict, unknown-result, receipt and native navigation
+paths retain the guarded operation and record identity. The additive media draft migration is
+part of the source package; this increment applies no production migration.
+
+New case and calendar interface text lives in the BG/RU/EN staff JSON catalogs. Catalog
+placement preserves the original text and does not grant human translation approval.
+
 ## Verification and remaining acceptance
 
 Focused unit, component, route and real-PostgreSQL checks cover filter confidentiality,
@@ -58,3 +73,12 @@ visual and container checks to pass for each integrated PR head.
 Real owner/broker acceptance, current inventory and translation approval, complete zero-loss
 migration, live provider outcomes, independently qualified recovery and production cutover
 remain separate. This source increment supplies none of those approvals.
+
+The release manifest template references the current draft policy revision. All unknown
+inputs, empty trusted-key configuration and missing approvals remain blocked; template
+alignment supplies no signed R00 authority or evidence-owner assignment.
+
+Browser CI uses a pinned Ubuntu browser runner and installs the engine for each profile with
+bounded dependency/setup steps. The required gate still includes desktop Chromium, mobile
+Chromium, mobile WebKit, real scanner-backed journeys, isolated recovery, analytics isolation,
+visual comparisons and the delivery container.

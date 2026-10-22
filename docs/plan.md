@@ -4,6 +4,11 @@ Status: active, not release-qualified · Started 2026-09-23 · Realigned 2026-09
 
 The current execution record is [delivery/2026-09-27-recovery.md](delivery/2026-09-27-recovery.md). The interrupted workflow status is not acceptance evidence.
 
+Phase 1 completes the deferred O04 case directory and O08 calendar source workflows; see
+[the source completion note](delivery/phase-one-completion.md). Hosted qualification is
+required for each integrated PR head. This source completion supersedes the O04 follow-up
+recorded in the historical progress log. R00–R12 and owner operating acceptance remain open.
+
 Authority, in order: [`docs/architecture.md`](architecture.md) (final architecture v1.0,
 normative), [`docs/adr/0002-implementation-deviations.md`](adr/0002-implementation-deviations.md)
 (where the implementation differs and what it must still prove), [`docs/ux-spec.md`](ux-spec.md)
