@@ -65,6 +65,9 @@ for (const javascript of [true, false])
       });
       await expect(runtimeCheck).toBeInViewport({ ratio: 1 });
       await runtimeCheck.click();
+      await expect(page.getByRole("link", { name: copy.seeImpact, exact: true })).toBeInViewport({
+        ratio: 1,
+      });
       const runtimeReport = page.locator('[data-release-report="deployed_check"]');
       const runtimeReportControl = runtimeReport.locator("summary").first();
       await expect(runtimeReportControl).toHaveAccessibleName(
@@ -77,6 +80,12 @@ for (const javascript of [true, false])
         exact: true,
       });
       await expect(reportStatus).toBeVisible();
+      await expect(
+        reportStatus.getByRole("heading", {
+          name: `${copy.reportStatus}: ${copy.requirements.deployed_check}`,
+          exact: true,
+        }),
+      ).toBeVisible();
       await expect(
         reportStatus.getByText(copy.results.not_confirmed, { exact: true }),
       ).toBeVisible();
@@ -113,9 +122,16 @@ for (const javascript of [true, false])
       await expect(
         page.getByRole("link", { name: copy.openExceptions, exact: true }),
       ).toHaveAttribute("href", "/en/operations/jobs?view=exceptions");
-      const before = page.url();
+      const expectedRead = new URL(page.url());
+      expectedRead.searchParams.set("read", "saved");
+      expectedRead.hash = "release-R07-impact";
       await page.getByRole("link", { name: copy.checkAgain, exact: true }).click();
-      await expect(page).toHaveURL(before);
+      await expect(
+        page.getByRole("status").getByText("Saved results read. Nothing was sent again.", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(page).toHaveURL(expectedRead.href);
       await expect(
         page.getByRole("heading", { name: copy.gates.R07.title, exact: true }),
       ).toBeVisible();

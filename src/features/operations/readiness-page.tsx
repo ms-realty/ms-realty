@@ -14,10 +14,12 @@ export async function ReleaseReadinessPage({
   locale,
   gate,
   impact,
+  readSaved,
 }: {
   locale: string;
   gate?: string;
   impact?: boolean;
+  readSaved?: boolean;
 }) {
   if (!isStaffLocale(locale) || (gate !== undefined && !gateIds.includes(gate as GateId)))
     notFound();
@@ -31,6 +33,7 @@ export async function ReleaseReadinessPage({
         view={view}
         selected={gate as GateId | undefined}
         impact={impact}
+        readSaved={readSaved}
       />
     );
   } catch (error) {

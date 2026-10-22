@@ -12,11 +12,13 @@ export function ReleaseReadinessScreen({
   view,
   selected,
   impact = false,
+  readSaved = false,
 }: {
   locale: string;
   view: ReleaseOverview;
   selected?: GateId;
   impact?: boolean;
+  readSaved?: boolean;
 }) {
   const copy = operationsCopy(locale);
   const root = `/${locale}/operations/readiness`;
@@ -36,6 +38,19 @@ export function ReleaseReadinessScreen({
           </a>
         ) : null}
       </header>
+      {selected && !impact ? (
+        <>
+          <div className="flex flex-wrap gap-3">
+            <a className={buttonClass("secondary")} href={`${root}/${selected}?read=saved`}>
+              {copy.checkAgain}
+            </a>
+            <a className={buttonClass("secondary")} href={`${root}/${selected}?view=impact`}>
+              {copy.seeImpact}
+            </a>
+          </div>
+          {readSaved ? <p role="status">{copy.savedRead}</p> : null}
+        </>
+      ) : null}
       <Notice
         tone={current && view.summary.verdict === "pass" ? "info" : "warning"}
         title={
@@ -48,11 +63,6 @@ export function ReleaseReadinessScreen({
       >
         <p>{current ? copy.boundary : copy.noCurrentReport}</p>
       </Notice>
-      {selected && !impact ? (
-        <a className={buttonClass("secondary")} href={`${root}/${selected}`}>
-          {copy.checkAgain}
-        </a>
-      ) : null}
       <div className="grid min-w-0 gap-5">
         {gates.map((gate) => {
           const text = copy.gates[gate.id];
@@ -80,18 +90,24 @@ export function ReleaseReadinessScreen({
               {selected ? (
                 <>
                   {impact ? (
-                    <div className="space-y-4">
+                    <div id={`release-${gate.id}-impact`} className="scroll-mt-24 space-y-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <h2 className="flex min-h-control items-center text-subheading font-semibold">
                           {copy.affected}
                         </h2>
                         <a
                           className={buttonClass("secondary")}
-                          href={`${root}/${gate.id}?view=impact`}
+                          href={`${root}/${gate.id}?view=impact&read=saved#release-${gate.id}-impact`}
                         >
                           {copy.checkAgain}
                         </a>
                       </div>
+                      {readSaved ? (
+                        <p role="status" className="max-w-reading">
+                          <span>{copy.savedRead}</span>{" "}
+                          {current && gate.status === "pass" ? copy.confirmed : copy.needsEvidence}
+                        </p>
+                      ) : null}
                       {gate.affects.length ? (
                         <ul className="space-y-2">
                           {gate.affects.map((id) => (
@@ -162,7 +178,9 @@ export function ReleaseReadinessScreen({
                               aria-label={`${copy.reportStatus}: ${names[requirement.type] ?? copy.report}`}
                               className="space-y-4 rounded-b-control border-t border-border bg-surface px-4 py-5"
                             >
-                              <h3 className="font-semibold">{copy.reportStatus}</h3>
+                              <h3 className="font-semibold">
+                                {copy.reportStatus}: {names[requirement.type] ?? copy.report}
+                              </h3>
                               <p>{copy.results[requirement.result]}</p>
                               {requirement.result === "not_confirmed" ? (
                                 <p>{copy.missingReportHelp}</p>
@@ -185,11 +203,6 @@ export function ReleaseReadinessScreen({
                   ) : (
                     <p>{copy.noCurrentReport}</p>
                   )}
-                  {!impact ? (
-                    <a className={buttonClass("secondary")} href={`${root}/${gate.id}?view=impact`}>
-                      {copy.seeImpact}
-                    </a>
-                  ) : null}
                 </>
               ) : null}
               {selected ? (
@@ -209,9 +222,12 @@ export function ReleaseReadinessScreen({
         })}
       </div>
       {!selected ? (
-        <a className={buttonClass("secondary")} href={root}>
-          {copy.checkAgain}
-        </a>
+        <>
+          <a className={buttonClass("secondary")} href={`${root}?read=saved`}>
+            {copy.checkAgain}
+          </a>
+          {readSaved ? <p role="status">{copy.savedRead}</p> : null}
+        </>
       ) : null}
       <TechnicalDetails locale={locale}>
         <p className="break-all">

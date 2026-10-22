@@ -34,7 +34,7 @@ describe.each(["bg", "en", "ru"])("W14 release checks in %s", (locale) => {
     expect(screen.queryByText(copy.recordedPass)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: copy.checkAgain })).toHaveAttribute(
       "href",
-      `/${locale}/operations/readiness`,
+      `/${locale}/operations/readiness?read=saved`,
     );
   });
   it("shows runtime proof and its impact, with GET-only checks and no repeated action", () => {

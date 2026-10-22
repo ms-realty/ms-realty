@@ -8,11 +8,13 @@ export default async function Page({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale, gate } = await params;
+  const query = await searchParams;
   return (
     <ReleaseReadinessPage
       locale={locale}
       gate={gate}
-      impact={(await searchParams).view === "impact"}
+      impact={query.view === "impact"}
+      readSaved={query.read === "saved"}
     />
   );
 }
