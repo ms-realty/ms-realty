@@ -208,8 +208,8 @@ export function InventoryEditor({
             {fields.map((name) => render(form, name))}
           </div>
         ) : (
-          // 647:12802 / 657:12889: the work column reads alerts, the needed-before-saving
-          // block, the Facts hint, then the fields, 24 px apart.
+          // Ordinary editing comes first. Required source input stays explicit before Save;
+          // rejected fields remain reachable through the shared error summary.
           <div className="flex flex-col gap-6">
             {lead}
             {draftKey ? (
@@ -223,20 +223,6 @@ export function InventoryEditor({
                   currentValue: copy.form.latestValue,
                 }}
               />
-            ) : null}
-            {missing.length ? (
-              // Named by its first row, as drawn (647:12802): a legend would sit in the border,
-              // and WebKit keeps it there even when floated.
-              <fieldset
-                aria-labelledby="o12-needed"
-                className="grid gap-x-6 gap-y-4 rounded-panel border border-warning p-4 sm:grid-cols-2"
-              >
-                <p id="o12-needed" className="text-dense font-semibold sm:col-span-2">
-                  {copy.o12.needsInput}
-                </p>
-                {missing.map((name) => render(form, name))}
-                {missingNote}
-              </fieldset>
             ) : null}
             <p className="hidden text-dense group-has-[#o12-facts:checked]/o12:block">
               {copy.factsHint}
@@ -258,6 +244,20 @@ export function InventoryEditor({
               ))}
               {missing.includes("brokerNote") ? null : render(form, "brokerNote")}
             </div>
+            {missing.length ? (
+              // Named by its first row, as drawn (647:12802): a legend would sit in the border,
+              // and WebKit keeps it there even when floated.
+              <fieldset
+                aria-labelledby="o12-needed"
+                className="grid gap-x-6 gap-y-4 rounded-panel border border-warning p-4 sm:grid-cols-2"
+              >
+                <p id="o12-needed" className="text-dense font-semibold sm:col-span-2">
+                  {copy.o12.needsInput}
+                </p>
+                {missing.map((name) => render(form, name))}
+                {missingNote}
+              </fieldset>
+            ) : null}
             {footer}
           </div>
         )

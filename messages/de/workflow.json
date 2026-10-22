@@ -582,6 +582,17 @@
     "reviewShort": "Prüfen",
     "editPermissions": "Erfasste Genehmigungen ändern",
     "reviewNeedsDetails": "Ergänzen Sie vor der Freigabe eine Bildbeschreibung und Angaben zu Änderungen.",
-    "photoNumber": "Foto {n} von {total}"
+    "photoNumber": "Foto {n} von {total}",
+    "directoryTitle": "Immobilien",
+    "sourceVersionHint": "Sie bearbeiten die zuletzt gespeicherte Version. Speichern erstellt einen Arbeitsentwurf.",
+    "photoReviewShort": "Fotoprüfung",
+    "reviewSaved": "Gespeicherte Fotodaten prüfen",
+    "currentCover": "Aktuelles Titelbild",
+    "proposedCover": "Vorgeschlagenes Titelbild",
+    "enlargePhoto": "Foto vergrößern",
+    "opensNewTab": "Öffnet in einem neuen Tab",
+    "photoMoved": "{photo}: Position {position} von {total} in der vorgeschlagenen Reihenfolge.",
+    "draftDiscarded": "Fotoentwurf verworfen",
+    "detailsUnchanged": "Fotodaten entsprechen der freigegebenen Version"
   }
 }

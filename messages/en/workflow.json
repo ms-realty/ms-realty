@@ -582,6 +582,17 @@
     "reviewShort": "Review",
     "editPermissions": "Change recorded permissions",
     "reviewNeedsDetails": "Add an image description and any modification disclosure before approving.",
-    "photoNumber": "Photo {n} of {total}"
+    "photoNumber": "Photo {n} of {total}",
+    "directoryTitle": "Listings",
+    "sourceVersionHint": "Editing the last saved version. Save to create a working draft.",
+    "photoReviewShort": "Photo review",
+    "reviewSaved": "Review saved photo details",
+    "currentCover": "Current cover",
+    "proposedCover": "Proposed cover",
+    "enlargePhoto": "Enlarge photo",
+    "opensNewTab": "Opens in a new tab",
+    "photoMoved": "{photo}: position {position} of {total} in the proposed order.",
+    "draftDiscarded": "Photo draft discarded",
+    "detailsUnchanged": "Photo details match the approved version"
   }
 }

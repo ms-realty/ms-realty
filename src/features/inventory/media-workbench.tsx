@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { NativeForm } from "@/ui/form/native-form";
@@ -18,7 +18,7 @@ export function MediaGallery({
   confirmedOrder,
   copy,
 }: {
-  items: { id: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
+  items: { id: string; label: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
   heading: ReactNode;
   action: string;
   envelope: ReactNode;
@@ -36,6 +36,7 @@ export function MediaGallery({
     up: string;
     down: string;
     cover: string;
+    moved: string;
     conflict: string;
     guard: { title: string; body: string; stay: string; discard: string };
   };
@@ -49,7 +50,24 @@ export function MediaGallery({
   const [over, setOver] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
+  const root = useRef<HTMLDivElement>(null);
+  const reviewHeading = useRef<HTMLHeadingElement>(null);
+  const focusAfterMove = useRef<{ id: string; direction?: "up" | "down" } | null>(null);
   const changed = order.join() !== initial.join();
+  useLayoutEffect(() => {
+    const pending = focusAfterMove.current;
+    if (!pending || !order.includes(pending.id)) return;
+    const photo = root.current?.querySelector<HTMLElement>(`[data-photo="${pending.id}"]`);
+    const control = pending.direction
+      ? photo?.querySelector<HTMLButtonElement>(`[data-move="${pending.direction}"]`)
+      : null;
+    (control && !control.disabled ? control : photo)?.focus({ preventScroll: true });
+    focusAfterMove.current = null;
+  }, [order]);
+  useLayoutEffect(() => {
+    if (reviewing) reviewHeading.current?.focus();
+  }, [reviewing]);
   useEffect(() => {
     setHydrated(true);
     try {
@@ -80,12 +98,36 @@ export function MediaGallery({
       else window.sessionStorage.removeItem(draftKey);
     } catch {}
   }, [order, changed, hydrated, draftKey, version]);
-  const move = (source: string, target: string) => {
+  const recordMove = (next: string[], id: string, direction?: "up" | "down") => {
+    focusAfterMove.current = { id, direction };
+    const values = {
+      photo: items.find((item) => item.id === id)?.label ?? "",
+      position: String(next.indexOf(id) + 1),
+      total: String(next.length),
+    };
+    setAnnouncement(
+      copy.moved.replace(
+        /\{(photo|position|total)\}/g,
+        (_, key: keyof typeof values) => values[key],
+      ),
+    );
+    setOrder(next);
+    setReviewing(false);
+  };
+  const moveBefore = (source: string, target: string) => {
     if (source === target) return;
     const next = order.filter((id) => id !== source);
     next.splice(next.indexOf(target), 0, source);
-    setOrder(next);
-    setReviewing(false);
+    recordMove(next, source);
+  };
+  const moveOne = (id: string, direction: "up" | "down") => {
+    const position = order.indexOf(id);
+    const target = position + (direction === "up" ? -1 : 1);
+    if (position < 0 || target < 0 || target >= order.length) return;
+    const next = [...order];
+    next.splice(position, 1);
+    next.splice(target, 0, id);
+    recordMove(next, id, direction);
   };
   const cover = (ids: string[]) =>
     ids.map((id) => items.find((item) => item.id === id)).find((item) => item && !item.hidden);
@@ -96,10 +138,16 @@ export function MediaGallery({
     setEditing(false);
     setReviewing(false);
     setRestored(false);
+    setAnnouncement("");
   };
   const gallery = (
     <ol
-      className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4"
+      className={cx(
+        "grid gap-3",
+        reviewing
+          ? "grid-cols-3 sm:grid-cols-4 xl:grid-cols-6"
+          : "grid-cols-2 sm:grid-cols-3 xl:grid-cols-4",
+      )}
       onDragStart={(event) => {
         const id = (event.target as Element).closest<HTMLElement>("[data-photo]")?.dataset.photo;
         if (!editing || reviewing || !id) {
@@ -125,7 +173,7 @@ export function MediaGallery({
         const id = (event.target as Element).closest<HTMLElement>("[data-photo]")?.dataset.photo;
         if (!dragged || !id || event.dataTransfer.getData("text/plain") !== dragged) return;
         event.preventDefault();
-        move(dragged, id);
+        moveBefore(dragged, id);
         setOver(null);
         setDragged(null);
       }}
@@ -137,6 +185,8 @@ export function MediaGallery({
           <li
             key={id}
             data-photo={id}
+            tabIndex={editing ? -1 : undefined}
+            aria-label={editing ? item.label : undefined}
             draggable={editing && !reviewing}
             className={cx(
               "relative min-w-0 rounded-panel",
@@ -157,23 +207,21 @@ export function MediaGallery({
               <div className="mt-2 flex justify-between gap-2">
                 <button
                   type="button"
+                  data-move="up"
                   disabled={index === 0}
                   aria-label={`${copy.up} · ${index + 1}`}
                   className={buttonClass("tertiary", "px-3")}
-                  onClick={() => move(id, order[index - 1] ?? id)}
+                  onClick={() => moveOne(id, "up")}
                 >
                   <ArrowUpIcon className="size-4" />
                 </button>
                 <button
                   type="button"
+                  data-move="down"
                   disabled={index === order.length - 1}
                   aria-label={`${copy.down} · ${index + 1}`}
                   className={buttonClass("tertiary", "px-3")}
-                  onClick={() => {
-                    const target = order[index + 1];
-                    if (!target) return;
-                    move(target, id);
-                  }}
+                  onClick={() => moveOne(id, "down")}
                 >
                   <ArrowDownIcon className="size-4" />
                 </button>
@@ -185,7 +233,12 @@ export function MediaGallery({
     </ol>
   );
   return (
-    <div className="space-y-4">
+    <div ref={root} className="space-y-4" data-reordering={editing ? "" : undefined}>
+      {announcement ? (
+        <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          {announcement}
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {heading}
         {!editing && hydrated && items.length > 1 ? (
@@ -242,8 +295,14 @@ export function MediaGallery({
               </div>
               {reviewing ? (
                 <>
-                  <h3 className="text-section font-semibold">{copy.review}</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <h3
+                    ref={reviewHeading}
+                    tabIndex={-1}
+                    className="scroll-mt-20 text-section font-semibold"
+                  >
+                    {copy.review}
+                  </h3>
+                  <div className="grid max-w-md grid-cols-2 gap-4">
                     {[
                       [copy.before, before],
                       [copy.after, after],
@@ -254,7 +313,7 @@ export function MediaGallery({
                           <figcaption className="text-dense font-semibold">
                             {label as string}
                           </figcaption>
-                          <div className="aspect-4/3 overflow-hidden rounded-control bg-subtle">
+                          <div className="h-20 overflow-hidden rounded-control bg-subtle sm:h-24">
                             {photo?.preview}
                           </div>
                         </figure>

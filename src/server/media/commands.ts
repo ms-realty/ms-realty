@@ -207,11 +207,17 @@ export async function mediaReceipt(
     .select({ id: mediaRelations.id, assetId: mediaRelations.mediaAssetId })
     .from(mediaRelations)
     .where(and(eq(mediaRelations.listingId, listingId), isNull(mediaRelations.removedAt)));
-  const photo = (assetId: string, action?: string) => {
+  const photo = (
+    assetId: string,
+    action?: string,
+    details: { pendingReview: boolean; discarded: boolean } | null = null,
+  ) => {
     const relation =
       relations.find((row) => row.id === placement && row.assetId === assetId) ??
       relations.find((row) => row.assetId === assetId);
-    return relation ? { id, relationId: relation.id, move: false, order: null, action } : null;
+    return relation
+      ? { id, relationId: relation.id, move: false, order: null, action, details }
+      : null;
   };
   const [event] = await db
     .select({
@@ -251,6 +257,7 @@ export async function mediaReceipt(
     return {
       id,
       action: event.action,
+      details: null,
       relationId,
       move: Boolean(payload.move),
       order:
@@ -259,9 +266,19 @@ export async function mediaReceipt(
           : null,
     };
   }
+  const detailPayload = event?.payload as { pendingReview?: unknown; discarded?: unknown } | null;
   if (event)
     return event.recordType === "media" && event.recordId
-      ? photo(event.recordId, event.action)
+      ? photo(
+          event.recordId,
+          event.action,
+          event.action === "media.details.saved"
+            ? {
+                pendingReview: detailPayload?.pendingReview === true,
+                discarded: detailPayload?.discarded === true,
+              }
+            : null,
+        )
       : null;
   const [upload] = await db
     .select({ targetType: fileUploads.targetType, targetId: fileUploads.targetId })
@@ -329,7 +346,11 @@ export async function saveMediaDetails(
         recordType: "media",
         recordId: asset.id,
         operationId,
-        payload: { version: asset.version + 1, pendingReview: next !== null },
+        payload: {
+          version: asset.version + 1,
+          pendingReview: next !== null,
+          discarded: "discard" in input,
+        },
       });
       return { id: asset.id, version: asset.version + 1 };
     },

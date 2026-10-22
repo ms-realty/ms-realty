@@ -97,10 +97,12 @@ for (const javaScriptEnabled of [false, true])
       await signIn(page, f.token);
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
 
-      await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
-      const summary = page
-        .locator("header")
-        .filter({ has: page.getByRole("heading", { level: 1, name: "Edit listing" }) });
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
+      ).toBeVisible();
+      const summary = page.locator("header").filter({
+        has: page.getByRole("heading", { level: 1, name: "Синтетичен апартамент за редакция" }),
+      });
       await expect(
         page.getByRole("paragraph").getByText(f.reference, { exact: true }),
       ).toBeVisible();
@@ -183,7 +185,9 @@ for (const javaScriptEnabled of [false, true])
       // A receipt from another listing shows nothing on this one.
       const id = new URL(receipt).searchParams.get("saved") ?? "";
       await page.goto(hostUrl("staff", `/en/inventory/${f.blank.reference}?saved=${id}`));
-      await expect(page.getByRole("heading", { level: 1, name: "Edit listing" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Синтетична обява без чернова" }),
+      ).toBeVisible();
       await expect(page.getByText("Working draft saved")).toHaveCount(0);
     });
 

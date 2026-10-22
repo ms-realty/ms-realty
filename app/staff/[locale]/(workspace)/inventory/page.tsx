@@ -19,7 +19,7 @@ import { inventoryListPage } from "@/server/inventory/queries";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
-import { ChevronDownIcon, ChevronEndIcon, PlusIcon } from "@/ui/icons";
+import { ChevronDownIcon, ChevronEndIcon, PlusIcon, SearchIcon } from "@/ui/icons";
 
 type Query = { q?: string; view?: string; purpose?: string; type?: string; cursor?: string };
 type RawQuery = Record<string, string | string[] | undefined>;
@@ -171,12 +171,9 @@ export default async function InventoryPage({
           ? o10.noneNeeds
           : o10.noneMine;
   return (
-    <div className="flex flex-col gap-6 px-gutter py-6 sm:gap-8 sm:px-gutter-wide sm:py-8">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <h1 className="text-heading font-semibold sm:text-title">{copy.inventory}</h1>
-          <p className="max-w-prose text-dense text-text-muted">{o10.instruction}</p>
-        </div>
+    <div className="flex flex-col gap-4 px-gutter py-5 sm:gap-6 sm:px-gutter-wide sm:py-6">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-heading font-semibold sm:text-title">{workspace.directoryTitle}</h1>
         {mayCreate ? (
           <a href={`/${locale}/inventory/new`} className={buttonClass("primary")}>
             <PlusIcon className="size-5" />
@@ -184,48 +181,48 @@ export default async function InventoryPage({
           </a>
         ) : null}
       </header>
-      <form method="get" className="flex flex-col gap-3">
+      <form method="get" className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2">
         {view !== "all" ? <input type="hidden" name="view" value={view} /> : null}
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex min-w-0 flex-1 basis-64 flex-col gap-2">
-            <label htmlFor="inventory-search" className={labelClass}>
-              {o10.search}
-            </label>
-            <input
-              id="inventory-search"
-              name="q"
-              type="search"
-              maxLength={searchLimit}
-              defaultValue={filters.q}
-              aria-describedby="inventory-search-hint"
-              className={controlClass}
-            />
-            <p id="inventory-search-hint" className="sr-only">
-              {o10.searchHint}
-            </p>
-          </div>
-          <button type="submit" className={buttonClass("secondary", "sm:min-h-input")}>
-            {o10.apply}
-          </button>
+        <div className="min-w-0">
+          <label htmlFor="inventory-search" className="sr-only">
+            {o10.search}
+          </label>
+          <input
+            id="inventory-search"
+            name="q"
+            type="search"
+            maxLength={searchLimit}
+            defaultValue={filters.q}
+            placeholder={o10.searchHint}
+            aria-describedby="inventory-search-hint"
+            className={controlClass}
+          />
+          <p id="inventory-search-hint" className="sr-only">
+            {o10.searchHint}
+          </p>
         </div>
-        <details className="group" open={Boolean(purpose || type)}>
+        <button type="submit" className={buttonClass("secondary", "min-h-input px-3")}>
+          <SearchIcon className="size-5" />
+          <span className="sr-only">{o10.apply}</span>
+        </button>
+        <details className="group contents" open={Boolean(purpose || type)}>
           <summary
             className={buttonClass(
               "secondary",
-              "w-fit list-none [&::-webkit-details-marker]:hidden",
+              "min-h-input list-none px-3 [&::-webkit-details-marker]:hidden",
             )}
           >
             {o10.filters}
-            <ChevronDownIcon className="size-5 shrink-0 group-open:rotate-180" />
+            <ChevronDownIcon className="size-4 shrink-0 group-open:rotate-180" />
           </summary>
-          <div className="mt-3 flex flex-wrap items-end gap-4 rounded-control bg-subtle p-4">
+          <div className="col-span-3 grid gap-3 rounded-control bg-subtle p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
             {(
               [
                 ["purpose", o10.purpose, listingPurposes, purpose],
                 ["type", o10.type, propertyTypes, type],
               ] as const
             ).map(([name, label, values, current]) => (
-              <div key={name} className="flex flex-col gap-2">
+              <div key={name} className="grid min-w-0 gap-2">
                 <label htmlFor={`inventory-${name}`} className={labelClass}>
                   {label}
                 </label>
