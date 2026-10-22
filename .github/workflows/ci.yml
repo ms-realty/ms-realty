@@ -29,6 +29,7 @@ jobs:
         until docker exec ci-postgres pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
         echo "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:5432/postgres" >>"${GITHUB_ENV}"
       extra-commands: |
+        node data/legacy/verify.mjs
         npm run tokens:check
         npm run openapi:generate
         npm run release:schemas
