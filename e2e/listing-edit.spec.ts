@@ -83,9 +83,7 @@ async function holdScripts(page: Page) {
   return release;
 }
 const hydrated = (page: Page) =>
-  expect(
-    page.getByText("Without JavaScript, save before opening Photos or Review", { exact: false }),
-  ).toHaveCount(0);
+  expect(page.getByText(inventoryCopy("en").o12.noscriptLeave, { exact: false })).toHaveCount(0);
 
 for (const javaScriptEnabled of [false, true])
   test.describe(`JavaScript ${javaScriptEnabled ? "on" : "off"}`, () => {
@@ -204,7 +202,7 @@ for (const javaScriptEnabled of [false, true])
       expect((await listing(f.listingId)).draft.description).not.toBe("Незаписан текст.");
       if (!javaScriptEnabled)
         await expect(
-          page.getByText("Without JavaScript, save before opening Photos or Review", {
+          page.getByText(inventoryCopy("en").o12.noscriptLeave, {
             exact: false,
           }),
         ).toBeVisible();
@@ -241,7 +239,7 @@ test.describe("JavaScript on", () => {
     await page.goto(hostUrl("staff", `/en/inventory/${f.reference}`));
     // The leave guard runs once hydrated, when the no-JavaScript note is gone.
     await expect(
-      page.getByText("Without JavaScript, save before opening Photos or Review", { exact: false }),
+      page.getByText(inventoryCopy("en").o12.noscriptLeave, { exact: false }),
     ).toHaveCount(0);
     await page.getByLabel("Description", { exact: true }).fill("Незаписана промяна.");
     const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });

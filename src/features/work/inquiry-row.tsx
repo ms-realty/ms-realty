@@ -18,6 +18,8 @@ export type InquiryRowView = {
   id: string;
   /** The preferred name as submitted; null when none was given. */
   name: string | null;
+  /** Localized stated purpose, when present in the source read. */
+  purpose: string | null;
   reference: string;
   /** The listing reference from the received context, else the stated purpose. */
   context: { kind: "listing" | "purpose"; value: string } | null;
@@ -50,10 +52,8 @@ export function InquiryRow({
   locale: string;
 }) {
   const copy = workCopy(locale);
-  const identity = row.name ?? row.context?.value ?? row.reference;
-  const detail = row.name
-    ? (row.context ?? { kind: "reference" as const, value: row.reference })
-    : null;
+  const identity = row.name ?? row.purpose ?? row.context?.value ?? row.reference;
+  const detail = row.context?.value !== identity ? row.context : null;
   return (
     <li
       id={`inquiry-${row.id}`}
@@ -75,12 +75,12 @@ export function InquiryRow({
                 {detail.kind === "purpose" ? detail.value : <bdi>{detail.value}</bdi>}
               </>
             ) : null}
-          </span>
-          {!row.name && identity !== row.reference ? (
+          </span>{" "}
+          {identity !== row.reference ? (
             <span className="text-caption text-text-muted wrap-anywhere">
               <bdi>{row.reference}</bdi>
             </span>
-          ) : null}
+          ) : null}{" "}
           <span className="font-medium text-text-muted">
             {row.state ? `${row.state} · ` : null}
             <time dateTime={row.received.dateTime}>{row.received.label}</time>
