@@ -10,7 +10,9 @@ The directory has one compact heading and create action, followed by search and 
 
 The listing title is the editor heading. Reference, editorial state, settlement and recorded facts provide compact context. Listing, Photos and Review are the primary destinations; More contains documents, sources and languages. Text and Facts belong to the editing column. Ordinary fields precede required source inputs; missing prerequisites still prevent an invalid save. The contextual source/version hint is brief, and recovery notices remain visible when they actually apply.
 
-The photo screen starts with the whole gallery. Upload details open on request. Selecting a photo opens a contextual preview, filmstrip and caption/description editor. From the tablet breakpoint the editor sits beside the preview; phones cap the preview height and offer enlargement of the same authorized derivative. The original download remains a separate, permission-checked action.
+The photo screen starts with the whole gallery. Upload details open on request, or directly when the gallery is empty. Selecting a photo opens a contextual preview, filmstrip and caption/description editor. Below 48rem the preview is capped at 20dvh so the editing task follows promptly. From the local 48rem breakpoint the editor sits beside the preview in a 19–24rem column, and the preview cap increases to 60dvh. This is a surface-specific split, not a new global token. Enlargement opens the same authorized derivative in a new tab with that behavior announced in its accessible name. The original download remains a separate, permission-checked action.
+
+The directory and main editing routes start with one column. At the small breakpoint, fact pairs and supporting groups may share a row. The listing context sits beside the editor from the large breakpoint; publication review places its source/context beside the blocker and decision flow. The directory adds aligned facts and next-action columns at the extra-large breakpoint. These changes preserve identity, task order and the manual path; they do not shrink essential text to fit.
 
 ## Save, review and publish
 
@@ -24,8 +26,12 @@ Publication review leads with the current blocker and the next task the operator
 
 Multiple drag, tap or keyboard moves remain local until one review and one Save order action. While ordering, upload is suppressed so the order decision is the primary task. Review shows a compact current/proposed cover comparison and the complete proposed thumbnail order.
 
-After a move, focus stays on the operated photo's control. At an endpoint it moves to the same photo, rather than silently switching direction. One polite announcement names that photo and its new position. Cancel writes nothing; reload restores the proposed order for review, and a stale version requires explicit recovery. The native position/review/save path remains complete without JavaScript.
+After a move, focus stays on the operated photo's control. At an endpoint it moves to the same photo, rather than silently switching direction. One atomic, polite announcement names that photo and its new position. Entering order review focuses the review heading. Cancel writes nothing; reload restores the proposed order for review, and a stale version requires explicit recovery. The native position/review/save path remains complete without JavaScript. Draft edit guards keep unsaved text and an explicit choice to stay or discard; a save acknowledges the recorded operation before navigation can continue.
 
 ## Evidence boundary
 
 Synthetic browser fixtures verify the interface and transactional behavior. They do not certify real listing facts, media rights, human language approval, provider capacity, deployment, or owner acceptance. All new private interface catalog text remains draft and unreviewed until a human language decision is recorded.
+
+The scan records the built source at `e1b9efdbf7a802ff3554fbcd4933cbcf372769cc` and the correction at `7624882d3af3c79d97cc66e5b6c95f9c88dbeb25` that suppresses both upload entry points while ordering and sets the media page's main gap to 16px. The inherited system is now recorded in root `DESIGN.md` and `.impeccable/design.json`; neither adds product or launch authority.
+
+Earlier `listings-current-*` screenshots support visual context only. Most precede the final 48rem split and 20dvh phone cap, and the directory/editor captures include earlier checks. The final correction has a passing production build and focused browser verification across Chromium desktop/mobile and WebKit mobile, including upload suppression, focus, announcements and the tablet split. Final viewport recapture and the independent visual verdict remain pending. No final visual acceptance is recorded here. The sidecar's sample labels are explanatory component specimens; they do not constitute human language approval.

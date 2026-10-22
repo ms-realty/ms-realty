@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 2,
+  "title": "Design System: MS Realty",
+  "extensions": {
+    "colorMeta": {
+      "action": {
+        "role": "primary",
+        "displayName": "Agency green"
+      },
+      "selected": {
+        "role": "primary",
+        "displayName": "Selected green tint"
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Warm canvas"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "White surface"
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Quiet sage"
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Deep green text"
+      },
+      "text-muted": {
+        "role": "neutral",
+        "displayName": "Muted green-grey"
+      },
+      "divider": {
+        "role": "neutral",
+        "displayName": "Soft divider"
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Control boundary"
+      },
+      "assist": {
+        "displayName": "Butler draft assistance"
+      },
+      "focus": {
+        "displayName": "Keyboard focus"
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "Page hierarchy; listing directory, media and review headings use it from the small breakpoint."
+      },
+      "page": {
+        "displayName": "Page",
+        "purpose": "Shared application page-heading role."
+      },
+      "heading": {
+        "displayName": "Heading",
+        "purpose": "Section hierarchy and compact listing headings."
+      },
+      "subheading": {
+        "displayName": "Subheading",
+        "purpose": "Groups within a task."
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Bold amount on a property card, with tabular figures."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading copy and field values."
+      },
+      "compact": {
+        "displayName": "Compact",
+        "purpose": "Shared controls; buttons apply semibold."
+      },
+      "dense": {
+        "displayName": "Dense",
+        "purpose": "Staff context; field labels apply semibold."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Hints and references; field errors apply medium."
+      }
+    },
+    "shadows": [
+      {
+        "name": "raised",
+        "value": "0px 1px 2px 0px rgb(25 46 39 / 0.08)",
+        "purpose": "Shared property cards."
+      },
+      {
+        "name": "overlay",
+        "value": "0px 12px 32px -8px rgb(25 46 39 / 0.18)",
+        "purpose": "Popovers and floating choices."
+      }
+    ],
+    "motion": [
+      {
+        "name": "duration-fast",
+        "value": "150ms",
+        "purpose": "Shared control color transitions."
+      },
+      {
+        "name": "duration-base",
+        "value": "200ms",
+        "purpose": "Card and image transitions."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Shared outgoing state-transition curve."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "40rem"
+      },
+      {
+        "name": "lg",
+        "value": "64rem"
+      },
+      {
+        "name": "xl",
+        "value": "90rem"
+      },
+      {
+        "name": "listing-photo-split-local",
+        "value": "48rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared native and React Aria button styling; sample text is a component specimen.",
+      "html": "<button type=\"button\" class=\"ds-button-primary\">Save photo details</button>",
+      "css": ".ds-button-primary{display:inline-flex;min-height:var(--spacing-control);min-width:var(--spacing-control);align-items:center;justify-content:center;gap:calc(var(--spacing)*2);border:1px solid transparent;border-radius:var(--radius-control);padding:calc(var(--spacing)*2) calc(var(--spacing)*5);font-family:var(--font-sans);font-size:var(--text-compact);line-height:var(--text-compact--line-height);font-weight:600;text-decoration:none;cursor:pointer;transition:color var(--duration-fast) var(--ease-out),background-color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out);background:var(--color-action);color:var(--color-text-inverse)}.ds-button-primary:hover:not(:disabled){background:var(--color-action-hover)}.ds-button-primary:active:not(:disabled){background:var(--color-action-pressed)}.ds-button-primary:disabled{cursor:not-allowed;border-color:var(--color-disabled);background:var(--color-disabled);color:var(--color-disabled-text)}.ds-button-primary:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-button-primary:focus-visible{outline-color:Highlight}}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition-duration:0.01ms}}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Shared native and React Aria button styling; sample text is a component specimen.",
+      "html": "<button type=\"button\" class=\"ds-button-secondary\">Review saved photo details</button>",
+      "css": ".ds-button-secondary{display:inline-flex;min-height:var(--spacing-control);min-width:var(--spacing-control);align-items:center;justify-content:center;gap:calc(var(--spacing)*2);border:1px solid transparent;border-radius:var(--radius-control);padding:calc(var(--spacing)*2) calc(var(--spacing)*5);font-family:var(--font-sans);font-size:var(--text-compact);line-height:var(--text-compact--line-height);font-weight:600;text-decoration:none;cursor:pointer;transition:color var(--duration-fast) var(--ease-out),background-color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out);border-color:var(--color-border);background:var(--color-surface);color:var(--color-action)}.ds-button-secondary:hover:not(:disabled){border-color:var(--color-action);background:var(--color-selected)}.ds-button-secondary:active:not(:disabled){border-color:var(--color-action-pressed);background:var(--color-selected);color:var(--color-action-pressed)}.ds-button-secondary:disabled{cursor:not-allowed;border-color:var(--color-disabled);background:var(--color-disabled);color:var(--color-disabled-text)}.ds-button-secondary:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-button-secondary:focus-visible{outline-color:Highlight}}@media(prefers-reduced-motion:reduce){.ds-button-secondary{transition-duration:0.01ms}}"
+    },
+    {
+      "name": "Tertiary button",
+      "kind": "button",
+      "refersTo": "button-tertiary",
+      "description": "Shared native and React Aria button styling; sample text is a component specimen.",
+      "html": "<button type=\"button\" class=\"ds-button-tertiary\">Cancel</button>",
+      "css": ".ds-button-tertiary{display:inline-flex;min-height:var(--spacing-control);min-width:var(--spacing-control);align-items:center;justify-content:center;gap:calc(var(--spacing)*2);border:1px solid transparent;border-radius:var(--radius-control);padding:calc(var(--spacing)*2) calc(var(--spacing)*5);font-family:var(--font-sans);font-size:var(--text-compact);line-height:var(--text-compact--line-height);font-weight:600;text-decoration:none;cursor:pointer;transition:color var(--duration-fast) var(--ease-out),background-color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out);background:transparent;color:var(--color-action)}.ds-button-tertiary:hover:not(:disabled){background:var(--color-subtle)}.ds-button-tertiary:active:not(:disabled){background:var(--color-selected)}.ds-button-tertiary:disabled{cursor:not-allowed;border-color:var(--color-disabled);background:var(--color-disabled);color:var(--color-disabled-text)}.ds-button-tertiary:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-button-tertiary:focus-visible{outline-color:Highlight}}@media(prefers-reduced-motion:reduce){.ds-button-tertiary{transition-duration:0.01ms}}"
+    },
+    {
+      "name": "Destructive button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Shared native and React Aria button styling; sample text is a component specimen.",
+      "html": "<button type=\"button\" class=\"ds-button-destructive\">Reject</button>",
+      "css": ".ds-button-destructive{display:inline-flex;min-height:var(--spacing-control);min-width:var(--spacing-control);align-items:center;justify-content:center;gap:calc(var(--spacing)*2);border:1px solid transparent;border-radius:var(--radius-control);padding:calc(var(--spacing)*2) calc(var(--spacing)*5);font-family:var(--font-sans);font-size:var(--text-compact);line-height:var(--text-compact--line-height);font-weight:600;text-decoration:none;cursor:pointer;transition:color var(--duration-fast) var(--ease-out),background-color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out);background:var(--color-error);color:var(--color-text-inverse)}.ds-button-destructive:hover:not(:disabled){background:var(--color-error-hover)}.ds-button-destructive:active:not(:disabled){background:var(--color-error-pressed)}.ds-button-destructive:disabled{cursor:not-allowed;border-color:var(--color-disabled);background:var(--color-disabled);color:var(--color-disabled-text)}.ds-button-destructive:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-button-destructive:focus-visible{outline-color:Highlight}}@media(prefers-reduced-motion:reduce){.ds-button-destructive{transition-duration:0.01ms}}"
+    },
+    {
+      "name": "Assistance button",
+      "kind": "button",
+      "refersTo": "button-assist",
+      "description": "Shared native and React Aria button styling; sample text is a component specimen.",
+      "html": "<button type=\"button\" class=\"ds-button-assist\">Prepare a draft</button>",
+      "css": ".ds-button-assist{display:inline-flex;min-height:var(--spacing-control);min-width:var(--spacing-control);align-items:center;justify-content:center;gap:calc(var(--spacing)*2);border:1px solid transparent;border-radius:var(--radius-control);padding:calc(var(--spacing)*2) calc(var(--spacing)*5);font-family:var(--font-sans);font-size:var(--text-compact);line-height:var(--text-compact--line-height);font-weight:600;text-decoration:none;cursor:pointer;transition:color var(--duration-fast) var(--ease-out),background-color var(--duration-fast) var(--ease-out),border-color var(--duration-fast) var(--ease-out);background:var(--color-assist-soft);color:var(--color-assist)}.ds-button-assist:hover:not(:disabled){border-color:var(--color-assist-line)}.ds-button-assist:active:not(:disabled){border-color:var(--color-assist-line)}.ds-button-assist:disabled{cursor:not-allowed;border-color:var(--color-disabled);background:var(--color-disabled);color:var(--color-disabled-text)}.ds-button-assist:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-button-assist:focus-visible{outline-color:Highlight}}@media(prefers-reduced-motion:reduce){.ds-button-assist{transition-duration:0.01ms}}"
+    },
+    {
+      "name": "Labeled text field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Canvas-filled control with its label, body value, and native focus/error/read-only/disabled states.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-caption\">Caption</label><input class=\"ds-input\" id=\"ds-caption\" name=\"caption\" type=\"text\" value=\"Photo caption\" /></div>",
+      "css": ".ds-field{display:flex;min-width:0;width:100%;flex-direction:column;gap:calc(var(--spacing)*2);font-family:var(--font-sans)}.ds-field-label{font-size:var(--text-dense);line-height:var(--text-dense--line-height);font-weight:600;color:var(--color-text)}.ds-input{width:100%;min-width:0;min-height:var(--spacing-input);border:1px solid var(--color-border);border-radius:var(--radius-control);padding:calc(var(--spacing)*3);background:var(--color-canvas);color:var(--color-text);font-family:var(--font-sans);font-size:var(--text-body);line-height:var(--text-body--line-height);caret-color:var(--color-action);transition:color var(--duration-fast),background-color var(--duration-fast),border-color var(--duration-fast)}.ds-input::placeholder{color:var(--color-text-muted)}.ds-input:hover{border-color:var(--color-text)}.ds-input[aria-invalid=true]{border-color:var(--color-error)}.ds-input:read-only{border-style:dashed;background:var(--color-subtle)}.ds-input:disabled{cursor:not-allowed;border-color:var(--color-disabled-text);background:var(--color-disabled);color:var(--color-disabled-text)}.ds-input:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-input:focus-visible{outline-color:Highlight}}@media(prefers-reduced-motion:reduce){.ds-input{transition-duration:0.01ms}}"
+    },
+    {
+      "name": "Listing section navigation",
+      "kind": "nav",
+      "refersTo": "listing-nav-current",
+      "description": "Three primary links, native More disclosure, and current-page bottom border.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Listing sections\"><a href=\"#ds-listing\" class=\"ds-nav-link\" aria-current=\"page\">Listing</a><a href=\"#ds-photos\" class=\"ds-nav-link\">Photos</a><a href=\"#ds-review\" class=\"ds-nav-link\">Review</a><details class=\"ds-nav-more\"><summary class=\"ds-nav-link\">More</summary><ul class=\"ds-nav-extra\"><li><a href=\"#ds-documents\" class=\"ds-nav-link\">Documents</a></li><li><a href=\"#ds-sources\" class=\"ds-nav-link\">Sources</a></li><li><a href=\"#ds-languages\" class=\"ds-nav-link\">Languages</a></li></ul></details></nav>",
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;align-items:flex-start;border-bottom:1px solid var(--color-divider);font-family:var(--font-sans)}.ds-nav-link{display:inline-flex;min-height:var(--spacing-control);align-items:center;justify-content:center;border-bottom:2px solid transparent;padding:calc(var(--spacing)*3);font-size:var(--text-dense);line-height:var(--text-dense--line-height);font-weight:600;text-decoration:none;color:var(--color-text-muted);cursor:pointer}.ds-nav-link:hover{background:var(--color-subtle);color:var(--color-text)}.ds-nav-link[aria-current=page]{border-bottom-color:var(--color-action);color:var(--color-action)}.ds-nav-more[open]{flex-basis:100%}.ds-nav-more>summary{list-style:none}.ds-nav-more>summary::-webkit-details-marker{display:none}.ds-nav-extra{display:flex;flex-wrap:wrap;gap:var(--spacing);margin:0 0 calc(var(--spacing)*3);padding:calc(var(--spacing)*2);list-style:none;border-radius:var(--radius-control);background:var(--color-subtle)}.ds-nav-link:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-nav-link:focus-visible{outline-color:Highlight}}"
+    },
+    {
+      "name": "Selected filter chip",
+      "kind": "chip",
+      "refersTo": "chip-selected",
+      "description": "A selected criterion has a pill shape, check icon, action border and pressed-state semantics.",
+      "html": "<button type=\"button\" class=\"ds-chip\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><span>Selected criterion</span></button>",
+      "css": ".ds-chip{display:inline-flex;min-height:var(--spacing-control);align-items:center;gap:calc(var(--spacing)*1.5);border:1px solid var(--color-action);border-radius:calc(infinity * 1px);padding-inline:calc(var(--spacing)*4);background:var(--color-selected);color:var(--color-action);font-family:var(--font-sans);font-size:var(--text-caption);line-height:var(--text-caption--line-height);font-weight:500;cursor:pointer}.ds-chip svg{width:1rem;height:1rem}.ds-chip:hover{background:var(--color-subtle)}.ds-chip:active{background:var(--color-divider)}.ds-chip:focus-visible{outline:var(--focus-width) solid var(--color-focus);outline-offset:var(--focus-offset)}@media(forced-colors:active){.ds-chip:focus-visible{outline-color:Highlight}}@media(forced-colors:active){.ds-chip{border-color:CanvasText}}"
+    },
+    {
+      "name": "Property card",
+      "kind": "card",
+      "refersTo": "property-card",
+      "description": "The existing card frame and empty-image treatment; illustrative labels carry no property facts.",
+      "html": "<article class=\"ds-property-card\"><div class=\"ds-card-image\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 3l18 18\"/><path d=\"M9.5 5H18a2 2 0 0 1 2 2v8.5M17 19H6a2 2 0 0 1-2-2V8\"/><path d=\"M4 16l4.5-4.5 3 3M14 12l1.5-1.5L20 15\"/></svg><span>No photo</span></div><div class=\"ds-card-body\"><h3 class=\"ds-card-title\"><a href=\"#ds-property\">Listing title</a></h3><p class=\"ds-card-locality\">Listing context</p></div></article>",
+      "css": ".ds-property-card{position:relative;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--color-divider);border-radius:var(--radius-panel);background:var(--color-surface);color:var(--color-text);box-shadow:var(--shadow-raised);font-family:var(--font-sans);transition:box-shadow var(--duration-base) var(--ease-out),border-color var(--duration-base) var(--ease-out)}.ds-property-card:has(a:hover){border-color:var(--color-border)}.ds-card-image{display:flex;aspect-ratio:4/3;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--spacing)*2);background:var(--color-subtle);color:var(--color-text-muted);font-size:var(--text-caption);line-height:var(--text-caption--line-height)}.ds-card-image svg{width:2rem;height:2rem}.ds-card-body{display:flex;flex:1;flex-direction:column;gap:calc(var(--spacing)*1.5);padding:calc(var(--spacing)*4) calc(var(--spacing)*5)}.ds-card-title{margin:0;font-size:var(--text-compact);line-height:var(--text-compact--line-height);font-weight:600}.ds-card-title a{color:var(--color-text);text-decoration:none;outline:none}.ds-card-title a::after{position:absolute;inset:0;content:''}.ds-card-title a:hover{text-decoration:underline}.ds-card-locality{margin:0;font-size:var(--text-caption);line-height:var(--text-caption--line-height);color:var(--color-text-muted)}.ds-property-card:has(a:focus-visible){outline:2px solid var(--color-focus);outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-property-card{transition-duration:0.01ms}}"
+    },
+    {
+      "name": "Warning notice",
+      "kind": "custom",
+      "refersTo": "notice-warning",
+      "description": "Semantic inline feedback; role=status or role=alert is added only when responding to an action.",
+      "html": "<div class=\"ds-notice\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10.3 4.6L3.6 16.5A2 2 0 0 0 5.3 19.5h13.4a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z\"/><path d=\"M12 10v3.5M12 16.5h.01\"/></svg><div class=\"ds-notice-content\"><p class=\"ds-notice-title\">Details await review</p><div>Review the saved photo details.</div></div></div>",
+      "css": ".ds-notice{display:flex;gap:calc(var(--spacing)*3);border:1px solid var(--color-warning);border-radius:var(--radius-panel);padding:calc(var(--spacing)*4);background:var(--color-warning-soft);color:var(--color-text);font-family:var(--font-sans);font-size:var(--text-compact);line-height:var(--text-compact--line-height)}.ds-notice>svg{flex-shrink:0;margin-top:calc(var(--spacing)*0.5);color:var(--color-warning)}.ds-notice-content{display:flex;min-width:0;flex:1;flex-direction:column;gap:var(--spacing)}.ds-notice-title{margin:0;font-weight:600}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Agency Workspace",
+    "overview": "The incumbent interface is a restrained working surface for a human-led agency. A warm canvas, white surfaces, dark green text and deliberate green actions leave property photography and useful facts in the foreground. Operational pages use compact rows, ordinary fields and clear section links; visual emphasis follows the person's next task.\n\nThis is a scan of the implemented system, not a new brand direction or a visual acceptance verdict. [design/tokens.json](design/tokens.json) owns the tokens and generates [src/ui/tokens.css](src/ui/tokens.css); this file records the reused subset. Product authority remains [CONTEXT.md](CONTEXT.md), [architecture](docs/architecture.md) and [the UX specification](docs/ux-spec.md). The listing-specific composition and evidence limits live in [the listing workspace record](docs/design/listing-workspace.md).",
+    "keyCharacteristics": [
+      "Readable property context before supporting detail.",
+      "A single multilingual sans-serif family with semantic type roles.",
+      "Quiet surfaces and dividers, with stronger boundaries around controls.",
+      "Native task paths, visible focus and explicit human decision states."
+    ],
+    "rules": [
+      {
+        "name": "The Semantic Role Rule",
+        "body": "Use the existing role for its existing purpose. The primary action color does not replace warning, approval, assistance or keyboard-focus meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Visible Focus Rule",
+        "body": "Preserve the global focus-visible outline (3px, offset 2px), including inverse and forced-colors variants. An error, selection border or hover fill does not replace keyboard focus.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Do** use the source semantic tokens and shared controls before adding local styling.",
+      "**Do** make essential facts, the current state and the next permitted action readable in the primary task flow.",
+      "**Do** preserve labeled native controls, visible focus, keyboard alternatives and recovery state.",
+      "**Do** retain full-image inspection alongside bounded scanning thumbnails."
+    ],
+    "donts": [
+      "**Don't** introduce a different dashboard theme, decorative gradients or a competing display font.",
+      "**Don't** use color alone for errors, selection, assistance or approval.",
+      "**Don't** stretch fields or reading text merely to fill a wide viewport.",
+      "**Don't** use invented property imagery or let a visual treatment imply approval or publication."
+    ]
+  }
+}
