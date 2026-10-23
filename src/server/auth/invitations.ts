@@ -3,9 +3,9 @@
 //
 // - Staff enrolment: a manager (access.grant, fresh step-up) invites an address. The emailed
 //   single-use token is the only proof the recipient has at that point; redeeming it opens the
-//   membership and a session that can do nothing but enrol two passkeys (access.ts).
+//   membership and a session that can do nothing but enrol a passkey (access.ts).
 // - Staff recovery (lost factor): a manager issues it for another member. Issuing revokes that
-//   member's sessions and passkeys; redeeming it requires a fresh two-passkey enrolment.
+//   member's sessions and passkeys; redeeming it requires fresh passkey enrolment.
 // - Break-glass bootstrap of the first manager: a CLI prints a one-hour enrolment link.
 // - Client access: tied to the recipient's client principal. It shows its details, and can be
 //   accepted or declined, only in that principal's signed-in session; to anyone else it is
@@ -551,7 +551,7 @@ export interface StaffInvitationAcceptance {
 /**
  * Redeems a staff enrolment or recovery token (the explicit POST). Opens the membership with
  * the invited roles (enrolment), ends every other session of the member and the browser's
- * current staff session, and starts a session that must enrol two passkeys before it opens
+ * current staff session, and starts a session that must enrol a passkey before it opens
  * any staff route.
  */
 export async function acceptStaffInvitation(

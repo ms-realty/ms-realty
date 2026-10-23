@@ -37,7 +37,7 @@ try {
       email: `publication-${randomUUID()}@example.test`,
     });
     // Valid-session entry fixture, not browser authentication evidence. The separate identity
-    // suite exercises real two-passkey enrollment and authentication on Chromium.
+    // suite exercises verified primary/optional backup enrollment and authentication on Chromium.
     await tx.insert(schema.passkeys).values(
       [0, 1].map(() => ({
         principalId: reviewer.id,

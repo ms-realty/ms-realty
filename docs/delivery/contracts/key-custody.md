@@ -1,7 +1,7 @@
 # Physical key custody — agency operations (§7.2 plan)
 
 Staff `/operations/keys` records physical custody; it does not grant permission to enter a
-property. Only a live staff session with two passkeys and global `key.manage` can read or
+property. Only a live staff session with an enrolled passkey and global `key.manage` can read or
 change this register. The manager preset includes that capability. Brokers may be selected
 as physical holders, but receive no register permission through that selection. Holder choices
 include staff email to distinguish people with identical display names. Clients and
@@ -19,7 +19,7 @@ authority from it. A recorded declaration is not independent evidence of a real 
 | Lost | In storage, returned to owner | Reviewed recovery and destination evidence |
 | Returned to owner | None | New receipt needs a new set tag and record |
 
-Check-out requires an active staff holder with current membership and two passkeys plus a
+Check-out requires an active staff holder with current membership and an enrolled passkey plus a
 future due-back instant. Forms interpret native local input in Europe/Sofia and reject
 ambiguous/nonexistent DST times. Return to storage requires its real storage label. Returns
 can still be recorded after the previous holder has been offboarded. This does not restore

@@ -10,7 +10,7 @@ const en = {
   member: "Staff member",
   evidence: "How you verified this person’s identity",
   recoveryNote:
-    "This revokes their current sessions and passkeys. They must register two new passkeys.",
+    "This revokes their current sessions and passkeys. They must register a new passkey; a backup is optional.",
   confirm: "I verified this person’s identity and reviewed the access change.",
   recover: "Revoke old access and queue recovery",
   clientTitle: "Invite a client",
@@ -35,7 +35,7 @@ const bg: Copy = {
   member: "Служител",
   evidence: "Как проверихте самоличността на човека",
   recoveryNote:
-    "Това отменя текущите сесии и ключове за достъп. Служителят трябва да регистрира два нови ключа.",
+    "Това отменя текущите сесии и ключове за достъп. Служителят трябва да регистрира нов ключ; резервният е по избор.",
   confirm: "Проверих самоличността на човека и прегледах промяната на достъпа.",
   recover: "Отмяна на стария достъп и възстановяване",
   clientTitle: "Покана за клиент",
@@ -59,7 +59,7 @@ const ru: Copy = {
   member: "Сотрудник",
   evidence: "Как вы проверили личность человека",
   recoveryNote:
-    "Текущие сеансы и ключи будут отозваны. Сотруднику потребуется зарегистрировать два новых ключа.",
+    "Текущие сеансы и ключи будут отозваны. Сотруднику потребуется зарегистрировать новый ключ; резервный необязателен.",
   confirm: "Я проверил личность человека и изменение доступа.",
   recover: "Отозвать старый доступ и восстановить",
   clientTitle: "Пригласить клиента",

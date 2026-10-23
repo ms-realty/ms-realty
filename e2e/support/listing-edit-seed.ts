@@ -22,7 +22,7 @@ try {
     roles: ["translation_reviewer"],
     email: `o12-reader-${randomBytes(6).toString("hex")}@example.test`,
   });
-  // Staff need two registered passkeys before the workspace opens (as in staffFixture).
+  // Seed a primary and optional backup; one verified key is sufficient under ADR 0005.
   await db.insert(schema.passkeys).values(
     [0, 1].map(() => ({
       principalId: reader.id,

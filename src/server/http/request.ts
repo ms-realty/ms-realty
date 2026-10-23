@@ -78,7 +78,7 @@ export interface RequestIdentity {
  * The signed-in actor behind the session cookie of the addressed private host, if any. The
  * public host has no session; a session only authenticates the context it was issued for, so
  * a client token never authenticates the staff interface (§8.1, AT36). A staff session also
- * needs an active membership and two enrolled passkeys.
+ * needs an active membership and an enrolled passkey.
  */
 export async function identify(
   db: Executor,
@@ -92,7 +92,7 @@ export async function identify(
   const token = readCookie(headers.get("cookie"), sessionCookieName(env, context));
   let session: Session | null = null;
   if (context === "staff") {
-    // A staff session acts only once its member holds two passkeys (enrolment is its own path).
+    // A staff session acts only after passkey enrolment (enrolment is its own path).
     const access = await staffAccess(db, token);
     session = access.state === "ready" ? access.session : null;
   } else {

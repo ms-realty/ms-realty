@@ -1,6 +1,6 @@
 # O23 — staff access removal and retained handover
 
-A current staff access manager with two active passkeys and a verification at most five
+A current staff access manager with an active passkey and a verification at most five
 minutes old may end another staff member's membership. Self-removal is refused. Record-scoped
 access grants cannot authorize this account-wide action. A reviewed reason/handover plan is
 required; authentication expiry returns to a deliberate review rather than automatically

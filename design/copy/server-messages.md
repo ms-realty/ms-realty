@@ -415,8 +415,8 @@ Parameter on every `expiry`: `{expiresAt}`, the link's expiry instant formatted 
 - **Client sign-in link.** Single use, valid for 15 minutes (`emailLinkTtlMs`), and bound to the client host. Opening it only shows a confirm page; the explicit confirm signs in. The copy therefore says "confirm on the page", never "click to sign in".
 - **Forwarding.** The sign-in and staff links travel as secret parameters, so their copy says not to forward. The client invitation link is not secret: it works only inside the invited person's own signed-in session. Its copy asks them to sign in with this address and does not warn about forwarding.
 - **Invitations.** Valid for 72 hours (`invitationTtlMs`). Opening one never uses it up; an explicit accept, decline or redeem does.
-- **Staff enrolment.** It opens a session that can only add two passkeys.
-- **Staff recovery.** It is issued by a manager, has already ended the member's sessions and passkeys, and requires two new passkeys.
+- **Staff enrolment.** It opens a session limited to registering the first verified passkey. Backups are optional under ADR 0005.
+- **Staff recovery.** It is issued by a manager, has already ended the member's sessions and passkeys, and requires a new verified passkey. Backups are optional.
 - **Staff locales.** Staff templates render only bg, en or ru. Any other locale value is an explicit rejection, never a silent fallback.
 - **Existing subjects.** The bg, en and ru subjects already in `resend.ts` are carried over intact.
 
@@ -462,9 +462,9 @@ No reauthentication email exists in code: step-up today is a passkey assertion (
 
 | | subject | instructions | expiry | next |
 |---|---|---|---|---|
-| bg | Покана за екипа на MS Realty | Отворете връзката по-долу, за да се присъедините към екипа и да настроите два ключа за достъп на устройствата си; не препращайте това писмо, защото връзката е единственото доказателство, че сте Вие. | Връзката може да се използва веднъж, до {expiresAt}. | Ако не очаквате тази покана, игнорирайте писмото; нищо не се случва, докато връзката не бъде използвана. |
-| en | Your MS Realty staff invitation | Open the link below to join the team and set up two passkeys on your devices; do not forward this email, because the link is the only proof that it is you. | The link works once, until {expiresAt}. | If you did not expect this invitation, ignore this email; nothing happens unless the link is used. |
-| ru | Приглашение в команду MS Realty | Откройте ссылку ниже, чтобы присоединиться к команде и настроить два ключа доступа на своих устройствах; не пересылайте это письмо: ссылка — единственное подтверждение, что это вы. | Ссылкой можно воспользоваться один раз, до {expiresAt}. | Если вы не ждали приглашения, проигнорируйте письмо — ничего не произойдёт, пока ссылкой не воспользуются. |
+| bg | Покана за екипа на MS Realty | Отворете връзката по-долу, за да се присъедините към екипа и да настроите ключ за достъп. Резервният е по избор. Не препращайте това писмо, защото връзката е единственото доказателство, че сте Вие. | Връзката може да се използва веднъж, до {expiresAt}. | Ако не очаквате тази покана, игнорирайте писмото; нищо не се случва, докато връзката не бъде използвана. |
+| en | Your MS Realty staff invitation | Open the link below to join the team and set up a passkey. A backup is optional. Do not forward this email, because the link is the only proof that it is you. | The link works once, until {expiresAt}. | If you did not expect this invitation, ignore this email; nothing happens unless the link is used. |
+| ru | Приглашение в команду MS Realty | Откройте ссылку ниже, чтобы присоединиться к команде и настроить ключ доступа. Резервный необязателен. Не пересылайте это письмо: ссылка — единственное подтверждение, что это вы. | Ссылкой можно воспользоваться один раз, до {expiresAt}. | Если вы не ждали приглашения, проигнорируйте письмо — ничего не произойдёт, пока ссылкой не воспользуются. |
 
 ### staffRecovery (staff: bg, en, ru)
 
@@ -472,9 +472,9 @@ No reauthentication email exists in code: step-up today is a passkey assertion (
 
 | | subject | instructions | expiry | next |
 |---|---|---|---|---|
-| bg | Възстановяване на достъпа до MS Realty | Вашият ръководител нулира достъпа Ви и старите Ви ключове за достъп вече не работят. Отворете връзката по-долу, за да настроите два нови, и не препращайте това писмо. | Връзката може да се използва веднъж, до {expiresAt}. | Ако не сте искали това, уведомете веднага Вашия ръководител. |
-| en | Recover your MS Realty access | Your manager has reset your access, and your old passkeys no longer work. Open the link below to set up two new ones, and do not forward this email. | The link works once, until {expiresAt}. | If you did not ask for this, tell your manager straight away. |
-| ru | Восстановление доступа к MS Realty | Руководитель сбросил ваш доступ, и старые ключи доступа больше не работают. Откройте ссылку ниже, чтобы настроить два новых, и не пересылайте это письмо. | Ссылкой можно воспользоваться один раз, до {expiresAt}. | Если вы этого не запрашивали, сразу сообщите руководителю. |
+| bg | Възстановяване на достъпа до MS Realty | Вашият ръководител нулира достъпа Ви и старите Ви ключове за достъп вече не работят. Отворете връзката по-долу, за да настроите нов ключ, и не препращайте това писмо. Резервният е по избор. | Връзката може да се използва веднъж, до {expiresAt}. | Ако не сте искали това, уведомете веднага Вашия ръководител. |
+| en | Recover your MS Realty access | Your manager has reset your access, and your old passkeys no longer work. Open the link below to set up a new passkey, and do not forward this email. A backup is optional. | The link works once, until {expiresAt}. | If you did not ask for this, tell your manager straight away. |
+| ru | Восстановление доступа к MS Realty | Руководитель сбросил ваш доступ, и старые ключи доступа больше не работают. Откройте ссылку ниже, чтобы настроить новый ключ, и не пересылайте это письмо. Резервный необязателен. | Ссылкой можно воспользоваться один раз, до {expiresAt}. | Если вы этого не запрашивали, сразу сообщите руководителю. |
 
 ---
 

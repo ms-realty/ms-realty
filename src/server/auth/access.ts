@@ -1,5 +1,5 @@
 // Where a staff-host request stands (F13 staff variant, O23): no staff route or staff API
-// works until the session belongs to an active member holding two passkeys. Framework-neutral;
+// works until the session belongs to an active member with a verified passkey. Framework-neutral;
 // pages.ts adapts it to Next.js pages and actions.
 import "server-only";
 import type { Executor } from "../db";
@@ -10,7 +10,7 @@ export type StaffAccess =
   | { readonly state: "signed_out" }
   /** Signed in, but without an active membership: the non-enumerating access-denied screen. */
   | { readonly state: "denied"; readonly session: Session }
-  /** A member still short of two passkeys: only enrolment is open. */
+  /** A member without a passkey: only enrolment is open. */
   | { readonly state: "enrolling"; readonly session: Session; readonly passkeys: number }
   | { readonly state: "ready"; readonly session: Session; readonly passkeys: number };
 

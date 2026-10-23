@@ -42,8 +42,8 @@ afterAll(async () => {
   await t?.drop();
 });
 const email = () => `${randomUUID()}@example.test`;
-async function enroll(session: Session) {
-  for (let index = 0; index < 2; index++) {
+async function enroll(session: Session, keys = 1) {
+  for (let index = 0; index < keys; index++) {
     const key = new SoftAuthenticator();
     const options = await startPasskeyRegistration(t.db, session);
     await finishPasskeyRegistration(t.db, session, key.register(options.challenge), {
@@ -70,7 +70,7 @@ async function tokenFor(id: string) {
 const accept = (token: string, currentSessionToken?: string) =>
   acceptStaffInvitation(t.db, token, { clientIp: randomUUID(), currentSessionToken });
 describe("AT37–AT39: recipient-bound invitations and audited recovery", () => {
-  it("bootstraps by an expiring invitation and still requires two passkeys", async () => {
+  it("bootstraps by an expiring invitation and requires one verified passkey", async () => {
     const issued = await bootstrapManager(t.db, {
       email: email(),
       displayName: "Bootstrap Manager",
@@ -81,6 +81,7 @@ describe("AT37–AT39: recipient-bound invitations and audited recovery", () => 
     const session = await accept(token);
     expect((await staffAccess(t.db, session.token)).state).toBe("enrolling");
     await enroll(session.session);
+    expect(await countActivePasskeys(t.db, session.session.account.id)).toBe(1);
     expect((await staffAccess(t.db, session.token)).state).toBe("ready");
     await expect(
       bootstrapManager(t.db, { email: email(), displayName: "Another" }),
@@ -117,7 +118,7 @@ describe("AT37–AT39: recipient-bound invitations and audited recovery", () => 
     await expect(accept(token, actor.token)).rejects.toMatchObject({ code: "not_found" });
     expect((await inspectStaffInvitation(t.db, token)).state).toBe("pending");
   });
-  it("requires a live session, two enrolled keys and recent verification for grants", async () => {
+  it("requires a live session, an enrolled key and recent verification for grants", async () => {
     const actor = await manager();
     await revokeSession(t.db, actor.token);
     await expect(
@@ -149,9 +150,11 @@ describe("AT37–AT39: recipient-bound invitations and audited recovery", () => 
       }),
     ).rejects.toMatchObject({ code: "step_up_required" });
   });
-  it("recovery records identity verification, revokes sessions and keys, and requires two new keys", async () => {
+  it("recovery records identity verification, revokes all old keys and requires a new verified key", async () => {
     const actor = await manager();
     const target = await manager();
+    await enroll(target.session);
+    expect(await countActivePasskeys(t.db, target.id)).toBe(2);
     const recovered = await issueStaffRecovery(t.db, {
       session: actor.session,
       principalId: target.id,

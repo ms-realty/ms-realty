@@ -11,7 +11,7 @@ import {
   privacyRequestStates,
 } from "@/domain/privacy";
 import { recordAudit } from "../audit";
-import { countActivePasskeys } from "../auth/passkeys";
+import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import type { Session } from "../auth/sessions";
 import { can } from "../authz";
 import { hasPrivacyRetentionHold } from "../compliance/retention";
@@ -41,7 +41,7 @@ export async function privacyOwners(db: Executor) {
   for (const person of staff)
     if (
       (await can(db, { kind: "staff", id: person.id }, "privacy.manage")) &&
-      (await countActivePasskeys(db, person.id)) >= 2
+      (await countActivePasskeys(db, person.id)) >= staffPasskeyMinimum
     )
       owners.push(person);
   return owners;

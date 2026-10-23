@@ -10,7 +10,7 @@ import {
   staffMemberships,
 } from "@/db/schema";
 import { recordAudit } from "../audit";
-import { countActivePasskeys } from "../auth/passkeys";
+import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import type { Session } from "../auth/sessions";
 import { can } from "../authz";
 import { hashRequest } from "../crypto";
@@ -61,7 +61,7 @@ async function eligibleHolder(db: Executor, id: string) {
   return Boolean(
     row &&
       (!row.absenceFrom || row.absenceFrom.getTime() > Date.now()) &&
-      (await countActivePasskeys(db, id)) >= 2,
+      (await countActivePasskeys(db, id)) >= staffPasskeyMinimum,
   );
 }
 export async function custodyHolders(db: Executor, session: Session) {
@@ -210,7 +210,7 @@ export async function moveKeys(db: Executor, session: Session, raw: unknown) {
           !(await eligibleHolder(ctx.tx, input.holderId)))
       )
         throw new AppError("validation_failed", {
-          fieldErrors: { holderId: ["Choose a current staff holder with two passkeys"] },
+          fieldErrors: { holderId: ["Choose a current staff holder with an enrolled passkey"] },
         });
       if (
         checkedOut &&

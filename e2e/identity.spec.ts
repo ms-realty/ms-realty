@@ -107,7 +107,7 @@ async function authenticator(context: BrowserContext, page: Page) {
   return { cdp, add };
 }
 
-test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out and passkey sign-in", async ({
+test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and passkey sign-in", async ({
   page,
   context,
   browserName,
@@ -143,13 +143,42 @@ test("AT36/AT39: staff invitation, two passkeys, workspace navigation, sign-out 
   await page.getByRole("button", { name: "Accept and continue" }).click();
   await expect(page).toHaveURL(hostUrl("staff", "/en/access/enrol"));
   await page.getByRole("button", { name: "Register a passkey", exact: true }).click();
-  await expect(page.getByText("1 of 2 passkeys registered.", { exact: true })).toBeVisible();
-  await page.goto(hostUrl("staff", "/en/today"));
-  await expect(page).toHaveURL(hostUrl("staff", "/en/access/enrol"));
+  await expect(
+    page.getByText("Your passkey is saved. You can enter the workspace.", { exact: true }),
+  ).toBeVisible();
+  const primary =
+    await sql`select count(*)::int as count from passkeys where principal_id=${account.id} and revoked_at is null`;
+  expect(primary[0]?.count).toBe(1);
+  await page.getByRole("link", { name: "Continue to the workspace" }).click();
+  await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
+  await page.goto(hostUrl("staff", "/en/access/enrol"));
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Your passkey is ready" }),
+  ).toBeVisible();
+  await info.attach("primary-passkey-ready-desktop", {
+    body: await page.screenshot(),
+    contentType: "image/png",
+  });
+  const enrollmentViewport = page.viewportSize();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("link", { name: "Continue to the workspace" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await info.attach("primary-passkey-ready-phone", {
+    body: await page.screenshot(),
+    contentType: "image/png",
+  });
+  if (enrollmentViewport) await page.setViewportSize(enrollmentViewport);
+  await page.getByText("Add another passkey (optional)", { exact: true }).click();
   await auth.cdp.send("WebAuthn.removeVirtualAuthenticator", { authenticatorId: first });
   await auth.add();
-  await page.getByRole("button", { name: "Register a passkey", exact: true }).click();
-  await expect(page.getByText("Both passkeys are registered.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Add backup passkey", exact: true }).click();
+  await expect(page.getByText("Passkey added.", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Your passkey is saved. You can enter the workspace.", { exact: true }),
+  ).toBeVisible();
+  const backup =
+    await sql`select count(*)::int as count from passkeys where principal_id=${account.id} and revoked_at is null`;
+  expect(backup[0]?.count).toBe(2);
   await page.getByRole("link", { name: "Continue to the workspace" }).click();
   await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
   const today = page

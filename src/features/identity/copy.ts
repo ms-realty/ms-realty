@@ -17,6 +17,12 @@ const en = {
   passkeyWorking: "Waiting for your passkey…",
   passkeyCancelled: "The passkey request was cancelled or timed out. Nothing was changed.",
   passkeyFailed: "We could not verify this passkey. Try again.",
+  passkeyAlreadyRegistered:
+    "This passkey is already registered. For your backup, choose a different passkey provider or a security key. Your saved passkey is still available.",
+  passkeyIncompatibleAuthenticator:
+    "This device or security key cannot create the passkey required here. Choose one that supports passkeys and PIN or biometric verification.",
+  passkeyBrowserFailed:
+    "Your browser could not complete this passkey request. Try again or choose another device or security key. Your saved passkeys have not changed.",
   javascriptRequired: "Passkeys need JavaScript. Enable it for this site, then reload this page.",
   passkeyUnsupported: "This browser cannot use passkeys. Use a current browser on this device.",
   // Staff sign-in (O23 access variant)
@@ -29,9 +35,9 @@ const en = {
   staffInvitationTitle: "Join the MS Realty workspace",
   staffRecoveryTitle: "Restore your workspace access",
   staffInvitationLead:
-    "This invitation is for {email}. Accepting opens your staff access; next you register two passkeys, one to use and one as a backup.",
+    "This invitation is for {email}. Accept it, then register a passkey to enter the workspace. You can add a backup later.",
   staffRecoveryLead:
-    "This recovery invitation is for {email}. Your previous passkeys and sessions were revoked when it was issued. Accepting asks you to register two new passkeys.",
+    "This recovery invitation is for {email}. Your previous passkeys and sessions were revoked when it was issued. Accept it, then register a new passkey.",
   invitationValidUntil: "Valid until {time}.",
   acceptAndContinue: "Accept and continue",
   invitationInvalid: "This invitation link is not valid. Check that you opened the whole link.",
@@ -41,14 +47,20 @@ const en = {
   invitationRevoked:
     "This invitation was replaced or withdrawn. Use the newest invitation you received.",
   // Enrolment
-  enrolTitle: "Register your passkeys",
+  enrolTitle: "Register your passkey",
   enrolLead:
-    "Staff sign in only with a passkey. Register two, for example on this device and on a security key or a second device, so that losing one does not lock you out.",
-  enrolProgress: "{count} of 2 passkeys registered.",
+    "Use your device or a security key to sign in to the staff workspace. One passkey is enough; a backup is optional.",
+  enrolReadyTitle: "Your passkey is ready",
+  enrolBackupTitle: "Add another passkey (optional)",
+  enrolBackupLead:
+    "Your first passkey is saved. Choose a different passkey provider or a security key for the backup. Devices sharing the same synced passkey count as one key.",
+  registerBackupPasskey: "Add backup passkey",
+  enrolBackupReauth: "Confirm it is you before adding another passkey.",
+  enrolProgress: "{count} passkeys registered.",
   passkeyLabel: "Name for this passkey",
   optional: "(optional)",
   registerPasskey: "Register a passkey",
-  enrolDone: "Both passkeys are registered.",
+  enrolDone: "Your passkey is saved. You can enter the workspace.",
   passkeysRegistered: "{count} passkeys registered.",
   continueToWorkspace: "Continue to the workspace",
   enrolWindowClosed:
@@ -56,7 +68,7 @@ const en = {
   // Recovery explanation
   recoveryTitle: "Lost access to your passkeys?",
   recoveryBody:
-    "Only a manager can restore workspace access. Contact your manager, or the agency by phone. After confirming who you are, they send a recovery invitation to your work email. It revokes your old passkeys and sessions, and you register two new passkeys.",
+    "Only a manager can restore workspace access. Contact your manager, or the agency by phone. After confirming who you are, they send a recovery invitation to your work email. It revokes your old passkeys and sessions, and you register a new passkey.",
   recoveryNoCodes:
     "There are no recovery codes, and nobody at MS Realty will ask you for a passkey, code or password.",
   backToSignIn: "Back to sign-in",
@@ -135,6 +147,12 @@ const bg: IdentityCopy = {
   passkeyWorking: "Изчакване на ключа за достъп…",
   passkeyCancelled: "Заявката за ключ за достъп е отказана или изтече. Нищо не е променено.",
   passkeyFailed: "Не успяхме да потвърдим този ключ за достъп. Опитайте отново.",
+  passkeyAlreadyRegistered:
+    "Този ключ за достъп вече е регистриран. За резервния изберете друг доставчик на ключове за достъп или ключ за сигурност. Запазеният ви ключ остава достъпен.",
+  passkeyIncompatibleAuthenticator:
+    "Това устройство или ключ за сигурност не може да създаде необходимия ключ за достъп. Изберете устройство с поддръжка на ключове за достъп и потвърждение с ПИН или биометрия.",
+  passkeyBrowserFailed:
+    "Браузърът не успя да завърши заявката за ключ за достъп. Опитайте отново или изберете друго устройство или ключ за сигурност. Запазените ви ключове не са променени.",
   javascriptRequired:
     "Ключовете за достъп изискват JavaScript. Разрешете го за този сайт и опреснете страницата.",
   passkeyUnsupported:
@@ -148,9 +166,9 @@ const bg: IdentityCopy = {
   staffInvitationTitle: "Присъединяване към работното пространство на MS Realty",
   staffRecoveryTitle: "Възстановяване на достъпа",
   staffInvitationLead:
-    "Поканата е за {email}. Приемането отваря служебния ви достъп; след това регистрирате два ключа за достъп – един за ползване и един резервен.",
+    "Поканата е за {email}. Приемете я и регистрирайте ключ за достъп до работното пространство. Можете да добавите резервен по-късно.",
   staffRecoveryLead:
-    "Тази покана за възстановяване е за {email}. Предишните ви ключове и сесии бяха отменени при издаването ѝ. Приемането изисква да регистрирате два нови ключа за достъп.",
+    "Тази покана за възстановяване е за {email}. Предишните ви ключове и сесии бяха отменени при издаването ѝ. Приемете я и регистрирайте нов ключ за достъп.",
   invitationValidUntil: "Валидна до {time}.",
   acceptAndContinue: "Приемане и продължаване",
   invitationInvalid:
@@ -159,21 +177,27 @@ const bg: IdentityCopy = {
   invitationUsed:
     "На тази покана вече е отговорено. Ако не сте били вие, уведомете веднага човека, който ви е поканил.",
   invitationRevoked: "Поканата е заменена или оттеглена. Използвайте най-новата получена покана.",
-  enrolTitle: "Регистрирайте ключовете си за достъп",
+  enrolTitle: "Регистрирайте ключ за достъп",
   enrolLead:
-    "Служителите влизат само с ключ за достъп. Регистрирайте два – например на това устройство и на ключ за сигурност или друго устройство, за да не загубите достъп, ако изгубите единия.",
-  enrolProgress: "Регистрирани ключове: {count} от 2.",
+    "Влизайте в служебното пространство чрез устройството си или ключ за сигурност. Един ключ за достъп е достатъчен; резервният е по избор.",
+  enrolReadyTitle: "Ключът ви за достъп е готов",
+  enrolBackupTitle: "Добавяне на друг ключ (по избор)",
+  enrolBackupLead:
+    "Първият ви ключ е запазен. За резервния изберете друг доставчик на ключове за достъп или ключ за сигурност. Устройства с един и същ синхронизиран ключ се броят като един ключ.",
+  registerBackupPasskey: "Добавяне на резервен ключ",
+  enrolBackupReauth: "Потвърдете самоличността си, преди да добавите друг ключ за достъп.",
+  enrolProgress: "Регистрирани ключове: {count}.",
   passkeyLabel: "Име на ключа",
   optional: "(по избор)",
   registerPasskey: "Регистриране на ключ за достъп",
-  enrolDone: "И двата ключа за достъп са регистрирани.",
+  enrolDone: "Ключът ви е запазен. Можете да влезете в работното пространство.",
   passkeysRegistered: "Регистрирани ключове: {count}.",
   continueToWorkspace: "Към работното пространство",
   enrolWindowClosed:
     "Времето за завършване на регистрацията изтече. Помолете мениджъра си за нова покана.",
   recoveryTitle: "Нямате достъп до ключовете си?",
   recoveryBody:
-    "Само мениджър може да възстанови достъпа. Свържете се с мениджъра си или с агенцията по телефона. След като потвърдят самоличността ви, ще изпратят покана за възстановяване на служебния ви имейл. Тя отменя старите ключове и сесии и регистрирате два нови ключа.",
+    "Само мениджър може да възстанови достъпа. Свържете се с мениджъра си или с агенцията по телефона. След като потвърдят самоличността ви, ще изпратят покана за възстановяване на служебния ви имейл. Тя отменя старите ключове и сесии и регистрирате нов ключ.",
   recoveryNoCodes:
     "Няма кодове за възстановяване и никой от MS Realty няма да ви поиска ключ, код или парола.",
   backToSignIn: "Обратно към входа",
@@ -244,6 +268,12 @@ const ru: IdentityCopy = {
   passkeyWorking: "Ожидание ключа доступа…",
   passkeyCancelled: "Запрос ключа доступа отменён или истёк. Ничего не изменено.",
   passkeyFailed: "Не удалось проверить этот ключ доступа. Попробуйте снова.",
+  passkeyAlreadyRegistered:
+    "Этот ключ доступа уже зарегистрирован. Для резервного выберите другого поставщика ключей доступа или ключ безопасности. Сохранённый ключ остаётся доступным.",
+  passkeyIncompatibleAuthenticator:
+    "Это устройство или ключ безопасности не может создать нужный ключ доступа. Выберите устройство с поддержкой ключей доступа и подтверждением с помощью ПИН-кода или биометрии.",
+  passkeyBrowserFailed:
+    "Браузер не смог завершить запрос ключа доступа. Попробуйте снова или выберите другое устройство или ключ безопасности. Сохранённые ключи не изменены.",
   javascriptRequired:
     "Для ключей доступа нужен JavaScript. Включите его для этого сайта и обновите страницу.",
   passkeyUnsupported:
@@ -257,9 +287,9 @@ const ru: IdentityCopy = {
   staffInvitationTitle: "Присоединиться к рабочему пространству MS Realty",
   staffRecoveryTitle: "Восстановление доступа",
   staffInvitationLead:
-    "Приглашение для {email}. Принятие открывает служебный доступ; затем вы регистрируете два ключа доступа: основной и резервный.",
+    "Приглашение для {email}. Примите его и зарегистрируйте ключ для входа в рабочее пространство. Резервный можно добавить позже.",
   staffRecoveryLead:
-    "Это приглашение на восстановление для {email}. Прежние ключи и сеансы отозваны при его выдаче. Принятие потребует зарегистрировать два новых ключа доступа.",
+    "Это приглашение на восстановление для {email}. Прежние ключи и сеансы отозваны при его выдаче. Примите его и зарегистрируйте новый ключ доступа.",
   invitationValidUntil: "Действует до {time}.",
   acceptAndContinue: "Принять и продолжить",
   invitationInvalid: "Ссылка приглашения недействительна. Проверьте, что открыли её полностью.",
@@ -268,21 +298,27 @@ const ru: IdentityCopy = {
     "На это приглашение уже ответили. Если это были не вы, сразу сообщите пригласившему вас.",
   invitationRevoked:
     "Приглашение заменено или отозвано. Используйте самое новое полученное приглашение.",
-  enrolTitle: "Зарегистрируйте ключи доступа",
+  enrolTitle: "Зарегистрируйте ключ доступа",
   enrolLead:
-    "Сотрудники входят только с ключом доступа. Зарегистрируйте два, например на этом устройстве и на ключе безопасности или другом устройстве, чтобы потеря одного не лишила вас доступа.",
-  enrolProgress: "Зарегистрировано ключей: {count} из 2.",
+    "Входите в служебное пространство с помощью своего устройства или ключа безопасности. Одного ключа доступа достаточно; резервный необязателен.",
+  enrolReadyTitle: "Ключ доступа готов",
+  enrolBackupTitle: "Добавить другой ключ (необязательно)",
+  enrolBackupLead:
+    "Первый ключ сохранён. Для резервного выберите другого поставщика ключей доступа или ключ безопасности. Устройства с одним синхронизированным ключом считаются одним ключом.",
+  registerBackupPasskey: "Добавить резервный ключ",
+  enrolBackupReauth: "Подтвердите свою личность перед добавлением другого ключа доступа.",
+  enrolProgress: "Зарегистрировано ключей: {count}.",
   passkeyLabel: "Название ключа",
   optional: "(необязательно)",
   registerPasskey: "Зарегистрировать ключ доступа",
-  enrolDone: "Оба ключа доступа зарегистрированы.",
+  enrolDone: "Ключ сохранён. Можно войти в рабочее пространство.",
   passkeysRegistered: "Зарегистрировано ключей: {count}.",
   continueToWorkspace: "Перейти в рабочее пространство",
   enrolWindowClosed:
     "Время на завершение регистрации истекло. Попросите руководителя прислать новое приглашение.",
   recoveryTitle: "Потеряли доступ к ключам?",
   recoveryBody:
-    "Восстановить доступ может только руководитель. Свяжитесь с руководителем или с агентством по телефону. Подтвердив вашу личность, они отправят приглашение на восстановление на рабочую почту. Оно отзывает старые ключи и сеансы, и вы регистрируете два новых ключа.",
+    "Восстановить доступ может только руководитель. Свяжитесь с руководителем или с агентством по телефону. Подтвердив вашу личность, они отправят приглашение на восстановление на рабочую почту. Оно отзывает старые ключи и сеансы, и вы регистрируете новый ключ.",
   recoveryNoCodes:
     "Кодов восстановления нет, и никто из MS Realty не попросит у вас ключ, код или пароль.",
   backToSignIn: "Назад ко входу",
@@ -410,6 +446,9 @@ export function ceremonyMessages(
     working: c.passkeyWorking,
     cancelled: c.passkeyCancelled,
     failed: c.passkeyFailed,
+    alreadyRegistered: c.passkeyAlreadyRegistered,
+    incompatibleAuthenticator: c.passkeyIncompatibleAuthenticator,
+    browserFailed: c.passkeyBrowserFailed,
     unsupported: c.passkeyUnsupported,
     javascriptRequired: c.javascriptRequired,
     rateLimited: c.rateLimited,

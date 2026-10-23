@@ -32,6 +32,9 @@ export interface CeremonyMessages {
   readonly working: string;
   readonly cancelled: string;
   readonly failed: string;
+  readonly alreadyRegistered: string;
+  readonly incompatibleAuthenticator: string;
+  readonly browserFailed: string;
   readonly unsupported: string;
   readonly javascriptRequired: string;
   readonly rateLimited: string;
@@ -76,6 +79,31 @@ function messageFor(code: string, messages: CeremonyMessages): string {
   }
 }
 
+function browserFailureMessage(error: unknown, messages: CeremonyMessages): string {
+  const failure = error as { code?: unknown; name?: unknown } | null;
+  if (
+    failure?.code === "ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED" ||
+    failure?.name === "InvalidStateError"
+  ) {
+    return messages.alreadyRegistered;
+  }
+  if (
+    failure?.code === "ERROR_AUTHENTICATOR_MISSING_DISCOVERABLE_CREDENTIAL_SUPPORT" ||
+    failure?.code === "ERROR_AUTHENTICATOR_MISSING_USER_VERIFICATION_SUPPORT" ||
+    failure?.code === "ERROR_AUTHENTICATOR_NO_SUPPORTED_PUBKEYCREDPARAMS_ALG"
+  ) {
+    return messages.incompatibleAuthenticator;
+  }
+  if (
+    failure?.code === "ERROR_CEREMONY_ABORTED" ||
+    failure?.name === "AbortError" ||
+    failure?.name === "NotAllowedError"
+  ) {
+    return messages.cancelled;
+  }
+  return messages.browserFailed;
+}
+
 export function PasskeyCeremony(props: Props) {
   const { messages } = props;
   const router = useRouter();
@@ -98,8 +126,8 @@ export function PasskeyCeremony(props: Props) {
         let response: AuthenticationResponseJSON;
         try {
           response = await startAuthentication({ optionsJSON: options.data });
-        } catch {
-          setStatus({ tone: "error", text: messages.cancelled });
+        } catch (error) {
+          setStatus({ tone: "error", text: browserFailureMessage(error, messages) });
           return;
         }
         result = await props.complete(response);
@@ -109,8 +137,8 @@ export function PasskeyCeremony(props: Props) {
         let response: RegistrationResponseJSON;
         try {
           response = await startRegistration({ optionsJSON: options.data });
-        } catch {
-          setStatus({ tone: "error", text: messages.cancelled });
+        } catch (error) {
+          setStatus({ tone: "error", text: browserFailureMessage(error, messages) });
           return;
         }
         result = await props.complete(response, label);

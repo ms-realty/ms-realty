@@ -3,7 +3,7 @@ import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
 import { z } from "zod";
 import { complaintReviews, complaints, principals, staffMemberships } from "@/db/schema";
 import { recordAudit } from "../audit";
-import { countActivePasskeys } from "../auth/passkeys";
+import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import type { Session } from "../auth/sessions";
 import { can } from "../authz";
 import { hashRequest } from "../crypto";
@@ -59,7 +59,7 @@ async function eligibleOwner(db: Executor, id: string) {
   return Boolean(
     row &&
       (await can(db, { kind: "staff", id }, "complaint.manage")) &&
-      (await countActivePasskeys(db, id)) >= 2,
+      (await countActivePasskeys(db, id)) >= staffPasskeyMinimum,
   );
 }
 async function recordReview(
