@@ -34,8 +34,8 @@ it("accepts only a live hash-bound measured empty archive, never an unknown empt
 
 it("all staged snapshots have verified body hashes and keep source locale without invented translations", () => {
   const pages = legacySnapshotPages();
-  // The direct-origin recovery preserves all previous 1108 identities and adds 65.
-  expect(pages).toHaveLength(1173);
+  // Fresh raw captures add 69 verified main sections and preserve all previous 1173 pages.
+  expect(pages).toHaveLength(1242);
   expect(pages.filter((page) => page.provenance.kind === "archived").length).toBe(49);
   const page = pages[0];
   expect(page).toBeDefined();

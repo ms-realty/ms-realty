@@ -5,11 +5,11 @@
   "productionAllowed": false,
   "baselineSourceRows": 457,
   "fullBaselineUniqueSources": 454,
-  "sourceRows": 1176,
-  "uniqueSources": 1173,
-  "retained200": 995,
+  "sourceRows": 1245,
+  "uniqueSources": 1242,
+  "retained200": 1064,
   "redirected301": 178,
-  "routeArtifactSha256": "574ec49459ce28017abd375554d7f6450369e4a9b08d5d9ac346ebd932bc0819",
+  "routeArtifactSha256": "5cecda80fde7420c7f1ab513c100ae855085331a7579494e7b46a1a1e73df0a2",
   "blockers": [],
   "exclusions": [
     {
@@ -153,6 +153,511 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
+      "id": "842cf9ac49962442bab86176",
+      "sourceUrl": "http://makler-realty.ru/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d0%b1%d1%83%d1%80%d0%b3%d0%b0%d1%81-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1f20bd2d7b0ea52794032920",
+      "sourceUrl": "http://makler-realty.ru/%D1%82%D1%80%D0%B0%D0%BD%D1%81%D1%84%D0%B5%D1%80-%D1%81%D0%B0%D0%BB%D0%BE%D0%BD%D0%B8%D0%BA%D0%B8-%D0%B1%D0%B0%D0%BD%D1%81%D0%BA%D0%BE/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "ba43b118a4bc77987944d669",
+      "sourceUrl": "http://makler-realty.ru/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "cae308663a113d0891031839",
+      "sourceUrl": "http://makler-realty.ru/category-type/apartment/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/property/sell/min-price/30000/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "206bcd58ddc948939370d334",
+      "sourceUrl": "http://makler-realty.ru/ru/%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D0%B8%D1%8F-%D0%B3%D0%BB%D0%B0%D0%B7%D0%B0%D0%BC%D0%B8-%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D1%86%D0%B5%D0%B21/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "53c83ee35a03145b22ddbc62",
+      "sourceUrl": "http://makler-realty.ru/ru/%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D1%81%D0%BA%D0%B0%D1%8F-%D0%BA%D1%83%D1%85%D0%BD%D1%8F/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "f5ca12acc0f844c33733c039",
+      "sourceUrl": "http://makler-realty.ru/ru/%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81-%D0%BE%D1%82%D0%B2%D0%B5%D1%82-%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D0%B8%D1%8F/%D0%BA%D0%B0%D0%BA-%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D1%82%D1%8C-%D0%B0%D0%B3%D0%B5%D0%BD%D1%82%D1%81%D1%82%D0%B2%D0%BE-%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "e535bb9eef097a1dcd4c8eb0",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/chto-takoe-bulstat/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "4685b3f22d23cb1246905b8a",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-dolgo-oformlqetsq-nedwizhimost-v-sobstvenost/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c354396711b543c63c380bf7",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-dolgo-oformlqetsq-notarialnij-akt/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "31f13244017c32ad5a3a81cf",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-kupit-i-zaregistrirovat-avto-v-bolgarii/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "77301cf0bdbbd8bad2cdbcd1",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-otnosqtsq-bolgari-k-inostrantsam/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6112d37455423313dde202c5",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-polichit-vnzh-v-bolgarii/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c934d858974c3706ed015551",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-poluchit-grazhdanstvo-bolgarii/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "4f1af8e9f469fd4a55bca3f7",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-poluchit-pmzh-v-bolgarii/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "17230c0b030e25105b2180dc",
+      "sourceUrl": "http://makler-realty.ru/ru/%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81-%D0%BE%D1%82%D0%B2%D0%B5%D1%82-%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D0%B8%D1%8F/kak-proverit-agentstvo-nedvizhimosti/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "89edc163660ba33f4add30ac",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kakie-v-bolgarii-kommunalnie-platezhi/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b6a7595fed726a3796a2b43e",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kupit-nedvizhimost-u-zastroishika-ili-charez-agentstvo-nedvizhimosti/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "60104cc51515f1f9285757dd",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/neobhodimie-dokumenti-dlq-pokupki-kvartiri-v-bolgarii/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6bfdaf8e88d1f46a7dbaef25",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/pochemu-nuzhna-firma-dlq-pokupki-doma-v-bolgarii/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a7c5ce8e615870025fbeca14",
+      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/skolko-vremeni-neobhodimo-dlq-vibora-nedvizhimosti-ipredvaritelnogo-dogovora/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "798cc39745e8a0cddac76bd5",
+      "sourceUrl": "http://makler-realty.ru/ru/%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4-%D0%B2-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D0%BE%D0%BC-%D0%BB%D0%B5%D0%B3%D0%BA%D0%BE-%D0%B4%D1%8B%D1%88%D0%B0%D1%82/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "3b9871affa71413754d11898",
+      "sourceUrl": "http://makler-realty.ru/ru/%D1%82%D0%B0%D0%BA%D1%81%D0%B8-%D0%B8%D0%B7-%D1%81%D0%BE%D1%84%D0%B8%D0%B8-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "ab5740e2a561055d8fb63314",
+      "sourceUrl": "http://makler-realty.ru/ru/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d820fa846112f1c213529aa5",
+      "sourceUrl": "http://makler-realty.ru/ru/%d1%83%d1%81%d0%bb%d1%83%d0%b3%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d6b4375d19a07290c3f88dc1",
+      "sourceUrl": "http://makler-realty.ru/ru/%D1%8D%D0%BA%D1%81%D0%BA%D1%83%D1%80%D1%81%D0%B8%D0%B8-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "dbfc1ef58e00dc4860d4a095",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BE%D0%BA-%D0%B7%D0%B5%D0%BC%D0%BB%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "0c777cccf2fcb3a09b729293",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BE%D0%BA-%D0%B7%D0%B5%D0%BC%D0%BB%D0%B8/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "29d4c32acd191299e9d744fe",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/apartment/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "25df59a54c3f9bc1268d811a",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/apartment/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c43513ae838dfce706c1a8c3",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/dom/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "bcf99914d84fbf4c62ab5d28",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/dom/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8a84d7601644db7110a53cf3",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/studio/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "16df2c3fe4b5be75e1df57a2",
+      "sourceUrl": "http://makler-realty.ru/ru/category-type/studio/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a073d60314ba4d356ce98896",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-%D0%B2-%D0%BF%D0%B0%D1%80%D0%BA-%D0%BE%D1%82%D0%B5%D0%BB%D0%B5-%D0%BF%D0%B8%D1%80%D0%B8%D0%BD-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d83c7e7bacd9bb67c9f25e95",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%80%D1%8F%D0%B4%D0%BE%D0%BC-%D1%81-%D0%BF%D0%B0%D1%80%D0%BA%D0%BE/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c7466e29fbe0eca3e30f1bcc",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81-%D0%BC%D0%B5%D0%B1%D0%B5%D0%BB%D1%8C%D1%8E-%D0%B2-%D0%B3-%D1%81/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "62bd705c69bfac69a25cf1ba",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81-%D0%BE%D1%82%D0%B4%D0%B5%D0%BB%D0%BA%D0%BE%D0%B9-%D0%B2-%D1%81/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "945014b1cd9358d2ef6de641",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "20fa03c8b0b2f62a7128eff4",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D0%BF%D0%B0%D1%80%D0%BA%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "173d63543b97bd4b5088a5bf",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8-2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "21e6c77e7d91ce5fb3fd8617",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "79ce81b2ed67ed523f66ceda",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%BB%D1%8E%D0%BA%D1%81-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "538eb7caf8329f949516fc82",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81-%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BA%D0%BE%D0%BC-%D0%B7%D0%B5%D0%BC%D0%BB%D0%B8-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c5ad5d21c625a7c7cf05cf2c",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D1%8B-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "0e9d434cf7bd995636d14185",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D1%8B-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "09c7cd068ebf594b6c2d92da",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BD%D0%B5%D0%B4%D0%BE%D1%80%D0%BE%D0%B3%D0%B8%D0%B5-%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8110c4716c96a4c134d01e86",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "dec43f7abac7ab4b56744811",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D1%82%D1%80%D0%B5%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D0%B3-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "28e87ef5894f37a4a2af7913",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D1%82%D1%80%D0%B5%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3-%D1%81%D0%B0%D0%BD/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "78c85898123a51ec5f0c2bb3",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BE%D0%BA-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8-%D1%81-%D0%B2%D0%B5%D0%BB%D0%B8%D0%BA%D0%BE%D0%BB%D0%B5%D0%BF%D0%BD%D0%BE%D0%B9-%D0%BF%D0%B0/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8f465ba4d6c9635341c212ca",
+      "sourceUrl": "http://makler-realty.ru/ru/listing/576/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "16e01b593b2698ae6827da0d",
+      "sourceUrl": "http://makler-realty.ru/ru/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "e7d4040b4dd14a94f86a7660",
+      "sourceUrl": "http://makler-realty.ru/ru/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%B2%D1%8F%D1%82%D0%BE%D0%B9-%D0%B2%D0%BB%D0%B0%D1%81/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "45999e1ec011c729b0ca3fe0",
+      "sourceUrl": "http://makler-realty.ru/ru/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "3b3cd85801f77c3b2f32fd36",
+      "sourceUrl": "http://makler-realty.ru/ru/resort/nesebar/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "0cac458e19d8640455c091d2",
+      "sourceUrl": "http://makler-realty.ru/ru/resort/pomorie/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "9e1b78c658ec6bde32951424",
+      "sourceUrl": "http://makler-realty.ru/ru/resort/sozopol/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "65ef2658d01735113af26fb9",
+      "sourceUrl": "https://makler-realty.com/bg",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a08fe5ba42a6dceef0b59d81",
+      "sourceUrl": "https://makler-realty.com/bg/balcon/1/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b69cfefb1f82b0a3b2526f02",
+      "sourceUrl": "https://makler-realty.com/bg/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "2d2b2be3f7f205627c0195b8",
+      "sourceUrl": "https://makler-realty.com/bg/category/category/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "78898b1e1448b9186a2d8d1c",
+      "sourceUrl": "https://makler-realty.com/bg/category/uncategorized/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "93bf704330fc81f494a13da6",
+      "sourceUrl": "https://makler-realty.com/bg/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "237dd3f3d8b86e8a3234d2b6",
+      "sourceUrl": "https://makler-realty.com/bg/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1a97633c8b9937d24e3135de",
+      "sourceUrl": "https://makler-realty.com/bg/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a9f17bb42f70cf285f48f673",
+      "sourceUrl": "https://makler-realty.com/bg/resort/skiing-resort/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "4361db1c9f60b519861061e4",
+      "sourceUrl": "https://makler-realty.com/cdn-cgi/l/email-protection",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "e6d9a12c795b82deec69c2cc",
+      "sourceUrl": "https://makler-realty.com/de/balcon/1/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b44dce8e17d7838ac9eeb8b4",
+      "sourceUrl": "https://makler-realty.com/de/category-type/dom/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "dcba79782a9b2c08d0deba3d",
+      "sourceUrl": "https://makler-realty.com/de/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d79de83f9fb5f54d7dfde11c",
+      "sourceUrl": "https://makler-realty.com/de/category/category/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "0a13424c6a47008a396c46ea",
+      "sourceUrl": "https://makler-realty.com/de/category/uncategorized/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "bf017689b241b55d045a529f",
+      "sourceUrl": "https://makler-realty.com/de/floors/2/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b1b3c80572d5dfacbc25e1df",
+      "sourceUrl": "https://makler-realty.com/de/listing/%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-%D0%BA%D0%BE%D0%BC%D0%BF%D0%BB%D0%B5%D0%BA%D1%81%D0%B5-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "7dfa92a028cc0cd2f45f6af3",
+      "sourceUrl": "https://makler-realty.com/de/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%BC-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3%D1%83/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "46a024d3aaa4d1cef75785c0",
+      "sourceUrl": "https://makler-realty.com/de/listing/%D0%BF%D1%80%D0%BE%D0%B4%D0%B0%D0%B5%D1%82%D1%81%D1%8F-%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D1%8B%D0%B9-%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6e7763e39aafa62312eac0dd",
+      "sourceUrl": "https://makler-realty.com/de/listing/%D1%82%D1%80%D0%B5%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81%D0%B0%D0%BD%D0%B8-%D0%B1%D0%B8%D0%B9%D1%87-%D1%85%D0%B8%D0%BB/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "5c412c4d84f6628f983a3657",
+      "sourceUrl": "https://makler-realty.com/de/listing/page/8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c17dc18e870d550e662a554a",
+      "sourceUrl": "https://makler-realty.com/de/property/sell/page/6/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "db423fa52a0b12107869c84f",
+      "sourceUrl": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/7/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "76d462cfab3e2d581e6964ad",
+      "sourceUrl": "https://makler-realty.com/de/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "dcd8b0828526fc7a24652efa",
+      "sourceUrl": "https://makler-realty.com/de/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1840af0ee85526116494ef9b",
+      "sourceUrl": "https://makler-realty.com/de/resort/loggari/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b38a532c70d83a1df9bc3244",
+      "sourceUrl": "https://makler-realty.com/de/resort/skiing-resort/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6c8ad201c333afbd81a77706",
+      "sourceUrl": "https://makler-realty.com/de/resort/spa-resorts/page/7/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "ad352b7e8870b40fc8c0d582",
+      "sourceUrl": "https://makler-realty.com/en/category-type/dom/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "968c7557a0f21e9e676bb862",
+      "sourceUrl": "https://makler-realty.com/en/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "f6b6da23bd4d931a160c54cd",
+      "sourceUrl": "https://makler-realty.com/en/category/category/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d3be544c9a23c72c603ba3ac",
+      "sourceUrl": "https://makler-realty.com/en/category/uncategorized/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "e5a04b7e2a8d747b0e41a281",
+      "sourceUrl": "https://makler-realty.com/en/listing/%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-%D0%BA%D0%BE%D0%BC%D0%BF%D0%BB%D0%B5%D0%BA%D1%81%D0%B5-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "9eac92a2c3724e600a4ce37c",
+      "sourceUrl": "https://makler-realty.com/en/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%BC-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3%D1%83/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "df3231852741dad9f6b654ca",
+      "sourceUrl": "https://makler-realty.com/en/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D1%8B-%D0%BB%D1%8E%D0%BA%D1%81-%D0%B2-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D0%BE%D0%BC-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3%D1%83/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "5c98fcfcb429c335e041d9b6",
+      "sourceUrl": "https://makler-realty.com/en/listing/%D0%BF%D1%80%D0%BE%D0%B4%D0%B0%D0%B5%D1%82%D1%81%D1%8F-%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D1%8B%D0%B9-%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "06fb8e09fab1490417821aa0",
+      "sourceUrl": "https://makler-realty.com/en/listing/%D1%82%D1%80%D0%B5%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81%D0%B0%D0%BD%D0%B8-%D0%B1%D0%B8%D0%B9%D1%87-%D1%85%D0%B8%D0%BB/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "57baf89bc8a2f379d6d1ecf1",
+      "sourceUrl": "https://makler-realty.com/en/listing/page/8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "fe84ff3827d918ea1a13a002",
+      "sourceUrl": "https://makler-realty.com/en/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a61051ac8b60147743a9e34d",
+      "sourceUrl": "https://makler-realty.com/en/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "0043b7e3591faf518707c792",
+      "sourceUrl": "https://makler-realty.com/en/resort/skiing-resort/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8a06adad826f3d1b8de5f53b",
+      "sourceUrl": "https://makler-realty.com/nl/balcon/1/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1c0ca7a291ab4a63be41a588",
+      "sourceUrl": "https://makler-realty.com/nl/balcon/1/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
       "id": "13a44dc3df38b3349ff2c0e7",
       "sourceUrl": "https://makler-realty.com/nl/balcon/3/",
       "reason": "missing_verified_source_or_render_projection"
@@ -160,6 +665,16 @@
     {
       "id": "7a726c9dbc6a4d32a20adfb8",
       "sourceUrl": "https://makler-realty.com/nl/balcon/4/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "911bf81c5ac41078ede460e5",
+      "sourceUrl": "https://makler-realty.com/nl/bedroom/2/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "4cdc2faa504ccc4966e29f92",
+      "sourceUrl": "https://makler-realty.com/nl/bedroom/3/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -173,63 +688,33 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "2d2b2be3f7f205627c0195b8",
-      "sourceUrl": "https://makler-realty.com/bg/category/category/",
+      "id": "e91c918afe04771e60df6a41",
+      "sourceUrl": "https://makler-realty.com/nl/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "f6b6da23bd4d931a160c54cd",
-      "sourceUrl": "https://makler-realty.com/en/category/category/",
+      "id": "a9d5700874a270b3166014a1",
+      "sourceUrl": "https://makler-realty.com/nl/category-type/apartment/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "d79de83f9fb5f54d7dfde11c",
-      "sourceUrl": "https://makler-realty.com/de/category/category/",
+      "id": "bd0f9ddc20982593490291ce",
+      "sourceUrl": "https://makler-realty.com/nl/category-type/apartment/page/3/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "1224e069985b6cbb18b7f36b",
-      "sourceUrl": "https://makler-realty.com/nl/category/category/",
+      "id": "0c103256021700ef118670b4",
+      "sourceUrl": "https://makler-realty.com/nl/category-type/dom/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "78898b1e1448b9186a2d8d1c",
-      "sourceUrl": "https://makler-realty.com/bg/category/uncategorized/",
+      "id": "ffc93513bcd065ec3240f75c",
+      "sourceUrl": "https://makler-realty.com/nl/category-type/dom/page/3/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "d3be544c9a23c72c603ba3ac",
-      "sourceUrl": "https://makler-realty.com/en/category/uncategorized/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0a13424c6a47008a396c46ea",
-      "sourceUrl": "https://makler-realty.com/de/category/uncategorized/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "69cff87a44a2da467959b043",
-      "sourceUrl": "https://makler-realty.com/nl/category/uncategorized/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4361db1c9f60b519861061e4",
-      "sourceUrl": "https://makler-realty.com/cdn-cgi/l/email-protection",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b69cfefb1f82b0a3b2526f02",
-      "sourceUrl": "https://makler-realty.com/bg/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "968c7557a0f21e9e676bb862",
-      "sourceUrl": "https://makler-realty.com/en/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "dcba79782a9b2c08d0deba3d",
-      "sourceUrl": "https://makler-realty.com/de/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
+      "id": "affc063d5ff5f88ecf73b7ed",
+      "sourceUrl": "https://makler-realty.com/nl/category-type/villa/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -238,8 +723,28 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "93bf704330fc81f494a13da6",
-      "sourceUrl": "https://makler-realty.com/bg/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
+      "id": "1224e069985b6cbb18b7f36b",
+      "sourceUrl": "https://makler-realty.com/nl/category/category/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "69cff87a44a2da467959b043",
+      "sourceUrl": "https://makler-realty.com/nl/category/uncategorized/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "682615799856398252d2e53d",
+      "sourceUrl": "https://makler-realty.com/nl/floors/2/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8f69a9684973fbb1e9473814",
+      "sourceUrl": "https://makler-realty.com/nl/floors/2/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "50fd19b40b85e3f5327b8f2c",
+      "sourceUrl": "https://makler-realty.com/nl/floors/3/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -258,148 +763,43 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
+      "id": "1ea8084c35a9b891a6087871",
+      "sourceUrl": "https://makler-realty.com/nl/listing/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8b142d3aa1eb876b57383fbc",
+      "sourceUrl": "https://makler-realty.com/nl/listing/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "266820ff84a08857bc09c536",
+      "sourceUrl": "https://makler-realty.com/nl/listing/page/4/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "32bce3ae02cfcb1641365936",
+      "sourceUrl": "https://makler-realty.com/nl/listing/page/5/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a76fe5a9dc1f7390cd2467cd",
+      "sourceUrl": "https://makler-realty.com/nl/listing/page/6/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d1858c63d80d36ab12829e8e",
+      "sourceUrl": "https://makler-realty.com/nl/listing/page/7/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b6cac0bb943acd1282200f28",
+      "sourceUrl": "https://makler-realty.com/nl/listing/page/8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
       "id": "ceb70fff6398698ffaeea878",
       "sourceUrl": "https://makler-realty.com/nl/location/%d0%b3%d1%8a%d1%80%d1%86%d0%b8%d1%8f/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "585afc7494918e369910008c",
-      "sourceUrl": "https://makler-realty.com/nl/resort/blagoevgrad/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a1b86fc662d10ae957f34ac2",
-      "sourceUrl": "https://makler-realty.com/nl/resort/halkidiki/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "1840af0ee85526116494ef9b",
-      "sourceUrl": "https://makler-realty.com/de/resort/loggari/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "89367ed80b4d74c86ea2de15",
-      "sourceUrl": "https://makler-realty.com/nl/resort/loggari/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a9f17bb42f70cf285f48f673",
-      "sourceUrl": "https://makler-realty.com/bg/resort/skiing-resort/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0043b7e3591faf518707c792",
-      "sourceUrl": "https://makler-realty.com/en/resort/skiing-resort/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b38a532c70d83a1df9bc3244",
-      "sourceUrl": "https://makler-realty.com/de/resort/skiing-resort/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "9f473364d28449464d6dcf4a",
-      "sourceUrl": "https://makler-realty.com/nl/resort/skiing-resort/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "2ea81a1ee42d499459a75589",
-      "sourceUrl": "https://makler-realty.com/nl/resort/thessaloniki/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "87708b17433b5fbfc88aa135",
-      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%b8%d0%b5-%d0%ba%d1%83%d1%80%d0%be%d1%80%d1%82%d1%8b-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "61f827a6cd5957722937be9f",
-      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "1a97633c8b9937d24e3135de",
-      "sourceUrl": "https://makler-realty.com/bg/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a61051ac8b60147743a9e34d",
-      "sourceUrl": "https://makler-realty.com/en/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "dcd8b0828526fc7a24652efa",
-      "sourceUrl": "https://makler-realty.com/de/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4d9993be8b0821a6db80a040",
-      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "dd68ae3e6bc396f52991c480",
-      "sourceUrl": "https://makler-realty.com/nl/type/featured/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "f7faba0ec93a1b9417f3b0e8",
-      "sourceUrl": "https://makler-realty.com/nl/type/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "8a06adad826f3d1b8de5f53b",
-      "sourceUrl": "https://makler-realty.com/nl/balcon/1/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "911bf81c5ac41078ede460e5",
-      "sourceUrl": "https://makler-realty.com/nl/bedroom/2/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4cdc2faa504ccc4966e29f92",
-      "sourceUrl": "https://makler-realty.com/nl/bedroom/3/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a9d5700874a270b3166014a1",
-      "sourceUrl": "https://makler-realty.com/nl/category-type/apartment/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "bd0f9ddc20982593490291ce",
-      "sourceUrl": "https://makler-realty.com/nl/category-type/apartment/page/3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0c647290381dc8e32120c478",
-      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "3191d3da876f7b052682adca",
-      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a5867284640c4098caa2627b",
-      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/4/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "8794b332a34d382610bde555",
-      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/5/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c17dc18e870d550e662a554a",
-      "sourceUrl": "https://makler-realty.com/de/property/sell/page/6/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "f7248c8f250c04fa1444f0bf",
-      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/6/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -423,8 +823,8 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "560be5390b930aed825cc82f",
-      "sourceUrl": "https://makler-realty.com/de/location/bulgaria/page/7/",
+      "id": "a4b9ecc3ca2cd1b9d883ec8c",
+      "sourceUrl": "https://makler-realty.com/nl/location/bulgaria/page/6/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -433,58 +833,43 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "8255d5d145f83a6829e58db2",
-      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "bda250994b0149f85bc22415",
-      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "04a103706af769773214f4e6",
-      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/4/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a950092b8848b14ea8624213",
-      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/5/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0996656beb0fe94b2b70ec80",
-      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/6/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "8b95cef51ea6fefbdfc276d5",
       "sourceUrl": "https://makler-realty.com/nl/property/rent/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "682615799856398252d2e53d",
-      "sourceUrl": "https://makler-realty.com/nl/floors/2/page/2/",
+      "id": "0c647290381dc8e32120c478",
+      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "50fd19b40b85e3f5327b8f2c",
-      "sourceUrl": "https://makler-realty.com/nl/floors/3/page/2/",
+      "id": "3191d3da876f7b052682adca",
+      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/3/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "0c103256021700ef118670b4",
-      "sourceUrl": "https://makler-realty.com/nl/category-type/dom/page/2/",
+      "id": "a5867284640c4098caa2627b",
+      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/4/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "affc063d5ff5f88ecf73b7ed",
-      "sourceUrl": "https://makler-realty.com/nl/category-type/villa/page/2/",
+      "id": "8794b332a34d382610bde555",
+      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/5/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "e91c918afe04771e60df6a41",
-      "sourceUrl": "https://makler-realty.com/nl/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/page/2/",
+      "id": "f7248c8f250c04fa1444f0bf",
+      "sourceUrl": "https://makler-realty.com/nl/property/sell/page/6/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "87708b17433b5fbfc88aa135",
+      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%b8%d0%b5-%d0%ba%d1%83%d1%80%d0%be%d1%80%d1%82%d1%8b-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "61f827a6cd5957722937be9f",
+      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -513,28 +898,63 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "34a38ab28d46325fc82aef0c",
-      "sourceUrl": "https://makler-realty.com/en/floors/2/page/3/",
+      "id": "2ea410be12c756a76862ee3a",
+      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/7/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "bf017689b241b55d045a529f",
-      "sourceUrl": "https://makler-realty.com/de/floors/2/page/3/",
+      "id": "ce9d04a5d0ec3fbe85ab3cb2",
+      "sourceUrl": "https://makler-realty.com/nl/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "8f69a9684973fbb1e9473814",
-      "sourceUrl": "https://makler-realty.com/nl/floors/2/page/3/",
+      "id": "4d9993be8b0821a6db80a040",
+      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "2531f517585077dd3e7745e4",
-      "sourceUrl": "https://makler-realty.com/en/resort/spa-resorts/page/7/",
+      "id": "585afc7494918e369910008c",
+      "sourceUrl": "https://makler-realty.com/nl/resort/blagoevgrad/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "6c8ad201c333afbd81a77706",
-      "sourceUrl": "https://makler-realty.com/de/resort/spa-resorts/page/7/",
+      "id": "a1b86fc662d10ae957f34ac2",
+      "sourceUrl": "https://makler-realty.com/nl/resort/halkidiki/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "89367ed80b4d74c86ea2de15",
+      "sourceUrl": "https://makler-realty.com/nl/resort/loggari/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "9f473364d28449464d6dcf4a",
+      "sourceUrl": "https://makler-realty.com/nl/resort/skiing-resort/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8255d5d145f83a6829e58db2",
+      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "bda250994b0149f85bc22415",
+      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "04a103706af769773214f4e6",
+      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/4/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a950092b8848b14ea8624213",
+      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/5/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "0996656beb0fe94b2b70ec80",
+      "sourceUrl": "https://makler-realty.com/nl/resort/spa-resorts/page/6/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -543,18 +963,18 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "d8e4991dbdf2cbcc4fee9649",
-      "sourceUrl": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/7/",
+      "id": "2ea81a1ee42d499459a75589",
+      "sourceUrl": "https://makler-realty.com/nl/resort/thessaloniki/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "db423fa52a0b12107869c84f",
-      "sourceUrl": "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/7/",
+      "id": "f7faba0ec93a1b9417f3b0e8",
+      "sourceUrl": "https://makler-realty.com/nl/type/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%bd/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "2ea410be12c756a76862ee3a",
-      "sourceUrl": "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/7/",
+      "id": "dd68ae3e6bc396f52991c480",
+      "sourceUrl": "https://makler-realty.com/nl/type/featured/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -563,8 +983,8 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "7b0c9ee2a5434b3884e8878b",
-      "sourceUrl": "https://makler-realty.com/sitemap.html",
+      "id": "a5e47534076e289abd4e7a34",
+      "sourceUrl": "https://makler-realty.com/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -573,13 +993,343 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
+      "id": "80fe551b0ebf712a4ad134e2",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2013-11.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b07f0d4f9813030cb8555de8",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2014-10.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "8ba1f73b212ab2010904b7e3",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2015-03.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "04566fe3870ad69f5603bf42",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2015-06.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "fb475e9db50a9a736008d8a0",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2016-01.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "507eedd44db4cce6917c97af",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2018-08.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "cf35aa692e2d5405bba199c2",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2018-11.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a2e34b2b9e4b154537d6f5a4",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-02.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "083664db874f23791af20128",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-08.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "57cc43aa6624033716a5a094",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-09.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "23dbadc304b62beedfed04a4",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-10.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "e1d64884cd4a071f89d21a45",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-11.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "40777f6d5c7bbc4c741fa340",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-12.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "ca30f87da5fcfdd4bccc15fc",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-01.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b0b4e29765273fd84f4c0834",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-02.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "309d5abb0fa30f45a1c28432",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-03.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "77b4d151bb58b84935ef16c8",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-04.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1bd9c5a72ba81e24f23aa445",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-05.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "2201286e5bfb9d4af5d091d4",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-06.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "2784146686137292e24df2f1",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-07.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "aa0db2351d76d44e47972e16",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-08.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "e577d256fa4a46cf0ff3e7ee",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-09.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "41ac8694ebcf50b0de2b410a",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-02.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1c7d860ea98f6f15275a4817",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-03.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "fcfbb55c09515f6ba3df9525",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-07.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a460b22a5ee67baf86961829",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-08.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "ddac957d5954c8b745aa702d",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-03.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "08c526039cda6860c1c194fe",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-06.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "f8d1617815d96c7f759af5d9",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-09.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6e5b1297363c7c19c5da7f21",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-11.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "dca1833d4e5b824cdefd3863",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-01.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "4a4d615db95898ce5b3ed296",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-02.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c4e8df1139fed11c34d9e8e5",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-03.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "83e1bf83505c3667c23b511f",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-04.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "2e1c018804605cd9f3f56663",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-05.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1dbd23833216a62850145966",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-09.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "98a9ce75d2d8e37150c2dfd1",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-10.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "ccef0c8447886cbb762c170f",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-12.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1cc1ef2ce12226618e59d2ef",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-01.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b1498998318d730a5b80e716",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-02.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "f2e757d93b0065c1b3adc451",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-03.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "295bf51118d32439fc2ce12b",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-04.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "262b6310cbcf7f300dcaf4c4",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-05.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a2858cff0258421abbbc8ea8",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-06.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "01d6349b274707a52486d4af",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-07.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6e2dd2445714f0550a4fb817",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-08.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "e8e477bae5878e038a04a6f5",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-09.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "bdc50c0bf4743bfcac896a5d",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-10.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "9df702a1ff98f7a81a9372f4",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-11.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "547926aba86c4d9aec60652c",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-03.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d9c9d690a5add2d77a7e2307",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-04.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "302285a84badf7956c7b6ec9",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-05.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c0ab086a10fbc5334d01f524",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-06.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "7ad35d5b6b27de6ba000cce6",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-07.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "dd8ef24173c16a91d4621827",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-08.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "50299abdfd8d408661a397b8",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-09.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "529c9694845df69de79622e4",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-10.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "9df4c2d9f7b338072ae3b618",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-07.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "7599099960b22fdee616360b",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-08.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b22364a413c38cf44c55ff9c",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-10.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c8c05c361c986d2d28fd220e",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-11.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "59a0c1e42ecbe12a97a30e02",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2017-10.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "f0d07178d1816cc66b66e579",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2018-05.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b6db6c0fe6ce15b20f2783c8",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-post-2013-11.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6a4583a7e0ff7a9b14579f65",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-post-2016-06.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "fdb7732f5c04cf06d964ce41",
+      "sourceUrl": "https://makler-realty.com/sitemap-pt-post-2025-04.html",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
       "id": "d11bd3aff26bca79ffed6104",
       "sourceUrl": "https://makler-realty.com/sitemap-tax-category_type.html",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "c085458584ed7332636b4d49",
-      "sourceUrl": "https://makler-realty.com/sitemap-tax-resort.html",
+      "id": "9e97568e4e674ff1919a704a",
+      "sourceUrl": "https://makler-realty.com/sitemap-tax-category.html",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -593,593 +1343,18 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "9e97568e4e674ff1919a704a",
-      "sourceUrl": "https://makler-realty.com/sitemap-tax-category.html",
+      "id": "c085458584ed7332636b4d49",
+      "sourceUrl": "https://makler-realty.com/sitemap-tax-resort.html",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "50299abdfd8d408661a397b8",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-09.html",
+      "id": "7b0c9ee2a5434b3884e8878b",
+      "sourceUrl": "https://makler-realty.com/sitemap.html",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "dd8ef24173c16a91d4621827",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-08.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "7ad35d5b6b27de6ba000cce6",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-07.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c0ab086a10fbc5334d01f524",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-06.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "302285a84badf7956c7b6ec9",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-05.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "d9c9d690a5add2d77a7e2307",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-04.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "547926aba86c4d9aec60652c",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2026-03.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "9df702a1ff98f7a81a9372f4",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-11.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "bdc50c0bf4743bfcac896a5d",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-10.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "e8e477bae5878e038a04a6f5",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-09.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6e2dd2445714f0550a4fb817",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-08.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "01d6349b274707a52486d4af",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-07.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a2858cff0258421abbbc8ea8",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-06.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "262b6310cbcf7f300dcaf4c4",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-05.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "295bf51118d32439fc2ce12b",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-04.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "f2e757d93b0065c1b3adc451",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-03.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b1498998318d730a5b80e716",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-02.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "1cc1ef2ce12226618e59d2ef",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2025-01.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "ccef0c8447886cbb762c170f",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-12.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "98a9ce75d2d8e37150c2dfd1",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-10.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "1dbd23833216a62850145966",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-09.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "2e1c018804605cd9f3f56663",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-05.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "83e1bf83505c3667c23b511f",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-04.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c4e8df1139fed11c34d9e8e5",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-03.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4a4d615db95898ce5b3ed296",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-02.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "dca1833d4e5b824cdefd3863",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2024-01.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6e5b1297363c7c19c5da7f21",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-11.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "f8d1617815d96c7f759af5d9",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-09.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "08c526039cda6860c1c194fe",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-06.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "ddac957d5954c8b745aa702d",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2023-03.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a460b22a5ee67baf86961829",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-08.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "fcfbb55c09515f6ba3df9525",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-07.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "1c7d860ea98f6f15275a4817",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-03.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "41ac8694ebcf50b0de2b410a",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2021-02.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "e577d256fa4a46cf0ff3e7ee",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-09.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "aa0db2351d76d44e47972e16",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-08.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "2784146686137292e24df2f1",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-07.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "2201286e5bfb9d4af5d091d4",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-06.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "1bd9c5a72ba81e24f23aa445",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-05.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "77b4d151bb58b84935ef16c8",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-04.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "309d5abb0fa30f45a1c28432",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-03.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b0b4e29765273fd84f4c0834",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-02.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "ca30f87da5fcfdd4bccc15fc",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2020-01.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "40777f6d5c7bbc4c741fa340",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-12.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "e1d64884cd4a071f89d21a45",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-11.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "23dbadc304b62beedfed04a4",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-10.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "57cc43aa6624033716a5a094",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-09.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "083664db874f23791af20128",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-08.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a2e34b2b9e4b154537d6f5a4",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2019-02.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "cf35aa692e2d5405bba199c2",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2018-11.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "507eedd44db4cce6917c97af",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2018-08.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "fb475e9db50a9a736008d8a0",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2016-01.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "04566fe3870ad69f5603bf42",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2015-06.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "8ba1f73b212ab2010904b7e3",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2015-03.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b07f0d4f9813030cb8555de8",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2014-10.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "80fe551b0ebf712a4ad134e2",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-listings-2013-11.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "fdb7732f5c04cf06d964ce41",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-post-2025-04.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6a4583a7e0ff7a9b14579f65",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-post-2016-06.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b6db6c0fe6ce15b20f2783c8",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-post-2013-11.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "f0d07178d1816cc66b66e579",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2018-05.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "59a0c1e42ecbe12a97a30e02",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2017-10.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c8c05c361c986d2d28fd220e",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-11.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b22364a413c38cf44c55ff9c",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-10.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "7599099960b22fdee616360b",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-08.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "9df4c2d9f7b338072ae3b618",
-      "sourceUrl": "https://makler-realty.com/sitemap-pt-page-2013-07.html",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a4b9ecc3ca2cd1b9d883ec8c",
-      "sourceUrl": "https://makler-realty.com/nl/location/bulgaria/page/6/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "65ef2658d01735113af26fb9",
-      "sourceUrl": "https://makler-realty.com/bg",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "bb4fa9d47b183e7ca2e28f5b",
-      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "8d5803e724332bd9a0b348b1",
-      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "63787a35aaf7300a7db7faf6",
-      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "8986d61e194b246fd36239d2",
-      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "9e51ffc3b972a1f18b8b8d81",
-      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c07fa730436cd83f79f182af",
-      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0db701ae8d0fa032ac5d15c7",
-      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "714e70d14bca49911834948e",
-      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "3c0050f78676fc234cf6ab2d",
-      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6ea8597ea603eac9be7494e4",
-      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "2c77ece914e175a6b4e42434",
-      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "5f4d33e968201ce7df04c3ef",
-      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "626ef5cbaf64286bc0c1c251",
-      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4916da0f0364f04f994d52c1",
-      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "5a707b1078be3041233e97ca",
-      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "38520f8624e73532c8bb860c",
-      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4638b7058768a7b671d8426e",
-      "sourceUrl": "https://makler-realty.ru/ru/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a7f2633c4cc3e720af7972ea",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b0%d0%bf%d1%82%d0%b5%d0%ba%d0%b8-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a78e45043f02dc53b58f09e8",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f-%d0%b3%d0%bb%d0%b0%d0%b7%d0%b0%d0%bc%d0%b8-%d0%bf%d0%b5%d1%80%d0%b5%d1%81%d0%b5%d0%bb%d0%b5%d0%bd%d1%86%d0%b5%d0%b2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "206bcd58ddc948939370d334",
-      "sourceUrl": "http://makler-realty.ru/ru/%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D0%B8%D1%8F-%D0%B3%D0%BB%D0%B0%D0%B7%D0%B0%D0%BC%D0%B8-%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D1%86%D0%B5%D0%B21/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "53c83ee35a03145b22ddbc62",
-      "sourceUrl": "http://makler-realty.ru/ru/%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D1%81%D0%BA%D0%B0%D1%8F-%D0%BA%D1%83%D1%85%D0%BD%D1%8F/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "319cafb81743e0fe8ff2a29b",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%b0%d0%bd%d0%b3%d0%b0-%d1%82%d0%b0%d0%b9%d0%bd%d0%b0-%d0%b4%d0%b0%d1%80%d0%b0-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d1%81%d0%ba%d0%be%d0%b9-%d1%8f%d1%81%d0%bd%d0%be%d0%b2%d0%b8%d0%b4%d0%b5/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "2b9b30d9273c15143b300c65",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%b2%d0%be%d0%b7-%d0%b2%d0%b0%d0%bb%d1%8e%d1%82%d1%8b-%d0%b2-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8e/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c65964619d70038a941c477c",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%bd%d0%b8%d0%bc%d0%b0%d0%bd%d0%b8%d0%b5-%d1%87%d0%b5%d1%80%d0%bd%d1%8b%d0%b5-%d1%80%d0%b8%d1%8d%d0%bb%d1%82%d0%be%d1%80%d1%8b-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "25df59a54c3f9bc1268d811a",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/apartment/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "bcf99914d84fbf4c62ab5d28",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/dom/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0c777cccf2fcb3a09b729293",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BE%D0%BA-%D0%B7%D0%B5%D0%BC%D0%BB%D0%B8/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "58b174282ba58cf80ed72982",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a7c5ce8e615870025fbeca14",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/skolko-vremeni-neobhodimo-dlq-vibora-nedvizhimosti-ipredvaritelnogo-dogovora/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4685b3f22d23cb1246905b8a",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-dolgo-oformlqetsq-nedwizhimost-v-sobstvenost/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c354396711b543c63c380bf7",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-dolgo-oformlqetsq-notarialnij-akt/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "89edc163660ba33f4add30ac",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kakie-v-bolgarii-kommunalnie-platezhi/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "31f13244017c32ad5a3a81cf",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-kupit-i-zaregistrirovat-avto-v-bolgarii/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6bfdaf8e88d1f46a7dbaef25",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/pochemu-nuzhna-firma-dlq-pokupki-doma-v-bolgarii/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "60104cc51515f1f9285757dd",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/neobhodimie-dokumenti-dlq-pokupki-kvartiri-v-bolgarii/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6112d37455423313dde202c5",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-polichit-vnzh-v-bolgarii/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "4f1af8e9f469fd4a55bca3f7",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-poluchit-pmzh-v-bolgarii/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c934d858974c3706ed015551",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-poluchit-grazhdanstvo-bolgarii/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "77301cf0bdbbd8bad2cdbcd1",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kak-otnosqtsq-bolgari-k-inostrantsam/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "e535bb9eef097a1dcd4c8eb0",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/chto-takoe-bulstat/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b6a7595fed726a3796a2b43e",
-      "sourceUrl": "http://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/kupit-nedvizhimost-u-zastroishika-ili-charez-agentstvo-nedvizhimosti/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "17230c0b030e25105b2180dc",
-      "sourceUrl": "http://makler-realty.ru/ru/%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81-%D0%BE%D1%82%D0%B2%D0%B5%D1%82-%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D0%B8%D1%8F/kak-proverit-agentstvo-nedvizhimosti/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "f5ca12acc0f844c33733c039",
-      "sourceUrl": "http://makler-realty.ru/ru/%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81-%D0%BE%D1%82%D0%B2%D0%B5%D1%82-%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B1%D0%BE%D0%BB%D0%B3%D0%B0%D1%80%D0%B8%D1%8F/%D0%BA%D0%B0%D0%BA-%D0%B2%D1%8B%D0%B1%D1%80%D0%B0%D1%82%D1%8C-%D0%B0%D0%B3%D0%B5%D0%BD%D1%82%D1%81%D1%82%D0%B2%D0%BE-%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "54407ff9ac67a20ec366af54",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "f93f8395d9767559e1cfe323",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%b4%d0%be%d1%81%d1%82%d0%be%d0%bf%d1%80%d0%b8%d0%bc%d0%b5%d1%87%d0%b0%d1%82%d0%b5%d0%bb%d0%bd%d0%be%d1%81%d1%82%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "74acb5007801c08e6a4e9af1",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d0%b0%d0%ba-%d0%b4%d0%be%d0%b5%d1%85%d0%b0%d1%82%d1%8c-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "3b9871affa71413754d11898",
-      "sourceUrl": "http://makler-realty.ru/ru/%D1%82%D0%B0%D0%BA%D1%81%D0%B8-%D0%B8%D0%B7-%D1%81%D0%BE%D1%84%D0%B8%D0%B8-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "47fe28e10250e00c30c6472e",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d0%b8%d0%bd%d0%b5%d0%b7%d0%b8%d1%82%d0%b5%d1%80%d0%b0%d0%bf%d0%b8%d1%8f-%d0%bc%d0%b0%d0%bd%d1%83%d0%b0%d0%bb%d1%8c%d0%bd%d0%b0%d1%8f-%d1%82%d0%b5%d1%80%d0%b0%d0%bf%d0%b8%d1%8f/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "16307747eca39eaac4a9389d",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "796375ea6faff7d07b79c8f9",
-      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d1%83%d0%bf%d0%b8%d1%82%d1%8c-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "e3907bee99350377e9cddab1",
+      "sourceUrl": "https://makler-realty.ru/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/page/2/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1198,63 +1373,133 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
+      "id": "bdce81a1c9303828d2c99ba2",
+      "sourceUrl": "https://makler-realty.ru/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "527b3a76a1e57b439507936e",
+      "sourceUrl": "https://makler-realty.ru/listing/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "d1965e65e8a2c16f1e167af2",
+      "sourceUrl": "https://makler-realty.ru/listing/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "1dac1996b964217e63ffee52",
+      "sourceUrl": "https://makler-realty.ru/location/bulgaria/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b088b862a04d31584dbb1a33",
+      "sourceUrl": "https://makler-realty.ru/location/bulgaria/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "736125c1cf6ce78dbfdfed06",
+      "sourceUrl": "https://makler-realty.ru/property/sell/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "09aa860e8097eb46bbdc36d5",
+      "sourceUrl": "https://makler-realty.ru/property/sell/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6a69daf284ac929e40740728",
+      "sourceUrl": "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "6b8e02b717c8a71d0b4a7ef5",
+      "sourceUrl": "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "dfe03f5b0515e55027dcd487",
+      "sourceUrl": "https://makler-realty.ru/resort/spa-resorts/page/2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "b9ada5c62f2d02241222ea4b",
+      "sourceUrl": "https://makler-realty.ru/resort/spa-resorts/page/3/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "88a3d6f6604bf22bf9181b91",
+      "sourceUrl": "https://makler-realty.ru/ru",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "4638b7058768a7b671d8426e",
+      "sourceUrl": "https://makler-realty.ru/ru/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a7f2633c4cc3e720af7972ea",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b0%d0%bf%d1%82%d0%b5%d0%ba%d0%b8-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "a78e45043f02dc53b58f09e8",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f-%d0%b3%d0%bb%d0%b0%d0%b7%d0%b0%d0%bc%d0%b8-%d0%bf%d0%b5%d1%80%d0%b5%d1%81%d0%b5%d0%bb%d0%b5%d0%bd%d1%86%d0%b5%d0%b2/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "319cafb81743e0fe8ff2a29b",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%b0%d0%bd%d0%b3%d0%b0-%d1%82%d0%b0%d0%b9%d0%bd%d0%b0-%d0%b4%d0%b0%d1%80%d0%b0-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d1%81%d0%ba%d0%be%d0%b9-%d1%8f%d1%81%d0%bd%d0%be%d0%b2%d0%b8%d0%b4%d0%b5/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "2b9b30d9273c15143b300c65",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%b2%d0%be%d0%b7-%d0%b2%d0%b0%d0%bb%d1%8e%d1%82%d1%8b-%d0%b2-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8e/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "c65964619d70038a941c477c",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%bd%d0%b8%d0%bc%d0%b0%d0%bd%d0%b8%d0%b5-%d1%87%d0%b5%d1%80%d0%bd%d1%8b%d0%b5-%d1%80%d0%b8%d1%8d%d0%bb%d1%82%d0%be%d1%80%d1%8b-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "58b174282ba58cf80ed72982",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b2%d0%be%d0%bf%d1%80%d0%be%d1%81-%d0%be%d1%82%d0%b2%d0%b5%d1%82-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "54407ff9ac67a20ec366af54",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b3%d0%bb%d0%b0%d0%b2%d0%bd%d0%b0%d1%8f/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "f93f8395d9767559e1cfe323",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%b4%d0%be%d1%81%d1%82%d0%be%d0%bf%d1%80%d0%b8%d0%bc%d0%b5%d1%87%d0%b0%d1%82%d0%b5%d0%bb%d0%bd%d0%be%d1%81%d1%82%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "74acb5007801c08e6a4e9af1",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d0%b0%d0%ba-%d0%b4%d0%be%d0%b5%d1%85%d0%b0%d1%82%d1%8c-%d0%b8%d0%b7-%d1%81%d0%be%d1%84%d0%b8%d0%b8-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "47fe28e10250e00c30c6472e",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d0%b8%d0%bd%d0%b5%d0%b7%d0%b8%d1%82%d0%b5%d1%80%d0%b0%d0%bf%d0%b8%d1%8f-%d0%bc%d0%b0%d0%bd%d1%83%d0%b0%d0%bb%d1%8c%d0%bd%d0%b0%d1%8f-%d1%82%d0%b5%d1%80%d0%b0%d0%bf%d0%b8%d1%8f/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "16307747eca39eaac4a9389d",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d0%be%d0%bd%d1%82%d0%b0%d0%ba%d1%82%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
+      "id": "796375ea6faff7d07b79c8f9",
+      "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d1%83%d0%bf%d0%b8%d1%82%d1%8c-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "reason": "missing_verified_source_or_render_projection"
+    },
+    {
       "id": "98f4a239b9fd7bbc42d0d47f",
       "sourceUrl": "https://makler-realty.ru/ru/%d0%ba%d1%83%d0%bf%d0%b8%d1%82%d1%8c-%d0%ba%d0%b2%d0%b0%d1%80%d1%82%d0%b8%d1%80%d1%83-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "09c7cd068ebf594b6c2d92da",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BD%D0%B5%D0%B4%D0%BE%D1%80%D0%BE%D0%B3%D0%B8%D0%B5-%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "21e6c77e7d91ce5fb3fd8617",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "173d63543b97bd4b5088a5bf",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8-2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0e9d434cf7bd995636d14185",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D1%8B-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "20fa03c8b0b2f62a7128eff4",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D0%BF%D0%B0%D1%80%D0%BA%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "dec43f7abac7ab4b56744811",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D1%82%D1%80%D0%B5%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D0%B3-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "8110c4716c96a4c134d01e86",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "28e87ef5894f37a4a2af7913",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D1%82%D1%80%D0%B5%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D1%86%D0%B5%D0%BD%D1%82%D1%80%D0%B5-%D0%B3-%D1%81%D0%B0%D0%BD/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "a073d60314ba4d356ce98896",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B0%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-%D0%B2-%D0%BF%D0%B0%D1%80%D0%BA-%D0%BE%D1%82%D0%B5%D0%BB%D0%B5-%D0%BF%D0%B8%D1%80%D0%B8%D0%BD-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "79ce81b2ed67ed523f66ceda",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%BB%D1%8E%D0%BA%D1%81-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "538eb7caf8329f949516fc82",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81-%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BA%D0%BE%D0%BC-%D0%B7%D0%B5%D0%BC%D0%BB%D0%B8-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1283,83 +1528,13 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "29d4c32acd191299e9d744fe",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/apartment/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "8a84d7601644db7110a53cf3",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/studio/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c43513ae838dfce706c1a8c3",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/dom/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "dbfc1ef58e00dc4860d4a095",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BE%D0%BA-%D0%B7%D0%B5%D0%BC%D0%BB%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "45999e1ec011c729b0ca3fe0",
-      "sourceUrl": "http://makler-realty.ru/ru/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9-%D0%B1%D0%B5%D1%80%D0%B5%D0%B3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "e7d4040b4dd14a94f86a7660",
-      "sourceUrl": "http://makler-realty.ru/ru/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D1%81%D0%B2%D1%8F%D1%82%D0%BE%D0%B9-%D0%B2%D0%BB%D0%B0%D1%81/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "9e1b78c658ec6bde32951424",
-      "sourceUrl": "http://makler-realty.ru/ru/resort/sozopol/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "3e746516ea3bf768e9c289b5",
       "sourceUrl": "https://makler-realty.ru/ru/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%b4%d0%b2%d1%83%d1%88%d0%ba%d0%b8/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "8f465ba4d6c9635341c212ca",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/576/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "945014b1cd9358d2ef6de641",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "d83c7e7bacd9bb67c9f25e95",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%80%D1%8F%D0%B4%D0%BE%D0%BC-%D1%81-%D0%BF%D0%B0%D1%80%D0%BA%D0%BE/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "62bd705c69bfac69a25cf1ba",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81-%D0%BE%D1%82%D0%B4%D0%B5%D0%BB%D0%BA%D0%BE%D0%B9-%D0%B2-%D1%81/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c7466e29fbe0eca3e30f1bcc",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%B4%D0%B2%D1%83%D1%85%D0%BA%D0%BE%D0%BC%D0%BD%D0%B0%D1%82%D0%BD%D0%B0%D1%8F-%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D0%B0-%D1%81-%D0%BC%D0%B5%D0%B1%D0%B5%D0%BB%D1%8C%D1%8E-%D0%B2-%D0%B3-%D1%81/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "c5ad5d21c625a7c7cf05cf2c",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D0%BA%D0%B2%D0%B0%D1%80%D1%82%D0%B8%D1%80%D1%8B-%D0%B2-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D0%B5-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "d83f403fc3f3d58e090ee926",
       "sourceUrl": "https://makler-realty.ru/ru/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "78c85898123a51ec5f0c2bb3",
-      "sourceUrl": "http://makler-realty.ru/ru/listing/%D1%83%D1%87%D0%B0%D1%81%D1%82%D0%BE%D0%BA-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8-%D1%81-%D0%B2%D0%B5%D0%BB%D0%B8%D0%BA%D0%BE%D0%BB%D0%B5%D0%BF%D0%BD%D0%BE%D0%B9-%D0%BF%D0%B0/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1380,11 +1555,6 @@
     {
       "id": "56aab72b83c883976c980bed",
       "sourceUrl": "https://makler-realty.ru/ru/%d0%be%d1%84%d0%be%d1%80%d0%bc%d0%bb%d0%b5%d0%bd%d0%b8%d0%b5-%d1%81%d0%b4%d0%b5%d0%bb%d0%ba%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "d820fa846112f1c213529aa5",
-      "sourceUrl": "http://makler-realty.ru/ru/%d1%83%d1%81%d0%bb%d1%83%d0%b3%d0%b8-%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d1%8f/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1413,28 +1583,8 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "16e01b593b2698ae6827da0d",
-      "sourceUrl": "http://makler-realty.ru/ru/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "47d073faed2f66d328bda8ec",
       "sourceUrl": "https://makler-realty.ru/ru/%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bb%d0%b5%d1%87%d0%b5%d0%bd%d0%b8%d0%b5-%d0%b0%d1%81%d1%82%d0%bc%d1%8b/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "0cac458e19d8640455c091d2",
-      "sourceUrl": "http://makler-realty.ru/ru/resort/pomorie/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "3b3cd85801f77c3b2f32fd36",
-      "sourceUrl": "http://makler-realty.ru/ru/resort/nesebar/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "798cc39745e8a0cddac76bd5",
-      "sourceUrl": "http://makler-realty.ru/ru/%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8-%D0%B3%D0%BE%D1%80%D0%BE%D0%B4-%D0%B2-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D0%BE%D0%BC-%D0%BB%D0%B5%D0%B3%D0%BA%D0%BE-%D0%B4%D1%8B%D1%88%D0%B0%D1%82/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1468,28 +1618,8 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "ab5740e2a561055d8fb63314",
-      "sourceUrl": "http://makler-realty.ru/ru/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b0%d0%bb%d0%be%d0%bd%d0%b8%d0%ba%d0%b8-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "356d6a16eed02d86057398a9",
       "sourceUrl": "https://makler-realty.ru/ru/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%be%d1%84%d0%b8%d1%8f-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "1f20bd2d7b0ea52794032920",
-      "sourceUrl": "http://makler-realty.ru/%D1%82%D1%80%D0%B0%D0%BD%D1%81%D1%84%D0%B5%D1%80-%D1%81%D0%B0%D0%BB%D0%BE%D0%BD%D0%B8%D0%BA%D0%B8-%D0%B1%D0%B0%D0%BD%D1%81%D0%BA%D0%BE/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "842cf9ac49962442bab86176",
-      "sourceUrl": "http://makler-realty.ru/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d0%b1%d1%83%d1%80%d0%b3%d0%b0%d1%81-%d1%81%d0%be%d0%bb%d0%bd%d0%b5%d1%87%d0%bd%d1%8b%d0%b9-%d0%b1%d0%b5%d1%80%d0%b5%d0%b3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "ba43b118a4bc77987944d669",
-      "sourceUrl": "http://makler-realty.ru/%d1%82%d1%80%d0%b0%d0%bd%d1%81%d1%84%d0%b5%d1%80-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1505,11 +1635,6 @@
     {
       "id": "e51930da9ab0e031af2e294c",
       "sourceUrl": "https://makler-realty.ru/ru/%d1%83%d1%81%d0%bb%d1%83%d0%b3%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/%d0%b8%d0%bd%d1%84%d0%be%d1%80%d0%bc%d0%b0%d1%86%d0%b8%d1%8f/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "d6b4375d19a07290c3f88dc1",
-      "sourceUrl": "http://makler-realty.ru/ru/%D1%8D%D0%BA%D1%81%D0%BA%D1%83%D1%80%D1%81%D0%B8%D0%B8-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1573,11 +1698,6 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "e3907bee99350377e9cddab1",
-      "sourceUrl": "https://makler-realty.ru/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "feac2a8bcf2cb238f193d67f",
       "sourceUrl": "https://makler-realty.ru/ru/category-type/commercial-area/",
       "reason": "missing_verified_source_or_render_projection"
@@ -1633,11 +1753,6 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "bdce81a1c9303828d2c99ba2",
-      "sourceUrl": "https://makler-realty.ru/category/%d0%bd%d0%be%d0%b2%d0%b8%d0%bd%d0%b8/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "d4e884e0b7bf9edfab09b23d",
       "sourceUrl": "https://makler-realty.ru/ru/category/%d1%81%d1%82%d0%b0%d1%82%d0%b8%d0%b8/",
       "reason": "missing_verified_source_or_render_projection"
@@ -1675,21 +1790,6 @@
     {
       "id": "c807998f8be45ecddb866283",
       "sourceUrl": "https://makler-realty.ru/ru/listing/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "527b3a76a1e57b439507936e",
-      "sourceUrl": "https://makler-realty.ru/listing/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "d1965e65e8a2c16f1e167af2",
-      "sourceUrl": "https://makler-realty.ru/listing/page/3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "88a3d6f6604bf22bf9181b91",
-      "sourceUrl": "https://makler-realty.ru/ru",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1753,13 +1853,13 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "68ab86faeb7021734d33425c",
-      "sourceUrl": "https://makler-realty.ru/ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "c5330bd49ebc38db072cb989",
+      "sourceUrl": "https://makler-realty.ru/ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "c5330bd49ebc38db072cb989",
-      "sourceUrl": "https://makler-realty.ru/ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "id": "68ab86faeb7021734d33425c",
+      "sourceUrl": "https://makler-realty.ru/ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1903,16 +2003,6 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "1dac1996b964217e63ffee52",
-      "sourceUrl": "https://makler-realty.ru/location/bulgaria/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b088b862a04d31584dbb1a33",
-      "sourceUrl": "https://makler-realty.ru/location/bulgaria/page/3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "29be9e2c3a70067f3dff76c3",
       "sourceUrl": "https://makler-realty.ru/ru/location/greece-property/",
       "reason": "missing_verified_source_or_render_projection"
@@ -1938,16 +2028,6 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "736125c1cf6ce78dbfdfed06",
-      "sourceUrl": "https://makler-realty.ru/property/sell/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "09aa860e8097eb46bbdc36d5",
-      "sourceUrl": "https://makler-realty.ru/property/sell/page/3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "a7b1da11b68ebe0d23f96a5c",
       "sourceUrl": "https://makler-realty.ru/ru/resort/%d0%bc%d0%be%d1%80%d1%81%d0%ba%d0%b8%d0%b5-%d0%ba%d1%83%d1%80%d0%be%d1%80%d1%82%d1%8b-%d0%b1%d0%be%d0%bb%d0%b3%d0%b0%d1%80%d0%b8%d0%b8/",
       "reason": "missing_verified_source_or_render_projection"
@@ -1960,16 +2040,6 @@
     {
       "id": "d3c24ffa91ec832be7124200",
       "sourceUrl": "https://makler-realty.ru/ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6a69daf284ac929e40740728",
-      "sourceUrl": "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "6b8e02b717c8a71d0b4a7ef5",
-      "sourceUrl": "https://makler-realty.ru/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/3/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -1993,28 +2063,8 @@
       "reason": "missing_verified_source_or_render_projection"
     },
     {
-      "id": "dfe03f5b0515e55027dcd487",
-      "sourceUrl": "https://makler-realty.ru/resort/spa-resorts/page/2/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "b9ada5c62f2d02241222ea4b",
-      "sourceUrl": "https://makler-realty.ru/resort/spa-resorts/page/3/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
       "id": "0f3c9ace00843f063b2d7bd4",
       "sourceUrl": "https://makler-realty.ru/ru/sandanski-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "16df2c3fe4b5be75e1df57a2",
-      "sourceUrl": "http://makler-realty.ru/ru/category-type/studio/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/",
-      "reason": "missing_verified_source_or_render_projection"
-    },
-    {
-      "id": "cae308663a113d0891031839",
-      "sourceUrl": "http://makler-realty.ru/category-type/apartment/resort/%D0%BD%D0%B5%D0%B4%D0%B2%D0%B8%D0%B6%D0%B8%D0%BC%D0%BE%D1%81%D1%82%D1%8C-%D0%B2-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/property/sell/min-price/30000/",
       "reason": "missing_verified_source_or_render_projection"
     },
     {
@@ -6349,6 +6399,696 @@
       "sourceUrl": "https://makler-realty.ru/%d1%8d%d0%ba%d1%81%d0%ba%d1%83%d1%80%d1%81%d0%b8%d0%b8-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
       "targetPath": "/ru/legacy/1fff518cc2377ca5e2c9f973",
       "sourceBodyHash": "ef5a25bb7d6c992ac50aa0754afa5fd2d00e29b379d9d7297f70795121132878",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "c07fa730436cd83f79f182af",
+      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/en/legacy/c07fa730436cd83f79f182af",
+      "sourceBodyHash": "aa5dc5e49bcfecddff0dcbb1eec6556b2414fedc4dd3c4bfc68e171c285e7ae2",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "8d5803e724332bd9a0b348b1",
+      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
+      "targetPath": "/en/legacy/8d5803e724332bd9a0b348b1",
+      "sourceBodyHash": "c348c1ee2b469bd9c8d0cbdd26f5f8b6d75ab000346589b61a0b4886479199a5",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "ac39a1c413d71321b672ceeb",
+      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/en/legacy/ac39a1c413d71321b672ceeb",
+      "sourceBodyHash": "44a6124ebdad39f6b9d9f820273000a2a4425563f24e53215ebfbd3c1648f7de",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "16312863cd2e2e42fa853b4d",
+      "sourceUrl": "https://makler-realty.com/en/listing/",
+      "targetPath": "/en/legacy/16312863cd2e2e42fa853b4d",
+      "sourceBodyHash": "0bc1ec002b59b6474293349cdf086002a98b61609677b5928ac25797ba0c906e",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "34a38ab28d46325fc82aef0c",
+      "sourceUrl": "https://makler-realty.com/en/floors/2/page/3/",
+      "targetPath": "/en/legacy/34a38ab28d46325fc82aef0c",
+      "sourceBodyHash": "f86387ff7c26019de86c4f594c529fc77eaf99af4414649598f96e5852a890c3",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "843171583944c8f9814cefa3",
+      "sourceUrl": "https://makler-realty.com/en/balcon/1/page/3/",
+      "targetPath": "/en/legacy/843171583944c8f9814cefa3",
+      "sourceBodyHash": "a50aa4a5c320fb72e2d9b0540c35b883de0de623c335ad47c9579b2234af826e",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "f00009f198d5a3a78355e71c",
+      "sourceUrl": "https://makler-realty.com/en/author/admin/",
+      "targetPath": "/en/legacy/f00009f198d5a3a78355e71c",
+      "sourceBodyHash": "0fb70c142185b327dce9e040f4207d262e8fd3cc8303b71fd04c6d11bce0cc1a",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "560be5390b930aed825cc82f",
+      "sourceUrl": "https://makler-realty.com/de/location/bulgaria/page/7/",
+      "targetPath": "/de/legacy/560be5390b930aed825cc82f",
+      "sourceBodyHash": "64de0254098d511e9590d349b2338fc8852579043e8658d3dd32ac2d87885a71",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "33b10e5d8ac0af13308cda28",
+      "sourceUrl": "https://makler-realty.com/de/listing/page/7/",
+      "targetPath": "/de/legacy/33b10e5d8ac0af13308cda28",
+      "sourceBodyHash": "b0568cf55bbd340bea5cbffaf307d09ed91c15e2dc76216d42ea282dda1b7262",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "1e204e2852e1db64e7dbb4e2",
+      "sourceUrl": "https://makler-realty.com/de/listing/page/6/",
+      "targetPath": "/de/legacy/1e204e2852e1db64e7dbb4e2",
+      "sourceBodyHash": "2b1557057d56d7861164d20f16adee84f613b6e48e6a23f52fc44a79145c3e03",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "ee5439906c7dd1ae61fb5700",
+      "sourceUrl": "https://makler-realty.com/de/listing/page/5/",
+      "targetPath": "/de/legacy/ee5439906c7dd1ae61fb5700",
+      "sourceBodyHash": "6fd5d80831ad07045d0416a6b2c6df485a0ff3a0658242222bfd5e4bb306325a",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "02dfc780f34e6374c5c14621",
+      "sourceUrl": "https://makler-realty.com/de/listing/page/4/",
+      "targetPath": "/de/legacy/02dfc780f34e6374c5c14621",
+      "sourceBodyHash": "5bd21daf84f6797db1d955fa441bd1ded1fc8e82fea4735ab2693e1f5fba4921",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "ad1ccb9877533080304ef546",
+      "sourceUrl": "https://makler-realty.com/de/listing/page/3/",
+      "targetPath": "/de/legacy/ad1ccb9877533080304ef546",
+      "sourceBodyHash": "6cf8ffaa0dddb767a9d63ea187a2e68ab4ebe3d7bb678a99be0f6954f159724e",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "18cf0289a4ae42b8f0d33a91",
+      "sourceUrl": "https://makler-realty.com/de/listing/page/2/",
+      "targetPath": "/de/legacy/18cf0289a4ae42b8f0d33a91",
+      "sourceBodyHash": "c9345a4acd43f9f251071a457faec0bf4362043295fee19352ba59dabe307d7a",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "cb46f0573285966e37de49c3",
+      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d0%b1%d0%b7%d0%b0%d0%b2%d0%b5%d0%b4%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b4%d0%b2%d0%be%d1%80/",
+      "targetPath": "/de/legacy/cb46f0573285966e37de49c3",
+      "sourceBodyHash": "5ef9766b35d4ba2104ee992bdc4238ba69538b9c745840997c5fd3d553fefc60",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "5a707b1078be3041233e97ca",
+      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
+      "targetPath": "/de/legacy/5a707b1078be3041233e97ca",
+      "sourceBodyHash": "f763893bafde1c136c9d2191c80500d2f305883756532b58c024d993ee16a7ab",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "2c77ece914e175a6b4e42434",
+      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
+      "targetPath": "/de/legacy/2c77ece914e175a6b4e42434",
+      "sourceBodyHash": "868a717088d85b0c34b85de14e3230ab94a53a05e060132ab9e294c3f5a85121",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "0db701ae8d0fa032ac5d15c7",
+      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/de/legacy/0db701ae8d0fa032ac5d15c7",
+      "sourceBodyHash": "b9bc8530c0a3e4a0bfbd2fb4e56e7724bb2e106a960729619a90628bd606c289",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "63787a35aaf7300a7db7faf6",
+      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
+      "targetPath": "/de/legacy/63787a35aaf7300a7db7faf6",
+      "sourceBodyHash": "4c3db8561efbee3b9f4a5c8549cd1047411d4b0fa99703e3c390424e858408eb",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "42ffce6475baebdfe8eb0f83",
+      "sourceUrl": "https://makler-realty.com/de/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/de/legacy/42ffce6475baebdfe8eb0f83",
+      "sourceBodyHash": "739054924bb7c40755d79dd807f124ade421bceaa6adc49631f692f75c1e06be",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "928c07f69e9ca0d9840c6dc4",
+      "sourceUrl": "https://makler-realty.com/de/listing/",
+      "targetPath": "/de/legacy/928c07f69e9ca0d9840c6dc4",
+      "sourceBodyHash": "f6522980169499de5de364a8d821745be6479939f75c543d5d96189c3179e70f",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "e7aff3710fe24a8824fe3590",
+      "sourceUrl": "https://makler-realty.com/de/author/admin/",
+      "targetPath": "/de/legacy/e7aff3710fe24a8824fe3590",
+      "sourceBodyHash": "5b2a003b743230d217474ef4688cae9c67dfed7c31a8069e9e6e9bd6a917cf3e",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "b605617c3be648695cbdd76f",
+      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d0%b1%d0%b7%d0%b0%d0%b2%d0%b5%d0%b4%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b4%d0%b2%d0%be%d1%80/",
+      "targetPath": "/nl/legacy/b605617c3be648695cbdd76f",
+      "sourceBodyHash": "cafa6828d68ea6c8d4ad18a3f3f4e19bb1d4b79f30e428cba5274d34fe9fa326",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "3f5f54227598517683fec535",
+      "sourceUrl": "https://makler-realty.com/category-type/dom/page/3/",
+      "targetPath": "/bg/legacy/3f5f54227598517683fec535",
+      "sourceBodyHash": "2c6dfea3db28cfc8490ecc69c955e3d2c0e7116528b8976728ace89827a067f0",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "38520f8624e73532c8bb860c",
+      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
+      "targetPath": "/nl/legacy/38520f8624e73532c8bb860c",
+      "sourceBodyHash": "230314a04b265c12311b0d155d40451f84284e0ffd9972b2610a543af8f205bf",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "e9f7b4586e1b84cb99d99a21",
+      "sourceUrl": "https://makler-realty.com/bg/listing/page/8/",
+      "targetPath": "/bg/legacy/e9f7b4586e1b84cb99d99a21",
+      "sourceBodyHash": "a3d9d69bccbb017ae2284f313cbd767cbe3dfb708d7190a50a5315d4681761f9",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "5f4d33e968201ce7df04c3ef",
+      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
+      "targetPath": "/nl/legacy/5f4d33e968201ce7df04c3ef",
+      "sourceBodyHash": "858b118cc8ee91a849765791fd4572867c1595558ea8896fa7abcb2e3c537f2e",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "714e70d14bca49911834948e",
+      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/nl/legacy/714e70d14bca49911834948e",
+      "sourceBodyHash": "cd8c6f8331d7b0b3fa28b72fbd72287c11e9e625f05a60c22b91d55097d5f1d4",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "348ef0d290f8a8944bd73d06",
+      "sourceUrl": "https://makler-realty.com/bg/listing/page/7/",
+      "targetPath": "/bg/legacy/348ef0d290f8a8944bd73d06",
+      "sourceBodyHash": "6aa1e2c880abc4ea9d6e37ac3f11691bda429c890812d225488fbe6d35f1ac44",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "8986d61e194b246fd36239d2",
+      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
+      "targetPath": "/nl/legacy/8986d61e194b246fd36239d2",
+      "sourceBodyHash": "2ac25b6c7bc26cd92602be2165f7d502860d13633b182bcb9a6ebd50ea2b05f4",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "be6844bdfad43b5c88a51d0d",
+      "sourceUrl": "https://makler-realty.com/nl/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/nl/legacy/be6844bdfad43b5c88a51d0d",
+      "sourceBodyHash": "bec0c59d2f4a60c7012b130bc3d3bc27e45573f0d114996086651a45b4596272",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "694261c6ef189de4c6b9fdfe",
+      "sourceUrl": "https://makler-realty.com/bg/listing/page/6/",
+      "targetPath": "/bg/legacy/694261c6ef189de4c6b9fdfe",
+      "sourceBodyHash": "8ea7d2cf0063c9ff26f5778e6ae16aa9a6f37a427c265a0e559f4878772d0dcf",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "7f5f8eb1cf41446ca661dbf2",
+      "sourceUrl": "https://makler-realty.com/nl/listing/",
+      "targetPath": "/nl/legacy/7f5f8eb1cf41446ca661dbf2",
+      "sourceBodyHash": "69d2202f32001439011a3628df587b927262b22b82604e4520c0cc8aec941a1a",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "6262d4fa24d55977dd2e3c44",
+      "sourceUrl": "https://makler-realty.com/bg/listing/page/5/",
+      "targetPath": "/bg/legacy/6262d4fa24d55977dd2e3c44",
+      "sourceBodyHash": "d8ea2755826736519889fa399163e80e2e7747392302a4d7adc977ae734c75f8",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "035639b9942dd32590c1abb5",
+      "sourceUrl": "https://makler-realty.com/nl/author/admin/",
+      "targetPath": "/nl/legacy/035639b9942dd32590c1abb5",
+      "sourceBodyHash": "b8292be4ce4ca3fbf3622508c61fb326f9ac07d0ddeb099c642bfbbfcb0b1dcb",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "c71b4d863b2ad6c21f854086",
+      "sourceUrl": "https://makler-realty.com/listing/page/8/",
+      "targetPath": "/bg/legacy/c71b4d863b2ad6c21f854086",
+      "sourceBodyHash": "a3d9d69bccbb017ae2284f313cbd767cbe3dfb708d7190a50a5315d4681761f9",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "adc8a9c31f3ca781b7a96321",
+      "sourceUrl": "https://makler-realty.com/bg/listing/page/4/",
+      "targetPath": "/bg/legacy/adc8a9c31f3ca781b7a96321",
+      "sourceBodyHash": "26e3c8e635aaf6e1ec33ef79e4228d6167ad29ab6c6420ddeaf1d1dbe97d4a5a",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "a663ef6a385c2f396c375114",
+      "sourceUrl": "https://makler-realty.com/listing/page/7/",
+      "targetPath": "/bg/legacy/a663ef6a385c2f396c375114",
+      "sourceBodyHash": "6aa1e2c880abc4ea9d6e37ac3f11691bda429c890812d225488fbe6d35f1ac44",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "288dd497ec7c7077e356ec8e",
+      "sourceUrl": "https://makler-realty.com/bg/listing/page/3/",
+      "targetPath": "/bg/legacy/288dd497ec7c7077e356ec8e",
+      "sourceBodyHash": "2c62bfe6ae17a8f7fc17ccb4a62731f63f537c2fa651c5762b0cc7c8b02c9430",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "189d2884bc8cfdc76109a4b2",
+      "sourceUrl": "https://makler-realty.com/listing/page/6/",
+      "targetPath": "/bg/legacy/189d2884bc8cfdc76109a4b2",
+      "sourceBodyHash": "8ea7d2cf0063c9ff26f5778e6ae16aa9a6f37a427c265a0e559f4878772d0dcf",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "ec9d832c6c5bebc70cdf8d29",
+      "sourceUrl": "https://makler-realty.com/listing/page/5/",
+      "targetPath": "/bg/legacy/ec9d832c6c5bebc70cdf8d29",
+      "sourceBodyHash": "d8ea2755826736519889fa399163e80e2e7747392302a4d7adc977ae734c75f8",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "1736099df5ee3562d0591251",
+      "sourceUrl": "https://makler-realty.com/bg/listing/page/2/",
+      "targetPath": "/bg/legacy/1736099df5ee3562d0591251",
+      "sourceBodyHash": "07f6734c782ec7acb1229f717dda3f6f5f8201f59c2d6b205169786d72641a87",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "05fe40ec384ceb4566e02f65",
+      "sourceUrl": "https://makler-realty.com/listing/page/4/",
+      "targetPath": "/bg/legacy/05fe40ec384ceb4566e02f65",
+      "sourceBodyHash": "26e3c8e635aaf6e1ec33ef79e4228d6167ad29ab6c6420ddeaf1d1dbe97d4a5a",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "0dfcfb0dc206c2c06f9f4e0d",
+      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d0%b1%d0%b7%d0%b0%d0%b2%d0%b5%d0%b4%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b4%d0%b2%d0%be%d1%80/",
+      "targetPath": "/bg/legacy/0dfcfb0dc206c2c06f9f4e0d",
+      "sourceBodyHash": "e15693e27c7778331821264ba5861d8fe588c9f1bbf8b65e02b3e95ca4322afb",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "677a55dd77e259bf9dd0732d",
+      "sourceUrl": "https://makler-realty.com/listing/page/3/",
+      "targetPath": "/bg/legacy/677a55dd77e259bf9dd0732d",
+      "sourceBodyHash": "2c62bfe6ae17a8f7fc17ccb4a62731f63f537c2fa651c5762b0cc7c8b02c9430",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "f3986fa0bf6eb7c8e691faab",
+      "sourceUrl": "https://makler-realty.com/listing/page/2/",
+      "targetPath": "/bg/legacy/f3986fa0bf6eb7c8e691faab",
+      "sourceBodyHash": "07f6734c782ec7acb1229f717dda3f6f5f8201f59c2d6b205169786d72641a87",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "626ef5cbaf64286bc0c1c251",
+      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
+      "targetPath": "/bg/legacy/626ef5cbaf64286bc0c1c251",
+      "sourceBodyHash": "1194005c100af88681f58b027bef62c7796d45c4915d541e714dd5ce4fe208f0",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "8c14bdb2845763eb348192ee",
+      "sourceUrl": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d0%b1%d0%b7%d0%b0%d0%b2%d0%b5%d0%b4%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b4%d0%b2%d0%be%d1%80/",
+      "targetPath": "/bg/legacy/8c14bdb2845763eb348192ee",
+      "sourceBodyHash": "e15693e27c7778331821264ba5861d8fe588c9f1bbf8b65e02b3e95ca4322afb",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "3c0050f78676fc234cf6ab2d",
+      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
+      "targetPath": "/bg/legacy/3c0050f78676fc234cf6ab2d",
+      "sourceBodyHash": "38de5b3b7d84a7041f5c14a97e872afdf4aa9b439150bcc7bdaf2d039411fe9d",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "c1dbd57acf78da2e1b0001e2",
+      "sourceUrl": "https://makler-realty.com/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/bg/legacy/c1dbd57acf78da2e1b0001e2",
+      "sourceBodyHash": "b3fa4a46c52910f9ca80845ea90b2ed636a47de12175b431e109e93d5ab7d1e9",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "035f2c7ea1e88448c2ff26a5",
+      "sourceUrl": "https://makler-realty.com/listing/",
+      "targetPath": "/bg/legacy/035f2c7ea1e88448c2ff26a5",
+      "sourceBodyHash": "5ab924d92e04c0dc06a737d4910e6fa0aa77797a138e844230925c26262b8a5c",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "9e51ffc3b972a1f18b8b8d81",
+      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/bg/legacy/9e51ffc3b972a1f18b8b8d81",
+      "sourceBodyHash": "c00c43293bd6624ee57caf4c326e0fa9370cddce7c9ce8f892dc5c825c5b53c6",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "2531f517585077dd3e7745e4",
+      "sourceUrl": "https://makler-realty.com/en/resort/spa-resorts/page/7/",
+      "targetPath": "/en/legacy/2531f517585077dd3e7745e4",
+      "sourceBodyHash": "8da07d9545354b15e1e1073acd734e0ae6ff71173f38792914c639d4e6ee1c28",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "d8e4991dbdf2cbcc4fee9649",
+      "sourceUrl": "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/page/7/",
+      "targetPath": "/en/legacy/d8e4991dbdf2cbcc4fee9649",
+      "sourceBodyHash": "9cc92f9f232cda70c9d1d30bce45477469c84dfb3d7331b49a1c24f4bcbf73cd",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "6ffc975fe68ecb5cf53bd981",
+      "sourceUrl": "https://makler-realty.com/en/listing/page/7/",
+      "targetPath": "/en/legacy/6ffc975fe68ecb5cf53bd981",
+      "sourceBodyHash": "1395e04abddeb8a8e3133652b9165b3878948138a9ba31f9635c7e30fce4616d",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "bb4fa9d47b183e7ca2e28f5b",
+      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bd%d0%be%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d1%81-%d0%b3%d0%be%d0%bb%d1%8f%d0%bc-%d0%b4%d0%b2%d0%be%d1%80-%d0%b2-%d1%81-%d0%b3%d0%be%d1%80%d0%bd%d0%b0-%d0%b1%d1%80%d0%b5%d0%b7%d0%bd%d0%b8%d1%86/",
+      "targetPath": "/bg/legacy/bb4fa9d47b183e7ca2e28f5b",
+      "sourceBodyHash": "54acb9a731fe151b37d315aff1086d05429c7845a9f3e3d52a082b7b997a58ad",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "644ecc161b06794951d08dbb",
+      "sourceUrl": "https://makler-realty.com/en/listing/page/6/",
+      "targetPath": "/en/legacy/644ecc161b06794951d08dbb",
+      "sourceBodyHash": "16d1d36d76eac1f6b569dcf6e27f0afd8812b94f8752dd0126801d0dd2abaa51",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "322f295fe3cbf5068b83f02f",
+      "sourceUrl": "https://makler-realty.com/bg/listing/%d0%bd%d0%b0%d0%b5%d0%bc-%d0%b5%d1%82%d0%b0%d0%b6-%d0%be%d1%82-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "targetPath": "/bg/legacy/322f295fe3cbf5068b83f02f",
+      "sourceBodyHash": "b3fa4a46c52910f9ca80845ea90b2ed636a47de12175b431e109e93d5ab7d1e9",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "eaf5dea95d9d586fb4b3a14d",
+      "sourceUrl": "https://makler-realty.com/en/listing/page/5/",
+      "targetPath": "/en/legacy/eaf5dea95d9d586fb4b3a14d",
+      "sourceBodyHash": "667a2d8d172f51cf2ca0989e2c45a811969b0130b3ea4ba68ab312d83e113cde",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "472a04be105fa280f769f4aa",
+      "sourceUrl": "https://makler-realty.com/en/listing/page/4/",
+      "targetPath": "/en/legacy/472a04be105fa280f769f4aa",
+      "sourceBodyHash": "2ed747fd6b0df3717eb0158d67b24f7ef7c5afd4e50f2acf109e463532cc1386",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "f370b0282a77daf9265fab13",
+      "sourceUrl": "https://makler-realty.com/bg/listing/",
+      "targetPath": "/bg/legacy/f370b0282a77daf9265fab13",
+      "sourceBodyHash": "5ab924d92e04c0dc06a737d4910e6fa0aa77797a138e844230925c26262b8a5c",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "cffd83e4b3c3ae08c916493c",
+      "sourceUrl": "https://makler-realty.com/en/listing/page/3/",
+      "targetPath": "/en/legacy/cffd83e4b3c3ae08c916493c",
+      "sourceBodyHash": "77fc2d95ee0cda453b9d822ce5f1ddfb87b3b639320b5cd167ef12a8a391a47b",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "5243129d3d7e0937e19668d6",
+      "sourceUrl": "https://makler-realty.com/en/listing/page/2/",
+      "targetPath": "/en/legacy/5243129d3d7e0937e19668d6",
+      "sourceBodyHash": "b3c12682f25f0b6494dd96e392c14bde123106b09947ce94a4ac94fcf464413c",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "adfef040b34b2d536804367f",
+      "sourceUrl": "https://makler-realty.com/bg/category-type/dom/page/3/",
+      "targetPath": "/bg/legacy/adfef040b34b2d536804367f",
+      "sourceBodyHash": "2c6dfea3db28cfc8490ecc69c955e3d2c0e7116528b8976728ace89827a067f0",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "6e51b108e40791b5af07cd38",
+      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%be%d0%b1%d0%b7%d0%b0%d0%b2%d0%b5%d0%b4%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d1%81-%d0%b4%d0%b2%d0%be%d1%80/",
+      "targetPath": "/en/legacy/6e51b108e40791b5af07cd38",
+      "sourceBodyHash": "92eb3407d2900e3e25c33c8592e58716835b9e6becc9ec8a9ea7039b722f8ffc",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "4916da0f0364f04f994d52c1",
+      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d1%81%d0%ba%d0%bb%d0%b0%d0%b2%d0%b5/",
+      "targetPath": "/en/legacy/4916da0f0364f04f994d52c1",
+      "sourceBodyHash": "993a3ed743510a75e91fbb50c7124254692154e60ab7ce1fa03fa4a0ca0eef71",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "f10216ec1d33c3c872b62c0b",
+      "sourceUrl": "https://makler-realty.com/bg/author/admin/",
+      "targetPath": "/bg/legacy/f10216ec1d33c3c872b62c0b",
+      "sourceBodyHash": "7fd7b3f6b0661804128f2e05fd135aa2875663fd4e8d69fe15eda393c8da8522",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "6ea8597ea603eac9be7494e4",
+      "sourceUrl": "https://makler-realty.com/en/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d1%81-%d0%b8%d0%bb%d0%b8%d0%bd%d0%b4%d0%b5%d0%bd%d1%86%d0%b8/",
+      "targetPath": "/en/legacy/6ea8597ea603eac9be7494e4",
+      "sourceBodyHash": "8b6b6af14d22a6c9bdf6ac582f323aeb41168e21c73024a0ad3c300b810657f4",
+      "review": "exact_source_body_preserved_in_render_projection",
+      "reviewer": "Codex source preparation lane",
+      "humanApproval": false,
+      "servedTargetStatus": null
+    },
+    {
+      "id": "68a351629e5a539b3bc1d538",
+      "sourceUrl": "https://makler-realty.com/author/admin/",
+      "targetPath": "/bg/legacy/68a351629e5a539b3bc1d538",
+      "sourceBodyHash": "7fd7b3f6b0661804128f2e05fd135aa2875663fd4e8d69fe15eda393c8da8522",
       "review": "exact_source_body_preserved_in_render_projection",
       "reviewer": "Codex source preparation lane",
       "humanApproval": false,
