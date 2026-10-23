@@ -10,5 +10,15 @@
     "message": "Deze pagina is ook in het Nederlands beschikbaar.",
     "switch": "Verder in het Nederlands",
     "dismiss": "Suggestie verbergen"
+  },
+  "passkeys": {
+    "passkeyAlreadyRegistered": "Deze toegangssleutel is al geregistreerd. Kies voor de reserve een andere aanbieder of een beveiligingssleutel. Je opgeslagen toegangssleutel blijft beschikbaar.",
+    "passkeyIncompatibleAuthenticator": "Dit apparaat of deze beveiligingssleutel kan de vereiste toegangssleutel niet maken. Kies een apparaat dat toegangssleutels en bevestiging met een pincode of biometrie ondersteunt.",
+    "passkeyBrowserFailed": "Je browser kon deze aanvraag niet voltooien. Probeer het opnieuw of kies een ander apparaat of een beveiligingssleutel. Je opgeslagen toegangssleutels zijn niet gewijzigd.",
+    "enrolReadyTitle": "Je toegangssleutel is klaar",
+    "enrolBackupTitle": "Nog een toegangssleutel toevoegen (optioneel)",
+    "enrolBackupLead": "Je eerste toegangssleutel is opgeslagen. Kies voor de reserve een andere aanbieder of een beveiligingssleutel. Apparaten met dezelfde gesynchroniseerde toegangssleutel tellen als één sleutel.",
+    "registerBackupPasskey": "Reserve-toegangssleutel toevoegen",
+    "enrolBackupReauth": "Bevestig je identiteit voordat je nog een toegangssleutel toevoegt."
   }
 }

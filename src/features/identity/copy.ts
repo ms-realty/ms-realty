@@ -3,8 +3,12 @@
 // other client locales fall back to English until the catalogs take these strings over.
 import type { ParticipantRole } from "@/domain/parties";
 import type { PublicLocale } from "@/i18n/config";
+import commonBg from "../../../messages/bg/common.json" with { type: "json" };
+import commonEn from "../../../messages/en/common.json" with { type: "json" };
+import commonRu from "../../../messages/ru/common.json" with { type: "json" };
 
 const en = {
+  ...commonEn.passkeys,
   // Shared
   signOut: "Sign out",
   switchAccount: "Sign out and use another account",
@@ -17,12 +21,6 @@ const en = {
   passkeyWorking: "Waiting for your passkey…",
   passkeyCancelled: "The passkey request was cancelled or timed out. Nothing was changed.",
   passkeyFailed: "We could not verify this passkey. Try again.",
-  passkeyAlreadyRegistered:
-    "This passkey is already registered. For your backup, choose a different passkey provider or a security key. Your saved passkey is still available.",
-  passkeyIncompatibleAuthenticator:
-    "This device or security key cannot create the passkey required here. Choose one that supports passkeys and PIN or biometric verification.",
-  passkeyBrowserFailed:
-    "Your browser could not complete this passkey request. Try again or choose another device or security key. Your saved passkeys have not changed.",
   javascriptRequired: "Passkeys need JavaScript. Enable it for this site, then reload this page.",
   passkeyUnsupported: "This browser cannot use passkeys. Use a current browser on this device.",
   // Staff sign-in (O23 access variant)
@@ -50,12 +48,6 @@ const en = {
   enrolTitle: "Register your passkey",
   enrolLead:
     "Use your device or a security key to sign in to the staff workspace. One passkey is enough; a backup is optional.",
-  enrolReadyTitle: "Your passkey is ready",
-  enrolBackupTitle: "Add another passkey (optional)",
-  enrolBackupLead:
-    "Your first passkey is saved. Choose a different passkey provider or a security key for the backup. Devices sharing the same synced passkey count as one key.",
-  registerBackupPasskey: "Add backup passkey",
-  enrolBackupReauth: "Confirm it is you before adding another passkey.",
   enrolProgress: "{count} passkeys registered.",
   passkeyLabel: "Name for this passkey",
   optional: "(optional)",
@@ -137,6 +129,7 @@ const en = {
 export type IdentityCopy = { readonly [K in keyof typeof en]: string };
 
 const bg: IdentityCopy = {
+  ...commonBg.passkeys,
   signOut: "Изход",
   switchAccount: "Изход и вход с друг профил",
   tryAgain: "Опитайте отново",
@@ -147,12 +140,6 @@ const bg: IdentityCopy = {
   passkeyWorking: "Изчакване на ключа за достъп…",
   passkeyCancelled: "Заявката за ключ за достъп е отказана или изтече. Нищо не е променено.",
   passkeyFailed: "Не успяхме да потвърдим този ключ за достъп. Опитайте отново.",
-  passkeyAlreadyRegistered:
-    "Този ключ за достъп вече е регистриран. За резервния изберете друг доставчик на ключове за достъп или ключ за сигурност. Запазеният ви ключ остава достъпен.",
-  passkeyIncompatibleAuthenticator:
-    "Това устройство или ключ за сигурност не може да създаде необходимия ключ за достъп. Изберете устройство с поддръжка на ключове за достъп и потвърждение с ПИН или биометрия.",
-  passkeyBrowserFailed:
-    "Браузърът не успя да завърши заявката за ключ за достъп. Опитайте отново или изберете друго устройство или ключ за сигурност. Запазените ви ключове не са променени.",
   javascriptRequired:
     "Ключовете за достъп изискват JavaScript. Разрешете го за този сайт и опреснете страницата.",
   passkeyUnsupported:
@@ -180,12 +167,6 @@ const bg: IdentityCopy = {
   enrolTitle: "Регистрирайте ключ за достъп",
   enrolLead:
     "Влизайте в служебното пространство чрез устройството си или ключ за сигурност. Един ключ за достъп е достатъчен; резервният е по избор.",
-  enrolReadyTitle: "Ключът ви за достъп е готов",
-  enrolBackupTitle: "Добавяне на друг ключ (по избор)",
-  enrolBackupLead:
-    "Първият ви ключ е запазен. За резервния изберете друг доставчик на ключове за достъп или ключ за сигурност. Устройства с един и същ синхронизиран ключ се броят като един ключ.",
-  registerBackupPasskey: "Добавяне на резервен ключ",
-  enrolBackupReauth: "Потвърдете самоличността си, преди да добавите друг ключ за достъп.",
   enrolProgress: "Регистрирани ключове: {count}.",
   passkeyLabel: "Име на ключа",
   optional: "(по избор)",
@@ -258,6 +239,7 @@ const bg: IdentityCopy = {
 };
 
 const ru: IdentityCopy = {
+  ...commonRu.passkeys,
   signOut: "Выйти",
   switchAccount: "Выйти и войти в другой аккаунт",
   tryAgain: "Попробовать снова",
@@ -268,12 +250,6 @@ const ru: IdentityCopy = {
   passkeyWorking: "Ожидание ключа доступа…",
   passkeyCancelled: "Запрос ключа доступа отменён или истёк. Ничего не изменено.",
   passkeyFailed: "Не удалось проверить этот ключ доступа. Попробуйте снова.",
-  passkeyAlreadyRegistered:
-    "Этот ключ доступа уже зарегистрирован. Для резервного выберите другого поставщика ключей доступа или ключ безопасности. Сохранённый ключ остаётся доступным.",
-  passkeyIncompatibleAuthenticator:
-    "Это устройство или ключ безопасности не может создать нужный ключ доступа. Выберите устройство с поддержкой ключей доступа и подтверждением с помощью ПИН-кода или биометрии.",
-  passkeyBrowserFailed:
-    "Браузер не смог завершить запрос ключа доступа. Попробуйте снова или выберите другое устройство или ключ безопасности. Сохранённые ключи не изменены.",
   javascriptRequired:
     "Для ключей доступа нужен JavaScript. Включите его для этого сайта и обновите страницу.",
   passkeyUnsupported:
@@ -301,12 +277,6 @@ const ru: IdentityCopy = {
   enrolTitle: "Зарегистрируйте ключ доступа",
   enrolLead:
     "Входите в служебное пространство с помощью своего устройства или ключа безопасности. Одного ключа доступа достаточно; резервный необязателен.",
-  enrolReadyTitle: "Ключ доступа готов",
-  enrolBackupTitle: "Добавить другой ключ (необязательно)",
-  enrolBackupLead:
-    "Первый ключ сохранён. Для резервного выберите другого поставщика ключей доступа или ключ безопасности. Устройства с одним синхронизированным ключом считаются одним ключом.",
-  registerBackupPasskey: "Добавить резервный ключ",
-  enrolBackupReauth: "Подтвердите свою личность перед добавлением другого ключа доступа.",
   enrolProgress: "Зарегистрировано ключей: {count}.",
   passkeyLabel: "Название ключа",
   optional: "(необязательно)",
