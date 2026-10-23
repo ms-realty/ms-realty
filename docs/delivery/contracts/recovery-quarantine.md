@@ -36,14 +36,14 @@ at the destination. Clearing the control row manually is not a supported recover
 
 ## Repeat the synthetic local rehearsal
 
-Use an owned disposable PostgreSQL 18 on loopback and PostgreSQL 18 client tools. Set
+Use an owned disposable PostgreSQL 16.14 on loopback and PostgreSQL 16 client tools. Set
 TEST_DATABASE_URL only for the command. The script creates both databases itself, consumes
 only its own synthetic dump, refuses non-loopback connections/connection overrides, never uses
 `--clean`, and drops only generated database names. It cleans up its temporary archive.
 
 ```sh
 NEXT_DIST_DIR=.next-recovery npm run build
-# TEST_DATABASE_URL points to the owned local test stand; PG_BIN holds its PG18 tools.
+# TEST_DATABASE_URL points to the owned local test stand; PG_BIN holds its PG16 tools.
 RECOVERY_NEXT_DIST_DIR=.next-recovery npm run recovery:rehearse
 ```
 

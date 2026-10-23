@@ -1,8 +1,8 @@
-// Synthetic local PG18 dump/restore. Owns both randomly named databases; never consumes an
+// Synthetic local PG16 dump/restore, matching the selected PostgreSQL 16.14 runtime. Owns both randomly named databases; never consumes an
 // operator archive, resets an existing destination, contacts a provider, or seals a point.
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -46,7 +46,7 @@ async function pg(tool: "pg_dump" | "pg_restore", args: string[], database: stri
   });
 }
 for (const tool of ["pg_dump", "pg_restore"] as const)
-  assert.match((await pg(tool, ["--version"], "postgres")).stdout, /\b18\./);
+  assert.match((await pg(tool, ["--version"], "postgres")).stdout, /\b16\./);
 
 const admin = postgres(base.toString(), { max: 1, onnotice: () => {} });
 const sourceName = `msr_restore_${randomUUID().replaceAll("-", "")}`;
@@ -89,7 +89,7 @@ async function webStartup(url: string, shouldOpen: boolean) {
   await new Promise<void>((resolve) => socket.close(() => resolve()));
   const child = spawn(
     process.execPath,
-    ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", String(port)],
+    ["node_modules/next/dist/bin/next", "start", "--hostname", "localhost", "--port", String(port)],
     {
       env: {
         ...process.env,
@@ -98,8 +98,11 @@ async function webStartup(url: string, shouldOpen: boolean) {
         DATABASE_URL: url,
         PUBLIC_ORIGIN: `http://localhost:${port}`,
         APP_ORIGIN: `http://localhost:${port}`,
+        CANONICAL_ORIGIN: `http://localhost:${port}`,
         CLIENT_ORIGIN: `http://my.localhost:${port}`,
         STAFF_ORIGIN: `http://app.localhost:${port}`,
+        MEDIA_PUBLIC_BASE_URL: `http://localhost:${port}/media`,
+        AUTH_SECRET: randomBytes(32).toString("hex"),
         BUTLER_ENABLED: "0",
         CASE_INBOUND_ENABLED: "0",
         ENABLE_TEST_OUTBOX: "1",
@@ -123,7 +126,7 @@ async function webStartup(url: string, shouldOpen: boolean) {
     if (shouldOpen) {
       // Next 16.3 prints Ready before loading configuration/instrumentation. Probe actual HTTP.
       while (Date.now() < until && child.exitCode === null) {
-        const ready = await fetch(`http://127.0.0.1:${port}/api/health`, {
+        const ready = await fetch(`http://localhost:${port}/api/health`, {
           signal: AbortSignal.timeout(1000),
         }).then(
           (response) => response.status === 200,
@@ -143,7 +146,7 @@ async function webStartup(url: string, shouldOpen: boolean) {
       );
       assert.match(output, /Recovery quarantine/);
       await assert.rejects(
-        fetch(`http://127.0.0.1:${port}/bg/properties`, {
+        fetch(`http://localhost:${port}/bg/properties`, {
           signal: AbortSignal.timeout(1000),
         }),
       );
@@ -163,7 +166,7 @@ async function webStartup(url: string, shouldOpen: boolean) {
 
 try {
   const [version] = await admin`select current_setting('server_version_num')::int as version`;
-  assert(version && version.version >= 180000 && version.version < 190000, "Use PostgreSQL 18");
+  assert(version && version.version === 160014, "Use the selected PostgreSQL 16.14 runtime");
   for (const name of [sourceName, destinationName]) {
     await admin`create database ${admin(name)}`;
     created.push(name);
@@ -232,7 +235,8 @@ try {
         kind: "local_synthetic_restore_rehearsal",
         passed: true,
         observedAt: new Date().toISOString(),
-        postgresMajor: 18,
+        postgresMajor: 16,
+        postgresVersion: "16.14",
         snapshotStartedAt,
         snapshotDigest: digest,
         restoredTables: Object.keys(counts).length,
