@@ -12,6 +12,7 @@ import {
   verifiedPrimaryCapture,
 } from "../src/server/legacy/manifest.ts";
 import { exportStagingRoutes } from "../src/server/legacy/staging-routes.ts";
+import { capturedSourceMedia } from "./legacy-media-sources.mjs";
 
 const tag = "legacy-app-final";
 const tagCommit = execFileSync("git", ["rev-parse", `${tag}^{commit}`], {
@@ -365,6 +366,9 @@ for (const listing of listings)
     }
     publicMedia.set(image.r2_key, { host: url.hostname, path, key: image.r2_key });
   }
+const capturedMediaBytes = readFileSync("data/legacy/migration/source-media-captures.json", "utf8");
+const capturedMedia = capturedSourceMedia(JSON.parse(capturedMediaBytes), pages);
+for (const object of capturedMedia) publicMedia.set(object.key, object);
 const mediaJson = JSON.stringify(
   [...publicMedia.values()].sort((a, b) => a.key.localeCompare(b.key)),
 );
@@ -444,6 +448,10 @@ const outputs = {
     schemaVersion: 1,
     publicAsIsAuthority: manifest.authority.directive,
     loadParityVerified: false,
+    capturedMediaScope: "protected_staging_source_media",
+    capturedMediaSha256: sha256(capturedMediaBytes),
+    capturedMediaObjects: capturedMedia.length,
+    productionAllowed: false,
     blockers: mediaBlockers,
     objects: [...publicMedia.values()],
   },
