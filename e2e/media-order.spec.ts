@@ -512,7 +512,26 @@ test("O13 desktop drag stages several moves, reviews the cover, cancels and save
 test("O13 staged arrow order survives reload and is saved only after review", async ({ page }) => {
   const f = seed();
   const [first, second, third] = f.relations;
+  const [relation] = await db
+    .select({ assetId: schema.mediaRelations.mediaAssetId })
+    .from(schema.mediaRelations)
+    .where(eq(schema.mediaRelations.id, first ?? ""));
+  if (!relation) throw new Error("Missing fixture photo");
+  await db
+    .update(schema.mediaAssets)
+    .set({
+      detailsDraft: {
+        caption: "Synthetic pending caption",
+        altText: "Synthetic pending image description",
+        modification: "none",
+        modificationDisclosure: "",
+      },
+    })
+    .where(eq(schema.mediaAssets.id, relation.assetId));
   await openGallery(page, f);
+  const pendingTile = page.locator(`[data-photo="${first}"]`);
+  const pendingStatus = pendingTile.getByText("Details awaiting review", { exact: true });
+  await expect(pendingStatus).toBeVisible();
   const upload = page.getByRole("link", { name: "Upload a file", exact: true });
   await expect(upload).toBeVisible();
   await upload.click();
@@ -546,6 +565,44 @@ test("O13 staged arrow order survives reload and is saved only after review", as
     page.getByRole("button", { name: "Review the new order", exact: true }),
   ).toBeEnabled();
   await page.getByRole("button", { name: "Review the new order", exact: true }).click();
+  // Both the position and cover must remain readable in a narrow review tile.
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    const position = await pendingTile.getByText("1", { exact: true }).boundingBox();
+    const cover = await pendingTile.getByText("Cover", { exact: true }).boundingBox();
+    const preview = await pendingTile.getByRole("img").first().boundingBox();
+    expect(position).not.toBeNull();
+    expect(cover).not.toBeNull();
+    expect(preview).not.toBeNull();
+    if (!position || !cover || !preview)
+      throw new Error("Missing photo position, cover or preview state");
+    expect(
+      position.x + position.width <= cover.x ||
+        cover.x + cover.width <= position.x ||
+        position.y + position.height <= cover.y ||
+        cover.y + cover.height <= position.y,
+    ).toBe(true);
+    for (const label of [position, cover]) {
+      expect(label.x).toBeGreaterThanOrEqual(preview.x - 1);
+      expect(label.x + label.width).toBeLessThanOrEqual(preview.x + preview.width + 1);
+      expect(label.y).toBeGreaterThanOrEqual(preview.y - 1);
+      expect(label.y + label.height).toBeLessThanOrEqual(preview.y + preview.height + 1);
+    }
+    await test.info().attach(`order-review-${width}`, {
+      body: await page.screenshot({ fullPage: true }),
+      contentType: "image/png",
+    });
+  }
+  // Pending text stays below the image even in the compact phone review grid; it cannot
+  // collide with the position/cover badges that occupy the image's top corners.
+  const image = await pendingTile.getByRole("img").first().boundingBox();
+  const status = await pendingStatus.boundingBox();
+  expect(image).not.toBeNull();
+  expect(status).not.toBeNull();
+  if (!image || !status) throw new Error("Missing pending photo review state");
+  expect(status.y).toBeGreaterThanOrEqual(image.y + image.height);
+  expect(status.x).toBeGreaterThanOrEqual(image.x);
+  expect(status.x + status.width).toBeLessThanOrEqual(image.x + image.width + 1);
   await page.getByRole("button", { name: "Save the order", exact: true }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "New photo order: 1, 3, 2." }),

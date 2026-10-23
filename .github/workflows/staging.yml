@@ -87,7 +87,8 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/staging-environment.mjs
-          git merge-base --is-ancestor e23d17b1ce71fce694e823643ea94a7440dd4912 HEAD
+          # The reviewed stack is integrated in main; its pre-squash commit is no longer fetched.
+          git merge-base --is-ancestor 80964128977277c786258f9a834af9f10f58472f HEAD
           node scripts/staging-inputs.mjs
           node scripts/staging-config.mjs deploy/staging-inputs.generated.json --before-image --require-secrets --connectivity-probe
           node scripts/staging-preflight.mjs deploy/staging-inputs.generated.json deploy/staging-provider.generated.json --connectivity-probe

@@ -81,7 +81,9 @@ check("current normalized source identities", migration.uniqueSources, 454);
 assert("blocked parity cannot supply a deployable route artifact", migration.status !== "blocked" ||
   (!migration.routeArtifactSha256 && !fs.existsSync(path.join(DIR, "migration", "legacy-routes.json"))));
 assert("public source main text keeps its exact captured hash", sourcePages.pages.every((page) =>
-  page.bodyText && createHash("sha256").update(page.bodyText).digest("hex") === page.sourceHash));
+  typeof page.bodyText === "string" &&
+  (page.bodyText.length > 0 || (page.contentState === "verified_empty_archive" && page.contentScope === "column:empty_archive")) &&
+  createHash("sha256").update(page.bodyText).digest("hex") === page.sourceHash));
 const liveDelta = readJson("migration/live-delta.json");
 assert("current public response archives keep exact source bytes", liveDelta.captures.every((capture) =>
   !capture.response_artifact ||
