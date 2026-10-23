@@ -1,0 +1,256 @@
+{
+  "Description": "MS Realty independent recovery archive proposal. Review account custody, retention and trust before executing a change set.",
+  "Parameters": {
+    "ArchiveBucketName": {
+      "Type": "String",
+      "AllowedPattern": "ms-realty-recovery-[a-z0-9-]+",
+      "MaxLength": 63
+    },
+    "RetentionDays": {
+      "Type": "Number",
+      "MinValue": 1,
+      "MaxValue": 3650,
+      "Description": "Owner-approved GOVERNANCE retention. No default grants approval."
+    },
+    "OperatorPrincipalArn": {
+      "Type": "String",
+      "AllowedPattern": "arn:aws:iam::[0-9]{12}:(role|user)/[A-Za-z0-9+=,.@_/-]+",
+      "Description": "Explicit agency-approved identity permitted to assume the narrow writer role."
+    }
+  },
+  "Resources": {
+    "ArchiveBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Properties": {
+        "BucketName": {
+          "Ref": "ArchiveBucketName"
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        },
+        "ObjectLockEnabled": true,
+        "ObjectLockConfiguration": {
+          "ObjectLockEnabled": "Enabled",
+          "Rule": {
+            "DefaultRetention": {
+              "Mode": "GOVERNANCE",
+              "Days": {
+                "Ref": "RetentionDays"
+              }
+            }
+          }
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "MS Realty"
+          },
+          {
+            "Key": "Purpose",
+            "Value": "Independent encrypted recovery"
+          }
+        ]
+      }
+    },
+    "BackupWriterRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "ms-realty-recovery-writer-${AWS::AccountId}"
+        },
+        "Description": "Append and verify encrypted MS Realty archives; cannot delete or bypass retention.",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "OperatorPrincipalArn"
+                }
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "AppendVerifyOnly",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "ObserveArchiveConfiguration",
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetBucketLocation",
+                    "s3:GetBucketVersioning",
+                    "s3:GetBucketObjectLockConfiguration",
+                    "s3:ListBucket"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "ArchiveBucket",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Sid": "AppendAndVerifyArchives",
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:GetObjectVersion",
+                    "s3:GetObjectRetention"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "${ArchiveBucket.Arn}/*"
+                  }
+                },
+                {
+                  "Sid": "CannotDeleteOrBypassRetention",
+                  "Effect": "Deny",
+                  "Action": [
+                    "s3:DeleteObject",
+                    "s3:DeleteObjectVersion",
+                    "s3:BypassGovernanceRetention",
+                    "s3:PutObjectRetention"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "${ArchiveBucket.Arn}/*"
+                  }
+                },
+                {
+                  "Sid": "CannotAdministerArchive",
+                  "Effect": "Deny",
+                  "Action": [
+                    "s3:DeleteBucket",
+                    "s3:PutBucketPolicy",
+                    "s3:DeleteBucketPolicy",
+                    "s3:PutBucketVersioning",
+                    "s3:PutBucketObjectLockConfiguration",
+                    "s3:PutLifecycleConfiguration",
+                    "s3:PutBucketPublicAccessBlock"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "ArchiveBucket",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "ArchiveBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ArchiveBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "RequireTLS",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "ArchiveBucket",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Sub": "${ArchiveBucket.Arn}/*"
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              }
+            },
+            {
+              "Sid": "WriterCannotDeleteOrBypass",
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "BackupWriterRole",
+                    "Arn"
+                  ]
+                }
+              },
+              "Action": [
+                "s3:DeleteObject",
+                "s3:DeleteObjectVersion",
+                "s3:BypassGovernanceRetention",
+                "s3:PutObjectRetention"
+              ],
+              "Resource": {
+                "Fn::Sub": "${ArchiveBucket.Arn}/*"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ArchiveBucket": {
+      "Value": {
+        "Ref": "ArchiveBucket"
+      }
+    },
+    "ArchiveRegion": {
+      "Value": {
+        "Ref": "AWS::Region"
+      }
+    },
+    "ExpectedBucketOwner": {
+      "Value": {
+        "Ref": "AWS::AccountId"
+      }
+    },
+    "BackupWriterRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "BackupWriterRole",
+          "Arn"
+        ]
+      }
+    }
+  }
+}

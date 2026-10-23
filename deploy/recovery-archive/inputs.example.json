@@ -1,0 +1,17 @@
+{
+  "scope": "independent_recovery_archive",
+  "awsProfile": null,
+  "expectedAwsAccountId": null,
+  "region": "eu-central-1",
+  "archiveBucketName": null,
+  "operatorPrincipalArn": null,
+  "proposedGovernanceRetentionDays": 90,
+  "retentionApproved": false,
+  "agencyCustodyConfirmed": false,
+  "operatorName": null,
+  "separateReviewer": null,
+  "ageRecipientFile": null,
+  "operatorSigningPublicKeyFile": null,
+  "reviewerSigningPublicKeyFile": null,
+  "deploymentApproved": false
+}
