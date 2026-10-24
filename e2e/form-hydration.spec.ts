@@ -31,9 +31,6 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
   page,
   context,
 }) => {
-  // Two complete pages each deliberately hold hydration, then submit a durable operation.
-  // Give the combined journey its own budget; the native confirmation still has a short bound.
-  test.setTimeout(60_000);
   const { token } = JSON.parse(
     execFileSync(
       process.execPath,
@@ -95,6 +92,9 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
     const releaseReview = await delayScripts(review);
     try {
       await review.goto(hostUrl("staff", href), { waitUntil: "commit" });
+      // A person selects this review tab. Background WebKit can suspend the animation
+      // frames needed for native click stability while these scripts are deliberately held.
+      await review.bringToFront();
       const section = review.locator("section").filter({
         has: review.getByRole("heading", { name: "Record qualified claim review", exact: true }),
       });
