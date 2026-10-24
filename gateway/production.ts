@@ -20,6 +20,7 @@ import {
 } from "./runtime-proof";
 // Same immutable logical route/media bytes qualified on staging; fixture modules cannot run.
 import { stagingArtifacts as acceptedArtifacts } from "./staging-artifacts.generated";
+import { withUnavailableDocument } from "./unavailable-document";
 import { type GatewayEnv, gateway } from "./worker";
 
 interface ProductionEnv
@@ -55,7 +56,10 @@ class ProductionRole extends Container<ProductionEnv> {
   }
   protected async readIdentity() {
     const result = await this.containerFetch("http://runtime/identity", { method: "GET" }, 3001);
-    if (!result.ok) throw new Error("Production private role identity unavailable");
+    if (!result.ok) {
+      await result.arrayBuffer();
+      throw new Error("Production private role identity unavailable");
+    }
     return runtimeProof(await result.json(), this.role, this.env.BUILD_SHA);
   }
   async connectivity() {
@@ -65,7 +69,10 @@ class ProductionRole extends Container<ProductionEnv> {
       { method: "POST" },
       3001,
     );
-    if (!result.ok) throw new Error("Actual production role TLS session unavailable");
+    if (!result.ok) {
+      await result.arrayBuffer();
+      throw new Error("Actual production role TLS session unavailable");
+    }
     return { identity, proof: await result.json() };
   }
   protected async startRole(operationId?: string) {
@@ -78,6 +85,8 @@ class ProductionRole extends Container<ProductionEnv> {
       },
       3001,
     );
+    // Consume the acknowledgement before another RPC can retain an SDK proxy stream.
+    await result.arrayBuffer();
     if (result.status !== 202)
       throw new Error("Production role start acknowledgement requires reconciliation");
   }
@@ -376,9 +385,9 @@ export async function productionRequest(request: Request, env: ProductionEnv): P
 export default {
   async fetch(request: Request, env: ProductionEnv) {
     try {
-      return await productionRequest(request, env);
+      return await withUnavailableDocument(request, await productionRequest(request, env));
     } catch {
-      return noStore(503);
+      return withUnavailableDocument(request, noStore(503));
     }
   },
   async scheduled(_event: ScheduledController, env: ProductionEnv) {

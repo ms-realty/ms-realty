@@ -127,6 +127,25 @@ function fixture() {
 }
 beforeEach(() => vi.clearAllMocks());
 describe("production gateway boundary with injected unit namespaces", () => {
+  it("offers a readable 503 while the release remains inactive, including runtime exceptions", async () => {
+    const f = fixture();
+    const request = new Request(`${f.env.PUBLIC_ORIGIN}/en`, {
+      headers: { Accept: "text/html" },
+    });
+    for (const unavailable of [false, true]) {
+      if (unavailable) f.control.active.mockRejectedValueOnce(new Error("private runtime failure"));
+      const response = await worker.fetch(request, f.env as never);
+      expect(response.status).toBe(503);
+      const html = await response.text();
+      expect(html).toContain("Temporarily unavailable");
+      expect(html).not.toContain("private runtime failure");
+      expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow");
+    }
+    expect(f.control.activate).not.toHaveBeenCalled();
+    expect(f.web.startWeb).not.toHaveBeenCalled();
+    expect(f.queue.startQueue).not.toHaveBeenCalled();
+    expect(gateway).not.toHaveBeenCalled();
+  });
   it("rejects staging/forged control hosts and stops public intake until explicit activation", async () => {
     const f = fixture();
     expect(

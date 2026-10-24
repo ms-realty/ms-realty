@@ -45,5 +45,10 @@
       "documents": "Zurück zu den Dokumenten",
       "properties": "Zurück zu den Immobilien"
     }
+  },
+  "unavailable": {
+    "title": "Vorübergehend nicht verfügbar",
+    "body": "Diese Seite kann gerade nicht geöffnet werden. Bitte versuchen Sie es gleich noch einmal.",
+    "retry": "Seite neu laden"
   }
 }

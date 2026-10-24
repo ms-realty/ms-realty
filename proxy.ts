@@ -128,7 +128,7 @@ function route(request: NextRequest) {
   if (pathname.startsWith("/maps/") || pathname.startsWith("/map-runtime/")) {
     const release = process.env.MAP_RELEASE_ID;
     const allowed =
-      pathname.startsWith("/map-runtime/v6.11.2/") ||
+      pathname.startsWith("/map-runtime/v6.15.0/") ||
       (release && /^[a-f0-9]{64}$/.test(release) && pathname.startsWith(`/maps/${release}/`));
     return context === "public" && allowed
       ? NextResponse.next({ request: { headers: trustedHeaders } })

@@ -144,11 +144,7 @@ export function ReleaseReadinessScreen({
                             data-release-report={requirement.type}
                             className="group/report min-w-0 rounded-control border border-border bg-subtle"
                           >
-                            <summary
-                              aria-labelledby={`report-${gate.id}-${requirement.type}-action report-${gate.id}-${requirement.type}-name`}
-                              aria-describedby={`report-${gate.id}-${requirement.type}-result`}
-                              className="grid min-h-control cursor-pointer list-none gap-3 rounded-control p-4 hover:bg-selected focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center [&::-webkit-details-marker]:hidden"
-                            >
+                            <summary className="grid min-h-control cursor-pointer list-none gap-3 rounded-control p-4 hover:bg-selected focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center [&::-webkit-details-marker]:hidden">
                               <span className="min-w-0">
                                 <span
                                   id={`report-${gate.id}-${requirement.type}-name`}

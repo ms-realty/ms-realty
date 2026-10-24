@@ -46,3 +46,5 @@ deploy/*.generated.json
 
 # Browser-only synthetic atlas must never ship in the application image.
 public/maps
+# The build prepares the pinned standalone worker; local generated versions must not ship.
+public/map-runtime

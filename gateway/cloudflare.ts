@@ -14,6 +14,7 @@ import {
 } from "./runtime-proof";
 import { stagingArtifacts } from "./staging-artifacts.generated";
 import { stagingWorkAllowed } from "./staging-phase";
+import { withUnavailableDocument } from "./unavailable-document";
 import { type GatewayEnv, gateway } from "./worker";
 
 interface StagingEnv
@@ -43,12 +44,18 @@ class StagingRoleContainer extends Container<StagingEnv> {
       { method: "POST" },
       3001,
     );
-    if (!response.ok) throw new Error("Actual private TLS connectivity is unavailable");
+    if (!response.ok) {
+      await response.arrayBuffer();
+      throw new Error("Actual private TLS connectivity is unavailable");
+    }
     return { identity, proof: await response.json() };
   }
   protected async readIdentity() {
     const response = await this.containerFetch("http://runtime/identity", { method: "GET" }, 3001);
-    if (!response.ok) throw new Error("Private role identity unavailable");
+    if (!response.ok) {
+      await response.arrayBuffer();
+      throw new Error("Private role identity unavailable");
+    }
     return runtimeProof(await response.json(), this.role, this.env.BUILD_SHA ?? "");
   }
   protected async startRole(operationId?: string) {
@@ -61,6 +68,8 @@ class StagingRoleContainer extends Container<StagingEnv> {
       },
       3001,
     );
+    // The SDK releases its proxy stream/inflight slot only when this finite reply is consumed.
+    await response.arrayBuffer();
     if (response.status !== 202) throw new Error("Private role start requires reconciliation");
   }
 }
@@ -273,9 +282,9 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
 export default {
   async fetch(request: Request, env: StagingEnv) {
     try {
-      return noindex(await handle(request, env));
+      return noindex(await withUnavailableDocument(request, await handle(request, env)));
     } catch {
-      return noindex(new Response(null, { status: 503 }));
+      return noindex(await withUnavailableDocument(request, new Response(null, { status: 503 })));
     }
   },
   async scheduled(_event: ScheduledController, env: StagingEnv) {

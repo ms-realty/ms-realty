@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import maplibrePackage from "maplibre-gl/package.json" with { type: "json" };
 import { describe, expect, it, vi } from "vitest";
 import nextConfig from "../next.config";
 import { type GatewayEnv, gateway } from "./worker";
@@ -22,7 +23,7 @@ describe("§7.5 public immutable cache allowlist", () => {
   it.each([
     "/_next/static/chunks/example-a1b2c3.js",
     fontPath,
-    "/map-runtime/v6.11.2/maplibre-gl-worker.mjs",
+    `/map-runtime/v${maplibrePackage.version}/maplibre-gl-worker.mjs`,
   ])("preserves the explicit origin policy for %s", async (path) => {
     const response = await gateway(
       new Request(`${config.PUBLIC_ORIGIN}${path}`),
@@ -43,7 +44,7 @@ describe("§7.5 public immutable cache allowlist", () => {
     ).toBe(true);
     expect(cached?.map((rule) => rule.source)).toEqual([
       "/fonts/:file([a-z0-9-]+\\.[a-f0-9]{12}\\.woff2)",
-      "/map-runtime/v6.11.2/:file(maplibre-gl-worker\\.mjs|maplibre-gl-shared\\.mjs)",
+      `/map-runtime/v${maplibrePackage.version}/:file(maplibre-gl-worker\\.mjs)`,
     ]);
   });
 
