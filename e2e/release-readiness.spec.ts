@@ -71,7 +71,7 @@ for (const javascript of [true, false])
       const runtimeReport = page.locator('[data-release-report="deployed_check"]');
       const runtimeReportControl = runtimeReport.locator("summary").first();
       await expect(runtimeReportControl).toHaveAccessibleName(
-        `View report status: ${copy.requirements.deployed_check}`,
+        `${copy.requirements.deployed_check} ${copy.results.not_confirmed} ${copy.showReport}:`,
       );
       await runtimeReportControl.click();
       await expect(runtimeReport).toHaveAttribute("open", "");

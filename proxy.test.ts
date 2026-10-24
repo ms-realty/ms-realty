@@ -46,13 +46,14 @@ describe("host routing (§11.1)", () => {
     vi.stubEnv("MAP_RELEASE_ID", release);
     for (const path of [
       `/maps/${release}/basemap.pmtiles`,
-      "/map-runtime/v6.11.2/maplibre-gl-worker.mjs",
+      `/map-runtime/v${maplibrePackage.version}/maplibre-gl-worker.mjs`,
     ]) {
       expect(run(hosts.public, path).headers.get("x-middleware-next")).toBe("1");
       expect(run(hosts.client, path).status).toBe(404);
       expect(run(hosts.staff, path).status).toBe(404);
     }
     expect(run(hosts.public, `/maps/${"b".repeat(64)}/basemap.pmtiles`).status).toBe(404);
+    expect(run(hosts.public, "/map-runtime/v0.0.0/maplibre-gl-worker.mjs").status).toBe(404);
     vi.stubEnv("MAP_RELEASE_ID", "");
     expect(run(hosts.public, `/maps/${release}/basemap.pmtiles`).status).toBe(404);
   });
@@ -248,3 +249,5 @@ describe("staging and direct-origin boundary", () => {
     ).toBe("1");
   });
 });
+
+import maplibrePackage from "maplibre-gl/package.json";

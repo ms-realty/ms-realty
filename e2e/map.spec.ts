@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
+import maplibrePackage from "maplibre-gl/package.json";
 import { publicLocales } from "../src/domain/ids";
 import { mapCopy } from "../src/features/discovery/map-copy";
 import { origins } from "./hosts";
@@ -55,7 +56,9 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   const archive = page.waitForResponse((r) => r.url().endsWith("basemap.pmtiles"));
   const modules = Promise.all(
     ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"].map((name) =>
-      page.waitForResponse((r) => r.url().endsWith(`/map-runtime/v6.11.2/${name}`)),
+      page.waitForResponse((r) =>
+        r.url().endsWith(`/map-runtime/v${maplibrePackage.version}/${name}`),
+      ),
     ),
   );
   await page.getByRole("button", { name: "Show map" }).click();
