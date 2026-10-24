@@ -11,12 +11,14 @@ export function WorkspaceContext({
 }: {
   label: string;
   navigationLabel?: string;
-  items: readonly { href: string; label: string }[];
+  items: readonly { href: string; label: string; matchPath?: string }[];
 }) {
   const pathname = usePathname();
+  const familyPath = (item: (typeof items)[number]) =>
+    item.matchPath ?? item.href.split("?")[0] ?? item.href;
   const current = [...items]
-    .sort((a, b) => b.href.length - a.href.length)
-    .find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
+    .sort((a, b) => familyPath(b).length - familyPath(a).length)
+    .find((item) => pathname === familyPath(item) || pathname.startsWith(`${familyPath(item)}/`));
   return (
     <nav aria-label={navigationLabel} className="min-w-0 text-dense text-text-muted">
       <ol className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
@@ -31,7 +33,7 @@ export function WorkspaceContext({
         {current ? (
           <li className="flex min-w-0 items-center gap-2">
             <ChevronEndIcon directional className="size-4" />
-            {pathname === current.href ? (
+            {pathname === current.href.split("?")[0] || pathname === current.matchPath ? (
               <span aria-current="page" className="font-medium text-text">
                 {current.label}
               </span>

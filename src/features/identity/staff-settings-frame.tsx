@@ -16,6 +16,7 @@ export async function StaffSettingsFrame({
   lead,
   children,
   backHref,
+  backLabel,
 }: {
   locale: StaffLocale;
   session: Session;
@@ -23,6 +24,7 @@ export async function StaffSettingsFrame({
   lead?: ReactNode;
   children?: ReactNode;
   backHref?: string;
+  backLabel?: string;
 }) {
   const [viewer, jar, requestHeaders] = await Promise.all([
     workspaceViewer(locale, session),
@@ -45,7 +47,7 @@ export async function StaffSettingsFrame({
           className="mb-5 inline-flex min-h-control items-center gap-2 rounded-control text-dense font-medium text-action hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
         >
           <ChevronStartIcon directional />
-          {settingsCopy(locale).openSettings}
+          {backLabel ?? settingsCopy(locale).openSettings}
         </a>
         <div className="flex max-w-reading flex-col gap-6">
           <div className="space-y-3">

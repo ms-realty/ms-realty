@@ -85,7 +85,14 @@ export default async function Page({
     person.version,
   );
   return (
-    <StaffSettingsFrame locale={locale} session={session} title={c.title} lead={c.lead}>
+    <StaffSettingsFrame
+      locale={locale}
+      session={session}
+      title={c.title}
+      lead={c.lead}
+      backHref={`/${locale}/access/manage`}
+      backLabel={c.back}
+    >
       <p className="font-semibold break-words">
         {person.name} · {person.email}
       </p>
@@ -223,9 +230,6 @@ export default async function Page({
           </ul>
         </section>
       ) : null}
-      <a href={`/${locale}/access/manage`} className={workflowLink}>
-        {c.back}
-      </a>
     </StaffSettingsFrame>
   );
 }

@@ -10,7 +10,7 @@ O01/X02 and the personal O23/F30 variant share the existing brand, tokens, nativ
 - Phones use the same directory in a native modal drawer. At ordinary heights the header, filter, account and language controls remain available while destinations scroll. Short viewports use one scrolling surface with a persistent Close header so account controls do not squeeze out the destinations. Desktop uses a stable-sized dialog so filtering does not move the controls.
 - A native account disclosure exposes Profile & settings, permitted agency access management and sign out. Names and email remain readable in its expanded content; the compact rail retains their accessible label.
 - Settings uses ordinary links to Profile, Preferences and Security. A separate Agency view appears only when a supported administrative destination is permitted. Each link works without JavaScript, retains its current-page indication and preserves locale.
-- Authorized team management, absence, offboarding and optional backup enrolment retain the workspace shell and a settings return path. Initial sign-in, initial enrolment and recovery remain focused access journeys.
+- Authorized team management, absence, offboarding and optional backup enrolment retain the workspace shell and a contextual return. Absence/offboarding return to the staff directory; backup enrolment returns to Security. Initial sign-in, initial enrolment and recovery remain focused access journeys.
 
 ## Interaction and recovery
 

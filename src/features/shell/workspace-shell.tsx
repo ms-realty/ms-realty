@@ -241,12 +241,23 @@ export async function WorkspaceShell({
                 <WorkspaceContext
                   label={t("label")}
                   navigationLabel={t("breadcrumb")}
-                  items={[...primary, ...secondary]
-                    .map((item) => ({ href: item.href, label: t(item.label) }))
-                    .concat([
-                      { href: `/${locale}/settings`, label: t("settings") },
-                      { href: `/${locale}/access/manage`, label: t("manageAccess") },
-                    ])}
+                  items={[
+                    ...[...primary, ...secondary].map((item) => ({
+                      href: item.href,
+                      label: t(item.label),
+                    })),
+                    { href: `/${locale}/settings`, label: t("settings") },
+                    {
+                      href: `/${locale}/access/manage`,
+                      label: t("manageAccess"),
+                      matchPath: `/${locale}/access`,
+                    },
+                    {
+                      href: `/${locale}/settings?section=security`,
+                      label: t("personalSettings.securityNav"),
+                      matchPath: `/${locale}/access/enrol`,
+                    },
+                  ]}
                 />
               </div>
               {languageSwitcher}
