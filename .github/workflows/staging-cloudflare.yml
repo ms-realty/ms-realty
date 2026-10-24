@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.ref }}
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
       - name: Capture resources without changing DNS or routes
