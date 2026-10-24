@@ -68,6 +68,6 @@ export async function withUnavailableDocument(
   );
   // An empty href reloads this document, preserving its path/query without reflecting a token
   // into HTML. It is always GET: a previous save/send can only be retried from its receipt.
-  const html = `<!DOCTYPE html><html lang="${locale}" dir="${locale === "he" ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>${escapeHtml(text.unavailable.title)} · MS Realty</title><style>${style}</style></head><body><header><bdi>MS Realty</bdi></header><main id="main-content"><h1>${escapeHtml(text.unavailable.title)}</h1><p>${escapeHtml(text.unavailable.body)}</p><a href="">${escapeHtml(text.generic.retry)}</a><p class="receipt">${escapeHtml(text.recovery.actionOutcome)}</p></main></body></html>`;
+  const html = `<!DOCTYPE html><html lang="${locale}" dir="${locale === "he" ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>${escapeHtml(text.unavailable.title)} · MS Realty</title><style>${style}</style></head><body><header><bdi>MS Realty</bdi></header><main id="main-content"><h1>${escapeHtml(text.unavailable.title)}</h1><p>${escapeHtml(text.unavailable.body)}</p><a href="">${escapeHtml(text.unavailable.retry)}</a><p class="receipt">${escapeHtml(text.recovery.actionOutcome)}</p></main></body></html>`;
   return new Response(html, { status: 503, headers });
 }

@@ -48,6 +48,7 @@
   },
   "unavailable": {
     "title": "Temporarily unavailable",
-    "body": "We cannot open this page right now. Please try again in a moment."
+    "body": "We cannot open this page right now. Please try again in a moment.",
+    "retry": "Reload this page"
   }
 }

@@ -48,6 +48,7 @@
   },
   "unavailable": {
     "title": "Tijdelijk niet beschikbaar",
-    "body": "Deze pagina kan nu niet worden geopend. Probeer het zo nog eens."
+    "body": "Deze pagina kan nu niet worden geopend. Probeer het zo nog eens.",
+    "retry": "Pagina opnieuw laden"
   }
 }
