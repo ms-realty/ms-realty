@@ -53,7 +53,66 @@ function fixture(Web: (typeof gateways)[number][1], initialState = "prepared") {
   return { web, waitForPorts, containerFetch, releasePort };
 }
 
+function heldControlResponse(status: number) {
+  // The SDK proxies private replies through an IdentityTransformStream and retains its
+  // inflight slot until the consumer drains that stream. A small unread reply still blocks.
+  const stream = new TransformStream<Uint8Array, Uint8Array>();
+  const writer = stream.writable.getWriter();
+  let released = false;
+  const finished = writer
+    .write(new TextEncoder().encode('{"state":"running"}'))
+    .then(() => writer.close())
+    .then(
+      () => {
+        released = true;
+      },
+      () => {
+        released = true;
+      },
+    );
+  const response = new Response(stream.readable, { status });
+  return {
+    response,
+    released: () => released,
+    async cleanup() {
+      await response.body?.cancel().catch(() => {});
+      await finished;
+    },
+  };
+}
+
 describe.each(gateways)("%s deferred web readiness", (_name, Web) => {
+  it.each([
+    ["start", 202],
+    ["start", 503],
+    ["identity", 503],
+    ["connectivity", 503],
+  ] as const)(
+    "releases the private %s response at HTTP %i before returning",
+    async (operation, status) => {
+      const f = fixture(Web);
+      const control = heldControlResponse(status);
+      const original = f.containerFetch.getMockImplementation();
+      if (!original) throw new Error("Missing unit transport");
+      f.containerFetch.mockImplementation(async (url, init) =>
+        url === `http://runtime/${operation}` ? control.response : original(url, init),
+      );
+      f.releasePort();
+      try {
+        const request = operation === "start" ? f.web.startWeb() : f.web[operation]();
+        if (status === 202) await request;
+        else await expect(request).rejects.toThrow(/unavailable|requires reconciliation/);
+        await vi.waitFor(() => expect(control.released()).toBe(true), { timeout: 150 });
+        if (operation === "identity")
+          expect(f.containerFetch.mock.calls.map(([url]) => url)).toEqual([
+            "http://runtime/identity",
+          ]);
+      } finally {
+        await control.cleanup();
+      }
+    },
+  );
+
   it("keeps the first request waiting until the web port accepts connections", async () => {
     const f = fixture(Web);
     let settled = false;

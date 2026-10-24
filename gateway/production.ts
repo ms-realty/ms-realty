@@ -56,7 +56,10 @@ class ProductionRole extends Container<ProductionEnv> {
   }
   protected async readIdentity() {
     const result = await this.containerFetch("http://runtime/identity", { method: "GET" }, 3001);
-    if (!result.ok) throw new Error("Production private role identity unavailable");
+    if (!result.ok) {
+      await result.arrayBuffer();
+      throw new Error("Production private role identity unavailable");
+    }
     return runtimeProof(await result.json(), this.role, this.env.BUILD_SHA);
   }
   async connectivity() {
@@ -66,7 +69,10 @@ class ProductionRole extends Container<ProductionEnv> {
       { method: "POST" },
       3001,
     );
-    if (!result.ok) throw new Error("Actual production role TLS session unavailable");
+    if (!result.ok) {
+      await result.arrayBuffer();
+      throw new Error("Actual production role TLS session unavailable");
+    }
     return { identity, proof: await result.json() };
   }
   protected async startRole(operationId?: string) {
@@ -79,6 +85,8 @@ class ProductionRole extends Container<ProductionEnv> {
       },
       3001,
     );
+    // Consume the acknowledgement before another RPC can retain an SDK proxy stream.
+    await result.arrayBuffer();
     if (result.status !== 202)
       throw new Error("Production role start acknowledgement requires reconciliation");
   }

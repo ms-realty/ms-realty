@@ -44,12 +44,18 @@ class StagingRoleContainer extends Container<StagingEnv> {
       { method: "POST" },
       3001,
     );
-    if (!response.ok) throw new Error("Actual private TLS connectivity is unavailable");
+    if (!response.ok) {
+      await response.arrayBuffer();
+      throw new Error("Actual private TLS connectivity is unavailable");
+    }
     return { identity, proof: await response.json() };
   }
   protected async readIdentity() {
     const response = await this.containerFetch("http://runtime/identity", { method: "GET" }, 3001);
-    if (!response.ok) throw new Error("Private role identity unavailable");
+    if (!response.ok) {
+      await response.arrayBuffer();
+      throw new Error("Private role identity unavailable");
+    }
     return runtimeProof(await response.json(), this.role, this.env.BUILD_SHA ?? "");
   }
   protected async startRole(operationId?: string) {
@@ -62,6 +68,8 @@ class StagingRoleContainer extends Container<StagingEnv> {
       },
       3001,
     );
+    // The SDK releases its proxy stream/inflight slot only when this finite reply is consumed.
+    await response.arrayBuffer();
     if (response.status !== 202) throw new Error("Private role start requires reconciliation");
   }
 }
