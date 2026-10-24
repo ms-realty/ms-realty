@@ -119,7 +119,7 @@ it("personal account uses a native disclosure; the sidebar toggle has a guarded 
   const account = rail.querySelector("details");
   expect(account).not.toHaveAttribute("open");
   expect(account?.querySelector("summary")).toHaveAccessibleName(
-    "Account: Synthetic Broker, broker@example.test",
+    "Account: Synthetic Broker broker@example.test",
   );
   expect(account?.querySelector('a[href="/en/settings"]')).toHaveTextContent("Profile & settings");
   expect(account?.querySelector('a[href="/en/access/manage"]')).toBeNull();

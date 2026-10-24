@@ -56,7 +56,7 @@ for (const javascript of [true, false])
       });
       await page.goto(hostUrl("staff", "/en/operations/readiness"));
       await expect(page.getByRole("heading", { name: copy.title, exact: true })).toBeVisible();
-      await expect(page.getByRole("heading", { level: 2 })).toHaveCount(13);
+      await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toHaveCount(13);
       await expect(page.getByText(copy.unconfirmed, { exact: true })).toBeVisible();
       await expect(page.getByText(copy.recordedPass, { exact: true })).toHaveCount(0);
       const runtimeCheck = page.getByRole("link", {

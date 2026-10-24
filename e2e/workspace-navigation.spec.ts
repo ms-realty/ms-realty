@@ -260,7 +260,7 @@ test("X02 modal keeps focus, stable filtering, nested Escape and return focus on
       (
         await new AxeBuilder({ page })
           .include("#agency-tools-menu")
-          .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
           .analyze()
       ).violations,
     ).toEqual([]);
@@ -280,6 +280,7 @@ test("account disclosure and page shortcut preserve keyboard focus without inter
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(hostUrl("staff", "/en/settings"));
   const account = sidebar(page).getByRole("button", { name: /^Account: Test Broker/ });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await account.click();
   await expect(
     sidebar(page).getByRole("link", { name: "Profile & settings", exact: true }),
