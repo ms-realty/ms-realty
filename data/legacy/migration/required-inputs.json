@@ -52,29 +52,9 @@
       ]
     },
     {
-      "id": "a3d9d4affb2cb1cf80ea5ec8",
-      "sourceUrls": [
-        "https://makler-realty.com/de/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
       "id": "aefc233e4d0ec603eff52926",
       "sourceUrls": [
         "https://makler-realty.com/de/transfer-thessaloniki-bansko/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "51b42eb18d2f03ba6b9311ad",
-      "sourceUrls": [
-        "https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
       ],
       "blockers": [
         "missing_verified_main_content",
@@ -136,139 +116,9 @@
       ]
     },
     {
-      "id": "18c0b5691f108c4031cae92c",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/dom/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "e7edeae7d8093730f2162771",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/house-floor/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "772f3a0505e284b73a0dc82f",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/office/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "0a97b844445a41e85a7bb879",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/studio/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "3bc6064df807891a14cddc3e",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/villa/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "41ed9d7d8ea5f2f343912b87",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/%d1%81%d0%b5%d0%bb%d1%8c%d1%81%d0%ba%d0%be%d1%85%d0%be%d0%b7%d1%8f%d0%b9%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%b0%d1%8f-%d0%b7%d0%b5%d0%bc%d0%bb%d1%8f/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "26728ca5a959f43c8218a875",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/category-type/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "ec6865e893f8a0d1113fa7d8",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/resort/nafplio/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "d69b962b23eb6afe9fed5f1c",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "899d93121d3dbd867db12142",
-      "sourceUrls": [
-        "https://makler-realty.com/nl/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
       "id": "00762ec63bd43584e5a7871c",
       "sourceUrls": [
         "https://makler-realty.com/nl/transfer-thessaloniki-bansko/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "c1c9f8607afe3fd2c41a98d1",
-      "sourceUrls": [
-        "https://makler-realty.com/resort/skiing-resort/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "cf0674d7327407791d511e2a",
-      "sourceUrls": [
-        "https://makler-realty.com/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/"
-      ],
-      "blockers": [
-        "missing_verified_main_content",
-        "target_equivalence_review_missing"
-      ]
-    },
-    {
-      "id": "df9f0527c9e1b328a05f1c97",
-      "sourceUrls": [
-        "https://makler-realty.com/resort/%d0%bf%d0%b0%d1%80%d0%b0%d0%bb%d0%b8%d1%8f-%d0%be%d1%84%d1%80%d0%b8%d0%bd%d0%b8%d0%be/"
       ],
       "blockers": [
         "missing_verified_main_content",

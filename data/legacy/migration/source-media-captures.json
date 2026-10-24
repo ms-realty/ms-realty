@@ -15,7 +15,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101010048",
-      "sourcePageSetSha256": "648299b88dd5980a85d00a25c5e22e8b0c9a1c50add94248ce5dd0dde03d8f02",
+      "sourcePageSetSha256": "3dc8c028f88c273be4f1078496e2b92aa58e3da08da78f1395afa3802c670f7e",
       "sourceCaptureReceiptSha256": "b696bf0824097f96ceeed3937180bd56a5b331934aca8219455072669880c95b",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -10266,7 +10266,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101000001",
-      "sourcePageSetSha256": "51f213f9eb8afb1ca4e99bf55ee50d5cabb85d5bc653a451f66edffaf53a08c1",
+      "sourcePageSetSha256": "3bab6f7174b9d246766731a761376d0c919ce25a499d645b89e3c7818a4fd379",
       "sourceCaptureReceiptSha256": "5bb98da311d64e0879816f642058dcdae7f55b6307e0656d7a91e8747a2d313f",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -10708,7 +10708,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101000001",
-      "sourcePageSetSha256": "dc2c5155955d0e33e3be6df3a2ebf54fb035260502f506368c94a226e7fc688b",
+      "sourcePageSetSha256": "12a3cb8b4e7bfdfdf94065fa5a6beb3726188d47a14001b543a26073d89c19cc",
       "sourceCaptureReceiptSha256": "98639d927a6c294ba28f18cf6b32dc45eb2451465354767b3ece19af30ba02bf",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -10929,7 +10929,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101000001",
-      "sourcePageSetSha256": "5858327bd2b2c8f37e599b5eef74f563a8d7982c5a2ced223dab4ba67993c1b7",
+      "sourcePageSetSha256": "334b6d73c14489e9bf4af1bf603637afe2c02f288b397af53312b638fad1b601",
       "sourceCaptureReceiptSha256": "412e47eb0075edd70e6dd96c0bf6866527abafa2ce281f75a9e5a42660beee86",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -13377,7 +13377,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101000001",
-      "sourcePageSetSha256": "98fd76f9a1e651837e4d53f7861fa71ee7635bae236d6314a656a577f0455a5e",
+      "sourcePageSetSha256": "cfdb846eba09acb9526874324c8a6980f0524609892a8e34d83a892796fd9162",
       "sourceCaptureReceiptSha256": "da5f705a67ea7fe0742bc6569a1dab093c63c4f0a9ca07690e80c350eddab1f9",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -13564,7 +13564,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101010060",
-      "sourcePageSetSha256": "ce76969e3dde3c24aa1e6d6038e6fa6ef34b98e9f0838ce9c73432bc39aa02df",
+      "sourcePageSetSha256": "7ceb096e044c085c799cea3770b00479607fd213f86969b082f08ff095e95ed7",
       "sourceCaptureReceiptSha256": "6784c3b2c9f9c3fa34baede1fa1f7d1a0ee4b1be1200032596481c19c923f3b2",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -13700,7 +13700,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101000001",
-      "sourcePageSetSha256": "728413446faf2754e4f6876dc3f8f9d51e402dc01241ac36e226d6844817280f",
+      "sourcePageSetSha256": "79110341f43cb60acd6b75e0b66b5a1d753c467f9202b5e0b8213dd0c50228b4",
       "sourceCaptureReceiptSha256": "d22e1ed0d3b08fc7f2bb1508aac49ca4ba6e19c903b33f0ca111a3203b24c4e6",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -14788,7 +14788,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101000001",
-      "sourcePageSetSha256": "4ae5073e61fbccf679051f90fd65d198dc4ce52c8165814c1c549ec3538ec5b7",
+      "sourcePageSetSha256": "6ffc07e9013fd9eaeaf05317784147414cf33d4f8be991dc68e104a5caf5ad45",
       "sourceCaptureReceiptSha256": "6555ebaf24dce3cae0736c67f2f419cba8df71829248c42a207275970ccf4a5f",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -15196,7 +15196,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101010060",
-      "sourcePageSetSha256": "f3ac0dc8539a9aaeb1ab9795524eb4c2984b83bac6d317e4a6f4d5a6fb5e0cdd",
+      "sourcePageSetSha256": "aae439745cd287c4debb7f0952a7755c0d89380e22c39eaf48b0ee258849257f",
       "sourceCaptureReceiptSha256": "e2160a30dd7e805407e739821f8ab59be0ac63d2db2ab5893f1c02f62981e49a",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
@@ -15298,7 +15298,7 @@
       "contentType": "image/jpeg",
       "sourceContentType": "image/jpeg",
       "headerPrefixHex": "ffd8ffe000104a464946000101000001",
-      "sourcePageSetSha256": "042653f9ce2439284923ddaa734c74164e6af6d88ab697caa9170c081e6deb45",
+      "sourcePageSetSha256": "0dac917fac0df90a5baa3cae3159ea319638c8e735f11e48c621de4d4363a2f5",
       "sourceCaptureReceiptSha256": "b02150cbde7debb4cdee7b66ddaaed205f4cac5f00e4adc011043f10e8b88022",
       "transport": "strict_https_recorded_origin",
       "publicDnsPathObserved": false
