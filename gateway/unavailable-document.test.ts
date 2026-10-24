@@ -19,6 +19,53 @@ const documentRequest = (path = "/en/access", headers: Record<string, string> = 
   });
 
 describe("O access: readable gateway outage without reopening intake or replaying an action", () => {
+  it("releases a replaced upstream stream before returning the outage document", async () => {
+    const stream = new TransformStream<Uint8Array, Uint8Array>();
+    const writer = stream.writable.getWriter();
+    let released = false;
+    const finished = writer
+      .write(new TextEncoder().encode("temporarily unavailable"))
+      .then(() => writer.close())
+      .then(
+        () => {
+          released = true;
+        },
+        () => {
+          released = true;
+        },
+      );
+    const upstream = new Response(stream.readable, {
+      status: 503,
+      headers: { "Content-Type": "text/plain" },
+    });
+    try {
+      const response = await withUnavailableDocument(documentRequest(), upstream);
+      expect(response.status).toBe(503);
+      expect(response.headers.get("content-type")).toContain("text/html");
+      await vi.waitFor(() => expect(released).toBe(true), { timeout: 150 });
+      expect(upstream.bodyUsed).toBe(true);
+      expect(await response.text()).toContain("Temporarily unavailable");
+    } finally {
+      await upstream.body?.cancel().catch(() => {});
+      await finished;
+    }
+  });
+
+  it("keeps the outage readable when the replaced upstream body has failed", async () => {
+    const upstream = new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.error(new Error("unit upstream disconnected"));
+        },
+      }),
+      { status: 503 },
+    );
+    const response = await withUnavailableDocument(documentRequest(), upstream);
+    expect(response.status).toBe(503);
+    expect(upstream.bodyUsed).toBe(true);
+    expect(await response.text()).toContain("Temporarily unavailable");
+  });
+
   it.each(["bg", "en", "ru", "de", "nl", "el", "he"])(
     "serves the %s document without scripts, upstream assets or reflected private links",
     async (locale) => {
