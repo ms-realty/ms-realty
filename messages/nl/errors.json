@@ -45,5 +45,9 @@
       "documents": "Terug naar documenten",
       "properties": "Terug naar woningen"
     }
+  },
+  "unavailable": {
+    "title": "Tijdelijk niet beschikbaar",
+    "body": "Deze pagina kan nu niet worden geopend. Probeer het zo nog eens."
   }
 }

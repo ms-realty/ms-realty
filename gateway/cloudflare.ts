@@ -14,6 +14,7 @@ import {
 } from "./runtime-proof";
 import { stagingArtifacts } from "./staging-artifacts.generated";
 import { stagingWorkAllowed } from "./staging-phase";
+import { withUnavailableDocument } from "./unavailable-document";
 import { type GatewayEnv, gateway } from "./worker";
 
 interface StagingEnv
@@ -273,9 +274,9 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
 export default {
   async fetch(request: Request, env: StagingEnv) {
     try {
-      return noindex(await handle(request, env));
+      return noindex(await withUnavailableDocument(request, await handle(request, env)));
     } catch {
-      return noindex(new Response(null, { status: 503 }));
+      return noindex(await withUnavailableDocument(request, new Response(null, { status: 503 })));
     }
   },
   async scheduled(_event: ScheduledController, env: StagingEnv) {

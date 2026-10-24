@@ -20,6 +20,7 @@ import {
 } from "./runtime-proof";
 // Same immutable logical route/media bytes qualified on staging; fixture modules cannot run.
 import { stagingArtifacts as acceptedArtifacts } from "./staging-artifacts.generated";
+import { withUnavailableDocument } from "./unavailable-document";
 import { type GatewayEnv, gateway } from "./worker";
 
 interface ProductionEnv
@@ -376,9 +377,9 @@ export async function productionRequest(request: Request, env: ProductionEnv): P
 export default {
   async fetch(request: Request, env: ProductionEnv) {
     try {
-      return await productionRequest(request, env);
+      return await withUnavailableDocument(request, await productionRequest(request, env));
     } catch {
-      return noStore(503);
+      return withUnavailableDocument(request, noStore(503));
     }
   },
   async scheduled(_event: ScheduledController, env: ProductionEnv) {

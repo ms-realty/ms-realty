@@ -45,5 +45,9 @@
       "documents": "Back to documents",
       "properties": "Back to properties"
     }
+  },
+  "unavailable": {
+    "title": "Temporarily unavailable",
+    "body": "We cannot open this page right now. Please try again in a moment."
   }
 }
