@@ -280,6 +280,16 @@ export async function heldCapabilities(
   now: Date = new Date(),
 ): Promise<Set<Capability>> {
   const grants = await resolveGrants(db, actor, now);
+  return heldCapabilitiesFromGrants(actor, grants, wanted, now);
+}
+
+/** A projection of one freshly resolved snapshot, never a replacement for command checks. */
+export function heldCapabilitiesFromGrants(
+  actor: Actor,
+  grants: readonly CapabilityGrant[],
+  wanted: readonly Capability[],
+  now: Date = new Date(),
+): Set<Capability> {
   return new Set(wanted.filter((capability) => allows(actor, grants, capability, undefined, now)));
 }
 

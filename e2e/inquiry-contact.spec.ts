@@ -291,9 +291,8 @@ test("O02 S15 an actual restore and its unknown status keep the current focus", 
     const release = await holdInquiryScripts(page);
     try {
       await page.goto(path, { waitUntil: "commit" });
-      // Target the work navigation, which stays visible at every breakpoint. Before
-      // styles finish streaming, a rail link can briefly match :visible and then hide.
-      const focus = page.getByRole("main").locator('a[href="/en/today"]').first();
+      // The skip-link destination remains stable at every breakpoint during hydration.
+      const focus = page.getByRole("main");
       await focus.focus();
       await expect(focus).toBeFocused();
       release();
@@ -339,7 +338,7 @@ for (const beforeHydration of [false, true])
       // still show the side rail that phones hide once its stylesheet applies.
       if ((page.viewportSize()?.width ?? 1440) < 1024) {
         // The phone shell opens X02 as a hydrated dialog or follows its native tools link.
-        const menu = page.getByRole("link", { name: "Open menu", exact: true });
+        const menu = page.getByRole("link", { name: "Open navigation", exact: true });
         if (!beforeHydration) await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
         await menu.click({ noWaitAfter: beforeHydration });
         if (beforeHydration) {
@@ -347,10 +346,17 @@ for (const beforeHydration of [false, true])
           await expect(page).toHaveURL(hostUrl("staff", "/en/operations"));
           signOut = page.getByRole("main").locator(signOutButton);
         } else {
-          const tools = page.getByRole("dialog", { name: "Agency tools", exact: true });
+          const tools = page.getByRole("dialog", { name: "All pages", exact: true });
           await expect(tools).toBeVisible();
           signOut = tools.locator(signOutButton);
         }
+      } else {
+        // Personal actions live in the native account disclosure, including before hydration.
+        await page
+          .getByRole("complementary")
+          .getByRole("button", { name: /^Account:/ })
+          .click();
+        signOut = page.getByRole("complementary").locator(signOutButton);
       }
       const posted = page.waitForResponse(
         (response) =>
@@ -711,11 +717,13 @@ test("O02 storage-disabled drafts survive history Forward and Back, with protect
         .click();
       return;
     }
-    const menu = page.getByRole("banner").getByRole("link", { name: "Open menu", exact: true });
+    const menu = page
+      .getByRole("banner")
+      .getByRole("link", { name: "Open navigation", exact: true });
     await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
     await menu.click();
     await page
-      .getByRole("dialog", { name: "Agency tools", exact: true })
+      .getByRole("dialog", { name: "All pages", exact: true })
       .getByRole("link", { name: /^Today/ })
       .click();
   }

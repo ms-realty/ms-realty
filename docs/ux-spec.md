@@ -159,7 +159,8 @@ All paths below are under the appropriate host and `/{locale}` unless a legacy m
 | Staff `/reviews`, `/publications/{id}`, `/corrections/{id}` | O15–O17, O32, O33 | Exact review, assistance and publication/correction outcomes |
 | Staff `/content` | O21 | Approved editorial content |
 | Staff `/operations/{section}` | O22, O25–O30 | Reports, exceptions, privacy, imports, merges and bounded service Cases |
-| Staff `/settings/{section}` | O23, O24; release-evidence panel | Capability-gated policy, team and release work |
+| Staff `/settings`, `?section=preferences`, `?section=security` | O23 personal variant; F30 | Own display name, browser navigation preference, interface locale and optional passkey backup; no agency role required after staff enrolment |
+| Staff `/settings?section=agency`, `/access/manage`, `/settings/{section}` | O23, O24; release-evidence panel | Capability-gated policy, team and release work |
 
 C15 and O31 are retired, with no replacement financial route. Do not create disabled “coming soon” statement tabs. Architecture route families prevail if route naming is normalized during implementation; retain stable object identity and these task contracts.
 
@@ -867,7 +868,7 @@ Each flow names the actor, entry, sequence, durable outcome, branches and proof.
 
 ### F30 — Manage preferences, access and personal data
 
-**Actor/entry:** client/subscriber/privacy operator; P10/P24, C13/C17/C18, O23/O26.
+**Actor/entry:** client/subscriber/privacy operator; P10/P24, C13/C17/C18, O23/O26. Enrolled staff also enter the personal O23 variant from the account disclosure. Personal name/preferences and agency access administration remain separate destinations; see [the workspace navigation contract](design/workspace-navigation.md).
 
 1. Distinguish service contact, saved-search alerts, marketing and account/access settings. Show current verified routes and purpose-specific choices.
 2. Pause/unsubscribe or change contact details; verify a new route where needed and recheck pending jobs against current eligibility.

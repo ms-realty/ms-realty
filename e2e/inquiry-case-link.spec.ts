@@ -227,7 +227,7 @@ for (const javaScriptEnabled of [true, false]) {
         await submit(page).click();
         await expect(page.getByRole("heading", { level: 1, name: copy.resultTitle })).toBeVisible();
         await expect(page).toHaveURL(/\/bg\/inquiries\/[0-9a-f-]+\/link\?key=/);
-        await expect(page.getByRole("heading", { level: 2 })).toHaveText(
+        await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toHaveText(
           copy.resultHeading.replace("{case}", f.caseA.reference),
         );
         await expect(page.getByText(copy.resultNote, { exact: true })).toBeVisible();

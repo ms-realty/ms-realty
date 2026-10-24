@@ -13,6 +13,7 @@ export function NavLink({
   className,
   exact = false,
   prefetch,
+  title,
   excludePaths = [],
 }: {
   /** Must come from the navigation registry, which checks that the route exists. */
@@ -22,6 +23,7 @@ export function NavLink({
   /** Match only this path, not its descendants (for section roots). */
   exact?: boolean;
   prefetch?: boolean;
+  title?: string;
   /** A separately navigable child section owns its own active item. */
   excludePaths?: readonly string[];
 }) {
@@ -34,6 +36,7 @@ export function NavLink({
     <Link
       href={href}
       prefetch={prefetch}
+      title={title}
       onNavigate={() =>
         window.dispatchEvent(new CustomEvent(navigationStartEvent, { detail: { href } }))
       }

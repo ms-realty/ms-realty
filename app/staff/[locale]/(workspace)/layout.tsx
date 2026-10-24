@@ -1,8 +1,9 @@
 // Agency workspace shell on the staff host (O01–O33).
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { staffSignInPath } from "@/features/privacy/access";
+import { sidebarMode, sidebarPreferenceCookie } from "@/features/shell/navigation-preference";
 import { workspaceViewer } from "@/features/shell/viewer";
 import { WorkspaceShell } from "@/features/shell/workspace-shell";
 import { isStaffLocale, requestPathHeader } from "@/i18n/config";
@@ -16,9 +17,11 @@ export default async function WorkspaceLayout({
   if (!isStaffLocale(locale)) notFound();
   // Signed out, the guard here runs before any page: keep a validated privacy queue position
   // (C-12) so sign-in returns there; every other state is the usual access route.
-  if ((await currentStaffAccess()).state === "signed_out")
+  const access = await currentStaffAccess();
+  if (access.state === "signed_out")
     redirect(staffSignInPath(locale, (await headers()).get(requestPathHeader)));
-  const session = await requireStaffPage(locale);
+  // Reuse this request's verified access result. Each destination still runs its own guard.
+  const session = access.state === "ready" ? access.session : await requireStaffPage(locale);
   const viewer = await workspaceViewer(locale, session);
   return (
     <WorkspaceShell
@@ -27,6 +30,8 @@ export default async function WorkspaceLayout({
       mayManageAccess={viewer.mayManageAccess}
       tools={viewer.tools}
       primary={viewer.primary}
+      initialMode={sidebarMode((await cookies()).get(sidebarPreferenceCookie)?.value)}
+      returnTo={(await headers()).get(requestPathHeader) ?? `/${locale}/today`}
     >
       {children}
     </WorkspaceShell>

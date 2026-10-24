@@ -38,6 +38,7 @@ function fixture() {
     identity: vi.fn(async () => proof("web")),
     connectivity: vi.fn(),
     startWeb: vi.fn(async () => proof("web")),
+    fetch: vi.fn(async () => new Response("application")),
   };
   const queue = {
     identity: vi.fn(async () => proof("worker")),
@@ -195,10 +196,24 @@ describe("production gateway boundary with injected unit namespaces", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("X-Robots-Tag")).toBeNull();
     expect(gateway).toHaveBeenCalledTimes(1);
-    expect(f.web.startWeb).toHaveBeenCalledTimes(1);
+    expect(f.web.startWeb).not.toHaveBeenCalled();
     expect(accessAuthorized).not.toHaveBeenCalled();
     expect((await worker.fetch(f.request("/__release/email"), f.env as never)).status).toBe(403);
     expect(f.env.EMAIL_RECEIPTS.getByName).not.toHaveBeenCalled();
+  });
+  it("starts the approved web role once only when gateway work reaches the origin", async () => {
+    const f = fixture();
+    f.control.active.mockResolvedValue(true);
+    vi.mocked(gateway).mockImplementationOnce(async (request, _env, upstream) => {
+      if (!upstream) throw new Error("Missing unit origin transport");
+      await upstream(request);
+      return upstream(request);
+    });
+    const response = await worker.fetch(new Request(`${f.env.PUBLIC_ORIGIN}/bg`), f.env as never);
+    expect(response.status).toBe(200);
+    expect(f.web.startWeb).toHaveBeenCalledOnce();
+    expect(f.web.fetch).toHaveBeenCalledTimes(2);
+    expect(f.queue.startQueue).not.toHaveBeenCalled();
   });
   it("activation requires a controller grant plus actual migration and common immutable build identities", async () => {
     const f = fixture();

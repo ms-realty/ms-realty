@@ -73,7 +73,7 @@ for (const javaScriptEnabled of [true, false])
         .where(eq(schema.principals.id, manager.id));
       await newStaffMember(context);
 
-      for (const { locale, title, about, denied, back, nav } of [
+      for (const { locale, title, about, denied, back, nav, menu } of [
         {
           locale: "bg",
           title: "Имоти и обяви",
@@ -81,6 +81,7 @@ for (const javaScriptEnabled of [true, false])
           denied: "Достъпът ви не включва тази страница",
           back: "Обратно към „Днес“",
           nav: "Работно пространство",
+          menu: "Отворете навигацията",
         },
         {
           locale: "en",
@@ -89,6 +90,7 @@ for (const javaScriptEnabled of [true, false])
           denied: "Your access does not include this page",
           back: "Back to Today",
           nav: "Workspace",
+          menu: "Open navigation",
         },
       ]) {
         const response = await page.goto(hostUrl("staff", `/${locale}/inventory`));
@@ -104,7 +106,16 @@ for (const javaScriptEnabled of [true, false])
         );
         // The workspace shell stays around it; nothing of the list is read or drawn.
         await expect(page.getByRole("main")).toContainText(denied);
-        await expect(page.getByRole("navigation", { name: nav }).first()).toBeVisible();
+        if ((page.viewportSize()?.width ?? 1440) >= 1024) {
+          await expect(page.getByRole("navigation", { name: nav }).first()).toBeVisible();
+        } else {
+          const trigger = page.getByRole("banner").getByRole("link", {
+            name: menu,
+            exact: true,
+          });
+          await expect(trigger).toBeVisible();
+          await expect(trigger).toHaveAttribute("href", `/${locale}/operations`);
+        }
         await expect(page.locator("form[method=get], ul[aria-label]")).toHaveCount(0);
         await expect(page.getByText(noDefaultError)).toHaveCount(0);
         if (javaScriptEnabled)
