@@ -100,7 +100,7 @@ export class ProductionWeb extends ProductionRole {
     const proof = await this.identity();
     if (!["prepared", "running"].includes(proof.state))
       throw new Error("Production web requires reconciliation");
-    await this.startRole();
+    if (proof.state === "prepared") await this.startRole();
     // Control-port readiness does not establish that the web server accepts requests.
     await this.startAndWaitForPorts([3000]);
     return this.identity();
@@ -115,7 +115,7 @@ export class ProductionWorker extends ProductionRole {
     const proof = await this.identity();
     if (!["prepared", "running"].includes(proof.state))
       throw new Error("Production queue requires reconciliation");
-    await this.startRole();
+    if (proof.state === "prepared") await this.startRole();
     await this.renewActivityTimeout();
     return this.identity();
   }
@@ -367,8 +367,8 @@ export async function productionRequest(request: Request, env: ProductionEnv): P
     return noStore(404);
   }
   if (!(await release(env).active())) return noStore(503);
-  // An approved web role may resume after idle sleep; uncertain/failed roles still reject.
-  await env.MS_REALTY.getByName("web").startWeb();
+  // Activation still gates every request. Only application-bound work needs a live web role.
+  let originReady: Promise<unknown> | undefined;
   return gateway(
     request,
     {
@@ -378,6 +378,8 @@ export async function productionRequest(request: Request, env: ProductionEnv): P
     },
     async (input) => {
       if (!(input instanceof Request)) throw new Error("Fixed Container upstream required");
+      originReady ??= env.MS_REALTY.getByName("web").startWeb();
+      await originReady;
       return env.MS_REALTY.getByName("web").fetch(input);
     },
   );

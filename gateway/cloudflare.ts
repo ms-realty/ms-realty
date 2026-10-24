@@ -83,7 +83,7 @@ export class MsRealtyContainer extends StagingRoleContainer {
     const proof = await this.identity();
     if (proof.state !== "prepared" && proof.state !== "running")
       throw new Error("Web process requires reconciliation");
-    await this.startRole();
+    if (proof.state === "prepared") await this.startRole();
     // The control port can be healthy while the deferred web server is still starting.
     await this.startAndWaitForPorts([3000]);
   }
@@ -97,7 +97,7 @@ export class MsRealtyWorkerContainer extends StagingRoleContainer {
     const proof = await this.identity();
     if (proof.state !== "prepared" && proof.state !== "running")
       throw new Error("Queue process requires reconciliation");
-    await this.startRole();
+    if (proof.state === "prepared") await this.startRole();
     await this.renewActivityTimeout();
   }
   async onActivityExpired() {
@@ -263,8 +263,9 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
     });
   }
   if (!(await migrated(env))) return new Response(null, { status: 503 });
-  await env.MS_REALTY_WORKER.getByName("queue").startQueue();
-  await env.MS_REALTY.getByName("web").startWeb();
+  // Gateway-owned media, assets and redirects need custody checks, not application startup.
+  // Share readiness only within this request; every new request still checks its own gates.
+  let originReady: Promise<unknown> | undefined;
   return gateway(
     request,
     {
@@ -274,6 +275,11 @@ async function handle(request: Request, env: StagingEnv): Promise<Response> {
     },
     async (input) => {
       if (!(input instanceof Request)) throw new Error("Expected fixed upstream request");
+      originReady ??= Promise.all([
+        env.MS_REALTY_WORKER.getByName("queue").startQueue(),
+        env.MS_REALTY.getByName("web").startWeb(),
+      ]);
+      await originReady;
       return env.MS_REALTY.getByName("web").fetch(input);
     },
     async () => true,

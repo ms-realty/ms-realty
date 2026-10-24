@@ -7,8 +7,8 @@ vi.mock("./staging-artifacts.generated", () => ({
   stagingArtifacts: { fixture: false, sourceCommit: "a".repeat(40), routes: "[]", media: "[]" },
 }));
 
-import { MsRealtyContainer } from "./cloudflare";
-import { ProductionWeb } from "./production";
+import { MsRealtyContainer, MsRealtyWorkerContainer } from "./cloudflare";
+import { ProductionWeb, ProductionWorker } from "./production";
 
 const source = "a".repeat(40);
 const nonce = "3f310bab-b56b-4e71-a71e-a913e65ff59c";
@@ -16,6 +16,36 @@ const gateways = [
   ["protected staging", MsRealtyContainer],
   ["production", ProductionWeb],
 ] as const;
+
+describe.each([
+  ["protected staging", MsRealtyWorkerContainer],
+  ["production", ProductionWorker],
+] as const)("%s warm queue", (_name, Queue) => {
+  it("checks the current role and renews activity without issuing another start", async () => {
+    const containerFetch = vi.fn(async (_url: string) =>
+      Response.json({
+        schemaVersion: 1,
+        role: "worker",
+        sourceCommit: source,
+        buildNonce: nonce,
+        state: "running",
+      }),
+    );
+    const renewActivityTimeout = vi.fn(async () => {});
+    const queue = Object.assign(Object.create(Queue.prototype), {
+      role: "worker",
+      env: { BUILD_SHA: source },
+      ctx: { id: { toString: () => "b".repeat(64) } },
+      startAndWaitForPorts: vi.fn(async () => {}),
+      containerFetch,
+      renewActivityTimeout,
+    }) as InstanceType<typeof Queue>;
+    await queue.startQueue();
+    expect(containerFetch).toHaveBeenCalledWith("http://runtime/identity", { method: "GET" }, 3001);
+    expect(containerFetch.mock.calls.map((call) => call[0])).not.toContain("http://runtime/start");
+    expect(renewActivityTimeout).toHaveBeenCalledOnce();
+  });
+});
 
 function fixture(Web: (typeof gateways)[number][1], initialState = "prepared") {
   let state = initialState;
@@ -82,6 +112,18 @@ function heldControlResponse(status: number) {
 }
 
 describe.each(gateways)("%s deferred web readiness", (_name, Web) => {
+  it("checks a running web role without issuing another start command", async () => {
+    const f = fixture(Web, "running");
+    f.releasePort();
+    await f.web.startWeb();
+    expect(f.containerFetch).toHaveBeenCalledWith(
+      "http://runtime/identity",
+      { method: "GET" },
+      3001,
+    );
+    expect(f.containerFetch.mock.calls.map(([url]) => url)).not.toContain("http://runtime/start");
+    expect(f.waitForPorts).toHaveBeenCalledWith([3000]);
+  });
   it.each([
     ["start", 202],
     ["start", 503],
