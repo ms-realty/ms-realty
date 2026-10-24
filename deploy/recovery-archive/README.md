@@ -1,62 +1,54 @@
-# Independent recovery archive setup
+# Cloudflare recovery archive setup
 
-This is a reviewable setup proposal. It provisions nothing by itself and does not qualify
-R08, R10 or a recovery point. The existing Cloudflare R2 recovery evidence belongs to the
-previous application and does not establish the selected architecture's independent archive.
+The owner accepted the provider choice and R2 lock-administrator tradeoff in ADR 0006.
+Use a separate agency-controlled Cloudflare account, an EU-jurisdiction private R2 bucket,
+and an encrypted recovery copy and keys outside the application account. This plan creates
+nothing and does not qualify R08, R10 or a recovery point.
 
-Architecture §17.3 requires: “Store encrypted independent copies in a separately controlled
-AWS account/S3 EU region.” It also requires a named operator and separate reviewer, replay
-of the latest verifiable safety tail or a closed restore, and provider-outcome reconciliation.
+The existing application and legacy backup configuration share an account. Existing files,
+an S3-compatible credential name or an earlier report cannot establish separate custody.
+The proposed retention is 90 days; that duration still needs explicit approval. No automatic
+lifecycle cleanup is configured: retained points must keep every referenced object.
 
-## Proposed resources
-
-Use an agency-controlled recovery account, Frankfurt (`eu-central-1`), a private versioned S3
-bucket and governance Object Lock. The proposed retention is 90 days, matching the retained
-legacy recovery policy; its application to this new archive still needs owner review. The
-backup writer may put and verify archive objects. It cannot delete versions, bypass retention
-or administer the bucket or IAM. Encryption with the agency's age recipient happens before
-upload; the private decryption identity stays outside the backup runtime and the archive.
-There is no automatic lifecycle deletion: retained manifests must keep all their references.
-
-Copy `inputs.example.json` into private operator configuration and complete the nonsecret
-account, profile, bucket and custody fields. Record the retention decision and a separate
-reviewer. Keep credentials and private keys out of this repository and chat. The previously
-configured AWS default profile was unavailable during the local preparation; do not substitute
-another project's account or the application's R2 credentials.
+Copy `inputs.example.json` to private operator configuration. Complete the archive-account
+pin, bucket, custody, retention and separate-review inputs. Keep credentials and private
+keys out of the repository and chat. Use only the named private environment variable for
+the archive read token; there is no default-account or credential fallback.
 
 `node scripts/recovery-archive-plan.mjs --inputs <private-json> --out <private-report>`
-renders a blocked proposal until the required custody/review inputs exist. Optional `--validate`
-performs only STS account readback and CloudFormation template validation in the explicit EU
-region. It never creates resources or a change set and cannot execute one.
+produces a blocked plan until those inputs exist. Optional `--validate` uses only
+fixed-origin Cloudflare GETs to observe the pinned account, exact EU bucket, private
+managed/custom-domain configuration and archive-wide retention rules. Successful reads
+qualify configuration only. The command never creates resources, changes locks, uploads,
+deletes, signs or opens a recovery destination.
 
-## Review and execution sequence
+## Execution and qualification
 
-1. The owner identifies the agency-controlled AWS recovery account and approves its custody,
-   region, retention and operator trust principal. A separate reviewer accepts that role.
-2. An operator verifies the selected profile's STS account against the explicit account pin,
-   then validates the template and reviews a CloudFormation change set in that account.
-   Creating a change set is separate from executing it. No template or account field is an
-   approval to execute it.
-3. After approval, create the private versioned bucket and narrow writer role. Independently
-   read back its owner, EU region, Public Access Block, versioning, governance retention and
-   writer permissions. Prove that the writer cannot delete an archive version or bypass
-   retention using a disposable test object, retaining the actual provider denial.
-4. Upload an encrypted, checksum-bound consistent recovery package. Download its exact object
-   version through independently held recovery credentials; verify ciphertext, manifest,
-   database and every referenced object before restoring into new isolated resources.
-5. Restore with web, jobs and provider egress disabled. Compare all records and object digests,
-   replay the current complete safety tail, invalidate restored sessions and reconcile accepted
-   writes and external-action outcomes. Missing or unverifiable authority keeps the destination
-   quarantined; restoring only an older database is never an application rollback.
-6. The operator and separate reviewer review the exact archive, restore, reconciliation and
-   reopen evidence. Their signatures must bind the selected candidate, configuration, policy,
-   schema and provider accounts. Empty key/approval fields remain blocked. No old approval or
-   earlier R2 report is transferred to this candidate.
+1. Record agency custody of the separate archive account and outside-account encrypted
+   copy/keys. Name the operator and separate reviewer, approve retention and keep
+   application deployment credentials out of archive administration.
+2. Create the dedicated private EU bucket and approved locks under that authority. Scope
+   the backup writer to its archive bucket with no configuration/lock permissions. R2
+   administrators can remove locks; keep that accepted limitation in the operating record.
+3. Independently observe configuration. With a unique disposable canary, prove the writer
+   cannot overwrite or delete a retained object or change retention. Preserve the provider
+   denials. Configuration booleans cannot substitute for these checks.
+4. Encrypt a consistent database/object/release package before upload. Use unique immutable
+   keys and conditional creation. Download the actual archived ciphertext through recovery
+   credentials and compare ciphertext, manifest, database and all referenced object hashes.
+5. Verify the outside-account copy and latest independently retained append-only safety
+   tail/watermark. Restore into clean isolated resources, revoke restored sessions, disable
+   external effects and reconcile post-snapshot accepted writes/provider outcomes. Missing
+   or unverifiable safety history keeps the destination quarantined.
+6. Obtain operator and separate-reviewer evidence bound to the exact candidate, account,
+   configuration, archive and restore. Require signed authority before controlled reopening.
+   An old database restore is not an application rollback; preserve accepted newer writes.
 
-The live staging drill is narrower: it proves data/object recovery and a closed destination.
-It leaves independent custody, a complete safety tail, controlled reopening, recovery
-objectives and human approval unqualified until their actual evidence exists.
+The live staging drill proves data/object restoration and a closed destination. It leaves
+separate custody, outside-account copy, safety-tail completeness, controlled reopening,
+recovery objectives and human approval unqualified until their real evidence exists.
 
-Provider references: [S3 Object Lock](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html),
-[S3 bucket CloudFormation schema](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-s3-bucket.html),
+References: [R2 bucket locks](https://developers.cloudflare.com/r2/buckets/bucket-locks/),
+[R2 token permissions](https://developers.cloudflare.com/r2/api/tokens/),
+[data jurisdiction](https://developers.cloudflare.com/r2/reference/data-location/) and
 [PostgreSQL 16 pg_dump](https://www.postgresql.org/docs/16/app-pgdump.html).

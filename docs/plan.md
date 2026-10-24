@@ -70,7 +70,7 @@ Architecture §2 as amended by [ADR 0002](adr/0002-implementation-deviations.md)
 | i18n | next-intl; public/client `bg en ru de nl el he`, staff `bg en ru`; per-namespace catalogs; locale published only when its content is approved |
 | Rendering | Mutable public pages render per request from PostgreSQL (architecture §7.5); only static assets and approved media derivatives are cached |
 | Media | R2 EU jurisdiction: quarantine, private, public buckets via the S3 API; seal → scan (ClamAV) → derivatives; private downloads through the app |
-| Providers | Resend (mail), OpenRouter hosted Jev Router + typed Jev Decisions (Hermes; ADR 0003), Protomaps + MapLibre (maps), Better Stack (monitoring), AWS S3 Object Lock (independent archive); synthetic checks until live qualification |
+| Providers | Resend (mail), OpenRouter hosted Jev Router + typed Jev Decisions (Hermes; ADR 0003), Protomaps + MapLibre (maps), Better Stack (monitoring), separately administered EU R2 archive and outside-account encrypted recovery copy (ADR 0006); synthetic checks until live qualification |
 | Tests | Vitest (unit, jsdom, integration on real PostgreSQL), Playwright (Chromium desktop/mobile + WebKit mobile) with axe and screenshot baselines in the pinned Playwright image |
 | Hosting | Cloudflare gateway and protected Containers candidate: web, persistent worker and serialized migration use one immutable image digest with distinct credentials; separate PostgreSQL 16.14 staging service and private TLS path require live qualification before promotion |
 
@@ -134,7 +134,7 @@ Blocked gates stay blocked until these exist; the safe default applies meanwhile
 | Seller authority, media rights and public-address precision per listing | Listing stays unpublished | R02 |
 | Country process copy and document policy (BG, GR) reviewed by professionals | No process claims shown | R02/R04 |
 | Retention, deletion, contact-purpose and vendor-processing policy | No production personal-data capture | R00/R05 |
-| Provider accounts owned by the agency: Cloudflare gateway/Containers/R2, private PostgreSQL, Resend, qualified OpenRouter/explicit model adapters, Better Stack monitoring and AWS S3 Object Lock | Local fakes and synthetic tests only | R01/R08 |
+| Provider accounts owned by the agency: Cloudflare gateway/Containers/R2, private PostgreSQL, Resend, qualified OpenRouter/explicit model adapters, Better Stack monitoring, separate EU R2 recovery administration and outside-account encrypted copy | Local fakes and synthetic tests only | R01/R08 |
 | DNS for `my.` and `app.` hosts, the reply subdomain and cutover; renewal of `makler-realty.ru` | No cutover, no mail-DNS change | R07/R10 |
 | Historical SEO analytics (Search Console, Yandex, backlinks) | Optional at every lifecycle stage by owner decision of 2026-09-24; never a release blocker | — |
 | Recovery custody, Ed25519 signing key holder, incident contacts | No release | R08/R10 |

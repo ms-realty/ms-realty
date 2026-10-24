@@ -68,11 +68,12 @@ separate evidence. The live restore must compare every table and durable object,
 restored credentials and prove startup remains quarantined. A matching restore is useful
 proof but is not a sealed independent recovery point.
 
-Architecture §17.3 additionally requires an agency-controlled EU AWS archive, governance
+Architecture §17.3 and owner-approved ADR 0006 additionally require an EU R2 archive under
+separate administration, an encrypted copy and keys outside the application account,
 retention approval, an independent safety tail and watermark, named operator and separate
-reviewer, signed evidence and controlled reopening. The review-only proposal lives in
-`deploy/recovery-archive/`. Its proposed retention is not approval, and the existing
-Cloudflare R2 archive cannot substitute for separate AWS custody.
+reviewer, signed evidence and controlled reopening. The plan lives in
+`deploy/recovery-archive/`. Its proposed retention is not approval. Existing same-account
+Cloudflare storage does not establish separate recovery custody.
 
 Application rollback must preserve writes accepted after the previous build. Do not restore
 an older database as an application rollback. Any unavailable independent destination or
