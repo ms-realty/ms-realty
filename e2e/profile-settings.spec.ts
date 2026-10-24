@@ -4,7 +4,9 @@ import { expect, test } from "@playwright/test";
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import settingsBg from "../messages/staff/bg/workspace.json" with { type: "json" };
 import settings from "../messages/staff/en/workspace.json" with { type: "json" };
+import settingsRu from "../messages/staff/ru/workspace.json" with { type: "json" };
 import * as schema from "../src/db/schema";
 import { workCopy } from "../src/features/work/copy";
 import { hostUrl } from "./hosts";
@@ -22,6 +24,36 @@ const form = workCopy("en").form;
 for (const javaScriptEnabled of [true, false]) {
   test.describe(`O23 profile with JavaScript ${javaScriptEnabled}`, () => {
     test.use({ javaScriptEnabled });
+    test("phone settings keep the selected view and all locale choices visible without horizontal scrolling", async ({
+      context,
+      page,
+    }) => {
+      await enrolledStaff(db, context, { roles: [] });
+      await page.setViewportSize({ width: 320, height: 740 });
+      for (const [locale, messages] of [
+        ["en", settings.personalSettings],
+        ["bg", settingsBg.personalSettings],
+        ["ru", settingsRu.personalSettings],
+      ] as const) {
+        await page.goto(hostUrl("staff", `/${locale}/settings?section=security`));
+        const views = page.getByRole("navigation", { name: messages.title, exact: true });
+        const chooser = views.getByRole("button", {
+          name: `${messages.title}: ${messages.securityNav}`,
+          exact: true,
+        });
+        await expect(chooser).toBeVisible();
+        await chooser.click();
+        const profile = views.getByRole("link", { name: messages.profile, exact: true });
+        await expect(profile).toBeInViewport({ ratio: 0.95 });
+        await profile.click();
+        await expect(
+          page.getByRole("textbox", { name: messages.displayName, exact: true }),
+        ).toBeVisible();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+          320,
+        );
+      }
+    });
     test("invalid drafts survive, a name saves with its durable receipt, and another person cannot read it", async ({
       context,
       page,

@@ -286,10 +286,13 @@ test("account disclosure and page shortcut preserve keyboard focus without inter
   ).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(account).toBeFocused();
+  // A navigation-layer change closes an open account disclosure before opening the modal.
+  await account.click();
   await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
   const dialog = page.getByRole("dialog", { name: "All pages", exact: true });
   await expect(dialog.getByRole("searchbox")).toBeFocused();
-  await dialog.getByRole("button", { name: "Close", exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
   await expect(account).toBeFocused();
   await page.getByRole("textbox", { name: "Your name", exact: true }).fill("Kept draft");
   await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");

@@ -8,6 +8,18 @@ function menuDialog(id: string): HTMLDialogElement | null {
   return element instanceof HTMLDialogElement ? element : null;
 }
 
+/** Changing navigation layers closes disclosures and retains a visible return target. */
+function closeDisclosuresForMenu(origin: HTMLElement | null) {
+  let visibleOrigin = origin;
+  for (const details of document.querySelectorAll<HTMLDetailsElement>(
+    "details[data-dismissible][open]",
+  )) {
+    if (origin && details.contains(origin)) visibleOrigin = details.querySelector("summary");
+    details.open = false;
+  }
+  return visibleOrigin;
+}
+
 /** Native link first; an enhanced opener restores only its own focus after closing. */
 export function AgencyToolsMenu({
   href,
@@ -57,6 +69,7 @@ export function AgencyToolsMenu({
           return;
         event.preventDefault();
         openedHere.current = true;
+        closeDisclosuresForMenu(trigger.current);
         dialog.showModal();
         dialog.querySelector<HTMLInputElement>("[data-page-filter]")?.focus();
       }}
@@ -137,8 +150,9 @@ export function AgencyToolsBehavior({ dialogId }: { dialogId: string }) {
         return;
       if (dialog.open || document.querySelector("dialog:modal")) return;
       event.preventDefault();
-      shortcutOrigin =
-        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      shortcutOrigin = closeDisclosuresForMenu(
+        document.activeElement instanceof HTMLElement ? document.activeElement : null,
+      );
       dialog.showModal();
       dialog.querySelector<HTMLInputElement>("[data-page-filter]")?.focus();
     };

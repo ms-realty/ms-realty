@@ -16,6 +16,7 @@ import { profileOperation, readStaffProfile } from "@/server/auth/profile";
 import { heldCapabilities } from "@/server/authz";
 import { buttonClass } from "@/ui/button-class";
 import { initialFormState } from "@/ui/form/server";
+import { CheckIcon, ChevronDownIcon } from "@/ui/icons";
 import { saveProfile } from "./actions";
 
 export default async function SettingsPage({
@@ -64,23 +65,53 @@ export default async function SettingsPage({
         <h1 className="text-page font-semibold">{copy.title}</h1>
         <p className="max-w-reading text-text-muted">{copy.lead}</p>
       </div>
-      <nav aria-label={copy.title} className="flex gap-1 overflow-x-auto border-b border-divider">
-        {sections.map((section) => (
-          <a
-            key={section.id}
-            href={section.href}
-            aria-current={selected === section.id ? "page" : undefined}
-            className="inline-flex min-h-control shrink-0 items-center border-b-2 border-transparent px-3 py-3 text-dense font-medium text-text-muted no-underline hover:bg-subtle focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:border-action aria-[current=page]:text-action"
+      <nav aria-label={copy.title}>
+        <div className="hidden gap-1 border-b border-divider sm:flex">
+          {sections.map((section) => (
+            <a
+              key={section.id}
+              href={section.href}
+              aria-current={selected === section.id ? "page" : undefined}
+              className="inline-flex min-h-control shrink-0 items-center border-b-2 border-transparent px-3 py-3 text-dense font-medium text-text-muted no-underline hover:bg-subtle focus-visible:-outline-offset-2 focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:border-action aria-[current=page]:text-action"
+            >
+              {section.label}
+            </a>
+          ))}
+        </div>
+        <details
+          data-dismissible=""
+          className="group/settings-view sm:hidden [&:not([open])>ul]:hidden"
+        >
+          {/* biome-ignore lint/a11y/useSemanticElements: native summary is the no-JavaScript settings-view disclosure. */}
+          <summary
+            role="button"
+            aria-label={`${copy.title}: ${sections.find((section) => section.id === selected)?.label}`}
+            className="flex min-h-control cursor-pointer list-none items-center justify-between gap-3 rounded-control border border-border bg-surface px-3 py-3 text-dense font-semibold text-action focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus [&::-webkit-details-marker]:hidden"
           >
-            {section.label}
-          </a>
-        ))}
+            {sections.find((section) => section.id === selected)?.label}
+            <ChevronDownIcon className="group-open/settings-view:-scale-y-100" />
+          </summary>
+          <ul className="mt-2 space-y-1 border-b border-divider pb-2">
+            {sections.map((section) => (
+              <li key={section.id}>
+                <a
+                  href={section.href}
+                  aria-current={selected === section.id ? "page" : undefined}
+                  className="flex min-h-control items-center justify-between gap-3 rounded-control px-3 py-3 text-dense text-text hover:bg-subtle focus-visible:outline-2 focus-visible:outline-focus aria-[current=page]:bg-selected aria-[current=page]:font-semibold aria-[current=page]:text-action"
+                >
+                  {section.label}
+                  {selected === section.id ? <CheckIcon /> : null}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
       </nav>
       <div className="max-w-reading pt-7">
         {selected === "profile" ? (
           <section aria-labelledby="profile-title" className="space-y-6">
             <div className="space-y-2">
-              <h2 id="profile-title" className="text-heading font-semibold">
+              <h2 id="profile-title" className="sr-only text-heading font-semibold sm:not-sr-only">
                 {copy.profile}
               </h2>
               <p className="text-text-muted">{copy.profileLead}</p>
@@ -111,7 +142,10 @@ export default async function SettingsPage({
           </section>
         ) : selected === "preferences" ? (
           <section aria-labelledby="preferences-title" className="space-y-7">
-            <h2 id="preferences-title" className="text-heading font-semibold">
+            <h2
+              id="preferences-title"
+              className="sr-only text-heading font-semibold sm:not-sr-only"
+            >
               {copy.preferences}
             </h2>
             <div className="space-y-3">
@@ -139,7 +173,7 @@ export default async function SettingsPage({
           </section>
         ) : selected === "security" ? (
           <section aria-labelledby="security-title" className="space-y-5">
-            <h2 id="security-title" className="text-heading font-semibold">
+            <h2 id="security-title" className="sr-only text-heading font-semibold sm:not-sr-only">
               {copy.security}
             </h2>
             <p className="text-text-muted">{copy.securityLead}</p>
@@ -156,7 +190,10 @@ export default async function SettingsPage({
         ) : (
           <section aria-labelledby="agency-settings-title" className="space-y-5">
             <div className="space-y-2">
-              <h2 id="agency-settings-title" className="text-heading font-semibold">
+              <h2
+                id="agency-settings-title"
+                className="sr-only text-heading font-semibold sm:not-sr-only"
+              >
                 {copy.agency}
               </h2>
               <p className="text-text-muted">{copy.agencyLead}</p>
