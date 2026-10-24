@@ -1,6 +1,7 @@
 // Read-only live delta capture. Only GET, allowed legacy hosts, bounded bodies and redirects.
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { parseArgs } from "node:util";
 import { gzipSync } from "node:zlib";
 import { extractLiveSource } from "../src/server/legacy/capture.ts";
@@ -78,6 +79,8 @@ for (const requested of requestedUrls) {
       error: error.stdout ? JSON.parse(String(error.stdout)).error : String(error.message),
     });
   }
+  // A stopped operator run must retain each completed source receipt, not only its raw gzip.
+  persist();
   console.log(
     JSON.stringify({
       completed: captures.length,
@@ -87,33 +90,7 @@ for (const requested of requestedUrls) {
     }),
   );
 }
-const discovered = captures
-  .filter((capture) => !capture.parked && capture.response_artifact && capture.title)
-  .flatMap((capture) => capture.links ?? [])
-  .filter(
-    (link) =>
-      !known.has(link.id) &&
-      !/^\/wp-(?:content|includes)\//u.test(sourceIdentity(link.url).path) &&
-      !/\.(?:jpe?g|png|webp|gif|svg|pdf|xml|css|js)$/iu.test(sourceIdentity(link.url).path),
-  );
-const output = {
-  schemaVersion: 1,
-  requestMethod: "GET",
-  authority: "2026-10-01 owner zero-loss migration",
-  status: "partial_delta_not_reconciled",
-  independentCheckerBaseline: false,
-  requestedSources: captures.length,
-  capturedSources: captures.filter((capture) => !capture.error).length,
-  verifiedPrimarySources: captures.filter(verifiedPrimaryCapture).length,
-  parkedSources: captures.filter((capture) => capture.parked).length,
-  completeSiteDelta: false,
-  captures,
-  discoveredOutsideFrozenUrls: discovered.filter(
-    (link, index) => discovered.findIndex((other) => other.id === link.id) === index,
-  ),
-};
-mkdirSync("data/legacy/migration", { recursive: true });
-writeFileSync(values.output, `${JSON.stringify(output, null, 2)}\n`);
+const output = persist();
 console.log(
   JSON.stringify({
     requested: output.requestedSources,
@@ -123,3 +100,36 @@ console.log(
     completeSiteDelta: false,
   }),
 );
+
+function persist() {
+  const discovered = captures
+    .filter((capture) => !capture.parked && capture.response_artifact && capture.title)
+    .flatMap((capture) => capture.links ?? [])
+    .filter(
+      (link) =>
+        !known.has(link.id) &&
+        !/^\/wp-(?:content|includes)\//u.test(sourceIdentity(link.url).path) &&
+        !/\.(?:jpe?g|png|webp|gif|svg|pdf|xml|css|js)$/iu.test(sourceIdentity(link.url).path),
+    );
+  const output = {
+    schemaVersion: 1,
+    requestMethod: "GET",
+    authority: "2026-10-01 owner zero-loss migration",
+    status: "partial_delta_not_reconciled",
+    independentCheckerBaseline: false,
+    requestedSources: captures.length,
+    capturedSources: captures.filter((capture) => !capture.error).length,
+    verifiedPrimarySources: captures.filter(verifiedPrimaryCapture).length,
+    parkedSources: captures.filter((capture) => capture.parked).length,
+    completeSiteDelta: false,
+    captures,
+    discoveredOutsideFrozenUrls: discovered.filter(
+      (link, index) => discovered.findIndex((other) => other.id === link.id) === index,
+    ),
+  };
+  mkdirSync(dirname(values.output), { recursive: true });
+  const temporary = `${values.output}.${process.pid}.tmp`;
+  writeFileSync(temporary, `${JSON.stringify(output, null, 2)}\n`, { mode: 0o600 });
+  renameSync(temporary, values.output);
+  return output;
+}
