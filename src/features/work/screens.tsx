@@ -76,47 +76,13 @@ export function queryPage(value: string | string[] | undefined) {
 }
 const link = "font-semibold text-link underline underline-offset-4";
 
-function WorkNav({ locale }: { locale: string }) {
-  const copy = workCopy(locale);
-  return (
-    <nav aria-label={copy.details} className="flex flex-wrap gap-5">
-      <a className={link} href={`/${locale}/today`}>
-        {copy.today}
-      </a>
-      <a className={link} href={`/${locale}/inquiries`}>
-        {copy.inbox}
-      </a>
-      <a className={link} href={`/${locale}/tasks`}>
-        {copy.tasks}
-      </a>
-      <a className={link} href={`/${locale}/contacts`}>
-        {copy.contacts}
-      </a>
-      <a className={link} href={`/${locale}/coverage`}>
-        {coverageCopy(locale).title}
-      </a>
-    </nav>
-  );
-}
-
-export function Page({
-  title,
-  locale,
-  children,
-}: {
-  title: string;
-  locale: string;
-  children: ReactNode;
-}) {
+export function Page({ title, children }: { title: string; locale: string; children: ReactNode }) {
   return (
     <div className="mx-auto min-w-0 max-w-page space-y-8 break-words px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <header className="space-y-4">
         <h1 className="text-title font-semibold">{title}</h1>
       </header>
       {children}
-      <footer className="border-t border-divider pt-6">
-        <WorkNav locale={locale} />
-      </footer>
     </div>
   );
 }
@@ -623,9 +589,6 @@ export async function InquiryScreen({
               </ol>
             </section>
           </aside>
-        </div>
-        <div className="border-t border-divider pt-5">
-          <WorkNav locale={locale} />
         </div>
       </div>
     </div>

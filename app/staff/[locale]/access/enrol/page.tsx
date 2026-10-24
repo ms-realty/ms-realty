@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
 import { ceremonyMessages, fill, identityCopy } from "@/features/identity/copy";
 import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
+import { settingsCopy } from "@/features/identity/settings-copy";
+import { StaffSettingsFrame } from "@/features/identity/staff-settings-frame";
 import { isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess, staffAccessPath } from "@/server/auth/pages";
 import { enrolmentWindowMs } from "@/server/auth/passkeys";
@@ -31,39 +33,38 @@ export default async function EnrolPage({ params }: PageProps<"/staff/[locale]/a
       })}
     />
   );
+  if (ready)
+    return (
+      <StaffSettingsFrame
+        locale={locale}
+        session={access.session}
+        backHref={`/${locale}/settings?section=security`}
+        title={settingsCopy(locale).security}
+        lead={c.enrolBackupLead}
+      >
+        <Notice tone="success">{c.enrolDone}</Notice>
+        <a className={buttonClass("secondary")} href={`/${locale}/today`}>
+          {c.continueToWorkspace}
+        </a>
+        {isFresh(access.session, now) ? (
+          registration
+        ) : (
+          <>
+            <Notice tone="info">{c.enrolBackupReauth}</Notice>
+            <a
+              className={buttonClass("secondary")}
+              href={`/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/access/enrol`)}`}
+            >
+              {c.confirmWithPasskey}
+            </a>
+          </>
+        )}
+      </StaffSettingsFrame>
+    );
   return (
-    <AccessFrame title={ready ? c.enrolReadyTitle : c.enrolTitle} lead={c.enrolLead} standalone>
-      <Notice tone={ready ? "success" : "info"}>
-        {ready ? c.enrolDone : fill(c.enrolProgress, { count: access.passkeys })}
-      </Notice>
-      {ready ? (
-        <>
-          <a className={buttonClass()} href={`/${locale}/today`}>
-            {c.continueToWorkspace}
-          </a>
-          <details className="rounded-control border border-border p-4">
-            <summary className="cursor-pointer font-medium text-action">
-              {c.enrolBackupTitle}
-            </summary>
-            <div className="mt-4 flex flex-col gap-4">
-              <p>{c.enrolBackupLead}</p>
-              {isFresh(access.session, now) ? (
-                registration
-              ) : (
-                <>
-                  <Notice tone="info">{c.enrolBackupReauth}</Notice>
-                  <a
-                    className={buttonClass("secondary")}
-                    href={`/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/access/enrol`)}`}
-                  >
-                    {c.confirmWithPasskey}
-                  </a>
-                </>
-              )}
-            </div>
-          </details>
-        </>
-      ) : isFresh(access.session, now, enrolmentWindowMs) ? (
+    <AccessFrame title={c.enrolTitle} lead={c.enrolLead} standalone>
+      <Notice tone="info">{fill(c.enrolProgress, { count: access.passkeys })}</Notice>
+      {isFresh(access.session, now, enrolmentWindowMs) ? (
         registration
       ) : (
         <Notice tone="warning">{c.enrolWindowClosed}</Notice>

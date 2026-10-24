@@ -83,6 +83,7 @@ export const workspacePrimaryNav: readonly (WorkspaceNavItem & { label: AgencyTo
   { label: "inventory", screen: "O10", path: "/inventory", requires: ["listing.read"] },
   { label: "calendar", screen: "O08", path: "/calendar", requires: ["appointment.manage"] },
   { label: "tasks", screen: "O18", path: "/tasks", requires: ["task.manage"] },
+  { label: "contacts", screen: "O02", path: "/contacts", requires: ["inquiry.read"] },
 ];
 
 export function permittedWorkspaceNav(held: ReadonlySet<Capability>): WorkspaceNavItem[] {
@@ -92,6 +93,11 @@ export function permittedWorkspaceNav(held: ReadonlySet<Capability>): WorkspaceN
 export const workspaceSecondaryNav: readonly WorkspaceNavItem[] = [
   { label: "butler", screen: "XBUTLER", path: "/operations/assistance" },
   { label: "moreTools", screen: "X02", path: "/operations" },
+];
+
+/** Personal settings are available to each enrolled staff member, without an agency role. */
+export const workspacePersonalNav: readonly AgencyToolItem[] = [
+  { label: "profile", screen: "O23", path: "/settings" },
 ];
 
 /**
@@ -141,6 +147,7 @@ export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyTool
       requires: ["settings.manage", "message.send_external"],
     },
   ],
+  personal: workspacePersonalNav,
 };
 
 /** Every capability a tool row asks for: resolve them once per request. */
