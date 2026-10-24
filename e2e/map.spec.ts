@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
-import maplibrePackage from "maplibre-gl/package.json";
+import maplibrePackage from "maplibre-gl/package.json" with { type: "json" };
 import { publicLocales } from "../src/domain/ids";
 import { mapCopy } from "../src/features/discovery/map-copy";
 import { origins } from "./hosts";

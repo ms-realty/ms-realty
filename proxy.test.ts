@@ -250,4 +250,4 @@ describe("staging and direct-origin boundary", () => {
   });
 });
 
-import maplibrePackage from "maplibre-gl/package.json";
+import maplibrePackage from "maplibre-gl/package.json" with { type: "json" };

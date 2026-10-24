@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import maplibrePackage from "maplibre-gl/package.json";
+import maplibrePackage from "maplibre-gl/package.json" with { type: "json" };
 import { describe, expect, it, vi } from "vitest";
 import nextConfig from "../next.config";
 import { type GatewayEnv, gateway } from "./worker";
