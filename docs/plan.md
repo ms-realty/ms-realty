@@ -52,7 +52,7 @@ description below is the 26 September baseline, not a fresh live-service observa
 | Legacy site | `makler-realty.com` serves the legacy WordPress site (Worker routes removed out-of-band on 2026-09-17); `makler-realty.ru` registration expired. The old Next/Payload app still runs on workers.dev and the origin at `a51827be`, watched by the legacy monitoring workflows pinned to tag `legacy-app-final` |
 | Merged | S0 deploy freeze (#260); S1 scaffold and legacy extraction (#261); S1 foundations (#263): domain model, schema, server core, UI kit, i18n shells, staged legacy import; CI v2 (`ci / gate`, #265/#272) |
 | Legacy data | `data/legacy/`: 165 listings (30 active at freeze), 457 exact URL decisions (179×301, 268×410, 10×200), 1725 R2 media objects, 31 places, approved guide content; verified by `data/legacy/verify.mjs` |
-| Recovered foundation | Three-host routing, mandatory two-passkey staff identity, revisioned publication/generation, split catalogs, architecture tokens, native forms and release evaluator implemented; production image, migrator and worker have local smoke evidence |
+| Recovered foundation | Three-host routing, mandatory staff passkey identity with optional backups under ADR 0005, revisioned publication/generation, split catalogs, architecture tokens, native forms and release evaluator implemented; production image, migrator and worker have local smoke evidence |
 | Delivery work | Inventory/publication, discovery/intake, case continuity, private files, process controls, draft assistance and opt-in alert rule implemented with scoped database/browser evidence. Integrated verification and review fixes in progress; remaining software and external inputs are enumerated in the delivery record |
 | Launch authority | Original `production/data/launch-readiness.json` and `launch-input-checklist.md` preserved; R00 and live qualification remain blocked |
 
@@ -65,7 +65,7 @@ Architecture §2 as amended by [ADR 0002](adr/0002-implementation-deviations.md)
 | Application | Next.js 16 App Router, React 19, TypeScript strict, Node 24; one app serving three hosts: `makler-realty.com` (public), `my.makler-realty.com` (client), `app.makler-realty.com` (staff), routed by host in `proxy.ts`; local equivalents `*.localhost` |
 | Data | PostgreSQL 16.14 for the selected provider contract, Drizzle ORM, committed SQL migrations (expand/backfill/contract), atomic revision guards; actual private staging connectivity remains unverified |
 | Work | pg-boss in a dedicated worker; outbox + external-action ledger; lanes; leases |
-| Identity | First-party passwordless (ADR 0002): staff passkeys ×2 mandatory, client e-mail link with confirm POST; host-only cookies per context |
+| Identity | First-party passwordless (ADRs 0002/0005): one verified staff passkey, optional backups; client e-mail link with confirm POST; host-only cookies per context |
 | UI | React Aria Components + Tailwind v4 on DTCG-sourced semantic tokens (architecture §11.3 palette); server components by default; forms work without JavaScript |
 | i18n | next-intl; public/client `bg en ru de nl el he`, staff `bg en ru`; per-namespace catalogs; locale published only when its content is approved |
 | Rendering | Mutable public pages render per request from PostgreSQL (architecture §7.5); only static assets and approved media derivatives are cached |

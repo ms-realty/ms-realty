@@ -10,5 +10,15 @@
     "message": "This page is also available in English.",
     "switch": "Continue in English",
     "dismiss": "Hide this suggestion"
+  },
+  "passkeys": {
+    "passkeyAlreadyRegistered": "This passkey is already registered. For your backup, choose a different passkey provider or a security key. Your saved passkey is still available.",
+    "passkeyIncompatibleAuthenticator": "This device or security key cannot create the passkey required here. Choose one that supports passkeys and PIN or biometric verification.",
+    "passkeyBrowserFailed": "Your browser could not complete this passkey request. Try again or choose another device or security key. Your saved passkeys have not changed.",
+    "enrolReadyTitle": "Your passkey is ready",
+    "enrolBackupTitle": "Add another passkey (optional)",
+    "enrolBackupLead": "Your first passkey is saved. Choose a different passkey provider or a security key for the backup. Devices sharing the same synced passkey count as one key.",
+    "registerBackupPasskey": "Add backup passkey",
+    "enrolBackupReauth": "Confirm it is you before adding another passkey."
   }
 }

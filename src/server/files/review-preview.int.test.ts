@@ -34,7 +34,7 @@ async function fixture() {
     ],
   });
   await t.db.insert(passkeys).values(
-    [0, 1].map(() => ({
+    [0].map(() => ({
       principalId: reviewer.id,
       credentialId: randomUUID(),
       publicKey: Buffer.from([1]),
@@ -128,7 +128,7 @@ describe("O16 scoped derivative review preview", () => {
     }
   });
 
-  it("denies one passkey before inspecting the scoped asset or reading bytes", async () => {
+  it("denies zero passkeys before inspecting the scoped asset or reading bytes", async () => {
     const f = await fixture();
     const [key] = await t.db.select().from(passkeys).where(eq(passkeys.principalId, f.reviewer.id));
     if (!key) throw new Error("Missing synthetic review passkey");

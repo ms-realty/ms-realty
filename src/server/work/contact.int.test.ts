@@ -317,6 +317,14 @@ describe("O03 / AT14 human-attested contact and owned follow-up", () => {
           .limit(1);
         if (!key) throw new Error("Key fixture missing");
         await t.db.update(passkeys).set({ revokedAt: new Date() }).where(eq(passkeys.id, key.id));
+        // Revoking an optional backup leaves the verified primary and its receipt usable.
+        await expect(recordInquiryContact(t.db, f.session, f.input)).resolves.toMatchObject({
+          replayed: true,
+        });
+        await t.db
+          .update(passkeys)
+          .set({ revokedAt: new Date() })
+          .where(eq(passkeys.principalId, f.person.id));
       }
       if (change === "absence")
         await t.db

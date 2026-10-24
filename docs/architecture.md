@@ -54,7 +54,7 @@ The final choice is not a claim that custom development is always cheaper. It is
 | D05 | pg-boss on PostgreSQL, one dedicated worker process, application-owned outbox and external-action ledger (ADR 0002) | Inngest/Temporal/n8n plus a competing native queue |
 | D06 | Cloudflare gateway and Containers candidate for web/worker/migration with one image digest; PostgreSQL 16.14 behind a qualified private path (ADR 0004) | Edge-only execution of the full Node application; public database exposure |
 | D07 | Cloudflare edge protection and a thin gateway; R2 EU-jurisdiction object storage | Serving private evidence from a public bucket or relying on a location hint as a residency guarantee |
-| D08 | First-party passwordless identity with separate staff/client contexts, two staff passkeys and local authorization (ADR 0002) | Password/OTP bypass or email address as a role |
+| D08 | First-party passwordless identity with separate staff/client contexts, one verified staff passkey, optional backups and local authorization (ADRs 0002/0005) | Password/OTP bypass or email address as a role |
 | D09 | Resend for application email and reply ingestion; the application owns conversations and delivery records | Rebuilding a general mailbox or requiring full personal mailbox synchronization |
 | D10 | Application-owned viewing calendar and ICS invitations/updates | Unverified instant booking or mandatory bidirectional Google/Microsoft calendar sync |
 | D11 | MapLibre with a self-hosted Protomaps extract; list mode always works independently (ADR 0002) | A map-only interface or a bespoke map stack |
@@ -304,11 +304,11 @@ Do not add mutable CDN caching later without revision-aware invalidation, a docu
 
 ### 8.1 Identity architecture
 
-Use separate first-party staff and invited-client authentication contexts. Staff sign in with WebAuthn passkeys and must enrol two; email links are restricted to first enrolment and audited recovery. Clients sign in by verified email link with an explicit confirm POST and may optionally use a passkey. Neither context may authenticate the other host. The implementation and residual independent security-review obligation are in ADR 0002.
+Use separate first-party staff and invited-client authentication contexts. Staff sign in with a verified WebAuthn passkey; additional backup passkeys are optional under [ADR 0005](adr/0005-one-staff-passkey.md). Email links are restricted to first enrolment and audited recovery. Clients sign in by verified email link with an explicit confirm POST and may optionally use a passkey. Neither context may authenticate the other host. The implementation and residual independent security-review obligation are in ADR 0002.
 
 Use host-only secure HttpOnly cookies with separate names/contexts for `app.makler-realty.com` and `my.makler-realty.com`; the public host receives neither private session cookie. Every request resolves a hashed server-side session token and rechecks expiry, context, active membership or grant, and revocation. The public host never accepts a private context merely because an email address matches.
 
-Staff access additionally requires an active local StaffMembership and the two-passkey policy. A lost-factor recovery revokes prior sessions and passkeys and requires authorized, audited re-enrolment. No password, TOTP, social or SSO fallback is enabled at launch; any later method needs a new qualification and authority decision.
+Staff access additionally requires an active local StaffMembership and at least one unrevoked passkey. A lost-factor recovery revokes prior sessions and passkeys and requires authorized, audited re-enrolment. No password, TOTP, social or SSO fallback is enabled at launch; any later method needs a new qualification and authority decision.
 
 Client access uses verified email authentication through the client context and local invitation/grant matching. The same person may legitimately be both staff and client, but a client-context token never authenticates the staff interface.
 

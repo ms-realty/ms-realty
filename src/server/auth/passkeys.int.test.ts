@@ -7,6 +7,7 @@ import { createClient, createStaff } from "../testing";
 import { staffAccess } from "./access";
 import {
   challengeTtlMs,
+  countActivePasskeys,
   enrolmentWindowMs,
   finishPasskeyAuthentication,
   finishPasskeyRegistration,
@@ -51,10 +52,9 @@ async function enrolled(context: AccountKind = "staff") {
   return { account, issued, key };
 }
 describe("AT36–AT39: passkey ceremonies with real P-256 signatures", () => {
-  it("opens staff routes only after two distinct credentials, and signs in on the staff relying party", async () => {
+  it("opens staff routes after one verified credential, and signs in on the staff relying party", async () => {
     const { account, issued, key } = await enrolled();
-    expect((await staffAccess(t.db, issued.token)).state).toBe("enrolling");
-    await register(issued.session);
+    expect(await countActivePasskeys(t.db, account.id)).toBe(1);
     expect((await staffAccess(t.db, issued.token)).state).toBe("ready");
     const options = await begin();
     expect(options.rpId).toBe(new URL(getEnv().hosts.staff).hostname);
@@ -73,7 +73,7 @@ describe("AT36–AT39: passkey ceremonies with real P-256 signatures", () => {
     });
     expect(signIn?.payload).not.toHaveProperty("previousSessionId");
   });
-  it("a second registration of the same credential cannot satisfy the minimum", async () => {
+  it("rejects a duplicate backup without losing the existing key or workspace access", async () => {
     const { issued, key } = await enrolled();
     const options = await startPasskeyRegistration(t.db, issued.session);
     expect(options.excludeCredentials?.map((item) => item.id)).toContain(
@@ -84,7 +84,21 @@ describe("AT36–AT39: passkey ceremonies with real P-256 signatures", () => {
         expectedChallenge: options.challenge,
       }),
     ).rejects.toThrow();
-    expect((await staffAccess(t.db, issued.token)).state).toBe("enrolling");
+    expect(await countActivePasskeys(t.db, issued.session.account.id)).toBe(1);
+    expect((await staffAccess(t.db, issued.token)).state).toBe("ready");
+  });
+  it("allows an optional distinct backup and requires fresh verification before adding one", async () => {
+    const { account, issued } = await enrolled();
+    await register(issued.session);
+    expect(await countActivePasskeys(t.db, account.id)).toBe(2);
+    expect((await staffAccess(t.db, issued.token)).state).toBe("ready");
+    await expect(
+      startPasskeyRegistration(
+        t.db,
+        issued.session,
+        new Date(issued.session.createdAt.getTime() + sessionPolicy.staff.stepUpMs + 1),
+      ),
+    ).rejects.toMatchObject({ code: "step_up_required" });
   });
   it("consumes a challenge once and rejects replay", async () => {
     const { key } = await enrolled();

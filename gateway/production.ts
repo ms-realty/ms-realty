@@ -92,6 +92,8 @@ export class ProductionWeb extends ProductionRole {
     if (!["prepared", "running"].includes(proof.state))
       throw new Error("Production web requires reconciliation");
     await this.startRole();
+    // Control-port readiness does not establish that the web server accepts requests.
+    await this.startAndWaitForPorts([3000]);
     return this.identity();
   }
 }

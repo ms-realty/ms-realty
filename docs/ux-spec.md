@@ -151,7 +151,7 @@ All paths below are under the appropriate host and `/{locale}` unless a legacy m
 | Client Case `/brief`, `/properties`, `/appointments`, `/messages`, `/documents`, `/proposals`, `/listing-preview` | C04–C10, C12 | Contextual private tasks |
 | Client `/preferences`, scoped `/participants`, `/privacy-requests` | C13, C17, C18 | Personal choices and access/data requests |
 | Client supported service Case | C14 | Owned consultation, not maintenance tracking |
-| Staff `/access`, `/access/recovery` | O23 access variant | Staff-only passkey sign-in, two-passkey enrolment, denial and recovery |
+| Staff `/access`, `/access/recovery` | O23 access variant | Staff-only passkey sign-in, one-passkey enrolment with optional backups, denial and recovery |
 | Staff `/today`, `/inquiries`, `/inquiries/{id}` | O01–O03, O18 | Coverage, triage and commitments |
 | Staff `/cases`, `/cases/{id}`, `/parties/{id}` | O04–O07, O19, O20 | Work and relationship context |
 | Staff `/calendar`, `/appointments/{id}` | O08, O09 | Resource-aware scheduling |
@@ -626,10 +626,10 @@ Each flow names the actor, entry, sequence, durable outcome, branches and proof.
 
 1. Application-owned entry identifies MS Realty staff access, the destination host/environment and a safe return task. Staff invitation previews do not accept membership or expose operational records. Client identity and cookies never substitute for the staff context.
 2. A returning staff member signs in with a registered passkey through the browser's own passkey prompt. Entry stays blocked until the passkey verifies and an active local membership exists.
-3. An invitation (72-hour expiry, recipient-bound, reissue invalidates the old one) is opened from the work email and accepted explicitly. Accepting opens enrolment: the person registers two passkeys (for example this device and a security key or second device) within 15 minutes, with visible progress "1 of 2". No staff route opens before both exist. An authenticated identity without a valid invitation/current membership receives a non-enumerating access-denied screen with sign-out/switch and verified support, not an empty operational dashboard.
+3. An invitation (72-hour expiry, recipient-bound, reissue invalidates the old one) is opened from the work email and accepted explicitly. Accepting opens enrolment: the person registers one verified passkey within 15 minutes. Success immediately exposes the workspace action. A backup at a different passkey provider or on a security key is optional and secondary; adding one requires recent verification. Zero passkeys cannot open staff routes. An authenticated identity without a valid invitation/current membership receives a non-enumerating access-denied screen with sign-out/switch and verified support, not an empty operational dashboard.
 4. Return to the allowed task with current grants. Enforce staff 12-hour absolute and 30-minute idle limits locally. Warn before a known expiry when possible, preserve only permitted draft state, and never promise the warning will always run in a suspended tab.
 5. Access grants, exports, production controls and other sensitive actions require a passkey check within the last five minutes. Show the reason and expected return, run the passkey prompt, recheck local authority, then show the current action/diff again. The user explicitly recommits; successful sign-in does not replay the pending operation.
-6. "Lost access to your passkeys?" explains that only a manager can restore access and that there are no recovery codes; nobody at MS Realty asks for a passkey, code or password. After confirming who the person is, a manager issues a recovery invitation to the work email. Issuing it revokes the old passkeys and sessions, and accepting it re-runs the two-passkey enrolment. Every step is audited. Recovery remains a visible blocked state until completed, with owned work transferred through normal coverage rather than a sign-in bypass.
+6. "Lost access to your passkeys?" explains that only a manager can restore access and that there are no recovery codes; nobody at MS Realty asks for a passkey, code or password. After confirming who the person is, a manager issues a recovery invitation to the work email. Issuing it revokes all old passkeys and sessions, and accepting it requires a new verified passkey, with optional backups under ADR 0005. Every step is audited. Recovery remains a visible blocked state until completed, with owned work transferred through normal coverage rather than a sign-in bypass.
 
 **Required branches:** passkey prompt cancelled or failed with safe retry/rate limit, no passkey on this device, enrolment abandoned after one passkey, enrolment window closed, expired/revoked/used invitation, wrong account, client-context session on the staff host, missing/suspended/revoked membership, lost passkeys and recovery pending, session expiry with a draft, cancelled reauthentication, and permission revoked during step-up. Browser and authenticator prompts belong to the platform; membership, return-context and business-action outcomes belong to MS Realty. Errors never reveal whether another staff account exists.
 
@@ -1442,11 +1442,11 @@ Prioritize useful human response, Cases with next action, overdue promises, fres
 
 ### O23 — Team, access and coverage
 
-**Layout/flows:** L16/L11 for management; L05 for access/recovery; F13 including its staff variant, F19/F30. **Order after authorization:** memberships/roles → coverage/absence → invitations/passkey enrolment status (0, 1 or 2 of 2) → access-impact review → attributable grant/revoke result. `/access` and `/access/recovery` are separate unauthenticated task states and never render this management surface.
+**Layout/flows:** L16/L11 for management; L05 for access/recovery; F13 including its staff variant, F19/F30. **Order after authorization:** memberships/roles → coverage/absence → invitations/passkey enrolment status (none, enrolled, optional backups) → access-impact review → attributable grant/revoke result. One verified passkey opens staff access under ADR 0005; optional backups never block the workspace. `/access` and `/access/recovery` are separate unauthenticated task states and never render this management surface.
 
 Require staff-context identity, active membership and recent reauthentication for sensitive changes. Show open work/receiver acceptance before revoking or moving responsibility. Recovery is a manager-issued, audited recovery invitation that revokes old passkeys and sessions, not a sign-in bypass.
 
-**Draw:** staff entry, passkey prompt, two-passkey enrolment with progress and closed window, invalid/expired invitation, wrong context, missing/revoked membership, prompt cancelled/failed, lost-passkeys explanation/recovery pending, session expiry and sensitive-action reauthentication/return; then management invited, enrollment pending, active, absent, restricted, revoke with open commitments, transfer pending and completed. Staff/client applications and staging environments must never be conflated in labels or links. Browser passkey prompts are platform UI, annotated rather than redrawn; never draw a password or code field.
+**Draw:** staff entry, passkey prompt, first-passkey enrolment and closed window, immediate workspace access after success, optional backup with fresh reauthentication, duplicate/unsupported authenticator guidance, invalid/expired invitation, wrong context, missing/revoked membership, prompt cancelled/failed, lost-passkeys explanation/recovery pending, session expiry and sensitive-action reauthentication/return; then management invited, enrollment pending, active, absent, restricted, revoke with open commitments, transfer pending and completed. Staff/client applications and staging environments must never be conflated in labels or links. Browser passkey prompts are platform UI, annotated rather than redrawn; never draw a password or code field.
 
 ### O24 — Service policy and release controls
 
@@ -1893,7 +1893,7 @@ This table maps every architecture scenario exactly once; the architecture retai
 | AT34 | Proposal revision/expiry/counter prevents obsolete decision; C10/O19 |
 | AT35 | Closeout evidence and remaining obligations without legal overclaim; C16/O05/O19 |
 | AT36 | Correct identity application/token and local membership; C01/O23 and protected-route negative tests |
-| AT37 | Real staff two-passkey enrolment and sign-in, lost-passkey recovery and safe step-up return; F13 staff variant, O23/O24 |
+| AT37 | Real staff one-passkey enrolment and sign-in, optional backups, lost-passkey recovery and safe step-up return; F13 staff variant, O23/O24 |
 | AT38 | Invitation GET/scanner/wrong-recipient/revocation; C01/C02/C17 |
 | AT39 | Subsequent-access revocation, cache clear and history reauthorization; C07–C09/C17, §20.6 |
 | AT40 | Record/field/audience allow-and-deny coverage; §02 and every protected contract |

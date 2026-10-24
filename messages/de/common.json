@@ -10,5 +10,15 @@
     "message": "Diese Seite gibt es auch auf Deutsch.",
     "switch": "Auf Deutsch weiter",
     "dismiss": "Vorschlag ausblenden"
+  },
+  "passkeys": {
+    "passkeyAlreadyRegistered": "Dieser Passkey ist bereits registriert. Wählen Sie für die Sicherung einen anderen Passkey-Anbieter oder einen Sicherheitsschlüssel. Ihr gespeicherter Passkey bleibt verfügbar.",
+    "passkeyIncompatibleAuthenticator": "Dieses Gerät oder dieser Sicherheitsschlüssel kann den erforderlichen Passkey nicht erstellen. Wählen Sie ein Gerät mit Passkey-Unterstützung und Bestätigung per PIN oder Biometrie.",
+    "passkeyBrowserFailed": "Ihr Browser konnte die Passkey-Anfrage nicht abschließen. Versuchen Sie es erneut oder wählen Sie ein anderes Gerät oder einen Sicherheitsschlüssel. Ihre gespeicherten Passkeys bleiben unverändert.",
+    "enrolReadyTitle": "Ihr Passkey ist bereit",
+    "enrolBackupTitle": "Weiteren Passkey hinzufügen (optional)",
+    "enrolBackupLead": "Ihr erster Passkey ist gespeichert. Wählen Sie für die Sicherung einen anderen Passkey-Anbieter oder einen Sicherheitsschlüssel. Geräte mit demselben synchronisierten Passkey zählen als ein Schlüssel.",
+    "registerBackupPasskey": "Sicherungs-Passkey hinzufügen",
+    "enrolBackupReauth": "Bestätigen Sie Ihre Identität, bevor Sie einen weiteren Passkey hinzufügen."
   }
 }

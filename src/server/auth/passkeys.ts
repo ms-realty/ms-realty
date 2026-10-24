@@ -1,7 +1,7 @@
 // WebAuthn passkeys (ADR 0002) via @simplewebauthn/server. Each private host is its own relying
 // party: the staff host's rpID and origin are the staff origin, the client host's the client
 // origin, so a credential made for one context can never answer the other (§8.1, AT36). Staff
-// sign in only with a passkey and must hold two; for clients a passkey is optional. Challenges
+// sign in only with a passkey; additional backup passkeys are optional. Clients may add one. Challenges
 // are stored server-side, expire after five minutes and are consumed by the first verification
 // attempt, successful or not.
 import "server-only";
@@ -35,8 +35,8 @@ import {
 } from "./sessions";
 
 export const challengeTtlMs = 5 * 60_000;
-/** A staff member enrols a primary and a backup passkey before any staff route opens. */
-export const staffPasskeyMinimum = 2;
+/** One verified passkey opens staff access; additional backup keys are optional (ADR 0005). */
+export const staffPasskeyMinimum = 1;
 /**
  * How long after redeeming an enrolment or recovery invitation the staff member may register
  * the missing passkeys without a further verification. Past it, a manager reissues.
@@ -102,7 +102,7 @@ export async function countActivePasskeys(db: Executor, principalId: string): Pr
 
 /**
  * Adding a passkey is a sensitive action: the session must have verified within its step-up
- * window, except that a staff member still short of two passkeys may finish enrolling within
+ * window, except that a staff member without a passkey may finish enrolling within
  * `enrolmentWindowMs` of redeeming the invitation.
  */
 async function assertMayRegister(db: Executor, session: Session, now: Date): Promise<void> {

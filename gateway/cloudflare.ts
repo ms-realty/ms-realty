@@ -75,6 +75,8 @@ export class MsRealtyContainer extends StagingRoleContainer {
     if (proof.state !== "prepared" && proof.state !== "running")
       throw new Error("Web process requires reconciliation");
     await this.startRole();
+    // The control port can be healthy while the deferred web server is still starting.
+    await this.startAndWaitForPorts([3000]);
   }
 }
 export class MsRealtyWorkerContainer extends StagingRoleContainer {

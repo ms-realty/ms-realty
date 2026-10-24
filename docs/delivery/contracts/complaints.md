@@ -6,7 +6,7 @@ conclusion or automatic statutory deadline is produced. Dates and external respo
 are entered by the responsible person. BG is the source locale; staff BG/RU/EN copy follows
 the existing Operations forms.
 
-Global `complaint.manage` authority and current two-passkey staff access are required. Managers
+Global `complaint.manage` authority and current passkey-authenticated staff access are required. Managers
 receive this capability; brokers, clients and AI do not. Records are private to authorized
 operators. This register does not create client or Case access. The initial report stays
 unchanged; append-only review entries retain decisions, owner changes, due changes, resolution

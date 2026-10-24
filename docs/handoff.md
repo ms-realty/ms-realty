@@ -138,7 +138,8 @@ requirements precisely:
    - staff and client contexts on separate hosts, with host-only cookies and a WebAuthn RP per
      host;
    - staff: 12 h absolute / 30 min idle; step-up within 5 min; enrolment by invitation (72 h,
-     GET shows, POST accepts, reissue invalidates), then two passkeys mandatory; audited
+     GET shows, POST accepts, reissue invalidates), then one verified passkey, with optional
+     backups under ADR 0005; audited
      recovery; `npm run staff:bootstrap` for the first manager;
    - clients: invitation and e-mail-link sign-in with a confirm POST; 7 d / 24 h; step-up
      within 15 min for documents.

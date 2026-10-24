@@ -1,6 +1,6 @@
 # Privacy requests and preferences
 
-Client routes are `/{locale}/privacy` and `/{locale}/preferences` on the client host. Staff review is `/{locale}/operations/privacy` on the staff host. Each mutation is an explicit native POST, works without JavaScript, checks the configured host and origin, and requires a current, recently reverified session. Staff reviewers additionally need an explicit `privacy.manage` capability and two active passkeys. Receipt banners read successful operations for the current actor.
+Client routes are `/{locale}/privacy` and `/{locale}/preferences` on the client host. Staff review is `/{locale}/operations/privacy` on the staff host. Each mutation is an explicit native POST, works without JavaScript, checks the configured host and origin, and requires a current, recently reverified session. Staff reviewers additionally need an explicit `privacy.manage` capability and an active passkey under ADR 0005. Receipt banners read successful operations for the current actor.
 
 ## Human privacy work
 
@@ -22,4 +22,4 @@ This module stores and manages preferences. Search-alert scheduling and provider
 
 `TEST_DATABASE_URL=... npx vitest run src/server/privacy src/server/auth/email-link.int.test.ts --maxWorkers=2` creates disposable UUID databases. Tests author explicitly synthetic policy pages and approve them through the real content commands. They cover identity/party isolation, idempotent requests, version conflicts, fresh review, retained evidence, separate purposes, unverified contacts, policy withdrawal, search edits and dispatch eligibility.
 
-`e2e/identity.spec.ts` adds native client request/preference forms and staff privacy assessment to the real email-link and two-passkey browser journeys. These run against the per-run isolated database and local outbox only.
+`e2e/identity.spec.ts` adds native client request/preference forms and staff privacy assessment to the real email-link and passkey browser journeys, including optional backup enrollment. These run against the per-run isolated database and local outbox only.

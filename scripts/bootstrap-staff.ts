@@ -1,5 +1,5 @@
 // Offline operator entry point. Database credentials are required; no HTTP/bootstrap bypass
-// is exposed. The invitation still requires confirm POST and two WebAuthn registrations.
+// is exposed. The invitation still requires confirm POST and a verified WebAuthn registration.
 import { closeSync, openSync, writeFileSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import { parseArgs } from "node:util";
@@ -59,7 +59,9 @@ try {
   });
   writeFileSync(output, `${JSON.stringify(invitation, null, 2)}\n`);
   console.log(`Private enrollment invitation written to ${values.output}.`);
-  console.log("Open it on the configured staff host and register two passkeys. No email was sent.");
+  console.log(
+    "Open it on the configured staff host and register a passkey. Backups are optional. No email was sent.",
+  );
 } finally {
   closeSync(output);
   await client.end();

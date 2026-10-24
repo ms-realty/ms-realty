@@ -48,7 +48,7 @@ export function staffAccessPath(locale: string, state: StaffAccess["state"]): st
   }
 }
 
-/** Guard for every staff workspace page: an active member with two passkeys, or a redirect. */
+/** Guard for every staff workspace page: an active member with a passkey, or a redirect. */
 export async function requireStaffPage(locale: string): Promise<Session> {
   const access = await currentStaffAccess();
   if (access.state !== "ready") redirect(staffAccessPath(locale, access.state));

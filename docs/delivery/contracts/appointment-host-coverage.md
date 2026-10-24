@@ -2,7 +2,7 @@
 
 A staff member with current Case-read and appointment-management access can explicitly
 accept hosting a viewing from agency coverage. The receiver is the signed-in actor; the
-command cannot assign or accept on behalf of another employee. It requires two passkeys,
+command cannot assign or accept on behalf of another employee. It requires an enrolled passkey,
 fresh authentication, the reviewed appointment revision, a handover reason, a property-access
 check and a check of the receiver's external calendar. No AI or manager impersonation path
 exists. An available existing host cannot be displaced through this coverage command.
