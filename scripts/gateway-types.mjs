@@ -2,11 +2,17 @@
 import { spawnSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 
+const gatewayPackage = JSON.parse(
+  await readFile(new URL("../gateway/package.json", import.meta.url), "utf8"),
+);
+const wranglerVersion = gatewayPackage.devDependencies.wrangler;
+if (!/^\d+\.\d+\.\d+$/.test(wranglerVersion))
+  throw new Error("Gateway Wrangler must be pinned to an exact release");
 const result = spawnSync(
   "npx",
   [
     "--yes",
-    "wrangler@4.151.1",
+    `wrangler@${wranglerVersion}`,
     "types",
     "gateway/worker-configuration.d.ts",
     "--config",
