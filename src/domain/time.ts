@@ -8,9 +8,12 @@ export type LocalTimeResolution =
   | { readonly outcome: "ambiguous"; readonly candidates: readonly [string, string] };
 
 const localPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
+const zonePartFormats = new Map<string, Intl.DateTimeFormat>();
 
-function wallClockAsUtc(instantMs: number, timeZone: string): number {
-  const parts = new Intl.DateTimeFormat("en-US", {
+function zonePartFormat(timeZone: string): Intl.DateTimeFormat {
+  const existing = zonePartFormats.get(timeZone);
+  if (existing) return existing;
+  const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone,
     hourCycle: "h23",
     year: "numeric",
@@ -19,7 +22,19 @@ function wallClockAsUtc(instantMs: number, timeZone: string): number {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-  }).formatToParts(new Date(instantMs));
+  });
+  // Cache only immutable formatter configuration, never instants or people's records.
+  // Bound uncommon caller-supplied zones as well as the agency's usual zones.
+  if (zonePartFormats.size >= 16) {
+    const oldest = zonePartFormats.keys().next().value;
+    if (oldest !== undefined) zonePartFormats.delete(oldest);
+  }
+  zonePartFormats.set(timeZone, formatter);
+  return formatter;
+}
+
+function wallClockAsUtc(instantMs: number, timeZone: string): number {
+  const parts = zonePartFormat(timeZone).formatToParts(new Date(instantMs));
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
   return Date.UTC(
     get("year"),
