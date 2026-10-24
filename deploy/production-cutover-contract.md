@@ -50,8 +50,8 @@ Cloudflare route writes are not an atomic multi-route transaction and expose no 
 Create a private output directory first. The journal parent must have mode 700; journal files use mode 600, atomic initial creation/replacement and file/directory fsync. Credentials remain environment-only. Use a read-only token for snapshots and an independently reviewed narrow route-write token only in the eventual controlled production operation.
 
 ```sh
-mise exec node@24.16.0 -- node scripts/production-cutover.mjs snapshot /private/exact-zones.json /private/baseline.json
-mise exec node@24.16.0 -- node --test scripts/production-cutover.test.mjs
+mise exec node@24.22.1 -- node scripts/production-cutover.mjs snapshot /private/exact-zones.json /private/baseline.json
+mise exec node@24.22.1 -- node --test scripts/production-cutover.test.mjs
 ```
 
 The `apply` and `restore` subcommands accept a bundle path and private journal path. They are not invoked by this preparation or any active workflow. Local tests use ephemeral test keys and injected provider/SQL records labeled as unit fixtures; no fixture is a live PASS, real approval, account observation or watchdog drill.

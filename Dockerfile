@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Official multi-architecture Node 24 LTS index, verified 2026-09-27. One immutable application
+# Official multi-architecture Node 24.22.1 LTS index. One immutable application
 # image runs web, worker and pre-deploy migrator with distinct commands and credentials.
-FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS dependencies
+FROM node:24-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -17,7 +17,7 @@ RUN npm ci --prefix gateway --omit=dev --ignore-scripts --no-audit --no-fund \
 FROM dependencies AS production-dependencies
 RUN npm prune --omit=dev --no-audit --no-fund
 
-FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS runtime
+FROM node:24-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205 AS runtime
 WORKDIR /app
 # Cloudflare Containers run linux/amd64. Retained official HTTPS package and extracted binary
 # are both pinned; this does not claim a signed current repository entry for this old version.
