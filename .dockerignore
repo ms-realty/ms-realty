@@ -19,6 +19,7 @@ test-results
 playwright-report
 e2e/**
 !e2e/hosts.ts
+!e2e/time.ts
 !e2e/support/
 !e2e/support/map-fixture.mjs
 !e2e/support/map-fixture.d.mts
