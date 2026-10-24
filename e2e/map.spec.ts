@@ -54,16 +54,13 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await expect(page.getByRole("button", { name: "Show map" })).toBeEnabled();
   expect(mapRequests).toHaveLength(0);
   const archive = page.waitForResponse((r) => r.url().endsWith("basemap.pmtiles"));
-  const modules = Promise.all(
-    ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"].map((name) =>
-      page.waitForResponse((r) =>
-        r.url().endsWith(`/map-runtime/v${maplibrePackage.version}/${name}`),
-      ),
-    ),
+  // The pinned worker is standalone; its previous shared-module request no longer exists.
+  const worker = page.waitForResponse((r) =>
+    r.url().endsWith(`/map-runtime/v${maplibrePackage.version}/maplibre-gl-worker.mjs`),
   );
   await page.getByRole("button", { name: "Show map" }).click();
   expect((await archive).status()).toBe(206);
-  for (const response of await modules) expect(response.status()).toBe(200);
+  expect((await worker).status()).toBe(200);
   await expect(page.getByText("Loading map…", { exact: true })).not.toBeVisible({ timeout: 20000 });
   await expect(page.getByText("The map is unavailable.", { exact: false })).not.toBeVisible();
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();

@@ -44,7 +44,7 @@ describe("§7.5 public immutable cache allowlist", () => {
     ).toBe(true);
     expect(cached?.map((rule) => rule.source)).toEqual([
       "/fonts/:file([a-z0-9-]+\\.[a-f0-9]{12}\\.woff2)",
-      `/map-runtime/v${maplibrePackage.version}/:file(maplibre-gl-worker\\.mjs|maplibre-gl-shared\\.mjs)`,
+      `/map-runtime/v${maplibrePackage.version}/:file(maplibre-gl-worker\\.mjs)`,
     ]);
   });
 

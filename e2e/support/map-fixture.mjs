@@ -74,6 +74,22 @@ const files = {
   "sprites/light.png": png,
   "sprites/light@2x.png": png,
 };
+// The standalone renderer requests a baseline glyph range even for this unlabeled tile.
+// These valid, empty fontstack messages are synthetic transport fixtures, never real fonts.
+for (const font of ["Noto Sans Regular", "Noto Sans Medium", "Noto Sans Italic"]) {
+  const name = Buffer.from(font);
+  const range = Buffer.from("0-255");
+  const stack = Buffer.concat([
+    Buffer.from([10, ...varint(name.length)]),
+    name,
+    Buffer.from([18, ...varint(range.length)]),
+    range,
+  ]);
+  files[`fonts/${font}/0-255.pbf`] = Buffer.concat([
+    Buffer.from([10, ...varint(stack.length)]),
+    stack,
+  ]);
+}
 export const mapFixtureRelease = createHash("sha256")
   .update(
     Buffer.concat(Object.entries(files).flatMap(([name, bytes]) => [Buffer.from(name), bytes])),

@@ -1,4 +1,4 @@
-// Ship the pinned MapLibre module worker and its shared module on our own origin. No CDN/CSP exception.
+// Ship the pinned standalone MapLibre worker on our own origin. No CDN/CSP exception.
 import { copyFile, mkdir, readFile } from "node:fs/promises";
 
 const pkg = JSON.parse(
@@ -7,7 +7,7 @@ const pkg = JSON.parse(
 if (pkg.version !== "6.15.0") throw new Error("Update the map worker URL and version together");
 const root = new URL(`../public/map-runtime/v${pkg.version}/`, import.meta.url);
 await mkdir(root, { recursive: true });
-for (const file of ["maplibre-gl-worker.mjs", "maplibre-gl-shared.mjs"])
+for (const file of ["maplibre-gl-worker.mjs"])
   await copyFile(
     new URL(`../node_modules/maplibre-gl/dist/${file}`, import.meta.url),
     new URL(file, root),

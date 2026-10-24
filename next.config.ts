@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
         headers: [{ key: "Cache-Control", value: publicAssetCacheControl }],
       },
       {
-        source: "/map-runtime/v6.15.0/:file(maplibre-gl-worker\\.mjs|maplibre-gl-shared\\.mjs)",
+        source: "/map-runtime/v6.15.0/:file(maplibre-gl-worker\\.mjs)",
         headers: [{ key: "Cache-Control", value: publicAssetCacheControl }],
       },
     ];
