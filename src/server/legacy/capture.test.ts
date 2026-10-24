@@ -24,7 +24,7 @@ it("selects measured tag posts only within the guarded content column and source
   );
 });
 
-it("declares only the measured empty RU taxonomy shape as an empty source, never a failed selector", () => {
+it("declares only measured empty taxonomy shapes as empty sources, never a failed selector", () => {
   const html =
     '<html lang="ru"><title>Studio source</title><nav>Navigation</nav><div class="col-lg-9"><div class="row" id="scroll-to"></div></div><aside>Sidebar</aside></html>';
   const source = extractLiveSource(html, "https://makler-realty.ru/category-type/studio/");
@@ -34,9 +34,21 @@ it("declares only the measured empty RU taxonomy shape as an empty source, never
     extracted_body_text: "",
   });
   for (const url of [
+    "https://makler-realty.com/nl/category-type/studio/",
+    "https://makler-realty.com/resort/skiing-resort/",
+  ]) {
+    expect(extractLiveSource(html, url)).toMatchObject({
+      content_scope: "column:empty_archive",
+      content_state: "verified_empty_archive",
+      extracted_body_text: "",
+    });
+  }
+  for (const url of [
     "https://makler-realty.ru/unknown/",
     "https://makler-realty.com/category-type/studio/",
     "https://makler-realty.ru/category-type/studio/?s=unknown",
+    "https://makler-realty.com/nl/category-type/studio/?s=unknown",
+    "https://makler-realty.com/nl/resort/unmeasured/",
   ]) {
     expect(extractLiveSource(html, url).content_scope).toBe("missing_main_content");
   }
@@ -50,6 +62,12 @@ it("declares only the measured empty RU taxonomy shape as an empty source, never
     extractLiveSource(
       html.replace("</div></div><aside>", "<p>Unrecognized content</p></div></div><aside>"),
       "https://makler-realty.ru/category-type/studio/",
+    ).content_scope,
+  ).toBe("missing_main_content");
+  expect(
+    extractLiveSource(
+      '<title>Not Found</title><div class="col-lg-9"><div id="scroll-to"><h2>Not Found</h2><p>Sorry, the source is missing.</p></div></div>',
+      "https://makler-realty.com/resort/skiing-resort/",
     ).content_scope,
   ).toBe("missing_main_content");
 });
