@@ -64,9 +64,7 @@ for (const { locale, dir, heading, primary, skip } of locales) {
 
       // Directional icons mirror in RTL; nothing else does.
       const chevron = page.locator("nav ol svg").first();
-      const scale = await chevron.evaluate((element) => getComputedStyle(element).scale);
-      if (dir === "rtl") expect(scale).toMatch(/^-1\b/);
-      else expect(scale).toBe("none");
+      await expect(chevron).toHaveCSS("scale", dir === "rtl" ? /^-1\b/ : "none");
 
       expect(errors).toEqual([]);
     });

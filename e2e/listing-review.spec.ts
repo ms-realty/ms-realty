@@ -329,7 +329,7 @@ test("O16 offers the publication decision only to someone who may publish", asyn
   expect((await page.request.get(previewUrl.href)).status()).toBe(404);
 });
 
-test("O16 rejects forged source locale and single-passkey HTTP reads", async ({ page }) => {
+test("O16 rejects forged source locale and zero-passkey HTTP reads", async ({ page }) => {
   const f = seed();
   await open(page, f, `/en/inventory/${f.reference}?tab=review`, f.readerToken);
   const image = page.locator('[aria-labelledby="o16-working"] img');
@@ -368,7 +368,16 @@ test("O16 rejects forged source locale and single-passkey HTTP reads", async ({ 
     .set({ revokedAt: new Date() })
     .where(eq(schema.passkeys.id, key.id));
   previewUrl.searchParams.set("locale", "bg");
-  // The outer staff-session gate still rejects an account with only one passkey.
+  // Removing an optional backup preserves scoped access through the remaining key.
+  const oneKeyPreview = await page.request.get(previewUrl.href);
+  expect(oneKeyPreview.status()).toBe(200);
+  expect(oneKeyPreview.headers()["content-type"]).toBe("image/webp");
+  expect(oneKeyPreview.headers()["cache-control"]).toContain("no-store");
+  await db
+    .update(schema.passkeys)
+    .set({ revokedAt: new Date() })
+    .where(eq(schema.passkeys.principalId, reader.principalId));
+  // The outer staff-session gate rejects zero keys before looking up any media.
   expect((await page.request.get(previewUrl.href)).status()).toBe(401);
   previewUrl.pathname = `/api/files/private/media/${randomUUID()}`;
   expect((await page.request.get(previewUrl.href)).status()).toBe(401);
