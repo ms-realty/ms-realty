@@ -53,7 +53,7 @@ test("a reviewer cannot be the operator or reuse the operator's public-key refer
   assert(issues.includes("operator_and_reviewer_must_differ"));
   assert(issues.includes("distinct_operator_and_reviewer_public_keys"));
 });
-function provider(overrides = {}) {
+function provider(overrides = {}, presentInEu = true) {
   const calls = [];
   return {
     calls,
@@ -62,7 +62,16 @@ function provider(overrides = {}) {
       assert.equal(init.method, "GET");
       assert.equal(new URL(url).origin, "https://api.cloudflare.com");
       assert.equal(init.headers["cf-r2-jurisdiction"], "eu");
-      const suffix = new URL(url).pathname.split(complete.archiveBucketName)[1];
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith("/r2/buckets")) {
+        assert.equal(parsed.searchParams.get("name_contains"), complete.archiveBucketName);
+        return Response.json({
+          success: true,
+          errors: [],
+          result: { buckets: presentInEu ? [{ name: complete.archiveBucketName }] : [] },
+        });
+      }
+      const suffix = parsed.pathname.split(complete.archiveBucketName)[1];
       const result =
         suffix === "/domains/managed"
           ? { enabled: false }
@@ -95,9 +104,19 @@ test("successful provider GETs cannot qualify a non-EU archive", async () => {
 test("configuration observation does not establish writer denials, outside-copy integrity or recovery", async () => {
   const p = provider();
   const result = await observeArchiveConfiguration(complete, "fixture", p.transport);
-  assert.equal(p.calls.length, 5);
+  assert(p.calls.every((call) => call.init.method === "GET"));
   assert.equal(result.privateAccess, true);
   assert.equal(result.writerPermissionDenialsVerified, false);
   assert.equal(result.outsideAccountCopyVerified, false);
   assert.equal(result.recoveryQualified, false);
+});
+test("an omitted jurisdiction field needs an exact EU-namespace bucket observation", async () => {
+  const p = provider({ jurisdiction: undefined });
+  const result = await observeArchiveConfiguration(complete, "fixture", p.transport);
+  assert.equal(result.jurisdiction, "eu");
+  const absent = provider({ jurisdiction: undefined }, false);
+  await assert.rejects(
+    observeArchiveConfiguration(complete, "fixture", absent.transport),
+    /namespace/,
+  );
 });

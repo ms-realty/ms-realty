@@ -126,8 +126,23 @@ export async function observeArchiveConfiguration(input, token, transport = fetc
   };
   const identity = await get("");
   if (identity?.id !== account) throw Error("Archive account identity mismatch");
+  // Some live R2 responses omit the optional jurisdiction field. The API's EU-qualified
+  // namespace listing must independently contain this exact bucket; a caller label is not proof.
+  const listing = await get(
+    `/r2/buckets?name_contains=${encodeURIComponent(input.archiveBucketName)}&per_page=1000`,
+  );
+  if (
+    !Array.isArray(listing?.buckets) ||
+    !listing.buckets.some(
+      (b) => b.name === input.archiveBucketName && (!b.jurisdiction || b.jurisdiction === "eu"),
+    )
+  )
+    throw Error("Archive bucket absent from EU provider namespace");
   const metadata = await get(bucket);
-  if (metadata?.name !== input.archiveBucketName || metadata.jurisdiction !== "eu")
+  if (
+    metadata?.name !== input.archiveBucketName ||
+    (metadata.jurisdiction && metadata.jurisdiction !== "eu")
+  )
     throw Error("Archive bucket identity or EU jurisdiction not observed");
   const managed = await get(bucket + "/domains/managed");
   const custom = await get(bucket + "/domains/custom");
@@ -153,7 +168,8 @@ export async function observeArchiveConfiguration(input, token, transport = fetc
   return {
     account,
     bucket: metadata.name,
-    jurisdiction: metadata.jurisdiction,
+    jurisdiction: "eu",
+    jurisdictionEvidence: "exact_bucket_in_eu_qualified_provider_namespace",
     privateAccess: true,
     retentionDaysAtLeast: input.proposedRetentionDays,
     writerPermissionDenialsVerified: false,
