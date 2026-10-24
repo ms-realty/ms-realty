@@ -7,6 +7,7 @@ import { cpus, platform, totalmem } from "node:os";
 import { promisify } from "node:util";
 import { expect, test } from "@playwright/test";
 import { hostUrl, origins } from "../e2e/hosts";
+import { fillAgencyInstant } from "../e2e/time";
 import { databaseMetrics } from "./database-metrics";
 
 const exec = promisify(execFile);
@@ -203,14 +204,15 @@ test("AT62: catalogue reads and staff commands under 50 public and 10 staff sess
               ).toBeVisible();
             });
             await page
-              .getByLabel("Status", { exact: true })
+              .getByLabel("Where it stands", { exact: true })
               .selectOption(cycle % 2 ? "waiting" : "in_progress");
             await page
               .getByLabel("Outcome, dependency or cancellation reason", { exact: true })
               .fill("Synthetic load transition; no customer commitment.");
-            await page
-              .getByLabel("Dependency review time (UTC)", { exact: true })
-              .fill(new Date(Date.now() + 86400000).toISOString().slice(0, 16));
+            await fillAgencyInstant(
+              page.getByLabel("Dependency review time", { exact: true }),
+              new Date(Date.now() + 86400000),
+            );
             const sent = page.waitForResponse(
               (response) =>
                 response.request().method() === "POST" &&
