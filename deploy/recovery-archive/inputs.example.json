@@ -1,21 +1,20 @@
 {
-  "scope": "independent_recovery_archive",
+  "scope": "single_operator_recovery_archive",
   "provider": "cloudflare_r2",
   "applicationAccountId": "921d0224dcd595c87b7928d2b3c479d1",
   "archiveAccountId": null,
   "jurisdiction": "eu",
   "archiveBucketName": null,
   "readTokenEnvironment": "MS_REALTY_RECOVERY_ARCHIVE_READ_TOKEN",
-  "proposedRetentionDays": 90,
+  "proposedRetentionDays": null,
   "retentionApproved": false,
-  "agencyCustodyConfirmed": false,
-  "separateAdministrationConfirmed": false,
   "outsideAccountCopyConfirmed": false,
   "outsideAccountCopyReference": null,
-  "operatorName": null,
-  "separateReviewer": null,
+  "operatorName": "Ivan",
   "ageRecipientFile": null,
   "operatorSigningPublicKeyFile": null,
-  "reviewerSigningPublicKeyFile": null,
-  "deploymentApproved": false
+  "deploymentApproved": false,
+  "retentionMode": "preserve_existing",
+  "operatorCustodyConfirmed": false,
+  "operatorEmail": null
 }

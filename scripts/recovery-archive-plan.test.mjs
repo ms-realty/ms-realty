@@ -12,6 +12,9 @@ const input = JSON.parse(
 );
 const complete = {
   ...input,
+  scope: "independent_recovery_archive",
+  proposedRetentionDays: 90,
+  retentionMode: "approved_new",
   archiveAccountId: "a".repeat(32),
   archiveBucketName: "ms-realty-recovery-unit",
   retentionApproved: true,
@@ -28,10 +31,51 @@ const complete = {
 test("an incomplete packet stays blocked without provider, custody or recovery qualification", () => {
   const plan = prepareArchivePlan(input);
   assert.equal(plan.status, "blocked_inputs");
-  assert(plan.missingInputs.includes("agency_account_custody"));
+  assert(plan.missingInputs.includes("operator_account_custody"));
   assert.equal(plan.providerValidated, false);
   assert.equal(plan.deploymentPerformed, false);
   assert.equal(plan.recoveryQualified, false);
+});
+test("the owner-selected single operator can preserve one account and its existing retention without a fabricated reviewer", async () => {
+  const single = {
+    ...complete,
+    scope: "single_operator_recovery_archive",
+    archiveAccountId: input.applicationAccountId,
+    operatorCustodyConfirmed: true,
+    operatorEmail: "operator@example.invalid",
+    separateReviewer: null,
+    operatorSigningPublicKeyFile: null,
+    reviewerSigningPublicKeyFile: null,
+    retentionMode: "preserve_existing",
+    proposedRetentionDays: null,
+    retentionApproved: false,
+  };
+  assert.deepEqual(archiveInputIssues(single), []);
+  const plan = prepareArchivePlan(single);
+  assert.equal(plan.independentlyAdministered, false);
+  assert.equal(plan.separateReviewerRequired, false);
+  assert.equal(plan.signingAuthorityVerified, false);
+  assert.equal(plan.proposedLockRules, null);
+  assert.equal(plan.recoveryQualified, false);
+  assert.equal(plan.productionQualified, false);
+  const observed = await observeArchiveConfiguration(
+    single,
+    "fixture",
+    provider({}, true, single).transport,
+  );
+  assert.equal(observed.independentlyAdministered, false);
+  assert.equal(observed.separateReviewerRequired, false);
+  assert.equal(observed.retentionDaysAtLeast, null);
+  assert.equal(observed.observedRetentionRules.length, 1);
+  await assert.rejects(
+    observeArchiveConfiguration(single, "", provider({}, true, single).transport),
+    /inputs incomplete/,
+  );
+  assert(
+    archiveInputIssues({ ...single, outsideAccountCopyConfirmed: false }).includes(
+      "outside_account_encrypted_copy_custody",
+    ),
+  );
 });
 test("rejects shared application custody, a foreign jurisdiction and absent outside-account copy", () => {
   const issues = archiveInputIssues({
@@ -53,7 +97,7 @@ test("a reviewer cannot be the operator or reuse the operator's public-key refer
   assert(issues.includes("operator_and_reviewer_must_differ"));
   assert(issues.includes("distinct_operator_and_reviewer_public_keys"));
 });
-function provider(overrides = {}, presentInEu = true) {
+function provider(overrides = {}, presentInEu = true, fixture = complete) {
   const calls = [];
   return {
     calls,
@@ -64,14 +108,14 @@ function provider(overrides = {}, presentInEu = true) {
       assert.equal(init.headers["cf-r2-jurisdiction"], "eu");
       const parsed = new URL(url);
       if (parsed.pathname.endsWith("/r2/buckets")) {
-        assert.equal(parsed.searchParams.get("name_contains"), complete.archiveBucketName);
+        assert.equal(parsed.searchParams.get("name_contains"), fixture.archiveBucketName);
         return Response.json({
           success: true,
           errors: [],
-          result: { buckets: presentInEu ? [{ name: complete.archiveBucketName }] : [] },
+          result: { buckets: presentInEu ? [{ name: fixture.archiveBucketName }] : [] },
         });
       }
-      const suffix = parsed.pathname.split(complete.archiveBucketName)[1];
+      const suffix = parsed.pathname.split(fixture.archiveBucketName)[1];
       const result =
         suffix === "/domains/managed"
           ? { enabled: false }
@@ -88,8 +132,8 @@ function provider(overrides = {}, presentInEu = true) {
                   ],
                 }
               : suffix === ""
-                ? { name: complete.archiveBucketName, jurisdiction: "eu", ...overrides }
-                : { id: complete.archiveAccountId };
+                ? { name: fixture.archiveBucketName, jurisdiction: "eu", ...overrides }
+                : { id: fixture.archiveAccountId };
       return Response.json({ success: true, errors: [], result });
     },
   };

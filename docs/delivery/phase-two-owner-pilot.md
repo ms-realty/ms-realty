@@ -68,12 +68,15 @@ separate evidence. The live restore must compare every table and durable object,
 restored credentials and prove startup remains quarantined. A matching restore is useful
 proof but is not a sealed independent recovery point.
 
-Architecture §17.3 and owner-approved ADR 0006 additionally require an EU R2 archive under
-separate administration, an encrypted copy and keys outside the application account,
-retention approval, an independent safety tail and watermark, named operator and separate
-reviewer, signed evidence and controlled reopening. The plan lives in
-`deploy/recovery-archive/`. Its proposed retention is not approval. Existing same-account
-Cloudflare storage does not establish separate recovery custody.
+Architecture §17.3 and owner-approved ADR 0006 use Cloudflare recovery operated solely by
+Ivan. No second person or Cloudflare account is required for this protected staging pilot.
+Use private EU storage, preserve existing retention and retain a verified encrypted copy
+outside the application account under Ivan's control. Record his actual restore review
+as operator review, without claiming independent administration. Current safety history,
+watermark, revocation, provider reconciliation and signed reopening authority still need
+real evidence. Unknown history keeps recovery closed. The plan lives in
+`deploy/recovery-archive/`. Ratify the draft production release policy for the selected
+operating model before production launch; do not invent a separate reviewer or signature.
 
 Application rollback must preserve writes accepted after the previous build. Do not restore
 an older database as an application rollback. Any unavailable independent destination or

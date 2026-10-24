@@ -1,54 +1,38 @@
-# Cloudflare recovery archive setup
+# Cloudflare recovery operated by Ivan
 
-The owner accepted the provider choice and R2 lock-administrator tradeoff in ADR 0006.
-Use a separate agency-controlled Cloudflare account, an EU-jurisdiction private R2 bucket,
-and an encrypted recovery copy and keys outside the application account. This plan creates
-nothing and does not qualify R08, R10 or a recovery point.
+ADR 0006 records the owner's Cloudflare choice and sole-operator instruction. Use the
+existing Cloudflare identity. A second account or reviewer is not required for Phase 2.
+Report the archive as single-operator storage; do not claim independent administration.
 
-The existing application and legacy backup configuration share an account. Existing files,
-an S3-compatible credential name or an earlier report cannot establish separate custody.
-The proposed retention is 90 days; that duration still needs explicit approval. No automatic
-lifecycle cleanup is configured: retained points must keep every referenced object.
+Keep EU archive access private, encrypt before upload and retain a verified encrypted
+copy outside the application account under Ivan's custody. Preserve existing retention;
+the observed legacy EU bucket has a 90-day default and a longer decommission prefix rule.
+Do not change retention or delete older objects as part of the staging drill.
 
-Copy `inputs.example.json` to private operator configuration. Complete the archive-account
-pin, bucket, custody, retention and separate-review inputs. Keep credentials and private
-keys out of the repository and chat. Use only the named private environment variable for
-the archive read token; there is no default-account or credential fallback.
+Copy `inputs.example.json` to private configuration and fill actual account/bucket,
+operator contact, encryption and outside-account copy references. Credentials and private
+keys stay outside Git and chat. `retentionMode: preserve_existing` observes current rules
+and proposes no new lock. The optional `independent_recovery_archive` scope additionally
+requires separate account administration, reviewer and signing references; it is not the
+owner's current operating model.
 
 `node scripts/recovery-archive-plan.mjs --inputs <private-json> --out <private-report>`
-produces a blocked plan until those inputs exist. Optional `--validate` uses only
-fixed-origin Cloudflare GETs to observe the pinned account, exact EU bucket, private
-managed/custom-domain configuration and archive-wide retention rules. Successful reads
-qualify configuration only. The command never creates resources, changes locks, uploads,
-deletes, signs or opens a recovery destination.
+prepares the plan. Optional `--validate` uses fixed-origin GETs to observe the pinned
+account, exact EU bucket, private domains and retention. It creates no resources and
+cannot qualify copy integrity, writer denials, signatures or recovery.
 
-## Execution and qualification
+For the protected staging drill:
 
-1. Record agency custody of the separate archive account and outside-account encrypted
-   copy/keys. Name the operator and separate reviewer, approve retention and keep
-   application deployment credentials out of archive administration.
-2. Create the dedicated private EU bucket and approved locks under that authority. Scope
-   the backup writer to its archive bucket with no configuration/lock permissions. R2
-   administrators can remove locks; keep that accepted limitation in the operating record.
-3. Independently observe configuration. With a unique disposable canary, prove the writer
-   cannot overwrite or delete a retained object or change retention. Preserve the provider
-   denials. Configuration booleans cannot substitute for these checks.
-4. Encrypt a consistent database/object/release package before upload. Use unique immutable
-   keys and conditional creation. Download the actual archived ciphertext through recovery
-   credentials and compare ciphertext, manifest, database and all referenced object hashes.
-5. Verify the outside-account copy and latest independently retained append-only safety
-   tail/watermark. Restore into clean isolated resources, revoke restored sessions, disable
-   external effects and reconcile post-snapshot accepted writes/provider outcomes. Missing
-   or unverifiable safety history keeps the destination quarantined.
-6. Obtain operator and separate-reviewer evidence bound to the exact candidate, account,
-   configuration, archive and restore. Require signed authority before controlled reopening.
-   An old database restore is not an application rollback; preserve accepted newer writes.
+1. Bind the database snapshot, every durable object and release configuration to one
+   candidate. Encrypt, conditionally upload under a unique private staging archive key,
+   download the actual ciphertext and verify its hash. Preserve the local encrypted copy.
+2. Restore into new isolated resources. Compare all table counts/content hashes and
+   object bytes, revoke restored sessions and prove startup stays quarantined.
+3. Reconcile current safety history, permissions and provider outcomes before reopening.
+   Unknown history remains closed. An older database is not an application rollback;
+   preserve accepted newer writes.
+4. Ivan records actual operator review and owner acceptance. Do not manufacture an
+   independent reviewer, signing authority, recovery target or production approval.
 
-The live staging drill proves data/object restoration and a closed destination. It leaves
-separate custody, outside-account copy, safety-tail completeness, controlled reopening,
-recovery objectives and human approval unqualified until their real evidence exists.
-
-References: [R2 bucket locks](https://developers.cloudflare.com/r2/buckets/bucket-locks/),
-[R2 token permissions](https://developers.cloudflare.com/r2/api/tokens/),
-[data jurisdiction](https://developers.cloudflare.com/r2/reference/data-location/) and
-[PostgreSQL 16 pg_dump](https://www.postgresql.org/docs/16/app-pgdump.html).
+Production policy ratification and launch gates remain separate work. The staging drill
+does not overwrite or delete production backups.

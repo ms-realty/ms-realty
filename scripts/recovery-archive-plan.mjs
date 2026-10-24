@@ -6,33 +6,60 @@ import { parseArgs } from "node:util";
 
 export function archiveInputIssues(input) {
   const issues = [];
-  if (input.scope !== "independent_recovery_archive" || input.provider !== "cloudflare_r2")
+  const singleOperator = input.scope === "single_operator_recovery_archive";
+  if (
+    !["independent_recovery_archive", "single_operator_recovery_archive"].includes(input.scope) ||
+    input.provider !== "cloudflare_r2"
+  )
     issues.push("cloudflare_archive_scope");
   for (const name of ["applicationAccountId", "archiveAccountId"])
     if (!/^[a-f0-9]{32}$/.test(input[name] ?? "")) issues.push(name);
   // Public account identifier already pinned in staging.yml; this is not a credential.
   if (input.applicationAccountId !== "921d0224dcd595c87b7928d2b3c479d1")
     issues.push("ms_realty_application_account_pin");
-  if (input.archiveAccountId && input.archiveAccountId === input.applicationAccountId)
+  if (
+    !singleOperator &&
+    input.archiveAccountId &&
+    input.archiveAccountId === input.applicationAccountId
+  )
     issues.push("archive_account_must_be_separate");
   if (input.jurisdiction !== "eu") issues.push("reviewed_eu_jurisdiction");
   if (
     typeof input.archiveBucketName !== "string" ||
-    !/^ms-realty-recovery-[a-z0-9-]+$/.test(input.archiveBucketName) ||
+    (!/^ms-realty-recovery-[a-z0-9-]+$/.test(input.archiveBucketName) &&
+      !(singleOperator && input.archiveBucketName === "ms-realty-production-backups-eu")) ||
     input.archiveBucketName.length > 63
   )
     issues.push("agency_archive_bucket");
+  if (
+    input.retentionMode != null &&
+    !["approved_new", "preserve_existing"].includes(input.retentionMode)
+  )
+    issues.push("known_retention_mode");
+  if (
+    input.retentionMode === "preserve_existing" &&
+    (!singleOperator || input.proposedRetentionDays != null)
+  )
+    issues.push("preserve_existing_proposes_no_new_retention");
   if (!/^MS_REALTY_RECOVERY_[A-Z0-9_]+_TOKEN$/.test(input.readTokenEnvironment ?? ""))
     issues.push("private_read_token_reference");
   if (
-    !Number.isSafeInteger(input.proposedRetentionDays) ||
-    input.proposedRetentionDays < 1 ||
-    input.proposedRetentionDays > 3650 ||
-    input.retentionApproved !== true
+    !(
+      singleOperator &&
+      input.retentionMode === "preserve_existing" &&
+      input.proposedRetentionDays == null
+    ) &&
+    (!Number.isSafeInteger(input.proposedRetentionDays) ||
+      input.proposedRetentionDays < 1 ||
+      input.proposedRetentionDays > 3650 ||
+      input.retentionApproved !== true)
   )
     issues.push("approved_retention");
-  if (input.agencyCustodyConfirmed !== true) issues.push("agency_account_custody");
-  if (input.separateAdministrationConfirmed !== true)
+  if (
+    singleOperator ? input.operatorCustodyConfirmed !== true : input.agencyCustodyConfirmed !== true
+  )
+    issues.push(singleOperator ? "operator_account_custody" : "agency_account_custody");
+  if (!singleOperator && input.separateAdministrationConfirmed !== true)
     issues.push("separate_archive_administration");
   if (
     input.outsideAccountCopyConfirmed !== true ||
@@ -42,20 +69,27 @@ export function archiveInputIssues(input) {
     issues.push("outside_account_encrypted_copy_custody");
   if (typeof input.operatorName !== "string" || !input.operatorName.trim())
     issues.push("named_recovery_operator");
-  if (typeof input.separateReviewer !== "string" || !input.separateReviewer.trim())
+  if (singleOperator && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.operatorEmail ?? ""))
+    issues.push("operator_contact");
+  if (
+    !singleOperator &&
+    (typeof input.separateReviewer !== "string" || !input.separateReviewer.trim())
+  )
     issues.push("separate_recovery_reviewer");
-  else if (input.separateReviewer.trim().toLowerCase() === input.operatorName?.trim().toLowerCase())
+  else if (
+    !singleOperator &&
+    input.separateReviewer.trim().toLowerCase() === input.operatorName?.trim().toLowerCase()
+  )
     issues.push("operator_and_reviewer_must_differ");
   if (
+    !singleOperator &&
     input.operatorSigningPublicKeyFile &&
     input.operatorSigningPublicKeyFile === input.reviewerSigningPublicKeyFile
   )
     issues.push("distinct_operator_and_reviewer_public_keys");
-  for (const name of [
-    "ageRecipientFile",
-    "operatorSigningPublicKeyFile",
-    "reviewerSigningPublicKeyFile",
-  ])
+  for (const name of singleOperator
+    ? ["ageRecipientFile"]
+    : ["ageRecipientFile", "operatorSigningPublicKeyFile", "reviewerSigningPublicKeyFile"])
     if (typeof input[name] !== "string" || !input[name].startsWith("/")) issues.push(name);
   return issues;
 }
@@ -66,6 +100,13 @@ export function prepareArchivePlan(input) {
   return {
     schemaVersion: 1,
     kind: "cloudflare_recovery_archive_plan",
+    administrationModel:
+      input.scope === "single_operator_recovery_archive"
+        ? "single_operator"
+        : "separate_administration",
+    independentlyAdministered: false,
+    separateReviewerRequired: input.scope !== "single_operator_recovery_archive",
+    signingAuthorityVerified: false,
     status: issues.length ? "blocked_inputs" : "prepared_unvalidated",
     applicationAccountId: input.applicationAccountId ?? null,
     archiveAccountId: input.archiveAccountId ?? null,
@@ -95,7 +136,7 @@ export function prepareArchivePlan(input) {
     productionQualified: false,
     retentionAdministratorRemovable: true,
     next: issues.length
-      ? "Complete the agency custody, retention and separate review inputs"
+      ? "Complete the selected administration model's custody and archive inputs"
       : "Observe configuration; separately prove writer denials, archived copy, safety tail and restore",
   };
 }
@@ -144,17 +185,18 @@ export async function observeArchiveConfiguration(input, token, transport = fetc
     (metadata.jurisdiction && metadata.jurisdiction !== "eu")
   )
     throw Error("Archive bucket identity or EU jurisdiction not observed");
-  const managed = await get(bucket + "/domains/managed");
-  const custom = await get(bucket + "/domains/custom");
+  const managed = await get(`${bucket}/domains/managed`);
+  const custom = await get(`${bucket}/domains/custom`);
   if (
     managed?.enabled !== false ||
     !Array.isArray(custom?.domains) ||
     custom.domains.some((d) => d.enabled !== false)
   )
     throw Error("Private archive access not established");
-  const locks = await get(bucket + "/lock");
+  const locks = await get(`${bucket}/lock`);
+  if (!Array.isArray(locks?.rules)) throw Error("Archive retention response unknown");
   if (
-    !Array.isArray(locks?.rules) ||
+    input.proposedRetentionDays != null &&
     !locks.rules.some(
       (rule) =>
         rule.enabled === true &&
@@ -171,7 +213,11 @@ export async function observeArchiveConfiguration(input, token, transport = fetc
     jurisdiction: "eu",
     jurisdictionEvidence: "exact_bucket_in_eu_qualified_provider_namespace",
     privateAccess: true,
-    retentionDaysAtLeast: input.proposedRetentionDays,
+    retentionDaysAtLeast: input.proposedRetentionDays ?? null,
+    retentionMode: input.retentionMode ?? "approved_new",
+    observedRetentionRules: locks?.rules ?? null,
+    independentlyAdministered: false,
+    separateReviewerRequired: input.scope !== "single_operator_recovery_archive",
     writerPermissionDenialsVerified: false,
     outsideAccountCopyVerified: false,
     recoveryQualified: false,
