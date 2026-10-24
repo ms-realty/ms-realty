@@ -90,14 +90,35 @@ export function sourceLocale(raw: string, recorded?: string): string | null {
       : "bg";
 }
 
-/** Only these measured RU taxonomy routes have a source with a deliberately empty results column. */
+// Exact COM taxonomy identities whose retained responses have the same empty results column.
+// Other COM routes, soft-404 pages and unknown selector failures remain unresolved.
+const measuredComEmptyArchives = new Set([
+  "/de/resort/недвижимость-в-банско/",
+  "/en/resort/недвижимость-в-банско/",
+  "/nl/category-type/dom/",
+  "/nl/category-type/house-floor/",
+  "/nl/category-type/office/",
+  "/nl/category-type/studio/",
+  "/nl/category-type/villa/",
+  "/nl/category-type/сельскохозяйственная-земля/",
+  "/nl/category-type/участок-земли/",
+  "/nl/resort/nafplio/",
+  "/nl/resort/недвижимость-в-банско/",
+  "/nl/resort/недвижимость-святой-влас/",
+  "/resort/skiing-resort/",
+  "/resort/недвижимость-в-банско/",
+  "/resort/паралия-офринио/",
+]);
+
+/** A supported URL still requires the exact measured empty DOM and raw-response binding. */
 export function measuredEmptyArchiveUrl(raw: string): boolean {
   try {
     const source = sourceIdentity(raw);
     return (
-      source.host === "makler-realty.ru" &&
       source.query === "" &&
-      /^\/(?:category-type|location|resort)\/[^/]+\/$/u.test(source.path)
+      ((source.host === "makler-realty.ru" &&
+        /^\/(?:category-type|location|resort)\/[^/]+\/$/u.test(source.path)) ||
+        (source.host === "makler-realty.com" && measuredComEmptyArchives.has(source.path)))
     );
   } catch {
     return false;

@@ -9,6 +9,7 @@ import { createHash } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { capturedSourceMedia } from "../../scripts/legacy-media-sources.mjs";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(DIR, "..", "..");
@@ -40,6 +41,16 @@ const listings = readJson("listings.json");
 const urlDecisions = readJson("url-decisions.json");
 const migration = readJson("migration/route-manifest.json");
 const sourcePages = readJson("migration/source-pages.json");
+const capturedMediaReport = readJson("migration/source-media-captures.json");
+const capturedMedia = capturedSourceMedia(capturedMediaReport, sourcePages.pages);
+const publicMedia = readJson("migration/public-media.json");
+const publicMediaKeys = new Set(publicMedia.map((object) => object.key));
+assert("captured source photos retain exact public staging identities", capturedMedia.every((object) =>
+  publicMedia.some((entry) => entry.key === object.key && entry.path === object.path && entry.host === object.host)));
+assert("captured photo provenance grants no production authority", capturedMediaReport.productionAllowed === false);
+assert("public media identities remain unique", publicMediaKeys.size === publicMedia.length);
+assert("frozen public photos remain mapped alongside captured source photos", listings.listings.every((listing) =>
+  listing.media.filter((image) => image.legacy_kind === "photo" && image.is_public && image.r2_key).every((image) => publicMediaKeys.has(image.r2_key))));
 const media = readJson("media-manifest.json");
 const geography = readJson("geography.json");
 const content = readJson("content.json");

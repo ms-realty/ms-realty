@@ -34,9 +34,9 @@ it("accepts only a live hash-bound measured empty archive, never an unknown empt
 
 it("all staged snapshots have verified body hashes and keep source locale without invented translations", () => {
   const pages = legacySnapshotPages();
-  // The direct-origin recovery preserves all previous 1108 identities and adds 65.
-  expect(pages).toHaveLength(1173);
-  expect(pages.filter((page) => page.provenance.kind === "archived").length).toBe(49);
+  // The current refresh preserves all 1242 pages and recovers 15 measured empty archives.
+  expect(pages).toHaveLength(1257);
+  expect(pages.filter((page) => page.provenance.kind === "archived").length).toBe(25);
   const page = pages[0];
   expect(page).toBeDefined();
   if (!page) return;
@@ -52,7 +52,7 @@ it("archived listings remain actual source pages without a fabricated sold statu
     (page) => page.listing && page.provenance.kind === "archived",
   );
   // Current origin captures replace historical observations without deleting source identities.
-  expect(listings.length).toBe(22);
+  expect(listings.length).toBe(21);
   expect(listings.some((page) => page.listing?.lifecycleAtFreeze.state === "archived")).toBe(true);
   expect(listings.every((page) => page.listing?.sold === null && page.media.length > 0)).toBe(true);
 });
@@ -60,13 +60,18 @@ it("archived listings remain actual source pages without a fabricated sold statu
 it("keeps the measured empty archives and direct-origin source provenance distinct from public DNS or approval", () => {
   const pages = legacySnapshotPages();
   const empty = pages.filter((page) => page.contentState === "verified_empty_archive");
-  expect(empty).toHaveLength(6);
+  expect(empty).toHaveLength(21);
   for (const page of empty) {
     expect(page.bodyText).toBe("");
     expect(page.sourceHash).toBe(sha256(""));
-    expect(page.provenance.publicDnsPathObserved).toBe(false);
-    expect(page.provenance.transport).toBe("curl_strict_https_explicit_resolve");
-    expect(page.provenance.originObservation?.originIp).toBe("185.80.2.102");
+    if (page.provenance.transport === "python_urllib_public_get") {
+      expect(page.provenance.publicDnsPathObserved).toBe(true);
+      expect(page.provenance.originObservation).toBeNull();
+    } else {
+      expect(page.provenance.transport).toBe("curl_strict_https_explicit_resolve");
+      expect(page.provenance.publicDnsPathObserved).toBe(false);
+      expect(page.provenance.originObservation?.originIp).toBe("185.80.2.102");
+    }
     expect(page.equivalenceReview.status).toBe("pending");
   }
   for (const reference of ["925", "926", "715", "964"]) {

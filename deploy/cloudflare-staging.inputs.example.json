@@ -61,12 +61,12 @@
   },
   "artifacts": {
     "routes": "data/legacy/migration/staging-legacy-routes.json",
-    "routesSha256": "574ec49459ce28017abd375554d7f6450369e4a9b08d5d9ac346ebd932bc0819",
+    "routesSha256": "c2930f6270b48ef486e4f3b514a938c2979a66a0dc855094fb063c180265a65e",
     "routeManifest": "data/legacy/migration/staging-route-manifest.json",
-    "routeManifestSha256": "6501fefd3c5b2365f63a8231deb163f9659b5da0213a765919e38552ffad38a3",
-    "exclusionsSha256": "dd1ba920769768a42456bf91697e279ab7056c6748e37f1d22365da2072fcf22",
+    "routeManifestSha256": "e3c1cf76c2a72bafa499d2371b0ddd771a5a2b737065f0aabf86bdbd36173504",
+    "exclusionsSha256": "ad67bb3d63c95b86c8c905b74c4f9c3a632b67be1eb67fbf5575e747b8007c70",
     "media": "data/legacy/migration/public-media.json",
-    "mediaSha256": "1b8e3f73f375af0a8c1b125133bbd5f6b70da89f48fda7fda82028a7a6adb362"
+    "mediaSha256": "fc6f7aece7e9a9e91f41b13f24d5b334e30201e8b3d8a513366cb8bdad91dca4"
   },
   "runtimeVars": {
     "WEBAUTHN_RP_NAME": "MS Realty staging",

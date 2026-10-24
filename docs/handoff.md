@@ -243,7 +243,7 @@ Full list in `docs/plan.md` §8. In short:
 - retention/privacy policy;
 - an AML officer, internal rules and a risk assessment;
 - provider accounts: DigitalOcean App Platform + HA PostgreSQL, Cloudflare R2 EU buckets,
-  Resend, OpenAI, Better Stack, AWS S3 Object Lock;
+  Resend, OpenAI, Better Stack, single-operator EU R2 recovery and an outside-account encrypted copy (ADR 0006);
 - DNS for `my.` and `app.`, and renewal of the expired `makler-realty.ru`;
 - the SEO evidence decision;
 - the recovery signing-key custodian;
