@@ -48,6 +48,9 @@ export async function withUnavailableDocument(
   )
     return response;
 
+  // A replaced upstream reply must finish its SDK stream before its slot can be released.
+  await response.arrayBuffer().catch(() => {});
+
   const text = copy[locale];
   const hash = btoa(
     String.fromCharCode(
