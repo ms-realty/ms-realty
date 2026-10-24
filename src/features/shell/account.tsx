@@ -94,14 +94,10 @@ export function AccountMenu({
       <summary
         role="button"
         aria-controls={id}
-        aria-labelledby={`${id}-label ${id}-identity`}
         className="flex min-h-control cursor-pointer list-none items-center gap-2 rounded-control p-2 hover:bg-divider focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus group-open/account:bg-divider [&::-webkit-details-marker]:hidden"
       >
-        <span id={`${id}-label`} className="sr-only">
-          {label}:
-        </span>
+        <span className="sr-only">{label}:</span>{" "}
         <span
-          id={`${id}-identity`}
           className={cx(
             "min-w-0 flex-1",
             "lg:group-data-[sidebar=compact]/shell:[&_[data-workspace-account]>span:last-child]:sr-only",

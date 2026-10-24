@@ -31,6 +31,9 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
   page,
   context,
 }) => {
+  // Two complete pages each deliberately hold hydration, then submit a durable operation.
+  // Give the combined journey its own budget; the native confirmation still has a short bound.
+  test.setTimeout(60_000);
   const { token } = JSON.parse(
     execFileSync(
       process.execPath,
@@ -104,7 +107,7 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
         section.getByLabel("Approval valid until", { exact: true }),
         expiryAt,
       );
-      await section.getByRole("checkbox").check();
+      await section.getByRole("checkbox").check({ timeout: 5_000 });
       releaseReview();
       await review.waitForLoadState("networkidle");
       await section
