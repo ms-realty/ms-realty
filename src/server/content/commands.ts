@@ -2,9 +2,16 @@
 import "server-only";
 import { and, asc, desc, eq, inArray, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
-import { approvals, contentPages, contentPageVersions, geographyPlaces } from "@/db/schema";
+import {
+  approvals,
+  contentLocaleEditions,
+  contentPages,
+  contentPageVersions,
+  geographyPlaces,
+} from "@/db/schema";
 import { type ApprovalKind, approvalCapability } from "@/domain/approval";
-import type { Capability } from "@/domain/capabilities";
+import { type Capability, hasCapability } from "@/domain/capabilities";
+import { type PublicLocale, publicLocales } from "@/i18n/config";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
@@ -15,6 +22,7 @@ import { AppError } from "../errors";
 import { findOperation, type OperationContext, runOperation } from "../operations";
 import { loadPlaceChains } from "../publication/presentation";
 import { commandEnvelope, liveStaff, parseInput, version } from "../work/shared";
+import { invalidateContentLocales } from "./invalidation";
 import { approvedContent, contentBody } from "./public";
 
 export const contentKinds = ["area", "service", "help"] as const;
@@ -55,11 +63,12 @@ const readCapabilities: Capability[] = [
   "listing.review_facts",
   "claim.approve",
   "publication.release",
+  "translation.review",
 ];
-const resource = (id?: string) => ({
+const resource = (id?: string, locale: PublicLocale = "bg") => ({
   type: "content_page",
   ...(id ? { id } : {}),
-  locale: "bg" as const,
+  locale,
   audience: "internal" as const,
 });
 
@@ -69,6 +78,7 @@ async function pageFor(
   id: string,
   capability?: Capability,
   lock = false,
+  locale: PublicLocale = "bg",
 ) {
   const live = await liveStaff(db, session);
   const query = db
@@ -78,10 +88,10 @@ async function pageFor(
   const [page] = await (lock ? query.for("update") : query);
   if (!page || !contentKinds.some((kind) => kind === page.kind)) throw new AppError("not_found");
   const permitted = await Promise.all(
-    readCapabilities.map((cap) => can(db, live.actor, cap, resource(id))),
+    readCapabilities.map((cap) => can(db, live.actor, cap, resource(id, locale))),
   );
   if (!permitted.some(Boolean)) throw new AppError("not_found");
-  if (capability) await assertCan(db, live.actor, capability, resource(id));
+  if (capability) await assertCan(db, live.actor, capability, resource(id, locale));
   return { live, page };
 }
 
@@ -150,19 +160,35 @@ export async function listContent(db: Executor, session: Session) {
     .filter((grant) => readCapabilities.includes(grant.capability))
     .flatMap(({ scope }) => {
       if (scope?.recordType && scope.recordType !== "content_page") return [];
-      if (scope?.locales && !scope.locales.includes("bg")) return [];
+      if (scope?.locales && !publicLocales.some((locale) => scope.locales?.includes(locale)))
+        return [];
       const terms: SQL[] = [];
       if (scope?.recordId) terms.push(eq(contentPages.id, scope.recordId));
       return [and(...terms) ?? sql`true`];
     });
   return {
     canCreate: await can(db, live.actor, "content.edit", resource()),
-    rows: await db
-      .select()
-      .from(contentPages)
-      .where(and(inArray(contentPages.kind, contentKinds), or(...branches) ?? sql`false`))
-      .orderBy(desc(contentPages.updatedAt))
-      .limit(100),
+    rows: (
+      await db
+        .select()
+        .from(contentPages)
+        .where(and(inArray(contentPages.kind, contentKinds), or(...branches) ?? sql`false`))
+        .orderBy(desc(contentPages.updatedAt))
+        .limit(100)
+    ).map((page) => ({
+      ...page,
+      entryLocale:
+        publicLocales.find((locale) =>
+          readCapabilities.some((capability) =>
+            hasCapability(live.actor, grants, capability, {
+              recordType: "content_page",
+              recordId: page.id,
+              locale,
+              now: new Date().toISOString(),
+            }),
+          ),
+        ) ?? "bg",
+    })),
   };
 }
 
@@ -210,7 +236,29 @@ export async function readContentWorkbench(db: Executor, session: Session, id: s
     access,
     ...locations,
     publishedPlaceId: publishedBody?.success ? (publishedBody.data.placeId ?? null) : null,
+    localeEditions: await contentEditionAccess(db, live.actor, page.id),
   };
+}
+
+export async function contentEditionAccess(db: Executor, actor: Session["actor"], id: string) {
+  const editions = await db
+    .select()
+    .from(contentLocaleEditions)
+    .where(eq(contentLocaleEditions.contentPageId, id));
+  const grants = await resolveGrants(db, actor);
+  const options = publicLocales.map((locale) => ({
+    locale,
+    permitted: readCapabilities.some((capability) =>
+      hasCapability(actor, grants, capability, {
+        recordType: "content_page",
+        recordId: id,
+        locale,
+        now: new Date().toISOString(),
+      }),
+    ),
+    edition: editions.find((row) => row.locale === locale) ?? null,
+  }));
+  return options.filter((entry) => entry.permitted);
 }
 
 export async function readContentOperation(
@@ -361,6 +409,7 @@ export async function saveContent(db: Executor, session: Session, raw: ContentDr
           updatedAt: new Date(),
         })
         .where(eq(contentPages.id, page.id));
+      await invalidateContentLocales(ctx.tx, page.id);
       await history(ctx, { ...page, currentVersionNumber: number }, "draft_saved", "content.edit");
       return { id: page.id, version: page.version + 1, recordedAt: new Date().toISOString() };
     },
@@ -398,6 +447,7 @@ export async function decideContent(db: Executor, session: Session, raw: Content
             updatedAt: new Date(),
           })
           .where(eq(contentPages.id, page.id));
+        await invalidateContentLocales(ctx.tx, page.id);
         await history(ctx, page, "withdrawn", capability, { reason: input.note });
         return { id: page.id, version: page.version + 1, recordedAt: new Date().toISOString() };
       }
@@ -438,6 +488,7 @@ export async function decideContent(db: Executor, session: Session, raw: Content
           .returning();
         if (!reviewed) throw new Error("Reviewed content edition insert failed");
         candidate = reviewed;
+        await invalidateContentLocales(ctx.tx, page.id);
       } else if (!candidate.reviewedAt) throw new AppError("approval_stale");
       await ctx.tx.insert(approvals).values({
         kind,
@@ -501,3 +552,12 @@ export async function decideContent(db: Executor, session: Session, raw: Content
     },
   );
 }
+
+// Shared O21 command primitives: locale commands use the same live grants, BG-page lock,
+// audit/activity journal and plaintext body validation as the existing source workflow.
+export {
+  bodyOf as contentBodyOf,
+  history as recordContentHistory,
+  pageFor as contentPageFor,
+  resource as contentResource,
+};

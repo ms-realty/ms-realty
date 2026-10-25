@@ -18,6 +18,7 @@ try {
       { capability: "content.edit" },
       { capability: "listing.review_facts" },
       { capability: "claim.approve" },
+      { capability: "translation.review" },
       { capability: "publication.release" },
     ],
   });

@@ -181,6 +181,57 @@ export const contentPageVersions = pgTable(
   (t) => [uniqueIndex("content_page_versions_number_idx").on(t.contentPageId, t.versionNumber)],
 );
 
+/** O21: a target language has its own draft and release pointers, never a BG fallback. */
+export const contentLocaleEditions = pgTable(
+  "content_locale_editions",
+  {
+    ...mutable(),
+    contentPageId: uuid("content_page_id")
+      .notNull()
+      .references(() => contentPages.id),
+    locale: publicLocaleEnum("locale").notNull(),
+    reviewState: text("review_state").notNull().default("draft"),
+    publicationState: publicationStateEnum("publication_state")
+      .notNull()
+      .default("never_published"),
+    currentVersionNumber: integer("current_version_number").notNull().default(0),
+    publishedVersionNumber: integer("published_version_number"),
+  },
+  (t) => [
+    uniqueIndex("content_locale_editions_page_locale_idx").on(t.contentPageId, t.locale),
+    check("content_locale_editions_target_locale", sql`${t.locale} <> 'bg'`),
+    check(
+      "content_locale_editions_review_state",
+      sql`${t.reviewState} in ('draft', 'in_review', 'rejected', 'approved', 'stale')`,
+    ),
+  ],
+);
+
+/** Immutable target text, bound to the exact immutable BG source and inherited place. */
+export const contentLocaleVersions = pgTable(
+  "content_locale_versions",
+  {
+    id: id(),
+    editionId: uuid("edition_id")
+      .notNull()
+      .references(() => contentLocaleEditions.id),
+    versionNumber: integer("version_number").notNull(),
+    sourceVersionId: uuid("source_version_id")
+      .notNull()
+      .references(() => contentPageVersions.id),
+    sourceVersionHash: text("source_version_hash").notNull(),
+    contentHash: text("content_hash").notNull(),
+    body: jsonb("body").notNull(),
+    jurisdiction: text("jurisdiction").notNull(),
+    reviewScope: text("review_scope").notNull(),
+    createdById: uuid("created_by_id")
+      .notNull()
+      .references(() => principals.id),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("content_locale_versions_number_idx").on(t.editionId, t.versionNumber)],
+);
+
 /**
  * Public shortlist shares: an unguessable revocable token over public listing references
  * only. No participant, note, budget, contact data or case link is stored here (§8.3, AT09).

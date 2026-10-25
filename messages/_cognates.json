@@ -65,7 +65,8 @@
     "caseDirectory.dueAt": "Срок",
     "workspace.workGroup": "Работа",
     "workspace.personalSettings.title": "Настройки",
-    "operations.businessReports.unknown": "Неизвестно"
+    "operations.businessReports.unknown": "Неизвестно",
+    "dataReview.contentLocales.approved": "Одобрено"
   },
   "de": {
     "discovery.hotel": "Hotel",
