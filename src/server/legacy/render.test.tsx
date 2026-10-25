@@ -2,6 +2,8 @@ import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import Page, { generateMetadata } from "../../../app/public/[locale]/(site)/legacy/[id]/page";
+import snapshots from "../../../data/legacy/migration/source-pages.json";
+import type { LegacyPage } from "./pages";
 
 const mocks = vi.hoisted(() => ({
   page: vi.fn(),
@@ -49,11 +51,11 @@ const source = {
     { url: "https://makler-realty.ru/listing/original/", text: "Original listing summary" },
   ],
 };
-it("renders measured empty archives with honest interface copy separate from the unchanged empty source", async () => {
+it("P21 renders measured empty archives without treating the absence of historical entries as a current search result", async () => {
   mocks.page.mockReturnValue({ ...source, bodyText: "", contentState: "verified_empty_archive" });
   render(await Page({ params }));
   expect(document.querySelector("[data-legacy-source-body]")?.textContent).toBe("");
-  expect(screen.getByRole("status")).toHaveTextContent("Нет результатов по этим условиям");
+  expect(screen.getByRole("status")).toHaveTextContent("В сохранённой коллекции не было записей.");
   expect(document.querySelector("article script, article form")).toBeNull();
   expect(mocks.schema).not.toHaveBeenCalled();
 });
@@ -119,4 +121,74 @@ it("listing JSON-LD uses the retained source URL helper and exact source page pr
 it("cannot replace a missing main-content source with a 200 placeholder", async () => {
   mocks.page.mockReturnValue(null);
   await expect(Page({ params })).rejects.toThrow("not-found");
+});
+
+// P21 / F09 / M-072: bind the presentation regression to the preserved real source
+// records. Source content stays in the existing inventory rather than copied fixtures.
+for (const [id, identity] of [
+  ["0060c155d560ff91e51b4193", "Archive listing"],
+  ["1b78f029a9e6cf185268e61a", "Archive page"],
+  ["49bedd92a43a06d767046abe", "Архивна статия"],
+  ["042922f874af5e9cf3f6092d", "Архивна колекция"],
+] as const) {
+  it(`P21 / M-072: ${id} has honest archive identity, clean reading and a native recovery path`, async () => {
+    const original = snapshots.pages.find((page) => page.id === id);
+    if (!original) throw new Error(`Missing recorded source ${id}`);
+    const unchanged = JSON.stringify(original);
+    mocks.page.mockReturnValue(original);
+    render(await Page({ params: Promise.resolve({ locale: original.locale, id }) }));
+    const article = document.querySelector("article");
+    expect(article).toHaveAttribute("lang", original.locale);
+    expect(screen.getByRole("heading", { name: original.title })).toBeVisible();
+    expect(screen.getByText(identity, { exact: true })).toBeVisible();
+    expect(article).toHaveAttribute("data-legacy-source-hash", original.sourceHash);
+    expect(article?.querySelector('a[href="tel:+359879696870"]')).not.toBeNull();
+    expect(article?.querySelector(`a[href="/${original.locale}/properties"]`)).not.toBeNull();
+    expect(article?.querySelector("script, form, input, button")).toBeNull();
+    expect(article?.textContent).not.toMatch(
+      /\[si-contact-form|\[email protected\]|Tweet|Name Email Phone Message Send/u,
+    );
+    expect(JSON.stringify(original)).toBe(unchanged);
+  });
+}
+
+it("P21 keeps a recorded reference, literal source fields and image failure recovery visible", async () => {
+  const original = snapshots.pages.find((page) => page.id === "0060c155d560ff91e51b4193");
+  if (!original?.listing) throw new Error("Missing recorded listing");
+  mocks.page.mockReturnValue(original);
+  render(await Page({ params: Promise.resolve({ locale: original.locale, id: original.id }) }));
+  const facts = document.querySelector("[data-legacy-source-facts]");
+  expect(facts).not.toBeNull();
+  for (const field of original.listing.liveSourceFields ?? []) {
+    expect(facts).toHaveTextContent(field.label);
+    expect(facts).toHaveTextContent(field.value);
+  }
+  expect(document.querySelector("aside bdi")?.textContent).toBe(original.listing.reference);
+  const photo = document.querySelector("article img");
+  expect(photo?.closest("a")).toHaveAttribute("href", photo?.getAttribute("src"));
+  expect(photo?.closest("a")).toHaveTextContent("Open image 1");
+  expect(screen.getByText("Current availability and conditions are unconfirmed.")).toBeVisible();
+  expect(screen.queryByText(/approved|reviewed facts|available now/iu)).toBeNull();
+});
+
+it("P21 retains Hebrew direction and bidirectional reference/phone isolation without translating source prose", async () => {
+  const synthetic = {
+    ...source,
+    locale: "he",
+    title: "כותרת מקור סינתטית",
+    bodyText: "תוכן מקור סינתטי.",
+    sourceHost: "makler-realty.com",
+    sourceUrl: "https://makler-realty.com/synthetic-archive/",
+    sourceType: "listing",
+    listing: { reference: "SYNTHETIC-001" },
+  } as unknown as LegacyPage;
+  mocks.page.mockReturnValue(synthetic);
+  render(await Page({ params: Promise.resolve({ locale: "he", id: source.id }) }));
+  expect(document.querySelector("article")).toHaveAttribute("dir", "rtl");
+  expect(document.querySelector("article")).toHaveAttribute("lang", "he");
+  expect(document.querySelector("[data-legacy-source-body]")?.textContent).toBe(synthetic.bodyText);
+  expect(document.querySelector('a[href="tel:+359879696870"] bdi')?.textContent).toBe(
+    "+359879696870",
+  );
+  expect(document.querySelector("aside bdi")?.textContent).toBe("SYNTHETIC-001");
 });
