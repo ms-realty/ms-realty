@@ -1,7 +1,7 @@
 // C18/O26 · AT43/AT45/UX23. Only allowlisted person data; never a raw relational dump.
 import "server-only";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
-import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   consentEvents,
@@ -1388,20 +1388,32 @@ export async function privacyExportOperationStatus(
 ) {
   await privacyOperator(db, session, requestId);
   if (!z.uuid().safeParse(operationKey).success) return "unknown";
-  const [row] = await db
-    .select({ status: operations.status })
-    .from(operations)
-    .where(
-      and(
-        eq(operations.actorKind, session.actor.kind),
-        eq(operations.actorId, session.actor.id),
-        eq(operations.idempotencyKey, operationKey),
-        eq(operations.resultType, "privacy_request"),
-        eq(operations.resultId, requestId),
-        inArray(operations.operationType, exportOperationTypes),
-      ),
-    );
-  return row?.status ?? "absent";
+  return db.transaction(async (tx) => {
+    // The command's receipt is invisible until commit. Fence every allowed command type
+    // for this exact actor/key before treating a missing row as a confirmed absence.
+    for (const type of exportOperationTypes) {
+      const lockKey = JSON.stringify([session.actor.kind, session.actor.id, type, operationKey]);
+      const [lock] = await tx.execute<{ locked: boolean }>(
+        sql`select pg_try_advisory_xact_lock(hashtextextended(${lockKey}, 0)) as locked`,
+      );
+      if (!lock?.locked) return "unknown";
+    }
+    await privacyOperator(tx, session, requestId);
+    const [row] = await tx
+      .select({ status: operations.status })
+      .from(operations)
+      .where(
+        and(
+          eq(operations.actorKind, session.actor.kind),
+          eq(operations.actorId, session.actor.id),
+          eq(operations.idempotencyKey, operationKey),
+          eq(operations.resultType, "privacy_request"),
+          eq(operations.resultId, requestId),
+          inArray(operations.operationType, exportOperationTypes),
+        ),
+      );
+    return row?.status ?? "absent";
+  });
 }
 
 export async function privacyExportReceipt(

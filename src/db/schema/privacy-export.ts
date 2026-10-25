@@ -45,7 +45,7 @@ export const privacyExports = pgTable(
     check("privacy_exports_digest", sql`${t.sha256} ~ '^[a-f0-9]{64}$'`),
     check(
       "privacy_exports_review_binding",
-      sql`(${t.encryptedReview} is null and ${t.reviewSha256} is null) or (${t.encryptedReview} is not null and ${t.reviewSha256} ~ '^[a-f0-9]{64}$')`,
+      sql`(${t.encryptedReview} is null and ${t.reviewSha256} is null) or (${t.encryptedReview} is not null and ${t.reviewSha256} is not null and ${t.reviewSha256} ~ '^[a-f0-9]{64}$')`,
     ),
     check(
       "privacy_exports_issued",
