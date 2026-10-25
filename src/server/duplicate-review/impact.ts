@@ -1,10 +1,10 @@
 import "server-only";
-import { asc, eq, type SQL, sql } from "drizzle-orm";
+import { and, asc, eq, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
 import { inquiries, listings, parties, properties } from "@/db/schema";
 import type { Actor, Capability } from "@/domain/capabilities";
 import { requireFreshAuth, type Session } from "@/server/auth/sessions";
-import { can, type Resource } from "@/server/authz";
+import { can, type Resource, resolveGrants } from "@/server/authz";
 import { hashRequest } from "@/server/crypto";
 import type { Executor } from "@/server/db";
 import { caseDocumentPurposes } from "@/server/documents/purposes";
@@ -12,7 +12,7 @@ import { assertRequestedDocumentAccess } from "@/server/documents/request-access
 import { AppError } from "@/server/errors";
 import { documentAccess, mediaAccess } from "@/server/files/access";
 import { privacyOperator } from "@/server/privacy/access";
-import { liveStaff } from "@/server/work/shared";
+import { liveStaff, visibleWhere } from "@/server/work/shared";
 
 export const duplicatePairSchema = z
   .object({
@@ -85,6 +85,7 @@ export async function readDuplicateSource(
             type: "inquiry",
             id: source.id,
             caseId: source.caseId ?? undefined,
+            locale: source.preferredLocale ?? undefined,
             audience: "internal",
           })
         ) {
@@ -201,6 +202,11 @@ const safeColumns = new Set([
   "revision_id",
   "proposal_revision_id",
   "principal_id",
+  "owner_id",
+  "host_id",
+  "holder_id",
+  "responsible_id",
+  "service_name",
   "contact_method_id",
   "kind",
   "state",
@@ -252,11 +258,20 @@ const safeColumns = new Set([
   "revision_number",
   "current_version_number",
   "document_version_id",
+  "commercial_state",
+  "editorial_state",
+  "freshness_state",
+  "publication_generation",
 ]);
 const audienceColumns = [
   "party_id",
   "sender_party_id",
   "principal_id",
+  "owner_id",
+  "host_id",
+  "holder_id",
+  "responsible_id",
+  "service_name",
   "case_id",
   "property_id",
   "role",
@@ -270,6 +285,24 @@ const audienceColumns = [
   "revoked_at",
   "expires_at",
   "valid_from",
+  "kind",
+  "state",
+  "status",
+  "purpose",
+  "contact_method_id",
+  "policy_version",
+  "provider",
+  "provider_reference",
+  "operation_id",
+  "batch_id",
+  "source_key",
+  "content_digest",
+  "revision_number",
+  "current_version_number",
+  "commercial_state",
+  "editorial_state",
+  "freshness_state",
+  "publication_generation",
 ];
 const sourceTable = (subject: MergeSubject) => (subject === "party" ? "parties" : "properties");
 const ident = (name: string) => sql`${sql.identifier(name)}`;
@@ -581,16 +614,58 @@ export async function readDuplicateImpact(
   return { ...result, digest: hashRequest(result) };
 }
 
-export async function listDuplicateSources(db: Executor, session: Session, subject: MergeSubject) {
+export async function listDuplicateSources(
+  db: Executor,
+  session: Session,
+  subject: MergeSubject,
+  after?: string,
+) {
   const live = await liveStaff(db, session);
+  if (after && !z.uuid().safeParse(after).success) throw new AppError("not_found");
+  const grants = await resolveGrants(db, live.actor);
   const table = subject === "party" ? parties : properties;
+  const pointer = subject === "party" ? parties.mergedIntoPartyId : properties.mergedIntoPropertyId;
+  const recordScope = (capability: Capability, type: string, id: SQL) =>
+    or(
+      ...grants
+        .filter((grant) => grant.capability === capability)
+        .flatMap(({ scope }) => {
+          if (
+            scope?.locales ||
+            (scope?.expiresAt && new Date(scope.expiresAt) <= new Date()) ||
+            (scope?.recordType && scope.recordType !== type)
+          )
+            return [];
+          return [scope?.recordId ? sql`${id} = ${scope.recordId}::uuid` : sql`true`];
+        }),
+    ) ?? sql`false`;
+  const readable =
+    subject === "party"
+      ? or(
+          recordScope("inquiry.read", "party", sql`${parties.id}`),
+          sql`exists(select 1 from ${inquiries}
+        where ${inquiries.partyId} = ${parties.id} and ${visibleWhere(grants, "inquiry.read", "inquiry")})`,
+        )
+      : or(
+          recordScope("listing.read", "property", sql`${properties.id}`),
+          sql`exists(select 1 from ${listings}
+        where ${listings.propertyId} = ${properties.id} and ${recordScope("listing.read", "listing", sql`${listings.id}`)})`,
+        );
   const candidates = await db
     .select({ id: table.id })
     .from(table)
+    .where(
+      and(
+        recordScope("import.run", subject, sql`${table.id}`),
+        readable,
+        sql`${pointer} is null`,
+        after ? sql`${table.id} > ${after}::uuid` : undefined,
+      ),
+    )
     .orderBy(asc(table.id))
-    .limit(101);
+    .limit(51);
   const visible: Array<{ id: string; label: string }> = [];
-  for (const candidate of candidates) {
+  for (const candidate of candidates.slice(0, 50)) {
     if (
       !(await can(db, live.actor, "import.run", {
         type: subject,
@@ -606,7 +681,10 @@ export async function listDuplicateSources(db: Executor, session: Session, subje
       if (!(error instanceof AppError && error.code === "not_found")) throw error;
     }
   }
-  return visible;
+  return {
+    rows: visible,
+    nextCursor: candidates.length > 50 ? (visible.at(-1)?.id ?? null) : null,
+  };
 }
 
 /** Useful canonical navigation, with independent visibility checks for EVERY source/alias. */

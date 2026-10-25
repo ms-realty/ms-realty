@@ -9,6 +9,7 @@ import { getDb } from "@/db/client";
 import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
+import { DuplicateIdentityLink } from "@/features/duplicate-review/identity-link";
 import { isStaffLocale, type StaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
@@ -776,6 +777,7 @@ export async function ContactScreen({
   const contact = await privateRead(() => readContact(getDb(), session, id));
   return (
     <Page title={contact.party.displayName} locale={locale}>
+      <DuplicateIdentityLink locale={locale} session={session} subject="party" id={id} />
       <p>{copy.contactScope}</p>
       <section className="space-y-3">
         <h2 className="text-subheading font-semibold">{copy.methods}</h2>

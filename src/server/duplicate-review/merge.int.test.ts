@@ -30,7 +30,7 @@ import { staffFixture } from "@/server/cases/testing";
 import { createStaff } from "@/server/testing";
 import { readContact } from "@/server/work/queries";
 import { issueFormOperation } from "@/ui/form/server";
-import { type DuplicatePair, readCanonicalDuplicate } from "./impact";
+import { type DuplicatePair, listDuplicateSources, readCanonicalDuplicate } from "./impact";
 import {
   duplicateOperationScope,
   duplicateOperationStatus,
@@ -123,6 +123,67 @@ async function scopedStaff(readIds: string[], mergeIds: string[] = []) {
 }
 
 describe("O27/F32/AT56/UX22 human identity merge and safe split", () => {
+  it("paginates source selection after applying current independent read and merge scopes", async () => {
+    const f = await fixture(),
+      staff = await scopedStaff(
+        [f.left.inquiry.id, f.right.inquiry.id],
+        [f.left.party.id, f.right.party.id],
+      );
+    const selected = await listDuplicateSources(t.db, staff.session, "party");
+    expect(selected.rows.map((row) => row.id).sort()).toEqual(
+      [f.left.party.id, f.right.party.id].sort(),
+    );
+    expect(selected.nextCursor).toBeNull();
+    await t.db
+      .update(grants)
+      .set({ revokedAt: new Date() })
+      .where(and(eq(grants.principalId, staff.id), eq(grants.recordId, f.right.inquiry.id)));
+    expect(
+      (await listDuplicateSources(t.db, staff.session, "party")).rows.map((row) => row.id),
+    ).toEqual([f.left.party.id]);
+    const propertyRows = await t.db
+      .insert(properties)
+      .values(
+        Array.from({ length: 52 }, () => ({
+          reference: `PROP-PAGE-${randomUUID()}`,
+          propertyType: "apartment" as const,
+          country: "BG",
+          region: "Synthetic region",
+          settlement: "Sandanski",
+        })),
+      )
+      .returning();
+    await t.db.insert(grants).values([
+      {
+        principalId: staff.id,
+        capability: "import.run",
+        recordType: "property",
+        reason: "Synthetic property-only review scope",
+      },
+      {
+        principalId: staff.id,
+        capability: "listing.read",
+        recordType: "property",
+        reason: "Synthetic property-only read scope",
+      },
+    ]);
+    const found = new Set<string>();
+    let cursor: string | undefined;
+    for (let page = 0; page < 10; page++) {
+      const current = await listDuplicateSources(t.db, staff.session, "property", cursor);
+      expect(current.rows.length).toBeLessThanOrEqual(50);
+      for (const row of current.rows) {
+        expect(found.has(row.id)).toBe(false);
+        found.add(row.id);
+      }
+      if (!current.nextCursor) break;
+      cursor = current.nextCursor;
+    }
+    expect(propertyRows.every((row) => found.has(row.id))).toBe(true);
+    await expect(
+      listDuplicateSources(t.db, staff.session, "party", "forged-cursor"),
+    ).rejects.toMatchObject({ code: "not_found" });
+  });
   it("merges once, retains aliases and source/provider/receipt references, then reverses once with history", async () => {
     const f = await fixture();
     await t.db
@@ -437,15 +498,13 @@ describe("O27/F32/AT56/UX22 human identity merge and safe split", () => {
     const held = await previewDuplicateMerge(t.db, reviewer.session, f.pair);
     expect(held.held).toContain("restricted");
     expect(JSON.stringify(held.references)).not.toContain(document.id);
-    await t.db
-      .insert(grants)
-      .values({
-        principalId: reviewer.id,
-        capability: "document.read_restricted",
-        recordType: "document",
-        recordId: document.id,
-        reason: "Synthetic exact document scope",
-      });
+    await t.db.insert(grants).values({
+      principalId: reviewer.id,
+      capability: "document.read_restricted",
+      recordType: "document",
+      recordId: document.id,
+      reason: "Synthetic exact document scope",
+    });
     const allowed = await previewDuplicateMerge(t.db, reviewer.session, f.pair);
     expect(allowed.held).toEqual([]);
     expect(allowed.references.some((row) => row.id === document.id)).toBe(true);
