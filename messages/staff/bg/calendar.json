@@ -65,5 +65,18 @@
   "details": "Обхват, актуалност и проверки на календара",
   "manualShort": "Външните календари се проверяват ръчно",
   "internalNote": "Предложенията не резервират ресурси",
-  "emptyDayShort": "Няма на тази страница"
+  "emptyDayShort": "Няма на тази страница",
+  "states": {
+    "requested": "Заявка",
+    "proposed": "Предложен час",
+    "confirmed": "Потвърден",
+    "reschedule_requested": "Искана промяна",
+    "cancelled": "Отменен",
+    "completed": "Завършен",
+    "no_show": "Неявяване",
+    "declined": "Отказан"
+  },
+  "filters": "Дата и филтри",
+  "snapshotShort": "Прочетен в",
+  "refreshShort": "Обнови"
 }

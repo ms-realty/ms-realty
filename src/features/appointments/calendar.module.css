@@ -2,6 +2,36 @@
 .calendar {
   min-width: 0;
 }
+
+.filterDisclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  border-block-start: 1px solid var(--color-divider);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+.filterDisclosure :where(summary > span) {
+  display: grid;
+  gap: 0.25rem;
+}
+.filterDisclosure :where(summary strong) {
+  font-weight: 600;
+}
+.filterDisclosure :where(summary span > span) {
+  color: var(--color-text-muted);
+}
+.filterDisclosure:where([open]) :where(summary > svg) {
+  transform: rotate(180deg);
+}
+.mobileSnapshot {
+  display: inline;
+}
+.desktopSnapshot {
+  display: none;
+}
 .controls,
 .itinerary,
 .requests {
@@ -591,6 +621,9 @@
 }
 .weekEvent > bdi {
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .weekState {
   color: var(--color-text-muted);
@@ -600,6 +633,16 @@
   gap: 0.125rem;
   border-block-start: 1px solid var(--color-divider);
   padding-block-start: 0.375rem;
+}
+.weekTime:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+.weekCase {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-muted);
 }
 .weekTime strong {
   font-weight: 600;
@@ -672,6 +715,15 @@
 }
 
 @media (min-width: 40rem) {
+  .filterDisclosure > summary {
+    display: none;
+  }
+  .mobileSnapshot {
+    display: none;
+  }
+  .desktopSnapshot {
+    display: inline;
+  }
   .filters {
     grid-template-columns: minmax(10rem, 0.85fr) minmax(12rem, 1.15fr);
   }

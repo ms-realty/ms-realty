@@ -1,7 +1,7 @@
 // O08 / L12 / F22: actual PostgreSQL intervals, native controls and complete mobile agenda.
 import { execFileSync } from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -14,6 +14,7 @@ import { hostUrl, origins } from "./hosts";
 type Item = { id: string; reference: string };
 type Fixture = {
   token: string;
+  caseId: string;
   replacement: Item;
   teammate: Item;
   proposal: Item;
@@ -21,6 +22,12 @@ type Fixture = {
   readOnly: Item;
   request: Item;
 };
+async function showCalendarFilters(page: Page, javaScriptEnabled: boolean) {
+  const disclosure = page.locator("[data-calendar-filters]");
+  if (javaScriptEnabled) await expect(disclosure).toHaveAttribute("data-enhanced", "true");
+  if (!(await disclosure.evaluate((element) => (element as HTMLDetailsElement).open)))
+    await disclosure.locator("summary").click();
+}
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
   throw new Error("Calendar tests require the generated disposable database");
@@ -53,6 +60,19 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   test.skip(info.project.name !== "chromium-desktop", "Focused staff composition evidence");
   test.setTimeout(90_000);
   const f = seed();
+  // Composition evidence uses readable synthetic identities; the functional journey below
+  // retains deliberately long references and verifies complete narrow-screen access.
+  for (const [index, item] of [f.replacement, f.teammate, f.proposal, f.request].entries()) {
+    item.reference = `AP-DEMO-${String(index + 1).padStart(3, "0")}`;
+    await db
+      .update(schema.appointments)
+      .set({ reference: item.reference })
+      .where(eq(schema.appointments.id, item.id));
+  }
+  await db
+    .update(schema.cases)
+    .set({ reference: "CS-DEMO-001" })
+    .where(eq(schema.cases.id, f.caseId));
   await page.context().addCookies([
     {
       name: "msr_staff_session",
@@ -63,7 +83,7 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
     },
   ]);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto(hostUrl("staff", "/en/calendar?date=2030-10-27&view=week"));
+  await page.goto(hostUrl("staff", "/en/calendar?date=2030-10-28&view=week"));
   await expect(
     page.getByRole("article", { name: f.replacement.reference, exact: true }),
   ).toBeVisible();
@@ -120,6 +140,9 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
       ).violations,
     ).toEqual([]);
     if (locale === "bg") {
+      await page.screenshot({ path: info.outputPath("synthetic-mobile320-populated-bg.png") });
+      await page.setViewportSize({ width: 390, height: 900 });
+      await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({ path: info.outputPath("synthetic-mobile-populated-bg.png") });
       await page.screenshot({
         path: info.outputPath("synthetic-mobile-full-itinerary-bg.png"),
@@ -161,6 +184,7 @@ for (const javaScriptEnabled of [false, true])
       ]);
       const path = "/en/calendar?date=2030-10-27&view=day&zone=Europe%2FSofia&scope=team";
       await page.goto(hostUrl("staff", path));
+      await showCalendarFilters(page, javaScriptEnabled);
       await expect(
         page.getByRole("heading", { level: 1, name: caseCopy("en").calendar, exact: true }),
       ).toBeVisible();
@@ -211,6 +235,7 @@ for (const javaScriptEnabled of [false, true])
         "page",
       );
       await page.getByRole("link", { name: c.next, exact: true }).click();
+      await showCalendarFilters(page, javaScriptEnabled);
       await expect(page.getByLabel(c.date, { exact: true })).toHaveValue("2030-11-03");
       await expect(
         page.getByRole("article", { name: f.teammate.reference, exact: true }),
@@ -231,6 +256,7 @@ for (const javaScriptEnabled of [false, true])
           .getByRole("article", { name: f.replacement.reference, exact: true })
           .getByText(c.overlap, { exact: false }),
       ).toBeVisible();
+      await showCalendarFilters(page, javaScriptEnabled);
       await page.getByLabel(c.zone, { exact: true }).selectOption("UTC");
       await page.getByRole("button", { name: c.apply, exact: true }).click();
       await expect(page.getByLabel(c.zone, { exact: true })).toHaveValue("UTC");
@@ -255,6 +281,7 @@ for (const javaScriptEnabled of [false, true])
       for (const locale of ["bg", "ru", "en"]) {
         const local = calendarCopy(locale);
         await page.goto(hostUrl("staff", path.replace("/en/", `/${locale}/`)));
+        await showCalendarFilters(page, javaScriptEnabled);
         await expect(page.getByLabel(local.zone, { exact: true })).toHaveValue("Europe/Sofia");
         await expect(page.getByRole("button", { name: local.apply, exact: true })).toBeVisible();
         await expect(

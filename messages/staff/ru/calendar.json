@@ -65,5 +65,18 @@
   "details": "Область, актуальность и проверки календаря",
   "manualShort": "Внешние календари проверяются вручную",
   "internalNote": "Предложения не резервируют ресурсы",
-  "emptyDayShort": "Нет на этой странице"
+  "emptyDayShort": "Нет на этой странице",
+  "states": {
+    "requested": "Заявка",
+    "proposed": "Предложено",
+    "confirmed": "Подтверждено",
+    "reschedule_requested": "Запрошен перенос",
+    "cancelled": "Отменено",
+    "completed": "Завершено",
+    "no_show": "Неявка",
+    "declined": "Отклонено"
+  },
+  "filters": "Дата и фильтры",
+  "snapshotShort": "Прочитано",
+  "refreshShort": "Обновить"
 }

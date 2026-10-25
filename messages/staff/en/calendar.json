@@ -65,5 +65,18 @@
   "details": "Scope, freshness & calendar checks",
   "manualShort": "External checks are manual",
   "internalNote": "Proposals do not reserve resources",
-  "emptyDayShort": "None on this page"
+  "emptyDayShort": "None on this page",
+  "states": {
+    "requested": "Requested",
+    "proposed": "Proposed",
+    "confirmed": "Confirmed",
+    "reschedule_requested": "Change requested",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "no_show": "No-show",
+    "declined": "Declined"
+  },
+  "filters": "Date & filters",
+  "snapshotShort": "Read at",
+  "refreshShort": "Refresh"
 }

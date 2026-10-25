@@ -15,6 +15,7 @@ import { Notice } from "@/ui/notice";
 import { caseCopy } from "../cases/copy";
 import s from "./calendar.module.css";
 import { calendarCopy } from "./calendar-copy";
+import { CalendarFilterDisclosure } from "./calendar-filter-disclosure";
 import {
   type CalendarQuery,
   calendarDay,
@@ -209,41 +210,46 @@ function CalendarControls({
           ))}
         </nav>
       </div>
-      <form action={`/${locale}/calendar`} method="get" className={s.filters}>
-        <input type="hidden" name="view" value={query.view} />
-        <div className={s.field}>
-          <label htmlFor="calendar-date">{c.date}</label>
-          <input
-            id="calendar-date"
-            name="date"
-            type="date"
-            required
-            min="2000-01-01"
-            max="2099-12-31"
-            defaultValue={query.date}
-          />
-        </div>
-        <div className={s.field}>
-          <label htmlFor="calendar-zone">{c.zone}</label>
-          <select id="calendar-zone" name="zone" defaultValue={query.zone}>
-            {calendarZones.map((zone) => (
-              <option key={zone} value={zone}>
-                {zone}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className={s.field}>
-          <label htmlFor="calendar-scope">{c.scope}</label>
-          <select id="calendar-scope" name="scope" defaultValue={query.scope}>
-            <option value="team">{c.team}</option>
-            <option value="mine">{c.mine}</option>
-          </select>
-        </div>
-        <button type="submit" className={buttonClass("primary", s.applyButton)}>
-          {c.apply}
-        </button>
-      </form>
+      <CalendarFilterDisclosure
+        label={c.filters}
+        selection={`${query.zone} · ${query.scope === "mine" ? c.mine : c.team}`}
+      >
+        <form action={`/${locale}/calendar`} method="get" className={s.filters}>
+          <input type="hidden" name="view" value={query.view} />
+          <div className={s.field}>
+            <label htmlFor="calendar-date">{c.date}</label>
+            <input
+              id="calendar-date"
+              name="date"
+              type="date"
+              required
+              min="2000-01-01"
+              max="2099-12-31"
+              defaultValue={query.date}
+            />
+          </div>
+          <div className={s.field}>
+            <label htmlFor="calendar-zone">{c.zone}</label>
+            <select id="calendar-zone" name="zone" defaultValue={query.zone}>
+              {calendarZones.map((zone) => (
+                <option key={zone} value={zone}>
+                  {zone}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={s.field}>
+            <label htmlFor="calendar-scope">{c.scope}</label>
+            <select id="calendar-scope" name="scope" defaultValue={query.scope}>
+              <option value="team">{c.team}</option>
+              <option value="mine">{c.mine}</option>
+            </select>
+          </div>
+          <button type="submit" className={buttonClass("primary", s.applyButton)}>
+            {c.apply}
+          </button>
+        </form>
+      </CalendarFilterDisclosure>
     </div>
   );
 }
@@ -426,7 +432,6 @@ function WeekOverview({
   now: Date;
 }) {
   const c = calendarCopy(locale);
-  const states = caseCopy(locale);
   const today = calendarDay(now, query.zone);
   return (
     <section aria-label={c.weekOverview} className={s.weekBoard}>
@@ -434,11 +439,11 @@ function WeekOverview({
         <div key={day} className={s.weekColumn} data-today={day === today || undefined}>
           <a
             className={s.weekDayLink}
-            aria-label={dayText(day, locale)}
             href={calendarHref(locale, query, { date: day, view: "day", page: 1 })}
           >
             <span>{shortDay(day, locale, true)}</span>
             <strong>{Number(day.slice(-2))}</strong>
+            <span className="sr-only"> · {dayText(day, locale)}</span>
           </a>
           <div className={s.weekEvents}>
             {rowsOnDay(data, day, query.zone).length ? (
@@ -463,8 +468,6 @@ function WeekOverview({
                     }
                     href={`/${locale}/calendar/${row.id}`}
                   >
-                    <bdi>{row.reference}</bdi>
-                    <span className={s.weekState}>{states[row.state]}</span>
                     {previews.length ? (
                       previews.map((interval) => (
                         <span
@@ -485,11 +488,21 @@ function WeekOverview({
                     ) : (
                       <span>{c.reserved}</span>
                     )}
+                    <span className={s.weekState}>{c.states[row.state]}</span>
+                    <bdi title={row.reference}>{row.reference}</bdi>
+                    {row.caseReference ? (
+                      <span className={s.weekCase} title={row.caseReference}>
+                        <bdi>{row.caseReference}</bdi>
+                      </span>
+                    ) : null}
                   </a>
                 );
               })
             ) : (
-              <span className={s.weekEmpty}>{c.emptyDayShort}</span>
+              <span className={s.weekEmpty}>
+                <span aria-hidden="true">—</span>
+                <span className="sr-only">{c.emptyDayShort}</span>
+              </span>
             )}
           </div>
         </div>
@@ -524,13 +537,24 @@ export function CalendarView({
             {c.manualShort}
           </span>
           {data ? (
-            <span>
+            <span className={s.desktopSnapshot}>
               {c.snapshot}: <CalendarTime at={data.checkedAt} locale={locale} zone={query.zone} />
             </span>
           ) : null}
+          {data ? (
+            <span className={s.mobileSnapshot}>
+              {c.snapshotShort}:{" "}
+              <CalendarTime
+                at={data.checkedAt}
+                locale={locale}
+                zone={query.zone}
+                withDate={false}
+              />
+            </span>
+          ) : null}
         </div>
-        <a className={s.textLink} href={calendarHref(locale, query)}>
-          {c.refresh}
+        <a className={s.textLink} aria-label={c.refresh} href={calendarHref(locale, query)}>
+          {c.refreshShort}
         </a>
       </div>
       <details className={s.calendarDetails}>
@@ -540,6 +564,11 @@ export function CalendarView({
           <ChevronDownIcon />
         </summary>
         <div>
+          {data ? (
+            <p>
+              {c.snapshot}: <CalendarTime at={data.checkedAt} locale={locale} zone={query.zone} />
+            </p>
+          ) : null}
           <p>{c.scopeNote}</p>
           <p>{c.manualNote}</p>
           <p>{c.snapshotNote}</p>
