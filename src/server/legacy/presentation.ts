@@ -107,7 +107,7 @@ function boundedLeadingFields(page: LegacyPage): { fields: SourceField[]; length
   // separate source field, leave that ambiguous prefix in prose rather than make
   // availability part of a parsed price or infer a current lifecycle state.
   if (
-    fields.some((field) => !field.value || /:\s/u.test(field.value)) ||
+    fields.some((field) => !field.value || field.value.includes(":")) ||
     !last ||
     !/^(?:Price|Цена|Стоимость)\s*:/u.test(last.label) ||
     !/^(?:[\d\s.,]+(?:€|EUR)|(?:По договаряне|Договорная)\s*€?)$/u.test(last.value)
@@ -159,13 +159,7 @@ export function presentLegacyPage(page: LegacyPage) {
     facts = parsed.fields;
     if (parsed.length) narrative = narrative.slice(parsed.length);
   }
-  const bodyText = cleanArchiveText(narrative);
-  // Only an exact duplicated heading is removed. A different source heading or
-  // a status word before it remains original text, not a synthesized fact.
-  const withoutHeading = bodyText.startsWith(`${page.title} `)
-    ? bodyText.slice(page.title.length).trimStart()
-    : bodyText === page.title
-      ? ""
-      : bodyText;
-  return { facts, bodyText: withoutHeading, contentLinks: cleanSourceLinks(page) };
+  // Flattened source text cannot distinguish a duplicated heading from the
+  // subject of a sentence. Retain title-shaped prose rather than guess.
+  return { facts, bodyText: cleanArchiveText(narrative), contentLinks: cleanSourceLinks(page) };
 }

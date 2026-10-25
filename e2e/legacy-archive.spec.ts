@@ -8,6 +8,7 @@ const cases = [
   { locale: "en", id: "1b78f029a9e6cf185268e61a", kind: "page" },
   { locale: "bg", id: "49bedd92a43a06d767046abe", kind: "post" },
   { locale: "bg", id: "042922f874af5e9cf3f6092d", kind: "taxonomy" },
+  { locale: "ru", id: "0442585901845f0312ec1ad0", kind: "listing" },
 ];
 
 for (const javaScriptEnabled of [true, false]) {
@@ -44,18 +45,27 @@ for (const javaScriptEnabled of [true, false]) {
         if (item.kind === "listing") {
           await expect(article.locator("[data-legacy-source-facts]")).toBeVisible();
           await expect(
-            article.getByText("Current availability and conditions are unconfirmed.", {
-              exact: true,
-            }),
+            article.getByText(
+              item.locale === "ru"
+                ? "Актуальная доступность и условия не подтверждены."
+                : "Current availability and conditions are unconfirmed.",
+              { exact: true },
+            ),
           ).toBeVisible();
-          const imageLink = article.getByRole("link", { name: /Open image 1$/u }).first();
+          const imageLink = article
+            .getByRole("link", {
+              name: item.locale === "ru" ? /Открыть изображение 1$/u : /Open image 1$/u,
+            })
+            .first();
           await expect(imageLink).toBeVisible();
           await expect(imageLink).toHaveAttribute("href", /^\/legacy-media\//u);
         }
-        await page.screenshot({ path: testInfo.outputPath(`P21-${item.kind}.png`) });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await expect(article.locator("h1")).toBeInViewport();
+        await page.screenshot({ path: testInfo.outputPath(`P21-${item.locale}-${item.kind}.png`) });
       }
-      await page.locator(`article a[href="/bg/properties"]`).click();
-      await expect(page).toHaveURL(hostUrl("public", "/bg/properties"));
+      await page.locator(`article a[href="/ru/properties"]`).click();
+      await expect(page).toHaveURL(hostUrl("public", "/ru/properties"));
       // An unsupported edition of an existing archive stays absent; it does not
       // acquire a fabricated Hebrew translation or a sold-property explanation.
       const absent = await page.goto(hostUrl("public", `/he/legacy/${cases[0]?.id}`));

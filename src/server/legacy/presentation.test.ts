@@ -124,3 +124,22 @@ it("P21 does not substitute a literal zero, unreviewed proposal or unknown quant
   const page: LegacyPage = { ...original, bodyText: "No structured facts in this preserved text." };
   expect(presentLegacyPage(page).facts).toEqual([]);
 });
+
+it("P21 retains a title-shaped sentence subject and ambiguous unknown field labels", () => {
+  const original = existing("0442585901845f0312ec1ad0");
+  const sentence = {
+    ...original,
+    title: "Synthetic place",
+    bodyText: "Synthetic place is an inland destination.",
+  };
+  expect(presentLegacyPage(sentence).bodyText).toBe(sentence.bodyText);
+  const unknownField = {
+    ...original,
+    title: "Synthetic source",
+    bodyText: "No: 12 Country: Recorded Unknown:unqualified Price: 1 EUR Synthetic source",
+  };
+  expect(presentLegacyPage(unknownField)).toMatchObject({
+    facts: [],
+    bodyText: unknownField.bodyText,
+  });
+});
