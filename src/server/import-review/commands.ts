@@ -339,26 +339,24 @@ export async function prepareStaffImport(
         })
         .returning();
       if (!review) throw new Error("Staff import insert failed");
-      await tx
-        .insert(importRows)
-        .values(
-          plans.map((plan) => ({
-            batchId: batch.id,
-            rowNumber: plan.number,
-            sourceKey: plan.values.reference ?? "",
-            classification: plan.issues.length
-              ? ("blocked" as const)
-              : plan.target
-                ? plan.fields.some((field) => field.decision)
-                  ? ("update_proposal" as const)
-                  : ("no_change" as const)
-                : ("create" as const),
-            targetType: "listing",
-            targetId: plan.target?.id ?? null,
-            diff: { plan },
-            issues: plan.issues,
-          })),
-        );
+      await tx.insert(importRows).values(
+        plans.map((plan) => ({
+          batchId: batch.id,
+          rowNumber: plan.number,
+          sourceKey: plan.values.reference ?? "",
+          classification: plan.issues.length
+            ? ("blocked" as const)
+            : plan.target
+              ? plan.fields.some((field) => field.decision)
+                ? ("update_proposal" as const)
+                : ("no_change" as const)
+              : ("create" as const),
+          targetType: "listing",
+          targetId: plan.target?.id ?? null,
+          diff: { plan },
+          issues: plan.issues,
+        })),
+      );
       await recordAudit(tx, {
         actor: current.actor,
         action: "staff_import.prepared",
@@ -415,7 +413,7 @@ export async function readStaffImport(
           ? selectedRows.some((row) => row.outcome === "failed")
             ? "partial"
             : "completed"
-          : selectedRows.some((row) => row.outcome !== "pending")
+          : selectedRows.some((row) => row.outcome !== "pending" || row.errorCode !== null)
             ? "partial"
             : "ready",
     rows: rows.map((row) => {
@@ -666,7 +664,7 @@ export async function executeStaffImport(
         if (current.cancelledAt) return;
         const { rows: currentRows } = await checkedRows(tx, current);
         const currentRow = currentRows.find((item) => item.id === row.id);
-        if (!currentRow || currentRow.outcome !== "pending") return;
+        if (currentRow?.outcome !== "pending") return;
         const plan = planOf(currentRow),
           selected = (current.selection as ImportSelection[]).find(
             (item) => item.number === row.rowNumber,
@@ -816,6 +814,30 @@ export async function executeStaffImport(
     } catch (error) {
       if (isAppError(error) && ["unauthenticated", "forbidden", "not_found"].includes(error.code))
         throw error;
+      // An interrupted request reconciles by the durable row result. If COMMIT succeeded
+      // despite a lost acknowledgement, its applied outcome wins over this pending marker.
+      await db.transaction(async (tx) => {
+        const { live, review: current } = await owned(tx, session, command.id, true);
+        if (current.cancelledAt) return;
+        const [interrupted] = await tx
+          .update(importRows)
+          .set({ errorCode: "unavailable" })
+          .where(and(eq(importRows.id, row.id), eq(importRows.outcome, "pending")))
+          .returning({ id: importRows.id });
+        if (interrupted)
+          await recordAudit(tx, {
+            actor: live.actor,
+            action: "staff_import.row.interrupted",
+            capability: "import.run",
+            recordType: "import_batch",
+            recordId: current.batchId,
+            payload: {
+              operationKey: current.operationKey,
+              row: row.rowNumber,
+              reason: "unavailable",
+            },
+          });
+      });
       break;
     }
   }

@@ -61,13 +61,11 @@ afterAll(async () => {
 });
 async function reviewer() {
   const staff = await staffFixture(t.db);
-  await t.db
-    .insert(grants)
-    .values({
-      principalId: staff.id,
-      capability: "import.run",
-      reason: "Synthetic O28 reviewed import authority",
-    });
+  await t.db.insert(grants).values({
+    principalId: staff.id,
+    capability: "import.run",
+    reason: "Synthetic O28 reviewed import authority",
+  });
   return staff;
 }
 type Staff = Awaited<ReturnType<typeof reviewer>>;
@@ -315,6 +313,11 @@ describe("F32/O28 AT55 reviewed staff import", () => {
       .update(grants)
       .set({ revokedAt: new Date() })
       .where(and(eq(grants.principalId, targetStaff.id), sql`${grants.role} is not null`));
+    await t.db.insert(grants).values({
+      principalId: targetStaff.id,
+      capability: "listing.read",
+      reason: "Synthetic read grant remains; editing was revoked",
+    });
     await expect(
       executeStaffImport(t.db, targetStaff.session, command(targetReady)),
     ).rejects.toMatchObject({ code: "forbidden" });
@@ -343,6 +346,7 @@ describe("F32/O28 AT55 reviewed staff import", () => {
     });
     const reconciled = await readStaffImport(t.db, staff.session, ready.id);
     expect(reconciled.rows.map((row) => row.outcome)).toEqual(["applied", "pending", "pending"]);
+    expect(reconciled.rows[1]?.errorCode).toBe("unavailable");
     expect(
       await t.db
         .select()
@@ -428,5 +432,53 @@ describe("F32/O28 AT55 reviewed staff import", () => {
     const historical = await prepared(staff, [sourceRow(old.listing.reference)]);
     expect(historical.rows[0]?.issues).toContain("draft_manual");
     expect(price.rows[0]?.values.currency).toBe("BGN");
+  });
+  it("allows correction before acceptance, records keep-current as unchanged and serializes concurrent resumes", async () => {
+    const staff = await reviewer(),
+      old = await existing(staff);
+    const review = await prepared(staff, [sourceRow(old.listing.reference)]);
+    await expect(sealed(staff, review, [{ number: 2, choices: {} }])).rejects.toMatchObject({
+      code: "validation_failed",
+    });
+    const choices = Object.fromEntries(
+      review.rows[0]?.fields
+        .filter((field) => field.decision)
+        .map((field) => [field.field, "keep"]) ?? [],
+    );
+    const ready = await sealed(staff, review, [{ number: 2, choices }]);
+    expect((await executeStaffImport(t.db, staff.session, command(ready))).rows[0]?.outcome).toBe(
+      "skipped",
+    );
+    expect(
+      (await t.db.select().from(listings).where(eq(listings.id, old.listing.id)))[0],
+    ).toMatchObject({ version: 1, draft: old.draft });
+    const refs = [reference(), reference()];
+    const concurrent = await sealed(
+      staff,
+      await prepared(
+        staff,
+        refs.map((ref) => sourceRow(ref)),
+      ),
+    );
+    await Promise.all([
+      executeStaffImport(t.db, staff.session, command(concurrent)),
+      executeStaffImport(t.db, staff.session, command(concurrent)),
+    ]);
+    const result = await readStaffImport(t.db, staff.session, concurrent.id);
+    expect(result.rows.map((row) => row.outcome)).toEqual(["applied", "applied"]);
+    for (const row of result.rows) {
+      expect(
+        await t.db
+          .select()
+          .from(operations)
+          .where(eq(operations.idempotencyKey, `${concurrent.operationKey}:${row.number}`)),
+      ).toHaveLength(1);
+      expect(
+        await t.db
+          .select()
+          .from(auditEvents)
+          .where(eq(auditEvents.operationId, row.receiptId as string)),
+      ).toHaveLength(1);
+    }
   });
 });
