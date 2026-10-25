@@ -131,14 +131,6 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
     await expect(page.getByText(c.scopeNote, { exact: true })).toBeVisible();
     await expect(page.getByText(c.snapshotNote, { exact: true })).toBeVisible();
     await details.click();
-    expect(
-      (
-        await new AxeBuilder({ page })
-          .include("main")
-          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-          .analyze()
-      ).violations,
-    ).toEqual([]);
     if (locale === "bg") {
       await page.screenshot({ path: info.outputPath("synthetic-mobile320-populated-bg.png") });
       await page.setViewportSize({ width: 390, height: 900 });
@@ -149,6 +141,14 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
         fullPage: true,
       });
     }
+    expect(
+      (
+        await new AxeBuilder({ page })
+          .include("main")
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+          .analyze()
+      ).violations,
+    ).toEqual([]);
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(hostUrl("staff", "/en/settings?section=preferences"));

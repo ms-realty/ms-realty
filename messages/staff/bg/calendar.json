@@ -78,5 +78,6 @@
   },
   "filters": "Дата и филтри",
   "snapshotShort": "Прочетен в",
-  "refreshShort": "Обнови"
+  "refreshShort": "Обнови",
+  "notReserved": "Без резервация"
 }

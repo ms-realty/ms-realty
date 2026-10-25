@@ -78,5 +78,6 @@
   },
   "filters": "Date & filters",
   "snapshotShort": "Read at",
-  "refreshShort": "Refresh"
+  "refreshShort": "Refresh",
+  "notReserved": "Not reserved"
 }

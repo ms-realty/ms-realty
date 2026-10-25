@@ -482,7 +482,15 @@ function WeekOverview({
                               query.zone,
                             )}
                           </strong>
-                          <span>{interval.proposed ? c.proposed : c.current}</span>
+                          {interval.proposed ? (
+                            <span>{c.notReserved}</span>
+                          ) : row.state === "reschedule_requested" ? (
+                            <span>{c.current}</span>
+                          ) : ["completed", "no_show", "cancelled", "declined"].includes(
+                              row.state,
+                            ) ? (
+                            <span>{c.previousTime}</span>
+                          ) : null}
                         </span>
                       ))
                     ) : (
@@ -491,8 +499,8 @@ function WeekOverview({
                     <span className={s.weekState}>{c.states[row.state]}</span>
                     <bdi title={row.reference}>{row.reference}</bdi>
                     {row.caseReference ? (
-                      <span className={s.weekCase} title={row.caseReference}>
-                        <bdi>{row.caseReference}</bdi>
+                      <span className="sr-only">
+                        {c.deal}: <bdi>{row.caseReference}</bdi>
                       </span>
                     ) : null}
                   </a>
@@ -553,8 +561,9 @@ export function CalendarView({
             </span>
           ) : null}
         </div>
-        <a className={s.textLink} aria-label={c.refresh} href={calendarHref(locale, query)}>
+        <a className={s.textLink} href={calendarHref(locale, query)}>
           {c.refreshShort}
+          <span className="sr-only"> · {c.refresh}</span>
         </a>
       </div>
       <details className={s.calendarDetails}>
