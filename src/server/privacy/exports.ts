@@ -16,6 +16,15 @@ import {
   privacyRequests,
   subscriptions,
 } from "@/db/schema";
+import { guardPrivacyRequestTransition } from "@/domain/privacy";
+import {
+  type PrivacyExportReview,
+  privacyExportBasis,
+  privacyExportCategories,
+  privacyExportDecision,
+  privacyExportDispositions,
+  privacyExportReview,
+} from "@/domain/privacy-export";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import { getEnv } from "../config/env";
@@ -28,6 +37,14 @@ import type { FileStorage } from "../files/storage";
 import { runOperation } from "../operations";
 import { parseInput } from "../work/shared";
 import { privacyClient, privacyOperator } from "./access";
+import {
+  assertCoverageDecision,
+  collectExportInventory,
+  inventoryDigest,
+  ownExportSourceDigest,
+  resolvedReview,
+  safeCoverage,
+} from "./export-coverage";
 import {
   collectDisclosureSupplement,
   type DisclosureSupplement,
@@ -43,6 +60,16 @@ const envelope = {
 };
 const maxRows = 2000;
 const maxBytes = 1024 * 1024;
+const exportOperationTypes = [
+  "privacy.export.prepare",
+  "privacy.export.inventory",
+  "privacy.export.disposition",
+  "privacy.export.complete",
+  "privacy.export.redact",
+  "privacy.export.issue",
+  "privacy.export.revoke",
+  "privacy.export.supplement",
+] as const;
 const key = () => createHash("sha256").update(`privacy-export:v1:${getEnv().authSecret}`).digest();
 type Binding = { id: string; requestId: string; partyId: string; recipientId: string };
 const aad = (b: Binding) => Buffer.from(`C18:${b.id}:${b.requestId}:${b.partyId}:${b.recipientId}`);
@@ -250,7 +277,8 @@ export interface PrivacyDossier {
   requestReference: string;
   asOf: string;
   sourceDigest: string;
-  fulfilment: "partial";
+  fulfilment: "partial" | "reviewed_scope";
+  coverage?: { category: string; disposition: string }[];
   data: PersonDossier;
   redactedText: { section: (typeof exportSections)[number]; id: string }[];
   supplements: DisclosureSupplement[];
@@ -307,6 +335,292 @@ function payload(row: typeof privacyExports.$inferSelect): PrivacyDossier {
   return JSON.parse(text) as PrivacyDossier;
 }
 
+function coveragePayload(row: typeof privacyExports.$inferSelect): PrivacyExportReview | null {
+  if (!row.encryptedReview || !row.reviewSha256) return null;
+  const text = openPrivacyExport({ ...row, id: `review:${row.id}` }, row.encryptedReview);
+  if (sha256Hex(text) !== row.reviewSha256) throw new AppError("not_found");
+  return privacyExportReview.parse(JSON.parse(text));
+}
+function coverageFields(row: typeof privacyExports.$inferSelect, review: PrivacyExportReview) {
+  const text = JSON.stringify(review);
+  if (Buffer.byteLength(text) > maxBytes) throw new AppError("validation_failed");
+  return {
+    encryptedReview: sealPrivacyExport({ ...row, id: `review:${row.id}` }, text),
+    reviewSha256: sha256Hex(text),
+  };
+}
+function resetCoverage(row: typeof privacyExports.$inferSelect, dossier: PrivacyDossier) {
+  const review = coveragePayload(row);
+  if (!review) return {};
+  review.decisions = [];
+  applyCoverage(dossier, review);
+  return { ...coverageFields(row, review), coverageComplete: false };
+}
+function applyCoverage(dossier: PrivacyDossier, review: PrivacyExportReview) {
+  dossier.coverage = safeCoverage(review);
+  dossier.fulfilment = resolvedReview(review) ? "reviewed_scope" : "partial";
+  dossier.omissions = dossier.coverage.filter(
+    (row) => !["disclosed", "none"].includes(row.disposition),
+  );
+}
+const requestPolicy = (request: typeof privacyRequests.$inferSelect) =>
+  z.object({ policyReference: z.string().min(5) }).parse(request.scope).policyReference;
+
+async function currentCoverage(
+  db: Executor,
+  row: typeof privacyExports.$inferSelect,
+  request: typeof privacyRequests.$inferSelect,
+  dossier: PrivacyDossier,
+): Promise<PrivacyExportReview | null> {
+  const review = coveragePayload(row);
+  if (!review) return null;
+  if (
+    review.inventory.recipientId !== row.recipientId ||
+    request.version !== review.inventory.requestVersion + (row.completedOperationId ? 1 : 0)
+  )
+    throw new AppError("version_conflict");
+  const ownDigest = ownExportSourceDigest(await collectPersonDossier(db, row.partyId), request.id);
+  if (ownDigest !== dossier.sourceDigest) throw new AppError("version_conflict");
+  // Recheck every reviewer's ordinary dependencies. An operator changing grants cannot
+  // leave a previously readable source silently eligible for download or completion.
+  for (const id of new Set([
+    review.inventoriedById,
+    ...review.decisions.map((decision) => decision.reviewedById),
+  ])) {
+    const current = await collectExportInventory(
+      db,
+      { kind: "staff", id },
+      {
+        partyId: row.partyId,
+        recipientId: row.recipientId,
+        requestId: request.id,
+        requestVersion: review.inventory.requestVersion,
+        scope: request.scope,
+      },
+      ownDigest,
+    );
+    if (inventoryDigest(current) !== inventoryDigest(review.inventory))
+      throw new AppError("version_conflict");
+  }
+  for (const decision of review.decisions)
+    assertCoverageDecision(review, decision, dossier.supplements, requestPolicy(request));
+  if (
+    hashRequest(dossier.coverage) !== hashRequest(safeCoverage(review)) ||
+    dossier.fulfilment !== (resolvedReview(review) ? "reviewed_scope" : "partial")
+  )
+    throw new AppError("version_conflict");
+  return review;
+}
+
+const reviewEnvelope = {
+  ...envelope,
+  exportId: z.uuid(),
+  exportVersion: z.int().positive(),
+  digest: z.string().regex(/^[a-f0-9]{64}$/),
+};
+async function draftForReview(
+  db: Executor,
+  request: typeof privacyRequests.$inferSelect,
+  value: { exportId: string; exportVersion: number; digest: string },
+) {
+  const [row] = await db
+    .select()
+    .from(privacyExports)
+    .where(and(eq(privacyExports.id, value.exportId), eq(privacyExports.requestId, request.id)))
+    .for("update");
+  if (row?.state !== "draft" || row.partyId !== request.partyId) throw new AppError("not_found");
+  if (
+    row.version !== value.exportVersion ||
+    row.sha256 !== value.digest ||
+    row.requestVersion !== request.version
+  )
+    throw new AppError("version_conflict");
+  await recipient(db, row.recipientId, row.partyId);
+  return row;
+}
+export async function capturePrivacyExportManifest(db: Executor, session: Session, input: unknown) {
+  const value = parseInput(z.object(reviewEnvelope).strict(), input);
+  await privacyOperator(db, session, value.requestId);
+  return runOperation(
+    db,
+    {
+      actor: session.actor,
+      type: "privacy.export.inventory",
+      idempotencyKey: value.operationId,
+      requestHash: hashRequest(value),
+      expectedVersion: value.expectedVersion,
+      subject: { type: "privacy_request", id: value.requestId },
+    },
+    async ({ tx, operationId }) => {
+      const request = await eligibleRequest(tx, session, value.requestId, value.expectedVersion);
+      const row = await draftForReview(tx, request, value),
+        dossier = payload(row);
+      const ownDigest = ownExportSourceDigest(
+        await collectPersonDossier(tx, row.partyId),
+        request.id,
+      );
+      if (ownDigest !== dossier.sourceDigest) throw new AppError("version_conflict");
+      const review: PrivacyExportReview = {
+        inventory: await collectExportInventory(
+          tx,
+          session.actor,
+          {
+            requestId: request.id,
+            requestVersion: request.version,
+            recipientId: row.recipientId,
+            partyId: row.partyId,
+            scope: request.scope,
+          },
+          ownDigest,
+        ),
+        inventoriedById: session.actor.id,
+        decisions: [],
+      };
+      applyCoverage(dossier, review);
+      const encoded = encode(dossier),
+        fields = coverageFields(row, review);
+      await tx
+        .update(privacyExports)
+        .set({
+          ...fields,
+          version: row.version + 1,
+          encryptedPayload: sealPrivacyExport(row, encoded.text),
+          sha256: encoded.sha256,
+          byteSize: encoded.byteSize,
+          coverageComplete: false,
+        })
+        .where(eq(privacyExports.id, row.id));
+      await recordAudit(tx, {
+        actor: session.actor,
+        action: "privacy.export.inventoried",
+        capability: "privacy.manage",
+        recordType: "privacy_request",
+        recordId: request.id,
+        operationId,
+        payload: { exportId: row.id, reviewSha256: fields.reviewSha256, sha256: encoded.sha256 },
+      });
+      return { id: row.id, sha256: encoded.sha256, reviewSha256: fields.reviewSha256 };
+    },
+  );
+}
+
+export async function reviewPrivacyExportCategory(db: Executor, session: Session, input: unknown) {
+  const value = parseInput(
+    z
+      .object({
+        ...reviewEnvelope,
+        reviewDigest: z.string().regex(/^[a-f0-9]{64}$/),
+        category: z.enum(privacyExportCategories),
+        disposition: z.enum(privacyExportDispositions),
+        sourceKeys: z.array(z.string().min(1).max(100)).max(100),
+        evidence: z
+          .array(
+            z
+              .object({ sourceKey: z.string().min(1).max(100), documentVersionId: z.uuid() })
+              .strict(),
+          )
+          .max(100),
+        basis: privacyExportBasis,
+        policyReference: z.string().trim().min(5).max(500),
+        evidenceReference: z.string().trim().min(10).max(1000),
+        confirmed: z.literal(true),
+      })
+      .strict(),
+    input,
+  );
+  await privacyOperator(db, session, value.requestId);
+  return runOperation(
+    db,
+    {
+      actor: session.actor,
+      type: "privacy.export.disposition",
+      idempotencyKey: value.operationId,
+      requestHash: hashRequest(value),
+      expectedVersion: value.expectedVersion,
+      subject: { type: "privacy_request", id: value.requestId },
+    },
+    async ({ tx, operationId }) => {
+      const request = await eligibleRequest(tx, session, value.requestId, value.expectedVersion);
+      const row = await draftForReview(tx, request, value),
+        dossier = payload(row);
+      if (row.reviewSha256 !== value.reviewDigest) throw new AppError("version_conflict");
+      const review = await currentCoverage(tx, row, request, dossier);
+      if (!review) throw new AppError("transition_denied");
+      // A different reviewer must have all ordinary source rights too, before receiving or
+      // making a decision over the manifest. This grants no new access to the client.
+      const ownDigest = ownExportSourceDigest(
+        await collectPersonDossier(tx, row.partyId),
+        request.id,
+      );
+      const inventory = await collectExportInventory(
+        tx,
+        session.actor,
+        {
+          partyId: row.partyId,
+          recipientId: row.recipientId,
+          requestId: request.id,
+          requestVersion: request.version,
+          scope: request.scope,
+        },
+        ownDigest,
+      );
+      if (inventoryDigest(inventory) !== inventoryDigest(review.inventory))
+        throw new AppError("version_conflict");
+      const decision = privacyExportDecision.parse({
+        category: value.category,
+        disposition: value.disposition,
+        sourceKeys: value.sourceKeys,
+        evidence: value.evidence,
+        basis: value.basis,
+        policyReference: value.policyReference,
+        evidenceReference: value.evidenceReference,
+        reviewedById: session.actor.id,
+        reviewedAt: new Date().toISOString(),
+      });
+      assertCoverageDecision(review, decision, dossier.supplements, requestPolicy(request));
+      review.decisions = [
+        ...review.decisions.filter((row) => row.category !== value.category),
+        decision,
+      ];
+      applyCoverage(dossier, review);
+      const encoded = encode(dossier),
+        fields = coverageFields(row, review);
+      await tx
+        .update(privacyExports)
+        .set({
+          ...fields,
+          version: row.version + 1,
+          encryptedPayload: sealPrivacyExport(row, encoded.text),
+          sha256: encoded.sha256,
+          byteSize: encoded.byteSize,
+          coverageComplete: false,
+        })
+        .where(eq(privacyExports.id, row.id));
+      await recordAudit(tx, {
+        actor: session.actor,
+        action: "privacy.export.category_reviewed",
+        capability: "privacy.manage",
+        recordType: "privacy_request",
+        recordId: request.id,
+        operationId,
+        payload: {
+          exportId: row.id,
+          category: value.category,
+          disposition: value.disposition,
+          reviewSha256: fields.reviewSha256,
+          sha256: encoded.sha256,
+        },
+      });
+      return {
+        id: row.id,
+        sha256: encoded.sha256,
+        reviewSha256: fields.reviewSha256,
+        fulfilment: dossier.fulfilment,
+      };
+    },
+  );
+}
+
 export async function preparePrivacyExport(db: Executor, session: Session, input: unknown) {
   const value = parseInput(
     z.object({ ...envelope, recipientId: z.uuid(), confirmed: z.literal(true) }),
@@ -332,7 +646,7 @@ export async function preparePrivacyExport(db: Executor, session: Session, input
         format: "ms-realty-person-export-v1",
         requestReference: request.reference,
         asOf: new Date().toISOString(),
-        sourceDigest: hashRequest(JSON.parse(JSON.stringify(data))),
+        sourceDigest: ownExportSourceDigest(data, request.id),
         fulfilment: "partial",
         data,
         redactedText: [],
@@ -429,6 +743,7 @@ export async function redactPrivacyExport(db: Executor, session: Session, input:
         )
           dossier.redactedText.push(omit);
       }
+      const reviewReset = resetCoverage(row, dossier);
       const encoded = encode(dossier);
       await tx
         .update(privacyExports)
@@ -437,6 +752,7 @@ export async function redactPrivacyExport(db: Executor, session: Session, input:
           encryptedPayload: sealPrivacyExport(row, encoded.text),
           sha256: encoded.sha256,
           byteSize: encoded.byteSize,
+          ...reviewReset,
         })
         .where(eq(privacyExports.id, row.id));
       await recordAudit(tx, {
@@ -519,10 +835,11 @@ export async function issuePrivacyExport(
           throw new AppError("version_conflict");
       }
       if (
-        hashRequest(JSON.parse(JSON.stringify(await collectPersonDossier(tx, row.partyId)))) !==
+        ownExportSourceDigest(await collectPersonDossier(tx, row.partyId), request.id) !==
         dossier.sourceDigest
       )
         throw new AppError("version_conflict");
+      const reviewed = await currentCoverage(tx, row, request, dossier);
       const expiresAt = new Date(Date.now() + value.expiresMinutes * 60000);
       await tx
         .update(privacyExports)
@@ -533,6 +850,7 @@ export async function issuePrivacyExport(
           reviewedAt: new Date(),
           expiresAt,
           issuedOperationId: operationId,
+          coverageComplete: reviewed ? resolvedReview(reviewed) : false,
         })
         .where(eq(privacyExports.id, row.id));
       await recordAudit(tx, {
@@ -546,18 +864,154 @@ export async function issuePrivacyExport(
           exportId: row.id,
           sha256: row.sha256,
           redactedTextCount: dossier.redactedText.length,
-          coverage: "partial",
+          coverage: dossier.fulfilment,
           expiresAt: expiresAt.toISOString(),
         },
       });
-      // Delivery has happened; the privacy request is still in progress because joint records
-      // and files remain pending. Never turn a partial dossier into full completion.
+      // Availability is separate from request completion, even for a fully reviewed set.
       return {
         id: row.id,
         sha256: row.sha256,
         expiresAt: expiresAt.toISOString(),
-        fulfilment: "partial" as const,
+        fulfilment: dossier.fulfilment,
       };
+    },
+  );
+}
+
+export async function completePrivacyExport(
+  db: Executor,
+  session: Session,
+  input: unknown,
+  storage?: FileStorage,
+) {
+  const value = parseInput(
+    z
+      .object({
+        ...reviewEnvelope,
+        reviewDigest: z.string().regex(/^[a-f0-9]{64}$/),
+        confirmed: z.literal(true),
+      })
+      .strict(),
+    input,
+  );
+  await privacyOperator(db, session, value.requestId);
+  return runOperation(
+    db,
+    {
+      actor: session.actor,
+      type: "privacy.export.complete",
+      idempotencyKey: value.operationId,
+      requestHash: hashRequest(value),
+      expectedVersion: value.expectedVersion,
+      subject: { type: "privacy_request", id: value.requestId },
+    },
+    async ({ tx, operationId }) => {
+      const request = await eligibleRequest(tx, session, value.requestId, value.expectedVersion);
+      const [row] = await tx
+        .select()
+        .from(privacyExports)
+        .where(and(eq(privacyExports.id, value.exportId), eq(privacyExports.requestId, request.id)))
+        .for("update");
+      if (
+        row?.state !== "issued" ||
+        row.partyId !== request.partyId ||
+        row.revokedAt ||
+        !row.expiresAt ||
+        row.expiresAt <= new Date()
+      )
+        throw new AppError("not_found");
+      if (
+        row.version !== value.exportVersion ||
+        row.sha256 !== value.digest ||
+        row.reviewSha256 !== value.reviewDigest ||
+        row.requestVersion !== request.version
+      )
+        throw new AppError("version_conflict");
+      await recipient(tx, row.recipientId, row.partyId);
+      const dossier = payload(row),
+        review = await currentCoverage(tx, row, request, dossier);
+      if (!review || !resolvedReview(review) || !row.coverageComplete)
+        throw new AppError("transition_denied");
+      const current = await collectExportInventory(
+        tx,
+        session.actor,
+        {
+          partyId: row.partyId,
+          recipientId: row.recipientId,
+          requestId: request.id,
+          requestVersion: request.version,
+          scope: request.scope,
+        },
+        ownExportSourceDigest(await collectPersonDossier(tx, row.partyId), request.id),
+      );
+      if (inventoryDigest(current) !== inventoryDigest(review.inventory))
+        throw new AppError("version_conflict");
+      for (const supplement of dossier.supplements) {
+        const proof = await collectDisclosureSupplement(
+          tx,
+          storage ?? fileServices().storage,
+          session,
+          row,
+          supplement.source.versionId,
+        );
+        if (
+          hashRequest(proof.source) !== hashRequest(supplement.source) ||
+          proof.bytesBase64 !== supplement.bytesBase64
+        )
+          throw new AppError("version_conflict");
+      }
+      const evidence = `privacy_export:${row.id}:${row.sha256}:${row.reviewSha256}`;
+      const disposition = review.decisions.find(
+        (row) => row.category === "restricted_material_and_security_credentials",
+      );
+      const decision = guardPrivacyRequestTransition(
+        request.state,
+        "completed",
+        {
+          verifiedAt: request.verifiedAt?.toISOString(),
+          responsiblePrincipalId: request.responsibleId ?? undefined,
+          completionEvidence: evidence,
+          legalHoldDisposition: disposition?.evidenceReference,
+        },
+        session.actor,
+      );
+      if (decision.outcome !== "allowed") throw new AppError("transition_denied");
+      await tx
+        .update(privacyRequests)
+        .set({
+          state: "completed",
+          version: request.version + 1,
+          updatedAt: new Date(),
+          completedAt: new Date(),
+          completionEvidence: evidence,
+          legalHoldDisposition: disposition?.evidenceReference,
+        })
+        .where(eq(privacyRequests.id, request.id));
+      await tx
+        .update(privacyExports)
+        .set({
+          version: row.version + 1,
+          requestVersion: request.version + 1,
+          completedOperationId: operationId,
+        })
+        .where(eq(privacyExports.id, row.id));
+      await recordAudit(tx, {
+        actor: session.actor,
+        action: "privacy.export.completed",
+        capability: "privacy.manage",
+        recordType: "privacy_request",
+        recordId: request.id,
+        operationId,
+        payload: {
+          exportId: row.id,
+          sha256: row.sha256,
+          reviewSha256: row.reviewSha256,
+          issuedOperationId: row.issuedOperationId,
+          scope: "reviewed_declared_categories",
+        },
+      });
+      return { id: row.id, state: "completed" as const, requestVersion: request.version + 1 };
     },
   );
 }
@@ -617,7 +1071,12 @@ export async function revokePrivacyExport(db: Executor, session: Session, input:
   );
 }
 
-export async function staffPrivacyExports(db: Executor, session: Session, requestId: string) {
+export async function staffPrivacyExports(
+  db: Executor,
+  session: Session,
+  requestId: string,
+  storage?: FileStorage,
+) {
   await privacyOperator(db, session, requestId);
   const [request] = await db
     .select()
@@ -643,15 +1102,62 @@ export async function staffPrivacyExports(db: Executor, session: Session, reques
   return {
     request,
     recipients,
-    exports: rows.map((row) => ({
-      id: row.id,
-      version: row.version,
-      state: row.state,
-      sha256: row.sha256,
-      recipientId: row.recipientId,
-      expiresAt: row.expiresAt,
-      dossier: row.state === "draft" && request.state === "in_progress" ? payload(row) : null,
-    })),
+    exports: await Promise.all(
+      rows.map(async (row) => {
+        let dossier: PrivacyDossier | null =
+          row.state === "draft" && request.state === "in_progress" ? payload(row) : null;
+        let review: PrivacyExportReview | null = null;
+        let reviewStale = false;
+        try {
+          const frozen = dossier ?? (row.state === "issued" ? payload(row) : null);
+          if (frozen) {
+            for (const supplement of frozen.supplements)
+              await collectDisclosureSupplement(
+                db,
+                storage ?? fileServices().storage,
+                session,
+                row,
+                supplement.source.versionId,
+              );
+            review = await currentCoverage(db, row, request, frozen);
+            if (review) {
+              const inventory = await collectExportInventory(
+                db,
+                session.actor,
+                {
+                  partyId: row.partyId,
+                  recipientId: row.recipientId,
+                  requestId: request.id,
+                  requestVersion: review.inventory.requestVersion,
+                  scope: request.scope,
+                },
+                ownExportSourceDigest(await collectPersonDossier(db, row.partyId), request.id),
+              );
+              if (inventoryDigest(inventory) !== inventoryDigest(review.inventory))
+                throw new AppError("not_found");
+            }
+          }
+        } catch (error) {
+          if (!(error instanceof AppError)) throw error;
+          dossier = null;
+          review = null;
+          reviewStale = true;
+        }
+        return {
+          id: row.id,
+          version: row.version,
+          state: row.state,
+          sha256: row.sha256,
+          recipientId: row.recipientId,
+          expiresAt: row.expiresAt,
+          dossier,
+          review,
+          reviewStale,
+          reviewSha256: row.reviewSha256,
+          coverageComplete: row.coverageComplete,
+        };
+      }),
+    ),
   };
 }
 export async function clientPrivacyExports(db: Executor, session: Session, requestId: string) {
@@ -663,11 +1169,7 @@ export async function clientPrivacyExports(db: Executor, session: Session, reque
   if (request?.kind !== "export") throw new AppError("not_found");
   if (request.state !== "in_progress" && request.state !== "completed") return [];
   const rows = await db
-    .select({
-      id: privacyExports.id,
-      expiresAt: privacyExports.expiresAt,
-      state: privacyExports.state,
-    })
+    .select()
     .from(privacyExports)
     .where(
       and(
@@ -678,9 +1180,26 @@ export async function clientPrivacyExports(db: Executor, session: Session, reque
       ),
     )
     .orderBy(desc(privacyExports.createdAt));
-  return rows.filter(
-    (row) => row.state === "issued" && row.expiresAt && row.expiresAt > new Date(),
-  );
+  const eligible = [];
+  for (const row of rows) {
+    if (row.state !== "issued" || !row.expiresAt || row.expiresAt <= new Date() || row.revokedAt)
+      continue;
+    try {
+      const dossier = payload(row);
+      await currentCoverage(db, row, request, dossier);
+      for (const supplement of dossier.supplements)
+        await verifyDeliveredSupplement(db, session, request.id, supplement.source);
+      eligible.push({
+        id: row.id,
+        expiresAt: row.expiresAt,
+        state: row.state,
+        coverageComplete: row.coverageComplete,
+      });
+    } catch (error) {
+      if (!(error instanceof AppError)) throw error;
+    }
+  }
+  return eligible;
 }
 
 /** Called before downloadResponse for every full/range read. Encrypted payload stays inside
@@ -721,6 +1240,18 @@ export async function privacyExportDownload(
     await recipient(tx, row.recipientId, row.partyId);
     const dossier = payload(row),
       encoded = encode(dossier);
+    try {
+      await currentCoverage(tx, row, request, dossier);
+    } catch (error) {
+      if (error instanceof AppError) throw new AppError("not_found");
+      throw error;
+    }
+    if (
+      row.completedOperationId &&
+      (request.state !== "completed" ||
+        request.completionEvidence !== `privacy_export:${row.id}:${row.sha256}:${row.reviewSha256}`)
+    )
+      throw new AppError("not_found");
     for (const supplement of dossier.supplements)
       await verifyDeliveredSupplement(tx, session, request.id, supplement.source);
     await privacyClient(tx, session);
@@ -743,7 +1274,7 @@ export async function privacyExportDownload(
       action: "privacy.export.downloaded",
       recordType: "privacy_request",
       recordId: request.id,
-      payload: { exportId: row.id, sha256: row.sha256, coverage: "partial" },
+      payload: { exportId: row.id, sha256: row.sha256, coverage: dossier.fulfilment },
     });
     return {
       bytes: Buffer.from(encoded.text),
@@ -767,7 +1298,11 @@ export async function attachPrivacyExportSupplement(
       exportVersion: z.int().positive(),
       digest: z.string().regex(/^[a-f0-9]{64}$/),
       documentVersionId: z.uuid(),
-      category: z.enum(["private_files", "joint_records_and_received_communications"]),
+      category: z.enum([
+        "private_files",
+        "joint_records_and_received_communications",
+        "restricted_material_and_security_credentials",
+      ]),
       reviewedRedaction: z.literal(true),
     }),
     input,
@@ -801,7 +1336,9 @@ export async function attachPrivacyExportSupplement(
       const dossier = payload(row);
       if (
         dossier.supplements.length >= 10 ||
-        dossier.supplements.some((s) => s.source.versionId === value.documentVersionId)
+        dossier.supplements.some(
+          (s) => s.source.versionId === value.documentVersionId && s.category === value.category,
+        )
       )
         throw new AppError("validation_failed");
       const supplement = await collectDisclosureSupplement(
@@ -812,6 +1349,7 @@ export async function attachPrivacyExportSupplement(
         value.documentVersionId,
       );
       dossier.supplements.push({ category: value.category, ...supplement });
+      const reviewReset = resetCoverage(row, dossier);
       const encoded = encode(dossier);
       await tx
         .update(privacyExports)
@@ -820,6 +1358,7 @@ export async function attachPrivacyExportSupplement(
           encryptedPayload: sealPrivacyExport(row, encoded.text),
           sha256: encoded.sha256,
           byteSize: encoded.byteSize,
+          ...reviewReset,
         })
         .where(eq(privacyExports.id, row.id));
       await recordAudit(tx, {
@@ -859,14 +1398,33 @@ export async function privacyExportOperationStatus(
         eq(operations.idempotencyKey, operationKey),
         eq(operations.resultType, "privacy_request"),
         eq(operations.resultId, requestId),
-        inArray(operations.operationType, [
-          "privacy.export.prepare",
-          "privacy.export.redact",
-          "privacy.export.issue",
-          "privacy.export.revoke",
-          "privacy.export.supplement",
-        ]),
+        inArray(operations.operationType, exportOperationTypes),
       ),
     );
   return row?.status ?? "absent";
+}
+
+export async function privacyExportReceipt(
+  db: Executor,
+  session: Session,
+  requestId: string,
+  id: string,
+) {
+  await privacyOperator(db, session, requestId);
+  if (!z.uuid().safeParse(id).success) return null;
+  const [row] = await db
+    .select({ id: operations.id })
+    .from(operations)
+    .where(
+      and(
+        eq(operations.id, id),
+        eq(operations.actorKind, session.actor.kind),
+        eq(operations.actorId, session.actor.id),
+        eq(operations.resultType, "privacy_request"),
+        eq(operations.resultId, requestId),
+        eq(operations.status, "succeeded"),
+        inArray(operations.operationType, exportOperationTypes),
+      ),
+    );
+  return row?.id ?? null;
 }

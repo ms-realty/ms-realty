@@ -5,14 +5,15 @@ import type { Session } from "@/server/auth/sessions";
 import {
   exportSections,
   privacyExportOperationStatus,
+  privacyExportReceipt,
   staffPrivacyExports,
 } from "@/server/privacy/exports";
-import { privateReceipt } from "@/server/privacy/native";
 import { controlClass, labelClass } from "@/ui/field-class";
 import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { privacyExportCopy } from "./export-copy";
+import { ExportCoverageForms } from "./export-coverage";
 import { Check, Submit, TextField } from "./forms";
 
 export async function StaffPrivacyExportScreen({
@@ -40,8 +41,10 @@ export async function StaffPrivacyExportScreen({
       <p>
         <bdi>{data.request.reference}</bdi>
       </p>
-      <Notice tone="info">{c.partial}</Notice>
-      {query.receipt && (await privateReceipt(db, session, query.receipt)) ? (
+      <Notice tone="info">
+        {data.request.state === "completed" ? c.completedScope : c.inventoryHelp}
+      </Notice>
+      {query.receipt && (await privacyExportReceipt(db, session, requestId, query.receipt)) ? (
         <Notice tone="success">{c.saved}</Notice>
       ) : null}
       {query.error ? <Notice tone="error">{c.error}</Notice> : null}
@@ -85,6 +88,8 @@ export async function StaffPrivacyExportScreen({
           className="grid min-w-0 gap-4 rounded-panel border border-divider p-5"
         >
           <h2 className="font-semibold">{c[row.state]}</h2>
+          {row.reviewStale ? <Notice tone="info">{c.manifestStale}</Notice> : null}
+          {row.coverageComplete && row.review ? <Notice tone="info">{c.readyScope}</Notice> : null}
           <p>
             {c.recipient}:{" "}
             <bdi>{data.recipients.find((p) => p.id === row.recipientId)?.email ?? "—"}</bdi>
@@ -107,11 +112,55 @@ export async function StaffPrivacyExportScreen({
                 <input type="hidden" name="exportVersion" value={row.version} />
                 <input type="hidden" name="digest" value={row.sha256} />
                 <TextField name="documentVersionId" label={c.sourceVersion} required />
-                <input type="hidden" name="category" value="private_files" />
+                <label className="grid gap-2">
+                  <span className={labelClass}>{c.disclosureCategory}</span>
+                  <select name="category" className={controlClass}>
+                    {(
+                      [
+                        "private_files",
+                        "joint_records_and_received_communications",
+                        "restricted_material_and_security_credentials",
+                      ] as const
+                    ).map((value) => (
+                      <option key={value} value={value}>
+                        {c.categories[value]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <Check name="reviewedRedaction">{c.supplementConfirm}</Check>
                 <Submit>{c.supplement}</Submit>
               </NativeForm>
             </TechnicalDetails>
+          ) : null}
+          {row.dossier && !pending ? (
+            <>
+              <NativeForm action={action} method="post" className="grid gap-3">
+                <input type="hidden" name="intent" value="inventory" />
+                <input type="hidden" name="operationId" value={randomUUID()} />
+                <input type="hidden" name="expectedVersion" value={data.request.version} />
+                <input type="hidden" name="exportId" value={row.id} />
+                <input type="hidden" name="exportVersion" value={row.version} />
+                <input type="hidden" name="digest" value={row.sha256} />
+                <Submit>{row.review ? c.refreshInventory : c.inventory}</Submit>
+              </NativeForm>
+              {row.review && row.reviewSha256 ? (
+                <ExportCoverageForms
+                  locale={locale}
+                  action={action}
+                  requestVersion={data.request.version}
+                  exportId={row.id}
+                  exportVersion={row.version}
+                  digest={row.sha256}
+                  reviewDigest={row.reviewSha256}
+                  review={row.review}
+                  dossier={row.dossier}
+                  policyReference={String(
+                    (data.request.scope as { policyReference?: string }).policyReference ?? "",
+                  )}
+                />
+              ) : null}
+            </>
           ) : null}
           {row.dossier && !pending ? (
             <NativeForm action={action} method="post" className="grid gap-4">
@@ -160,7 +209,27 @@ export async function StaffPrivacyExportScreen({
               <TextField name="expiresMinutes" label={c.expiry} type="number" value="60" required />
               <Check name="reviewed">{c.reviewed}</Check>
               <Check name="partialAcknowledged">{c.acknowledge}</Check>
-              <Submit>{c.issue}</Submit>
+              <Submit>
+                {row.dossier.fulfilment === "reviewed_scope" ? c.issueReviewed : c.issue}
+              </Submit>
+            </NativeForm>
+          ) : null}
+          {row.state === "issued" &&
+          row.coverageComplete &&
+          row.review &&
+          row.reviewSha256 &&
+          data.request.state === "in_progress" &&
+          !pending ? (
+            <NativeForm action={action} method="post" className="grid gap-3">
+              <input type="hidden" name="intent" value="complete" />
+              <input type="hidden" name="operationId" value={randomUUID()} />
+              <input type="hidden" name="expectedVersion" value={data.request.version} />
+              <input type="hidden" name="exportId" value={row.id} />
+              <input type="hidden" name="exportVersion" value={row.version} />
+              <input type="hidden" name="digest" value={row.sha256} />
+              <input type="hidden" name="reviewDigest" value={row.reviewSha256} />
+              <Check name="confirmed">{c.completeConfirm}</Check>
+              <Submit>{c.complete}</Submit>
             </NativeForm>
           ) : null}
           {row.state !== "revoked" && !pending ? (

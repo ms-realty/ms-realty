@@ -182,6 +182,7 @@ export function privacyFormRoute(area: "privacy" | "preferences" | "operations/p
             operationId: envelope.operationId,
             kind: text(form, "kind"),
             description: text(form, "description"),
+            exportScope: text(form, "exportScope") || "additional_material",
             confirmed: checked(form, "confirmed"),
           });
         else if (staff && intent === "review")

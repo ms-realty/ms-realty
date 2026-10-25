@@ -26,6 +26,9 @@ export const privacyExports = pgTable(
     byteSize: integer("byte_size").notNull(),
     // Unimplemented/held categories keep fulfilment partial. A checkbox cannot waive them.
     coverageComplete: boolean("coverage_complete").notNull().default(false),
+    encryptedReview: text("encrypted_review"),
+    reviewSha256: text("review_sha256"),
+    completedOperationId: uuid("completed_operation_id"),
     preparedById: uuid("prepared_by_id")
       .notNull()
       .references(() => principals.id),
@@ -41,8 +44,20 @@ export const privacyExports = pgTable(
     check("privacy_exports_size", sql`${t.byteSize} between 1 and 1048576`),
     check("privacy_exports_digest", sql`${t.sha256} ~ '^[a-f0-9]{64}$'`),
     check(
+      "privacy_exports_review_binding",
+      sql`(${t.encryptedReview} is null and ${t.reviewSha256} is null) or (${t.encryptedReview} is not null and ${t.reviewSha256} ~ '^[a-f0-9]{64}$')`,
+    ),
+    check(
       "privacy_exports_issued",
       sql`${t.state} <> 'issued' or (${t.reviewedAt} is not null and ${t.reviewedById} is not null and ${t.expiresAt} is not null and ${t.issuedOperationId} is not null)`,
+    ),
+    check(
+      "privacy_exports_coverage_binding",
+      sql`not ${t.coverageComplete} or (${t.encryptedReview} is not null and ${t.reviewSha256} is not null and ${t.issuedOperationId} is not null)`,
+    ),
+    check(
+      "privacy_exports_completion_binding",
+      sql`${t.completedOperationId} is null or (${t.coverageComplete} and ${t.reviewSha256} is not null and ${t.issuedOperationId} is not null)`,
     ),
   ],
 );
