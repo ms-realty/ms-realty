@@ -75,12 +75,12 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   });
   const scope = page.getByLabel(calendarCopy("en").scope, { exact: true });
   expect(await scope.boundingBox()).toMatchObject({ height: 44 });
-  await page.getByRole("button", { name: "Collapse navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
   await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "compact");
   await page.reload();
   await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "compact");
   await page.screenshot({ path: info.outputPath("synthetic-desktop-compact-navigation.png") });
-  await page.getByRole("button", { name: "Expand navigation", exact: true }).click();
+  await page.getByRole("button", { name: "Expand sidebar", exact: true }).click();
   await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "expanded");
   await page.goto(hostUrl("staff", "/bg/calendar?date=2030-12-02&view=agenda"));
   await expect(page.getByText(calendarCopy("bg").empty, { exact: true })).toBeVisible();
