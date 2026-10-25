@@ -1,6 +1,6 @@
 {
-  "id": "6cf83419-7ad6-4092-9fbb-c3b6db4bc5f4",
-  "prevId": "fbedd55f-2bcf-4b17-8bf6-49459014df3f",
+  "id": "6985fc1e-8025-4e9d-9cba-2f41d9361257",
+  "prevId": "ee73c175-c295-4b64-8439-3f891a5de8e6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -11625,6 +11625,276 @@
           "value": "(\"subscriptions\".\"purpose\" = 'search_alerts') = (\"subscriptions\".\"criteria\" is not null and \"subscriptions\".\"frequency\" is not null)"
         }
       },
+      "isRLSEnabled": false
+    },
+    "public.content_locale_editions": {
+      "name": "content_locale_editions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "content_page_id": {
+          "name": "content_page_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "locale": {
+          "name": "locale",
+          "type": "public_locale",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "review_state": {
+          "name": "review_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "publication_state": {
+          "name": "publication_state",
+          "type": "publication_state",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'never_published'"
+        },
+        "current_version_number": {
+          "name": "current_version_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "published_version_number": {
+          "name": "published_version_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "content_locale_editions_page_locale_idx": {
+          "name": "content_locale_editions_page_locale_idx",
+          "columns": [
+            {
+              "expression": "content_page_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "content_locale_editions_content_page_id_content_pages_id_fk": {
+          "name": "content_locale_editions_content_page_id_content_pages_id_fk",
+          "tableFrom": "content_locale_editions",
+          "tableTo": "content_pages",
+          "columnsFrom": [
+            "content_page_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "content_locale_editions_target_locale": {
+          "name": "content_locale_editions_target_locale",
+          "value": "\"content_locale_editions\".\"locale\" <> 'bg'"
+        },
+        "content_locale_editions_review_state": {
+          "name": "content_locale_editions_review_state",
+          "value": "\"content_locale_editions\".\"review_state\" in ('draft', 'in_review', 'rejected', 'approved', 'stale')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.content_locale_versions": {
+      "name": "content_locale_versions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "edition_id": {
+          "name": "edition_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "version_number": {
+          "name": "version_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_version_id": {
+          "name": "source_version_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_version_hash": {
+          "name": "source_version_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_hash": {
+          "name": "content_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "name": "body",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "jurisdiction": {
+          "name": "jurisdiction",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "review_scope": {
+          "name": "review_scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by_id": {
+          "name": "created_by_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "content_locale_versions_number_idx": {
+          "name": "content_locale_versions_number_idx",
+          "columns": [
+            {
+              "expression": "edition_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "version_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "content_locale_versions_edition_id_content_locale_editions_id_fk": {
+          "name": "content_locale_versions_edition_id_content_locale_editions_id_fk",
+          "tableFrom": "content_locale_versions",
+          "tableTo": "content_locale_editions",
+          "columnsFrom": [
+            "edition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "content_locale_versions_source_version_id_content_page_versions_id_fk": {
+          "name": "content_locale_versions_source_version_id_content_page_versions_id_fk",
+          "tableFrom": "content_locale_versions",
+          "tableTo": "content_page_versions",
+          "columnsFrom": [
+            "source_version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "content_locale_versions_created_by_id_principals_id_fk": {
+          "name": "content_locale_versions_created_by_id_principals_id_fk",
+          "tableFrom": "content_locale_versions",
+          "tableTo": "principals",
+          "columnsFrom": [
+            "created_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.content_page_versions": {
