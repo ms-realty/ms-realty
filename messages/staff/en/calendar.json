@@ -83,5 +83,8 @@
   "manualCompact": "Manual external checks",
   "dayOverview": "Day schedule",
   "onPage": "shown on this page",
-  "timelineNote": "The time axis follows the arrangements on this page. It does not show availability."
+  "timelineNote": "The time axis follows the arrangements on this page. It does not show availability.",
+  "filtersShort": "Filters",
+  "requestsScope": "No time assigned · all dates",
+  "requestsDetails": "About these requests"
 }

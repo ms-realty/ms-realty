@@ -211,8 +211,8 @@ function CalendarControls({
         </nav>
       </div>
       <CalendarFilterDisclosure
-        label={c.filters}
-        selection={`${query.zone} · ${query.scope === "mine" ? c.mine : c.team}`}
+        label={c.filtersShort}
+        selection={`${c.filters} · ${query.zone} · ${query.scope === "mine" ? c.mine : c.team}`}
       >
         <form action={`/${locale}/calendar`} method="get" className={s.filters}>
           <input type="hidden" name="view" value={query.view} />
@@ -503,9 +503,9 @@ function WeekOverview({
       (segment.end.getTime() - bounds.start.getTime()) / 3600000,
     ]),
   );
-  const firstHour = relative.length ? Math.max(0, Math.floor(Math.min(...relative)) - 1) : 0;
+  const firstHour = relative.length ? Math.max(0, Math.floor(Math.min(...relative))) : 0;
   const lastHour = relative.length
-    ? Math.min(25, Math.max(firstHour + 4, Math.ceil(Math.max(...relative)) + 1))
+    ? Math.min(25, Math.max(firstHour + 2, Math.ceil(Math.max(...relative))))
     : 24;
   return (
     <section aria-label={query.view === "day" ? c.dayOverview : c.weekOverview}>
@@ -604,7 +604,10 @@ function WeekOverview({
                   ))}
                 </div>
               ) : (
-                <p className={s.timelineEmpty}>{c.emptyDayShort}</p>
+                <p className={s.timelineEmpty}>
+                  <span aria-hidden="true">—</span>
+                  <span className="sr-only">{c.emptyDayShort}</span>
+                </p>
               )}
             </div>
           );
@@ -797,7 +800,7 @@ export function CalendarView({
               <ClockIcon />
               <div>
                 <h2 id="calendar-requests-title">{c.requests}</h2>
-                <p>{c.requestsNote}</p>
+                <p>{c.requestsScope}</p>
               </div>
             </div>
             {data.requests.length ? (
@@ -820,6 +823,10 @@ export function CalendarView({
             ) : (
               <p className={s.noRequests}>{c.noRequests}</p>
             )}
+            <details className={s.requestDetails}>
+              <summary>{c.requestsDetails}</summary>
+              <p>{c.requestsNote}</p>
+            </details>
             {query.requestPage > 1 || data.hasMoreRequests ? (
               <nav aria-label={c.requests} className={s.requestNavigation}>
                 {query.requestPage > 1 ? (
