@@ -65,7 +65,8 @@
     "caseDirectory.dueAt": "Срок",
     "workspace.workGroup": "Работа",
     "workspace.personalSettings.title": "Настройки",
-    "dataReview.contentLocales.approved": "Одобрено"
+    "dataReview.contentLocales.approved": "Одобрено",
+    "duplicateMerge.fields.familyName": "Фамилия"
   },
   "de": {
     "discovery.hotel": "Hotel",
