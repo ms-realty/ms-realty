@@ -86,5 +86,7 @@
   "timelineNote": "The time axis follows the arrangements on this page. It does not show availability.",
   "filtersShort": "Filters",
   "requestsScope": "No time assigned · all dates",
-  "requestsDetails": "About these requests"
+  "requestsDetails": "About these requests",
+  "appointmentDetails": "Resources & checks",
+  "requestsShort": "Awaiting a time"
 }

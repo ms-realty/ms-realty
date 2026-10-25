@@ -1368,3 +1368,70 @@
     gap: 0.25rem;
   }
 }
+
+.appointmentDetails {
+  min-width: 0;
+  border-block-start: 1px solid var(--color-divider);
+  font-size: 0.875rem;
+}
+.appointmentDetails summary {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--color-link);
+}
+.appointmentDetails summary svg {
+  width: 1rem;
+  height: 1rem;
+}
+.appointmentDetails[open] summary svg {
+  transform: rotate(180deg);
+}
+.appointmentDetails > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.75rem;
+  padding-block-end: 0.75rem;
+}
+.caseContext {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.criticalCheck {
+  display: flex;
+  align-items: start;
+  gap: 0.375rem;
+  color: var(--color-warning);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.criticalCheck svg {
+  width: 1rem;
+  height: 1rem;
+  margin-block-start: 0.125rem;
+}
+.requestJump {
+  gap: 0.375rem;
+  padding-inline: 0.5rem;
+  text-decoration: underline;
+}
+.requestJump > span:last-child {
+  color: var(--color-text-muted);
+}
+@media (min-width: 64rem) {
+  .timelineEvent {
+    height: 4.125rem;
+    gap: 0;
+  }
+  .timelineIdentity {
+    font-weight: 500;
+  }
+}
+@media (max-width: 639px) {
+  .requestJump {
+    display: none;
+  }
+}

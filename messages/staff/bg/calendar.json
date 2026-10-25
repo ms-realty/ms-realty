@@ -86,5 +86,7 @@
   "timelineNote": "Времевата ос следва уговорките на тази страница. Тя не показва свободни часове.",
   "filtersShort": "Филтри",
   "requestsScope": "Без уговорен час · за всички дати",
-  "requestsDetails": "За тези заявки"
+  "requestsDetails": "За тези заявки",
+  "appointmentDetails": "Ресурси и проверки",
+  "requestsShort": "Чакащи час"
 }

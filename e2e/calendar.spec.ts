@@ -71,7 +71,7 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   }
   await db
     .update(schema.cases)
-    .set({ reference: "CS-DEMO-001" })
+    .set({ reference: "CS-DEMO-001", title: "Synthetic buyer · Sandanski apartment search" })
     .where(eq(schema.cases.id, f.caseId));
   await page.context().addCookies([
     {
@@ -123,8 +123,10 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(hostUrl("staff", `/${locale}/calendar?date=2030-10-28&view=week`));
     const appointment = page.getByRole("article", { name: f.replacement.reference, exact: true });
+    await appointment.locator("details summary").click();
     await expect(appointment.getByText(c.reserved, { exact: true })).toBeVisible();
     await expect(appointment.getByText(c.buffer, { exact: false })).toContainText("30 / 30");
+    await appointment.locator("details summary").click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       320,
     );
@@ -142,6 +144,8 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
         path: info.outputPath("synthetic-mobile-full-itinerary-bg.png"),
         fullPage: true,
       });
+      await appointment.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: info.outputPath("synthetic-mobile-change-bg.png") });
     }
     expect(
       (

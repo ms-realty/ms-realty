@@ -4,6 +4,7 @@ import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import {
   CalendarIcon,
+  ChevronDownIcon,
   ChevronEndIcon,
   ChevronStartIcon,
   ClockIcon,
@@ -304,13 +305,15 @@ function CalendarItem({
             </a>
           </h4>
           <p className={s.state} data-state={row.state}>
-            {states[row.state]}
+            {c.states[row.state]}
           </p>
         </div>
-        <p className={s.version}>
-          {c.version}: <bdi>{row.version}</bdi>
-        </p>
       </header>
+      {row.caseTitle ? (
+        <p className={s.caseContext}>
+          <bdi>{row.caseReference}</bdi> · {row.caseTitle}
+        </p>
+      ) : null}
       <div className={s.arrangements}>
         {current
           ? arrangement(
@@ -328,60 +331,83 @@ function CalendarItem({
             )
           : null}
       </div>
-      {proposal ? <p className={s.proposalNote}>{c.proposalNote}</p> : null}
-      <dl className={s.facts}>
+      {!historical && row.propertyAccess !== "confirmed" ? (
+        <p className={s.criticalCheck}>
+          <InfoIcon />
+          {c.access}: {access[row.propertyAccess]}
+        </p>
+      ) : null}
+      {!historical && !row.externalBusyCheckedAt ? (
+        <p className={s.criticalCheck}>
+          <ClockIcon />
+          {c.externalMissing}
+        </p>
+      ) : null}
+      <details className={s.appointmentDetails}>
+        <summary>
+          {c.appointmentDetails}
+          <ChevronDownIcon />
+        </summary>
         <div>
-          <dt>
-            <UserIcon />
-            {c.host}
-          </dt>
-          <dd>{row.hostName ?? c.noHost}</dd>
-        </div>
-        <div>
-          <dt>{c.access}</dt>
-          <dd>{access[row.propertyAccess]}</dd>
-        </div>
-        <div className={s.externalCheck}>
-          <dt>{c.external}</dt>
-          <dd>
-            {row.externalBusyCheckedAt ? (
-              <CalendarTime at={row.externalBusyCheckedAt} locale={locale} zone={query.zone} />
-            ) : (
-              c.externalMissing
-            )}
-          </dd>
-        </div>
-      </dl>
-      {row.resources.length ? (
-        <div className={s.resources}>
-          <p className={s.resourceTitle}>
-            <ClockIcon />
-            {c.reserved}
+          <p className={s.version}>
+            {c.version}: <bdi>{row.version}</bdi>
           </p>
-          <ul>
-            {row.resources.map((resource) => (
-              <li key={resource.kind}>
-                <span>{resource.kind === "broker" ? c.broker : c.property}</span>
-                <TimeRange
-                  start={resource.start}
-                  end={resource.end}
-                  locale={locale}
-                  zone={query.zone}
-                />
-              </li>
-            ))}
-          </ul>
-          {broker && current ? (
-            <p className={s.buffer}>
-              {c.buffer}:{" "}
-              <strong>
-                {minutes((row.confirmedStartsAt as Date).getTime() - broker.start.getTime())} /{" "}
-                {minutes(broker.end.getTime() - (row.confirmedEndsAt as Date).getTime())}
-              </strong>
-            </p>
+          {proposal ? <p className={s.proposalNote}>{c.proposalNote}</p> : null}
+          <dl className={s.facts}>
+            <div>
+              <dt>
+                <UserIcon />
+                {c.host}
+              </dt>
+              <dd>{row.hostName ?? c.noHost}</dd>
+            </div>
+            <div>
+              <dt>{c.access}</dt>
+              <dd>{access[row.propertyAccess]}</dd>
+            </div>
+            <div className={s.externalCheck}>
+              <dt>{c.external}</dt>
+              <dd>
+                {row.externalBusyCheckedAt ? (
+                  <CalendarTime at={row.externalBusyCheckedAt} locale={locale} zone={query.zone} />
+                ) : (
+                  c.externalMissing
+                )}
+              </dd>
+            </div>
+          </dl>
+          {row.resources.length ? (
+            <div className={s.resources}>
+              <p className={s.resourceTitle}>
+                <ClockIcon />
+                {c.reserved}
+              </p>
+              <ul>
+                {row.resources.map((resource) => (
+                  <li key={resource.kind}>
+                    <span>{resource.kind === "broker" ? c.broker : c.property}</span>
+                    <TimeRange
+                      start={resource.start}
+                      end={resource.end}
+                      locale={locale}
+                      zone={query.zone}
+                    />
+                  </li>
+                ))}
+              </ul>
+              {broker && current ? (
+                <p className={s.buffer}>
+                  {c.buffer}:{" "}
+                  <strong>
+                    {minutes((row.confirmedStartsAt as Date).getTime() - broker.start.getTime())} /{" "}
+                    {minutes(broker.end.getTime() - (row.confirmedEndsAt as Date).getTime())}
+                  </strong>
+                </p>
+              ) : null}
+            </div>
           ) : null}
         </div>
-      ) : null}
+      </details>
       {!historical &&
       current &&
       (!row.resources.some((resource) => resource.kind === "broker") ||
@@ -561,7 +587,7 @@ function WeekOverview({
               {segments.length ? (
                 <div
                   className={s.timelineTrack}
-                  style={{ height: `${32 + laneEnds.length * 54}px` }}
+                  style={{ height: `${32 + laneEnds.length * 74}px` }}
                 >
                   {ticks.map((at) => (
                     <div
@@ -582,19 +608,26 @@ function WeekOverview({
                       style={{
                         left: `${((segment.start.getTime() - start) / span) * 100}%`,
                         width: `${((segment.end.getTime() - segment.start.getTime()) / span) * 100}%`,
-                        top: `${26 + segment.lane * 54}px`,
+                        top: `${26 + segment.lane * 74}px`,
                       }}
                     >
                       <strong>
                         {previewRange(segment.start, segment.end, locale, query.zone)}
                       </strong>
+                      <span className={s.timelineIdentity}>
+                        <bdi>{segment.row.reference}</bdi>
+                        {segment.row.caseTitle
+                          ? ` · ${segment.row.caseTitle}`
+                          : segment.row.caseReference
+                            ? ` · ${segment.row.caseReference}`
+                            : ""}
+                      </span>
                       <span>
                         {segment.reserved
                           ? c.reserved
                           : segment.proposed
-                            ? c.notReserved
-                            : c.states[segment.row.state]}{" "}
-                        · <bdi>{segment.row.reference}</bdi>
+                            ? `${c.states[segment.row.state]} · ${c.notReserved}`
+                            : c.states[segment.row.state]}
                       </span>
                       <span className="sr-only">
                         {c.states[segment.row.state]}{" "}
@@ -658,13 +691,12 @@ export function CalendarView({
           ) : null}
         </div>
         {data?.requests.length ? (
-          <a
-            className={s.requestJump}
-            href="#calendar-requests-title"
-            aria-label={`${c.requests}: ${data.requests.length} ${c.onPage}`}
-          >
-            <ClockIcon />
-            <span>{data.requests.length}</span>
+          <a className={s.requestJump} href="#calendar-requests-title">
+            <span>{c.requestsShort}</span>
+            <span className="sr-only">
+              {" "}
+              · {c.requests}: {data.requests.length} {c.onPage}
+            </span>
           </a>
         ) : null}
         <a className={s.contextAction} href={calendarHref(locale, query)}>
@@ -809,6 +841,7 @@ export function CalendarView({
                   <li key={row.id}>
                     <div>
                       <bdi className={s.requestReference}>{row.reference}</bdi>
+                      {row.caseTitle ? <p>{row.caseTitle}</p> : null}
                       <p>
                         {c.host}: {row.hostName ?? c.noHost}
                       </p>

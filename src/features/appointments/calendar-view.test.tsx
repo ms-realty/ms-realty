@@ -12,6 +12,7 @@ const row: CalendarAppointment = {
   reference: "AP-SYNTHETIC-O08",
   caseId: "case-id",
   caseReference: "CS-SYNTHETIC-O08",
+  caseTitle: "Synthetic buyer apartment search",
   hostName: "Synthetic host",
   state: "reschedule_requested",
   version: 4,
@@ -204,6 +205,10 @@ describe("O08 native agenda", () => {
       expect.stringContaining("date=2030-10-27&view=day&zone=Europe%2FSofia&scope=team"),
     );
     const full = screen.getByRole("article", { name: row.reference });
+    const resourceDetails = within(full)
+      .getByText(c.appointmentDetails, { exact: true })
+      .closest("details");
+    if (resourceDetails) resourceDetails.open = true;
     expect(within(full).getByText(c.reserved, { exact: true })).toBeVisible();
     expect(within(full).getByText(c.buffer, { exact: false })).toHaveTextContent("30 / 30");
     expect(screen.getByText(c.manualCompact, { exact: false })).toBeVisible();

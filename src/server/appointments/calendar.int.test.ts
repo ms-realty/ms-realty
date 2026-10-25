@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { appointmentResources, appointments, grants } from "@/db/schema";
+import { appointmentResources, appointments, cases, grants } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { parseCalendarQuery } from "@/features/appointments/calendar-period";
 import { readCalendar } from "./calendar";
@@ -56,7 +56,24 @@ describe("O08 authorized calendar periods", () => {
 
   it("never exposes unreadable Cases, unmanageable appointments or their overlap existence; grants are live", async () => {
     const f = await calendarFixture(t.db);
+    await t.db
+      .update(cases)
+      .set({ title: "PERMITTED_SYNTHETIC_CASE_TITLE" })
+      .where(eq(cases.id, f.caseId));
+    await t.db
+      .update(cases)
+      .set({ title: "PRIVATE_SYNTHETIC_CASE_TITLE" })
+      .where(eq(cases.id, f.privateCaseId));
+    await t.db
+      .update(cases)
+      .set({ title: "READONLY_SYNTHETIC_CASE_TITLE" })
+      .where(eq(cases.id, f.readOnlyCaseId));
     const monday = await readCalendar(t.db, f.session, query("2030-10-28"));
+    expect(monday.rows.every((row) => row.caseTitle === "PERMITTED_SYNTHETIC_CASE_TITLE")).toBe(
+      true,
+    );
+    expect(JSON.stringify(monday)).not.toContain("PRIVATE_SYNTHETIC_CASE_TITLE");
+    expect(JSON.stringify(monday)).not.toContain("READONLY_SYNTHETIC_CASE_TITLE");
     expect(JSON.stringify(monday)).not.toContain(f.readOnly.reference);
     const tuesday = await readCalendar(t.db, f.session, query("2030-10-29", { scope: "mine" }));
     expect(tuesday.rows.map((row) => row.id)).toEqual([f.proposal.id]);
