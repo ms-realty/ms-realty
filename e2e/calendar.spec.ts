@@ -51,6 +51,7 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   page,
 }, info) => {
   test.skip(info.project.name !== "chromium-desktop", "Focused staff composition evidence");
+  test.setTimeout(90_000);
   const f = seed();
   await page.context().addCookies([
     {
@@ -85,6 +86,16 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   await page.goto(hostUrl("staff", "/bg/calendar?date=2030-12-02&view=agenda"));
   await expect(page.getByText(calendarCopy("bg").empty, { exact: true })).toBeVisible();
   await page.screenshot({ path: info.outputPath("synthetic-desktop-empty-bg.png") });
+  await page.setViewportSize({ width: 1024, height: 900 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1024);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = "200%";
+  });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440);
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = "";
+  });
   for (const locale of ["bg", "en", "ru"]) {
     const c = calendarCopy(locale);
     await page.setViewportSize({ width: 320, height: 900 });
