@@ -102,9 +102,9 @@ export async function AgencyTools({
           <div className="flex min-w-0 items-center gap-3">
             <a
               href={`/${locale}/settings`}
-              aria-label={`${workspace("profileSettings")}: ${account.name}`}
               className="min-w-0 flex-1 rounded-control p-2 hover:bg-subtle focus-visible:outline-2 focus-visible:outline-focus"
             >
+              <span className="sr-only">{workspace("profileSettings")}:</span>{" "}
               <AccountIdentity {...account} as="span" truncate />
             </a>
             <SignOutForm

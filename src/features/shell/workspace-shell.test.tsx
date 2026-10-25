@@ -106,6 +106,9 @@ it("X02 starts closed, offers permitted native page links and preserves a person
     "/en/coverage",
   ]);
   expect(hrefs(navigation[1] as HTMLElement)).toEqual(["/en/settings"]);
+  expect(dialog.querySelector("[data-workspace-account]")?.closest("a")).toHaveAccessibleName(
+    "Profile & settings: Synthetic Broker broker@example.test",
+  );
   expect(hrefs(dialog)).not.toContain("/en/access/manage");
   const current = dialog.querySelectorAll('[aria-current="page"]');
   expect(current).toHaveLength(1);
