@@ -52,17 +52,15 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
 }, info) => {
   test.skip(info.project.name !== "chromium-desktop", "Focused staff composition evidence");
   const f = seed();
-  await page
-    .context()
-    .addCookies([
-      {
-        name: "msr_staff_session",
-        value: f.token,
-        url: origins.staff,
-        httpOnly: true,
-        sameSite: "Lax",
-      },
-    ]);
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: f.token,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(hostUrl("staff", "/en/calendar?date=2030-10-27&view=week"));
   await expect(
