@@ -1,4 +1,4 @@
-import type { PublicLocale } from "@/i18n/config";
+import { localeDirection, type PublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import type { ApprovedArea } from "@/server/content/public";
 import { buttonClass } from "@/ui/button-class";
@@ -40,7 +40,7 @@ export function AreaDetail({
       </a>
       <header className="space-y-3">
         <h1 className="break-words text-heading font-semibold lg:text-title">
-          {area?.title ?? copy.title}
+          <ContentPlaintext text={area?.title ?? copy.title} />
         </h1>
         {area?.geography.length ? (
           <p className="break-words text-caption text-text-muted">
@@ -49,7 +49,11 @@ export function AreaDetail({
         ) : null}
       </header>
       {area ? (
-        <article lang={area.locale} className="max-w-reading space-y-6">
+        <article
+          lang={area.locale}
+          dir={localeDirection(area.locale)}
+          className="max-w-reading space-y-6"
+        >
           {area.paragraphs.length > 5 ? (
             <nav aria-label={copy.contents}>
               <ol className="flex flex-wrap gap-x-4 gap-y-1">
@@ -74,13 +78,13 @@ export function AreaDetail({
               key={`paragraph-${index + 1}`}
               className="scroll-mt-24 whitespace-pre-wrap break-words"
             >
-              {paragraph}
+              <ContentPlaintext text={paragraph} />
             </p>
           ))}
           <dl className="space-y-2 border-t border-divider pt-4 text-caption text-text-muted">
             <div>
               <dt className="font-semibold">{copy.scope}</dt>
-              <dd className="break-words">
+              <dd className="break-words" lang="bg" dir="ltr">
                 {area.reviewScope} · {area.jurisdiction}
               </dd>
             </div>
@@ -169,3 +173,5 @@ export function AreaDetail({
     </AreaLayout>
   );
 }
+
+import { ContentPlaintext } from "@/features/content/plaintext";

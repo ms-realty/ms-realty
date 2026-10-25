@@ -13,6 +13,7 @@ for (const javaScriptEnabled of [true, false]) {
       page,
       context,
     }, testInfo) => {
+      test.setTimeout(60_000);
       const { token } = JSON.parse(
         execFileSync(
           process.execPath,
@@ -87,12 +88,100 @@ for (const javaScriptEnabled of [true, false]) {
       await publicPage.reload();
       await expect(publicPage.getByRole("heading", { name: title, exact: true })).toBeVisible();
       await expect(publicPage.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+      // B01 / AT03 / AT23: the manual Hebrew path uses a separate source-bound edition.
+      const sourceUrl = page.url();
+      await page
+        .getByRole("navigation", { name: "Language editions" })
+        .getByRole("link", { name: "עברית", exact: true })
+        .click();
+      const hebrewUrl = page.url(),
+        hebrewTitle = "כותרת בדיקה סינתטית",
+        hebrewText = "טקסט בדיקה בלבד. MS-00001 https://example.test/";
+      await expect(page.getByLabel("Page text", { exact: true })).toHaveAttribute("lang", "he");
+      await expect(page.getByLabel("Page text", { exact: true })).toHaveAttribute("dir", "rtl");
+      await page.getByLabel("Page title", { exact: true }).fill(hebrewTitle);
+      await page.getByLabel("Page text", { exact: true }).fill(hebrewText);
+      await page.getByRole("button", { name: "Save draft", exact: true }).click();
+      await expect(
+        page.getByText("Language edition action recorded", { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole("heading", { name: hebrewTitle, exact: true })).toBeVisible();
+      await page.reload();
+      await expect(
+        page.getByText("Language edition action recorded", { exact: true }),
+      ).toBeVisible();
+      await page.getByRole("link", { name: "Open workbench", exact: true }).click();
+      await publicPage.goto(hostUrl("public", `/he/help/${slug}`));
+      await expect(publicPage.getByRole("heading", { name: hebrewTitle, exact: true })).toHaveCount(
+        0,
+      );
+      await expect(publicPage.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+      for (const action of [
+        "Request review of this edition",
+        "Record qualified review of this edition",
+        "Approve this translation",
+        "Approve this edition’s content",
+        "Publish this reviewed edition",
+      ]) {
+        const section = page
+          .locator("section")
+          .filter({ has: page.getByRole("heading", { name: action, exact: true }) });
+        await section
+          .getByLabel("Review evidence or reason", { exact: true })
+          .fill("Synthetic browser source/target decision only");
+        if (action !== "Request review of this edition")
+          await fillAgencyInstant(
+            section.getByLabel("Approval valid until", { exact: true }),
+            new Date(Date.now() + 86400000),
+          );
+        await section.getByRole("checkbox").check();
+        await section.getByRole("button", { name: action, exact: true }).click();
+        await expect(page).toHaveURL((url) => url.pathname.endsWith("/editions/he/operations"));
+        await expect(
+          page.getByText("Language edition action recorded", { exact: true }),
+        ).toBeVisible();
+        await page.getByRole("link", { name: "Open workbench", exact: true }).click();
+      }
+      await publicPage.reload();
+      await expect(
+        publicPage.getByRole("heading", { name: hebrewTitle, exact: true }),
+      ).toBeVisible();
+      await expect(publicPage.locator("article")).toHaveAttribute("lang", "he");
+      await expect(publicPage.locator("article")).toHaveAttribute("dir", "rtl");
+      await expect(publicPage.locator("article")).toContainText(hebrewText);
+      await expect(
+        publicPage.locator("article bdi").filter({ hasText: /^MS-00001$/ }),
+      ).toHaveAttribute("dir", "ltr");
+      await expect(
+        publicPage.locator("article bdi").filter({ hasText: /^https:\/\/example\.test\/$/ }),
+      ).toHaveAttribute("dir", "ltr");
+      await publicPage.screenshot({
+        path: testInfo.outputPath("synthetic-hebrew-cms-edition.png"),
+        fullPage: true,
+      });
+      await page.goto(sourceUrl);
       await page
         .getByLabel("Page title", { exact: true })
         .fill("Непубликувана синтетична редакция");
       await page.getByRole("button", { name: "Save draft", exact: true }).click();
       await page.getByRole("link", { name: "Open workbench", exact: true }).click();
       await publicPage.reload();
+      await expect(publicPage.getByRole("heading", { name: hebrewTitle, exact: true })).toHaveCount(
+        0,
+      );
+      await expect(publicPage.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+      await page.goto(hebrewUrl);
+      await expect(
+        page.getByText(
+          "The Bulgarian source changed. Compare it with your draft, save a new edition and request fresh review.",
+          { exact: true },
+        ),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Publish this reviewed edition", exact: true }),
+      ).toHaveCount(0);
+      await page.goto(sourceUrl);
+      await publicPage.goto(hostUrl("public", `/bg/help/${slug}`));
       await expect(publicPage.getByRole("heading", { name: title, exact: true })).toBeVisible();
       await page.screenshot({
         path: testInfo.outputPath("synthetic-content-workbench.png"),

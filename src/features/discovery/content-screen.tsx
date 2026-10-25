@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import type { ContentReference } from "@/domain/inquiry-content";
-import { isRoutableLocale } from "@/i18n/config";
+import { ContentPlaintext } from "@/features/content/plaintext";
+import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { Notice } from "@/ui/notice";
 import { readApprovedContent } from "./content-source";
@@ -111,19 +112,25 @@ export async function ContentScreen({
     );
   return (
     <DiscoveryPage>
-      <h1 className="text-title font-semibold">{title}</h1>
+      <h1 className="text-title font-semibold">
+        <ContentPlaintext text={title} />
+      </h1>
       {content ? (
-        <article lang={content.locale} className="max-w-reading space-y-5">
+        <article
+          lang={content.locale}
+          dir={localeDirection(content.locale)}
+          className="max-w-reading space-y-5"
+        >
           {content.paragraphs.map((paragraph, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs belong to this immutable, approved version and have no client state.
             <p key={index} className="whitespace-pre-wrap break-words">
-              {paragraph}
+              <ContentPlaintext text={paragraph} />
             </p>
           ))}
           <dl className="space-y-2 border-t border-border pt-4 text-compact">
             <div>
               <dt>{label.scope}</dt>
-              <dd>
+              <dd lang="bg" dir="ltr">
                 {content.reviewScope} · {content.jurisdiction}
               </dd>
             </div>

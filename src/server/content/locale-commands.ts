@@ -482,11 +482,30 @@ export async function readContentLocaleOperation(
       (operation.status === "succeeded" && (outcome?.id !== id || outcome.locale !== locale)))
   )
     throw new AppError("not_found");
+  const [receiptVersion] =
+    operation?.status === "succeeded" && outcome?.editionVersion
+      ? await db
+          .select({ body: contentLocaleVersions.body })
+          .from(contentLocaleVersions)
+          .innerJoin(
+            contentLocaleEditions,
+            eq(contentLocaleEditions.id, contentLocaleVersions.editionId),
+          )
+          .where(
+            and(
+              eq(contentLocaleEditions.contentPageId, id),
+              eq(contentLocaleEditions.locale, locale),
+              eq(contentLocaleVersions.versionNumber, outcome.editionVersion),
+            ),
+          )
+      : [];
+  const receiptBody = receiptVersion ? contentBody.safeParse(receiptVersion.body) : null;
   return operation
     ? {
         status: operation.status,
         operationId: operation.operationId,
         outcome: operation.status === "succeeded" ? outcome : null,
+        title: receiptBody?.success ? receiptBody.data.title : null,
       }
     : null;
 }
