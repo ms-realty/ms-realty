@@ -99,13 +99,19 @@ export async function publicContentMetadata(
 ): Promise<Metadata> {
   if (!isRoutableLocale(locale)) notFound();
   const content = await readApprovedContent(getDb(), kind, slug, locale).catch(() => null);
-  return publicPageMetadata({
+  const metadata = await publicPageMetadata({
     locale,
     path,
     title: content?.title,
     description: content?.paragraphs.join(" "),
     availableIn: content ? [locale] : [],
   });
+  return content
+    ? metadata
+    : {
+        ...metadata,
+        robots: { ...(typeof metadata.robots === "object" ? metadata.robots : {}), index: false },
+      };
 }
 
 export function normalizePublicListingRoute(input: {

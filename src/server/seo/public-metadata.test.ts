@@ -63,9 +63,11 @@ it("an external-path header cannot change canonical origin or inject a fragment/
   }
 });
 it("CMS metadata never invents locale siblings or uses another locale's approved text", async () => {
+  vi.stubEnv("STAGING", "false");
   mocks.content.mockResolvedValueOnce(null);
   const absent = await publicContentMetadata("en", "help", "privacy", "/help/privacy");
   expect(absent.alternates?.languages).toEqual({});
+  expect(absent.robots).toMatchObject({ index: false });
   mocks.content.mockResolvedValueOnce({
     title: "Одобрено заглавие",
     paragraphs: ["Точно одобрен текст."],
@@ -73,6 +75,7 @@ it("CMS metadata never invents locale siblings or uses another locale's approved
   const present = await publicContentMetadata("bg", "help", "privacy", "/help/privacy");
   expect(present.title).toBe("Одобрено заглавие");
   expect(Object.keys(present.alternates?.languages ?? {})).toEqual(["bg", "x-default"]);
+  expect(present.robots).toMatchObject({ index: true });
 });
 it("fails closed on missing production origin rather than adopting an incoming header", () => {
   vi.stubEnv("NODE_ENV", "production");

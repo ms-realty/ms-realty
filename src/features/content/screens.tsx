@@ -26,6 +26,7 @@ import {
   saveContentAction,
 } from "./actions";
 import { contentCopy } from "./copy";
+import { ContentEditionLinks } from "./edition-links";
 import { ContentForm, ContentReviewForm } from "./forms";
 import { contentLabel } from "./labels";
 
@@ -56,7 +57,10 @@ export async function ContentListScreen({ locale, session }: { locale: string; s
         <ul className="divide-y divide-border">
           {result.rows.map((page) => (
             <li key={page.id} className="space-y-2 py-4">
-              <a href={`/${locale}/content/${page.id}`} className="font-semibold underline">
+              <a
+                href={`/${locale}/content/${page.id}${page.entryLocale && page.entryLocale !== "bg" ? `/editions/${page.entryLocale}` : ""}`}
+                className="font-semibold underline"
+              >
                 {page.kind === "area" || page.kind === "service" || page.kind === "help"
                   ? copy[page.kind]
                   : copy.kind}{" "}
@@ -121,8 +125,16 @@ export async function ContentWorkbenchScreen({
   id: string;
 }) {
   const copy = contentCopy(locale),
-    { page, current, decisions, access, places, placesAvailable, publishedPlaceId } =
-      await readContentWorkbench(getDb(), session, id).catch(privateError);
+    {
+      page,
+      current,
+      decisions,
+      access,
+      places,
+      placesAvailable,
+      publishedPlaceId,
+      localeEditions,
+    } = await readContentWorkbench(getDb(), session, id).catch(privateError);
   const body = contentBody.parse(current.body);
   const placeLabel = (placeId: string | null | undefined) => {
     if (!placeId) return copy.unbound;
@@ -167,6 +179,9 @@ export async function ContentWorkbenchScreen({
       <h1 className="text-title font-semibold">{body.title}</h1>
       <p>{copy.bg}</p>
       <p>{copy.sequence}</p>
+      {localeEditions ? (
+        <ContentEditionLinks shell={locale} id={id} selected="bg" editions={localeEditions} />
+      ) : null}
       <div className="flex flex-wrap gap-4">
         <a className="underline" href={`/${locale}/content`}>
           {copy.back}
