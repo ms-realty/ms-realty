@@ -260,10 +260,10 @@ test.describe("JavaScript on", () => {
     );
     if ((page.viewportSize()?.width ?? 1440) < 1024) {
       // Opening the phone menu (X02) is not leaving; choosing a destination in it is.
-      const menu = page.getByRole("banner").getByRole("link", { name: "Open menu" });
+      const menu = page.getByRole("banner").getByRole("link", { name: "Open navigation" });
       await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
       await menu.click();
-      const tools = page.getByRole("dialog", { name: "Agency tools", exact: true });
+      const tools = page.getByRole("dialog", { name: "All pages", exact: true });
       await expect(tools).toBeVisible();
       await expect(dialog).toBeHidden();
       await tools.getByRole("link", { name: /^Calendar/ }).click();
@@ -318,10 +318,10 @@ test.describe("JavaScript on", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     const edit = hostUrl("staff", `/en/inventory/${f.reference}?tab=facts`);
     await page.goto(edit);
-    const menu = page.getByRole("banner").getByRole("link", { name: "Open menu" });
+    const menu = page.getByRole("banner").getByRole("link", { name: "Open navigation" });
     // Hydrated: the menu opens X02 in place and the leave guard is listening.
     await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
-    const tools = page.getByRole("dialog", { name: "Agency tools", exact: true });
+    const tools = page.getByRole("dialog", { name: "All pages", exact: true });
     const dialog = page.getByRole("dialog", { name: "You have unsaved changes" });
     const source = page.getByLabel("Source or evidence reference", { exact: true });
     const chooseCalendar = async () => {

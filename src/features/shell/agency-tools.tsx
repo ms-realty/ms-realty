@@ -1,24 +1,17 @@
-// X02 «Инструменти на агенцията» (Figma 22:1103 desktop, 23:4648 mobile): one card for the
-// rail's «Още инструменти» page and the phone menu. Rows come from navigation.ts, already
-// narrowed to what this person may open; NavLink marks the current page. Below lg the foot
-// keeps the person, the interface language and sign out, which the phone context bar omits.
+// X02 is the same permission-filtered page directory in the drawer and its native fallback.
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx } from "@/ui/cx";
+import { CloseIcon } from "@/ui/icons";
 import { AccountIdentity, SignOutForm } from "./account";
 import { LocaleSwitcher } from "./language-switcher";
-import { NavLink } from "./nav-link";
 import type { AgencyToolGroup } from "./navigation";
+import { ToolNavigation } from "./tool-navigation";
 
 const closeClass =
-  "inline-flex size-control shrink-0 items-center justify-center rounded-control hover:bg-subtle";
-
-const rowClass = cx(
-  "flex min-h-19 items-center gap-4 rounded-control p-4 text-dense text-text no-underline",
-  "transition-colors duration-(--duration-fast) hover:bg-subtle aria-[current=page]:bg-selected",
-);
+  "inline-flex size-control shrink-0 items-center justify-center rounded-control hover:bg-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 export async function AgencyTools({
   locale,
@@ -33,27 +26,36 @@ export async function AgencyTools({
   groups: readonly AgencyToolGroup[];
   /** Unique per document: the menu dialog and the page can both be present. */
   idPrefix: string;
-  /** 1 on the page, 2 inside the menu dialog over another page. */
   level: 1 | 2;
-  /** Where Close goes on the page; without it Close dismisses the enclosing dialog. */
   closeHref?: string;
   account?: { name: string; detail?: string };
   search?: ReactNode;
 }) {
-  const t = await getTranslations({ locale, namespace: "tools" });
-  const workspace = await getTranslations({ locale, namespace: "workspace" });
-  const common = await getTranslations({ locale, namespace: "common" });
+  const [t, workspace, common] = await Promise.all([
+    getTranslations({ locale, namespace: "tools" }),
+    getTranslations({ locale, namespace: "workspace" }),
+    getTranslations({ locale, namespace: "common" }),
+  ]);
   const Title = level === 1 ? "h1" : "h2";
-  const SectionTitle = level === 1 ? "h2" : "h3";
-  // Eager: in the closed menu dialog a lazy image would only start loading once it opens.
-  const icon = (src: string) => (
-    <Image src={src} alt="" width={20} height={20} loading="eager" className="shrink-0" />
-  );
-
+  const pages = groups.map((group) => ({
+    section: group.section,
+    title: t(`sections.${group.section}`),
+    items: group.items.map((item) => ({
+      label: item.label,
+      href: item.href,
+      title: t(`items.${item.label}.title`),
+      description: t(`items.${item.label}.description`),
+    })),
+  }));
   return (
-    <div className="mx-auto flex w-full max-w-[55rem] flex-col gap-6 rounded-card bg-canvas p-5 sm:p-10">
-      <div className="flex items-start gap-3">
-        <p className="flex min-w-0 flex-1 items-center">
+    <div
+      className={cx(
+        "mx-auto flex w-full max-w-[55rem] flex-col gap-4 bg-canvas p-4 sm:p-6",
+        !closeHref && "h-full min-h-0 [@media(max-height:30rem)]:h-auto",
+      )}
+    >
+      <div className="sticky top-0 z-10 flex shrink-0 items-center gap-4 bg-canvas">
+        {closeHref ? (
           <Image
             src="/brand/logo-ms-realty.png"
             alt={common("brand")}
@@ -62,66 +64,64 @@ export async function AgencyTools({
             loading="eager"
             className="h-auto shrink-0 object-contain"
           />
-        </p>
+        ) : null}
+        <Title
+          id={`${idPrefix}-title`}
+          className="min-w-0 flex-1 text-heading font-semibold wrap-anywhere"
+        >
+          {t("title")}
+        </Title>
         {closeHref ? (
           <a href={closeHref} aria-label={t("close")} className={closeClass}>
-            {icon("/brand/workspace/x.svg")}
+            <CloseIcon />
           </a>
         ) : (
           <form method="dialog">
             <button type="submit" aria-label={t("close")} className={closeClass}>
-              {icon("/brand/workspace/x.svg")}
+              <CloseIcon />
             </button>
           </form>
         )}
       </div>
-      <Title id={`${idPrefix}-title`} className="text-heading font-semibold sm:text-title">
-        {t("title")}
-      </Title>
       {search ? <search aria-label={workspace("search")}>{search}</search> : null}
-      {groups.map((group) => (
-        <nav
-          key={group.section}
-          aria-labelledby={`${idPrefix}-${group.section}`}
-          className="flex flex-col gap-4"
-        >
-          <SectionTitle
-            id={`${idPrefix}-${group.section}`}
-            className="text-subheading font-semibold"
-          >
-            {t(`sections.${group.section}`)}
-          </SectionTitle>
-          <ul className="divide-y divide-divider">
-            {group.items.map((item) => (
-              <li key={item.label}>
-                <NavLink href={item.href} className={rowClass}>
-                  {icon("/brand/workspace/folder.svg")}
-                  <span className="flex min-w-0 flex-1 flex-col gap-1 wrap-anywhere">
-                    <span className="font-semibold">{t(`items.${item.label}.title`)}</span>{" "}
-                    <span className="font-medium text-text-muted">
-                      {t(`items.${item.label}.description`)}
-                    </span>
-                  </span>
-                  {icon("/brand/workspace/chevron-right.svg")}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      ))}
-      <div className="flex flex-col gap-4 lg:hidden">
-        {account ? <AccountIdentity name={account.name} detail={account.detail} /> : null}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <LocaleSwitcher
-            locale={locale}
-            locales={staffLocales}
-            label={workspace("interfaceLanguage")}
-            wide
-            align="start"
-            side="top"
-          />
-          {account ? <SignOutForm locale={locale} label={workspace("signOut")} /> : null}
-        </div>
+      <ToolNavigation
+        groups={pages}
+        locale={locale}
+        idPrefix={idPrefix}
+        level={level}
+        scrollable={!closeHref}
+        copy={{
+          search: t("searchPages"),
+          clear: t("clearSearch"),
+          empty: t("noPages"),
+          count: t.raw("pageCount"),
+        }}
+      />
+      <div className="shrink-0 space-y-3 border-t border-divider pt-3">
+        {account ? (
+          <div className="flex min-w-0 items-center gap-3">
+            <a
+              href={`/${locale}/settings`}
+              className="min-w-0 flex-1 rounded-control p-2 hover:bg-subtle focus-visible:outline-2 focus-visible:outline-focus"
+            >
+              <span className="sr-only">{workspace("profileSettings")}:</span>{" "}
+              <AccountIdentity {...account} as="span" truncate />
+            </a>
+            <SignOutForm
+              locale={locale}
+              label={workspace("signOut")}
+              className="min-h-control shrink-0 rounded-control px-3 text-dense text-text-muted hover:bg-subtle focus-visible:outline-2 focus-visible:outline-focus"
+            />
+          </div>
+        ) : null}
+        <LocaleSwitcher
+          locale={locale}
+          locales={staffLocales}
+          label={workspace("interfaceLanguage")}
+          wide
+          align="start"
+          side="top"
+        />
       </div>
     </div>
   );

@@ -22,13 +22,14 @@ vi.mock("next-intl/server", () => ({
       tools: enTools,
       workspace: enWorkspace,
     };
-    return (key: string) =>
+    const read = (key: string) =>
       key
         .split(".")
         .reduce<unknown>(
           (value, part) => (value as Record<string, unknown>)[part],
           catalogs[namespace],
         ) as string;
+    return Object.assign(read, { raw: read });
   },
 }));
 afterEach(cleanup);
@@ -37,7 +38,7 @@ async function shell(search?: ReactNode) {
   const { container } = render(
     await WorkspaceShell({
       locale: "en",
-      account: { name: "Synthetic Broker" },
+      account: { name: "Synthetic Broker", detail: "broker@example.test" },
       mayManageAccess: false,
       primary: workspacePrimaryNav,
       tools: permittedTools(
@@ -55,55 +56,45 @@ async function shell(search?: ReactNode) {
       children: <p>Authorized work</p>,
     }),
   );
-  const [rail, bar] = container.querySelectorAll("header");
+  const rail = container.querySelector("aside");
+  const bar = container.querySelector<HTMLElement>("header > div.lg\\:hidden");
   const dialog = container.querySelector("dialog");
   if (!rail || !bar || !dialog) throw new Error("Missing shell landmark");
-  return { rail, bar, dialog };
+  return { rail, bar, dialog, container };
 }
-
 const hrefs = (root: Element) =>
   [...root.querySelectorAll("a")].map((link) => link.getAttribute("href"));
 
-it("phones get the Figma context bar: logo, Butler and the X02 menu, no tabs or search", async () => {
+it("O01 groups everyday work and people/property in one rail, with a single page-picker entry", async () => {
   const { rail, bar } = await shell();
-  expect(bar).toHaveClass("lg:hidden");
-  expect(bar.querySelector('img[alt="MS Realty"]')).not.toBeNull();
-  expect(within(bar).getByRole("link", { name: "Butler" })).toHaveAttribute(
-    "href",
-    "/en/operations/assistance",
+  expect(within(rail).getByRole("heading", { name: "Work" })).toHaveAttribute(
+    "id",
+    "sidebar-work-title",
   );
-  const menu = within(bar).getByRole("link", { name: "Open menu" });
-  expect(menu).toHaveAttribute("href", "/en/operations");
-  expect(menu).toHaveAttribute("aria-controls", "agency-tools-menu");
-  expect(hrefs(bar)).toEqual(["/en/operations/assistance", "/en/operations"]);
-  expect([...bar.querySelectorAll("img")].map((icon) => icon.getAttribute("width"))).toEqual([
-    "86",
-    "20",
-    "20",
-  ]);
-  expect(bar.querySelector("details, search, input, form")).toBeNull();
-  // The wide-screen rail is untouched: six destinations, then Butler and More tools.
-  expect(hrefs(rail).filter((href) => !href?.includes("/access/"))).toEqual([
-    "/en/today",
-    "/en/inquiries",
-    "/en/cases",
-    "/en/inventory",
-    "/en/calendar",
-    "/en/tasks",
-    "/en/operations/assistance",
+  expect(within(rail).getByRole("heading", { name: "People & property" })).toHaveAttribute(
+    "id",
+    "sidebar-records-title",
+  );
+  expect(hrefs(rail).filter((href) => href?.startsWith("/en/operations"))).toEqual([
     "/en/operations",
+    "/en/operations/assistance",
   ]);
+  expect(hrefs(rail)).toContain("/en/contacts");
+  expect(hrefs(bar)).toEqual(["/en/operations", "/en/today", "/en/operations/assistance"]);
+  expect(within(bar).getByRole("link", { name: enWorkspace.openNavigation })).toHaveAttribute(
+    "aria-controls",
+    "agency-tools-menu",
+  );
+  expect(bar.querySelector("search, input, form, details")).toBeNull();
 });
 
-it("X02 waits closed, offers only permitted rows and marks the current page", async () => {
+it("X02 starts closed, offers permitted native page links and preserves a personal destination", async () => {
   const { dialog } = await shell();
   expect(dialog).not.toHaveAttribute("open");
   expect(dialog).toHaveAttribute("aria-labelledby", "agency-tools-menu-title");
-  expect(dialog.querySelector("#agency-tools-menu-title")).toHaveTextContent("Agency tools");
-  expect(dialog.querySelector("#agency-tools-menu-title")?.tagName).toBe("H2");
+  expect(dialog.querySelector("#agency-tools-menu-title")).toHaveTextContent("All pages");
   const navigation = within(dialog).getAllByRole("navigation", { hidden: true });
-  expect(navigation).toHaveLength(1);
-  expect(navigation[0]).toHaveAccessibleName("Work");
+  expect(navigation).toHaveLength(2);
   expect(hrefs(navigation[0] as HTMLElement)).toEqual([
     "/en/today",
     "/en/inquiries",
@@ -111,24 +102,42 @@ it("X02 waits closed, offers only permitted rows and marks the current page", as
     "/en/inventory",
     "/en/calendar",
     "/en/tasks",
+    "/en/contacts",
     "/en/coverage",
   ]);
+  expect(hrefs(navigation[1] as HTMLElement)).toEqual(["/en/settings"]);
+  expect(dialog.querySelector("[data-workspace-account]")?.closest("a")).toHaveAccessibleName(
+    "Profile & settings: Synthetic Broker broker@example.test",
+  );
+  expect(hrefs(dialog)).not.toContain("/en/access/manage");
   const current = dialog.querySelectorAll('[aria-current="page"]');
   expect(current).toHaveLength(1);
   expect(current[0]).toHaveAttribute("href", "/en/cases");
-  expect(current[0]).toHaveTextContent("Cases Context and next steps");
-  // Below lg the foot keeps the person, the interface language and sign out.
-  expect(dialog.querySelector("[data-workspace-account]")).toHaveTextContent("Synthetic Broker");
-  expect(dialog.querySelector('a[hreflang="ru"]')).toHaveAttribute("href", "/ru/cases/case-1");
-  expect(dialog.querySelector("form[method=post]")).toHaveAttribute("action", "/en/access/signout");
   expect(dialog.querySelector('form[method="dialog"] button')).toHaveAccessibleName("Close");
+  expect(dialog.querySelector("form[method=post]")).toHaveAttribute("action", "/en/access/signout");
 });
 
-it("global search, once supplied, sits in the rail and in X02, never in the phone bar", async () => {
+it("personal account uses a native disclosure; the sidebar toggle has a guarded native POST", async () => {
+  const { rail, container } = await shell();
+  const account = rail.querySelector("details");
+  expect(account).not.toHaveAttribute("open");
+  expect(account?.querySelector("summary")).toHaveAccessibleName(
+    "Account: Synthetic Broker broker@example.test",
+  );
+  expect(account?.querySelector('a[href="/en/settings"]')).toHaveTextContent("Profile & settings");
+  expect(account?.querySelector('a[href="/en/access/manage"]')).toBeNull();
+  expect(container.querySelector('form[action="/en/settings/navigation"]')).toHaveAttribute(
+    "method",
+    "post",
+  );
+});
+
+it("an actual supplied record search stays distinct from the page-name filter", async () => {
   const { rail, bar, dialog } = await shell(<input type="search" aria-label="Find records" />);
   expect(bar.querySelector("search, input")).toBeNull();
   for (const place of [rail, dialog])
     expect(place.querySelector('search[aria-label="Search records"] input')).toHaveAccessibleName(
       "Find records",
     );
+  expect(dialog.querySelector("[data-page-filter]")).toHaveAccessibleName(enTools.searchPages);
 });

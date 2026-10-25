@@ -116,14 +116,16 @@ for (const javaScriptEnabled of [true, false])
       await expect(page.getByText("Staff membership ended", { exact: true })).toBeVisible();
       await page.goto(hostUrl("staff", "/en/today"));
       // The phone context bar's menu opens X02 in place, or its page without JavaScript.
-      const menu = page.getByRole("banner").getByRole("link", { name: "Open menu", exact: true });
+      const menu = page
+        .getByRole("banner")
+        .getByRole("link", { name: "Open navigation", exact: true });
       if (javaScriptEnabled) await expect(menu).toHaveAttribute("aria-haspopup", "dialog");
       await menu.click();
       if (!javaScriptEnabled) await expect(page).toHaveURL(hostUrl("staff", "/en/operations"));
       const tools = javaScriptEnabled
-        ? page.getByRole("dialog", { name: "Agency tools", exact: true })
+        ? page.getByRole("dialog", { name: "All pages", exact: true })
         : page.getByRole("main");
-      await expect(tools.getByRole("heading", { name: "Agency tools", exact: true })).toBeVisible();
+      await expect(tools.getByRole("heading", { name: "All pages", exact: true })).toBeVisible();
       await tools.getByRole("link", { name: /^Work without an owner/ }).click();
       await expect(page).toHaveURL(hostUrl("staff", "/en/coverage"));
       for (const [locale, heading] of [

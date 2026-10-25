@@ -92,6 +92,9 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
     const releaseReview = await delayScripts(review);
     try {
       await review.goto(hostUrl("staff", href), { waitUntil: "commit" });
+      // A person selects this review tab. Background WebKit can suspend the animation
+      // frames needed for native click stability while these scripts are deliberately held.
+      await review.bringToFront();
       const section = review.locator("section").filter({
         has: review.getByRole("heading", { name: "Record qualified claim review", exact: true }),
       });
@@ -104,7 +107,7 @@ test("O21: pre-hydration content fields and review confirmation survive enhancem
         section.getByLabel("Approval valid until", { exact: true }),
         expiryAt,
       );
-      await section.getByRole("checkbox").check();
+      await section.getByRole("checkbox").check({ timeout: 5_000 });
       releaseReview();
       await review.waitForLoadState("networkidle");
       await section

@@ -1,7 +1,4 @@
-// Agency shell follows the saved O01 composition on wide screens. Phones and tablets get the
-// Figma context bar (O02 18:2906, O04 14:4523): logo, Butler and the X02 agency-tools menu,
-// which holds every destination, the person, the interface language and sign out.
-
+// O01/X02 workspace navigation: everyday work, records and personal controls share one shell.
 import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
@@ -9,10 +6,11 @@ import { type ReactNode, Suspense } from "react";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx } from "@/ui/cx";
+import { SearchIcon } from "@/ui/icons";
 import { SkipLink } from "@/ui/skip-link";
-import { AccountIdentity, SignOutForm } from "./account";
+import { AccountMenu } from "./account";
 import { AgencyTools } from "./agency-tools";
-import { AgencyToolsMenu } from "./agency-tools-menu";
+import { AgencyToolsBehavior, AgencyToolsMenu } from "./agency-tools-menu";
 import { LocaleSwitcher } from "./language-switcher";
 import { NavLink } from "./nav-link";
 import {
@@ -24,29 +22,21 @@ import {
   type WorkspaceNavLabel,
   workspaceSecondaryNav,
 } from "./navigation";
+import { NavigationIcon } from "./navigation-icons";
 import { NavigationLoading } from "./navigation-loading";
+import type { SidebarMode } from "./navigation-preference";
 import { WorkspaceContext } from "./workspace-context";
+import { SidebarToggle, WorkspaceFrame } from "./workspace-frame";
 
 export const workspaceMainId = "main";
 const toolsMenuId = "agency-tools-menu";
-
+const workLabels = new Set<WorkspaceNavLabel>(["today", "inquiries", "calendar", "tasks"]);
 const sideLinkClass = cx(
-  "flex min-h-control min-w-0 items-center gap-3 rounded-control px-3 py-2 text-dense text-text-muted no-underline wrap-anywhere",
-  "transition-colors duration-(--duration-fast) hover:bg-divider",
-  "aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-text",
+  "flex min-h-control min-w-0 items-center gap-3 rounded-control px-3 py-2.5 text-dense font-medium text-text-muted no-underline",
+  "transition-colors duration-(--duration-fast) hover:bg-divider hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+  "aria-[current=page]:bg-selected aria-[current=page]:font-semibold aria-[current=page]:text-action",
+  "lg:group-data-[sidebar=compact]/shell:justify-center lg:group-data-[sidebar=compact]/shell:px-2",
 );
-
-// Original 20px static assets from get_design_context O01, retained locally without redrawing.
-const navIcons: Partial<Record<WorkspaceNavLabel, string>> = {
-  today: "/brand/workspace/today.svg",
-  inquiries: "/brand/workspace/inquiries.svg",
-  cases: "/brand/workspace/cases.svg",
-  calendar: "/brand/workspace/calendar.svg",
-  inventory: "/brand/workspace/inventory.svg",
-  tasks: "/brand/workspace/tasks.svg",
-  butler: "/brand/workspace/butler.svg",
-  moreTools: "/brand/workspace/more-tools.svg",
-};
 
 export async function WorkspaceShell({
   locale,
@@ -56,40 +46,28 @@ export async function WorkspaceShell({
   mayManageAccess = false,
   tools,
   primary: primaryItems = permittedWorkspaceNav(new Set()),
+  initialMode = "expanded",
+  returnTo = `/${locale}/today`,
   children,
 }: {
   locale: StaffLocale;
-  /** Global search over authorized records (§06.3); supplied once search exists. */
   search?: ReactNode;
-  /** Owned, actionable work per destination: navigation aids, never decoration (L07). */
   counts?: Partial<Record<WorkspaceNavLabel, number>>;
-  /** Signed-in operator: name and office. */
   account?: { name: string; detail?: string };
   mayManageAccess?: boolean;
-  /** X02 rows this person may open (navigation.ts); signed out, only rows anyone may open. */
   tools?: readonly AgencyToolGroup[];
   primary?: readonly WorkspaceNavItem[];
+  initialMode?: SidebarMode;
+  returnTo?: string;
   children: ReactNode;
 }) {
   const t = await getTranslations({ locale, namespace: "workspace" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
   const common = await getTranslations({ locale, namespace: "common" });
-  const toolsCopy = await getTranslations({ locale, namespace: "tools" });
   const primary = linked(primaryItems, locale);
   const secondary = linked(workspaceSecondaryNav, locale);
   const butler = secondary.find((item) => item.label === "butler");
   const toolsPage = secondary.find((item) => item.label === "moreTools");
-  const accountActions = (
-    <div className="flex flex-col gap-2 px-2">
-      {mayManageAccess ? (
-        <a href={`/${locale}/access/manage`} className="text-compact text-action underline">
-          {t("manageAccess")}
-        </a>
-      ) : null}
-      {account ? <SignOutForm locale={locale} label={t("signOut")} /> : null}
-    </div>
-  );
-  // Awaited here, so the shell (and its unit test) renders in one pass.
   const toolsMenu = await AgencyTools({
     locale,
     groups: tools ?? permittedTools(locale, new Set()),
@@ -98,44 +76,28 @@ export async function WorkspaceShell({
     account,
     search,
   });
-  const accountIdentity = account ? (
-    <AccountIdentity name={account.name} detail={account.detail} className="px-2" />
-  ) : null;
-
-  // A preference, not a destination. Staff URLs carry the locale (§03.1), so choosing a
-  // language opens the same address in it.
   const languageSwitcher = (
     <LocaleSwitcher locale={locale} locales={staffLocales} label={t("interfaceLanguage")} />
   );
-
-  const list = (items: typeof primary, className: string, withIcons = false) => (
-    <ul className="flex flex-col gap-0.5">
+  const list = (items: typeof primary) => (
+    <ul className="flex flex-col gap-1">
       {items.map((item) => {
-        const icon = withIcons ? navIcons[item.label] : null;
         const count = counts?.[item.label];
         return (
           <li key={item.label}>
             <NavLink
               href={item.href}
-              prefetch={item.label === "butler" ? false : undefined}
-              className={className}
-              {...(item.label === "moreTools"
-                ? { excludePaths: [`/${locale}/operations/assistance`] }
-                : {})}
+              title={t(item.label)}
+              prefetch={false}
+              className={sideLinkClass}
+              excludePaths={item.label === "moreTools" && butler ? [butler.href] : []}
             >
-              {icon ? (
-                <Image
-                  src={icon}
-                  alt=""
-                  aria-hidden="true"
-                  width={20}
-                  height={20}
-                  className="shrink-0"
-                />
-              ) : null}
-              <span className="min-w-0 flex-1">{t(item.label)}</span>
+              <NavigationIcon name={item.label} />
+              <span className="min-w-0 flex-1 wrap-anywhere lg:group-data-[sidebar=compact]/shell:sr-only">
+                {t(item.label)}
+              </span>
               {count ? (
-                <span className="min-w-6 rounded-full bg-subtle px-1.5 text-center text-caption font-semibold text-text-muted tabular-nums group-data-current:bg-action group-data-current:text-text-inverse">
+                <span className="min-w-6 rounded-full bg-surface px-1.5 text-center text-caption font-semibold tabular-nums lg:group-data-[sidebar=compact]/shell:sr-only">
                   {count}
                 </span>
               ) : null}
@@ -145,102 +107,162 @@ export async function WorkspaceShell({
       })}
     </ul>
   );
-
+  const work = primary.filter((item) => workLabels.has(item.label));
+  const records = primary.filter((item) => !workLabels.has(item.label));
   return (
     <PrivatePageGuard locale={locale} verification={randomUUID()}>
-      {/* A focused state (one outcome, one way back) stands alone: the chrome steps aside. */}
-      <div className="group/shell min-h-dvh bg-canvas lg:grid lg:grid-cols-[14rem_minmax(0,1fr)] has-[[data-focused-state]]:block">
+      <WorkspaceFrame initialMode={initialMode}>
+        <AgencyToolsBehavior dialogId={toolsMenuId} />
         <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>
-
-        {/* Wide screens: persistent side navigation on a quiet subtle surface. */}
-        <header className="hidden bg-subtle lg:sticky lg:top-0 lg:flex lg:h-dvh lg:min-w-0 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:p-5 group-has-[[data-focused-state]]/shell:hidden!">
-          <p className="flex items-center">
+        <aside
+          id="workspace-sidebar"
+          aria-label={t("navigation")}
+          className="hidden min-w-0 flex-col gap-4 border-e border-divider bg-subtle px-3 py-4 lg:sticky lg:top-0 lg:flex lg:h-dvh group-has-[[data-focused-state]]/shell:hidden!"
+        >
+          <a
+            href={`/${locale}/today`}
+            className="flex min-h-control items-center gap-3 rounded-control px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus lg:group-data-[sidebar=compact]/shell:px-1"
+          >
             <Image
               src="/brand/logo-ms-realty.png"
               alt={common("brand")}
               width={86}
               height={44}
-              className="h-auto shrink-0 object-contain"
+              className="h-auto w-20 shrink-0 object-contain lg:group-data-[sidebar=compact]/shell:w-10"
+              priority
             />
-          </p>
-          {search ? <search aria-label={t("search")}>{search}</search> : null}
-          <nav aria-label={t("label")}>{list(primary, sideLinkClass, true)}</nav>
-          {secondary.length > 0 ? (
-            <nav aria-label={t("secondaryLabel")} className="mt-auto border-t border-divider pt-4">
-              {list(secondary, sideLinkClass, true)}
-            </nav>
+            <span className="text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only">
+              {t("label")}
+            </span>
+          </a>
+          {search ? (
+            <search aria-label={t("search")}>{search}</search>
+          ) : toolsPage ? (
+            <AgencyToolsMenu
+              href={toolsPage.href}
+              dialogId={toolsMenuId}
+              shortcut
+              className="flex min-h-control items-center gap-3 rounded-control border border-divider bg-canvas px-3 text-dense text-text-muted hover:bg-surface lg:group-data-[sidebar=compact]/shell:justify-center lg:group-data-[sidebar=compact]/shell:px-2"
+            >
+              <SearchIcon />
+              <span className="lg:group-data-[sidebar=compact]/shell:sr-only">{t("allPages")}</span>
+            </AgencyToolsMenu>
           ) : null}
-          <div className="flex min-w-0 flex-col gap-3 border-t border-divider pt-4">
-            {accountIdentity}
-            {accountActions}
-          </div>
-        </header>
-
-        {/* Phones and tablets: the context bar. No tab row and no inline search: every
-            destination, search, the language and sign out live in the X02 menu. */}
-        <header className="flex items-center gap-4 border-b border-divider bg-canvas px-gutter py-4 lg:hidden group-has-[[data-focused-state]]/shell:hidden">
-          <p className="flex min-w-0 flex-1 items-center">
-            <Image
-              src="/brand/logo-ms-realty.png"
-              alt={common("brand")}
-              width={86}
-              height={44}
-              className="h-auto shrink-0 object-contain"
-            />
-          </p>
-          <nav aria-label={t("label")} className="flex items-center gap-4">
-            {butler ? (
-              <NavLink
-                href={butler.href}
-                prefetch={false}
-                className="inline-flex h-control items-center gap-2 rounded-control p-3 text-dense text-text-muted no-underline hover:bg-subtle aria-[current=page]:bg-selected aria-[current=page]:text-text"
-              >
-                <Image
-                  src="/brand/workspace/sparkles.svg"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="shrink-0"
-                />
-                {t("butler")}
-              </NavLink>
+          <nav
+            aria-label={t("label")}
+            className="min-h-0 flex-1 space-y-5 overflow-y-auto px-1 py-1"
+          >
+            {work.length ? (
+              <section aria-labelledby="sidebar-work-title">
+                <h2
+                  id="sidebar-work-title"
+                  className="mb-2 px-3 text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only"
+                >
+                  {t("workGroup")}
+                </h2>
+                {list(work)}
+              </section>
             ) : null}
-            {toolsPage ? (
-              <AgencyToolsMenu
-                href={toolsPage.href}
-                dialogId={toolsMenuId}
-                className="inline-flex size-control items-center justify-center rounded-control hover:bg-subtle"
-              >
-                <Image src="/brand/workspace/panel-left.svg" alt="" width={20} height={20} />
-                <span className="sr-only">{toolsCopy("openMenu")}</span>
-              </AgencyToolsMenu>
+            {records.length ? (
+              <section aria-labelledby="sidebar-records-title">
+                <h2
+                  id="sidebar-records-title"
+                  className="mb-2 px-3 text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only"
+                >
+                  {t("recordsGroup")}
+                </h2>
+                {list(records)}
+              </section>
             ) : null}
           </nav>
-        </header>
-        {/* X02 in place over the page; hidden until the menu control opens it as a modal. */}
-        <dialog
-          id={toolsMenuId}
-          aria-labelledby={`${toolsMenuId}-title`}
-          className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto overscroll-contain bg-subtle p-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] text-text backdrop:bg-transparent sm:p-16"
-        >
-          {toolsMenu}
-        </dialog>
-
+          {butler ? (
+            <nav aria-label={t("secondaryLabel")} className="border-t border-divider pt-3">
+              {list([butler])}
+            </nav>
+          ) : null}
+          {account ? (
+            <div className="min-w-0 border-t border-divider pt-3">
+              <AccountMenu
+                account={account}
+                locale={locale}
+                id="workspace-account-links"
+                label={t("account")}
+                settingsLabel={t("profileSettings")}
+                manageLabel={mayManageAccess ? t("manageAccess") : undefined}
+                signOutLabel={t("signOut")}
+              />
+            </div>
+          ) : null}
+        </aside>
         <div className="min-w-0">
-          {/* A named region, so the wide-screen context bar sits inside a landmark like the rest of the page. */}
-          <section
-            aria-label={t("currentPage")}
-            className="hidden min-h-[4.5rem] items-center justify-between gap-4 border-b border-divider px-8 py-3 lg:flex group-has-[[data-focused-state]]/shell:hidden!"
-          >
-            <WorkspaceContext
-              label={t("label")}
-              items={[...primary, ...secondary].map((item) => ({
-                href: item.href,
-                label: t(item.label),
-              }))}
-            />
-            {languageSwitcher}
-          </section>
+          <header className="border-b border-divider bg-canvas group-has-[[data-focused-state]]/shell:hidden!">
+            <div className="flex min-h-18 items-center gap-3 px-gutter py-2 lg:hidden">
+              {toolsPage ? (
+                <AgencyToolsMenu
+                  href={toolsPage.href}
+                  dialogId={toolsMenuId}
+                  className="inline-flex size-control shrink-0 items-center justify-center rounded-control hover:bg-subtle"
+                >
+                  <Image src="/brand/workspace/panel-left.svg" alt="" width={20} height={20} />
+                  <span className="sr-only">{t("openNavigation")}</span>
+                </AgencyToolsMenu>
+              ) : null}
+              <a
+                href={`/${locale}/today`}
+                className="flex min-h-control min-w-0 flex-1 items-center"
+              >
+                <Image
+                  src="/brand/logo-ms-realty.png"
+                  alt={common("brand")}
+                  width={86}
+                  height={44}
+                  className="h-auto shrink-0 object-contain"
+                />
+              </a>
+              {butler ? (
+                <NavLink
+                  href={butler.href}
+                  prefetch={false}
+                  className="inline-flex min-h-control items-center gap-2 rounded-control px-3 text-dense text-text-muted hover:bg-subtle aria-[current=page]:bg-selected"
+                >
+                  <Image src="/brand/workspace/sparkles.svg" alt="" width={20} height={20} />
+                  {t("butler")}
+                </NavLink>
+              ) : null}
+            </div>
+            <div className="hidden min-h-18 items-center justify-between gap-4 px-6 py-2 lg:flex">
+              <div className="flex min-w-0 items-center gap-3">
+                <SidebarToggle
+                  locale={locale}
+                  returnTo={returnTo}
+                  expand={t("expandNavigation")}
+                  collapse={t("collapseNavigation")}
+                />
+                <WorkspaceContext
+                  label={t("label")}
+                  navigationLabel={t("breadcrumb")}
+                  items={[
+                    ...[...primary, ...secondary].map((item) => ({
+                      href: item.href,
+                      label: t(item.label),
+                    })),
+                    { href: `/${locale}/settings`, label: t("settings") },
+                    {
+                      href: `/${locale}/access/manage`,
+                      label: t("manageAccess"),
+                      matchPath: `/${locale}/access`,
+                    },
+                    {
+                      href: `/${locale}/settings?section=security`,
+                      label: t("personalSettings.securityNav"),
+                      matchPath: `/${locale}/access/enrol`,
+                    },
+                  ]}
+                />
+              </div>
+              {languageSwitcher}
+            </div>
+          </header>
           <main id={workspaceMainId} tabIndex={-1} className="min-w-0 outline-none">
             <Suspense fallback={null}>
               <NavigationLoading surface="staff" />
@@ -248,7 +270,14 @@ export async function WorkspaceShell({
             <div data-route-content="">{children}</div>
           </main>
         </div>
-      </div>
+        <dialog
+          id={toolsMenuId}
+          aria-labelledby={`${toolsMenuId}-title`}
+          className="fixed inset-y-0 start-0 m-0 h-dvh max-h-none w-[min(24rem,calc(100vw-1rem))] max-w-none overflow-hidden overscroll-contain [@media(max-height:30rem)]:overflow-y-auto border-e border-divider bg-canvas p-0 text-text backdrop:bg-text/40 lg:inset-0 lg:m-auto lg:h-[min(44rem,calc(100dvh-3rem))] lg:max-h-[calc(100dvh-3rem)] lg:w-[min(42rem,calc(100vw-3rem))] lg:rounded-panel lg:border"
+        >
+          {toolsMenu}
+        </dialog>
+      </WorkspaceFrame>
     </PrivatePageGuard>
   );
 }

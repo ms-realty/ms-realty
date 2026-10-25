@@ -152,9 +152,7 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
   await page.getByRole("link", { name: "Continue to the workspace" }).click();
   await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
   await page.goto(hostUrl("staff", "/en/access/enrol"));
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Your passkey is ready" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Sign-in & security" })).toBeVisible();
   await info.attach("primary-passkey-ready-desktop", {
     body: await page.screenshot(),
     contentType: "image/png",
@@ -168,7 +166,6 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
     contentType: "image/png",
   });
   if (enrollmentViewport) await page.setViewportSize(enrollmentViewport);
-  await page.getByText("Add another passkey (optional)", { exact: true }).click();
   await auth.cdp.send("WebAuthn.removeVirtualAuthenticator", { authenticatorId: first });
   await auth.add();
   await page.getByRole("button", { name: "Add backup passkey", exact: true }).click();
@@ -203,7 +200,14 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
   await page.goto(hostUrl("client", "/en/access"));
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your MS Realty client account");
   await page.goto(hostUrl("staff", "/en/access/enrol"));
-  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: /^Account:/ })
+    .click();
+  await page
+    .getByRole("complementary")
+    .getByRole("button", { name: "Sign out", exact: true })
+    .click();
   await expect(page).toHaveURL(hostUrl("staff", "/en/access"));
   await page.getByRole("button", { name: "Sign in with a passkey", exact: true }).click();
   await expect(page).toHaveURL(hostUrl("staff", "/en/today"));
@@ -237,7 +241,14 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
     ).toString("base64url");
     const returnTo = `/en/operations/privacy?after=${cursor}`;
     await page.goto(hostUrl("staff", "/en/access/enrol"));
-    await page.getByRole("button", { name: "Sign out", exact: true }).click();
+    await page
+      .getByRole("complementary")
+      .getByRole("button", { name: /^Account:/ })
+      .click();
+    await page
+      .getByRole("complementary")
+      .getByRole("button", { name: "Sign out", exact: true })
+      .click();
     await page.goto(hostUrl("staff", returnTo));
     await expect(page).toHaveURL(
       (url) => url.pathname === "/en/access" && url.searchParams.get("returnTo") === returnTo,

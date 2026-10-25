@@ -6,18 +6,21 @@ import { getDb } from "@/db/client";
 import { principals } from "@/db/schema";
 import type { StaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
-import { heldCapabilities, resolveGrants } from "@/server/authz";
+import { heldCapabilitiesFromGrants, resolveGrants } from "@/server/authz";
 import { agencyToolCapabilities, permittedTools, permittedWorkspaceNav } from "./navigation";
 
 export async function workspaceViewer(locale: StaffLocale, session: Session) {
   const db = getDb();
-  const [[principal], held, grants] = await Promise.all([
+  const [[principal], grants] = await Promise.all([
     db
-      .select({ name: principals.displayName })
+      .select({ name: principals.displayName, email: principals.email })
       .from(principals)
       .where(eq(principals.id, session.account.id)),
-    heldCapabilities(db, session.actor, [...agencyToolCapabilities, "access.grant"]),
     resolveGrants(db, session.actor),
+  ]);
+  const held = heldCapabilitiesFromGrants(session.actor, grants, [
+    ...agencyToolCapabilities,
+    "access.grant",
   ]);
   // A scoped grant still opens its filtered collection. Navigation never grants record access.
   const navigable = new Set(
@@ -26,7 +29,7 @@ export async function workspaceViewer(locale: StaffLocale, session: Session) {
       .map((grant) => grant.capability),
   );
   return {
-    account: { name: principal?.name ?? "MS Realty" },
+    account: { name: principal?.name ?? "MS Realty", detail: principal?.email },
     primary: permittedWorkspaceNav(navigable),
     tools: permittedTools(locale, held, navigable),
     mayManageAccess: held.has("access.grant"),
