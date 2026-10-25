@@ -9,12 +9,14 @@ export function StaffPage({
   title,
   lead,
   actions,
+  reference,
   children,
   className,
 }: {
   title: string;
   lead?: ReactNode;
   actions?: ReactNode;
+  reference?: string;
   children: ReactNode;
   className?: string;
 }) {
@@ -23,11 +25,16 @@ export function StaffPage({
       <header className={styles.pageHeader}>
         <div>
           <h1>{title}</h1>
+          {reference ? (
+            <p data-workflow-reference>
+              <bdi>{reference}</bdi>
+            </p>
+          ) : null}
           {lead ? <p>{lead}</p> : null}
         </div>
         {actions ? <div className={styles.actions}>{actions}</div> : null}
       </header>
-      {children}
+      <div className={styles.pageBody}>{children}</div>
     </div>
   );
 }

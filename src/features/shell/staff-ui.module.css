@@ -19,6 +19,12 @@
 .pageHeader > div:first-child {
   min-width: 0;
 }
+
+.pageBody {
+  display: grid;
+  min-width: 0;
+  gap: 1.5rem;
+}
 .pageHeader h1 {
   font-size: 1.625rem;
   line-height: 1.35;

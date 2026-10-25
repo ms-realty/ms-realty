@@ -8,6 +8,7 @@ import { settingsCopy } from "@/features/identity/settings-copy";
 import { AccountIdentity } from "@/features/shell/account";
 import { LocaleSwitcher } from "@/features/shell/language-switcher";
 import { NavigationIcon } from "@/features/shell/navigation-icons";
+import { StaffPage } from "@/features/shell/staff-ui";
 import { SidebarToggle } from "@/features/shell/workspace-frame";
 import { workCopy } from "@/features/work/copy";
 import { isStaffLocale, staffLocales } from "@/i18n/config";
@@ -60,11 +61,7 @@ export default async function SettingsPage({
   ];
   const selected = sections.find((section) => section.id === query.section)?.id ?? "profile";
   return (
-    <div className="mx-auto w-full max-w-5xl px-gutter py-8 lg:px-8 lg:py-10">
-      <div className="mb-6 space-y-3">
-        <h1 className="text-page font-semibold">{copy.title}</h1>
-        <p className="max-w-reading text-text-muted">{copy.lead}</p>
-      </div>
+    <StaffPage title={copy.title} lead={copy.lead}>
       <nav aria-label={copy.title}>
         <div className="hidden gap-1 border-b border-divider sm:flex">
           {sections.map((section) => (
@@ -107,7 +104,7 @@ export default async function SettingsPage({
           </ul>
         </details>
       </nav>
-      <div className="max-w-reading pt-7">
+      <div className="max-w-reading">
         {selected === "profile" ? (
           <section aria-labelledby="profile-title" className="space-y-6">
             <div className="space-y-2">
@@ -214,6 +211,6 @@ export default async function SettingsPage({
           </section>
         )}
       </div>
-    </div>
+    </StaffPage>
   );
 }
