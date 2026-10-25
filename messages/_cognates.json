@@ -64,7 +64,8 @@
     "caseDirectory.dispositions.active": "Активна",
     "caseDirectory.dueAt": "Срок",
     "workspace.workGroup": "Работа",
-    "workspace.personalSettings.title": "Настройки"
+    "workspace.personalSettings.title": "Настройки",
+    "operations.businessReports.unknown": "Неизвестно"
   },
   "de": {
     "discovery.hotel": "Hotel",
