@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { createContext, type ReactNode, useContext, useState } from "react";
 import { type SidebarMode, sidebarPreferenceCookie } from "./navigation-preference";
+import s from "./workspace.module.css";
 
 const NavigationContext = createContext<{
   mode: SidebarMode;
@@ -21,7 +22,7 @@ export function WorkspaceFrame({
     <NavigationContext value={{ mode, setMode }}>
       <div
         data-sidebar={mode}
-        className="group/shell min-h-dvh bg-canvas lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:data-[sidebar=compact]:grid-cols-[5rem_minmax(0,1fr)] has-[[data-focused-state]]:block"
+        className={`${s.frame} group/shell min-h-dvh bg-canvas lg:grid lg:grid-cols-[14.5rem_minmax(0,1fr)] lg:data-[sidebar=compact]:grid-cols-[4.5rem_minmax(0,1fr)] has-[[data-focused-state]]:block`}
       >
         {children}
       </div>

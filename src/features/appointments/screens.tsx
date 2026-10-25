@@ -21,8 +21,10 @@ import {
   WorkflowTimeRange,
   workflowLink,
 } from "../cases/screens";
+import { StaffPage } from "../shell/staff-ui";
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
+import { calendarCopy } from "./calendar-copy";
 import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
 import { CalendarView } from "./calendar-view";
 import { hostHandoverCopy } from "./host-copy";
@@ -61,9 +63,9 @@ export async function CalendarScreen(props: ScreenProps & { search?: CalendarSea
     );
   }
   return (
-    <WorkflowPage {...props} title={c.calendar}>
+    <StaffPage title={c.calendar} lead={calendarCopy(props.locale).subtitle}>
       <CalendarView locale={props.locale} query={query} data={data} adjusted={adjusted} />
-    </WorkflowPage>
+    </StaffPage>
   );
 }
 export async function AppointmentScreen(props: ScreenProps & { id: string }) {
