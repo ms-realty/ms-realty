@@ -43,13 +43,24 @@ const shortDay = (day: string, locale: string, weekday = false) =>
       ? { weekday: "short" as const }
       : { day: "numeric" as const, month: "short" as const }),
   }).format(civilDate(day));
-const clockText = (at: Date, locale: string, zone: string) =>
+const clockText = (at: Date, locale: string, zone: string, withOffset = false) =>
   new Intl.DateTimeFormat(language(locale), {
     timeZone: zone,
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
+    ...(withOffset ? { timeZoneName: "shortOffset" as const } : {}),
   }).format(at);
+const offsetText = (at: Date, zone: string) =>
+  new Intl.DateTimeFormat("en", { timeZone: zone, timeZoneName: "shortOffset" })
+    .formatToParts(at)
+    .find((part) => part.type === "timeZoneName")?.value;
+
+function previewRange(start: Date, end: Date, locale: string, zone: string) {
+  // A repeated civil hour must not look like a zero-duration appointment in the week preview.
+  const withOffset = offsetText(start, zone) !== offsetText(end, zone);
+  return `${clockText(start, locale, zone, withOffset)}–${clockText(end, locale, zone, withOffset)}`;
+}
 
 export function CalendarTime({
   at,
@@ -461,8 +472,12 @@ function WeekOverview({
                           className={s.weekTime}
                         >
                           <strong>
-                            {clockText(interval.start as Date, locale, query.zone)}–
-                            {clockText(interval.end as Date, locale, query.zone)}
+                            {previewRange(
+                              interval.start as Date,
+                              interval.end as Date,
+                              locale,
+                              query.zone,
+                            )}
                           </strong>
                           <span>{interval.proposed ? c.proposed : c.current}</span>
                         </span>

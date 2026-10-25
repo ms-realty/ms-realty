@@ -191,6 +191,7 @@ describe("O08 native agenda", () => {
     render(<CalendarView locale="en" query={{ ...query, view: "week" }} data={data} />);
     const overview = screen.getByRole("region", { name: c.weekOverview });
     expect(within(overview).getAllByRole("link")).toHaveLength(8);
+    expect(within(overview).getByText("03:30 GMT+3–03:30 GMT+2", { exact: true })).toBeVisible();
     expect(within(overview).getByText(row.reference, { exact: true }).closest("a")).toHaveAttribute(
       "href",
       `/en/calendar/${row.id}`,
