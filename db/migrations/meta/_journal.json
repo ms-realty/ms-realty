@@ -197,6 +197,13 @@
       "when": 1792690514658,
       "tag": "0060_cms_locale_editions",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792956222491,
+      "tag": "0032_task_effort",
+      "breakpoints": true
     }
   ]
 }
