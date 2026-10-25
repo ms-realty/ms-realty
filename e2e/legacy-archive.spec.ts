@@ -29,6 +29,15 @@ for (const javaScriptEnabled of [true, false]) {
         await expect(article).toHaveAttribute("dir", "ltr");
         await expect(article).toHaveAttribute("data-legacy-source-hash", /^[a-f0-9]{64}$/);
         await expect(article.locator("h1")).toBeVisible();
+        // F09 has only its recorded source edition. A translated shell must not
+        // advertise another edition, including through native/no-JS header links.
+        await expect(page.locator('section[lang="en"]')).toHaveCount(0);
+        await expect(
+          page.locator(`[data-public-header] a[hreflang]:not([hreflang="${item.locale}"])`),
+        ).toHaveCount(0);
+        await expect(
+          page.locator(`[data-public-header] a[hreflang="${item.locale}"]`),
+        ).toHaveAttribute("href", `/${item.locale}/legacy/${item.id}`);
         await expect(article).not.toContainText(
           /Tweet|\[si-contact-form|\[email protected\]|Name Email Phone Message Send/u,
         );

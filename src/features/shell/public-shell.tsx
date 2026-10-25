@@ -17,7 +17,7 @@ import { NavLink } from "./nav-link";
 import { footerNav, linked, publicPrimaryNav, publicUtilityNav } from "./navigation";
 import { NavigationLoading } from "./navigation-loading";
 import { StickyHeader } from "./sticky-header";
-import { languageSuggestionFor } from "./suggestion";
+import { languageSuggestionFor, publicPageLocaleAvailability } from "./suggestion";
 
 export const mainId = "main";
 
@@ -37,7 +37,11 @@ export async function PublicShell({
   const primary = linked(publicPrimaryNav, locale);
   const utilities = linked(publicUtilityNav, locale);
   const footerLinks = linked(footerNav, locale);
-  const suggestion = await languageSuggestionFor(locale);
+  const availability = await publicPageLocaleAvailability(locale);
+  const suggestion = await languageSuggestionFor(
+    locale,
+    availability?.locales ?? routableLocales(),
+  );
 
   const primaryList = (
     <ul className="flex flex-col gap-1 lg:flex-row lg:items-center">
@@ -55,7 +59,11 @@ export async function PublicShell({
     <div className="flex min-h-dvh flex-col bg-canvas">
       <SkipLink targetId={mainId}>{a11y("skipToContent")}</SkipLink>
       {suggestion ? (
-        <LanguageSuggestion suggested={suggestion.locale} copy={suggestion.copy} />
+        <LanguageSuggestion
+          suggested={suggestion.locale}
+          copy={suggestion.copy}
+          availability={availability}
+        />
       ) : null}
       <StickyHeader>
         <div className="mx-auto flex min-h-18 max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-gutter py-2 lg:px-gutter-wide">
@@ -81,7 +89,12 @@ export async function PublicShell({
               </li>
             ))}
             <li>
-              <LocaleSwitcher locale={locale} locales={routableLocales()} label={t("language")} />
+              <LocaleSwitcher
+                locale={locale}
+                locales={routableLocales()}
+                label={t("language")}
+                availability={availability}
+              />
             </li>
             {utilities.some((item) => item.label === "contact") ? null : (
               <li>
