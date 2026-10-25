@@ -306,7 +306,7 @@ Use a restrained 4 px spacing scale: 4, 8, 12, 16, 24, 32, 48, 64. Controls use 
 
 Headings establish page/section/group hierarchy, not a display-font spectacle. Use approximately 32/40 for public primary headings, 28/36 for app page headings, 22/30 for sections, 18/26 for group headings and 16/24 for button labels. Permit wrapping and zoom growth; these are not fixed-height boxes.
 
-Form fields follow Figma UI06 Input (`6:74`) and UI07 Textarea (`6:85`) on public, client and staff surfaces alike: a 14/20 semibold label 8 px above the control; a 16/26 value on the canvas fill, in a 52 px input or select or in a writing surface of at least 144 px with 16 px padding; and an error in 14/20 medium under the field, whose 1 px border takes the error colour; the message and the error summary carry the state, never colour alone. 52 px is the drawn field height; 44 px remains the minimum touch target (06.2), not the visual default.
+Form fields follow Figma UI06 Input (`6:74`) and UI07 Textarea (`6:85`) on public, client and staff surfaces alike: a 14/20 semibold label 8 px above the control; a 16/26 value on the canvas fill, in a 52 px input or select or in a writing surface of at least 144 px with 16 px padding; and an error in 14/20 medium under the field, whose 1 px border takes the error colour; the message and the error summary carry the state, never colour alone. 52 px is the default drawn field height. Staff operational toolbars and short staff forms may use the scoped 44 px control minimum with 16 px input text and 14 px labels (`docs/design/workspace-navigation.md`); public/client forms retain the 52 px default. Text areas remain at least 144 px and all controls grow with zoom and wrapping.
 
 ### 06.2 Layout ranges and density
 

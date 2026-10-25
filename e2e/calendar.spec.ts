@@ -47,6 +47,84 @@ function seed(): Fixture {
   );
 }
 
+test("O08 polished staff calendar keeps a complete responsive itinerary and honest empty state", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "chromium-desktop", "Focused staff composition evidence");
+  const f = seed();
+  await page
+    .context()
+    .addCookies([
+      {
+        name: "msr_staff_session",
+        value: f.token,
+        url: origins.staff,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(hostUrl("staff", "/en/calendar?date=2030-10-27&view=week"));
+  await expect(
+    page.getByRole("article", { name: f.replacement.reference, exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("region", { name: calendarCopy("en").weekOverview })).toBeVisible();
+  await expect(page.locator("#workspace-sidebar")).toBeVisible();
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-populated.png") });
+  await page.screenshot({
+    path: info.outputPath("synthetic-desktop-full-itinerary.png"),
+    fullPage: true,
+  });
+  const scope = page.getByLabel(calendarCopy("en").scope, { exact: true });
+  expect(await scope.boundingBox()).toMatchObject({ height: 44 });
+  await page.getByRole("button", { name: "Collapse navigation", exact: true }).click();
+  await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "compact");
+  await page.reload();
+  await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "compact");
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-compact-navigation.png") });
+  await page.getByRole("button", { name: "Expand navigation", exact: true }).click();
+  await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "expanded");
+  await page.goto(hostUrl("staff", "/bg/calendar?date=2030-12-02&view=agenda"));
+  await expect(page.getByText(calendarCopy("bg").empty, { exact: true })).toBeVisible();
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-empty-bg.png") });
+  for (const locale of ["bg", "en", "ru"]) {
+    const c = calendarCopy(locale);
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto(hostUrl("staff", `/${locale}/calendar?date=2030-10-27&view=week`));
+    const appointment = page.getByRole("article", { name: f.replacement.reference, exact: true });
+    await expect(appointment.getByText(c.reserved, { exact: true })).toBeVisible();
+    await expect(appointment.getByText(c.buffer, { exact: false })).toContainText("30 / 30");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      320,
+    );
+    const details = page.getByText(c.details, { exact: true });
+    await details.click();
+    await expect(page.getByText(c.scopeNote, { exact: true })).toBeVisible();
+    await expect(page.getByText(c.snapshotNote, { exact: true })).toBeVisible();
+    await details.click();
+    expect(
+      (
+        await new AxeBuilder({ page })
+          .include("main")
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+          .analyze()
+      ).violations,
+    ).toEqual([]);
+    if (locale === "bg") {
+      await page.screenshot({ path: info.outputPath("synthetic-mobile-populated-bg.png") });
+      await page.screenshot({
+        path: info.outputPath("synthetic-mobile-full-itinerary-bg.png"),
+        fullPage: true,
+      });
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(hostUrl("staff", "/en/settings?section=preferences"));
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.locator("#workspace-sidebar")).toBeVisible();
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-settings-context.png") });
+});
+
 for (const javaScriptEnabled of [false, true])
   test.describe(`O08 JavaScript ${javaScriptEnabled ? "on" : "off"}`, () => {
     test.use({ javaScriptEnabled });

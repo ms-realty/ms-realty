@@ -25,6 +25,7 @@ import {
 import { NavigationIcon } from "./navigation-icons";
 import { NavigationLoading } from "./navigation-loading";
 import type { SidebarMode } from "./navigation-preference";
+import s from "./workspace.module.css";
 import { WorkspaceContext } from "./workspace-context";
 import { SidebarToggle, WorkspaceFrame } from "./workspace-frame";
 
@@ -89,7 +90,7 @@ export async function WorkspaceShell({
               href={item.href}
               title={t(item.label)}
               prefetch={false}
-              className={sideLinkClass}
+              className={cx(s.sideLink, sideLinkClass)}
               excludePaths={item.label === "moreTools" && butler ? [butler.href] : []}
             >
               <NavigationIcon name={item.label} />
@@ -117,11 +118,17 @@ export async function WorkspaceShell({
         <aside
           id="workspace-sidebar"
           aria-label={t("navigation")}
-          className="hidden min-w-0 flex-col gap-4 border-e border-divider bg-subtle px-3 py-4 lg:sticky lg:top-0 lg:flex lg:h-dvh group-has-[[data-focused-state]]/shell:hidden!"
+          className={cx(
+            s.sidebar,
+            "hidden min-w-0 flex-col gap-4 border-e border-divider bg-subtle px-3 py-4 lg:sticky lg:top-0 lg:flex lg:h-dvh group-has-[[data-focused-state]]/shell:hidden!",
+          )}
         >
           <a
             href={`/${locale}/today`}
-            className="flex min-h-control items-center gap-3 rounded-control px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus lg:group-data-[sidebar=compact]/shell:px-1"
+            className={cx(
+              s.brand,
+              "flex min-h-control items-center gap-3 rounded-control px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus lg:group-data-[sidebar=compact]/shell:px-1",
+            )}
           >
             <Image
               src="/brand/logo-ms-realty.png"
@@ -131,7 +138,12 @@ export async function WorkspaceShell({
               className="h-auto w-20 shrink-0 object-contain lg:group-data-[sidebar=compact]/shell:w-10"
               priority
             />
-            <span className="text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only">
+            <span
+              className={cx(
+                s.brandLabel,
+                "text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only",
+              )}
+            >
               {t("label")}
             </span>
           </a>
@@ -156,7 +168,10 @@ export async function WorkspaceShell({
               <section aria-labelledby="sidebar-work-title">
                 <h2
                   id="sidebar-work-title"
-                  className="mb-2 px-3 text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only"
+                  className={cx(
+                    s.groupTitle,
+                    "mb-2 px-3 text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only",
+                  )}
                 >
                   {t("workGroup")}
                 </h2>
@@ -167,7 +182,10 @@ export async function WorkspaceShell({
               <section aria-labelledby="sidebar-records-title">
                 <h2
                   id="sidebar-records-title"
-                  className="mb-2 px-3 text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only"
+                  className={cx(
+                    s.groupTitle,
+                    "mb-2 px-3 text-caption font-medium text-text-muted lg:group-data-[sidebar=compact]/shell:sr-only",
+                  )}
                 >
                   {t("recordsGroup")}
                 </h2>
@@ -195,8 +213,18 @@ export async function WorkspaceShell({
           ) : null}
         </aside>
         <div className="min-w-0">
-          <header className="border-b border-divider bg-canvas group-has-[[data-focused-state]]/shell:hidden!">
-            <div className="flex min-h-18 items-center gap-3 px-gutter py-2 lg:hidden">
+          <header
+            className={cx(
+              s.contextHeader,
+              "border-b border-divider bg-canvas group-has-[[data-focused-state]]/shell:hidden!",
+            )}
+          >
+            <div
+              className={cx(
+                s.mobileBar,
+                "flex min-h-18 items-center gap-3 px-gutter py-2 lg:hidden",
+              )}
+            >
               {toolsPage ? (
                 <AgencyToolsMenu
                   href={toolsPage.href}
@@ -230,7 +258,12 @@ export async function WorkspaceShell({
                 </NavLink>
               ) : null}
             </div>
-            <div className="hidden min-h-18 items-center justify-between gap-4 px-6 py-2 lg:flex">
+            <div
+              className={cx(
+                s.desktopBar,
+                "hidden min-h-18 items-center justify-between gap-4 px-6 py-2 lg:flex",
+              )}
+            >
               <div className="flex min-w-0 items-center gap-3">
                 <SidebarToggle
                   locale={locale}
