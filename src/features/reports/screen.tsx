@@ -51,9 +51,10 @@ export async function ReportsScreen({
         action={`/${locale}/reports#results`}
         className="flex flex-wrap items-end gap-4"
       >
-        <label className="flex flex-col gap-2">
-          {t.period}
+        <div className="flex flex-col gap-2">
+          <label htmlFor="report-period">{t.period}</label>
           <select
+            id="report-period"
             name="days"
             defaultValue={filter.days}
             className="min-h-control rounded-control border border-border bg-surface p-3"
@@ -64,10 +65,11 @@ export async function ReportsScreen({
               </option>
             ))}
           </select>
-        </label>
-        <label className="flex flex-col gap-2">
-          {t.scope}
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="report-responsibility">{t.scope}</label>
           <select
+            id="report-responsibility"
             name="scope"
             defaultValue={filter.scope}
             className="min-h-control rounded-control border border-border bg-surface p-3"
@@ -75,7 +77,7 @@ export async function ReportsScreen({
             <option value="all">{t.all}</option>
             <option value="mine">{t.mine}</option>
           </select>
-        </label>
+        </div>
         <button className={buttonClass()} type="submit">
           {t.apply}
         </button>
