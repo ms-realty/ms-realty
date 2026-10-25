@@ -16,15 +16,13 @@ try {
     email: `${randomUUID()}@example.test`,
     grants: [{ capability: "report.read" }],
   });
-  await db
-    .insert(schema.passkeys)
-    .values({
-      principalId: staff.id,
-      credentialId: randomUUID(),
-      publicKey: Buffer.from([1]),
-      deviceType: "singleDevice",
-      backedUp: false,
-    });
+  await db.insert(schema.passkeys).values({
+    principalId: staff.id,
+    credentialId: randomUUID(),
+    publicKey: Buffer.from([1]),
+    deviceType: "singleDevice",
+    backedUp: false,
+  });
   const suffix = randomUUID(),
     visibleReference = `RQ-REPORT-${suffix}`,
     hiddenReference = `RQ-HIDDEN-${suffix}`;
