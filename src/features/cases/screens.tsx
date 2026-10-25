@@ -21,6 +21,7 @@ import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { caseAccessCopy } from "../case-access/copy";
 import { documentRequestCopy } from "../document-requests/copy";
+import { StaffPage } from "../shell/staff-ui";
 import { CoverageOwner } from "../work/coverage-owner";
 import { privateRead } from "../work/screens";
 import { workflowAction } from "./actions";
@@ -41,6 +42,7 @@ import { ownerPreviewCopy } from "./owner-preview-copy";
 export const workflowLink = "font-semibold text-accent underline underline-offset-4";
 export type ScreenProps = { locale: string; session: Session };
 export function WorkflowPage({
+  session,
   title,
   children,
   clientOverview = false,
@@ -51,6 +53,12 @@ export function WorkflowPage({
   clientOverview?: boolean;
   reference?: string;
 }) {
+  if (session.account.kind === "staff")
+    return (
+      <StaffPage title={title} reference={reference}>
+        {children}
+      </StaffPage>
+    );
   return (
     <div
       className={

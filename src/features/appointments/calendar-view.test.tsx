@@ -185,4 +185,28 @@ describe("O08 native agenda", () => {
       expect.stringContaining("page=2&requestPage=3"),
     );
   });
+
+  it("O08 week previews supplement the complete resource itinerary and keep day navigation native", () => {
+    const c = calendarCopy("en");
+    render(<CalendarView locale="en" query={{ ...query, view: "week" }} data={data} />);
+    const overview = screen.getByRole("region", { name: c.weekOverview });
+    expect(within(overview).getAllByRole("link")).toHaveLength(8);
+    expect(within(overview).getByText(row.reference, { exact: true }).closest("a")).toHaveAttribute(
+      "href",
+      `/en/calendar/${row.id}`,
+    );
+    const dayLink = within(overview).getByRole("link", { name: /Sunday, 27 October/ });
+    expect(dayLink).toHaveAttribute(
+      "href",
+      expect.stringContaining("date=2030-10-27&view=day&zone=Europe%2FSofia&scope=team"),
+    );
+    const full = screen.getByRole("article", { name: row.reference });
+    expect(within(full).getByText(c.reserved, { exact: true })).toBeVisible();
+    expect(within(full).getByText(c.buffer, { exact: false })).toHaveTextContent("30 / 30");
+    expect(screen.getByText(c.manualShort, { exact: true })).toBeVisible();
+    const details = screen.getByText(c.details, { exact: true }).closest("details");
+    expect(details?.querySelector("summary")).toHaveTextContent(c.details);
+    expect(details).toHaveTextContent(c.scopeNote);
+    expect(details).toHaveTextContent(c.snapshotNote);
+  });
 });

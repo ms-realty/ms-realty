@@ -5,7 +5,7 @@
   "scope": "Calendar scope",
   "team": "Permitted team",
   "mine": "My viewings",
-  "apply": "Show calendar",
+  "apply": "Apply filters",
   "agenda": "Agenda",
   "day": "Day",
   "week": "Week",
@@ -60,5 +60,10 @@
   "requestsNote": "These requests have no confirmed or proposed interval and are not filtered by date. Open a request to review its preferred windows and enter an arrangement.",
   "noRequests": "No requests awaiting a time on this page in the selected scope.",
   "moreRequests": "Next requests",
-  "backRequests": "Previous requests"
+  "backRequests": "Previous requests",
+  "subtitle": "Viewings, host time and property access, in one place.",
+  "details": "Scope, freshness & calendar checks",
+  "manualShort": "External calendars checked manually",
+  "internalNote": "Proposals do not reserve resources",
+  "emptyDayShort": "None on this page"
 }

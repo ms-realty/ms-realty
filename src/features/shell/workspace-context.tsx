@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { ChevronEndIcon } from "@/ui/icons";
+import s from "./workspace.module.css";
 
 /** Section identity uses the same native destinations as the rail, including nested records. */
 export function WorkspaceContext({
@@ -20,7 +21,7 @@ export function WorkspaceContext({
     .sort((a, b) => familyPath(b).length - familyPath(a).length)
     .find((item) => pathname === familyPath(item) || pathname.startsWith(`${familyPath(item)}/`));
   return (
-    <nav aria-label={navigationLabel} className="min-w-0 text-dense text-text-muted">
+    <nav aria-label={navigationLabel} className={`${s.context} min-w-0 text-dense text-text-muted`}>
       <ol className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
         <li>
           <a
