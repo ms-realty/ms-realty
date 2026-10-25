@@ -1,10 +1,8 @@
-"use client";
-
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { ChevronDownIcon } from "@/ui/icons";
 import s from "./calendar.module.css";
 
-/** Phones may fold secondary filters. The native GET form remains expanded without JS. */
+/** Native disclosure and GET form share the same behavior with and without JavaScript. */
 export function CalendarFilterDisclosure({
   label,
   selection,
@@ -14,33 +12,12 @@ export function CalendarFilterDisclosure({
   selection: string;
   children: ReactNode;
 }) {
-  const ref = useRef<HTMLDetailsElement>(null);
-  const [enhanced, setEnhanced] = useState(false);
-  useEffect(() => {
-    if (!window.matchMedia) return;
-    const narrow = window.matchMedia("(max-width: 639px)");
-    const adapt = () => {
-      if (ref.current) ref.current.open = !narrow.matches;
-    };
-    adapt();
-    setEnhanced(true);
-    narrow.addEventListener("change", adapt);
-    return () => narrow.removeEventListener("change", adapt);
-  }, []);
   return (
-    <details
-      ref={ref}
-      open
-      data-calendar-filters
-      data-enhanced={enhanced || undefined}
-      className={s.filterDisclosure}
-    >
+    <details data-calendar-filters className={s.filterDisclosure}>
       <summary>
-        <span>
-          <strong>{label}</strong>
-          <span>{selection}</span>
-        </span>
+        <strong>{label}</strong>
         <ChevronDownIcon />
+        <span className="sr-only"> · {selection}</span>
       </summary>
       {children}
     </details>

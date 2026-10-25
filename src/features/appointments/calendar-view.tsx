@@ -4,10 +4,10 @@ import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import {
   CalendarIcon,
-  ChevronDownIcon,
   ChevronEndIcon,
   ChevronStartIcon,
   ClockIcon,
+  HistoryIcon,
   InfoIcon,
   UserIcon,
 } from "@/ui/icons";
@@ -419,7 +419,67 @@ function rowsOnDay(data: CalendarData, day: string, zone: string) {
     });
 }
 
-/** A scannable week projection supplements, never replaces, the full resource itinerary. */
+type TimelineSegment = {
+  row: CalendarAppointment;
+  start: Date;
+  end: Date;
+  proposed: boolean;
+  reserved: boolean;
+};
+function daySegments(data: CalendarData, day: string, query: CalendarQuery): TimelineSegment[] {
+  const bounds = calendarPeriod({ ...query, date: day, view: "day" });
+  return rowsOnDay(data, day, query.zone)
+    .flatMap((row) => {
+      const intervals = [
+        {
+          start: row.confirmedStartsAt,
+          end: row.confirmedEndsAt,
+          proposed: false,
+          reserved: false,
+        },
+        { start: row.proposedStartsAt, end: row.proposedEndsAt, proposed: true, reserved: false },
+      ].flatMap((interval) =>
+        interval.start && interval.end && interval.start < bounds.end && interval.end > bounds.start
+          ? [
+              {
+                row,
+                ...interval,
+                start: new Date(Math.max(interval.start.getTime(), bounds.start.getTime())),
+                end: new Date(Math.min(interval.end.getTime(), bounds.end.getTime())),
+              },
+            ]
+          : [],
+      );
+      if (intervals.length) return intervals;
+      const resources = row.resources.filter(
+        (resource) => resource.start < bounds.end && resource.end > bounds.start,
+      );
+      return resources.length
+        ? [
+            {
+              row,
+              start: new Date(
+                Math.max(
+                  bounds.start.getTime(),
+                  Math.min(...resources.map((resource) => resource.start.getTime())),
+                ),
+              ),
+              end: new Date(
+                Math.min(
+                  bounds.end.getTime(),
+                  Math.max(...resources.map((resource) => resource.end.getTime())),
+                ),
+              ),
+              proposed: false,
+              reserved: true,
+            },
+          ]
+        : [];
+    })
+    .sort((a, b) => a.start.getTime() - b.start.getTime() || a.row.id.localeCompare(b.row.id));
+}
+
+/** Time-aligned rows use real instants from each civil day's boundary, including DST days. */
 function WeekOverview({
   locale,
   query,
@@ -432,12 +492,27 @@ function WeekOverview({
   now: Date;
 }) {
   const c = calendarCopy(locale);
-  const today = calendarDay(now, query.zone);
+  const days = calendarPeriod(query).days.map((day) => ({
+    day,
+    bounds: calendarPeriod({ ...query, date: day, view: "day" }),
+    segments: daySegments(data, day, query),
+  }));
+  const relative = days.flatMap(({ bounds, segments }) =>
+    segments.flatMap((segment) => [
+      (segment.start.getTime() - bounds.start.getTime()) / 3600000,
+      (segment.end.getTime() - bounds.start.getTime()) / 3600000,
+    ]),
+  );
+  const firstHour = relative.length ? Math.max(0, Math.floor(Math.min(...relative)) - 1) : 0;
+  const lastHour = relative.length
+    ? Math.min(25, Math.max(firstHour + 4, Math.ceil(Math.max(...relative)) + 1))
+    : 24;
   return (
-    <section aria-label={c.weekOverview} className={s.weekBoard}>
-      {calendarPeriod(query).days.map((day) => (
-        <div key={day} className={s.weekColumn} data-today={day === today || undefined}>
+    <section aria-label={query.view === "day" ? c.dayOverview : c.weekOverview}>
+      <nav aria-label={c.weekOverview} className={s.phoneWeekStrip}>
+        {days.map(({ day }) => (
           <a
+            key={day}
             className={s.weekDayLink}
             href={calendarHref(locale, query, { date: day, view: "day", page: 1 })}
           >
@@ -445,76 +520,100 @@ function WeekOverview({
             <strong>{Number(day.slice(-2))}</strong>
             <span className="sr-only"> · {dayText(day, locale)}</span>
           </a>
-          <div className={s.weekEvents}>
-            {rowsOnDay(data, day, query.zone).length ? (
-              rowsOnDay(data, day, query.zone).map((row) => {
-                const previews = [
-                  { start: row.confirmedStartsAt, end: row.confirmedEndsAt, proposed: false },
-                  { start: row.proposedStartsAt, end: row.proposedEndsAt, proposed: true },
-                ].filter(
-                  (interval) =>
-                    interval.start &&
-                    interval.end &&
-                    calendarDay(interval.start, query.zone) <= day &&
-                    calendarDay(new Date(interval.end.getTime() - 1), query.zone) >= day,
-                );
-                return (
-                  <a
-                    key={row.id}
-                    className={s.weekEvent}
-                    data-proposed={
-                      (previews.length && previews.every((interval) => interval.proposed)) ||
-                      undefined
-                    }
-                    href={`/${locale}/calendar/${row.id}`}
-                  >
-                    {previews.length ? (
-                      previews.map((interval) => (
-                        <span
-                          key={interval.proposed ? "proposed" : "confirmed"}
-                          className={s.weekTime}
-                        >
-                          <strong>
-                            {previewRange(
-                              interval.start as Date,
-                              interval.end as Date,
-                              locale,
-                              query.zone,
-                            )}
-                          </strong>
-                          {interval.proposed ? (
-                            <span>{c.notReserved}</span>
-                          ) : row.state === "reschedule_requested" ? (
-                            <span>{c.current}</span>
-                          ) : ["completed", "no_show", "cancelled", "declined"].includes(
-                              row.state,
-                            ) ? (
-                            <span>{c.previousTime}</span>
-                          ) : null}
-                        </span>
-                      ))
-                    ) : (
-                      <span>{c.reserved}</span>
-                    )}
-                    <span className={s.weekState}>{c.states[row.state]}</span>
-                    <bdi title={row.reference}>{row.reference}</bdi>
-                    {row.caseReference ? (
-                      <span className="sr-only">
-                        {c.deal}: <bdi>{row.caseReference}</bdi>
-                      </span>
-                    ) : null}
-                  </a>
-                );
-              })
-            ) : (
-              <span className={s.weekEmpty}>
-                <span aria-hidden="true">—</span>
-                <span className="sr-only">{c.emptyDayShort}</span>
-              </span>
-            )}
-          </div>
+        ))}
+      </nav>
+      <div className={s.timeOverview}>
+        <div className={s.timeOverviewHeading}>
+          <h2>{query.view === "day" ? c.day : c.week}</h2>
+          <span>{query.zone}</span>
         </div>
-      ))}
+        {days.map(({ day, bounds, segments }) => {
+          const laneEnds: number[] = [];
+          const placed = segments.map((segment) => {
+            let lane = laneEnds.findIndex((end) => end <= segment.start.getTime());
+            if (lane < 0) lane = laneEnds.length;
+            laneEnds[lane] = segment.end.getTime();
+            return { ...segment, lane };
+          });
+          const start = bounds.start.getTime() + firstHour * 3600000;
+          const end = Math.min(bounds.end.getTime(), bounds.start.getTime() + lastHour * 3600000);
+          const span = end - start;
+          const hours = span / 3600000;
+          const step = Math.max(1, Math.ceil(hours / 5));
+          const ticks = Array.from(
+            { length: Math.floor(hours / step) + 1 },
+            (_, index) => start + index * step * 3600000,
+          );
+          const differentOffsets =
+            offsetText(bounds.start, query.zone) !==
+            offsetText(new Date(bounds.end.getTime() - 1), query.zone);
+          return (
+            <div key={day} className={s.timelineDay} data-empty={!segments.length || undefined}>
+              <a
+                className={s.timelineDate}
+                data-today={day === calendarDay(now, query.zone) || undefined}
+                href={calendarHref(locale, query, { date: day, view: "day", page: 1 })}
+              >
+                <strong>{Number(day.slice(-2))}</strong>
+                <span>{shortDay(day, locale, true)}</span>
+                <span className="sr-only"> · {dayText(day, locale)}</span>
+              </a>
+              {segments.length ? (
+                <div
+                  className={s.timelineTrack}
+                  style={{ height: `${32 + laneEnds.length * 54}px` }}
+                >
+                  {ticks.map((at) => (
+                    <div
+                      key={at}
+                      className={s.timelineTick}
+                      style={{ left: `${((at - start) / span) * 100}%` }}
+                    >
+                      <span>{clockText(new Date(at), locale, query.zone, differentOffsets)}</span>
+                    </div>
+                  ))}
+                  {placed.map((segment) => (
+                    <a
+                      key={`${segment.row.id}-${segment.start.toISOString()}-${segment.proposed ? "proposed" : segment.reserved ? "reserved" : "confirmed"}`}
+                      className={s.timelineEvent}
+                      data-proposed={segment.proposed || undefined}
+                      data-reserved={segment.reserved || undefined}
+                      href={`/${locale}/calendar/${segment.row.id}`}
+                      style={{
+                        left: `${((segment.start.getTime() - start) / span) * 100}%`,
+                        width: `${((segment.end.getTime() - segment.start.getTime()) / span) * 100}%`,
+                        top: `${26 + segment.lane * 54}px`,
+                      }}
+                    >
+                      <strong>
+                        {previewRange(segment.start, segment.end, locale, query.zone)}
+                      </strong>
+                      <span>
+                        {segment.reserved
+                          ? c.reserved
+                          : segment.proposed
+                            ? c.notReserved
+                            : c.states[segment.row.state]}{" "}
+                        · <bdi>{segment.row.reference}</bdi>
+                      </span>
+                      <span className="sr-only">
+                        {c.states[segment.row.state]}{" "}
+                        {segment.row.caseReference ? `${c.deal}: ${segment.row.caseReference}` : ""}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className={s.timelineEmpty}>{c.emptyDayShort}</p>
+              )}
+            </div>
+          );
+        })}
+        <p className={s.timelineNote}>
+          {c.timelineNote}
+          {query.page > 1 || data.hasMore ? ` ${c.bounded}` : ""}
+        </p>
+      </div>
     </section>
   );
 }
@@ -538,19 +637,13 @@ export function CalendarView({
     <div className={s.calendar}>
       <CalendarControls locale={locale} query={query} now={now} />
       {adjusted ? <Notice tone="warning">{c.adjusted}</Notice> : null}
-      <div className={s.calendarStatus}>
-        <div className={s.statusText}>
+      <div className={s.contextLine}>
+        <div className={s.calendarStatus}>
           <span>
-            <ClockIcon />
-            {c.manualShort}
+            <bdi>{query.zone}</bdi> · {c.manualCompact}
           </span>
           {data ? (
             <span className={s.desktopSnapshot}>
-              {c.snapshot}: <CalendarTime at={data.checkedAt} locale={locale} zone={query.zone} />
-            </span>
-          ) : null}
-          {data ? (
-            <span className={s.mobileSnapshot}>
               {c.snapshotShort}:{" "}
               <CalendarTime
                 at={data.checkedAt}
@@ -561,29 +654,38 @@ export function CalendarView({
             </span>
           ) : null}
         </div>
-        <a className={s.textLink} href={calendarHref(locale, query)}>
-          {c.refreshShort}
-          <span className="sr-only"> · {c.refresh}</span>
+        {data?.requests.length ? (
+          <a
+            className={s.requestJump}
+            href="#calendar-requests-title"
+            aria-label={`${c.requests}: ${data.requests.length} ${c.onPage}`}
+          >
+            <ClockIcon />
+            <span>{data.requests.length}</span>
+          </a>
+        ) : null}
+        <a className={s.contextAction} href={calendarHref(locale, query)}>
+          <HistoryIcon />
+          <span className="sr-only">{c.refresh}</span>
         </a>
+        <details className={s.calendarDetails}>
+          <summary>
+            <InfoIcon />
+            <span className={s.detailsLabel}>{c.details}</span>
+          </summary>
+          <div>
+            {data ? (
+              <p>
+                {c.snapshot}: <CalendarTime at={data.checkedAt} locale={locale} zone={query.zone} />
+              </p>
+            ) : null}
+            <p>{c.scopeNote}</p>
+            <p>{c.manualNote}</p>
+            <p>{c.snapshotNote}</p>
+            <p>{c.mobileNote}</p>
+          </div>
+        </details>
       </div>
-      <details className={s.calendarDetails}>
-        <summary>
-          <InfoIcon />
-          <span>{c.details}</span>
-          <ChevronDownIcon />
-        </summary>
-        <div>
-          {data ? (
-            <p>
-              {c.snapshot}: <CalendarTime at={data.checkedAt} locale={locale} zone={query.zone} />
-            </p>
-          ) : null}
-          <p>{c.scopeNote}</p>
-          <p>{c.manualNote}</p>
-          <p>{c.snapshotNote}</p>
-          <p>{c.mobileNote}</p>
-        </div>
-      </details>
       {!data ? (
         <Notice
           tone="error"
@@ -597,9 +699,9 @@ export function CalendarView({
           {c.failureNote}
         </Notice>
       ) : (
-        <>
+        <div className={s.calendarBody}>
           <section aria-label={c.itinerary} className={s.itinerary} data-view={query.view}>
-            {query.view === "week" ? (
+            {query.view === "week" || query.view === "day" ? (
               <WeekOverview locale={locale} query={query} data={data} now={now} />
             ) : null}
             <div className={s.sectionHeader}>
@@ -626,42 +728,44 @@ export function CalendarView({
               </div>
             ) : (
               <div className={s.agendaDays}>
-                {period.days.map((day) => {
-                  const rows = rowsOnDay(data, day, query.zone);
-                  return (
-                    <section
-                      key={day}
-                      aria-labelledby={`calendar-day-${day}`}
-                      className={s.agendaDay}
-                      data-empty={!rows.length || undefined}
-                    >
-                      <h3 id={`calendar-day-${day}`} className={s.dayHeading}>
-                        <time dateTime={day}>
-                          <span className={s.dayNumber}>{Number(day.slice(-2))}</span>
-                          <span className={s.dayName}>
-                            {shortDay(day, locale, true)}
-                            <span>
-                              {new Intl.DateTimeFormat(language(locale), {
-                                timeZone: "UTC",
-                                month: "short",
-                                year: "numeric",
-                              }).format(civilDate(day))}
+                {period.days
+                  .filter((day) => rowsOnDay(data, day, query.zone).length)
+                  .map((day) => {
+                    const rows = rowsOnDay(data, day, query.zone);
+                    return (
+                      <section
+                        key={day}
+                        aria-labelledby={`calendar-day-${day}`}
+                        className={s.agendaDay}
+                        data-empty={!rows.length || undefined}
+                      >
+                        <h3 id={`calendar-day-${day}`} className={s.dayHeading}>
+                          <time dateTime={day}>
+                            <span className={s.dayNumber}>{Number(day.slice(-2))}</span>
+                            <span className={s.dayName}>
+                              {shortDay(day, locale, true)}
+                              <span>
+                                {new Intl.DateTimeFormat(language(locale), {
+                                  timeZone: "UTC",
+                                  month: "short",
+                                  year: "numeric",
+                                }).format(civilDate(day))}
+                              </span>
                             </span>
-                          </span>
-                        </time>
-                      </h3>
-                      <div className={s.dayAppointments}>
-                        {rows.length ? (
-                          rows.map((row) => (
-                            <CalendarItem key={row.id} row={row} locale={locale} query={query} />
-                          ))
-                        ) : (
-                          <p className={s.emptyDay}>{c.emptyDay}</p>
-                        )}
-                      </div>
-                    </section>
-                  );
-                })}
+                          </time>
+                        </h3>
+                        <div className={s.dayAppointments}>
+                          {rows.length ? (
+                            rows.map((row) => (
+                              <CalendarItem key={row.id} row={row} locale={locale} query={query} />
+                            ))
+                          ) : (
+                            <p className={s.emptyDay}>{c.emptyDay}</p>
+                          )}
+                        </div>
+                      </section>
+                    );
+                  })}
               </div>
             )}
             {query.page > 1 || data.hasMore ? (
@@ -737,7 +841,7 @@ export function CalendarView({
               </nav>
             ) : null}
           </section>
-        </>
+        </div>
       )}
     </div>
   );

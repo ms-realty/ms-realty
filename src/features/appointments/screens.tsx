@@ -24,7 +24,7 @@ import {
 import { StaffPage } from "../shell/staff-ui";
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
-import { calendarCopy } from "./calendar-copy";
+import calendarStyles from "./calendar.module.css";
 import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
 import { CalendarView } from "./calendar-view";
 import { hostHandoverCopy } from "./host-copy";
@@ -63,7 +63,7 @@ export async function CalendarScreen(props: ScreenProps & { search?: CalendarSea
     );
   }
   return (
-    <StaffPage title={c.calendar} lead={calendarCopy(props.locale).subtitle}>
+    <StaffPage title={c.calendar} className={calendarStyles.pageLayout}>
       <CalendarView locale={props.locale} query={query} data={data} adjusted={adjusted} />
     </StaffPage>
   );

@@ -22,9 +22,9 @@ type Fixture = {
   readOnly: Item;
   request: Item;
 };
-async function showCalendarFilters(page: Page, javaScriptEnabled: boolean) {
+async function showCalendarFilters(page: Page, _javaScriptEnabled: boolean) {
   const disclosure = page.locator("[data-calendar-filters]");
-  if (javaScriptEnabled) await expect(disclosure).toHaveAttribute("data-enhanced", "true");
+
   if (!(await disclosure.evaluate((element) => (element as HTMLDetailsElement).open)))
     await disclosure.locator("summary").click();
 }
@@ -94,8 +94,10 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
     path: info.outputPath("synthetic-desktop-full-itinerary.png"),
     fullPage: true,
   });
+  await showCalendarFilters(page, true);
   const scope = page.getByLabel(calendarCopy("en").scope, { exact: true });
   expect(await scope.boundingBox()).toMatchObject({ height: 44 });
+  await page.locator("[data-calendar-filters] summary").click();
   await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
   await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "compact");
   await page.reload();
@@ -119,14 +121,14 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   for (const locale of ["bg", "en", "ru"]) {
     const c = calendarCopy(locale);
     await page.setViewportSize({ width: 320, height: 900 });
-    await page.goto(hostUrl("staff", `/${locale}/calendar?date=2030-10-27&view=week`));
+    await page.goto(hostUrl("staff", `/${locale}/calendar?date=2030-10-28&view=week`));
     const appointment = page.getByRole("article", { name: f.replacement.reference, exact: true });
     await expect(appointment.getByText(c.reserved, { exact: true })).toBeVisible();
     await expect(appointment.getByText(c.buffer, { exact: false })).toContainText("30 / 30");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       320,
     );
-    const details = page.getByText(c.details, { exact: true });
+    const details = page.locator("details").filter({ hasText: c.details }).locator("summary");
     await details.click();
     await expect(page.getByText(c.scopeNote, { exact: true })).toBeVisible();
     await expect(page.getByText(c.snapshotNote, { exact: true })).toBeVisible();
