@@ -9,6 +9,7 @@ import { currentStaffAccess } from "@/server/auth/pages";
 import type { Session } from "@/server/auth/sessions";
 import { AppError, wireCode } from "@/server/errors";
 import { action } from "@/server/http/next";
+import { clientPrivacyExports } from "@/server/privacy/exports";
 import {
   privacyReviewSessionKeys,
   privateReceipt,
@@ -28,6 +29,7 @@ import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import { caseCopy } from "../cases/copy";
 import { privacyCopy, privacyLabel } from "./copy";
+import { privacyExportCopy } from "./export-copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
 import { ReviewEnvelope } from "./review-envelope";
 
@@ -143,6 +145,17 @@ export async function ClientPrivacyScreen({
 }) {
   const c = privacyCopy(locale);
   const requests = await clientPrivacyRequests(getDb(), session);
+  const exportCopy = privacyExportCopy(locale);
+  const deliveries = new Map(
+    await Promise.all(
+      requests
+        .filter((request) => request.kind === "export")
+        .map(
+          async (request) =>
+            [request.id, await clientPrivacyExports(getDb(), session, request.id)] as const,
+        ),
+    ),
+  );
   return (
     <Frame title={c.privacy} lead={c.lead}>
       <Result query={query} locale={locale} session={session} />
@@ -179,6 +192,18 @@ export async function ClientPrivacyScreen({
           </h3>
           <p>{privacyLabel(locale, request.state)}</p>
           <p>{request.description}</p>
+          {deliveries.get(request.id)?.map((delivery) => (
+            <div key={delivery.id} className="grid gap-2">
+              <p>{exportCopy.available}</p>
+              <p>{exportCopy.partial}</p>
+              <a
+                className="min-h-control py-2 underline"
+                href={`/${locale}/privacy/exports/${delivery.id}`}
+              >
+                {exportCopy.download}
+              </a>
+            </div>
+          ))}
           <p>
             {c.owner}: {request.ownerName}
           </p>
@@ -472,6 +497,14 @@ export async function StaffPrivacyScreen({
               {privacyLabel(locale, record.kind)} · {privacyLabel(locale, record.state)}
             </p>
             <p>{scope.description}</p>
+            {record.kind === "export" ? (
+              <a
+                className="min-h-control py-2 underline"
+                href={`/${locale}/operations/privacy/${record.id}/export`}
+              >
+                {privacyExportCopy(locale).title}
+              </a>
+            ) : null}
             <p>
               {c.owner}: {ownerName}
             </p>

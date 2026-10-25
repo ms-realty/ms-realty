@@ -18,6 +18,7 @@ export * from "./inventory";
 export * from "./key-custody";
 export * from "./migration";
 export * from "./parties";
+export * from "./privacy-export";
 export * from "./publication";
 export * from "./records";
 export * from "./runtime";

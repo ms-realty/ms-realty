@@ -13,6 +13,7 @@ import type intent from "../../messages/bg/intent.json";
 import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
 import type privacy from "../../messages/bg/privacy.json";
+import type privacyExportClient from "../../messages/bg/privacy-export.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
 import type workflow from "../../messages/bg/workflow.json";
@@ -21,6 +22,7 @@ import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
 import type operations from "../../messages/staff/bg/operations.json";
+import type privacyExportStaff from "../../messages/staff/bg/privacyExport.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
 import type tools from "../../messages/staff/bg/tools.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
@@ -38,6 +40,7 @@ export const publicNamespaces = [
   "map",
   "nav",
   "privacy",
+  "privacy-export",
   "server",
   "states",
   "workflow",
@@ -53,6 +56,7 @@ export const staffNamespaces = [
   "operations",
   "dataReview",
   "auditHistory",
+  "privacyExport",
 ] as const;
 
 export interface PublicMessages {
@@ -66,6 +70,7 @@ export interface PublicMessages {
   map: typeof map;
   nav: typeof nav;
   privacy: typeof privacy;
+  "privacy-export": typeof privacyExportClient;
   server: typeof server;
   states: typeof states;
   workflow: typeof workflow;
@@ -75,6 +80,7 @@ export interface StaffMessages {
   caseDirectory: typeof caseDirectory;
   auditHistory: typeof auditHistory;
   operations: typeof operations;
+  privacyExport: typeof privacyExportStaff;
   dataReview: typeof dataReview;
   serverStaff: typeof serverStaff;
   tools: typeof tools;

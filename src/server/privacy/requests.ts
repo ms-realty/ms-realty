@@ -3,7 +3,13 @@
 import "server-only";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { parties, principals, privacyRequests, staffMemberships } from "@/db/schema";
+import {
+  parties,
+  principals,
+  privacyExports,
+  privacyRequests,
+  staffMemberships,
+} from "@/db/schema";
 import {
   guardPrivacyRequestTransition,
   privacyRequestKinds,
@@ -291,6 +297,22 @@ export async function reviewPrivacyRequest(db: Executor, session: Session, input
         throw new AppError("validation_failed");
       if (value.to === "on_legal_hold" && value.legalHoldReason.length < 10)
         throw new AppError("validation_failed");
+      if (record.kind === "export" && value.to === "completed") {
+        // Human free text is not fulfilment. Partial deliveries retain pending disclosure
+        // categories and cannot turn the whole request green.
+        const [delivery] = await tx
+          .select({ id: privacyExports.id })
+          .from(privacyExports)
+          .where(
+            and(
+              eq(privacyExports.requestId, record.id),
+              eq(privacyExports.state, "issued"),
+              eq(privacyExports.coverageComplete, true),
+            ),
+          )
+          .limit(1);
+        if (!delivery) throw new AppError("transition_denied");
+      }
       // This boolean intentionally conceals the source of a retention obligation.
       // Human acknowledgement cannot override current server-side retention evidence.
       if (
