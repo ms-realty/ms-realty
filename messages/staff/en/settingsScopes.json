@@ -5,6 +5,7 @@
   "help": "When Agency settings is selected, use this resource. The record ID field applies to other record scopes. Settings scopes do not use a language restriction.",
   "options": {
     "operatingPolicy": "Operating policy",
-    "privacyGovernance": "Privacy registers and incidents"
+    "privacyGovernance": "Privacy registers and incidents",
+    "serviceScope": "Consultation coverage"
   }
 }

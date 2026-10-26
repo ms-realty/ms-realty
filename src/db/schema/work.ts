@@ -49,6 +49,8 @@ export const cases = pgTable(
     disposition: caseDispositionEnum("disposition").notNull().default("active"),
     /** Service intake only: what the consultation is about. */
     serviceTopic: serviceIntakeTopicEnum("service_topic"),
+    /** Immutable intake source and self-declared context, never ownership or booking proof. */
+    serviceContext: jsonb("service_context"),
     title: text("title").notNull(),
     propertyId: uuid("property_id").references(() => properties.id),
     /** The one accountable broker. */
