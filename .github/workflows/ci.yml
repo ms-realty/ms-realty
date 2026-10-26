@@ -78,7 +78,11 @@ jobs:
         run: |
           # The hosted Azure HTTP mirror can stall on small OS packages. Keep the
           # same signed Ubuntu archive and package set through its HTTPS endpoint.
-          sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+          for apt_source in /etc/apt/sources.list.d/ubuntu.sources /etc/apt/apt-mirrors.txt; do
+            if [ -f "$apt_source" ]; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$apt_source"
+            fi
+          done
           npx playwright install --with-deps "$BROWSER_ENGINE"
       - name: Start disposable PostgreSQL and build the candidate
         run: |

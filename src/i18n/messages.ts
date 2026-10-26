@@ -10,6 +10,7 @@ import type errors from "../../messages/bg/errors.json";
 import type footer from "../../messages/bg/footer.json";
 import type forms from "../../messages/bg/forms.json";
 import type intent from "../../messages/bg/intent.json";
+import type legacyArchive from "../../messages/bg/legacy-archive.json";
 import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
 import type privacy from "../../messages/bg/privacy.json";
@@ -38,6 +39,7 @@ export const publicNamespaces = [
   "footer",
   "forms",
   "intent",
+  "legacy-archive",
   "map",
   "nav",
   "privacy",
@@ -69,6 +71,7 @@ export interface PublicMessages {
   footer: typeof footer;
   forms: typeof forms;
   intent: typeof intent;
+  "legacy-archive": typeof legacyArchive;
   map: typeof map;
   nav: typeof nav;
   privacy: typeof privacy;
