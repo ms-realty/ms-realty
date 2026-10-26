@@ -68,6 +68,11 @@ describe("O08 native agenda", () => {
       const appointment = screen.getByRole("article", { name: row.reference });
       expect(within(appointment).getByText(c.current, { exact: true })).toBeVisible();
       expect(within(appointment).getByText(c.replacement, { exact: true })).toBeVisible();
+      const review = within(appointment)
+        .getByText(c.conflictShort, { exact: true })
+        .closest("details");
+      expect(review).not.toHaveAttribute("open");
+      if (review) review.open = true;
       expect(within(appointment).getByText(c.buffer, { exact: false })).toHaveTextContent(
         "30 / 30",
       );
@@ -206,14 +211,15 @@ describe("O08 native agenda", () => {
     );
     const full = screen.getByRole("article", { name: row.reference });
     const resourceDetails = within(full)
-      .getByText(c.appointmentDetails, { exact: true })
+      .getByText(c.conflictShort, { exact: true })
       .closest("details");
     if (resourceDetails) resourceDetails.open = true;
     expect(within(full).getByText(c.reserved, { exact: true })).toBeVisible();
     expect(within(full).getByText(c.buffer, { exact: false })).toHaveTextContent("30 / 30");
-    expect(screen.getByText(c.manualCompact, { exact: false })).toBeVisible();
     const details = screen.getByText(c.details, { exact: true }).closest("details");
     expect(details?.querySelector("summary")).toHaveTextContent(c.details);
+    if (details) details.open = true;
+    expect(screen.getByText(c.manualCompact, { exact: false })).toBeVisible();
     expect(details).toHaveTextContent(c.scopeNote);
     expect(details).toHaveTextContent(c.snapshotNote);
   });
