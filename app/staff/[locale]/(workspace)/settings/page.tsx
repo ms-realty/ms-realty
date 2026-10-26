@@ -6,6 +6,7 @@ import { getDb } from "@/db/client";
 import { ProfileForm } from "@/features/identity/profile-form";
 import { settingsCopy } from "@/features/identity/settings-copy";
 import { operatingPolicyCopy } from "@/features/operating-policy/copy";
+import { governanceCopy } from "@/features/privacy-governance/copy";
 import { AccountIdentity } from "@/features/shell/account";
 import { LocaleSwitcher } from "@/features/shell/language-switcher";
 import { NavigationIcon } from "@/features/shell/navigation-icons";
@@ -17,6 +18,7 @@ import { requireStaffPage } from "@/server/auth/pages";
 import { profileOperation, readStaffProfile } from "@/server/auth/profile";
 import { can, heldCapabilities } from "@/server/authz";
 import { policyResource } from "@/server/operating-policy/service";
+import { governanceResource } from "@/server/privacy-governance/service";
 import { buttonClass } from "@/ui/button-class";
 import { initialFormState } from "@/ui/form/server";
 import { CheckIcon, ChevronDownIcon } from "@/ui/icons";
@@ -30,7 +32,14 @@ export default async function SettingsPage({
   if (!isStaffLocale(locale)) notFound();
   const session = await requireStaffPage(locale);
   const db = getDb();
-  const [profile, held, query, mayManageOperatingPolicy] = await Promise.all([
+  const [
+    profile,
+    held,
+    query,
+    mayManageOperatingPolicy,
+    mayManagePrivacySettings,
+    mayReadPrivacySettings,
+  ] = await Promise.all([
     readStaffProfile(db, session),
     heldCapabilities(db, session.actor, [
       "access.grant",
@@ -40,10 +49,21 @@ export default async function SettingsPage({
     ]),
     searchParams,
     can(db, session.actor, "settings.manage", policyResource),
+    can(db, session.actor, "settings.manage", governanceResource),
+    can(db, session.actor, "privacy.manage", governanceResource),
   ]);
   const copy = settingsCopy(locale);
   const workspace = await getTranslations({ locale, namespace: "workspace" });
   const administration = [
+    ...(mayManagePrivacySettings && mayReadPrivacySettings
+      ? [
+          {
+            href: `/${locale}/operations/privacy-governance`,
+            label: governanceCopy(locale).title,
+            icon: "system",
+          },
+        ]
+      : []),
     ...(mayManageOperatingPolicy
       ? [
           {
