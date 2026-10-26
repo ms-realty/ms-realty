@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   emptyGovernanceDocument,
   governanceDocumentSchema,
+  governanceEditionSchema,
   governanceFromValues,
   governanceIssues,
+  governanceReviewEdition,
   governanceTimer,
   governanceToValues,
 } from "./privacy-governance";
@@ -49,6 +51,45 @@ describe("O26/F30 privacy operating records", () => {
     });
     document.responseState = "response_recorded";
     expect(governanceTimer(document, true, now)).toEqual({ state: "response_recorded" });
+  });
+  it("accepts only exact typed processor source bindings while retaining legacy editions", () => {
+    const document = emptyGovernanceDocument("processor");
+    if (document.kind !== "processor") throw new Error("Expected processor");
+    document.title = "Synthetic processor review";
+    document.nextAction = "Review the exact linked processing source";
+    document.processingRecordId = "00000000-0000-4000-8000-000000000001";
+    const processingReview = {
+      recordId: document.processingRecordId,
+      recordVersion: 3,
+      contentHash: "a".repeat(64),
+    };
+    const edition = governanceReviewEdition(document, processingReview);
+    expect(governanceEditionSchema.parse(edition)).toEqual(edition);
+    expect(governanceEditionSchema.parse(document)).toEqual(document);
+    expect(
+      governanceEditionSchema.safeParse({
+        ...edition,
+        processingReview: { ...processingReview, recordId: "00000000-0000-4000-8000-000000000002" },
+      }).success,
+    ).toBe(false);
+    expect(
+      governanceEditionSchema.safeParse({
+        ...edition,
+        processingReview: { ...processingReview, recordVersion: 0 },
+      }).success,
+    ).toBe(false);
+    expect(
+      governanceEditionSchema.safeParse({
+        ...edition,
+        processingReview: { ...processingReview, contentHash: "unverified" },
+      }).success,
+    ).toBe(false);
+    expect(
+      governanceEditionSchema.safeParse({
+        ...edition,
+        document: { ...document, kind: "processing" },
+      }).success,
+    ).toBe(false);
   });
   it("requires transfer assessment, notification determination, response evidence and valid instants", () => {
     const processor = emptyGovernanceDocument("processor");

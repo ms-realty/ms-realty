@@ -152,7 +152,7 @@ async function review(session: Session, id: string) {
   return reviewGovernance(t.db, session, {
     id,
     expectedVersion: row.version,
-    expectedHash: row.contentHash,
+    expectedHash: row.reviewHash,
     operationId: randomUUID(),
     reviewed: true,
     note: "Synthetic explicit human review of this exact saved revision",
@@ -369,6 +369,130 @@ describe("O26/F30 controlled privacy governance", () => {
     await expect(review(actor.session, saved.outcome.id)).rejects.toMatchObject({
       code: "validation_failed",
     });
+  });
+  it("binds processor review to the exact processing edition and rejects changed review context", async () => {
+    const actor = await allocated(),
+      processing = await save(actor.session, complete("processing", actor.id));
+    await review(actor.session, processing.outcome.id);
+    const source = await readGovernance(t.db, actor.session, processing.outcome.id),
+      processor = complete("processor", actor.id);
+    if (processor.kind !== "processor") throw new Error("Expected processor");
+    if (source.document.kind !== "processing") throw new Error("Expected processing");
+    processor.processingRecordId = source.id;
+    const saved = await save(actor.session, processor),
+      draft = await readGovernance(t.db, actor.session, saved.outcome.id),
+      firstInput = {
+        id: draft.id,
+        expectedVersion: draft.version,
+        expectedHash: draft.reviewHash,
+        operationId: randomUUID(),
+        reviewed: true as const,
+        note: "Synthetic exact processor and processing source review",
+      };
+    const first = await reviewGovernance(t.db, actor.session, firstInput),
+      original = await readGovernanceRevision(t.db, actor.session, draft.id, first.outcome.version);
+    expect(original.processingReview).toEqual({
+      recordId: source.id,
+      recordVersion: source.version,
+      contentHash: source.contentHash,
+    });
+    expect(original.contentHash).toBe(draft.reviewHash);
+    expect((await readGovernance(t.db, actor.session, draft.id)).reviewed).toBe(true);
+    await save(
+      actor.session,
+      { ...source.document, purpose: "Materially changed synthetic processing purpose" },
+      source.id,
+      source.version,
+    );
+    const held = await readGovernance(t.db, actor.session, draft.id);
+    expect(held.issues).toContain("processingRecordId");
+    expect(held.reviewed).toBe(false);
+    await review(actor.session, source.id);
+    const currentSource = await readGovernance(t.db, actor.session, source.id),
+      stale = await readGovernance(t.db, actor.session, draft.id);
+    expect(stale.version).toBe(first.outcome.version);
+    expect(stale.contentHash).toBe(draft.contentHash);
+    expect(stale.issues).toEqual([]);
+    expect(stale.reviewed).toBe(false);
+    expect(stale.reviewHash).not.toBe(draft.reviewHash);
+    expect(
+      (await listGovernance(t.db, actor.session)).items.find((row) => row.id === draft.id),
+    ).toMatchObject({ reviewed: false });
+    expect((await reviewGovernance(t.db, actor.session, firstInput)).replayed).toBe(true);
+    expect((await readGovernance(t.db, actor.session, draft.id)).reviewed).toBe(false);
+    await expect(
+      reviewGovernance(t.db, actor.session, {
+        ...firstInput,
+        expectedVersion: stale.version,
+        operationId: randomUUID(),
+      }),
+    ).rejects.toMatchObject({ code: "approval_stale" });
+    const renewed = await review(actor.session, draft.id),
+      renewedRevision = await readGovernanceRevision(
+        t.db,
+        actor.session,
+        draft.id,
+        renewed.outcome.version,
+      );
+    expect(renewedRevision.processingReview).toEqual({
+      recordId: currentSource.id,
+      recordVersion: currentSource.version,
+      contentHash: currentSource.contentHash,
+    });
+    expect((await readGovernance(t.db, actor.session, draft.id)).reviewed).toBe(true);
+    expect(
+      await readGovernanceRevision(t.db, actor.session, draft.id, original.recordVersion),
+    ).toEqual(original);
+    // A new reviewed source edition must be accepted even if its business document is identical.
+    await save(actor.session, currentSource.document, currentSource.id, currentSource.version);
+    await review(actor.session, currentSource.id);
+    expect((await readGovernance(t.db, actor.session, draft.id)).reviewed).toBe(false);
+    await review(actor.session, draft.id);
+    expect((await readGovernance(t.db, actor.session, draft.id)).reviewed).toBe(true);
+  });
+  it("holds legacy processor reviews without a source binding until an exact fresh review", async () => {
+    const actor = await allocated(),
+      processing = await save(actor.session, complete("processing", actor.id));
+    await review(actor.session, processing.outcome.id);
+    const source = await readGovernance(t.db, actor.session, processing.outcome.id),
+      processor = complete("processor", actor.id);
+    if (processor.kind !== "processor") throw new Error("Expected processor");
+    processor.processingRecordId = source.id;
+    const saved = await save(actor.session, processor),
+      legacyVersion = saved.outcome.version + 1;
+    await t.db
+      .update(privacyGovernanceRecords)
+      .set({ version: legacyVersion })
+      .where(eq(privacyGovernanceRecords.id, saved.outcome.id));
+    await t.db.insert(privacyGovernanceRevisions).values({
+      recordId: saved.outcome.id,
+      recordVersion: legacyVersion,
+      action: "reviewed",
+      document: processor,
+      contentHash: hashRequest(processor),
+      actorId: actor.id,
+      note: "Synthetic legacy review predating exact source bindings",
+      operationId: randomUUID(),
+    });
+    const legacy = await readGovernance(t.db, actor.session, saved.outcome.id);
+    expect(legacy.latestReview?.recordVersion).toBe(legacyVersion);
+    expect(legacy.issues).toEqual([]);
+    expect(legacy.reviewed).toBe(false);
+    expect(
+      (await listGovernance(t.db, actor.session)).items.find((row) => row.id === legacy.id),
+    ).toMatchObject({ reviewed: false });
+    await review(actor.session, legacy.id);
+    const renewed = await readGovernance(t.db, actor.session, legacy.id);
+    expect(renewed.reviewed).toBe(true);
+    expect(renewed.latestReview?.processingReview).toEqual({
+      recordId: source.id,
+      recordVersion: source.version,
+      contentHash: source.contentHash,
+    });
+    expect(
+      (await readGovernanceRevision(t.db, actor.session, legacy.id, legacyVersion))
+        .processingReview,
+    ).toBeNull();
   });
   it("keeps basic incident drafting available while explicit legal/process review requires allocated qualification", async () => {
     const actor = await allocated(),
