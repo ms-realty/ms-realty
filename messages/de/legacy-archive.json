@@ -1,0 +1,22 @@
+{
+  "listing": "Archiviertes Angebot",
+  "page": "Archivseite",
+  "post": "Archivierter Artikel",
+  "taxonomy": "Archivierte Sammlung",
+  "availability": "Aktuelle Verfügbarkeit und Bedingungen sind nicht bestätigt.",
+  "historical": "Gesicherte Informationen der früheren Website. Inhalte und Leistungen können sich geändert haben.",
+  "facts": "Angaben aus der Originalquelle",
+  "factsNote": "Historische Quellenangaben, deren Aktualität nicht bestätigt ist.",
+  "reading": "Beschreibung aus der Quelle",
+  "media": "Bilder aus der Quelle",
+  "mediaNote": "Gesicherte Bilder der ursprünglichen Website. Der aktuelle Zustand ist nicht bestätigt.",
+  "openImage": "Bild öffnen",
+  "contact": "MS Realty fragen",
+  "quote": "Nennen Sie beim Anruf die Angebotsnummer oder den Titel dieser Seite.",
+  "call": "Anrufen",
+  "search": "Aktuelle Immobilien suchen",
+  "source": "Adresse der Originalquelle",
+  "sourceLinks": "Links aus der Originalquelle",
+  "emptyArchive": "Diese gesicherte Sammlung enthielt keine Einträge.",
+  "noText": "Dieses Archiv enthält keinen weiteren lesbaren Text."
+}
