@@ -16,6 +16,7 @@ import {
   privacyGovernanceId,
 } from "@/domain/privacy-governance";
 import { recordAudit } from "../audit";
+import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { assertCan, staffWhoCan } from "../authz";
 import { hashRequest } from "../crypto";
@@ -82,7 +83,14 @@ export async function governanceOwners(db: Executor, session: Session) {
       ),
     )
     .orderBy(principals.displayName);
-  const ids = new Set(people.map((person) => person.id)),
+  const usablePeople = (
+    await Promise.all(
+      people.map(async (person) =>
+        (await countActivePasskeys(db, person.id)) >= staffPasskeyMinimum ? person : null,
+      ),
+    )
+  ).filter((person): person is NonNullable<typeof person> => person !== null);
+  const ids = new Set(usablePeople.map((person) => person.id)),
     owners = await staffWhoCan(
       db,
       [...ids],
@@ -96,13 +104,14 @@ export async function governanceOwners(db: Executor, session: Session) {
       governanceResource,
     );
   return {
-    owners: people.filter((person) => owners.has(person.id)),
-    reviewers: people.filter((person) => reviewers.has(person.id)),
+    owners: usablePeople.filter((person) => owners.has(person.id)),
+    reviewers: usablePeople.filter((person) => reviewers.has(person.id)),
   };
 }
 async function allocatedOwner(db: Executor, id: string, qualified = false) {
   return (
     (await activeStaff(db, id)) &&
+    (await countActivePasskeys(db, id)) >= staffPasskeyMinimum &&
     (
       await staffWhoCan(
         db,

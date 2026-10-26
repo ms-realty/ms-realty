@@ -26,6 +26,7 @@ import { can } from "../authz";
 import { hashRequest } from "../crypto";
 import { createStaff } from "../testing";
 import {
+  governanceOwners,
   governanceResource,
   listGovernance,
   readGovernance,
@@ -158,6 +159,59 @@ async function review(session: Session, id: string) {
   });
 }
 describe("O26/F30 controlled privacy governance", () => {
+  it("allows one qualified owner/reviewer and fences their exact review replay after qualification revocation", async () => {
+    const actor = await allocated(true),
+      saved = await save(actor.session, complete("incident", actor.id));
+    const row = await readGovernance(t.db, actor.session, saved.outcome.id),
+      operationId = randomUUID();
+    const input = {
+      id: row.id,
+      expectedVersion: row.version,
+      expectedHash: row.contentHash,
+      operationId,
+      reviewed: true as const,
+      note: "Synthetic single-operator exact incident review",
+    };
+    await reviewGovernance(t.db, actor.session, input);
+    expect((await reviewGovernance(t.db, actor.session, input)).replayed).toBe(true);
+    expect(
+      await readGovernanceOperation(t.db, actor.session, row.id, "review", operationId),
+    ).toMatchObject({ status: "succeeded" });
+    const qualification = actor.receipts[2]?.outcome.grantId;
+    if (!qualification) throw new Error("Missing qualification allocation");
+    await revokeStaffGrant(t.db, actor.manager.session, {
+      operationId: randomUUID(),
+      grantId: qualification,
+      expectedRevision: 1,
+      reason: "Synthetic explicit qualification allocation revoked",
+    });
+    const fresh = await createSession(t.db, { kind: "staff", id: actor.id });
+    await expect(reviewGovernance(t.db, fresh.session, input)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    await expect(
+      readGovernanceOperation(t.db, fresh.session, row.id, "review", operationId),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    expect((await readGovernance(t.db, fresh.session, row.id)).issues).toContain(
+      "determinationById",
+    );
+  });
+  it("holds reviewed ownership while a responsible person cannot use a passkey", async () => {
+    const actor = await allocated(),
+      owner = await allocated(),
+      saved = await save(actor.session, complete("processing", owner.id));
+    await review(actor.session, saved.outcome.id);
+    await t.db
+      .update(passkeys)
+      .set({ revokedAt: new Date() })
+      .where(eq(passkeys.principalId, owner.id));
+    expect((await readGovernance(t.db, actor.session, saved.outcome.id)).issues).toContain(
+      "ownerId",
+    );
+    expect(
+      (await governanceOwners(t.db, actor.session)).owners.some((person) => person.id === owner.id),
+    ).toBe(false);
+  });
   it("persists owned unknown-policy work and holds review with clear missing evidence", async () => {
     const actor = await allocated(),
       document = emptyGovernanceDocument("processing");
