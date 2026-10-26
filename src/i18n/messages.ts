@@ -24,6 +24,7 @@ import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
 import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
 import type operations from "../../messages/staff/bg/operations.json";
+import type privacyErasure from "../../messages/staff/bg/privacyErasure.json";
 import type privacyExportStaff from "../../messages/staff/bg/privacyExport.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
 import type tools from "../../messages/staff/bg/tools.json";
@@ -60,6 +61,7 @@ export const staffNamespaces = [
   "dataReview",
   "auditHistory",
   "privacyExport",
+  "privacyErasure",
   "operatingPolicy",
 ] as const;
 
@@ -87,6 +89,7 @@ export interface StaffMessages {
   operations: typeof operations;
   operatingPolicy: typeof operatingPolicy;
   privacyExport: typeof privacyExportStaff;
+  privacyErasure: typeof privacyErasure;
   dataReview: typeof dataReview;
   serverStaff: typeof serverStaff;
   tools: typeof tools;

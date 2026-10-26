@@ -29,6 +29,7 @@ import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import { caseCopy } from "../cases/copy";
 import { privacyCopy, privacyLabel } from "./copy";
+import { privacyErasureCopy } from "./erasure-copy";
 import { privacyExportCopy } from "./export-copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
 import { ReviewEnvelope } from "./review-envelope";
@@ -492,7 +493,8 @@ export async function StaffPrivacyScreen({
       {rows.map(({ record, partyName, ownerName }) => {
         const scope = record.scope as { description?: string; policyReference?: string };
         const next = privacyRequestMachine.transitions[record.state].filter(
-          (state) => record.kind !== "export" || state !== "completed",
+          (state) =>
+            !["export", "deletion", "restriction"].includes(record.kind) || state !== "completed",
         );
         return (
           <section
@@ -513,6 +515,14 @@ export async function StaffPrivacyScreen({
                 href={`/${locale}/operations/privacy/${record.id}/export`}
               >
                 {privacyExportCopy(locale).title}
+              </a>
+            ) : null}
+            {["deletion", "restriction"].includes(record.kind) ? (
+              <a
+                className="min-h-control py-2 underline"
+                href={`/${locale}/operations/privacy/${record.id}/erasure`}
+              >
+                {privacyErasureCopy(locale).title}
               </a>
             ) : null}
             <p>
