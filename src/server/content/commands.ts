@@ -13,6 +13,7 @@ import { type ApprovalKind, approvalCapability } from "@/domain/approval";
 import { type Capability, hasCapability } from "@/domain/capabilities";
 import { type PublicLocale, publicLocales } from "@/i18n/config";
 import { recordActivity } from "../activity";
+import { reviewDisplayEligible } from "../agency-obligations/reviews";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import { assertCan, can, resolveGrants } from "../authz";
@@ -25,7 +26,7 @@ import { commandEnvelope, liveStaff, parseInput, version } from "../work/shared"
 import { invalidateContentLocales } from "./invalidation";
 import { approvedContent, contentBody } from "./public";
 
-export const contentKinds = ["area", "service", "help"] as const;
+export const contentKinds = ["area", "service", "help", "review"] as const;
 // P15 guides describe a district, municipality, settlement or neighborhood, not a country.
 const contentPlaceLevels = ["district", "municipality", "settlement", "neighborhood"] as const;
 const operationId = z.string().min(16).max(200);
@@ -241,6 +242,12 @@ export async function readContentWorkbench(db: Executor, session: Session, id: s
 }
 
 export async function contentEditionAccess(db: Executor, actor: Session["actor"], id: string) {
+  const [page] = await db
+    .select({ kind: contentPages.kind })
+    .from(contentPages)
+    .where(eq(contentPages.id, id));
+  // Each translated review needs its own author assent, which this source-only path cannot issue.
+  if (page?.kind === "review") return [];
   const editions = await db
     .select()
     .from(contentLocaleEditions)
@@ -514,6 +521,8 @@ export async function decideContent(db: Executor, session: Session, raw: Content
         expiresAt,
       });
       if (input.decision === "publish") {
+        if (page.kind === "review" && !(await reviewDisplayEligible(ctx.tx, candidate.id)))
+          throw new AppError("publication_ineligible");
         const decisions = await ctx.tx
           .select()
           .from(approvals)

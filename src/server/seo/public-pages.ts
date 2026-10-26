@@ -157,7 +157,13 @@ export async function publicContentPages(): Promise<
       const approved = await readApprovedContent(db, row.kind, row.slug, locale);
       if (!approved) continue;
       const directory =
-        row.kind === "area" ? "areas" : row.kind === "service" ? "services" : "help";
+        row.kind === "area"
+          ? "areas"
+          : row.kind === "service"
+            ? "services"
+            : row.kind === "review"
+              ? "reviews"
+              : "help";
       result.push({
         locale,
         path: `/${directory}/${encodeURIComponent(row.slug)}`,

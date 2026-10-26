@@ -16,7 +16,14 @@ export const inquirySources = [
 ] as const;
 
 /** Approved editorial content shares the listing approval and localization rules. */
-export const contentPageKinds = ["area", "guide", "service", "team_member", "help"] as const;
+export const contentPageKinds = [
+  "area",
+  "guide",
+  "service",
+  "team_member",
+  "help",
+  "review",
+] as const;
 
 /** Legacy URL decisions recorded in data/legacy/url-decisions.json (architecture §18.1). */
 export const legacyDomains = ["makler-realty.com", "makler-realty.ru"] as const;

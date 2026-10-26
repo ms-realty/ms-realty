@@ -1,3 +1,7 @@
+import agencyBg from "../../../messages/staff/bg/agency.json";
+import agencyEn from "../../../messages/staff/en/agency.json";
+import agencyRu from "../../../messages/staff/ru/agency.json";
+
 const en = {
   title: "Editorial content",
   new: "Create content",
@@ -62,6 +66,7 @@ const en = {
   area: "Area",
   service: "Service",
   help: "Help or consent terms",
+  review: agencyEn.reviews,
   back: "All content",
   public: "Open published page",
   none: "None",
@@ -130,6 +135,7 @@ const bg: Copy = {
   area: "Район",
   service: "Услуга",
   help: "Помощ или условия за съгласие",
+  review: agencyBg.reviews,
   back: "Всички страници",
   public: "Отваряне на публикацията",
   none: "Няма",
@@ -197,6 +203,7 @@ const ru: Copy = {
   area: "Район",
   service: "Услуга",
   help: "Помощь или условия согласия",
+  review: agencyRu.reviews,
   back: "Все страницы",
   public: "Открыть публикацию",
   none: "Нет",

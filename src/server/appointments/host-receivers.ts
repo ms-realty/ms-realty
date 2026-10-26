@@ -6,11 +6,15 @@ import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { can, staffWhoCan } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { propertyHostCan } from "./property-work";
 
 interface Hosting {
   id: string;
   caseId: string | null;
   hostId: string | null;
+  purpose?: string;
+  listingId?: string | null;
+  propertyId?: string | null;
 }
 const appointmentResource = (row: Hosting) => ({
   type: "appointment",
@@ -20,7 +24,7 @@ const appointmentResource = (row: Hosting) => ({
 
 /** Both Case read and appointment authority apply; selection never grants access. */
 export async function readHostReceivers(db: Executor, row: Hosting, through?: Date) {
-  if (!row.caseId) return [];
+  if (!row.caseId && row.purpose !== "photography") return [];
   const people = (
     await db
       .select({ id: principals.id, name: principals.displayName })
@@ -42,17 +46,49 @@ export async function readHostReceivers(db: Executor, row: Hosting, through?: Da
       .orderBy(asc(principals.displayName), asc(principals.id))
   ).filter((person) => person.id !== row.hostId);
   const ids = people.map((person) => person.id);
-  const caseReaders = await staffWhoCan(db, ids, ["case.read"], { type: "case", id: row.caseId });
+  if (row.purpose === "photography") {
+    const allowed = await Promise.all(
+      people.map(
+        async (person) =>
+          await propertyHostCan(db, person.id, {
+            ...row,
+            listingId: row.listingId ?? null,
+            propertyId: row.propertyId ?? null,
+          }),
+      ),
+    );
+    return people.filter((_, i) => allowed[i]);
+  }
+  const caseReaders = await staffWhoCan(db, ids, ["case.read"], {
+    type: "case",
+    id: row.caseId ?? undefined,
+  });
   const hosts = await staffWhoCan(db, ids, ["appointment.manage"], appointmentResource(row));
   return people.filter((person) => caseReaders.has(person.id) && hosts.has(person.id));
 }
 
 export async function requireHostReceiver(db: Executor, row: Hosting, id: string, through?: Date) {
-  if (!row.caseId || id === row.hostId) throw new AppError("transition_denied");
+  if ((!row.caseId && row.purpose !== "photography") || id === row.hostId)
+    throw new AppError("transition_denied");
   await requireAvailableStaff(db, id, true, through);
+  if (row.purpose === "photography") {
+    if (
+      (await countActivePasskeys(db, id)) < staffPasskeyMinimum ||
+      !(await propertyHostCan(db, id, {
+        ...row,
+        listingId: row.listingId ?? null,
+        propertyId: row.propertyId ?? null,
+      }))
+    )
+      throw new AppError("forbidden");
+    return;
+  }
   if (
     (await countActivePasskeys(db, id)) < staffPasskeyMinimum ||
-    !(await can(db, { kind: "staff", id }, "case.read", { type: "case", id: row.caseId })) ||
+    !(await can(db, { kind: "staff", id }, "case.read", {
+      type: "case",
+      id: row.caseId ?? undefined,
+    })) ||
     !(await can(db, { kind: "staff", id }, "appointment.manage", appointmentResource(row)))
   )
     throw new AppError("forbidden");
