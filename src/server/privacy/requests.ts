@@ -3,19 +3,14 @@
 import "server-only";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import {
-  parties,
-  principals,
-  privacyExports,
-  privacyRequests,
-  staffMemberships,
-} from "@/db/schema";
+import { parties, principals, privacyRequests, staffMemberships } from "@/db/schema";
 import {
   guardPrivacyRequestTransition,
   privacyRequestKinds,
   privacyRequestMachine,
   privacyRequestStates,
 } from "@/domain/privacy";
+import { privacyExportScope } from "@/domain/privacy-export";
 import { recordAudit } from "../audit";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import type { Session } from "../auth/sessions";
@@ -59,6 +54,7 @@ export async function submitPrivacyRequest(db: Executor, session: Session, input
       operationId: z.uuid(),
       kind: z.enum(privacyRequestKinds),
       description: z.string().trim().min(10).max(4000),
+      exportScope: privacyExportScope.default("additional_material"),
       confirmed: z.literal(true),
     }),
     input,
@@ -92,6 +88,7 @@ export async function submitPrivacyRequest(db: Executor, session: Session, input
             description: value.description,
             dueCondition: "awaiting_human_assessment",
             policyReference: null,
+            ...(value.kind === "export" ? { exportScope: value.exportScope } : {}),
           },
         })
         .returning();
@@ -298,20 +295,8 @@ export async function reviewPrivacyRequest(db: Executor, session: Session, input
       if (value.to === "on_legal_hold" && value.legalHoldReason.length < 10)
         throw new AppError("validation_failed");
       if (record.kind === "export" && value.to === "completed") {
-        // Human free text is not fulfilment. Partial deliveries retain pending disclosure
-        // categories and cannot turn the whole request green.
-        const [delivery] = await tx
-          .select({ id: privacyExports.id })
-          .from(privacyExports)
-          .where(
-            and(
-              eq(privacyExports.requestId, record.id),
-              eq(privacyExports.state, "issued"),
-              eq(privacyExports.coverageComplete, true),
-            ),
-          )
-          .limit(1);
-        if (!delivery) throw new AppError("transition_denied");
+        // Only the source/permission/version-bound export completion command may close it.
+        throw new AppError("transition_denied");
       }
       // This boolean intentionally conceals the source of a retention obligation.
       // Human acknowledgement cannot override current server-side retention evidence.

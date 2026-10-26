@@ -179,6 +179,14 @@ export async function ClientPrivacyScreen({
           </select>
         </label>
         <p>{c.scopeHelp}</p>
+        <label className="grid gap-2">
+          <span className={labelClass}>{exportCopy.scope}</span>
+          <select name="exportScope" className={controlClass} defaultValue="additional_material">
+            <option value="additional_material">{exportCopy.additionalScope}</option>
+            <option value="listed_categories">{exportCopy.listedScope}</option>
+          </select>
+        </label>
+        <p>{exportCopy.scopeHelp}</p>
         <Area name="description" label={c.scope} required />
         <Check name="confirmed">{c.confirm}</Check>
         <Submit>{c.submit}</Submit>
@@ -195,7 +203,7 @@ export async function ClientPrivacyScreen({
           {deliveries.get(request.id)?.map((delivery) => (
             <div key={delivery.id} className="grid gap-2">
               <p>{exportCopy.available}</p>
-              <p>{exportCopy.partial}</p>
+              <p>{delivery.coverageComplete ? exportCopy.reviewedScope : exportCopy.partial}</p>
               <a
                 className="min-h-control py-2 underline"
                 href={`/${locale}/privacy/exports/${delivery.id}`}
@@ -483,7 +491,9 @@ export async function StaffPrivacyScreen({
       {!rows.length ? <p>{c.empty}</p> : null}
       {rows.map(({ record, partyName, ownerName }) => {
         const scope = record.scope as { description?: string; policyReference?: string };
-        const next = privacyRequestMachine.transitions[record.state];
+        const next = privacyRequestMachine.transitions[record.state].filter(
+          (state) => record.kind !== "export" || state !== "completed",
+        );
         return (
           <section
             key={`${record.id}:${session.id}`}

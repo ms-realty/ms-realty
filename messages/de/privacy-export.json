@@ -1,5 +1,10 @@
 {
   "download": "Meine Daten herunterladen",
-  "available": "Ihre Teilkopie ist bereit. Bestätigen Sie bei Bedarf erneut Ihre Identität. Der Zugriff läuft ab und kann widerrufen werden.",
-  "partial": "Diese Teilkopie schließt den Antrag nicht ab. Gemeinsame Unterlagen, empfangene Nachrichten und private Dateien werden gesondert geprüft."
+  "available": "Ihre Datenkopie ist bereit. Melden Sie sich bei Bedarf erneut an. Der Link läuft ab und der Zugriff kann entzogen werden.",
+  "partial": "Diese Teilkopie schließt den Antrag nicht ab. Gemeinsame Unterlagen, empfangene Nachrichten und private Dateien werden gesondert geprüft.",
+  "scope": "Umfang des Exports",
+  "additionalScope": "Zusätzliche oder nicht näher bezeichnete Unterlagen",
+  "listedScope": "Nur die aufgeführten Quellenkategorien",
+  "scopeHelp": "Für Exporte: Die Kategorien umfassen Profil, Kontakte, Einstellungen, eigene Beiträge, gemeinsame Geschäftsvorgänge, empfangene Nachrichten und private Dateien. Beschränkte Unterlagen und Zugangsdaten bleiben geschützt. Für weitere Inhalte wählen Sie zusätzliche Unterlagen.",
+  "reviewedScope": "Diese Kopie enthält die geprüften angegebenen Kategorien einschließlich begründeter Zurückhaltungen. Der Abschluss wird separat erfasst; der Zugriff läuft ab und kann entzogen werden."
 }

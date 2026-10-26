@@ -21,7 +21,10 @@ export interface DisclosureSupplementSource {
   requestVersion: number;
 }
 export interface DisclosureSupplement {
-  category: "private_files" | "joint_records_and_received_communications";
+  category:
+    | "private_files"
+    | "joint_records_and_received_communications"
+    | "restricted_material_and_security_credentials";
   source: DisclosureSupplementSource;
   contentType: string;
   fileName: string;

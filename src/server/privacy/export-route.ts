@@ -18,11 +18,14 @@ import {
 } from "../http/request";
 import {
   attachPrivacyExportSupplement,
+  capturePrivacyExportManifest,
+  completePrivacyExport,
   exportSections,
   issuePrivacyExport,
   preparePrivacyExport,
   privacyExportDownload,
   redactPrivacyExport,
+  reviewPrivacyExportCategory,
   revokePrivacyExport,
 } from "./exports";
 
@@ -41,11 +44,42 @@ export const privacyExportFormRoute = nativeAuthRoute(
       expectedVersion: Number(text(form, "expectedVersion")),
     };
     let result: { operationId: string };
+    const frozen = {
+      ...envelope,
+      exportId: text(form, "exportId"),
+      exportVersion: Number(text(form, "exportVersion")),
+      digest: text(form, "digest"),
+    };
     try {
       if (text(form, "intent") === "prepare")
         result = await preparePrivacyExport(db, access.session, {
           ...envelope,
           recipientId: text(form, "recipientId"),
+          confirmed: form.get("confirmed") === "yes",
+        });
+      else if (text(form, "intent") === "inventory")
+        result = await capturePrivacyExportManifest(db, access.session, frozen);
+      else if (text(form, "intent") === "disposition") {
+        const sourceKeys = form.getAll("sourceKey").map(String);
+        result = await reviewPrivacyExportCategory(db, access.session, {
+          ...frozen,
+          reviewDigest: text(form, "reviewDigest"),
+          category: text(form, "category"),
+          disposition: text(form, "disposition"),
+          basis: text(form, "basis"),
+          policyReference: text(form, "policyReference"),
+          evidenceReference: text(form, "evidenceReference"),
+          sourceKeys,
+          evidence: sourceKeys.flatMap((sourceKey) => {
+            const documentVersionId = text(form, `proof:${sourceKey}`);
+            return documentVersionId ? [{ sourceKey, documentVersionId }] : [];
+          }),
+          confirmed: form.get("confirmed") === "yes",
+        });
+      } else if (text(form, "intent") === "complete")
+        result = await completePrivacyExport(db, access.session, {
+          ...frozen,
+          reviewDigest: text(form, "reviewDigest"),
           confirmed: form.get("confirmed") === "yes",
         });
       else if (text(form, "intent") === "redact") {

@@ -1,103 +1,135 @@
-# B05 controlled privacy export slice
+# B05 controlled privacy export
 
-This source slice supplies real collection, frozen review and expiring private delivery for
-C18/O26, F30, AT43, AT45 and UX23. It does not complete B05, B06, human privacy-policy review,
-provider qualification or release acceptance. Shared records and files without a supported
-disclosure path remain visible pending categories. Every generated dossier says `partial`;
-the request remains in progress and a free-text review cannot mark it complete.
+This source supports actual collection, frozen human review, private delivery and controlled
+completion of a declared export scope for C18/O26, F30, AT43, AT45 and UX23. It does not
+certify legal compliance, complete B06, ratify privacy policy or supply human/release acceptance.
+Unresolved, held, inaccessible or unsupported material keeps the export partial.
 
-## Interaction and authority contract
+## Request and declared scope
 
-The current client submits a request about their own person. A current privacy operator
-verifies it, records the actual policy reference, responsible person and reviewed response
-condition, then moves it into progress. The operator opens the export link in the privacy
-queue, explicitly selects the client account receiving the copy and collects a private draft.
-Collection requires current staff context, fresh authentication, `privacy.manage`, the exact
-request revision and a verified, owned request. An organization party is held for a separate
-person/authority review rather than treated as one individual.
+A current client submits a request about their own person. Export scope explicitly includes
+all listed source categories or requests additional material. The default is additional or
+unspecified material. Legacy requests containing only free text retain that default; an
+operator cannot narrow them through a checkbox. A new scope-confirmed client request is
+needed for a narrower declared scope.
 
-The draft contains allowlisted account/contact/preferences/consent records, the person's own
-privacy-request descriptions, inquiry submissions, authored client messages and feedback.
-Other participants, recipients, attachments, internal notes, restricted compliance records,
-provider metadata, passkeys, sessions and authentication material are never read into it.
-Structured contact preferences are allowlisted rather than dumped as arbitrary JSON.
+A privacy operator verifies the request and records its actual policy reference, responsible
+person and response condition before work starts. Collection requires fresh staff
+authentication, current `privacy.manage`, the exact verified request revision and the exact
+active client recipient. An organization requires a separate person/authority review.
 
-The operator reviews the exact collected data and can remove whole free-text entries before
-disclosure. Saving removals creates a new private draft revision before final review, so an
-invalid delivery submission cannot lose them. These removals cannot inject new records or
-prose. The issue command binds the already reviewed exact bytes, digest, request and export
-revisions, recipient and expiry without changing the dossier.
-Changed source data refuses issue and requires a fresh draft. Identity, language and policy
-approval are not inferred from a checkbox or synthetic test.
+The dossier collects allowlisted profile, contacts, preferences, consent references, request
+descriptions, inquiry submissions, authored client messages and feedback. It excludes
+recipient rosters, attachments, internal notes, restricted records, credentials and provider
+metadata. Whole-text removals are saved as a separate encrypted draft revision before final
+review. Issue preserves the exact reviewed bytes and digest.
+
+## Source inventory and attributable decisions
+
+The operator captures a private manifest for every fixed category. A form cannot remove a
+category or source. Source bounds fail closed instead of silently truncating the inventory.
+
+| Category | Supported source evidence |
+| --- | --- |
+| Personal activity | Digest of allowlisted collected data and exact own free-text removals |
+| Shared business records and received communications | Explicit case, timeline, brief, interest, feedback, task, appointment, proposal, message and seller-instruction revision metadata; scoped received inquiry communications |
+| Private files | Current document/version manifests linked to the person's cases, requests or uploads |
+| Restricted material and security boundary | Opaque purpose-keyed revision fingerprint and boundary signal; no restricted identities, counts or contents |
+| Additional requested material | Client scope declaration; additional or legacy unspecified scope stays unsupported |
+
+Ordinary case/internal-case, inquiry and document permissions are required before staff can
+see source identities or counts. A missing dependency hides the category's source list and
+keeps it unresolved. Property-only evidence currently has no complete collector and also
+keeps shared records unresolved. Restricted compliance source identities and counts never
+enter the staff review, recipient copy or audit. Their opaque fingerprint still changes
+when relevant restricted evidence changes while the hold boolean stays true.
+
+Each category records one typed decision: disclosed, none, withheld, held or unsupported.
+The server binds the reviewer, evidence reference, actual request policy reference, complete
+source-key set and exact reviewed source manifests. A `none` decision requires a genuinely
+empty captured category and the explicit no-sources basis. Free text cannot declare
+additional, inaccessible, restricted or nonempty material absent.
+
+Disclosure and withholding decisions over nonempty shared/file sources require an exact
+purpose-reviewed redacted copy or withholding notice for every captured source. Restricted
+material can only receive a supported withholding decision or remain unresolved; it cannot
+be disclosed or declared absent. No decision releases a retention duty. Additional material
+has no arbitrary manual absence override. Redaction or a new supplement clears all prior
+category decisions and requires review of the new frozen copy.
 
 ## Controlled manual supplement
 
-A pending category can receive an attributable redacted supplement through the existing
-private client-document workflow. It cannot import a raw legal or financial dossier, create
-a new audience or grant access through a privacy request.
+Supplements reuse the existing private client-document workflow and create no new audience
+or grant. They cannot import a raw legal or financial dossier.
 
-1. Use the existing purpose-bound document request for the exact client participant and an
-   ordinary permitted `other` document. The existing upload, immutable sealing, clean-scan
-   and purpose-review steps still apply. This slice can include an already supplied redacted
-   copy; staff-authored arbitrary dossier upload is not added.
-2. An authorized document reviewer checks that exact redacted version for this recipient and
-   privacy request. The existing purpose-review note must be exactly
-   `privacy-export:<privacy-request-UUID>`. A generic clean scan or generic review is insufficient.
-3. In the export's technical-details section, add the reviewed document version and explicitly
-   confirm its redaction scope. The privacy operator also needs ordinary restricted-document
-   read access. The recipient must already hold the current purpose-bound document grant,
-   active participant scope and case capability. Expired/cancelled requests, revoked grants,
-   wrong recipients, internal audiences and restricted document purposes are refused.
-4. The server reads existing private sealed bytes through `privateDownload`, freezes their
-   digest plus document/file/request revisions into the encrypted dossier and changes its
-   review digest. A supplement is limited to 512 KiB, at most ten supplements and 1 MiB for
-   the whole dossier. Oversized copies are held, never silently truncated.
-5. Review the new complete frozen draft before issue. Issue rechecks current source access,
-   revisions and bytes. Every client full/range download again runs ordinary document access
-   for each supplement and compares the frozen source manifest. Permission, scan/review,
-   replacement, cancellation or source revision changes deny the old delivery.
+1. Use an existing purpose-bound request for the exact client participant and an ordinary
+   permitted `other` document. Upload, immutable sealing, clean scan and purpose review
+   remain mandatory. This slice can include an already supplied redacted copy; it does not
+   add arbitrary staff dossier uploads.
+2. An authorized document reviewer checks the exact version for this recipient and privacy
+   request. Its purpose-review note must be exactly `privacy-export:<privacy-request-UUID>`.
+   A generic scan or generic review is insufficient.
+3. The privacy operator attaches that version to a specific category and confirms its
+   redaction scope. The operator needs ordinary restricted-document read access. The
+   recipient already needs the current document-request grant, participant scope and case
+   capability. Internal audiences, restricted purposes, wrong recipients, expired/cancelled
+   requests and revoked grants are refused.
+4. The server reads sealed bytes through `privateDownload` and freezes their digest plus
+   document/file/request revisions into the encrypted dossier. Each supplement is at most
+   512 KiB; at most ten supplements and a 1 MiB whole-dossier bound apply.
+5. The reviewer maps each nonempty category source to the exact attached redacted copy or
+   withholding notice. One reviewed document may support multiple category mappings only
+   through separate explicit category attachments and attributable decisions.
 
-The remaining category is not automatically closed just because one supplement exists. The
-current collector cannot establish that every requested joint record or file has been
-reviewed. Completion therefore stays partial. A future completion command must enumerate
-requested categories and source manifests, record exact supported disclosure/withholding
-decisions with attributable reviewers, resolve every pending category, and bind those
-decisions to one current delivery. It must not expose identities or counts of restricted
-compliance records. The existing request owner keeps pending work held until that controlled
-category-disposition path is implemented and exercised.
+The software binds evidence and authority; it cannot determine that a person's redaction or
+withholding judgment is legally correct. Actual policy, identity and disclosure decisions
+remain with authorized people. Synthetic fixtures provide no such acceptance.
 
-## Private delivery and recovery
+## Issue, completion and private reads
 
-The dossier is AES-256-GCM encrypted in the private database using the existing private
-context encryption pattern with a separate purpose binding. Authenticated associated data
-binds artifact, privacy request, person and exact recipient. Review digests and operation
-receipts contain no dossier body. There is no public bucket, signed bearer URL, customer
-email or model call. A key change makes old ciphertext unavailable and requires an
-operator-managed transition; it does not silently move custody.
+Issue rechecks the exact recipient, request/export versions, current source inventory,
+every reviewer's ordinary source permissions and every supplement's current bytes and
+purpose review. A partial set remains partial. A fully supported set is labelled
+`reviewed_scope`; making it available still does not complete the request.
 
-The selected client downloads from `/{locale}/privacy` after current fresh authentication.
-Full and range reads check the exact client account and person, current request revision,
-state, expiry/revocation and supplemental source access before calling the shared private
-download response helper. Wrong-party and denied reads disclose no size or byte-range
-metadata. Responses are attachments with `private, no-store`, restrictive content policy and
-no referrer. Access can be withdrawn; already downloaded copies cannot be recalled.
+The dedicated completion command requires the current issued, unexpired, unrevoked export,
+its exact public and private review digests, every declared category resolved, current
+sources and permissions, and the exact request/recipient/version binding. It rechecks the
+actual supplement bytes and records a durable attributable receipt. The request's completed
+revision and export delivery binding advance atomically without changing reviewed bytes.
+The generic request-status form cannot complete an export, even if a complete copy exists.
 
-All actions are native POSTs. Stable operation keys make retry converge on one result.
-An uncertain submission returns to the same request's reconciliation state before another
-attempt. Draft and issue receipts remain separate from the privacy request's completion.
-Expired ciphertext retention and deletion/restriction propagation require the actual accepted
-retention policy and B06 work; this slice does not claim they are implemented.
+Every full and byte-range download requires fresh client authentication, exact account and
+person, current request binding, expiry/revocation, current source/reviewer permissions and
+ordinary source-file access. Stale, revoked and wrong-party reads reveal no source identity,
+size or range metadata. Availability lists also hide copies whose dependencies are no longer
+eligible. A source or grant change can invalidate a previously completed delivery; its
+historical completion receipt does not grant continuing access.
 
-## Integration and proof boundaries
+The dossier and separate private review manifest are AES-256-GCM encrypted in the private
+database with distinct purpose bindings to artifact, request, person and recipient. No key,
+plaintext dossier or bearer download token is stored in receipts. There is no public bucket,
+customer email or model call. Attachments use `private, no-store`, a restrictive content
+policy and no referrer. Withdrawal stops later reads but cannot recall downloaded copies.
 
-`0029_privacy_export` is additive. The integration owner must regenerate its canonical
-snapshot and journal ordering after the CMS and import migrations are combined. Existing
-launch-authority files are untouched. Local fixtures use only synthetic people, policies,
-documents and sessions; their review/scan records do not become live evidence.
+## Recovery, integration and remaining gates
 
-Focused server checks cover collection, wrong-party and exact-recipient denial,
-source/revision conflict, redaction, replay, ciphertext substitution, partial completion fence,
-expiry, legal hold, session/grant revocation, private full/range reads and reviewed supplement
-bytes/source grants. The browser portfolio adds native/enhanced review and issue, Hebrew
-client layout, download, range and revocation at phone/desktop profiles. Actual operator,
-physical-device, language, independent G1–G4 and deployed-provider acceptance remain open.
+All commands have native POST paths, stable operation keys, exact-version conflicts and
+reconciliation of uncertain outcomes. Receipt replay does not duplicate review, issue or
+completion. A source/permission change requires a fresh supported draft and review.
+
+Migration `0029_privacy_export` already has the integrated CMS/import snapshot. The additive
+`0030_privacy_export_dispositions` adds private review/completion bindings and constraints.
+The integration owner regenerates its canonical snapshot; no parent snapshot is manually
+merged. Original launch authority remains untouched.
+
+Focused checks cover allow/deny, typed absence, missing/invented evidence, additional scope,
+source/restricted-revision changes, reviewer/recipient grant revocation, redaction invalidation,
+exact completion and replay, staff confidentiality, and private full/range access. Browser
+checks cover native/enhanced partial and complete flows, Hebrew client layout, withdrawal,
+accessibility and narrow viewports across desktop/mobile Chromium and mobile WebKit.
+
+Accepted retention, expiry cleanup and restore-safe deletion/restriction propagation remain
+separate B06 work. Property-only and additional/unmapped requested material remain unsupported
+by the completion collector. Actual operator, policy, language, physical-device, independent
+F01/F02/G1–G4, integrated CI and deployed-release acceptance remain open.
