@@ -127,15 +127,13 @@ it("O22 never follows an effort identity into another task", async () => {
     .update(grants)
     .set({ revokedAt: new Date() })
     .where(eq(grants.principalId, f.actor.id));
-  await t.db
-    .insert(grants)
-    .values({
-      principalId: f.actor.id,
-      capability: "task.manage",
-      recordType: "task",
-      recordId: f.id,
-      reason: "Synthetic narrow effort grant",
-    });
+  await t.db.insert(grants).values({
+    principalId: f.actor.id,
+    capability: "task.manage",
+    recordType: "task",
+    recordId: f.id,
+    reason: "Synthetic narrow effort grant",
+  });
   await expect(readTaskEffort(t.db, f.actor.session, other.id)).rejects.toBeDefined();
   expect((await readTaskEffort(t.db, f.actor.session, f.id)).entries).toHaveLength(0);
 });
