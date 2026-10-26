@@ -239,6 +239,13 @@
       "when": 1793029229031,
       "tag": "0033_privacy_erasure",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793047486573,
+      "tag": "0034_privacy_governance",
+      "breakpoints": true
     }
   ]
 }

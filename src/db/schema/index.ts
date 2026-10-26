@@ -20,6 +20,7 @@ export * from "./migration";
 export * from "./parties";
 export * from "./privacy-erasure";
 export * from "./privacy-export";
+export * from "./privacy-governance";
 export * from "./publication";
 export * from "./records";
 export * from "./runtime";
