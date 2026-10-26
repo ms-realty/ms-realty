@@ -1,8 +1,11 @@
 "use server";
+import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
 import { isStaffLocale } from "@/i18n/config";
 import { requireAuthHost } from "@/server/auth/pages";
 import { AppError } from "@/server/errors";
 import { action } from "@/server/http/next";
+import { prepareStaffImport } from "@/server/import-review/commands";
 import { type ColumnMapping, CsvError, importFields } from "@/server/import-review/csv";
 import {
   checkImportPreview,
@@ -38,7 +41,7 @@ export async function importReviewAction(
           const source = await startImportPreview(db, session, file, delimiter);
           return { stage: "mapping", source } as ImportReviewState;
         }
-        if (intent !== "check") throw new CsvError("format");
+        if (intent !== "check" && intent !== "prepare") throw new CsvError("format");
         const mapping = Object.fromEntries(
           importFields.map((field) => {
             const value = one(data, `column.${field}`);
@@ -46,11 +49,32 @@ export async function importReviewAction(
             return [field, value === "" ? null : Number(value)];
           }),
         ) as ColumnMapping;
+        if (intent === "prepare") {
+          const context = Object.fromEntries(
+            ["country", "region", "propertyType", "purpose", "areaBasis", "sourceLanguage"].map(
+              (field) => [field, one(data, `context.${field}`)],
+            ),
+          );
+          const receipt = await prepareStaffImport(db, session, {
+            token: one(data, "source"),
+            mapping,
+            context,
+            operationKey: one(data, "operationKey"),
+          });
+          return { stage: "receipt", receipt } as ImportReviewState;
+        }
         const checked = await checkImportPreview(db, session, one(data, "source"), mapping);
         return {
           stage: "problems",
-          source: { ...checked, mapping },
+          source: {
+            filename: checked.filename,
+            document: checked.document,
+            digest: checked.digest,
+            token: checked.token,
+            mapping,
+          },
           rows: checked.rows,
+          operationKey: randomUUID(),
         } as ImportReviewState;
       } catch (error) {
         if (error instanceof CsvError)
@@ -60,5 +84,7 @@ export async function importReviewAction(
     },
     { requireSession: true },
   );
+  if (result.ok && result.data.receipt)
+    redirect(`/${locale}/operations/imports?review=${result.data.receipt.id}`);
   return result.ok ? result.data : { stage: "choose", error: "failure" };
 }
