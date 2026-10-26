@@ -27,7 +27,7 @@ import { findOperation, type OperationContext, runOperation } from "../operation
 import { liveStaff, parseInput, version } from "../work/shared";
 
 export const policyResource = {
-  type: "operating_policy",
+  type: "settings",
   id: operatingPolicyId,
   audience: "internal" as const,
 };

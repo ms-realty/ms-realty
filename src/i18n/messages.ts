@@ -26,6 +26,7 @@ import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
 import type operations from "../../messages/staff/bg/operations.json";
 import type privacyExportStaff from "../../messages/staff/bg/privacyExport.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
+import type settingsScopes from "../../messages/staff/bg/settingsScopes.json";
 import type tools from "../../messages/staff/bg/tools.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
 import type workspaceStates from "../../messages/staff/bg/workspaceStates.json";
@@ -61,6 +62,7 @@ export const staffNamespaces = [
   "auditHistory",
   "privacyExport",
   "operatingPolicy",
+  "settingsScopes",
 ] as const;
 
 export interface PublicMessages {
@@ -86,6 +88,7 @@ export interface StaffMessages {
   auditHistory: typeof auditHistory;
   operations: typeof operations;
   operatingPolicy: typeof operatingPolicy;
+  settingsScopes: typeof settingsScopes;
   privacyExport: typeof privacyExportStaff;
   dataReview: typeof dataReview;
   serverStaff: typeof serverStaff;

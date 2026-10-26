@@ -3,7 +3,10 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import { auditEvents, grants, principals, sessions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
+import { emptyOperatingPolicy } from "@/domain/operating-policy";
+import { settingsResources } from "@/domain/settings-resources";
 import { can } from "../authz";
+import { readOperatingPolicy, saveOperatingPolicy } from "../operating-policy/service";
 import { createClient, createStaff, type GrantSpec } from "../testing";
 import {
   accessManagerNames,
@@ -299,4 +302,81 @@ it("authorizes grant-directory reads and rejects invalid page or search input", 
   await expect(listStaffGrants(t.db, manager.session)).rejects.toMatchObject({
     code: "unauthenticated",
   });
+});
+
+it("O23/O24 allocates a supported settings scope through the actual grant command and fences target sessions, replay and revocation", async () => {
+  const manager = await member(),
+    target = await member(false);
+  const input = {
+    operationId: randomUUID(),
+    principalId: target.id,
+    capability: "settings.manage",
+    reason: "Synthetic reviewed assignment of operating-policy stewardship",
+    scope: { ...globalScope, recordType: "settings", recordId: settingsResources.operatingPolicy },
+  };
+  const done = await grantStaffCapability(t.db, manager.session, input);
+  expect((await grantStaffCapability(t.db, manager.session, input)).operationId).toBe(
+    done.operationId,
+  );
+  expect(await readSession(t.db, target.token)).toBeNull();
+  await expect(readOperatingPolicy(t.db, target.session)).rejects.toHaveProperty("code");
+  const issued = await createSession(t.db, { kind: "staff", id: target.id });
+  expect(
+    await can(t.db, target.actor, "settings.manage", {
+      type: "settings",
+      id: settingsResources.operatingPolicy,
+    }),
+  ).toBe(true);
+  expect(
+    await can(t.db, target.actor, "settings.manage", {
+      type: "settings",
+      id: settingsResources.privacyGovernance,
+    }),
+  ).toBe(false);
+  expect(
+    await can(t.db, target.actor, "claim.approve", {
+      type: "settings",
+      id: settingsResources.operatingPolicy,
+    }),
+  ).toBe(false);
+  const { draft } = await readOperatingPolicy(t.db, issued.session);
+  const save = {
+    operationId: randomUUID(),
+    expectedVersion: draft.version,
+    document: emptyOperatingPolicy,
+  };
+  await saveOperatingPolicy(t.db, issued.session, save);
+  expect((await saveOperatingPolicy(t.db, issued.session, save)).replayed).toBe(true);
+  await revokeStaffGrant(t.db, manager.session, {
+    operationId: randomUUID(),
+    grantId: done.outcome.grantId,
+    expectedRevision: 1,
+    reason: "Synthetic operator assignment ended; current access revoked",
+  });
+  await expect(saveOperatingPolicy(t.db, issued.session, save)).rejects.toHaveProperty("code");
+  const after = await createSession(t.db, { kind: "staff", id: target.id });
+  await expect(readOperatingPolicy(t.db, after.session)).rejects.toMatchObject({
+    code: "forbidden",
+  });
+});
+it("O23 rejects unknown settings IDs, unrelated capabilities, missing IDs and language-narrowed settings scopes", async () => {
+  const manager = await member(),
+    target = await member(false);
+  const input = {
+    operationId: randomUUID(),
+    principalId: target.id,
+    capability: "settings.manage",
+    reason: "Synthetic bounded settings allocation validation",
+    scope: { ...globalScope, recordType: "settings", recordId: settingsResources.operatingPolicy },
+  };
+  for (const overrides of [
+    { scope: { ...input.scope, recordId: randomUUID() } },
+    { scope: { ...input.scope, recordId: null } },
+    { scope: { ...input.scope, recordType: "operating_policy" } },
+    { scope: { ...input.scope, locales: ["bg"] } },
+    { capability: "listing.edit" },
+  ])
+    await expect(
+      grantStaffCapability(t.db, manager.session, { ...input, ...overrides }),
+    ).rejects.toMatchObject({ code: "validation_failed" });
 });
