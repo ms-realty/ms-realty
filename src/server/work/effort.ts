@@ -165,6 +165,8 @@ export async function readEffortOperation(
       (result.outcome as { taskId?: string } | null)?.taskId !== id
     )
       throw new AppError("not_found");
+    if (result.status !== "succeeded" && (result.resultType !== "task" || result.resultId !== id))
+      throw new AppError("not_found");
     return { state: result.status, operationId: result.operationId };
   });
 }

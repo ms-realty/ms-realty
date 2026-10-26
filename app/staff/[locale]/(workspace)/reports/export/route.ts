@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ loca
     const report = await readReports(getDb(), session, filter);
     // No titles, recipients, contacts or arbitrary source values enter a spreadsheet cell.
     const rows = [
-      ["definition", "O22-v1"],
+      ["definition", report.definition],
       ["scope", filter.scope],
       ["period_days", String(filter.days)],
       ["as_of", report.asOf.toISOString()],
@@ -33,7 +33,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ loca
       ["response_missing", String(report.response?.missing ?? "unknown")],
       ["response_median_elapsed_minutes", String(report.response?.medianMinutes ?? "unknown")],
       ["staffed_response_minutes", "unknown"],
-      ["correction_effort", "unknown"],
+      [
+        "correction_reported_minutes",
+        String(report.correctionEffort.correctionMinutes ?? "unknown"),
+      ],
+      ["reentry_reported_minutes", String(report.correctionEffort.reentryMinutes ?? "unknown")],
+      ["effort_observations", String(report.correctionEffort.observations ?? "unknown")],
     ];
     return new Response(`${rows.map((r) => r.join(",")).join("\r\n")}\r\n`, {
       headers: {

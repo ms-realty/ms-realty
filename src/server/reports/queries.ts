@@ -9,6 +9,7 @@ import {
   inquiries,
   listings,
   messages,
+  taskEffortEntries,
   tasks,
 } from "@/db/schema";
 import type { Capability, CapabilityGrant } from "@/domain/capabilities";
@@ -354,8 +355,49 @@ export async function readReports(
               ),
             )
         : [];
+      const effortWhere = task
+        ? and(
+            task,
+            mine(tasks.ownerId),
+            eq(taskEffortEntries.action, "record"),
+            sql`${taskEffortEntries.createdAt} >= ${from.toISOString()}::timestamptz`,
+            lt(taskEffortEntries.createdAt, now),
+            sql`not exists (select 1 from task_effort_entries effort_correction where effort_correction.voids_id = ${taskEffortEntries.id})`,
+          )
+        : null;
+      const [effort] = effortWhere
+        ? await tx
+            .select({
+              observations: sql<number>`count(*)`.mapWith(Number),
+              correctionMinutes:
+                sql<number>`coalesce(sum(${taskEffortEntries.minutes}) filter (where ${taskEffortEntries.category} = 'correction'), 0)`.mapWith(
+                  Number,
+                ),
+              reentryMinutes:
+                sql<number>`coalesce(sum(${taskEffortEntries.minutes}) filter (where ${taskEffortEntries.category} = 'reentry'), 0)`.mapWith(
+                  Number,
+                ),
+            })
+            .from(taskEffortEntries)
+            .innerJoin(tasks, eq(tasks.id, taskEffortEntries.taskId))
+            .where(effortWhere)
+        : [];
+      const effortRows =
+        effortWhere && effort && effort.observations > 0
+          ? await tx
+              .selectDistinctOn([tasks.id], {
+                id: tasks.id,
+                reference: tasks.title,
+                path: sql<string>`'/tasks/' || ${tasks.id}::text || '/effort'`,
+              })
+              .from(taskEffortEntries)
+              .innerJoin(tasks, eq(tasks.id, taskEffortEntries.taskId))
+              .where(effortWhere)
+              .orderBy(asc(tasks.id))
+              .limit(maxRows + 1)
+          : [];
       return {
-        definition: "O22-v1",
+        definition: "O22-v2",
         filter,
         from,
         asOf: now,
@@ -369,7 +411,22 @@ export async function readReports(
             }
           : null,
         staffedResponse: { state: "unknown" as const, reason: "approved_hours_policy_not_bound" },
-        correctionEffort: { state: "unknown" as const, reason: "effort_events_not_recorded" },
+        correctionEffort:
+          effort && effort.observations > 0
+            ? {
+                state: "observed" as const,
+                ...effort,
+                rows: effortRows.slice(0, maxRows),
+                hasMore: effortRows.length > maxRows,
+              }
+            : {
+                state: effort ? ("unobserved" as const) : ("denied" as const),
+                rows: [],
+                hasMore: false,
+                observations: null,
+                correctionMinutes: null,
+                reentryMinutes: null,
+              },
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

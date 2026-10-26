@@ -170,5 +170,41 @@
         "definition": "Outgoing deal emails currently failed, bounced or with an unknown outcome. Provider acceptance does not prove delivery; no recipient or message content appears here."
       }
     }
+  },
+  "taskEffort": {
+    "title": "Correction and reentry time",
+    "about": "Record the minutes you spent on this task. These are reported observations, not automatic time tracking.",
+    "minutes": "Minutes spent",
+    "category": "Kind of work",
+    "reason": "Reason for the work",
+    "record": "Record time",
+    "newEntry": "Record another entry",
+    "void": "Exclude mistaken entry",
+    "back": "Back to the task",
+    "history": "Recorded observations",
+    "empty": "No time has been recorded. This does not mean the work took no time.",
+    "hint": "Enter a whole number from 1 to 480 minutes. Do not include customer details.",
+    "confirmed": "The entry is recorded.",
+    "failed": "The entry was not recorded. Check the current task before trying again.",
+    "pending": "This entry is still being checked. Refresh its status before trying again.",
+    "unknown": "The result is not known. Check the same entry before recording it again.",
+    "refresh": "Check this entry",
+    "excluded": "Excluded by a later correction",
+    "recordedAt": "Recorded at",
+    "count": "Recorded entries",
+    "correctionMinutes": "Reported correction minutes",
+    "reentryMinutes": "Reported reentry minutes",
+    "reportNote": "Self-reported time recorded during this period, after excluding mistaken entries. No observations means unknown effort.",
+    "categories": {
+      "correction": "Correcting information",
+      "reentry": "Entering information again"
+    },
+    "reasons": {
+      "facts": "Property or contact facts",
+      "language": "Language or presentation",
+      "duplicate_entry": "Repeated data entry",
+      "routing": "Assignment or routing",
+      "other": "Other correction work"
+    }
   }
 }

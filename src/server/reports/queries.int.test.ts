@@ -7,6 +7,7 @@ import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { Capability } from "@/domain/capabilities";
 import { staffFixture } from "../cases/testing";
 import { createCase } from "../testing";
+import { recordTaskEffort } from "../work/effort";
 import { readReports, reportFilter } from "./queries";
 
 let t: TestDatabase;
@@ -112,9 +113,70 @@ it("counts only the recorded useful-human response and keeps missing policy/data
     smallSample: true,
   });
   expect(report.staffedResponse.state).toBe("unknown");
-  expect(report.correctionEffort.state).toBe("unknown");
+  expect(report.correctionEffort.state).toBe("unobserved");
   const empty = await readReports(t.db, staff.session, { days: 7, scope: "mine" }, now);
   expect(empty.response).toMatchObject({ received: 0, responded: 0, medianMinutes: null });
+});
+
+it("O22 reports attributable effort only within intersected report/task scope and excludes corrected entries", async () => {
+  const staff = await staffFixture(t.db);
+  const [visible, hidden, otherOwner] = await t.db
+    .insert(tasks)
+    .values([
+      { title: "Synthetic permitted correction", ownerId: staff.id },
+      { title: "Synthetic hidden correction", ownerId: staff.id },
+      { title: "Synthetic other-owner correction", ownerId: null },
+    ])
+    .returning();
+  if (!visible || !hidden || !otherOwner) throw new Error("Missing effort fixtures");
+  const record = (id: string, category: "correction" | "reentry", minutes: number) =>
+    recordTaskEffort(t.db, staff.session, {
+      id,
+      expectedVersion: 1,
+      operationId: randomUUID(),
+      action: "record",
+      category,
+      minutes,
+      reason: "facts",
+    });
+  const mistaken = await record(visible.id, "correction", 9);
+  await recordTaskEffort(t.db, staff.session, {
+    id: visible.id,
+    expectedVersion: 1,
+    operationId: randomUUID(),
+    action: "void",
+    entryId: mistaken.outcome.id,
+    reason: "entry_mistake",
+  });
+  await record(visible.id, "correction", 12);
+  await record(visible.id, "reentry", 4);
+  await record(hidden.id, "correction", 80);
+  await record(otherOwner.id, "reentry", 40);
+  await t.db.update(grants).set({ revokedAt: new Date() }).where(eq(grants.principalId, staff.id));
+  await grant(staff.id, "report.read", "task", visible.id);
+  await grant(staff.id, "task.manage");
+  const observed = await readReports(t.db, staff.session, filter);
+  expect(observed.correctionEffort).toMatchObject({
+    state: "observed",
+    observations: 2,
+    correctionMinutes: 12,
+    reentryMinutes: 4,
+    rows: [{ id: visible.id, reference: visible.title }],
+  });
+  expect(JSON.stringify(observed)).not.toContain(hidden.title);
+  await grant(staff.id, "report.read", "task", otherOwner.id);
+  expect(
+    (await readReports(t.db, staff.session, { ...filter, scope: "mine" })).correctionEffort
+      .observations,
+  ).toBe(2);
+  expect((await readReports(t.db, staff.session, filter)).correctionEffort.reentryMinutes).toBe(44);
+  await t.db.update(grants).set({ revokedAt: new Date() }).where(eq(grants.principalId, staff.id));
+  await grant(staff.id, "report.read");
+  expect((await readReports(t.db, staff.session, filter)).correctionEffort).toMatchObject({
+    state: "denied",
+    observations: null,
+    rows: [],
+  });
 });
 
 it("uses actual transition events and open client promises, never guesses from current Case stage", async () => {
