@@ -1,7 +1,7 @@
 import "server-only";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-import { appointmentResources, appointments } from "@/db/schema";
+import { appointmentParticipants, appointmentResources, appointments } from "@/db/schema";
 import { requireAvailableStaff } from "../auth/availability";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { caseEvent } from "../cases/shared";
@@ -148,6 +148,16 @@ export async function acceptAppointmentHost(db: Executor, session: Session, raw:
         })
         .where(eq(appointments.id, row.id))
         .returning();
+      if (row.purpose === "photography")
+        await ctx.tx
+          .update(appointmentParticipants)
+          .set({ principalId: receiver.account.id })
+          .where(
+            and(
+              eq(appointmentParticipants.appointmentId, row.id),
+              eq(appointmentParticipants.role, "host"),
+            ),
+          );
       if (!changed) throw new Error("Appointment host acceptance failed");
       await recordAppointmentVersion(ctx.tx, changed, receiver);
       await caseEvent(

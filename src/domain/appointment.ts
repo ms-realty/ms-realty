@@ -48,6 +48,9 @@ export interface Slot {
 }
 
 export interface AppointmentEvidence {
+  readonly purpose?: "viewing" | "photography";
+  readonly photographyScopeReviewed?: boolean;
+  readonly propertyWorkContextConfirmed?: boolean;
   readonly slot?: Slot;
   readonly hostAvailable?: boolean;
   readonly propertyAccess?: PropertyAccessState;
@@ -93,10 +96,14 @@ export function guardAppointmentTransition(
         need(evidence.slot?.timezone, "timezone_required"),
         need(evidence.hostAvailable, "host_unavailable"),
         need(evidence.propertyAccess === "confirmed", "property_access_unconfirmed"),
-        need((evidence.participantCount ?? 0) > 0, "participants_required"),
+        evidence.purpose === "photography"
+          ? need(evidence.photographyScopeReviewed, "photography_scope_required")
+          : need((evidence.participantCount ?? 0) > 0, "participants_required"),
         need(evidence.externalBusyChecked, "external_busy_check_required"),
         need(evidence.resourcesFree, "appointment_conflict"),
-        need(evidence.availabilityConfirmed, "availability_reconfirmation_required"),
+        evidence.purpose === "photography"
+          ? need(evidence.propertyWorkContextConfirmed, "property_work_context_required")
+          : need(evidence.availabilityConfirmed, "availability_reconfirmation_required"),
       );
     case "completed":
       return need(evidence.attendanceRecorded, "attendance_required");

@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, desc, eq, gt, inArray, isNull, lt, or, type SQLWrapper, sql } from "drizzle-orm";
-import { appointmentResources, appointments, cases, principals } from "@/db/schema";
+import { appointmentResources, appointments, cases, principals, properties } from "@/db/schema";
 import { type CalendarQuery, calendarPeriod } from "@/features/appointments/calendar-period";
 import type { Session } from "../auth/sessions";
 import { liveUser } from "../cases/shared";
@@ -14,10 +14,11 @@ const fields = {
   id: appointments.id,
   reference: appointments.reference,
   state: appointments.state,
+  purpose: appointments.purpose,
   version: appointments.version,
   caseId: appointments.caseId,
-  caseReference: cases.reference,
-  caseTitle: cases.title,
+  caseReference: sql<string>`coalesce(${cases.reference}, ${properties.reference}, '')`,
+  caseTitle: sql<string>`coalesce(${cases.title}, ${properties.settlement}, '')`,
   hostId: appointments.hostId,
   hostName: principals.displayName,
   propertyId: appointments.propertyId,
@@ -35,6 +36,7 @@ export type CalendarAppointment = {
   id: string;
   reference: string;
   state: typeof appointments.$inferSelect.state;
+  purpose?: string;
   version: number;
   caseId: string | null;
   caseReference: string;
@@ -81,7 +83,8 @@ export async function readCalendar(db: Executor, session: Session, query: Calend
   const rows = await db
     .select(fields)
     .from(appointments)
-    .innerJoin(cases, eq(cases.id, appointments.caseId))
+    .leftJoin(cases, eq(cases.id, appointments.caseId))
+    .leftJoin(properties, eq(properties.id, appointments.propertyId))
     .leftJoin(principals, eq(principals.id, appointments.hostId))
     .where(and(permitted, scope, inPeriod))
     .orderBy(asc(firstInPeriod), asc(appointments.id))
@@ -92,7 +95,8 @@ export async function readCalendar(db: Executor, session: Session, query: Calend
   const requests = await db
     .select(fields)
     .from(appointments)
-    .innerJoin(cases, eq(cases.id, appointments.caseId))
+    .leftJoin(cases, eq(cases.id, appointments.caseId))
+    .leftJoin(properties, eq(properties.id, appointments.propertyId))
     .leftJoin(principals, eq(principals.id, appointments.hostId))
     .where(
       and(

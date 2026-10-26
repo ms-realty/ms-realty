@@ -1,3 +1,7 @@
+import agencyBg from "../../../messages/staff/bg/agency.json";
+import agencyEn from "../../../messages/staff/en/agency.json";
+import agencyRu from "../../../messages/staff/ru/agency.json";
+
 const en = {
   title: "Save an attachment in the deal",
   lead: "Choose one attachment and its purpose. Import keeps it private and starts a malware check. Acceptance for the stated purpose requires a separate human review.",
@@ -29,6 +33,7 @@ const en = {
   case_check: "Deal check evidence",
   process_policy: "Process policy evidence",
   case_completion: "Agency outcome evidence",
+  review_consent: agencyEn.documentConsent,
   identity: "Identity",
   titleDocument: "Title / ownership evidence",
   financial: "Financial",
@@ -67,6 +72,7 @@ const bg: typeof en = {
   case_check: "Проверка по сделката",
   process_policy: "Доказателство за процесна политика",
   case_completion: "Доказателство за резултата на агенцията",
+  review_consent: agencyBg.documentConsent,
   identity: "Самоличност",
   titleDocument: "Собственост",
   financial: "Финансов",
@@ -105,6 +111,7 @@ const ru: typeof en = {
   case_check: "Проверка по сделке",
   process_policy: "Подтверждение процессной политики",
   case_completion: "Подтверждение результата агентства",
+  review_consent: agencyRu.documentConsent,
   identity: "Удостоверение личности",
   titleDocument: "Право собственности",
   financial: "Финансовый",

@@ -171,6 +171,7 @@ async function checkedSource(
   page: Awaited<ReturnType<typeof contentPageFor>>["page"],
   input: z.infer<typeof saveSchema> | z.infer<typeof decideSchema>,
 ) {
+  if (page.kind === "review") throw new AppError("approval_stale");
   version(page, input.sourceExpectedVersion);
   const source = await readApprovedContent(db, page.kind, page.slug, "bg");
   if (

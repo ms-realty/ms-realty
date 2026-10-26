@@ -1,5 +1,7 @@
 // The whole schema. pg-boss owns its own schema for queue jobs; the outbox, external actions
 // and inbox events here are the business journal.
+
+export * from "./agency-obligations";
 export * from "./approvals";
 export * from "./assistance";
 export * from "./chatgpt";
