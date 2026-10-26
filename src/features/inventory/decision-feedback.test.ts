@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { operatingPolicyCopy } from "@/features/operating-policy/copy";
 import type { ErrorBody } from "@/server/errors";
 import { inventoryCopy } from "./copy";
 import type { InventoryDecisionContext, InventoryDecisionValues } from "./decision-contract";
@@ -26,6 +27,23 @@ const error = (extra: Partial<ErrorBody> = {}): ErrorBody => ({
 });
 
 describe("inventory decision recovery", () => {
+  it("explains unknown review policy as a held decision rather than a missing broker note", () => {
+    expect(
+      inventoryDecisionFeedback(
+        error({
+          code: "VALIDATION_FAILED",
+          fieldErrors: { evidence: ["review_interval_policy_unknown"] },
+        }),
+        context,
+        values,
+        status,
+      ),
+    ).toMatchObject({
+      kind: "rejected",
+      message: operatingPolicyCopy("en").reviewHeld,
+      retryable: false,
+    });
+  });
   it("routes an exact missing seller prerequisite to evidence and never retries a recorded rejection", () => {
     expect(
       inventoryDecisionFeedback(

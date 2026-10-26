@@ -47,6 +47,10 @@ export const appointments = pgTable(
   {
     ...mutable(),
     reference: reference(),
+    /** Request context is never overwritten when later operating policy changes. */
+    operatingPolicySnapshot: jsonb("operating_policy_snapshot"),
+    /** Policy used for the first confirmation; later versions retain their full context. */
+    confirmedPolicySnapshot: jsonb("confirmed_policy_snapshot"),
     state: appointmentStateEnum("state").notNull().default("requested"),
     format: appointmentFormatEnum("format").notNull(),
     caseId: uuid("case_id").references(() => cases.id),

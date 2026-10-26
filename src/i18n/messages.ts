@@ -10,9 +10,11 @@ import type errors from "../../messages/bg/errors.json";
 import type footer from "../../messages/bg/footer.json";
 import type forms from "../../messages/bg/forms.json";
 import type intent from "../../messages/bg/intent.json";
+import type legacyArchive from "../../messages/bg/legacy-archive.json";
 import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
 import type privacy from "../../messages/bg/privacy.json";
+import type privacyExportClient from "../../messages/bg/privacy-export.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
 import type workflow from "../../messages/bg/workflow.json";
@@ -20,7 +22,9 @@ import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
+import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
 import type operations from "../../messages/staff/bg/operations.json";
+import type privacyExportStaff from "../../messages/staff/bg/privacyExport.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
 import type tools from "../../messages/staff/bg/tools.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
@@ -35,9 +39,11 @@ export const publicNamespaces = [
   "footer",
   "forms",
   "intent",
+  "legacy-archive",
   "map",
   "nav",
   "privacy",
+  "privacy-export",
   "server",
   "states",
   "workflow",
@@ -53,6 +59,8 @@ export const staffNamespaces = [
   "operations",
   "dataReview",
   "auditHistory",
+  "privacyExport",
+  "operatingPolicy",
 ] as const;
 
 export interface PublicMessages {
@@ -63,9 +71,11 @@ export interface PublicMessages {
   footer: typeof footer;
   forms: typeof forms;
   intent: typeof intent;
+  "legacy-archive": typeof legacyArchive;
   map: typeof map;
   nav: typeof nav;
   privacy: typeof privacy;
+  "privacy-export": typeof privacyExportClient;
   server: typeof server;
   states: typeof states;
   workflow: typeof workflow;
@@ -75,6 +85,8 @@ export interface StaffMessages {
   caseDirectory: typeof caseDirectory;
   auditHistory: typeof auditHistory;
   operations: typeof operations;
+  operatingPolicy: typeof operatingPolicy;
+  privacyExport: typeof privacyExportStaff;
   dataReview: typeof dataReview;
   serverStaff: typeof serverStaff;
   tools: typeof tools;

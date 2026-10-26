@@ -1,0 +1,22 @@
+{
+  "listing": "Archive listing",
+  "page": "Archive page",
+  "post": "Archive article",
+  "taxonomy": "Archive collection",
+  "availability": "Current availability and conditions are unconfirmed.",
+  "historical": "Preserved information from the previous website. Content and services may have changed.",
+  "facts": "Details from the original source",
+  "factsNote": "These are historical source details, not confirmed current facts.",
+  "reading": "Source description",
+  "media": "Source images",
+  "mediaNote": "Preserved images from the original website. Current condition is unconfirmed.",
+  "openImage": "Open image",
+  "contact": "Ask MS Realty",
+  "quote": "When calling, quote the listing reference or this page title.",
+  "call": "Call",
+  "search": "Search current properties",
+  "source": "Original source address",
+  "sourceLinks": "Links from the original source",
+  "emptyArchive": "There were no entries in this captured collection.",
+  "noText": "There is no additional readable text in this archive."
+}

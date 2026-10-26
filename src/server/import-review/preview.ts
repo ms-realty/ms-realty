@@ -109,5 +109,7 @@ export async function checkImportPreview(
     token,
     mapping,
     rows,
+    documentSource: parsed.source,
+    delimiter: parsed.delimiter,
   };
 }

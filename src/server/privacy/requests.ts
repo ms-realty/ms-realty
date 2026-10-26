@@ -10,6 +10,7 @@ import {
   privacyRequestMachine,
   privacyRequestStates,
 } from "@/domain/privacy";
+import { privacyExportScope } from "@/domain/privacy-export";
 import { recordAudit } from "../audit";
 import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import type { Session } from "../auth/sessions";
@@ -53,6 +54,7 @@ export async function submitPrivacyRequest(db: Executor, session: Session, input
       operationId: z.uuid(),
       kind: z.enum(privacyRequestKinds),
       description: z.string().trim().min(10).max(4000),
+      exportScope: privacyExportScope.default("additional_material"),
       confirmed: z.literal(true),
     }),
     input,
@@ -86,6 +88,7 @@ export async function submitPrivacyRequest(db: Executor, session: Session, input
             description: value.description,
             dueCondition: "awaiting_human_assessment",
             policyReference: null,
+            ...(value.kind === "export" ? { exportScope: value.exportScope } : {}),
           },
         })
         .returning();
@@ -291,6 +294,10 @@ export async function reviewPrivacyRequest(db: Executor, session: Session, input
         throw new AppError("validation_failed");
       if (value.to === "on_legal_hold" && value.legalHoldReason.length < 10)
         throw new AppError("validation_failed");
+      if (record.kind === "export" && value.to === "completed") {
+        // Only the source/permission/version-bound export completion command may close it.
+        throw new AppError("transition_denied");
+      }
       // This boolean intentionally conceals the source of a retention obligation.
       // Human acknowledgement cannot override current server-side retention evidence.
       if (

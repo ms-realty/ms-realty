@@ -1,3 +1,5 @@
+import { operatingPolicyCopy } from "@/features/operating-policy/copy";
+import { isStaffLocale } from "@/i18n/config";
 import type { ErrorBody } from "@/server/errors";
 import type { FormOutcome, RecoveryLink } from "@/ui/form/contract";
 import { inventoryCopy } from "./copy";
@@ -31,6 +33,15 @@ export function inventoryDecisionFeedback(
   if (error.code === "REVISION_CONFLICT" || error.code === "IDEMPOTENCY_KEY_REUSED")
     return { kind: "conflict", code: error.code, message: feedback.changed, recovery: current };
   if (error.code === "VALIDATION_FAILED") {
+    if (error.fieldErrors?.evidence?.includes("review_interval_policy_unknown"))
+      return {
+        kind: "rejected",
+        code: error.code,
+        message: operatingPolicyCopy(isStaffLocale(context.locale) ? context.locale : "bg")
+          .reviewHeld,
+        retryable: false,
+        recovery: current,
+      };
     const fields = error.fieldErrors ?? {};
     const fieldErrors: Partial<Record<keyof InventoryDecisionValues, string[]>> = {};
     if (["scope", "note", "reason", "evidence"].some((key) => fields[key]))

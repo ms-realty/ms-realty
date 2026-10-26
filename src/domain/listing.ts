@@ -196,6 +196,8 @@ export interface FreshnessInput {
   readonly conflicting?: boolean;
   readonly now: string;
   readonly intervalDays?: number;
+  /** Explicitly bound confirmation: null/invalid is unknown, never a fallback to defaults. */
+  readonly recordedReviewDueAt?: string | null;
 }
 
 /** Freshness under policy, and when the next review falls due. */
@@ -207,7 +209,12 @@ export function assessFreshness(input: FreshnessInput): {
     return { state: input.conflicting ? "conflicting" : "unknown", reviewDueAt: null };
   }
   const days = input.intervalDays ?? availabilityReviewIntervalDays[input.purpose];
-  const due = Date.parse(input.lastConfirmedAt) + days * dayMs;
+  const due =
+    "recordedReviewDueAt" in input
+      ? Date.parse(input.recordedReviewDueAt ?? "")
+      : Date.parse(input.lastConfirmedAt) + days * dayMs;
+  if (!Number.isFinite(due) || due <= Date.parse(input.lastConfirmedAt))
+    return { state: input.conflicting ? "conflicting" : "unknown", reviewDueAt: null };
   const reviewDueAt = new Date(due).toISOString();
   if (input.conflicting) return { state: "conflicting", reviewDueAt };
   return {

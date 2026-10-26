@@ -4,6 +4,11 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { localeEndonyms, type PublicLocale } from "@/i18n/config";
 import { LanguageSwitcher, type LanguageSwitcherProps } from "@/ui/language-switcher";
+import {
+  localeLinkPath,
+  type PageLocaleAvailability,
+  samePageLocales,
+} from "./page-locale-availability";
 
 /**
  * Same page in another language: replaces only the leading locale segment and keeps the
@@ -36,11 +41,13 @@ export function LocaleSwitcher({
   locale,
   locales,
   label,
+  availability,
   ...layout
 }: {
   locale: PublicLocale;
   locales: readonly PublicLocale[];
   label: string;
+  availability?: PageLocaleAvailability | null;
 } & Pick<LanguageSwitcherProps, "wide" | "align" | "side" | "className">) {
   const pathname = usePathname();
   const suffix = useQueryAndHash();
@@ -49,10 +56,13 @@ export function LocaleSwitcher({
       {...layout}
       label={label}
       current={locale}
-      options={locales.map((target) => ({
+      options={samePageLocales(pathname, locales, availability).map((target) => ({
         locale: target,
         endonym: localeEndonyms[target],
-        href: switchLocalePath(pathname, target, suffix),
+        href:
+          target === locale && availability
+            ? `${pathname}${suffix}`
+            : switchLocalePath(localeLinkPath(pathname, availability), target, suffix),
       }))}
     />
   );

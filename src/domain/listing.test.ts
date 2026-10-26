@@ -101,6 +101,19 @@ describe("listing lifecycle dimensions (architecture §7.1)", () => {
 });
 
 describe("availability freshness (architecture §7.1)", () => {
+  it("uses a recorded human-confirmation horizon without silently applying a later default", () => {
+    const input = {
+      purpose: "sale" as const,
+      lastConfirmedAt: "2026-09-01T09:00:00Z",
+      now: "2026-09-05T09:00:00Z",
+    };
+    expect(assessFreshness({ ...input, recordedReviewDueAt: "2026-09-04T09:00:00Z" }).state).toBe(
+      "review_due",
+    );
+    expect(assessFreshness({ ...input, recordedReviewDueAt: null }).state).toBe("unknown");
+    expect(assessFreshness({ ...input, recordedReviewDueAt: "invalid" }).state).toBe("unknown");
+    expect(assessFreshness(input).state).toBe("current_under_policy");
+  });
   it("defaults to 14 days for sale and 7 days for long-term rent", () => {
     expect(availabilityReviewIntervalDays).toEqual({ sale: 14, long_term_rent: 7 });
     const confirmed = "2026-09-01T09:00:00.000Z";
