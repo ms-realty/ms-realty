@@ -18,6 +18,8 @@ import { runOperation } from "../operations";
 import { type NormalizedSearch, normalizeSearch } from "../search/search";
 import { parseInput } from "../work/shared";
 import { privacyClient } from "./access";
+import { privacyProcessingRestricted } from "./restrictions";
+import { recordSubscriptionWithdrawal } from "./safety-ledger";
 
 export const optionalPurposes = ["search_alerts", "marketing"] as const;
 export const preferencePurposes = ["service_updates", ...optionalPurposes] as const;
@@ -192,6 +194,8 @@ export async function optIn(db: Executor, session: Session, input: unknown) {
     async ({ tx, operationId }) => {
       await privacyClient(tx, session);
       const terms = await consentTerms(tx, value.purpose, value.locale, true);
+      if (await privacyProcessingRestricted(tx, person.partyId, value.purpose))
+        throw new AppError("transition_denied");
       if (!terms || terms.version.id !== value.termsVersionId) throw new AppError("approval_stale");
       const [contact] = await tx
         .select()
@@ -302,6 +306,8 @@ export async function changeSubscription(db: Executor, session: Session, input: 
       if (subscriptionMachine.check(row.state, value.state).outcome !== "allowed")
         throw new AppError("transition_denied");
       if (value.state === "active") {
+        if (await privacyProcessingRestricted(tx, person.partyId, row.purpose))
+          throw new AppError("transition_denied");
         const locale = z.enum(publicLocales).safeParse(row.policyVersion.split(":").at(-1));
         const terms = locale.success
           ? await consentTerms(tx, row.purpose as PreferencePurpose, locale.data, true)
@@ -333,6 +339,13 @@ export async function changeSubscription(db: Executor, session: Session, input: 
         actorKind: session.actor.kind,
         actorId: session.actor.id,
       });
+      if (value.state === "withdrawn")
+        await recordSubscriptionWithdrawal(tx, {
+          operationId,
+          partyId: person.partyId,
+          subscriptionId: row.id,
+          actor: session.actor,
+        });
       await recordAudit(tx, {
         actor: session.actor,
         action: `subscription.${value.state}`,
@@ -479,6 +492,7 @@ export async function eligibleSubscriptionRecipient(
     .where(eq(subscriptions.id, id));
   if (
     !row ||
+    (await privacyProcessingRestricted(db, row.subscription.partyId, purpose)) ||
     checkSendEligibility(
       { ...row.subscription, verifiedAt: row.subscription.verifiedAt?.toISOString() ?? null },
       purpose,

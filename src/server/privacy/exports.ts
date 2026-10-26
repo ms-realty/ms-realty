@@ -50,6 +50,7 @@ import {
   type DisclosureSupplement,
   verifyDeliveredSupplement,
 } from "./export-supplements";
+import { privacyProcessingRestricted } from "./restrictions";
 
 export const exportSections = ["requests", "inquiries", "messages", "feedback"] as const;
 const redaction = z.object({ section: z.enum(exportSections), id: z.uuid() }).strict();
@@ -315,6 +316,8 @@ async function eligibleRequest(
   return request;
 }
 async function recipient(db: Executor, id: string, partyId: string) {
+  if (await privacyProcessingRestricted(db, partyId, "client_access"))
+    throw new AppError("not_found");
   const [person] = await db
     .select({ id: principals.id })
     .from(principals)

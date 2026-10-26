@@ -8,6 +8,7 @@ import type { Actor } from "@/domain/capabilities";
 import { randomToken, sha256Hex } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { privacyProcessingRestricted } from "../privacy/restrictions";
 
 export type AccountKind = "staff" | "client";
 
@@ -111,11 +112,17 @@ async function accountIsActive(db: Executor, account: AccountRef): Promise<boole
       kind: principals.kind,
       status: principals.status,
       membership: staffMemberships.state,
+      partyId: principals.partyId,
     })
     .from(principals)
     .leftJoin(staffMemberships, eq(staffMemberships.principalId, principals.id))
     .where(eq(principals.id, account.id));
   if (row?.status !== "active" || row.kind !== account.kind) return false;
+  if (
+    account.kind === "client" &&
+    (await privacyProcessingRestricted(db, row.partyId, "client_access"))
+  )
+    return false;
   return account.kind === "client" || row.membership === "active";
 }
 

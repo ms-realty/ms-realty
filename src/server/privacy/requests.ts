@@ -294,8 +294,8 @@ export async function reviewPrivacyRequest(db: Executor, session: Session, input
         throw new AppError("validation_failed");
       if (value.to === "on_legal_hold" && value.legalHoldReason.length < 10)
         throw new AppError("validation_failed");
-      if (record.kind === "export" && value.to === "completed") {
-        // Only the source/permission/version-bound export completion command may close it.
+      if (["export", "deletion", "restriction"].includes(record.kind) && value.to === "completed") {
+        // Source/permission/version-bound dedicated commands own consequential fulfilment.
         throw new AppError("transition_denied");
       }
       // This boolean intentionally conceals the source of a retention obligation.

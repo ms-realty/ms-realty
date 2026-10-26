@@ -10,6 +10,15 @@ The compliance retention service returns a boolean only. Current restricted repo
 
 ## Separate optional consent
 
+The dedicated [erasure/restriction workflow](../../../docs/delivery/privacy-erasure-propagation.md)
+binds per-source human dispositions to current authority and policy, records an append-only
+application safety decision, stops optional work and revokes only applicable own-client
+credentials/export exposure. Only separately reviewed eligible optional copies are removed.
+Business/history, physical file, provider and independent archive boundaries remain held or
+unsupported. Its typed completion check stays partial; free-text review cannot complete
+deletion or restriction. Signed synthetic tail reapplication reuses global recovery quarantine
+and never automatically reopens runtime or replays old sends.
+
 Consuming a valid account email link verifies that email contact route. GET inspection, inquiries, invitations and service preferences never create optional subscriptions or consent events.
 
 Optional purposes require separately authored and human-approved content: `help/search-alert-consent` and `help/marketing-consent`. The generic privacy page does not authorize either. `readApprovedContent` checks the published immutable version and current editorial, publication and legal-process approvals. No environment variable or bundled default constitutes approval. The UI disables opt-in where approved terms in the chosen language or a verified contact are absent. Current authored content supports BG; translated terms must become an approved content contract before they can authorize another locale.
