@@ -208,6 +208,7 @@ export async function ClientPrivacyScreen({
               <a
                 className="min-h-control py-2 underline"
                 href={`/${locale}/privacy/exports/${delivery.id}`}
+                download="my-data.json"
               >
                 {exportCopy.download}
               </a>
