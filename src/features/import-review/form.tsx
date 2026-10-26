@@ -3,7 +3,9 @@ import { useActionState } from "react";
 import { importFields } from "@/server/import-review/csv";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
+import { ImportContextFields } from "./context-fields";
 import { dataReviewCopy } from "./copy";
+import { importExecutionCopy } from "./execution-copy";
 import type { ImportReviewState } from "./state";
 
 export function ImportReviewForm({
@@ -21,6 +23,7 @@ export function ImportReviewForm({
     `/${locale}/operations/imports`,
   );
   const copy = dataReviewCopy(locale).imports;
+  const execution = importExecutionCopy(locale);
   const source = state.source;
   const problems = state.rows?.filter((row) => row.issues.length) ?? [];
   return (
@@ -149,6 +152,23 @@ export function ImportReviewForm({
                   </article>
                 ))
               )}
+              <form action={submit} className="grid gap-5">
+                <input type="hidden" name="intent" value="prepare" />
+                <input type="hidden" name="source" value={source.token} />
+                <input type="hidden" name="operationKey" value={state.operationKey ?? ""} />
+                {importFields.map((field) => (
+                  <input
+                    key={field}
+                    type="hidden"
+                    name={`column.${field}`}
+                    value={source.mapping[field] ?? ""}
+                  />
+                ))}
+                <ImportContextFields locale={locale} pending={pending} />
+                <button type="submit" className={buttonClass()} disabled={pending}>
+                  {pending ? copy.pending : execution.prepare}
+                </button>
+              </form>
             </section>
           )}
           <a
