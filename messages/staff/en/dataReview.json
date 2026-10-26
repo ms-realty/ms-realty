@@ -123,5 +123,82 @@
     "saved": "Language edition action recorded",
     "next": "Open this language edition to check its current review state and next permitted action.",
     "conflict": "The source or edition changed. Your text is retained. Compare the current edition and reopen it before reviewing again."
+  },
+  "importExecution": {
+    "boundary": "Check the file without changing business records. After a separate review, selected rows can create or update supplied working drafts. Facts, availability and publication still need their normal human review.",
+    "intro": "Check the source and mapping, review an exact subset, then follow its durable result.",
+    "limited": "Text checks are the first step. Prepare a dry run to compare these rows with current records before selecting any changes.",
+    "setup": "Declare the source interpretation",
+    "setupHint": "These declarations apply to this file. Country, region, property type and purpose are used for new records only. Location must be an exact settlement in the mapped source. Prices use EUR, areas use m² and the chosen basis; bedrooms may be zero. Blank cells preserve existing values. No currency conversion is performed.",
+    "prepare": "Prepare a dry run",
+    "review": "Review the exact rows",
+    "current": "Current working value",
+    "incoming": "Original source text",
+    "proposed": "Proposed working value",
+    "accepted": "Accepted working value",
+    "choose": "Choose explicitly",
+    "keep": "Keep current value",
+    "source": "Use supplied source value",
+    "select": "Include source row",
+    "choice": "Decision for row",
+    "subset": "Only checked rows will be accepted. Each changed field needs an explicit choice. This review does not execute the import.",
+    "confirm": "I reviewed the selected rows, their source, interpretation and every changed field.",
+    "seal": "Accept this exact subset",
+    "result": "Import receipt and recovery",
+    "execute": "Execute up to 10 reviewed rows",
+    "executeHint": "Each row commits separately. Continue with this same receipt to process pending reviewed rows. An interrupted request may have committed some rows; check this receipt before retrying.",
+    "stop": "Stop unstarted rows",
+    "stopConfirm": "I understand that stopping does not reverse committed rows.",
+    "reverse": "Reverse eligible imported drafts",
+    "reverseConfirm": "I reviewed the committed rows below. Reverse only drafts that have not changed since import.",
+    "reverseHint": "A reversal restores an unchanged earlier working draft. A newly created draft is emptied and withdrawn while its identity and source history remain. Later edits, revisions or dependent records can block reversal. Up to 10 rows are checked per request.",
+    "refresh": "Check this same receipt again",
+    "recent": "Your recent import receipts",
+    "technical": "Source, subset and operation identity",
+    "operation": "Logical operation",
+    "digest": "Source SHA-256",
+    "selection": "Accepted subset digest",
+    "manual": "Open the normal inventory workflow",
+    "notSelected": "Outside the reviewed subset",
+    "failed": "The command could not finish. Current results are shown below. Review changed source, choices, revisions and access before continuing.",
+    "unknown": "The result could not be confirmed. Use this same receipt to reconcile it before starting another import.",
+    "classifications": {
+      "create": "New working draft",
+      "update_proposal": "Changes need decisions",
+      "no_change": "No working changes",
+      "blocked": "Blocked",
+      "needs_review": "Needs review"
+    },
+    "states": {
+      "review": "Dry run — awaiting subset review",
+      "ready": "Reviewed — awaiting execution",
+      "partial": "Partially completed — review each row",
+      "completed": "Reviewed subset completed",
+      "cancelled": "Unstarted rows stopped"
+    },
+    "outcomes": {
+      "pending": "Not started",
+      "applied": "Working draft committed",
+      "skipped": "Unchanged",
+      "failed": "Not applied — fresh review needed"
+    },
+    "reversals": {
+      "reversed": "Reversed; history retained",
+      "blocked": "Reversal blocked; current record retained"
+    },
+    "issues": {
+      "reference_format": "Keep the exact MS listing reference: MS- followed by at least five digits, within the supported reference range.",
+      "target_unavailable": "This reference cannot be imported with your current record access.",
+      "draft_manual": "The existing record needs its normal inventory source review before a CSV draft update is supported.",
+      "location_manual": "The source settlement differs from the current record. Review this protected location through the normal inventory workflow.",
+      "purpose_manual": "The declared source purpose differs from this listing. Review the sale/rent price meaning through the normal inventory workflow.",
+      "location_required": "A new record needs an exact mapped settlement, up to 150 characters.",
+      "price_eur_positive": "A supplied price must be positive and explicitly in EUR. Other source currencies remain in the evidence for manual review.",
+      "area_positive": "A supplied area must be positive.",
+      "draft_limits": "The proposed working draft exceeds an editor limit or has unsupported source details.",
+      "version_conflict": "The reviewed record or source changed. Prepare a fresh dry run.",
+      "target_changed": "A later record change prevents automatic reversal.",
+      "dependent_records": "A later relationship or record depends on this identity. Review it manually before reversal."
+    }
   }
 }
