@@ -158,24 +158,23 @@ describe("AT45 erasure and restriction propagation", () => {
     ).rejects.toMatchObject({ cause: { code: "23001" } });
   });
 
-  it("rejects changed sources, a changed approved policy edition, changed scope and stale request versions", async () => {
-    const f = await syntheticErasureFixture(t.db);
-    const source = await command(f);
-    await t.db
-      .update(parties)
-      .set({ contactPreferences: { channel: "phone" } })
-      .where(eq(parties.id, f.client.partyId));
-    await expect(apply(f, source)).rejects.toMatchObject({ code: "version_conflict" });
-    const policy = await command(f);
-    await syntheticErasurePolicy(t.db, f);
-    await expect(apply(f, policy)).rejects.toMatchObject({ code: "version_conflict" });
-    const scope = await command(f);
-    scope.decisions[0]?.sourceKeys.push(`principal:${f.other.id}:access`);
-    await expect(apply(f, scope)).rejects.toMatchObject({ code: "version_conflict" });
-    await expect(apply(f, { ...(await command(f)), expectedVersion: 50 })).rejects.toMatchObject({
-      code: "version_conflict",
-    });
-  });
+  it.each(["source", "policy", "scope", "version"] as const)(
+    "rejects changed %s with the same source and authority boundaries",
+    async (changed) => {
+      const f = await syntheticErasureFixture(t.db);
+      const input = await command(f);
+      if (changed === "source")
+        await t.db
+          .update(parties)
+          .set({ contactPreferences: { channel: "phone" } })
+          .where(eq(parties.id, f.client.partyId));
+      if (changed === "policy") await syntheticErasurePolicy(t.db, f);
+      if (changed === "scope")
+        input.decisions[0]?.sourceKeys.push(`principal:${f.other.id}:access`);
+      if (changed === "version") input.expectedVersion = 50;
+      await expect(apply(f, input)).rejects.toMatchObject({ code: "version_conflict" });
+    },
+  );
 
   it("requires explicit access authority, fresh authentication and a live human session on apply, replay and status", async () => {
     const f = await syntheticErasureFixture(t.db, false);
