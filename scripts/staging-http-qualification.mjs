@@ -8,6 +8,7 @@ import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const accountId = "921d0224dcd595c87b7928d2b3c479d1";
+export const zoneId = "f0ac7af0721419e8129e5d10ff547372";
 export const origins = Object.freeze({
   public: "https://staging.makler-realty.com",
   client: "https://staging-my.makler-realty.com",
@@ -61,6 +62,7 @@ export function validateCandidate(candidate, expectedSource) {
   assert.equal(candidate.environment, "staging");
   assert.equal(candidate.runtime, "containers");
   assert.equal(candidate.accountId, accountId);
+  assert.equal(candidate.zoneId, zoneId);
   assert.equal(candidate.workerName, "ms-realty-staging");
   assert.equal(candidate.sourceCommit, expectedSource);
   assert.deepEqual(candidate.origins, origins);
@@ -98,7 +100,11 @@ export function validateProviderRead(url, init = {}) {
   const target = new URL(url);
   assert.equal(target.origin, "https://api.cloudflare.com");
   assert(!init.method || init.method === "GET");
-  assert(target.pathname.startsWith(`/client/v4/accounts/${accountId}/`));
+  assert(
+    target.pathname.startsWith(`/client/v4/accounts/${accountId}/`) ||
+      target.pathname === `/client/v4/zones/${zoneId}` ||
+      target.pathname.startsWith(`/client/v4/zones/${zoneId}/`),
+  );
   assert(!target.username && !target.password);
   return target.href;
 }

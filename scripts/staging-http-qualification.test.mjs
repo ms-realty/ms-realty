@@ -16,6 +16,7 @@ import {
   validateDispatch,
   validateMediaProof,
   validateProviderRead,
+  zoneId,
 } from "./staging-http-qualification.mjs";
 
 const source = "a".repeat(40),
@@ -45,6 +46,7 @@ const candidate = {
   environment: "staging",
   runtime: "containers",
   accountId,
+  zoneId,
   workerName: "ms-realty-staging",
   sourceCommit: source,
   image: `registry.cloudflare.com/${accountId}/ms-realty-staging@sha256:${hash}`,
@@ -126,9 +128,24 @@ test("R08 provider transport accepts ordinary default GET and rejects writes or 
   const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/ms-realty-staging/settings`;
   assert.equal(validateProviderRead(url), url);
   assert.equal(validateProviderRead(url, { method: "GET" }), url);
+  assert.equal(
+    validateProviderRead(`https://api.cloudflare.com/client/v4/zones/${zoneId}`),
+    `https://api.cloudflare.com/client/v4/zones/${zoneId}`,
+  );
+  assert.equal(
+    validateProviderRead(
+      `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records?name=staging.makler-realty.com`,
+    ),
+    `https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records?name=staging.makler-realty.com`,
+  );
   for (const method of ["POST", "PUT", "PATCH", "DELETE"])
     assert.throws(() => validateProviderRead(url, { method }));
   assert.throws(() => validateProviderRead(url.replace(accountId, "0".repeat(32))));
+  assert.throws(() =>
+    validateProviderRead(
+      `https://api.cloudflare.com/client/v4/zones/${"0".repeat(32)}/dns_records`,
+    ),
+  );
   assert.throws(() => validateProviderRead(url.replace("api.cloudflare.com", "example.test")));
   assert.throws(() => validateProviderRead(url.replace("https://", "https://user:password@")));
 });
