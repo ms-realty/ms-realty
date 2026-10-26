@@ -50,6 +50,15 @@ client access if mutable account status is accidentally restored. Linked staff a
 parties are excluded. The export recipient guard rereads restriction at preparation, review,
 issue and download.
 
+Queued client sign-in emails are bound to their exact token. Erasure/reapplication cancels
+the person's still-queued token-bound emails and clears raw secrets. Dispatch rechecks the
+token's current expiry, revocation and consumption, recipient/account identity and durable
+restriction both before claim and immediately before a bounded provider handoff. Token and
+account locks remain held through that handoff. Mutable status restoration cannot issue or
+consume a new link, recreate contact routes or start a client session under a durable
+restriction. Legacy untagged emails require their original token-bound effect key. Already
+attempting or unknown provider outcomes remain for reconciliation and are never blindly resent.
+
 Only separately reviewed eligible contact preferences, matching aliases, optional search
 criteria, own optional contact routes and client profile copies are removed. Core party
 identity, joint Case participation, legal/business facts, immutable audit/activity/consent

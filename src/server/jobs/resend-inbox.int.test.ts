@@ -42,7 +42,7 @@ async function accepted(emailId: string) {
     idempotencyKey: randomUUID(),
     channel: "email",
     recipient: "person@example.test",
-    template: "auth.email_link",
+    template: "synthetic.delivery-receipt",
   });
   await dispatchMessage(
     t.db,

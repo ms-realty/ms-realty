@@ -6,6 +6,7 @@ import {
   consentEvents,
   contactMethods,
   emailSignInTokens,
+  externalActions,
   grants,
   invitations,
   parties,
@@ -149,6 +150,7 @@ export async function applyPrivacySafetyEffect(
     : [];
   const ids = clients.map((row) => row.id);
   let revokedSessions = 0;
+  let authEmailsCancelled = 0;
   if (ids.length) {
     await db
       .update(principals)
@@ -177,6 +179,42 @@ export async function applyPrivacySafetyEffect(
           isNull(emailSignInTokens.consumedAt),
         ),
       );
+    const credentials = await db
+      .select({ id: emailSignInTokens.id })
+      .from(emailSignInTokens)
+      .where(
+        and(
+          inArray(emailSignInTokens.principalId, ids),
+          eq(emailSignInTokens.principalKind, "client"),
+        ),
+      );
+    if (credentials.length) {
+      const cancelled = await db
+        .update(externalActions)
+        .set({
+          state: "cancelled",
+          secretPayload: null,
+          lastErrorCode: "auth_email_link_ineligible",
+          updatedAt: now,
+          version: sql`${externalActions.version} + 1`,
+        })
+        .where(
+          and(
+            eq(externalActions.kind, "email_send"),
+            eq(externalActions.state, "queued"),
+            sql`(${externalActions.effectKey} in (${sql.join(
+              credentials.map((credential) => sql`${`email_link:${credential.id}`}`),
+              sql`,`,
+            )} )
+            or (${externalActions.subjectType} = 'email_sign_in_token' and ${externalActions.subjectId} in (${sql.join(
+              credentials.map((credential) => sql`${credential.id}::uuid`),
+              sql`,`,
+            )})))`,
+          ),
+        )
+        .returning({ id: externalActions.id });
+      authEmailsCancelled = cancelled.length;
+    }
     await db
       .update(invitations)
       .set({ revokedAt: now })
@@ -268,6 +306,7 @@ export async function applyPrivacySafetyEffect(
     withdrawn: withdrawn.length,
     clientCredentialsRestricted: ids.length,
     revokedSessions,
+    authEmailsCancelled,
     exportsRevoked: exports.length,
     physicalFileDeletion: false,
     providerDeletion: false,

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, expect, it, vi } from "vitest";
 import {
   approvals,
@@ -12,6 +12,7 @@ import {
   subscriptions,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
+import { issueEmailLink } from "../auth/email-link";
 import {
   dispatchMessage,
   dispatchQueued,
@@ -22,6 +23,7 @@ import {
 import type { MessageProvider } from "../jobs/provider";
 import { consentPolicyKey } from "../privacy/preferences";
 import { syntheticServiceEmailTerms } from "../privacy/testing";
+import { createClient } from "../testing";
 import { approveCaseEmail, caseEmailWorkbench, draftCaseEmail } from "./email";
 import { dispatchCaseEmail } from "./email-dispatch";
 import { caseFixture } from "./testing";
@@ -447,12 +449,13 @@ it("disabled Case email cannot starve access emails in a bounded queue sweep", a
   const p = provider();
   vi.stubEnv("CASE_EMAIL_ENABLED", "");
   try {
-    const access = await enqueueMessage(t.db, {
-      idempotencyKey: randomUUID(),
-      channel: "email",
-      recipient: "access@example.test",
-      template: "auth.email_link",
-    });
+    const client = await createClient(t.db);
+    await issueEmailLink(t.db, { email: client.email, returnTo: null, locale: "en" });
+    const [access] = await t.db
+      .select()
+      .from(externalActions)
+      .where(sql`${externalActions.payload}->>'recipient' = ${client.email}`);
+    if (!access) throw new Error("Missing actual synthetic sign-in email");
     expect(await dispatchQueued(t.db, p, 1)).toBe(1);
     expect(p.send).toHaveBeenCalledTimes(1);
     expect(p.send.mock.calls[0]?.[0].outboxId).toBe(access.id);
