@@ -85,7 +85,7 @@ export async function WorkspaceShell({
       {items.map((item) => {
         const count = counts?.[item.label];
         return (
-          <li key={item.label}>
+          <li key={item.label} data-nav-item={item.label}>
             <NavLink
               href={item.href}
               title={t(item.label)}
@@ -162,7 +162,10 @@ export async function WorkspaceShell({
           ) : null}
           <nav
             aria-label={t("label")}
-            className="min-h-0 flex-1 space-y-5 overflow-y-auto px-1 py-1"
+            className={cx(
+              s.primaryNavigation,
+              "min-h-0 flex-1 space-y-5 overflow-y-auto px-1 py-1",
+            )}
           >
             {work.length ? (
               <section aria-labelledby="sidebar-work-title">
@@ -303,6 +306,22 @@ export async function WorkspaceShell({
             <div data-route-content="">{children}</div>
           </main>
         </div>
+        <nav aria-label={t("label")} className={s.mobileNavigation}>
+          {primary
+            .filter((item) => ["today", "cases", "calendar"].includes(item.label))
+            .map((item) => (
+              <NavLink key={item.label} href={item.href} prefetch={false}>
+                <NavigationIcon name={item.label} />
+                <span>{t(item.label)}</span>
+              </NavLink>
+            ))}
+          {toolsPage ? (
+            <AgencyToolsMenu href={toolsPage.href} dialogId={toolsMenuId}>
+              <NavigationIcon name="moreTools" />
+              <span>{t("moreTools")}</span>
+            </AgencyToolsMenu>
+          ) : null}
+        </nav>
         <dialog
           id={toolsMenuId}
           aria-labelledby={`${toolsMenuId}-title`}

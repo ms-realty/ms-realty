@@ -1,0 +1,10 @@
+{
+  "settings": "Agency settings",
+  "resource": "Settings resource",
+  "choose": "Choose a settings resource",
+  "help": "When Agency settings is selected, use this resource. The record ID field applies to other record scopes. Settings scopes do not use a language restriction.",
+  "options": {
+    "operatingPolicy": "Operating policy",
+    "privacyGovernance": "Privacy registers and incidents"
+  }
+}
