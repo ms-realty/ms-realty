@@ -18,6 +18,7 @@ import { resolveGrants } from "../authz";
 import type { Database } from "../db";
 import { AppError } from "../errors";
 import { liveStaff, openTaskStates } from "../work/shared";
+import { maxStaffedResponses, summarizeStaffedResponses } from "./staffed-response";
 
 export type ReportPeriod = 7 | 30 | 90;
 export type ReportScope = "all" | "mine";
@@ -355,6 +356,38 @@ export async function readReports(
               ),
             )
         : [];
+      // Read only the complete, authorized eligible cohort. Larger cohorts are held rather
+      // than reporting a biased median from the first records returned by a LIMIT.
+      const staffedObservations =
+        inquiry && response && response.responded <= maxStaffedResponses
+          ? await tx
+              .select({
+                id: inquiries.id,
+                reference: inquiries.reference,
+                createdAt: inquiries.createdAt,
+                firstResponseAt: sql<Date>`${inquiries.firstResponseAt}`.mapWith(
+                  (value) => new Date(value),
+                ),
+                operatingPolicySnapshot: inquiries.operatingPolicySnapshot,
+              })
+              .from(inquiries)
+              .where(
+                and(
+                  inquiry,
+                  mine(inquiries.ownerId),
+                  sql`${inquiries.createdAt} >= ${from.toISOString()}::timestamptz`,
+                  lt(inquiries.createdAt, now),
+                  sql`${inquiries.firstResponseAt} >= ${inquiries.createdAt}`,
+                  sql`${inquiries.firstResponseAt} <= ${now.toISOString()}::timestamptz`,
+                ),
+              )
+              .orderBy(asc(inquiries.createdAt), asc(inquiries.id))
+              .limit(maxStaffedResponses)
+          : [];
+      const staffedResponse = summarizeStaffedResponses(
+        staffedObservations,
+        response?.responded ?? null,
+      );
       const effortWhere = task
         ? and(
             task,
@@ -397,7 +430,7 @@ export async function readReports(
               .limit(maxRows + 1)
           : [];
       return {
-        definition: "O22-v2",
+        definition: "O22-v3",
         filter,
         from,
         asOf: now,
@@ -406,11 +439,17 @@ export async function readReports(
         response: response
           ? {
               ...response,
-              missing: response.received - response.responded,
+              missing: response.received - response.responded - response.invalid,
               smallSample: response.responded < 5,
             }
           : null,
-        staffedResponse: { state: "unknown" as const, reason: "approved_hours_policy_not_bound" },
+        staffedResponse: {
+          ...staffedResponse,
+          rows: staffedObservations
+            .slice(0, maxRows)
+            .map(({ id, reference }) => ({ id, reference, path: `/inquiries/${id}` })),
+          hasMore: staffedObservations.length > maxRows,
+        },
         correctionEffort:
           effort && effort.observations > 0
             ? {

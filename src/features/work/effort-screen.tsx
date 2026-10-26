@@ -74,7 +74,9 @@ export async function EffortScreen({
             }
           >
             {operation.state === "succeeded"
-              ? t.confirmed
+              ? action === "void"
+                ? t.voidConfirmed
+                : t.confirmed
               : operation.state === "failed"
                 ? t.failed
                 : operation.state === "outcome_unknown"

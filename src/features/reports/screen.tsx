@@ -43,6 +43,7 @@ export async function ReportsScreen({
       timeStyle: "short",
     }).format(date);
   const response = report?.response;
+  const staffed = report?.staffedResponse;
   return (
     <StaffPage title={t.title} lead={t.about}>
       <div className="space-y-5">
@@ -127,6 +128,7 @@ export async function ReportsScreen({
                       [t.received, response.received],
                       [t.responded, response.responded],
                       [t.missing, response.missing],
+                      [t.invalidCount, response.invalid],
                       [t.median, response.medianMinutes],
                     ].map(([label, value]) => (
                       <div key={String(label)}>
@@ -148,7 +150,93 @@ export async function ReportsScreen({
               ) : (
                 <p>{t.denied}</p>
               )}
-              <Notice tone="info">{t.staffed}</Notice>
+              {staffed ? (
+                <section
+                  aria-labelledby="staffed-response"
+                  className="space-y-3 border-t border-divider pt-4"
+                >
+                  <h3 id="staffed-response" className="text-subheading font-semibold">
+                    {t.staffedResponse.title}
+                  </h3>
+                  <p>{t.staffedResponse.definition}</p>
+                  {staffed.state === "denied" ? (
+                    <p>{t.denied}</p>
+                  ) : (
+                    <>
+                      <dl className="grid gap-4 sm:grid-cols-2">
+                        {[
+                          [t.staffedResponse.eligible, staffed.eligible],
+                          [t.staffedResponse.known, staffed.known],
+                          [t.staffedResponse.unknownCount, staffed.unknown],
+                          [t.staffedResponse.median, staffed.medianMinutes],
+                        ].map(([label, value]) => (
+                          <div key={String(label)}>
+                            <dt className={staffUi.hint}>{label}</dt>
+                            <dd className="text-heading font-semibold tabular-nums">
+                              {typeof value === "number"
+                                ? value > 0 && value < 1
+                                  ? "<1"
+                                  : number.format(value)
+                                : t.unknown}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                      {staffed.state === "held" ? (
+                        <Notice tone="warning">
+                          <p>
+                            {staffed.reason === "cohort_limit"
+                              ? t.staffedResponse.cohortLimit
+                              : t.staffedResponse.calculationLimit}
+                          </p>
+                          <p>{t.staffedResponse.manual}</p>
+                        </Notice>
+                      ) : staffed.state === "unobserved" ? (
+                        <p>{t.staffedResponse.unobserved}</p>
+                      ) : staffed.state === "unknown" ? (
+                        <p>{t.staffedResponse.unknown}</p>
+                      ) : (
+                        <p>
+                          {staffed.unknown ? t.staffedResponse.partial : t.staffedResponse.complete}
+                        </p>
+                      )}
+                      {staffed.smallSample ? <p>{t.small}</p> : null}
+                      {Object.entries(staffed.unknownReasons).length ? (
+                        <ul className="space-y-1">
+                          {Object.entries(staffed.unknownReasons).map(([reason, value]) => (
+                            <li key={reason}>
+                              {
+                                t.staffedResponse.reasons[
+                                  reason as keyof typeof t.staffedResponse.reasons
+                                ]
+                              }
+                              : {number.format(value ?? 0)}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </>
+                  )}
+                  {staffed.rows.length ? (
+                    <>
+                      <p>{t.staffedResponse.records}</p>
+                      <ul className="space-y-2">
+                        {staffed.rows.map((row) => (
+                          <li key={row.id}>
+                            <a
+                              className="inline-flex min-h-control items-center font-semibold text-action underline underline-offset-4"
+                              href={`/${locale}${row.path}`}
+                            >
+                              <bdi>{row.reference}</bdi>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                  {staffed.hasMore ? <p className={staffUi.hint}>{t.sample}</p> : null}
+                </section>
+              ) : null}
             </section>
             <div className="grid gap-4 lg:grid-cols-2">
               {report.metrics.map((metric) => (

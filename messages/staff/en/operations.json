@@ -129,12 +129,11 @@
     "responseDefinition": "Requests received in the selected period. A recorded useful human contact counts; an automatic acknowledgement does not. Duration is elapsed time from receipt to that contact, including time outside staffed hours.",
     "received": "Requests received",
     "responded": "With a recorded useful response",
-    "missing": "Without a valid recorded useful response",
+    "missing": "Without a recorded useful response",
     "median": "Median elapsed minutes among recorded responses",
     "minutes": "minutes",
     "small": "Fewer than five recorded responses: a small sample.",
     "incomplete": "Missing responses are not treated as zero-minute responses. This cohort can change as more responses are recorded.",
-    "staffed": "Response time within staffed hours is unknown until approved hours and their policy are connected to these observations.",
     "effort": "Correction and re-entry effort is unknown: this report has no recorded effort observations.",
     "invalid": "Some response times fall outside their valid receipt-to-observation interval and are excluded from duration calculations.",
     "unknown": "Unknown",
@@ -168,6 +167,31 @@
       "deliveries": {
         "title": "Email deliveries needing attention",
         "definition": "Outgoing deal emails currently failed, bounced or with an unknown outcome. Provider acceptance does not prove delivery; no recipient or message content appears here."
+      }
+    },
+    "invalidCount": "With an invalid response time",
+    "staffedResponse": {
+      "title": "Response within staffed hours",
+      "definition": "Each request uses the reviewed Sofia service calendar captured when it was accepted. Only recorded useful human responses enter this calculation. This is an observation, not a response target or a lateness decision.",
+      "eligible": "Valid recorded responses",
+      "known": "With known policy coverage",
+      "unknownCount": "With unknown policy coverage",
+      "median": "Median staffed minutes among known observations",
+      "complete": "Every valid recorded response has known policy coverage. Missing and invalid responses remain outside this median.",
+      "partial": "This median covers only the known policy observations, not the whole response cohort. Unknown coverage is not counted as zero.",
+      "unobserved": "Response time within staffed hours is unknown: this cohort has no valid recorded useful responses.",
+      "unknown": "Response time within staffed hours is unknown: no valid response has complete reviewed policy coverage.",
+      "cohortLimit": "Staffed time has not been calculated: more than 1,000 valid responses match this period. No partial-sample median is shown.",
+      "calculationLimit": "Staffed time has not been calculated for the full cohort within the report limit. No partial-sample median is shown.",
+      "manual": "Choose a narrower observation period or check the permitted requests manually.",
+      "records": "Requests behind these response observations",
+      "reasons": {
+        "no_reviewed_policy": "No reviewed policy captured at receipt",
+        "calendar_unknown": "Reviewed service calendar is unknown",
+        "outside_reviewed_calendar": "Response interval is outside the reviewed calendar",
+        "unknown_day": "Staffing is unknown for part of the interval",
+        "invalid_interval": "Response interval is invalid",
+        "interval_too_large": "Response interval exceeds the calculation limit"
       }
     }
   },
@@ -205,6 +229,7 @@
       "duplicate_entry": "Repeated data entry",
       "routing": "Assignment or routing",
       "other": "Other correction work"
-    }
+    },
+    "voidConfirmed": "The mistaken entry is excluded from totals. Its history is preserved."
   }
 }
