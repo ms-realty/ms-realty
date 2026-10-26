@@ -435,8 +435,10 @@ export default async function ManagePage({
             <span className={labelClass}>{grantCopy.recordId}</span>
             <input name="recordId" className={field} maxLength={36} />
           </label>
-          <label htmlFor="capability-settings-resource" className="grid min-w-0 grid-cols-1 gap-2">
-            <span className={labelClass}>{settingsCopy.resource}</span>
+          <div className="grid min-w-0 grid-cols-1 gap-2">
+            <label htmlFor="capability-settings-resource" className={labelClass}>
+              {settingsCopy.resource}
+            </label>
             <AccessSelect
               id="capability-settings-resource"
               name="settingsRecordId"
@@ -454,7 +456,7 @@ export default async function ManagePage({
             <span id="settings-scope-help" className="text-dense text-text-muted">
               {settingsCopy.help}
             </span>
-          </label>
+          </div>
           <label htmlFor="capability-locale" className="grid min-w-0 grid-cols-1 gap-2">
             <span className={labelClass}>{grantCopy.locale}</span>
             <AccessSelect
