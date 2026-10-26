@@ -95,6 +95,58 @@ describe("O08 native agenda", () => {
     expect(row.confirmedStartsAt?.toISOString()).toBe("2030-10-27T00:30:00.000Z");
   });
 
+  it("O08 distinguishes appointments contained within each occurrence of a repeated hour", () => {
+    const first = {
+      ...row,
+      id: "first-hour",
+      reference: "AP-SYNTHETIC-FIRST-HOUR",
+      state: "confirmed" as const,
+      confirmedStartsAt: new Date("2030-10-27T00:00:00Z"),
+      confirmedEndsAt: new Date("2030-10-27T00:20:00Z"),
+      proposedStartsAt: null,
+      proposedEndsAt: null,
+      resources: [],
+    };
+    const second = {
+      ...first,
+      id: "second-hour",
+      reference: "AP-SYNTHETIC-SECOND-HOUR",
+      confirmedStartsAt: new Date("2030-10-27T01:00:00Z"),
+      confirmedEndsAt: new Date("2030-10-27T01:20:00Z"),
+    };
+    const { container } = render(
+      <CalendarView locale="en" query={query} data={{ ...data, rows: [first, second] }} />,
+    );
+    expect(container.querySelector('time[datetime="2030-10-27T00:00:00.000Z"]')).toHaveTextContent(
+      "03:00 GMT+3",
+    );
+    expect(container.querySelector('time[datetime="2030-10-27T01:00:00.000Z"]')).toHaveTextContent(
+      "03:00 GMT+2",
+    );
+  });
+
+  it("O08 ends a late civil-day canvas at midnight without adding another day's clock tick", () => {
+    const late = {
+      ...row,
+      state: "confirmed" as const,
+      confirmedStartsAt: new Date("2030-10-28T21:30:00Z"),
+      confirmedEndsAt: new Date("2030-10-28T22:00:00Z"),
+      proposedStartsAt: null,
+      proposedEndsAt: null,
+      resources: [],
+    };
+    render(
+      <CalendarView
+        locale="en"
+        query={{ ...query, date: "2030-10-28" }}
+        data={{ ...data, rows: [late] }}
+      />,
+    );
+    const overview = screen.getByRole("region", { name: calendarCopy("en").dayOverview });
+    expect(within(overview).getByText("23:00", { exact: true })).toBeVisible();
+    expect(within(overview).queryByText("00:00", { exact: true })).not.toBeInTheDocument();
+  });
+
   it("renders a failed read separately from an empty period and preserves a retry URL", () => {
     const c = calendarCopy("en");
     render(

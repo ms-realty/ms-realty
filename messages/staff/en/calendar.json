@@ -95,5 +95,6 @@
   "weekScroll": "Weekly schedule, scroll through times",
   "canvasEmpty": "No viewings recorded in this period",
   "conflictShort": "Resource overlap · Review",
-  "reviewShort": "Review required"
+  "reviewShort": "Review required",
+  "transitionNote": "When clocks change, each column shows that day's local times and offsets."
 }

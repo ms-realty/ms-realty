@@ -1,5 +1,6 @@
 // O08 / L12 / F22: actual PostgreSQL intervals, native controls and complete mobile agenda.
 import { execFileSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
@@ -94,6 +95,17 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
     path: info.outputPath("synthetic-desktop-full-itinerary.png"),
     fullPage: true,
   });
+  const pending = page.locator("details").filter({
+    has: page.getByRole("heading", {
+      name: calendarCopy("en").requests,
+      exact: true,
+      includeHidden: true,
+    }),
+  });
+  await pending.locator("summary").click();
+  await expect(pending.getByRole("link").filter({ hasText: f.request.reference })).toBeVisible();
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-pending.png") });
+  await pending.locator("summary").click();
   await showCalendarFilters(page, true);
   const scope = page.getByLabel(calendarCopy("en").scope, { exact: true });
   expect(await scope.boundingBox()).toMatchObject({ height: 44 });
@@ -118,6 +130,17 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   await page.evaluate(() => {
     document.documentElement.style.fontSize = "";
   });
+  // Localized composition identity is synthetic data in the same guarded Case projection.
+  await db
+    .update(schema.cases)
+    .set({ title: "Търсене на двустаен · Сандански" })
+    .where(eq(schema.cases.id, f.caseId));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(hostUrl("staff", "/bg/calendar?date=2030-10-28&view=week"));
+  await expect(
+    page.getByRole("article", { name: f.teammate.reference, exact: true }),
+  ).toBeVisible();
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-populated-bg.png") });
   for (const locale of ["bg", "en", "ru"]) {
     const c = calendarCopy(locale);
     await page.setViewportSize({ width: 320, height: 900 });
@@ -141,6 +164,15 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
       await page.setViewportSize({ width: 390, height: 900 });
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({ path: info.outputPath("synthetic-mobile-populated-bg.png") });
+      const pending = page.locator("details").filter({
+        has: page.getByRole("heading", { name: c.requests, exact: true, includeHidden: true }),
+      });
+      await pending.locator("summary").click();
+      await expect(
+        pending.getByRole("link").filter({ hasText: f.request.reference }),
+      ).toBeVisible();
+      await page.screenshot({ path: info.outputPath("synthetic-mobile390-pending-bg.png") });
+      await pending.locator("summary").click();
       await page.screenshot({
         path: info.outputPath("synthetic-mobile-full-itinerary-bg.png"),
         fullPage: true,
@@ -197,8 +229,10 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
           });
       }
     }
+    const targetReceipt = info.outputPath(`synthetic-mobile${width}-targets.json`);
+    writeFileSync(targetReceipt, `${JSON.stringify(hitAreas, null, 2)}\n`);
     await info.attach(`mobile${width}-targets`, {
-      body: JSON.stringify(hitAreas, null, 2),
+      path: targetReceipt,
       contentType: "application/json",
     });
     await page.evaluate(() => {

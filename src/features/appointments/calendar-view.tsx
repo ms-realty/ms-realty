@@ -56,9 +56,23 @@ const offsetText = (at: Date, zone: string) =>
     .formatToParts(at)
     .find((part) => part.type === "timeZoneName")?.value;
 
-function previewRange(start: Date, end: Date, locale: string, zone: string) {
-  // A repeated civil hour must not look like a zero-duration appointment in the week preview.
-  const withOffset = offsetText(start, zone) !== offsetText(end, zone);
+function showCalendarOffsets(start: Date, end: Date, zone: CalendarQuery["zone"]) {
+  if (offsetText(start, zone) !== offsetText(end, zone)) return true;
+  // A viewing wholly inside either repeated hour also needs an explicit offset.
+  return [start, end].some((at) => {
+    const bounds = calendarPeriod({
+      date: calendarDay(at, zone),
+      zone,
+      view: "day",
+      scope: "team",
+      page: 1,
+      requestPage: 1,
+    });
+    return bounds.end.getTime() - bounds.start.getTime() !== 86400000;
+  });
+}
+function previewRange(start: Date, end: Date, locale: string, zone: CalendarQuery["zone"]) {
+  const withOffset = showCalendarOffsets(start, end, zone);
   return `${clockText(start, locale, zone, withOffset)}–${clockText(end, locale, zone, withOffset)}`;
 }
 
@@ -335,7 +349,7 @@ function CalendarItem({
   const compact = (start: Date, end: Date, label: string, proposed = false) => {
     const first = calendarDay(start, query.zone);
     const last = calendarDay(end, query.zone);
-    const showOffset = offsetText(start, query.zone) !== offsetText(end, query.zone);
+    const showOffset = showCalendarOffsets(start, end, query.zone);
     const clock = (at: Date) =>
       `${clockText(at, locale, query.zone)}${showOffset ? ` ${offsetText(at, query.zone)}` : ""}`;
     return (
@@ -617,10 +631,15 @@ function WeekOverview({
       (segment.end.getTime() - bounds.start.getTime()) / 3600000,
     ]),
   );
+  const dayLengths = days.map(
+    ({ bounds }) => (bounds.end.getTime() - bounds.start.getTime()) / 3600000,
+  );
+  const mixedDayLengths = new Set(dayLengths).size > 1;
   const firstHour = relative.length ? Math.max(0, Math.floor(Math.min(...relative))) : 9;
-  const lastHour = relative.length
-    ? Math.min(25, Math.max(firstHour + 8, Math.ceil(Math.max(...relative)) + 1))
-    : 18;
+  const lastHour = Math.min(
+    Math.max(...dayLengths),
+    relative.length ? Math.max(firstHour + 8, Math.ceil(Math.max(...relative)) + 1) : 18,
+  );
   const hourCount = lastHour - firstHour;
   const hours = Array.from({ length: Math.ceil(hourCount) }, (_, index) => firstHour + index);
   const representative =
@@ -683,18 +702,19 @@ function WeekOverview({
             }}
           >
             <div className={s.timeColumn} aria-hidden="true">
-              {hours.map((hour) => (
-                <span
-                  key={hour}
-                  style={{ top: `calc(${hour - firstHour} * var(--calendar-hour))` }}
-                >
-                  {clockText(
-                    new Date(representative.bounds.start.getTime() + hour * 3600000),
-                    locale,
-                    query.zone,
-                  )}
-                </span>
-              ))}
+              {!mixedDayLengths &&
+                hours.map((hour) => (
+                  <span
+                    key={hour}
+                    style={{ top: `calc(${hour - firstHour} * var(--calendar-hour))` }}
+                  >
+                    {clockText(
+                      new Date(representative.bounds.start.getTime() + hour * 3600000),
+                      locale,
+                      query.zone,
+                    )}
+                  </span>
+                ))}
             </div>
             {days.map(({ day, bounds, segments }) => {
               const laneEnds: number[] = [];
@@ -715,8 +735,11 @@ function WeekOverview({
                   data-weekend={[0, 6].includes(civilDate(day).getUTCDay()) || undefined}
                   data-selected={day === query.date || undefined}
                   data-transition={transition || undefined}
+                  style={{
+                    height: `calc(${Math.max(0, Math.min(lastHour, (bounds.end.getTime() - bounds.start.getTime()) / 3600000) - firstHour)} * var(--calendar-hour))`,
+                  }}
                 >
-                  {transition
+                  {transition || mixedDayLengths
                     ? Array.from({ length: Math.ceil(hourCount) }, (_, index) => {
                         const at = bounds.start.getTime() + (firstHour + index) * 3600000;
                         return at < bounds.end.getTime() ? (
@@ -787,7 +810,7 @@ function WeekOverview({
           ) : null}
         </section>
         <footer className={s.calendarFooter}>
-          <span>{c.timelineNote}</span>
+          <span>{mixedDayLengths ? `${c.transitionNote} ${c.timelineNote}` : c.timelineNote}</span>
           <a href="#calendar-itinerary">
             {c.fullItinerary}
             <ChevronDownIcon />
@@ -825,12 +848,15 @@ export function CalendarView({
                 {data.requests.length}
                 {data.hasMoreRequests ? "+" : ""}
               </b>
+              <span className="sr-only"> {c.onPage}</span>
               <ChevronDownIcon />
             </summary>
             <section aria-labelledby="calendar-requests-title" className={s.requests}>
               <header className={s.requestsHeading}>
                 <h2 id="calendar-requests-title">{c.requests}</h2>
-                <p>{c.requestsScope}</p>
+                <p>
+                  {c.requestsScope} · {data.requests.length} {c.onPage}
+                </p>
               </header>
               {data.requests.length ? (
                 <ul className={s.requestList}>

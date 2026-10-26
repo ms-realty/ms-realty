@@ -349,7 +349,7 @@
 .weekGrid {
   position: relative;
   display: grid;
-  min-height: 32rem;
+  min-height: 0;
 }
 .timeColumn {
   position: relative;
