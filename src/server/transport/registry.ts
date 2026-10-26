@@ -175,6 +175,15 @@ const submissionKeyExample = `${"A".repeat(43)}.${"0".repeat(32)}`;
 export const submissionKeyResponseSchema = z.object({ submissionKey: z.string() });
 
 export const inquiryReceiptSchema = z.object({
+  service: z
+    .object({
+      topic: z.enum(["short_stay_consultation", "management_consultation"]),
+      regionId: z.uuid(),
+      scopeVersionId: z.uuid(),
+      scopeVersion: z.number().int().positive(),
+      sourceUrl: z.url({ protocol: /^https?$/ }),
+    })
+    .optional(),
   content: inquiryContentSnapshotSchema.optional(),
   ownerInput: ownerInquiryReceiptSchema.optional(),
   receiptId: z.string().describe("The logical submission key"),
@@ -200,6 +209,7 @@ const inquiryFormSchema = z.object({
   contentReference: z.string().max(512).optional(),
   ownerInput: z.string().max(2048).optional(),
   viewingPreferences: z.string().max(4096).optional(),
+  serviceRequest: z.string().max(4096).optional(),
   submissionKey: z.string(),
   purpose: z.enum(inquiryPurposes),
   locale: z.enum(publicLocales),

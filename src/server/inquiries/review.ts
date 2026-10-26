@@ -2,6 +2,7 @@ import "server-only";
 import { timingSafeEqual } from "node:crypto";
 import { parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
+import { parseServiceEntry } from "@/domain/service-scope";
 import type { InquiryValues } from "@/features/discovery/inquiry-state";
 import { viewingPreferencesFromFields } from "@/features/discovery/viewing-fields";
 import type { PublicLocale } from "@/i18n/config";
@@ -12,6 +13,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { getPublicListing } from "../listings/detail";
 import type { ListingCard } from "../listings/view-models";
+import { bindServiceRequest } from "../service-intake/scope";
 import { parseInquiry } from "./intake";
 
 export function inquiryPayload(values: InquiryValues, key: string, locale: PublicLocale) {
@@ -28,6 +30,7 @@ export function inquiryPayload(values: InquiryValues, key: string, locale: Publi
       },
     });
   const owner = ["seller_consultation", "landlord_consultation"].includes(values.purpose);
+  const service = values.serviceScope ? parseServiceEntry(values.serviceScope) : null;
   const contentReference = values.contentReference
     ? parseContentReference(values.contentReference)
     : undefined;
@@ -50,6 +53,19 @@ export function inquiryPayload(values: InquiryValues, key: string, locale: Publi
     selectedListings,
     comparisonReferences,
     contentReference,
+    ...(values.purpose === "service_consultation"
+      ? {
+          serviceRequest: {
+            version: 1,
+            ...service,
+            location: values.serviceLocation,
+            needs: values.serviceNeeds,
+            requestedFrom: values.serviceFrom || undefined,
+            requestedUntil: values.serviceUntil || undefined,
+            relationship: values.serviceRelationship || undefined,
+          },
+        }
+      : {}),
     ...(values.purpose === "viewing_request"
       ? { viewingPreferences: viewingPreferencesFromFields(values) }
       : {}),
@@ -77,6 +93,8 @@ export async function reviewInquirySources(
   input: ReturnType<typeof inquiryPayload>,
   refresh = false,
 ) {
+  if (input.serviceRequest && input.contentReference)
+    await bindServiceRequest(db, input.serviceRequest, input.contentReference, input.locale);
   const subjects =
     input.selectedListings ??
     (input.listingReference

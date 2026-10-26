@@ -111,7 +111,12 @@ export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyTool
     ...workspacePrimaryNav.slice(0, 4),
     { label: "imports", screen: "O28", path: "/operations/imports", requires: ["import.run"] },
     ...workspacePrimaryNav.slice(4),
-    { label: "consultations", screen: "O29", path: null },
+    {
+      label: "consultations",
+      screen: "O29",
+      path: "/operations/consultations",
+      requires: ["inquiry.read", "case.read"],
+    },
     { label: "coverage", screen: "O01", path: "/coverage", requires: ["case.read_internal"] },
     {
       label: "inbound",
@@ -171,7 +176,8 @@ export function permittedTools(
       agencyTools[section].filter((item) =>
         (item.requires ?? []).every((c) =>
           workspacePrimaryNav.some((primary) => primary.path === item.path) ||
-          item.path === "/operations/history"
+          item.path === "/operations/history" ||
+          item.path === "/operations/consultations"
             ? navigable.has(c)
             : held.has(c),
         ),

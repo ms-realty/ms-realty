@@ -22,6 +22,7 @@ import type { FormState, FormValues } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { SubmitButton } from "@/ui/form/submit-button";
 import { ChevronStartIcon } from "@/ui/icons";
+import { serviceStaffCopy } from "../service-intake/copy";
 import {
   acceptAction,
   contactAction,
@@ -328,11 +329,13 @@ export async function InquiryScreen({
             inquiry.ownerId === session.account.id &&
             inquiry.state === "assigned" ? (
             <a className={link} href={`/${locale}/cases/new?inquiry=${inquiry.id}`}>
-              {locale === "bg"
-                ? "Създаване на сделка"
-                : locale === "ru"
-                  ? "Создать сделку"
-                  : "Create a deal"}
+              {inquiry.purpose === "service_consultation"
+                ? serviceStaffCopy(locale).create
+                : locale === "bg"
+                  ? "Създаване на сделка"
+                  : locale === "ru"
+                    ? "Создать сделку"
+                    : "Create a deal"}
             </a>
           ) : null}
         </nav>
@@ -355,7 +358,11 @@ export async function InquiryScreen({
                 </div>
               ) : null}
               <InquirySelectionContext context={inquiry.context} locale={locale} />
-              <InquiryOwnerContext context={inquiry.context} locale={locale} />
+              <InquiryOwnerContext
+                context={inquiry.context}
+                locale={locale}
+                serviceCurrent={detail.serviceCurrent}
+              />
               <dl className="grid grid-cols-2 gap-x-5 gap-y-3 text-dense">
                 <div>
                   <dt className="font-semibold">{copy.purpose}</dt>

@@ -3,6 +3,8 @@ import { and, asc, desc, eq, exists, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { caseParticipants, cases, contactMethods, inquiries, parties, tasks } from "@/db/schema";
 import { guardInquiryTransition, inquiryMachine } from "@/domain/inquiry";
+import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
+import { serviceCaseContextSchema } from "@/domain/service-scope";
 import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead, can } from "../authz";
@@ -10,6 +12,7 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
+import { bindServiceRequest, serviceCaseCoverage } from "../service-intake/scope";
 import {
   allow,
   commandEnvelope,
@@ -76,6 +79,35 @@ export async function linkInquiryToExistingCase(
       )
         throw new AppError("transition_denied");
       allow(inquiryMachine.check(inquiry.state, "linked_to_case"));
+      if (inquiry.purpose === "service_consultation") {
+        const context = inquiry.context as { service?: unknown; content?: unknown } | null;
+        const service = serviceCaseContextSchema.safeParse(context?.service);
+        const content = inquiryContentSnapshotSchema.safeParse(context?.content);
+        const existing = serviceCaseContextSchema.safeParse(target.serviceContext);
+        if (
+          !service.success ||
+          !content.success ||
+          !existing.success ||
+          target.kind !== "service_intake" ||
+          target.serviceTopic !== service.data.request.topic ||
+          existing.data.request.regionId !== service.data.request.regionId ||
+          existing.data.binding.scopeVersionId !== service.data.binding.scopeVersionId
+        )
+          throw new AppError("transition_denied");
+        const binding = await bindServiceRequest(
+          ctx.tx,
+          service.data.request,
+          content.data,
+          content.data.locale,
+        );
+        if (
+          !(await serviceCaseCoverage(ctx.tx, target.serviceContext)).current ||
+          (binding.responsibleId !== live.account.id &&
+            (binding.offering.fallback.kind !== "staff" ||
+              binding.offering.fallback.principalId !== live.account.id))
+        )
+          throw new AppError("approval_stale");
+      }
       allow(
         guardInquiryTransition(inquiry.state, "linked_to_case", { caseId: target.id }, live.actor),
       );
@@ -157,6 +189,10 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
   await assertCanRead(db, live.actor, "inquiry.read", inquiryResource(inquiry));
   const partyId = inquiry.partyId;
   if (!partyId || inquiry.caseId) return [];
+  const service = serviceCaseContextSchema.safeParse(
+    (inquiry.context as { service?: unknown } | null)?.service,
+  );
+  if (inquiry.purpose === "service_consultation" && !service.success) return [];
   const [route] = inquiry.contactMethodId
     ? await db
         .select({ kind: contactMethods.kind, normalizedValue: contactMethods.normalizedValue })
@@ -211,6 +247,14 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
     .where(
       and(
         await caseVisibility(db, session),
+        inquiry.purpose === "service_consultation" && service.success
+          ? and(
+              eq(cases.kind, "service_intake"),
+              eq(cases.serviceTopic, service.data.request.topic),
+              sql`${cases.serviceContext}->'request'->>'regionId' = ${service.data.request.regionId}`,
+              sql`${cases.serviceContext}->'binding'->>'scopeVersionId' = ${service.data.binding.scopeVersionId}`,
+            )
+          : undefined,
         eq(cases.disposition, "active"),
         or(sameParty, sameContact),
       ),

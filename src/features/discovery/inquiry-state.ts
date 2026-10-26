@@ -4,6 +4,7 @@ import { inquiryCheckCode } from "@/domain/inquiry-check-code";
 import { type ContentReference, parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import type { OwnerInquiry } from "@/domain/owner-inquiry";
+import { parseServiceEntry, type ServiceRequest } from "@/domain/service-scope";
 import type { ViewingPreferences } from "@/domain/viewing-preferences";
 import type { PublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
@@ -26,6 +27,12 @@ export type InquiryValues = typeof emptyViewingValues & {
   selectedListings: string;
   comparisonReferences: string;
   contentReference: string;
+  serviceScope: string;
+  serviceLocation: string;
+  serviceNeeds: string;
+  serviceFrom: string;
+  serviceUntil: string;
+  serviceRelationship: string;
   ownerLocality: string;
   ownerPropertyType: string;
   ownerTransaction: string;
@@ -48,6 +55,12 @@ export const emptyInquiry: InquiryValues = {
   selectedListings: "",
   comparisonReferences: "",
   contentReference: "",
+  serviceScope: "",
+  serviceLocation: "",
+  serviceNeeds: "",
+  serviceFrom: "",
+  serviceUntil: "",
+  serviceRelationship: "unknown",
   ownerLocality: "",
   ownerPropertyType: "",
   ownerTransaction: "",
@@ -64,6 +77,7 @@ export type InquiryState = FormState<InquiryValues> & {
     ownerInput?: OwnerInquiry;
     viewingPreferences?: ViewingPreferences;
     content?: ContentReference & { title: string; locale: PublicLocale; sourceUrl: string };
+    serviceRequest?: ServiceRequest;
   };
 };
 export const inquiryStatus = (locale: PublicLocale, key: string) =>
@@ -71,6 +85,10 @@ export const inquiryStatus = (locale: PublicLocale, key: string) =>
 export function inquiryPermalink(locale: PublicLocale, key: string, values?: InquiryValues) {
   const query = new URLSearchParams({ submission: key });
   if (values) {
+    if (values.serviceScope) {
+      const service = parseServiceEntry(values.serviceScope);
+      query.set("serviceScope", service ? JSON.stringify(service) : "invalid");
+    }
     if (values.contentReference) {
       const content = parseContentReference(values.contentReference);
       query.set("contentReference", content ? JSON.stringify(content) : "invalid");

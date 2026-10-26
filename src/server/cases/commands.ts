@@ -15,10 +15,12 @@ import {
   messages,
   tasks,
 } from "@/db/schema";
-import { initialStage } from "@/domain/case";
+import { caseKinds, initialStage, serviceIntakeTopics } from "@/domain/case";
 import { guardInquiryTransition, inquiryMachine } from "@/domain/inquiry";
+import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot";
 import { guardInterestTransition, interestMachine } from "@/domain/interest";
 import { commercialStates } from "@/domain/listing";
+import { serviceCaseContextSchema } from "@/domain/service-scope";
 import { requireAvailableStaff } from "../auth/availability";
 import type { Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
@@ -29,6 +31,7 @@ import { runOperation } from "../operations";
 import { loadPublishedListings, presentationOf } from "../publication/presentation";
 import { nextReference } from "../references";
 import { caseMatchCriteriaInput, offeredStates } from "../search/search";
+import { bindServiceRequest } from "../service-intake/scope";
 import {
   allow,
   commandEnvelope,
@@ -46,15 +49,21 @@ export {
   linkInquiryToExistingCase,
 } from "./inquiry-link";
 
-const createSchema = z.object({
-  ...commandEnvelope,
-  kind: z.enum(["buyer", "tenant", "seller", "landlord"]),
-  title: z.string().trim().min(3).max(200),
-  nextAction: z.string().trim().min(3).max(500),
-  dueAt: z.iso.datetime({ offset: true }),
-  requirements: z.string().trim().min(3).max(4000),
-  preferences: z.string().trim().max(4000),
-});
+const createSchema = z
+  .object({
+    ...commandEnvelope,
+    kind: z.enum(caseKinds),
+    serviceTopic: z.enum(serviceIntakeTopics).optional(),
+    title: z.string().trim().min(3).max(200),
+    nextAction: z.string().trim().min(3).max(500),
+    dueAt: z.iso.datetime({ offset: true }),
+    requirements: z.string().trim().min(3).max(4000),
+    preferences: z.string().trim().max(4000),
+  })
+  .superRefine((value, ctx) => {
+    if ((value.kind === "service_intake") !== Boolean(value.serviceTopic))
+      ctx.addIssue({ code: "custom", path: ["serviceTopic"], message: "service_topic_required" });
+  });
 export type CreateCaseInput = z.input<typeof createSchema>;
 const nextSchema = z.object({
   ...commandEnvelope,
@@ -140,11 +149,50 @@ export async function createCaseFromInquiry(db: Executor, session: Session, raw:
       allow(inquiryMachine.check(inquiry.state, "linked_to_case"));
       if (Date.parse(input.dueAt) <= Date.now())
         throw new AppError("validation_failed", { fieldErrors: { dueAt: ["future_required"] } });
+      const original = inquiry.context as { service?: unknown; content?: unknown } | null;
+      const service = serviceCaseContextSchema.safeParse(original?.service);
+      if ((inquiry.purpose === "service_consultation") !== (input.kind === "service_intake"))
+        throw new AppError("transition_denied");
+      if (input.kind === "service_intake") {
+        const content = inquiryContentSnapshotSchema.safeParse(original?.content);
+        if (
+          !service.success ||
+          !content.success ||
+          service.data.request.topic !== input.serviceTopic
+        )
+          throw new AppError("transition_denied");
+        const binding = await bindServiceRequest(
+          ctx.tx,
+          service.data.request,
+          content.data,
+          content.data.locale,
+        );
+        if (
+          binding.responsibleId !== live.account.id &&
+          (binding.offering.fallback.kind !== "staff" ||
+            binding.offering.fallback.principalId !== live.account.id)
+        )
+          throw new AppError("transition_denied");
+        const [commitment] = await ctx.tx
+          .select({ id: tasks.id })
+          .from(tasks)
+          .where(
+            and(
+              eq(tasks.inquiryId, inquiry.id),
+              eq(tasks.ownerId, live.account.id),
+              sql`${tasks.state} not in ('done', 'cancelled')`,
+            ),
+          )
+          .for("share");
+        if (!commitment) throw new AppError("transition_denied");
+      }
       const [record] = await ctx.tx
         .insert(cases)
         .values({
           reference: await nextReference(ctx.tx, "case"),
           kind: input.kind,
+          serviceTopic: input.serviceTopic ?? null,
+          serviceContext: input.kind === "service_intake" && service.success ? service.data : null,
           stage: initialStage[input.kind],
           title: input.title,
           ownerId: live.account.id,
@@ -156,7 +204,7 @@ export async function createCaseFromInquiry(db: Executor, session: Session, raw:
       await ctx.tx.insert(caseParticipants).values({
         caseId: record.id,
         partyId: inquiry.partyId,
-        role: input.kind,
+        role: input.kind === "service_intake" ? "collaborator" : input.kind,
         authority:
           input.kind === "seller" || input.kind === "landlord" ? "self_declared" : "not_claimed",
       });

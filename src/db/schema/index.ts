@@ -24,6 +24,7 @@ export * from "./privacy-governance";
 export * from "./publication";
 export * from "./records";
 export * from "./runtime";
+export * from "./service-scope";
 export * from "./settings";
 export * from "./task-effort";
 export * from "./work";

@@ -7,6 +7,7 @@ import { principals } from "@/db/schema";
 import type { StaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { heldCapabilitiesFromGrants, resolveGrants } from "@/server/authz";
+import { publicServiceOfferings } from "@/server/service-intake/scope";
 import { agencyToolCapabilities, permittedTools, permittedWorkspaceNav } from "./navigation";
 
 export async function workspaceViewer(locale: StaffLocale, session: Session) {
@@ -28,10 +29,16 @@ export async function workspaceViewer(locale: StaffLocale, session: Session) {
       .filter((grant) => !grant.scope?.locales || grant.scope.locales.includes(locale))
       .map((grant) => grant.capability),
   );
+  const services = await publicServiceOfferings(db).catch(() => []);
   return {
     account: { name: principal?.name ?? "MS Realty", detail: principal?.email },
     primary: permittedWorkspaceNav(navigable),
-    tools: permittedTools(locale, held, navigable),
+    tools: permittedTools(locale, held, navigable)
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) => item.label !== "consultations" || services.length > 0),
+      }))
+      .filter((group) => group.items.length > 0),
     mayManageAccess: held.has("access.grant"),
   };
 }

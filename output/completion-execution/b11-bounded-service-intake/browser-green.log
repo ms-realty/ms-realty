@@ -1,0 +1,333 @@
+[WebServer] (node:84776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84821) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84822) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] Fresh disposable browser database migrated.
+[WebServer] ▲ Next.js 16.4.2 (Turbopack)
+[WebServer] (node:84874) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ✓ Running next.config.ts took 37ms
+[WebServer] - Experiments (use with caution):
+[WebServer]   ✓ globalNotFound
+[WebServer]   · proxyClientMaxBodySize: "26mb"
+[WebServer]   ✓ strictRouteTypes
+[WebServer] 
+[WebServer]   Creating an optimized production build ...
+[WebServer] (node:84878) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84879) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ✓ Compiled successfully in 4.1s
+[WebServer]   Running TypeScript ...
+[WebServer]   Finished TypeScript in 3.5s ...
+[WebServer]   Collecting page data using 15 workers ...
+[WebServer] (node:84931) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84933) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84927) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84928) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84929) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84936) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84934) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84932) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84930) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84935) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84925) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84926) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84923) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84924) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:84937) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer]   Generating static pages using 15 workers (0/11) ...
+[WebServer]   Generating static pages using 15 workers (2/11) 
+[WebServer]   Generating static pages using 15 workers (5/11) 
+[WebServer]   Generating static pages using 15 workers (8/11) 
+[WebServer] ✓ Generating static pages using 15 workers (11/11) in 270ms
+[WebServer] Turbopack build encountered 1 warning:
+[WebServer] ./src/server/ops/readiness.ts:22:18
+[WebServer] Warning: Dynamic filesystem access causes tracing of the whole project
+[WebServer]   20 |   let text: string;
+[WebServer]   21 |   try {
+[WebServer] > 22 |     text = await readFile(path, "utf8");
+[WebServer]      |                  ^^^^^^^^^^^^^^^^^^^^^^
+[WebServer]   23 |   } catch (error) {
+[WebServer]   24 |     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+[WebServer]   25 |     throw error;
+[WebServer] 
+[WebServer] Static analysis determined that this filesystem access causes the whole project to be traced and included in the output.
+[WebServer] This is usually unintentional and leads to all source files (including the public folder) to be deployed as part of the server code.
+[WebServer] This can slow down deployments or lead to failures when size limits are exceeded.
+[WebServer] To resolve this, you can
+[WebServer] - make sure the path is statically scoped to some subfolder, for example path.join(process.cwd(), 'data', bar), or
+[WebServer] - only use them in development, or
+[WebServer] - opt out by adding an ignore comment to the highlighted call: fs.readFile(/*turbopackIgnore: true*/ ...), or
+[WebServer] - remove them.
+[WebServer] 
+[WebServer] Import traces:
+[WebServer]   App Route:
+[WebServer]     ./src/server/ops/readiness.ts
+[WebServer]     ./app/api/ops/readiness/route.ts
+[WebServer] 
+[WebServer]   Server Component:
+[WebServer]     ./src/server/ops/readiness.ts
+[WebServer]     ./src/server/ops/readiness-view.ts
+[WebServer]     ./src/features/operations/readiness-page.tsx
+[WebServer]     ./app/staff/[locale]/(workspace)/operations/readiness/[gate]/page.tsx
+[WebServer] 
+[WebServer] 
+[WebServer]   Finalizing page optimization ...
+[WebServer] 
+[WebServer] Route (app)
+[WebServer] ┌ ƒ /_not-found
+[WebServer] ├ ƒ /api/files/private/[kind]/[id]
+[WebServer] ├ ƒ /api/files/uploads/[id]
+[WebServer] ├ ƒ /api/health
+[WebServer] ├ ƒ /api/inquiries
+[WebServer] ├ ƒ /api/inquiries/[submission]
+[WebServer] ├ ƒ /api/media/[id]/[digest]
+[WebServer] ├ ƒ /api/ops/readiness
+[WebServer] ├ ƒ /api/providers/resend/webhook
+[WebServer] ├ ƒ /api/public-shares/creator-session
+[WebServer] ├ ƒ /api/test-outbox
+[WebServer] ├ ƒ /client/[locale]/access
+[WebServer] ├ ƒ /client/[locale]/access/confirm
+[WebServer] ├ ƒ /client/[locale]/access/confirm/submit
+[WebServer] ├ ƒ /client/[locale]/access/reauth
+[WebServer] ├ ƒ /client/[locale]/access/reauth/request
+[WebServer] ├ ƒ /client/[locale]/access/request
+[WebServer] ├ ƒ /client/[locale]/access/signout
+[WebServer] ├ ƒ /client/[locale]/appointments
+[WebServer] ├ ƒ /client/[locale]/appointments/[id]
+[WebServer] ├ ƒ /client/[locale]/appointments/[id]/calendar
+[WebServer] ├ ƒ /client/[locale]/documents
+[WebServer] ├ ƒ /client/[locale]/documents/[id]
+[WebServer] ├ ƒ /client/[locale]/documents/requests
+[WebServer] ├ ƒ /client/[locale]/documents/requests/[id]
+[WebServer] ├ ƒ /client/[locale]/documents/requests/[id]/submit
+[WebServer] ├ ƒ /client/[locale]/invitations/[id]
+[WebServer] ├ ƒ /client/[locale]/invitations/[id]/respond
+[WebServer] ├ ƒ /client/[locale]/messages
+[WebServer] ├ ƒ /client/[locale]/messages/[id]
+[WebServer] ├ ƒ /client/[locale]/overview
+[WebServer] ├ ƒ /client/[locale]/overview/[id]
+[WebServer] ├ ƒ /client/[locale]/overview/[id]/participants
+[WebServer] ├ ƒ /client/[locale]/overview/operations
+[WebServer] ├ ƒ /client/[locale]/preferences
+[WebServer] ├ ƒ /client/[locale]/preferences/search-alerts
+[WebServer] ├ ƒ /client/[locale]/preferences/submit
+[WebServer] ├ ƒ /client/[locale]/privacy
+[WebServer] ├ ƒ /client/[locale]/privacy/exports/[id]
+[WebServer] ├ ƒ /client/[locale]/privacy/submit
+[WebServer] ├ ƒ /client/[locale]/properties
+[WebServer] ├ ƒ /client/[locale]/properties/[id]
+[WebServer] ├ ƒ /client/[locale]/properties/[id]/preview
+[WebServer] ├ ƒ /client/[locale]/properties/[id]/preview/media/[assetId]
+[WebServer] ├ ƒ /client/[locale]/proposals
+[WebServer] ├ ƒ /client/[locale]/proposals/[id]
+[WebServer] ├ ƒ /client/[locale]/proposals/operations
+[WebServer] ├ ƒ /llms.txt
+[WebServer] ├ ƒ /public/[locale]
+[WebServer] ├ ƒ /public/[locale]/areas
+[WebServer] ├ ƒ /public/[locale]/areas/[slug]
+[WebServer] ├ ƒ /public/[locale]/compare
+[WebServer] ├ ƒ /public/[locale]/contact
+[WebServer] ├ ƒ /public/[locale]/design
+[WebServer] ├ ƒ /public/[locale]/design/forms
+[WebServer] ├ ƒ /public/[locale]/design/forms/receipt
+[WebServer] ├ ƒ /public/[locale]/help/[topic]
+[WebServer] ├ ƒ /public/[locale]/inquire
+[WebServer] ├ ƒ /public/[locale]/inquire/start
+[WebServer] ├ ƒ /public/[locale]/legacy/[id]
+[WebServer] ├ ƒ /public/[locale]/let
+[WebServer] ├ ƒ /public/[locale]/properties
+[WebServer] ├ ƒ /public/[locale]/properties/[reference]/[slug]
+[WebServer] ├ ƒ /public/[locale]/properties/intent
+[WebServer] ├ ƒ /public/[locale]/requests/[receiptId]
+[WebServer] ├ ƒ /public/[locale]/saved
+[WebServer] ├ ƒ /public/[locale]/search-alerts
+[WebServer] ├ ƒ /public/[locale]/sell
+[WebServer] ├ ƒ /public/[locale]/services/[slug]
+[WebServer] ├ ƒ /public/[locale]/share/[token]
+[WebServer] ├ ƒ /robots.txt
+[WebServer] ├ ƒ /sitemap.xml
+[WebServer] ├ ƒ /staff/[locale]/access
+[WebServer] ├ ƒ /staff/[locale]/access/absence/[id]
+[WebServer] ├ ƒ /staff/[locale]/access/denied
+[WebServer] ├ ƒ /staff/[locale]/access/enrol
+[WebServer] ├ ƒ /staff/[locale]/access/invitation
+[WebServer] ├ ƒ /staff/[locale]/access/invitation/submit
+[WebServer] ├ ƒ /staff/[locale]/access/manage
+[WebServer] ├ ƒ /staff/[locale]/access/manage/submit
+[WebServer] ├ ƒ /staff/[locale]/access/offboard/[id]
+[WebServer] ├ ƒ /staff/[locale]/access/reauth
+[WebServer] ├ ƒ /staff/[locale]/access/recovery
+[WebServer] ├ ƒ /staff/[locale]/access/signout
+[WebServer] ├ ƒ /staff/[locale]/calendar
+[WebServer] ├ ƒ /staff/[locale]/calendar/[id]
+[WebServer] ├ ƒ /staff/[locale]/calendar/[id]/calendar
+[WebServer] ├ ƒ /staff/[locale]/cases
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/continuity
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/document-requests
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/documents
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/documents/submit
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/email
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/matching
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/participants
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/process
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/process/operations
+[WebServer] ├ ƒ /staff/[locale]/cases/[id]/process/restricted
+[WebServer] ├ ƒ /staff/[locale]/cases/new
+[WebServer] ├ ƒ /staff/[locale]/cases/operations
+[WebServer] ├ ƒ /staff/[locale]/contacts
+[WebServer] ├ ƒ /staff/[locale]/contacts/[id]
+[WebServer] ├ ƒ /staff/[locale]/content
+[WebServer] ├ ƒ /staff/[locale]/content/[id]
+[WebServer] ├ ƒ /staff/[locale]/content/[id]/editions/[edition]
+[WebServer] ├ ƒ /staff/[locale]/content/[id]/editions/[edition]/operations
+[WebServer] ├ ƒ /staff/[locale]/content/new
+[WebServer] ├ ƒ /staff/[locale]/content/operations
+[WebServer] ├ ƒ /staff/[locale]/coverage
+[WebServer] ├ ƒ /staff/[locale]/inbox
+[WebServer] ├ ƒ /staff/[locale]/inquiries
+[WebServer] ├ ƒ /staff/[locale]/inquiries/[id]
+[WebServer] ├ ƒ /staff/[locale]/inquiries/[id]/link
+[WebServer] ├ ƒ /staff/[locale]/inquiries/[id]/operations
+[WebServer] ├ ƒ /staff/[locale]/inventory
+[WebServer] ├ ƒ /staff/[locale]/inventory/[reference]
+[WebServer] ├ ƒ /staff/[locale]/inventory/[reference]/documents
+[WebServer] ├ ƒ /staff/[locale]/inventory/[reference]/documents/submit
+[WebServer] ├ ƒ /staff/[locale]/inventory/[reference]/evidence
+[WebServer] ├ ƒ /staff/[locale]/inventory/[reference]/media
+[WebServer] ├ ƒ /staff/[locale]/inventory/[reference]/media/submit
+[WebServer] ├ ƒ /staff/[locale]/inventory/[reference]/translations/[language]
+[WebServer] ├ ƒ /staff/[locale]/inventory/new
+[WebServer] ├ ƒ /staff/[locale]/inventory/operations/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations
+[WebServer] ├ ƒ /staff/[locale]/operations/assistance
+[WebServer] ├ ƒ /staff/[locale]/operations/assistance/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations/assistance/intake
+[WebServer] ├ ƒ /staff/[locale]/operations/assistance/locale
+[WebServer] ├ ƒ /staff/[locale]/operations/assistance/research
+[WebServer] ├ ƒ /staff/[locale]/operations/assistance/research/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations/assistance/research/[id]/progress
+[WebServer] ├ ƒ /staff/[locale]/operations/complaints
+[WebServer] ├ ƒ /staff/[locale]/operations/complaints/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations/complaints/receipt
+[WebServer] ├ ƒ /staff/[locale]/operations/consultations
+[WebServer] ├ ƒ /staff/[locale]/operations/consultations/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations/duplicates
+[WebServer] ├ ƒ /staff/[locale]/operations/duplicates/receipt
+[WebServer] ├ ƒ /staff/[locale]/operations/duplicates/status
+[WebServer] ├ ƒ /staff/[locale]/operations/history
+[WebServer] ├ ƒ /staff/[locale]/operations/history/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations/imports
+[WebServer] ├ ƒ /staff/[locale]/operations/inbound
+[WebServer] ├ ƒ /staff/[locale]/operations/inbound/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations/inbound/[id]/attachments/submit
+[WebServer] ├ ƒ /staff/[locale]/operations/inbound/[id]/submit
+[WebServer] ├ ƒ /staff/[locale]/operations/jobs
+[WebServer] ├ ƒ /staff/[locale]/operations/keys
+[WebServer] ├ ƒ /staff/[locale]/operations/keys/[id]
+[WebServer] ├ ƒ /staff/[locale]/operations/keys/receipt
+[WebServer] ├ ƒ /staff/[locale]/operations/privacy
+[WebServer] ├ ƒ /staff/[locale]/operations/privacy/[id]/export
+[WebServer] ├ ƒ /staff/[locale]/operations/privacy/[id]/export/submit
+[WebServer] ├ ƒ /staff/[locale]/operations/privacy/submit
+[WebServer] ├ ƒ /staff/[locale]/operations/readiness
+[WebServer] ├ ƒ /staff/[locale]/operations/readiness/[gate]
+[WebServer] ├ ƒ /staff/[locale]/operations/subscriptions
+[WebServer] ├ ƒ /staff/[locale]/operations/subscriptions/submit
+[WebServer] ├ ƒ /staff/[locale]/proposals
+[WebServer] ├ ƒ /staff/[locale]/proposals/[id]
+[WebServer] ├ ƒ /staff/[locale]/proposals/new
+[WebServer] ├ ƒ /staff/[locale]/proposals/operations
+[WebServer] ├ ƒ /staff/[locale]/reports
+[WebServer] ├ ƒ /staff/[locale]/reports/export
+[WebServer] ├ ƒ /staff/[locale]/settings
+[WebServer] ├ ƒ /staff/[locale]/settings/navigation
+[WebServer] ├ ƒ /staff/[locale]/settings/operating-policy
+[WebServer] ├ ƒ /staff/[locale]/settings/operating-policy/operations/[command]/[operation]
+[WebServer] ├ ƒ /staff/[locale]/settings/operating-policy/versions/[version]
+[WebServer] ├ ƒ /staff/[locale]/settings/operations/[operation]
+[WebServer] ├ ƒ /staff/[locale]/settings/service-scope
+[WebServer] ├ ƒ /staff/[locale]/settings/service-scope/operations/[command]/[operation]
+[WebServer] ├ ƒ /staff/[locale]/tasks
+[WebServer] ├ ƒ /staff/[locale]/tasks/[id]
+[WebServer] ├ ƒ /staff/[locale]/tasks/[id]/effort
+[WebServer] ├ ƒ /staff/[locale]/tasks/[id]/effort/submit
+[WebServer] ├ ƒ /staff/[locale]/tasks/[id]/operations
+[WebServer] └ ƒ /staff/[locale]/today
+[WebServer] 
+[WebServer] 
+[WebServer] ƒ Proxy (Middleware)
+[WebServer] 
+[WebServer] ƒ  (Dynamic)  server-rendered on demand
+[WebServer] 
+[WebServer] (node:84939) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] ▲ Next.js 16.4.2
+[WebServer] - Local:         http://localhost:3162
+[WebServer] - Network:       http://localhost:3162
+[WebServer] ✓ Ready in 63ms
+[WebServer] ✓ Running next.config.ts took 24ms
+
+Running 4 tests using 1 worker
+
+(node:84940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84945) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84979) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85003) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium-mobile] › e2e/service-intake.spec.ts:32:5 › B11 consultation with JavaScript true › request, named acceptance, service Case and scoped client continuation remain bounded (4.5s)
+(node:85007) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85008) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85010) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85011) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium-mobile] › e2e/service-intake.spec.ts:32:5 › B11 consultation with JavaScript false › request, named acceptance, service Case and scoped client continuation remain bounded (3.8s)
+(node:85013) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85024) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85027) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85410) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85413) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [webkit-mobile] › e2e/service-intake.spec.ts:32:5 › B11 consultation with JavaScript true › request, named acceptance, service Case and scoped client continuation remain bounded (4.8s)
+(node:85460) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85480) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85485) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85487) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [webkit-mobile] › e2e/service-intake.spec.ts:32:5 › B11 consultation with JavaScript false › request, named acceptance, service Case and scoped client continuation remain bounded (4.1s)
+
+  4 passed (30.0s)

@@ -2,6 +2,7 @@
 export const settingsResources = {
   operatingPolicy: "00000000-0000-4000-8000-000000000024",
   privacyGovernance: "00000000-0000-4000-8000-000000000026",
+  serviceScope: "00000000-0000-4000-8000-000000000029",
 } as const;
 export type SettingsResourceKey = keyof typeof settingsResources;
 export const settingsResourceKeys = Object.keys(settingsResources) as SettingsResourceKey[];

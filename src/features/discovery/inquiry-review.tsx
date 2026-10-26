@@ -1,3 +1,4 @@
+import { serviceCopy } from "@/features/service-intake/copy";
 import { localeEndonyms, type PublicLocale } from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
@@ -62,6 +63,33 @@ export function InquiryReview({
             </a>
           </h3>
           <p className="text-dense text-text-muted">{localeEndonyms[review.content.locale]}</p>
+        </section>
+      ) : null}
+      {review.serviceRequest ? (
+        <section className="min-w-0 space-y-3 rounded-panel border border-divider p-4">
+          <h3 className="font-semibold">{serviceCopy(locale)[review.serviceRequest.topic]}</h3>
+          <p>{serviceCopy(locale).boundary}</p>
+          <dl className="space-y-3">
+            {[
+              [serviceCopy(locale).location, review.serviceRequest.location],
+              [serviceCopy(locale).needs, review.serviceRequest.needs],
+              [serviceCopy(locale).from, review.serviceRequest.requestedFrom],
+              [serviceCopy(locale).until, review.serviceRequest.requestedUntil],
+              [
+                serviceCopy(locale).relationship,
+                review.serviceRequest.relationship
+                  ? serviceCopy(locale).relationships[review.serviceRequest.relationship]
+                  : null,
+              ],
+            ]
+              .filter(([, value]) => value)
+              .map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd className="whitespace-pre-wrap break-words">{value}</dd>
+                </div>
+              ))}
+          </dl>
         </section>
       ) : null}
       <InquiryListingSummaries
