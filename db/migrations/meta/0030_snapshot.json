@@ -1,5 +1,5 @@
 {
-  "id": "e4afe068-27ef-429f-bba8-15e1367348ad",
+  "id": "19d53d32-3894-4687-9f09-28788a89be81",
   "prevId": "2c205198-d19a-4829-8a7b-efab4114d333",
   "version": "7",
   "dialect": "postgresql",
@@ -11878,7 +11878,7 @@
         },
         "privacy_exports_review_binding": {
           "name": "privacy_exports_review_binding",
-          "value": "(\"privacy_exports\".\"encrypted_review\" is null and \"privacy_exports\".\"review_sha256\" is null) or (\"privacy_exports\".\"encrypted_review\" is not null and \"privacy_exports\".\"review_sha256\" ~ '^[a-f0-9]{64}$')"
+          "value": "(\"privacy_exports\".\"encrypted_review\" is null and \"privacy_exports\".\"review_sha256\" is null) or (\"privacy_exports\".\"encrypted_review\" is not null and \"privacy_exports\".\"review_sha256\" is not null and \"privacy_exports\".\"review_sha256\" ~ '^[a-f0-9]{64}$')"
         },
         "privacy_exports_issued": {
           "name": "privacy_exports_issued",
