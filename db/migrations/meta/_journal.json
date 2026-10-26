@@ -246,6 +246,13 @@
       "when": 1793047486573,
       "tag": "0034_privacy_governance",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1793058337803,
+      "tag": "0035_bounded_service_scope",
+      "breakpoints": true
     }
   ]
 }
