@@ -26,6 +26,7 @@ vi.mock("@/server/inquiries/intake", async (load) => ({
 vi.mock("@/server/listings/detail", () => ({ getPublicListing: mocks.source }));
 vi.mock("@/server/inquiries/content-context", () => ({ readInquiryContent: mocks.content }));
 vi.mock("@/server/content/public", () => ({ readApprovedContent: mocks.approved }));
+vi.mock("@/server/service-intake/scope", () => ({ bindServiceRequest: vi.fn(async () => ({})) }));
 
 function initial(): InquiryState {
   return {
@@ -196,6 +197,13 @@ it("binds and explicitly refreshes approved content identity without replacing t
   state.values = {
     ...state.values,
     purpose: "service_consultation",
+    serviceScope: JSON.stringify({
+      topic: "management_consultation",
+      regionId: "12345678-1234-4123-8123-123456789003",
+      scopeVersionId: "12345678-1234-4123-8123-123456789004",
+    }),
+    serviceLocation: "Synthetic declared region",
+    serviceNeeds: "Synthetic bounded consultation request",
     contentReference: JSON.stringify(content),
   };
   mocks.content.mockImplementation(async (_db, reference) => ({

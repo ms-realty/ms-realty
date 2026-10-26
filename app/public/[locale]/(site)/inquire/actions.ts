@@ -132,6 +132,7 @@ export async function sendInquiry(
           ownerInput: payload.ownerInput,
           viewingPreferences: payload.viewingPreferences,
           content,
+          serviceRequest: payload.serviceRequest,
         },
       };
     }

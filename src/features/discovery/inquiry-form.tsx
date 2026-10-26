@@ -6,6 +6,7 @@ import {
   parseComparisonReferences,
   parseSelectedListingsJson,
 } from "@/domain/inquiry-selection";
+import { serviceCopy } from "@/features/service-intake/copy";
 import type { PublicLocale } from "@/i18n/config";
 import type { ListingCard } from "@/server/listings/view-models";
 import { buttonClass } from "@/ui/button-class";
@@ -18,6 +19,7 @@ import { InquiryListingSummaries } from "./inquiry-listing-summaries";
 import { OwnerInquiryFields } from "./inquiry-owner";
 import { InquiryReview } from "./inquiry-review";
 import { inquiryReviewCopy } from "./inquiry-review-copy";
+import { InquiryServiceFields } from "./inquiry-service";
 import {
   type InquiryState,
   type InquiryValues,
@@ -35,6 +37,7 @@ export function InquiryForm({
   locale,
   copy,
   initialListings = [],
+  serviceAvailable = true,
 }: {
   action: FormAction<InquiryValues>;
   initialState: InquiryState;
@@ -42,6 +45,7 @@ export function InquiryForm({
   copy: DiscoveryCopy;
   /** Approved cards the page read for the requested subjects; review rechecks them. */
   initialListings?: readonly ListingCard[];
+  serviceAvailable?: boolean;
 }) {
   const contacts = useRef<Record<string, string>>({});
   const reviewCopy = inquiryReviewCopy(locale);
@@ -51,6 +55,7 @@ export function InquiryForm({
       layout="full"
       action={action}
       initialState={initialState}
+      commandAvailable={initialState.values.purpose !== "service_consultation" || serviceAvailable}
       permalink={inquiryPermalink(locale, initialState.operationId, initialState.values)}
       reconciliation={{
         href: inquiryStatus(locale, initialState.operationId),
@@ -70,6 +75,12 @@ export function InquiryForm({
         selectedListings: copy.compare,
         comparisonReferences: copy.compare,
         contentReference: reviewCopy.sourceContext,
+        serviceScope: reviewCopy.sourceContext,
+        serviceLocation: serviceCopy(locale).location,
+        serviceNeeds: serviceCopy(locale).needs,
+        serviceFrom: serviceCopy(locale).from,
+        serviceUntil: serviceCopy(locale).until,
+        serviceRelationship: serviceCopy(locale).relationship,
         ownerLocality: reviewCopy.locality,
         ownerPropertyType: reviewCopy.propertyType,
         ownerTransaction: reviewCopy.transaction,
@@ -143,12 +154,23 @@ export function InquiryForm({
               seller_consultation: copy.sell,
               landlord_consultation: copy.let,
               ...(form.values.listingReference ? { viewing_request: copy.viewing } : {}),
-              ...(contentReference?.kind === "service"
+              ...(contentReference?.kind === "service" && form.values.serviceScope
                 ? { service_consultation: reviewCopy.service }
                 : {}),
             };
         return (
           <>
+            {!serviceAvailable && initialState.values.purpose === "service_consultation" ? (
+              <div role="status" className="space-y-3">
+                <p>{serviceCopy(locale).held}</p>
+                <a
+                  className="inline-flex min-h-control items-center underline"
+                  href={`/${locale}/inquire`}
+                >
+                  {copy.ask}
+                </a>
+              </div>
+            ) : null}
             <input type="hidden" name="inquiryStage" value="review" />
             <input type="hidden" name="contentReference" value={form.values.contentReference} />
             {entryListings.length ? (
@@ -315,6 +337,15 @@ export function InquiryForm({
                   .filter(([name]) => name.startsWith("owner"))
                   .map(([name, value]) => (
                     <input type="hidden" key={name} name={name} value={value} />
+                  ))
+              )}
+              {form.values.purpose === "service_consultation" ? (
+                <InquiryServiceFields form={form} locale={locale} />
+              ) : (
+                Object.entries(form.values)
+                  .filter(([name]) => name.startsWith("service"))
+                  .map(([name, value]) => (
+                    <input key={name} type="hidden" name={name} value={value} />
                   ))
               )}
               {form.values.purpose === "viewing_request" ? (

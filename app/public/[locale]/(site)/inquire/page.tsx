@@ -10,6 +10,7 @@ import {
   parseComparisonReferences,
   parseSelectedListingsJson,
 } from "@/domain/inquiry-selection";
+import { parseServiceEntry } from "@/domain/service-scope";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { InquiryForm } from "@/features/discovery/inquiry-form";
 import { inquiryListingSummary } from "@/features/discovery/inquiry-listing-summaries";
@@ -28,6 +29,7 @@ import {
 import { getPublicListing } from "@/server/listings/detail";
 import type { ListingCard } from "@/server/listings/view-models";
 import { publicRouteMetadata } from "@/server/seo/public-metadata";
+import { publicServiceOfferings } from "@/server/service-intake/scope";
 import { Notice } from "@/ui/notice";
 import { sendInquiry } from "./actions";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -64,6 +66,8 @@ export default async function InquiryPage({
     typeof query.contentReference === "string"
       ? parseContentReference(query.contentReference)
       : null;
+  const serviceEntry =
+    typeof query.serviceScope === "string" ? parseServiceEntry(query.serviceScope) : null;
   const invalidContext =
     query.context !== undefined ||
     (query.reference !== undefined &&
@@ -72,6 +76,7 @@ export default async function InquiryPage({
     (query.manifest !== undefined &&
       (typeof query.manifest !== "string" || !isUuid(query.manifest) || !query.reference)) ||
     (query.contentReference !== undefined && !content) ||
+    (query.serviceScope !== undefined && !serviceEntry) ||
     (query.purpose === "service_consultation" && content?.kind !== "service") ||
     [
       "purpose",
@@ -81,6 +86,7 @@ export default async function InquiryPage({
       "selection",
       "comparisonReferences",
       "contentReference",
+      "serviceScope",
     ].some((name) => Array.isArray(query[name])) ||
     (query.selection !== undefined &&
       (!selected ||
@@ -98,9 +104,15 @@ export default async function InquiryPage({
         <Notice tone="warning" title={copy.invalid} />
         <a
           className="underline"
-          href={comparison ? comparisonReturnHref(locale, comparison) : `/${locale}/compare`}
+          href={
+            query.purpose === "service_consultation"
+              ? `/${locale}/inquire`
+              : comparison
+                ? comparisonReturnHref(locale, comparison)
+                : `/${locale}/compare`
+          }
         >
-          {copy.compare}
+          {query.purpose === "service_consultation" ? copy.ask : copy.compare}
         </a>
       </DiscoveryPage>
     );
@@ -115,6 +127,7 @@ export default async function InquiryPage({
       "selection",
       "comparisonReferences",
       "contentReference",
+      "serviceScope",
       "error",
     ]) {
       if (typeof query[name] === "string") next.set(name, query[name]);
@@ -130,10 +143,29 @@ export default async function InquiryPage({
     );
   const values = {
     ...emptyInquiry,
+    serviceScope:
+      typeof query.serviceScope === "string"
+        ? parseServiceEntry(query.serviceScope)
+          ? query.serviceScope
+          : "invalid"
+        : "",
     comparisonReferences: comparison?.join(",") ?? "",
     contentReference: content ? JSON.stringify(content) : "",
   };
-  let selectionChanged = false;
+  const serviceAvailable =
+    query.purpose !== "service_consultation" ||
+    Boolean(
+      serviceEntry &&
+        content &&
+        (await publicServiceOfferings(getDb(), content.slug, locale).catch(() => [])).some(
+          (row) =>
+            row.scopeVersionId === serviceEntry.scopeVersionId &&
+            row.regionId === serviceEntry.regionId &&
+            row.topic === serviceEntry.topic &&
+            row.contentReference.versionId === content.versionId,
+        ),
+    );
+  let selectionChanged = !serviceAvailable;
   const initialListings: ListingCard[] = [];
   if (
     typeof query.purpose === "string" &&
@@ -221,6 +253,7 @@ export default async function InquiryPage({
         action={sendInquiry.bind(null, locale)}
         initialState={state}
         initialListings={initialListings}
+        serviceAvailable={serviceAvailable}
         locale={locale}
         copy={copy}
       />

@@ -2,6 +2,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
+import { parseServiceEntry } from "@/domain/service-scope";
 import { isRoutableLocale } from "@/i18n/config";
 import { getEnv } from "@/server/config/env";
 import {
@@ -30,11 +31,18 @@ export async function GET(
       "submission",
       "comparisonReferences",
       "contentReference",
+      "serviceScope",
     ].some((name) => query.getAll(name).length > 1)
   )
     return new Response(null, { status: 400 });
   if (query.has("context")) return new Response(null, { status: 400 });
   const rawContent = query.get("contentReference");
+  const rawService = query.get("serviceScope");
+  if (rawService !== null) {
+    const service = parseServiceEntry(rawService);
+    if (!service) return new Response(null, { status: 400 });
+    target.searchParams.set("serviceScope", JSON.stringify(service));
+  }
   if (rawContent !== null) {
     const content = parseContentReference(rawContent);
     if (!content) return new Response(null, { status: 400 });

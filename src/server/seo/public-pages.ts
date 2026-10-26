@@ -12,6 +12,7 @@ import {
   listingSlug,
   publicDestination,
 } from "@/server/publication/presentation";
+import { publicServiceOfferings } from "../service-intake/scope";
 
 export const publicStaticPaths = [
   "/",
@@ -146,6 +147,13 @@ export async function publicContentPages(): Promise<
   const result: { locale: PublicLocale; path: string; publishedAt: string }[] = [];
   for (const row of rows) {
     for (const locale of publicLocales) {
+      if (
+        row.kind === "service" &&
+        row.slug !== "sell" &&
+        row.slug !== "let" &&
+        !(await publicServiceOfferings(db, row.slug, locale)).length
+      )
+        continue;
       const approved = await readApprovedContent(db, row.kind, row.slug, locale);
       if (!approved) continue;
       const directory =

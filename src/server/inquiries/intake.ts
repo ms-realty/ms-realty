@@ -28,6 +28,7 @@ import {
   selectedListingsSchema,
 } from "@/domain/inquiry-selection";
 import { ownerInquiryReceipt, ownerInquirySchema } from "@/domain/owner-inquiry";
+import { serviceBindingSchema, serviceRequestSchema } from "@/domain/service-scope";
 import { pastViewingWindows, viewingPreferencesSchema } from "@/domain/viewing-preferences";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
@@ -45,6 +46,7 @@ import { listingSlug, loadPublishedListings, presentationOf } from "../publicati
 import { enforceRateLimit } from "../rate-limit";
 import { nextReference } from "../references";
 import { normalizeSearch } from "../search/search";
+import { bindServiceRequest } from "../service-intake/scope";
 import { readInquiryContent } from "./content-context";
 
 /**
@@ -158,6 +160,7 @@ export const inquirySchema = z
     ownerInput: ownerInquirySchema.optional(),
     viewingPreferences: viewingPreferencesSchema.optional(),
     contentReference: contentReferenceSchema.optional(),
+    serviceRequest: serviceRequestSchema.optional(),
     /** The approved page the visitor actually reviewed. Optional for older/general clients. */
     observedManifestId: z.preprocess(blankAsUnset, z.uuid().optional()),
     /** The search the visitor asked from, as its public filters (never a private brief). */
@@ -227,6 +230,10 @@ export const inquirySchema = z
     }
     if (input.purpose === "service_consultation" && input.contentReference?.kind !== "service")
       issue(["contentReference"], "approved_service_context_required");
+    if (input.purpose === "service_consultation" && !input.serviceRequest)
+      issue(["serviceRequest"], "approved_service_scope_required");
+    if (input.serviceRequest && input.purpose !== "service_consultation")
+      issue(["serviceRequest"], "service_purpose_required");
   });
 
 export type InquiryInput = z.input<typeof inquirySchema>;
@@ -272,6 +279,13 @@ export function parseInquiry(input: unknown): ParsedInquiry {
 
 /** Acceptance state only: never the contact details, message or any other personal data. */
 export interface InquiryReceipt {
+  readonly service?: {
+    topic: "short_stay_consultation" | "management_consultation";
+    regionId: string;
+    scopeVersionId: string;
+    scopeVersion: number;
+    sourceUrl: string;
+  };
   readonly content?: z.infer<typeof inquiryContentSnapshotSchema>;
   readonly ownerInput?: ReturnType<typeof ownerInquiryReceipt>;
   /** The logical submission identity (the submission key). */
@@ -334,6 +348,7 @@ function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
     listing?: unknown;
     ownerInput?: unknown;
     content?: unknown;
+    service?: { binding?: unknown };
     selection?: unknown;
     comparisonReferences?: string[];
   } | null;
@@ -342,7 +357,19 @@ function toReceipt(row: typeof inquiries.$inferSelect): InquiryReceipt {
     ? context.selection.map(receiptListing).filter((item) => item !== null)
     : [];
   const content = inquiryContentSnapshotSchema.safeParse(context?.content);
+  const binding = serviceBindingSchema.safeParse(context?.service?.binding);
   return {
+    ...(binding.success
+      ? {
+          service: {
+            topic: binding.data.offering.topic,
+            regionId: binding.data.offering.regionId,
+            scopeVersionId: binding.data.scopeVersionId,
+            scopeVersion: binding.data.scopeVersion,
+            sourceUrl: binding.data.sourceUrl,
+          },
+        }
+      : {}),
     ...(content.success ? { content: content.data } : {}),
     receiptId: row.submissionKey,
     ...(ownerInquiryReceipt(context?.ownerInput)
@@ -462,6 +489,25 @@ export async function submitInquiry(
           const content = input.contentReference
             ? await readInquiryContent(tx, input.contentReference, input.locale)
             : null;
+          const service =
+            input.serviceRequest && input.contentReference
+              ? {
+                  request: input.serviceRequest,
+                  binding: await bindServiceRequest(
+                    tx,
+                    input.serviceRequest,
+                    input.contentReference,
+                    input.locale,
+                  ),
+                }
+              : null;
+          if (
+            service?.request.requestedFrom &&
+            service.request.requestedFrom < now.toISOString().slice(0, 10)
+          )
+            throw new AppError("validation_failed", {
+              fieldErrors: { serviceRequest: ["future_required"] },
+            });
           const selection: (PublicListingDetail & { sourceUrl: string })[] = [];
           if (input.selectedListings) {
             // Lock in canonical order to avoid deadlocks; snapshots and intent retain visitor order.
@@ -593,6 +639,7 @@ export async function submitInquiry(
                   : {}),
                 criteria,
                 ...(content ? { content } : {}),
+                ...(service ? { service } : {}),
                 ...(input.ownerInput ? { ownerInput: input.ownerInput } : {}),
                 ...(input.viewingPreferences
                   ? { viewingPreferences: input.viewingPreferences }

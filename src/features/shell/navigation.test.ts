@@ -162,6 +162,7 @@ describe("navigation registry (§06)", () => {
           "/en/calendar",
           "/en/tasks",
           "/en/contacts",
+          "/en/operations/consultations",
         ],
       ],
     ]);
@@ -176,6 +177,7 @@ describe("navigation registry (§06)", () => {
           "/en/calendar",
           "/en/tasks",
           "/en/contacts",
+          "/en/operations/consultations",
           "/en/coverage",
           "/en/operations/inbound",
         ],
@@ -193,6 +195,7 @@ describe("navigation registry (§06)", () => {
           "/en/calendar",
           "/en/tasks",
           "/en/contacts",
+          "/en/operations/consultations",
           "/en/coverage",
           "/en/operations/inbound",
           "/en/operations/keys",

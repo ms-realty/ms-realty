@@ -250,6 +250,7 @@ export async function approveServiceScope(
           await validateOffering(ctx.tx, offering);
         }
       const previous = await currentScope(ctx.tx);
+      if (previous?.contentHash === draft.contentHash) throw new AppError("transition_denied");
       const scopeVersion = (previous?.scopeVersion ?? 0) + 1;
       const [row] = await ctx.tx
         .insert(serviceScopeVersions)

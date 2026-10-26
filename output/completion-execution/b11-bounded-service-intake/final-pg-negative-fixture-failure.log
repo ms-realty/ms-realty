@@ -1,0 +1,31 @@
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-reviewed-import/MS-Realty
+
+ ❯ |integration| src/server/service-intake/service-intake.int.test.ts (7 tests | 1 failed) 5588ms
+   ❯ B11 / F27 F28 P23 C14 O29 O30 bounded service intake (synthetic only) (7)
+     × creates one real topic-bound owned service Case and first task without brokerage facts or automatic client authority 848ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |integration| src/server/service-intake/service-intake.int.test.ts > B11 / F27 F28 P23 C14 O29 O30 bounded service intake (synthetic only) > creates one real topic-bound owned service Case and first task without brokerage facts or automatic client authority
+AppError: idempotency_key_reused
+ ❯ src/server/operations.ts:129:38
+    127|     );
+    128|     if (decision.action === "reject") {
+    129|       return { kind: "error", error: new AppError("idempotency_key_reu…
+       |                                      ^
+    130|     }
+    131|     if (existing && decision.action !== "execute") {
+ ❯ scope node_modules/postgres/src/index.js:260:18
+ ❯ Function.begin node_modules/postgres/src/index.js:243:14
+ ❯ runOperation src/server/operations.ts:105:19
+ ❯ src/server/service-intake/service-intake.int.test.ts:236:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 34 passed (35)
+   Start at  01:26:12
+   Duration  6.38s (tests 86%, import 12%, transform 2%)
+

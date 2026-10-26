@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { interestMachine } from "@/domain/interest";
+import { serviceCaseContextSchema } from "@/domain/service-scope";
 import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
 import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
@@ -14,6 +15,7 @@ import { listCases, readCase, readCaseMessages, readInterestContext } from "@/se
 import { caseFor } from "@/server/cases/shared";
 import { getEnv } from "@/server/config/env";
 import { findOperation } from "@/server/operations";
+import { serviceCaseCoverage } from "@/server/service-intake/scope";
 import { listTasks, readInquiry } from "@/server/work/queries";
 import { buttonClass } from "@/ui/button-class";
 import type { FormReceipt } from "@/ui/form/contract";
@@ -21,6 +23,8 @@ import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { caseAccessCopy } from "../case-access/copy";
 import { documentRequestCopy } from "../document-requests/copy";
+import { ServiceContext } from "../service-intake/context";
+import { serviceCopy, serviceStaffCopy } from "../service-intake/copy";
 import { StaffPage } from "../shell/staff-ui";
 import { CoverageOwner } from "../work/coverage-owner";
 import { privateRead } from "../work/screens";
@@ -174,6 +178,7 @@ export function BoundWorkflowForm({
   submit,
   receipt,
   nativeIdentity,
+  commandAvailable,
 }: ScreenProps & {
   command: WorkflowCommand;
   id: string;
@@ -184,6 +189,7 @@ export function BoundWorkflowForm({
   submit: string;
   receipt?: FormReceipt;
   nativeIdentity?: string;
+  commandAvailable?: boolean;
 }) {
   const initial = initialFormState(
     workflowScope(command, id),
@@ -199,6 +205,7 @@ export function BoundWorkflowForm({
       fields={fields}
       path={path}
       nativeIdentity={nativeIdentity ?? workflowScope(command, id)}
+      commandAvailable={commandAvailable}
       status={{
         href: workflowStatus(session.account.kind, locale, command, id, initial.operationId),
         label: caseCopy(locale).status,
@@ -284,10 +291,19 @@ export async function CaseIndexScreen(
 
 export async function NewCaseScreen(props: ScreenProps & { inquiryId: string }) {
   const { inquiry } = await privateRead(() => readInquiry(getDb(), props.session, props.inquiryId));
+  const service = serviceCaseContextSchema.safeParse(
+    (inquiry.context as { service?: unknown } | null)?.service,
+  );
+  const currentService =
+    inquiry.purpose !== "service_consultation" ||
+    (await serviceCaseCoverage(getDb(), (inquiry.context as { service?: unknown } | null)?.service))
+      .current;
   const c = caseCopy(props.locale);
+  const createLabel =
+    inquiry.purpose === "service_consultation" ? serviceStaffCopy(props.locale).create : c.create;
   if (inquiry.caseId)
     return (
-      <WorkflowPage {...props} title={c.create}>
+      <WorkflowPage {...props} title={createLabel}>
         <a className={workflowLink} href={`/${props.locale}/cases/${inquiry.caseId}`}>
           {c.back}
         </a>
@@ -298,11 +314,33 @@ export async function NewCaseScreen(props: ScreenProps & { inquiryId: string }) 
       name: "kind",
       label: c.kind,
       type: "select",
-      options: ["buyer", "tenant", "seller", "landlord"].map((value) => ({
+      options: (inquiry.purpose === "service_consultation"
+        ? ["service_intake"]
+        : ["buyer", "tenant", "seller", "landlord"]
+      ).map((value) => ({
         value,
-        label: c[value as "buyer"],
+        label:
+          value === "service_intake" ? workflowLabel(value, props.locale) : c[value as "buyer"],
       })),
     },
+    ...(inquiry.purpose === "service_consultation"
+      ? [
+          {
+            name: "serviceTopic",
+            label: serviceStaffCopy(props.locale).topic,
+            type: "select" as const,
+            required: true,
+            options: service.success
+              ? [
+                  {
+                    value: service.data.request.topic,
+                    label: serviceCopy(props.locale)[service.data.request.topic],
+                  },
+                ]
+              : [],
+          },
+        ]
+      : []),
     { name: "title", label: c.title, required: true },
     { name: "requirements", label: c.requirements, type: "textarea", required: true },
     { name: "preferences", label: c.preferences, type: "textarea" },
@@ -310,17 +348,35 @@ export async function NewCaseScreen(props: ScreenProps & { inquiryId: string }) 
     { name: "dueAt", label: c.due, type: "datetime-local", required: true },
   ];
   return (
-    <WorkflowPage {...props} title={`${c.create} · ${inquiry.reference}`}>
-      <p>{c.createLead}</p>
+    <WorkflowPage {...props} title={`${createLabel} · ${inquiry.reference}`}>
+      <p>
+        {inquiry.purpose === "service_consultation"
+          ? serviceCopy(props.locale).boundary
+          : c.createLead}
+      </p>
+      {service.success ? (
+        <ServiceContext
+          locale={props.locale}
+          request={service.data.request}
+          sourceUrl={service.data.binding.sourceUrl}
+          staff
+          current={currentService}
+        />
+      ) : null}
       <BoundWorkflowForm
         {...props}
         command="create"
+        commandAvailable={currentService}
         id={inquiry.id}
         revision={inquiry.version}
         fields={fields}
-        values={{ kind: "buyer", requirements: inquiry.message ?? "" }}
+        values={{
+          kind: inquiry.purpose === "service_consultation" ? "service_intake" : "buyer",
+          serviceTopic: service.success ? service.data.request.topic : "",
+          requirements: service.success ? service.data.request.needs : (inquiry.message ?? ""),
+        }}
         path={`/${props.locale}/cases/new?inquiry=${inquiry.id}`}
-        submit={c.create}
+        submit={createLabel}
       />
     </WorkflowPage>
   );
@@ -446,7 +502,8 @@ export async function CaseScreen(
   const staff = props.session.account.kind === "staff";
   const row = view.record;
   const path = `/${props.locale}/${staff ? "cases" : (props.pane ?? "overview")}/${row.id}`;
-  if (!staff && props.compactClientOverview && props.pane === "overview") {
+  const service = row.kind === "service_intake";
+  if (!service && !staff && props.compactClientOverview && props.pane === "overview") {
     // The compact entry still uses readCase's current authorization and client projection.
     // Its links need no conversation history or signed manual-action forms.
     const agenda = await listAppointments(getDb(), props.session, row.id);
@@ -521,7 +578,7 @@ export async function CaseScreen(
     .safeParse(brief?.items ?? []);
   const items = parsedItems.success ? parsedItems.data : [];
   const focusedConversation = !staff && props.pane === "messages";
-  const showAppointments = !focusedConversation;
+  const showAppointments = !service && !focusedConversation;
   const thread = await readCaseMessages(getDb(), props.session, row.id);
   const agenda = showAppointments ? await listAppointments(getDb(), props.session, row.id) : [];
   const commitments = staff ? await listTasks(getDb(), props.session, { caseId: row.id }) : null;
@@ -530,7 +587,7 @@ export async function CaseScreen(
       ? `/${props.locale}/cases/${row.id}/matching`
       : null;
   const showOverview = staff || !props.pane || props.pane === "overview";
-  const showProperties = staff || props.pane === "properties" || showOverview;
+  const showProperties = !service && (staff || props.pane === "properties" || showOverview);
   const showMessages = staff || props.pane === "messages" || showOverview;
   return (
     <WorkflowPage
@@ -539,6 +596,15 @@ export async function CaseScreen(
       reference={focusedConversation ? `${row.reference} · ${row.title}` : row.reference}
       clientOverview={!staff && showOverview}
     >
+      {service ? (
+        <ServiceContext
+          locale={props.locale}
+          request={row.service?.request ?? null}
+          sourceUrl={row.service?.sourceUrl ?? null}
+          current={row.service?.current ?? false}
+          staff={staff}
+        />
+      ) : null}
       {!staff && showOverview ? <ClientCaseOverview locale={props.locale} view={view} /> : null}
       <div className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
         {staff || !showOverview ? (
@@ -625,7 +691,7 @@ export async function CaseScreen(
             .concat(showOverview ? [{ href: "#case-brief", label: c.brief }] : [])
             .concat(view.canManageNext ? [{ href: "#case-next", label: c.next }] : [])
             .concat(showProperties ? [{ href: "#case-properties", label: c.interests }] : [])
-            .concat([{ href: "#case-appointments", label: c.appointments }])
+            .concat(showAppointments ? [{ href: "#case-appointments", label: c.appointments }] : [])
             .concat(showMessages ? [{ href: "#case-conversation", label: c.messages }] : [])
             .map(({ href, label }) => (
               <a
@@ -643,12 +709,14 @@ export async function CaseScreen(
           {c.relatedTools}
         </summary>
         <nav aria-label={c.relatedTools} className="flex flex-wrap gap-x-5 gap-y-2 pb-3">
-          <a
-            className={`${workflowLink} inline-flex min-h-control items-center`}
-            href={`/${props.locale}/proposals?case=${row.id}`}
-          >
-            {c.proposals}
-          </a>
+          {!service ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/proposals?case=${row.id}`}
+            >
+              {c.proposals}
+            </a>
+          ) : null}
           {staff ? (
             <a
               className={`${workflowLink} inline-flex min-h-control items-center`}

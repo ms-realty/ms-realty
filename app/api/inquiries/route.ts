@@ -13,6 +13,7 @@ import { isPublicLocale, isUuid, parseReference, sourceLocale } from "@/domain/i
 import { parseContentReference } from "@/domain/inquiry-content";
 import { parseComparisonReferences, parseSelectedListingsJson } from "@/domain/inquiry-selection";
 import { ownerInquirySchema } from "@/domain/owner-inquiry";
+import { serviceRequestSchema } from "@/domain/service-scope";
 import { viewingPreferencesSchema } from "@/domain/viewing-preferences";
 import { readCookie } from "@/server/auth/cookies";
 import { getEnv } from "@/server/config/env";
@@ -80,6 +81,16 @@ function formInput(form: URLSearchParams): Record<string, unknown> {
     }
   }
   let viewingPreferences: unknown;
+  let serviceRequest: unknown;
+  const rawService = field("serviceRequest");
+  if (rawService) {
+    try {
+      if (rawService.length > 4096) throw new Error("too_large");
+      serviceRequest = serviceRequestSchema.parse(JSON.parse(rawService));
+    } catch {
+      throw new AppError("validation_failed", { fieldErrors: { serviceRequest: ["invalid"] } });
+    }
+  }
   const rawViewing = field("viewingPreferences");
   if (rawViewing) {
     try {
@@ -111,6 +122,7 @@ function formInput(form: URLSearchParams): Record<string, unknown> {
     contentReference,
     ownerInput,
     viewingPreferences,
+    serviceRequest,
     comparisonReferences,
     callbackWindow: field("callbackWindow"),
     privacyNotice: checked("privacyNotice"),
@@ -190,6 +202,23 @@ export async function POST(request: Request): Promise<Response> {
     const rawSelection = single("selectedListings");
     const rawContent = single("contentReference");
     const content = rawContent ? parseContentReference(rawContent) : null;
+    const rawService = single("serviceRequest");
+    let service: ReturnType<typeof serviceRequestSchema.parse> | null = null;
+    try {
+      const parsed = rawService ? serviceRequestSchema.safeParse(JSON.parse(rawService)) : null;
+      service = parsed?.success ? parsed.data : null;
+    } catch {
+      /* Never copy malformed private request text into a recovery URL. */
+    }
+    if (service)
+      query.set(
+        "serviceScope",
+        JSON.stringify({
+          topic: service.topic,
+          regionId: service.regionId,
+          scopeVersionId: service.scopeVersionId,
+        }),
+      );
     if (content) query.set("contentReference", JSON.stringify(content));
     const selected = rawSelection ? parseSelectedListingsJson(rawSelection) : null;
     const rawComparison = single("comparisonReferences");
@@ -201,6 +230,7 @@ export async function POST(request: Request): Promise<Response> {
     const contextFields = [
       "contentReference",
       "ownerInput",
+      "serviceRequest",
       "selectedListings",
       "comparisonReferences",
       "listingReference",
@@ -209,6 +239,7 @@ export async function POST(request: Request): Promise<Response> {
     ];
     const invalidContext =
       Boolean(rawContent && !content) ||
+      Boolean(rawService && !service) ||
       contextFields.some((name) => (nativeFields?.getAll(name).length ?? 0) > 1) ||
       Boolean(rawSelection && !selected) ||
       Boolean(rawComparison && !comparison) ||
@@ -231,6 +262,7 @@ export async function POST(request: Request): Promise<Response> {
         "seller_consultation",
         "landlord_consultation",
         "viewing_request",
+        "service_consultation",
       ].includes(purpose)
     )
       query.set("purpose", purpose);
