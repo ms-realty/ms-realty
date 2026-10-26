@@ -25,15 +25,13 @@ try {
     const actors = [];
     for (const manager of [true, false]) {
       const actor = await createStaff(db, { roles: manager ? ["manager"] : [], grants: [] });
-      await db
-        .insert(schema.passkeys)
-        .values({
-          principalId: actor.id,
-          credentialId: randomUUID(),
-          publicKey: Buffer.from([1]),
-          deviceType: "singleDevice",
-          backedUp: false,
-        });
+      await db.insert(schema.passkeys).values({
+        principalId: actor.id,
+        credentialId: randomUUID(),
+        publicKey: Buffer.from([1]),
+        deviceType: "singleDevice",
+        backedUp: false,
+      });
       actors.push({ id: actor.id, ...(await createSession(db, { kind: "staff", id: actor.id })) });
     }
     console.log(JSON.stringify({ manager: actors[0], target: actors[1] }));
