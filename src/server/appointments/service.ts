@@ -31,6 +31,7 @@ import {
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { captureOperatingPolicy } from "../operating-policy/service";
 import { runOperation } from "../operations";
 import { loadPublishedListings } from "../publication/presentation";
 import { nextReference } from "../references";
@@ -129,6 +130,8 @@ export async function recordAppointmentVersion(
       pendingHostVersion: row.pendingHostVersion,
       pendingHostNote: row.pendingHostNote,
       pendingHostOfferedAt: row.pendingHostOfferedAt?.toISOString(),
+      operatingPolicySnapshot: row.operatingPolicySnapshot,
+      confirmedPolicySnapshot: row.confirmedPolicySnapshot,
     },
     actorKind: session.actor.kind,
     actorId: session.actor.id,
@@ -223,6 +226,7 @@ export async function requestAppointment(
           propertyId: listing.propertyId,
           hostId: caseRow.ownerId,
           timezone: appointmentTimezone,
+          operatingPolicySnapshot: await captureOperatingPolicy(ctx.tx),
           requestedWindows: [{ text: input.preferredWindow, requestedById: live.account.id }],
           icsUid: `${randomUUID()}@appointments.ms-realty.com`,
         })
@@ -295,6 +299,7 @@ export async function arrangeAppointment(
         endsAt: end.toISOString(),
         timezone: appointmentTimezone,
       };
+      let confirmationPolicySnapshot = row.confirmedPolicySnapshot;
       if (input.action === "confirm") {
         if (!row.listingId || !row.propertyId || !row.hostId)
           throw new AppError("transition_denied");
@@ -359,6 +364,8 @@ export async function arrangeAppointment(
               startsAt: ["An approved service-hours policy covering this time is required."],
             },
           });
+        if (!confirmationPolicySnapshot)
+          confirmationPolicySnapshot = await captureOperatingPolicy(ctx.tx, new Date(), policy.id);
         const bufferedStart = new Date(start.getTime() - input.bufferMinutes * 60000);
         const bufferedEnd = new Date(end.getTime() + input.bufferMinutes * 60000);
         // Sorted advisory locks prevent competing confirmation deadlocks; the DB exclusion
@@ -438,6 +445,9 @@ export async function arrangeAppointment(
                 externalBusyCheckedById: live.account.id,
                 icsSequence: row.icsSequence + 1,
                 accessNotes: input.accessNotes || null,
+                ...(!row.confirmedPolicySnapshot
+                  ? { confirmedPolicySnapshot: confirmationPolicySnapshot }
+                  : {}),
               }
             : {
                 state:

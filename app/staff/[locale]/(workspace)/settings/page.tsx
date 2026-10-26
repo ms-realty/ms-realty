@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { getDb } from "@/db/client";
 import { ProfileForm } from "@/features/identity/profile-form";
 import { settingsCopy } from "@/features/identity/settings-copy";
+import { operatingPolicyCopy } from "@/features/operating-policy/copy";
 import { AccountIdentity } from "@/features/shell/account";
 import { LocaleSwitcher } from "@/features/shell/language-switcher";
 import { NavigationIcon } from "@/features/shell/navigation-icons";
@@ -14,7 +15,8 @@ import { workCopy } from "@/features/work/copy";
 import { isStaffLocale, staffLocales } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { profileOperation, readStaffProfile } from "@/server/auth/profile";
-import { heldCapabilities } from "@/server/authz";
+import { can, heldCapabilities } from "@/server/authz";
+import { policyResource } from "@/server/operating-policy/service";
 import { buttonClass } from "@/ui/button-class";
 import { initialFormState } from "@/ui/form/server";
 import { CheckIcon, ChevronDownIcon } from "@/ui/icons";
@@ -28,7 +30,7 @@ export default async function SettingsPage({
   if (!isStaffLocale(locale)) notFound();
   const session = await requireStaffPage(locale);
   const db = getDb();
-  const [profile, held, query] = await Promise.all([
+  const [profile, held, query, mayManageOperatingPolicy] = await Promise.all([
     readStaffProfile(db, session),
     heldCapabilities(db, session.actor, [
       "access.grant",
@@ -37,10 +39,20 @@ export default async function SettingsPage({
       "message.send_external",
     ]),
     searchParams,
+    can(db, session.actor, "settings.manage", policyResource),
   ]);
   const copy = settingsCopy(locale);
   const workspace = await getTranslations({ locale, namespace: "workspace" });
   const administration = [
+    ...(mayManageOperatingPolicy
+      ? [
+          {
+            href: `/${locale}/settings/operating-policy`,
+            label: operatingPolicyCopy(locale).title,
+            icon: "system",
+          },
+        ]
+      : []),
     ...(held.has("access.grant")
       ? [{ href: `/${locale}/access/manage`, label: copy.team, icon: "team" }]
       : []),

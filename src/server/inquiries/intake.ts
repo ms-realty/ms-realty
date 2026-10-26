@@ -39,6 +39,7 @@ import { AppError, isAppError } from "../errors";
 import { recordOutboxEvent } from "../jobs/outbox";
 import { getPublicListing } from "../listings/detail";
 import type { PublicListingDetail } from "../listings/view-models";
+import { captureOperatingPolicy } from "../operating-policy/service";
 import { findOperation, runOperation } from "../operations";
 import { listingSlug, loadPublishedListings, presentationOf } from "../publication/presentation";
 import { enforceRateLimit } from "../rate-limit";
@@ -572,6 +573,7 @@ export async function submitInquiry(
               source: "website",
               submissionKey,
               payloadDigest: requestHash,
+              operatingPolicySnapshot: await captureOperatingPolicy(tx, now),
               receiptSessionHash: receiptSessionHash(context.receiptSession),
               listingId: listing?.listingId ?? null,
               listingRevisionId: listing?.listingRevisionId ?? null,

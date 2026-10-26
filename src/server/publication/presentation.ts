@@ -381,6 +381,9 @@ export interface PublishedListing {
   /** Live, not from the manifest: publication never establishes availability. */
   readonly commercialState: CommercialState;
   readonly availabilityConfirmedAt: Date | null;
+  /** Bound at a human confirmation; legacy records omit it and retain the §7.1 baseline. */
+  readonly recordedAvailabilityReviewDueAt?: Date | null;
+  readonly hasRecordedAvailabilityPolicy?: boolean;
   readonly freshnessConflicting: boolean;
   readonly disclosure: ManifestDisclosure;
   readonly placeChain: readonly PlaceNode[];
@@ -553,6 +556,8 @@ export async function loadPublishedListings(
       listingRevisionId: manifest.listingRevisionId,
       commercialState: listing.commercialState,
       availabilityConfirmedAt: listing.availabilityConfirmedAt,
+      recordedAvailabilityReviewDueAt: listing.reviewDueAt,
+      hasRecordedAvailabilityPolicy: listing.availabilityPolicySnapshot !== null,
       freshnessConflicting: listing.freshnessState === "conflicting",
       disclosure,
       placeChain: chain,
@@ -578,6 +583,9 @@ export function freshnessOf(listing: PublishedListing, now: Date): FreshnessStat
       ? { lastConfirmedAt: listing.availabilityConfirmedAt.toISOString() }
       : {}),
     conflicting: listing.freshnessConflicting,
+    ...(listing.hasRecordedAvailabilityPolicy
+      ? { recordedReviewDueAt: listing.recordedAvailabilityReviewDueAt?.toISOString() ?? null }
+      : {}),
     now: now.toISOString(),
   }).state;
 }

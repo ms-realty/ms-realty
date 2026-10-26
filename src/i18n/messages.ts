@@ -21,6 +21,7 @@ import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
+import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
 import type operations from "../../messages/staff/bg/operations.json";
 import type privacyExportStaff from "../../messages/staff/bg/privacyExport.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
@@ -57,6 +58,7 @@ export const staffNamespaces = [
   "dataReview",
   "auditHistory",
   "privacyExport",
+  "operatingPolicy",
 ] as const;
 
 export interface PublicMessages {
@@ -80,6 +82,7 @@ export interface StaffMessages {
   caseDirectory: typeof caseDirectory;
   auditHistory: typeof auditHistory;
   operations: typeof operations;
+  operatingPolicy: typeof operatingPolicy;
   privacyExport: typeof privacyExportStaff;
   dataReview: typeof dataReview;
   serverStaff: typeof serverStaff;
