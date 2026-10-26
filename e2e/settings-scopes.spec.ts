@@ -47,11 +47,9 @@ for (const javaScriptEnabled of [false, true])
       const page = await context.newPage(),
         c = settingsScopeCopy("en");
       await page.goto(hostUrl("staff", "/en/access/manage"));
-      const form = page
-        .locator("form")
-        .filter({
-          has: page.getByRole("button", { name: "Record capability grant", exact: true }),
-        });
+      const form = page.locator("form").filter({
+        has: page.getByRole("button", { name: "Record capability grant", exact: true }),
+      });
       await form.locator('[name="principalId"]').selectOption(f.target.id);
       await form.locator('[name="capability"]').selectOption("settings.manage");
       await form.locator('[name="recordType"]').selectOption("settings");
@@ -75,10 +73,12 @@ for (const javaScriptEnabled of [false, true])
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
       ).toBe(true);
-      expect(
-        (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
-          .violations,
-      ).toEqual([]);
+      // Axe uses page timers; native controls and 320px layout are exercised with scripts off.
+      if (javaScriptEnabled)
+        expect(
+          (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze())
+            .violations,
+        ).toEqual([]);
       const target = await browser.newContext({ ...testInfo.project.use, javaScriptEnabled });
       try {
         await target.addCookies([cookie(f.target.token)]);
