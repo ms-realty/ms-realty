@@ -28,6 +28,7 @@ import {
 } from "@/db/schema";
 import { type Capability, capabilities, hasCapability, rolePresets } from "@/domain/capabilities";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
+import { isSettingsResource, settingsScopeCapabilities } from "@/domain/settings-resources";
 import { recordAudit } from "../audit";
 import { can, resolveGrants, staffWhoCan } from "../authz";
 import { hashRequest } from "../crypto";
@@ -42,14 +43,22 @@ import { requireFreshAuth, requireLiveSession, revokeAllSessions, type Session }
 
 const scopeSchema = z
   .object({
-    recordType: z.enum(["document", "listing", "property", "case"]).nullable(),
+    recordType: z.enum(["document", "listing", "property", "case", "settings"]).nullable(),
     recordId: z.uuid().nullable(),
     locales: z.array(z.enum(publicLocales)).max(7).nullable(),
     expiresAt: z.iso.datetime().nullable(),
   })
   .refine((scope) => Boolean(scope.recordId) === Boolean(scope.recordType), {
     message: "A record scope needs its type and identity.",
-  });
+  })
+  .refine(
+    (scope) =>
+      scope.recordType !== "settings" ||
+      (isSettingsResource(scope.recordId) && !scope.locales?.length),
+    {
+      message: "Settings scopes need a supported fixed resource without a language restriction.",
+    },
+  );
 type Scope = z.infer<typeof scopeSchema>;
 function parse<T>(schema: z.ZodType<T>, input: unknown) {
   const result = schema.safeParse(input);
@@ -148,13 +157,22 @@ export async function ensureUsableManager(db: Executor) {
     detail: "Keep another usable access manager before revoking this grant",
   });
 }
-const inputSchema = z.object({
-  operationId: z.string().min(8).max(160),
-  principalId: z.uuid(),
-  capability: z.enum(capabilities),
-  reason: z.string().trim().min(10).max(1000),
-  scope: scopeSchema,
-});
+const inputSchema = z
+  .object({
+    operationId: z.string().min(8).max(160),
+    principalId: z.uuid(),
+    capability: z.enum(capabilities),
+    reason: z.string().trim().min(10).max(1000),
+    scope: scopeSchema,
+  })
+  .refine(
+    (value) =>
+      value.scope.recordType !== "settings" ||
+      (settingsScopeCapabilities as readonly string[]).includes(value.capability),
+    {
+      message: "The capability does not apply to a settings resource.",
+    },
+  );
 export async function grantStaffCapability(db: Executor, session: Session, input: unknown) {
   const value = parse(inputSchema, input);
   if (value.scope.expiresAt && new Date(value.scope.expiresAt) <= new Date())

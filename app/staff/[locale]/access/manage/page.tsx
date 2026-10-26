@@ -8,6 +8,7 @@ import { cases, operations, principals, staffMemberships } from "@/db/schema";
 import { capabilities } from "@/domain/capabilities";
 import { publicLocales } from "@/domain/ids";
 import { participantRoles } from "@/domain/parties";
+import { settingsResourceKeys, settingsResources } from "@/domain/settings-resources";
 import { absenceCopy } from "@/features/absence/copy";
 import { WorkflowTime } from "@/features/cases/screens";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/features/identity/copy";
 import { grantManagementCopy } from "@/features/identity/grant-copy";
 import { managementCopy, staffRoleLabel } from "@/features/identity/management-copy";
+import { settingsResourceLabel, settingsScopeCopy } from "@/features/identity/settings-scope-copy";
 import { StaffSettingsFrame } from "@/features/identity/staff-settings-frame";
 import { offboardingCopy } from "@/features/offboarding/copy";
 import { workCopy } from "@/features/work/copy";
@@ -98,6 +100,7 @@ export default async function ManagePage({
     search: grantSearch,
   });
   const grantCopy = grantManagementCopy(locale);
+  const settingsCopy = settingsScopeCopy(locale);
   const directoryCopy =
     locale === "bg"
       ? {
@@ -425,12 +428,35 @@ export default async function ManagePage({
                   {grantCopy[type]}
                 </option>
               ))}
+              <option value="settings">{settingsCopy.settings}</option>
             </AccessSelect>
           </label>
           <label className="grid min-w-0 grid-cols-1 gap-2">
             <span className={labelClass}>{grantCopy.recordId}</span>
             <input name="recordId" className={field} maxLength={36} />
           </label>
+          <div className="grid min-w-0 grid-cols-1 gap-2">
+            <label htmlFor="capability-settings-resource" className={labelClass}>
+              {settingsCopy.resource}
+            </label>
+            <AccessSelect
+              id="capability-settings-resource"
+              name="settingsRecordId"
+              className={field}
+              defaultValue=""
+              aria-describedby="settings-scope-help"
+            >
+              <option value="">{settingsCopy.choose}</option>
+              {settingsResourceKeys.map((key) => (
+                <option key={key} value={settingsResources[key]}>
+                  {settingsCopy.options[key]}
+                </option>
+              ))}
+            </AccessSelect>
+            <span id="settings-scope-help" className="text-dense text-text-muted">
+              {settingsCopy.help}
+            </span>
+          </div>
           <label htmlFor="capability-locale" className="grid min-w-0 grid-cols-1 gap-2">
             <span className={labelClass}>{grantCopy.locale}</span>
             <AccessSelect
@@ -515,12 +541,14 @@ export default async function ManagePage({
                   ? staffRoleLabel(locale, grant.role)
                   : ""}{" "}
               ·{" "}
-              {grant.recordType &&
-              ["document", "listing", "property", "case"].includes(grant.recordType)
-                ? grantCopy[grant.recordType as "document" | "listing" | "property" | "case"]
-                : grant.recordType
-                  ? grantCopy.scope
-                  : grantCopy.global}
+              {grant.recordType === "settings"
+                ? settingsResourceLabel(locale, grant.recordId)
+                : grant.recordType &&
+                    ["document", "listing", "property", "case"].includes(grant.recordType)
+                  ? grantCopy[grant.recordType as "document" | "listing" | "property" | "case"]
+                  : grant.recordType
+                    ? grantCopy.scope
+                    : grantCopy.global}
               {grant.locales?.length
                 ? ` · ${grant.locales.map((value) => (isPublicLocale(value) ? localeEndonyms[value] : grantCopy.locale)).join(", ")}`
                 : ""}

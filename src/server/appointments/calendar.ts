@@ -17,6 +17,7 @@ const fields = {
   version: appointments.version,
   caseId: appointments.caseId,
   caseReference: cases.reference,
+  caseTitle: cases.title,
   hostId: appointments.hostId,
   hostName: principals.displayName,
   propertyId: appointments.propertyId,
@@ -37,6 +38,7 @@ export type CalendarAppointment = {
   version: number;
   caseId: string | null;
   caseReference: string;
+  caseTitle?: string;
   hostName: string | null;
   timezone: string;
   proposedStartsAt: Date | null;

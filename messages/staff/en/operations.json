@@ -105,5 +105,131 @@
     "release_attestation": "Approved release evidence",
     "external_observation": "Checks of public domains",
     "operational_acceptance": "Agency operating review"
+  },
+  "businessReports": {
+    "title": "Business reports",
+    "about": "Find work that needs attention and review recorded service outcomes.",
+    "period": "Observation period",
+    "days": "days",
+    "scope": "Responsibility",
+    "all": "All work I may read",
+    "mine": "My responsibility",
+    "apply": "Show report",
+    "export": "Download these totals",
+    "asOf": "Observed at",
+    "window": "Outcomes observed from",
+    "definitions": "What this report measures",
+    "snapshot": "Open work is a current snapshot. The selected period applies to response, viewing and stage-change observations. This is a rolling, incomplete period.",
+    "empty": "No matching records within your access.",
+    "denied": "Your access does not include this measure.",
+    "sample": "Only the first 20 matching records are shown. The total includes all matching records within your access.",
+    "unavailable": "The report could not be read. The totals are unknown. Your work has not changed.",
+    "retry": "Try reading again",
+    "response": "Useful human response",
+    "responseDefinition": "Requests received in the selected period. A recorded useful human contact counts; an automatic acknowledgement does not. Duration is elapsed time from receipt to that contact, including time outside staffed hours.",
+    "received": "Requests received",
+    "responded": "With a recorded useful response",
+    "missing": "Without a recorded useful response",
+    "median": "Median elapsed minutes among recorded responses",
+    "minutes": "minutes",
+    "small": "Fewer than five recorded responses: a small sample.",
+    "incomplete": "Missing responses are not treated as zero-minute responses. This cohort can change as more responses are recorded.",
+    "effort": "Correction and re-entry effort is unknown: this report has no recorded effort observations.",
+    "invalid": "Some response times fall outside their valid receipt-to-observation interval and are excluded from duration calculations.",
+    "unknown": "Unknown",
+    "scopeNotice": "Totals and links cover only records and fields your current access permits. Opening a record checks access again. Use Back to return to these filters.",
+    "moreTools": "More tools",
+    "metrics": {
+      "unowned": {
+        "title": "Requests awaiting a named owner",
+        "definition": "Open received, assigned or waiting requests without a named owner. Their coverage queue retains responsibility. Unowned requests are outside My responsibility."
+      },
+      "promises": {
+        "title": "Overdue client promises",
+        "definition": "Open, in-progress or waiting tasks with a recorded client promise and an elapsed promised due time. Internal follow-up alone is not a client promise."
+      },
+      "nextActions": {
+        "title": "Deals with a due next step or review",
+        "definition": "Active deals with an elapsed next-action or waiting-review time. This measure requires access to internal deal work."
+      },
+      "viewings": {
+        "title": "Recorded completed viewings",
+        "definition": "Appointments currently recorded as completed whose confirmed end falls in the selected period. A request, confirmation or past appointment alone is not completion."
+      },
+      "progressions": {
+        "title": "Recorded stage changes",
+        "definition": "Recorded changes from one deal stage to a different stage during the selected period. Initial creation is excluded. This counts events, including reversals, rather than distinct deals or inferred conversion."
+      },
+      "freshness": {
+        "title": "Listings needing freshness review",
+        "definition": "Listings with an elapsed review time, review due, conflicting or unknown freshness. A timer never confirms availability."
+      },
+      "deliveries": {
+        "title": "Email deliveries needing attention",
+        "definition": "Outgoing deal emails currently failed, bounced or with an unknown outcome. Provider acceptance does not prove delivery; no recipient or message content appears here."
+      }
+    },
+    "invalidCount": "With an invalid response time",
+    "staffedResponse": {
+      "title": "Response within staffed hours",
+      "definition": "Each request uses the reviewed Sofia service calendar captured when it was accepted. Only recorded useful human responses enter this calculation. This is an observation, not a response target or a lateness decision.",
+      "eligible": "Valid recorded responses",
+      "known": "With known policy coverage",
+      "unknownCount": "With unknown policy coverage",
+      "median": "Median staffed minutes among known observations",
+      "complete": "Every valid recorded response has known policy coverage. Missing and invalid responses remain outside this median.",
+      "partial": "This median covers only the known policy observations, not the whole response cohort. Unknown coverage is not counted as zero.",
+      "unobserved": "Response time within staffed hours is unknown: this cohort has no valid recorded useful responses.",
+      "unknown": "Response time within staffed hours is unknown: no valid response has complete reviewed policy coverage.",
+      "cohortLimit": "Staffed time has not been calculated: more than 1,000 valid responses match this period. No partial-sample median is shown.",
+      "calculationLimit": "Staffed time has not been calculated for the full cohort within the report limit. No partial-sample median is shown.",
+      "manual": "Choose a narrower observation period or check the permitted requests manually.",
+      "records": "Requests behind these response observations",
+      "reasons": {
+        "no_reviewed_policy": "No reviewed policy captured at receipt",
+        "calendar_unknown": "Reviewed service calendar is unknown",
+        "outside_reviewed_calendar": "Response interval is outside the reviewed calendar",
+        "unknown_day": "Staffing is unknown for part of the interval",
+        "invalid_interval": "Response interval is invalid",
+        "interval_too_large": "Response interval exceeds the calculation limit"
+      }
+    }
+  },
+  "taskEffort": {
+    "title": "Correction and reentry time",
+    "about": "Record the minutes you spent on this task. These are reported observations, not automatic time tracking.",
+    "minutes": "Minutes spent",
+    "category": "Kind of work",
+    "reason": "Reason for the work",
+    "record": "Record time",
+    "newEntry": "Record another entry",
+    "void": "Exclude mistaken entry",
+    "back": "Back to the task",
+    "history": "Recorded observations",
+    "empty": "No time has been recorded. This does not mean the work took no time.",
+    "hint": "Enter a whole number from 1 to 480 minutes. Do not include customer details.",
+    "confirmed": "The entry is recorded.",
+    "failed": "The entry was not recorded. Check the current task before trying again.",
+    "pending": "This entry is still being checked. Refresh its status before trying again.",
+    "unknown": "The result is not known. Check the same entry before recording it again.",
+    "refresh": "Check this entry",
+    "excluded": "Excluded by a later correction",
+    "recordedAt": "Recorded at",
+    "count": "Recorded entries",
+    "correctionMinutes": "Reported correction minutes",
+    "reentryMinutes": "Reported reentry minutes",
+    "reportNote": "Self-reported time recorded during this period, after excluding mistaken entries. No observations means unknown effort.",
+    "categories": {
+      "correction": "Correcting information",
+      "reentry": "Entering information again"
+    },
+    "reasons": {
+      "facts": "Property or contact facts",
+      "language": "Language or presentation",
+      "duplicate_entry": "Repeated data entry",
+      "routing": "Assignment or routing",
+      "other": "Other correction work"
+    },
+    "voidConfirmed": "The mistaken entry is excluded from totals. Its history is preserved."
   }
 }

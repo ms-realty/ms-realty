@@ -229,6 +229,13 @@
     {
       "idx": 32,
       "version": "7",
+      "when": 1793029229030,
+      "tag": "0032_task_effort",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
       "when": 1793029229031,
       "tag": "0033_privacy_erasure",
       "breakpoints": true

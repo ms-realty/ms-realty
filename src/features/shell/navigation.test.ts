@@ -203,6 +203,7 @@ describe("navigation registry (§06)", () => {
         "management",
         [
           "/en/content",
+          "/en/reports",
           "/en/access/manage",
           "/en/operations/readiness",
           "/en/operations/jobs",

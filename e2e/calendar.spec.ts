@@ -1,7 +1,8 @@
 // O08 / L12 / F22: actual PostgreSQL intervals, native controls and complete mobile agenda.
 import { execFileSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -14,6 +15,7 @@ import { hostUrl, origins } from "./hosts";
 type Item = { id: string; reference: string };
 type Fixture = {
   token: string;
+  caseId: string;
   replacement: Item;
   teammate: Item;
   proposal: Item;
@@ -21,6 +23,12 @@ type Fixture = {
   readOnly: Item;
   request: Item;
 };
+async function showCalendarFilters(page: Page, _javaScriptEnabled: boolean) {
+  const disclosure = page.locator("[data-calendar-filters]");
+
+  if (!(await disclosure.evaluate((element) => (element as HTMLDetailsElement).open)))
+    await disclosure.locator("summary").click();
+}
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
   throw new Error("Calendar tests require the generated disposable database");
@@ -53,6 +61,19 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   test.skip(info.project.name !== "chromium-desktop", "Focused staff composition evidence");
   test.setTimeout(90_000);
   const f = seed();
+  // Composition evidence uses readable synthetic identities; the functional journey below
+  // retains deliberately long references and verifies complete narrow-screen access.
+  for (const [index, item] of [f.replacement, f.teammate, f.proposal, f.request].entries()) {
+    item.reference = `AP-DEMO-${String(index + 1).padStart(3, "0")}`;
+    await db
+      .update(schema.appointments)
+      .set({ reference: item.reference })
+      .where(eq(schema.appointments.id, item.id));
+  }
+  await db
+    .update(schema.cases)
+    .set({ reference: "CS-DEMO-001", title: "Synthetic buyer · Sandanski apartment search" })
+    .where(eq(schema.cases.id, f.caseId));
   await page.context().addCookies([
     {
       name: "msr_staff_session",
@@ -63,7 +84,7 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
     },
   ]);
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto(hostUrl("staff", "/en/calendar?date=2030-10-27&view=week"));
+  await page.goto(hostUrl("staff", "/en/calendar?date=2030-10-28&view=week"));
   await expect(
     page.getByRole("article", { name: f.replacement.reference, exact: true }),
   ).toBeVisible();
@@ -74,8 +95,21 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
     path: info.outputPath("synthetic-desktop-full-itinerary.png"),
     fullPage: true,
   });
+  const pending = page.locator("details").filter({
+    has: page.getByRole("heading", {
+      name: calendarCopy("en").requests,
+      exact: true,
+      includeHidden: true,
+    }),
+  });
+  await pending.locator("summary").click();
+  await expect(pending.getByRole("link").filter({ hasText: f.request.reference })).toBeVisible();
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-pending.png") });
+  await pending.locator("summary").click();
+  await showCalendarFilters(page, true);
   const scope = page.getByLabel(calendarCopy("en").scope, { exact: true });
   expect(await scope.boundingBox()).toMatchObject({ height: 44 });
+  await page.locator("[data-calendar-filters] summary").click();
   await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
   await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "compact");
   await page.reload();
@@ -96,21 +130,56 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
   await page.evaluate(() => {
     document.documentElement.style.fontSize = "";
   });
+  // Localized composition identity is synthetic data in the same guarded Case projection.
+  await db
+    .update(schema.cases)
+    .set({ title: "Търсене на двустаен · Сандански" })
+    .where(eq(schema.cases.id, f.caseId));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(hostUrl("staff", "/bg/calendar?date=2030-10-28&view=week"));
+  await expect(
+    page.getByRole("article", { name: f.teammate.reference, exact: true }),
+  ).toBeVisible();
+  await page.screenshot({ path: info.outputPath("synthetic-desktop-populated-bg.png") });
   for (const locale of ["bg", "en", "ru"]) {
     const c = calendarCopy(locale);
     await page.setViewportSize({ width: 320, height: 900 });
-    await page.goto(hostUrl("staff", `/${locale}/calendar?date=2030-10-27&view=week`));
+    await page.goto(hostUrl("staff", `/${locale}/calendar?date=2030-10-28&view=week`));
     const appointment = page.getByRole("article", { name: f.replacement.reference, exact: true });
+    await appointment.locator("details summary").click();
     await expect(appointment.getByText(c.reserved, { exact: true })).toBeVisible();
     await expect(appointment.getByText(c.buffer, { exact: false })).toContainText("30 / 30");
+    await appointment.locator("details summary").click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       320,
     );
-    const details = page.getByText(c.details, { exact: true });
+    const details = page.locator("details").filter({ hasText: c.details }).locator("summary");
     await details.click();
     await expect(page.getByText(c.scopeNote, { exact: true })).toBeVisible();
     await expect(page.getByText(c.snapshotNote, { exact: true })).toBeVisible();
     await details.click();
+    if (locale === "bg") {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({ path: info.outputPath("synthetic-mobile320-populated-bg.png") });
+      await page.setViewportSize({ width: 390, height: 900 });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({ path: info.outputPath("synthetic-mobile-populated-bg.png") });
+      const pending = page.locator("details").filter({
+        has: page.getByRole("heading", { name: c.requests, exact: true, includeHidden: true }),
+      });
+      await pending.locator("summary").click();
+      await expect(
+        pending.getByRole("link").filter({ hasText: f.request.reference }),
+      ).toBeVisible();
+      await page.screenshot({ path: info.outputPath("synthetic-mobile390-pending-bg.png") });
+      await pending.locator("summary").click();
+      await page.screenshot({
+        path: info.outputPath("synthetic-mobile-full-itinerary-bg.png"),
+        fullPage: true,
+      });
+      await appointment.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: info.outputPath("synthetic-mobile-change-bg.png") });
+    }
     expect(
       (
         await new AxeBuilder({ page })
@@ -119,13 +188,93 @@ test("O08 polished staff calendar keeps a complete responsive itinerary and hone
           .analyze()
       ).violations,
     ).toEqual([]);
-    if (locale === "bg") {
-      await page.screenshot({ path: info.outputPath("synthetic-mobile-populated-bg.png") });
-      await page.screenshot({
-        path: info.outputPath("synthetic-mobile-full-itinerary-bg.png"),
-        fullPage: true,
-      });
+  }
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(hostUrl("staff", "/bg/calendar?date=2030-10-28&view=week"));
+    const targets = page.locator("[data-staff-calendar] nav[aria-label='Преглед на седмицата'] a");
+    await expect(targets).toHaveCount(7);
+    const hitAreas: { name: string; width: number; height: number }[] = [];
+    const periodLinks = page
+      .getByRole("navigation", { name: calendarCopy("bg").navigation, exact: true })
+      .getByRole("link");
+    const appointmentLink = page
+      .getByRole("article", { name: f.teammate.reference, exact: true })
+      .getByRole("link")
+      .first();
+    for (const target of [
+      ...(await targets.all()),
+      ...(await periodLinks.all()),
+      appointmentLink,
+    ]) {
+      const box = await target.boundingBox();
+      expect(box?.width).toBeGreaterThanOrEqual(44);
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+      if (box)
+        hitAreas.push({
+          name: (await target.getAttribute("aria-label")) || (await target.innerText()).trim(),
+          width: box.width,
+          height: box.height,
+        });
     }
+    for (const target of await page.locator("[data-staff-calendar] summary").all()) {
+      if (await target.isVisible()) {
+        const box = await target.boundingBox();
+        expect(box?.height).toBeGreaterThanOrEqual(44);
+        if (box)
+          hitAreas.push({
+            name: (await target.innerText()).trim(),
+            width: box.width,
+            height: box.height,
+          });
+      }
+    }
+    const targetReceipt = info.outputPath(`synthetic-mobile${width}-targets.json`);
+    writeFileSync(targetReceipt, `${JSON.stringify(hitAreas, null, 2)}\n`);
+    await info.attach(`mobile${width}-targets`, {
+      path: targetReceipt,
+      contentType: "application/json",
+    });
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+      window.scrollTo(0, 0);
+    });
+    await expect(
+      page
+        .getByRole("article", { name: f.teammate.reference, exact: true })
+        .getByRole("link")
+        .first(),
+    ).toBeVisible();
+    await page.screenshot({ path: info.outputPath(`synthetic-mobile${width}-text200-bg.png`) });
+    const overflow = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("body *"))
+        .filter((element) => {
+          const box = element.getBoundingClientRect();
+          return box.width > 0 && (box.right > innerWidth + 1 || box.left < -1);
+        })
+        .slice(0, 16)
+        .map((element) => ({
+          tag: element.tagName,
+          class: element.className,
+          right: Math.round(element.getBoundingClientRect().right),
+          width: Math.round(element.getBoundingClientRect().width),
+          overflow: getComputedStyle(element).overflowX,
+        })),
+    );
+    if ((await page.evaluate(() => document.documentElement.scrollWidth)) > width)
+      console.log(JSON.stringify({ width, overflow }));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width,
+    );
+    await page
+      .getByRole("article", { name: f.teammate.reference, exact: true })
+      .scrollIntoViewIfNeeded();
+    await page.screenshot({
+      path: info.outputPath(`synthetic-mobile${width}-text200-agenda-bg.png`),
+    });
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "";
+    });
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(hostUrl("staff", "/en/settings?section=preferences"));
@@ -161,9 +310,11 @@ for (const javaScriptEnabled of [false, true])
       ]);
       const path = "/en/calendar?date=2030-10-27&view=day&zone=Europe%2FSofia&scope=team";
       await page.goto(hostUrl("staff", path));
+      await showCalendarFilters(page, javaScriptEnabled);
       await expect(
         page.getByRole("heading", { level: 1, name: caseCopy("en").calendar, exact: true }),
       ).toBeVisible();
+      await page.locator("[data-calendar-filters] summary").click();
       const viewing = page.getByRole("article", { name: f.replacement.reference, exact: true });
       await expect(viewing.getByText(c.current, { exact: true })).toBeVisible();
       await expect(viewing.getByText(c.replacement, { exact: true })).toBeVisible();
@@ -173,10 +324,20 @@ for (const javaScriptEnabled of [false, true])
       await expect(
         viewing.locator('time[datetime="2030-10-27T01:30:00.000Z"]').first(),
       ).toContainText("03:30 GMT+2");
+      await expect(viewing.getByText(c.conflictShort, { exact: true })).toBeVisible();
+      await viewing.locator("details summary").click();
+      await expect(viewing.getByText(c.buffer, { exact: false })).toBeVisible();
       await expect(viewing.getByText(c.buffer, { exact: false })).toContainText("30 / 30");
+      await expect(viewing.getByText(c.overlap, { exact: false })).toBeVisible();
+      await viewing.locator("details summary").click();
+      const requests = page.locator("details").filter({
+        has: page.getByRole("heading", { name: c.requests, exact: true, includeHidden: true }),
+      });
+      await requests.locator("summary").click();
       await expect(
-        page.getByRole("link", { name: `${c.open} ${f.request.reference}`, exact: true }),
+        requests.getByRole("link").filter({ hasText: f.request.reference }),
       ).toBeVisible();
+      await requests.locator("summary").click();
       await expect(page.getByText(f.hidden.reference, { exact: true })).toHaveCount(0);
       await expect(page.getByText(f.readOnly.reference, { exact: true })).toHaveCount(0);
       await expect(
@@ -203,14 +364,22 @@ for (const javaScriptEnabled of [false, true])
         ).toEqual([]);
       if (originalViewport) await page.setViewportSize(originalViewport);
 
-      const week = page.getByRole("link", { name: c.week, exact: true });
-      await week.focus();
-      await week.press("Enter");
-      await expect(page.getByRole("link", { name: c.week, exact: true })).toHaveAttribute(
-        "aria-current",
-        "page",
-      );
+      if ((page.viewportSize()?.width ?? 1440) < 1024) {
+        await showCalendarFilters(page, javaScriptEnabled);
+        await page.getByRole("combobox", { name: c.views, exact: true }).selectOption("week");
+        await page.getByRole("button", { name: c.apply, exact: true }).press("Enter");
+        await showCalendarFilters(page, javaScriptEnabled);
+        await expect(page.getByRole("combobox", { name: c.views, exact: true })).toHaveValue(
+          "week",
+        );
+      } else {
+        const week = page.getByRole("link", { name: c.week, exact: true });
+        await week.focus();
+        await week.press("Enter");
+        await expect(week).toHaveAttribute("aria-current", "page");
+      }
       await page.getByRole("link", { name: c.next, exact: true }).click();
+      await showCalendarFilters(page, javaScriptEnabled);
       await expect(page.getByLabel(c.date, { exact: true })).toHaveValue("2030-11-03");
       await expect(
         page.getByRole("article", { name: f.teammate.reference, exact: true }),
@@ -226,20 +395,20 @@ for (const javaScriptEnabled of [false, true])
       await expect(
         page.getByRole("article", { name: f.teammate.reference, exact: true }),
       ).toHaveCount(0);
-      await expect(
-        page
-          .getByRole("article", { name: f.replacement.reference, exact: true })
-          .getByText(c.overlap, { exact: false }),
-      ).toBeVisible();
+      const changed = page.getByRole("article", { name: f.replacement.reference, exact: true });
+      await expect(changed.getByText(c.conflictShort, { exact: true })).toBeVisible();
+      await changed.locator("details summary").click();
+      await expect(changed.getByText(c.overlap, { exact: false })).toBeVisible();
+      await changed.locator("details summary").click();
+      await showCalendarFilters(page, javaScriptEnabled);
       await page.getByLabel(c.zone, { exact: true }).selectOption("UTC");
       await page.getByRole("button", { name: c.apply, exact: true }).click();
       await expect(page.getByLabel(c.zone, { exact: true })).toHaveValue("UTC");
-      await expect(
-        page
-          .getByRole("article", { name: f.replacement.reference, exact: true })
-          .locator('time[datetime="2030-10-27T00:30:00.000Z"]')
-          .first(),
-      ).toContainText("00:30 GMT");
+      await changed.locator("details summary").click();
+      const exactUtc = changed.locator('details time[datetime="2030-10-27T00:30:00.000Z"]').first();
+      await expect(exactUtc).toBeVisible();
+      await expect(exactUtc).toContainText("00:30 GMT");
+      await changed.locator("details summary").click();
       await page.getByRole("link", { name: c.previous, exact: true }).click();
       await expect(page.getByLabel(c.date, { exact: true })).toHaveValue("2030-10-21");
       await expect(page.getByLabel(c.zone, { exact: true })).toHaveValue("UTC");
@@ -255,6 +424,7 @@ for (const javaScriptEnabled of [false, true])
       for (const locale of ["bg", "ru", "en"]) {
         const local = calendarCopy(locale);
         await page.goto(hostUrl("staff", path.replace("/en/", `/${locale}/`)));
+        await showCalendarFilters(page, javaScriptEnabled);
         await expect(page.getByLabel(local.zone, { exact: true })).toHaveValue("Europe/Sofia");
         await expect(page.getByRole("button", { name: local.apply, exact: true })).toBeVisible();
         await expect(
@@ -262,6 +432,7 @@ for (const javaScriptEnabled of [false, true])
             .getByRole("article", { name: f.replacement.reference, exact: true })
             .getByText(local.current, { exact: true }),
         ).toBeVisible();
+        await page.locator("[data-calendar-filters] summary").click();
       }
       await page
         .getByRole("article", { name: f.replacement.reference, exact: true })

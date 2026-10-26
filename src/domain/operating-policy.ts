@@ -1,7 +1,8 @@
 // O24/AT14: reviewed local calendars and immutable policy context, never inferred staffing.
 import { z } from "zod";
+import { settingsResources } from "./settings-resources";
 
-export const operatingPolicyId = "00000000-0000-4000-8000-000000000024";
+export const operatingPolicyId = settingsResources.operatingPolicy;
 export const policyWeekdays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 const day = z
   .string()

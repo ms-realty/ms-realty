@@ -33,7 +33,12 @@ export const POST = nativeAuthRoute(
             capability: String(form.get("capability") ?? ""),
             scope: {
               recordType: String(form.get("recordType") ?? "") || null,
-              recordId: String(form.get("recordId") ?? "") || null,
+              recordId:
+                String(
+                  form.get(
+                    form.get("recordType") === "settings" ? "settingsRecordId" : "recordId",
+                  ) ?? "",
+                ) || null,
               locales: grantLocale ? [grantLocale] : null,
               expiresAt: expiry ? new Date(expiry).toISOString() : null,
             },
