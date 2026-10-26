@@ -129,7 +129,7 @@ export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyTool
   ],
   management: [
     { label: "pages", screen: "O21", path: "/content", requires: ["content.edit"] },
-    { label: "reports", screen: "O22", path: null },
+    { label: "reports", screen: "O22", path: "/reports", requires: ["report.read"] },
     { label: "team", screen: "O23", path: "/access/manage", requires: ["access.grant"] },
     { label: "system", screen: "O24", path: "/operations/readiness", requires: ["report.read"] },
     { label: "jobs", screen: "O25", path: "/operations/jobs", requires: ["report.read"] },
