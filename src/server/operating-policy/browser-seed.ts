@@ -20,7 +20,7 @@ try {
         ? [
             {
               capability: "settings.manage",
-              recordType: "operating_policy",
+              recordType: "settings",
               recordId: operatingPolicyId,
             },
           ]
