@@ -22,6 +22,7 @@ import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
+import type duplicateMerge from "../../messages/staff/bg/duplicateMerge.json";
 import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
 import type operations from "../../messages/staff/bg/operations.json";
 import type privacyErasure from "../../messages/staff/bg/privacyErasure.json";
@@ -52,6 +53,7 @@ export const publicNamespaces = [
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
 export const staffNamespaces = [
+  "duplicateMerge",
   "calendar",
   "caseDirectory",
   "serverStaff",
@@ -85,6 +87,7 @@ export interface PublicMessages {
   workflow: typeof workflow;
 }
 export interface StaffMessages {
+  duplicateMerge: typeof duplicateMerge;
   calendar: typeof calendar;
   caseDirectory: typeof caseDirectory;
   auditHistory: typeof auditHistory;
