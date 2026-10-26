@@ -62,6 +62,9 @@ for (const javascript of [true, false])
         const pair = f[subject];
         if (subject === "party") {
           await page.goto(hostUrl("staff", "/en/operations/duplicates/merge?subject=party"));
+          await expect(page.getByLabel(copy.left, { exact: true }).locator("option")).toHaveCount(
+            3,
+          );
           await page.getByLabel(copy.left, { exact: true }).selectOption(pair.left);
           await page.getByRole("button", { name: copy.chooseSecond, exact: true }).click();
           await expect(page.locator(`[data-duplicate-source="${pair.left}"]`)).toContainText(

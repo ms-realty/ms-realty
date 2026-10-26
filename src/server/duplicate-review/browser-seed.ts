@@ -14,9 +14,9 @@ try {
   const reviewer = await staffFixture(db),
     denied = await staffFixture(db);
   await db.insert(schema.grants).values(
-    ["import.run", "access.grant", "audit.read"].map((capability) => ({
+    ["access.grant", "audit.read"].map((capability) => ({
       principalId: reviewer.id,
-      capability: capability as "import.run" | "access.grant" | "audit.read",
+      capability: capability as "access.grant" | "audit.read",
       reason: "Synthetic O27 reviewed merge authority",
     })),
   );
@@ -36,6 +36,24 @@ try {
     .returning();
   const [propertyLeft, propertyRight] = propertyRows;
   if (!propertyLeft || !propertyRight) throw new Error("Missing synthetic property pair");
+  // This reviewer owns these four synthetic identities. Other browser journeys share the
+  // disposable database; their records must not change this reviewer's picker or its pages.
+  await db.insert(schema.grants).values([
+    ...[left.party.id, right.party.id].map((recordId) => ({
+      principalId: reviewer.id,
+      capability: "import.run" as const,
+      recordType: "party",
+      recordId,
+      reason: "Synthetic O27 scoped identity review",
+    })),
+    ...propertyRows.map(({ id: recordId }) => ({
+      principalId: reviewer.id,
+      capability: "import.run" as const,
+      recordType: "property",
+      recordId,
+      reason: "Synthetic O27 scoped identity review",
+    })),
+  ]);
   await db.insert(schema.listings).values(
     propertyRows.map((property) => ({
       reference: `LIST-${randomUUID()}`,
