@@ -2,10 +2,20 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { localeDirection, type PublicLocale, suggestionDismissedCookie } from "@/i18n/config";
+import {
+  localeDirection,
+  type PublicLocale,
+  routableLocales,
+  suggestionDismissedCookie,
+} from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
 import { Banner } from "@/ui/notice";
 import { switchLocalePath, useQueryAndHash } from "./language-switcher";
+import {
+  localeLinkPath,
+  type PageLocaleAvailability,
+  samePageLocales,
+} from "./page-locale-availability";
 
 const halfYear = 60 * 60 * 24 * 182;
 
@@ -23,14 +33,17 @@ export interface SuggestionCopy {
 export function LanguageSuggestion({
   suggested,
   copy,
+  availability,
 }: {
   suggested: PublicLocale;
   copy: SuggestionCopy;
+  availability?: PageLocaleAvailability | null;
 }) {
   const pathname = usePathname();
   const suffix = useQueryAndHash();
   const [open, setOpen] = useState(true);
-  if (!open) return null;
+  if (!open || !samePageLocales(pathname, routableLocales(), availability).includes(suggested))
+    return null;
 
   function dismiss() {
     // biome-ignore lint/suspicious/noDocumentCookie: a plain first-party preference cookie.
@@ -47,7 +60,7 @@ export function LanguageSuggestion({
         action={
           <>
             <a
-              href={switchLocalePath(pathname, suggested, suffix)}
+              href={switchLocalePath(localeLinkPath(pathname, availability), suggested, suffix)}
               hrefLang={suggested}
               className={buttonClass("primary")}
             >
