@@ -1,17 +1,26 @@
 import "server-only";
-import { and, asc, eq, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
-import { inquiries, listings, parties, properties } from "@/db/schema";
+import {
+  inquiries,
+  listings,
+  parties,
+  privacyExports,
+  privacyRequests,
+  properties,
+} from "@/db/schema";
 import type { Actor, Capability } from "@/domain/capabilities";
 import { requireFreshAuth, type Session } from "@/server/auth/sessions";
 import { can, type Resource, resolveGrants } from "@/server/authz";
-import { hashRequest } from "@/server/crypto";
+import { getEnv } from "@/server/config/env";
+import { hashRequest, keyedHash } from "@/server/crypto";
 import type { Executor } from "@/server/db";
 import { caseDocumentPurposes } from "@/server/documents/purposes";
 import { assertRequestedDocumentAccess } from "@/server/documents/request-access";
 import { AppError } from "@/server/errors";
 import { documentAccess, mediaAccess } from "@/server/files/access";
 import { privacyOperator } from "@/server/privacy/access";
+import { privacySafetyRevision } from "@/server/privacy/source-fingerprint";
 import { liveStaff, visibleWhere } from "@/server/work/shared";
 
 export const duplicatePairSchema = z
@@ -31,6 +40,7 @@ export type Hold =
   | "existing_merge"
   | "different_kind"
   | "verified_contact_conflict"
+  | "privacy_restriction"
   | "changed_after_merge"
   | "already_reversed";
 export interface DuplicateIdentity {
@@ -309,6 +319,103 @@ const ident = (name: string) => sql`${sql.identifier(name)}`;
 const idsCondition = (column: SQL, pair: DuplicatePair) =>
   sql`${column} in (${pair.left}::uuid, ${pair.right}::uuid)`;
 
+// Dedicated projections, including the restriction's composite key. A new FK/column is
+// still unknown; this declaration does not authorize an arbitrary table or JSON scan.
+const privacyPartyEdges = new Set([
+  "privacy_exports.party_id",
+  "privacy_safety_decisions.party_id",
+  "privacy_processing_restrictions.party_id",
+]);
+
+async function privacyHistoryImpact(
+  db: Executor,
+  session: Session,
+  pair: DuplicatePair,
+  lock: boolean,
+): Promise<{ held: Hold[]; reference?: RetainedReference }> {
+  const sources = [pair.left, pair.right].sort();
+  const [history] = await db.execute<{ present: boolean }>(sql`select
+    exists(select 1 from privacy_exports where ${idsCondition(sql`party_id`, pair)}) or
+    exists(select 1 from privacy_safety_decisions where ${idsCondition(sql`party_id`, pair)}) or
+    exists(select 1 from privacy_processing_restrictions where ${idsCondition(sql`party_id`, pair)})
+    as present`);
+  if (!history?.present) return { held: [] };
+  try {
+    const live = await privacyOperator(db, session);
+    for (const id of sources)
+      if (
+        !(await can(db, live.actor, "privacy.manage", { type: "party", id, audience: "internal" }))
+      )
+        return { held: ["restricted"] };
+    const query = db
+      .select({
+        id: privacyExports.id,
+        version: privacyExports.version,
+        createdAt: privacyExports.createdAt,
+        updatedAt: privacyExports.updatedAt,
+        requestId: privacyExports.requestId,
+        requestVersion: privacyExports.requestVersion,
+        partyId: privacyExports.partyId,
+        recipientId: privacyExports.recipientId,
+        state: privacyExports.state,
+        sha256: privacyExports.sha256,
+        byteSize: privacyExports.byteSize,
+        coverageComplete: privacyExports.coverageComplete,
+        reviewSha256: privacyExports.reviewSha256,
+        completedOperationId: privacyExports.completedOperationId,
+        preparedById: privacyExports.preparedById,
+        reviewedById: privacyExports.reviewedById,
+        reviewedAt: privacyExports.reviewedAt,
+        expiresAt: privacyExports.expiresAt,
+        revokedAt: privacyExports.revokedAt,
+        issuedOperationId: privacyExports.issuedOperationId,
+      })
+      .from(privacyExports)
+      .where(inArray(privacyExports.partyId, sources))
+      .orderBy(asc(privacyExports.id))
+      .limit(501);
+    const exports = await (lock ? query.for("share") : query);
+    if (exports.length > 500) return { held: ["too_many"] };
+    const safety = await privacySafetyRevision(db, sources, lock, 500);
+    const bindings = [
+      ...exports.map((row) => ({ id: row.requestId, partyId: row.partyId, required: true })),
+      ...safety.requestBindings.map((row) => ({ ...row, required: false })),
+    ];
+    for (const binding of bindings) {
+      const requestQuery = db
+        .select({ id: privacyRequests.id, partyId: privacyRequests.partyId })
+        .from(privacyRequests)
+        .where(eq(privacyRequests.id, binding.id));
+      const [request] = await (lock ? requestQuery.for("share") : requestQuery);
+      // A restored safety tail may precede its request. This supplies no authority to
+      // reopen a restored application; the independent recovery gate still applies.
+      if (!request && !binding.required) continue;
+      if (request?.partyId !== binding.partyId) return { held: ["restricted"] };
+      await privacyOperator(db, live, binding.id);
+    }
+    return {
+      held: safety.clientAccessRestricted ? ["privacy_restriction"] : [],
+      reference: {
+        table: "privacy_history",
+        id: keyedHash(getEnv().authSecret, `duplicate-privacy-pair:v1:${JSON.stringify(sources)}`),
+        sources,
+        digest: keyedHash(
+          getEnv().authSecret,
+          `duplicate-privacy-history:v1:${hashRequest(
+            JSON.parse(JSON.stringify({ exports, safety: safety.fingerprint })),
+          )}`,
+        ),
+        // One pair-scoped boundary, regardless of private table/row counts or identities.
+        audience: {},
+      },
+    };
+  } catch (error) {
+    if (error instanceof AppError)
+      return { held: [error.code === "validation_failed" ? "too_many" : "restricted"] };
+    throw error;
+  }
+}
+
 /** Read only a declared parent to obtain the same case/property scope as its ordinary reader. */
 async function referenceResource(db: Executor, table: string, row: Row): Promise<Resource> {
   let caseId = typeof row.case_id === "string" ? row.case_id : undefined;
@@ -535,6 +642,8 @@ export async function readDuplicateImpact(
   };
   for (const edge of edges) {
     const condition = idsCondition(ident(edge.column_name), pair);
+    if (pair.subject === "party" && privacyPartyEdges.has(`${edge.table_name}.${edge.column_name}`))
+      continue;
     // Unknown populated edges are held; nothing about their contents is exposed or hashed.
     if (!(edge.table_name in directPolicies)) {
       const [exists] = await db.execute<{ present: boolean }>(sql`select exists(select 1 from
@@ -577,6 +686,10 @@ export async function readDuplicateImpact(
     );
   }
   if (pair.subject === "party") {
+    const privacy = await privacyHistoryImpact(db, live, pair, lock);
+    for (const hold of privacy.held) held.add(hold);
+    if (privacy.reference)
+      references.set(`${privacy.reference.table}:${privacy.reference.id}`, privacy.reference);
     await readRows(
       "case_process_reviews",
       sql`party_ids ?| array[${pair.left}, ${pair.right}]`,

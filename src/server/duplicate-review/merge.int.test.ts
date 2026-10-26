@@ -6,6 +6,7 @@ import {
   auditEvents,
   caseParticipants,
   cases,
+  consentEvents,
   contactMethods,
   documents,
   externalActions,
@@ -18,15 +19,26 @@ import {
   parties,
   passkeys,
   principals,
+  privacyExports,
+  privacyProcessingRestrictions,
+  privacyPropagationEvents,
+  privacyRequests,
+  privacySafetyDecisions,
   properties,
   propertyFactRevisions,
   propertyFacts,
   sessions,
+  subscriptions,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession } from "@/server/auth/sessions";
 import { can, resolveGrants } from "@/server/authz";
 import { staffFixture } from "@/server/cases/testing";
+import { hashRequest } from "@/server/crypto";
+import {
+  appendPrivacySafetyDecision,
+  recordPrivacyPropagation,
+} from "@/server/privacy/safety-ledger";
 import { createStaff } from "@/server/testing";
 import { readContact } from "@/server/work/queries";
 import { issueFormOperation } from "@/ui/form/server";
@@ -122,7 +134,276 @@ async function scopedStaff(readIds: string[], mergeIds: string[] = []) {
   return { ...staff, ...(await createSession(t.db, { kind: "staff", id: staff.id })) };
 }
 
+async function retainedPrivacy(f: Awaited<ReturnType<typeof fixture>>, restrictions = true) {
+  const [client] = await t.db
+    .insert(principals)
+    .values({
+      kind: "client",
+      issuer: "urn:ms-realty:client",
+      subject: randomUUID(),
+      partyId: f.right.party.id,
+      email: `${randomUUID()}@example.test`,
+      displayName: "Synthetic original recipient",
+    })
+    .returning();
+  const [request] = await t.db
+    .insert(privacyRequests)
+    .values({
+      reference: `PR-RETAINED-${randomUUID()}`,
+      kind: "export",
+      state: "completed",
+      partyId: f.right.party.id,
+      responsibleId: f.staff.id,
+      verifiedAt: new Date(),
+      completedAt: new Date(),
+      completionEvidence: "Synthetic completed source-specific export",
+      legalHoldDisposition: "Synthetic retained history only",
+    })
+    .returning();
+  if (!client || !request) throw new Error("Missing synthetic privacy subject");
+  const [exported] = await t.db
+    .insert(privacyExports)
+    .values({
+      requestId: request.id,
+      requestVersion: request.version,
+      partyId: f.right.party.id,
+      recipientId: client.id,
+      state: "issued",
+      encryptedPayload: "SYNTHETIC_PRIVATE_EXPORT_NEVER_PROJECT",
+      encryptedReview: "SYNTHETIC_PRIVATE_REVIEW_NEVER_PROJECT",
+      sha256: "a".repeat(64),
+      reviewSha256: "b".repeat(64),
+      byteSize: 1,
+      coverageComplete: true,
+      preparedById: f.staff.id,
+      reviewedById: f.staff.id,
+      reviewedAt: new Date(),
+      expiresAt: new Date(Date.now() + 3600000),
+      issuedOperationId: randomUUID(),
+      completedOperationId: randomUUID(),
+    })
+    .returning();
+  const [subscription] = await t.db
+    .insert(subscriptions)
+    .values({
+      partyId: f.right.party.id,
+      contactMethodId: f.right.method.id,
+      purpose: "marketing",
+      state: "withdrawn",
+      timezone: "Europe/Sofia",
+      policyVersion: "synthetic-retained-consent",
+      unsubscribeTokenHash: randomUUID(),
+    })
+    .returning();
+  if (!exported || !subscription) throw new Error("Missing synthetic retained privacy history");
+  await t.db.insert(consentEvents).values({
+    subscriptionId: subscription.id,
+    kind: "withdrawn",
+    policyVersion: subscription.policyVersion,
+    source: "Synthetic original consent source",
+    actorKind: "client",
+    actorId: client.id,
+  });
+  const append = () =>
+    appendPrivacySafetyDecision(t.db, {
+      operationId: randomUUID(),
+      partyId: f.right.party.id,
+      requestId: request.id,
+      requestHash: hashRequest({ synthetic: randomUUID() }),
+      review: { note: "SYNTHETIC_PRIVATE_DECISION_NEVER_PROJECT" },
+      effect: {
+        kind: "subscription_withdrawal_v1",
+        partyId: f.right.party.id,
+        subscriptionIds: [subscription.id],
+      },
+    });
+  const decision = await append();
+  await recordPrivacyPropagation(t.db, decision.sequence, "application", "applied", {
+    note: "SYNTHETIC_PRIVATE_PROPAGATION_NEVER_PROJECT",
+  });
+  if (restrictions)
+    await t.db.insert(privacyProcessingRestrictions).values(
+      ["marketing", "search_alerts"].map((purpose) => ({
+        partyId: f.right.party.id,
+        purpose,
+        decisionSequence: decision.sequence,
+      })),
+    );
+  return { client, request, exported, subscription, decision, append };
+}
+
+async function privacySourceSnapshot() {
+  return {
+    principals: await t.db.select().from(principals),
+    contacts: await t.db.select().from(contactMethods),
+    grants: await t.db.select().from(grants),
+    subscriptions: await t.db.select().from(subscriptions),
+    consent: await t.db.select().from(consentEvents),
+    requests: await t.db.select().from(privacyRequests),
+    exports: await t.db.select().from(privacyExports),
+    decisions: await t.db.select().from(privacySafetyDecisions),
+    restrictions: await t.db.select().from(privacyProcessingRestrictions),
+    propagation: await t.db.select().from(privacyPropagationEvents),
+  };
+}
+
 describe("O27/F32/AT56/UX22 human identity merge and safe split", () => {
+  it("retains completed exports, consent and composite-key restrictions under one opaque pair boundary through merge and split", async () => {
+    const f = await fixture(),
+      history = await retainedPrivacy(f),
+      before = await privacySourceSnapshot(),
+      preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toEqual([]);
+    const boundaries = preview.references.filter((row) => row.table === "privacy_history");
+    expect(boundaries).toHaveLength(1);
+    expect(boundaries[0]).toMatchObject({
+      sources: [f.pair.left, f.pair.right].sort(),
+      audience: {},
+    });
+    expect((await previewDuplicateMerge(t.db, f.staff.session, f.pair)).digest).toBe(
+      preview.digest,
+    );
+    for (const hidden of [
+      history.exported.id,
+      history.decision.id,
+      history.decision.digest,
+      "SYNTHETIC_PRIVATE_EXPORT_NEVER_PROJECT",
+      "SYNTHETIC_PRIVATE_REVIEW_NEVER_PROJECT",
+      "SYNTHETIC_PRIVATE_DECISION_NEVER_PROJECT",
+      "SYNTHETIC_PRIVATE_PROPAGATION_NEVER_PROJECT",
+    ])
+      expect(JSON.stringify(preview)).not.toContain(hidden);
+    const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+    expect(await privacySourceSnapshot()).toEqual(before);
+    await reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId));
+    expect(await privacySourceSnapshot()).toEqual(before);
+    expect(done.outcome.permissionChanges).toEqual([]);
+  });
+
+  it("holds restricted client identities and hides all new privacy source identities from an unauthorized reviewer", async () => {
+    const f = await fixture(),
+      history = await retainedPrivacy(f),
+      reviewer = await scopedStaff(
+        [f.left.inquiry.id, f.right.inquiry.id],
+        [f.left.party.id, f.right.party.id],
+      );
+    await t.db.insert(privacyProcessingRestrictions).values({
+      partyId: f.right.party.id,
+      purpose: "client_access",
+      decisionSequence: history.decision.sequence,
+    });
+    const hidden = await previewDuplicateMerge(t.db, reviewer.session, f.pair);
+    expect(hidden.held).toContain("restricted");
+    expect(hidden.held).not.toContain("privacy_restriction");
+    expect(hidden.references.some((row) => row.table.startsWith("privacy_"))).toBe(false);
+    for (const privateValue of [history.exported.id, history.request.id, history.decision.id])
+      expect(JSON.stringify(hidden)).not.toContain(privateValue);
+    await expect(mergeDuplicate(t.db, reviewer.session, await inputFor(f))).rejects.toMatchObject({
+      code: "not_found",
+    });
+    const authorized = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(authorized.held).toEqual(["privacy_restriction"]);
+    await expect(mergeDuplicate(t.db, f.staff.session, await inputFor(f))).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+  });
+
+  it.each(["decision", "restriction", "propagation", "export"] as const)(
+    "fences a new %s in stale merge review and subsequent automatic split",
+    async (change) => {
+      const f = await fixture(),
+        history = await retainedPrivacy(f, false),
+        input = await inputFor(f);
+      const mutate = async (afterMerge: boolean) => {
+        if (change === "decision") await history.append();
+        if (change === "restriction")
+          await t.db.insert(privacyProcessingRestrictions).values({
+            partyId: f.right.party.id,
+            purpose: afterMerge ? "search_alerts" : "marketing",
+            decisionSequence: history.decision.sequence,
+          });
+        if (change === "propagation")
+          await recordPrivacyPropagation(t.db, history.decision.sequence, "provider_data", "held", {
+            synthetic: randomUUID(),
+          });
+        if (change === "export")
+          await t.db
+            .update(privacyExports)
+            .set({ version: sql`${privacyExports.version} + 1`, updatedAt: new Date() })
+            .where(eq(privacyExports.id, history.exported.id));
+      };
+      await mutate(false);
+      await expect(mergeDuplicate(t.db, f.staff.session, input)).rejects.toMatchObject({
+        code: "version_conflict",
+      });
+      const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+      await mutate(true);
+      expect(
+        (await previewDuplicateReversal(t.db, f.staff.session, done.outcome.mergeId)).impact.held,
+      ).toContain("changed_after_merge");
+      await expect(
+        reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId)),
+      ).rejects.toMatchObject({ code: "transition_denied" });
+    },
+  );
+
+  it("rechecks live privacy authority and fresh verification before disclosing or replaying retained history", async () => {
+    const f = await fixture();
+    await retainedPrivacy(f);
+    await t.db
+      .update(sessions)
+      .set({ reverifiedAt: null })
+      .where(eq(sessions.id, f.staff.session.id));
+    const stale = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(stale.held).toContain("restricted");
+    expect(stale.references.some((row) => row.table.startsWith("privacy_"))).toBe(false);
+    await t.db
+      .update(sessions)
+      .set({ reverifiedAt: new Date() })
+      .where(eq(sessions.id, f.staff.session.id));
+    const input = await inputFor(f),
+      done = await mergeDuplicate(t.db, f.staff.session, input);
+    await t.db
+      .update(grants)
+      .set({ revokedAt: new Date() })
+      .where(and(eq(grants.principalId, f.staff.id), eq(grants.capability, "privacy.manage")));
+    await expect(mergeDuplicate(t.db, f.staff.session, input)).rejects.toMatchObject({
+      code: "not_found",
+    });
+    await expect(
+      readDuplicateReceipt(t.db, f.staff.session, done.operationId),
+    ).rejects.toMatchObject({
+      code: "not_found",
+    });
+    await expect(
+      previewDuplicateReversal(t.db, f.staff.session, done.outcome.mergeId),
+    ).rejects.toMatchObject({ code: "not_found" });
+  });
+
+  it("holds an oversized declared privacy history without exposing a partial row inventory", async () => {
+    const f = await fixture(),
+      history = await retainedPrivacy(f);
+    const added = await t.db
+      .insert(privacyPropagationEvents)
+      .values(
+        Array.from({ length: 500 }, () => ({
+          decisionSequence: history.decision.sequence,
+          boundary: "provider_data",
+          state: "held",
+          evidence: { synthetic: "SYNTHETIC_BOUNDED_EVIDENCE_NEVER_PROJECT" },
+        })),
+      )
+      .returning({ id: privacyPropagationEvents.id });
+    const preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toEqual(["too_many"]);
+    expect(preview.references.some((row) => row.table === "privacy_history")).toBe(false);
+    expect(JSON.stringify(preview)).not.toContain(added[0]?.id);
+    expect(JSON.stringify(preview)).not.toContain("SYNTHETIC_BOUNDED_EVIDENCE_NEVER_PROJECT");
+    await expect(mergeDuplicate(t.db, f.staff.session, await inputFor(f))).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+  });
+
   it("paginates source selection after applying current independent read and merge scopes", async () => {
     const f = await fixture(),
       staff = await scopedStaff(

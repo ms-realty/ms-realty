@@ -39,7 +39,8 @@
     "different_kind": "The recorded identity types conflict. Verify the source records before linking them.",
     "verified_contact_conflict": "The records contain different verified contact values. Confirm identity and contact verification separately before merging.",
     "changed_after_merge": "A source record, dependency or audience changed after the merge. Automatic split is held so later work is preserved.",
-    "already_reversed": "This merge has already been split. Its history and receipts remain available."
+    "already_reversed": "This merge has already been split. Its history and receipts remain available.",
+    "privacy_restriction": "A source has a client-access privacy restriction. Linking these identities requires separate privacy reconciliation; the restriction remains in force."
   },
   "merged": "Identity merge recorded",
   "reversed": "Identity split recorded",
@@ -116,7 +117,8 @@
     "approvals": "Existing approval",
     "import_rows": "Import provenance",
     "case_process_reviews": "Qualified process review",
-    "messages": "Source message recipients"
+    "messages": "Source message recipients",
+    "privacy_history": "Retained privacy history for both source identities"
   },
   "chooseSecond": "Choose the second source record",
   "nextPage": "More permitted source records"

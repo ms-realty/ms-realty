@@ -42,6 +42,7 @@ import type { Executor } from "../db";
 import { caseDocumentPurposes } from "../documents/purposes";
 import { AppError } from "../errors";
 import type { DisclosureSupplement } from "./export-supplements";
+import { privacySafetyRevision } from "./source-fingerprint";
 
 const digest = (value: unknown) => hashRequest(JSON.parse(JSON.stringify(value)));
 const bounded = <T>(rows: T[], max = 1000): T[] => {
@@ -224,9 +225,10 @@ async function restrictedRevisionFingerprint(
     : [];
   for (const rows of [reports, agreements, reviews, items, files])
     if (rows.length > 1000) throw new AppError("validation_failed");
+  const safety = await privacySafetyRevision(db, [partyId]);
   return keyedHash(
     getEnv().authSecret,
-    `privacy-restricted-revision:v1:${JSON.stringify({ hold, reports, agreements, reviews, items, files })}`,
+    `privacy-restricted-revision:v2:${JSON.stringify({ hold, reports, agreements, reviews, items, files, safety: safety.fingerprint })}`,
   );
 }
 
