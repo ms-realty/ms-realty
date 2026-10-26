@@ -104,6 +104,7 @@ export async function ReportsScreen({
             <a
               className={buttonClass("secondary")}
               href={`/${locale}/reports/export?days=${filter.days}&scope=${filter.scope}`}
+                download="business-report.csv"
             >
               {t.export}
             </a>
