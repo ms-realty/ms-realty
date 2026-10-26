@@ -33,6 +33,15 @@ unrelated capabilities and language restrictions are rejected. Allocation and
 revocation end the target's sessions. Current authority is rechecked before a
 stored result can be replayed or read.
 
+A processor review binds the linked processing record's exact reviewed revision
+and content hash in its immutable review edition. A changed source revision
+holds the prior processor review even after the new processing source is
+reviewed; the operator must freshly review the processor against that edition.
+Older processor reviews without this binding remain historical and require a
+fresh review. The form's review hash includes the source binding, so a source
+change between opening and submitting the form is rejected. The displayed
+working content hash continues to describe the working document alone.
+
 Native HTML forms and their enhanced equivalents share the guarded commands.
 Each signed form operation is bound to the command and record. Stale revisions,
 changed hashes and key reuse fail without overwriting a reviewed edition. A

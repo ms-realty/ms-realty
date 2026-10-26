@@ -163,7 +163,7 @@ export default async function GovernanceRecordPage({
                 formCopy={formCopy}
                 initialState={initialFormState(
                   `privacy_governance.review.${recordId}`,
-                  { expectedHash: model.contentHash, note: "", reviewed: "" },
+                  { expectedHash: model.reviewHash, note: "", reviewed: "" },
                   model.version,
                 )}
                 action={reviewGovernanceAction.bind(null, locale, recordId)}
