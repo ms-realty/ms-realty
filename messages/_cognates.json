@@ -61,6 +61,8 @@
     "calendar.date": "Дата",
     "calendar.itinerary": "Маршрут",
     "calendar.deal": "Сделка",
+    "calendar.states.requested": "Заявка",
+    "calendar.requestsShort": "Заявки",
     "caseDirectory.dispositions.active": "Активна",
     "caseDirectory.dueAt": "Срок",
     "workspace.workGroup": "Работа",
