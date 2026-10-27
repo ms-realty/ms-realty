@@ -8,6 +8,7 @@ import { isStaffLocale } from "@/i18n/config";
 import { privateRobots } from "@/i18n/seo";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
+import { LiveAnnouncer } from "@/ui/live-announcer";
 import { LocaleProvider } from "@/ui/locale-provider";
 import { appViewport } from "@/ui/viewport";
 
@@ -32,6 +33,7 @@ export default async function StaffLayout({ children, params }: LayoutProps<"/st
     <html lang={locale} dir="ltr">
       <body>
         <CspNonceMeta />
+        <LiveAnnouncer />
         <DisclosureBehavior />
         <LocaleProvider locale={locale}>{children}</LocaleProvider>
       </body>

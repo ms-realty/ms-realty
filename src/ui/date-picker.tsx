@@ -38,7 +38,7 @@ type DateFieldExtras = {
 
 const groupClass = cx(
   "flex min-h-input w-full items-center rounded-control border border-border bg-canvas ps-3 text-body text-text",
-  "data-hovered:border-text data-focus-within:outline-2 data-focus-within:outline-offset-2 data-focus-within:outline-focus",
+  "data-hovered:border-text data-focus-within:outline-3 data-focus-within:outline-offset-2 data-focus-within:outline-focus",
   "group-data-invalid:border-error",
   "group-data-readonly:border-dashed group-data-readonly:bg-subtle",
   "group-data-disabled:border-disabled-text group-data-disabled:bg-disabled group-data-disabled:text-disabled-text",
@@ -150,7 +150,7 @@ export function DatePicker<T extends DateValue>({
       <DateDescription description={description} timeZoneLabel={timeZoneLabel} />
       <Group className={groupClass}>
         <Segments />
-        <Button className="flex size-control shrink-0 cursor-pointer items-center justify-center rounded-e-control border-s border-divider text-action outline-offset-[-2px] data-hovered:bg-selected data-pressed:bg-selected">
+        <Button className="flex size-control shrink-0 cursor-pointer items-center justify-center rounded-e-control border-s border-divider text-action outline-offset-2 data-hovered:bg-selected data-pressed:bg-selected">
           <CalendarIcon />
         </Button>
       </Group>
@@ -174,7 +174,7 @@ export function DatePicker<T extends DateValue>({
                   className={cx(
                     "flex size-control cursor-pointer items-center justify-center rounded-control tabular-nums outline-none",
                     "data-hovered:bg-selected data-outside-month:hidden",
-                    "data-focus-visible:outline-2 data-focus-visible:outline-offset-1 data-focus-visible:outline-focus",
+                    "data-focus-visible:outline-3 data-focus-visible:outline-offset-2 data-focus-visible:outline-focus",
                     "data-selected:bg-action data-selected:font-semibold data-selected:text-text-inverse",
                     "data-disabled:cursor-not-allowed data-disabled:text-disabled-text data-unavailable:text-disabled-text data-unavailable:line-through",
                     "forced-colors:data-selected:bg-[Highlight] forced-colors:data-selected:text-[HighlightText]",

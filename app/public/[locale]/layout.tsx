@@ -13,6 +13,7 @@ import { analyticsPreference, trackingConfig } from "@/i18n/tracking";
 import { publicSeoOrigin } from "@/server/seo/public-metadata";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
+import { LiveAnnouncer } from "@/ui/live-announcer";
 import { LocaleProvider } from "@/ui/locale-provider";
 import { StructuredData } from "@/ui/structured-data";
 import { appViewport } from "@/ui/viewport";
@@ -44,6 +45,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/p
     <html lang={locale} dir={localeDirection(locale)}>
       <body>
         <CspNonceMeta />
+        <LiveAnnouncer />
         <StructuredData value={organizationStructuredData(publicSeoOrigin())} />
         <DisclosureBehavior />
         <LocaleProvider locale={locale}>

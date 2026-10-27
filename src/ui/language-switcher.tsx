@@ -77,7 +77,7 @@ export function LanguageSwitcher({
                 hrefLang={option.locale}
                 aria-current={isCurrent ? "true" : undefined}
                 className={cx(
-                  "flex min-h-control items-center justify-between gap-4 px-4 text-compact text-text no-underline outline-offset-[-3px] hover:bg-subtle",
+                  "flex min-h-control items-center justify-between gap-4 px-4 text-compact text-text no-underline outline-offset-2 hover:bg-subtle",
                   isCurrent && "font-semibold",
                 )}
               >

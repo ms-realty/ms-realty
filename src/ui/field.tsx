@@ -78,6 +78,6 @@ export function ListPopover({ className, ...props }: RACPopoverProps & { classNa
 
 export const optionClass = cx(
   "flex min-h-control cursor-default items-center gap-2 px-3 py-2 text-compact text-text outline-none",
-  "data-focused:bg-selected data-selected:font-semibold data-disabled:text-disabled-text",
+  "data-focused:bg-selected data-focus-visible:outline-3 data-focus-visible:outline-offset-2 data-focus-visible:outline-focus data-selected:font-semibold data-disabled:text-disabled-text",
   "forced-colors:data-focused:bg-[Highlight] forced-colors:data-focused:text-[HighlightText]",
 );

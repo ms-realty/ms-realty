@@ -73,7 +73,7 @@ export function PropertyCard({
         "transition-[box-shadow,border-color] duration-(--duration-base) ease-(--ease-out)",
         "has-[a:hover]:border-border",
         "data-compared:border-action data-compared:ring-1 data-compared:ring-action",
-        "has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-focus",
+        "has-[a:focus-visible]:outline-3 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-focus",
       )}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-subtle [&_img]:size-full [&_img]:object-cover [&_img]:transition-transform [&_img]:duration-(--duration-base) [&_img]:ease-(--ease-out) group-has-[a:hover]:[&_img]:scale-[1.02]">

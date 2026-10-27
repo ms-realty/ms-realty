@@ -33,7 +33,7 @@ export function Checkbox({ children, className, ...props }: CheckboxProps) {
             className={cx(
               "flex size-5 shrink-0 items-center justify-center rounded-control border border-border bg-canvas text-text-inverse",
               "group-data-hovered/checkbox:border-text",
-              "group-data-focus-visible/checkbox:outline-2 group-data-focus-visible/checkbox:outline-offset-2 group-data-focus-visible/checkbox:outline-focus",
+              "group-data-focus-visible/checkbox:outline-3 group-data-focus-visible/checkbox:outline-offset-2 group-data-focus-visible/checkbox:outline-focus",
               "group-data-selected/checkbox:border-action group-data-selected/checkbox:bg-action",
               "group-data-indeterminate/checkbox:border-action group-data-indeterminate/checkbox:bg-action",
               "group-data-invalid/checkbox:border-error",

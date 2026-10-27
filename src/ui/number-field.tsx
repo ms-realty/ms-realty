@@ -24,7 +24,7 @@ export type NumberFieldProps = Omit<RACNumberFieldProps, "children" | "className
 };
 
 const stepperClass = cx(
-  "flex min-h-control w-control shrink-0 cursor-pointer items-center justify-center text-action outline-offset-[-2px]",
+  "flex min-h-control w-control shrink-0 cursor-pointer items-center justify-center text-action outline-offset-2",
   "data-hovered:bg-selected data-pressed:bg-selected data-disabled:cursor-not-allowed data-disabled:text-disabled-text",
 );
 
@@ -47,7 +47,7 @@ export function NumberField({
       <Group
         className={cx(
           "flex min-h-input w-full max-w-xs items-stretch overflow-hidden rounded-control border border-border bg-canvas",
-          "data-hovered:border-text data-focus-within:outline-2 data-focus-within:outline-offset-2 data-focus-within:outline-focus",
+          "data-hovered:border-text data-focus-within:outline-3 data-focus-within:outline-offset-2 data-focus-within:outline-focus",
           "group-data-invalid:border-error",
           "group-data-readonly:border-dashed group-data-readonly:bg-subtle",
           "group-data-disabled:border-disabled-text group-data-disabled:bg-disabled",
