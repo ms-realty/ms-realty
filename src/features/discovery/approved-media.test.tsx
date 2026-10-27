@@ -166,6 +166,7 @@ it("P06/UI17 opens the selected item, bounds zoom, keeps a failed item navigable
     "aria-disabled",
     "true",
   );
+  dialog.focus();
   await user.keyboard("{ArrowLeft}");
   expect(dialog).toHaveTextContent("2 of 3");
   await user.keyboard("{Escape}");
@@ -189,6 +190,7 @@ it("P06 Back closes the viewer without leaving the parent; RTL arrows retain log
     screen.getByRole("link", { name: new RegExp(copy.openMedia.replace("{position}", "1")) }),
   );
   const dialog = screen.getByRole("dialog", { name: copy.mediaViewer });
+  dialog.focus();
   await user.keyboard("{ArrowLeft}");
   expect(dialog).toHaveTextContent(
     copy.mediaPosition.replace("{position}", "2").replace("{count}", "2"),

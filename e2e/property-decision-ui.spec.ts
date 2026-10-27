@@ -299,6 +299,10 @@ for (const [width, height, locale] of [
       copy.mediaPosition.replace("{position}", "2").replace("{count}", "3"),
     );
     await viewer.getByRole("button", { name: `${copy.fitMedia} 150%`, exact: true }).click();
+    await expect(
+      viewer.getByRole("button", { name: `${copy.fitMedia} 100%`, exact: true }),
+    ).toBeVisible();
+    expect(await viewer.evaluate((node) => node.contains(document.activeElement))).toBe(true);
     await page.keyboard.press(locale === "he" ? "ArrowLeft" : "ArrowRight");
     await expect(viewer).toContainText(
       copy.mediaPosition.replace("{position}", "3").replace("{count}", "3"),
@@ -331,6 +335,7 @@ for (const width of [320, 390, 1440]) {
   }, info) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(propertyHref());
+    await page.screenshot({ path: info.outputPath(`property-viewport-${width}.png`) });
     const dock = page.getByRole("navigation", { name: "Property actions", exact: true });
     const panel = page.getByRole("complementary");
     if (width === 1440) {

@@ -171,6 +171,7 @@ for (const [locale, width] of [
     const dialog = page.getByRole("dialog", { name: copy.filters, exact: true });
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText(copy.filterDraftHint);
+    await page.screenshot({ path: info.outputPath(`filters-initial-${locale}-${width}.png`) });
     const modal = await dialog.boundingBox();
     expect(modal?.height).toBe(844);
     const minimum = dialog.getByLabel(locale === "en" ? "Minimum bedrooms" : copy.minBeds, {

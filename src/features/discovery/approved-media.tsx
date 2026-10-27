@@ -244,24 +244,24 @@ export function ApprovedGallery({
         className={cx(overlayClass, "flex items-center justify-center sm:p-4")}
       >
         <Modal className="flex h-dvh w-full max-w-[90rem] flex-col overflow-hidden bg-surface shadow-overlay sm:h-[min(56rem,calc(100dvh-2rem))] sm:rounded-panel forced-colors:border">
-          <Dialog className="flex h-full min-h-0 flex-col outline-none">
-            <div
-              className="flex h-full min-h-0 flex-col"
-              role="presentation"
-              onKeyDownCapture={(event) => {
-                if (zoom > 1 && event.target === viewport.current) return;
-                const previous = locale === "he" ? "ArrowRight" : "ArrowLeft";
-                const next = locale === "he" ? "ArrowLeft" : "ArrowRight";
-                if (event.key === previous && index > 0) {
-                  event.preventDefault();
-                  select(index - 1);
-                }
-                if (event.key === next && index < media.length - 1) {
-                  event.preventDefault();
-                  select(index + 1);
-                }
-              }}
-            >
+          <div
+            className="flex h-full min-h-0 flex-col"
+            role="presentation"
+            onKeyDownCapture={(event) => {
+              if (zoom > 1 && event.target === viewport.current) return;
+              const previous = locale === "he" ? "ArrowRight" : "ArrowLeft";
+              const next = locale === "he" ? "ArrowLeft" : "ArrowRight";
+              if (event.key === previous && index > 0) {
+                event.preventDefault();
+                select(index - 1);
+              }
+              if (event.key === next && index < media.length - 1) {
+                event.preventDefault();
+                select(index + 1);
+              }
+            }}
+          >
+            <Dialog className="flex h-full min-h-0 flex-col outline-none">
               <div className="flex shrink-0 items-center justify-between gap-3 border-b border-divider px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2">
                 <Heading slot="title" className="text-subheading font-semibold">
                   {copy.mediaViewer}
@@ -363,8 +363,8 @@ export function ApprovedGallery({
                   <ChevronEndIcon directional />
                 </button>
               </div>
-            </div>
-          </Dialog>
+            </Dialog>
+          </div>
         </Modal>
       </ModalOverlay>
     </div>
