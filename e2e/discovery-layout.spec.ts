@@ -48,6 +48,15 @@ for (const javaScriptEnabled of [true, false]) {
           expect(
             await page.evaluate(() => document.documentElement.scrollWidth),
           ).toBeLessThanOrEqual(width);
+          for (const link of await page.locator("footer a[href]").all()) {
+            const target = await link.boundingBox();
+            expect(
+              target,
+              "Public footer destinations must have a rendered touch target",
+            ).not.toBeNull();
+            expect(target?.height).toBeGreaterThanOrEqual(44);
+            expect(target?.width).toBeGreaterThanOrEqual(44);
+          }
           if (locale === "en") {
             await expect(
               page.getByRole("link", { name: data.published.title, exact: true }),
@@ -210,7 +219,7 @@ for (const [locale, width] of [
     if (await image.count()) {
       const frame = await image.locator("..").boundingBox();
       expect(frame).not.toBeNull();
-      expect((frame?.width ?? 0) / (frame?.height ?? 1)).toBeCloseTo(1.5, 1);
+      expect((frame?.width ?? 0) / (frame?.height ?? 1)).toBeCloseTo(4 / 3, 1);
     }
   });
 }

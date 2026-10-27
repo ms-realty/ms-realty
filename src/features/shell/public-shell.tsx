@@ -164,9 +164,9 @@ export async function PublicShell({
             <p className="text-compact text-text-muted">{footer("agencyKind")}</p>
             <a
               href={`tel:${brandPhone.e164}`}
-              className="inline-flex w-fit items-center gap-2 text-compact font-semibold text-link no-underline hover:underline"
+              className="inline-flex min-h-control min-w-control w-fit max-w-full items-center gap-2 py-2 text-compact font-semibold text-link no-underline hover:underline"
             >
-              <icons.PhoneIcon className="size-[1.125rem]" />
+              <icons.PhoneIcon className="size-[1.125rem] shrink-0" />
               {footer("call", { phone: isolateText(brandPhone.display, "ltr") })}
             </a>
           </div>
@@ -177,7 +177,7 @@ export async function PublicShell({
                   <li key={item.label}>
                     <PublicNavLink
                       href={item.href}
-                      className="text-compact text-text no-underline hover:underline"
+                      className="inline-flex min-h-control min-w-control max-w-full items-center py-2 text-compact text-text no-underline hover:underline"
                     >
                       {footer(item.label)}
                     </PublicNavLink>
