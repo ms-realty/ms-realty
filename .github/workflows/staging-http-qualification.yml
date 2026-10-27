@@ -37,6 +37,7 @@ jobs:
       run_id: ${{ steps.guard.outputs.run_id }}
       attempt: ${{ steps.guard.outputs.attempt }}
       mode: ${{ steps.guard.outputs.mode }}
+      reviewed_main_sha: ${{ steps.guard.outputs.reviewed_main_sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -64,7 +65,7 @@ jobs:
           test "$GITHUB_REF" = refs/heads/codex/msr-staging
           test "$GITHUB_SHA" = "$EXPECTED_SOURCE"
           gh api "repos/ms-realty/ms-realty/actions/runs/${DEPLOYMENT_RUN_ID}" > "$RUNNER_TEMP/deployment-run.json"
-          # The guard also requires an exact clean checkout integrated in origin/main.
+          # Require ancestry or a whole-tree match against one pinned reviewed main commit.
           node scripts/staging-http-qualification.mjs guard "$RUNNER_TEMP/deployment-run.json"
 
   qualify:
@@ -72,11 +73,15 @@ jobs:
     environment: staging
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      REVIEWED_MAIN_SHA: ${{ needs.prerequisites.outputs.reviewed_main_sha }}
+      STAGING_SOURCE_QUALIFIED_SHA: ${{ vars.STAGING_SOURCE_QUALIFIED_SHA }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prerequisites.outputs.source }}
           path: verifier
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

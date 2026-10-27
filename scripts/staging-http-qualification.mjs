@@ -64,12 +64,90 @@ export function validateDispatch(env, run) {
   };
 }
 
-export function validateSourceCheckout(sourceDir, expectedSource) {
+export function validateExactCheckout(sourceDir, expectedSource) {
   assert(hex(40).test(expectedSource ?? ""));
   const git = (...args) => execFileSync("git", args, { cwd: sourceDir, encoding: "utf8" }).trim();
   assert.equal(git("rev-parse", "HEAD"), expectedSource);
   assert.equal(git("status", "--porcelain", "--untracked-files=no"), "");
-  git("merge-base", "--is-ancestor", expectedSource, "refs/remotes/origin/main");
+  const sourceTree = git("rev-parse", "--verify", `${expectedSource}^{tree}`);
+  assert(hex(40).test(sourceTree));
+  return { sourceCommit: expectedSource, sourceTree };
+}
+
+const sourceBindingFields = [
+  "schemaVersion",
+  "sourceCommit",
+  "sourceTree",
+  "reviewedMainCommit",
+  "reviewedMainTree",
+  "proofMode",
+  "sourceInMainHistory",
+  "exactTreeMatch",
+];
+
+export function validateSourceCheckout(sourceDir, expectedSource, expectedMain) {
+  const { sourceCommit, sourceTree } = validateExactCheckout(sourceDir, expectedSource);
+  const git = (...args) => execFileSync("git", args, { cwd: sourceDir, encoding: "utf8" }).trim();
+  // Resolve the mutable ref once, then use only this immutable commit for the proof.
+  const reviewedMainCommit = git("rev-parse", "--verify", "refs/remotes/origin/main^{commit}");
+  assert(hex(40).test(reviewedMainCommit));
+  if (expectedMain !== undefined) {
+    assert(hex(40).test(expectedMain));
+    assert.equal(
+      reviewedMainCommit,
+      expectedMain,
+      "Reviewed main changed between qualification jobs",
+    );
+  }
+  const reviewedMainTree = git("rev-parse", "--verify", `${reviewedMainCommit}^{tree}`);
+  assert(hex(40).test(reviewedMainTree));
+  let sourceInMainHistory = false;
+  try {
+    git("merge-base", "--is-ancestor", sourceCommit, reviewedMainCommit);
+    sourceInMainHistory = true;
+  } catch (error) {
+    // Exit 1 means non-ancestor; missing objects, broken refs and other Git failures are fatal.
+    if (error.status !== 1) throw error;
+  }
+  const exactTreeMatch = sourceTree === reviewedMainTree;
+  assert(
+    sourceInMainHistory || exactTreeMatch,
+    "Qualified source is neither an ancestor nor an exact whole-tree match of reviewed main",
+  );
+  const proof = {
+    schemaVersion: 1,
+    sourceCommit,
+    sourceTree,
+    reviewedMainCommit,
+    reviewedMainTree,
+    proofMode: sourceInMainHistory ? "ancestry" : "exact_tree_squash",
+    sourceInMainHistory,
+    exactTreeMatch,
+  };
+  return Object.freeze({ ...proof, sha256: digest(JSON.stringify(proof)) });
+}
+
+export function bindSourceReport(report, binding, expected) {
+  assert(binding && Object.getPrototypeOf(binding) === Object.prototype);
+  assert.deepEqual(Object.keys(binding).sort(), [...sourceBindingFields, "sha256"].sort());
+  const core = Object.fromEntries(sourceBindingFields.map((field) => [field, binding[field]]));
+  assert.equal(core.schemaVersion, 1);
+  for (const field of ["sourceCommit", "sourceTree", "reviewedMainCommit", "reviewedMainTree"])
+    assert(hex(40).test(core[field]));
+  assert.equal(core.sourceCommit, expected.source);
+  assert.equal(report.source, expected.source);
+  assert.equal(core.reviewedMainCommit, expected.reviewedMain);
+  assert.equal(typeof core.sourceInMainHistory, "boolean");
+  assert.equal(core.exactTreeMatch, core.sourceTree === core.reviewedMainTree);
+  assert.equal(core.proofMode, core.sourceInMainHistory ? "ancestry" : "exact_tree_squash");
+  assert(core.sourceInMainHistory || core.exactTreeMatch);
+  assert.equal(binding.sha256, digest(JSON.stringify(core)));
+  return {
+    ...report,
+    sourceBinding: { ...core, sha256: binding.sha256 },
+    sourceBindingVerified: false,
+    fullHttpQualificationPassed: false,
+  };
 }
 
 export function validateCandidate(candidate, expectedSource) {
@@ -212,6 +290,7 @@ export function sourcePageChecks(document, page) {
 
 export function qualificationCoverage(candidate) {
   return {
+    sourceBindingVerified: false,
     fullHttpQualificationPassed: false,
     fullLegacyParityQualified: false,
     seoQualified: false,
@@ -835,13 +914,13 @@ async function qualify(context) {
 async function main() {
   if (process.argv[2] === "guard") {
     const result = validateDispatch(process.env, await json(process.argv[3]));
-    validateSourceCheckout(process.cwd(), result.source);
+    const sourceBinding = validateSourceCheckout(process.cwd(), result.source);
     if (process.env.GITHUB_OUTPUT)
       await appendFile(
         process.env.GITHUB_OUTPUT,
-        `source=${result.source}\nrun_id=${result.runId}\nattempt=${result.attempt}\nmode=${result.mode}\n`,
+        `source=${result.source}\nrun_id=${result.runId}\nattempt=${result.attempt}\nmode=${result.mode}\nreviewed_main_sha=${sourceBinding.reviewedMainCommit}\n`,
       );
-    console.log(JSON.stringify(result));
+    console.log(JSON.stringify({ ...result, sourceBinding }));
     return;
   }
   assert.equal(process.argv[2], "run");
@@ -863,16 +942,32 @@ async function main() {
     process.env.STAGING_CONTROL_SECRET,
     process.env.STAGING_CLOUDFLARE_READ_TOKEN,
   ];
+  let phase = "candidate_and_checkout";
   try {
     const candidate = validateCandidate(
       await json(resolve(artifactDir, "staging-candidate.generated.json")),
       expectedSource,
     );
     Object.assign(report, qualificationCoverage(candidate));
-    assert.equal(
-      execFileSync("git", ["rev-parse", "HEAD"], { cwd: sourceDir, encoding: "utf8" }).trim(),
+    assert.equal(process.env.GITHUB_REPOSITORY, "ms-realty/ms-realty");
+    assert.equal(process.env.GITHUB_EVENT_NAME, "workflow_dispatch");
+    assert.equal(process.env.GITHUB_REF, "refs/heads/codex/msr-staging");
+    assert.equal(process.env.GITHUB_SHA, expectedSource);
+    assert.equal(process.env.GITHUB_WORKFLOW_SHA, expectedSource);
+    assert.equal(process.env.STAGING_SOURCE_QUALIFIED_SHA, expectedSource);
+    assert(hex(40).test(process.env.REVIEWED_MAIN_SHA ?? ""));
+    phase = "source_binding_before";
+    const verifierDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+    const sourceBinding = validateSourceCheckout(
+      verifierDir,
       expectedSource,
+      process.env.REVIEWED_MAIN_SHA,
     );
+    const sourceCheckout = validateExactCheckout(sourceDir, expectedSource);
+    assert.equal(sourceCheckout.sourceTree, sourceBinding.sourceTree);
+    const bindingExpected = { source: expectedSource, reviewedMain: process.env.REVIEWED_MAIN_SHA };
+    report = bindSourceReport(report, sourceBinding, bindingExpected);
+    await save(resolve(output, "source-binding-before.json"), sourceBinding);
     const artifactHashes = {};
     for (const name of [
       "candidate",
@@ -885,18 +980,24 @@ async function main() {
       const file = `staging-${name}.generated.json`;
       artifactHashes[file] = digest(await readFile(resolve(artifactDir, file)));
     }
+    phase = "http_observations";
+    let byteProofSha256;
     if (mode === "full") {
       const proofPath = resolve(
         dirname(fileURLToPath(import.meta.url)),
         "../data/legacy/migration/source-media-byte-proof.json",
       );
-      const corpus = await loadCorpus(sourceDir, candidate, await json(proofPath));
+      const proofBytes = await readFile(proofPath);
+      const corpus = await loadCorpus(sourceDir, candidate, JSON.parse(proofBytes.toString()));
+      byteProofSha256 = digest(proofBytes);
       report = await qualify({ candidate, corpus, sourceDir, output, env: process.env });
-      report.byteProofSha256 = digest(await readFile(proofPath));
-      report.fullHttpQualificationPassed = report.passed;
     } else {
       report = await observeTransport(candidate, process.env.STAGING_ACCESS_SERVICE_CLIENT_SECRET);
     }
+    // Both observation branches return a new object. Reapply the checked provenance
+    // before any further work so partial/failing qualification also retains it.
+    report = bindSourceReport(report, sourceBinding, bindingExpected);
+    if (byteProofSha256) report.byteProofSha256 = byteProofSha256;
     report.mode = mode;
     report.sourcePackageLockSha256 = digest(await sourceFile(sourceDir, "package-lock.json"));
     report.nodeVersion = process.versions.node;
@@ -904,14 +1005,32 @@ async function main() {
     report.deploymentArtifactFileSha256 = artifactHashes;
     report.humanSourceEquivalenceApproved = false;
     report.publicationApproved = false;
+    phase = "source_binding_after";
+    const afterBinding = validateSourceCheckout(
+      verifierDir,
+      expectedSource,
+      sourceBinding.reviewedMainCommit,
+    );
+    assert.deepEqual(afterBinding, sourceBinding);
+    assert.deepEqual(validateExactCheckout(sourceDir, expectedSource), sourceCheckout);
+    await save(resolve(output, "source-binding-after.json"), afterBinding);
+    report.sourceBindingVerified = true;
+    report.fullHttpQualificationPassed = mode === "full" && report.passed;
   } catch (error) {
     report.passed = false;
-    report.failure = errorEvidence(error, secrets);
+    report.fullHttpQualificationPassed = false;
+    report.sourceBindingVerified = false;
+    const failure = errorEvidence(error, secrets);
+    if (report.failure) report.additionalFailures = [{ phase, failure }];
+    else report.failure = failure;
+    report.failedPhase = phase;
   }
   await save(resolve(output, "qualification.json"), report);
   console.log(
     JSON.stringify({
       source: report.source,
+      sourceBinding: report.sourceBinding,
+      sourceBindingVerified: report.sourceBindingVerified,
       passed: report.passed,
       initialAccessPassed: report.initialHealth?.every((r) => r.passed),
       routes: report.routes,
