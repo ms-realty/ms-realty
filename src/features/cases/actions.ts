@@ -42,6 +42,7 @@ import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { hostHandoverCopy } from "../appointments/host-copy";
+import { clientWorkflowCopy } from "./client-workflow-copy";
 import {
   type WorkflowCommand,
   workflowFields,
@@ -293,7 +294,7 @@ export async function workflowAction(
             await postCaseMessage(db, s, {
               ...base,
               audience: "case_participants",
-              body: `Искане за корекция · ${preview.reference} · ${preview.hash}\n${values.body ?? ""}`,
+              body: `${clientWorkflowCopy(locale).requestCorrection} · ${preview.reference} · ${preview.hash}\n${values.body ?? ""}`,
               reviewed: false,
             })
           ).outcome;

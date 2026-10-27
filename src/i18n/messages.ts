@@ -5,8 +5,10 @@
 //   messages/staff/<locale>/<namespace>.json  staff host only, bg/en/ru
 
 import type a11y from "../../messages/bg/a11y.json";
+import type accountSaves from "../../messages/bg/account-saves.json";
 import type caseReview from "../../messages/bg/caseReview.json";
 import type clientAccess from "../../messages/bg/client-access.json";
+import type clientWorkflow from "../../messages/bg/client-workflow.json";
 import type common from "../../messages/bg/common.json";
 import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
@@ -44,6 +46,8 @@ import { isStaffLocale, type PublicLocale } from "./config";
 export const publicNamespaces = [
   "caseReview",
   "client-access",
+  "account-saves",
+  "client-workflow",
   "a11y",
   "common",
   "discovery",
@@ -85,6 +89,8 @@ export const staffNamespaces = [
 export interface PublicMessages {
   caseReview: typeof caseReview;
   "client-access": typeof clientAccess;
+  "account-saves": typeof accountSaves;
+  "client-workflow": typeof clientWorkflow;
   a11y: typeof a11y;
   common: typeof common;
   discovery: typeof discovery;

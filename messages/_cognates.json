@@ -106,7 +106,9 @@
     "discovery.contentLabels.contact": "Contact",
     "workflow.journeyTabs.appointments": "Agenda",
     "workflow.journeyTabs.messages": "Chat",
-    "workflow.journeyTabs.account": "Account"
+    "workflow.journeyTabs.account": "Account",
+    "client-workflow.overview.account": "Account",
+    "client-workflow.overview.privacy": "Privacy"
   },
   "el": {
     "discovery.email": "Email"
