@@ -270,6 +270,57 @@ describe("AT45 category/source-bound controlled completion", () => {
     expect(JSON.stringify(denied.exports)).not.toContain(f.record.id);
   });
 
+  it("rechecks source authority for every category command after capturing its proposed input", async () => {
+    const f = await fixture();
+    try {
+      // Disposable-database fault injection: revoke ordinary source access in the first
+      // category command's commit, after its own live checks and before the next command.
+      await t.sql`
+        create function synthetic_revoke_privacy_source_grant() returns trigger as $$
+        begin
+          if new.action = 'privacy.export.category_reviewed' then
+            update grants set revoked_at = clock_timestamp()
+              where principal_id::text = new.actor_id and role = 'assigned_broker';
+          end if;
+          return new;
+        end;
+        $$ language plpgsql
+      `;
+      await t.sql`
+        create trigger synthetic_revoke_privacy_source_grant
+          after insert on audit_events for each row
+          execute function synthetic_revoke_privacy_source_grant()
+      `;
+      await expect(resolveCoverage(f)).rejects.toMatchObject({ code: "version_conflict" });
+      const reviews = await t.db
+        .select({ status: operations.status })
+        .from(operations)
+        .where(
+          and(
+            eq(operations.actorId, f.staff.id),
+            eq(operations.operationType, "privacy.export.disposition"),
+          ),
+        );
+      expect(reviews.map((row) => row.status).sort()).toEqual(["failed", "succeeded"]);
+      const audited = await t.db
+        .select({ id: auditEvents.id })
+        .from(auditEvents)
+        .where(
+          and(
+            eq(auditEvents.recordId, f.requestId),
+            eq(auditEvents.action, "privacy.export.category_reviewed"),
+          ),
+        );
+      expect(audited).toHaveLength(1);
+      const work = await staffPrivacyExports(t.db, f.staff.session, f.requestId, storage);
+      expect(work.exports[0]?.review).toBeNull();
+      expect(work.exports[0]?.reviewStale).toBe(true);
+    } finally {
+      await t.sql`drop trigger if exists synthetic_revoke_privacy_source_grant on audit_events`;
+      await t.sql`drop function if exists synthetic_revoke_privacy_source_grant()`;
+    }
+  });
+
   it("denies stale issue/completion and every later full/range read after source or grant changes; generic status cannot bypass the command", async () => {
     const f = await fixture();
     await resolveCoverage(f);

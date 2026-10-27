@@ -2,7 +2,11 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { documents, documentVersions, grants, privacyExports } from "@/db/schema";
-import { type PrivacyExportCategory, privacyExportCategories } from "@/domain/privacy-export";
+import {
+  type PrivacyExportCategory,
+  type PrivacyExportInventory,
+  privacyExportCategories,
+} from "@/domain/privacy-export";
 import type { Executor } from "../db";
 import { documentRequestFixture } from "../documents/request-testing";
 import { digestOf, type FileStorage } from "../files/storage";
@@ -126,8 +130,7 @@ export async function exportCoverageRow(db: Executor, exportId: string) {
   return row;
 }
 type Fixture = Awaited<ReturnType<typeof privacyExportCoverageFixture>>;
-export async function coverageEnvelope(f: Fixture) {
-  const row = await exportCoverageRow(f.db, f.exportId);
+function envelopeFromRow(f: Fixture, row: Awaited<ReturnType<typeof exportCoverageRow>>) {
   return {
     operationId: randomUUID(),
     requestId: f.requestId,
@@ -137,6 +140,9 @@ export async function coverageEnvelope(f: Fixture) {
     digest: row.sha256,
   };
 }
+export async function coverageEnvelope(f: Fixture) {
+  return envelopeFromRow(f, await exportCoverageRow(f.db, f.exportId));
+}
 export async function captureCoverage(f: Fixture) {
   return capturePrivacyExportManifest(f.db, f.staff.session, await coverageEnvelope(f));
 }
@@ -144,7 +150,18 @@ export async function categoryDecision(f: Fixture, category: PrivacyExportCatego
   const work = await staffPrivacyExports(f.db, f.staff.session, f.requestId, f.storage),
     row = work.exports.find((row) => row.id === f.exportId);
   if (!row?.review || !row.reviewSha256) throw new Error("Missing current synthetic review");
-  const bucket = row.review.inventory.categories.find((row) => row.category === category);
+  return {
+    ...(await coverageEnvelope(f)),
+    reviewDigest: row.reviewSha256,
+    ...categoryInput(f, category, row.review.inventory),
+  };
+}
+function categoryInput(
+  f: Fixture,
+  category: PrivacyExportCategory,
+  inventory: PrivacyExportInventory,
+) {
+  const bucket = inventory.categories.find((row) => row.category === category);
   if (!bucket) throw new Error("Missing synthetic category");
   const disposition = bucket.blocked
     ? "unsupported"
@@ -154,8 +171,6 @@ export async function categoryDecision(f: Fixture, category: PrivacyExportCatego
         ? "withheld"
         : "disclosed";
   return {
-    ...(await coverageEnvelope(f)),
-    reviewDigest: row.reviewSha256,
     category,
     disposition,
     sourceKeys: bucket.sources.map((row) => row.key),
@@ -178,8 +193,20 @@ export async function categoryDecision(f: Fixture, category: PrivacyExportCatego
 }
 export async function resolveCoverage(f: Fixture) {
   await captureCoverage(f);
-  for (const category of privacyExportCategories)
-    await reviewPrivacyExportCategory(f.db, f.staff.session, await categoryDecision(f, category));
+  const work = await staffPrivacyExports(f.db, f.staff.session, f.requestId, f.storage),
+    captured = work.exports.find((row) => row.id === f.exportId);
+  if (!captured?.review) throw new Error("Missing current synthetic review");
+  // The captured source keys are proposed human input only. Each real command below
+  // rechecks current source/reviewer authority; its version and review digest are freshly read.
+  for (const category of privacyExportCategories) {
+    const row = await exportCoverageRow(f.db, f.exportId);
+    if (!row.reviewSha256) throw new Error("Missing current synthetic review digest");
+    await reviewPrivacyExportCategory(f.db, f.staff.session, {
+      ...envelopeFromRow(f, row),
+      reviewDigest: row.reviewSha256,
+      ...categoryInput(f, category, captured.review.inventory),
+    });
+  }
 }
 export async function issueCoverage(f: Fixture) {
   return issuePrivacyExport(
