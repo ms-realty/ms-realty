@@ -1,5 +1,6 @@
 // B11 / W13 / F27 F28 / P23 C14 O29 O30: synthetic native consultation continuity.
 import { execFileSync } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
@@ -34,6 +35,9 @@ for (const javaScriptEnabled of [true, false])
       context,
     }, testInfo) => {
       const f = seed<{ token: string; slug: string }>();
+      // Each journey has its own visitor IP; all browser profiles keep the real limiter.
+      const visitorIp = `2001:db8:${randomBytes(12).toString("hex").match(/.{4}/g)?.join(":")}`;
+      await context.setExtraHTTPHeaders({ "cf-connecting-ip": visitorIp });
       await page.goto(hostUrl("public", `/bg/services/${f.slug}`));
       const topic = javaScriptEnabled
         ? "Консултация за управление"
@@ -69,7 +73,9 @@ for (const javaScriptEnabled of [true, false])
             .violations,
         ).toEqual([]);
       await send.click();
-      await expect(send).toHaveCount(0);
+      await expect(
+        page.getByRole("heading", { name: "Запитването е получено", exact: true }),
+      ).toBeVisible();
       const received = seed<{ inquiry: { id: string; purpose: string }; record?: { id: string } }>(
         "read",
         f.slug,
