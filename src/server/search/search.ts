@@ -8,7 +8,7 @@
 // explicitly includes them. Availability is read live from the listing, as presented to the
 // visitor (an expired confirmation reads as confirmation required).
 import "server-only";
-import { and, arrayOverlaps, eq, inArray, type SQL, sql } from "drizzle-orm";
+import { and, arrayOverlaps, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { listingSearchDocuments as doc, listings } from "@/db/schema";
@@ -415,6 +415,10 @@ export interface SearchResponse {
   readonly items: readonly SearchResultItem[];
   /** Opaque, bound to `queryId`; null on the last page. */
   readonly nextCursor: string | null;
+  /** Current eligible predecessors, from the same statement as this page. */
+  readonly position: { readonly before: number; readonly shown: number };
+  readonly hasPrevious: boolean;
+  readonly previousCursor: string | null;
   /** `estimated` is a lower bound above the exact-count limit. */
   readonly count: { readonly value: number; readonly type: "exact" | "estimated" };
   /** Each count is what selecting that type alone would return with the other filters. */
@@ -492,6 +496,20 @@ export async function searchListings(
     .from(base)
     .groupBy(base.propertyType)
     .as("search_facets");
+  const previousQuery = db
+    .select({ listingId: base.listingId, k1: base.k1, k2: base.k2 })
+    .from(base)
+    .where(
+      and(
+        selectedTypes,
+        cursor
+          ? sql`(${base.k1}, ${base.k2}, ${base.listingId}) <= (${cursor.key[0]}::numeric, ${cursor.key[1]}::numeric, ${cursor.key[2]}::uuid)`
+          : sql`false`,
+      ),
+    )
+    .orderBy(desc(base.k1), desc(base.k2), desc(base.listingId))
+    .limit(search.pageSize + 1)
+    .as("search_previous");
   type MatchRow = {
     listingId: string;
     k1: string;
@@ -513,6 +531,14 @@ export async function searchListings(
       facets: sql<FacetRow[]>`coalesce((select json_agg(json_build_object(
       'value', ${facetQuery.value}, 'count', ${facetQuery.count}
     )) from ${facetQuery}), '[]'::json)`,
+      previousRows: cursor
+        ? sql<
+            Pick<MatchRow, "listingId" | "k1" | "k2">[]
+          >`coalesce((select json_agg(json_build_object('listingId', ${previousQuery.listingId}, 'k1', ${previousQuery.k1}::text, 'k2', ${previousQuery.k2}::text) order by ${previousQuery.k1} desc, ${previousQuery.k2} desc, ${previousQuery.listingId} desc) from ${previousQuery}), '[]'::json)`
+        : sql<Pick<MatchRow, "listingId" | "k1" | "k2">[]>`'[]'::json`,
+      before: cursor
+        ? sql<number>`(select count(*)::int from ${base} where ${selectedTypes ?? sql`true`} and (${base.k1}, ${base.k2}, ${base.listingId}) <= (${cursor.key[0]}::numeric, ${cursor.key[1]}::numeric, ${cursor.key[2]}::uuid))`
+        : sql<number>`0`,
       latestAt: cursor
         ? sql<string | null>`(select max(${base.activatedAt})::text from ${base}
           where ${selectedTypes ?? sql`true`})`
@@ -572,11 +598,23 @@ export async function searchListings(
       : null;
 
   const { cursor: _cursor, ...applied } = search;
+  const previousBoundary = projection.previousRows.at(search.pageSize);
   return {
     queryId,
     ...applied,
     items,
     nextCursor,
+    hasPrevious: projection.before > 0,
+    previousCursor:
+      previousBoundary && cursor
+        ? encodeCursor({
+            query: queryId,
+            key: [previousBoundary.k1, previousBoundary.k2, previousBoundary.listingId],
+            total: cursor.total,
+            asOf: cursor.asOf,
+          })
+        : null,
+    position: { before: projection.before, shown: items.length },
     count: {
       value: Math.min(total, exactCountLimit),
       type: total > exactCountLimit ? "estimated" : "exact",

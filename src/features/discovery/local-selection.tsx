@@ -84,8 +84,9 @@ export function LocalActions({ reference, copy }: { reference: string; copy: Dis
     const refs = selectedReferences(read(kind), kind);
     const exists = refs.includes(reference);
     if (!exists && refs.length >= (kind === "compare" ? 3 : 50)) {
-      setNotice(copy.compareLimit);
-      announce(copy.compareLimit);
+      const limit = kind === "saved" ? copy.saveLimit : copy.compareLimit;
+      setNotice(limit);
+      announce(limit);
       return;
     }
     const durable = writeSelection(

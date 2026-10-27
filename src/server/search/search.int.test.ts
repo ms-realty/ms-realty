@@ -282,6 +282,31 @@ describe("pagination, sorting and availability", () => {
     expect(seen).toEqual([refs[1], refs[4], refs[3], refs[0], refs[2]]);
   });
 
+  it("F02/UI14 reconstructs previous pages and current position from the same eligible sorted set", async () => {
+    const first = await searchListings(t.db, query(), { now: new Date() });
+    expect(first.position).toEqual({ before: 0, shown: first.items.length });
+    expect(first.hasPrevious).toBe(false);
+    expect(first.nextCursor).not.toBeNull();
+    const second = await searchListings(t.db, query({ cursor: first.nextCursor }), {
+      now: new Date(),
+    });
+    expect(second.position.before).toBe(2);
+    expect(second.hasPrevious).toBe(true);
+    expect(second.previousCursor).toBeNull();
+    const third = await searchListings(t.db, query({ cursor: second.nextCursor }), {
+      now: new Date(),
+    });
+    expect(third.position.before).toBe(4);
+    expect(third.previousCursor).not.toBeNull();
+    const previous = await searchListings(t.db, query({ cursor: third.previousCursor }), {
+      now: new Date(),
+    });
+    expect(previous.items.map((item) => item.reference)).toEqual(
+      second.items.map((item) => item.reference),
+    );
+    expect(previous.position.before).toBe(2);
+  });
+
   it("refuses a cursor from another query and a page size above 60", async () => {
     const first = await searchListings(t.db, query(), { now: new Date() });
     await expect(

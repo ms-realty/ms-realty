@@ -72,6 +72,7 @@ export function ListingCard({
   copy,
   actions,
   headingLevel = 2,
+  returnTo,
 }: {
   listing: Listing;
   locale: PublicLocale;
@@ -79,6 +80,7 @@ export function ListingCard({
   /** Context-specific links under the local save/compare toggles (P09: contact). */
   actions?: ReactNode;
   headingLevel?: 2 | 3 | 4;
+  returnTo?: string;
 }) {
   const Heading = `h${headingLevel}` as const;
   return (
@@ -101,7 +103,8 @@ export function ListingCard({
           <Heading className="mt-1 break-words text-subheading font-semibold">
             <a
               className="text-text no-underline hover:underline hover:underline-offset-4"
-              href={listingHref(listing, locale)}
+              id={`property-result-${listing.reference}`}
+              href={listingHref(listing, locale, returnTo)}
             >
               {listing.title || listing.reference}
             </a>
@@ -126,11 +129,13 @@ export function ListingGrid({
   locale,
   copy,
   headingLevel = 2,
+  returnTo,
 }: {
   items: readonly Listing[];
   locale: PublicLocale;
   copy: DiscoveryCopy;
   headingLevel?: 2 | 3 | 4;
+  returnTo?: string;
 }) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -141,6 +146,7 @@ export function ListingGrid({
           locale={locale}
           copy={copy}
           headingLevel={headingLevel}
+          returnTo={returnTo}
         />
       ))}
     </div>

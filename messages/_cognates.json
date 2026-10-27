@@ -71,7 +71,9 @@
     "discovery.serviceIntake.location": "Местоположение",
     "operations.serviceIntake.topic": "Тема",
     "operations.serviceIntake.reason": "Причина",
-    "operations.serviceIntake.version": "Версия"
+    "operations.serviceIntake.version": "Версия",
+    "discovery.pagePosition": "Страница {position}",
+    "discovery.contentLabels.contact": "Контакт"
   },
   "de": {
     "discovery.hotel": "Hotel",
@@ -95,7 +97,8 @@
     "nav.contact": "Contact",
     "nav.menu": "Menu",
     "workflow.caseAccess.roles.specialist": "Specialist",
-    "workflow.files.specialist": "Specialist"
+    "workflow.files.specialist": "Specialist",
+    "discovery.contentLabels.contact": "Contact"
   },
   "el": {
     "discovery.email": "Email"

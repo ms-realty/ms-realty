@@ -13,6 +13,8 @@ import {
   readFilters,
   searchInput,
 } from "@/features/discovery/query";
+import { ResultsCompletion } from "@/features/discovery/results-completion";
+import { ResultsSort } from "@/features/discovery/results-controls";
 import { searchAlertCopy, searchAlertCopyLocale } from "@/features/discovery/search-alert-copy";
 import { alertSearch } from "@/features/discovery/search-alert-state";
 import { SearchForm } from "@/features/discovery/search-form";
@@ -53,7 +55,25 @@ export default async function PropertiesPage({
   }
   return (
     <DiscoveryPage>
-      <h1 className="text-title font-semibold">{copy.search}</h1>
+      <h1 id="discovery-title" tabIndex={-1} className="text-title font-semibold">
+        {copy.search}
+      </h1>
+      <ResultsCompletion
+        locale={locale}
+        identity={`${result?.queryId ?? "unavailable"}:${typeof query.cursor === "string" ? query.cursor : ""}`}
+        message={
+          result
+            ? copy.resultsUpdated.replace(
+                "{count}",
+                `${result.count.type === "estimated" ? `${copy.atLeast} ` : ""}${formatNumber(locale, result.count.value)}`,
+              )
+            : invalid
+              ? copy.check
+              : copy.failed
+        }
+        success={Boolean(result)}
+        offlineTitle={copy.offlineSearch}
+      />
       {result ? (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
@@ -61,6 +81,7 @@ export default async function PropertiesPage({
               {copy.results}: {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
               {formatNumber(locale, result.count.value)}
             </h2>
+            <ResultsSort locale={locale} values={values} copy={copy} />
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               {result.items.length ? (
                 <a
@@ -80,7 +101,19 @@ export default async function PropertiesPage({
               </a>
             </div>
           </div>
-          {!result.items.length ? <p>{copy.none}</p> : null}
+          <p className="text-caption text-text-muted">
+            {result.position ? (
+              <>
+                {copy.pagePosition.replace(
+                  "{position}",
+                  String(Math.floor(result.position.before / result.pageSize) + 1),
+                )}{" "}
+                ·{" "}
+              </>
+            ) : null}
+            {copy.shownResults.replace("{count}", formatNumber(locale, result.items.length))}
+          </p>
+          {!result.items.length ? <p>{result.count.value ? copy.emptyPage : copy.none}</p> : null}
           {result.partial || result.stale ? <Notice tone="warning" title={copy.partial} /> : null}
         </div>
       ) : (
@@ -110,10 +143,23 @@ export default async function PropertiesPage({
           />
           {result.items.length ? (
             <section id="property-results" tabIndex={-1} aria-labelledby="results-heading">
-              <ListingGrid items={result.items} locale={locale} copy={copy} headingLevel={3} />
+              <ListingGrid
+                items={result.items}
+                locale={locale}
+                copy={copy}
+                headingLevel={3}
+                returnTo={filterUrl(
+                  locale,
+                  values,
+                  typeof query.cursor === "string" ? query.cursor : undefined,
+                )}
+              />
             </section>
           ) : (
             <div className="space-y-4">
+              <a className="underline" href="#active-search-criteria">
+                {copy.filters}
+              </a>
               <a className="underline" href={`/${locale}/inquire`}>
                 {copy.ask}
               </a>
@@ -126,14 +172,36 @@ export default async function PropertiesPage({
               ) : null}
             </div>
           )}
-          {result.nextCursor ? (
-            <a
-              className={buttonClass("secondary", "self-start")}
-              href={filterUrl(locale, values, result.nextCursor)}
-            >
-              {copy.more}
-            </a>
-          ) : null}
+          <nav
+            aria-label={copy.results}
+            className="flex flex-wrap items-center gap-3"
+            data-print-hide=""
+          >
+            {result.hasPrevious ? (
+              <>
+                <a
+                  className={buttonClass("secondary")}
+                  href={`${filterUrl(locale, values)}#results-heading`}
+                >
+                  {copy.firstPage}
+                </a>
+                <a
+                  className={buttonClass("secondary")}
+                  href={`${filterUrl(locale, values, result.previousCursor ?? undefined)}#results-heading`}
+                >
+                  {copy.previousPage}
+                </a>
+              </>
+            ) : null}
+            {result.nextCursor ? (
+              <a
+                className={buttonClass("secondary")}
+                href={`${filterUrl(locale, values, result.nextCursor)}#results-heading`}
+              >
+                {copy.more}
+              </a>
+            ) : null}
+          </nav>
         </>
       ) : null}
     </DiscoveryPage>
