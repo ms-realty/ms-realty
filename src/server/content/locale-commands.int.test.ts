@@ -151,54 +151,63 @@ async function publish(
 }
 
 describe("O21 / F24 / AT22 / AT23 BG-bound CMS language editions", () => {
-  it("keeps all six target drafts private and releases only exact separately reviewed editions", async () => {
-    const actor = await staff(),
+  describe("legacy editions sharing one BG source", () => {
+    let actor: Staff;
+    let page: Awaited<ReturnType<typeof source>>;
+    beforeAll(async () => {
+      actor = await staff();
       page = await source(actor);
-    for (const locale of contentTargetLocales) {
-      const { input, result } = await draft(actor, page.id, locale);
-      expect((await saveContentLocale(t.db, actor.session, input)).outcome).toEqual(result.outcome);
-      expect(await readApprovedContent(t.db, "help", page.input.slug, locale)).toBeNull();
-      await expect(decision(actor, page.id, locale, "publish")).rejects.toMatchObject({
-        code: "approval_stale",
-      });
-      await publish(actor, page.id, locale);
-      const edition = await readApprovedContent(t.db, "help", page.input.slug, locale);
-      expect(edition).toMatchObject({
-        title: input.title,
-        paragraphs: [input.text],
-        locale,
-        placeId: null,
-      });
-      expect(edition?.version.id).not.toBe(input.sourceVersionId);
-      if (!edition) throw new Error("Missing synthetic target edition");
-      expect(
-        await t.db.transaction((tx) =>
-          readInquiryContent(
-            tx,
-            { kind: "help", slug: page.input.slug, versionId: edition.version.id },
-            locale,
+    });
+    it.each(contentTargetLocales)(
+      "keeps %s drafts private and releases only exact separately reviewed editions",
+      async (locale) => {
+        const { input, result } = await draft(actor, page.id, locale);
+        expect((await saveContentLocale(t.db, actor.session, input)).outcome).toEqual(
+          result.outcome,
+        );
+        expect(await readApprovedContent(t.db, "help", page.input.slug, locale)).toBeNull();
+        await expect(decision(actor, page.id, locale, "publish")).rejects.toMatchObject({
+          code: "approval_stale",
+        });
+        await publish(actor, page.id, locale);
+        const edition = await readApprovedContent(t.db, "help", page.input.slug, locale);
+        expect(edition).toMatchObject({
+          title: input.title,
+          paragraphs: [input.text],
+          locale,
+          placeId: null,
+        });
+        expect(edition?.version.id).not.toBe(input.sourceVersionId);
+        if (!edition) throw new Error("Missing synthetic target edition");
+        expect(
+          await t.db.transaction((tx) =>
+            readInquiryContent(
+              tx,
+              { kind: "help", slug: page.input.slug, versionId: edition.version.id },
+              locale,
+            ),
           ),
-        ),
-      ).toMatchObject({ title: input.title, locale });
-      const edited = await draft(actor, page.id, locale);
-      expect((await readApprovedContent(t.db, "help", page.input.slug, locale))?.version.id).toBe(
-        edition.version.id,
-      );
-      const view = await readContentLocaleWorkbench(t.db, actor.session, page.id, locale);
-      expect(view.decisions).toEqual([]);
-      expect(view.current?.versionNumber).toBe(2);
-      await expect(
-        decideContentLocale(t.db, actor.session, {
-          ...edited.input,
-          operationId: randomUUID(),
-          expectedVersion: edited.result.outcome.version,
-          decision: "publish",
-          reviewed: true,
-          note: "Old decisions cannot approve a new edition",
-          expiresAt: expiry(),
-        }),
-      ).rejects.toMatchObject({ code: "approval_stale" });
-    }
+        ).toMatchObject({ title: input.title, locale });
+        const edited = await draft(actor, page.id, locale);
+        expect((await readApprovedContent(t.db, "help", page.input.slug, locale))?.version.id).toBe(
+          edition.version.id,
+        );
+        const view = await readContentLocaleWorkbench(t.db, actor.session, page.id, locale);
+        expect(view.decisions).toEqual([]);
+        expect(view.current?.versionNumber).toBe(2);
+        await expect(
+          decideContentLocale(t.db, actor.session, {
+            ...edited.input,
+            operationId: randomUUID(),
+            expectedVersion: edited.result.outcome.version,
+            decision: "publish",
+            reviewed: true,
+            note: "Old decisions cannot approve a new edition",
+            expiresAt: expiry(),
+          }),
+        ).rejects.toMatchObject({ code: "approval_stale" });
+      },
+    );
   });
 
   it("requires target-locale grants and separate claim/publication authority, including replay and receipts", async () => {

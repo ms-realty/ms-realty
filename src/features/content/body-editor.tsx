@@ -198,7 +198,7 @@ export function ContentBodyEditor<V extends FormValues & ContentBodyValues>({
                     <FormField
                       {...named("text")}
                       label={copy.text}
-                      multiline
+                      multiline={row.type !== "heading" && row.type !== "link"}
                       maxLength={row.type === "heading" || row.type === "link" ? 200 : 5000}
                     />
                   </div>
