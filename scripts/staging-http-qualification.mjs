@@ -252,8 +252,26 @@ export function qualificationPassed({
   );
 }
 
-export function sourcePageChecks(document, page) {
-  const body = document.querySelector("[data-legacy-source-body]"),
+export function sourcePageChecks(document, page, view) {
+  assert(
+    view &&
+      typeof view.bodyText === "string" &&
+      Array.isArray(view.facts) &&
+      Array.isArray(view.contentLinks),
+  );
+  const article = document.querySelector("article"),
+    bodies = document.querySelectorAll("[data-legacy-source-body]"),
+    body = bodies[0],
+    factGroups = document.querySelectorAll("[data-legacy-source-facts]"),
+    factRows = [...(factGroups[0]?.children ?? [])],
+    facts = factRows.map((row) => ({
+      label: row.querySelector("dt")?.textContent,
+      value: row.querySelector("dd")?.textContent,
+    })),
+    linkHeadings = document.querySelectorAll("#archive-links"),
+    links = [...(linkHeadings[0]?.closest("section")?.querySelectorAll("li a") ?? [])].map(
+      (link) => ({ url: link.getAttribute("href"), text: link.textContent }),
+    ),
     images = [...document.querySelectorAll("article img")],
     expectedSources = page.media.map((photo) => {
       const source = new URL(photo.url);
@@ -267,7 +285,22 @@ export function sourcePageChecks(document, page) {
       return `/legacy-media/${source.hostname}${source.pathname}`;
     });
   return {
-    sourceBody: body?.textContent === page.bodyText.replace(/\r\n?/g, "\n"),
+    // P21 keeps the captured bytes in the inventory and presents a reviewed reading
+    // view. Check both identities and every extracted field; never drop the body check.
+    sourceEvidence:
+      hex(64).test(page.sourceHash ?? "") &&
+      digest(page.bodyText) === page.sourceHash &&
+      article?.getAttribute("data-legacy-source-hash") === page.sourceHash,
+    sourceBody: bodies.length === 1 && body.textContent === view.bodyText.replace(/\r\n?/g, "\n"),
+    sourceFacts:
+      factGroups.length === (view.facts.length ? 1 : 0) &&
+      factRows.every(
+        (row) => row.querySelectorAll("dt").length === 1 && row.querySelectorAll("dd").length === 1,
+      ) &&
+      JSON.stringify(facts) === JSON.stringify(view.facts),
+    sourceLinks:
+      linkHeadings.length === (view.contentLinks.length ? 1 : 0) &&
+      JSON.stringify(links) === JSON.stringify(view.contentLinks),
     title: document.querySelector("article h1")?.textContent === page.title,
     locale: document.querySelector("article")?.getAttribute("lang") === page.locale,
     noSourceScriptsOrForms: document.querySelectorAll("article script,article form").length === 0,
@@ -472,6 +505,22 @@ async function sourceFile(root, path) {
   const selected = await realpath(resolve(root, path));
   assert(!relative(await realpath(root), selected).startsWith(".."));
   return readFile(selected);
+}
+
+export async function loadSourcePresentation(sourceDir) {
+  const path = "src/server/legacy/presentation.ts";
+  const bytes = await sourceFile(sourceDir, path);
+  // Guard and transport mode must remain dependency-free. Full mode resolves the
+  // already pinned loader from the installed qualified source, never the verifier.
+  const { tsImport } = await import(
+    pathToFileURL(createRequire(resolve(sourceDir, "package.json")).resolve("tsx/esm/api"))
+  );
+  const { presentLegacyPage } = await tsImport(pathToFileURL(resolve(sourceDir, path)).href, {
+    parentURL: pathToFileURL(resolve(sourceDir, "package.json")).href,
+    tsconfig: false,
+  });
+  assert.equal(typeof presentLegacyPage, "function");
+  return { presentLegacyPage, receipt: { path, sha256: digest(bytes), fromQualifiedSource: true } };
 }
 
 export async function loadCorpus(sourceDir, candidate, byteProof) {
@@ -688,6 +737,8 @@ async function qualify(context) {
     const { JSDOM } = await import(
       pathToFileURL(createRequire(resolve(sourceDir, "package.json")).resolve("jsdom"))
     );
+    const { presentLegacyPage, receipt } = await loadSourcePresentation(sourceDir);
+    report.sourcePresentation = receipt;
     const routePace = createPacer(),
       mediaPace = createPacer(),
       completed = {};
@@ -730,7 +781,10 @@ async function qualify(context) {
         }
         const dom = new JSDOM((await readBoundedBody(response, 5_000_000)).toString());
         try {
-          Object.assign(row.checks, sourcePageChecks(dom.window.document, page));
+          Object.assign(
+            row.checks,
+            sourcePageChecks(dom.window.document, page, presentLegacyPage(page)),
+          );
         } finally {
           dom.window.close();
         }
