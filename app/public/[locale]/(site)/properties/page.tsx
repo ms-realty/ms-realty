@@ -110,7 +110,7 @@ export default async function PropertiesPage({
           />
           {result.items.length ? (
             <section id="property-results" tabIndex={-1} aria-labelledby="results-heading">
-              <ListingGrid items={result.items} locale={locale} copy={copy} />
+              <ListingGrid items={result.items} locale={locale} copy={copy} headingLevel={3} />
             </section>
           ) : (
             <div className="space-y-4">

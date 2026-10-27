@@ -311,7 +311,10 @@ export function ApprovedGallery({
                   <MediaCaption media={current} as="div" />
                 </figcaption>
               </figure>
-              <div className="flex shrink-0 flex-wrap items-center justify-center gap-2 border-t border-divider px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+              <div
+                data-print-hide=""
+                className="flex shrink-0 flex-wrap items-center justify-center gap-2 border-t border-divider px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+              >
                 <button
                   type="button"
                   aria-disabled={index === 0}

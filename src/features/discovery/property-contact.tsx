@@ -69,7 +69,13 @@ export function PropertyContactBar({
     };
   }, []);
   return (
-    <nav ref={bar} aria-label={label} data-keyboard={keyboard || undefined} className={styles.dock}>
+    <nav
+      ref={bar}
+      aria-label={label}
+      data-keyboard={keyboard || undefined}
+      data-print-hide=""
+      className={styles.dock}
+    >
       <div className="mx-auto max-w-page space-y-2 px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <p className="text-center text-caption text-text-muted">
           <bdi>{reference}</bdi>
