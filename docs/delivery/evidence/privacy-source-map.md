@@ -87,16 +87,39 @@ booking, publication, consent or access authority. Invalid/missing service conte
 held instead of silently disappearing from a supposedly complete disclosure. Source readers
 are bounded to 1000 rows per declared source and 32 KiB per stored service field.
 
-## New-source integration boundary
+## B10 retained agency and photography sources
 
-Partner terms, customer reviews/consent, and photo-visit work require explicit source classification from
-their final schemas, including immutable wording/terms/consent history and ordinary
-Case/document access. This map supplies no generic table whitelist or permission to
-ignore newly introduced customer sources.
+| Source | Merge classification | Export classification |
+| --- | --- | --- |
+| `agency_partner_terms` | The exact `counterparty_party_id` edge is declared; the original Party, optional Case/document, supplied wording/source, acceptance, qualified approval and revocation remain unchanged. Every current and historical binding requires its original Case/compliance/contact/document visibility. Standing text-only terms without a retained original Case or document link have an explicit `agency_reconciliation` hold until a human supplies a supported original-scope bridge. | An explicit joint source requires a concrete reviewed redacted supplement or withholding notice. Raw terms, professional names, internal unknowns and approval notes never enter the automatic dossier. Exact source, wording, acceptance/expiry and approval/revocation commitments bind review even when row version/timestamp do not change. |
+| `agency_case_reviews` | The exact original `author_party_id` edge is declared. Identity association never moves the author, consent principal, exact CMS wording, display choice, refusal/withdrawal or qualified verification to a canonical Party. | A separate joint source requires a supported disposition over exact wording, author/display choice, purpose-specific consent and verification. The native author's own-wording page remains a separate existing reader. No raw agency row, Case evidence or consent history is automatically exported. |
+| `agency_evidence_history` | Only the declared `partner_terms` / `case_review` parent and original snapshot Party/Case/document bindings are followed, including a prior Party/Case after the current record changes. The immutable snapshot ID must match its parent, the shape/fields must be known, and all original scopes must remain readable. Unknown, scalar, oversized, orphan or unreadable history returns a generic hold without a partial list or record identities. | The database returns declared ACL fields and a full snapshot commitment, never snapshot plaintext. Every retained decision joins its parent source's keyed revision. Current and historical CMS editions/hashes and private document revisions are also bound. Each parent is accounted for by exact source key and concrete redacted evidence; an absence checkbox cannot dispose of an existing source. |
+| `appointments.purpose` / `photography_scope` and `appointment_versions.snapshot` | The original appointment, listing/property and participant links remain unchanged. Ordinary property/listing visibility and appointment authority gate a photo reference. Purpose, scope and immutable version commitments stale merge review and automatic reversal independently of the mutable appointment version. | A photo source is discovered only through an original explicit appointment Party participant or an already related Case. A staff host or property relationship supplies no customer ownership or dossier link. Supported sources require separate reviewed redacted evidence. Raw scope, logistics, policy snapshots and version payloads are never exported. Unknown or mixed historical photo purpose remains held. |
+
+The agency collectors read at most 1000 rows per declared current/history source; merge
+comparison uses 500. A retained agency snapshot above 64 KiB stays held. Snapshot field
+validation is specific to these two source schemas; it grants no generic table/JSON
+whitelist. A newly populated undeclared agency FK retains the unsupported merge hold.
+
+Read-only history classification uses exact original scope without following a canonical
+Party. A merged pointer conveys no authority to edit, accept, approve or use terms, assent
+to publication, or restore public display. Current terms/public reviews can remain held
+after association and require fresh human review under their ordinary gates. A negative
+consent or privacy restriction remains on its original identity and is never released by
+this classification or identity linking.
+
+These are retained business records, not newly approved optional erasure copies. Existing
+FK/business-dependency checks continue to hold unsupported retention/deletion work. Review
+publication consent is a separate purpose from `search_alerts` and `marketing`; unknown
+business/photography purposes are never mapped to those optional-processing commands. No
+erasure, retention-policy, provider deletion or legal approval capability is added here.
+
+New sources still require explicit classification from their final schemas. This map
+supplies no permission to ignore newly introduced customer material or unknown history.
 
 ## Local verification and remaining acceptance
 
-The expanded synthetic integration run passed 64 tests across eight files: duplicate
+The B11 source checkpoint's expanded synthetic integration run passed 64 tests across eight files: duplicate
 merge/split, export safety fingerprints, coverage, delivery, supplements, review binding
 and recovery, plus service-source disclosure. It covered retained completed exports and consent, stable
 composite restrictions, generic restricted-actor output, the client-access hold, changed
@@ -117,6 +140,28 @@ incorrect fixture assertions/states and an overly broad new non-service Case dep
 read. The fixtures were corrected and the added Case read was limited to service sources;
 the unchanged document-access assertion passed. The final focused and expanded runs passed
 without assertion or timeout weakening.
+
+The B10 classification continuation passed 123 combined integration tests across 13 files,
+covering the B11/duplicate/privacy regressions, agency and photography source classifiers,
+existing agency/photography commands, and existing erasure boundaries. It verified exact
+terms/review/consent/history commitments, current and historical original scopes, a
+document-specific grant, unknown/scalar/oversized/orphan history without source identities,
+unversioned current edits and appended immutable history, unchanged original Parties and
+negative consent through merge/reversal, standing-term reconciliation, a newly populated
+unknown agency FK, photo scope/purpose/version changes, original property access, no
+customer ownership inference, and retained unsupported erasure purposes. Two additional
+targeted regressions verified that ordinary source grants cannot outlive required passkey
+assurance, including an issued partial service export without a manifest.
+
+The initial B10 focused failures were synthetic fixture omissions (an author display name,
+valid sealed/scan metadata, the required active Case owner/action, and a valid relationship
+role). Those fixtures were corrected without weakening source assertions or database
+constraints. Dedicated typecheck, owned-file Biome and diff checks passed. The separate
+catalog/copy run passed 114 tests and retained three known imported-B10 baseline failures:
+the Russian `agency.fields.action` cognate, the English `agency.reviewHint` script, and the
+missing public `caseReview` review-status entry. The added reconciliation labels passed;
+the baseline repairs remain with the B10/catalog owner. No catalog guard or baseline was
+expanded, and the full catalog suite is not claimed green at this checkpoint.
 
 These are source and disposable-database results. They do not establish human policy
 acceptance, live provider deletion, independent archive/restore proof, runtime qualification,

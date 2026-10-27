@@ -7,6 +7,7 @@ import type { Actor } from "@/domain/capabilities";
 import { publicLocales } from "@/domain/ids";
 import { contentReferenceSchema } from "@/domain/inquiry-content";
 import { serviceCaseContextSchema } from "@/domain/service-scope";
+import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { can } from "../authz";
 import { getEnv } from "../config/env";
 import { hashRequest, keyedHash } from "../crypto";
@@ -172,12 +173,15 @@ export async function collectServiceSources(db: Executor, actor: Actor, partyId:
       )
     : [];
   const rows: ServiceDisclosureRow[] = [];
+  const readableActor =
+    actor.kind === "staff" && (await countActivePasskeys(db, actor.id)) >= staffPasskeyMinimum;
   for (const row of [...own, ...records, ...origins]) serviceContextRevision(row.service);
   let ownBlocked = false,
     jointBlocked = false;
   for (const row of own) {
     const context = disclosure(row.service);
     if (
+      !readableActor ||
       !context ||
       !(await can(db, actor, "inquiry.read", {
         type: "inquiry",
@@ -205,6 +209,7 @@ export async function collectServiceSources(db: Executor, actor: Actor, partyId:
       original = own.filter((origin) => origin.caseId === row.id);
     const resource = { type: "case", id: row.id, caseId: row.id, audience: "internal" as const };
     if (
+      !readableActor ||
       !context ||
       row.kind !== "service_intake" ||
       row.topic !== context.request.topic ||

@@ -10,6 +10,7 @@ import {
   cases,
   grants,
   inquiries,
+  passkeys,
   serviceScopeDrafts,
   serviceScopeVersions,
 } from "@/db/schema";
@@ -249,6 +250,22 @@ describe("B11/AT45 service source disclosure classification", () => {
         },
       })
       .where(eq(inquiries.id, f.inquiry.id));
+    await expect(privacyExportDownload(t.db, f.client.session, f.exportId)).rejects.toMatchObject({
+      code: "not_found",
+    });
+  });
+
+  it("requires current passkey assurance for a retained service source even on partial frozen delivery", async () => {
+    const f = await fixture();
+    await issueCoverage(f);
+    await t.db
+      .update(passkeys)
+      .set({ revokedAt: new Date() })
+      .where(eq(passkeys.principalId, f.staff.id));
+    const source = await collectServiceSources(t.db, f.staff.actor, f.client.partyId as string);
+    expect(source.rows).toEqual([]);
+    expect(source.ownBlocked).toBe(true);
+    expect(source.jointBlocked).toBe(true);
     await expect(privacyExportDownload(t.db, f.client.session, f.exportId)).rejects.toMatchObject({
       code: "not_found",
     });

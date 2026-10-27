@@ -20,6 +20,8 @@ import { assertRequestedDocumentAccess } from "@/server/documents/request-access
 import { AppError } from "@/server/errors";
 import { documentAccess, mediaAccess } from "@/server/files/access";
 import { privacyOperator } from "@/server/privacy/access";
+import { collectAgencySources } from "@/server/privacy/agency-sources";
+import { appointmentSourceRevision } from "@/server/privacy/photography-sources";
 import { serviceContextRevision } from "@/server/privacy/service-sources";
 import { privacySafetyRevision } from "@/server/privacy/source-fingerprint";
 import { liveStaff, visibleWhere } from "@/server/work/shared";
@@ -42,6 +44,7 @@ export type Hold =
   | "different_kind"
   | "verified_contact_conflict"
   | "privacy_restriction"
+  | "agency_reconciliation"
   | "changed_after_merge"
   | "already_reversed";
 export interface DuplicateIdentity {
@@ -284,6 +287,7 @@ const audienceColumns = [
   "responsible_id",
   "service_name",
   "case_id",
+  "appointment_id",
   "property_id",
   "role",
   "authority",
@@ -326,6 +330,10 @@ const privacyPartyEdges = new Set([
   "privacy_exports.party_id",
   "privacy_safety_decisions.party_id",
   "privacy_processing_restrictions.party_id",
+]);
+const agencyPartyEdges = new Set([
+  "agency_partner_terms.counterparty_party_id",
+  "agency_case_reviews.author_party_id",
 ]);
 
 async function privacyHistoryImpact(
@@ -476,6 +484,11 @@ async function referenceReadable(
       await privacyOperator(db, session, row.id);
       return true;
     }
+    if (table === "appointment_participants")
+      return (
+        typeof row.appointment_id === "string" &&
+        Boolean(await appointmentSourceRevision(db, actor, row.appointment_id))
+      );
     if (table === "subscriptions") {
       requireFreshAuth(session);
       return can(db, actor, "privacy.manage");
@@ -642,12 +655,23 @@ export async function readDuplicateImpact(
           continue;
         }
       }
+      let appointmentRevision: string | undefined;
+      if (table === "appointments") {
+        const source = await appointmentSourceRevision(db, live.actor, row.id, lock, 500);
+        if (!source) {
+          held.add("restricted");
+          continue;
+        }
+        appointmentRevision = source.digest;
+      }
       const serialized = JSON.stringify(record);
       references.set(`${table}:${row.id}`, {
         table,
         id: row.id,
         sources: [pair.left, pair.right].filter((id) => serialized.includes(id)),
-        digest: hashRequest(JSON.parse(JSON.stringify({ ...record, serviceRevision }))),
+        digest: hashRequest(
+          JSON.parse(JSON.stringify({ ...record, serviceRevision, appointmentRevision })),
+        ),
         audience: Object.fromEntries(
           audienceColumns.filter((key) => row[key] !== undefined).map((key) => [key, row[key]]),
         ),
@@ -665,6 +689,8 @@ export async function readDuplicateImpact(
   for (const edge of edges) {
     const condition = idsCondition(ident(edge.column_name), pair);
     if (pair.subject === "party" && privacyPartyEdges.has(`${edge.table_name}.${edge.column_name}`))
+      continue;
+    if (pair.subject === "party" && agencyPartyEdges.has(`${edge.table_name}.${edge.column_name}`))
       continue;
     // Unknown populated edges are held; nothing about their contents is exposed or hashed.
     if (!(edge.table_name in directPolicies)) {
@@ -748,6 +774,55 @@ export async function readDuplicateImpact(
         sql`, `,
       )})`,
     );
+  }
+  const appointmentIds = [
+    ...new Set(
+      [...references.values()]
+        .map((row) => row.audience.appointment_id)
+        .filter((id): id is string => typeof id === "string"),
+    ),
+  ].sort();
+  if (caseIds.length || appointmentIds.length)
+    await readRows(
+      "appointments",
+      or(
+        caseIds.length
+          ? sql`case_id in (${sql.join(
+              caseIds.map((id) => sql`${id}::uuid`),
+              sql`, `,
+            )})`
+          : undefined,
+        appointmentIds.length
+          ? sql`id in (${sql.join(
+              appointmentIds.map((id) => sql`${id}::uuid`),
+              sql`, `,
+            )})`
+          : undefined,
+      ) ?? sql`false`,
+    );
+  try {
+    const agency = await collectAgencySources(
+      db,
+      live.actor,
+      pair.subject === "party" ? [pair.left, pair.right] : [],
+      caseIds,
+      lock,
+      500,
+    );
+    if (agency.blocked) held.add("restricted");
+    if (agency.mergeHeld) held.add("agency_reconciliation");
+    if (references.size + agency.sources.length > 2000) throw new AppError("validation_failed");
+    for (const row of agency.sources)
+      references.set(`agency:${row.kind}:${row.id}`, {
+        table: row.kind === "partner_terms" ? "agency_partner_terms" : "agency_case_reviews",
+        id: row.id,
+        sources: row.parties,
+        digest: row.digest,
+        audience: {},
+      });
+  } catch (error) {
+    if (!(error instanceof AppError)) throw error;
+    held.add(error.code === "validation_failed" ? "too_many" : "restricted");
   }
   const refs = [...references.values()].sort((a, b) =>
     `${a.table}:${a.id}`.localeCompare(`${b.table}:${b.id}`),
