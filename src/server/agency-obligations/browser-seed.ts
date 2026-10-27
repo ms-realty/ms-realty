@@ -9,6 +9,7 @@ import { createSession } from "../auth/sessions";
 import { caseFixture } from "../cases/testing";
 import { createContent, decideContent, readContentWorkbench } from "../content/commands";
 import { readApprovedContent } from "../content/public";
+import { nextReference } from "../references";
 import { createProperty, createStaff } from "../testing";
 import { saveCaseReview } from "./reviews";
 
@@ -34,6 +35,39 @@ try {
   });
   const issued = await createSession(db, { kind: "staff", id: staff.id });
   const f = await caseFixture(db, { ...staff, ...issued });
+  let partyName = "Test Client";
+  if (process.argv.includes("--partner-picker")) {
+    const prefix = `ZZZ-B10-${randomUUID()}`;
+    // The selected permitted party is necessarily beyond the ordinary first page.
+    for (let index = 0; index < 31; index++) {
+      const [party] = await db
+        .insert(schema.parties)
+        .values({
+          kind: "person",
+          displayName: `${prefix}-${String(index).padStart(2, "0")}`,
+          preferredLocale: "en",
+        })
+        .returning();
+      if (!party) throw new Error("Missing synthetic contact page fixture");
+      await db.insert(schema.inquiries).values({
+        reference: await nextReference(db, "inquiry"),
+        source: "website",
+        state: "assigned",
+        purpose: "question",
+        submissionKey: randomUUID(),
+        payloadDigest: "synthetic-picker",
+        ownerId: staff.id,
+        partyId: party.id,
+        preferredLocale: "en",
+        message: "Synthetic contact-picker fixture only",
+      });
+    }
+    partyName = `${prefix}-ZZ-selected`;
+    await db
+      .update(schema.parties)
+      .set({ displayName: partyName })
+      .where(eq(schema.parties.id, f.client.partyId));
+  }
   await db.update(schema.cases).set({ stage: "completed" }).where(eq(schema.cases.id, f.record.id));
   await db.transaction(async (tx) => {
     await tx.execute(
@@ -124,6 +158,7 @@ try {
       clientToken: f.client.token,
       clientId: f.client.id,
       partyId: f.client.partyId,
+      partyName,
       caseId: f.record.id,
       reviewId: review.outcome.id,
       contentPageId: created.outcome.id,

@@ -87,5 +87,11 @@
   "photoActions": "Other appointment actions",
   "termsReviewed": "I reviewed this exact supplied source and will be its accountable owner.",
   "stepUp": "Confirm your identity to apply this change. Your draft is retained.",
-  "reauth": "Confirm identity"
+  "reauth": "Confirm identity",
+  "pickCounterparty": "Choose the counterparty",
+  "pickerLead": "Choose the counterparty, then enter the supplied terms.",
+  "counterpartyPage": "Contacts page",
+  "caseCounterparties": "Participants in this Case",
+  "noEligibleContacts": "No currently eligible counterparties on this page. Continue to another page when available.",
+  "returnToRecord": "Back to record"
 }

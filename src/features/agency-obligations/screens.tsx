@@ -14,6 +14,7 @@ import {
   reviewConsentPolicy,
 } from "@/server/agency-obligations/reviews";
 import { propertyWorkFor } from "@/server/appointments/property-work";
+import { localReturnPath } from "@/server/auth/pages";
 import type { Session } from "@/server/auth/sessions";
 import { can } from "@/server/authz";
 import { listCases } from "@/server/cases/queries";
@@ -23,7 +24,6 @@ import { listContent, readContentWorkbench } from "@/server/content/commands";
 import { contentBody } from "@/server/content/public";
 import { AppError, isAppError } from "@/server/errors";
 import { documentAccess } from "@/server/files/access";
-import { listContacts, readContact } from "@/server/work/queries";
 import { liveStaff } from "@/server/work/shared";
 import { controlClass, labelClass } from "@/ui/field-class";
 import type { FormValues } from "@/ui/form/contract";
@@ -32,6 +32,7 @@ import { Notice } from "@/ui/notice";
 import { type WorkflowField, WorkflowForm } from "../cases/form";
 import { WorkflowTime, workflowLink } from "../cases/screens";
 import { StaffPage, StaffPanel, StaffToolbar } from "../shell/staff-ui";
+import { Pagination } from "../work/screens";
 import { agencyAction } from "./actions";
 import {
   type AgencyCommand,
@@ -41,6 +42,8 @@ import {
   agencyScope,
 } from "./contract";
 import { agencyCopy, caseReviewCopy } from "./copy";
+import { type PartnerEntryContext, partnerEntryPath } from "./partner-context";
+import { partnerChoices, readPartnerChoice } from "./partner-picker";
 
 type Props = { locale: string; session: Session };
 const rootPath = (locale: string) => `/${locale}/operations/agency`;
@@ -236,9 +239,7 @@ export async function AgencyIndex(props: Props) {
   );
 }
 
-export async function PartnerScreen(
-  props: Props & { id: string; draft?: string; caseId?: string; partyId?: string },
-) {
+export async function PartnerScreen(props: Props & PartnerEntryContext & { id: string }) {
   const db = getDb(),
     copy = agencyCopy(props.locale),
     creating = props.id === "new";
@@ -248,29 +249,90 @@ export async function PartnerScreen(
     props.caseId,
     "partyId" in props ? (props.partyId as string) : undefined,
   );
+  const context = {
+    ...props,
+    returnTo:
+      localReturnPath(props.returnTo, "staff", props.locale) ??
+      (props.caseId ? `/${props.locale}/cases/${props.caseId}` : undefined),
+  };
   if (creating && !props.draft)
-    redirect(
-      `${rootPath(props.locale)}/partners/new?draft=${randomUUID()}${props.caseId ? `&case=${props.caseId}` : ""}${props.partyId ? `&party=${props.partyId}` : ""}`,
+    redirect(partnerEntryPath(props.locale, { ...context, draft: randomUUID() }));
+  if (creating && !props.partyId) {
+    const choices = await partnerChoices(db, props.session, props.page ?? 1, props.caseId);
+    const list = (rows: { id: string; name: string; reference?: string | null }[]) => (
+      <ul className="divide-y divide-divider">
+        {rows.map((party) => (
+          <li
+            key={party.id}
+            className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3"
+          >
+            <div className="min-w-0">
+              <a
+                className={`${workflowLink} inline-flex min-h-control items-center break-words`}
+                href={partnerEntryPath(props.locale, { ...context, partyId: party.id })}
+              >
+                {party.name}
+              </a>
+              {party.reference ? (
+                <p className="text-dense text-text-muted">{party.reference}</p>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ul>
     );
+    return (
+      <StaffPage
+        title={copy.pickCounterparty}
+        lead={copy.pickerLead}
+        actions={
+          <a className={workflowLink} href={context.returnTo ?? rootPath(props.locale)}>
+            {context.returnTo ? copy.returnToRecord : copy.back}
+          </a>
+        }
+      >
+        {choices.currentCase && choices.caseChoices.length ? (
+          <StaffPanel
+            title={copy.caseCounterparties}
+            lead={`${choices.currentCase.reference} · ${choices.currentCase.title}`}
+          >
+            {list(choices.caseChoices)}
+          </StaffPanel>
+        ) : null}
+        <StaffPanel title={copy.fields.counterpartyPartyId}>
+          <p className="text-dense text-text-muted">
+            {copy.counterpartyPage} {choices.page}
+          </p>
+          <Pagination
+            {...choices}
+            href={partnerEntryPath(props.locale, { ...context, page: undefined })}
+            locale={props.locale}
+          />
+          {choices.rows.length ? list(choices.rows) : <p>{copy.noEligibleContacts}</p>}
+        </StaffPanel>
+      </StaffPage>
+    );
+  }
   const detail = creating ? null : await readPartnerTerms(db, props.session, props.id);
   const row = detail?.row,
     id = row?.id ?? (props.draft as string);
-  const caseRows = await listCases(db, props.session),
-    contacts = await listContacts(db, props.session);
+  const caseRows = await listCases(db, props.session);
+  const caseOptions = caseRows.map(({ id, reference, title }) => ({ id, reference, title }));
   const currentCase = row?.caseId ?? props.caseId;
-  if (currentCase) await caseFor(db, props.session, currentCase);
-  const contactOptions = contacts.rows.map((p) => ({ value: p.id, label: p.name }));
-  if (detail && !contactOptions.some((p) => p.value === detail.party.id))
-    contactOptions.push({ value: detail.party.id, label: detail.party.displayName });
-  if (props.partyId && !contactOptions.some((p) => p.value === props.partyId)) {
-    const { party } = await readContact(db, props.session, props.partyId);
-    contactOptions.push({ value: party.id, label: party.displayName });
-  }
+  const selectedCase = currentCase ? (await caseFor(db, props.session, currentCase)).row : null;
+  if (selectedCase && !caseOptions.some((candidate) => candidate.id === selectedCase.id))
+    caseOptions.push(selectedCase);
+  const selected = detail
+    ? { id: detail.party.id, name: detail.party.displayName }
+    : await readPartnerChoice(db, props.session, props.partyId as string, currentCase ?? undefined);
+  const contactOptions = [{ value: selected.id, label: selected.name }];
   const docs = await documentChoices(props.session, currentCase ?? undefined);
   const fields = copy.fields,
-    path = creating
-      ? `${rootPath(props.locale)}/partners/new?draft=${id}`
-      : `${rootPath(props.locale)}/partners/${id}`;
+    path = partnerEntryPath(
+      props.locale,
+      creating ? { ...context, draft: id, partyId: selected.id } : { returnTo: context.returnTo },
+      creating ? "new" : id,
+    );
   const values = row
     ? Object.fromEntries(
         agencyFields.partnerSave.map((key) => [
@@ -290,8 +352,8 @@ export async function PartnerScreen(
       title={copy.partners}
       lead={copy.qualified}
       actions={
-        <a className={workflowLink} href={rootPath(props.locale)}>
-          {copy.back}
+        <a className={workflowLink} href={context.returnTo ?? rootPath(props.locale)}>
+          {context.returnTo ? copy.returnToRecord : copy.back}
         </a>
       }
     >
@@ -336,14 +398,14 @@ export async function PartnerScreen(
                 fields.caseId,
                 [
                   { value: "", label: copy.noCase },
-                  ...caseRows.map((c) => ({ value: c.id, label: `${c.reference} · ${c.title}` })),
+                  ...caseOptions.map((c) => ({
+                    value: c.id,
+                    label: `${c.reference} · ${c.title}`,
+                  })),
                 ],
                 false,
               ),
-              select("counterpartyPartyId", fields.counterpartyPartyId, [
-                { value: "", label: copy.choose },
-                ...contactOptions,
-              ]),
+              select("counterpartyPartyId", fields.counterpartyPartyId, [...contactOptions]),
               select(
                 "relationship",
                 fields.relationship,

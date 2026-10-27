@@ -1,6 +1,6 @@
 // B10 / AT10 / AT11 / AT40: exact-purpose evidence, current scope and recoverable human commands.
 import { PartnerScreen } from "@/features/agency-obligations/screens";
-import { checkLocale, privateRead } from "@/features/work/screens";
+import { checkLocale, privateRead, queryPage } from "@/features/work/screens";
 import { requireStaffPage } from "@/server/auth/pages";
 export default async function Page({
   params,
@@ -14,6 +14,8 @@ export default async function Page({
     command?: string;
     id?: string;
     key?: string;
+    page?: string;
+    returnTo?: string;
   }>;
 }) {
   const { locale, id } = await params;
@@ -28,6 +30,8 @@ export default async function Page({
       draft: query.draft,
       caseId: query.case,
       partyId: query.party,
+      page: queryPage(query.page),
+      returnTo: query.returnTo,
     }),
   );
 }
