@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, exists, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, exists, isNull, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { caseParticipants, cases, contactMethods, inquiries, parties, tasks } from "@/db/schema";
 import { guardInquiryTransition, inquiryMachine } from "@/domain/inquiry";
@@ -79,6 +79,8 @@ export async function linkInquiryToExistingCase(
       )
         throw new AppError("transition_denied");
       allow(inquiryMachine.check(inquiry.state, "linked_to_case"));
+      if ((inquiry.purpose === "service_consultation") !== (target.kind === "service_intake"))
+        throw new AppError("transition_denied");
       if (inquiry.purpose === "service_consultation") {
         const context = inquiry.context as { service?: unknown; content?: unknown } | null;
         const service = serviceCaseContextSchema.safeParse(context?.service);
@@ -94,6 +96,12 @@ export async function linkInquiryToExistingCase(
           existing.data.binding.scopeVersionId !== service.data.binding.scopeVersionId
         )
           throw new AppError("transition_denied");
+        if (
+          service.data.binding.observedSource?.locale !== content.data.locale ||
+          service.data.binding.observedSource?.versionId !== content.data.versionId ||
+          !(await serviceCaseCoverage(ctx.tx, service.data)).current
+        )
+          throw new AppError("approval_stale");
         const binding = await bindServiceRequest(
           ctx.tx,
           service.data.request,
@@ -193,6 +201,12 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
     (inquiry.context as { service?: unknown } | null)?.service,
   );
   if (inquiry.purpose === "service_consultation" && !service.success) return [];
+  if (
+    inquiry.purpose === "service_consultation" &&
+    service.success &&
+    !(await serviceCaseCoverage(db, service.data)).current
+  )
+    return [];
   const [route] = inquiry.contactMethodId
     ? await db
         .select({ kind: contactMethods.kind, normalizedValue: contactMethods.normalizedValue })
@@ -241,6 +255,7 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
       title: cases.title,
       kind: cases.kind,
       stage: cases.stage,
+      serviceContext: cases.serviceContext,
       sameParty,
     })
     .from(cases)
@@ -254,7 +269,7 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
               sql`${cases.serviceContext}->'request'->>'regionId' = ${service.data.request.regionId}`,
               sql`${cases.serviceContext}->'binding'->>'scopeVersionId' = ${service.data.binding.scopeVersionId}`,
             )
-          : undefined,
+          : ne(cases.kind, "service_intake"),
         eq(cases.disposition, "active"),
         or(sameParty, sameContact),
       ),
@@ -300,8 +315,10 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
         .from(parties)
         .where(and(eq(parties.id, partyId), isNull(parties.mergedIntoPartyId)))
     : [];
-  return Promise.all(
-    rows.map(async ({ sameParty, ...row }) => {
+  const candidates = await Promise.all(
+    rows.map(async ({ sameParty, serviceContext, ...row }) => {
+      if (row.kind === "service_intake" && !(await serviceCaseCoverage(db, serviceContext)).current)
+        return null;
       let reason: InquiryCaseBlockReason = blockReason;
       if (
         !reason &&
@@ -336,4 +353,5 @@ export async function listInquiryCaseCandidates(db: Executor, session: Session, 
       };
     }),
   );
+  return candidates.filter((row) => row !== null);
 }

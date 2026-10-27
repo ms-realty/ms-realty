@@ -229,6 +229,60 @@ it("binds and explicitly refreshes approved content identity without replacing t
   expect(mocks.submit).toHaveBeenCalledTimes(1);
 });
 
+it("B11 / P23 keeps an elapsed stay start editable on the original review and submission key", async () => {
+  const state = initial();
+  const day = (offset: number) =>
+    new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
+  state.values = {
+    ...state.values,
+    purpose: "service_consultation",
+    contentReference: JSON.stringify({
+      kind: "service",
+      slug: "synthetic-short-stay",
+      versionId: "12345678-1234-4123-8123-123456789001",
+    }),
+    serviceScope: JSON.stringify({
+      topic: "short_stay_consultation",
+      regionId: "12345678-1234-4123-8123-123456789003",
+      scopeVersionId: "12345678-1234-4123-8123-123456789004",
+    }),
+    serviceLocation: "Synthetic declared region",
+    serviceNeeds: "Synthetic short stay clarification",
+    serviceFrom: day(-1),
+    serviceUntil: day(3),
+  };
+  const rejected = await sendInquiry("en", state, post(state));
+  expect(rejected.outcome).toMatchObject({
+    kind: "validation",
+    fieldErrors: { serviceFrom: expect.any(Array) },
+  });
+  expect(rejected.operationId).toBe(state.operationId);
+  expect(rejected.values).toEqual(state.values);
+  expect(mocks.submit).not.toHaveBeenCalled();
+  rejected.values.serviceFrom = day(1);
+  const reviewed = await sendInquiry("en", rejected, post(rejected));
+  expect(reviewed.review?.serviceRequest?.requestedFrom).toBe(day(1));
+  mocks.submit.mockRejectedValueOnce(
+    new AppError("validation_failed", {
+      fieldErrors: { "serviceRequest.requestedFrom": ["future_required"] },
+    }),
+  );
+  const elapsed = await sendInquiry("en", reviewed, post(reviewed, "confirm"));
+  expect(elapsed.outcome).toMatchObject({
+    kind: "validation",
+    fieldErrors: { serviceFrom: expect.any(Array) },
+  });
+  expect(elapsed.operationId).toBe(state.operationId);
+  elapsed.values.serviceFrom = day(2);
+  const refreshed = await sendInquiry("en", elapsed, post(elapsed));
+  const confirmed = await sendInquiry("en", refreshed, post(refreshed, "confirm"));
+  expect(confirmed.outcome.kind).toBe("confirmed");
+  expect(mocks.submit.mock.calls.at(-1)?.[1]).toMatchObject({
+    submissionKey: state.operationId,
+    serviceRequest: { requestedFrom: day(2) },
+  });
+});
+
 it("P13 retains ranked viewing preferences through Edit, changed sources, Refresh and final intake", async () => {
   const state = initial();
   let manifestId = "12345678-1234-4123-8123-123456789001";

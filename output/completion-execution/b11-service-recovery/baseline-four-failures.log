@@ -1,0 +1,116 @@
+
+ RUN  v5.0.5 /private/var/folders/7g/xvnd380n10972whhk0r2020w0000gn/T/msr-b11-independent-as3iisuv
+
+stdout | src/server/service-intake/independent-review.int.test.ts > B11 recovery: a past stay start can be corrected using the same submission key
+B11 past-date retained operation [{"status":"failed","outcome":{"code":"validation_failed","fieldErrors":{"serviceRequest":["future_required"]}}}]
+
+stdout | src/server/service-intake/independent-review.int.test.ts > B11 service boundary: a brokerage inquiry cannot link to a service Case without service context
+B11 nonservice candidate [{"kind":"service_intake","canLink":true,"blockReason":null}]
+
+stdout | src/server/service-intake/independent-review.int.test.ts > B11 scope form: identical save replay returns its receipt after an unrelated draft change
+B11 scope form replay {"first":{"kind":"confirmed","receipt":{"title":"Запази чернова","reference":"Версия 3","recordedAt":{"dateTime":"2026-10-26T23:58:26.911Z","label":"вт, 27 октомври в 01:58"},"nextStep":"Само прегледан действителен обхват допуска нова консултация. Неизвестният обхват остава задържан.","destination":{"href":"/bg/settings/service-scope","label":"Преглед на обхвата"}}},"replay":{"kind":"conflict","code":"IDEMPOTENCY_KEY_REUSED","message":"Политиката е променена. Черновата ви е запазена; сравнете я с текущата политика преди ново изпращане.","recovery":{"href":"/bg/settings/service-scope","label":"Преглед на текущата политика"}}}
+
+stdout | src/server/service-intake/independent-review.int.test.ts > B11 locale continuation: revoked observed locale holds new consultation
+B11 revoked locale continuation {"current":true,"transition":{"id":"0ec098e1-b5ba-4878-ad0e-8652a9031979","reference":"CS-2026-000001","version":2,"recordedAt":"2026-10-26T23:58:28.221Z","stage":"consultation"}}
+
+ ❯ |integration| src/server/service-intake/independent-review.int.test.ts (4 tests | 4 failed) 4367ms
+   × B11 recovery: a past stay start can be corrected using the same submission key 1355ms
+   × B11 service boundary: a brokerage inquiry cannot link to a service Case without service context 902ms
+   × B11 scope form: identical save replay returns its receipt after an unrelated draft change 790ms
+   × B11 locale continuation: revoked observed locale holds new consultation 1318ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |integration| src/server/service-intake/independent-review.int.test.ts > B11 recovery: a past stay start can be corrected using the same submission key
+AssertionError: promise rejected "AppError: idempotency_key_reused { …(7) }" instead of resolving
+ ❯ src/server/service-intake/independent-review.int.test.ts:55:151
+
+
+Caused by: AppError: idempotency_key_reused
+ ❯ src/server/operations.ts:129:38
+ ❯ scope ../../../../../../../Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/node_modules/postgres/src/index.js:260:18
+ ❯ runOperation src/server/operations.ts:105:19
+ ❯ src/server/inquiries/intake.ts:482:22
+ ❯ scope ../../../../../../../Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/node_modules/postgres/src/index.js:260:18
+ ❯ Function.begin ../../../../../../../Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/node_modules/postgres/src/index.js:243:14
+ ❯ Module.submitInquiry src/server/inquiries/intake.ts:480:19
+ ❯ src/server/service-intake/independent-review.int.test.ts:55:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'idempotency_key_reused', status: 409, retryable: false, outcome: 'not_applied', fieldErrors: undefined, retryAfterSeconds: undefined, current: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |integration| src/server/service-intake/independent-review.int.test.ts > B11 service boundary: a brokerage inquiry cannot link to a service Case without service context
+AssertionError: promise resolved "{ …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "operationId": "a86a2507-edcf-461c-9755-22c4a29ec27c",
++   "outcome": {
++     "caseId": "c2ad7b5e-809f-4e03-a11c-b4e35f1ff585",
++     "caseReference": "CS-2026-000001",
++     "caseVersion": 2,
++     "id": "98db98db-507d-4bc8-9855-d71fd6ec28c2",
++     "recordedAt": "2026-10-26T23:58:26.136Z",
++     "reference": "RQ-2026-000002",
++     "state": "linked_to_case",
++     "version": 3,
++   },
++   "replayed": false,
+  }
+
+ ❯ src/server/service-intake/independent-review.int.test.ts:69:81
+     67|   console.log("B11 nonservice candidate", JSON.stringify(candidates.ma…
+     68|   await expect(linkInquiryToExistingCase(t.db, f.session, { id: b.inqu…
+     69|     caseId: created.outcome.id, expectedCaseVersion: created.outcome.v…
+       |                                                                                 ^
+     70| });
+     71| it("B11 scope form: identical save replay returns its receipt after an…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |integration| src/server/service-intake/independent-review.int.test.ts > B11 scope form: identical save replay returns its receipt after an unrelated draft change
+AssertionError: expected 'conflict' to be 'confirmed' // Object.is equality
+
+Expected: "confirmed"
+Received: "conflict"
+
+ ❯ src/server/service-intake/independent-review.int.test.ts:87:31
+     85|   const replay = await submitServiceScope("bg", "save", state, data);
+     86|   console.log("B11 scope form replay", JSON.stringify({ first: first.o…
+     87|   expect(replay.outcome.kind).toBe("confirmed");
+       |                               ^
+     88| });
+     89|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |integration| src/server/service-intake/independent-review.int.test.ts > B11 locale continuation: revoked observed locale holds new consultation
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/server/service-intake/independent-review.int.test.ts:119:40
+    117|     operationId:randomUUID(), stage:"consultation", reason:"Synthetic …
+    118|   console.log("B11 revoked locale continuation", JSON.stringify({ curr…
+    119|   expect(view.record.service?.current).toBe(false);
+       |                                        ^
+    120| });
+    121|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  01:58:23
+   Duration  4.85s (tests 91%, import 7%, transform 2%)
+
