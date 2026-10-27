@@ -10,7 +10,7 @@ import { compareCopy } from "@/features/discovery/compare-copy";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { intentCopy } from "@/features/discovery/intent-copy";
 import { searchAlertCopy } from "@/features/discovery/search-alert-copy";
-import { isRoutableLocale, type PublicLocale } from "@/i18n/config";
+import { isRoutableLocale, localePolicy, type PublicLocale } from "@/i18n/config";
 import { canonicalOrigin, localizedMetadata, localizedPath } from "@/i18n/seo";
 import { hostOrigins } from "@/server/config/hosts";
 import { readApprovedContent } from "@/server/content/public";
@@ -37,6 +37,7 @@ export async function publicPageMetadata(input: {
   title?: string;
   description?: string;
   availableIn?: readonly PublicLocale[];
+  indexable?: boolean;
 }): Promise<Metadata> {
   if (!isRoutableLocale(input.locale)) notFound();
   const origin = publicSeoOrigin();
@@ -111,6 +112,7 @@ export async function publicContentMetadata(
     title: content?.title,
     description: content?.paragraphs.join(" "),
     availableIn: content ? [locale] : [],
+    indexable: Boolean(content) && localePolicy(locale).indexable,
   });
   return content
     ? metadata
@@ -165,6 +167,7 @@ export async function publicListingMetadata(input: {
           ? copy.unavailable
           : copy.failed,
     availableIn,
+    indexable: result?.status === "listing" && result.listing.indexable === true,
   });
 }
 

@@ -4,7 +4,7 @@ import { cache } from "react";
 import { getDb } from "@/db/client";
 import { loadAreaGuide, loadAreaInventory } from "@/features/discovery/area-data";
 import { AreaDetail } from "@/features/discovery/area-detail";
-import { isRoutableLocale, type PublicLocale } from "@/i18n/config";
+import { isRoutableLocale, localePolicy, type PublicLocale } from "@/i18n/config";
 import { publicPageMetadata } from "@/server/seo/public-metadata";
 
 // Metadata and the page use the same observed approved edition and failure decision.
@@ -30,6 +30,7 @@ export async function generateMetadata({
     title: content?.title,
     description: content?.paragraphs.join(" "),
     availableIn: content ? [locale] : [],
+    indexable: Boolean(content) && localePolicy(locale).indexable,
   });
   return content
     ? metadata

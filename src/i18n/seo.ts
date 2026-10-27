@@ -50,6 +50,8 @@ export interface LocalizedMetadataInput {
   readonly origin?: URL | null;
   // Exact published siblings; never generated translations or unavailable pages.
   readonly availableIn?: readonly PublicLocale[];
+  // Content publication and locale approval can hold indexing while preserving its route.
+  readonly indexable?: boolean;
   readonly staging?: boolean;
 }
 export function localizedMetadata({
@@ -57,9 +59,10 @@ export function localizedMetadata({
   path,
   origin = canonicalOrigin(),
   availableIn = publicLocales,
+  indexable = true,
   staging = stagingEnabled(),
 }: LocalizedMetadataInput): Pick<Metadata, "alternates" | "robots"> {
-  const robots = { index: !staging, follow: !staging };
+  const robots = { index: !staging && indexable && availableIn.includes(locale), follow: !staging };
   if (!origin) return { robots };
   const url = (target: PublicLocale) => new URL(localizedPath(target, path), origin).toString();
   const siblings = publicLocales.filter((target) => availableIn.includes(target));
