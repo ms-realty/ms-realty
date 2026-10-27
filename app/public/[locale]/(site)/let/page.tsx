@@ -1,4 +1,4 @@
-// P15: landlord consultation without property-management claims.
+// P18 / F28: landlord consultation without property-management claims.
 import { ContentScreen } from "@/features/discovery/content-screen";
 import { publicContentMetadata } from "@/server/seo/public-metadata";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {

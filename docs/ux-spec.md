@@ -164,6 +164,8 @@ All paths below are under the appropriate host and `/{locale}` unless a legacy m
 
 C15 and O31 are retired, with no replacement financial route. Do not create disabled “coming soon” statement tabs. Architecture route families prevail if route naming is normalized during implementation; retain stable object identity and these task contracts.
 
+Current implementation aliases and their unchanged screen contracts are recorded in [the route contract mapping](delivery/route-contract-mapping.md).
+
 ### 03.3 Return context, links and interruptions
 
 Back from a Listing restores committed filters, sort, loaded-page position and focused result when possible. Opening a filter sheet or media viewer adds a meaningful closeable state; Back closes that state before leaving its parent. Direct links open a complete parent context with a sensible close destination even when there is no previous in-app history.

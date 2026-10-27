@@ -1,4 +1,4 @@
-// P14: supply consultation; public explanation requires exact approved CMS content.
+// P17 / F27: seller consultation; public explanation requires exact approved CMS content.
 import { ContentScreen } from "@/features/discovery/content-screen";
 import { publicContentMetadata } from "@/server/seo/public-metadata";
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
