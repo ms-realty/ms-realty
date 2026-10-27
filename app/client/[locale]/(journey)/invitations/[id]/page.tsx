@@ -2,6 +2,7 @@
 
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
+import { clientWorkflowCopy } from "@/features/cases/client-workflow-copy";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
 import {
   accessErrorMessage,
@@ -61,6 +62,7 @@ export default async function InvitationPage({
               <li key={capability}>{capabilityLabel(locale, capability)}</li>
             ))}
           </ul>
+          <p>{clientWorkflowCopy(locale).visibilityBoundary}</p>
           <p>
             {fill(c.invitationRecipient, {
               email: view.details.recipientEmail,

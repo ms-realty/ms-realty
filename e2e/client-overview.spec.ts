@@ -6,6 +6,7 @@ import { eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { clientWorkflowCopy } from "../src/features/cases/client-workflow-copy";
 import { caseCopy } from "../src/features/cases/copy";
 import { lifecycleCopy } from "../src/features/cases/lifecycle-copy";
 import { publicLocales } from "../src/i18n/config";
@@ -154,7 +155,7 @@ for (const javaScriptEnabled of [true, false]) {
           await expect(page.getByRole("heading", { level: 1 })).toHaveText(data.first.title);
           await expect(page.locator("[data-workflow-reference]")).toHaveText(data.first.reference);
           await expect(
-            page.getByRole("heading", { name: data.summary, exact: true }),
+            page.getByRole("heading", { name: clientWorkflowCopy("en").reviewBrief, exact: true }),
           ).toBeVisible();
           await expect(page.getByRole("heading", { name: data.name, exact: true })).toBeVisible();
           await expect(
@@ -166,7 +167,7 @@ for (const javaScriptEnabled of [true, false]) {
           await expect(page.getByText(data.internal, { exact: true })).toHaveCount(0);
           await expect(page.getByText(data.second.reference, { exact: false })).toHaveCount(0);
           await expect(page.getByText(data.excluded.reference, { exact: false })).toHaveCount(0);
-          await expect(page.locator(`time[datetime="${data.dueAt.toISOString()}"]`)).toBeVisible();
+          await expect(page.locator(`time[datetime="${data.dueAt.toISOString()}"]`)).toHaveCount(0);
           await expect(
             page
               .getByRole("complementary", { name: caseCopy("en").owned })
@@ -210,7 +211,7 @@ for (const javaScriptEnabled of [true, false]) {
           await page.goBack();
           await expect(page).toHaveURL(overview);
           await expect(
-            page.getByRole("heading", { name: data.summary, exact: true }),
+            page.getByRole("heading", { name: clientWorkflowCopy("en").reviewBrief, exact: true }),
           ).toBeVisible();
           await expect(page.getByRole("main").locator("form")).toHaveCount(0);
         }
@@ -247,7 +248,10 @@ for (const javaScriptEnabled of [true, false]) {
             await page.goBack();
             await expect(page).toHaveURL(/\/en\/overview(?:#main)?$/);
             await expect(
-              page.getByRole("heading", { name: data.summary, exact: true }),
+              page.getByRole("heading", {
+                name: clientWorkflowCopy("en").reviewBrief,
+                exact: true,
+              }),
             ).toBeVisible();
             // Native history may restore an open details; explicitly close it through its control.
             if (await menu.evaluate((element) => element.closest("details")?.open))
@@ -267,7 +271,9 @@ for (const javaScriptEnabled of [true, false]) {
         await page.getByRole("link", { name: "עברית", exact: true }).click();
         await expect(page).toHaveURL(/\/he\/overview(?:#main)?$/);
         await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-        await expect(page.getByRole("heading", { name: data.summary, exact: true })).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: clientWorkflowCopy("he").reviewBrief, exact: true }),
+        ).toBeVisible();
         await expect(page.getByRole("heading", { name: data.name, exact: true })).toBeVisible();
         await page.getByRole("button", { name: "תפריט", exact: true }).click();
         for (const destination of [
@@ -324,7 +330,9 @@ for (const javaScriptEnabled of [true, false]) {
             exact: true,
           }),
         ).toHaveAttribute("href", `/en/overview/${data.second.id}`);
-        await expect(page.getByRole("heading", { name: data.summary, exact: true })).toHaveCount(0);
+        await expect(
+          page.getByRole("heading", { name: clientWorkflowCopy("en").reviewBrief, exact: true }),
+        ).toHaveCount(0);
         await expect(page.getByText(data.excluded.reference, { exact: false })).toHaveCount(0);
         await fitsViewport(page, 320);
         await page.screenshot({

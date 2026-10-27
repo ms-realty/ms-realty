@@ -41,6 +41,7 @@ import { hashRequest, keyedHash } from "../crypto";
 import type { Executor } from "../db";
 import { caseDocumentPurposes } from "../documents/purposes";
 import { AppError } from "../errors";
+import { collectInquiryAttachmentPrivacy } from "../inquiries/attachment-privacy";
 import { collectAgencySources } from "./agency-sources";
 import type { DisclosureSupplement } from "./export-supplements";
 import { collectPhotographySources } from "./photography-sources";
@@ -368,8 +369,9 @@ export async function collectExportInventory(
         digest: digest({ inquiry, received }),
       });
   }
-  const files: PrivacyExportSource[] = [];
-  let filesBlocked = false;
+  const attachments = await collectInquiryAttachmentPrivacy(db, actor, subject.partyId);
+  const files: PrivacyExportSource[] = [...attachments.sources];
+  let filesBlocked = attachments.blocked;
   const related = or(
     caseIds.length ? inArray(documents.caseId, caseIds) : undefined,
     inArray(

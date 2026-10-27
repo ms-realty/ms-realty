@@ -9,10 +9,15 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { interestMachine } from "@/domain/interest";
 import { serviceCaseContextSchema } from "@/domain/service-scope";
+import { ApprovedMedia } from "@/features/discovery/approved-media";
+import { discoveryCopy } from "@/features/discovery/copy";
+import { Availability } from "@/features/discovery/listing-card";
+import { listingHref, locality, priceText } from "@/features/discovery/presentation";
 import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
 import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import type { Session } from "@/server/auth/sessions";
+import { readClientContinuity, readClientInterestCards } from "@/server/cases/client-continuity";
 import { listCases, readCase, readCaseMessages, readInterestContext } from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
 import { getEnv } from "@/server/config/env";
@@ -32,6 +37,7 @@ import { StaffPage } from "../shell/staff-ui";
 import { CoverageOwner } from "../work/coverage-owner";
 import { privateRead } from "../work/screens";
 import { workflowAction } from "./actions";
+import { clientWorkflowCopy } from "./client-workflow-copy";
 import {
   type WorkflowCommand,
   workflowFields,
@@ -46,7 +52,8 @@ import { lifecycleCopy } from "./lifecycle-copy";
 import { matchingCopy } from "./matching-copy";
 import { ownerPreviewCopy } from "./owner-preview-copy";
 
-export const workflowLink = "font-semibold text-accent underline underline-offset-4";
+export const workflowLink =
+  "inline-flex min-h-control min-w-control items-center rounded-control py-2 font-semibold text-accent underline underline-offset-4";
 export type ScreenProps = { locale: string; session: Session };
 export function WorkflowPage({
   session,
@@ -78,7 +85,7 @@ export function WorkflowPage({
         <h1
           className={
             clientOverview
-              ? "font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em] lg:text-title"
+              ? "font-display text-heading font-semibold lg:text-title"
               : "text-heading font-semibold"
           }
         >
@@ -280,6 +287,17 @@ export async function CaseIndexScreen(
                 <p>
                   {c.owned}: {row.ownerName ?? "—"}
                 </p>
+                <p dir="auto">{row.nextAction ?? c.noAction}</p>
+                <p className="text-dense text-text-muted">
+                  {row.dueAt ? (
+                    <>
+                      <strong>{c.due}:</strong>{" "}
+                      <WorkflowTime value={row.dueAt} locale={props.locale} zoneLabel />
+                    </>
+                  ) : (
+                    clientWorkflowCopy(props.locale).notScheduled
+                  )}
+                </p>
                 <p className="text-text-muted">
                   {row.kind in c ? c[row.kind as "buyer"] : workflowLabel(row.kind, props.locale)} ·{" "}
                   {workflowLabel(row.stage, props.locale)} ·{" "}
@@ -292,7 +310,14 @@ export async function CaseIndexScreen(
           </ul>
         </>
       ) : (
-        <p>{props.session.account.kind === "staff" ? c.empty : c.emptyClient}</p>
+        <div className="space-y-4">
+          <p>{props.session.account.kind === "staff" ? c.empty : c.emptyClient}</p>
+          {props.session.account.kind === "client" ? (
+            <a className={buttonClass("primary")} href="tel:+359879696870">
+              {clientWorkflowCopy(props.locale).contactTeam}
+            </a>
+          ) : null}
+        </div>
       )}
     </WorkflowPage>
   );
@@ -396,10 +421,12 @@ export function ClientCaseOverview({
   view,
   targetBasePath = "",
   nextSteps,
+  history,
 }: {
   locale: string;
   targetBasePath?: string;
   nextSteps?: ReactNode;
+  history?: ReactNode;
   view: Pick<
     Awaited<ReturnType<typeof readCase>>,
     "record" | "brief" | "canAcknowledge" | "canPost"
@@ -410,8 +437,25 @@ export function ClientCaseOverview({
     brief = view.brief[0];
   const active = row.disposition === "active";
   const reviewBrief = active && view.canAcknowledge && brief && !brief.clientAcknowledgedAt;
-  const primaryHref = `${targetBasePath}${reviewBrief || !view.canPost ? "#case-brief" : "#case-conversation"}`;
-  const primaryLabel = reviewBrief ? c.requirements : view.canPost ? c.messages : c.brief;
+  const client = clientWorkflowCopy(locale);
+  // One source-bound action model: a requirements review never borrows an unrelated due time.
+  const step = {
+    title: !active
+      ? row.disposition === "closed"
+        ? c.closedSummary
+        : c.pausedSummary
+      : reviewBrief
+        ? client.reviewBrief
+        : (row.nextAction ?? c.noAction),
+    responsibility: reviewBrief ? client.you : client.responsibilityUnknown,
+    dueAt: active && !reviewBrief && row.nextAction ? row.dueAt : null,
+    href: reviewBrief
+      ? `${targetBasePath}#case-brief`
+      : view.canPost
+        ? `/${locale}/messages/${row.id}`
+        : "tel:+359879696870",
+    label: reviewBrief ? c.requirements : view.canPost ? client.askAboutStep : client.contactTeam,
+  };
   return (
     <div className="min-w-0 space-y-6 [overflow-wrap:anywhere]">
       <p className="text-body text-text-muted">
@@ -430,15 +474,8 @@ export function ClientCaseOverview({
             className="min-w-0 space-y-5 rounded-[1rem] bg-brand-tint p-6"
             aria-label={c.clientSummary}
           >
-            <h2
-              dir="auto"
-              className="font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em]"
-            >
-              {active
-                ? (row.nextAction ?? c.noAction)
-                : row.disposition === "closed"
-                  ? c.closedSummary
-                  : c.pausedSummary}
+            <h2 dir="auto" className="font-display text-heading font-semibold">
+              {step.title}
             </h2>
             {!active &&
             (row.dispositionReason || row.closureOutcome || row.waitingOn || row.reviewAt) ? (
@@ -466,27 +503,39 @@ export function ClientCaseOverview({
                 ) : null}
               </div>
             ) : null}
-            {active && row.dueAt ? (
+            {active ? <p>{step.responsibility}</p> : null}
+            {step.dueAt ? (
               <p>
-                <WorkflowTime value={row.dueAt} locale={locale} zoneLabel />
+                <strong>{c.due}:</strong>{" "}
+                <WorkflowTime value={step.dueAt} locale={locale} zoneLabel />
               </p>
+            ) : active ? (
+              <p className="text-dense text-text-muted">{client.notScheduled}</p>
+            ) : null}
+            {row.disposition === "closed" ? (
+              <div className="space-y-2">
+                <h3 className="font-semibold">{client.remaining}</h3>
+                <p>{client.remainingUnknown}</p>
+                <p>
+                  {client.broker}: {row.ownerName ?? "—"}
+                </p>
+              </div>
             ) : null}
             <div className="flex flex-wrap items-center gap-4">
               <a
-                href={primaryHref}
+                href={step.href}
                 className="inline-flex min-h-control items-center justify-center rounded-control bg-action px-4 py-3 text-dense font-semibold text-text-inverse hover:bg-action-hover active:bg-action-pressed"
               >
-                {primaryLabel}
+                {step.label}
               </a>
             </div>
           </section>
           {nextSteps}
+          {history}
         </div>
         <aside className="min-w-0 space-y-5 rounded-[1rem] bg-subtle p-6" aria-label={c.owned}>
           <p className="text-dense text-text-muted">{c.owned}</p>
-          <h2 className="font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em]">
-            {row.ownerName ?? "—"}
-          </h2>
+          <h2 className="font-display text-heading font-semibold">{row.ownerName ?? "—"}</h2>
           <a
             href={`/${locale}/messages/${row.id}`}
             className="inline-flex min-h-control w-full items-center justify-center rounded-control bg-action px-4 py-3 text-dense font-semibold text-text-inverse hover:bg-action-hover active:bg-action-pressed"
@@ -512,12 +561,52 @@ export async function CaseScreen(
   const row = view.record;
   const path = `/${props.locale}/${staff ? "cases" : (props.pane ?? "overview")}/${row.id}`;
   const service = row.kind === "service_intake";
+  const clientLocale = isPublicLocale(props.locale) ? props.locale : "bg";
+  const clientCopy = clientWorkflowCopy(props.locale);
+  const timeline =
+    !staff && props.pane === "overview"
+      ? await readClientContinuity(getDb(), props.session, row.id)
+      : [];
+  const history = timeline.length ? (
+    <WorkflowSection title={clientCopy.history} id="case-history">
+      <ol className="space-y-4">
+        {timeline.map((event) => (
+          <li key={event.id}>
+            <p>
+              {event.kind === "stage"
+                ? workflowLabel(event.stage ?? "", props.locale)
+                : event.kind === "opened"
+                  ? clientCopy.caseOpened
+                  : event.kind === "brief"
+                    ? clientCopy.briefShared
+                    : clientCopy.briefAcknowledged}
+            </p>
+            <WorkflowTime value={event.at} locale={props.locale} zoneLabel />
+          </li>
+        ))}
+      </ol>
+    </WorkflowSection>
+  ) : null;
+  const interestCards =
+    !staff && !service && props.pane !== "messages"
+      ? await readClientInterestCards(getDb(), props.session, row.id, clientLocale)
+      : new Map();
   if (!service && !staff && props.compactClientOverview && props.pane === "overview") {
     // The compact entry still uses readCase's current authorization and client projection.
     // Its links need no conversation history or signed manual-action forms.
-    const agenda = await listAppointments(getDb(), props.session, row.id);
+    const agenda = await listAppointments(
+      getDb(),
+      props.session,
+      row.id,
+      !staff ? clientLocale : undefined,
+    );
     const appointment = agenda.length === 1 ? agenda[0] : undefined;
     const links = [
+      ...view.ownerPreviews.map((reference) => ({
+        label: `${ownerPreviewCopy(props.locale).ownerLink} · ${reference}`,
+        href: `/${props.locale}/properties/${row.id}/preview?listing=${encodeURIComponent(reference)}`,
+        detail: null,
+      })),
       {
         label: c.appointments,
         href: `/${props.locale}/appointments${appointment ? `/${appointment.id}` : ""}`,
@@ -551,6 +640,7 @@ export async function CaseScreen(
         <ClientCaseOverview
           locale={props.locale}
           view={view}
+          history={history}
           targetBasePath={path}
           nextSteps={
             <section className="min-w-0 space-y-3" aria-label={c.nextSteps}>
@@ -589,7 +679,9 @@ export async function CaseScreen(
   const focusedConversation = !staff && props.pane === "messages";
   const showAppointments = !service && !focusedConversation;
   const thread = await readCaseMessages(getDb(), props.session, row.id);
-  const agenda = showAppointments ? await listAppointments(getDb(), props.session, row.id) : [];
+  const agenda = showAppointments
+    ? await listAppointments(getDb(), props.session, row.id, !staff ? clientLocale : undefined)
+    : [];
   const commitments = staff ? await listTasks(getDb(), props.session, { caseId: row.id }) : null;
   const matching =
     staff && view.canAddInterest && ["buyer", "tenant"].includes(row.kind)
@@ -614,7 +706,9 @@ export async function CaseScreen(
           staff={staff}
         />
       ) : null}
-      {!staff && showOverview ? <ClientCaseOverview locale={props.locale} view={view} /> : null}
+      {!staff && showOverview ? (
+        <ClientCaseOverview locale={props.locale} view={view} history={history} />
+      ) : null}
       {staff && view.canReadInternal ? (
         <StaffCaseContacts locale={props.locale} session={props.session} id={row.id} />
       ) : null}
@@ -939,16 +1033,52 @@ export async function CaseScreen(
                   id={`interest-${interest.id}`}
                   className="scroll-mt-6 space-y-3 border-b border-border pb-5"
                 >
-                  <a
-                    className={workflowLink}
-                    href={
-                      staff
-                        ? `/${props.locale}/inventory/${interest.reference}`
-                        : `${getEnv().hosts.public}/bg/properties/${interest.reference}/${interest.reference.toLowerCase()}`
-                    }
-                  >
-                    {interest.reference}
-                  </a>
+                  {!staff ? (
+                    (() => {
+                      const card = interestCards.get(interest.id);
+                      const copy = discoveryCopy(clientLocale);
+                      return card ? (
+                        <div className="grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
+                          <ApprovedMedia
+                            media={card.cover}
+                            unavailable={copy.noPhoto}
+                            sizes="12rem"
+                          />
+                          <div className="space-y-2">
+                            <h3 className="text-subheading font-semibold">
+                              <a
+                                className={workflowLink}
+                                href={`${getEnv().hosts.public}${listingHref(card, clientLocale)}`}
+                              >
+                                {card.title ?? card.reference}
+                              </a>
+                            </h3>
+                            <p>
+                              <bdi>{card.reference}</bdi> · {locality(card)}
+                            </p>
+                            <p className="text-price font-semibold">
+                              <bdi>{priceText(card.price, clientLocale, copy)}</bdi>
+                            </p>
+                            <Availability listing={card} locale={clientLocale} copy={copy} />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <p>
+                            <bdi>{interest.reference}</bdi>
+                          </p>
+                          <p>{clientCopy.propertyUnknown}</p>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <a
+                      className={workflowLink}
+                      href={`/${props.locale}/inventory/${interest.reference}`}
+                    >
+                      {interest.reference}
+                    </a>
+                  )}
                   <p>{c[interest.state]}</p>
                   {view.canRequestProposal &&
                   row.disposition === "active" &&
@@ -989,7 +1119,9 @@ export async function CaseScreen(
                       {interest.explanation
                         .filter((text): text is string => typeof text === "string")
                         .map((text) => (
-                          <li key={text}>{text}</li>
+                          <li key={text} dir="auto">
+                            {text}
+                          </li>
                         ))}
                     </ul>
                   ) : null}
@@ -1006,39 +1138,71 @@ export async function CaseScreen(
                       <summary className="min-h-control cursor-pointer py-3 font-semibold text-action underline underline-offset-4">
                         {c.reviewSelection}
                       </summary>
-                      <BoundWorkflowForm
-                        {...props}
-                        command="feedback"
-                        id={interest.id}
-                        revision={interest.version}
-                        path={path}
-                        fields={[
-                          {
-                            name: "state",
-                            label: c.action,
-                            type: "select",
-                            required: true,
-                            options: [
-                              { value: "", label: c.chooseAction },
-                              ...(["shortlisted", "declined"] as const)
-                                .filter(
-                                  (state) =>
-                                    interestMachine.check(interest.state, state).outcome ===
-                                    "allowed",
-                                )
-                                .map((value) => ({
-                                  value,
-                                  label: value === "shortlisted" ? c.shortlist : c.decline,
-                                })),
-                            ],
-                          },
-                          { name: "reason", label: c.feedback, type: "textarea" },
-                        ]}
-                        values={{
-                          state: "",
-                        }}
-                        submit={c.respond}
-                      />
+                      {!staff ? (
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {(["shortlisted", "declined"] as const)
+                            .filter(
+                              (state) =>
+                                interestMachine.check(interest.state, state).outcome === "allowed",
+                            )
+                            .map((state) => (
+                              <BoundWorkflowForm
+                                key={state}
+                                {...props}
+                                command="feedback"
+                                id={interest.id}
+                                nativeIdentity={`${workflowScope("feedback", interest.id)}:${state}`}
+                                revision={interest.version}
+                                path={path}
+                                fields={[
+                                  { name: "state", label: c.action, type: "hidden" },
+                                  {
+                                    name: "reason",
+                                    label: c.feedback,
+                                    type: "textarea",
+                                    required: state === "declined",
+                                  },
+                                ]}
+                                values={{ state }}
+                                submit={state === "declined" ? c.decline : c.shortlist}
+                              />
+                            ))}
+                        </div>
+                      ) : (
+                        <BoundWorkflowForm
+                          {...props}
+                          command="feedback"
+                          id={interest.id}
+                          revision={interest.version}
+                          path={path}
+                          fields={[
+                            {
+                              name: "state",
+                              label: c.action,
+                              type: "select",
+                              required: true,
+                              options: [
+                                { value: "", label: c.chooseAction },
+                                ...(["shortlisted", "declined"] as const)
+                                  .filter(
+                                    (state) =>
+                                      interestMachine.check(interest.state, state).outcome ===
+                                      "allowed",
+                                  )
+                                  .map((value) => ({
+                                    value,
+                                    label: value === "shortlisted" ? c.shortlist : c.decline,
+                                  })),
+                              ],
+                            },
+                            { name: "reason", label: c.feedback, type: "textarea" },
+                          ]}
+                          values={{
+                            state: "",
+                          }}
+                          submit={c.respond}
+                        />
+                      )}
                     </details>
                   ) : null}
                 </li>
@@ -1111,7 +1275,13 @@ export async function CaseScreen(
         <WorkflowSection title={c.messages} id="case-conversation" showTitle={!focusedConversation}>
           <p>{c.messageNote}</p>
           {thread.length ? (
-            <ol className="space-y-5">
+            <ol
+              role="log"
+              aria-label={c.messages}
+              aria-live="polite"
+              aria-relevant="additions"
+              className="space-y-5"
+            >
               {thread.map((message) => (
                 <li
                   key={message.id}
@@ -1139,7 +1309,9 @@ export async function CaseScreen(
                       zoneLabel={props.session.account.kind === "client"}
                     />
                   </p>
-                  <p className="whitespace-pre-wrap">{message.body}</p>
+                  <p dir="auto" className="whitespace-pre-wrap">
+                    {message.body}
+                  </p>
                 </li>
               ))}
             </ol>
@@ -1215,15 +1387,40 @@ export function AppointmentList(
             className={workflowLink}
             href={`/${props.locale}/${props.session.account.kind === "staff" ? "calendar" : "appointments"}/${row.id}`}
           >
-            {row.reference}
+            <span dir="auto">{row.listingTitle ?? row.caseTitle ?? c.appointments}</span>
           </a>
+          <p className="text-caption text-text-muted">
+            <bdi>{row.reference}</bdi>
+            {row.listingReference ? (
+              <>
+                {" "}
+                · <bdi>{row.listingReference}</bdi>
+              </>
+            ) : null}
+          </p>
           <p>{c[row.state]}</p>
           <p>{row.hostName}</p>
-          <WorkflowTime
-            value={row.confirmedStartsAt ?? row.proposedStartsAt}
-            locale={props.locale}
-            zoneLabel={props.session.account.kind === "client"}
-          />
+          {(row.confirmedStartsAt ?? row.proposedStartsAt) ? (
+            <p>
+              <strong>
+                {["cancelled", "declined", "completed", "no_show"].includes(row.state)
+                  ? c.previousTime
+                  : row.confirmedStartsAt
+                    ? c.confirmedTime
+                    : c.proposedTime}
+                :
+              </strong>{" "}
+              <WorkflowTimeRange
+                start={(row.confirmedStartsAt ?? row.proposedStartsAt) as Date}
+                end={row.confirmedEndsAt ?? row.proposedEndsAt}
+                locale={props.locale}
+                zone={row.timezone}
+                zoneLabel={props.session.account.kind === "client"}
+              />
+            </p>
+          ) : (
+            <p>{c.requestNote}</p>
+          )}
         </li>
       ))}
     </ul>
@@ -1254,7 +1451,13 @@ export async function WorkflowStatusScreen(
     await privateRead(() => readInquiry(getDb(), props.session, id));
     destination = `/${props.locale}/inquiries/${id}`;
   } else if (
-    ["arrange", "appointment", "appointmentHost", "appointmentHostHandover"].includes(command)
+    [
+      "arrange",
+      "appointment",
+      "appointmentReply",
+      "appointmentHost",
+      "appointmentHostHandover",
+    ].includes(command)
   ) {
     await privateRead(() => readAppointment(getDb(), props.session, id));
     destination = `/${props.locale}/${props.session.account.kind === "staff" ? "calendar" : "appointments"}/${id}`;
@@ -1265,6 +1468,8 @@ export async function WorkflowStatusScreen(
     await privateRead(() => caseFor(getDb(), props.session, id));
     destination = `/${props.locale}/${props.session.account.kind === "staff" ? "cases" : "overview"}/${id}`;
   }
+  if (command === "message" && props.session.account.kind === "client")
+    destination = `/${props.locale}/messages/${id}#case-conversation`;
   if (command === "emailDraft" || command === "emailApprove") {
     if (props.session.account.kind !== "staff") notFound();
     destination += "/email";

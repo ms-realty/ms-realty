@@ -47,6 +47,8 @@ export const privacySafetyEffect = z.discriminatedUnion("kind", [
       eraseAliases: z.boolean(),
       contactIds: z.array(z.uuid()).max(500),
       clientProfileIds: z.array(z.uuid()).max(500),
+      personalSavedIds: z.array(z.uuid()).max(500).optional(),
+      savedTransferIds: z.array(z.uuid()).max(500).optional(),
       searchSubscriptionIds: z.array(z.uuid()).max(500),
       inventoryDigest: digest,
     })
