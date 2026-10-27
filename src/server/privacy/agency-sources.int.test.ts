@@ -142,60 +142,63 @@ describe("B10/AT45 exact agency source classification", () => {
         expect(copy).not.toContain(value);
   });
 
-  it.each(["terms", "wording", "consent", "history"] as const)(
-    "fences an unversioned %s change in exact category review and issued delivery",
-    async (change) => {
-      for (const issued of [false, true]) {
-        const f = await fixture();
-        await resolveCoverage(f);
-        if (issued) await issueCoverage(f);
-        if (change === "terms")
+  it.each(
+    (["terms", "wording", "consent", "history"] as const).flatMap((change) => [
+      { change, state: "before issue", issued: false },
+      { change, state: "after issue", issued: true },
+    ]),
+  )(
+    "fences an unversioned $change change $state in exact category review and issued delivery",
+    async ({ change, issued }) => {
+      const f = await fixture();
+      await resolveCoverage(f);
+      if (issued) await issueCoverage(f);
+      if (change === "terms")
+        await t.db
+          .update(agencyPartnerTerms)
+          .set({ termsText: "SYNTHETIC_CHANGED_TERMS", updatedAt: f.agency.terms.updatedAt })
+          .where(eq(agencyPartnerTerms.id, f.agency.terms.id));
+      if (change === "wording")
+        await t.db
+          .update(agencyCaseReviews)
+          .set({ reviewText: "SYNTHETIC_CHANGED_WORDING", updatedAt: f.agency.review.updatedAt })
+          .where(eq(agencyCaseReviews.id, f.agency.review.id));
+      if (change === "consent")
+        await t.db
+          .update(agencyCaseReviews)
+          .set({ consentState: "withdrawn", updatedAt: f.agency.review.updatedAt })
+          .where(eq(agencyCaseReviews.id, f.agency.review.id));
+      if (change === "history")
+        await syntheticAgencyHistory(t.db, f.staff.id, "case_review", f.agency.review.id, {
+          ...f.agency.review,
+          consentState: "withdrawn",
+        });
+      expect(
+        (
           await t.db
-            .update(agencyPartnerTerms)
-            .set({ termsText: "SYNTHETIC_CHANGED_TERMS", updatedAt: f.agency.terms.updatedAt })
-            .where(eq(agencyPartnerTerms.id, f.agency.terms.id));
-        if (change === "wording")
+            .select()
+            .from(agencyPartnerTerms)
+            .where(eq(agencyPartnerTerms.id, f.agency.terms.id))
+        )[0]?.version,
+      ).toBe(f.agency.terms.version);
+      expect(
+        (
           await t.db
-            .update(agencyCaseReviews)
-            .set({ reviewText: "SYNTHETIC_CHANGED_WORDING", updatedAt: f.agency.review.updatedAt })
-            .where(eq(agencyCaseReviews.id, f.agency.review.id));
-        if (change === "consent")
-          await t.db
-            .update(agencyCaseReviews)
-            .set({ consentState: "withdrawn", updatedAt: f.agency.review.updatedAt })
-            .where(eq(agencyCaseReviews.id, f.agency.review.id));
-        if (change === "history")
-          await syntheticAgencyHistory(t.db, f.staff.id, "case_review", f.agency.review.id, {
-            ...f.agency.review,
-            consentState: "withdrawn",
-          });
-        expect(
-          (
-            await t.db
-              .select()
-              .from(agencyPartnerTerms)
-              .where(eq(agencyPartnerTerms.id, f.agency.terms.id))
-          )[0]?.version,
-        ).toBe(f.agency.terms.version);
-        expect(
-          (
-            await t.db
-              .select()
-              .from(agencyCaseReviews)
-              .where(eq(agencyCaseReviews.id, f.agency.review.id))
-          )[0]?.version,
-        ).toBe(f.agency.review.version);
-        expect((await work(f))?.review).toBeNull();
-        if (!issued)
-          await expect(issueCoverage(f)).rejects.toMatchObject({ code: "version_conflict" });
-        else {
-          await expect(
-            completePrivacyExport(t.db, f.staff.session, await completion(f), storage),
-          ).rejects.toMatchObject({ code: "version_conflict" });
-          await expect(
-            privacyExportDownload(t.db, f.client.session, f.exportId),
-          ).rejects.toMatchObject({ code: "not_found" });
-        }
+            .select()
+            .from(agencyCaseReviews)
+            .where(eq(agencyCaseReviews.id, f.agency.review.id))
+        )[0]?.version,
+      ).toBe(f.agency.review.version);
+      expect((await work(f))?.review).toBeNull();
+      if (!issued)
+        await expect(issueCoverage(f)).rejects.toMatchObject({ code: "version_conflict" });
+      else {
+        await expect(
+          completePrivacyExport(t.db, f.staff.session, await completion(f), storage),
+        ).rejects.toMatchObject({ code: "version_conflict" });
+        await expect(
+          privacyExportDownload(t.db, f.client.session, f.exportId),
+        ).rejects.toMatchObject({ code: "not_found" });
       }
     },
   );
