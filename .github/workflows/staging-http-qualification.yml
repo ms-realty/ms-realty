@@ -40,6 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -60,10 +61,11 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_SOURCE" =~ ^[a-f0-9]{40}$ ]]
           [[ "$DEPLOYMENT_RUN_ID" =~ ^[1-9][0-9]*$ ]]
-          test "$GITHUB_REF" = refs/heads/main
+          test "$GITHUB_REF" = refs/heads/codex/msr-staging
+          test "$GITHUB_SHA" = "$EXPECTED_SOURCE"
           gh api "repos/ms-realty/ms-realty/actions/runs/${DEPLOYMENT_RUN_ID}" > "$RUNNER_TEMP/deployment-run.json"
+          # The guard also requires an exact clean checkout integrated in origin/main.
           node scripts/staging-http-qualification.mjs guard "$RUNNER_TEMP/deployment-run.json"
-          git merge-base --is-ancestor "$EXPECTED_SOURCE" HEAD
 
   qualify:
     needs: prerequisites
@@ -73,6 +75,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.prerequisites.outputs.source }}
           path: verifier
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

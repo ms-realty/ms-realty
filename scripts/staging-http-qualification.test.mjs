@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
+import { JSDOM } from "jsdom";
 import {
   accountId,
   createPacer,
@@ -9,13 +13,16 @@ import {
   observeTransport,
   origins,
   protocol,
+  qualificationCoverage,
   qualificationPassed,
   readBoundedBody,
+  sourcePageChecks,
   stagingUrl,
   validateCandidate,
   validateDispatch,
   validateMediaProof,
   validateProviderRead,
+  validateSourceCheckout,
   zoneId,
 } from "./staging-http-qualification.mjs";
 
@@ -24,7 +31,12 @@ const source = "a".repeat(40),
 const copy = (value) => structuredClone(value);
 const env = {
   GITHUB_REPOSITORY: "ms-realty/ms-realty",
-  GITHUB_REF: "refs/heads/main",
+  GITHUB_EVENT_NAME: "workflow_dispatch",
+  GITHUB_REF: "refs/heads/codex/msr-staging",
+  GITHUB_SHA: source,
+  GITHUB_WORKFLOW_SHA: source,
+  GITHUB_WORKFLOW_REF:
+    "ms-realty/ms-realty/.github/workflows/staging-http-qualification.yml@refs/heads/codex/msr-staging",
   STAGING_ENVIRONMENT_CONFIGURED: "true",
   CLOUDFLARE_ACCOUNT_ID: accountId,
   EXPECTED_SOURCE: source,
@@ -62,10 +74,22 @@ const candidate = {
   },
 };
 
-test("R07/R08 only a successful pinned staging workflow from main resolves the environment", () => {
+test("R07/R08 only the already-permitted staging ref at the exact deployed workflow commit resolves the environment", () => {
   assert.deepEqual(validateDispatch(env, run), { source, runId: "123", attempt: 2, mode: "full" });
   for (const change of [
     { GITHUB_REF: "refs/heads/untrusted" },
+    { GITHUB_REF: "refs/heads/main" },
+    { GITHUB_EVENT_NAME: "push" },
+    { GITHUB_SHA: "c".repeat(40) },
+    { GITHUB_WORKFLOW_SHA: "c".repeat(40) },
+    {
+      GITHUB_WORKFLOW_REF:
+        "ms-realty/ms-realty/.github/workflows/staging.yml@refs/heads/codex/msr-staging",
+    },
+    {
+      GITHUB_WORKFLOW_REF:
+        "ms-realty/ms-realty/.github/workflows/staging-http-qualification.yml@refs/heads/main",
+    },
     { GITHUB_REPOSITORY: "another/repository" },
     { STAGING_ENVIRONMENT_CONFIGURED: "false" },
     { STAGING_SOURCE_QUALIFIED_SHA: "c".repeat(40) },
@@ -86,6 +110,47 @@ test("R07/R08 only a successful pinned staging workflow from main resolves the e
     { run_attempt: 0 },
   ])
     assert.throws(() => validateDispatch(env, { ...run, ...change }));
+});
+
+test("R07/R08 the exact staging checkout must be clean and integrated in reviewed main", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "msr-http-source-"));
+  const git = (...args) => execFileSync("git", args, { cwd: directory, encoding: "utf8" }).trim();
+  const commit = (message) =>
+    git(
+      "-c",
+      "core.hooksPath=/dev/null",
+      "-c",
+      "commit.gpgsign=false",
+      "-c",
+      "user.name=Qualification fixture",
+      "-c",
+      "user.email=fixture@example.invalid",
+      "commit",
+      "--allow-empty",
+      "--quiet",
+      "-m",
+      message,
+    );
+  try {
+    git("init", "--quiet", "--initial-branch=main");
+    await writeFile(join(directory, "source-proof.txt"), "reviewed\n");
+    git("add", "source-proof.txt");
+    commit("Reviewed source");
+    const reviewed = git("rev-parse", "HEAD");
+    git("update-ref", "refs/remotes/origin/main", reviewed);
+    git("checkout", "--quiet", "-b", "codex/msr-staging");
+    assert.doesNotThrow(() => validateSourceCheckout(directory, reviewed));
+    commit("Unreviewed staging branch advance");
+    const unreviewed = git("rev-parse", "HEAD");
+    assert.throws(() => validateSourceCheckout(directory, reviewed));
+    assert.throws(() => validateSourceCheckout(directory, unreviewed));
+    git("update-ref", "refs/remotes/origin/main", unreviewed);
+    assert.doesNotThrow(() => validateSourceCheckout(directory, unreviewed));
+    await writeFile(join(directory, "source-proof.txt"), "unreviewed change\n");
+    assert.throws(() => validateSourceCheckout(directory, unreviewed));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test("R07/R08 production, wrong images and escaped source paths fail before credentials are used", () => {
@@ -209,6 +274,92 @@ test("R07 the portable proof matches the complete selected source corpus", async
   assert(!JSON.stringify(proof).includes("/Users/"));
 });
 
+const sourcePage = {
+  bodyText: "Retained source text",
+  title: "Source gallery",
+  locale: "bg",
+  media: [
+    { url: "https://makler-realty.com/wp-content/uploads/first%20view.jpg" },
+    { url: "https://makler-realty.ru/wp-content/uploads/second.png" },
+  ],
+};
+const sourceGallery = [
+  "/legacy-media/makler-realty.com/wp-content/uploads/first%20view.jpg",
+  "/legacy-media/makler-realty.ru/wp-content/uploads/second.png",
+];
+function galleryChecks(sources, page = sourcePage) {
+  const dom = new JSDOM(
+    '<article lang="bg"><h1>Source gallery</h1><div data-legacy-source-body>Retained source text</div></article>',
+  );
+  try {
+    for (const src of sources) {
+      const image = dom.window.document.createElement("img");
+      if (src !== null) image.setAttribute("src", src);
+      dom.window.document.querySelector("article").append(image);
+    }
+    return sourcePageChecks(dom.window.document, page);
+  } finally {
+    dom.window.close();
+  }
+}
+
+test("R07 source galleries preserve each source host, encoded path and photo order", () => {
+  for (const sources of [
+    sourceGallery,
+    sourceGallery.map((src) => `${origins.public}${src}`),
+    [sourceGallery[0], `${origins.public}${sourceGallery[1]}`],
+  ])
+    assert(Object.values(galleryChecks(sources)).every(Boolean));
+  assert(Object.values(galleryChecks([], { ...sourcePage, media: [] })).every(Boolean));
+});
+
+test("R07 same-count galleries from a different property fail exact source binding", () => {
+  const checks = galleryChecks([
+    "/legacy-media/makler-realty.com/wp-content/uploads/another-property.jpg",
+    sourceGallery[1],
+  ]);
+  assert.equal(checks.galleryCount, true);
+  assert.equal(checks.stagingImages, true);
+  assert.equal(checks.gallerySourcesInOrder, false);
+});
+
+test("R07 same-count galleries with the correct photos in the wrong order fail", () => {
+  const checks = galleryChecks([...sourceGallery].reverse());
+  assert.equal(checks.galleryCount, true);
+  assert.equal(checks.stagingImages, true);
+  assert.equal(checks.gallerySourcesInOrder, false);
+});
+
+test("R07 gallery source binding rejects duplicates, wrong hosts and altered URLs", () => {
+  for (const first of [
+    sourceGallery[1],
+    sourceGallery[0].replace("makler-realty.com", "makler-realty.ru"),
+    sourceGallery[0].replace("%20", " "),
+    `${sourceGallery[0]}?different=1`,
+    `${sourceGallery[0]}#different`,
+    `https://example.test${sourceGallery[0]}`,
+    `//staging.makler-realty.com${sourceGallery[0]}`,
+    null,
+  ])
+    assert.equal(galleryChecks([first, sourceGallery[1]]).gallerySourcesInOrder, false);
+  assert.equal(galleryChecks(sourceGallery.slice(1)).gallerySourcesInOrder, false);
+});
+
+test("R07 passing HTTP content with an empty head leaves SEO and sitemap evidence unqualified", () => {
+  assert(Object.values(galleryChecks(sourceGallery)).every(Boolean));
+  const coverage = qualificationCoverage(candidate);
+  assert.equal(coverage.fullLegacyParityQualified, false);
+  assert.equal(coverage.seoQualified, false);
+  assert.equal(coverage.sitemapConsistencyQualified, false);
+  assert.equal(coverage.requiredSeparateEvidence.expectedSource, candidate.sourceCommit);
+  assert.equal(coverage.requiredSeparateEvidence.expectedImage, candidate.image);
+  assert.equal(coverage.requiredSeparateEvidence.artifact, "staging-url-seo-sitemap-parity.json");
+  assert.equal(
+    coverage.requiredSeparateEvidence.status,
+    "required_separate_candidate_bound_evidence",
+  );
+});
+
 test("R08 eventual healthy responses cannot erase a failed initial access or partial sweep", () => {
   const passing = {
     initialHealth: Array.from({ length: 3 }, () => ({ passed: true })),
@@ -308,7 +459,11 @@ test("R08 bounded transport performs exactly eight reads and never claims a mana
   assert.equal(result.passed, true);
   assert.equal(fixture.calls.length, 8);
   assert.equal(result.mode, "transport");
-  assert.equal(result.fullQualificationPassed, false);
+  assert.equal(result.fullHttpQualificationPassed, false);
+  assert.equal(result.fullLegacyParityQualified, false);
+  assert.equal(result.seoQualified, false);
+  assert.equal(result.sitemapConsistencyQualified, false);
+  assert(!("fullQualificationPassed" in result));
   assert.equal(result.managerSessionVerified, false);
   assert.equal(result.ownerAcceptance, false);
   assert.equal(result.caseSessionGate.locationPath, "/bg/access");
@@ -336,7 +491,8 @@ test("R07/R08 hosted qualification holds the same staging lock and exposes only 
     workflow.includes("group: ms-realty-staging") && workflow.includes("cancel-in-progress: false"),
   );
   assert(workflow.indexOf("needs: prerequisites") < workflow.indexOf("environment: staging"));
-  assert(workflow.includes('test "$GITHUB_REF" = refs/heads/main'));
+  assert(workflow.includes('test "$GITHUB_REF" = refs/heads/codex/msr-staging'));
+  assert(workflow.includes('test "$GITHUB_SHA" = "$EXPECTED_SOURCE"'));
   assert(workflow.includes("if: always()") && workflow.includes("staging-http-qualification/"));
   for (const forbidden of [
     "wrangler deploy",

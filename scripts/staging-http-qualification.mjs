@@ -34,10 +34,17 @@ const save = (path, data) => writeFile(path, `${JSON.stringify(data, null, 2)}\n
 
 export function validateDispatch(env, run) {
   assert.equal(env.GITHUB_REPOSITORY, "ms-realty/ms-realty");
-  assert.equal(env.GITHUB_REF, "refs/heads/main");
+  assert.equal(env.GITHUB_EVENT_NAME, "workflow_dispatch");
+  assert.equal(env.GITHUB_REF, "refs/heads/codex/msr-staging");
   assert.equal(env.STAGING_ENVIRONMENT_CONFIGURED, "true");
   assert.equal(env.CLOUDFLARE_ACCOUNT_ID, accountId);
   assert(hex(40).test(env.EXPECTED_SOURCE ?? ""));
+  assert.equal(env.GITHUB_SHA, env.EXPECTED_SOURCE);
+  assert.equal(env.GITHUB_WORKFLOW_SHA, env.EXPECTED_SOURCE);
+  assert.equal(
+    env.GITHUB_WORKFLOW_REF,
+    "ms-realty/ms-realty/.github/workflows/staging-http-qualification.yml@refs/heads/codex/msr-staging",
+  );
   assert.equal(env.STAGING_SOURCE_QUALIFIED_SHA, env.EXPECTED_SOURCE);
   assert(["transport", "full"].includes(env.QUALIFICATION_MODE));
   assert(/^[1-9][0-9]*$/.test(env.DEPLOYMENT_RUN_ID ?? ""));
@@ -55,6 +62,14 @@ export function validateDispatch(env, run) {
     attempt: run.run_attempt,
     mode: env.QUALIFICATION_MODE,
   };
+}
+
+export function validateSourceCheckout(sourceDir, expectedSource) {
+  assert(hex(40).test(expectedSource ?? ""));
+  const git = (...args) => execFileSync("git", args, { cwd: sourceDir, encoding: "utf8" }).trim();
+  assert.equal(git("rev-parse", "HEAD"), expectedSource);
+  assert.equal(git("status", "--porcelain", "--untracked-files=no"), "");
+  git("merge-base", "--is-ancestor", expectedSource, "refs/remotes/origin/main");
 }
 
 export function validateCandidate(candidate, expectedSource) {
@@ -159,6 +174,66 @@ export function qualificationPassed({
   );
 }
 
+export function sourcePageChecks(document, page) {
+  const body = document.querySelector("[data-legacy-source-body]"),
+    images = [...document.querySelectorAll("article img")],
+    expectedSources = page.media.map((photo) => {
+      const source = new URL(photo.url);
+      assert(/^https?:$/.test(source.protocol));
+      assert(["makler-realty.com", "makler-realty.ru"].includes(source.hostname));
+      assert(
+        !source.username && !source.password && !source.port && !source.search && !source.hash,
+      );
+      assert(source.pathname.startsWith("/wp-content/uploads/"));
+      assert(!/%2f|%5c/i.test(source.pathname));
+      return `/legacy-media/${source.hostname}${source.pathname}`;
+    });
+  return {
+    sourceBody: body?.textContent === page.bodyText.replace(/\r\n?/g, "\n"),
+    title: document.querySelector("article h1")?.textContent === page.title,
+    locale: document.querySelector("article")?.getAttribute("lang") === page.locale,
+    noSourceScriptsOrForms: document.querySelectorAll("article script,article form").length === 0,
+    galleryCount: images.length === expectedSources.length,
+    stagingImages: images.every((image) => {
+      const src = image.getAttribute("src");
+      return (
+        src?.startsWith("/legacy-media/") || src?.startsWith(`${origins.public}/legacy-media/`)
+      );
+    }),
+    gallerySourcesInOrder:
+      images.length === expectedSources.length &&
+      images.every((image, index) => {
+        const src = image.getAttribute("src"),
+          expected = expectedSources[index];
+        return src === expected || src === `${origins.public}${expected}`;
+      }),
+  };
+}
+
+export function qualificationCoverage(candidate) {
+  return {
+    fullHttpQualificationPassed: false,
+    fullLegacyParityQualified: false,
+    seoQualified: false,
+    sitemapConsistencyQualified: false,
+    requiredSeparateEvidence: {
+      artifact: "staging-url-seo-sitemap-parity.json",
+      contract: "docs/delivery/staging-http-qualification.md",
+      status: "required_separate_candidate_bound_evidence",
+      environment: "staging",
+      expectedSource: candidate.sourceCommit,
+      expectedImage: candidate.image,
+      assertions: [
+        "canonical_and_exact_redirect_mapping",
+        "locale_hreflang_and_approved_translation_eligibility",
+        "titles_descriptions_and_structured_data_match_visible_eligible_content",
+        "sitemap_metadata_and_public_projection_revision_consistency",
+        "protected_staging_noindex_and_unapproved_locale_holds_preserved",
+      ],
+    },
+  };
+}
+
 export function errorEvidence(error, secrets = [], depth = 0) {
   if (depth > 4) return { name: "NestedError" };
   const redact = (value) =>
@@ -215,12 +290,12 @@ export async function observeTransport(candidate, secret, { fetcher = fetch } = 
     });
   const report = {
     scope: "bounded protected staging transport and unauthenticated staff access",
+    ...qualificationCoverage(candidate),
     source: candidate.sourceCommit,
     configuredImage: candidate.image,
     imageDigestIndependentlyObserved: false,
     mode: "transport",
     passed: false,
-    fullQualificationPassed: false,
     ownerAcceptance: false,
     managerSessionVerified: false,
     deploymentPerformed: false,
@@ -452,6 +527,7 @@ async function qualify(context) {
   };
   const report = {
     scope: "R07/R08 read-only exact staging HTTP qualification",
+    ...qualificationCoverage(candidate),
     source: candidate.sourceCommit,
     image: candidate.image,
     protocol,
@@ -575,23 +651,7 @@ async function qualify(context) {
         }
         const dom = new JSDOM((await readBoundedBody(response, 5_000_000)).toString());
         try {
-          const document = dom.window.document,
-            body = document.querySelector("[data-legacy-source-body]"),
-            images = [...document.querySelectorAll("article img")];
-          row.checks.sourceBody = body?.textContent === page.bodyText.replace(/\r\n?/g, "\n");
-          row.checks.title = document.querySelector("article h1")?.textContent === page.title;
-          row.checks.locale =
-            document.querySelector("article")?.getAttribute("lang") === page.locale;
-          row.checks.noSourceScriptsOrForms =
-            document.querySelectorAll("article script,article form").length === 0;
-          row.checks.galleryCount = images.length === page.media.length;
-          row.checks.stagingImages = images.every((image) => {
-            const src = image.getAttribute("src");
-            return (
-              src?.startsWith("/legacy-media/") ||
-              src?.startsWith(`${origins.public}/legacy-media/`)
-            );
-          });
+          Object.assign(row.checks, sourcePageChecks(dom.window.document, page));
         } finally {
           dom.window.close();
         }
@@ -775,6 +835,7 @@ async function qualify(context) {
 async function main() {
   if (process.argv[2] === "guard") {
     const result = validateDispatch(process.env, await json(process.argv[3]));
+    validateSourceCheckout(process.cwd(), result.source);
     if (process.env.GITHUB_OUTPUT)
       await appendFile(
         process.env.GITHUB_OUTPUT,
@@ -789,6 +850,8 @@ async function main() {
   assert(["transport", "full"].includes(mode));
   await mkdir(output, { recursive: false });
   let report = {
+    ...qualificationCoverage({ sourceCommit: expectedSource, image: null }),
+    mode,
     passed: false,
     source: expectedSource,
     productionQualified: false,
@@ -805,6 +868,7 @@ async function main() {
       await json(resolve(artifactDir, "staging-candidate.generated.json")),
       expectedSource,
     );
+    Object.assign(report, qualificationCoverage(candidate));
     assert.equal(
       execFileSync("git", ["rev-parse", "HEAD"], { cwd: sourceDir, encoding: "utf8" }).trim(),
       expectedSource,
@@ -829,7 +893,7 @@ async function main() {
       const corpus = await loadCorpus(sourceDir, candidate, await json(proofPath));
       report = await qualify({ candidate, corpus, sourceDir, output, env: process.env });
       report.byteProofSha256 = digest(await readFile(proofPath));
-      report.fullQualificationPassed = report.passed;
+      report.fullHttpQualificationPassed = report.passed;
     } else {
       report = await observeTransport(candidate, process.env.STAGING_ACCESS_SERVICE_CLIENT_SECRET);
     }
