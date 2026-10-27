@@ -57,6 +57,11 @@ vi.mock("@/ui/form/server", () => ({
   }),
 }));
 
+vi.mock("@/server/cases/client-continuity", () => ({
+  readClientContinuity: vi.fn(async () => []),
+  readClientInterestCards: vi.fn(async () => new Map()),
+}));
+
 const session = { account: { kind: "client", id: "client-one" } } as Session;
 const view = (ids: string[], version = 1) => ({
   record: {
@@ -125,14 +130,14 @@ it("keeps a property's proposal-request response on that property after a fresh 
   expect(after.get("B")?.permalink).toBe(submitted.permalink);
   expect(after.get("B")?.initial.operationId).not.toBe(submitted.initial.operationId);
   expect(after.get("B")?.initial.expectedRevision).toBe(9);
-  const submittedRow = screen.getByRole("link", { name: "MS-B" }).closest("li");
+  const submittedRow = document.querySelector<HTMLElement>("#interest-B");
   if (!submittedRow) throw new Error("Missing property row");
   expect(
     within(submittedRow).getByRole("heading", { name: "Recorded for this source" }),
   ).toBeVisible();
   expect(within(submittedRow).queryByRole("button")).not.toBeInTheDocument();
   for (const reference of ["MS-A", "MS-C"]) {
-    const row = screen.getByRole("link", { name: reference }).closest("li");
+    const row = document.querySelector<HTMLElement>(`#interest-${reference.slice(3)}`);
     if (!row) throw new Error("Missing unsubmitted property row");
     expect(
       within(row).queryByRole("heading", { name: "Recorded for this source" }),

@@ -6,6 +6,8 @@ import { consentEvents, contactMethods, parties, subscriptions } from "@/db/sche
 import { listingPurposes } from "@/domain/facts";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { alertFrequencies, checkSendEligibility, subscriptionMachine } from "@/domain/subscription";
+import { formatMoney } from "@/i18n/format";
+import { workflowLabel } from "@/i18n/workflow-labels";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import { getEnv } from "../config/env";
@@ -48,18 +50,12 @@ export const consentTerms = (
 ) => readApprovedContent(db, "help", consentSlug[purpose], locale, { lock });
 export const consentPolicyKey = (terms: NonNullable<Awaited<ReturnType<typeof consentTerms>>>) =>
   `${terms.version.id}:${terms.version.number}:${terms.version.contentHash}:${terms.locale}`;
-const searchSummary = (search: NormalizedSearch) =>
+export const searchSummary = (search: NormalizedSearch) =>
   [
-    search.criteria.purpose === "sale"
-      ? search.locale === "bg"
-        ? "Покупка"
-        : "Buy"
-      : search.locale === "bg"
-        ? "Наем"
-        : "Rent",
+    workflowLabel(search.criteria.purpose, search.locale),
     search.q,
     search.criteria.price
-      ? `${search.criteria.price.currency} ${search.criteria.price.min === undefined ? "0" : search.criteria.price.min / 100} – ${search.criteria.price.max === undefined ? "∞" : search.criteria.price.max / 100}`
+      ? `${search.criteria.price.min === undefined ? "—" : formatMoney(search.locale, search.criteria.price.min, search.criteria.price.currency)} – ${search.criteria.price.max === undefined ? "—" : formatMoney(search.locale, search.criteria.price.max, search.criteria.price.currency)}`
       : null,
   ]
     .filter(Boolean)

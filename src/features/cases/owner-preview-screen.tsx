@@ -1,8 +1,12 @@
 import "server-only";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
+import { isCurrencyCode } from "@/domain/ids";
+import { isPublicLocale } from "@/i18n/config";
+import { formatMoney } from "@/i18n/format";
 import { getOwnerPreview } from "@/server/cases/owner-preview";
 import { isAppError } from "@/server/errors";
+import { clientWorkflowCopy } from "./client-workflow-copy";
 import { ownerPreviewCopy, ownerPreviewLabel } from "./owner-preview-copy";
 import {
   BoundWorkflowForm,
@@ -12,16 +16,20 @@ import {
   workflowLink,
 } from "./screens";
 
-const scalar = (value: unknown, locale: string): string => {
+export const ownerPreviewScalar = (value: unknown, locale: string): string => {
   const label = (value: string) => ownerPreviewLabel(value, locale);
   if (value && typeof value === "object" && !Array.isArray(value)) {
     const object = value as Record<string, unknown>;
-    if (typeof object.amountMinor === "number" && typeof object.currency === "string")
-      return `${new Intl.NumberFormat(locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB", { style: "currency", currency: object.currency }).format(object.amountMinor / 100)}${object.period === "month" ? ` / ${label("month")}` : ""}${typeof object.basis === "string" ? ` · ${label(object.basis)}` : ""}${Array.isArray(object.inclusions) && object.inclusions.length ? ` · ${scalar(object.inclusions, locale)}` : ""}`;
+    if (
+      typeof object.amountMinor === "number" &&
+      typeof object.currency === "string" &&
+      isCurrencyCode(object.currency)
+    )
+      return `${formatMoney(isPublicLocale(locale) ? locale : "bg", object.amountMinor, object.currency)}${object.period === "month" ? ` / ${label("month")}` : ""}${typeof object.basis === "string" ? ` · ${label(object.basis)}` : ""}${Array.isArray(object.inclusions) && object.inclusions.length ? ` · ${ownerPreviewScalar(object.inclusions, locale)}` : ""}`;
     if (typeof object.value === "number" && typeof object.unit === "string")
       return `${object.value} ${object.unit === "m2" ? "m²" : object.unit}${typeof object.basis === "string" ? ` · ${label(object.basis)}` : ""}`;
     return Object.entries(object)
-      .map(([key, v]) => `${label(key)}: ${scalar(v, locale)}`)
+      .map(([key, v]) => `${label(key)}: ${ownerPreviewScalar(v, locale)}`)
       .join(" · ");
   }
   return typeof value === "string" || typeof value === "number" || typeof value === "boolean"
@@ -29,7 +37,7 @@ const scalar = (value: unknown, locale: string): string => {
       ? label(String(value))
       : String(value)
     : Array.isArray(value)
-      ? value.map((value) => scalar(value, locale)).join(", ")
+      ? value.map((value) => ownerPreviewScalar(value, locale)).join(", ")
       : "—";
 };
 export async function OwnerPreviewScreen(props: ScreenProps & { id: string; reference: string }) {
@@ -71,7 +79,7 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
               <dt className="font-semibold">{ownerPreviewLabel(fact.key, props.locale)}</dt>
               <dd>
                 {fact.state === "known"
-                  ? scalar(fact.value, props.locale)
+                  ? ownerPreviewScalar(fact.value, props.locale)
                   : ownerPreviewLabel(fact.state, props.locale)}
                 {fact.unit && typeof fact.value !== "object" ? ` ${fact.unit}` : ""}
                 {fact.basis && typeof fact.value !== "object"
@@ -119,10 +127,10 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
         <p>{view.instruction.scope}</p>
         <p>{view.instruction.commissionTerms}</p>
         <p>
-          {c.rights}: {scalar(view.instruction.mediaUsageRights, props.locale)}
+          {c.rights}: {ownerPreviewScalar(view.instruction.mediaUsageRights, props.locale)}
         </p>
         <p>
-          {c.permission}: {scalar(view.instruction.publicationPermission, props.locale)}
+          {c.permission}: {ownerPreviewScalar(view.instruction.publicationPermission, props.locale)}
         </p>
         <p>{c.consequences}</p>
       </WorkflowSection>
@@ -144,6 +152,29 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
           submit={c.acknowledge}
         />
       )}
+      <WorkflowSection title={clientWorkflowCopy(props.locale).requestCorrection}>
+        <p>{clientWorkflowCopy(props.locale).correctionHint}</p>
+        <BoundWorkflowForm
+          {...props}
+          command="ownerCorrection"
+          commandAvailable={view.canCorrect}
+          id={props.id}
+          revision={view.caseVersion}
+          path={path}
+          fields={[
+            { name: "reference", label: "Reference", type: "hidden" },
+            { name: "previewHash", label: "Preview", type: "hidden" },
+            {
+              name: "body",
+              label: clientWorkflowCopy(props.locale).correction,
+              type: "textarea",
+              required: true,
+            },
+          ]}
+          values={{ reference: view.reference, previewHash: view.hash }}
+          submit={clientWorkflowCopy(props.locale).requestCorrection}
+        />
+      </WorkflowSection>
     </WorkflowPage>
   );
 }

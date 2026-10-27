@@ -7,6 +7,8 @@ export const workflowTypes = {
   acknowledge: "case.brief.acknowledge",
   sellerBind: "case.seller.bind",
   ownerAcknowledge: "case.owner_preview.acknowledge",
+  ownerCorrection: "case.message.post",
+  appointmentReply: "appointment.participant.respond",
   proposalRequest: "case.proposal.request",
   stage: "case.stage",
   disposition: "case.disposition",
@@ -31,6 +33,8 @@ export const workflowFields: Record<WorkflowCommand, readonly string[]> = {
   acknowledge: ["briefId", "reviewed"],
   sellerBind: ["instructionId", "reviewed", "reason"],
   ownerAcknowledge: ["reference", "previewHash", "reviewed"],
+  ownerCorrection: ["reference", "previewHash", "body"],
+  appointmentReply: ["decision", "note"],
   proposalRequest: ["interestId", "reviewed"],
   stage: [
     "stage",

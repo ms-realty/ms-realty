@@ -48,8 +48,16 @@ export async function listProposals(db: Executor, session: Session, caseId?: str
         ) ?? sql`false`)
       : sql`exists (select 1 from ${proposalRevisions} visible_revision where visible_revision.proposal_id = ${proposals.id} and visible_revision.submitted_at is not null and visible_revision.parties @> ${JSON.stringify([{ partyId: principal.partyId }])}::jsonb)`;
   return db
-    .select({ id: proposals.id, reference: proposals.reference, caseId: proposals.caseId })
+    .select({
+      id: proposals.id,
+      reference: proposals.reference,
+      caseId: proposals.caseId,
+      caseTitle: cases.title,
+      listingReference: listings.reference,
+    })
     .from(proposals)
+    .innerJoin(cases, eq(cases.id, proposals.caseId))
+    .innerJoin(listings, eq(listings.id, proposals.listingId))
     .where(
       and(
         inArray(proposals.caseId, visibleCases),

@@ -85,3 +85,49 @@ it("reports upload bytes and checking separately, and retains an uncertain resul
   fireEvent.submit(form);
   expect(requests).toHaveLength(1);
 });
+
+it("localizes validation independently from browser language, links and associates fields, retains input and allows a corrected POST", () => {
+  document.documentElement.lang = "de";
+  const { container } = render(
+    <NativeForm
+      action="/submit"
+      validation={{
+        summary: "Проверете полето",
+        fields: { email: { label: "Имейл", required: "Въведете имейл", email: "Невалиден имейл" } },
+      }}
+    >
+      <label htmlFor="test-email">
+        Имейл
+        <input id="test-email" type="email" name="email" required defaultValue="bad-address" />
+      </label>
+      <button type="submit">Изпратете</button>
+    </NativeForm>,
+  );
+  const form = container.querySelector("form");
+  if (!form) throw new Error("Missing form");
+  expect(form).toHaveAttribute("novalidate");
+  const first = new Event("submit", { bubbles: true, cancelable: true });
+  act(() => {
+    form.dispatchEvent(first);
+  });
+  expect(first.defaultPrevented).toBe(true);
+  expect(screen.getByRole("link", { name: "Имейл: Невалиден имейл" })).toHaveAttribute(
+    "href",
+    "#test-email",
+  );
+  const field = screen.getByRole("textbox");
+  expect(field).toHaveValue("bad-address");
+  expect(field).toHaveAttribute("aria-invalid", "true");
+  expect(field).toHaveAttribute("aria-describedby", "test-email-error");
+  expect(screen.getByText("Невалиден имейл", { exact: true })).toHaveAttribute(
+    "id",
+    "test-email-error",
+  );
+  fireEvent.change(field, { target: { value: "synthetic@example.test" } });
+  const corrected = new Event("submit", { bubbles: true, cancelable: true });
+  act(() => {
+    form.dispatchEvent(corrected);
+  });
+  expect(corrected.defaultPrevented).toBe(false);
+  expect(screen.queryByRole("link")).toBeNull();
+});

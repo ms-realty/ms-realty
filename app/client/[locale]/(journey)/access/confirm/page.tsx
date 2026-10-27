@@ -8,10 +8,15 @@ import { requireAuthHost } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
 import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
-export const metadata = {
-  robots: { index: false, follow: false },
-  referrer: "no-referrer" as const,
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  if (!isRoutableLocale(locale)) notFound();
+  return {
+    title: identityCopy(locale).confirmTitle,
+    robots: { index: false, follow: false },
+    referrer: "no-referrer" as const,
+  };
+}
 export default async function ConfirmPage({
   params,
   searchParams,

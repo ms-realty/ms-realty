@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
+import { clientWorkflowCopy } from "@/features/cases/client-workflow-copy";
+import { SignOutForm } from "@/features/identity/access-frame";
+import { identityCopy } from "@/features/identity/copy";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { homePaths } from "@/server/config/hosts";
@@ -20,16 +23,47 @@ const linkClass =
 export async function JourneyShell({
   locale,
   caseSwitcher,
+  accountName,
   children,
 }: {
   locale: PublicLocale;
   /** Names the case's purpose and property/area; one person may hold several cases. */
   caseSwitcher?: ReactNode;
+  accountName?: string;
   children: ReactNode;
 }) {
   const t = await getTranslations({ locale, namespace: "nav" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
+  const client = clientWorkflowCopy(locale);
+  const identity = identityCopy(locale);
   const destinations = linked(journeyNav, locale);
+  const account = (
+    <details data-dismissible="" className="relative [&:not([open])>div]:hidden">
+      <summary className={`${linkClass} cursor-pointer`}>{accountName ?? client.account}</summary>
+      <div className="absolute end-0 z-(--z-popover) mt-2 w-64 max-w-[calc(100vw-2rem)] space-y-2 rounded-panel border border-divider bg-surface p-3 shadow-overlay">
+        <a className={linkClass} href={`/${locale}/access`}>
+          {client.account}
+        </a>
+        <a className={linkClass} href={`/${locale}/preferences`}>
+          {client.preferences}
+        </a>
+        <a className={linkClass} href={`/${locale}/privacy`}>
+          {client.privacy}
+        </a>
+        <a className={linkClass} href={`/${locale}/saved`}>
+          {client.saved}
+        </a>
+        <a className={linkClass} href={`/${locale}/help`}>
+          {client.help}
+        </a>
+        <SignOutForm
+          action={`/${locale}/access/signout`}
+          label={identity.signOut}
+          variant="tertiary"
+        />
+      </div>
+    </details>
+  );
   const [help] = linked([journeyHelpNav], locale);
   const logo = (
     <Link
@@ -75,7 +109,7 @@ export async function JourneyShell({
   ) : null;
   return (
     <PrivatePageGuard locale={locale} verification={randomUUID()}>
-      <div className="min-h-dvh min-w-0 bg-canvas lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <div className="min-h-dvh min-w-0 bg-canvas pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
         <SkipLink targetId={journeyMainId}>{a11y("skipToContent")}</SkipLink>
         <aside
           className="hidden min-w-0 border-e border-divider bg-subtle p-5 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-5 lg:overflow-y-auto"
@@ -103,6 +137,7 @@ export async function JourneyShell({
             <div className="flex min-w-0 items-center justify-between gap-4 p-5 lg:hidden">
               {logo}
               <div className="flex min-w-0 items-center gap-2">
+                {account}
                 {language}
                 <details data-dismissible="" className="relative [&:not([open])>div]:hidden">
                   {/* biome-ignore lint/a11y/useSemanticElements: native summary must remain operable without JavaScript; explicit role names the control consistently. */}
@@ -133,6 +168,7 @@ export async function JourneyShell({
                   {t("journey.help")}
                 </Link>
               ) : null}
+              {account}
               {language}
             </div>
           </header>
@@ -143,6 +179,31 @@ export async function JourneyShell({
             <div data-route-content="">{children}</div>
           </main>
         </div>
+        <nav
+          aria-label={t("journey.label")}
+          className="fixed inset-x-0 bottom-0 z-(--z-sticky) grid grid-cols-5 gap-1 border-t border-divider bg-surface px-2 pb-[env(safe-area-inset-bottom)] lg:hidden"
+        >
+          {destinations
+            .filter((item) =>
+              ["overview", "properties", "appointments", "messages"].includes(item.label),
+            )
+            .map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                className="flex min-h-control min-w-0 flex-col items-center justify-center gap-1 rounded-control px-1 py-2 text-center text-caption [overflow-wrap:anywhere] no-underline aria-[current=page]:bg-subtle aria-[current=page]:font-semibold"
+              >
+                <Image src={`/brand/journey/${item.label}.svg`} alt="" width={20} height={20} />
+                <span>{t(`journey.${item.label}`)}</span>
+              </NavLink>
+            ))}
+          <NavLink
+            href={`/${locale}/preferences`}
+            className="flex min-h-control items-center justify-center rounded-control px-1 py-2 text-center text-caption no-underline aria-[current=page]:bg-subtle"
+          >
+            {client.account}
+          </NavLink>
+        </nav>
       </div>
     </PrivatePageGuard>
   );

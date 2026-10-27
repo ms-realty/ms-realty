@@ -48,6 +48,7 @@ function ProposalForm(
     label: string;
     disclosure?: string;
     commandAvailable?: boolean;
+    nativeIdentity?: string;
   },
 ) {
   const initial = initialFormState(
@@ -70,7 +71,7 @@ function ProposalForm(
       initialState={initial}
       fields={props.fields}
       path={props.path}
-      nativeIdentity={proposalScope(props.command, props.id)}
+      nativeIdentity={props.nativeIdentity ?? proposalScope(props.command, props.id)}
       commandAvailable={props.commandAvailable}
       status={{
         href: proposalStatus(props.locale, props.command, props.id, initial.operationId),
@@ -133,6 +134,12 @@ export async function ProposalIndexScreen(props: ScreenProps & { caseId?: string
             {rows.map((row) => (
               <li key={row.id}>
                 <a className={workflowLink} href={`/${props.locale}/proposals/${row.id}`}>
+                  <span dir="auto">{row.caseTitle}</span> · <bdi>{row.listingReference}</bdi>
+                </a>
+                <p className="text-caption text-text-muted">
+                  <bdi>{row.reference}</bdi>
+                </p>
+                <a className="sr-only" href={`/${props.locale}/proposals/${row.id}`}>
                   <bdi>{row.reference}</bdi>
                 </a>
               </li>
@@ -232,7 +239,8 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
         {c.paymentBasis}: {row.paymentBasis}
       </p>
       <p>
-        {c.deadline}: <WorkflowTime value={row.deadlineAt} locale={locale} zoneLabel />
+        {c.deadline}:{" "}
+        <WorkflowTime value={row.deadlineAt} locale={locale} zone={row.timezone} zoneLabel />
       </p>
       <h3 className="font-semibold">{c.parties}</h3>
       <ul>
@@ -405,30 +413,30 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
           ) : null}
         </div>
       ) : null}
-      {view.canRespond ? (
+      {!staff ? (
         <WorkflowSection title={c.response}>
           <p>{c.responseNote}</p>
-          <ProposalForm
-            {...common}
-            command="decide"
-            fields={[
-              ...hidden,
-              {
-                name: "state",
-                label: c.response,
-                type: "select",
-                required: true,
-                options: [
-                  { value: "", label: "—" },
-                  { value: "agreed_for_next_step", label: c.agree },
-                  { value: "declined", label: c.decline },
-                ],
-              },
-              { name: "reason", label: c.reason, type: "textarea", required: true },
-            ]}
-            values={revisionValues}
-            label={c.record}
-          />
+          <div className="grid gap-5 md:grid-cols-2">
+            {(["agreed_for_next_step", "declined"] as const).map((state) => (
+              <ProposalForm
+                key={state}
+                {...common}
+                command="decide"
+                commandAvailable={view.canRespond}
+                nativeIdentity={`${proposalScope("decide", common.id)}:${state}`}
+                fields={[
+                  ...hidden,
+                  { name: "state", label: c.response, type: "hidden" },
+                  { name: "reason", label: c.reason, type: "textarea", required: true },
+                ]}
+                values={{ ...revisionValues, state }}
+                label={state === "agreed_for_next_step" ? c.agree : c.decline}
+              />
+            ))}
+          </div>
+          <a className={workflowLink} href={`/${props.locale}/messages/${view.proposal.caseId}`}>
+            {caseCopy(props.locale).messages}
+          </a>
         </WorkflowSection>
       ) : null}
       {canRevise || !staff ? (
@@ -504,12 +512,112 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
               <summary className="cursor-pointer font-semibold">
                 {c.revision} {previous.number} · {c[previous.state]}
               </summary>
+              <TermsDiff previous={previous} current={row} locale={props.locale} />
               <Terms row={previous} locale={props.locale} />
             </details>
           ))}
         </WorkflowSection>
       ) : null}
     </WorkflowPage>
+  );
+}
+/** C10 exact changed fields, comparing source values without converting amounts. */
+function TermsDiff({
+  previous,
+  current,
+  locale,
+}: {
+  previous: Revision;
+  current: Revision;
+  locale: string;
+}) {
+  const c = proposalCopy(locale);
+  const money = (row: Revision) =>
+    formatExactMoney(isPublicLocale(locale) ? locale : "bg", row.amountMinor, row.currency);
+  const pairs: {
+    key: string;
+    before: unknown;
+    after: unknown;
+    old: React.ReactNode;
+    value: React.ReactNode;
+  }[] = [
+    {
+      key: moneyCopy(isPublicLocale(locale) ? locale : "bg").amount,
+      before: [previous.amountMinor, previous.currency],
+      after: [current.amountMinor, current.currency],
+      old: money(previous),
+      value: money(current),
+    },
+    {
+      key: c.period,
+      before: previous.period,
+      after: current.period,
+      old: previous.period === "month" ? c.month : c.total,
+      value: current.period === "month" ? c.month : c.total,
+    },
+    {
+      key: c.paymentBasis,
+      before: previous.paymentBasis,
+      after: current.paymentBasis,
+      old: previous.paymentBasis,
+      value: current.paymentBasis,
+    },
+    {
+      key: c.conditions,
+      before: previous.conditions,
+      after: current.conditions,
+      old: previous.conditions.join(" · ") || "—",
+      value: current.conditions.join(" · ") || "—",
+    },
+    {
+      key: c.inclusions,
+      before: previous.inclusions,
+      after: current.inclusions,
+      old: previous.inclusions.join(" · ") || "—",
+      value: current.inclusions.join(" · ") || "—",
+    },
+    {
+      key: c.parties,
+      before: previous.parties,
+      after: current.parties,
+      old: previous.parties.map((p) => p.name).join(" · "),
+      value: current.parties.map((p) => p.name).join(" · "),
+    },
+    {
+      key: c.deadline,
+      before: [previous.deadlineAt.toISOString(), previous.timezone],
+      after: [current.deadlineAt.toISOString(), current.timezone],
+      old: (
+        <WorkflowTime
+          value={previous.deadlineAt}
+          locale={locale}
+          zone={previous.timezone}
+          zoneLabel
+        />
+      ),
+      value: (
+        <WorkflowTime
+          value={current.deadlineAt}
+          locale={locale}
+          zone={current.timezone}
+          zoneLabel
+        />
+      ),
+    },
+  ];
+  return (
+    <dl data-terms-diff className="my-4 space-y-3">
+      {pairs
+        .filter((pair) => JSON.stringify(pair.before) !== JSON.stringify(pair.after))
+        .map((pair) => (
+          <div key={pair.key}>
+            <dt className="font-semibold">{pair.key}</dt>
+            <dd dir="auto">
+              <del>{pair.old}</del> <span aria-hidden="true">→</span> <ins>{pair.value}</ins>
+            </dd>
+          </div>
+        ))}
+    </dl>
   );
 }
 export async function ProposalStatusScreen(
