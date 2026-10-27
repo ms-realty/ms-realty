@@ -692,7 +692,9 @@ export async function TaskScreen({
     task.evidenceRequired || (highImpactTaskTypes as readonly string[]).includes(task.type);
   const targets = (["in_progress", "waiting", "done", "cancelled"] as const).filter(
     (state) =>
-      taskMachine.check(task.state, state).outcome === "allowed" && !(state === "done" && guarded),
+      taskMachine.check(task.state, state).outcome === "allowed" &&
+      !(state === "done" && guarded) &&
+      !(state === "cancelled" && task.purpose === "material_correction"),
   );
   return (
     <Page title={task.title} locale={locale}>
@@ -773,6 +775,17 @@ export async function TaskScreen({
         </a>
       ) : null}
       {guarded ? <p>{copy.guardedTask}</p> : null}
+      {view.listingReference ? (
+        <a
+          className={link}
+          href={`/${locale}/inventory/${view.listingReference}${task.purpose === "material_correction" ? "/correction" : ""}`}
+        >
+          <bdi>{view.listingReference}</bdi> ·{" "}
+          {task.purpose === "material_correction"
+            ? staffWorkflowCopy(locale).correction.title
+            : staffWorkflowCopy(locale).listings}
+        </a>
+      ) : null}
       {!["done", "cancelled"].includes(task.state) ? (
         <TaskHandoverScreen locale={locale} session={session} id={id} view={view} step={step} />
       ) : null}

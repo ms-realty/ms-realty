@@ -343,7 +343,7 @@ export default async function InventoryDetailPage({
                       >
                         {o12.reviewForPublication}
                       </LeaveControl>
-                      {published ? (
+                      {published && mayPublish ? (
                         // Text only: the Facts frames (647:12680, 657:12889) keep Save and Review.
                         <LeaveControl
                           href={`${path}/correction`}

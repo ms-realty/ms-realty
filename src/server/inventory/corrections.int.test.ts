@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import {
   currentPublications,
+  grants,
   interests,
   listingSearchDocuments,
   outboxEvents,
@@ -176,4 +177,33 @@ it("F31 refuses a partial impact view before revealing or mutating a hidden rela
         .where(eq(currentPublications.listingId, listing.listingId))
     ).every((row) => row.state === "active"),
   ).toBe(true);
+  await t.db
+    .insert(grants)
+    .values(
+      ["case.read", "case.read_internal"].map((capability) => ({
+        principalId: scoped.id,
+        capability: capability as "case.read",
+        recordType: "case",
+        recordId: f.record.id,
+        reason: "Synthetic scoped correction review",
+      })),
+    );
+  const authorized = await readCorrectionWorkspace(t.db, issued.session, listing.reference);
+  const input = {
+    operationId: randomUUID(),
+    expectedVersion: authorized.listing.version,
+    impactHash: authorized.digest,
+    sourceReference: "synthetic-source",
+    disputedFact: "Synthetic changed fact",
+    urgency: "normal" as const,
+    reviewed: true as const,
+  };
+  await openMaterialCorrection(t.db, issued.session, listing.reference, input);
+  await t.db
+    .update(grants)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(grants.principalId, scoped.id), eq(grants.capability, "case.read_internal")));
+  await expect(
+    openMaterialCorrection(t.db, issued.session, listing.reference, input),
+  ).rejects.toMatchObject({ code: "forbidden" });
 });

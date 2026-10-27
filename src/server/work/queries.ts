@@ -8,6 +8,7 @@ import {
   contactMethods,
   inquiries,
   keySets,
+  listings,
   parties,
   principals,
   properties,
@@ -413,10 +414,26 @@ export async function readTask(db: Executor, session: Session, id: string) {
         .from(principals)
         .where(eq(principals.id, row.ownerId))
     : [];
+  const [listing] = row.listingId
+    ? await db
+        .select({ id: listings.id, propertyId: listings.propertyId, reference: listings.reference })
+        .from(listings)
+        .where(eq(listings.id, row.listingId))
+    : [];
+  const listingReference =
+    listing &&
+    (await can(db, live.actor, "listing.read", {
+      type: "listing",
+      id: listing.id,
+      propertyId: listing.propertyId,
+    }))
+      ? listing.reference
+      : null;
   return {
     task: row,
     ownerName: owner?.name ?? null,
     needsCoverage: owner?.needsCoverage ?? true,
+    listingReference,
     canReadCase: Boolean(
       row.caseId &&
         (await can(db, live.actor, "case.read", {

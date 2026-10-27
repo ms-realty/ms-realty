@@ -340,6 +340,23 @@ export async function readCorrectionWorkspace(db: Executor, session: Session, re
         .limit(1)
     : [];
   const opened = snapshotSchema.safeParse(receipt?.outcome);
+  if (opened.success) {
+    for (const caseId of new Set(opened.data.items.flatMap((item) => item.caseId ?? [])))
+      await caseFor(db, live, caseId, "case.read_internal");
+    for (const item of opened.data.items)
+      if (item.kind === "proposal" || item.kind === "appointment")
+        await assertCanRead(
+          db,
+          live.actor,
+          item.kind === "proposal" ? "proposal.manage" : "appointment.manage",
+          {
+            type: item.kind,
+            id: item.recordId,
+            caseId: item.caseId ?? undefined,
+            audience: "case_participants",
+          },
+        );
+  }
   const original =
     opened.success && task?.state !== "done"
       ? opened.data.sourceRevisionId
@@ -422,6 +439,8 @@ export async function openMaterialCorrection(
   const input = parsed.data;
   const { live, listing } = await source(db, session, reference);
   requireFreshAuth(live);
+  // An old successful receipt carries the original impact; reauthorize it before replay too.
+  await readCorrectionWorkspace(db, live, reference);
   return runOperation(
     db,
     {
@@ -512,6 +531,7 @@ export async function reconcileMaterialCorrection(
   const input = parsed.data;
   const { live, listing } = await source(db, session, reference);
   requireFreshAuth(live);
+  await readCorrectionWorkspace(db, live, reference);
   return runOperation(
     db,
     {

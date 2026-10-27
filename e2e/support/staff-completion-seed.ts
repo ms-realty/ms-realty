@@ -19,9 +19,16 @@ try {
   const email = `staff-completion-${marker}@example.test`;
   const client = await createClient(db, { email });
   const [contact] = await db
-    .select()
-    .from(schema.contactMethods)
-    .where(eq(schema.contactMethods.partyId, client.partyId));
+    .insert(schema.contactMethods)
+    .values({
+      partyId: client.partyId,
+      kind: "email",
+      value: email,
+      normalizedValue: email,
+      verification: "verified",
+      verifiedAt: new Date(),
+    })
+    .returning();
   if (!contact) throw new Error("Missing synthetic contact");
   const [inquiry] = await db
     .insert(schema.inquiries)
