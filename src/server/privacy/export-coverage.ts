@@ -41,7 +41,9 @@ import { hashRequest, keyedHash } from "../crypto";
 import type { Executor } from "../db";
 import { caseDocumentPurposes } from "../documents/purposes";
 import { AppError } from "../errors";
+import { collectAgencySources } from "./agency-sources";
 import type { DisclosureSupplement } from "./export-supplements";
+import { collectPhotographySources } from "./photography-sources";
 import { collectServiceSources, serviceContextRevision } from "./service-sources";
 import { privacySafetyRevision } from "./source-fingerprint";
 
@@ -284,8 +286,26 @@ export async function collectExportInventory(
     100,
   );
   const caseIds = [...new Set(links.map((row) => row.caseId))];
+  const agency = await collectAgencySources(db, actor, [subject.partyId], caseIds);
+  const photography = await collectPhotographySources(db, actor, [subject.partyId], caseIds);
   const joint: PrivacyExportSource[] = [];
-  let jointBlocked = service.jointBlocked;
+  let jointBlocked = service.jointBlocked || agency.blocked || photography.blocked;
+  for (const source of photography.sources)
+    joint.push({
+      key: `appointment:${source.id}`,
+      kind: "appointment_bundle",
+      id: source.id,
+      revision: source.version,
+      digest: source.digest,
+    });
+  for (const source of agency.sources)
+    joint.push({
+      key: `agency:${source.kind}:${source.id}`,
+      kind: "agency_record",
+      id: source.id,
+      revision: source.version,
+      digest: source.digest,
+    });
   for (const id of caseIds) {
     if (
       !(await can(db, actor, "case.read", { type: "case", id })) ||

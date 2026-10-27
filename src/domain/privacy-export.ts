@@ -30,7 +30,14 @@ const digest = z.string().regex(/^[a-f0-9]{64}$/);
 export const privacyExportSource = z
   .object({
     key: z.string().min(1).max(100),
-    kind: z.enum(["own_activity", "case_bundle", "document", "security_boundary"]),
+    kind: z.enum([
+      "own_activity",
+      "case_bundle",
+      "agency_record",
+      "appointment_bundle",
+      "document",
+      "security_boundary",
+    ]),
     id: z.uuid().optional(),
     revision: z.int().positive().optional(),
     digest,

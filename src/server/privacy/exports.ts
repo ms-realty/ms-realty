@@ -38,6 +38,7 @@ import type { FileStorage } from "../files/storage";
 import { runOperation } from "../operations";
 import { parseInput } from "../work/shared";
 import { privacyClient, privacyOperator } from "./access";
+import { collectPartyAgencySources } from "./agency-sources";
 import {
   assertCoverageDecision,
   collectExportInventory,
@@ -51,6 +52,7 @@ import {
   type DisclosureSupplement,
   verifyDeliveredSupplement,
 } from "./export-supplements";
+import { collectPartyPhotographySources } from "./photography-sources";
 import { privacyProcessingRestricted } from "./restrictions";
 import { collectServiceSources } from "./service-sources";
 
@@ -266,8 +268,12 @@ async function collectPersonDossier(db: Executor, partyId: string, actor: Actor)
       .limit(maxRows + 1),
   );
   const service = await collectServiceSources(db, actor, partyId);
+  const agency = await collectPartyAgencySources(db, actor, partyId);
+  const photography = await collectPartyPhotographySources(db, actor, partyId);
   return {
     serviceRevision: service.revision,
+    agencyRevision: agency.revision,
+    photographyRevision: photography.revision,
     data: {
       person: { ...party, contactPreferences: ownPreferences(party.contactPreferences) },
       accounts: accounts.map(({ id: _id, ...account }) => account),
@@ -291,7 +297,12 @@ function personDossierSourceDigest(
   requestId: string,
 ) {
   return ownExportSourceDigest(
-    { ...source.data, serviceRevision: source.serviceRevision },
+    {
+      ...source.data,
+      serviceRevision: source.serviceRevision,
+      agencyRevision: source.agencyRevision,
+      photographyRevision: source.photographyRevision,
+    },
     requestId,
   );
 }
