@@ -155,7 +155,6 @@ it("publishes only the organization brand contact and authentic logo location", 
     url: "https://example.test/",
     logo: "https://example.test/brand/logo-ms-realty.png",
     telephone: "+359879696870",
-    email: "ms.realty.bg@gmail.com",
   });
 });
 

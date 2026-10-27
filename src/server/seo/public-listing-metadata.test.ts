@@ -144,3 +144,48 @@ it("does not infer current-locale eligibility from another published sibling", a
   expect(result.robots).toEqual({ index: false, follow: true });
   expect(Object.keys(result.alternates?.languages ?? {})).toEqual(["en"]);
 });
+
+it("uses only the currently eligible publication photo for social cards and drops it on withdrawal", async () => {
+  const photo = {
+    assetId: "00000000-0000-4000-8000-000000000001",
+    digest: "a".repeat(64),
+    kind: "photo",
+    contentType: "image/jpeg",
+    alt: "Exact reviewed photo description",
+    width: 1280,
+    height: 960,
+  };
+  mocks.listing.mockResolvedValue({
+    status: "listing",
+    listing: {
+      reference: input.reference,
+      title: "Current reviewed title",
+      description: "Current reviewed description.",
+      indexable: true,
+      media: [{ ...photo, kind: "floor_plan" }, photo],
+    },
+  });
+  mocks.catalogue.mockResolvedValue([{ reference: input.reference, locale: "bg" }]);
+  const current = await publicListingMetadata(input);
+  expect(current.openGraph).toMatchObject({
+    title: "Current reviewed title",
+    description: "Current reviewed description.",
+    images: [
+      {
+        url: `https://staging.makler-realty.com/api/media/${photo.assetId}/${photo.digest}`,
+        alt: photo.alt,
+        width: 1280,
+        height: 960,
+      },
+    ],
+  });
+  expect(current.twitter).toMatchObject({ card: "summary_large_image" });
+  mocks.listing.mockResolvedValue({ status: "unavailable", reference: input.reference });
+  const withdrawn = await publicListingMetadata(input);
+  expect(withdrawn.openGraph).toMatchObject({
+    title: input.reference,
+    images: [{ url: "https://staging.makler-realty.com/brand/logo-ms-realty.png" }],
+  });
+  expect(JSON.stringify(withdrawn)).not.toContain("Current reviewed");
+  expect(JSON.stringify(withdrawn)).not.toContain(photo.digest);
+});

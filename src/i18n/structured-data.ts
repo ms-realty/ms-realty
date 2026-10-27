@@ -23,7 +23,6 @@ export function organizationStructuredData(origin: URL) {
     url: origin.toString(),
     logo: new URL("/brand/logo-ms-realty.png", origin).toString(),
     telephone: legacyContent.brand_contact.phone,
-    email: legacyContent.brand_contact.email,
   };
 }
 

@@ -7,7 +7,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   await headers(); // Runtime configuration, never frozen into the immutable image.
   if (stagingEnabled()) return { rules: { userAgent: "*", disallow: "/" } };
   return {
-    rules: { userAgent: "*", allow: "/", disallow: "/api/" },
+    rules: { userAgent: "*", allow: ["/", "/api/media/"], disallow: "/api/" },
     sitemap: new URL("/sitemap.xml", publicSeoOrigin()).toString(),
   };
 }
