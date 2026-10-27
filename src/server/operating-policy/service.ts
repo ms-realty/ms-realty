@@ -1,6 +1,6 @@
 // O24/F30: permissioned drafts and explicit human approval; no provider or launch authority.
 import "server-only";
-import { and, desc, eq, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   operatingPolicyDrafts,
@@ -68,9 +68,64 @@ async function draftFor(db: Executor) {
     updatedAt: row?.updatedAt ?? null,
   };
 }
+export const operatingPolicyOwnersPageSize = 30;
+const ownersQuery = z.object({
+  page: z.number().int().min(1).max(10000).default(1),
+  search: z.string().trim().max(120).default(""),
+});
+function availableOwner() {
+  return and(
+    eq(principals.kind, "staff"),
+    eq(principals.status, "active"),
+    eq(staffMemberships.state, "active"),
+  );
+}
+
+/** Settings authority permits only current active staff display identities, never contact details. */
+export async function listOperatingPolicyOwners(
+  db: Executor,
+  session: Session,
+  query: { page?: number; search?: string } = {},
+) {
+  await authorize(db, session);
+  const { page, search } = parseInput(ownersQuery, query);
+  const pattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+  const rows = await db
+    .select({ id: principals.id, displayName: principals.displayName })
+    .from(principals)
+    .innerJoin(staffMemberships, eq(principals.id, staffMemberships.principalId))
+    .where(and(availableOwner(), search ? ilike(principals.displayName, pattern) : undefined))
+    .orderBy(asc(principals.displayName), asc(principals.id))
+    .limit(operatingPolicyOwnersPageSize + 1)
+    .offset((page - 1) * operatingPolicyOwnersPageSize);
+  return {
+    rows: rows.slice(0, operatingPolicyOwnersPageSize),
+    page,
+    search,
+    hasMore: rows.length > operatingPolicyOwnersPageSize,
+  };
+}
+
+/** Retain exact selected/reference identities outside the current page; a UUID grants no access. */
+export async function readOperatingPolicyOwnerChoices(
+  db: Executor,
+  session: Session,
+  raw: string[],
+) {
+  await authorize(db, session);
+  const ids = parseInput(z.array(z.uuid()).max(60), [...new Set(raw.filter(Boolean))]);
+  if (!ids.length) return [];
+  return db
+    .select({ id: principals.id, displayName: principals.displayName })
+    .from(principals)
+    .innerJoin(staffMemberships, eq(principals.id, staffMemberships.principalId))
+    .where(and(availableOwner(), inArray(principals.id, ids)))
+    .orderBy(asc(principals.displayName), asc(principals.id));
+}
+
 export async function readOperatingPolicy(db: Executor, session: Session) {
   await authorize(db, session);
-  const [draft, history, owners] = await Promise.all([
+  const [draft, history] = await Promise.all([
     draftFor(db),
     db
       .select({
@@ -87,21 +142,25 @@ export async function readOperatingPolicy(db: Executor, session: Session) {
       .from(operatingPolicyVersions)
       .orderBy(desc(operatingPolicyVersions.policyVersion))
       .limit(12),
-    db
-      .select({ id: principals.id, displayName: principals.displayName })
-      .from(principals)
-      .innerJoin(staffMemberships, eq(principals.id, staffMemberships.principalId))
-      .where(
-        and(
-          eq(principals.kind, "staff"),
-          eq(principals.status, "active"),
-          eq(staffMemberships.state, "active"),
-        ),
-      )
-      .orderBy(principals.displayName)
-      .limit(100),
   ]);
-  return { draft, history, owners, effects: policyEffects(draft.document) };
+  const references = [
+    ...Object.values(draft.document.responsibilities),
+    ...history.flatMap((row) => {
+      const document = operatingPolicySchema.safeParse(row.document);
+      return [
+        row.approvedById,
+        ...(document.success ? Object.values(document.data.responsibilities) : []),
+      ];
+    }),
+  ].filter((id): id is string => Boolean(id));
+  const [ownerDirectory, selected] = await Promise.all([
+    listOperatingPolicyOwners(db, session),
+    readOperatingPolicyOwnerChoices(db, session, references),
+  ]);
+  const owners = [
+    ...new Map([...ownerDirectory.rows, ...selected].map((row) => [row.id, row])).values(),
+  ];
+  return { draft, history, owners, ownerDirectory, effects: policyEffects(draft.document) };
 }
 
 export async function readOperatingPolicyVersion(db: Executor, session: Session, number: number) {

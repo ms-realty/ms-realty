@@ -9,6 +9,10 @@ import {
 } from "@/domain/operating-policy-form";
 import { operatingPolicyCopy } from "@/features/operating-policy/copy";
 import type { PolicyApprovalValues } from "@/features/operating-policy/forms";
+import type {
+  PolicyDraftState,
+  PolicyDraftValues,
+} from "@/features/operating-policy/owner-directory-state";
 import { isStaffLocale, type StaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
@@ -16,10 +20,12 @@ import { AppError } from "@/server/errors";
 import { action } from "@/server/http/next";
 import {
   approveOperatingPolicy,
+  listOperatingPolicyOwners,
   readOperatingPolicyOperation,
+  readOperatingPolicyOwnerChoices,
   saveOperatingPolicy,
 } from "@/server/operating-policy/service";
-import type { FormState, FormValues } from "@/ui/form/contract";
+import { type FormState, type FormValues, formFields } from "@/ui/form/contract";
 import { readFormEnvelope, readFormValues } from "@/ui/form/server";
 
 function stateFor<V extends FormValues>(
@@ -154,13 +160,13 @@ async function execute<V extends FormValues>(
     },
   };
 }
-export async function submitPolicyDraft(
+async function savePolicyDraftState(
   locale: string,
-  _previous: FormState<PolicyFormValues>,
+  _previous: PolicyDraftState,
   data: FormData,
-): Promise<FormState<PolicyFormValues>> {
+): Promise<PolicyDraftState> {
   if (!isStaffLocale(locale)) throw new AppError("not_found");
-  const values = readFormValues<PolicyFormValues>(data, policyFormFields);
+  const values = readFormValues<PolicyDraftValues>(data, [...policyFormFields, "ownerSearch"]);
   let document: ReturnType<typeof policyFromValues>;
   try {
     document = policyFromValues(values);
@@ -203,6 +209,98 @@ export async function submitPolicyDraft(
     };
   }
   return execute(locale, "save", data, values, document);
+}
+/** Browsing is a read inside the draft form, so a native POST retains every entry and key. */
+export async function submitPolicyDraft(
+  locale: string,
+  previous: PolicyDraftState,
+  data: FormData,
+): Promise<PolicyDraftState> {
+  if (!isStaffLocale(locale)) throw new AppError("not_found");
+  const browse = data.has("_ownerPage");
+  let metadata = data;
+  if (browse) {
+    metadata = new FormData();
+    for (const field of [formFields.operationId, formFields.expectedRevision])
+      for (const value of data.getAll(field)) metadata.append(field, value);
+    // A browse button submits no command intent. Still validate the issued save envelope,
+    // rejecting duplicate metadata or an ambiguous extra command submitter.
+    if (data.getAll("_ownerPage").length === 1 && !data.has(formFields.intent))
+      metadata.append(formFields.intent, "submit");
+  }
+  const values = readFormValues<PolicyDraftValues>(data, [...policyFormFields, "ownerSearch"]);
+  const { envelope, state: idle, status } = stateFor(locale, "save", metadata, values);
+  const state = browse ? idle : await savePolicyDraftState(locale, previous, data);
+  if (state.outcome.kind === "confirmed") return state;
+  if (!envelope?.expectedRevision)
+    return {
+      ...state,
+      outcome: {
+        kind: "validation",
+        code: "VALIDATION_FAILED",
+        message: operatingPolicyCopy(locale).ownerInvalid,
+        fieldErrors: { ownerSearch: [operatingPolicyCopy(locale).ownerInvalid] },
+      },
+      ownerDirectory: { rows: [], page: 1, search: values.ownerSearch, hasMore: false },
+      ownerChoices: [],
+    };
+  const rawPage = data.getAll(browse ? "_ownerPage" : "_ownerCurrentPage");
+  const page = rawPage.length === 0 ? 1 : rawPage.length === 1 ? Number(rawPage[0]) : Number.NaN;
+  const result = await action(
+    async ({ db }) => {
+      const access = await currentStaffAccess();
+      if (access.state !== "ready") throw new AppError("unauthenticated");
+      if (
+        browse &&
+        (await readOperatingPolicyOperation(db, access.session, "save", envelope.operationId))
+      )
+        throw new AppError("outcome_unknown");
+      const [ownerDirectory, ownerChoices] = await Promise.all([
+        listOperatingPolicyOwners(db, access.session, { page, search: values.ownerSearch }),
+        readOperatingPolicyOwnerChoices(db, access.session, [
+          values.ownerService,
+          values.ownerPrivacy,
+          values.ownerAlerts,
+        ]),
+      ]);
+      return { ownerDirectory, ownerChoices };
+    },
+    { requireSession: true },
+  );
+  if (result.ok) return { ...state, ...result.data };
+  const copy = operatingPolicyCopy(locale);
+  const held: PolicyDraftState = {
+    ...state,
+    ownerDirectory: { rows: [], page: 1, search: values.ownerSearch, hasMore: false },
+    ownerChoices: [],
+  };
+  // A directory read must never replace an existing command outcome or clear its fence.
+  if (!browse) return held;
+  if (result.error.code === "VALIDATION_FAILED")
+    return {
+      ...held,
+      outcome: {
+        kind: "validation",
+        code: "VALIDATION_FAILED",
+        message: copy.ownerInvalid,
+        fieldErrors: { ownerSearch: [copy.ownerInvalid] },
+      },
+    };
+  if (result.error.code === "OUTCOME_UNKNOWN")
+    return {
+      ...held,
+      outcome: { kind: "unknown", code: "OUTCOME_UNKNOWN", message: copy.pending, status },
+    };
+  return {
+    ...held,
+    outcome: {
+      kind: "rejected",
+      code: result.error.code,
+      message: copy.failed,
+      retryable: false,
+      recovery: { href: `/${locale}/settings/operating-policy`, label: copy.reload },
+    },
+  };
 }
 export async function submitPolicyApproval(
   locale: string,

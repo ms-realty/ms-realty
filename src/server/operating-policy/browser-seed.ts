@@ -1,5 +1,6 @@
 // Disposable synthetic actors only. These sessions establish browser behavior, not real policy acceptance.
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
@@ -13,6 +14,21 @@ if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/u.test(new URL(url).pathname))
 const connection = postgres(url, { max: 1, onnotice: () => {} }),
   db = drizzle(connection, { schema });
 try {
+  const directory = process.argv.includes("--owner-directory");
+  if (directory) {
+    const existing = await db
+      .select({ id: schema.principals.id })
+      .from(schema.principals)
+      .where(eq(schema.principals.displayName, "A synthetic O24 directory fixture"))
+      .limit(101);
+    for (let i = existing.length; i < 101; i++) {
+      const row = await createStaff(db);
+      await db
+        .update(schema.principals)
+        .set({ displayName: "A synthetic O24 directory fixture" })
+        .where(eq(schema.principals.id, row.id));
+    }
+  }
   const actors = [];
   for (const allowed of [true, true, false]) {
     const actor = await createStaff(db, {
@@ -34,7 +50,13 @@ try {
       backedUp: false,
     });
     const issued = await createSession(db, { kind: "staff", id: actor.id });
-    actors.push({ id: actor.id, token: issued.token });
+    const displayName = directory ? `Z synthetic O24 owner ${actor.id}` : "Test Staff";
+    if (directory)
+      await db
+        .update(schema.principals)
+        .set({ displayName })
+        .where(eq(schema.principals.id, actor.id));
+    actors.push({ id: actor.id, token: issued.token, displayName });
   }
   console.log(JSON.stringify({ operator: actors[0], other: actors[1], denied: actors[2] }));
 } finally {

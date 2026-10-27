@@ -132,10 +132,11 @@ export default async function OperatingPolicyPage({
           copy={copy}
           formCopy={formCopy}
           owners={model.owners}
+          ownerDirectory={model.ownerDirectory}
           action={submitPolicyDraft.bind(null, locale)}
           initialState={initialFormState(
             "operating_policy.save",
-            policyToValues(model.draft.document),
+            { ...policyToValues(model.draft.document), ownerSearch: "" },
             model.draft.version,
           )}
         />

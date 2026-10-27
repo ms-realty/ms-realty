@@ -84,5 +84,14 @@
   },
   "coverage": "Service coverage",
   "processControls": "Open availability review work",
-  "reviewHeld": "Availability confirmation is held because current policy has no reviewed interval for this listing purpose. Ask the agency policy owner to review it."
+  "reviewHeld": "Availability confirmation is held because current policy has no reviewed interval for this listing purpose. Ask the agency policy owner to review it.",
+  "ownerSearch": "Find an accountable owner",
+  "ownerSearchHelp": "Search active staff by name. Browsing keeps the entered policy values and does not save or approve them.",
+  "ownerSearchSubmit": "Find staff",
+  "ownerResults": "Choose from the matching staff below",
+  "ownerNone": "No active staff match this page",
+  "ownerPage": "Staff page",
+  "ownerPrevious": "Previous staff",
+  "ownerNext": "Next staff",
+  "ownerInvalid": "Use a name of at most 120 characters and a valid staff page."
 }
