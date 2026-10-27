@@ -92,6 +92,13 @@
     "active": "Активен",
     "paused": "На пауза",
     "withdrawn": "Отписан",
-    "pending_verification": "Очаква потвърждение"
+    "pending_verification": "Очаква потвърждение",
+    "Europe/Sofia": "София",
+    "Europe/London": "Лондон",
+    "Europe/Berlin": "Берлин",
+    "Europe/Amsterdam": "Амстердам",
+    "Europe/Athens": "Атина",
+    "Europe/Moscow": "Москва",
+    "Asia/Jerusalem": "Йерусалим"
   }
 }

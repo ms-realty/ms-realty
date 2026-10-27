@@ -92,6 +92,13 @@
     "active": "Aktiv",
     "paused": "Pausiert",
     "withdrawn": "Abgemeldet",
-    "pending_verification": "Wartet auf Bestätigung"
+    "pending_verification": "Wartet auf Bestätigung",
+    "Europe/Sofia": "Sofia",
+    "Europe/London": "London",
+    "Europe/Berlin": "Berlin",
+    "Europe/Amsterdam": "Amsterdam",
+    "Europe/Athens": "Athen",
+    "Europe/Moscow": "Moskau",
+    "Asia/Jerusalem": "Jerusalem"
   }
 }

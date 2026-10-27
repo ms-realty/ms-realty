@@ -77,7 +77,12 @@
     "discovery.propertyFacts.facilities": "Удобства",
     "discovery.propertyFacts.deposit": "Депозит",
     "discovery.propertyFacts.restrictions": "Ограничения",
-    "workflow.journeyTabs.messages": "Чат"
+    "workflow.journeyTabs.messages": "Чат",
+    "privacy.names.Europe/Sofia": "София",
+    "privacy.names.Europe/London": "Лондон",
+    "privacy.names.Europe/Berlin": "Берлин",
+    "privacy.names.Europe/Amsterdam": "Амстердам",
+    "privacy.names.Europe/Moscow": "Москва"
   },
   "de": {
     "discovery.hotel": "Hotel",
@@ -90,7 +95,12 @@
     "workflow.files.version": "Version",
     "workflow.documents.version": "Version",
     "workflow.ownerPreviewValues.region": "Region",
-    "workflow.journeyTabs.messages": "Chat"
+    "workflow.journeyTabs.messages": "Chat",
+    "privacy.names.Europe/Sofia": "Sofia",
+    "privacy.names.Europe/London": "London",
+    "privacy.names.Europe/Berlin": "Berlin",
+    "privacy.names.Europe/Amsterdam": "Amsterdam",
+    "privacy.names.Asia/Jerusalem": "Jerusalem"
   },
   "nl": {
     "discovery.filters": "Filters",
@@ -108,7 +118,9 @@
     "workflow.journeyTabs.messages": "Chat",
     "workflow.journeyTabs.account": "Account",
     "client-workflow.overview.account": "Account",
-    "client-workflow.overview.privacy": "Privacy"
+    "client-workflow.overview.privacy": "Privacy",
+    "privacy.names.Europe/Sofia": "Sofia",
+    "privacy.names.Europe/Amsterdam": "Amsterdam"
   },
   "el": {
     "discovery.email": "Email"
