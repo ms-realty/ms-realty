@@ -15,6 +15,11 @@ import {
   maxDeliveryAttempts,
   providerIdempotencyWindowMs,
 } from "@/domain/message";
+import {
+  emailLinkDeliveryIsCurrent,
+  emailLinkSubject,
+  emailLinkTemplate,
+} from "../auth/email-link-delivery";
 import { caseEmailConfig, caseEmailTemplate } from "../cases/email-contract";
 import { type Database, type Executor, inTransaction } from "../db";
 import { AppError } from "../errors";
@@ -158,6 +163,8 @@ export async function dispatchMessage(
   outboxId: string,
   now: Date = new Date(),
 ): Promise<OutboxState> {
+  const startedAt = Date.now();
+  const currentTime = () => new Date(now.getTime() + Math.max(0, Date.now() - startedAt));
   await assertRecoveryOpen(db);
   // Consequential dispatch uses a pool: the attempting state must commit before I/O.
   // Optional digests have stricter current-consent/publication gates than access emails.
@@ -198,6 +205,9 @@ export async function dispatchMessage(
     }
     const payload = row.payload as Partial<EmailPayload> | null;
     const template = payload?.template;
+    const credentialMail = template === emailLinkTemplate || row.subjectType === emailLinkSubject;
+    const invalidCredentialMail =
+      credentialMail && !(await emailLinkDeliveryIsCurrent(tx, row, currentTime()));
     const inquiryNotice =
       template === inquiryCoverageNoticeTemplate ||
       row.subjectType === inquiryCoverageNoticeSubject;
@@ -216,16 +226,19 @@ export async function dispatchMessage(
       template === alertTemplate ||
       template === caseEmailTemplate ||
       invalidInquiryNotice ||
+      invalidCredentialMail ||
       secretChanged ||
       row.payloadDigest !== createHash("sha256").update(canonicalJson(row.payload)).digest("hex")
     ) {
-      const code = invalidInquiryNotice
-        ? "inquiry_notice_guard_failed"
-        : template === alertTemplate || template === caseEmailTemplate
-          ? "guarded_template_subject_mismatch"
-          : secretChanged
-            ? "secret_digest_mismatch"
-            : "payload_digest_mismatch";
+      const code = invalidCredentialMail
+        ? "auth_email_link_ineligible"
+        : invalidInquiryNotice
+          ? "inquiry_notice_guard_failed"
+          : template === alertTemplate || template === caseEmailTemplate
+            ? "guarded_template_subject_mismatch"
+            : secretChanged
+              ? "secret_digest_mismatch"
+              : "payload_digest_mismatch";
       await tx
         .update(externalActions)
         .set({
@@ -258,43 +271,93 @@ export async function dispatchMessage(
   const payload = row.payload as EmailPayload;
 
   const finish = async (
+    executor: Executor,
     state: OutboxState,
     values: Partial<typeof externalActions.$inferInsert>,
   ) => {
-    await db
+    await executor
       .update(externalActions)
       .set({ state, ...values, version: sql`${externalActions.version} + 1` })
       .where(and(eq(externalActions.id, outboxId), eq(externalActions.state, "attempting")));
     return state;
   };
 
-  let result: Awaited<ReturnType<MessageProvider["send"]>>;
-  try {
-    result = await provider.send({
-      outboxId,
-      idempotencyKey: row.effectKey,
-      channel: payload.channel,
-      recipient: payload.recipient,
-      template: payload.template,
-      params: payload.params,
-      secretParams: row.secretPayload as Record<string, unknown> | null,
-    });
-  } catch {
-    // Unknown: reconciled, never resent; the error text may carry provider detail.
-    return finish("outcome_unknown", { lastErrorCode: "provider_unreachable" });
-  }
-  if (result.status === "accepted") {
-    return finish("acknowledged", {
-      providerReference: result.providerMessageId,
-      acknowledgedAt: now,
-      lastErrorCode: null,
-    });
-  }
-  if (result.retryable && row.attempts + 1 < maxDeliveryAttempts) {
-    // The provider definitely did not take it: put it back, secrets included.
-    return finish("queued", { lastErrorCode: result.code, secretPayload: row.secretPayload });
-  }
-  return finish("failed", { lastErrorCode: result.code, failedAt: now });
+  const deliver = async (executor: Executor, bounded: boolean): Promise<OutboxState> => {
+    let result: Awaited<ReturnType<MessageProvider["send"]>>;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const sending = provider.send({
+        outboxId,
+        idempotencyKey: row.effectKey,
+        channel: payload.channel,
+        recipient: payload.recipient,
+        template: payload.template,
+        params: payload.params,
+        secretParams: row.secretPayload as Record<string, unknown> | null,
+      });
+      result = bounded
+        ? await Promise.race([
+            sending,
+            new Promise<never>((_, reject) => {
+              timer = setTimeout(
+                () => reject(new Error("Credential provider handoff timeout")),
+                16_000,
+              );
+            }),
+          ])
+        : await sending;
+    } catch {
+      // Unknown: reconciled, never resent; the error text may carry provider detail.
+      return finish(executor, "outcome_unknown", { lastErrorCode: "provider_unreachable" });
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+    if (result.status === "accepted") {
+      return finish(executor, "acknowledged", {
+        providerReference: result.providerMessageId,
+        acknowledgedAt: now,
+        lastErrorCode: null,
+      });
+    }
+    if (result.retryable && row.attempts + 1 < maxDeliveryAttempts) {
+      // The provider definitely did not take it: put it back, secrets included.
+      return finish(executor, "queued", {
+        lastErrorCode: result.code,
+        secretPayload: row.secretPayload,
+      });
+    }
+    return finish(executor, "failed", { lastErrorCode: result.code, failedAt: now });
+  };
+  if (payload.template !== emailLinkTemplate && row.subjectType !== emailLinkSubject)
+    return deliver(db, false);
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select()
+      .from(externalActions)
+      .where(eq(externalActions.id, row.id))
+      .for("update");
+    if (current?.state !== "attempting" || current.version !== row.version + 1)
+      return current?.state ?? "outcome_unknown";
+    // The claim committed, but consent/access/token state may have changed before I/O.
+    // Reacquire the live token/account locks through this one bounded handoff.
+    if (
+      current.payloadDigest !== row.payloadDigest ||
+      current.effectKey !== row.effectKey ||
+      !(await emailLinkDeliveryIsCurrent(
+        tx,
+        { ...current, secretPayload: row.secretPayload },
+        currentTime(),
+      ))
+    ) {
+      await finish(tx, "cancelled", {
+        lastErrorCode: "auth_email_link_ineligible",
+        secretPayload: null,
+        updatedAt: currentTime(),
+      });
+      return "cancelled";
+    }
+    return deliver(tx, true);
+  });
 }
 
 /** Dispatches every queued email, oldest first. The worker runs this as a safety sweep. */

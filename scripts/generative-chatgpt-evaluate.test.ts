@@ -5,16 +5,22 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { eq } from "drizzle-orm";
+import { operatingPolicyDrafts } from "../src/db/schema";
+import { createTestDatabase } from "../src/db/test-utils";
 import type {
   ArtifactProposal,
   PlannerInput,
   PlannerTurn,
   WorkspaceTool,
 } from "../src/domain/generative";
+import { emptyOperatingPolicy, operatingPolicyId } from "../src/domain/operating-policy";
 import { chatGptGeneration } from "../src/server/ai/chatgpt/transport";
+import { createStaff } from "../src/server/testing";
 import {
   assertDisposableEndpoint,
   parseQualificationArguments,
+  protectedRecords,
   type QualificationOptions,
   type QualificationTransport,
   readObservedCatalog,
@@ -238,6 +244,32 @@ test("redaction removes account/session values while retaining exact source fact
   });
 });
 const databaseAvailable = Boolean(process.env.TEST_DATABASE_URL);
+test("human-only policy records detect changed bytes without a changed row count", {
+  skip: !databaseAvailable,
+}, async () => {
+  assertDisposableEndpoint(endpoint);
+  const t = await createTestDatabase();
+  try {
+    const staff = await createStaff(t.db, { grants: [] });
+    await t.db.insert(operatingPolicyDrafts).values({
+      id: operatingPolicyId,
+      document: emptyOperatingPolicy,
+      contentHash: "a".repeat(64),
+      updatedById: staff.id,
+    });
+    const before = await protectedRecords(t);
+    assert.equal(before.operating_policy_drafts?.count, 1);
+    await t.db
+      .update(operatingPolicyDrafts)
+      .set({ contentHash: "b".repeat(64) })
+      .where(eq(operatingPolicyDrafts.id, operatingPolicyId));
+    const after = await protectedRecords(t);
+    assert.equal(after.operating_policy_drafts?.count, before.operating_policy_drafts?.count);
+    assert.notEqual(after.operating_policy_drafts?.sha256, before.operating_policy_drafts?.sha256);
+  } finally {
+    await t.drop();
+  }
+});
 for (const mode of ["complete", "usage_limit", "interrupted"] as const)
   test(`real persisted qualification harness with ${mode} synthetic transport`, {
     skip: !databaseAvailable,

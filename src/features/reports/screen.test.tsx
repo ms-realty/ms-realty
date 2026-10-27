@@ -10,7 +10,7 @@ const session = { account: { id: "synthetic-staff", kind: "staff" } } as Session
 const filter = { days: 7 as const, scope: "mine" as const };
 function report() {
   return {
-    definition: "O22-v1",
+    definition: "O22-v3",
     filter,
     from: new Date(Date.now() - 604800000),
     asOf: new Date(),
@@ -22,6 +22,26 @@ function report() {
       invalid: 0,
       medianMinutes: null,
       smallSample: true,
+    },
+    staffedResponse: {
+      state: "unobserved",
+      eligible: 0,
+      known: 0,
+      unknown: 0,
+      medianMinutes: null,
+      smallSample: false,
+      reason: null,
+      unknownReasons: {},
+      rows: [],
+      hasMore: false,
+    },
+    correctionEffort: {
+      state: "unobserved",
+      observations: null,
+      correctionMinutes: null,
+      reentryMinutes: null,
+      rows: [],
+      hasMore: false,
     },
     metrics: [
       { id: "unowned", state: "observed", count: 0, rows: [], hasMore: false },
@@ -68,8 +88,59 @@ it("offers native filters and matching private export while distinguishing denie
   expect(within(denied).getByText("Unknown")).toBeVisible();
   expect(within(denied).queryByText("0")).toBeNull();
   expect(screen.getByText(/Response time within staffed hours is unknown/)).toBeVisible();
-  expect(screen.getByText(/Correction and re-entry effort is unknown/)).toBeVisible();
+  expect(screen.getByText(/No time has been recorded/)).toBeVisible();
   expect(screen.getByText(/Only the first 20/)).toBeVisible();
+});
+
+it("labels a staffed median as known observations only and exposes unknown coverage and scoped records", async () => {
+  readReports.mockResolvedValue({
+    ...report(),
+    staffedResponse: {
+      state: "observed",
+      eligible: 3,
+      known: 2,
+      unknown: 1,
+      medianMinutes: 30,
+      smallSample: true,
+      reason: null,
+      unknownReasons: { no_reviewed_policy: 1 },
+      rows: [{ id: "permitted", reference: "Permitted response", path: "/inquiries/permitted" }],
+      hasMore: false,
+    },
+  });
+  render(await ReportsScreen({ locale: "en", session, filter }));
+  const staffed = screen.getByRole("region", { name: "Response within staffed hours" });
+  expect(within(staffed).getByText(/not the whole response cohort/)).toBeVisible();
+  expect(within(staffed).getByText("No reviewed policy captured at receipt: 1")).toBeVisible();
+  expect(within(staffed).getByRole("link", { name: "Permitted response" })).toHaveAttribute(
+    "href",
+    "/en/inquiries/permitted",
+  );
+  expect(within(staffed).getByText("30")).toBeVisible();
+});
+
+it("holds an oversized cohort with a narrower-period/manual path and no invented duration", async () => {
+  readReports.mockResolvedValue({
+    ...report(),
+    staffedResponse: {
+      state: "held",
+      eligible: 1001,
+      known: null,
+      unknown: null,
+      medianMinutes: null,
+      smallSample: false,
+      reason: "cohort_limit",
+      unknownReasons: {},
+      rows: [],
+      hasMore: false,
+    },
+  });
+  render(await ReportsScreen({ locale: "en", session, filter }));
+  const staffed = screen.getByRole("region", { name: "Response within staffed hours" });
+  expect(within(staffed).getByText(/more than 1,000 valid responses/)).toBeVisible();
+  expect(within(staffed).getByText(/narrower observation period/)).toBeVisible();
+  expect(within(staffed).getAllByText("Unknown")).toHaveLength(3);
+  expect(within(staffed).queryByText("0")).toBeNull();
 });
 
 it.each(["bg", "ru"] as const)("provides staff %s native labels", async (locale) => {

@@ -12,6 +12,14 @@ O01/X02 and the personal O23/F30 variant share the existing brand, tokens, nativ
 - Settings uses ordinary links to Profile, Preferences and Security. A separate Agency view appears only when a supported administrative destination is permitted. Phones use a native section disclosure so longer Bulgarian and Russian names remain fully visible. Each link works without JavaScript, retains its current-page indication and preserves locale.
 - Authorized team management, absence, offboarding and optional backup enrolment retain the workspace shell and a contextual return. Absence/offboarding return to the staff directory; backup enrolment returns to Security. Initial sign-in, initial enrolment and recovery remain focused access journeys.
 
+## Staff composition and density
+
+The staff shell uses a quiet white navigation rail and context bar, warm canvas and forest selected state. Expanded/compact preference remains the operator's choice; the compact rail keeps native destination names and an always available toggle.
+
+`src/features/shell/staff-ui.tsx` supplies `StaffPage`, `StaffPanel` and `StaffToolbar`. The exported `staffUi` classes cover bounded forms, two-column field groups, labels, hints, native controls and action groups. These are staff-only primitives; public/client tokens and forms retain their existing contract. Staff operational controls may use a 44 px minimum with 16 px input text and 14 px labels. Text areas retain at least 144 px. All controls grow with wrapping and zoom.
+
+O08 places period/view navigation and native date, timezone and scope filters in one compact control surface. Read time and the manual external-calendar boundary stay visible; a native disclosure contains scope, revalidation and manual-path details. On phones, the selected timezone and scope remain visible while secondary filters can fold into a native disclosure. Without JavaScript the same GET form starts expanded. Desktop retains the filter row. Week previews put time and concise state before safe references, with full identity and consequential wording in the linked itinerary; abbreviated visual labels retain their full accessible date. Week previews supplement the full itinerary. Confirmed and proposed intervals, access checks, resource reservations, travel allowance and conflicts remain available in the complete phone itinerary. Empty, failed-read and pending-request states remain distinct.
+
 ## Interaction and recovery
 
 Opening the directory moves focus to the page filter. Tab remains inside the native modal. Escape closes one open disclosure or the dialog, and returns focus to the actual opener. The desktop page picker also supports Control/Command K outside editable controls; it does not consume typing in a form. Ordinary navigation remains available without JavaScript.

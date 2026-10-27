@@ -49,6 +49,8 @@ export const cases = pgTable(
     disposition: caseDispositionEnum("disposition").notNull().default("active"),
     /** Service intake only: what the consultation is about. */
     serviceTopic: serviceIntakeTopicEnum("service_topic"),
+    /** Immutable intake source and self-declared context, never ownership or booking proof. */
+    serviceContext: jsonb("service_context"),
     title: text("title").notNull(),
     propertyId: uuid("property_id").references(() => properties.id),
     /** The one accountable broker. */
@@ -171,6 +173,8 @@ export const inquiries = pgTable(
     listingRevisionId: uuid("listing_revision_id").references(() => listingRevisions.id),
     /** Property or criteria snapshot the visitor submitted from, as shown on the receipt. */
     context: jsonb("context").notNull().default({}),
+    /** Immutable policy context at acceptance; null means historical/unbound, never reviewed. */
+    operatingPolicySnapshot: jsonb("operating_policy_snapshot"),
     preferredName: text("preferred_name"),
     contactMethodId: uuid("contact_method_id").references(() => contactMethods.id),
     partyId: uuid("party_id").references(() => parties.id),

@@ -484,7 +484,8 @@
     "orderSavedDetail": "{reference} · Neue Fotoreihenfolge: {order}. Das öffentliche Inserat hat sich nicht geändert.",
     "orderSavedPlain": "{reference} · Die neue Arbeitsreihenfolge ist gespeichert. Das öffentliche Inserat hat sich nicht geändert.",
     "orderChangedSince": "Die Reihenfolge hat sich seit diesem Speichern geändert. Die Galerie zeigt die aktuelle Reihenfolge.",
-    "toTask": "Zurück zur aktuellen Aufgabe"
+    "toTask": "Zurück zur aktuellen Aufgabe",
+    "review_consent": "Einwilligung zur Veröffentlichung der Bewertung"
   },
   "documents": {
     "title": "Dokumente",

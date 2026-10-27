@@ -2,7 +2,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, check, integer, jsonb, pgTable, real, text, uuid } from "drizzle-orm/pg-core";
 import { approvals } from "./approvals";
-import { instant, mutable } from "./columns";
+import { createdAt, id, instant, mutable } from "./columns";
 import { publicLocaleEnum } from "./enums";
 import { principals } from "./identity";
 
@@ -49,6 +49,49 @@ export const servicePolicies = pgTable("service_policies", {
     .default({ sale: 14, long_term_rent: 7 }),
   approvedById: uuid("approved_by_id").references(() => principals.id),
 });
+
+/** O24 singleton working draft. Approval copies the exact hash into an immutable edition. */
+export const operatingPolicyDrafts = pgTable(
+  "operating_policy_drafts",
+  {
+    ...mutable(),
+    document: jsonb("document").notNull().default({}),
+    contentHash: text("content_hash"),
+    updatedById: uuid("updated_by_id").references(() => principals.id),
+  },
+  (t) => [
+    check(
+      "operating_policy_drafts_singleton",
+      sql`${t.id} = '00000000-0000-4000-8000-000000000024'`,
+    ),
+  ],
+);
+
+export const operatingPolicyVersions = pgTable(
+  "operating_policy_versions",
+  {
+    id: id(),
+    policyVersion: integer("policy_version").notNull().unique(),
+    draftRevision: integer("draft_revision").notNull(),
+    document: jsonb("document").notNull(),
+    contentHash: text("content_hash").notNull(),
+    approvedById: uuid("approved_by_id")
+      .notNull()
+      .references(() => principals.id),
+    approvedAt: createdAt(),
+    approvalNote: text("approval_note").notNull(),
+    operationId: text("operation_id").notNull().unique(),
+    /** Projection for the pre-existing appointment safety guard; legacy rows are not upgraded. */
+    servicePolicyId: uuid("service_policy_id")
+      .notNull()
+      .references(() => servicePolicies.id),
+  },
+  (t) => [
+    check("operating_policy_version_positive", sql`${t.policyVersion} > 0`),
+    check("operating_policy_draft_revision_positive", sql`${t.draftRevision} > 0`),
+    check("operating_policy_content_hash", sql`${t.contentHash} ~ '^[a-f0-9]{64}$'`),
+  ],
+);
 
 /** Token buckets for public endpoints (inquiry, sign-in); keys hold no personal data. */
 export const rateLimitBuckets = pgTable("rate_limit_buckets", {

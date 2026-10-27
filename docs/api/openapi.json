@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MS Realty application transport",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "Generated from src/server/transport/registry.ts by scripts/openapi.mjs; do not edit. Application endpoints only (architecture §19.3), never raw collections. Mutations follow the §5.1 envelope: server-derived Principal, logical operation identity, expected revision where applicable, and one of the §5.1 results."
   },
   "servers": [
@@ -21,6 +21,9 @@
   ],
   "tags": [
     {
+      "name": "agency_commands"
+    },
+    {
       "name": "files"
     },
     {
@@ -37,6 +40,904 @@
     }
   ],
   "paths": {
+    "/api/agency/{command}": {
+      "post": {
+        "operationId": "agency.command",
+        "summary": "Record guarded partner terms, review consent or property photography",
+        "description": "Only clientConsent accepts a current client session on the client host; every other command requires current staff on the staff host. Public host returns 404. Each command uses its named request schema, current ordinary source/record permissions and qualified capability where applicable. Staff mutations require a passkey and fresh authentication. id is the terms/review record, or the Listing for photography; operationId is actor/type/record/payload bound. expectedVersion is 0 only for new partnerSave/reviewSave records, otherwise the exact current revision. expectedHash binds exact terms or review wording for decisions. Unknown outcomes must reconcile the original operation before retrying. No autonomous approval, booking or publication is granted by this transport.",
+        "tags": ["agency_commands"],
+        "servers": [
+          {
+            "url": "https://my.makler-realty.com",
+            "description": "Client host"
+          },
+          {
+            "url": "https://app.makler-realty.com",
+            "description": "Staff host"
+          }
+        ],
+        "security": [
+          {
+            "clientSession": []
+          },
+          {
+            "staffSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "command",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "partnerSave",
+                "partnerDecision",
+                "reviewSave",
+                "reviewDocumentConsent",
+                "reviewVerify",
+                "clientConsent",
+                "photography"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "caseId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "counterpartyPartyId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "relationship": {
+                        "type": "string",
+                        "enum": ["partner", "referral"]
+                      },
+                      "purpose": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 1500
+                      },
+                      "sourceReference": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 1000
+                      },
+                      "sourceVersion": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "termsText": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 20000
+                      },
+                      "documentVersionId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "acceptedReference": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "acceptedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "validUntil": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "unknowns": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "operationId": {
+                        "type": "string",
+                        "minLength": 16,
+                        "maxLength": 200
+                      },
+                      "expectedVersion": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "reviewed": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "caseId",
+                      "counterpartyPartyId",
+                      "relationship",
+                      "purpose",
+                      "sourceReference",
+                      "sourceVersion",
+                      "termsText",
+                      "documentVersionId",
+                      "acceptedReference",
+                      "acceptedAt",
+                      "validUntil",
+                      "unknowns",
+                      "id",
+                      "operationId",
+                      "expectedVersion",
+                      "reviewed"
+                    ],
+                    "description": "partnerSave"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "operationId": {
+                        "type": "string",
+                        "minLength": 16,
+                        "maxLength": 200
+                      },
+                      "expectedVersion": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "action": {
+                        "type": "string",
+                        "enum": ["accept", "revoke"]
+                      },
+                      "expectedHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "professionalName": {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 1500
+                      },
+                      "reviewed": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "operationId",
+                      "expectedVersion",
+                      "action",
+                      "expectedHash",
+                      "professionalName",
+                      "note",
+                      "reviewed"
+                    ],
+                    "description": "partnerDecision"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "operationId": {
+                        "type": "string",
+                        "minLength": 16,
+                        "maxLength": 200
+                      },
+                      "expectedVersion": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "caseId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "authorPartyId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "contentPageVersionId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "displayChoice": {
+                        "type": "string",
+                        "enum": ["anonymous", "name"]
+                      },
+                      "reviewed": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "operationId",
+                      "expectedVersion",
+                      "caseId",
+                      "authorPartyId",
+                      "contentPageVersionId",
+                      "displayChoice",
+                      "reviewed"
+                    ],
+                    "description": "reviewSave"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "operationId": {
+                        "type": "string",
+                        "minLength": 16,
+                        "maxLength": 200
+                      },
+                      "expectedVersion": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "expectedHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "decision": {
+                        "type": "string",
+                        "enum": ["granted", "refused", "withdrawn"]
+                      },
+                      "policyVersionId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "reviewed": {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "documentVersionId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "sourceReference": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 1000
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "operationId",
+                      "expectedVersion",
+                      "expectedHash",
+                      "decision",
+                      "policyVersionId",
+                      "reviewed",
+                      "documentVersionId",
+                      "sourceReference"
+                    ],
+                    "description": "reviewDocumentConsent"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "operationId": {
+                        "type": "string",
+                        "minLength": 16,
+                        "maxLength": 200
+                      },
+                      "expectedVersion": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "expectedHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "note": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 2000
+                      },
+                      "reviewed": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "operationId",
+                      "expectedVersion",
+                      "expectedHash",
+                      "note",
+                      "reviewed"
+                    ],
+                    "description": "reviewVerify"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "operationId": {
+                        "type": "string",
+                        "minLength": 16,
+                        "maxLength": 200
+                      },
+                      "expectedVersion": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "expectedHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "decision": {
+                        "type": "string",
+                        "enum": ["granted", "refused", "withdrawn"]
+                      },
+                      "policyVersionId": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "reviewed": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "operationId",
+                      "expectedVersion",
+                      "expectedHash",
+                      "decision",
+                      "policyVersionId",
+                      "reviewed"
+                    ],
+                    "description": "clientConsent"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "operationId": {
+                        "type": "string",
+                        "minLength": 16,
+                        "maxLength": 200
+                      },
+                      "expectedVersion": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "preferredWindow": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 500
+                      },
+                      "photographyScope": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 2000
+                      },
+                      "reviewed": {
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "operationId",
+                      "expectedVersion",
+                      "preferredWindow",
+                      "photographyScope",
+                      "reviewed"
+                    ],
+                    "description": "photography"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Committed command or identical stored operation replay",
+            "headers": {
+              "cache-control": {
+                "description": "private, no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "operationId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    },
+                    "outcome": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "version": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "termsHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            }
+                          },
+                          "required": ["id", "version", "termsHash"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "version": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "bindingHash": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            }
+                          },
+                          "required": ["id", "version", "bindingHash"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "version": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "consentState": {
+                              "type": "string",
+                              "enum": ["granted", "refused", "withdrawn"]
+                            }
+                          },
+                          "required": ["id", "version", "consentState"],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "version": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "reference": {
+                              "type": "string"
+                            },
+                            "recordedAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": ["id", "version", "reference", "recordedAt"],
+                          "additionalProperties": false
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["operationId", "replayed", "outcome"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED, STEP_UP_REQUIRED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "UNAUTHENTICATED": {
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHENTICATED",
+                        "message": "Please sign in to continue.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "STEP_UP_REQUIRED": {
+                    "value": {
+                      "error": {
+                        "code": "STEP_UP_REQUIRED",
+                        "message": "Please confirm it is you before this action.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["UNAUTHENTICATED", "STEP_UP_REQUIRED"]
+          },
+          "403": {
+            "description": "NOT_AUTHORIZED, CROSS_ORIGIN_REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_AUTHORIZED": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_AUTHORIZED",
+                        "message": "You do not have permission for this action.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "CROSS_ORIGIN_REQUEST": {
+                    "value": {
+                      "error": {
+                        "code": "CROSS_ORIGIN_REQUEST",
+                        "message": "This request did not come from this site.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_AUTHORIZED", "CROSS_ORIGIN_REQUEST"]
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "We could not find this item.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_FOUND"]
+          },
+          "409": {
+            "description": "REVISION_CONFLICT, APPROVAL_STALE, IDEMPOTENCY_KEY_REUSED, OPERATION_PENDING, OUTCOME_UNKNOWN",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "REVISION_CONFLICT": {
+                    "value": {
+                      "error": {
+                        "code": "REVISION_CONFLICT",
+                        "message": "Someone else changed this in the meantime. Review the latest version.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "APPROVAL_STALE": {
+                    "value": {
+                      "error": {
+                        "code": "APPROVAL_STALE",
+                        "message": "The approval this step relies on no longer matches the current version.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "IDEMPOTENCY_KEY_REUSED": {
+                    "value": {
+                      "error": {
+                        "code": "IDEMPOTENCY_KEY_REUSED",
+                        "message": "This request conflicts with an earlier one. Start again from the current page.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "OPERATION_PENDING": {
+                    "value": {
+                      "error": {
+                        "code": "OPERATION_PENDING",
+                        "message": "This request is still being processed.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  },
+                  "OUTCOME_UNKNOWN": {
+                    "value": {
+                      "error": {
+                        "code": "OUTCOME_UNKNOWN",
+                        "message": "We could not confirm whether this went through. We are checking it.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": [
+              "REVISION_CONFLICT",
+              "APPROVAL_STALE",
+              "IDEMPOTENCY_KEY_REUSED",
+              "OPERATION_PENDING",
+              "OUTCOME_UNKNOWN"
+            ]
+          },
+          "422": {
+            "description": "VALIDATION_FAILED, TRANSITION_DENIED",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "VALIDATION_FAILED": {
+                    "value": {
+                      "error": {
+                        "code": "VALIDATION_FAILED",
+                        "message": "Some details need attention.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "TRANSITION_DENIED": {
+                    "value": {
+                      "error": {
+                        "code": "TRANSITION_DENIED",
+                        "message": "This step is not available for the item in its current state.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["VALIDATION_FAILED", "TRANSITION_DENIED"]
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Something went wrong on our side.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["INTERNAL_ERROR"]
+          },
+          "503": {
+            "description": "DEPENDENCY_UNAVAILABLE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "DEPENDENCY_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "code": "DEPENDENCY_UNAVAILABLE",
+                        "message": "This service is temporarily unavailable. Please try again shortly.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["DEPENDENCY_UNAVAILABLE"]
+          }
+        },
+        "x-host-context": "private",
+        "x-authorization": {
+          "class": "private_session"
+        },
+        "x-idempotency": "operation_id",
+        "x-revision": "expected_revision",
+        "x-pagination": "none",
+        "x-acceptance": ["AT10", "AT11", "AT40"]
+      }
+    },
     "/api/files/uploads/{id}": {
       "put": {
         "operationId": "files.upload",
@@ -1262,6 +2163,60 @@
                     "required": ["kind", "slug", "versionId"],
                     "additionalProperties": false
                   },
+                  "serviceRequest": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "number",
+                        "const": 1
+                      },
+                      "topic": {
+                        "type": "string",
+                        "enum": ["short_stay_consultation", "management_consultation"]
+                      },
+                      "scopeVersionId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "regionId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "location": {
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 200
+                      },
+                      "needs": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 2000
+                      },
+                      "requestedFrom": {
+                        "type": "string",
+                        "pattern": "^20\\d{2}-\\d{2}-\\d{2}$"
+                      },
+                      "requestedUntil": {
+                        "type": "string",
+                        "pattern": "^20\\d{2}-\\d{2}-\\d{2}$"
+                      },
+                      "relationship": {
+                        "type": "string",
+                        "enum": ["owner", "representative", "tenant", "other", "unknown"]
+                      }
+                    },
+                    "required": [
+                      "version",
+                      "topic",
+                      "scopeVersionId",
+                      "regionId",
+                      "location",
+                      "needs"
+                    ],
+                    "additionalProperties": false
+                  },
                   "observedManifestId": {
                     "type": "string",
                     "format": "uuid",
@@ -1318,6 +2273,10 @@
                     "maxLength": 2048
                   },
                   "viewingPreferences": {
+                    "type": "string",
+                    "maxLength": 4096
+                  },
+                  "serviceRequest": {
                     "type": "string",
                     "maxLength": 4096
                   },
@@ -1409,6 +2368,42 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "service": {
+                          "type": "object",
+                          "properties": {
+                            "topic": {
+                              "type": "string",
+                              "enum": ["short_stay_consultation", "management_consultation"]
+                            },
+                            "regionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "scopeVersionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "scopeVersion": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": [
+                            "topic",
+                            "regionId",
+                            "scopeVersionId",
+                            "scopeVersion",
+                            "sourceUrl"
+                          ],
+                          "additionalProperties": false
+                        },
                         "content": {
                           "type": "object",
                           "properties": {
@@ -1674,6 +2669,42 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "service": {
+                          "type": "object",
+                          "properties": {
+                            "topic": {
+                              "type": "string",
+                              "enum": ["short_stay_consultation", "management_consultation"]
+                            },
+                            "regionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "scopeVersionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "scopeVersion": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": [
+                            "topic",
+                            "regionId",
+                            "scopeVersionId",
+                            "scopeVersion",
+                            "sourceUrl"
+                          ],
+                          "additionalProperties": false
+                        },
                         "content": {
                           "type": "object",
                           "properties": {
@@ -2148,6 +3179,42 @@
                     "receipt": {
                       "type": "object",
                       "properties": {
+                        "service": {
+                          "type": "object",
+                          "properties": {
+                            "topic": {
+                              "type": "string",
+                              "enum": ["short_stay_consultation", "management_consultation"]
+                            },
+                            "regionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "scopeVersionId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "scopeVersion": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "sourceUrl": {
+                              "type": "string",
+                              "format": "uri"
+                            }
+                          },
+                          "required": [
+                            "topic",
+                            "regionId",
+                            "scopeVersionId",
+                            "scopeVersion",
+                            "sourceUrl"
+                          ],
+                          "additionalProperties": false
+                        },
                         "content": {
                           "type": "object",
                           "properties": {

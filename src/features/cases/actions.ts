@@ -224,6 +224,9 @@ export async function workflowAction(
             await createCaseFromInquiry(db, s, {
               ...base,
               kind: values.kind as "buyer",
+              serviceTopic: (values.serviceTopic || undefined) as
+                | "short_stay_consultation"
+                | undefined,
               title: values.title ?? "",
               nextAction: values.nextAction ?? "",
               dueAt: formInstant(values, "dueAt"),

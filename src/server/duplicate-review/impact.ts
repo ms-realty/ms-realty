@@ -1,17 +1,29 @@
 import "server-only";
-import { and, asc, eq, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
-import { inquiries, listings, parties, properties } from "@/db/schema";
+import {
+  inquiries,
+  listings,
+  parties,
+  privacyExports,
+  privacyRequests,
+  properties,
+} from "@/db/schema";
 import type { Actor, Capability } from "@/domain/capabilities";
 import { requireFreshAuth, type Session } from "@/server/auth/sessions";
 import { can, type Resource, resolveGrants } from "@/server/authz";
-import { hashRequest } from "@/server/crypto";
+import { getEnv } from "@/server/config/env";
+import { hashRequest, keyedHash } from "@/server/crypto";
 import type { Executor } from "@/server/db";
 import { caseDocumentPurposes } from "@/server/documents/purposes";
 import { assertRequestedDocumentAccess } from "@/server/documents/request-access";
 import { AppError } from "@/server/errors";
 import { documentAccess, mediaAccess } from "@/server/files/access";
 import { privacyOperator } from "@/server/privacy/access";
+import { collectAgencySources } from "@/server/privacy/agency-sources";
+import { appointmentSourceRevision } from "@/server/privacy/photography-sources";
+import { serviceContextRevision } from "@/server/privacy/service-sources";
+import { privacySafetyRevision } from "@/server/privacy/source-fingerprint";
 import { liveStaff, visibleWhere } from "@/server/work/shared";
 
 export const duplicatePairSchema = z
@@ -31,6 +43,8 @@ export type Hold =
   | "existing_merge"
   | "different_kind"
   | "verified_contact_conflict"
+  | "privacy_restriction"
+  | "agency_reconciliation"
   | "changed_after_merge"
   | "already_reversed";
 export interface DuplicateIdentity {
@@ -273,6 +287,7 @@ const audienceColumns = [
   "responsible_id",
   "service_name",
   "case_id",
+  "appointment_id",
   "property_id",
   "role",
   "authority",
@@ -308,6 +323,107 @@ const sourceTable = (subject: MergeSubject) => (subject === "party" ? "parties" 
 const ident = (name: string) => sql`${sql.identifier(name)}`;
 const idsCondition = (column: SQL, pair: DuplicatePair) =>
   sql`${column} in (${pair.left}::uuid, ${pair.right}::uuid)`;
+
+// Dedicated projections, including the restriction's composite key. A new FK/column is
+// still unknown; this declaration does not authorize an arbitrary table or JSON scan.
+const privacyPartyEdges = new Set([
+  "privacy_exports.party_id",
+  "privacy_safety_decisions.party_id",
+  "privacy_processing_restrictions.party_id",
+]);
+const agencyPartyEdges = new Set([
+  "agency_partner_terms.counterparty_party_id",
+  "agency_case_reviews.author_party_id",
+]);
+
+async function privacyHistoryImpact(
+  db: Executor,
+  session: Session,
+  pair: DuplicatePair,
+  lock: boolean,
+): Promise<{ held: Hold[]; reference?: RetainedReference }> {
+  const sources = [pair.left, pair.right].sort();
+  const [history] = await db.execute<{ present: boolean }>(sql`select
+    exists(select 1 from privacy_exports where ${idsCondition(sql`party_id`, pair)}) or
+    exists(select 1 from privacy_safety_decisions where ${idsCondition(sql`party_id`, pair)}) or
+    exists(select 1 from privacy_processing_restrictions where ${idsCondition(sql`party_id`, pair)})
+    as present`);
+  if (!history?.present) return { held: [] };
+  try {
+    const live = await privacyOperator(db, session);
+    for (const id of sources)
+      if (
+        !(await can(db, live.actor, "privacy.manage", { type: "party", id, audience: "internal" }))
+      )
+        return { held: ["restricted"] };
+    const query = db
+      .select({
+        id: privacyExports.id,
+        version: privacyExports.version,
+        createdAt: privacyExports.createdAt,
+        updatedAt: privacyExports.updatedAt,
+        requestId: privacyExports.requestId,
+        requestVersion: privacyExports.requestVersion,
+        partyId: privacyExports.partyId,
+        recipientId: privacyExports.recipientId,
+        state: privacyExports.state,
+        sha256: privacyExports.sha256,
+        byteSize: privacyExports.byteSize,
+        coverageComplete: privacyExports.coverageComplete,
+        reviewSha256: privacyExports.reviewSha256,
+        completedOperationId: privacyExports.completedOperationId,
+        preparedById: privacyExports.preparedById,
+        reviewedById: privacyExports.reviewedById,
+        reviewedAt: privacyExports.reviewedAt,
+        expiresAt: privacyExports.expiresAt,
+        revokedAt: privacyExports.revokedAt,
+        issuedOperationId: privacyExports.issuedOperationId,
+      })
+      .from(privacyExports)
+      .where(inArray(privacyExports.partyId, sources))
+      .orderBy(asc(privacyExports.id))
+      .limit(501);
+    const exports = await (lock ? query.for("share") : query);
+    if (exports.length > 500) return { held: ["too_many"] };
+    const safety = await privacySafetyRevision(db, sources, lock, 500);
+    const bindings = [
+      ...exports.map((row) => ({ id: row.requestId, partyId: row.partyId, required: true })),
+      ...safety.requestBindings.map((row) => ({ ...row, required: false })),
+    ];
+    for (const binding of bindings) {
+      const requestQuery = db
+        .select({ id: privacyRequests.id, partyId: privacyRequests.partyId })
+        .from(privacyRequests)
+        .where(eq(privacyRequests.id, binding.id));
+      const [request] = await (lock ? requestQuery.for("share") : requestQuery);
+      // A restored safety tail may precede its request. This supplies no authority to
+      // reopen a restored application; the independent recovery gate still applies.
+      if (!request && !binding.required) continue;
+      if (request?.partyId !== binding.partyId) return { held: ["restricted"] };
+      await privacyOperator(db, live, binding.id);
+    }
+    return {
+      held: safety.clientAccessRestricted ? ["privacy_restriction"] : [],
+      reference: {
+        table: "privacy_history",
+        id: keyedHash(getEnv().authSecret, `duplicate-privacy-pair:v1:${JSON.stringify(sources)}`),
+        sources,
+        digest: keyedHash(
+          getEnv().authSecret,
+          `duplicate-privacy-history:v1:${hashRequest(
+            JSON.parse(JSON.stringify({ exports, safety: safety.fingerprint })),
+          )}`,
+        ),
+        // One pair-scoped boundary, regardless of private table/row counts or identities.
+        audience: {},
+      },
+    };
+  } catch (error) {
+    if (error instanceof AppError)
+      return { held: [error.code === "validation_failed" ? "too_many" : "restricted"] };
+    throw error;
+  }
+}
 
 /** Read only a declared parent to obtain the same case/property scope as its ordinary reader. */
 async function referenceResource(db: Executor, table: string, row: Row): Promise<Resource> {
@@ -368,6 +484,11 @@ async function referenceReadable(
       await privacyOperator(db, session, row.id);
       return true;
     }
+    if (table === "appointment_participants")
+      return (
+        typeof row.appointment_id === "string" &&
+        Boolean(await appointmentSourceRevision(db, actor, row.appointment_id))
+      );
     if (table === "subscriptions") {
       requireFreshAuth(session);
       return can(db, actor, "privacy.manage");
@@ -443,6 +564,7 @@ async function referenceReadable(
         }
       : await referenceResource(db, table, row);
   if (!(await can(db, actor, policy, resource))) return false;
+  if (table === "cases") return can(db, actor, "case.read", resource);
   // Permission-management is not a substitute for reading the actual private relationship.
   if (table === "case_participants") return can(db, actor, "case.read", resource);
   if (table === "property_relationships") return can(db, actor, "listing.read", resource);
@@ -480,7 +602,16 @@ export async function readDuplicateImpact(
       held.add("unsupported");
       return;
     }
-    const rows = await db.execute<Row>(sql`select ${sql.join(selected.map(ident), sql`, `)}
+    // Only these two declared B11 fields are read, and only an opaque commitment leaves
+    // the reader. They never enter audience metadata or identity/ownership matching.
+    const serviceColumn =
+      table === "inquiries"
+        ? sql`, context->'service' as retained_service_context`
+        : table === "cases"
+          ? sql`, service_context as retained_service_context`
+          : sql``;
+    const rows =
+      await db.execute<Row>(sql`select ${sql.join(selected.map(ident), sql`, `)}${serviceColumn}
       from ${ident(table)} where ${condition} order by id limit 501 ${lock ? sql`for share` : sql``}`);
     if (rows.length > 500 || references.size + rows.length > 2000) {
       held.add("too_many");
@@ -513,12 +644,34 @@ export async function readDuplicateImpact(
         held.add(directPolicies[table] || policy ? "restricted" : "unsupported");
         continue;
       }
-      const serialized = JSON.stringify(row);
+      const { retained_service_context: service, ...record } = row;
+      let serviceRevision: string | undefined;
+      if (table === "inquiries" || table === "cases") {
+        try {
+          serviceRevision = serviceContextRevision(service);
+        } catch (error) {
+          if (!(error instanceof AppError)) throw error;
+          held.add("unsupported");
+          continue;
+        }
+      }
+      let appointmentRevision: string | undefined;
+      if (table === "appointments") {
+        const source = await appointmentSourceRevision(db, live.actor, row.id, lock, 500);
+        if (!source) {
+          held.add("restricted");
+          continue;
+        }
+        appointmentRevision = source.digest;
+      }
+      const serialized = JSON.stringify(record);
       references.set(`${table}:${row.id}`, {
         table,
         id: row.id,
         sources: [pair.left, pair.right].filter((id) => serialized.includes(id)),
-        digest: hashRequest(JSON.parse(JSON.stringify(row))),
+        digest: hashRequest(
+          JSON.parse(JSON.stringify({ ...record, serviceRevision, appointmentRevision })),
+        ),
         audience: Object.fromEntries(
           audienceColumns.filter((key) => row[key] !== undefined).map((key) => [key, row[key]]),
         ),
@@ -535,6 +688,10 @@ export async function readDuplicateImpact(
   };
   for (const edge of edges) {
     const condition = idsCondition(ident(edge.column_name), pair);
+    if (pair.subject === "party" && privacyPartyEdges.has(`${edge.table_name}.${edge.column_name}`))
+      continue;
+    if (pair.subject === "party" && agencyPartyEdges.has(`${edge.table_name}.${edge.column_name}`))
+      continue;
     // Unknown populated edges are held; nothing about their contents is exposed or hashed.
     if (!(edge.table_name in directPolicies)) {
       const [exists] = await db.execute<{ present: boolean }>(sql`select exists(select 1 from
@@ -577,6 +734,10 @@ export async function readDuplicateImpact(
     );
   }
   if (pair.subject === "party") {
+    const privacy = await privacyHistoryImpact(db, live, pair, lock);
+    for (const hold of privacy.held) held.add(hold);
+    if (privacy.reference)
+      references.set(`${privacy.reference.table}:${privacy.reference.id}`, privacy.reference);
     await readRows(
       "case_process_reviews",
       sql`party_ids ?| array[${pair.left}, ${pair.right}]`,
@@ -598,7 +759,14 @@ export async function readDuplicateImpact(
         .filter((id): id is string => typeof id === "string"),
     ),
   ].sort();
-  if (caseIds.length)
+  if (caseIds.length) {
+    await readRows(
+      "cases",
+      sql`id in (${sql.join(
+        caseIds.map((id) => sql`${id}::uuid`),
+        sql`, `,
+      )}) and (kind = 'service_intake' or service_context is not null)`,
+    );
     await readRows(
       "documents",
       sql`case_id in (${sql.join(
@@ -606,6 +774,56 @@ export async function readDuplicateImpact(
         sql`, `,
       )})`,
     );
+  }
+  const appointmentIds = [
+    ...new Set(
+      [...references.values()]
+        .map((row) => row.audience.appointment_id)
+        .filter((id): id is string => typeof id === "string"),
+    ),
+  ].sort();
+  if (caseIds.length || appointmentIds.length)
+    await readRows(
+      "appointments",
+      or(
+        caseIds.length
+          ? sql`case_id in (${sql.join(
+              caseIds.map((id) => sql`${id}::uuid`),
+              sql`, `,
+            )})`
+          : undefined,
+        appointmentIds.length
+          ? sql`id in (${sql.join(
+              appointmentIds.map((id) => sql`${id}::uuid`),
+              sql`, `,
+            )})`
+          : undefined,
+      ) ?? sql`false`,
+    );
+  try {
+    const agency = await collectAgencySources(
+      db,
+      live.actor,
+      pair.subject === "party" ? [pair.left, pair.right] : [],
+      caseIds,
+      lock,
+      500,
+    );
+    if (agency.blocked) held.add("restricted");
+    if (agency.mergeHeld) held.add("agency_reconciliation");
+    if (references.size + agency.sources.length > 2000) throw new AppError("validation_failed");
+    for (const row of agency.sources)
+      references.set(`agency:${row.kind}:${row.id}`, {
+        table: row.kind === "partner_terms" ? "agency_partner_terms" : "agency_case_reviews",
+        id: row.id,
+        sources: row.parties,
+        digest: row.digest,
+        audience: {},
+      });
+  } catch (error) {
+    if (!(error instanceof AppError)) throw error;
+    held.add(error.code === "validation_failed" ? "too_many" : "restricted");
+  }
   const refs = [...references.values()].sort((a, b) =>
     `${a.table}:${a.id}`.localeCompare(`${b.table}:${b.id}`),
   );

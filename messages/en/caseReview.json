@@ -1,0 +1,14 @@
+{
+  "title": "My review",
+  "lead": "Consent applies only to the exact Bulgarian text and displayed public name. Refusal or withdrawal does not change your service.",
+  "empty": "No reviews have been prepared.",
+  "grant": "Allow this exact publication",
+  "refuse": "Refuse consent",
+  "withdraw": "Withdraw consent",
+  "reviewed": "I read the exact review, verification statement, name and terms for this publication.",
+  "held": "Current consent terms are unavailable. You can refuse or withdraw; use the approved manual procedure to grant consent.",
+  "state": "Consent state",
+  "status": "Check this action",
+  "back": "Back to reviews",
+  "unresolved": "The result is unresolved. Check the same action before retrying."
+}

@@ -5,6 +5,11 @@ restore tool. The independent safety ledger, object archive, seal/completeness c
 review and controlled reopening remain required by architecture §17.3. No release gate is
 passed by this implementation or its synthetic rehearsal.
 
+The application privacy safety ledger and controlled signed synthetic-tail reapplication are
+described in [AT45/UX23 privacy propagation](../privacy-erasure-propagation.md). They reuse this
+quarantine, retain invalid restored credentials and leave runtime globally closed. They do
+not establish actual independent archive completeness or provide a reopening command.
+
 Migration 0016 adds one persistent runtime control row. Newly migrated installations start
 normally. On an isolated restored destination, the offline recovery preparation transaction
 sets quarantine, binds the restore ID and database archive SHA-256, revokes restored sessions,

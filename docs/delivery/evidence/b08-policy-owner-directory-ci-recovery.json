@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "flowIds": ["O24", "F30", "AT14", "AT45", "UX23"],
+  "status": "source-repaired-focused-checks-passed-integrated-browser-pending",
+  "baselineSource": "84e0a43a33bb497c2f369fe01363d9d040d3a531",
+  "sourceCheckpoints": [
+    "ce568e728d14d4f75557fec0e302afc4ff729b8e",
+    "141f8215da6a565c5479f76b3103562e6453908c"
+  ],
+  "upstreamCi": {
+    "runId": 40494628940,
+    "jobId": 122162461702,
+    "project": "chromium-mobile",
+    "rawLog": "output/completion-execution/evidence/ci/pr340-84e0a43a-chromium-mobile-red.json",
+    "rawLogSha256": "abd5cf64fe934676c4f61e2670b30ad7b06b5e8512ee0a48bd983954394b2091",
+    "rawLogTruncated": true,
+    "summary": {
+      "passed": 471,
+      "failed": 2,
+      "flaky": 1,
+      "skipped": 18,
+      "notRun": 1
+    },
+    "scope": "This repair covers operating policy and erasure. The separate publication failure is owned by the publication worker.",
+    "artifactId": 12731688221,
+    "artifactBytes": 160168474,
+    "expectedArtifactSha256": "f8e99eb8f33b353c3c6f2fc12a37c20eaaea689056addd50b72f80b79dc87d4f",
+    "actualArtifactSha256": "f8e99eb8f33b353c3c6f2fc12a37c20eaaea689056addd50b72f80b79dc87d4f",
+    "artifactValidated": true,
+    "downloadedBy": "root; existing download reused",
+    "traces": [
+      {
+        "test": "operating-policy-O24-polic-c43c1--receipt-and-history-native-chromium-mobile",
+        "trace": "output/completion-execution/evidence/F03/ci-340-84e0a43a-analysis/test-results/151e071de68f49828e0fb346f752c81d/operating-policy-O24-polic-c43c1--receipt-and-history-native-chromium-mobile/trace.zip",
+        "traceSha256": "3d13ad8d43377dfa49591b07a89484ee851f60f69a28d477b9f3d54e0148537e",
+        "errorContextSha256": "b7ecd469945d108cadd37880f8eba97072b0e62e61258e501c0f984aa327f2d3",
+        "testTimeoutMs": 30000,
+        "reportedErrors": [
+          "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+          "Error: browserContext.close: Test ended."
+        ],
+        "blockedAction": "Select actual freshly seeded service owner",
+        "blockedAtOffsetMs": 2198.523,
+        "browserLogEvidence": [
+          "locator resolved to the Service responsibility select",
+          "did not find some options"
+        ],
+        "mutationPostBeforeFailure": false
+      },
+      {
+        "test": "operating-policy-O24-polic-c43c1--receipt-and-history-native-chromium-mobile-retry1",
+        "trace": "output/completion-execution/evidence/F03/ci-340-84e0a43a-analysis/test-results/151e071de68f49828e0fb346f752c81d/operating-policy-O24-polic-c43c1--receipt-and-history-native-chromium-mobile-retry1/trace.zip",
+        "traceSha256": "79e39490e860f7dab75820d3bc6a3db5ce45db7087627661c7041918bb97192a",
+        "errorContextSha256": "9656a7601a53eb0afe23ee6542ff8e36fa488b7112276773acf0dc8e0ec9f74d",
+        "testTimeoutMs": 30000,
+        "reportedErrors": [
+          "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+          "Error: browserContext.close: Target page, context or browser has been closed"
+        ],
+        "blockedAction": "Select actual freshly seeded service owner",
+        "blockedAtOffsetMs": 5542.761,
+        "browserLogEvidence": [
+          "locator resolved to the Service responsibility select",
+          "did not find some options"
+        ],
+        "mutationPostBeforeFailure": false
+      },
+      {
+        "test": "privacy-erasure-AT45-reviewed-erasure-enhanced-chromium-mobile",
+        "trace": "output/completion-execution/evidence/F03/ci-340-84e0a43a-analysis/test-results/151e071de68f49828e0fb346f752c81d/privacy-erasure-AT45-reviewed-erasure-enhanced-chromium-mobile/trace.zip",
+        "traceSha256": "71654d341bd62baaf45ce12f9366c539d4b68c4d66764d6e989d10cf87c6d143",
+        "errorContextSha256": "66a61c536ee3af362f62d06a2182f0b1c6ff0c3a84289a0e7d601f25a743c6c9",
+        "testTimeoutMs": 30000,
+        "reportedErrors": [
+          "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+          "Error: write CONNECTION_ENDED 127.0.0.1:5432"
+        ],
+        "firstBrowserActionOffsetMs": 28330.647,
+        "preBrowserSourceSteps": [
+          "acquire shared policy advisory lock",
+          "run synchronous synthetic erasure seed"
+        ],
+        "timeoutStage": "filling category evidence, before erase POST",
+        "mutationPostBeforeFailure": false
+      }
+    ]
+  },
+  "diagnosis": {
+    "provedPrimaryCause": "Both native policy attempts wait for an eligible owner missing from the actual select. The authorized active-staff query orders by display name, caps at 100 and offers no search or paging. Earlier synthetic active staff displace the fresh owner.",
+    "cleanupError": "browserContext.close is reported only after the 30-second total expires while that select remains pending. No save/approve POST precedes either failure.",
+    "erasureTiming": "Erasure first opens its browser context at +28330.647 ms of the same 30000 ms total. Its source first acquires the same advisory key then seeds. This overlaps the stalled policy retry holding that key, leaving insufficient time for the real erasure journey.",
+    "limits": "The traces do not include SQL acquisition timing. The pre-browser offset includes both lease acquisition and seed; it is not an exact measured SQL wait. They show no leaked reserved fixture lease or spontaneous database outage. CONNECTION_ENDED appears as a secondary cleanup error after timeout; a specific cleanup race is not independently proven."
+  },
+  "repair": {
+    "ownerDirectory": "Current settings.manage at the existing operating-policy settings resource gates 30-row stable displayName/id paging and escaped literal name search. Only active staff with active membership are returned; no emails/contact data or new capabilities.",
+    "nativeRecovery": "Search/page buttons POST inside the existing signed save form, with no policy write. Every entered policy field, original key and revision survives. Exact selected owner identities are freshly guarded and retained outside the result page, including empty results and native validation. Search/source prose never enters a URL.",
+    "operationFence": "A browse request checks for an existing actor/type/key save operation before returning an idle form. A recorded operation stays behind manual reconciliation. Unknown/conflict command outcomes are preserved during directory projection.",
+    "positiveAuthority": "Existing policy save/approval inputs, source/hash/revision, active named owner, fresh-authentication and passkey guards remain unchanged. No production policy, hours, booking or permission guard is loosened.",
+    "history": "Current draft/recent editions resolve only their exact currently eligible referenced owners outside the first page. An exact older edition resolves its own owner references under the same authority; no directory/canonical identity substitution.",
+    "leaseRobustness": "The two legacy policy/erasure journeys now reuse the same automatic reserved physical-session lease as B10/B11/S4. Erasure uses a per-test query pool closed in finally rather than module afterAll. This is lifecycle robustness, not a claimed lock-leak diagnosis.",
+    "advisoryKey": "synthetic-operating-policy-browser",
+    "timeoutPolicy": "Both policy and erasure retain their original 30000 ms totals. No assertion/action timeout, retry count, threshold or force-click behavior changes. Shared helper API and other journey timeout scopes remain unchanged.",
+    "browserRegression": "The real policy journey seeds more than 100 earlier active staff, advances the actual native directory, searches the actual fresh owner name, selects it, then performs an empty search. It checks retained source, selection, operation key and revision before continuing all existing stale approval, receipt, actor isolation, denied-scope, 320px and axe checks."
+  },
+  "checks": [
+    {
+      "command": "npx vitest run --project unit src/features/operating-policy/owner-actions.test.ts src/i18n/messages.test.ts src/i18n/copy-guard.test.ts",
+      "exitCode": 0,
+      "result": "127 tests in 3 files passed",
+      "receipt": "output/browser-policy-recovery/unit-first.log",
+      "sha256": "1729cd9f9c1e86686d05257241066c9e952d37724e4ccc5d12c4a53b3f217abf"
+    },
+    {
+      "command": "npx vitest run --project unit-dom src/features/operating-policy/owner-directory.test.tsx",
+      "exitCode": 0,
+      "result": "3 tests passed; native FormData, restored exact owner/source/key, unknown-state disabled actions",
+      "receipt": "output/browser-policy-recovery/dom-first.log",
+      "sha256": "14f176267078eb6f4198ce2461ae0e6bf58dce5c0b2b57a01418a15fd714cee1"
+    },
+    {
+      "command": "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx vitest run --project integration src/server/operating-policy/owners.int.test.ts src/server/operating-policy/service.int.test.ts src/server/appointments/photography.int.test.ts",
+      "exitCode": 1,
+      "result": "Existing operating-policy and photography suites passed 16 tests; 3 new directory cases failed because their new manager fixture omitted its required passkey. Failure retained; synthetic single-passkey fixture corrected without changing production guards.",
+      "receipt": "output/browser-policy-recovery/integration-first.log",
+      "sha256": "cc3e0d6ad68d61ca5c8f9d2938bac04a6048602acc580141349a6fa45479f13e"
+    },
+    {
+      "command": "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx vitest run --project integration src/server/operating-policy/owners.int.test.ts",
+      "exitCode": 0,
+      "result": "3 new real-PG directory cases passed: beyond100/stable ties/literal search/exact saved owner; wrong scope/revoked grant/client/suspended/ended filtering; bounded invalid inputs. createTestDatabase used a unique disposable database.",
+      "receipt": "output/browser-policy-recovery/integration-corrected.log",
+      "sha256": "bd211bd0bbe97955f768fbce20af0612c92f0654070f041bbad085cc7fc9cf0c"
+    },
+    {
+      "command": "npx tsc --noEmit --incremental false",
+      "exitCode": 1,
+      "result": "New test helper inferred a literal settings UUID for its optional scope; retained diagnostic. Parameter corrected to string, with no application change.",
+      "receipt": "output/browser-policy-recovery/types-final.log",
+      "sha256": "fdb487747801561b18d3b2fd723abae8a643b367fe3fc888b1973c025a1f13f4"
+    },
+    {
+      "command": "npx tsc --noEmit --incremental false",
+      "exitCode": 0,
+      "result": "Passed",
+      "receipt": "output/browser-policy-recovery/types-corrected.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "npx biome check <all 15 changed source/test/catalogue files>",
+      "exitCode": 0,
+      "result": "15 files passed with no fixes; seed display-name exactness follow-up also passed scoped Biome check",
+      "receipt": "output/browser-policy-recovery/lint-final.log",
+      "sha256": "99b256230f9e29db3fcb6bad6dbd4a893882f1bad3aa6ae06c89a5e71d0d9e75"
+    },
+    {
+      "command": "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx playwright test e2e/operating-policy.spec.ts e2e/privacy-erasure.spec.ts --list",
+      "exitCode": 0,
+      "result": "12 existing native/enhanced journeys discovered across all 3 browser profiles. Discovery only; no server/build/browser started.",
+      "receipt": "output/browser-policy-recovery/discovery-final.log",
+      "sha256": "8d545b20f915d994190b41e675c40771a37f80e57eb1b1eb613e7f5d7dfcf327"
+    }
+  ],
+  "verificationBoundary": {
+    "sourceAndFocusedChecks": "completed locally; no push",
+    "freshCombinedBrowser": "pending root-owned combined build/run; no green browser claim for this source",
+    "productionStagingProviderLaunchWrites": false,
+    "actualAgencyPolicyOrHumanAcceptance": "not supplied or claimed",
+    "unrelatedCpuWorkers": "not stopped or modified",
+    "oldReceiptsAndBranches": "preserved; no archive/reset/cleanup"
+  }
+}

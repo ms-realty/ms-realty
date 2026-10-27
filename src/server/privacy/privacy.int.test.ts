@@ -185,7 +185,7 @@ describe("privacy requests remain owned, scoped human work", () => {
     });
   });
 
-  it("cannot release a current server retention hold; completion records evidence without deleting data or revealing restricted details", async () => {
+  it("cannot release a current server retention hold or complete erasure from free text without typed propagation", async () => {
     const staff = await operator(),
       person = await client();
     const request = await submitPrivacyRequest(t.db, person.session, requestInput());
@@ -313,11 +313,13 @@ describe("privacy requests remain owned, scoped human work", () => {
       .update(suspicionReports)
       .set({ createdAt: new Date(Date.now() - 3 * 86400000) })
       .where(eq(suspicionReports.id, hold.id));
-    await reviewPrivacyRequest(t.db, staff.session, {
-      ...reviewInput(id, staff.id, 4, "completed"),
-      holdResolved: true,
-    });
-    expect((await clientPrivacyRequests(t.db, person.session))[0]?.state).toBe("completed");
+    await expect(
+      reviewPrivacyRequest(t.db, staff.session, {
+        ...reviewInput(id, staff.id, 4, "completed"),
+        holdResolved: true,
+      }),
+    ).rejects.toMatchObject({ code: "transition_denied" });
+    expect((await clientPrivacyRequests(t.db, person.session))[0]?.state).toBe("on_legal_hold");
     expect(await t.db.select().from(parties).where(eq(parties.id, person.partyId))).toHaveLength(1);
     expect(
       await t.db.select().from(contactMethods).where(eq(contactMethods.id, person.contact.id)),

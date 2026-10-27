@@ -3,17 +3,23 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getDb } from "@/db/client";
+import { agencyCopy } from "@/features/agency-obligations/copy";
 import { ProfileForm } from "@/features/identity/profile-form";
 import { settingsCopy } from "@/features/identity/settings-copy";
+import { operatingPolicyCopy } from "@/features/operating-policy/copy";
+import { governanceCopy } from "@/features/privacy-governance/copy";
 import { AccountIdentity } from "@/features/shell/account";
 import { LocaleSwitcher } from "@/features/shell/language-switcher";
 import { NavigationIcon } from "@/features/shell/navigation-icons";
+import { StaffPage } from "@/features/shell/staff-ui";
 import { SidebarToggle } from "@/features/shell/workspace-frame";
 import { workCopy } from "@/features/work/copy";
 import { isStaffLocale, staffLocales } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { profileOperation, readStaffProfile } from "@/server/auth/profile";
-import { heldCapabilities } from "@/server/authz";
+import { can, heldCapabilities } from "@/server/authz";
+import { policyResource } from "@/server/operating-policy/service";
+import { governanceResource } from "@/server/privacy-governance/service";
 import { buttonClass } from "@/ui/button-class";
 import { initialFormState } from "@/ui/form/server";
 import { CheckIcon, ChevronDownIcon } from "@/ui/icons";
@@ -27,19 +33,51 @@ export default async function SettingsPage({
   if (!isStaffLocale(locale)) notFound();
   const session = await requireStaffPage(locale);
   const db = getDb();
-  const [profile, held, query] = await Promise.all([
+  const [
+    profile,
+    held,
+    query,
+    mayManageOperatingPolicy,
+    mayManagePrivacySettings,
+    mayReadPrivacySettings,
+  ] = await Promise.all([
     readStaffProfile(db, session),
     heldCapabilities(db, session.actor, [
+      "compliance.review",
       "access.grant",
       "report.read",
       "settings.manage",
       "message.send_external",
     ]),
     searchParams,
+    can(db, session.actor, "settings.manage", policyResource),
+    can(db, session.actor, "settings.manage", governanceResource),
+    can(db, session.actor, "privacy.manage", governanceResource),
   ]);
   const copy = settingsCopy(locale);
   const workspace = await getTranslations({ locale, namespace: "workspace" });
   const administration = [
+    ...(held.has("compliance.review")
+      ? [{ href: `/${locale}/operations/agency`, label: agencyCopy(locale).title, icon: "pages" }]
+      : []),
+    ...(mayManagePrivacySettings && mayReadPrivacySettings
+      ? [
+          {
+            href: `/${locale}/operations/privacy-governance`,
+            label: governanceCopy(locale).title,
+            icon: "system",
+          },
+        ]
+      : []),
+    ...(mayManageOperatingPolicy
+      ? [
+          {
+            href: `/${locale}/settings/operating-policy`,
+            label: operatingPolicyCopy(locale).title,
+            icon: "system",
+          },
+        ]
+      : []),
     ...(held.has("access.grant")
       ? [{ href: `/${locale}/access/manage`, label: copy.team, icon: "team" }]
       : []),
@@ -60,11 +98,7 @@ export default async function SettingsPage({
   ];
   const selected = sections.find((section) => section.id === query.section)?.id ?? "profile";
   return (
-    <div className="mx-auto w-full max-w-5xl px-gutter py-8 lg:px-8 lg:py-10">
-      <div className="mb-6 space-y-3">
-        <h1 className="text-page font-semibold">{copy.title}</h1>
-        <p className="max-w-reading text-text-muted">{copy.lead}</p>
-      </div>
+    <StaffPage title={copy.title} lead={copy.lead}>
       <nav aria-label={copy.title}>
         <div className="hidden gap-1 border-b border-divider sm:flex">
           {sections.map((section) => (
@@ -107,7 +141,7 @@ export default async function SettingsPage({
           </ul>
         </details>
       </nav>
-      <div className="max-w-reading pt-7">
+      <div className="max-w-reading">
         {selected === "profile" ? (
           <section aria-labelledby="profile-title" className="space-y-6">
             <div className="space-y-2">
@@ -214,6 +248,6 @@ export default async function SettingsPage({
           </section>
         )}
       </div>
-    </div>
+    </StaffPage>
   );
 }

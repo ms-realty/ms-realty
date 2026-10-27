@@ -17,6 +17,7 @@ import { can } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { containsSearchControl } from "../search/controls";
+import { serviceCaseCoverage } from "../service-intake/scope";
 import { ownerNeedsCoverage } from "../work/coverage-policy";
 import { caseFor, caseVisibility, liveParticipation } from "./shared";
 
@@ -66,6 +67,8 @@ export async function readCase(db: Executor, session: Session, id: string) {
   const staff = live.account.kind === "staff";
   const internal = staff && (await can(db, live.actor, "case.read_internal", resource));
   const active = row.disposition === "active";
+  const service =
+    row.kind === "service_intake" ? await serviceCaseCoverage(db, row.serviceContext) : null;
   const canTransition = staff && (await can(db, live.actor, "case.transition", resource));
   const [owner] = row.ownerId
     ? await db
@@ -163,6 +166,17 @@ export async function readCase(db: Executor, session: Session, id: string) {
       reference: row.reference,
       version: row.version,
       kind: row.kind,
+      ...(service
+        ? {
+            service: {
+              current: service.current,
+              topic: row.serviceTopic,
+              request: service.context?.request ?? null,
+              sourceUrl: service.context?.binding.sourceUrl ?? null,
+              scopeVersion: service.context?.binding.scopeVersion ?? null,
+            },
+          }
+        : {}),
       title: row.title,
       stage: row.stage,
       disposition: row.disposition,

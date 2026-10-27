@@ -1,0 +1,94 @@
+{
+  "kind": "B10 counterparty picker followup; local source and focused proof",
+  "source": {
+    "base": "590117d135ad5d8f12a7834afcde14d1078dcc76",
+    "commit": "ba7d051b21ac694637f7b6320981dd157d48f122",
+    "branch": "codex/msr-partner-picker",
+    "preservedHttpBranch": "codex/msr-agency-http",
+    "preservedHttpHead": "27f8274a9080e715da24375f65aad4adbd788658"
+  },
+  "problem": "The terms form offered only the first 30 permitted contacts, making later allowed counterparties unreachable through generic UI.",
+  "behavior": [
+    "Choose the actual counterparty through a native paginated initial step before entering terms. No command key or terms form is issued during browsing.",
+    "Pagination uses existing current ordinary contact scopes. Current merged/unreadable candidates are held neutrally; an empty eligible page retains the ordinary Next link.",
+    "A current Case participant can use the already supported exact Case bridge without an invented contact or consumer Case.",
+    "The selected source form remains mounted with draft, Case, original party, page and safe local return context in its native permalink. Validation and unknown results retain the source and original operation identity.",
+    "Only record context enters navigation URLs; supplied source text, scope and terms remain form values."
+  ],
+  "checks": [
+    {
+      "name": "focused-unit-and-catalogs",
+      "command": "npx vitest run src/features/agency-obligations/partner-context.test.ts src/features/agency-obligations/partner-screen.test.tsx src/features/agency-obligations/actions.test.ts src/i18n/messages.test.ts src/i18n/copy-guard.test.ts",
+      "files": 5,
+      "tests": 131,
+      "exitCode": 0,
+      "log": "output/partner-picker/unit-second.log",
+      "logSha256": "f6753e741008d4ac0f4ace6ecb846f8cff29b08d827479cb71e4e94096a8d3cf"
+    },
+    {
+      "name": "disposable-postgres-picker",
+      "command": "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx vitest run --project integration src/features/agency-obligations/partner-picker.int.test.ts",
+      "files": 1,
+      "tests": 3,
+      "exitCode": 0,
+      "log": "output/partner-picker/integration-first.log",
+      "logSha256": "cda2993a9085925309e9e4cc2501241322270224ce8bc7dfcd32196c45121815"
+    },
+    {
+      "name": "types",
+      "command": "NEXT_DIST_DIR=.next-partner-picker npx next typegen && npx tsc --noEmit",
+      "exitCode": 0,
+      "log": "output/partner-picker/types-second.log",
+      "logSha256": "adba4af9194e10e47dda75ff0fd0f8c2b756474896d0eba5612799c527ff372a"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "exitCode": 0,
+      "warnings": 4,
+      "informationDiagnostics": 71,
+      "log": "output/partner-picker/lint-final.log",
+      "logSha256": "9145169826554e818db69f0220307a4395adc54cc2614e940c5e7dece7f8ddee"
+    }
+  ],
+  "regressions": [
+    "Permitted target beyond page one; existing unreadable inquiry excluded before picker selection",
+    "Merged original, unknown and unreadable/canonical parties remain neutral and are never substituted",
+    "All held contacts on a page do not strand a later permitted page",
+    "Case-only party uses exact current Case access; revoked participation removes it",
+    "Native initial chooser has no source form or operation; selected form restores original operation/source after validation or unknown outcomes"
+  ],
+  "retainedFailures": [
+    {
+      "log": "output/partner-picker/unit-first.log",
+      "sha256": "6551900be2b09799f6660716138e968eb1de75d346140d6106fb0897c05198e0",
+      "finding": "New catalog page placeholder was not in the catalog formatter sample contract, and a new UI assertion used an incorrect Next label. Used a localized page label plus numeric data and the existing actual pagination copy; no catalog or guard assertion weakened."
+    },
+    {
+      "log": "output/partner-picker/types-first.log",
+      "sha256": "ad66793258b94db10f0f99f23a56247a2c45afcba30c2031f527296f3516037f",
+      "finding": "New Testing Library assertion used unsupported ByRoleOptions.exact. Removed the unsupported option and used the actual page-link name."
+    },
+    {
+      "log": "output/partner-picker/lint-first.log",
+      "sha256": "289a4afeedc9ca43d9869d5c1b513b2c3061c65dc4d9bb665d71bbeed4b5dce8",
+      "finding": "Biome required another formatting pass on the new integration fixture chains. No behavior changed; final full lint passes."
+    }
+  ],
+  "browser": {
+    "status": "pending_root_combined_current_source_run",
+    "file": "e2e/agency-obligations.spec.ts",
+    "sha256": "1504a71a29045bb575b7164cfff311e0edd2eda74ec561a78c654b0a9a295411",
+    "cases": "Existing B10 partner/photo native and enhanced cases on all three profiles",
+    "entry": "Generic partners/new UI. The fixture supplies 31 permitted contacts ordered before the selected permitted party. The target is asserted absent on page one, then actual Next and selection links are clicked. No known party UUID is appended to bypass the chooser.",
+    "timeoutsChanged": false,
+    "newScreenshot": "partner-picker-native-320.png and partner-picker-enhanced-320.png per project; 320px overflow assertion",
+    "heavyBuildOrBrowserRunByWorker": false
+  },
+  "boundaries": {
+    "authority": "No generic contact ACL/query, backend partner terms authority, private history/export, SQL or grant semantics changed.",
+    "evidence": "Earlier UI and HTTP proof stays bound to its own source; this picker change awaits root current-source browser qualification. Raw prior browser receipts remain preserved.",
+    "publication": "No push, PR, provider, staging, deployment or launch-authority mutation.",
+    "inputs": "No actual business terms, fee policy, consent, rights, human acceptance or infrastructure success asserted."
+  }
+}

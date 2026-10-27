@@ -1,0 +1,10 @@
+[vitest] TEST_DATABASE_URL is not set: skipping the integration project. Start a disposable Postgres and pass TEST_DATABASE_URL to run it (see README).
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-reviewed-import/MS-Realty
+
+
+ Test Files  3 passed (3)
+      Tests  30 passed (30)
+   Start at  02:03:54
+   Duration  994ms (import 43%, environment 23%, transform 17%, tests 14%, setup 4%)
+

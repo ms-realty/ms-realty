@@ -122,5 +122,23 @@
   "newRequest": "Nieuwe aanvraag",
   "optional": "(optioneel)",
   "messageHint": "Maximaal 2.000 tekens. Geen identiteitsdocumenten of financiële gegevens.",
-  "changed": "De aanbieding is gewijzigd. Bekijk de huidige versie."
+  "changed": "De aanbieding is gewijzigd. Bekijk de huidige versie.",
+  "serviceIntake": {
+    "short_stay_consultation": "Advies over kort verblijf",
+    "management_consultation": "Beheeradvies",
+    "location": "Locatie",
+    "needs": "Welke hulp heeft u nodig?",
+    "from": "Gewenste start",
+    "until": "Gewenst einde",
+    "relationship": "Relatie tot het pand (zelf opgegeven)",
+    "relationships": {
+      "owner": "Eigenaar",
+      "representative": "Vertegenwoordiger",
+      "tenant": "Huurder",
+      "other": "Anders",
+      "unknown": "Onbekend"
+    },
+    "boundary": "Dit verzoek is voor beoordeling door een persoon. Datums zijn voorkeuren; indienen bevestigt geen beschikbaarheid, reservering of werk. Dit webverzoek is geen noodhulpdienst.",
+    "held": "De dienstverlening is niet langer bevestigd. Neem contact op met de verantwoordelijke persoon voor verduidelijking of een handmatig alternatief."
+  }
 }

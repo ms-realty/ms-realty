@@ -5,8 +5,10 @@ import { afterEach, beforeEach, expect, it } from "vitest";
 import { caseStageHistory, cases, grants, inquiries, tasks } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { Capability } from "@/domain/capabilities";
+import { emptyOperatingPolicy, type OperatingPolicy } from "@/domain/operating-policy";
 import { staffFixture } from "../cases/testing";
 import { createCase } from "../testing";
+import { recordTaskEffort } from "../work/effort";
 import { readReports, reportFilter } from "./queries";
 
 let t: TestDatabase;
@@ -112,9 +114,195 @@ it("counts only the recorded useful-human response and keeps missing policy/data
     smallSample: true,
   });
   expect(report.staffedResponse.state).toBe("unknown");
-  expect(report.correctionEffort.state).toBe("unknown");
+  expect(report.staffedResponse).toMatchObject({
+    eligible: 1,
+    known: 0,
+    unknown: 1,
+    medianMinutes: null,
+  });
+  expect(report.correctionEffort.state).toBe("unobserved");
   const empty = await readReports(t.db, staff.session, { days: 7, scope: "mine" }, now);
   expect(empty.response).toMatchObject({ received: 0, responded: 0, medianMinutes: null });
+  expect(empty.staffedResponse.state).toBe("unobserved");
+});
+
+it("O22 / AT40 intersects report, inquiry and owner scope before staffed policy coverage and samples", async () => {
+  const staff = await staffFixture(t.db);
+  const serviceCalendar: NonNullable<OperatingPolicy["serviceCalendar"]> = {
+    kind: "reviewed_calendar_v1",
+    timezone: "Europe/Sofia",
+    validFrom: "2026-01-01",
+    validUntil: "2026-12-31",
+    sourceReference: "Synthetic reviewed calendar",
+    weekly: { mon: [["09:00", "17:00"]], tue: [], wed: null, thu: [], fri: [], sat: [], sun: [] },
+    exceptions: [],
+  };
+  const policy = {
+    kind: "approved_operating_policy_v1",
+    policyId: randomUUID(),
+    policyVersion: 3,
+    contentHash: "a".repeat(64),
+    approvedAt: "2026-01-01T00:00:00.000Z",
+    document: { ...emptyOperatingPolicy, serviceCalendar },
+  };
+  const now = new Date("2026-02-05T12:00Z"),
+    createdAt = new Date("2026-02-02T08:00Z"),
+    firstResponseAt = new Date("2026-02-02T09:00Z");
+  const known = await inquiry({
+    ownerId: staff.id,
+    createdAt,
+    firstResponseAt,
+    operatingPolicySnapshot: policy,
+  });
+  const closed = await inquiry({
+    ownerId: staff.id,
+    createdAt: new Date("2026-01-31T08:00Z"),
+    firstResponseAt: new Date("2026-01-31T09:00Z"),
+    operatingPolicySnapshot: policy,
+  });
+  const legacy = await inquiry({ ownerId: staff.id, createdAt, firstResponseAt });
+  const missing = await inquiry({
+    ownerId: staff.id,
+    createdAt,
+    acknowledgedAt: firstResponseAt,
+    operatingPolicySnapshot: policy,
+  });
+  const invalid = await inquiry({
+    ownerId: staff.id,
+    createdAt,
+    firstResponseAt: new Date("2026-02-02T07:00Z"),
+    operatingPolicySnapshot: policy,
+  });
+  const hidden = await inquiry({ createdAt, firstResponseAt, operatingPolicySnapshot: policy });
+  const otherOwner = await inquiry({ createdAt, firstResponseAt, operatingPolicySnapshot: policy });
+  await t.db.update(grants).set({ revokedAt: new Date() }).where(eq(grants.principalId, staff.id));
+  for (const row of [known, closed, legacy, missing, invalid, hidden, otherOwner])
+    await grant(staff.id, "report.read", "inquiry", row.id);
+  for (const row of [known, closed, legacy, missing, invalid, otherOwner])
+    await grant(staff.id, "inquiry.read", "inquiry", row.id);
+  const report = await readReports(t.db, staff.session, { ...filter, scope: "mine" }, now);
+  expect(report.definition).toBe("O22-v3");
+  expect(report.response).toMatchObject({
+    received: 5,
+    responded: 3,
+    missing: 1,
+    invalid: 1,
+    medianMinutes: 60,
+  });
+  expect(report.staffedResponse).toMatchObject({
+    state: "observed",
+    eligible: 3,
+    known: 2,
+    unknown: 1,
+    medianMinutes: 30,
+    unknownReasons: { no_reviewed_policy: 1 },
+  });
+  expect(report.staffedResponse.rows.map((row) => row.id).sort()).toEqual(
+    [known.id, closed.id, legacy.id].sort(),
+  );
+  expect(JSON.stringify(report)).not.toContain(hidden.reference);
+  expect(JSON.stringify(report)).not.toContain(otherOwner.reference);
+  await t.db.update(grants).set({ revokedAt: new Date() }).where(eq(grants.principalId, staff.id));
+  await grant(staff.id, "report.read");
+  expect((await readReports(t.db, staff.session, filter, now)).staffedResponse).toMatchObject({
+    state: "denied",
+    eligible: null,
+    known: null,
+    unknown: null,
+    rows: [],
+  });
+});
+
+it("O22 holds a complete oversized authorized response cohort instead of sampling its median", async () => {
+  const staff = await staffFixture(t.db);
+  await grant(staff.id, "report.read");
+  const now = new Date(),
+    createdAt = new Date(now.getTime() - 3600000),
+    firstResponseAt = new Date(now.getTime() - 1800000);
+  await t.db.insert(inquiries).values(
+    Array.from({ length: 1001 }, () => ({
+      reference: `RQ-SYN-${randomUUID()}`,
+      purpose: "question" as const,
+      source: "website" as const,
+      submissionKey: randomUUID(),
+      payloadDigest: "synthetic",
+      coverageQueue: "synthetic-coverage",
+      createdAt,
+      firstResponseAt,
+    })),
+  );
+  const report = await readReports(t.db, staff.session, filter, now);
+  expect(report.response).toMatchObject({ received: 1001, responded: 1001, medianMinutes: 30 });
+  expect(report.staffedResponse).toMatchObject({
+    state: "held",
+    reason: "cohort_limit",
+    eligible: 1001,
+    known: null,
+    unknown: null,
+    medianMinutes: null,
+    rows: [],
+  });
+});
+
+it("O22 reports attributable effort only within intersected report/task scope and excludes corrected entries", async () => {
+  const staff = await staffFixture(t.db);
+  const [visible, hidden, otherOwner] = await t.db
+    .insert(tasks)
+    .values([
+      { title: "Synthetic permitted correction", ownerId: staff.id },
+      { title: "Synthetic hidden correction", ownerId: staff.id },
+      { title: "Synthetic other-owner correction", ownerId: null },
+    ])
+    .returning();
+  if (!visible || !hidden || !otherOwner) throw new Error("Missing effort fixtures");
+  const record = (id: string, category: "correction" | "reentry", minutes: number) =>
+    recordTaskEffort(t.db, staff.session, {
+      id,
+      expectedVersion: 1,
+      operationId: randomUUID(),
+      action: "record",
+      category,
+      minutes,
+      reason: "facts",
+    });
+  const mistaken = await record(visible.id, "correction", 9);
+  await recordTaskEffort(t.db, staff.session, {
+    id: visible.id,
+    expectedVersion: 1,
+    operationId: randomUUID(),
+    action: "void",
+    entryId: mistaken.outcome.id,
+    reason: "entry_mistake",
+  });
+  await record(visible.id, "correction", 12);
+  await record(visible.id, "reentry", 4);
+  await record(hidden.id, "correction", 80);
+  await record(otherOwner.id, "reentry", 40);
+  await t.db.update(grants).set({ revokedAt: new Date() }).where(eq(grants.principalId, staff.id));
+  await grant(staff.id, "report.read", "task", visible.id);
+  await grant(staff.id, "task.manage");
+  const observed = await readReports(t.db, staff.session, filter);
+  expect(observed.correctionEffort).toMatchObject({
+    state: "observed",
+    observations: 2,
+    correctionMinutes: 12,
+    reentryMinutes: 4,
+    rows: [{ id: visible.id, reference: visible.title }],
+  });
+  expect(JSON.stringify(observed)).not.toContain(hidden.title);
+  await grant(staff.id, "report.read", "task", otherOwner.id);
+  expect(
+    (await readReports(t.db, staff.session, { ...filter, scope: "mine" })).correctionEffort
+      .observations,
+  ).toBe(2);
+  expect((await readReports(t.db, staff.session, filter)).correctionEffort.reentryMinutes).toBe(44);
+  await t.db.update(grants).set({ revokedAt: new Date() }).where(eq(grants.principalId, staff.id));
+  await grant(staff.id, "report.read");
+  expect((await readReports(t.db, staff.session, filter)).correctionEffort).toMatchObject({
+    state: "denied",
+    observations: null,
+    rows: [],
+  });
 });
 
 it("uses actual transition events and open client promises, never guesses from current Case stage", async () => {

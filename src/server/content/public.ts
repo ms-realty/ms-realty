@@ -13,6 +13,7 @@ import type { PublicLocale } from "@/i18n/config";
 import { hashRequest } from "@/server/crypto";
 import { type Executor, inTransaction } from "@/server/db";
 import { loadPlaceChains, placeName } from "@/server/publication/presentation";
+import { reviewDisplayEligible } from "../agency-obligations/reviews";
 
 // A deliberately narrow plaintext projection. Rich text, embedded scripts and remote media
 // have no renderer here. Operator-authored CMS content must use an explicit supported shape.
@@ -188,6 +189,8 @@ export async function readApprovedContent(
     // observed version before their separately authorized consent write commits.
     const [row] = await query.for("share");
     if (!row) return null;
+    if (kind === "review" && !(await reviewDisplayEligible(tx, row.version.id, locale)))
+      return null;
     const decisionQuery = tx
       .select()
       .from(approvals)

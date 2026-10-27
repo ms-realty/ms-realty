@@ -1,0 +1,10 @@
+{
+  "download": "Download my data",
+  "available": "Your data copy is ready. Sign in again if requested. The link expires and access can be withdrawn.",
+  "partial": "This is a partial copy. Shared records, received communications and private files still need separate disclosure review. The request stays open.",
+  "scope": "Export scope",
+  "additionalScope": "Additional or unspecified material is requested",
+  "listedScope": "Only the listed source categories",
+  "scopeHelp": "For exports: the listed categories cover your profile, contacts, choices, authored activity, shared business records, received communications and private files. Restricted records and security credentials stay protected. Choose additional material if anything else is requested.",
+  "reviewedScope": "This copy reflects the reviewed declared categories, including supported withholding decisions. Completion is recorded separately; access expires and may be withdrawn."
+}

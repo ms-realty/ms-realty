@@ -1,0 +1,74 @@
+{
+  "title": "Erasure and restriction",
+  "lead": "Review the person’s selected purposes and eligible copies, then apply an explicit human decision.",
+  "queue": "Privacy work",
+  "partialHelp": "Local restriction is separate from complete erasure. Retained records, files, providers and independently archived safety history require their own evidence.",
+  "error": "The command needs attention. Check its recorded result before preparing another decision.",
+  "accessRequired": "Applying this decision requires current privacy and access-administration authority.",
+  "retentionHold": "A current retention obligation holds copy removal. Optional processing can still stop; the restricted source is not disclosed here.",
+  "businessHold": "Related business or joint evidence requires a separate disposition. Optional copy removal remains held.",
+  "checkResult": "Check this command",
+  "refresh": "Review current sources",
+  "reviewTitle": "Review source categories",
+  "reviewHelp": "The review binds this request, sources, current authority and policy edition. A policy reference alone does not permit erasing retained evidence.",
+  "purposes": "Stop selected optional purposes",
+  "eligible": "The current own-party dependency inventory permits a separate optional-copy review.",
+  "heldCopies": "Copy removal is held for this category. Record the remaining human review.",
+  "disposition": "Reviewed disposition",
+  "classification": "Reviewed purpose and retention classification",
+  "evidence": "Review evidence reference",
+  "confirm": "I reviewed these sources and purposes and explicitly authorize optional restriction and revocation of this party’s client credentials and private export delivery.",
+  "apply": "Apply reviewed restriction",
+  "outcome": "Propagation and remaining work",
+  "localApplied": "The application decision has been recorded. The request remains partial while other boundaries are unresolved.",
+  "manual": "The responsible privacy operator must resolve retained or joint evidence and request supported file, provider and independent archive proof through the manual recovery path. Existing copies already downloaded cannot be recalled here.",
+  "completionCheck": "Check fulfilment boundaries",
+  "confirmCheck": "Check the actual typed outcomes. This does not waive any held boundary.",
+  "purposeNames": {
+    "search_alerts": "Saved-search alerts",
+    "marketing": "Marketing"
+  },
+  "categories": {
+    "optional_processing": "Optional processing and consent",
+    "contact_preferences": "Optional contact preferences",
+    "matching_aliases": "Optional matching aliases",
+    "optional_search_criteria": "Saved-search criteria copies",
+    "optional_contacts": "Own optional contact routes",
+    "client_profile_copies": "Client account profile copies",
+    "client_access": "Own client credentials and export delivery"
+  },
+  "dispositions": {
+    "restrict_processing": "Restrict selected optional processing",
+    "revoke_client_access": "Revoke own client credentials and private export delivery",
+    "erase_optional_copy": "Erase the reviewed eligible optional copies",
+    "retain_restricted": "Retain for separate restricted review",
+    "hold_unknown": "Hold: purpose or retention is unknown"
+  },
+  "classifications": {
+    "unknown": "Unknown: hold removal",
+    "retained_business": "Retained business or legal evidence",
+    "optional_only": "Separately reviewed: only needed for the optional purpose"
+  },
+  "statuses": {
+    "absent": "This issued command has no committed receipt. Review before submitting.",
+    "pending": "The command is still in progress. Check this same key before another attempt.",
+    "unknown": "The command outcome is unknown. Keep this key and resolve it before another attempt.",
+    "failed": "The recorded command did not apply. Review current sources before another decision.",
+    "succeeded": "The command has a recorded outcome. This does not mean the privacy request is complete."
+  },
+  "boundaries": {
+    "application": "Application copies and access",
+    "business_and_history": "Business, joint and immutable history",
+    "private_files": "Physical private files",
+    "provider_data": "Provider-held data",
+    "independent_archive": "Independent safety archive",
+    "restore_reapplication": "Offline restore reapplication"
+  },
+  "states": {
+    "applied": "Applied locally",
+    "held": "Held for actual evidence",
+    "unsupported": "Unsupported: manual work remains"
+  },
+  "policyUnknown": "An appropriate reviewed policy edition is unavailable. Copy removal is held; restriction and access revocation remain separate human decisions.",
+  "sourcePreview": "Review current own source"
+}

@@ -190,6 +190,50 @@ describe("native API correction preserves logical context", () => {
       privacyNotice: "on",
     });
   }
+  it("retains the exact public service binding and purpose while keeping all private request context out of recovery URLs", async () => {
+    const key = issueSubmissionKey(),
+      data = fields(key);
+    data.delete("selectedListings");
+    data.set("purpose", "service_consultation");
+    const entry = {
+      topic: "management_consultation",
+      regionId: "12345678-1234-4123-8123-123456789003",
+      scopeVersionId: "12345678-1234-4123-8123-123456789004",
+    };
+    data.set(
+      "contentReference",
+      JSON.stringify({
+        kind: "service",
+        slug: "synthetic-service",
+        versionId: "12345678-1234-4123-8123-123456789005",
+      }),
+    );
+    data.set(
+      "serviceRequest",
+      JSON.stringify({
+        version: 1,
+        ...entry,
+        location: "Private declared location",
+        needs: "Private consultation needs",
+        relationship: "unknown",
+      }),
+    );
+    mocked.submit.mockRejectedValue(
+      new AppError("validation_failed", { fieldErrors: { "contact.value": ["invalid_email"] } }),
+    );
+    const response = await native(data),
+      url = new URL(response.headers.get("location") ?? "");
+    expect(url.searchParams.get("purpose")).toBe("service_consultation");
+    expect(JSON.parse(url.searchParams.get("serviceScope") ?? "")).toEqual(entry);
+    expect(url.searchParams.get("submission")).toBe(key);
+    expect(url.href).not.toMatch(/Private|private|location|needs|relationship|example.test/);
+    const started = await startInquiry(
+      new NextRequest(`http://localhost:3000/en/inquire/start?${url.searchParams}`),
+      { params: Promise.resolve({ locale: "en" }) },
+    );
+    const restored = new URL(started.headers.get("location") ?? "");
+    expect(JSON.parse(restored.searchParams.get("serviceScope") ?? "")).toEqual(entry);
+  });
   it.each(["malformed", "duplicate", "mixed_listing", "mixed_manifest", "mixed_purpose"])(
     "blocks %s selection without changing key or locale or leaking private values",
     async (kind) => {

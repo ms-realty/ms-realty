@@ -10,6 +10,8 @@ import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
 import { DuplicateIdentityLink } from "@/features/duplicate-review/identity-link";
+import { StaffPage } from "@/features/shell/staff-ui";
+import { effortCopy } from "@/features/work/effort-copy";
 import { isStaffLocale, type StaffLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
@@ -20,6 +22,7 @@ import type { FormState, FormValues } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { SubmitButton } from "@/ui/form/submit-button";
 import { ChevronStartIcon } from "@/ui/icons";
+import { serviceStaffCopy } from "../service-intake/copy";
 import {
   acceptAction,
   contactAction,
@@ -79,12 +82,9 @@ const link = "font-semibold text-link underline underline-offset-4";
 
 export function Page({ title, children }: { title: string; locale: string; children: ReactNode }) {
   return (
-    <div className="mx-auto min-w-0 max-w-page space-y-8 break-words px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <header className="space-y-4">
-        <h1 className="text-title font-semibold">{title}</h1>
-      </header>
-      {children}
-    </div>
+    <StaffPage title={title}>
+      <div className="space-y-6">{children}</div>
+    </StaffPage>
   );
 }
 
@@ -329,11 +329,13 @@ export async function InquiryScreen({
             inquiry.ownerId === session.account.id &&
             inquiry.state === "assigned" ? (
             <a className={link} href={`/${locale}/cases/new?inquiry=${inquiry.id}`}>
-              {locale === "bg"
-                ? "Създаване на сделка"
-                : locale === "ru"
-                  ? "Создать сделку"
-                  : "Create a deal"}
+              {inquiry.purpose === "service_consultation"
+                ? serviceStaffCopy(locale).create
+                : locale === "bg"
+                  ? "Създаване на сделка"
+                  : locale === "ru"
+                    ? "Создать сделку"
+                    : "Create a deal"}
             </a>
           ) : null}
         </nav>
@@ -356,7 +358,11 @@ export async function InquiryScreen({
                 </div>
               ) : null}
               <InquirySelectionContext context={inquiry.context} locale={locale} />
-              <InquiryOwnerContext context={inquiry.context} locale={locale} />
+              <InquiryOwnerContext
+                context={inquiry.context}
+                locale={locale}
+                serviceCurrent={detail.serviceCurrent}
+              />
               <dl className="grid grid-cols-2 gap-x-5 gap-y-3 text-dense">
                 <div>
                   <dt className="font-semibold">{copy.purpose}</dt>
@@ -666,6 +672,9 @@ export async function TaskScreen({
   );
   return (
     <Page title={task.title} locale={locale}>
+      <a className={link} href={`/${locale}/tasks/${task.id}/effort`}>
+        {effortCopy(locale).title}
+      </a>
       <dl className="space-y-3">
         <div>
           <dt className="font-semibold">{copy.state}</dt>

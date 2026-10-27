@@ -148,7 +148,7 @@ export async function ContentWorkbenchScreen({
       ? page.slug
       : page.kind === "help" && page.slug === "contact"
         ? "contact"
-        : `${page.kind === "area" ? "areas" : page.kind === "service" ? "services" : "help"}/${page.slug}`;
+        : `${page.kind === "area" ? "areas" : page.kind === "service" ? "services" : page.kind === "review" ? "reviews" : "help"}/${page.slug}`;
   const now = new Date();
   const reviewed = (kind: string) =>
     decisions.some(

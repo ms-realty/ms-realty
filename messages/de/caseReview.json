@@ -1,0 +1,14 @@
+{
+  "title": "Meine Bewertung",
+  "lead": "Die Einwilligung gilt nur für den genauen bulgarischen Text und den angezeigten öffentlichen Namen. Ablehnung oder Widerruf ändern Ihre Leistung nicht.",
+  "empty": "Es wurden keine Bewertungen vorbereitet.",
+  "grant": "Diese genaue Veröffentlichung erlauben",
+  "refuse": "Einwilligung verweigern",
+  "withdraw": "Einwilligung widerrufen",
+  "reviewed": "Ich habe die genaue Bewertung, die Prüferklärung, den Namen und die Bedingungen dieser Veröffentlichung gelesen.",
+  "held": "Aktuelle Einwilligungsbedingungen fehlen. Ablehnung und Widerruf sind möglich; nutzen Sie für eine Einwilligung das genehmigte manuelle Verfahren.",
+  "state": "Einwilligungsstatus",
+  "status": "Diese Aktion prüfen",
+  "back": "Zurück zu Bewertungen",
+  "unresolved": "Das Ergebnis ist ungeklärt. Prüfen Sie dieselbe Aktion vor einem erneuten Versuch."
+}

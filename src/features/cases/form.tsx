@@ -1,4 +1,5 @@
 "use client";
+import type { ReactNode } from "react";
 import { isCurrencyCode } from "@/domain/ids";
 import { isInstantInput } from "@/domain/time";
 import { isPublicLocale } from "@/i18n/config";
@@ -53,6 +54,7 @@ export function WorkflowForm({
   pendingReferenceCookie,
   disclosure,
   enhancementField,
+  intro,
 }: {
   locale: string;
   initialState: FormState<FormValues>;
@@ -66,6 +68,7 @@ export function WorkflowForm({
   pendingReferenceCookie?: string;
   disclosure?: string;
   enhancementField?: string;
+  intro?: ReactNode;
 }) {
   return (
     <ActionForm
@@ -104,6 +107,7 @@ export function WorkflowForm({
     >
       {(form) => (
         <>
+          {intro}
           {fields.map((definition) => {
             const field = form.field(definition.name);
             if (definition.type === "hidden")

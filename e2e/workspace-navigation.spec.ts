@@ -56,6 +56,7 @@ const expectedWork = [
   "/en/calendar",
   "/en/tasks",
   "/en/contacts",
+  "/en/operations/consultations",
   "/en/coverage",
   "/en/operations/inbound",
 ];
@@ -163,7 +164,7 @@ for (const javaScriptEnabled of [true, false]) {
         .click();
       await expect(page.locator('[data-sidebar="compact"]')).toHaveCount(1);
       await expect(page).toHaveURL(hostUrl("staff", "/en/tasks?view=mine"));
-      expect((await sidebar(page).boundingBox())?.width).toBe(80);
+      expect((await sidebar(page).boundingBox())?.width).toBe(72);
       await sidebar(page).getByRole("link", { name: "Contacts", exact: true }).click();
       await expect(page).toHaveURL(hostUrl("staff", "/en/contacts"));
       await page.reload();

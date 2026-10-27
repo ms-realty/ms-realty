@@ -21,6 +21,7 @@ import { readInquiry } from "@/server/work/queries";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
+import { serviceCopy, serviceStaffCopy } from "../service-intake/copy";
 import { workCopy } from "../work/copy";
 import { caseCopy } from "./copy";
 import { linkInquiryAction } from "./inquiry-link-actions";
@@ -267,13 +268,23 @@ export async function InquiryCaseLink({
       </div>
       {mayCreateCase(detail, session) ? (
         <div className="space-y-4 border-t border-divider pt-6">
-          <h3 className="text-compact font-semibold">{copy.createTitle}</h3>
-          <p className="text-dense text-text-muted">{copy.createLead}</p>
+          <h3 className="text-compact font-semibold">
+            {inquiry.purpose === "service_consultation"
+              ? serviceStaffCopy(locale).create
+              : copy.createTitle}
+          </h3>
+          <p className="text-dense text-text-muted">
+            {inquiry.purpose === "service_consultation"
+              ? serviceCopy(locale).boundary
+              : copy.createLead}
+          </p>
           <a
             href={`/${locale}/cases/new?inquiry=${inquiry.id}`}
             className={buttonClass("secondary", "text-text")}
           >
-            {copy.create}
+            {inquiry.purpose === "service_consultation"
+              ? serviceStaffCopy(locale).create
+              : copy.create}
           </a>
         </div>
       ) : null}

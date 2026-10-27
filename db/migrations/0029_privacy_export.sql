@@ -1,0 +1,26 @@
+CREATE TABLE "privacy_exports" (
+  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "version" integer NOT NULL DEFAULT 1,
+  "created_at" timestamptz NOT NULL DEFAULT now(),
+  "updated_at" timestamptz NOT NULL DEFAULT now(),
+  "request_id" uuid NOT NULL REFERENCES "privacy_requests"("id"),
+  "request_version" integer NOT NULL,
+  "party_id" uuid NOT NULL REFERENCES "parties"("id"),
+  "recipient_id" uuid NOT NULL REFERENCES "principals"("id"),
+  "state" text NOT NULL DEFAULT 'draft',
+  "encrypted_payload" text NOT NULL,
+  "sha256" text NOT NULL,
+  "byte_size" integer NOT NULL,
+  "coverage_complete" boolean NOT NULL DEFAULT false,
+  "prepared_by_id" uuid NOT NULL REFERENCES "principals"("id"),
+  "reviewed_by_id" uuid REFERENCES "principals"("id"),
+  "reviewed_at" timestamptz,
+  "expires_at" timestamptz,
+  "revoked_at" timestamptz,
+  "issued_operation_id" uuid,
+  CONSTRAINT "privacy_exports_state" CHECK ("state" in ('draft','issued','revoked')),
+  CONSTRAINT "privacy_exports_size" CHECK ("byte_size" between 1 and 1048576),
+  CONSTRAINT "privacy_exports_digest" CHECK ("sha256" ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT "privacy_exports_issued" CHECK ("state" <> 'issued' or ("reviewed_at" is not null and "reviewed_by_id" is not null and "expires_at" is not null and "issued_operation_id" is not null))
+);
+CREATE INDEX "privacy_exports_request_idx" ON "privacy_exports"("request_id", "created_at");

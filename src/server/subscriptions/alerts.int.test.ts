@@ -9,6 +9,7 @@ import {
   grants,
   listings,
   passkeys,
+  privacyRequests,
   subscriptions,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -18,6 +19,8 @@ import { createContent, decideContent, readContentWorkbench } from "../content/c
 import { dispatchMessage, enqueueMessage, recordDeliveryReport } from "../jobs/outbox";
 import { type MessageProvider, TestMessageProvider } from "../jobs/provider";
 import { ResendMessageProvider } from "../jobs/resend";
+import { applyPrivacyErasure, readPrivacyErasureWorkbench } from "../privacy/erasure";
+import { syntheticErasureDecisions } from "../privacy/erasure-testing";
 import {
   changeSubscription,
   consentTerms,
@@ -56,6 +59,8 @@ async function operator() {
       "listing.review_facts",
       "claim.approve",
       "publication.release",
+      "privacy.manage",
+      "access.grant",
     ].map((capability) => ({ capability: capability as Capability })),
   });
   await t.db.insert(passkeys).values(
@@ -258,6 +263,38 @@ describe("AT44 saved-search alert delivery", () => {
       expectedVersion: 1,
       state,
     });
+    expect(await dispatchSearchAlert(t.db, provider, id, options)).toBe("cancelled");
+    expect(provider.sent).toEqual([]);
+  });
+  it("AT45 reviewed privacy restriction cancels an already queued optional send without claiming provider deletion", async () => {
+    const f = await fixture(),
+      id = await plan(f.id),
+      provider = new TestMessageProvider();
+    const [request] = await t.db
+      .insert(privacyRequests)
+      .values({
+        reference: `ER-${randomUUID()}`,
+        kind: "restriction",
+        state: "in_progress",
+        partyId: f.client.partyId,
+        responsibleId: staff.id,
+        verifiedAt: new Date(),
+        dueAt: new Date(Date.now() + 86400000),
+        scope: { policyReference: "Synthetic optional-processing review" },
+      })
+      .returning();
+    if (!request) throw new Error("Missing synthetic privacy request");
+    const data = await readPrivacyErasureWorkbench(t.db, staff.session, request.id);
+    const result = await applyPrivacyErasure(t.db, staff.session, {
+      operationId: randomUUID(),
+      requestId: request.id,
+      expectedVersion: 1,
+      inventoryDigest: data.inventoryDigest,
+      purposes: ["search_alerts"],
+      decisions: syntheticErasureDecisions(data.inventory),
+      confirmed: true,
+    });
+    expect(result.outcome.fulfilment).toBe("partial");
     expect(await dispatchSearchAlert(t.db, provider, id, options)).toBe("cancelled");
     expect(provider.sent).toEqual([]);
   });

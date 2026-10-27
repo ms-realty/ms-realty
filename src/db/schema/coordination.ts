@@ -47,7 +47,14 @@ export const appointments = pgTable(
   {
     ...mutable(),
     reference: reference(),
+    /** Request context is never overwritten when later operating policy changes. */
+    operatingPolicySnapshot: jsonb("operating_policy_snapshot"),
+    /** Policy used for the first confirmation; later versions retain their full context. */
+    confirmedPolicySnapshot: jsonb("confirmed_policy_snapshot"),
     state: appointmentStateEnum("state").notNull().default("requested"),
+    /** Property preparation is never fabricated as a buyer viewing. */
+    purpose: text("purpose").notNull().default("viewing"),
+    photographyScope: text("photography_scope"),
     format: appointmentFormatEnum("format").notNull(),
     caseId: uuid("case_id").references(() => cases.id),
     interestId: uuid("interest_id").references(() => interests.id),
@@ -85,6 +92,11 @@ export const appointments = pgTable(
     cancelReason: text("cancel_reason"),
   },
   (t) => [
+    check("appointments_purpose", sql`${t.purpose} in ('viewing', 'photography')`),
+    check(
+      "appointments_photography_context",
+      sql`${t.purpose} <> 'photography' or (${t.caseId} is null and ${t.interestId} is null and ${t.propertyId} is not null and ${t.listingId} is not null and ${t.photographyScope} is not null and char_length(${t.photographyScope}) between 10 and 2000)`,
+    ),
     check(
       "appointments_host_offer_complete",
       sql`num_nonnulls(${t.pendingHostId}, ${t.pendingHostVersion}, ${t.pendingHostNote}, ${t.pendingHostOfferedAt}) in (0, 4) and (${t.pendingHostId} is null or (${t.hostId} is not null and ${t.pendingHostId} <> ${t.hostId} and ${t.pendingHostVersion} > 0 and ${t.pendingHostVersion} <= ${t.version} and char_length(${t.pendingHostNote}) between 10 and 2000))`,

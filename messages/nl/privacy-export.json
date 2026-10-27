@@ -1,0 +1,10 @@
+{
+  "download": "Mijn gegevens downloaden",
+  "available": "Uw gegevenskopie is klaar. Meld u opnieuw aan als daarom wordt gevraagd. De link verloopt en toegang kan worden ingetrokken.",
+  "partial": "Deze gedeeltelijke kopie rondt het verzoek niet af. Gedeelde gegevens, ontvangen berichten en privébestanden vereisen aparte beoordeling.",
+  "scope": "Omvang van de export",
+  "additionalScope": "Aanvullend of niet nader omschreven materiaal",
+  "listedScope": "Alleen de vermelde broncategorieën",
+  "scopeHelp": "Voor exports: de categorieën omvatten uw profiel, contacten, voorkeuren, eigen bijdragen, gedeelde zakelijke dossiers, ontvangen berichten en privébestanden. Beperkte dossiers en beveiligingsgegevens blijven beschermd. Kies aanvullend materiaal voor andere inhoud.",
+  "reviewedScope": "Deze kopie bevat de beoordeelde opgegeven categorieën, inclusief onderbouwde besluiten tot achterhouding. Afronding wordt apart vastgelegd; toegang verloopt en kan worden ingetrokken."
+}

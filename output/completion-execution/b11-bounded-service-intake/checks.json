@@ -1,0 +1,102 @@
+{
+  "kind": "b11_local_source_handoff_v1",
+  "branch": "codex/msr-bounded-service-intake",
+  "base": "bfbb80a8139caa40c153727519ded414e603f61c",
+  "scopeCheckpoint": "eeebb513c371a681284dafe8c8563a10d602282c",
+  "businessApproval": "held_C06_actual_services_regions_terms_staffing_and_fallback_unknown",
+  "launchAuthorityChanged": false,
+  "canonicalMigrationMetadataChanged": false,
+  "migration": "db/migrations/0035_bounded_service_scope.sql",
+  "validation": {
+    "productionBuildAndBrowser": {
+      "status": "passed",
+      "tests": 4,
+      "engines": ["chromium-mobile", "webkit-mobile"],
+      "javascript": [true, false],
+      "width": 320,
+      "defaultTestTimeoutMs": 30000,
+      "timeoutIncreased": false,
+      "log": "browser-green.log",
+      "scope": "Production build and native/enhanced public request, named acceptance, service Case, O30, scoped C14. Later narrow duplicate-approval and native API correction checks covered by focused PG/unit."
+    },
+    "focusedPgBeforeFinalNegativeFixture": {
+      "status": "passed",
+      "tests": 35,
+      "log": "focused-pg-green.log"
+    },
+    "finalFocusedPg": {
+      "status": "34_passed_1_negative_fixture_failed",
+      "log": "final-pg-negative-fixture-failure.log",
+      "cause": "Negative brokerage-kind attempt reused the successful service intent key; command correctly fenced a changed payload. Fixed the negative fixture to use its own key."
+    },
+    "finalServicePgAfterFixtureCorrection": {
+      "status": "passed",
+      "tests": 7,
+      "log": "final-service-pg-green.log"
+    },
+    "finalUnits": {
+      "status": "passed",
+      "tests": 61,
+      "log": "final-unit-green.log"
+    },
+    "sourceTypecheck": {
+      "exitCode": 0,
+      "command": "npx tsc --noEmit --incremental false --pretty false",
+      "log": "final-source-typecheck.log"
+    },
+    "repoLint": {
+      "exitCode": 0,
+      "command": "npm run lint",
+      "log": "final-lint.log"
+    },
+    "migrations": {
+      "folder": "/tmp/msr-b11-migrations",
+      "kind": "Copy of base migrations with temporary journal entry for SQL35; no canonical journal or snapshot edits",
+      "testServer": "Disposable PostgreSQL server on loopback port 55463; each test creates its own database"
+    }
+  },
+  "customerData": {
+    "transport": "serviceRequest (JSON or bounded JSON form field); serviceScope is public entry identity only",
+    "requestFields": [
+      "version",
+      "topic",
+      "scopeVersionId",
+      "regionId",
+      "location",
+      "needs",
+      "requestedFrom",
+      "requestedUntil",
+      "relationship"
+    ],
+    "newPrivateCopies": ["inquiries.context.service.request", "cases.service_context.request"],
+    "bindingCopies": ["inquiries.context.service.binding", "cases.service_context.binding"],
+    "safeReceiptServiceFields": [
+      "topic",
+      "regionId",
+      "scopeVersionId",
+      "scopeVersion",
+      "sourceUrl"
+    ],
+    "newTables": {
+      "service_scope_drafts": "Operator coverage policy: staff updated_by_id and exact source/terms/owner/fallback policy references; no customer subject reference",
+      "service_scope_versions": "Immutable operator coverage editions: staff approved_by_id, approval note and operation receipt; no customer subject reference"
+    },
+    "classificationNeeded": [
+      "Add both policy tables to canonical schema inventory and explicit subject-export/duplicate-review dispositions",
+      "Minimize client exports to their service request/source context; do not expose operator fallback/grant/third-party or staff configuration by copying the raw binding",
+      "Include service request fields in Case/inquiry export projections and stale-plan fingerprints as applicable",
+      "Preserve original service binding/context through duplicate association; never infer property ownership, brokerage context or appointment from the service request"
+    ]
+  },
+  "artifacts": {
+    "screenshots": "test-results/16a1ea5d99074be98065f949763d6dc1",
+    "firstBrowserTraces": "test-results/6eb0572888954b55ba375cf7c901bbc7",
+    "secondBrowserTraces": "test-results/ca5d22aa467246c780d8981b8631dd54"
+  },
+  "residualAcceptance": [
+    "Actual C06 source terms, offered regions/topics, responsible human and fallback remain unapproved; default is held",
+    "Local synthetic proofs do not establish provider, runtime, operator acceptance or any R00-R12 release gate",
+    "Quotes remain exact human message/document context with source and expiry required by the displayed manual procedure; no quote, reservation, payment, dispatch or statement engine was added",
+    "Integrated canonical migration, privacy/duplicate coverage, independent review, publication and release lifecycle remain root-owned"
+  ]
+}

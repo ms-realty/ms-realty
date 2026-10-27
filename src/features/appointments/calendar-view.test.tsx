@@ -12,6 +12,7 @@ const row: CalendarAppointment = {
   reference: "AP-SYNTHETIC-O08",
   caseId: "case-id",
   caseReference: "CS-SYNTHETIC-O08",
+  caseTitle: "Synthetic buyer apartment search",
   hostName: "Synthetic host",
   state: "reschedule_requested",
   version: 4,
@@ -51,6 +52,8 @@ describe("O08 native agenda", () => {
       const c = calendarCopy(locale);
       render(<CalendarView locale={locale} query={query} data={data} />);
       const date = screen.getByLabelText(c.date, { exact: true });
+      const disclosure = date.closest("details");
+      if (disclosure) disclosure.open = true;
       expect(date).toHaveAttribute("type", "date");
       const form = date.closest("form");
       expect(form).toHaveAttribute("method", "get");
@@ -65,6 +68,11 @@ describe("O08 native agenda", () => {
       const appointment = screen.getByRole("article", { name: row.reference });
       expect(within(appointment).getByText(c.current, { exact: true })).toBeVisible();
       expect(within(appointment).getByText(c.replacement, { exact: true })).toBeVisible();
+      const review = within(appointment)
+        .getByText(c.conflictShort, { exact: true })
+        .closest("details");
+      expect(review).not.toHaveAttribute("open");
+      if (review) review.open = true;
       expect(within(appointment).getByText(c.buffer, { exact: false })).toHaveTextContent(
         "30 / 30",
       );
@@ -85,6 +93,58 @@ describe("O08 native agenda", () => {
       "03:30 GMT+2",
     );
     expect(row.confirmedStartsAt?.toISOString()).toBe("2030-10-27T00:30:00.000Z");
+  });
+
+  it("O08 distinguishes appointments contained within each occurrence of a repeated hour", () => {
+    const first = {
+      ...row,
+      id: "first-hour",
+      reference: "AP-SYNTHETIC-FIRST-HOUR",
+      state: "confirmed" as const,
+      confirmedStartsAt: new Date("2030-10-27T00:00:00Z"),
+      confirmedEndsAt: new Date("2030-10-27T00:20:00Z"),
+      proposedStartsAt: null,
+      proposedEndsAt: null,
+      resources: [],
+    };
+    const second = {
+      ...first,
+      id: "second-hour",
+      reference: "AP-SYNTHETIC-SECOND-HOUR",
+      confirmedStartsAt: new Date("2030-10-27T01:00:00Z"),
+      confirmedEndsAt: new Date("2030-10-27T01:20:00Z"),
+    };
+    const { container } = render(
+      <CalendarView locale="en" query={query} data={{ ...data, rows: [first, second] }} />,
+    );
+    expect(container.querySelector('time[datetime="2030-10-27T00:00:00.000Z"]')).toHaveTextContent(
+      "03:00 GMT+3",
+    );
+    expect(container.querySelector('time[datetime="2030-10-27T01:00:00.000Z"]')).toHaveTextContent(
+      "03:00 GMT+2",
+    );
+  });
+
+  it("O08 ends a late civil-day canvas at midnight without adding another day's clock tick", () => {
+    const late = {
+      ...row,
+      state: "confirmed" as const,
+      confirmedStartsAt: new Date("2030-10-28T21:30:00Z"),
+      confirmedEndsAt: new Date("2030-10-28T22:00:00Z"),
+      proposedStartsAt: null,
+      proposedEndsAt: null,
+      resources: [],
+    };
+    render(
+      <CalendarView
+        locale="en"
+        query={{ ...query, date: "2030-10-28" }}
+        data={{ ...data, rows: [late] }}
+      />,
+    );
+    const overview = screen.getByRole("region", { name: calendarCopy("en").dayOverview });
+    expect(within(overview).getByText("23:00", { exact: true })).toBeVisible();
+    expect(within(overview).queryByText("00:00", { exact: true })).not.toBeInTheDocument();
   });
 
   it("renders a failed read separately from an empty period and preserves a retry URL", () => {
@@ -184,5 +244,35 @@ describe("O08 native agenda", () => {
       "href",
       expect.stringContaining("page=2&requestPage=3"),
     );
+  });
+
+  it("O08 week previews supplement the complete resource itinerary and keep day navigation native", () => {
+    const c = calendarCopy("en");
+    render(<CalendarView locale="en" query={{ ...query, view: "week" }} data={data} />);
+    const overview = screen.getByRole("region", { name: c.weekOverview });
+    expect(within(overview).getAllByRole("link").length).toBeGreaterThan(7);
+    expect(within(overview).getByText("03:30 GMT+3–03:30 GMT+2", { exact: true })).toBeVisible();
+    expect(within(overview).getByText(row.reference, { exact: true }).closest("a")).toHaveAttribute(
+      "href",
+      `/en/calendar/${row.id}`,
+    );
+    const dayLink = within(overview).getAllByRole("link", { name: /Sunday, 27 October/ })[0];
+    expect(dayLink).toHaveAttribute(
+      "href",
+      expect.stringContaining("date=2030-10-27&view=day&zone=Europe%2FSofia&scope=team"),
+    );
+    const full = screen.getByRole("article", { name: row.reference });
+    const resourceDetails = within(full)
+      .getByText(c.conflictShort, { exact: true })
+      .closest("details");
+    if (resourceDetails) resourceDetails.open = true;
+    expect(within(full).getByText(c.reserved, { exact: true })).toBeVisible();
+    expect(within(full).getByText(c.buffer, { exact: false })).toHaveTextContent("30 / 30");
+    const details = screen.getByText(c.details, { exact: true }).closest("details");
+    expect(details?.querySelector("summary")).toHaveTextContent(c.details);
+    if (details) details.open = true;
+    expect(screen.getByText(c.manualCompact, { exact: false })).toBeVisible();
+    expect(details).toHaveTextContent(c.scopeNote);
+    expect(details).toHaveTextContent(c.snapshotNote);
   });
 });

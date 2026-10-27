@@ -12,7 +12,7 @@ import {
 } from "./registry";
 
 /** Bump on any change a client could observe. */
-export const transportVersion = "0.3.0";
+export const transportVersion = "0.4.0";
 
 const servers = {
   public: { url: "https://makler-realty.com", description: "Public host" },

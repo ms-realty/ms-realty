@@ -207,6 +207,8 @@ export const listings = pgTable(
     availabilityConfirmedById: uuid("availability_confirmed_by_id").references(() => principals.id),
     freshnessState: freshnessStateEnum("freshness_state").notNull().default("unknown"),
     reviewDueAt: instant("review_due_at"),
+    /** Policy used at the last human confirmation; prior values stay in immutable audit. */
+    availabilityPolicySnapshot: jsonb("availability_policy_snapshot"),
     editorialState: editorialStateEnum("editorial_state").notNull().default("draft"),
     /** The mutable editorial working copy; submitting it creates a ListingRevision. */
     draft: jsonb("draft").notNull().default({}),

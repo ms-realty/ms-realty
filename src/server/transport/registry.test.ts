@@ -126,6 +126,34 @@ describe("transport registry", () => {
     }
   });
 
+  it("keeps agency HTTP commands on private production hosts through the actual proxy", async () => {
+    const hosts = ["makler-realty.com", "my.makler-realty.com", "app.makler-realty.com"];
+    const proof = crypto.randomUUID();
+    try {
+      vi.stubEnv("PUBLIC_ORIGIN", `https://${hosts[0]}`);
+      vi.stubEnv("CLIENT_ORIGIN", `https://${hosts[1]}`);
+      vi.stubEnv("STAFF_ORIGIN", `https://${hosts[2]}`);
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("STAGING", "false");
+      vi.stubEnv("ORIGIN_VERIFY_SECRET", proof);
+      vi.resetModules();
+      const { proxy } = await import("../../../proxy");
+      for (const host of hosts) {
+        const response = proxy(
+          new NextRequest(`https://${host}/api/agency/clientConsent`, {
+            headers: { host, "x-msr-origin-token": proof, "x-msr-public-host": host },
+          }),
+        );
+        expect(response.status, host).toBe(host === hosts[0] ? 404 : 200);
+        expect(response.headers.get("x-middleware-next"), host).toBe(
+          host === hosts[0] ? null : "1",
+        );
+      }
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("describes the error body errors.ts actually sends", () => {
     const body = toErrorBody(
       new AppError("version_conflict", { current: { revision: 3 } }),

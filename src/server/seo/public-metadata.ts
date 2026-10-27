@@ -16,6 +16,7 @@ import { hostOrigins } from "@/server/config/hosts";
 import { readApprovedContent } from "@/server/content/public";
 import { getPublicListing } from "@/server/listings/detail";
 import { listingSlug } from "@/server/publication/presentation";
+import { publicServiceOfferings } from "../service-intake/scope";
 import { publicCataloguePages } from "./public-pages";
 
 export function publicSeoOrigin(): URL {
@@ -93,12 +94,17 @@ export async function publicRouteMetadata(locale: string, path: string): Promise
 
 export async function publicContentMetadata(
   locale: string,
-  kind: "area" | "help" | "service",
+  kind: "area" | "help" | "service" | "review",
   slug: string,
   path: string,
 ): Promise<Metadata> {
   if (!isRoutableLocale(locale)) notFound();
-  const content = await readApprovedContent(getDb(), kind, slug, locale).catch(() => null);
+  const bounded = kind === "service" && slug !== "sell" && slug !== "let";
+  const available =
+    !bounded || (await publicServiceOfferings(getDb(), slug, locale).catch(() => [])).length > 0;
+  const content = available
+    ? await readApprovedContent(getDb(), kind, slug, locale).catch(() => null)
+    : null;
   const metadata = await publicPageMetadata({
     locale,
     path,

@@ -165,6 +165,38 @@ it("gives ordinary bound commands a stable record identity independent of issued
   expect(native.calls[0]?.initial.operationId).not.toBe(before?.initial.operationId);
 });
 
+it("restores a photography response after eligibility ends and opens its native disclosure", () => {
+  const form = (available: boolean, revision: number) => (
+    <BoundWorkflowForm
+      locale="en"
+      session={session}
+      command="appointment"
+      id="synthetic-photo"
+      revision={revision}
+      path="/en/calendar/synthetic-photo"
+      fields={[{ name: "reason", label: "Reason" }]}
+      values={{ state: "cancelled", reason: "Synthetic cancellation" }}
+      commandAvailable={available}
+      disclosure="Other appointment actions"
+      intro={<p>Actual outcome</p>}
+      submit="Record outcome"
+    />
+  );
+  render(form(true, 1));
+  const submitted = native.calls[0];
+  if (!submitted?.permalink) throw new Error("Missing native photography identity");
+  native.restored.set(submitted.permalink, restoredReceipt(submitted.initial, "AP-SYNTHETIC"));
+  cleanup();
+  const { container } = render(form(false, 2));
+  expect(screen.getByRole("heading", { name: "Recorded for this source" })).toBeVisible();
+  expect(container.querySelector("details")?.open).toBe(true);
+  expect(screen.queryByRole("button", { name: "Record outcome" })).not.toBeInTheDocument();
+  cleanup();
+  native.restored.clear();
+  const fresh = render(form(false, 2));
+  expect(fresh.container).toBeEmptyDOMElement();
+});
+
 it.each(["freeze", "availability"] as const)(
   "restores the listing's %s receipt when the native response introduces its first frozen revision",
   (intent) => {

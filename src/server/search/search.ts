@@ -236,10 +236,13 @@ function presentedAvailability(now: Date): SQL {
     ),
     sql` `,
   );
-  const fresh = sql`(${listings.availabilityConfirmedAt} is not null
+  const due = sql`(case when ${listings.availabilityPolicySnapshot} is not null
+    then ${listings.reviewDueAt}
+    else ${listings.availabilityConfirmedAt} + make_interval(days => case ${listings.purpose}::text ${days} end) end)`;
+  const fresh = sql`coalesce((${listings.availabilityConfirmedAt} is not null
     and ${listings.freshnessState} <> 'conflicting'
-    and ${listings.availabilityConfirmedAt} + make_interval(days => case ${listings.purpose}::text ${days} end)
-      > ${now.toISOString()}::timestamptz)`;
+    and ${due} > ${listings.availabilityConfirmedAt}
+    and ${due} > ${now.toISOString()}::timestamptz), false)`;
   return sql`(case when ${listings.commercialState} = 'available' and not ${fresh}
     then 'confirmation_required' else ${listings.commercialState}::text end)`;
 }

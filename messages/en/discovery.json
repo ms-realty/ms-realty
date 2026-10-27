@@ -122,5 +122,23 @@
   "newRequest": "New inquiry",
   "optional": "(optional)",
   "messageHint": "Up to 2,000 characters. No identity documents or financial details.",
-  "changed": "The listing changed. Review the current version before continuing."
+  "changed": "The listing changed. Review the current version before continuing.",
+  "serviceIntake": {
+    "short_stay_consultation": "Short-stay consultation",
+    "management_consultation": "Management consultation",
+    "location": "Location",
+    "needs": "What help do you need?",
+    "from": "Requested start",
+    "until": "Requested end",
+    "relationship": "Property relationship (self-declared)",
+    "relationships": {
+      "owner": "Owner",
+      "representative": "Representative",
+      "tenant": "Tenant",
+      "other": "Other",
+      "unknown": "Unknown"
+    },
+    "boundary": "This request is for human assessment. Dates are preferences; submitting does not confirm availability, a reservation or work. This web request is not an emergency-response service.",
+    "held": "Service coverage is no longer confirmed. Contact the responsible person for clarification or a manual alternative."
+  }
 }

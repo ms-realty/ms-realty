@@ -484,7 +484,8 @@
     "orderSavedDetail": "{reference} · New photo order: {order}. The public listing has not changed.",
     "orderSavedPlain": "{reference} · The new working order is saved. The public listing has not changed.",
     "orderChangedSince": "The order has changed since this save. The gallery shows the current order.",
-    "toTask": "Back to the current task"
+    "toTask": "Back to the current task",
+    "review_consent": "Review publication consent"
   },
   "documents": {
     "title": "Documents",

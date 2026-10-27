@@ -4,11 +4,20 @@ Client routes are `/{locale}/privacy` and `/{locale}/preferences` on the client 
 
 ## Human privacy work
 
-Requests concern the signed-in principal's current party. They receive an available, active privacy operator and the explicit due condition `awaiting_human_assessment`. The service does not invent a statutory deadline. A reviewer records the approved policy reference, reviewed response date, owner and verification before work starts; completion requires human evidence and a retention disposition. These commands record work, and do not themselves delete data, export a dossier or send records to a model.
+Requests concern the signed-in principal's current party. They receive an available, active privacy operator and the explicit due condition `awaiting_human_assessment`. The service does not invent a statutory deadline. A reviewer records the approved policy reference, reviewed response date, owner and verification before work starts; completion requires human evidence and a retention disposition. These review commands record work and do not delete data or send records to a model. The separate [export workflow](../../../docs/delivery/privacy-export-fulfilment.md) collects a real person-scoped dossier, supports reviewed redacted private-file supplements and issues a revocable, expiring private copy. Typed source-bound category decisions can support the dedicated completion command. Pending or unenumerated categories keep fulfilment partial; free-text status changes cannot complete exports.
 
 The compliance retention service returns a boolean only. Current restricted reports or case process retention can prevent deletion/restriction completion or release of a legal hold. Neither the client projection nor privacy workbench exposes the restricted record responsible for that decision. Historical case participation remains relevant after access is revoked. A checkbox or free-text disposition does not override an active server retention obligation.
 
 ## Separate optional consent
+
+The dedicated [erasure/restriction workflow](../../../docs/delivery/privacy-erasure-propagation.md)
+binds per-source human dispositions to current authority and policy, records an append-only
+application safety decision, stops optional work and revokes only applicable own-client
+credentials/export exposure. Only separately reviewed eligible optional copies are removed.
+Business/history, physical file, provider and independent archive boundaries remain held or
+unsupported. Its typed completion check stays partial; free-text review cannot complete
+deletion or restriction. Signed synthetic tail reapplication reuses global recovery quarantine
+and never automatically reopens runtime or replays old sends.
 
 Consuming a valid account email link verifies that email contact route. GET inspection, inquiries, invitations and service preferences never create optional subscriptions or consent events.
 

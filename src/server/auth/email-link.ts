@@ -20,7 +20,9 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { enqueueMessage } from "../jobs/outbox";
 import type { JobPayloads, JobQueue } from "../jobs/queue";
+import { privacyProcessingRestricted } from "../privacy/restrictions";
 import { enforceRateLimit } from "../rate-limit";
+import { emailLinkSubject, emailLinkTemplate } from "./email-link-delivery";
 import { createSession, type IssuedSession, revokeSession } from "./sessions";
 
 export const emailLinkTtlMs = 15 * 60_000;
@@ -84,7 +86,9 @@ async function findActiveClient(
       ),
     )
     .for("update");
-  return principal;
+  return principal && !(await privacyProcessingRestricted(db, principal.partyId, "client_access"))
+    ? principal
+    : undefined;
 }
 
 /** Always resolves to `{ status: "sent" }` unless the input is malformed or rate-limited. */
@@ -153,7 +157,8 @@ export async function issueEmailLink(
         idempotencyKey: `email_link:${row.id}`,
         channel: "email",
         recipient: email,
-        template: "auth.email_link",
+        template: emailLinkTemplate,
+        subject: { type: emailLinkSubject, id: row.id },
         params: { locale: job.locale, expiresAt: expiresAt.toISOString() },
         secretParams: { url: link },
       },
@@ -184,6 +189,14 @@ export async function inspectEmailLink(
   if (row.revokedAt) return { state: "revoked" };
   if (row.consumedAt) return { state: "consumed" };
   if (now >= row.expiresAt) return { state: "expired" };
+  const [account] = await db.select().from(principals).where(eq(principals.id, row.principalId));
+  if (
+    account?.kind !== "client" ||
+    account.status !== "active" ||
+    account.email.toLowerCase() !== row.email.toLowerCase() ||
+    (await privacyProcessingRestricted(db, account.partyId, "client_access"))
+  )
+    return { state: "revoked" };
   return { state: "valid", returnTo: row.returnTo };
 }
 

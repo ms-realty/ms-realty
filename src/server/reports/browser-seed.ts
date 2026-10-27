@@ -69,7 +69,7 @@ try {
     },
   ]);
   const { token } = await createSession(db, { kind: "staff", id: staff.id });
-  console.log(JSON.stringify({ token, visibleReference, hiddenReference }));
+  console.log(JSON.stringify({ token, visibleReference, hiddenReference, taskId: task.id }));
 } finally {
   await client.end();
 }

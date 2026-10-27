@@ -4,4 +4,5 @@ export const caseDocumentPurposes = [
   "case_check",
   "process_policy",
   "case_completion",
+  "review_consent",
 ] as const;

@@ -2,8 +2,10 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import type { ContentReference } from "@/domain/inquiry-content";
 import { ContentPlaintext } from "@/features/content/plaintext";
+import { serviceCopy } from "@/features/service-intake/copy";
 import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
+import { publicServiceOfferings } from "@/server/service-intake/scope";
 import { Notice } from "@/ui/notice";
 import { readApprovedContent } from "./content-source";
 import { discoveryCopy } from "./copy";
@@ -85,12 +87,19 @@ export async function ContentScreen({
   const copy = discoveryCopy(locale),
     label = labels[locale];
   let failed = false;
-  const content = await readApprovedContent(getDb(), kind, slug, locale).catch(() => {
-    failed = true;
-    return null;
-  });
+  const bounded = kind === "service" && !intent;
+  const offerings = bounded
+    ? await publicServiceOfferings(getDb(), slug, locale).catch(() => [])
+    : [];
+  const content =
+    bounded && !offerings.length
+      ? null
+      : await readApprovedContent(getDb(), kind, slug, locale).catch(() => {
+          failed = true;
+          return null;
+        });
   const source =
-    !failed && !content && locale !== "bg"
+    !bounded && !failed && !content && locale !== "bg"
       ? await readApprovedContent(getDb(), kind, slug, "bg").catch(() => null)
       : null;
   const title =
@@ -104,7 +113,6 @@ export async function ContentScreen({
           : label[kind]);
   const inquiryQuery = new URLSearchParams();
   if (intent) inquiryQuery.set("purpose", intent);
-  else if (kind === "service" && content) inquiryQuery.set("purpose", "service_consultation");
   if (content)
     inquiryQuery.set(
       "contentReference",
@@ -162,6 +170,31 @@ export async function ContentScreen({
         >
           {copy.search}
         </a>
+      ) : null}
+      {offerings.length ? (
+        <section className="min-w-0 space-y-3">
+          <p>{serviceCopy(locale).boundary}</p>
+          {offerings.map((offering) => {
+            const query = new URLSearchParams({
+              purpose: "service_consultation",
+              contentReference: JSON.stringify(offering.contentReference),
+              serviceScope: JSON.stringify({
+                topic: offering.topic,
+                regionId: offering.regionId,
+                scopeVersionId: offering.scopeVersionId,
+              }),
+            });
+            return (
+              <a
+                className="block min-h-control underline"
+                key={`${offering.topic}:${offering.regionId}`}
+                href={`/${locale}/inquire?${query}`}
+              >
+                {serviceCopy(locale)[offering.topic]} · {offering.regionName}
+              </a>
+            );
+          })}
+        </section>
       ) : null}
       <a
         className="self-start underline"

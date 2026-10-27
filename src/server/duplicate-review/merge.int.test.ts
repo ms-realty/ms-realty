@@ -3,9 +3,15 @@ import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   activityEvents,
+  agencyCaseReviews,
+  agencyEvidenceHistory,
+  agencyPartnerTerms,
+  appointments,
+  appointmentVersions,
   auditEvents,
   caseParticipants,
   cases,
+  consentEvents,
   contactMethods,
   documents,
   externalActions,
@@ -18,16 +24,33 @@ import {
   parties,
   passkeys,
   principals,
+  privacyExports,
+  privacyProcessingRestrictions,
+  privacyPropagationEvents,
+  privacyRequests,
+  privacySafetyDecisions,
   properties,
   propertyFactRevisions,
   propertyFacts,
   sessions,
+  subscriptions,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession } from "@/server/auth/sessions";
 import { can, resolveGrants } from "@/server/authz";
 import { staffFixture } from "@/server/cases/testing";
-import { createStaff } from "@/server/testing";
+import { hashRequest } from "@/server/crypto";
+import {
+  syntheticAgencyHistory,
+  syntheticAgencySources,
+} from "@/server/privacy/agency-source-testing";
+import { syntheticPhotographySource } from "@/server/privacy/photography-source-testing";
+import {
+  appendPrivacySafetyDecision,
+  recordPrivacyPropagation,
+} from "@/server/privacy/safety-ledger";
+import { syntheticServiceContext } from "@/server/privacy/service-source-testing";
+import { createProperty, createStaff } from "@/server/testing";
 import { readContact } from "@/server/work/queries";
 import { issueFormOperation } from "@/ui/form/server";
 import { type DuplicatePair, listDuplicateSources, readCanonicalDuplicate } from "./impact";
@@ -66,6 +89,80 @@ async function fixture() {
     right = await reviewContactFixture(t.db, "Synthetic identity A source B");
   const pair: DuplicatePair = { subject: "party", left: left.party.id, right: right.party.id };
   return { staff, left, right, pair };
+}
+async function retainedService(f: Awaited<ReturnType<typeof fixture>>) {
+  const context = syntheticServiceContext(f.staff.id, true);
+  const [record] = await t.db
+    .insert(cases)
+    .values({
+      reference: `CASE-SERVICE-${randomUUID()}`,
+      kind: "service_intake",
+      stage: "request_received",
+      serviceTopic: context.request.topic,
+      serviceContext: context,
+      title: "Synthetic service request",
+      ownerId: f.staff.id,
+      nextAction: "Human reviews the original request",
+    })
+    .returning();
+  if (!record) throw new Error("Missing synthetic service Case");
+  await t.db
+    .insert(caseParticipants)
+    .values({ caseId: record.id, partyId: f.right.party.id, role: "collaborator" });
+  await t.db
+    .update(inquiries)
+    .set({
+      purpose: "service_consultation",
+      caseId: record.id,
+      context: { service: context },
+    })
+    .where(eq(inquiries.id, f.right.inquiry.id));
+  return { context, record };
+}
+async function retainedAgency(f: Awaited<ReturnType<typeof fixture>>, standing = false) {
+  await t.db.insert(grants).values({
+    principalId: f.staff.id,
+    capability: "compliance.review",
+    reason: "Synthetic original source review",
+  });
+  const [client] = await t.db
+    .insert(principals)
+    .values({
+      kind: "client",
+      issuer: "urn:ms-realty:client",
+      subject: randomUUID(),
+      partyId: f.right.party.id,
+      email: `${randomUUID()}@example.test`,
+      displayName: "Synthetic retained author",
+    })
+    .returning();
+  const [record] = await t.db
+    .insert(cases)
+    .values({
+      reference: `CASE-AGENCY-${randomUUID()}`,
+      kind: "buyer",
+      stage: "completed",
+      title: "Synthetic retained agency Case",
+      ownerId: f.staff.id,
+      nextAction: "Review the original agency evidence",
+    })
+    .returning();
+  if (!client || !record) throw new Error("Missing synthetic original agency bindings");
+  await t.db
+    .insert(caseParticipants)
+    .values({ caseId: record.id, partyId: f.right.party.id, role: "buyer" });
+  await t.db
+    .update(inquiries)
+    .set({ caseId: record.id })
+    .where(eq(inquiries.id, f.right.inquiry.id));
+  const agency = await syntheticAgencySources(t.db, {
+    actorId: f.staff.id,
+    partyId: f.right.party.id,
+    clientId: client.id,
+    caseId: record.id,
+    standing,
+  });
+  return { ...agency, client, record };
 }
 async function inputFor(f: { staff: Awaited<ReturnType<typeof operator>>; pair: DuplicatePair }) {
   const preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
@@ -122,7 +219,533 @@ async function scopedStaff(readIds: string[], mergeIds: string[] = []) {
   return { ...staff, ...(await createSession(t.db, { kind: "staff", id: staff.id })) };
 }
 
+async function retainedPrivacy(f: Awaited<ReturnType<typeof fixture>>, restrictions = true) {
+  const [client] = await t.db
+    .insert(principals)
+    .values({
+      kind: "client",
+      issuer: "urn:ms-realty:client",
+      subject: randomUUID(),
+      partyId: f.right.party.id,
+      email: `${randomUUID()}@example.test`,
+      displayName: "Synthetic original recipient",
+    })
+    .returning();
+  const [request] = await t.db
+    .insert(privacyRequests)
+    .values({
+      reference: `PR-RETAINED-${randomUUID()}`,
+      kind: "export",
+      state: "completed",
+      partyId: f.right.party.id,
+      responsibleId: f.staff.id,
+      verifiedAt: new Date(),
+      completedAt: new Date(),
+      completionEvidence: "Synthetic completed source-specific export",
+      legalHoldDisposition: "Synthetic retained history only",
+    })
+    .returning();
+  if (!client || !request) throw new Error("Missing synthetic privacy subject");
+  const [exported] = await t.db
+    .insert(privacyExports)
+    .values({
+      requestId: request.id,
+      requestVersion: request.version,
+      partyId: f.right.party.id,
+      recipientId: client.id,
+      state: "issued",
+      encryptedPayload: "SYNTHETIC_PRIVATE_EXPORT_NEVER_PROJECT",
+      encryptedReview: "SYNTHETIC_PRIVATE_REVIEW_NEVER_PROJECT",
+      sha256: "a".repeat(64),
+      reviewSha256: "b".repeat(64),
+      byteSize: 1,
+      coverageComplete: true,
+      preparedById: f.staff.id,
+      reviewedById: f.staff.id,
+      reviewedAt: new Date(),
+      expiresAt: new Date(Date.now() + 3600000),
+      issuedOperationId: randomUUID(),
+      completedOperationId: randomUUID(),
+    })
+    .returning();
+  const [subscription] = await t.db
+    .insert(subscriptions)
+    .values({
+      partyId: f.right.party.id,
+      contactMethodId: f.right.method.id,
+      purpose: "marketing",
+      state: "withdrawn",
+      timezone: "Europe/Sofia",
+      policyVersion: "synthetic-retained-consent",
+      unsubscribeTokenHash: randomUUID(),
+    })
+    .returning();
+  if (!exported || !subscription) throw new Error("Missing synthetic retained privacy history");
+  await t.db.insert(consentEvents).values({
+    subscriptionId: subscription.id,
+    kind: "withdrawn",
+    policyVersion: subscription.policyVersion,
+    source: "Synthetic original consent source",
+    actorKind: "client",
+    actorId: client.id,
+  });
+  const append = () =>
+    appendPrivacySafetyDecision(t.db, {
+      operationId: randomUUID(),
+      partyId: f.right.party.id,
+      requestId: request.id,
+      requestHash: hashRequest({ synthetic: randomUUID() }),
+      review: { note: "SYNTHETIC_PRIVATE_DECISION_NEVER_PROJECT" },
+      effect: {
+        kind: "subscription_withdrawal_v1",
+        partyId: f.right.party.id,
+        subscriptionIds: [subscription.id],
+      },
+    });
+  const decision = await append();
+  await recordPrivacyPropagation(t.db, decision.sequence, "application", "applied", {
+    note: "SYNTHETIC_PRIVATE_PROPAGATION_NEVER_PROJECT",
+  });
+  if (restrictions)
+    await t.db.insert(privacyProcessingRestrictions).values(
+      ["marketing", "search_alerts"].map((purpose) => ({
+        partyId: f.right.party.id,
+        purpose,
+        decisionSequence: decision.sequence,
+      })),
+    );
+  return { client, request, exported, subscription, decision, append };
+}
+
+async function privacySourceSnapshot() {
+  return {
+    principals: await t.db.select().from(principals),
+    contacts: await t.db.select().from(contactMethods),
+    grants: await t.db.select().from(grants),
+    subscriptions: await t.db.select().from(subscriptions),
+    consent: await t.db.select().from(consentEvents),
+    requests: await t.db.select().from(privacyRequests),
+    exports: await t.db.select().from(privacyExports),
+    decisions: await t.db.select().from(privacySafetyDecisions),
+    restrictions: await t.db.select().from(privacyProcessingRestrictions),
+    propagation: await t.db.select().from(privacyPropagationEvents),
+  };
+}
+
 describe("O27/F32/AT56/UX22 human identity merge and safe split", () => {
+  it("retains original partner terms, review wording, negative consent history and author identity through merge/reversal", async () => {
+    const f = await fixture(),
+      agency = await retainedAgency(f);
+    const snapshot = async () => ({
+      terms: await t.db.select().from(agencyPartnerTerms),
+      reviews: await t.db.select().from(agencyCaseReviews),
+      history: await t.db.select().from(agencyEvidenceHistory),
+    });
+    const before = await snapshot(),
+      preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toEqual([]);
+    expect(
+      preview.references
+        .filter((row) => row.table.startsWith("agency_"))
+        .map((row) => row.id)
+        .sort(),
+    ).toEqual([agency.terms.id, agency.review.id].sort());
+    for (const value of [
+      agency.terms.termsText,
+      agency.review.reviewText,
+      agency.review.verificationStatement,
+      agency.termsHistory.id,
+      agency.reviewHistory.id,
+      agency.policy.id,
+    ])
+      expect(JSON.stringify(preview)).not.toContain(value);
+    const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+    expect(await snapshot()).toEqual(before);
+    expect(
+      (await snapshot()).reviews.find((row) => row.id === agency.review.id)?.authorPartyId,
+    ).toBe(f.right.party.id);
+    await reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId));
+    expect(await snapshot()).toEqual(before);
+    expect(done.outcome.permissionChanges).toEqual([]);
+  });
+
+  it.each(["terms", "wording", "consent", "history"] as const)(
+    "stales agency %s review and automatic reversal without relying on mutable row versions",
+    async (change) => {
+      const f = await fixture(),
+        agency = await retainedAgency(f),
+        input = await inputFor(f);
+      const mutate = async (after: boolean) => {
+        if (change === "terms")
+          await t.db
+            .update(agencyPartnerTerms)
+            .set({
+              termsText: `SYNTHETIC_CHANGED_TERMS_${after}`,
+              updatedAt: agency.terms.updatedAt,
+            })
+            .where(eq(agencyPartnerTerms.id, agency.terms.id));
+        if (change === "wording")
+          await t.db
+            .update(agencyCaseReviews)
+            .set({
+              reviewText: `SYNTHETIC_CHANGED_REVIEW_${after}`,
+              updatedAt: agency.review.updatedAt,
+            })
+            .where(eq(agencyCaseReviews.id, agency.review.id));
+        if (change === "consent")
+          await t.db
+            .update(agencyCaseReviews)
+            .set({
+              consentState: after ? "refused" : "withdrawn",
+              updatedAt: agency.review.updatedAt,
+            })
+            .where(eq(agencyCaseReviews.id, agency.review.id));
+        if (change === "history")
+          await syntheticAgencyHistory(t.db, f.staff.id, "case_review", agency.review.id, {
+            ...agency.review,
+            consentState: after ? "refused" : "withdrawn",
+          });
+      };
+      await mutate(false);
+      await expect(mergeDuplicate(t.db, f.staff.session, input)).rejects.toMatchObject({
+        code: "version_conflict",
+      });
+      const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+      await mutate(true);
+      expect(
+        (await previewDuplicateReversal(t.db, f.staff.session, done.outcome.mergeId)).impact.held,
+      ).toContain("changed_after_merge");
+      await expect(
+        reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId)),
+      ).rejects.toMatchObject({ code: "transition_denied" });
+    },
+  );
+
+  it("holds standing text-only terms for a manual original-scope bridge and hides agency identities from an unqualified reviewer", async () => {
+    const f = await fixture(),
+      agency = await retainedAgency(f, true);
+    const preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toContain("agency_reconciliation");
+    await expect(mergeDuplicate(t.db, f.staff.session, await inputFor(f))).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+    const reviewer = await scopedStaff(
+      [f.left.inquiry.id, f.right.inquiry.id],
+      [f.left.party.id, f.right.party.id],
+    );
+    const hidden = await previewDuplicateMerge(t.db, reviewer.session, f.pair);
+    expect(hidden.held).toContain("restricted");
+    expect(hidden.held).not.toContain("agency_reconciliation");
+    expect(hidden.references.filter((row) => row.table.startsWith("agency_"))).toEqual([]);
+    for (const value of [agency.terms.id, agency.review.id, agency.termsHistory.id])
+      expect(JSON.stringify(hidden)).not.toContain(value);
+  });
+
+  it("keeps a newly populated unknown agency FK held instead of whitelisting the agency table", async () => {
+    const f = await fixture(),
+      agency = await retainedAgency(f);
+    await t.db.execute(
+      sql`alter table agency_partner_terms add column synthetic_unknown_party uuid references parties(id)`,
+    );
+    try {
+      await t.db.execute(
+        sql`update agency_partner_terms set synthetic_unknown_party = ${f.left.party.id}::uuid where id = ${agency.terms.id}::uuid`,
+      );
+      expect((await previewDuplicateMerge(t.db, f.staff.session, f.pair)).held).toContain(
+        "unsupported",
+      );
+    } finally {
+      await t.db.execute(sql`alter table agency_partner_terms drop column synthetic_unknown_party`);
+    }
+  });
+
+  it.each(["scope", "version"] as const)(
+    "binds original photo %s through property merge review and safe reversal",
+    async (change) => {
+      const staff = await operator(),
+        left = await createProperty(t.db),
+        right = await createProperty(t.db);
+      const photo = await syntheticPhotographySource(t.db, staff.id, undefined, right);
+      const pair: DuplicatePair = { subject: "property", left, right },
+        f = { staff, pair };
+      const input = await inputFor(f);
+      const mutate = async (after: boolean) => {
+        if (change === "scope")
+          await t.db
+            .update(appointments)
+            .set({
+              photographyScope: `SYNTHETIC_CHANGED_SCOPE_${after}`,
+              updatedAt: photo.appointment.updatedAt,
+            })
+            .where(eq(appointments.id, photo.appointment.id));
+        else
+          await t.db.insert(appointmentVersions).values({
+            appointmentId: photo.appointment.id,
+            versionNumber: after ? 3 : 2,
+            snapshot: {
+              ...photo.snapshot,
+              photographyScope: `SYNTHETIC_RETAINED_SCOPE_${after}`,
+            },
+            actorKind: "staff",
+            actorId: staff.id,
+          });
+      };
+      await mutate(false);
+      await expect(mergeDuplicate(t.db, staff.session, input)).rejects.toMatchObject({
+        code: "version_conflict",
+      });
+      const done = await mergeDuplicate(t.db, staff.session, await inputFor(f));
+      const before = await previewDuplicateReversal(t.db, staff.session, done.outcome.mergeId);
+      expect(before.impact.held).toEqual([]);
+      await mutate(true);
+      expect(
+        (await previewDuplicateReversal(t.db, staff.session, done.outcome.mergeId)).impact.held,
+      ).toContain("changed_after_merge");
+      expect(
+        (await t.db.select().from(appointments).where(eq(appointments.id, photo.appointment.id)))[0]
+          ?.propertyId,
+      ).toBe(right);
+    },
+  );
+
+  it("preserves both original service context copies through identity association and reversal without projecting the binding", async () => {
+    const f = await fixture(),
+      service = await retainedService(f);
+    const snapshot = async () => ({
+      inquiry: await t.db.select().from(inquiries).where(eq(inquiries.id, f.right.inquiry.id)),
+      record: await t.db.select().from(cases).where(eq(cases.id, service.record.id)),
+      parties: await t.db
+        .select()
+        .from(caseParticipants)
+        .where(eq(caseParticipants.caseId, service.record.id)),
+    });
+    const before = await snapshot(),
+      preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toEqual([]);
+    expect(
+      preview.references.some((row) => row.table === "cases" && row.id === service.record.id),
+    ).toBe(true);
+    for (const value of [
+      service.context.request.location,
+      service.context.request.needs,
+      "synthetic-internal-fallback",
+      service.context.binding.scopeHash,
+    ])
+      expect(JSON.stringify(preview)).not.toContain(value);
+    const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+    expect(await snapshot()).toEqual(before);
+    await reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId));
+    expect(await snapshot()).toEqual(before);
+    expect(done.outcome.permissionChanges).toEqual([]);
+  });
+
+  it.each(["inquiry_request", "inquiry_binding", "case_request", "case_binding"] as const)(
+    "stales merge review and automatic reversal for an unversioned %s change",
+    async (change) => {
+      const f = await fixture(),
+        service = await retainedService(f),
+        input = await inputFor(f);
+      const mutate = async (suffix: string) => {
+        const context = structuredClone(service.context);
+        if (change.endsWith("request"))
+          context.request.location = `SYNTHETIC_CHANGED_LOCATION_${suffix}`;
+        else context.binding.offering.fallback = { kind: "staff", principalId: randomUUID() };
+        if (change.startsWith("inquiry")) {
+          const [row] = await t.db
+            .select()
+            .from(inquiries)
+            .where(eq(inquiries.id, f.right.inquiry.id));
+          if (!row) throw new Error("Missing synthetic source inquiry");
+          await t.db
+            .update(inquiries)
+            .set({ context: { service: context }, updatedAt: row.updatedAt })
+            .where(eq(inquiries.id, row.id));
+          const [current] = await t.db.select().from(inquiries).where(eq(inquiries.id, row.id));
+          expect(current?.version).toBe(row.version);
+          expect(current?.updatedAt).toEqual(row.updatedAt);
+        } else {
+          const [row] = await t.db.select().from(cases).where(eq(cases.id, service.record.id));
+          if (!row) throw new Error("Missing synthetic source Case");
+          await t.db
+            .update(cases)
+            .set({ serviceContext: context, updatedAt: row.updatedAt })
+            .where(eq(cases.id, row.id));
+          const [current] = await t.db.select().from(cases).where(eq(cases.id, row.id));
+          expect(current?.version).toBe(row.version);
+          expect(current?.updatedAt).toEqual(row.updatedAt);
+        }
+      };
+      await mutate("before");
+      await expect(mergeDuplicate(t.db, f.staff.session, input)).rejects.toMatchObject({
+        code: "version_conflict",
+      });
+      const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+      await mutate("after");
+      expect(
+        (await previewDuplicateReversal(t.db, f.staff.session, done.outcome.mergeId)).impact.held,
+      ).toContain("changed_after_merge");
+      await expect(
+        reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId)),
+      ).rejects.toMatchObject({ code: "transition_denied" });
+    },
+  );
+
+  it("retains completed exports, consent and composite-key restrictions under one opaque pair boundary through merge and split", async () => {
+    const f = await fixture(),
+      history = await retainedPrivacy(f),
+      before = await privacySourceSnapshot(),
+      preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toEqual([]);
+    const boundaries = preview.references.filter((row) => row.table === "privacy_history");
+    expect(boundaries).toHaveLength(1);
+    expect(boundaries[0]).toMatchObject({
+      sources: [f.pair.left, f.pair.right].sort(),
+      audience: {},
+    });
+    expect((await previewDuplicateMerge(t.db, f.staff.session, f.pair)).digest).toBe(
+      preview.digest,
+    );
+    for (const hidden of [
+      history.exported.id,
+      history.decision.id,
+      history.decision.digest,
+      "SYNTHETIC_PRIVATE_EXPORT_NEVER_PROJECT",
+      "SYNTHETIC_PRIVATE_REVIEW_NEVER_PROJECT",
+      "SYNTHETIC_PRIVATE_DECISION_NEVER_PROJECT",
+      "SYNTHETIC_PRIVATE_PROPAGATION_NEVER_PROJECT",
+    ])
+      expect(JSON.stringify(preview)).not.toContain(hidden);
+    const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+    expect(await privacySourceSnapshot()).toEqual(before);
+    await reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId));
+    expect(await privacySourceSnapshot()).toEqual(before);
+    expect(done.outcome.permissionChanges).toEqual([]);
+  });
+
+  it("holds restricted client identities and hides all new privacy source identities from an unauthorized reviewer", async () => {
+    const f = await fixture(),
+      history = await retainedPrivacy(f),
+      reviewer = await scopedStaff(
+        [f.left.inquiry.id, f.right.inquiry.id],
+        [f.left.party.id, f.right.party.id],
+      );
+    await t.db.insert(privacyProcessingRestrictions).values({
+      partyId: f.right.party.id,
+      purpose: "client_access",
+      decisionSequence: history.decision.sequence,
+    });
+    const hidden = await previewDuplicateMerge(t.db, reviewer.session, f.pair);
+    expect(hidden.held).toContain("restricted");
+    expect(hidden.held).not.toContain("privacy_restriction");
+    expect(hidden.references.some((row) => row.table.startsWith("privacy_"))).toBe(false);
+    for (const privateValue of [history.exported.id, history.request.id, history.decision.id])
+      expect(JSON.stringify(hidden)).not.toContain(privateValue);
+    await expect(mergeDuplicate(t.db, reviewer.session, await inputFor(f))).rejects.toMatchObject({
+      code: "not_found",
+    });
+    const authorized = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(authorized.held).toEqual(["privacy_restriction"]);
+    await expect(mergeDuplicate(t.db, f.staff.session, await inputFor(f))).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+  });
+
+  it.each(["decision", "restriction", "propagation", "export"] as const)(
+    "fences a new %s in stale merge review and subsequent automatic split",
+    async (change) => {
+      const f = await fixture(),
+        history = await retainedPrivacy(f, false),
+        input = await inputFor(f);
+      const mutate = async (afterMerge: boolean) => {
+        if (change === "decision") await history.append();
+        if (change === "restriction")
+          await t.db.insert(privacyProcessingRestrictions).values({
+            partyId: f.right.party.id,
+            purpose: afterMerge ? "search_alerts" : "marketing",
+            decisionSequence: history.decision.sequence,
+          });
+        if (change === "propagation")
+          await recordPrivacyPropagation(t.db, history.decision.sequence, "provider_data", "held", {
+            synthetic: randomUUID(),
+          });
+        if (change === "export")
+          await t.db
+            .update(privacyExports)
+            .set({ version: sql`${privacyExports.version} + 1`, updatedAt: new Date() })
+            .where(eq(privacyExports.id, history.exported.id));
+      };
+      await mutate(false);
+      await expect(mergeDuplicate(t.db, f.staff.session, input)).rejects.toMatchObject({
+        code: "version_conflict",
+      });
+      const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+      await mutate(true);
+      expect(
+        (await previewDuplicateReversal(t.db, f.staff.session, done.outcome.mergeId)).impact.held,
+      ).toContain("changed_after_merge");
+      await expect(
+        reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId)),
+      ).rejects.toMatchObject({ code: "transition_denied" });
+    },
+  );
+
+  it("rechecks live privacy authority and fresh verification before disclosing or replaying retained history", async () => {
+    const f = await fixture();
+    await retainedPrivacy(f);
+    await t.db
+      .update(sessions)
+      .set({ reverifiedAt: null })
+      .where(eq(sessions.id, f.staff.session.id));
+    const stale = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(stale.held).toContain("restricted");
+    expect(stale.references.some((row) => row.table.startsWith("privacy_"))).toBe(false);
+    await t.db
+      .update(sessions)
+      .set({ reverifiedAt: new Date() })
+      .where(eq(sessions.id, f.staff.session.id));
+    const input = await inputFor(f),
+      done = await mergeDuplicate(t.db, f.staff.session, input);
+    await t.db
+      .update(grants)
+      .set({ revokedAt: new Date() })
+      .where(and(eq(grants.principalId, f.staff.id), eq(grants.capability, "privacy.manage")));
+    await expect(mergeDuplicate(t.db, f.staff.session, input)).rejects.toMatchObject({
+      code: "not_found",
+    });
+    await expect(
+      readDuplicateReceipt(t.db, f.staff.session, done.operationId),
+    ).rejects.toMatchObject({
+      code: "not_found",
+    });
+    await expect(
+      previewDuplicateReversal(t.db, f.staff.session, done.outcome.mergeId),
+    ).rejects.toMatchObject({ code: "not_found" });
+  });
+
+  it("holds an oversized declared privacy history without exposing a partial row inventory", async () => {
+    const f = await fixture(),
+      history = await retainedPrivacy(f);
+    const added = await t.db
+      .insert(privacyPropagationEvents)
+      .values(
+        Array.from({ length: 500 }, () => ({
+          decisionSequence: history.decision.sequence,
+          boundary: "provider_data",
+          state: "held",
+          evidence: { synthetic: "SYNTHETIC_BOUNDED_EVIDENCE_NEVER_PROJECT" },
+        })),
+      )
+      .returning({ id: privacyPropagationEvents.id });
+    const preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toEqual(["too_many"]);
+    expect(preview.references.some((row) => row.table === "privacy_history")).toBe(false);
+    expect(JSON.stringify(preview)).not.toContain(added[0]?.id);
+    expect(JSON.stringify(preview)).not.toContain("SYNTHETIC_BOUNDED_EVIDENCE_NEVER_PROJECT");
+    await expect(mergeDuplicate(t.db, f.staff.session, await inputFor(f))).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+  });
+
   it("paginates source selection after applying current independent read and merge scopes", async () => {
     const f = await fixture(),
       staff = await scopedStaff(

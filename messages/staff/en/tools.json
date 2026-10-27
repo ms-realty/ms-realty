@@ -95,6 +95,10 @@
     "profile": {
       "title": "Profile & settings",
       "description": "Your name, language and sign-in security"
+    },
+    "agency": {
+      "title": "Agency obligations",
+      "description": "Partners and referrals · Case reviews"
     }
   },
   "searchPages": "Find a page…",

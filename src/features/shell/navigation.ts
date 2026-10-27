@@ -66,6 +66,7 @@ export const journeyNav: readonly NavItem<JourneyNavLabel>[] = [
   { label: "appointments", screen: "C06", path: "/appointments" },
   { label: "messages", screen: "C07", path: "/messages" },
   { label: "documents", screen: "C08", path: "/documents" },
+  { label: "reviews", screen: "C18", path: "/reviews" },
 ];
 
 export const journeyHelpNav: NavItem<JourneyNavLabel> = {
@@ -111,7 +112,12 @@ export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyTool
     ...workspacePrimaryNav.slice(0, 4),
     { label: "imports", screen: "O28", path: "/operations/imports", requires: ["import.run"] },
     ...workspacePrimaryNav.slice(4),
-    { label: "consultations", screen: "O29", path: null },
+    {
+      label: "consultations",
+      screen: "O29",
+      path: "/operations/consultations",
+      requires: ["inquiry.read", "case.read"],
+    },
     { label: "coverage", screen: "O01", path: "/coverage", requires: ["case.read_internal"] },
     {
       label: "inbound",
@@ -128,6 +134,7 @@ export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyTool
     },
   ],
   management: [
+    { label: "agency", screen: "O25", path: "/operations/agency", requires: ["compliance.review"] },
     { label: "pages", screen: "O21", path: "/content", requires: ["content.edit"] },
     { label: "reports", screen: "O22", path: "/reports", requires: ["report.read"] },
     { label: "team", screen: "O23", path: "/access/manage", requires: ["access.grant"] },
@@ -171,7 +178,8 @@ export function permittedTools(
       agencyTools[section].filter((item) =>
         (item.requires ?? []).every((c) =>
           workspacePrimaryNav.some((primary) => primary.path === item.path) ||
-          item.path === "/operations/history"
+          item.path === "/operations/history" ||
+          item.path === "/operations/consultations"
             ? navigable.has(c)
             : held.has(c),
         ),

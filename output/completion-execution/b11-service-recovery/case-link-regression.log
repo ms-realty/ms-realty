@@ -1,0 +1,9 @@
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-reviewed-import/MS-Realty
+
+
+ Test Files  3 passed (3)
+      Tests  35 passed (35)
+   Start at  02:04:39
+   Duration  3.38s (tests 81%, import 16%, transform 3%)
+

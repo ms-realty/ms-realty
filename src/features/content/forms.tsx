@@ -170,7 +170,7 @@ export function ContentForm({
                   disabled={form.pending}
                   className={controlClass}
                 >
-                  {(["area", "service", "help"] as const).map((value) => (
+                  {(["area", "service", "help", "review"] as const).map((value) => (
                     <option key={value} value={value}>
                       {copy[value]}
                     </option>

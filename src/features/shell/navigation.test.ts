@@ -84,6 +84,7 @@ describe("navigation registry (§06)", () => {
       "appointments",
       "messages",
       "documents",
+      "reviews",
     ]);
     expect(workspacePrimaryNav.map((item) => item.label)).toEqual([
       "today",
@@ -114,6 +115,7 @@ describe("navigation registry (§06)", () => {
       "complaints",
     ]);
     expect(agencyTools.management.map((item) => item.label)).toEqual([
+      "agency",
       "pages",
       "reports",
       "team",
@@ -162,6 +164,7 @@ describe("navigation registry (§06)", () => {
           "/en/calendar",
           "/en/tasks",
           "/en/contacts",
+          "/en/operations/consultations",
         ],
       ],
     ]);
@@ -176,6 +179,7 @@ describe("navigation registry (§06)", () => {
           "/en/calendar",
           "/en/tasks",
           "/en/contacts",
+          "/en/operations/consultations",
           "/en/coverage",
           "/en/operations/inbound",
         ],
@@ -193,6 +197,7 @@ describe("navigation registry (§06)", () => {
           "/en/calendar",
           "/en/tasks",
           "/en/contacts",
+          "/en/operations/consultations",
           "/en/coverage",
           "/en/operations/inbound",
           "/en/operations/keys",
@@ -202,6 +207,7 @@ describe("navigation registry (§06)", () => {
       [
         "management",
         [
+          "/en/operations/agency",
           "/en/content",
           "/en/reports",
           "/en/access/manage",

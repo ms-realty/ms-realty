@@ -28,7 +28,6 @@ import { canonicalJson } from "@/domain/approval";
 import type { Actor } from "@/domain/capabilities";
 import type { FactState } from "@/domain/facts";
 import { formatListingReference } from "@/domain/ids";
-import { availabilityReviewIntervalDays } from "@/domain/listing";
 import { representationScopes } from "@/domain/seller-instruction";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
@@ -37,6 +36,7 @@ import { hashRequest, sha256Hex } from "../crypto";
 import type { Executor, Transaction } from "../db";
 import { AppError } from "../errors";
 import { recordOutboxEvent } from "../jobs/outbox";
+import { availabilityReviewPolicy } from "../operating-policy/availability";
 import { runOperation } from "../operations";
 import { loadPublishedListings, termsFacts } from "../publication/presentation";
 import { nextReference } from "../references";
@@ -562,6 +562,12 @@ export async function confirmListingAvailability(
       if (!["available", "confirmation_required"].includes(listing.commercialState))
         throw new AppError("transition_denied");
       const now = new Date();
+      const reviewPolicy = await availabilityReviewPolicy(tx, listing.purpose, now);
+      if (reviewPolicy.status !== "known")
+        throw new AppError("validation_failed", {
+          fieldErrors: { evidence: ["review_interval_policy_unknown"] },
+        });
+      const reviewDueAt = new Date(now.getTime() + reviewPolicy.days * 86_400_000);
       await tx
         .update(listings)
         .set({
@@ -570,15 +576,16 @@ export async function confirmListingAvailability(
           availabilityConfirmedAt: now,
           availabilityConfirmedById: command.actor.id,
           freshnessState: "current_under_policy",
-          reviewDueAt: new Date(
-            now.getTime() + availabilityReviewIntervalDays[listing.purpose] * 86_400_000,
-          ),
+          reviewDueAt,
+          availabilityPolicySnapshot: reviewPolicy.snapshot,
           version: listing.version + 1,
         })
         .where(eq(listings.id, listing.id));
       await history(tx, command.actor, operationId, listing, "listing.availability.confirmed", {
         evidence,
         confirmedAt: now.toISOString(),
+        reviewDueAt: reviewDueAt.toISOString(),
+        operatingPolicySnapshot: reviewPolicy.snapshot,
       });
       return { reference: listing.reference, version: listing.version + 1 };
     },

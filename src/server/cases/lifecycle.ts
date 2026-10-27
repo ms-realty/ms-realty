@@ -46,6 +46,7 @@ import {
 } from "../proposals/shared";
 import { partySnapshotsSchema } from "../proposals/terms";
 import { currentSellerEvidence } from "../publication/seller-evidence";
+import { serviceCaseCoverage } from "../service-intake/scope";
 import {
   allow,
   commandEnvelope,
@@ -652,6 +653,12 @@ export async function transitionCaseStage(
       await accountableStaff(ctx.tx, row.ownerId);
       const to = input.stage as CaseStage,
         rules = caseStageTransitions(row.kind);
+      if (
+        row.kind === "service_intake" &&
+        to === "consultation" &&
+        !(await serviceCaseCoverage(ctx.tx, row.serviceContext)).current
+      )
+        throw new AppError("approval_stale");
       allow(rules.machine.check(row.stage as CaseStage, to));
       const [brief] = await ctx.tx
         .select()

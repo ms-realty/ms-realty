@@ -1,0 +1,178 @@
+{
+  "kind": "B10 local synthetic qualification",
+  "source": {
+    "base": "1d950597c37146d93045b318116998e12f4e7856",
+    "commit": "ac2788be475ae6471c8d3f7e8eedebb87cf447b1",
+    "tree": "f377e7aca8aabd0b0799d0df7cf5ebd9b629f327",
+    "branch": "codex/msr-agency-obligations",
+    "checkpoints": ["be25f891", "5fc7d02a", "4ba6018c", "ac2788be"]
+  },
+  "scope": [
+    "Actual-source partner/referral terms with optional Case and guarded source/qualification/history",
+    "Property-only staff photography without buyer Case or Interest, with current booking controls and native recovery",
+    "Completed-Case exact review wording, separate native/document consent, qualified verification, live publication and withdrawal gates"
+  ],
+  "schema": {
+    "migration": "db/migrations/0036_agency_obligations.sql",
+    "sha256": "65b4a5e36f7ec85a98c313a9bbdad9c809bfcd0beedc9b9d618353a5c839644b",
+    "canonicalMetadataChanged": false,
+    "testJournal": "Copied canonical0-34 journal plus migration36, isolated under output/agency-obligations/migrations",
+    "integrationHold": "Root owns canonical35 to36 metadata integration and privacy classifications; no hand-authored canonical snapshot or journal."
+  },
+  "build": {
+    "output": ".next-agency-obligations",
+    "port": 3163,
+    "buildId": "X0YQFK_aFv5KFvIIIQ3TV",
+    "sourceNote": "Final product content equals the fresh build input. Source was frozen during build and browser execution; only a test assertion changed between the fresh build and final all-profile pass."
+  },
+  "checks": [
+    {
+      "name": "unit",
+      "command": "npx vitest run src/features/agency-obligations/actions.test.ts src/features/cases/native-form-identity.test.tsx src/ui/form/disclosure.test.tsx src/i18n/messages.test.ts src/i18n/copy-guard.test.ts src/features/content/forms.test.tsx src/features/content/screens-labels.test.tsx src/features/appointments/calendar-view.test.tsx src/features/appointments/calendar-period.test.ts src/features/shell/navigation.test.ts src/domain/appointment.test.ts src/domain/time.test.ts src/server/appointments/calendar-contract.test.ts",
+      "files": 13,
+      "tests": 196,
+      "exitCode": 0,
+      "log": "output/agency-obligations/unit-final.log",
+      "logSha256": "ff04958b1592b5bb8fe5d06a05006d3a5a20e481dac23f20968296f27dae63d7"
+    },
+    {
+      "name": "disposable-postgres-integration",
+      "command": "MIGRATIONS_FOLDER=\"$PWD/output/agency-obligations/migrations\" TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx vitest run --project integration src/server/agency-obligations/obligations.int.test.ts src/server/appointments/photography.int.test.ts src/server/appointments/appointments.int.test.ts src/server/appointments/calendar.int.test.ts src/server/appointments/host-handover.int.test.ts src/server/content/commands.int.test.ts src/server/content/locale-commands.int.test.ts src/server/reports/queries.int.test.ts",
+      "files": 8,
+      "tests": 66,
+      "exitCode": 0,
+      "log": "output/agency-obligations/integration-candidate.log",
+      "logSha256": "72991ee05cbb8f79a340f3cc6c033e60941177a588acbc5018a77904b515cfd1"
+    },
+    {
+      "name": "types",
+      "command": "NEXT_DIST_DIR=.next-agency-obligations npx next typegen && npx tsc --noEmit",
+      "exitCode": 0,
+      "log": "output/agency-obligations/types-final.log",
+      "logSha256": "adba4af9194e10e47dda75ff0fd0f8c2b756474896d0eba5612799c527ff372a"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "exitCode": 0,
+      "warnings": 4,
+      "informationDiagnostics": 71,
+      "log": "output/agency-obligations/lint-final.log",
+      "logSha256": "139901dda4623a960504f087e1b2f7a93c791f29c2b6af8f42072b7aa4c6a834"
+    },
+    {
+      "name": "fresh-production-build",
+      "command": "MIGRATIONS_FOLDER=\"$PWD/output/agency-obligations/migrations\" NEXT_DIST_DIR=.next-agency-obligations E2E_PORT=3163 TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx playwright test e2e/agency-obligations.spec.ts --workers=2",
+      "buildPassed": true,
+      "journeyRunPassed": false,
+      "log": "output/agency-obligations/browser-seventh.log",
+      "note": "Fresh product build passed. All photo paths reached valid native receipt and actual visible cancellation field errors. The newly added test expected unused generic copy rather than the actual linked field error.",
+      "logSha256": "58bec75b513c8689cd9b6e95a4ee77e5938c90f186d752385956a7c60021227a"
+    },
+    {
+      "name": "all-browser-profiles",
+      "command": "MIGRATIONS_FOLDER=\"$PWD/output/agency-obligations/migrations\" NEXT_DIST_DIR=.next-agency-obligations E2E_PORT=3163 E2E_SKIP_BUILD=1 TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx playwright test e2e/agency-obligations.spec.ts --workers=2",
+      "tests": 12,
+      "exitCode": 0,
+      "profiles": ["chromium-desktop", "chromium-mobile", "webkit-mobile"],
+      "javascript": [true, false],
+      "log": "output/agency-obligations/browser-eighth.log",
+      "artifacts": "test-results/a713cd00c6d14890840d303314a36d98",
+      "note": "Reused the exact fresh product build from the prior run. Only the test assertion changed to the actual linked field error and aria-invalid; no product source changed. Includes native pointer and keyboard controls, 320px overflow, populated desktop/390px/320px screenshots and enhanced WCAG Axe checks.",
+      "logSha256": "4c17d198c9f95c742677622e58085325f20490aec9ce36e4435ff39eebc9b38a"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-par-d14a8-tography-without-JavaScript-chromium-desktop/photography-workbench-native-320.png",
+      "sha256": "5f4529ad7f08525243b159a61899bd09fee50cce6792dbe442f751b1933b2487"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-par-d14a8-tography-without-JavaScript-chromium-desktop/photography-arrange-native-desktop.png",
+      "sha256": "ec211da17323b43d25546bdd208873d3e6594ef12a19f8ad8c958f9228de5247"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-par-d14a8-tography-without-JavaScript-chromium-desktop/photography-validation-native-320.png",
+      "sha256": "a11829e770540e43ee5c37a43e6448c917d5e7356ac2800aa70d9805ee09480f"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-par-d14a8-tography-without-JavaScript-chromium-desktop/partner-held-native-320.png",
+      "sha256": "69130519fa10ada42b9658684605eefb6a06fb4083b799715e4db0fc61312186"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-par-d14a8-tography-without-JavaScript-chromium-desktop/partner-accepted-native-desktop.png",
+      "sha256": "5d7b284014c0b9408e861755566885774ad832d92effb933dae8ed4cde66da41"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-exa-ab007-thdrawal-without-JavaScript-chromium-desktop/review-qualified-populated.png",
+      "sha256": "ca4c1029b16b3603ae823c75e4c99d22147b4816b58f9739bcfe92ed94b1eaa6"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-exa-ab007-thdrawal-without-JavaScript-chromium-desktop/review-qualified-320.png",
+      "sha256": "ddd30395d6be2e62a98de1d75baf819885ae718b5383246b737c82ad812e94fd"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-exa-ab007-thdrawal-without-JavaScript-chromium-desktop/review-withdrawn-held-320.png",
+      "sha256": "a6faa580b2a3d16bfee47fc31b38479662ced51a8a9fc0a09db1f5fa7f6b21be"
+    },
+    {
+      "path": "test-results/a713cd00c6d14890840d303314a36d98/agency-obligations-B10-exa-ab007-thdrawal-without-JavaScript-chromium-mobile/review-qualified-populated.png",
+      "sha256": "0d7e9d00aa839e00fa1d3c1c761d86773e3ee980bc6d123cbfbbf1fce67e90a7"
+    }
+  ],
+  "retainedFailures": [
+    {
+      "log": "output/agency-obligations/browser-first.log",
+      "sha256": "0748fa2c7cbb5a9519d6dc4ceac8b372043c9f405f037e1f5c8518d3334495c6",
+      "artifacts": null,
+      "finding": "Fresh build passed; test discovery rejected missing JSON import attributes. No browser journey ran."
+    },
+    {
+      "log": "output/agency-obligations/browser-second.log",
+      "sha256": "10a476ac60a796cb0acbba342f356c0989f0871f507f6d403e3356eb6fdccf21",
+      "artifacts": "test-results/9e7a448381284109b8eff02ceacb3ece",
+      "finding": "Invalid synthetic Listing reference and premature CMS navigation assertions. Run interrupted after repeated failure; original exit130 retained."
+    },
+    {
+      "log": "output/agency-obligations/browser-third.log",
+      "sha256": "fd47f76ef8fb1bd061a3d57884d8a3aa7ccc4065c8532fa9066969b8f9f22b45",
+      "artifacts": "test-results/d50204bf08754d8482274682badf9b79",
+      "finding": "Nine passed; three native flows exposed fixed mobile navigation intercepting a real checkbox. Shared scroll clearance was corrected."
+    },
+    {
+      "log": "output/agency-obligations/browser-fifth.log",
+      "sha256": "e7e68b6efd0f697264e9c57cc30c56198e8188129a7aaccae6764042bc85e254",
+      "artifacts": "test-results/7aa08c6e84f34a3d88009c290751b627",
+      "finding": "Fresh photo hierarchy build passed; tests incorrectly expected a redirect instead of the shared inline receipt."
+    },
+    {
+      "log": "output/agency-obligations/browser-sixth.log",
+      "sha256": "c9d9ad1395ed5fea96f3996b99d71e8bd9d95921810c3f69310627f4c93aada1",
+      "artifacts": "test-results/3058f0a81c774ed89fc36f0423a59e41",
+      "finding": "Nine passed; native photo confirmation committed but removed its form hook and lost restored receipt. Stable commandAvailable mounting and state-aware disclosure corrected it."
+    },
+    {
+      "log": "output/agency-obligations/browser-seventh.log",
+      "sha256": "58bec75b513c8689cd9b6e95a4ee77e5938c90f186d752385956a7c60021227a",
+      "artifacts": "test-results/610a3af5624942f5aa5543e185f4704d",
+      "finding": "Fresh build and native receipt recovery passed; new negative test expected generic copy absent from the shared linked field-error rendering. Test-only assertion corrected before the passing final run."
+    }
+  ],
+  "procedure": "docs/operations/agency-obligations.md",
+  "boundaries": {
+    "independentReview": "Pending root source and actual screenshot review; local test success is not owner workflow acceptance.",
+    "identityMerge": "Retained original Case/document/contact reads remain scoped; positive terms use and author consent never transfer to a canonical identity. Standing text-only terms without a preserved ordinary bridge require a B04 merge hold and manual decision.",
+    "privacy": "Public review origin reads honor durable client_access restrictions on the original author. Retained history is not new author consent.",
+    "cache": "Withdrawal and wording replacement restrict origin and existing dependent locale editions in the transaction. External edge purge is not proven.",
+    "humanInputs": [
+      "Actual reviewed partner terms and counterparty acceptance",
+      "Actual qualified professional conclusions",
+      "Actual approved review-publication-consent policy and eligible author consent",
+      "Actual property access and host external-calendar checks",
+      "Actual media rights, asset review and publication decisions",
+      "Actual owner-report audience, content, interval, transport exercise and next owned commitment"
+    ],
+    "publication": "No push, PR creation, CI execution, deployment or provider mutation performed by this worker.",
+    "launchAuthority": "production/data/launch-readiness.json and production/data/launch-input-checklist.md unchanged from base; no R00-R12 or launch acceptance claimed."
+  }
+}

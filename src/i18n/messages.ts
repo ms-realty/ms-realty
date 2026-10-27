@@ -3,7 +3,9 @@
 // match the files on disk and that every locale has the source's keys.
 //   messages/<locale>/<namespace>.json        public and client hosts, seven locales
 //   messages/staff/<locale>/<namespace>.json  staff host only, bg/en/ru
+
 import type a11y from "../../messages/bg/a11y.json";
+import type caseReview from "../../messages/bg/caseReview.json";
 import type common from "../../messages/bg/common.json";
 import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
@@ -14,22 +16,30 @@ import type legacyArchive from "../../messages/bg/legacy-archive.json";
 import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
 import type privacy from "../../messages/bg/privacy.json";
+import type privacyExportClient from "../../messages/bg/privacy-export.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
 import type workflow from "../../messages/bg/workflow.json";
+import type agency from "../../messages/staff/bg/agency.json";
 import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
 import type duplicateMerge from "../../messages/staff/bg/duplicateMerge.json";
+import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
 import type operations from "../../messages/staff/bg/operations.json";
+import type privacyErasure from "../../messages/staff/bg/privacyErasure.json";
+import type privacyExportStaff from "../../messages/staff/bg/privacyExport.json";
+import type privacyGovernance from "../../messages/staff/bg/privacyGovernance.json";
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
+import type settingsScopes from "../../messages/staff/bg/settingsScopes.json";
 import type tools from "../../messages/staff/bg/tools.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
 import type workspaceStates from "../../messages/staff/bg/workspaceStates.json";
 import { isStaffLocale, type PublicLocale } from "./config";
 
 export const publicNamespaces = [
+  "caseReview",
   "a11y",
   "common",
   "discovery",
@@ -41,12 +51,14 @@ export const publicNamespaces = [
   "map",
   "nav",
   "privacy",
+  "privacy-export",
   "server",
   "states",
   "workflow",
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
 export const staffNamespaces = [
+  "agency",
   "duplicateMerge",
   "calendar",
   "caseDirectory",
@@ -57,9 +69,15 @@ export const staffNamespaces = [
   "operations",
   "dataReview",
   "auditHistory",
+  "privacyExport",
+  "privacyErasure",
+  "operatingPolicy",
+  "settingsScopes",
+  "privacyGovernance",
 ] as const;
 
 export interface PublicMessages {
+  caseReview: typeof caseReview;
   a11y: typeof a11y;
   common: typeof common;
   discovery: typeof discovery;
@@ -71,16 +89,23 @@ export interface PublicMessages {
   map: typeof map;
   nav: typeof nav;
   privacy: typeof privacy;
+  "privacy-export": typeof privacyExportClient;
   server: typeof server;
   states: typeof states;
   workflow: typeof workflow;
 }
 export interface StaffMessages {
+  agency: typeof agency;
   duplicateMerge: typeof duplicateMerge;
   calendar: typeof calendar;
   caseDirectory: typeof caseDirectory;
   auditHistory: typeof auditHistory;
   operations: typeof operations;
+  operatingPolicy: typeof operatingPolicy;
+  settingsScopes: typeof settingsScopes;
+  privacyGovernance: typeof privacyGovernance;
+  privacyExport: typeof privacyExportStaff;
+  privacyErasure: typeof privacyErasure;
   dataReview: typeof dataReview;
   serverStaff: typeof serverStaff;
   tools: typeof tools;

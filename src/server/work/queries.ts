@@ -20,6 +20,7 @@ import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { normalizePhone } from "../inquiries/intake";
 import { containsSearchControl } from "../search/controls";
+import { serviceCaseCoverage } from "../service-intake/scope";
 import { ownerNeedsCoverage } from "./coverage-policy";
 import {
   effectiveTaskDue,
@@ -314,6 +315,11 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
     .limit(200);
   return {
     inquiry: row,
+    serviceCurrent:
+      row.purpose === "service_consultation"
+        ? (await serviceCaseCoverage(db, (row.context as { service?: unknown } | null)?.service))
+            .current
+        : undefined,
     duplicateCandidates,
     ownerName: owner?.name ?? null,
     needsCoverage: owner?.needsCoverage ?? true,

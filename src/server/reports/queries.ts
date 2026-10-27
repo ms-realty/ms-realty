@@ -9,6 +9,7 @@ import {
   inquiries,
   listings,
   messages,
+  taskEffortEntries,
   tasks,
 } from "@/db/schema";
 import type { Capability, CapabilityGrant } from "@/domain/capabilities";
@@ -17,6 +18,7 @@ import { resolveGrants } from "../authz";
 import type { Database } from "../db";
 import { AppError } from "../errors";
 import { liveStaff, openTaskStates } from "../work/shared";
+import { maxStaffedResponses, summarizeStaffedResponses } from "./staffed-response";
 
 export type ReportPeriod = 7 | 30 | 90;
 export type ReportScope = "all" | "mine";
@@ -234,6 +236,7 @@ export async function readReports(
                     permitted(grants, "case.read", { type: "case", id: cases.id }) ?? sql`false`,
                     mine(appointments.hostId),
                     eq(appointments.state, "completed"),
+                    eq(appointments.purpose, "viewing"),
                     sql`${appointments.confirmedEndsAt} >= ${from.toISOString()}::timestamptz`,
                     lt(appointments.confirmedEndsAt, now),
                   ),
@@ -354,8 +357,81 @@ export async function readReports(
               ),
             )
         : [];
+      // Read only the complete, authorized eligible cohort. Larger cohorts are held rather
+      // than reporting a biased median from the first records returned by a LIMIT.
+      const staffedObservations =
+        inquiry && response && response.responded <= maxStaffedResponses
+          ? await tx
+              .select({
+                id: inquiries.id,
+                reference: inquiries.reference,
+                createdAt: inquiries.createdAt,
+                firstResponseAt: sql<Date>`${inquiries.firstResponseAt}`.mapWith(
+                  (value) => new Date(value),
+                ),
+                operatingPolicySnapshot: inquiries.operatingPolicySnapshot,
+              })
+              .from(inquiries)
+              .where(
+                and(
+                  inquiry,
+                  mine(inquiries.ownerId),
+                  sql`${inquiries.createdAt} >= ${from.toISOString()}::timestamptz`,
+                  lt(inquiries.createdAt, now),
+                  sql`${inquiries.firstResponseAt} >= ${inquiries.createdAt}`,
+                  sql`${inquiries.firstResponseAt} <= ${now.toISOString()}::timestamptz`,
+                ),
+              )
+              .orderBy(asc(inquiries.createdAt), asc(inquiries.id))
+              .limit(maxStaffedResponses)
+          : [];
+      const staffedResponse = summarizeStaffedResponses(
+        staffedObservations,
+        response?.responded ?? null,
+      );
+      const effortWhere = task
+        ? and(
+            task,
+            mine(tasks.ownerId),
+            eq(taskEffortEntries.action, "record"),
+            sql`${taskEffortEntries.createdAt} >= ${from.toISOString()}::timestamptz`,
+            lt(taskEffortEntries.createdAt, now),
+            sql`not exists (select 1 from task_effort_entries effort_correction where effort_correction.voids_id = ${taskEffortEntries.id})`,
+          )
+        : null;
+      const [effort] = effortWhere
+        ? await tx
+            .select({
+              observations: sql<number>`count(*)`.mapWith(Number),
+              correctionMinutes:
+                sql<number>`coalesce(sum(${taskEffortEntries.minutes}) filter (where ${taskEffortEntries.category} = 'correction'), 0)`.mapWith(
+                  Number,
+                ),
+              reentryMinutes:
+                sql<number>`coalesce(sum(${taskEffortEntries.minutes}) filter (where ${taskEffortEntries.category} = 'reentry'), 0)`.mapWith(
+                  Number,
+                ),
+            })
+            .from(taskEffortEntries)
+            .innerJoin(tasks, eq(tasks.id, taskEffortEntries.taskId))
+            .where(effortWhere)
+        : [];
+      const effortRows =
+        effortWhere && effort && effort.observations > 0
+          ? await tx
+              .selectDistinctOn([tasks.id], {
+                id: tasks.id,
+                reference: tasks.title,
+                path: sql<string>`'/tasks/' || ${tasks.id}::text || '/effort'`,
+              })
+              .from(taskEffortEntries)
+              .innerJoin(tasks, eq(tasks.id, taskEffortEntries.taskId))
+              .where(effortWhere)
+              .orderBy(asc(tasks.id))
+              .limit(maxRows + 1)
+          : [];
       return {
-        definition: "O22-v1",
+        definition: "O22-v3",
         filter,
         from,
         asOf: now,
@@ -364,12 +440,33 @@ export async function readReports(
         response: response
           ? {
               ...response,
-              missing: response.received - response.responded,
+              missing: response.received - response.responded - response.invalid,
               smallSample: response.responded < 5,
             }
           : null,
-        staffedResponse: { state: "unknown" as const, reason: "approved_hours_policy_not_bound" },
-        correctionEffort: { state: "unknown" as const, reason: "effort_events_not_recorded" },
+        staffedResponse: {
+          ...staffedResponse,
+          rows: staffedObservations
+            .slice(0, maxRows)
+            .map(({ id, reference }) => ({ id, reference, path: `/inquiries/${id}` })),
+          hasMore: staffedObservations.length > maxRows,
+        },
+        correctionEffort:
+          effort && effort.observations > 0
+            ? {
+                state: "observed" as const,
+                ...effort,
+                rows: effortRows.slice(0, maxRows),
+                hasMore: effortRows.length > maxRows,
+              }
+            : {
+                state: effort ? ("unobserved" as const) : ("denied" as const),
+                rows: [],
+                hasMore: false,
+                observations: null,
+                correctionMinutes: null,
+                reentryMinutes: null,
+              },
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

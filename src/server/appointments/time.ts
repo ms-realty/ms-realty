@@ -1,4 +1,5 @@
 // Explicit local offset disambiguates the autumn fold; round-trip rejects the spring gap.
+import { calendarStaffedDuration } from "@/domain/operating-policy";
 export const appointmentTimezone = "Europe/Sofia";
 export function localParts(instant: Date) {
   return Object.fromEntries(
@@ -24,6 +25,10 @@ export function sofiaInstant(value: string): Date | null {
   return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}` === value.slice(0, 16) ? date : null;
 }
 export function inServiceHours(start: Date, end: Date, value: unknown): boolean {
+  if (value && typeof value === "object" && "kind" in value) {
+    const duration = calendarStaffedDuration(value, start, end);
+    return duration.status === "known" && duration.milliseconds === end.getTime() - start.getTime();
+  }
   const first = localParts(start);
   const last = localParts(end);
   if (first.day !== last.day || first.month !== last.month || first.year !== last.year)
@@ -64,6 +69,7 @@ export function calendarFile(input: {
   uid: string;
   sequence: number;
   reference: string;
+  purpose?: "viewing" | "photography";
   start: Date;
   end: Date;
   cancelled: boolean;
@@ -81,7 +87,7 @@ export function calendarFile(input: {
     `DTSTAMP:${stamp(input.updatedAt)}`,
     `DTSTART:${stamp(input.start)}`,
     `DTEND:${stamp(input.end)}`,
-    `SUMMARY:${escapeText(`MS Realty · ${input.reference}`)}`,
+    `SUMMARY:${escapeText(`MS Realty · ${input.purpose === "photography" ? "Photography · " : ""}${input.reference}`)}`,
     `STATUS:${input.cancelled ? "CANCELLED" : "CONFIRMED"}`,
   ];
   if (input.invitation) {
