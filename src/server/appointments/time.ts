@@ -69,6 +69,7 @@ export function calendarFile(input: {
   uid: string;
   sequence: number;
   reference: string;
+  purpose?: "viewing" | "photography";
   start: Date;
   end: Date;
   cancelled: boolean;
@@ -86,7 +87,7 @@ export function calendarFile(input: {
     `DTSTAMP:${stamp(input.updatedAt)}`,
     `DTSTART:${stamp(input.start)}`,
     `DTEND:${stamp(input.end)}`,
-    `SUMMARY:${escapeText(`MS Realty · ${input.reference}`)}`,
+    `SUMMARY:${escapeText(`MS Realty · ${input.purpose === "photography" ? "Photography · " : ""}${input.reference}`)}`,
     `STATUS:${input.cancelled ? "CANCELLED" : "CONFIRMED"}`,
   ];
   if (input.invitation) {

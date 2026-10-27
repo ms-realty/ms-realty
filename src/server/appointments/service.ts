@@ -17,8 +17,9 @@ import {
 } from "@/db/schema";
 import { appointmentMachine, guardAppointmentTransition } from "@/domain/appointment";
 import type { PublicLocale } from "@/i18n/config";
+import { agencyPendingFence } from "../agency-obligations/shared";
 import { requireAvailableStaff } from "../auth/availability";
-import type { Session } from "../auth/sessions";
+import { requireFreshAuth, type Session } from "../auth/sessions";
 import { assertCan, can, resolveGrants } from "../authz";
 import {
   bumpCase,
@@ -39,7 +40,9 @@ import { appointmentCoverageAt, ownerNeedsCoverage } from "../work/coverage-poli
 import { allow, commandEnvelope, openAppointmentStates, parseInput, version } from "../work/shared";
 import { readHostReceivers } from "./host-receivers";
 import { readAppointmentListing } from "./listing-context";
+import { propertyHostCan, propertyWorkFor } from "./property-work";
 import { appointmentTimezone, calendarFile, inServiceHours, sofiaInstant } from "./time";
+import { staffAppointmentVisibility } from "./visibility";
 
 const requestSchema = z.object({
   ...commandEnvelope,
@@ -74,21 +77,26 @@ export async function appointmentFor(
   const live = await liveUser(db, session);
   const query = db.select().from(appointments).where(eq(appointments.id, id));
   const [row] = await (lock ? query.for("update") : query);
-  if (!row?.caseId) throw new AppError("not_found");
-  await caseFor(db, live, row.caseId);
+  if (!row) throw new AppError("not_found");
+  if (row.purpose === "photography") await propertyWorkFor(db, live, row);
+  else {
+    if (!row.caseId) throw new AppError("not_found");
+    await caseFor(db, live, row.caseId);
+  }
   const resource = {
     type: "appointment",
     id,
-    caseId: row.caseId,
+    caseId: row.caseId ?? undefined,
     audience: "case_participants" as const,
   };
-  if (live.account.kind === "staff" || write)
+  if (row.purpose !== "photography" && (live.account.kind === "staff" || write))
     await assertCan(
       db,
       live.actor,
       live.account.kind === "staff" ? "appointment.manage" : "portal.appointment.request",
       resource,
     );
+  if (write && live.account.kind === "staff") requireFreshAuth(live);
   if (live.account.kind === "client") {
     const [principal] = await db
       .select({ partyId: principals.partyId })
@@ -120,6 +128,8 @@ export async function recordAppointmentVersion(
     versionNumber: row.version,
     snapshot: {
       state: row.state,
+      purpose: row.purpose,
+      photographyScope: row.photographyScope,
       proposedStartsAt: row.proposedStartsAt?.toISOString(),
       proposedEndsAt: row.proposedEndsAt?.toISOString(),
       confirmedStartsAt: row.confirmedStartsAt?.toISOString(),
@@ -135,6 +145,93 @@ export async function recordAppointmentVersion(
     },
     actorKind: session.actor.kind,
     actorId: session.actor.id,
+  });
+}
+
+const photographySchema = z.object({
+  ...commandEnvelope,
+  preferredWindow: z.string().trim().min(3).max(500),
+  photographyScope: z.string().trim().min(10).max(2000),
+  reviewed: z.literal(true),
+});
+
+/** O10/F23 property preparation, with no customer Case, Interest or implied media license. */
+export async function requestPhotography(db: Executor, session: Session, raw: unknown) {
+  const input = parseInput(photographySchema, raw);
+  const authorize = async (tx: Executor, lock = false) => {
+    const live = await liveUser(tx, session);
+    if (live.account.kind !== "staff") throw new AppError("not_found");
+    requireFreshAuth(live);
+    const query = tx.select().from(listings).where(eq(listings.id, input.id));
+    const [listing] = await (lock ? query.for("update") : query);
+    if (!listing) throw new AppError("not_found");
+    const context = await propertyWorkFor(tx, live, {
+      listingId: listing.id,
+      propertyId: listing.propertyId,
+    });
+    if (context.property.country !== "BG") throw new AppError("transition_denied");
+    await requireAvailableStaff(tx, live.account.id, lock);
+    return { live, listing };
+  };
+  await authorize(db);
+  return db.transaction(async (tx) => {
+    const { live } = await authorize(tx, true);
+    await agencyPendingFence(
+      tx,
+      live,
+      "appointment.photography.request",
+      { type: "listing", id: input.id },
+      input.operationId,
+    );
+    return runOperation(
+      tx,
+      {
+        actor: session.actor,
+        type: "appointment.photography.request",
+        idempotencyKey: input.operationId,
+        requestHash: hashRequest(input),
+        expectedVersion: input.expectedVersion,
+        subject: { type: "listing", id: input.id },
+      },
+      async (ctx) => {
+        const { live, listing } = await authorize(ctx.tx, true);
+        version(listing, input.expectedVersion);
+        const [row] = await ctx.tx
+          .insert(appointments)
+          .values({
+            reference: await nextReference(ctx.tx, "appointment"),
+            purpose: "photography",
+            format: "in_person",
+            photographyScope: input.photographyScope,
+            listingId: listing.id,
+            propertyId: listing.propertyId,
+            hostId: live.account.id,
+            timezone: appointmentTimezone,
+            requestedWindows: [{ text: input.preferredWindow, requestedById: live.account.id }],
+            operatingPolicySnapshot: await captureOperatingPolicy(ctx.tx),
+            icsUid: `${randomUUID()}@appointments.ms-realty.com`,
+          })
+          .returning();
+        if (!row) throw new Error("Photography appointment insert failed");
+        await ctx.tx
+          .insert(appointmentParticipants)
+          .values({ appointmentId: row.id, principalId: live.account.id, role: "host" });
+        await recordAppointmentVersion(ctx.tx, row, live);
+        await caseEvent(
+          ctx,
+          "appointment",
+          row.id,
+          "appointment.photography.requested",
+          "appointment.manage",
+        );
+        return {
+          id: row.id,
+          reference: row.reference,
+          version: row.version,
+          recordedAt: new Date().toISOString(),
+        };
+      },
+    );
   });
 }
 
@@ -314,9 +411,12 @@ export async function arrangeAppointment(
           .from(listings)
           .where(eq(listings.id, row.listingId))
           .for("share");
-        const [published] = listing
-          ? await loadPublishedListings(ctx.tx, { ids: [listing.id] }, "bg")
-          : [];
+        const [published] =
+          listing && row.purpose === "viewing"
+            ? await loadPublishedListings(ctx.tx, { ids: [listing.id] }, "bg")
+            : [];
+        const propertyWork =
+          row.purpose === "photography" ? await propertyWorkFor(ctx.tx, live, row) : null;
         const available = Boolean(
           published &&
             listing?.commercialState === "available" &&
@@ -325,24 +425,37 @@ export async function arrangeAppointment(
             listing.reviewDueAt.getTime() > Date.now() &&
             listing.freshnessState === "current_under_policy",
         );
-        const hostAvailable = await can(
-          ctx.tx,
-          { kind: "staff", id: row.hostId },
-          "appointment.manage",
-          { type: "appointment", caseId: row.caseId ?? undefined, audience: "internal" },
-        );
-        const participants = await ctx.tx
-          .select({ id: appointmentParticipants.id })
-          .from(appointmentParticipants)
-          .innerJoin(
-            caseParticipants,
-            and(
-              eq(caseParticipants.partyId, appointmentParticipants.partyId),
-              eq(caseParticipants.caseId, row.caseId as string),
-              liveParticipation(),
-            ),
-          )
-          .where(eq(appointmentParticipants.appointmentId, row.id));
+        const hostAvailable =
+          row.purpose === "photography"
+            ? await propertyHostCan(ctx.tx, row.hostId, row)
+            : await can(ctx.tx, { kind: "staff", id: row.hostId }, "appointment.manage", {
+                type: "appointment",
+                caseId: row.caseId ?? undefined,
+                audience: "internal",
+              });
+        const participants =
+          row.purpose === "photography"
+            ? await ctx.tx
+                .select({ id: appointmentParticipants.id })
+                .from(appointmentParticipants)
+                .where(
+                  and(
+                    eq(appointmentParticipants.appointmentId, row.id),
+                    eq(appointmentParticipants.principalId, row.hostId),
+                  ),
+                )
+            : await ctx.tx
+                .select({ id: appointmentParticipants.id })
+                .from(appointmentParticipants)
+                .innerJoin(
+                  caseParticipants,
+                  and(
+                    eq(caseParticipants.partyId, appointmentParticipants.partyId),
+                    eq(caseParticipants.caseId, row.caseId as string),
+                    liveParticipation(),
+                  ),
+                )
+                .where(eq(appointmentParticipants.appointmentId, row.id));
         const [policy] = await ctx.tx
           .select()
           .from(servicePolicies)
@@ -402,6 +515,14 @@ export async function arrangeAppointment(
             "confirmed",
             {
               slot,
+              purpose: row.purpose === "photography" ? "photography" : "viewing",
+              photographyScopeReviewed: Boolean(
+                row.photographyScope && row.photographyScope.length >= 10,
+              ),
+              propertyWorkContextConfirmed: Boolean(
+                propertyWork?.property.country === "BG" &&
+                  propertyWork.listing.propertyId === row.propertyId,
+              ),
               hostAvailable,
               propertyAccess: input.propertyAccessConfirmed ? "confirmed" : "unknown",
               participantCount: participants.length,
@@ -574,9 +695,11 @@ export async function readAppointment(
   locale?: PublicLocale,
 ) {
   const { row, live, resource } = await appointmentFor(db, session, id);
-  const listing = locale
-    ? await readAppointmentListing(db, resource.caseId, row.interestId, locale)
-    : null;
+  const propertyWork = row.purpose === "photography" ? await propertyWorkFor(db, live, row) : null;
+  const listing =
+    locale && row.caseId
+      ? await readAppointmentListing(db, row.caseId, row.interestId, locale)
+      : null;
   const [reservation] =
     live.actor.kind === "staff"
       ? await db
@@ -609,14 +732,16 @@ export async function readAppointment(
         .where(eq(principals.id, row.hostId))
     : [];
   const logisticsAllowed =
-    live.account.kind === "staff" ||
-    Boolean(
-      row.confirmedStartsAt &&
-        row.confirmedEndsAt &&
-        ["confirmed", "reschedule_requested"].includes(row.state) &&
-        Date.now() >= row.confirmedStartsAt.getTime() - 7 * 86400000 &&
-        Date.now() <= row.confirmedEndsAt.getTime() + 86400000,
-    );
+    row.purpose === "photography"
+      ? row.hostId === live.account.id
+      : live.account.kind === "staff" ||
+        Boolean(
+          row.confirmedStartsAt &&
+            row.confirmedEndsAt &&
+            ["confirmed", "reschedule_requested"].includes(row.state) &&
+            Date.now() >= row.confirmedStartsAt.getTime() - 7 * 86400000 &&
+            Date.now() <= row.confirmedEndsAt.getTime() + 86400000,
+        );
   const future =
     (!row.confirmedStartsAt || row.confirmedStartsAt.getTime() > Date.now()) &&
     (!row.proposedStartsAt || row.confirmedStartsAt || row.proposedStartsAt.getTime() > Date.now());
@@ -639,11 +764,20 @@ export async function readAppointment(
     : [];
   return {
     listing,
+    propertyWork: propertyWork
+      ? {
+          listingId: propertyWork.listing.id,
+          listingReference: propertyWork.listing.reference,
+          propertyReference: propertyWork.property.reference,
+        }
+      : null,
     appointment: {
       id: row.id,
       reference: row.reference,
       version: row.version,
       state: row.state,
+      purpose: row.purpose,
+      photographyScope: row.photographyScope,
       caseId: row.caseId,
       interestId: row.interestId,
       hostName: host?.name ?? null,
@@ -659,6 +793,7 @@ export async function readAppointment(
       icsSequence: row.icsSequence,
     },
     canManage: live.account.kind === "staff",
+    canDownload: row.purpose !== "photography" || row.hostId === live.account.id,
     needsCoverage: Boolean(coverage?.needed),
     canOfferHost,
     canWithdrawHost: Boolean(ownHost && row.pendingHostId),
@@ -682,12 +817,15 @@ export async function readAppointment(
     reservedInterval: reservation
       ? { startsAt: new Date(reservation.startsAt), endsAt: new Date(reservation.endsAt) }
       : null,
-    canRespond: await can(
-      db,
-      live.actor,
-      live.account.kind === "staff" ? "appointment.manage" : "portal.appointment.request",
-      resource,
-    ),
+    canRespond:
+      row.purpose === "photography"
+        ? true
+        : await can(
+            db,
+            live.actor,
+            live.account.kind === "staff" ? "appointment.manage" : "portal.appointment.request",
+            resource,
+          ),
   };
 }
 
@@ -718,8 +856,13 @@ export async function listAppointments(db: Executor, session: Session, caseId?: 
     .from(appointments)
     .where(
       and(
-        inArray(appointments.caseId, allowedCases),
-        appointmentScope,
+        live.account.kind === "staff"
+          ? await staffAppointmentVisibility(db, live)
+          : and(
+              eq(appointments.purpose, "viewing"),
+              inArray(appointments.caseId, allowedCases),
+              appointmentScope,
+            ),
         caseId ? eq(appointments.caseId, caseId) : undefined,
       ),
     )
@@ -738,7 +881,9 @@ export async function listAppointments(db: Executor, session: Session, caseId?: 
 }
 
 export async function exportAppointmentCalendar(db: Executor, session: Session, id: string) {
-  const { row } = await appointmentFor(db, session, id);
+  const { row, live } = await appointmentFor(db, session, id);
+  if (row.purpose === "photography" && row.hostId !== live.account.id)
+    throw new AppError("not_found");
   if (
     !row.confirmedStartsAt ||
     !row.confirmedEndsAt ||
@@ -749,6 +894,7 @@ export async function exportAppointmentCalendar(db: Executor, session: Session, 
     uid: row.icsUid,
     sequence: row.icsSequence,
     reference: row.reference,
+    purpose: row.purpose === "photography" ? "photography" : "viewing",
     start: row.confirmedStartsAt,
     end: row.confirmedEndsAt,
     cancelled: row.state === "cancelled",

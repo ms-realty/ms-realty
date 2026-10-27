@@ -10,9 +10,12 @@ import {
 } from "@/db/schema";
 import {
   type GovernanceDocument,
+  type GovernanceProcessingReview,
   governanceDocumentSchema,
+  governanceEditionSchema,
   governanceIssues,
   governanceKinds,
+  governanceReviewEdition,
   privacyGovernanceId,
 } from "@/domain/privacy-governance";
 import { recordAudit } from "../audit";
@@ -124,15 +127,17 @@ async function allocatedOwner(db: Executor, id: string, qualified = false) {
     ).has(id)
   );
 }
-function documentOf(row: { document: unknown; contentHash: string; kind?: string }) {
-  const parsed = governanceDocumentSchema.safeParse(row.document);
-  if (
-    !parsed.success ||
-    hashRequest(parsed.data) !== row.contentHash ||
-    (row.kind && parsed.data.kind !== row.kind)
-  )
+function editionOf(row: { document: unknown; contentHash: string; kind?: string }) {
+  const parsed = governanceEditionSchema.safeParse(row.document);
+  if (!parsed.success || hashRequest(parsed.data) !== row.contentHash)
     throw new AppError("outcome_unknown");
-  return parsed.data;
+  const edition = parsed.data,
+    document = "type" in edition ? edition.document : edition;
+  if (row.kind && document.kind !== row.kind) throw new AppError("outcome_unknown");
+  return { document, processingReview: "type" in edition ? edition.processingReview : null };
+}
+function documentOf(row: { document: unknown; contentHash: string; kind?: string }) {
+  return editionOf(row).document;
 }
 async function findRecord(db: Executor, id: string) {
   const [row] = await db
@@ -173,8 +178,9 @@ async function namedPeople(db: Executor, documents: GovernanceDocument[]) {
         .where(inArray(principals.id, ids))
     : [];
 }
-async function liveIssues(db: Executor, document: GovernanceDocument) {
+async function reviewContext(db: Executor, document: GovernanceDocument) {
   const issues = governanceIssues(document);
+  let processingReview: GovernanceProcessingReview | null = null;
   if (document.ownerId && !(await allocatedOwner(db, document.ownerId))) issues.push("ownerId");
   if (
     document.kind === "incident" &&
@@ -190,14 +196,45 @@ async function liveIssues(db: Executor, document: GovernanceDocument) {
       !linked ||
       !review ||
       review.recordVersion !== linked.version ||
+      review.contentHash !== linked.contentHash ||
       source?.kind !== "processing" ||
       source.lifecycle !== "active" ||
       governanceIssues(source).length ||
       (source.ownerId && !(await allocatedOwner(db, source.ownerId)))
     )
       issues.push("processingRecordId");
+    else {
+      documentOf(review);
+      processingReview = {
+        recordId: linked.id,
+        recordVersion: review.recordVersion,
+        contentHash: review.contentHash,
+      };
+    }
   }
-  return [...new Set(issues)];
+  return {
+    issues: [...new Set(issues)],
+    processingReview,
+    reviewHash: hashRequest(governanceReviewEdition(document, processingReview)),
+  };
+}
+function reviewIsCurrent(
+  version: number,
+  document: GovernanceDocument,
+  review: Awaited<ReturnType<typeof latestReview>>,
+  context: Awaited<ReturnType<typeof reviewContext>>,
+) {
+  if (!review || review.recordVersion !== version) return false;
+  const edition = editionOf(review);
+  // A legacy unbound processor review stays historical; it cannot attest a current source.
+  return (
+    document.kind !== "processor" ||
+    Boolean(
+      edition.processingReview &&
+        context.processingReview &&
+        review.contentHash === context.reviewHash,
+    )
+  );
 }
 export async function listGovernance(
   db: Executor,
@@ -222,13 +259,14 @@ export async function listGovernance(
   const items = await Promise.all(
     rows.slice(0, 40).map(async (row) => {
       const document = documentOf(row),
-        review = await latestReview(db, row.id);
+        review = await latestReview(db, row.id),
+        context = await reviewContext(db, document);
       return {
         id: row.id,
         version: row.version,
         document,
-        issues: await liveIssues(db, document),
-        reviewed: review?.recordVersion === row.version,
+        issues: context.issues,
+        reviewed: reviewIsCurrent(row.version, document, review, context),
         updatedAt: row.updatedAt,
       };
     }),
@@ -258,7 +296,8 @@ export async function readGovernance(
   const row = await findRecord(db, id);
   if (!row) throw new AppError("not_found");
   const document = documentOf(row),
-    review = await latestReview(db, id);
+    review = await latestReview(db, id),
+    context = await reviewContext(db, document);
   const history = await db
     .select({
       id: privacyGovernanceRevisions.id,
@@ -281,12 +320,13 @@ export async function readGovernance(
   return {
     ...row,
     document,
-    issues: await liveIssues(db, document),
+    issues: context.issues,
+    reviewHash: context.reviewHash,
     history: history.slice(0, 40),
     historyPage,
     historyMore: history.length > 40,
-    reviewed: review?.recordVersion === row.version,
-    latestReview: review ? { ...review, document: documentOf(review) } : null,
+    reviewed: reviewIsCurrent(row.version, document, review, context),
+    latestReview: review ? { ...review, ...editionOf(review) } : null,
     people: await namedPeople(db, [document, ...(reviewedDocument ? [reviewedDocument] : [])]),
   };
 }
@@ -317,7 +357,7 @@ export async function readGovernanceRevision(
     .where(eq(principals.id, row.actorId));
   return {
     ...row,
-    document,
+    ...editionOf(row),
     actorName: actor?.name ?? row.actorId,
     people: await namedPeople(db, [document]),
   };
@@ -335,13 +375,14 @@ async function recordRevision(
     document: GovernanceDocument;
     contentHash: string;
     action: "saved" | "reviewed";
+    processingReview?: GovernanceProcessingReview | null;
     note?: string;
   },
 ) {
   await ctx.tx.insert(privacyGovernanceRevisions).values({
     recordId: input.id,
     recordVersion: input.version,
-    document: input.document,
+    document: governanceReviewEdition(input.document, input.processingReview ?? null),
     contentHash: input.contentHash,
     action: input.action,
     note: input.note ?? null,
@@ -448,21 +489,30 @@ export async function reviewGovernance(db: Executor, session: Session, raw: Revi
       if (!row) throw new AppError("not_found");
       version(row, input.expectedVersion);
       const document = documentOf(row);
-      if (row.contentHash !== input.expectedHash) throw new AppError("approval_stale");
       if (document.kind === "incident")
         await assertCan(ctx.tx, current.actor, "claim.approve", governanceResource);
-      const issues = await liveIssues(ctx.tx, document);
-      if (issues.length)
-        throw new AppError("validation_failed", {
-          fieldErrors: Object.fromEntries(issues.map((key) => [key, ["review_evidence_required"]])),
-        });
-      // Reviewed processing is a dependency: its concurrent change must settle before this review.
+      // Hold the exact processing edition until its bound processor review commits.
       if (document.kind === "processor" && document.processingRecordId) {
+        // Only processing records can be dependencies; invalid reciprocal processor links
+        // must fail before attempting to acquire each other's record locks.
+        const linked = await findRecord(ctx.tx, document.processingRecordId);
+        if (linked?.kind !== "processing")
+          throw new AppError("validation_failed", {
+            fieldErrors: { processingRecordId: ["review_evidence_required"] },
+          });
         await lock(ctx.tx, document.processingRecordId);
-        if ((await liveIssues(ctx.tx, document)).length) throw new AppError("approval_stale");
       }
+      const context = await reviewContext(ctx.tx, document);
+      if (context.reviewHash !== input.expectedHash) throw new AppError("approval_stale");
+      if (context.issues.length)
+        throw new AppError("validation_failed", {
+          fieldErrors: Object.fromEntries(
+            context.issues.map((key) => [key, ["review_evidence_required"]]),
+          ),
+        });
       const latest = await latestReview(ctx.tx, input.id);
-      if (latest?.recordVersion === row.version) throw new AppError("transition_denied");
+      if (reviewIsCurrent(row.version, document, latest, context))
+        throw new AppError("transition_denied");
       const revision = row.version + 1,
         now = new Date();
       await ctx.tx
@@ -473,14 +523,16 @@ export async function reviewGovernance(db: Executor, session: Session, raw: Revi
         id: input.id,
         version: revision,
         document,
-        contentHash: row.contentHash,
+        contentHash: context.reviewHash,
         action: "reviewed",
+        processingReview: context.processingReview,
         note: input.note,
       });
       return {
         id: input.id,
         version: revision,
         contentHash: row.contentHash,
+        reviewHash: context.reviewHash,
         recordedAt: now.toISOString(),
       };
     },

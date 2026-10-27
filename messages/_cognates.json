@@ -67,7 +67,13 @@
     "workspace.personalSettings.title": "Настройки",
     "dataReview.contentLocales.approved": "Одобрено",
     "operations.businessReports.unknown": "Неизвестно",
-    "duplicateMerge.fields.familyName": "Фамилия"
+    "duplicateMerge.fields.familyName": "Фамилия",
+    "calendar.states.requested": "Заявка",
+    "calendar.requestsShort": "Заявки",
+    "discovery.serviceIntake.location": "Местоположение",
+    "operations.serviceIntake.topic": "Тема",
+    "operations.serviceIntake.reason": "Причина",
+    "operations.serviceIntake.version": "Версия"
   },
   "de": {
     "discovery.hotel": "Hotel",

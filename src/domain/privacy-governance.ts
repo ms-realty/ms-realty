@@ -83,6 +83,41 @@ export const governanceDocumentSchema = z.discriminatedUnion("kind", [
 ]);
 export type GovernanceDocument = z.infer<typeof governanceDocumentSchema>;
 
+export const governanceProcessingReviewSchema = z
+  .object({
+    recordId: z.uuid(),
+    recordVersion: z.number().int().positive().safe(),
+    contentHash: z.string().regex(/^[a-f0-9]{64}$/),
+  })
+  .strict();
+export type GovernanceProcessingReview = z.infer<typeof governanceProcessingReviewSchema>;
+/** The immutable reviewed edition binds the processor document and its exact processing source. */
+const governanceBoundReviewSchema = z
+  .object({
+    type: z.literal("privacy_governance_processor_review_v1"),
+    document: governanceDocumentSchema,
+    processingReview: governanceProcessingReviewSchema,
+  })
+  .strict()
+  .refine(
+    ({ document, processingReview }) =>
+      document.kind === "processor" && document.processingRecordId === processingReview.recordId,
+    { message: "A bound review needs the processor's exact processing record." },
+  );
+export const governanceEditionSchema = z.union([
+  governanceDocumentSchema,
+  governanceBoundReviewSchema,
+]);
+export type GovernanceEdition = z.infer<typeof governanceEditionSchema>;
+export function governanceReviewEdition(
+  document: GovernanceDocument,
+  processingReview: GovernanceProcessingReview | null,
+): GovernanceEdition {
+  return document.kind === "processor" && processingReview
+    ? { type: "privacy_governance_processor_review_v1", document, processingReview }
+    : document;
+}
+
 /** Required fields are checked at review; a minimised, attributable working record can stay held. */
 export function governanceIssues(document: GovernanceDocument): string[] {
   const issues: string[] = [];

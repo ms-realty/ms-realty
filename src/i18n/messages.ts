@@ -3,7 +3,9 @@
 // match the files on disk and that every locale has the source's keys.
 //   messages/<locale>/<namespace>.json        public and client hosts, seven locales
 //   messages/staff/<locale>/<namespace>.json  staff host only, bg/en/ru
+
 import type a11y from "../../messages/bg/a11y.json";
+import type caseReview from "../../messages/bg/caseReview.json";
 import type common from "../../messages/bg/common.json";
 import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
@@ -18,6 +20,7 @@ import type privacyExportClient from "../../messages/bg/privacy-export.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
 import type workflow from "../../messages/bg/workflow.json";
+import type agency from "../../messages/staff/bg/agency.json";
 import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
@@ -36,6 +39,7 @@ import type workspaceStates from "../../messages/staff/bg/workspaceStates.json";
 import { isStaffLocale, type PublicLocale } from "./config";
 
 export const publicNamespaces = [
+  "caseReview",
   "a11y",
   "common",
   "discovery",
@@ -54,6 +58,7 @@ export const publicNamespaces = [
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
 export const staffNamespaces = [
+  "agency",
   "duplicateMerge",
   "calendar",
   "caseDirectory",
@@ -72,6 +77,7 @@ export const staffNamespaces = [
 ] as const;
 
 export interface PublicMessages {
+  caseReview: typeof caseReview;
   a11y: typeof a11y;
   common: typeof common;
   discovery: typeof discovery;
@@ -89,6 +95,7 @@ export interface PublicMessages {
   workflow: typeof workflow;
 }
 export interface StaffMessages {
+  agency: typeof agency;
   duplicateMerge: typeof duplicateMerge;
   calendar: typeof calendar;
   caseDirectory: typeof caseDirectory;

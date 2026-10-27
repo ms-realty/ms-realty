@@ -80,6 +80,7 @@ for (const javascript of [false, true])
       const downloading = client.waitForEvent("download");
       await link.click();
       const download = await downloading;
+      expect(download.suggestedFilename()).toBe("my-data.json");
       const local = await download.path();
       if (!local) throw new Error("Missing synthetic download");
       const dossier = JSON.parse(await readFile(local, "utf8"));

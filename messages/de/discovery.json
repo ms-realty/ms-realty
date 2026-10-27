@@ -122,5 +122,23 @@
   "newRequest": "Neue Anfrage",
   "optional": "(optional)",
   "messageHint": "Bis zu 2.000 Zeichen. Keine Ausweis- oder Finanzdaten.",
-  "changed": "Das Angebot hat sich geändert. Prüfen Sie die aktuelle Fassung."
+  "changed": "Das Angebot hat sich geändert. Prüfen Sie die aktuelle Fassung.",
+  "serviceIntake": {
+    "short_stay_consultation": "Beratung zu Kurzaufenthalten",
+    "management_consultation": "Verwaltungsberatung",
+    "location": "Ort",
+    "needs": "Welche Hilfe benötigen Sie?",
+    "from": "Gewünschter Beginn",
+    "until": "Gewünschtes Ende",
+    "relationship": "Beziehung zur Immobilie (Selbstauskunft)",
+    "relationships": {
+      "owner": "Eigentümer",
+      "representative": "Vertreter",
+      "tenant": "Mieter",
+      "other": "Andere",
+      "unknown": "Unbekannt"
+    },
+    "boundary": "Diese Anfrage dient der menschlichen Prüfung. Termine sind Wünsche; das Absenden bestätigt weder Verfügbarkeit noch Buchung oder Arbeiten. Diese Webanfrage ist kein Notfalldienst.",
+    "held": "Der Leistungsumfang ist nicht mehr bestätigt. Wenden Sie sich zur Klärung oder für eine manuelle Alternative an die zuständige Person."
+  }
 }

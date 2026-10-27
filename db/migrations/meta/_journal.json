@@ -253,6 +253,13 @@
       "when": 1793058337803,
       "tag": "0035_bounded_service_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793059177747,
+      "tag": "0036_agency_obligations",
+      "breakpoints": true
     }
   ]
 }

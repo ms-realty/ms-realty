@@ -94,7 +94,7 @@ export async function publicRouteMetadata(locale: string, path: string): Promise
 
 export async function publicContentMetadata(
   locale: string,
-  kind: "area" | "help" | "service",
+  kind: "area" | "help" | "service" | "review",
   slug: string,
   path: string,
 ): Promise<Metadata> {

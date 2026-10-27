@@ -236,6 +236,7 @@ export async function readReports(
                     permitted(grants, "case.read", { type: "case", id: cases.id }) ?? sql`false`,
                     mine(appointments.hostId),
                     eq(appointments.state, "completed"),
+                    eq(appointments.purpose, "viewing"),
                     sql`${appointments.confirmedEndsAt} >= ${from.toISOString()}::timestamptz`,
                     lt(appointments.confirmedEndsAt, now),
                   ),
