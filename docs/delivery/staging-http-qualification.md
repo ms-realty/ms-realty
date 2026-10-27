@@ -9,15 +9,15 @@ observations. Every initial failure remains in the result.
 
 ## Use the existing staging environment boundary
 
-After the combined candidate passes its source/browser checks, is merged into `main`, and
-is deployed through the existing staging procedure, dispatch this workflow from
-`codex/msr-staging` at that same qualified source commit. The commit must contain this
-checker. Keep the existing staging environment's allowed-branch rule unchanged; no new
-`main` secret-access grant is needed.
+After the combined candidate passes its source/browser checks, its content is integrated
+into reviewed `main`, and it is deployed through the existing staging procedure, dispatch
+this workflow from `codex/msr-staging` at that same qualified source commit H. The commit
+must contain this checker. Keep the existing staging environment's allowed-branch rule
+unchanged; no new `main` secret-access grant is needed.
 
 The prerequisite job requires the exact repository, manual event and staging branch,
 matching workflow/run/source SHAs, the repository's qualified source, a clean exact
-checkout integrated in reviewed `origin/main`, and the successful staging deployment
+checkout, proof of integration in reviewed `origin/main`, and the successful staging deployment
 workflow/run/attempt for that source. Only then can the protected environment resolve.
 GitHub defines these workflow and commit identities in its
 [variables reference](https://docs.github.com/en/actions/reference/workflows-and-actions/variables).
@@ -25,12 +25,29 @@ The immutable candidate bundle, image checks, observation-only credentials and s
 `ms-realty-staging` concurrency lock remain required. Reusing a deployment receipt for
 another source or running an ahead/behind checker is rejected.
 
+The prerequisite resolves `origin/main` once to commit S, then accepts either H as an
+ancestor of S or exact equality of their entire Git trees. The second path supports a
+reviewed squash merge without claiming ancestry. H remains the qualified CI, deployment,
+workflow and verifier source; S establishes reviewed content integration. No path allows
+a different HEAD or staged/unstaged tracked changes. Missing refs, missing objects and
+Git errors fail closed. An ancestor H can have a different tree from a later S; the
+recorded proof distinguishes that existing ancestry path from `exact_tree_squash`.
+
+The qualification job checks pinned S again, verifies both clean H checkouts and their
+trees, and repeats these checks after HTTP observations. A changed main ref, checkout or
+proof fails the run. `qualification.json` retains H and its tree, S and its tree, proof
+mode, ancestry/tree equality results and an integrity digest, including partial or failed
+observations. `source-binding-before.json` and `source-binding-after.json` retain the
+successful boundary checks; `sourceBindingVerified` is true only after both checks pass.
+The digest detects record changes; it is not a signature or separate CI approval.
+
 The companion Cloudflare inventory workflow keeps its redacted run artifact and cannot
 commit or push generated inventory back to the staging branch. Such a push would advance
 the branch beyond its qualified/deployed SHA and correctly fail this checker's guards.
 Before promoting the combined candidate, retain the existing staging tip in its history
-so promotion can fast-forward without discarding earlier inventory evidence. Source review
-does not move the live branch or rewrite that history.
+so promotion to H can fast-forward without discarding earlier inventory evidence. When
+main uses squash commit S, the exact-tree proof permits staging to retain H and its history.
+Source review does not move the live branch or rewrite that history.
 
 The older frozen deployment does not contain this new workflow, so it cannot execute
 this route. Keep that image held until the coordinated candidate is qualified. A source

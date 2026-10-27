@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { JSDOM } from "jsdom";
 import {
   accountId,
+  bindSourceReport,
   createPacer,
   errorEvidence,
   observeTransport,
@@ -140,6 +141,8 @@ test("R07/R08 the exact staging checkout must be clean and integrated in reviewe
     git("update-ref", "refs/remotes/origin/main", reviewed);
     git("checkout", "--quiet", "-b", "codex/msr-staging");
     assert.doesNotThrow(() => validateSourceCheckout(directory, reviewed));
+    await writeFile(join(directory, "source-proof.txt"), "different source\n");
+    git("add", "source-proof.txt");
     commit("Unreviewed staging branch advance");
     const unreviewed = git("rev-parse", "HEAD");
     assert.throws(() => validateSourceCheckout(directory, reviewed));
@@ -151,6 +154,247 @@ test("R07/R08 the exact staging checkout must be clean and integrated in reviewe
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+async function withGitRepository(run) {
+  const directory = await realpath(await mkdtemp(join(tmpdir(), "msr-http-binding-")));
+  const prefix = [
+    "-c",
+    "core.hooksPath=/dev/null",
+    "-c",
+    "commit.gpgsign=false",
+    "-c",
+    "user.name=Qualification fixture",
+    "-c",
+    "user.email=fixture@example.invalid",
+  ];
+  const git = (...args) =>
+    execFileSync("git", [...prefix, ...args], { cwd: directory, encoding: "utf8" }).trim();
+  const input = (value, ...args) =>
+    execFileSync("git", [...prefix, ...args], {
+      cwd: directory,
+      encoding: "utf8",
+      input: value,
+    }).trim();
+  try {
+    git("init", "--quiet", "--initial-branch=main");
+    await writeFile(join(directory, "source-proof.txt"), "base\n");
+    git("add", "source-proof.txt");
+    git("commit", "--quiet", "-m", "Reviewed base");
+    const base = git("rev-parse", "HEAD");
+    git("checkout", "--quiet", "-b", "codex/msr-staging");
+    await run({ directory, git, input, base });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}
+
+test("R07 a nonancestor squash is accepted only for an exact whole Git tree", async () => {
+  await withGitRepository(async ({ directory, git, input, base }) => {
+    await writeFile(join(directory, "source-proof.txt"), "candidate\n");
+    git("add", "source-proof.txt");
+    git("commit", "--quiet", "-m", "Qualified source H");
+    const head = git("rev-parse", "HEAD"),
+      tree = git("rev-parse", "HEAD^{tree}");
+    git("update-ref", "refs/remotes/origin/main", base);
+    assert.throws(() => validateSourceCheckout(directory, head, base));
+    const main = git("commit-tree", tree, "-p", base, "-m", "Reviewed squash S");
+    git("update-ref", "refs/remotes/origin/main", main);
+    const proof = validateSourceCheckout(directory, head, main);
+    assert.equal(proof.proofMode, "exact_tree_squash");
+    assert.equal(proof.sourceInMainHistory, false);
+    assert.equal(proof.sourceCommit, head);
+    assert.equal(proof.reviewedMainCommit, main);
+    assert.equal(proof.sourceTree, proof.reviewedMainTree);
+    assert.equal(proof.exactTreeMatch, true);
+    const { sha256, ...core } = proof;
+    assert.equal(sha256, createHash("sha256").update(JSON.stringify(core)).digest("hex"));
+    // Same tree is insufficient when HEAD is not the exact approved H.
+    assert.throws(() => validateSourceCheckout(directory, main, main));
+    const movedMain = git("commit-tree", tree, "-p", base, "-m", "Another same-tree main revision");
+    git("update-ref", "refs/remotes/origin/main", movedMain);
+    assert.throws(() => validateSourceCheckout(directory, head, main));
+    git("update-ref", "refs/remotes/origin/main", main);
+    await writeFile(join(directory, "source-proof.txt"), "unstaged change\n");
+    assert.throws(() => validateSourceCheckout(directory, head, main));
+    git("add", "source-proof.txt");
+    assert.throws(() => validateSourceCheckout(directory, head, main));
+    git("restore", "--source", head, "--staged", "--worktree", "--", "source-proof.txt");
+    const descendant = git(
+      "commit-tree",
+      `${base}^{tree}`,
+      "-p",
+      head,
+      "-m",
+      "Later reviewed main with another tree",
+    );
+    git("update-ref", "refs/remotes/origin/main", descendant);
+    const ancestry = validateSourceCheckout(directory, head, descendant);
+    assert.equal(ancestry.proofMode, "ancestry");
+    assert.equal(ancestry.sourceInMainHistory, true);
+    assert.equal(ancestry.exactTreeMatch, false);
+    git("update-ref", "-d", "refs/remotes/origin/main");
+    assert.throws(() => validateSourceCheckout(directory, head));
+    const ref = join(directory, ".git/refs/remotes/origin/main");
+    await mkdir(join(directory, ".git/refs/remotes/origin"), { recursive: true });
+    await writeFile(ref, `${"f".repeat(40)}\n`);
+    assert.throws(() => validateSourceCheckout(directory, head));
+    await writeFile(ref, `${main}\n`);
+    const broken = input(
+      `tree ${tree}\nparent ${"f".repeat(40)}\nauthor Fixture <fixture@example.invalid> 0 +0000\ncommitter Fixture <fixture@example.invalid> 0 +0000\n\nMissing ancestry object\n`,
+      "hash-object",
+      "-t",
+      "commit",
+      "-w",
+      "--stdin",
+    );
+    git("update-ref", "refs/remotes/origin/main", broken);
+    // A Git error must not be treated as ordinary non-ancestry, even with equal trees.
+    assert.throws(() => validateSourceCheckout(directory, head, broken));
+  });
+});
+
+test("R07 source proof survives replacement HTTP reports and rejects altered H/main/fields", async () => {
+  await withGitRepository(async ({ directory, git, base }) => {
+    git("update-ref", "refs/remotes/origin/main", base);
+    const proof = validateSourceCheckout(directory, base, base);
+    const expected = { source: base, reviewedMain: base };
+    for (const mode of ["transport", "full"]) {
+      const observed = { source: base, mode, passed: true, ...qualificationCoverage(candidate) };
+      const bound = bindSourceReport(observed, proof, expected);
+      assert.deepEqual(bound.sourceBinding, proof);
+      assert.equal(bound.sourceBindingVerified, false);
+      assert.equal(bound.seoQualified, false);
+      assert.equal(bound.sitemapConsistencyQualified, false);
+      assert.equal(bound.fullLegacyParityQualified, false);
+      for (const changed of [
+        { sourceCommit: "c".repeat(40) },
+        { reviewedMainCommit: "c".repeat(40) },
+        { sourceTree: "c".repeat(40) },
+        { proofMode: "exact_tree_squash" },
+        { unexpectedQualifiedSource: base },
+        { sha256: "f".repeat(64) },
+      ])
+        assert.throws(() => bindSourceReport(observed, { ...proof, ...changed }, expected));
+      assert.throws(() =>
+        bindSourceReport({ ...observed, source: "c".repeat(40) }, proof, expected),
+      );
+      assert.throws(() =>
+        bindSourceReport(observed, proof, { source: "c".repeat(40), reviewedMain: base }),
+      );
+      assert.throws(() =>
+        bindSourceReport(observed, proof, { source: base, reviewedMain: "c".repeat(40) }),
+      );
+    }
+  });
+});
+
+test("R07 CLI uploads same-tree provenance after transport report replacement and fails on main drift", async () => {
+  await withGitRepository(async ({ directory, git, base }) => {
+    const artifacts = await mkdtemp(join(tmpdir(), "msr-http-artifacts-"));
+    try {
+      await mkdir(join(directory, "scripts"));
+      await writeFile(
+        join(directory, "scripts/staging-http-qualification.mjs"),
+        await readFile(new URL("./staging-http-qualification.mjs", import.meta.url)),
+      );
+      await writeFile(join(directory, "package-lock.json"), "{}\n");
+      git("add", "scripts/staging-http-qualification.mjs", "package-lock.json");
+      git("commit", "--quiet", "-m", "Qualified verifier and source H");
+      const head = git("rev-parse", "HEAD"),
+        tree = git("rev-parse", "HEAD^{tree}");
+      const main = git("commit-tree", tree, "-p", base, "-m", "Reviewed squash S");
+      const moved = git(
+        "commit-tree",
+        tree,
+        "-p",
+        base,
+        "-m",
+        "A different reviewed main revision",
+      );
+      git("update-ref", "refs/remotes/origin/main", main);
+      const bundle = join(artifacts, "bundle");
+      await mkdir(bundle);
+      for (const name of [
+        "candidate",
+        "runtime",
+        "isolation",
+        "connectivity",
+        "provenance",
+        "provider",
+      ])
+        await writeFile(
+          join(bundle, `staging-${name}.generated.json`),
+          JSON.stringify(
+            name === "candidate" ? { ...candidate, sourceCommit: head } : { synthetic: true },
+          ),
+        );
+      const wrapper = `import assert from 'node:assert/strict';import{execFileSync}from'node:child_process';import{pathToFileURL}from'node:url';
+const args=process.argv.slice(1);let calls=0;globalThis.fetch=async(url,init)=>{calls++;assert(Object.values(${JSON.stringify(origins)}).includes(new URL(url).origin));assert.equal(init.redirect,'manual');
+if(process.env.MSR_FAKE_MAIN_DRIFT&&calls===8)execFileSync('git',['update-ref','refs/remotes/origin/main',process.env.MSR_FAKE_MAIN_DRIFT]);
+if(!init.headers['CF-Access-Client-Secret'])return new Response(null,{status:302,headers:{location:'https://fixture.cloudflareaccess.com/login'}});
+const headers={'x-robots-tag':'noindex'};const path=new URL(url).pathname;
+if(path==='/api/health')return Response.json({status:'ok',build:process.env.GITHUB_SHA},{headers});
+if(path==='/bg/access')return new Response('<main>Saved-key sign-in</main>',{headers:{...headers,'content-type':'text/html'}});
+assert.equal(path,'/bg/cases');return new Response(null,{status:307,headers:{...headers,location:'/bg/access'}})};
+process.on('exit',()=>{if(calls!==8)process.exitCode=99});process.argv=[process.execPath,args[0],...args.slice(1)];await import(pathToFileURL(args[0]));`;
+      for (const drift of [false, true]) {
+        git("update-ref", "refs/remotes/origin/main", main);
+        const output = join(artifacts, drift ? "drift" : "passing");
+        let status = 0;
+        let childOutput = "";
+        try {
+          execFileSync(
+            process.execPath,
+            [
+              "--input-type=module",
+              "-e",
+              wrapper,
+              join(directory, "scripts/staging-http-qualification.mjs"),
+              "run",
+              directory,
+              bundle,
+              output,
+              head,
+              "transport",
+            ],
+            {
+              cwd: directory,
+              encoding: "utf8",
+              env: {
+                ...process.env,
+                ...env,
+                GITHUB_SHA: head,
+                GITHUB_WORKFLOW_SHA: head,
+                STAGING_SOURCE_QUALIFIED_SHA: head,
+                REVIEWED_MAIN_SHA: main,
+                STAGING_ACCESS_SERVICE_CLIENT_SECRET: "synthetic-secret",
+                MSR_FAKE_MAIN_DRIFT: drift ? moved : "",
+              },
+            },
+          );
+        } catch (error) {
+          status = error.status;
+          childOutput = `${error.stdout ?? ""}${error.stderr ?? ""}`;
+        }
+        assert.equal(status, drift ? 2 : 0, childOutput);
+        const report = JSON.parse(await readFile(join(output, "qualification.json"), "utf8"));
+        assert.equal(report.sourceBinding.sourceCommit, head);
+        assert.equal(report.sourceBinding.reviewedMainCommit, main);
+        assert.equal(report.sourceBinding.proofMode, "exact_tree_squash");
+        assert.equal(report.sourceBinding.sourceInMainHistory, false);
+        assert.equal(report.sourceBinding.exactTreeMatch, true);
+        assert.equal(report.passed, !drift);
+        assert.equal(report.sourceBindingVerified, !drift);
+        assert.equal(report.seoQualified, false);
+        assert.equal(report.sitemapConsistencyQualified, false);
+        assert.equal(report.fullLegacyParityQualified, false);
+        if (drift) assert.equal(report.failedPhase, "source_binding_after");
+      }
+    } finally {
+      await rm(artifacts, { recursive: true, force: true });
+    }
+  });
 });
 
 test("R07/R08 production, wrong images and escaped source paths fail before credentials are used", () => {
