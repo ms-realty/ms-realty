@@ -56,10 +56,11 @@ const decision = z.object({
 });
 type Terms = typeof agencyPartnerTerms.$inferSelect;
 export function partnerTermsHash(
-  row: Pick<Terms, keyof z.infer<typeof source> | "documentDigest">,
+  row: Pick<Terms, keyof z.infer<typeof source> | "documentDigest" | "ownerId">,
 ) {
   return hashRequest({
     caseId: row.caseId,
+    ownerId: row.ownerId,
     counterpartyPartyId: row.counterpartyPartyId,
     relationship: row.relationship,
     purpose: row.purpose,
@@ -99,6 +100,14 @@ export async function readPartnerTerms(db: Executor, session: Session, id: strin
     row.state === "accepted" &&
     row.approvedHash === partnerTermsHash(row) &&
     Boolean(row.validUntil && row.validUntil > new Date());
+  if (current) {
+    try {
+      await requireAvailableStaff(db, row.ownerId);
+    } catch (error) {
+      if (!isAppError(error)) throw error;
+      current = false;
+    }
+  }
   if (current && row.documentVersionId) {
     try {
       await reviewedEvidence(db, row.documentVersionId, {
@@ -223,6 +232,7 @@ export async function decidePartnerTerms(db: Executor, session: Session, raw: un
     const { row } = await readPartnerTerms(tx, session, input.id, true);
     const context = await access(tx, session, row, true, input.action === "revoke");
     await assertCanRead(tx, context.live.actor, "claim.approve", context.resource);
+    if (input.action === "accept") await requireAvailableStaff(tx, row.ownerId, true);
     if (input.action === "accept" && row.documentVersionId)
       await reviewedEvidence(tx, row.documentVersionId, {
         digest: row.documentDigest ?? undefined,

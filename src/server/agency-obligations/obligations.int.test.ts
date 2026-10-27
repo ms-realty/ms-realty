@@ -14,6 +14,7 @@ import {
   parties,
   passkeys,
   privacyProcessingRestrictions,
+  staffMemberships,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession } from "../auth/sessions";
@@ -234,6 +235,41 @@ async function consentAndVerify() {
 }
 
 describe("B10 partner/referral current supplied terms", () => {
+  it("binds the accountable owner and holds acceptance when that owner is no longer available", async () => {
+    const f = await fixture(),
+      reviewer = await fixture(),
+      input = terms(f);
+    const saved = await savePartnerTerms(t.db, f.staff.session, input);
+    const approval = {
+      id: input.id,
+      operationId: randomUUID(),
+      expectedVersion: 1,
+      expectedHash: saved.outcome.termsHash,
+      action: "accept",
+      professionalName: "Synthetic qualified reviewer",
+      note: "Synthetic current owner and exact terms review",
+      reviewed: true,
+    };
+    await decidePartnerTerms(t.db, reviewer.staff.session, approval);
+    await t.db
+      .update(staffMemberships)
+      .set({ state: "ended" })
+      .where(eq(staffMemberships.principalId, f.staff.id));
+    expect((await readPartnerTerms(t.db, reviewer.staff.session, input.id)).current).toBe(false);
+    await expect(decidePartnerTerms(t.db, reviewer.staff.session, approval)).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+    const changed = await savePartnerTerms(t.db, reviewer.staff.session, {
+      ...input,
+      operationId: randomUUID(),
+      expectedVersion: 2,
+    });
+    expect(changed.outcome.termsHash).not.toBe(saved.outcome.termsHash);
+    expect((await readPartnerTerms(t.db, reviewer.staff.session, input.id)).row).toMatchObject({
+      ownerId: reviewer.staff.id,
+      state: "draft",
+    });
+  });
   it("keeps original Case-scoped history after a merge while holding positive use and preserving revocation", async () => {
     const f = await fixture(),
       input = { ...terms(f), caseId: f.record.id };
