@@ -172,13 +172,15 @@ export async function StaffPrivacyExportScreen({
               <input type="hidden" name="digest" value={row.sha256} />
               <h3 className="font-semibold">{c.review}</h3>
               {exportSections.map((section) =>
-                row.dossier?.data[section].map((item) => (
+                row.dossier?.data[section]?.map((item) => (
                   <div
-                    key={`${section}:${item.id}`}
+                    key={`${section}:${"source" in item ? item.source : ""}:${item.id}`}
                     className="grid gap-2 border-b border-divider pb-3"
                   >
                     <p className="whitespace-pre-wrap break-words" dir="auto">
-                      {item.text}
+                      {"context" in item && item.context
+                        ? JSON.stringify(item.context, null, 2)
+                        : item.text}
                     </p>
                     <label className="flex gap-2">
                       <input

@@ -42,6 +42,7 @@ import type { Executor } from "../db";
 import { caseDocumentPurposes } from "../documents/purposes";
 import { AppError } from "../errors";
 import type { DisclosureSupplement } from "./export-supplements";
+import { collectServiceSources, serviceContextRevision } from "./service-sources";
 import { privacySafetyRevision } from "./source-fingerprint";
 
 const digest = (value: unknown) => hashRequest(JSON.parse(JSON.stringify(value)));
@@ -67,7 +68,7 @@ export function ownExportSourceDigest<T extends { requests: { id: string; state:
 
 async function caseBundle(db: Executor, id: string) {
   const [record] = await db
-    .select({ id: cases.id, version: cases.version })
+    .select({ id: cases.id, version: cases.version, service: cases.serviceContext })
     .from(cases)
     .where(eq(cases.id, id));
   if (!record) throw new AppError("not_found");
@@ -144,7 +145,14 @@ async function caseBundle(db: Executor, id: string) {
     kind: "case_bundle" as const,
     id,
     revision: record.version,
-    digest: digest({ record, parts }),
+    digest: digest({
+      record: {
+        id: record.id,
+        version: record.version,
+        service: serviceContextRevision(record.service),
+      },
+      parts,
+    }),
   };
 }
 
@@ -261,6 +269,7 @@ export async function collectExportInventory(
   );
   const ids = accounts.map((row) => row.id);
   if (!ids.includes(subject.recipientId)) throw new AppError("not_found");
+  const service = await collectServiceSources(db, actor, subject.partyId);
   const links = bounded(
     await db
       .select({
@@ -276,7 +285,7 @@ export async function collectExportInventory(
   );
   const caseIds = [...new Set(links.map((row) => row.caseId))];
   const joint: PrivacyExportSource[] = [];
-  let jointBlocked = false;
+  let jointBlocked = service.jointBlocked;
   for (const id of caseIds) {
     if (
       !(await can(db, actor, "case.read", { type: "case", id })) ||
@@ -428,8 +437,14 @@ export async function collectExportInventory(
     categories: [
       {
         category: "personal_activity",
-        blocked: false,
-        sources: [{ key: "own_activity", kind: "own_activity", digest: ownSourceDigest }],
+        blocked: service.ownBlocked,
+        sources: [
+          {
+            key: "own_activity",
+            kind: "own_activity",
+            digest: digest({ ownSourceDigest, service: service.revision }),
+          },
+        ],
       },
       {
         category: "joint_records_and_received_communications",

@@ -16,6 +16,7 @@ import {
   privacyRequests,
   subscriptions,
 } from "@/db/schema";
+import type { Actor } from "@/domain/capabilities";
 import { guardPrivacyRequestTransition } from "@/domain/privacy";
 import {
   type PrivacyExportReview,
@@ -51,8 +52,15 @@ import {
   verifyDeliveredSupplement,
 } from "./export-supplements";
 import { privacyProcessingRestricted } from "./restrictions";
+import { collectServiceSources } from "./service-sources";
 
-export const exportSections = ["requests", "inquiries", "messages", "feedback"] as const;
+export const exportSections = [
+  "requests",
+  "inquiries",
+  "messages",
+  "feedback",
+  "serviceContexts",
+] as const;
 const redaction = z.object({ section: z.enum(exportSections), id: z.uuid() }).strict();
 const envelope = {
   operationId: z.uuid(),
@@ -112,7 +120,7 @@ function ownPreferences(value: unknown) {
 
 /** Restricted compliance, staff notes, recipient lists, credentials and raw join payloads are
  * deliberately never read. Joint records/files stay pending separate disclosure review. */
-async function collectPersonDossier(db: Executor, partyId: string) {
+async function collectPersonDossier(db: Executor, partyId: string, actor: Actor) {
   const [party] = await db
     .select({
       displayName: parties.displayName,
@@ -257,22 +265,36 @@ async function collectPersonDossier(db: Executor, partyId: string) {
       .orderBy(asc(interestFeedback.id))
       .limit(maxRows + 1),
   );
+  const service = await collectServiceSources(db, actor, partyId);
   return {
-    person: { ...party, contactPreferences: ownPreferences(party.contactPreferences) },
-    accounts: accounts.map(({ id: _id, ...account }) => account),
-    contacts,
-    preferences: choices,
-    consent,
-    requests: requestRows.map(({ scope, ...request }) => ({
-      ...request,
-      text: z.object({ description: z.string().default("") }).parse(scope).description,
-    })),
-    inquiries: ownInquiries,
-    messages: ownMessages,
-    feedback: ownFeedback,
+    serviceRevision: service.revision,
+    data: {
+      person: { ...party, contactPreferences: ownPreferences(party.contactPreferences) },
+      accounts: accounts.map(({ id: _id, ...account }) => account),
+      contacts,
+      preferences: choices,
+      consent,
+      requests: requestRows.map(({ scope, ...request }) => ({
+        ...request,
+        text: z.object({ description: z.string().default("") }).parse(scope).description,
+      })),
+      inquiries: ownInquiries,
+      messages: ownMessages,
+      feedback: ownFeedback,
+      serviceContexts: service.rows,
+    },
   };
 }
-type PersonDossier = Awaited<ReturnType<typeof collectPersonDossier>>;
+type PersonDossier = Awaited<ReturnType<typeof collectPersonDossier>>["data"];
+function personDossierSourceDigest(
+  source: Awaited<ReturnType<typeof collectPersonDossier>>,
+  requestId: string,
+) {
+  return ownExportSourceDigest(
+    { ...source.data, serviceRevision: source.serviceRevision },
+    requestId,
+  );
+}
 export interface PrivacyDossier {
   format: "ms-realty-person-export-v1";
   requestReference: string;
@@ -376,14 +398,17 @@ async function currentCoverage(
   dossier: PrivacyDossier,
 ): Promise<PrivacyExportReview | null> {
   const review = coveragePayload(row);
+  const ownDigest = personDossierSourceDigest(
+    await collectPersonDossier(db, row.partyId, { kind: "staff", id: row.preparedById }),
+    request.id,
+  );
+  if (ownDigest !== dossier.sourceDigest) throw new AppError("version_conflict");
   if (!review) return null;
   if (
     review.inventory.recipientId !== row.recipientId ||
     request.version !== review.inventory.requestVersion + (row.completedOperationId ? 1 : 0)
   )
     throw new AppError("version_conflict");
-  const ownDigest = ownExportSourceDigest(await collectPersonDossier(db, row.partyId), request.id);
-  if (ownDigest !== dossier.sourceDigest) throw new AppError("version_conflict");
   // Recheck every reviewer's ordinary dependencies. An operator changing grants cannot
   // leave a previously readable source silently eligible for download or completion.
   for (const id of new Set([
@@ -458,8 +483,8 @@ export async function capturePrivacyExportManifest(db: Executor, session: Sessio
       const request = await eligibleRequest(tx, session, value.requestId, value.expectedVersion);
       const row = await draftForReview(tx, request, value),
         dossier = payload(row);
-      const ownDigest = ownExportSourceDigest(
-        await collectPersonDossier(tx, row.partyId),
+      const ownDigest = personDossierSourceDigest(
+        await collectPersonDossier(tx, row.partyId, session.actor),
         request.id,
       );
       if (ownDigest !== dossier.sourceDigest) throw new AppError("version_conflict");
@@ -551,8 +576,8 @@ export async function reviewPrivacyExportCategory(db: Executor, session: Session
       if (!review) throw new AppError("transition_denied");
       // A different reviewer must have all ordinary source rights too, before receiving or
       // making a decision over the manifest. This grants no new access to the client.
-      const ownDigest = ownExportSourceDigest(
-        await collectPersonDossier(tx, row.partyId),
+      const ownDigest = personDossierSourceDigest(
+        await collectPersonDossier(tx, row.partyId, session.actor),
         request.id,
       );
       const inventory = await collectExportInventory(
@@ -644,12 +669,13 @@ export async function preparePrivacyExport(db: Executor, session: Session, input
       const request = await eligibleRequest(tx, session, value.requestId, value.expectedVersion);
       const partyId = request.partyId as string;
       await recipient(tx, value.recipientId, partyId);
-      const data = await collectPersonDossier(tx, partyId);
+      const sources = await collectPersonDossier(tx, partyId, session.actor);
+      const data = sources.data;
       const dossier: PrivacyDossier = {
         format: "ms-realty-person-export-v1",
         requestReference: request.reference,
         asOf: new Date().toISOString(),
-        sourceDigest: ownExportSourceDigest(data, request.id),
+        sourceDigest: personDossierSourceDigest(sources, request.id),
         fulfilment: "partial",
         data,
         redactedText: [],
@@ -736,9 +762,12 @@ export async function redactPrivacyExport(db: Executor, session: Session, input:
       // Save removals before final review. The issue command must deliver the digest that
       // was actually displayed, including removals retained after an invalid submission.
       for (const omit of value.omitTexts) {
-        const item = dossier.data[omit.section].find((item) => item.id === omit.id);
-        if (!item) throw new AppError("validation_failed");
-        item.text = "[redacted during privacy disclosure review]";
+        const items = dossier.data[omit.section].filter((item) => item.id === omit.id);
+        if (!items.length) throw new AppError("validation_failed");
+        for (const item of items) {
+          item.text = "[redacted during privacy disclosure review]";
+          if ("context" in item) item.context = null;
+        }
         if (
           !dossier.redactedText.some(
             (entry) => entry.section === omit.section && entry.id === omit.id,
@@ -838,8 +867,10 @@ export async function issuePrivacyExport(
           throw new AppError("version_conflict");
       }
       if (
-        ownExportSourceDigest(await collectPersonDossier(tx, row.partyId), request.id) !==
-        dossier.sourceDigest
+        personDossierSourceDigest(
+          await collectPersonDossier(tx, row.partyId, session.actor),
+          request.id,
+        ) !== dossier.sourceDigest
       )
         throw new AppError("version_conflict");
       const reviewed = await currentCoverage(tx, row, request, dossier);
@@ -946,7 +977,10 @@ export async function completePrivacyExport(
           requestVersion: request.version,
           scope: request.scope,
         },
-        ownExportSourceDigest(await collectPersonDossier(tx, row.partyId), request.id),
+        personDossierSourceDigest(
+          await collectPersonDossier(tx, row.partyId, session.actor),
+          request.id,
+        ),
       );
       if (inventoryDigest(current) !== inventoryDigest(review.inventory))
         throw new AppError("version_conflict");
@@ -1114,6 +1148,13 @@ export async function staffPrivacyExports(
         try {
           const frozen = dossier ?? (row.state === "issued" ? payload(row) : null);
           if (frozen) {
+            if (
+              personDossierSourceDigest(
+                await collectPersonDossier(db, row.partyId, session.actor),
+                request.id,
+              ) !== frozen.sourceDigest
+            )
+              throw new AppError("not_found");
             for (const supplement of frozen.supplements)
               await collectDisclosureSupplement(
                 db,
@@ -1134,7 +1175,13 @@ export async function staffPrivacyExports(
                   requestVersion: review.inventory.requestVersion,
                   scope: request.scope,
                 },
-                ownExportSourceDigest(await collectPersonDossier(db, row.partyId), request.id),
+                personDossierSourceDigest(
+                  await collectPersonDossier(db, row.partyId, {
+                    kind: "staff",
+                    id: row.preparedById,
+                  }),
+                  request.id,
+                ),
               );
               if (inventoryDigest(inventory) !== inventoryDigest(review.inventory))
                 throw new AppError("not_found");
