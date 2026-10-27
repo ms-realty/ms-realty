@@ -7,7 +7,7 @@ import { LocalActions } from "@/features/discovery/local-selection";
 import { Locality } from "@/features/discovery/locality";
 import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage } from "@/features/discovery/page";
-import { listingHref, priceText } from "@/features/discovery/presentation";
+import { listingHref, locality, priceText } from "@/features/discovery/presentation";
 import { PropertyContactBar } from "@/features/discovery/property-contact";
 import { PropertyFacts } from "@/features/discovery/property-facts";
 import type { QueryParams } from "@/features/discovery/query";
@@ -198,7 +198,7 @@ export default async function PropertyPage({
                     {
                       reference: listing.reference,
                       href: listingHref(listing, locale),
-                      label: `${listing.reference} · ${<Locality listing={listing} />}`,
+                      label: `${listing.reference} · ${locality(listing)}`,
                       point: listing.place.mapPoint,
                     },
                   ]
