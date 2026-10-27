@@ -1,5 +1,6 @@
 /** F13 staff navigation after sign-in. Destinations still authorize every read and action. */
 const workspaceRoots = new Set([
+  "search",
   "today",
   "inbox",
   "inquiries",

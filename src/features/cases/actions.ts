@@ -239,6 +239,7 @@ export async function workflowAction(
             await updateNextAction(db, s, {
               ...base,
               nextAction: values.nextAction ?? "",
+              reason: values.reason ?? "",
               dueAt: formInstant(values, "dueAt"),
               clientSummary: values.clientSummary ?? "",
             })

@@ -22,6 +22,7 @@ import { initialFormState } from "@/ui/form/server";
 import { Notice } from "@/ui/notice";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { type AiValues, assistanceAction } from "./actions";
+import { DraftRunReceipt } from "./butler-receipt";
 import { aiCopy } from "./copy";
 import { assistanceCost } from "./cost-label";
 import { AssistanceForm } from "./forms";
@@ -243,6 +244,19 @@ export async function AssistanceRunScreen({
       <p>
         {copy.status}: <strong>{aiLabel("run", run.state, locale)}</strong>
       </p>
+      <DraftRunReceipt
+        locale={locale}
+        state={run.state}
+        sourceCurrent={sourceCurrent}
+        reviewedAt={run.reviewedAt}
+        manualHref={
+          extractedSource
+            ? `/${locale}/inventory/${extractedSource.reference}`
+            : translatedSource
+              ? `/${locale}/inventory/${translatedSource.reference}/translations/${translatedSource.targetLocale}`
+              : `/${locale}/inquiries/${run.sourceId}#inquiry-reply`
+        }
+      />
       {extractedSource ? (
         <IntakeSourcePanel source={extractedSource} locale={locale} />
       ) : translatedSource ? (

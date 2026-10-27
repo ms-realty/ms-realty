@@ -3,6 +3,8 @@ import { and, asc, desc, eq, exists, inArray, isNull, lt, ne, or, sql } from "dr
 import { z } from "zod";
 import {
   activityEvents,
+  caseParticipants,
+  cases,
   contactMethods,
   inquiries,
   keySets,
@@ -16,6 +18,7 @@ import { checkCodeNoncePrefix } from "@/domain/inquiry-check-code";
 import { readInquiryContact } from "@/domain/inquiry-contact";
 import type { Session } from "../auth/sessions";
 import { assertCanRead, can, resolveGrants } from "../authz";
+import { caseGrantVisibility, liveParticipation } from "../cases/shared";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { normalizePhone } from "../inquiries/intake";
@@ -288,6 +291,7 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
             version: contactMethods.version,
             kind: contactMethods.kind,
             value: contactMethods.value,
+            verification: contactMethods.verification,
           })
           .from(contactMethods)
           .where(
@@ -344,6 +348,7 @@ export async function readInquiry(db: Executor, session: Session, id: string) {
 }
 
 interface TaskQueryOptions {
+  q?: string;
   page?: number;
   mine?: boolean;
   awaitingAcceptance?: boolean;
@@ -361,6 +366,7 @@ async function tasksQuery(
   options: TaskQueryOptions = {},
 ) {
   const page = parseInput(pageSchema, options.page ?? 1);
+  const term = options.q ? parseInput(inquirySearchSchema, options.q) : "";
   const effectiveDue = effectiveTaskDue;
   const rows = await db
     .select({
@@ -378,6 +384,7 @@ async function tasksQuery(
         options.mine ? eq(tasks.ownerId, live.account.id) : undefined,
         options.awaitingAcceptance ? eq(tasks.pendingOwnerId, live.account.id) : undefined,
         options.caseId ? eq(tasks.caseId, options.caseId) : undefined,
+        term ? sql`strpos(lower(${tasks.title}), lower(${term})) > 0` : undefined,
         options.dueBefore
           ? sql`${effectiveDue} <= ${options.dueBefore.toISOString()}::timestamptz`
           : undefined,
@@ -406,19 +413,64 @@ export async function readTask(db: Executor, session: Session, id: string) {
         .from(principals)
         .where(eq(principals.id, row.ownerId))
     : [];
-  return { task: row, ownerName: owner?.name ?? null, needsCoverage: owner?.needsCoverage ?? true };
+  return {
+    task: row,
+    ownerName: owner?.name ?? null,
+    needsCoverage: owner?.needsCoverage ?? true,
+    canReadCase: Boolean(
+      row.caseId &&
+        (await can(db, live.actor, "case.read", {
+          type: "case",
+          id: row.caseId,
+          audience: "internal",
+        })),
+    ),
+    canReadInquiry: Boolean(
+      row.inquiryId &&
+        (await can(db, live.actor, "inquiry.read", {
+          type: "inquiry",
+          id: row.inquiryId,
+          audience: "internal",
+        })),
+    ),
+  };
 }
 
 /** Contacts are reached through authorized inquiries; a known party UUID grants nothing. */
-export async function listContacts(db: Executor, session: Session, page = 1) {
+export async function listContacts(db: Executor, session: Session, page = 1, q = "") {
   const live = await liveStaff(db, session);
   const grants = await resolveGrants(db, live.actor);
   const current = parseInput(pageSchema, page);
+  const term = q ? parseInput(inquirySearchSchema, q) : "";
   const rows = await db
-    .selectDistinct({ id: parties.id, name: parties.displayName, locale: parties.preferredLocale })
+    .select({
+      id: parties.id,
+      name: parties.displayName,
+      locale: parties.preferredLocale,
+      latestInquiryAt: sql<string>`max(${inquiries.createdAt})::text`,
+      inquiryCount: sql<number>`count(distinct ${inquiries.id})`.mapWith(Number),
+      methods: sql<
+        { kind: string; value: string; verification: string }[]
+      >`coalesce(jsonb_agg(distinct jsonb_build_object('kind', ${contactMethods.kind}, 'value', ${contactMethods.value}, 'verification', ${contactMethods.verification})) filter (where ${contactMethods.id} is not null), '[]'::jsonb)`,
+    })
     .from(parties)
     .innerJoin(inquiries, eq(inquiries.partyId, parties.id))
-    .where(visibleWhere(grants, "inquiry.read", "inquiry"))
+    .leftJoin(
+      contactMethods,
+      and(eq(contactMethods.id, inquiries.contactMethodId), eq(contactMethods.partyId, parties.id)),
+    )
+    .where(
+      and(
+        visibleWhere(grants, "inquiry.read", "inquiry"),
+        term
+          ? or(
+              sql`strpos(lower(${parties.displayName}), lower(${term})) > 0`,
+              sql`strpos(lower(${contactMethods.value}), lower(${term})) > 0`,
+            )
+          : undefined,
+      ),
+    )
+    .groupBy(parties.id, parties.displayName, parties.preferredLocale)
     .orderBy(asc(parties.displayName), asc(parties.id))
     .limit(pageSize + 1)
     .offset((current - 1) * pageSize);
@@ -430,7 +482,12 @@ export async function readContact(db: Executor, session: Session, id: string) {
   if (!z.uuid().safeParse(id).success) throw new AppError("not_found");
   const grants = await resolveGrants(db, live.actor);
   const related = await db
-    .select({ id: inquiries.id, reference: inquiries.reference, state: inquiries.state })
+    .select({
+      id: inquiries.id,
+      reference: inquiries.reference,
+      state: inquiries.state,
+      caseId: inquiries.caseId,
+    })
     .from(inquiries)
     .where(and(eq(inquiries.partyId, id), visibleWhere(grants, "inquiry.read", "inquiry")))
     .orderBy(desc(inquiries.createdAt))
@@ -447,7 +504,35 @@ export async function readContact(db: Executor, session: Session, id: string) {
     })
     .from(contactMethods)
     .where(eq(contactMethods.partyId, id));
-  return { party, methods, inquiries: related };
+  const relatedCases = await db
+    .select({ id: cases.id, reference: cases.reference, title: cases.title })
+    .from(cases)
+    .where(
+      and(
+        caseGrantVisibility(grants, "case.read"),
+        or(
+          inArray(
+            cases.id,
+            related.flatMap((row) => row.caseId ?? []),
+          ),
+          exists(
+            db
+              .select({ id: caseParticipants.caseId })
+              .from(caseParticipants)
+              .where(
+                and(
+                  eq(caseParticipants.caseId, cases.id),
+                  eq(caseParticipants.partyId, id),
+                  liveParticipation(),
+                ),
+              ),
+          ),
+        ),
+      ),
+    )
+    .orderBy(desc(cases.updatedAt))
+    .limit(30);
+  return { party, methods, inquiries: related, cases: relatedCases };
 }
 
 // The custody register requires global key.manage; holding a key does not grant that access.

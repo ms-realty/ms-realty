@@ -1,12 +1,12 @@
 import { isPublicLocale, localeEndonyms } from "@/i18n/config";
 import type { FormCopy } from "@/ui/form/contract";
+import { staffWorkflowCopy } from "../work/workflow-completion-copy";
 
 const en = {
   inventory: "Inventory",
-  rentalTitle: "Rental source facts",
-  rentalBoundary:
-    "These are recorded source terms for human review. Missing charges are unknown, never zero; availability is not a booking confirmation.",
-  rentalUnreadable: "The recorded value needs review before this editor can display it.",
+  rentalTitle: staffWorkflowCopy("en").inventory.rentalTitle,
+  rentalBoundary: staffWorkflowCopy("en").inventory.rentalBoundary,
+  rentalUnreadable: staffWorkflowCopy("en").inventory.rentalUnreadable,
   create: "New listing",
   back: "Back to inventory",
   edit: "Working draft",
@@ -200,6 +200,7 @@ const en = {
     reviewException: "Review the exception",
   },
   o12: {
+    ...staffWorkflowCopy("en").inventory.o12,
     title: "Edit listing",
     instruction: "Change the description, save it and review it for publication.",
     sourceLine: "Bulgarian source · Working draft",
@@ -254,8 +255,6 @@ const en = {
     choose: "Choose…",
     unsupported: "not supported, choose again",
     needsInput: "Needed before preparing a review candidate",
-    unsavedStatus: "Unsaved changes",
-    savedState: "No unsaved changes",
     unsavedTitle: "You have unsaved changes",
     unsavedBody: "Save the working draft, discard these changes, or stay on this page.",
     saveDraft: "Save draft",
@@ -283,6 +282,7 @@ const en = {
     noscriptLeave: "Save your changes before opening Photos or Review.",
   },
   labels: {
+    ...staffWorkflowCopy("en").inventory.labels,
     propertyType: "Property type",
     purpose: "Sale or rent",
     country: "Country",
@@ -303,15 +303,6 @@ const en = {
     sourceReference: "Source or evidence reference",
     sourceClass: "Source type",
     sourceLanguage: "Language of the source evidence",
-    rentalDepositState: "Deposit — source state",
-    rentalDeposit: "Deposit (EUR, total)",
-    rentalChargesState: "Recurring charges — source state",
-    rentalCharges: "Known recurring charges (EUR per month)",
-    rentalChargesIncludes: "Named charges included (one per line)",
-    rentalAvailableFromState: "Available from — source state",
-    rentalAvailableFrom: "Available from (YYYY-MM-DD)",
-    rentalRestrictionsState: "Restrictions — source state",
-    rentalRestrictions: "Recorded rental restrictions",
   },
   form: {
     errorSummary: "Check the form",
@@ -331,10 +322,9 @@ type Copy = typeof en;
 const bg: Copy = {
   ...en,
   inventory: "Имоти и обяви",
-  rentalTitle: "Данни за наем от източника",
-  rentalBoundary:
-    "Това са записани условия от източника за човешки преглед. Липсващите разходи са неизвестни, а не нула; датата не потвърждава резервация.",
-  rentalUnreadable: "Записаната стойност изисква преглед, преди редакторът да я покаже.",
+  rentalTitle: staffWorkflowCopy("bg").inventory.rentalTitle,
+  rentalBoundary: staffWorkflowCopy("bg").inventory.rentalBoundary,
+  rentalUnreadable: staffWorkflowCopy("bg").inventory.rentalUnreadable,
   create: "Нова обява",
   back: "Към обявите",
   edit: "Работна чернова",
@@ -529,6 +519,7 @@ const bg: Copy = {
     reviewException: "Прегледайте изключението",
   },
   o12: {
+    ...staffWorkflowCopy("bg").inventory.o12,
     title: "Редактиране на обява",
     instruction: "Променете описанието, запишете го и го прегледайте за публикуване.",
     sourceLine: "Български източник · Работна чернова",
@@ -581,8 +572,6 @@ const bg: Copy = {
     choose: "Изберете…",
     unsupported: "не се поддържа, изберете отново",
     needsInput: "Нужно, преди да подготвите версия за преглед",
-    unsavedStatus: "Незаписани промени",
-    savedState: "Няма незаписани промени",
     unsavedTitle: "Имате незаписани промени",
     unsavedBody: "Запишете работната чернова, откажете промените или останете на страницата.",
     saveDraft: "Запишете черновата",
@@ -611,6 +600,7 @@ const bg: Copy = {
     noscriptLeave: "Запишете промените, преди да отворите „Снимки“ или прегледа.",
   },
   labels: {
+    ...staffWorkflowCopy("bg").inventory.labels,
     propertyType: "Вид имот",
     purpose: "Продажба или наем",
     country: "Държава",
@@ -631,15 +621,6 @@ const bg: Copy = {
     sourceReference: "Източник или доказателство",
     sourceClass: "Вид източник",
     sourceLanguage: "Език на източника",
-    rentalDepositState: "Депозит — състояние на източника",
-    rentalDeposit: "Депозит (EUR, общо)",
-    rentalChargesState: "Текущи разходи — състояние на източника",
-    rentalCharges: "Известни текущи разходи (EUR на месец)",
-    rentalChargesIncludes: "Включени разходи по име (по един на ред)",
-    rentalAvailableFromState: "Свободен от — състояние на източника",
-    rentalAvailableFrom: "Свободен от (ГГГГ-ММ-ДД)",
-    rentalRestrictionsState: "Ограничения — състояние на източника",
-    rentalRestrictions: "Записани ограничения при наемане",
   },
   form: {
     errorSummary: "Проверете формуляра",
@@ -657,10 +638,9 @@ const bg: Copy = {
 const ru: Copy = {
   ...en,
   inventory: "Объекты и объявления",
-  rentalTitle: "Данные об аренде из источника",
-  rentalBoundary:
-    "Это записанные условия источника для проверки человеком. Отсутствующие расходы неизвестны, а не равны нулю; дата не подтверждает бронирование.",
-  rentalUnreadable: "Записанное значение требует проверки перед отображением в редакторе.",
+  rentalTitle: staffWorkflowCopy("ru").inventory.rentalTitle,
+  rentalBoundary: staffWorkflowCopy("ru").inventory.rentalBoundary,
+  rentalUnreadable: staffWorkflowCopy("ru").inventory.rentalUnreadable,
   create: "Новое объявление",
   back: "К объявлениям",
   edit: "Рабочий черновик",
@@ -855,6 +835,7 @@ const ru: Copy = {
     reviewException: "Посмотреть исключение",
   },
   o12: {
+    ...staffWorkflowCopy("ru").inventory.o12,
     title: "Редактирование объявления",
     instruction: "Измените описание, сохраните его и проверьте перед публикацией.",
     sourceLine: "Болгарский источник · Рабочий черновик",
@@ -908,8 +889,6 @@ const ru: Copy = {
     choose: "Выберите…",
     unsupported: "не поддерживается, выберите заново",
     needsInput: "Нужно перед подготовкой версии для проверки",
-    unsavedStatus: "Несохранённые изменения",
-    savedState: "Нет несохранённых изменений",
     unsavedTitle: "Есть несохранённые изменения",
     unsavedBody: "Сохраните рабочий черновик, отмените изменения или останьтесь на странице.",
     saveDraft: "Сохранить черновик",
@@ -938,6 +917,7 @@ const ru: Copy = {
     noscriptLeave: "Сохраните изменения перед переходом в «Фото» или к проверке.",
   },
   labels: {
+    ...staffWorkflowCopy("ru").inventory.labels,
     propertyType: "Вид объекта",
     purpose: "Продажа или аренда",
     country: "Страна",
@@ -958,15 +938,6 @@ const ru: Copy = {
     sourceReference: "Источник или доказательство",
     sourceClass: "Вид источника",
     sourceLanguage: "Язык источника",
-    rentalDepositState: "Депозит — состояние источника",
-    rentalDeposit: "Депозит (EUR, всего)",
-    rentalChargesState: "Текущие расходы — состояние источника",
-    rentalCharges: "Известные текущие расходы (EUR в месяц)",
-    rentalChargesIncludes: "Включённые расходы по названию (по одному в строке)",
-    rentalAvailableFromState: "Доступно с — состояние источника",
-    rentalAvailableFrom: "Доступно с (ГГГГ-ММ-ДД)",
-    rentalRestrictionsState: "Ограничения — состояние источника",
-    rentalRestrictions: "Записанные ограничения аренды",
   },
   form: {
     errorSummary: "Проверьте форму",

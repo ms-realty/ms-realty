@@ -18,6 +18,7 @@ import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
 import { readTaskHandover } from "@/server/work/handover";
+import { readReviewedInquiryReply } from "@/server/work/inquiry-reply";
 import { listContacts, listTasks, readContact, readInquiry } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
@@ -31,10 +32,10 @@ import {
   taskAction,
   triageAction,
 } from "./actions";
+import { ContactActions } from "./contact-actions";
 import { contactCopy, contactMethodLabel } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
-import { coverageCopy } from "./coverage-copy";
 import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
@@ -56,9 +57,13 @@ import {
   isInquiryDraftKind,
   parseInquiryReference,
 } from "./inquiry-reference";
+import { InquiryReply } from "./inquiry-reply";
 import { inquiryHref, parseInboxScope, queueHref } from "./inquiry-row";
 import { InquirySelectionContext } from "./inquiry-selection-context";
+import { RecordSearch } from "./record-search";
+import { recordSearchAction } from "./record-search-action";
 import { When } from "./when";
+import { staffWorkflowCopy } from "./workflow-completion-copy";
 
 export function checkLocale(locale: string): asserts locale is StaffLocale {
   if (!isStaffLocale(locale)) notFound();
@@ -206,6 +211,10 @@ export async function InquiryScreen({
 }) {
   const detail = await privateRead(() => readInquiry(getDb(), session, id));
   const { inquiry, ownerName } = detail;
+  const replyDraft =
+    detail.canAssist && detail.canRespond
+      ? await readReviewedInquiryReply(getDb(), session, id)
+      : null;
   const copy = workCopy(locale);
   const contact = contactCopy(locale);
   const draftOwner = inquiryDraftOwner(session);
@@ -450,6 +459,20 @@ export async function InquiryScreen({
                   })}
                 />
               </section>
+            ) : null}
+            {detail.canRespond ? (
+              <>
+                <ContactActions
+                  locale={locale}
+                  methods={detail.contactMethod ? [detail.contactMethod] : []}
+                />
+                <InquiryReply
+                  locale={locale}
+                  reference={inquiry.reference}
+                  contact={detail.contactMethod}
+                  draft={replyDraft}
+                />
+              </>
             ) : null}
             <InquiryCaseLink locale={locale} session={session} detail={detail} />
             {targets.length ? (
@@ -730,12 +753,12 @@ export async function TaskScreen({
           </div>
         ) : null}
       </dl>
-      {task.inquiryId ? (
+      {task.inquiryId && view.canReadInquiry ? (
         <a className={link} href={`/${locale}/inquiries/${task.inquiryId}`}>
           {copy.inbox}
         </a>
       ) : null}
-      {task.caseId ? (
+      {task.caseId && view.canReadCase ? (
         <a className={link} href={`/${locale}/cases/${task.caseId}`}>
           {caseCopy(locale).cases}
         </a>
@@ -778,20 +801,32 @@ export async function ContactsScreen({
   return (
     <Page title={copy.contacts} locale={locale}>
       <p>{copy.contactScope}</p>
-      {queue.rows.length ? (
-        <ul className="divide-y divide-border">
-          {queue.rows.map((row) => (
-            <li key={row.id} className="py-4">
-              <a className={link} href={`/${locale}/contacts/${row.id}`}>
-                {row.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>{copy.noContacts}</p>
-      )}
-      <Pagination {...queue} href={`/${locale}/contacts`} locale={locale} />
+      <RecordSearch
+        locale={locale}
+        path={`/${locale}/contacts`}
+        action={recordSearchAction.bind(null, locale, "contacts")}
+      >
+        {queue.rows.length ? (
+          <ul className="divide-y divide-border">
+            {queue.rows.map((row) => (
+              <li key={row.id} className="py-4">
+                <a className={link} href={`/${locale}/contacts/${row.id}`}>
+                  {row.name}
+                </a>
+                <ContactActions locale={locale} methods={row.methods} />
+                <p className="mt-2 text-dense text-text-muted">
+                  {staffWorkflowCopy(locale).lastActivity}:{" "}
+                  <When date={new Date(row.latestInquiryAt)} locale={locale} /> · {copy.inbox}:{" "}
+                  {row.inquiryCount}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>{copy.noContacts}</p>
+        )}
+        <Pagination {...queue} href={`/${locale}/contacts`} locale={locale} />
+      </RecordSearch>
     </Page>
   );
 }
@@ -811,6 +846,21 @@ export async function ContactScreen({
     <Page title={contact.party.displayName} locale={locale}>
       <DuplicateIdentityLink locale={locale} session={session} subject="party" id={id} />
       <p>{copy.contactScope}</p>
+      <ContactActions locale={locale} methods={contact.methods} />
+      {contact.cases.length ? (
+        <section className="space-y-3">
+          <h2 className="text-subheading font-semibold">{staffWorkflowCopy(locale).linkedCases}</h2>
+          <ul className="space-y-3">
+            {contact.cases.map((row) => (
+              <li key={row.id}>
+                <a className={link} href={`/${locale}/cases/${row.id}`}>
+                  <bdi>{row.reference}</bdi> · {row.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <section className="space-y-3">
         <h2 className="text-subheading font-semibold">{copy.methods}</h2>
         {contact.methods.length === 0 ? <p className="text-text-muted">{copy.noMethods}</p> : null}

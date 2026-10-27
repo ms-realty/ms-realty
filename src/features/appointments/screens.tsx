@@ -24,8 +24,10 @@ import {
   workflowLink,
 } from "../cases/screens";
 import { StaffPage } from "../shell/staff-ui";
+import { ContactActions } from "../work/contact-actions";
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
+import { staffWorkflowCopy } from "../work/workflow-completion-copy";
 import calendarStyles from "./calendar.module.css";
 import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
 import { CalendarView } from "./calendar-view";
@@ -221,6 +223,52 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             </a>
           ) : null}
         </WorkflowSection>
+      ) : null}
+      {staff && detail.staffContext ? (
+        <section className="space-y-3">
+          {detail.staffContext.contacts.length ? (
+            <>
+              <h2 className="text-subheading font-semibold">
+                {staffWorkflowCopy(props.locale).contacts}
+              </h2>
+              {[...new Set(detail.staffContext.contacts.map((contact) => contact.partyId))].map(
+                (partyId) => (
+                  <div key={partyId} className="space-y-2">
+                    <p className="font-semibold">
+                      {
+                        detail.staffContext?.contacts.find((contact) => contact.partyId === partyId)
+                          ?.name
+                      }
+                    </p>
+                    <ContactActions
+                      locale={props.locale}
+                      methods={
+                        detail.staffContext?.contacts.filter(
+                          (contact) => contact.partyId === partyId,
+                        ) ?? []
+                      }
+                    />
+                  </div>
+                ),
+              )}
+            </>
+          ) : null}
+          {detail.staffContext.location ? (
+            <>
+              <p>
+                <bdi>{detail.staffContext.location.address}</bdi>
+              </p>
+              <a
+                className="inline-flex min-h-control items-center rounded-control border border-border px-3 py-2 font-semibold text-link"
+                href={`https://www.google.com/maps/search/?${new URLSearchParams({ api: "1", query: detail.staffContext.location.address })}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {staffWorkflowCopy(props.locale).openMap}
+              </a>
+            </>
+          ) : null}
+        </section>
       ) : null}
       {row.proposedStartsAt &&
       ["proposed", "reschedule_requested"].includes(row.state) &&

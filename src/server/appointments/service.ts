@@ -41,6 +41,7 @@ import { allow, commandEnvelope, openAppointmentStates, parseInput, version } fr
 import { readHostReceivers } from "./host-receivers";
 import { readAppointmentListing } from "./listing-context";
 import { propertyHostCan, propertyWorkFor } from "./property-work";
+import { appointmentStaffContext } from "./staff-context";
 import { appointmentTimezone, calendarFile, inServiceHours, sofiaInstant } from "./time";
 import { staffAppointmentVisibility } from "./visibility";
 
@@ -695,6 +696,7 @@ export async function readAppointment(
   locale?: PublicLocale,
 ) {
   const { row, live, resource } = await appointmentFor(db, session, id);
+  const staffContext = await appointmentStaffContext(db, live, row);
   const propertyWork = row.purpose === "photography" ? await propertyWorkFor(db, live, row) : null;
   const listing =
     locale && row.caseId
@@ -764,6 +766,7 @@ export async function readAppointment(
     : [];
   return {
     listing,
+    staffContext,
     propertyWork: propertyWork
       ? {
           listingId: propertyWork.listing.id,

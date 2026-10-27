@@ -160,6 +160,7 @@ export async function readCase(db: Executor, session: Session, id: string) {
     )
       ownerPreviews.push(listing.reference);
   return {
+    canReadInternal: internal,
     ownerPreviews: [...new Set(ownerPreviews)],
     record: {
       id: row.id,

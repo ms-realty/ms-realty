@@ -26,7 +26,7 @@ export const workflowFields: Record<WorkflowCommand, readonly string[]> = {
   emailDraft: ["subscriptionIds", "documentVersionIds", "appointmentId", "subject", "body"],
   emailApprove: ["messageId", "messageVersion", "reviewHash", "reviewed"],
   create: ["kind", "serviceTopic", "title", "nextAction", "dueAt", "requirements", "preferences"],
-  next: ["nextAction", "dueAt", "clientSummary"],
+  next: ["nextAction", "dueAt", "clientSummary", "reason"],
   brief: ["requirements", "preferences"],
   acknowledge: ["briefId", "reviewed"],
   sellerBind: ["instructionId", "reviewed", "reason"],
