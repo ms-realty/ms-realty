@@ -484,7 +484,8 @@
     "orderSavedDetail": "{reference} · Nieuwe fotovolgorde: {order}. De openbare advertentie is niet gewijzigd.",
     "orderSavedPlain": "{reference} · De nieuwe werkvolgorde is opgeslagen. De openbare advertentie is niet gewijzigd.",
     "orderChangedSince": "De volgorde is sinds deze opslag gewijzigd. De galerij toont de huidige volgorde.",
-    "toTask": "Terug naar de huidige taak"
+    "toTask": "Terug naar de huidige taak",
+    "review_consent": "Toestemming voor publicatie van de beoordeling"
   },
   "documents": {
     "title": "Documenten",

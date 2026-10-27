@@ -1,6 +1,6 @@
-import agencyBg from "../../../messages/staff/bg/agency.json";
-import agencyEn from "../../../messages/staff/en/agency.json";
-import agencyRu from "../../../messages/staff/ru/agency.json";
+import agencyBg from "../../../messages/staff/bg/agency.json" with { type: "json" };
+import agencyEn from "../../../messages/staff/en/agency.json" with { type: "json" };
+import agencyRu from "../../../messages/staff/ru/agency.json" with { type: "json" };
 
 const en = {
   title: "Editorial content",

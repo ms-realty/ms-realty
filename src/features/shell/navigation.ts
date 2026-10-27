@@ -66,6 +66,7 @@ export const journeyNav: readonly NavItem<JourneyNavLabel>[] = [
   { label: "appointments", screen: "C06", path: "/appointments" },
   { label: "messages", screen: "C07", path: "/messages" },
   { label: "documents", screen: "C08", path: "/documents" },
+  { label: "reviews", screen: "C18", path: "/reviews" },
 ];
 
 export const journeyHelpNav: NavItem<JourneyNavLabel> = {
@@ -128,6 +129,7 @@ export const agencyTools: Readonly<Record<AgencyToolSection, readonly AgencyTool
     },
   ],
   management: [
+    { label: "agency", screen: "O25", path: "/operations/agency", requires: ["compliance.review"] },
     { label: "pages", screen: "O21", path: "/content", requires: ["content.edit"] },
     { label: "reports", screen: "O22", path: "/reports", requires: ["report.read"] },
     { label: "team", screen: "O23", path: "/access/manage", requires: ["access.grant"] },

@@ -30,7 +30,7 @@
   "noCase": "Standing relationship — no Case",
   "noDocument": "Supplied terms text is the source",
   "sourceHint": "Transcribe the actual terms exactly. Supply their actual reference and version; do not generate missing clauses or fees.",
-  "reviewHint": "First prepare and qualify a Bulgarian CMS Review: title is the consented public name or Отзив; first paragraph is exact review text, second is the exact verification statement. The author then grants or refuses separate consent.",
+  "reviewHint": "First prepare and qualify a Bulgarian CMS Review: title is the consented public name or the anonymous review heading; first paragraph is exact review text, second is the exact verification statement. The author then grants or refuses separate consent.",
   "policyHeld": "The current review-consent policy is unavailable. Positive client consent stays held; use the approved manual consent procedure and reviewed evidence.",
   "manual": "Use the agency’s approved manual procedure and retain its exact evidence.",
   "reviewed": "I checked this exact source, scope and action.",
@@ -79,5 +79,13 @@
   "owner": "Accountable owner",
   "verificationRecorded": "Exact review verification recorded",
   "publicationSeparate": "Publication remains a separate CMS decision.",
-  "author": "Recorded review author"
+  "author": "Recorded review author",
+  "historyRecent": "Recent decisions · up to 50 permitted entries",
+  "photoBoundary": "Scheduling and media rights are reviewed separately.",
+  "arrangePhoto": "Arrange photography",
+  "photoArrangeHint": "Check the current host, property access, service hours and external calendars before committing the time.",
+  "photoActions": "Other appointment actions",
+  "termsReviewed": "I reviewed this exact supplied source and will be its accountable owner.",
+  "stepUp": "Confirm your identity to apply this change. Your draft is retained.",
+  "reauth": "Confirm identity"
 }

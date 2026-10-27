@@ -56,6 +56,13 @@ const offsetText = (at: Date, zone: string) =>
     .formatToParts(at)
     .find((part) => part.type === "timeZoneName")?.value;
 
+function appointmentHeading(
+  row: Pick<CalendarAppointment, "purpose" | "caseTitle" | "reference">,
+  photography: string,
+) {
+  const title = row.caseTitle || row.reference;
+  return row.purpose === "photography" ? `${photography} · ${title}` : title;
+}
 function showCalendarOffsets(start: Date, end: Date, zone: CalendarQuery["zone"]) {
   if (offsetText(start, zone) !== offsetText(end, zone)) return true;
   // A viewing wholly inside either repeated hour also needs an explicit offset.
@@ -406,7 +413,7 @@ function CalendarItem({
       <header className={s.appointmentHeader}>
         <h4>
           <a className={s.appointmentTitle} href={`/${locale}/calendar/${row.id}`}>
-            {row.caseTitle || row.reference}
+            {appointmentHeading(row, c.photography)}
             <ChevronEndIcon directional />
           </a>
         </h4>
@@ -521,7 +528,8 @@ function CalendarItem({
             ) : null}
             {row.caseId ? (
               <a className={s.textLink} href={`/${locale}/cases/${row.caseId}`}>
-                {c.deal}: <bdi>{row.caseReference}</bdi>
+                {row.purpose === "photography" ? c.property : c.deal}:{" "}
+                <bdi>{row.caseReference}</bdi>
               </a>
             ) : null}
           </div>
@@ -764,7 +772,7 @@ function WeekOverview({
                       data-proposed={segment.proposed || undefined}
                       data-reserved={segment.reserved || undefined}
                       href={`/${locale}/calendar/${segment.row.id}`}
-                      title={`${segment.row.caseTitle || segment.row.reference} · ${previewRange(segment.start, segment.end, locale, query.zone)} · ${segment.row.reference}`}
+                      title={`${appointmentHeading(segment.row, c.photography)} · ${previewRange(segment.start, segment.end, locale, query.zone)} · ${segment.row.reference}`}
                       style={{
                         top: `calc(${(segment.start.getTime() - bounds.start.getTime()) / 3600000 - firstHour} * var(--calendar-hour) + 2px)`,
                         height: `max(2.75rem, calc(${(segment.end.getTime() - segment.start.getTime()) / 3600000} * var(--calendar-hour) - 4px))`,
@@ -776,7 +784,7 @@ function WeekOverview({
                         {previewRange(segment.start, segment.end, locale, query.zone)}
                       </span>
                       <strong className={s.eventTitle}>
-                        {segment.row.caseTitle || segment.row.reference}
+                        {appointmentHeading(segment.row, c.photography)}
                       </strong>
                       <span className={s.eventReference}>
                         <bdi>{segment.row.reference}</bdi>
@@ -863,7 +871,7 @@ export function CalendarView({
                   {data.requests.map((row) => (
                     <li key={row.id}>
                       <a href={`/${locale}/calendar/${row.id}`}>
-                        <strong>{row.caseTitle || row.reference}</strong>
+                        <strong>{appointmentHeading(row, c.photography)}</strong>
                         <span>
                           <bdi>{row.reference}</bdi> · <bdi>{row.caseReference}</bdi>
                         </span>

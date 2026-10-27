@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { cx } from "@/ui/cx";
 import { ChevronStartIcon } from "@/ui/icons";
+import { agencyCopy } from "../agency-obligations/copy";
 import { inventoryCopy } from "./copy";
 import { inventorySections } from "./decision-contract";
 import { LeaveControl } from "./leave-control";
@@ -16,6 +17,7 @@ export function listingSections(locale: string, reference: string) {
     { id: "text", href: path, label: copy.o12.text },
     { id: "facts", href: `${path}?tab=facts`, label: copy.o12.facts },
     { id: "media", href: `${path}/media`, label: copy.o12.photos },
+    { id: "photography", href: `${path}/photography`, label: agencyCopy(locale).photo },
     { id: "documents", href: `${path}/documents`, label: labels.documents },
     { id: "evidence", href: `${path}/evidence`, label: labels.evidence },
     {
@@ -72,7 +74,9 @@ export function ListingNavigation({
         </summary>
         <ul className="mb-3 flex flex-wrap gap-1 rounded-control bg-subtle p-2">
           {listingSections(locale, reference)
-            .filter((section) => ["documents", "evidence", "translations"].includes(section.id))
+            .filter((section) =>
+              ["documents", "evidence", "translations", "photography"].includes(section.id),
+            )
             .map((section) => (
               <li key={section.id}>
                 <LeaveControl
