@@ -103,6 +103,7 @@ it("X02 starts closed, offers permitted native page links and preserves a person
     "/en/calendar",
     "/en/tasks",
     "/en/contacts",
+    "/en/operations/consultations",
     "/en/coverage",
   ]);
   expect(hrefs(navigation[1] as HTMLElement)).toEqual(["/en/settings"]);

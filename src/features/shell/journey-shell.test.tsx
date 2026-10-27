@@ -27,15 +27,20 @@ vi.mock("next-intl/server", () => ({
 afterEach(cleanup);
 
 it.each(["en", "he"] as const)(
-  "retains all five real native destinations, current state and private content in %s",
+  "retains every Case and review destination, current state and private content in %s",
   async (locale) => {
     location.pathname = `/${locale}/overview`;
     const { container } = render(
       await JourneyShell({ locale, children: <p>Authorized Case content</p> }),
     );
-    const expected = ["overview", "properties", "appointments", "messages", "documents"].map(
-      (path) => `/${locale}/${path}`,
-    );
+    const expected = [
+      "overview",
+      "properties",
+      "appointments",
+      "messages",
+      "documents",
+      "reviews",
+    ].map((path) => `/${locale}/${path}`);
     const navigations = container.querySelectorAll("nav");
     expect(navigations).toHaveLength(2);
     for (const navigation of navigations) {
