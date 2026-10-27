@@ -44,11 +44,11 @@ describe("F10/AT42 inquiry photo transport", () => {
   });
 
   it("publishes the receipt capability, strict multipart shape and actual redirect error channel", () => {
-    expect(upload?.params?.safeParse({ receiptId: issueSubmissionKey() }).success).toBe(true);
-    expect(upload?.params?.safeParse({ receiptId: crypto.randomUUID() }).success).toBe(false);
+    expect(upload?.params?.safeParse({ submission: issueSubmissionKey() }).success).toBe(true);
+    expect(upload?.params?.safeParse({ submission: crypto.randomUUID() }).success).toBe(false);
     expect(upload?.query?.parse({})).toEqual({ locale: "bg" });
     expect(upload?.query?.safeParse({ locale: "unsupported" }).success).toBe(false);
-    const operation = buildOpenApiDocument().paths["/api/inquiries/{receiptId}/photos"]?.post;
+    const operation = buildOpenApiDocument().paths["/api/inquiries/{submission}/photos"]?.post;
     expect(operation).toMatchObject({
       servers: [{ url: "https://makler-realty.com" }],
       security: [{ receiptSession: [] }],
@@ -62,7 +62,7 @@ describe("F10/AT42 inquiry photo transport", () => {
         "unavailable",
       ],
       parameters: [
-        { name: "receiptId", in: "path", required: true },
+        { name: "submission", in: "path", required: true },
         {
           name: "locale",
           in: "query",

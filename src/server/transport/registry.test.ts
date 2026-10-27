@@ -48,6 +48,24 @@ describe("transport registry", () => {
       expect(buildOpenApiDocument().paths[tool.path]).toBeUndefined();
   });
 
+  it("uses one dynamic parameter name per API path level so the production matcher can start", () => {
+    const names = new Map<string, string>();
+    for (const operation of routeFileOperations()) {
+      const path = operation.slice(operation.indexOf(" ") + 1),
+        parts = path.split("/");
+      for (let index = 0; index < parts.length; index++) {
+        const name = /^\{([^}]+)\}$/.exec(parts[index] ?? "")?.[1];
+        if (!name) continue;
+        const prefix = parts
+          .slice(0, index + 1)
+          .map((part) => part.replace(/^\{[^}]+\}$/, "{}"))
+          .join("/");
+        expect(names.get(prefix) ?? name, operation).toBe(name);
+        names.set(prefix, name);
+      }
+    }
+  });
+
   it("has unique operation ids and a capability on every staff endpoint", () => {
     expect(new Set(registered.map((entry) => entry.id)).size).toBe(registered.length);
     for (const entry of registered) {

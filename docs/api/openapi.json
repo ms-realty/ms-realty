@@ -3999,7 +3999,7 @@
         "x-acceptance": ["AT10", "AT11"]
       }
     },
-    "/api/inquiries/{receiptId}/photos": {
+    "/api/inquiries/{submission}/photos": {
       "post": {
         "operationId": "inquiries.attachPhoto",
         "summary": "Attach one optional assessment photo to an accepted owner inquiry",
@@ -4018,7 +4018,7 @@
         ],
         "parameters": [
           {
-            "name": "receiptId",
+            "name": "submission",
             "in": "path",
             "required": true,
             "schema": {

@@ -1,5 +1,5 @@
 import { beforeEach, expect, it, vi } from "vitest";
-import { POST } from "../../../app/api/inquiries/[receiptId]/photos/route";
+import { POST } from "../../../app/api/inquiries/[submission]/photos/route";
 import { getEnv } from "../config/env";
 import { AppError } from "../errors";
 import { issueSubmissionKey, newReceiptSession, receiptCookieName } from "./intake";
@@ -56,7 +56,7 @@ function request(overrides: Record<string, string> = {}, duplicate = false) {
   };
 }
 const post = (value: ReturnType<typeof request>) =>
-  POST(value.req, { params: Promise.resolve({ receiptId: value.receiptId }) });
+  POST(value.req, { params: Promise.resolve({ submission: value.receiptId }) });
 it("F10 checks exact Origin and receipt authorization before reading multipart bytes", async () => {
   const originCases: Record<string, string>[] = [
     { origin: "https://foreign.example.test" },

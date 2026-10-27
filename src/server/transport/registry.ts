@@ -694,7 +694,7 @@ export const endpoints = [
       " non-erased photos belong to an Inquiry. The operation UUID is bound to that Inquiry and measured bytes, type and dimensions; the same operation and bytes reconcile the reservation or sealed result, while different bytes or an erased reservation conflict. Storage interruption retains the retry identity; reconcile the receipt before retrying. Acceptance seals verified private bytes and queues scanning, without establishing a clean scan, human review, publication rights or retention approval. Always returns a fixed receipt redirect on success and declared form failures; no JSON success or photo-byte URL. Wrong host or unsupported locale returns an empty 404. Receipt, Origin and forbidden failures use the standard JSON envelope; unexpected failures use its internal error with no-store and request correlation.",
     group: "public_submission",
     method: "POST",
-    path: "/api/inquiries/{receiptId}/photos",
+    path: "/api/inquiries/{submission}/photos",
     host: "public",
     authorization: "receipt_session",
     acceptance: ["AT10", "AT11", "AT42"],
@@ -702,7 +702,7 @@ export const endpoints = [
     revision: "none",
     pagination: "none",
     params: z.object({
-      receiptId: z
+      submission: z
         .string()
         .regex(/^[A-Za-z0-9_-]{43}\.[0-9a-f]{32}$/)
         .describe(

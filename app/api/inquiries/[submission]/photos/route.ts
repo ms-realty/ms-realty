@@ -26,13 +26,13 @@ import { assertRecoveryOpen } from "@/server/recovery/quarantine";
 export const runtime = "nodejs";
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ receiptId: string }> },
+  { params }: { params: Promise<{ submission: string }> },
 ) {
   const env = getEnv();
   const locale = new URL(request.url).searchParams.get("locale") ?? "bg";
   if (hostContextOf(request.headers, env) !== "public" || !isRoutableLocale(locale))
     return new Response(null, { status: 404 });
-  const { receiptId } = await params;
+  const { submission: receiptId } = await params;
   const owner = {
     submissionKey: receiptId,
     receiptSession: validReceiptSession(
