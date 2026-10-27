@@ -1,0 +1,106 @@
+{
+  "kind": "B10 private HTTP followup; source and focused checks only",
+  "source": {
+    "base": "072d222b362ff98fa4c1263379cb8fdc7c8b4d2f",
+    "commit": "f9c082d287f1d3bed33c710dd11ea29cbdd85fec",
+    "branch": "codex/msr-agency-http",
+    "priorBranchPreserved": "codex/msr-agency-obligations"
+  },
+  "changes": [
+    "Mount the production agency API family on client/staff hosts only; keep public404 and command-specific own-host/session guards",
+    "Export the seven actual existing service parsers without changing their validation or domain behavior",
+    "Register the exact POST /api/agency/{command} endpoint, named body alternatives, typed result, private cookie security, revision/key semantics and safe errors",
+    "Return safe validation errors for unsupported content types and malformed JSON",
+    "Add actual proxy and real request-wrapper tests without weakening route inventory or local-only exclusions"
+  ],
+  "contract": {
+    "method": "POST",
+    "path": "/api/agency/{command}",
+    "host": "private",
+    "authorization": "private_session",
+    "clientCommand": "clientConsent",
+    "staffCommands": [
+      "partnerSave",
+      "partnerDecision",
+      "reviewSave",
+      "reviewDocumentConsent",
+      "reviewVerify",
+      "photography"
+    ],
+    "openapiVersion": "0.4.0",
+    "artifact": "docs/api/openapi.json",
+    "artifactSha256": "1daf7a0790a48da5dca5dab58e812d71e6a738d5b361919e880707ab3d0a93c0",
+    "localTestOperationsChanged": false
+  },
+  "checks": [
+    {
+      "name": "focused-units",
+      "command": "npx vitest run src/server/config/hosts.test.ts src/server/transport/registry.test.ts src/server/agency-obligations/http-route.test.ts src/server/agency-obligations/transport-schema.test.ts src/server/http/request.test.ts proxy.test.ts",
+      "files": 6,
+      "tests": 66,
+      "exitCode": 0,
+      "log": "output/agency-http/unit-final.log",
+      "logSha256": "618c5054343d6e0a0ddea9d34e44f0bb2e3ec0605d645161cd78b4b49e8d571c"
+    },
+    {
+      "name": "typecheck",
+      "command": "NEXT_DIST_DIR=.next-agency-http npx next typegen && npx tsc --noEmit",
+      "exitCode": 0,
+      "log": "output/agency-http/types-final.log",
+      "logSha256": "adba4af9194e10e47dda75ff0fd0f8c2b756474896d0eba5612799c527ff372a"
+    },
+    {
+      "name": "lint",
+      "command": "npm run lint",
+      "exitCode": 0,
+      "warnings": 4,
+      "informationDiagnostics": 71,
+      "log": "output/agency-http/lint-final.log",
+      "logSha256": "70a23a44026f135a9331239213624329eb412e810cd0af36a07ea5965e6b63d2"
+    },
+    {
+      "name": "openapi-generation",
+      "command": "npm run openapi:generate",
+      "exitCode": 0,
+      "log": "output/agency-http/openapi-generate.log",
+      "logSha256": "166d550662c1b0ff6e358773d0c2049a1efae3c41568422e8f4f09603c37b73c"
+    },
+    {
+      "name": "openapi-current",
+      "command": "npm run openapi:generate -- --check",
+      "exitCode": 0,
+      "log": "output/agency-http/openapi-check.log",
+      "logSha256": "e78d99165b1f4252a2fe3caedcc787d67488bc17376c3d46842f20a59022c10a"
+    }
+  ],
+  "retainedFailure": {
+    "log": "output/agency-http/types-first.log",
+    "logSha256": "52cf543af8081a99d384a5e98ee3b2bab25c699f92ff584e92a0f4c100e4a044",
+    "exitCode": 1,
+    "cause": "New test accessed properties on the generator unknown-typed operation object (TS2339). Replaced those accesses with a structural expectation; product source unchanged by that correction."
+  },
+  "browser": {
+    "status": "pending_root_combined_run",
+    "testFile": "e2e/agency-obligations.spec.ts",
+    "testName": "B10 actual private JSON transport enforces surface, replay and original-author consent",
+    "testFileSha256": "890fb2c2749a5d21668f51db0d3cc25fb28536ce1757987e5f0f5b9d6e0743fa",
+    "scope": [
+      "Actual same-origin browser fetch with staff and client host-only cookies",
+      "Public and wrong private-command 404; unknown command404",
+      "Staff exact-source save, identical replay, changed payload409, stale revision409 and wrong counterparty404",
+      "Original-author exact policy consent, replay and withdrawal via JSON",
+      "Current qualification revocation holds staff replay and preserves one draft"
+    ],
+    "heavyBuildOrBrowserRunByWorker": false
+  },
+  "priorProof": {
+    "source": "ac2788be",
+    "manifest": "docs/delivery/evidence/b10-local-qualification.json",
+    "note": "Earlier native/enhanced UI browser proof remains bound to its original source. It does not qualify this HTTP followup."
+  },
+  "boundaries": {
+    "domainBehavior": "Existing command schemas were exported and renamed only; no SQL, grants, privacy internals or native UI redesign.",
+    "publication": "No push, PR, provider, staging, deployment or launch-authority mutation. Root owns combined browser proof and publication.",
+    "humanAcceptance": "No actual terms, consent, policy, rights or human acceptance asserted."
+  }
+}
