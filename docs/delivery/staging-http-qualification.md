@@ -19,9 +19,18 @@ The prerequisite job requires the exact repository, manual event and staging bra
 matching workflow/run/source SHAs, the repository's qualified source, a clean exact
 checkout integrated in reviewed `origin/main`, and the successful staging deployment
 workflow/run/attempt for that source. Only then can the protected environment resolve.
+GitHub defines these workflow and commit identities in its
+[variables reference](https://docs.github.com/en/actions/reference/workflows-and-actions/variables).
 The immutable candidate bundle, image checks, observation-only credentials and shared
 `ms-realty-staging` concurrency lock remain required. Reusing a deployment receipt for
 another source or running an ahead/behind checker is rejected.
+
+The companion Cloudflare inventory workflow keeps its redacted run artifact and cannot
+commit or push generated inventory back to the staging branch. Such a push would advance
+the branch beyond its qualified/deployed SHA and correctly fail this checker's guards.
+Before promoting the combined candidate, retain the existing staging tip in its history
+so promotion can fast-forward without discarding earlier inventory evidence. Source review
+does not move the live branch or rewrite that history.
 
 The older frozen deployment does not contain this new workflow, so it cannot execute
 this route. Keep that image held until the coordinated candidate is qualified. A source

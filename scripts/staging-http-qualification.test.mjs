@@ -506,3 +506,17 @@ test("R07/R08 hosted qualification holds the same staging lock and exposes only 
   ])
     assert(!workflow.includes(forbidden), forbidden);
 });
+
+test("R07 inventory evidence cannot advance the exact qualified staging ref", async () => {
+  const inventory = await readFile(
+    new URL("../.github/workflows/staging-cloudflare.yml", import.meta.url),
+    "utf8",
+  );
+  assert(inventory.includes("contents: read"));
+  assert(inventory.includes("persist-credentials: false"));
+  assert(/ref: \$\{\{ github\.sha \}\}/u.test(inventory));
+  assert(inventory.includes("actions/upload-artifact@"));
+  assert(/ms-realty-cloudflare-inventory-\$\{\{ github\.run_id \}\}/u.test(inventory));
+  for (const write of ["contents: write", "git push", "git commit", "git add"])
+    assert(!inventory.includes(write), write);
+});
