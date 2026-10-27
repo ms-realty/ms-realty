@@ -9,6 +9,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { agencyCopy, caseReviewCopy } from "../src/features/agency-obligations/copy";
 import { caseCopy } from "../src/features/cases/copy";
+import { workCopy } from "../src/features/work/copy";
 import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -25,6 +26,7 @@ type Fixture = {
   clientToken: string;
   clientId: string;
   partyId: string;
+  partyName: string;
   caseId: string;
   reviewId: string;
   contentPageId: string;
@@ -33,7 +35,7 @@ type Fixture = {
   listingId: string;
   listingReference: string;
 };
-function seed(): Fixture {
+function seed(partnerPicker = false): Fixture {
   return JSON.parse(
     execFileSync(
       process.execPath,
@@ -42,6 +44,7 @@ function seed(): Fixture {
         "--import",
         "tsx",
         "src/server/agency-obligations/browser-seed.ts",
+        ...(partnerPicker ? ["--partner-picker"] : []),
       ],
       {
         encoding: "utf8",
@@ -225,7 +228,7 @@ for (const javaScriptEnabled of [true, false]) {
     browser,
   }, info) => {
     test.setTimeout(120000);
-    const f = seed(),
+    const f = seed(true),
       c = agencyCopy("en"),
       context = await browser.newContext({ ...info.project.use, javaScriptEnabled });
     try {
@@ -242,7 +245,39 @@ for (const javaScriptEnabled of [true, false]) {
       page.setDefaultTimeout(15000);
       await page.goto(hostUrl("staff", "/en/operations/agency/partners/new"));
       const marker = `Synthetic standing partner ${randomUUID()}`;
-      await page.getByLabel(c.fields.counterpartyPartyId, { exact: true }).selectOption(f.partyId);
+      await expect(
+        page.getByRole("heading", { name: c.pickCounterparty, exact: true }),
+      ).toBeVisible();
+      await expect(page.getByLabel(c.fields.termsText, { exact: true })).toHaveCount(0);
+      const draft = new URL(page.url()).searchParams.get("draft");
+      expect(draft).toMatch(/^[a-f0-9-]{36}$/);
+      const choice = page.getByRole("link", { name: f.partyName, exact: true });
+      await expect(choice).toHaveCount(0);
+      await page.setViewportSize({ width: 320, height: 844 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.screenshot({
+        path: info.outputPath(
+          `partner-picker-${javaScriptEnabled ? "enhanced" : "native"}-320.png`,
+        ),
+        fullPage: true,
+      });
+      let pages = 0;
+      while (!(await choice.count())) {
+        const previousPage = Number(new URL(page.url()).searchParams.get("page") ?? 1);
+        await page.getByRole("link", { name: workCopy("en").next, exact: true }).click();
+        expect(new URL(page.url()).searchParams.get("draft")).toBe(draft);
+        expect(Number(new URL(page.url()).searchParams.get("page"))).toBe(previousPage + 1);
+        pages++;
+      }
+      expect(pages).toBeGreaterThan(0);
+      await choice.click();
+      expect(new URL(page.url()).searchParams.get("draft")).toBe(draft);
+      expect(new URL(page.url()).searchParams.get("party")).toBe(f.partyId);
+      await expect(page.getByLabel(c.fields.counterpartyPartyId, { exact: true })).toHaveValue(
+        f.partyId,
+      );
       await page.getByLabel(c.fields.purpose, { exact: true }).fill(marker);
       await page
         .getByLabel(c.fields.sourceReference, { exact: true })
