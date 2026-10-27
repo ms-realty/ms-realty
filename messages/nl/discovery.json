@@ -140,5 +140,23 @@
     },
     "boundary": "Dit verzoek is voor beoordeling door een persoon. Datums zijn voorkeuren; indienen bevestigt geen beschikbaarheid, reservering of werk. Dit webverzoek is geen noodhulpdienst.",
     "held": "De dienstverlening is niet langer bevestigd. Neem contact op met de verantwoordelijke persoon voor verduidelijking of een handmatig alternatief."
-  }
+  },
+  "close": "Sluiten",
+  "cancel": "Annuleren",
+  "filterDraftHint": "Wijzigingen zijn een concept. Toepassen werkt de resultaten bij; sluiten verwijdert deze wijzigingen.",
+  "clearDraft": "Concept wissen",
+  "mediaViewer": "Woninggalerij",
+  "openMedia": "Afbeelding {position} openen",
+  "previousMedia": "Vorige afbeelding",
+  "nextMedia": "Volgende afbeelding",
+  "zoomIn": "Inzoomen",
+  "zoomOut": "Uitzoomen",
+  "fitMedia": "Hele afbeelding",
+  "mediaPosition": "{position} van {count}",
+  "mediaPhoto": "Afbeelding",
+  "mediaFloorPlan": "Plattegrond",
+  "mediaRender": "Architectuurvisualisatie",
+  "mediaVideo": "Videobeeld",
+  "mediaVirtualTour": "Virtuele rondleiding",
+  "propertyActions": "Woningacties"
 }

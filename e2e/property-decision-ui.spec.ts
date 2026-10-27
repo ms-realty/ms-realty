@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
+import { discoveryCopy } from "../src/features/discovery/copy";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -26,6 +27,7 @@ import { eq, sql as statement } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./src/db/schema/index.ts";
+import sharp from "sharp";
 import { createListingFixture, insertPlace, publishForTest } from "./src/server/publication/testing.ts";
 import { createStaff } from "./src/server/testing.ts";
 const url = process.env.E2E_DATABASE_URL;
@@ -48,7 +50,9 @@ try {
     await tx.execute(statement\`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))\`);
     const item = await createListingFixture(tx, {
       reviewerId: staff.id, placeId, title, description,
-      translations: { en: { title, description } },
+      translations: { en: { title, description }, he: { title, description } },
+      photos: 3,
+      photoFixture: { width: 1200, height: 800, bytes: await sharp({ create: { width: 1200, height: 800, channels: 3, background: "#d7e3e1" } }).webp().toBuffer() },
     });
     const number = randomBytes(6).readUIntBE(0, 6).toString();
     const reference = "MS-" + number;
@@ -57,7 +61,10 @@ try {
     await tx.update(schema.sellerInstructions).set({ reference: "SI-2026-" + number }).where(eq(schema.sellerInstructions.listingId, item.listingId));
     return { ...item, reference };
   });
-  const manifests = await publishForTest(db, staff.actor, fixture, ["bg", "en"]);
+  // Declare synthetic media metadata before producing the approved publication manifest.
+  await db.update(schema.mediaAssets).set({ kind: "floor_plan", altText: "Synthetic floor plan", caption: "Synthetic plan for viewer testing. Not a real property plan." }).where(eq(schema.mediaAssets.id, fixture.assetIds[1]));
+  await db.update(schema.mediaAssets).set({ kind: "render", originalAssetId: fixture.assetIds[0], altText: "Synthetic rendering", modification: "renovation_render", modificationDisclosure: "Synthetic architectural rendering", caption: "Synthetic render for viewer testing." }).where(eq(schema.mediaAssets.id, fixture.assetIds[2]));
+  const manifests = await publishForTest(db, staff.actor, fixture, ["bg", "en", "he"]);
   console.log(JSON.stringify({ reference: fixture.reference, title, manifestId: manifests[1], listingId: fixture.listingId }));
 } finally { await sql.end(); }
 `;
@@ -240,6 +247,173 @@ test("P05/F06/AT27: phone contact works without JavaScript and records the exact
       path: testInfo.outputPath("property-native-receipt.png"),
       fullPage: true,
     });
+  } finally {
+    await context.close();
+  }
+});
+
+for (const [width, height, locale] of [
+  [1440, 900, "en"],
+  [390, 844, "en"],
+  [320, 844, "he"],
+  [844, 390, "en"],
+] as const) {
+  test(`P06/UI17: ${width}px ${locale} selected media, keyboard, fit/zoom, Back and focus return`, async ({
+    page,
+  }, info) => {
+    const copy = discoveryCopy(locale);
+    await page.setViewportSize({ width, height });
+    await page.goto(propertyHref().replace("/en/", `/${locale}/`));
+    const main = page.getByRole("main");
+    await main.getByText(copy.morePhotos.replace("{count}", "2"), { exact: true }).click();
+    const launcher = main.getByRole("link", {
+      name: `${copy.openMedia.replace("{position}", "2")} · Synthetic floor plan`,
+      exact: true,
+    });
+    const href = await launcher.getAttribute("href");
+    expect(href).toMatch(/^\/api\/media\/[a-f\d-]{36}\/[a-f\d]{64}$/);
+    const parent = page.url();
+    await launcher.click();
+    const viewer = page.getByRole("dialog", { name: copy.mediaViewer, exact: true });
+    await expect(viewer).toBeVisible();
+    await expect(viewer.getByRole("button", { name: copy.close, exact: true })).toBeFocused();
+    await expect(viewer).toContainText(
+      copy.mediaPosition.replace("{position}", "2").replace("{count}", "3"),
+    );
+    const image = viewer.getByRole("img", { name: "Synthetic floor plan", exact: true });
+    await expect
+      .poll(() => image.evaluate((node) => (node as HTMLImageElement).naturalWidth))
+      .toBe(1200);
+    expect(await image.evaluate((node) => getComputedStyle(node).objectFit)).toBe("contain");
+    await expect(viewer).toContainText("Synthetic plan for viewer testing.");
+    await viewer.getByRole("button", { name: copy.zoomIn, exact: true }).click();
+    await expect(
+      viewer.getByRole("button", { name: `${copy.fitMedia} 150%`, exact: true }),
+    ).toBeVisible();
+    const viewport = viewer.getByRole("region", { name: copy.mediaFloorPlan, exact: true });
+    expect(await viewport.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+    await viewport.focus();
+    await page.keyboard.press(locale === "he" ? "ArrowLeft" : "ArrowRight");
+    // A zoomed image retains arrow-key panning; media navigation remains a separate control.
+    await expect(viewer).toContainText(
+      copy.mediaPosition.replace("{position}", "2").replace("{count}", "3"),
+    );
+    await viewer.getByRole("button", { name: `${copy.fitMedia} 150%`, exact: true }).click();
+    await page.keyboard.press(locale === "he" ? "ArrowLeft" : "ArrowRight");
+    await expect(viewer).toContainText(
+      copy.mediaPosition.replace("{position}", "3").replace("{count}", "3"),
+    );
+    await expect(viewer).toContainText("Synthetic architectural rendering");
+    await expect(viewer.getByRole("button", { name: copy.nextMedia, exact: true })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    await page.keyboard.press("Tab");
+    expect(await viewer.evaluate((node) => node.contains(document.activeElement))).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: info.outputPath(`gallery-${locale}-${width}.png`) });
+    await page.goBack();
+    await expect(viewer).toHaveCount(0);
+    await expect(page).toHaveURL(parent);
+    await expect(launcher).toBeFocused();
+    await launcher.click();
+    await page.keyboard.press("Escape");
+    await expect(viewer).toHaveCount(0);
+    await expect(launcher).toBeFocused();
+  });
+}
+
+for (const width of [320, 390, 1440]) {
+  test(`P05/L03: ${width}px actions stay reachable, preserve source context and clear the page end`, async ({
+    page,
+  }, info) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(propertyHref());
+    const dock = page.getByRole("navigation", { name: "Property actions", exact: true });
+    const panel = page.getByRole("complementary");
+    if (width === 1440) {
+      await expect(dock).toBeHidden();
+      expect(await panel.evaluate((node) => getComputedStyle(node).position)).toBe("sticky");
+      await page.evaluate(() => window.scrollBy(0, 900));
+      const panelBox = await bounds(panel);
+      const headerBox = await bounds(page.locator("[data-public-header]"));
+      expect(panelBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height);
+      expect(panelBox.y).toBeLessThan(160);
+    } else {
+      await expect(dock).toBeVisible();
+      for (const [name, purpose] of [
+        ["Send an inquiry", "question"],
+        ["Request a viewing", "viewing_request"],
+      ] as const) {
+        const action = dock.getByRole("link", {
+          name: `${name} · ${listing.reference}`,
+          exact: true,
+        });
+        const target = new URL((await action.getAttribute("href")) ?? "", page.url());
+        expect(Object.fromEntries(target.searchParams)).toEqual({
+          purpose,
+          reference: listing.reference,
+          manifest: listing.manifestId,
+        });
+        expect((await bounds(action)).height).toBeGreaterThanOrEqual(44);
+      }
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      const copyright = page.locator("footer > div > p");
+      await expect
+        .poll(
+          async () =>
+            (await bounds(copyright)).y + (await bounds(copyright)).height <=
+            (await bounds(dock)).y + 1,
+        )
+        .toBe(true);
+      const lastLink = page.locator("footer a").last();
+      await lastLink.focus();
+      await expect
+        .poll(
+          async () =>
+            (await bounds(lastLink)).y + (await bounds(lastLink)).height <=
+            (await bounds(dock)).y + 1,
+        )
+        .toBe(true);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: info.outputPath(`property-actions-${width}.png`) });
+  });
+}
+
+test("P06/AT01: native media links and captions remain usable without JavaScript", async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext({
+    baseURL,
+    javaScriptEnabled: false,
+    viewport: { width: 390, height: 844 },
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto(propertyHref());
+    await page.getByText("More photos (2)", { exact: true }).click();
+    const plan = page.getByRole("link", {
+      name: "Open media 2 · Synthetic floor plan",
+      exact: true,
+    });
+    await expect(plan).toBeVisible();
+    await expect(
+      page.getByText("Synthetic plan for viewer testing. Not a real property plan.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    const href = await plan.getAttribute("href");
+    const response = await context.request.get(href ?? "");
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toBe("image/webp");
+    await plan.click();
+    await expect(page).toHaveURL(new URL(href ?? "", baseURL).toString());
   } finally {
     await context.close();
   }

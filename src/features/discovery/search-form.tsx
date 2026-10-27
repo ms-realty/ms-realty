@@ -8,8 +8,8 @@ import { intentPlaces } from "@/server/ai/intent-source";
 import { searchableAreaBases } from "@/server/search/search";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass, labelClass } from "@/ui/field-class";
-import { ChevronDownIcon, FiltersIcon } from "@/ui/icons";
 import type { DiscoveryCopy } from "./copy";
+import { FilterEditor } from "./filter-editor";
 import { intentCopy } from "./intent-copy";
 import type { Filters } from "./query";
 
@@ -148,28 +148,38 @@ export async function SearchForm({
         </ul>
       ) : null}
       {!compact ? (
-        <details
-          open={filtersOpen}
-          className="group/filters border-t border-border pt-3 [&:not([open])>div]:hidden"
+        <FilterEditor
+          action={`/${locale}/properties`}
+          copy={copy}
+          values={values}
+          activeCount={rules.length}
+          filtersOpen={filtersOpen}
         >
-          {/* biome-ignore lint/a11y/useSemanticElements: native summary stays operable without JS; role exposes the disclosure consistently to assistive technology. */}
-          <summary
-            role="button"
-            className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-control text-compact font-semibold text-action [&::-webkit-details-marker]:hidden"
-          >
-            <FiltersIcon />
-            <span>
-              {copy.filters}
-              {rules.length ? (
-                <>
-                  {" "}
-                  · <bdi>{rules.length}</bdi>
-                </>
-              ) : null}
-            </span>
-            <ChevronDownIcon className="ms-auto shrink-0 group-open/filters:rotate-180" />
-          </summary>
           <div className="grid min-w-0 gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="flex min-w-0 flex-col gap-2 sm:col-span-2 lg:col-span-3">
+              <span className={labelClass}>{extra.locations}</span>
+              <select
+                name="places"
+                multiple
+                size={Math.max(2, Math.min(5, places.length))}
+                defaultValue={values.places ? values.places.split(",") : []}
+                className={controlClass}
+              >
+                {places.map((place) => (
+                  <option key={place.id} value={place.id}>
+                    {locale === "bg" ? place.names[0] : (place.names[1] ?? place.names[0])}
+                  </option>
+                ))}
+                {values.places
+                  .split(",")
+                  .filter((id) => id && !places.some((p) => p.id === id))
+                  .map((id) => (
+                    <option key={id} value={id}>
+                      {copy.failed}
+                    </option>
+                  ))}
+              </select>
+            </label>
             <label className="flex min-w-0 flex-col gap-2">
               <span className={labelClass}>
                 {extra.minimum} · {extra.amount}
@@ -209,6 +219,25 @@ export async function SearchForm({
                 ))}
               </select>
             </label>
+            <fieldset className="min-w-0 space-y-2 sm:col-span-2 lg:col-span-3">
+              <legend className="font-semibold">
+                {copy.propertyType} · {copy.anyType}
+              </legend>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {[...new Set([...propertyTypes, ...selected(values.type)])].map((value) => (
+                  <label key={value} className="flex min-h-11 items-center gap-2">
+                    <input
+                      type="checkbox"
+                      name="type"
+                      value={value}
+                      defaultChecked={values.type.split(",").includes(value)}
+                      className="size-5 accent-action"
+                    />
+                    {label(value)}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <label className="flex min-w-0 flex-col gap-2">
               <span className={labelClass}>{copy.minBeds}</span>
               <input
@@ -229,71 +258,6 @@ export async function SearchForm({
                 />
               </label>
             ))}
-            <fieldset className="min-w-0 space-y-2 sm:col-span-2 lg:col-span-3">
-              <legend className="font-semibold">
-                {copy.propertyType} · {copy.anyType}
-              </legend>
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {[...new Set([...propertyTypes, ...selected(values.type)])].map((value) => (
-                  <label key={value} className="flex min-h-11 items-center gap-2">
-                    <input
-                      type="checkbox"
-                      name="type"
-                      value={value}
-                      defaultChecked={values.type.split(",").includes(value)}
-                      className="size-5 accent-action"
-                    />
-                    {label(value)}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset className="min-w-0 space-y-2 sm:col-span-2 lg:col-span-3">
-              <legend className="font-semibold">{extra.features}</legend>
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {[
-                  ...new Set([
-                    ...interpretedFeatureKeys,
-                    ...values.features.split(",").filter(Boolean),
-                  ]),
-                ].map((key) => (
-                  <label key={key} className="flex min-h-11 items-center gap-2">
-                    <input
-                      type="checkbox"
-                      name="features"
-                      value={key}
-                      defaultChecked={values.features.split(",").includes(key)}
-                      className="size-5 accent-action"
-                    />
-                    {featureLabel(key)}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-            <label className="flex min-w-0 flex-col gap-2 sm:col-span-2 lg:col-span-3">
-              <span className={labelClass}>{extra.locations}</span>
-              <select
-                name="places"
-                multiple
-                size={Math.max(2, Math.min(5, places.length))}
-                defaultValue={values.places ? values.places.split(",") : []}
-                className={controlClass}
-              >
-                {places.map((place) => (
-                  <option key={place.id} value={place.id}>
-                    {locale === "bg" ? place.names[0] : (place.names[1] ?? place.names[0])}
-                  </option>
-                ))}
-                {values.places
-                  .split(",")
-                  .filter((id) => id && !places.some((p) => p.id === id))
-                  .map((id) => (
-                    <option key={id} value={id}>
-                      {copy.failed}
-                    </option>
-                  ))}
-              </select>
-            </label>
             <label className="flex min-w-0 flex-col gap-2">
               <span className={labelClass}>{copy.areaBasis}</span>
               <select
@@ -330,6 +294,28 @@ export async function SearchForm({
                 className={controlClass}
               />
             </label>
+            <fieldset className="min-w-0 space-y-2 sm:col-span-2 lg:col-span-3">
+              <legend className="font-semibold">{extra.features}</legend>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                {[
+                  ...new Set([
+                    ...interpretedFeatureKeys,
+                    ...values.features.split(",").filter(Boolean),
+                  ]),
+                ].map((key) => (
+                  <label key={key} className="flex min-h-11 items-center gap-2">
+                    <input
+                      type="checkbox"
+                      name="features"
+                      value={key}
+                      defaultChecked={values.features.split(",").includes(key)}
+                      className="size-5 accent-action"
+                    />
+                    {featureLabel(key)}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <label className="flex min-w-0 flex-col gap-2">
               <span className={labelClass}>{copy.sort}</span>
               <select
@@ -357,13 +343,8 @@ export async function SearchForm({
               />
               {copy.includeUnconfirmed}
             </label>
-            <div className="sm:col-span-2 lg:col-span-3">
-              <button type="submit" className={buttonClass("secondary")}>
-                {copy.apply}
-              </button>
-            </div>
           </div>
-        </details>
+        </FilterEditor>
       ) : null}
     </form>
   );

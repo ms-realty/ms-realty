@@ -86,37 +86,40 @@ export function ListingCard({
 }) {
   return (
     <article
-      className="flex min-w-0 flex-col gap-4 rounded-panel border border-border bg-surface p-5"
+      className="flex min-w-0 flex-col overflow-hidden rounded-panel border border-divider bg-surface shadow-raised"
       data-listing-reference={listing.reference}
     >
-      {/* ListingGrid: one column, two from sm, three from xl; the card adds 2.5 rem padding. */}
+      {/* UI13: approved photos use a full-width 3:2 frame; plans retain their full extent. */}
       <ApprovedMedia
         media={listing.cover}
+        presentation="card"
         unavailable={copy.noPhoto}
-        sizes="auto, (min-width: 90rem) 25rem, (min-width: 40rem) calc(50vw - 4.5rem), calc(100vw - 5rem)"
+        sizes="auto, (min-width: 90rem) 27.5rem, (min-width: 80rem) calc(33.333vw - 2.75rem), (min-width: 40rem) calc(50vw - 2rem), calc(100vw - 2.5rem)"
       />
-      <div>
-        <p className="text-caption text-text-muted">
-          <bdi>{listing.reference}</bdi> · {copy[listing.propertyType]}
+      <div className="flex flex-1 flex-col gap-4 p-5">
+        <div>
+          <p className="text-caption text-text-muted">
+            <bdi>{listing.reference}</bdi> · {copy[listing.propertyType]}
+          </p>
+          <h2 className="mt-1 break-words text-subheading font-semibold">
+            <a
+              className="text-text no-underline hover:underline hover:underline-offset-4"
+              href={listingHref(listing, locale)}
+            >
+              {listing.title || listing.reference}
+            </a>
+          </h2>
+          <p className="mt-1 text-compact text-text-muted">{locality(listing)}</p>
+        </div>
+        <p className="text-price font-semibold">
+          <bdi>{priceText(listing.price, locale, copy)}</bdi>
         </p>
-        <h2 className="mt-1 break-words text-subheading font-semibold">
-          <a
-            className="underline decoration-border underline-offset-4 hover:decoration-current"
-            href={listingHref(listing, locale)}
-          >
-            {listing.title || listing.reference}
-          </a>
-        </h2>
-        <p className="mt-1 text-compact text-text-muted">{locality(listing)}</p>
-      </div>
-      <p className="text-price font-semibold">
-        <bdi>{priceText(listing.price, locale, copy)}</bdi>
-      </p>
-      <ListingFacts listing={listing} locale={locale} copy={copy} />
-      <Availability listing={listing} locale={locale} copy={copy} />
-      <div className="mt-auto space-y-3">
-        <LocalActions reference={listing.reference} copy={copy} />
-        {actions}
+        <ListingFacts listing={listing} locale={locale} copy={copy} />
+        <Availability listing={listing} locale={locale} copy={copy} />
+        <div className="mt-auto space-y-3">
+          <LocalActions reference={listing.reference} copy={copy} />
+          {actions}
+        </div>
       </div>
     </article>
   );
