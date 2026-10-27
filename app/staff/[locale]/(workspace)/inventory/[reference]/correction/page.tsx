@@ -21,7 +21,6 @@ export default async function CorrectionPage({
   const view = await privateRead(() => readCorrectionWorkspace(getDb(), session, reference));
   const copy = staffWorkflowCopy(locale).correction;
   const active = Boolean(view.task && view.task.state !== "done");
-  const mode = active ? "reconcile" : "open";
   const values: Record<string, string> = {
     impactHash: view.digest,
     sourceReference: "",
@@ -99,18 +98,22 @@ export default async function CorrectionPage({
             ))}
           </ul>
         ) : null}
-        <CorrectionForm
-          locale={locale}
-          reference={reference}
-          mode={mode}
-          items={view.items}
-          initialState={initialFormState(
-            `inventory.correction.${mode}.${reference}`,
-            values,
-            active ? view.task?.version : view.listing.version,
-          )}
-          action={correctionAction.bind(null, locale, reference, mode)}
-        />
+        {(["open", "reconcile"] as const).map((mode) => (
+          <CorrectionForm
+            key={mode}
+            locale={locale}
+            reference={reference}
+            mode={mode}
+            available={mode === "open" ? !active : active}
+            items={view.items}
+            initialState={initialFormState(
+              `inventory.correction.${mode}.${reference}`,
+              values,
+              mode === "open" ? view.listing.version : (view.task?.version ?? view.listing.version),
+            )}
+            action={correctionAction.bind(null, locale, reference, mode)}
+          />
+        ))}
       </section>
     </StaffPage>
   );

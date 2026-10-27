@@ -18,6 +18,7 @@ export function CorrectionForm({
   items,
   initialState,
   action,
+  available = true,
 }: {
   locale: string;
   reference: string;
@@ -25,6 +26,7 @@ export function CorrectionForm({
   items: CorrectionImpactItem[];
   initialState: FormState<FormValues>;
   action: FormAction<FormValues>;
+  available?: boolean;
 }) {
   const copy = staffWorkflowCopy(locale).correction;
   const path = `/${locale}/inventory/${reference}/correction`;
@@ -34,6 +36,7 @@ export function CorrectionForm({
       initialState={initialState}
       permalink={path}
       nativeIdentity={`correction:${reference}:${mode}`}
+      commandAvailable={available}
       copy={inventoryCopy(locale).form}
       labels={{
         sourceReference: copy.source,

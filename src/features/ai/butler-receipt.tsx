@@ -29,9 +29,10 @@ export function ButlerReceiptLine({
       <p className="font-semibold">
         {copy.receipt} · {verdict}
       </p>
-      <p>{copy.draftOnly}</p>
+      <p>{receipt.policy === "owner_draft_only" ? copy.draftOnly : copy.legacyReceipt}</p>
       <p>
-        {copy.reason}: {receipt.reason === "draft_only" ? copy.draftOnly : copy.unknownReason}
+        {copy.reason}:{" "}
+        {(copy.receiptReasons as Record<string, string>)[receipt.reason] ?? copy.unknownReason}
       </p>
       {receipt.manual.requiresReconciliation ? <p>{copy.manualReconcile}</p> : null}
       <a

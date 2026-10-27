@@ -211,8 +211,14 @@ export async function InquiryScreen({
 }) {
   const detail = await privateRead(() => readInquiry(getDb(), session, id));
   const { inquiry, ownerName } = detail;
+  const canPrepareReply =
+    detail.canRespond &&
+    detail.canCreateTask &&
+    !detail.needsCoverage &&
+    inquiry.ownerId === session.account.id &&
+    ["assigned", "awaiting_client"].includes(inquiry.state);
   const replyDraft =
-    detail.canAssist && detail.canRespond
+    detail.canAssist && canPrepareReply
       ? await readReviewedInquiryReply(getDb(), session, id)
       : null;
   const copy = workCopy(locale);
@@ -429,6 +435,20 @@ export async function InquiryScreen({
                 />
               </section>
             ) : null}
+            {canPrepareReply ? (
+              <>
+                <ContactActions
+                  locale={locale}
+                  methods={detail.contactMethod ? [detail.contactMethod] : []}
+                />
+                <InquiryReply
+                  locale={locale}
+                  reference={inquiry.reference}
+                  contact={detail.contactMethod}
+                  draft={replyDraft}
+                />
+              </>
+            ) : null}
             {detail.canRespond &&
             detail.canCreateTask &&
             !detail.needsCoverage &&
@@ -459,20 +479,6 @@ export async function InquiryScreen({
                   })}
                 />
               </section>
-            ) : null}
-            {detail.canRespond ? (
-              <>
-                <ContactActions
-                  locale={locale}
-                  methods={detail.contactMethod ? [detail.contactMethod] : []}
-                />
-                <InquiryReply
-                  locale={locale}
-                  reference={inquiry.reference}
-                  contact={detail.contactMethod}
-                  draft={replyDraft}
-                />
-              </>
             ) : null}
             <InquiryCaseLink locale={locale} session={session} detail={detail} />
             {targets.length ? (

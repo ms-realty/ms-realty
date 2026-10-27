@@ -14,7 +14,7 @@ export type ReviewedReplyDraft = {
 };
 export function inquiryEmailDraft(value: string, reference: string, body: string) {
   return z.email().safeParse(value).success && body.trim()
-    ? `mailto:${encodeURIComponent(value)}?${new URLSearchParams({ subject: reference, body })}`
+    ? `mailto:${encodeURIComponent(value)}?${new URLSearchParams({ subject: reference, body }).toString().replaceAll("+", "%20")}`
     : null;
 }
 /** O03/F06 human-owned native composer. Opening a draft is never a send/contact receipt. */

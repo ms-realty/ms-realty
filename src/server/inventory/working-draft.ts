@@ -144,6 +144,14 @@ export function workingDraftFrom(
   const rentalCharges = rentalFact(terms, "rental.recurring_charges");
   const rentalAvailableFrom = rentalFact(terms, "rental.available_from");
   const rentalRestrictions = rentalFact(terms, "rental.restrictions");
+  // The flat editor must not replace differing named charges with one candidate's list.
+  // Keep the immutable source intact and require manual entry before another freeze.
+  const carryCharges =
+    new Set(rentalCharges.values.map((value) => JSON.stringify(value.inclusions))).size <= 1 &&
+    rentalCharges.values.every((value) =>
+      value.inclusions.every((item) => item === item.trim() && !/[\r\n]/.test(item)),
+    );
+  const carryRestrictions = rentalRestrictions.values.every((value) => !value.includes("|"));
   const rentalAmount = (value: { amountMinor: number }) =>
     `${Math.floor(value.amountMinor / 100)}.${String(value.amountMinor % 100).padStart(2, "0")}`;
   const areaFacts = facts.filter(
@@ -204,12 +212,14 @@ export function workingDraftFrom(
     rentalDepositState: rentalDeposit.state,
     rentalDeposit: rentalDeposit.values.map(rentalAmount).join("|"),
     rentalChargesState: rentalCharges.state,
-    rentalCharges: rentalCharges.values.map(rentalAmount).join("|"),
-    rentalChargesIncludes: rentalCharges.values[0]?.inclusions.join("\n") ?? "",
+    rentalCharges: carryCharges ? rentalCharges.values.map(rentalAmount).join("|") : "",
+    rentalChargesIncludes: carryCharges
+      ? (rentalCharges.values[0]?.inclusions.join("\n") ?? "")
+      : "",
     rentalAvailableFromState: rentalAvailableFrom.state,
     rentalAvailableFrom: rentalAvailableFrom.values.join("|"),
     rentalRestrictionsState: rentalRestrictions.state,
-    rentalRestrictions: rentalRestrictions.values.join("|"),
+    rentalRestrictions: carryRestrictions ? rentalRestrictions.values.join("|") : "",
     priceState: priceDraft.state,
     price: priceDraft.value,
     areaState: areaDraft.state,

@@ -27,6 +27,9 @@ it("O03 requires current human review and never overwrites a typed reply with a 
     "href",
     expect.stringContaining("mailto:synthetic%40example.test?"),
   );
+  expect(screen.getByRole("link", { name: "Open email draft" }).getAttribute("href")).toContain(
+    "%20",
+  );
   fireEvent.change(field, { target: { value: "Human correction" } });
   expect(screen.queryByRole("link", { name: "Open email draft" })).not.toBeInTheDocument();
   expect(screen.getByText(/Nothing is sent by this workspace/)).toBeVisible();

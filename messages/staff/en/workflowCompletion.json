@@ -131,5 +131,22 @@
       "media": "Media and retained copies",
       "derived": "Search, alerts, comparison and saved views"
     }
-  }
+  },
+  "receiptReasons": {
+    "draft_only": "Only a human-reviewed draft is permitted.",
+    "action_not_allowlisted": "This action is outside the supported task scope.",
+    "case_scope_not_current": "The deal or its current authority changed.",
+    "recipient_not_eligible": "The recipient is not currently eligible.",
+    "slot_not_agreed": "The exact viewing time has not been agreed by both sides.",
+    "viewing_resources_unavailable": "Current viewing resources or listing availability are not proven.",
+    "document_receipt_not_proven": "Receipt of the exact document version is not proven.",
+    "task_scope_invalid": "The task scope or accountable owner is not valid.",
+    "template_unavailable": "The required message template is unavailable.",
+    "template_not_approved": "The exact template has not been approved.",
+    "first_contact_requires_human": "A person must make the first contact.",
+    "client_promise_requires_human": "A promise to a client requires a person.",
+    "human_required": "A person must decide this action.",
+    "protected_effect": "This action affects a protected human decision."
+  },
+  "legacyReceipt": "This stored outcome belongs to an earlier policy. Check the actual result before taking a manual action; current Butler work remains draft-only."
 }

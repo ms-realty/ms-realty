@@ -1,6 +1,6 @@
 // Current-source synthetic browser proof; no live-service or owner acceptance claim.
 import { execFileSync } from "node:child_process";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, type TestInfo, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -45,17 +45,15 @@ function seed(): Seed {
   );
 }
 async function open(page: Page, f: Seed, path: string) {
-  await page
-    .context()
-    .addCookies([
-      {
-        name: "msr_staff_session",
-        value: f.session,
-        url: origins.staff,
-        httpOnly: true,
-        sameSite: "Lax",
-      },
-    ]);
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: f.session,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
   await page.goto(hostUrl("staff", path));
 }
 
@@ -82,6 +80,7 @@ test("F13/O03/O18 searches scoped records, prepares a human email draft and reco
     "href",
     new RegExp(`^mailto:${encodeURIComponent(f.email)}`),
   );
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: info.outputPath("inquiry-reply.png"), fullPage: true });
   await page.goto(hostUrl("staff", `/en/tasks/${f.taskId}`));
   await page
@@ -94,9 +93,7 @@ test("F13/O03/O18 searches scoped records, prepares a human email draft and reco
   expect(task?.state).toBe("done");
 });
 
-test("F31/O33 restricts current exposure and keeps unresolved correction work with its human owner", async ({
-  page,
-}, info) => {
+async function correctionJourney(page: Page, info: TestInfo) {
   const f = seed();
   await open(page, f, `/en/inventory/${f.reference}/correction`);
   await page
@@ -141,6 +138,7 @@ test("F31/O33 restricts current exposure and keeps unresolved correction work wi
   ).toBeVisible();
   await page.getByRole("link", { name: "Open current correction workspace", exact: true }).click();
   await expect(page.getByText(/Current correction state: Waiting/)).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: info.outputPath("correction-waiting.png"), fullPage: true });
   const [task] = await db
     .select()
@@ -152,4 +150,13 @@ test("F31/O33 restricts current exposure and keeps unresolved correction work wi
     .from(schema.currentPublications)
     .where(eq(schema.currentPublications.listingId, f.listingId));
   expect(pointers.every((pointer) => pointer.state === "restricted")).toBe(true);
+}
+
+test("F31/O33 restricts current exposure and keeps unresolved correction work with its human owner", async ({
+  page,
+}, info) => correctionJourney(page, info));
+test.describe("native correction fallback", () => {
+  test.use({ javaScriptEnabled: false });
+  test("F31/O33 preserves native restriction and reconciliation receipts", async ({ page }, info) =>
+    correctionJourney(page, info));
 });

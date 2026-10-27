@@ -61,3 +61,45 @@ it("F26 retains conflicting candidates without selecting one and rejects unsuppo
     rentalTermsOf({ ...emptyDraft, rentalDepositState: "known", rentalDeposit: "-1" }),
   ).toThrow();
 });
+
+it("F26 never flattens different source charge inclusions into one candidate's terms", () => {
+  const terms = {
+    purpose: "long_term_rent",
+    facts: {
+      "rental.recurring_charges": {
+        state: "conflicting",
+        value: [
+          {
+            amountMinor: 10000,
+            currency: "EUR",
+            period: "month",
+            inclusions: ["first source charge"],
+          },
+          {
+            amountMinor: 20000,
+            currency: "EUR",
+            period: "month",
+            inclusions: ["second source charge"],
+          },
+        ],
+      },
+    },
+  };
+  const before = structuredClone(terms);
+  const draft = workingDraftFrom({ terms, sourceCopy: {} }, []);
+  expect(draft).toMatchObject({
+    rentalChargesState: "conflicting",
+    rentalCharges: "",
+    rentalChargesIncludes: "",
+  });
+  expect(terms).toEqual(before);
+  expect(() =>
+    rentalTermsOf({
+      ...emptyDraft,
+      ...draft,
+      areaBasis: "living",
+      sourceClass: "source_supplied",
+      sourceLanguage: "bg",
+    }),
+  ).toThrow();
+});
