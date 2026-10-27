@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { operations } from "@/db/schema";
+import { correctionKeysJsonLimit } from "@/domain/correction-limits";
 import { isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { requireAuthHost } from "@/server/auth/pages";
@@ -16,6 +17,7 @@ import {
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { staffWorkflowCopy } from "../work/workflow-completion-copy";
+import { correctionValues } from "./correction-values";
 
 export async function correctionAction(
   locale: string,
@@ -27,18 +29,7 @@ export async function correctionAction(
   const copy = staffWorkflowCopy(locale).correction;
   const scope = `inventory.correction.${mode}.${reference}`;
   const envelope = readFormEnvelope(data, scope);
-  const values: FormValues = {};
-  for (const key of new Set(data.keys())) {
-    if (
-      !/^(sourceReference|disputedFact|urgency|reviewed|impactHash|followUpAt|items|state_\d{1,3}|evidence_\d{1,3})$/.test(
-        key,
-      )
-    )
-      continue;
-    const entries = data.getAll(key);
-    values[key] =
-      entries.length === 1 && typeof entries[0] === "string" ? entries[0].slice(0, 16_000) : "";
-  }
+  const values = correctionValues(data);
   Object.assign(values, readTimeFormValues(data, ["followUpAt"]));
   const path = `/${locale}/inventory/${reference}/correction`;
   const result = await action(
@@ -66,6 +57,8 @@ export async function correctionAction(
             },
           );
         let keys: unknown;
+        if ((values.items?.length ?? 0) > correctionKeysJsonLimit)
+          throw new AppError("validation_failed");
         try {
           keys = JSON.parse(values.items ?? "null");
         } catch {

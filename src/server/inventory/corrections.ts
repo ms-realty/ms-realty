@@ -19,6 +19,12 @@ import {
   sellerInstructions,
   tasks,
 } from "@/db/schema";
+import {
+  correctionGroupLimit,
+  correctionImpactLimit,
+  correctionKeyLimit,
+  correctionSnapshotLimit,
+} from "@/domain/correction-limits";
 import { recordAudit } from "../audit";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { assertCan, assertCanRead } from "../authz";
@@ -58,7 +64,7 @@ const snapshotSchema = z.object({
   sourceReference: z.string(),
   disputedFact: z.string(),
   urgency: z.enum(["urgent", "normal"]),
-  items: z.array(itemSchema),
+  items: z.array(itemSchema).max(correctionSnapshotLimit),
 });
 async function source(db: Executor, session: Session, reference: string, lock = false) {
   const live = await liveStaff(db, session);
@@ -93,13 +99,13 @@ async function impact(
       .select()
       .from(currentPublications)
       .where(eq(currentPublications.listingId, listing.id))
-      .limit(201),
+      .limit(correctionGroupLimit + 1),
     db
       .select()
       .from(destinationDeliveries)
       .where(eq(destinationDeliveries.listingId, listing.id))
       .orderBy(desc(destinationDeliveries.generation), desc(destinationDeliveries.createdAt))
-      .limit(201),
+      .limit(correctionGroupLimit + 1),
     db
       .select({
         id: interests.id,
@@ -109,7 +115,7 @@ async function impact(
       })
       .from(interests)
       .where(eq(interests.listingId, listing.id))
-      .limit(201),
+      .limit(correctionGroupLimit + 1),
     db
       .select({
         id: proposals.id,
@@ -128,7 +134,7 @@ async function impact(
         ),
       )
       .where(eq(proposals.listingId, listing.id))
-      .limit(201),
+      .limit(correctionGroupLimit + 1),
     db
       .select({
         id: appointments.id,
@@ -140,12 +146,12 @@ async function impact(
       .from(appointments)
       .innerJoin(interests, eq(interests.id, appointments.interestId))
       .where(eq(interests.listingId, listing.id))
-      .limit(201),
+      .limit(correctionGroupLimit + 1),
     db
       .selectDistinct({ id: sellerInstructions.caseId })
       .from(sellerInstructions)
       .where(eq(sellerInstructions.listingId, listing.id))
-      .limit(201),
+      .limit(correctionGroupLimit + 1),
     db
       .select({
         id: mediaRelations.id,
@@ -155,7 +161,7 @@ async function impact(
       })
       .from(mediaRelations)
       .where(eq(mediaRelations.listingId, listing.id))
-      .limit(201),
+      .limit(correctionGroupLimit + 1),
     db
       .select({ locale: listingSearchDocuments.locale })
       .from(listingSearchDocuments)
@@ -163,7 +169,7 @@ async function impact(
   ]);
   if (
     [pointers, deliveries, interestRows, proposalRows, appointmentRows, ownerRows, media].some(
-      (rows) => rows.length > 200,
+      (rows) => rows.length > correctionGroupLimit,
     )
   )
     throw new AppError("transition_denied");
@@ -513,12 +519,12 @@ const reconcileSchema = z.object({
   items: z
     .array(
       z.object({
-        key: z.string(),
+        key: z.string().max(correctionKeyLimit),
         state: z.enum(["verified", "unresolved"]),
         evidence: z.string().trim().min(3).max(1500),
       }),
     )
-    .max(1000),
+    .max(correctionImpactLimit),
 });
 export async function reconcileMaterialCorrection(
   db: Executor,
