@@ -15,7 +15,7 @@ export default async function Page({
     id?: string;
     key?: string;
     page?: string;
-    returnTo?: string;
+    returnTo?: string | string[];
   }>;
 }) {
   const { locale, id } = await params;
@@ -31,7 +31,7 @@ export default async function Page({
       caseId: query.case,
       partyId: query.party,
       page: queryPage(query.page),
-      returnTo: query.returnTo,
+      returnTo: typeof query.returnTo === "string" ? query.returnTo : undefined,
     }),
   );
 }
