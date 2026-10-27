@@ -17,48 +17,49 @@ test.afterAll(async () => {
   await connection.end();
 });
 
+// Each source type owns its context and cleanup budget; both retain the complete reviewed journey.
 for (const javascript of [true, false])
-  test(`O27 F32 AT56 UX22 reviewed merge and split ${javascript ? "enhanced" : "native"}`, async ({
-    browser,
-  }, testInfo) => {
-    const f = JSON.parse(
-      execFileSync(
-        process.execPath,
-        [
-          "--conditions=react-server",
-          "--import",
-          "tsx",
-          "src/server/duplicate-review/browser-seed.ts",
-        ],
-        {
-          env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
-          encoding: "utf8",
-        },
-      ),
-    ) as {
-      token: string;
-      deniedToken: string;
-      party: { left: string; right: string; leftLabel: string; rightLabel: string };
-      property: { left: string; right: string; leftLabel: string; rightLabel: string };
-    };
-    const context = await browser.newContext({
-      ...testInfo.project.use,
-      javaScriptEnabled: javascript,
-    });
-    const copy = duplicateMergeCopy("en");
-    try {
-      await context.addCookies([
-        {
-          name: "msr_staff_session",
-          value: f.token,
-          url: origins.staff,
-          httpOnly: true,
-          sameSite: "Lax",
-        },
-      ]);
-      const page = await context.newPage();
-      await page.bringToFront();
-      for (const subject of ["party", "property"] as const) {
+  for (const subject of ["party", "property"] as const)
+    test(`O27 F32 AT56 UX22 reviewed ${subject} merge and split ${javascript ? "enhanced" : "native"}`, async ({
+      browser,
+    }, testInfo) => {
+      const f = JSON.parse(
+        execFileSync(
+          process.execPath,
+          [
+            "--conditions=react-server",
+            "--import",
+            "tsx",
+            "src/server/duplicate-review/browser-seed.ts",
+          ],
+          {
+            env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET, DATABASE_URL: url },
+            encoding: "utf8",
+          },
+        ),
+      ) as {
+        token: string;
+        deniedToken: string;
+        party: { left: string; right: string; leftLabel: string; rightLabel: string };
+        property: { left: string; right: string; leftLabel: string; rightLabel: string };
+      };
+      const context = await browser.newContext({
+        ...testInfo.project.use,
+        javaScriptEnabled: javascript,
+      });
+      const copy = duplicateMergeCopy("en");
+      try {
+        await context.addCookies([
+          {
+            name: "msr_staff_session",
+            value: f.token,
+            url: origins.staff,
+            httpOnly: true,
+            sameSite: "Lax",
+          },
+        ]);
+        const page = await context.newPage();
+        await page.bringToFront();
         const pair = f[subject];
         if (subject === "party") {
           await page.goto(hostUrl("staff", "/en/operations/duplicates/merge?subject=party"));
@@ -174,51 +175,56 @@ for (const javascript of [true, false])
           .where(eq(schema.mergeRecords.id, merge.id));
         expect(history?.reversedAt).not.toBeNull();
         if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+        if (subject === "party") {
+          // A subsequent source edit creates an honest held/manual split, with no submit path.
+          const pair = f.party;
+          await page.goto(
+            hostUrl(
+              "staff",
+              `/en/operations/duplicates/merge?subject=party&left=${pair.left}&right=${pair.right}&survivor=${pair.left}`,
+            ),
+          );
+          const form = page.locator("[data-duplicate-merge-form=merge]");
+          await form
+            .getByLabel(copy.reason, { exact: true })
+            .fill(
+              "Human reviewed a new independent identity-link decision after the previous split",
+            );
+          await form.getByLabel(copy.reviewed, { exact: true }).check();
+          await form.getByRole("button", { name: copy.merge, exact: true }).click();
+          await expect(page.getByRole("heading", { name: copy.merged, exact: true })).toBeVisible();
+          await db
+            .update(schema.parties)
+            .set({
+              version: sql`${schema.parties.version} + 1`,
+              matchingAliases: ["Synthetic subsequent source spelling"],
+            })
+            .where(eq(schema.parties.id, pair.right));
+          await page.getByRole("link", { name: copy.splitReview, exact: true }).click();
+          await expect(page.locator("[data-duplicate-held]")).toContainText(
+            copy.holds.changed_after_merge,
+          );
+          await expect(page.getByRole("button", { name: copy.reverse, exact: true })).toHaveCount(
+            0,
+          );
+          await context.addCookies([
+            {
+              name: "msr_staff_session",
+              value: f.deniedToken,
+              url: origins.staff,
+              httpOnly: true,
+              sameSite: "Lax",
+            },
+          ]);
+          await page.goto(
+            hostUrl(
+              "staff",
+              `/en/operations/duplicates/merge?subject=party&left=${pair.left}&right=${pair.right}`,
+            ),
+          );
+          await expect(page.locator("[data-duplicate-merge-form]")).toHaveCount(0);
+        }
+      } finally {
+        await context.close();
       }
-      // A subsequent source edit creates an honest held/manual split, with no submit path.
-      const pair = f.party;
-      await page.goto(
-        hostUrl(
-          "staff",
-          `/en/operations/duplicates/merge?subject=party&left=${pair.left}&right=${pair.right}&survivor=${pair.left}`,
-        ),
-      );
-      const form = page.locator("[data-duplicate-merge-form=merge]");
-      await form
-        .getByLabel(copy.reason, { exact: true })
-        .fill("Human reviewed a new independent identity-link decision after the previous split");
-      await form.getByLabel(copy.reviewed, { exact: true }).check();
-      await form.getByRole("button", { name: copy.merge, exact: true }).click();
-      await expect(page.getByRole("heading", { name: copy.merged, exact: true })).toBeVisible();
-      await db
-        .update(schema.parties)
-        .set({
-          version: sql`${schema.parties.version} + 1`,
-          matchingAliases: ["Synthetic subsequent source spelling"],
-        })
-        .where(eq(schema.parties.id, pair.right));
-      await page.getByRole("link", { name: copy.splitReview, exact: true }).click();
-      await expect(page.locator("[data-duplicate-held]")).toContainText(
-        copy.holds.changed_after_merge,
-      );
-      await expect(page.getByRole("button", { name: copy.reverse, exact: true })).toHaveCount(0);
-      await context.addCookies([
-        {
-          name: "msr_staff_session",
-          value: f.deniedToken,
-          url: origins.staff,
-          httpOnly: true,
-          sameSite: "Lax",
-        },
-      ]);
-      await page.goto(
-        hostUrl(
-          "staff",
-          `/en/operations/duplicates/merge?subject=party&left=${pair.left}&right=${pair.right}`,
-        ),
-      );
-      await expect(page.locator("[data-duplicate-merge-form]")).toHaveCount(0);
-    } finally {
-      await context.close();
-    }
-  });
+    });
