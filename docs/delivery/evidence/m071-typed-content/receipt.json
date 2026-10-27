@@ -146,14 +146,7 @@
     "human visual acceptance",
     "runtime/release gates R00-R12"
   ],
-  "actionsNotPerformed": [
-    "push",
-    "PR",
-    "merge",
-    "deploy",
-    "provider change",
-    "customer send"
-  ],
+  "actionsNotPerformed": ["push", "PR", "merge", "deploy", "provider change", "customer send"],
   "commands": {
     "unitDomAndCatalogs": [
       "npx",
@@ -189,21 +182,8 @@
       "src/server/content/public-areas.int.test.ts"
     ],
     "databaseContext": "TEST_DATABASE_URL passed per command to a unique disposable loopback Postgres; no shared database",
-    "freshTypes": [
-      "npx",
-      "tsc",
-      "--noEmit",
-      "--incremental",
-      "false"
-    ],
-    "copyGuard": [
-      "npx",
-      "vitest",
-      "run",
-      "--project",
-      "unit",
-      "src/i18n/copy-guard.test.ts"
-    ]
+    "freshTypes": ["npx", "tsc", "--noEmit", "--incremental", "false"],
+    "copyGuard": ["npx", "vitest", "run", "--project", "unit", "src/i18n/copy-guard.test.ts"]
   },
   "receiptNormalization": "Only terminal blank lines normalized in committed text receipts; diagnostic content retained. rawSha256 records original bytes when different."
 }
