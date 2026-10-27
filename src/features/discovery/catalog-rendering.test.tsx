@@ -1,11 +1,12 @@
 // Synthetic DOM checks exercise current catalog consumers. Browser layout, live publication
 // and human translation approval remain separate checks.
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { area as areaFact, known, money } from "@/domain/facts";
 import { displayLocale, localeDirection, type PublicLocale, publicLocales } from "@/i18n/config";
 import type { ListingCard as Listing } from "@/server/listings/view-models";
+import { announce } from "@/ui/announce";
 import { discoveryCopy } from "./copy";
 import { intentCopy } from "./intent-copy";
 import { ListingGrid } from "./listing-card";
@@ -14,10 +15,14 @@ import { readFilters } from "./query";
 import { SearchForm } from "./search-form";
 import { SearchMap } from "./search-map";
 
+type RenderMap = typeof import("./map-renderer")["renderMap"];
+const renderer = vi.hoisted(() => ({ draw: vi.fn(), select: vi.fn(), destroy: vi.fn() }));
+
 vi.mock("@/db/client", () => ({ getDb: () => ({}) }));
 vi.mock("@/server/ai/intent-source", () => ({ intentPlaces: async () => [] }));
+vi.mock("@/ui/announce", () => ({ announce: vi.fn() }));
 vi.mock("./map-renderer", () => ({
-  renderMap: (
+  renderMap: ((
     _element: unknown,
     _items: unknown,
     _locale: unknown,
@@ -26,12 +31,16 @@ vi.mock("./map-renderer", () => ({
     _onReady: unknown,
     onError: () => void,
   ) => {
+    renderer.draw();
     onError();
-    return () => {};
-  },
+    return { select: renderer.select, destroy: renderer.destroy };
+  }) satisfies RenderMap,
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 function listing(locale: PublicLocale): Listing {
   const provenance = { sourceClass: "source_supplied" } as const;
@@ -133,7 +142,7 @@ describe.each([...publicLocales])("%s catalogs in current discovery components",
     async (scope) => {
       const copy = mapCopy(locale, scope);
       const user = userEvent.setup();
-      render(
+      const view = render(
         <SearchMap
           items={[
             {
@@ -155,12 +164,25 @@ describe.each([...publicLocales])("%s catalogs in current discovery components",
       );
       await user.click(screen.getByRole("button", { name: copy.show }));
       expect(screen.getByText(copy.precision, { exact: true })).toBeVisible();
-      expect(await screen.findByRole("status")).toHaveTextContent(copy.error);
+      expect(await screen.findByText(copy.error, { exact: true })).toBeVisible();
+      await waitFor(() => expect(announce).toHaveBeenCalledExactlyOnceWith(copy.error));
       expect(screen.getByRole("button", { name: copy.retry })).toBeVisible();
       expect(screen.getByRole("link", { name: copy.list })).toHaveAttribute(
         "href",
         "#property-results",
       );
+      await user.click(screen.getByRole("button", { name: copy.retry }));
+      await waitFor(() => expect(renderer.draw).toHaveBeenCalledTimes(2));
+      expect(announce).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(announce).mock.calls).toEqual([[copy.error], [copy.error]]);
+      expect(renderer.destroy).toHaveBeenCalledTimes(1);
+      expect(screen.getByText(copy.precision, { exact: true })).toBeVisible();
+      expect(screen.getByRole("link", { name: copy.list })).toHaveAttribute(
+        "href",
+        "#property-results",
+      );
+      view.unmount();
+      expect(renderer.destroy).toHaveBeenCalledTimes(2);
     },
   );
 });
