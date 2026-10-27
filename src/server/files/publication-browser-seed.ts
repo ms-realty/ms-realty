@@ -1,9 +1,10 @@
-// Synthetic entry conditions only. No files, scans, listing approvals, seller instructions,
-// manifests or publication pointers are seeded. Those must be produced by the browser flow.
+// Synthetic entry conditions only. No policy approvals, files, scans, listing approvals,
+// seller instructions, manifests or publication pointers are seeded. The browser produces them.
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
+import { operatingPolicyId } from "@/domain/operating-policy";
 import { createSession } from "../auth/sessions";
 import { hashRequest } from "../crypto";
 import { createStaff } from "../testing";
@@ -73,7 +74,29 @@ try {
       message: "Synthetic browser fixture only. No real seller, title or authority is asserted.",
     });
     const { token } = await createSession(tx, { kind: "staff", id: reviewer.id });
-    return { token, reviewerId: reviewer.id, sellerId: seller.id, sellerName };
+    // A separate, narrowly scoped actor records the synthetic availability-policy prerequisite
+    // through O24. The listing reviewer does not acquire agency-settings authority.
+    const policyOwner = await createStaff(tx, {
+      grants: [
+        { capability: "settings.manage", recordType: "settings", recordId: operatingPolicyId },
+      ],
+      email: `publication-policy-${randomUUID()}@example.test`,
+    });
+    await tx.insert(schema.passkeys).values({
+      principalId: policyOwner.id,
+      credentialId: randomUUID(),
+      publicKey: Buffer.from([1]),
+      deviceType: "singleDevice",
+      backedUp: false,
+    });
+    const policySession = await createSession(tx, { kind: "staff", id: policyOwner.id });
+    return {
+      token,
+      reviewerId: reviewer.id,
+      sellerId: seller.id,
+      sellerName,
+      policyOwner: { id: policyOwner.id, token: policySession.token },
+    };
   });
   console.log(JSON.stringify(result));
 } finally {

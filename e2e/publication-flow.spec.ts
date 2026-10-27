@@ -5,10 +5,16 @@ import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve, sep } from "node:path";
-import { expect, type Page, type TestInfo, test } from "@playwright/test";
+import { expect, type Page, type TestInfo } from "@playwright/test";
 import postgres from "postgres";
 import sharp from "sharp";
+import { emptyOperatingPolicy } from "../src/domain/operating-policy";
+import { operatingPolicyCopy } from "../src/features/operating-policy/copy";
 import { hostUrl, origins } from "./hosts";
+import { withPolicyFixtureTimeout } from "./support/policy-test";
+
+// The existing S2 budget also covers the shared synthetic-policy lease before setup starts.
+const test = withPolicyFixtureTimeout(180_000);
 
 const databaseUrl = process.env.E2E_DATABASE_URL;
 if (
@@ -168,7 +174,6 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   context,
   request,
 }, info) => {
-  test.setTimeout(180_000);
   const fixture = JSON.parse(
     execFileSync(
       process.execPath,
@@ -187,17 +192,71 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
         },
       },
     ).trim(),
-  ) as { token: string; reviewerId: string; sellerId: string; sellerName: string };
-  await context.addCookies([
-    {
-      name: "msr_staff_session",
-      value: fixture.token,
-      url: origins.staff,
-      httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
-    },
-  ]);
+  ) as {
+    token: string;
+    reviewerId: string;
+    sellerId: string;
+    sellerName: string;
+    policyOwner: { id: string; token: string };
+  };
+  const useStaffSession = (token: string) =>
+    context.addCookies([
+      {
+        name: "msr_staff_session",
+        value: token,
+        url: origins.staff,
+        httpOnly: true,
+        secure: false,
+        sameSite: "Lax",
+      },
+    ]);
+
+  // Other synthetic journeys intentionally leave availability unknown. Establish this journey's
+  // prerequisite through native save/review, under the same lease as those singleton writers.
+  await useStaffSession(fixture.policyOwner.token);
+  const policyCopy = operatingPolicyCopy("en"),
+    policyPath = "/en/settings/operating-policy",
+    policyReference = `Synthetic joined S2 availability prerequisite ${randomUUID()}`;
+  await page.goto(hostUrl("staff", policyPath));
+  await page.getByLabel(policyCopy.fields.calendarState, { exact: true }).selectOption("");
+  await page.getByText(policyCopy.coverageGroup, { exact: true }).click();
+  await page.getByLabel(policyCopy.fields.coverage, { exact: true }).fill("");
+  for (const owner of ["ownerService", "ownerPrivacy", "ownerAlerts"] as const)
+    await page.getByLabel(policyCopy.fields[owner], { exact: true }).selectOption("");
+  await page.getByText(policyCopy.referencesGroup, { exact: true }).click();
+  for (const reference of [
+    "purposeService",
+    "purposeSavedSearch",
+    "purposeMarketing",
+    "retentionReference",
+    "vendorReference",
+  ] as const)
+    await page.getByLabel(policyCopy.fields[reference], { exact: true }).fill("");
+  await page.getByText(policyCopy.controlsGroup, { exact: true }).click();
+  await page.getByLabel(policyCopy.fields.processReference, { exact: true }).fill(policyReference);
+  await page.getByLabel(policyCopy.fields.alertReference, { exact: true }).fill("");
+  await page.getByLabel(policyCopy.fields.daysSales, { exact: true }).fill("14");
+  await page.getByLabel(policyCopy.fields.daysRent, { exact: true }).fill("");
+  await page.getByRole("button", { name: policyCopy.save, exact: true }).click();
+  await expect(page.getByRole("heading", { name: policyCopy.saved, exact: true })).toBeVisible();
+  await page.goto(hostUrl("staff", policyPath));
+  await page
+    .getByLabel(policyCopy.note, { exact: true })
+    .fill("Synthetic interval review for local S2 only; no actual agency policy acceptance.");
+  await page.getByLabel(policyCopy.reviewed, { exact: true }).check();
+  await page.getByRole("button", { name: policyCopy.approve, exact: true }).click();
+  await expect(page.getByRole("heading", { name: policyCopy.approved, exact: true })).toBeVisible();
+  const [policy] =
+    await connection`select id, policy_version, content_hash, document, approved_by_id from operating_policy_versions where approved_by_id = ${fixture.policyOwner.id} order by policy_version desc limit 1`;
+  expect(policy).toMatchObject({
+    approved_by_id: fixture.policyOwner.id,
+  });
+  expect(policy?.document).toEqual({
+    ...emptyOperatingPolicy,
+    processReference: policyReference,
+    availabilityReviewDays: { sale: 14, long_term_rent: null },
+  });
+  await useStaffSession(fixture.token);
   const title = `Синтетична обява за проверка ${randomUUID().slice(0, 8)}`;
   const description = "Измислен имот само за автоматизиран тест. Не е предложение за продажба.";
   await page.goto(hostUrl("staff", "/en/inventory/new"));
@@ -328,6 +387,15 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   // O12: decisions live on the listing's review tab, apart from the editor.
   await page.goto(hostUrl("staff", `/en/inventory/${reference}?tab=review`));
   await decision(page, "Confirm current availability");
+  const [availability] =
+    await connection`select availability_policy_snapshot from listings where id = ${listing.id}`;
+  expect(availability?.availability_policy_snapshot).toMatchObject({
+    kind: "approved_operating_policy_v1",
+    policyId: policy?.id,
+    policyVersion: policy?.policy_version,
+    contentHash: policy?.content_hash,
+    document: policy?.document,
+  });
   await decision(page, "Freeze review candidate");
   await decision(page, "Approve factual revision");
   await decision(page, "Submit editorial review");
@@ -501,6 +569,13 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
           scope:
             "Synthetic seller and legal evidence; actual local bytes and ClamAV scans; no live provider or launch proof",
           reference,
+          availabilityPolicy: {
+            scope: "Synthetic native O24 prerequisite only; no actual agency policy acceptance",
+            policyId: policy?.id,
+            policyVersion: policy?.policy_version,
+            contentHash: policy?.content_hash,
+            intervalDays: 14,
+          },
           manifestId: published?.manifest_id,
           sourceRevisionId: published?.listing_revision_id,
           assetId,
