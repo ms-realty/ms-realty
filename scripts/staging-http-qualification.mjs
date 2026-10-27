@@ -6,14 +6,6 @@ import { appendFile, mkdir, readFile, realpath, writeFile } from "node:fs/promis
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { tsImport } from "tsx/esm/api";
-
-// Keep the documented Node >=22.13 entry point: native TypeScript loading is not
-// available throughout that range. tsx is already pinned in the verifier lockfile.
-const { presentLegacyPage } = await tsImport(
-  "../src/server/legacy/presentation.ts",
-  import.meta.url,
-);
 
 export const accountId = "921d0224dcd595c87b7928d2b3c479d1";
 export const zoneId = "f0ac7af0721419e8129e5d10ff547372";
@@ -260,9 +252,14 @@ export function qualificationPassed({
   );
 }
 
-export function sourcePageChecks(document, page) {
-  const view = presentLegacyPage(page),
-    article = document.querySelector("article"),
+export function sourcePageChecks(document, page, view) {
+  assert(
+    view &&
+      typeof view.bodyText === "string" &&
+      Array.isArray(view.facts) &&
+      Array.isArray(view.contentLinks),
+  );
+  const article = document.querySelector("article"),
     bodies = document.querySelectorAll("[data-legacy-source-body]"),
     body = bodies[0],
     factGroups = document.querySelectorAll("[data-legacy-source-facts]"),
@@ -510,6 +507,22 @@ async function sourceFile(root, path) {
   return readFile(selected);
 }
 
+export async function loadSourcePresentation(sourceDir) {
+  const path = "src/server/legacy/presentation.ts";
+  const bytes = await sourceFile(sourceDir, path);
+  // Guard and transport mode must remain dependency-free. Full mode resolves the
+  // already pinned loader from the installed qualified source, never the verifier.
+  const { tsImport } = await import(
+    pathToFileURL(createRequire(resolve(sourceDir, "package.json")).resolve("tsx/esm/api"))
+  );
+  const { presentLegacyPage } = await tsImport(pathToFileURL(resolve(sourceDir, path)).href, {
+    parentURL: pathToFileURL(resolve(sourceDir, "package.json")).href,
+    tsconfig: false,
+  });
+  assert.equal(typeof presentLegacyPage, "function");
+  return { presentLegacyPage, receipt: { path, sha256: digest(bytes), fromQualifiedSource: true } };
+}
+
 export async function loadCorpus(sourceDir, candidate, byteProof) {
   const bytes = {};
   for (const key of ["routes", "routeManifest", "media"]) {
@@ -724,6 +737,8 @@ async function qualify(context) {
     const { JSDOM } = await import(
       pathToFileURL(createRequire(resolve(sourceDir, "package.json")).resolve("jsdom"))
     );
+    const { presentLegacyPage, receipt } = await loadSourcePresentation(sourceDir);
+    report.sourcePresentation = receipt;
     const routePace = createPacer(),
       mediaPace = createPacer(),
       completed = {};
@@ -766,7 +781,10 @@ async function qualify(context) {
         }
         const dom = new JSDOM((await readBoundedBody(response, 5_000_000)).toString());
         try {
-          Object.assign(row.checks, sourcePageChecks(dom.window.document, page));
+          Object.assign(
+            row.checks,
+            sourcePageChecks(dom.window.document, page, presentLegacyPage(page)),
+          );
         } finally {
           dom.window.close();
         }

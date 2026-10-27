@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -11,6 +11,7 @@ import {
   bindSourceReport,
   createPacer,
   errorEvidence,
+  loadSourcePresentation,
   observeTransport,
   origins,
   protocol,
@@ -289,7 +290,7 @@ test("R07 source proof survives replacement HTTP reports and rejects altered H/m
   });
 });
 
-test("R07 CLI uploads same-tree provenance after transport report replacement and fails on main drift", async () => {
+test("R07 CLI without parsing dependencies uploads transport provenance and fails on main drift", async () => {
   await withGitRepository(async ({ directory, git, base }) => {
     const artifacts = await mkdtemp(join(tmpdir(), "msr-http-artifacts-"));
     try {
@@ -298,25 +299,8 @@ test("R07 CLI uploads same-tree provenance after transport report replacement an
         join(directory, "scripts/staging-http-qualification.mjs"),
         await readFile(new URL("./staging-http-qualification.mjs", import.meta.url)),
       );
-      await mkdir(join(directory, "src/server/legacy"), { recursive: true });
-      await writeFile(
-        join(directory, "src/server/legacy/presentation.ts"),
-        await readFile(new URL("../src/server/legacy/presentation.ts", import.meta.url)),
-      );
-      await symlink(
-        await realpath(new URL("../node_modules", import.meta.url)),
-        join(directory, "node_modules"),
-        "dir",
-      );
-      await writeFile(join(directory, "package.json"), '{"type":"module"}\n');
       await writeFile(join(directory, "package-lock.json"), "{}\n");
-      git(
-        "add",
-        "scripts/staging-http-qualification.mjs",
-        "src",
-        "package.json",
-        "package-lock.json",
-      );
+      git("add", "scripts/staging-http-qualification.mjs", "package-lock.json");
       git("commit", "--quiet", "-m", "Qualified verifier and source H");
       const head = git("rev-parse", "HEAD"),
         tree = git("rev-parse", "HEAD^{tree}");
@@ -562,7 +546,11 @@ function galleryChecks(sources, page = sourcePage) {
       if (src !== null) image.setAttribute("src", src);
       dom.window.document.querySelector("article").append(image);
     }
-    return sourcePageChecks(dom.window.document, page);
+    return sourcePageChecks(dom.window.document, page, {
+      bodyText: page.bodyText,
+      facts: [],
+      contentLinks: [],
+    });
   } finally {
     dom.window.close();
   }
@@ -623,7 +611,11 @@ function readingChecks(mutate = () => {}, page = readingPage) {
   article.append(section);
   try {
     mutate(document);
-    return sourcePageChecks(document, page);
+    return sourcePageChecks(document, page, {
+      bodyText: "Source gallery\nLiteral […] [unknown-plugin field='retain'] prose.",
+      facts: readingPage.listing.liveSourceFields,
+      contentLinks: readingPage.contentLinks,
+    });
   } finally {
     dom.window.close();
   }
@@ -635,6 +627,23 @@ test("P21/R07 verifies the exact reading view, source fact values and links whil
     readingPage.bodyText,
     "Source gallery\nLiteral […] [unknown-plugin field='retain'] prose.",
   );
+});
+
+test("P21/R07 full-mode presentation loads from qualified source and records its exact module hash", async () => {
+  const sourceDir = await realpath(new URL("../", import.meta.url));
+  const { presentLegacyPage, receipt } = await loadSourcePresentation(sourceDir);
+  assert.deepEqual(presentLegacyPage(readingPage), {
+    bodyText: "Source gallery\nLiteral […] [unknown-plugin field='retain'] prose.",
+    facts: readingPage.listing.liveSourceFields,
+    contentLinks: readingPage.contentLinks,
+  });
+  assert.deepEqual(receipt, {
+    path: "src/server/legacy/presentation.ts",
+    sha256: createHash("sha256")
+      .update(await readFile(join(sourceDir, "src/server/legacy/presentation.ts")))
+      .digest("hex"),
+    fromQualifiedSource: true,
+  });
 });
 
 test("P21/R07 missing, altered, extra or reordered fact labels and values fail", () => {

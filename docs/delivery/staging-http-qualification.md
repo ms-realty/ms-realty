@@ -64,6 +64,9 @@ replacing the body, or claiming a different source hash fails qualification. Thi
 same reviewed pure presentation function as the renderer; its independent source fixtures
 and full-inventory preservation tests remain necessary. It does not approve source
 equivalence, facts, translations, availability or media rights.
+Only full mode loads that function, using the locked loader installed in the qualified
+source checkout and retaining the module digest. Guard and transport mode require no
+parsing dependencies; the separate verifier checkout does not need an installation.
 
 `passed` applies only to the named HTTP scope. `fullHttpQualificationPassed` records a
 successful complete HTTP run. The ambiguous `fullQualificationPassed` field is omitted.
