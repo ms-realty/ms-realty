@@ -130,6 +130,8 @@ export async function recordAppointmentVersion(
       state: row.state,
       purpose: row.purpose,
       photographyScope: row.photographyScope,
+      proposedVersion: row.proposedVersion,
+      proposedBufferMinutes: row.proposedBufferMinutes,
       proposedStartsAt: row.proposedStartsAt?.toISOString(),
       proposedEndsAt: row.proposedEndsAt?.toISOString(),
       confirmedStartsAt: row.confirmedStartsAt?.toISOString(),

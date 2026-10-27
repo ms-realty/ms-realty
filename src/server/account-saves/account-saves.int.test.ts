@@ -13,6 +13,7 @@ import {
   createSavedTransfer,
   listPersonalSaves,
   reviewSavedTransfer,
+  savedTransferLifetime,
   validateSavedHandoff,
 } from "./service";
 
@@ -120,4 +121,50 @@ it("C05 rejects expired and overlarge selection batches without truncation or au
   await expect(
     validateSavedHandoff(t.db, transfer.nonce, getEnv().hosts.public, transfer.target),
   ).rejects.toMatchObject({ code: "not_found" });
+});
+
+it("C05 a pruned expired nonce cannot be revived by reusing the old logical key", async () => {
+  const creator = newShareCreatorSession(),
+    input = { locale: "bg" as const, references: ["MS-99998"], operationId: randomUUID() },
+    now = new Date();
+  const old = await createSavedTransfer(
+    t.db,
+    creator,
+    input,
+    "127.0.0.76",
+    new Date(now.getTime() - 31 * 60_000),
+  );
+  await expect(
+    validateSavedHandoff(t.db, old.nonce, getEnv().hosts.public, old.target),
+  ).rejects.toMatchObject({ code: "not_found" });
+  const fresh = await createSavedTransfer(t.db, creator, input, "127.0.0.76", now);
+  expect(fresh.nonce).not.toBe(old.nonce);
+  await expect(
+    validateSavedHandoff(t.db, old.nonce, getEnv().hosts.public, old.target),
+  ).rejects.toMatchObject({ code: "not_found" });
+  await validateSavedHandoff(t.db, fresh.nonce, getEnv().hosts.public, fresh.target);
+});
+it("C05 recovers the original still-valid capability across an expiry epoch boundary", async () => {
+  const creator = newShareCreatorSession(),
+    input = { locale: "bg" as const, references: ["MS-99997"], operationId: randomUUID() },
+    boundary = Math.ceil(Date.now() / savedTransferLifetime) * savedTransferLifetime;
+  const first = await createSavedTransfer(
+    t.db,
+    creator,
+    input,
+    "127.0.0.77",
+    new Date(boundary - 1000),
+  );
+  expect(
+    await createSavedTransfer(t.db, creator, input, "127.0.0.77", new Date(boundary + 1000)),
+  ).toEqual(first);
+  await expect(
+    createSavedTransfer(
+      t.db,
+      creator,
+      { ...input, references: ["MS-99996"] },
+      "127.0.0.77",
+      new Date(boundary + 1000),
+    ),
+  ).rejects.toMatchObject({ code: "idempotency_key_reused" });
 });

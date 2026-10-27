@@ -19,7 +19,14 @@ const connection = postgres(url, { max: 1, onnotice: () => {} }),
   db = drizzle(connection, { schema });
 try {
   const f = await caseFixture(db),
-    listing = await createListingFixture(db, { reviewerId: f.staff.id });
+    listing = await createListingFixture(db, {
+      reviewerId: f.staff.id,
+      fixtureReferences: {
+        property: `PR-SYNTHETIC-${randomUUID()}`,
+        listing: `MS-${Number.parseInt(randomUUID().replaceAll("-", "").slice(0, 12), 16)}`,
+        sellerInstruction: `SI-SYNTHETIC-${randomUUID()}`,
+      },
+    });
   await publishForTest(db, f.staff.actor, listing);
   await db
     .update(schema.listings)

@@ -1,17 +1,19 @@
 // C01 / F13: invited client authentication, explicit email verification and optional passkey.
 
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { invitations, principals } from "@/db/schema";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
-import { ClientEmailForm } from "@/features/identity/client-email-form";
 import { accessErrorMessage, ceremonyMessages, fill, identityCopy } from "@/features/identity/copy";
 import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
 import { isRoutableLocale } from "@/i18n/config";
+import { clientInputCookieName, openClientInput } from "@/server/auth/client-input";
 import { currentClientSession, localReturnPath } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
-import { ErrorSummary } from "@/ui/error-summary";
+import { controlClass, labelClass } from "@/ui/field-class";
+import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
 import {
   beginClientPasskey,
@@ -25,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     title: identityCopy(locale).clientAccessTitle,
     robots: { index: false, follow: false },
-    referrer: "no-referrer" as const,
+    referrer: "same-origin" as const,
   };
 }
 export default async function ClientAccessPage({
@@ -36,8 +38,12 @@ export default async function ClientAccessPage({
   if (!isRoutableLocale(locale)) notFound();
   const c = identityCopy(locale);
   const query = await searchParams;
+  const draft =
+    typeof query.error === "string"
+      ? openClientInput((await cookies()).get(clientInputCookieName())?.value, locale)
+      : null;
   const returnTo = localReturnPath(
-    typeof query.returnTo === "string" ? query.returnTo : null,
+    typeof query.returnTo === "string" ? query.returnTo : (draft?.returnTo ?? null),
     "client",
     locale,
   );
@@ -114,17 +120,42 @@ export default async function ClientAccessPage({
       title={query.sent === "1" ? c.linkSentTitle : c.clientAccessTitle}
       lead={query.sent === "1" ? c.linkSent : c.clientAccessLead}
     >
-      {error ? (
-        code === "VALIDATION_FAILED" ? (
-          <ErrorSummary
-            title={error}
-            errors={[{ fieldId: "client-email", message: `${c.emailLabel}: ${c.invalidEmail}` }]}
+      {error && code !== "VALIDATION_FAILED" ? <Notice tone="error">{error}</Notice> : null}
+      <NativeForm
+        method="post"
+        action={`/${locale}/access/request`}
+        className="flex flex-col gap-4"
+        validation={{
+          summary: c.invalidEmail,
+          fields: {
+            email: {
+              label: c.emailLabel,
+              required: c.invalidEmail,
+              email: c.invalidEmail,
+              error: code === "VALIDATION_FAILED" ? c.invalidEmail : undefined,
+            },
+          },
+        }}
+      >
+        <input type="hidden" name="returnTo" value={returnTo ?? ""} />
+        <label htmlFor="client-email" className="flex flex-col gap-2">
+          <span className={labelClass}>{c.emailLabel}</span>
+          <input
+            id="client-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            className={controlClass}
+            maxLength={254}
+            required
+            dir="ltr"
+            defaultValue={draft?.email ?? ""}
           />
-        ) : (
-          <Notice tone="error">{error}</Notice>
-        )
-      ) : null}
-      <ClientEmailForm locale={locale} returnTo={returnTo} />
+        </label>
+        <button type="submit" className={buttonClass()}>
+          {c.sendLink}
+        </button>
+      </NativeForm>
       <p className="text-compact text-text-muted">{c.noSelfRegistration}</p>
       <p>{c.orPasskey}</p>
       <PasskeyCeremony

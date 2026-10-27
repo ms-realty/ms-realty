@@ -349,7 +349,19 @@ export async function workflowAction(
     if (command === "message") {
       const conversation = `/${locale}/${context === "staff" ? "cases" : "messages"}/${id}`;
       revalidatePath(conversation);
-      redirect(`${conversation}#case-conversation`);
+      const nextOperation = issueFormOperation(scope);
+      return {
+        ...state,
+        operationId: nextOperation,
+        expectedRevision: result.data.version,
+        values: Object.fromEntries(fields.map((name) => [name, ""])),
+        responseId: randomUUID(),
+        reconciliation: {
+          href: workflowStatus(context, locale, command, id, nextOperation),
+          label: copy.status,
+        },
+        outcome: { kind: "idle" },
+      };
     }
     // Acceptance/cancellation removes the submitted form. Keep the recorded outcome
     // visible after a native POST by opening its actor-bound receipt instead.

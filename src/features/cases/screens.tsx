@@ -51,7 +51,7 @@ import { matchingCopy } from "./matching-copy";
 import { ownerPreviewCopy } from "./owner-preview-copy";
 
 export const workflowLink =
-  "inline-flex min-h-control items-center rounded-control py-2 font-semibold text-accent underline underline-offset-4";
+  "inline-flex min-h-control min-w-control items-center rounded-control py-2 font-semibold text-accent underline underline-offset-4";
 export type ScreenProps = { locale: string; session: Session };
 export function WorkflowPage({
   session,
@@ -600,6 +600,11 @@ export async function CaseScreen(
     );
     const appointment = agenda.length === 1 ? agenda[0] : undefined;
     const links = [
+      ...view.ownerPreviews.map((reference) => ({
+        label: `${ownerPreviewCopy(props.locale).ownerLink} · ${reference}`,
+        href: `/${props.locale}/properties/${row.id}/preview?listing=${encodeURIComponent(reference)}`,
+        detail: null,
+      })),
       {
         label: c.appointments,
         href: `/${props.locale}/appointments${appointment ? `/${appointment.id}` : ""}`,
@@ -1108,7 +1113,9 @@ export async function CaseScreen(
                       {interest.explanation
                         .filter((text): text is string => typeof text === "string")
                         .map((text) => (
-                          <li key={text}>{text}</li>
+                          <li key={text} dir="auto">
+                            {text}
+                          </li>
                         ))}
                     </ul>
                   ) : null}
@@ -1262,7 +1269,13 @@ export async function CaseScreen(
         <WorkflowSection title={c.messages} id="case-conversation" showTitle={!focusedConversation}>
           <p>{c.messageNote}</p>
           {thread.length ? (
-            <ol className="space-y-5">
+            <ol
+              role="log"
+              aria-label={c.messages}
+              aria-live="polite"
+              aria-relevant="additions"
+              className="space-y-5"
+            >
               {thread.map((message) => (
                 <li
                   key={message.id}
@@ -1380,7 +1393,14 @@ export function AppointmentList(
           <p>{row.hostName}</p>
           {(row.confirmedStartsAt ?? row.proposedStartsAt) ? (
             <p>
-              <strong>{row.confirmedStartsAt ? c.confirmedTime : c.proposedTime}:</strong>{" "}
+              <strong>
+                {["cancelled", "declined", "completed", "no_show"].includes(row.state)
+                  ? c.previousTime
+                  : row.confirmedStartsAt
+                    ? c.confirmedTime
+                    : c.proposedTime}
+                :
+              </strong>{" "}
               <WorkflowTimeRange
                 start={(row.confirmedStartsAt ?? row.proposedStartsAt) as Date}
                 end={row.confirmedEndsAt ?? row.proposedEndsAt}

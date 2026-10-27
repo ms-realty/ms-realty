@@ -109,9 +109,13 @@ export async function JourneyShell({
   ) : null;
   return (
     <PrivatePageGuard locale={locale} verification={randomUUID()}>
-      <div className="min-h-dvh min-w-0 bg-canvas pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0 lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <div
+        data-client-shell
+        className="flex h-dvh min-w-0 flex-col overflow-hidden bg-canvas print:block print:h-auto print:overflow-visible lg:grid lg:h-auto lg:min-h-dvh lg:grid-cols-[14rem_minmax(0,1fr)] lg:overflow-visible"
+      >
         <SkipLink targetId={journeyMainId}>{a11y("skipToContent")}</SkipLink>
         <aside
+          data-client-navigation
           className="hidden min-w-0 border-e border-divider bg-subtle p-5 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:gap-5 lg:overflow-y-auto"
           aria-label={t("journey.label")}
         >
@@ -132,8 +136,8 @@ export async function JourneyShell({
             </Link>
           </div>
         </aside>
-        <div className="flex min-w-0 flex-col">
-          <header className="border-b border-divider bg-surface">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden print:overflow-visible lg:overflow-visible">
+          <header className="shrink-0 border-b border-divider bg-surface">
             <div className="flex min-w-0 items-center justify-between gap-4 p-5 lg:hidden">
               {logo}
               <div className="flex min-w-0 items-center gap-2">
@@ -172,7 +176,11 @@ export async function JourneyShell({
               {language}
             </div>
           </header>
-          <main id={journeyMainId} tabIndex={-1} className="min-w-0 flex-1 outline-none">
+          <main
+            id={journeyMainId}
+            tabIndex={-1}
+            className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain outline-none print:overflow-visible lg:overflow-visible"
+          >
             <Suspense fallback={null}>
               <NavigationLoading surface="client" />
             </Suspense>
@@ -180,8 +188,9 @@ export async function JourneyShell({
           </main>
         </div>
         <nav
+          data-print-hide
           aria-label={t("journey.label")}
-          className="fixed inset-x-0 bottom-0 z-(--z-sticky) grid grid-cols-5 gap-1 border-t border-divider bg-surface px-2 pb-[env(safe-area-inset-bottom)] lg:hidden"
+          className="grid shrink-0 grid-cols-5 gap-1 border-t border-divider bg-surface px-2 pb-[env(safe-area-inset-bottom)] lg:hidden"
         >
           {destinations
             .filter((item) =>

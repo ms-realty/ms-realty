@@ -93,7 +93,7 @@ for (const javaScriptEnabled of [true, false])
       await page.goto(hostUrl("client", `/bg/messages/${f.caseId}`));
       await page.getByLabel(c.message, { exact: true }).fill(body);
       await page.getByRole("button", { name: c.post, exact: true }).click();
-      await expect(page).toHaveURL(hostUrl("client", `/bg/messages/${f.caseId}#case-conversation`));
+      await expect(page).toHaveURL((url) => url.pathname === `/bg/messages/${f.caseId}`);
       await expect(page.getByText(body, { exact: true })).toHaveCount(1);
       await expect(page.getByText(body, { exact: true })).toHaveAttribute("dir", "auto");
       await expect(page.getByLabel(c.message, { exact: true })).toHaveValue("");

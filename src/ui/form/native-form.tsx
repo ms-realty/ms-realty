@@ -87,7 +87,15 @@ export function NativeForm({ children, validation, ...props }: Props) {
     ),
   );
   const fieldIds: Record<string, string> = {};
-  const localFields = (nodes: ReactNode): ReactNode =>
+  const namedFields = (nodes: ReactNode): string[] =>
+    Children.toArray(nodes).flatMap((node) =>
+      !isValidElement<Record<string, unknown>>(node)
+        ? []
+        : typeof node.props.name === "string" && validation?.fields[node.props.name]
+          ? [node.props.name]
+          : namedFields(node.props.children as ReactNode),
+    );
+  const localFields = (nodes: ReactNode, inLabel = false): ReactNode =>
     Children.map(nodes, (node) => {
       if (!isValidElement<Record<string, unknown>>(node)) return node;
       const name = typeof node.props.name === "string" ? node.props.name : "";
@@ -110,7 +118,7 @@ export function NativeForm({ children, validation, ...props }: Props) {
               "aria-invalid": errors[name] ? true : node.props["aria-invalid"],
               "aria-describedby": described,
             })}
-            {errors[name] ? (
+            {errors[name] && !inLabel ? (
               <p id={`${id}-error`} className="text-dense text-error">
                 {errors[name]}
               </p>
@@ -118,9 +126,31 @@ export function NativeForm({ children, validation, ...props }: Props) {
           </>
         );
       }
-      return node.props.children
-        ? cloneElement(node, {}, localFields(node.props.children as ReactNode))
-        : node;
+      if (!node.props.children) return node;
+      const label = node.type === "label";
+      const content = cloneElement(
+        node,
+        {},
+        localFields(node.props.children as ReactNode, inLabel || label),
+      );
+      return label ? (
+        <>
+          {content}
+          {namedFields(node.props.children as ReactNode)
+            .filter((name) => errors[name])
+            .map((name) => (
+              <p
+                key={name}
+                id={`${fieldIds[name] ?? `native-${name}`}-error`}
+                className="text-dense text-error"
+              >
+                {errors[name]}
+              </p>
+            ))}
+        </>
+      ) : (
+        content
+      );
     });
   const localizedChildren = validation ? localFields(children) : children;
   const request = useRef<XMLHttpRequest | null>(null);

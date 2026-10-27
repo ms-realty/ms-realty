@@ -178,3 +178,20 @@ it("C06 rejects a now-unavailable selection and current resource conflicts befor
       .where(eq(appointmentParticipantResponses.appointmentId, f.request.id)),
   ).toHaveLength(0);
 });
+it("C06 holds an older proposed slot without an exact recorded buffer", async () => {
+  const f = await fixture();
+  await t.db
+    .update(appointments)
+    .set({ proposedBufferMinutes: null })
+    .where(eq(appointments.id, f.request.id));
+  await expect(
+    respondToProposedSlot(t.db, f.client.session, {
+      id: f.request.id,
+      operationId: randomUUID(),
+      expectedVersion: 2,
+      decision: "accept",
+      note: "",
+    }),
+  ).rejects.toMatchObject({ code: "transition_denied" });
+  expect(await ownSlotResponse(t.db, f.client.session, f.request.id)).toBeNull();
+});

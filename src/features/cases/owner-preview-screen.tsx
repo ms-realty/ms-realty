@@ -67,7 +67,7 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
           <summary className="cursor-pointer font-semibold">{c.technical}</summary>
           <p>Revision {view.revision}</p>
         </details>
-        <div lang="bg">
+        <div lang="bg" dir="ltr">
           <h2 className="font-semibold">{view.title}</h2>
           <p className="whitespace-pre-wrap">{view.description}</p>
         </div>

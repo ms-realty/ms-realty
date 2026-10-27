@@ -46,21 +46,43 @@ export async function createSavedTransfer(
   creatorToken: string,
   raw: z.input<typeof transferInput>,
   clientIp: string,
+  now = new Date(),
 ) {
   const input = parseInput(transferInput, raw);
   if (!validShareCreatorSession(creatorToken)) throw new AppError("unauthenticated");
-  const env = getEnv(),
-    now = new Date();
+  const env = getEnv();
   const creatorSessionHash = keyedHash(env.authSecret, `saved-creator:${creatorToken}`);
   await enforceRateLimit(db, "public_share.ip", clientIp, { now });
   await enforceRateLimit(db, "public_share.creator", creatorSessionHash, { now });
-  // Deterministic to this random logical key and creator secret, so a lost creation response
-  // can recover the same capability. Only its one-way hash is stored.
-  const nonce = keyedHash(
-    env.authSecret,
-    `saved-transfer:${creatorSessionHash}:${input.operationId}`,
+  // Recover a lost response throughout its validity window, including an epoch boundary.
+  // Expiry epochs prevent a pruned expired nonce being revived by an old logical key.
+  // Only one-way capability hashes are stored.
+  const epoch = Math.floor(now.getTime() / savedTransferLifetime);
+  const candidates = [epoch - 1, epoch].map((value) =>
+    keyedHash(env.authSecret, `saved-transfer:${creatorSessionHash}:${input.operationId}:${value}`),
   );
   const targetPath = `/${input.locale}/saved/handoff`;
+  const prior = await db
+    .select()
+    .from(savedSelectionTransfers)
+    .where(inArray(savedSelectionTransfers.nonceHash, candidates.map(sha256Hex)));
+  const recoverable = candidates.find((candidate) =>
+    prior.some((row) => row.nonceHash === sha256Hex(candidate) && row.expiresAt > now),
+  );
+  if (recoverable) {
+    const row = prior.find((value) => value.nonceHash === sha256Hex(recoverable));
+    if (
+      !row ||
+      hashRequest(row.listingReferences) !== hashRequest(input.references) ||
+      row.targetPath !== targetPath ||
+      row.sourceOrigin !== env.hosts.public ||
+      row.targetOrigin !== env.hosts.client
+    )
+      throw new AppError("idempotency_key_reused");
+    return { nonce: recoverable, target: `${env.hosts.client}${targetPath}` };
+  }
+  const nonce = candidates[1];
+  if (!nonce) throw new AppError("unavailable");
   await db
     .delete(savedSelectionTransfers)
     .where(
@@ -73,6 +95,7 @@ export async function createSavedTransfer(
   await db
     .insert(savedSelectionTransfers)
     .values({
+      createdAt: now,
       nonceHash: sha256Hex(nonce),
       creatorSessionHash,
       sourceOrigin: env.hosts.public,
@@ -191,7 +214,11 @@ export async function reviewSavedTransfer(
     consumed: Boolean(transfer.consumedAt),
     items: transfer.listingReferences.map((reference) => ({
       reference,
-      card: cards.find((card) => card.reference === reference) ?? null,
+      card:
+        cards.find(
+          (card) =>
+            card.reference === reference && card.availability.primaryAction !== "view_similar",
+        ) ?? null,
       existing: existing.some((row) => row.reference === reference),
     })),
   };

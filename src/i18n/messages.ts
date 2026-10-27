@@ -6,6 +6,7 @@
 
 import type a11y from "../../messages/bg/a11y.json";
 import type caseReview from "../../messages/bg/caseReview.json";
+import type clientAccess from "../../messages/bg/client-access.json";
 import type common from "../../messages/bg/common.json";
 import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
@@ -40,6 +41,7 @@ import { isStaffLocale, type PublicLocale } from "./config";
 
 export const publicNamespaces = [
   "caseReview",
+  "client-access",
   "a11y",
   "common",
   "discovery",
@@ -78,6 +80,7 @@ export const staffNamespaces = [
 
 export interface PublicMessages {
   caseReview: typeof caseReview;
+  "client-access": typeof clientAccess;
   a11y: typeof a11y;
   common: typeof common;
   discovery: typeof discovery;

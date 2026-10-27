@@ -56,6 +56,7 @@ export async function respondToProposedSlot(
         !row.proposedVersion ||
         !row.proposedStartsAt ||
         !row.proposedEndsAt ||
+        row.proposedBufferMinutes === null ||
         row.proposedStartsAt <= new Date() ||
         row.proposedEndsAt <= row.proposedStartsAt ||
         !row.listingId
@@ -93,7 +94,7 @@ export async function respondToProposedSlot(
         listing.freshnessState !== "current_under_policy"
       )
         throw new AppError("transition_denied");
-      const during = `[${new Date(row.proposedStartsAt.getTime() - (row.proposedBufferMinutes ?? 0) * 60000).toISOString()},${new Date(row.proposedEndsAt.getTime() + (row.proposedBufferMinutes ?? 0) * 60000).toISOString()})`;
+      const during = `[${new Date(row.proposedStartsAt.getTime() - row.proposedBufferMinutes * 60000).toISOString()},${new Date(row.proposedEndsAt.getTime() + row.proposedBufferMinutes * 60000).toISOString()})`;
       const [conflict] = await ctx.tx
         .select({ id: appointmentResources.id })
         .from(appointmentResources)
