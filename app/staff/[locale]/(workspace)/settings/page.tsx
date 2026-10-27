@@ -3,6 +3,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getDb } from "@/db/client";
+import { agencyCopy } from "@/features/agency-obligations/copy";
 import { ProfileForm } from "@/features/identity/profile-form";
 import { settingsCopy } from "@/features/identity/settings-copy";
 import { operatingPolicyCopy } from "@/features/operating-policy/copy";
@@ -42,6 +43,7 @@ export default async function SettingsPage({
   ] = await Promise.all([
     readStaffProfile(db, session),
     heldCapabilities(db, session.actor, [
+      "compliance.review",
       "access.grant",
       "report.read",
       "settings.manage",
@@ -55,6 +57,9 @@ export default async function SettingsPage({
   const copy = settingsCopy(locale);
   const workspace = await getTranslations({ locale, namespace: "workspace" });
   const administration = [
+    ...(held.has("compliance.review")
+      ? [{ href: `/${locale}/operations/agency`, label: agencyCopy(locale).title, icon: "pages" }]
+      : []),
     ...(mayManagePrivacySettings && mayReadPrivacySettings
       ? [
           {

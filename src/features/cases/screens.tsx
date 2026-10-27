@@ -21,6 +21,7 @@ import { buttonClass } from "@/ui/button-class";
 import type { FormReceipt } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { TechnicalDetails } from "@/ui/technical-details";
+import { agencyCopy } from "../agency-obligations/copy";
 import { caseAccessCopy } from "../case-access/copy";
 import { documentRequestCopy } from "../document-requests/copy";
 import { ServiceContext } from "../service-intake/context";
@@ -179,6 +180,8 @@ export function BoundWorkflowForm({
   receipt,
   nativeIdentity,
   commandAvailable,
+  disclosure,
+  intro,
 }: ScreenProps & {
   command: WorkflowCommand;
   id: string;
@@ -190,6 +193,8 @@ export function BoundWorkflowForm({
   receipt?: FormReceipt;
   nativeIdentity?: string;
   commandAvailable?: boolean;
+  disclosure?: string;
+  intro?: ReactNode;
 }) {
   const initial = initialFormState(
     workflowScope(command, id),
@@ -206,6 +211,8 @@ export function BoundWorkflowForm({
       path={path}
       nativeIdentity={nativeIdentity ?? workflowScope(command, id)}
       commandAvailable={commandAvailable}
+      disclosure={disclosure}
+      intro={intro}
       status={{
         href: workflowStatus(session.account.kind, locale, command, id, initial.operationId),
         label: caseCopy(locale).status,
@@ -747,6 +754,23 @@ export async function CaseScreen(
               href={`/${props.locale}/cases/${row.id}/email`}
             >
               {caseEmailCopy(props.locale).title}
+            </a>
+          ) : null}
+          {view.canReviewProcess ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/operations/agency/partners/new?case=${row.id}`}
+            >
+              {agencyCopy(props.locale).newPartner}
+            </a>
+          ) : null}
+          {view.canReviewProcess &&
+          ["completed", "completion_handover", "concluded"].includes(row.stage) ? (
+            <a
+              className={`${workflowLink} inline-flex min-h-control items-center`}
+              href={`/${props.locale}/operations/agency/reviews/new?case=${row.id}`}
+            >
+              {agencyCopy(props.locale).newReview}
             </a>
           ) : null}
           {view.canReviewProcess ? (

@@ -4,7 +4,7 @@
   "zone": "Display timezone",
   "scope": "Calendar scope",
   "team": "Permitted team",
-  "mine": "My viewings",
+  "mine": "My appointments",
   "apply": "Apply filters",
   "agenda": "Agenda",
   "day": "Day",
@@ -15,7 +15,7 @@
   "next": "Next period",
   "today": "Today",
   "refresh": "Refresh calendar",
-  "scopeNote": "Only viewings in deals you may read and manage are included. My viewings shows you as the recorded host.",
+  "scopeNote": "Only permitted Case viewings and property-work photography are included. My appointments shows you as the recorded host.",
   "manualNote": "The agency calendar records internal commitments. Check external calendars manually before confirmation; automatic calendar sync is not available.",
   "snapshot": "Calendar read at",
   "snapshotNote": "Refresh before acting. A proposal does not reserve resources; confirmation rechecks the current arrangement.",
@@ -51,7 +51,7 @@
   "external": "Last recorded manual external-busy check",
   "externalMissing": "A manual external-busy check is required before confirmation.",
   "version": "Recorded version",
-  "open": "Open viewing",
+  "open": "Open appointment",
   "deal": "Deal",
   "more": "Next appointments",
   "back": "Previous appointments",
@@ -61,7 +61,7 @@
   "noRequests": "No requests awaiting a time on this page in the selected scope.",
   "moreRequests": "Next requests",
   "backRequests": "Previous requests",
-  "subtitle": "Viewings, host time and property access, in one place.",
+  "subtitle": "Viewings and property photography, host time and access, in one place.",
   "details": "Scope and checks",
   "manualShort": "External checks are manual",
   "internalNote": "Proposals do not reserve resources",
@@ -96,5 +96,6 @@
   "canvasEmpty": "No viewings recorded in this period",
   "conflictShort": "Resource overlap · Review",
   "reviewShort": "Review required",
-  "transitionNote": "When clocks change, each column shows that day's local times and offsets."
+  "transitionNote": "When clocks change, each column shows that day's local times and offsets.",
+  "photography": "Photography"
 }

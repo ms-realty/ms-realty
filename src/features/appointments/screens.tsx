@@ -1,5 +1,6 @@
 import "server-only";
 import { unstable_rethrow } from "next/navigation";
+import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
@@ -9,6 +10,7 @@ import { type CalendarData, readCalendar } from "@/server/appointments/calendar"
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import { isAppError } from "@/server/errors";
 import { Notice } from "@/ui/notice";
+import { agencyCopy } from "../agency-obligations/copy";
 import { workflowScope } from "../cases/contract";
 import { caseCopy } from "../cases/copy";
 import { caseEmailCopy } from "../cases/email-copy";
@@ -68,6 +70,17 @@ export async function CalendarScreen(props: ScreenProps & { search?: CalendarSea
     </StaffPage>
   );
 }
+function SecondaryAppointmentTask({
+  folded,
+  title,
+  children,
+}: {
+  folded: boolean;
+  title: string;
+  children: ReactNode;
+}) {
+  return folded ? children : <WorkflowSection title={title}>{children}</WorkflowSection>;
+}
 export async function AppointmentScreen(props: ScreenProps & { id: string }) {
   const locale = isPublicLocale(props.locale) ? props.locale : "bg";
   const detail = await privateRead(() => readAppointment(getDb(), props.session, props.id, locale));
@@ -86,11 +99,104 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
       appointmentMachine.check(row.state, target).outcome === "allowed" &&
       (staff || ["reschedule_requested", "cancelled"].includes(target)),
   );
+  const photography = row.purpose === "photography",
+    photoCopy = agencyCopy(props.locale);
+  // Keep the exact form hook mounted after a native confirmation removes eligibility.
+  // ActionForm hides a fresh unavailable form while restoring its recorded response.
+  const arrangement =
+    canArrange || photography ? (
+      <section
+        className={
+          canArrange ? "space-y-4 rounded-card border border-border bg-surface p-5" : undefined
+        }
+      >
+        <BoundWorkflowForm
+          {...props}
+          command="arrange"
+          id={row.id}
+          revision={row.version}
+          path={path}
+          commandAvailable={canArrange}
+          intro={
+            <>
+              <h2 className="text-subheading font-semibold">
+                {photography ? photoCopy.arrangePhoto : c.arrangement}
+              </h2>
+              <p>{photography ? photoCopy.photoArrangeHint : c.policyNote}</p>
+            </>
+          }
+          fields={[
+            {
+              name: "action",
+              label: c.action,
+              type: "select",
+              options: [
+                ...(row.state !== "proposed" ? [{ value: "propose", label: c.propose }] : []),
+                { value: "confirm", label: c.confirm },
+              ],
+            },
+            { name: "startsAt", label: c.start, type: "datetime-local", required: true },
+            { name: "endsAt", label: c.end, type: "datetime-local", required: true },
+            { name: "bufferMinutes", label: c.buffer, type: "number", required: true },
+            { name: "propertyAccessConfirmed", label: c.access, type: "checkbox" },
+            { name: "externalBusyChecked", label: c.external, type: "checkbox" },
+            { name: "accessNotes", label: c.logistics, type: "textarea" },
+          ]}
+          values={{
+            action: row.state === "proposed" ? "confirm" : "propose",
+            bufferMinutes: "30",
+          }}
+          submit={c.change}
+        />
+      </section>
+    ) : null;
   return (
-    <WorkflowPage {...props} title={c.appointmentTitle} reference={row.reference}>
-      <p data-testid="appointment-state" className="font-semibold">
-        {c[row.state]}
-      </p>
+    <WorkflowPage
+      {...props}
+      title={row.purpose === "photography" ? agencyCopy(props.locale).photo : c.appointmentTitle}
+      reference={row.reference}
+    >
+      {photography ? (
+        <div className="space-y-3 text-dense">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <p data-testid="appointment-state" className="font-semibold">
+              {c[row.state]}
+            </p>
+            <p>
+              {c.owned}: {row.hostName ?? "—"}
+            </p>
+          </div>
+          {detail.propertyWork ? (
+            <p>
+              <a
+                className={workflowLink}
+                href={`/${props.locale}/inventory/${detail.propertyWork.listingReference}`}
+              >
+                {detail.propertyWork.propertyReference} · {detail.propertyWork.listingReference}
+              </a>
+            </p>
+          ) : null}
+          <p className="text-text-muted">{photoCopy.photoBoundary}</p>
+          {windows.success && windows.data.length ? (
+            <p>
+              {c.preferredWindow}: {windows.data.map((window) => window.text).join(" · ")}
+            </p>
+          ) : null}
+          {row.photographyScope ? (
+            <details>
+              <summary className="min-h-control cursor-pointer py-2 font-semibold text-action">
+                {photoCopy.fields.photographyScope}
+              </summary>
+              <p>{photoCopy.photoLead}</p>
+              <p className="mt-2 whitespace-pre-wrap">{row.photographyScope}</p>
+            </details>
+          ) : null}
+        </div>
+      ) : (
+        <p data-testid="appointment-state" className="font-semibold">
+          {c[row.state]}
+        </p>
+      )}
       {row.confirmedStartsAt ? (
         <WorkflowSection
           title={
@@ -107,9 +213,11 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           />
           {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
           <p>{c.calendarNote}</p>
-          <a className={workflowLink} href={`${path}/calendar`} download>
-            {c.download}
-          </a>
+          {detail.canDownload ? (
+            <a className={workflowLink} href={`${path}/calendar`} download>
+              {c.download}
+            </a>
+          ) : null}
         </WorkflowSection>
       ) : null}
       {row.proposedStartsAt && ["proposed", "reschedule_requested"].includes(row.state) ? (
@@ -131,9 +239,11 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           <p>{coverageCopy(props.locale).appointmentNote}</p>
         </Notice>
       ) : null}
-      <p>
-        {c.owned}: {row.hostName ?? "—"}
-      </p>
+      {!photography ? (
+        <p>
+          {c.owned}: {row.hostName ?? "—"}
+        </p>
+      ) : null}
 
       {row.caseId ? (
         <nav
@@ -156,7 +266,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           ) : null}
         </nav>
       ) : null}
-      {windows.success && windows.data.length ? (
+      {!photography && windows.success && windows.data.length ? (
         <WorkflowSection title={c.preferredWindow}>
           <ul>
             {windows.data.map((window) => (
@@ -165,11 +275,9 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           </ul>
         </WorkflowSection>
       ) : null}
+      {photography ? arrangement : null}
       {staff && detail.hostOffer ? (
-        <WorkflowSection title={hostCopy.pending}>
-          <p>{detail.hostOffer.name}</p>
-          <p className="whitespace-pre-wrap">{detail.hostOffer.note}</p>
-          {!detail.hostOffer.current ? <Notice tone="warning">{hostCopy.stale}</Notice> : null}
+        <SecondaryAppointmentTask folded={photography} title={hostCopy.pending}>
           {detail.canWithdrawHost ? (
             <BoundWorkflowForm
               {...props}
@@ -178,6 +286,16 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               id={row.id}
               revision={row.version}
               path={path}
+              disclosure={photography ? hostCopy.pending : undefined}
+              intro={
+                <>
+                  <p>{detail.hostOffer.name}</p>
+                  <p className="whitespace-pre-wrap">{detail.hostOffer.note}</p>
+                  {!detail.hostOffer.current ? (
+                    <Notice tone="warning">{hostCopy.stale}</Notice>
+                  ) : null}
+                </>
+              }
               values={{ action: "cancel" }}
               fields={[
                 { name: "action", label: "", type: "hidden" },
@@ -191,12 +309,17 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               ]}
               submit={hostCopy.withdraw}
             />
-          ) : null}
-        </WorkflowSection>
+          ) : (
+            <div className="space-y-4">
+              <p>{detail.hostOffer.name}</p>
+              <p className="whitespace-pre-wrap">{detail.hostOffer.note}</p>
+              {!detail.hostOffer.current ? <Notice tone="warning">{hostCopy.stale}</Notice> : null}
+            </div>
+          )}
+        </SecondaryAppointmentTask>
       ) : null}
       {staff && detail.canOfferHost ? (
-        <WorkflowSection title={hostCopy.offerTitle}>
-          <p>{hostCopy.offerLead}</p>
+        <SecondaryAppointmentTask folded={photography} title={hostCopy.offerTitle}>
           {detail.hostReceivers.length ? (
             <BoundWorkflowForm
               {...props}
@@ -205,6 +328,8 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               id={row.id}
               revision={row.version}
               path={path}
+              disclosure={photography ? hostCopy.offerTitle : undefined}
+              intro={<p>{hostCopy.offerLead}</p>}
               values={{ action: "request" }}
               fields={[
                 { name: "action", label: "", type: "hidden" },
@@ -228,30 +353,46 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               ]}
               submit={hostCopy.offerSubmit}
             />
+          ) : photography ? (
+            <details className="rounded-control border border-border p-4">
+              <summary className="min-h-control cursor-pointer font-semibold">
+                {hostCopy.offerTitle}
+              </summary>
+              <p>{hostCopy.offerLead}</p>
+              <Notice tone="info">{hostCopy.none}</Notice>
+            </details>
           ) : (
-            <Notice tone="info">{hostCopy.none}</Notice>
+            <>
+              <p>{hostCopy.offerLead}</p>
+              <Notice tone="info">{hostCopy.none}</Notice>
+            </>
           )}
-        </WorkflowSection>
+        </SecondaryAppointmentTask>
       ) : null}
       {staff && detail.canAcceptHost ? (
-        <WorkflowSection title={hostCopy.title}>
-          <p>{detail.needsCoverage ? hostCopy.lead : hostCopy.plannedLead}</p>
-          {detail.reservedInterval ? (
-            <p>
-              {hostCopy.reserved}:{" "}
-              <WorkflowTimeRange
-                start={detail.reservedInterval.startsAt}
-                end={detail.reservedInterval.endsAt}
-                locale={props.locale}
-              />
-            </p>
-          ) : null}
+        <SecondaryAppointmentTask folded={photography} title={hostCopy.title}>
           <BoundWorkflowForm
             {...props}
             command="appointmentHost"
             id={row.id}
             revision={row.version}
             path={path}
+            disclosure={photography ? hostCopy.title : undefined}
+            intro={
+              <>
+                <p>{detail.needsCoverage ? hostCopy.lead : hostCopy.plannedLead}</p>
+                {detail.reservedInterval ? (
+                  <p>
+                    {hostCopy.reserved}:{" "}
+                    <WorkflowTimeRange
+                      start={detail.reservedInterval.startsAt}
+                      end={detail.reservedInterval.endsAt}
+                      locale={props.locale}
+                    />
+                  </p>
+                ) : null}
+              </>
+            }
             fields={[
               { name: "reason", label: hostCopy.reason, type: "textarea", required: true },
               {
@@ -270,50 +411,22 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             ]}
             submit={hostCopy.submit}
           />
-        </WorkflowSection>
+        </SecondaryAppointmentTask>
       ) : null}
-      {canArrange ? (
-        <WorkflowSection title={c.arrangement}>
-          <p>{c.policyNote}</p>
-          <BoundWorkflowForm
-            {...props}
-            command="arrange"
-            id={row.id}
-            revision={row.version}
-            path={path}
-            fields={[
-              {
-                name: "action",
-                label: c.action,
-                type: "select",
-                options: [
-                  ...(row.state !== "proposed" ? [{ value: "propose", label: c.propose }] : []),
-                  { value: "confirm", label: c.confirm },
-                ],
-              },
-              { name: "startsAt", label: c.start, type: "datetime-local", required: true },
-              { name: "endsAt", label: c.end, type: "datetime-local", required: true },
-              { name: "bufferMinutes", label: c.buffer, type: "number", required: true },
-              { name: "propertyAccessConfirmed", label: c.access, type: "checkbox" },
-              { name: "externalBusyChecked", label: c.external, type: "checkbox" },
-              { name: "accessNotes", label: c.logistics, type: "textarea" },
-            ]}
-            values={{
-              action: row.state === "proposed" ? "confirm" : "propose",
-              bufferMinutes: "30",
-            }}
-            submit={c.change}
-          />
-        </WorkflowSection>
-      ) : null}
-      {detail.canRespond && targets.length ? (
-        <WorkflowSection title={c.change}>
+      {row.purpose !== "photography" ? arrangement : null}
+      {(detail.canRespond && targets.length) || photography ? (
+        <SecondaryAppointmentTask
+          folded={photography}
+          title={photography ? photoCopy.photoActions : c.change}
+        >
           <BoundWorkflowForm
             {...props}
             command="appointment"
             id={row.id}
             revision={row.version}
             path={path}
+            commandAvailable={Boolean(detail.canRespond && targets.length)}
+            disclosure={photography ? photoCopy.photoActions : undefined}
             fields={[
               {
                 name: "state",
@@ -338,7 +451,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             values={{ state: targets[0] ?? "" }}
             submit={c.change}
           />
-        </WorkflowSection>
+        </SecondaryAppointmentTask>
       ) : null}
       {row.cancelReason || row.outcomeNote ? <p>{row.cancelReason ?? row.outcomeNote}</p> : null}
     </WorkflowPage>

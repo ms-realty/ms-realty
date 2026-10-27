@@ -120,8 +120,16 @@
   }
 }
 @media (max-width: 63.999rem) {
+  /* Native focus and scrollIntoView use the document scrollport. Reserve the fixed dock's
+     space there as well as in the layout, so controls cannot stop underneath navigation. */
+  html:has(.frame) {
+    scroll-padding-block-end: calc(5rem + env(safe-area-inset-bottom));
+  }
   .frame {
-    padding-block-end: 4.5rem;
+    padding-block-end: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+  .frame :where(input, select, textarea, button) {
+    scroll-margin-block-end: calc(5rem + env(safe-area-inset-bottom));
   }
   .frame:has([data-staff-calendar]) .contextHeader {
     display: none;

@@ -58,6 +58,14 @@ export async function readAgencyOperation(
         eq(operations.actorKind, session.actor.kind),
         eq(operations.actorId, session.actor.id),
         eq(operations.operationType, agencyCommands[command]),
+        eq(
+          operations.resultType,
+          command.startsWith("partner")
+            ? "partner_terms"
+            : command === "photography"
+              ? "listing"
+              : "case_review",
+        ),
         eq(operations.idempotencyKey, key),
         eq(operations.resultId, id),
       ),

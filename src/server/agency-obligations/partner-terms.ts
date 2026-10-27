@@ -17,6 +17,8 @@ import {
   agencyStaff,
   counterpartyFor,
   evidenceHistory,
+  retainedAgencyTransaction,
+  retainedCounterpartyFor,
 } from "./shared";
 
 const optionalId = z.uuid().nullable();
@@ -28,7 +30,11 @@ const source = z.object({
   purpose: z.string().trim().min(3).max(1500),
   sourceReference: z.string().trim().min(3).max(1000),
   sourceVersion: z.string().trim().min(1).max(200),
-  termsText: z.string().trim().min(10).max(20000),
+  termsText: z
+    .string()
+    .min(10)
+    .max(20000)
+    .refine((value) => value.trim().length >= 10),
   documentVersionId: optionalId,
   acceptedReference: z.string().trim().max(1000).nullable(),
   acceptedAt: instant,
@@ -50,10 +56,11 @@ const decision = z.object({
 });
 type Terms = typeof agencyPartnerTerms.$inferSelect;
 export function partnerTermsHash(
-  row: Pick<Terms, keyof z.infer<typeof source> | "documentDigest">,
+  row: Pick<Terms, keyof z.infer<typeof source> | "documentDigest" | "ownerId">,
 ) {
   return hashRequest({
     caseId: row.caseId,
+    ownerId: row.ownerId,
     counterpartyPartyId: row.counterpartyPartyId,
     relationship: row.relationship,
     purpose: row.purpose,
@@ -74,9 +81,12 @@ async function access(
   session: Session,
   row: Pick<Terms, "caseId" | "documentVersionId" | "counterpartyPartyId">,
   fresh = false,
+  retained = false,
 ) {
   const context = await agencyStaff(db, session, row.caseId, row.documentVersionId, fresh);
-  const party = await counterpartyFor(db, context.live, row.counterpartyPartyId, row.caseId);
+  const party = retained
+    ? await retainedCounterpartyFor(db, context.live, row)
+    : await counterpartyFor(db, context.live, row.counterpartyPartyId, row.caseId);
   return { ...context, party };
 }
 export async function readPartnerTerms(db: Executor, session: Session, id: string, lock = false) {
@@ -84,11 +94,20 @@ export async function readPartnerTerms(db: Executor, session: Session, id: strin
   const query = db.select().from(agencyPartnerTerms).where(eq(agencyPartnerTerms.id, id));
   const [row] = await (lock ? query.for("update") : query);
   if (!row) throw new AppError("not_found");
-  const context = await access(db, session, row);
+  const context = await access(db, session, row, false, true);
   let current =
+    !context.party.mergedIntoPartyId &&
     row.state === "accepted" &&
     row.approvedHash === partnerTermsHash(row) &&
     Boolean(row.validUntil && row.validUntil > new Date());
+  if (current) {
+    try {
+      await requireAvailableStaff(db, row.ownerId);
+    } catch (error) {
+      if (!isAppError(error)) throw error;
+      current = false;
+    }
+  }
   if (current && row.documentVersionId) {
     try {
       await reviewedEvidence(db, row.documentVersionId, {
@@ -119,7 +138,7 @@ export async function readPartnerTerms(db: Executor, session: Session, id: strin
       .safeParse(event.snapshot);
     if (!snapshot.success) continue;
     try {
-      await access(db, session, snapshot.data);
+      await access(db, session, snapshot.data, false, true);
       history.push(event);
     } catch (error) {
       if (!isAppError(error) || !["not_found", "forbidden"].includes(error.code)) throw error;
@@ -136,12 +155,17 @@ export async function savePartnerTerms(db: Executor, session: Session, raw: unkn
   const input = parseInput(save, raw);
   await access(db, session, input, true);
   if (input.expectedVersion) await readPartnerTerms(db, session, input.id);
-  return db.transaction(async (tx) => {
+  return retainedAgencyTransaction(db, async (tx) => {
     // Recheck every ordinary source before runOperation can return an old success receipt.
     const context = await access(tx, session, input, true);
-    const previous = input.expectedVersion
-      ? (await readPartnerTerms(tx, session, input.id, true)).row
-      : null;
+    const [existing] = await tx
+      .select({ id: agencyPartnerTerms.id })
+      .from(agencyPartnerTerms)
+      .where(eq(agencyPartnerTerms.id, input.id))
+      .for("update");
+    const previous = existing ? (await readPartnerTerms(tx, session, input.id)).row : null;
+    if (input.expectedVersion && !previous) throw new AppError("not_found");
+    if (previous) await access(tx, session, previous, true);
     await agencyPendingFence(
       tx,
       context.live,
@@ -204,10 +228,11 @@ export async function savePartnerTerms(db: Executor, session: Session, raw: unkn
 export async function decidePartnerTerms(db: Executor, session: Session, raw: unknown) {
   const input = parseInput(decision, raw);
   await readPartnerTerms(db, session, input.id);
-  return db.transaction(async (tx) => {
+  return retainedAgencyTransaction(db, async (tx) => {
     const { row } = await readPartnerTerms(tx, session, input.id, true);
-    const context = await access(tx, session, row, true);
+    const context = await access(tx, session, row, true, input.action === "revoke");
     await assertCanRead(tx, context.live.actor, "claim.approve", context.resource);
+    if (input.action === "accept") await requireAvailableStaff(tx, row.ownerId, true);
     if (input.action === "accept" && row.documentVersionId)
       await reviewedEvidence(tx, row.documentVersionId, {
         digest: row.documentDigest ?? undefined,
