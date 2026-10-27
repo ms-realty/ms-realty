@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isPublicLocale, isStaffLocale } from "@/i18n/config";
@@ -572,7 +573,7 @@ export async function taskAction(
   _previous: FormState<TaskValues>,
   data: FormData,
 ) {
-  return perform<TaskValues>(
+  const result = await perform<TaskValues>(
     locale,
     id,
     "task",
@@ -580,15 +581,15 @@ export async function taskAction(
     ["state", "note", "followUpAt"],
     async (ctx, envelope, values) => {
       if (!ctx.session) throw new AppError("unauthenticated");
-      return (
-        await changeTask(ctx.db, ctx.session, {
-          id,
-          ...envelope,
-          state: values.state as Parameters<typeof changeTask>[2]["state"],
-          note: values.note,
-          ...(values.followUpAt ? { followUpAt: formInstant(values, "followUpAt") } : {}),
-        })
-      ).outcome;
+      const recorded = await changeTask(ctx.db, ctx.session, {
+        id,
+        ...envelope,
+        state: values.state as Parameters<typeof changeTask>[2]["state"],
+        note: values.note,
+        ...(values.followUpAt ? { followUpAt: formInstant(values, "followUpAt") } : {}),
+      });
+      const { task } = await readTask(ctx.db, ctx.session, id);
+      return { ...recorded.outcome, reference: task.title };
     },
     async (ctx) => {
       if (!ctx.session) throw new AppError("unauthenticated");
@@ -603,6 +604,8 @@ export async function taskAction(
       };
     },
   );
+  if (result.outcome.kind === "confirmed") revalidatePath(`/${locale}/tasks/${id}`);
+  return result;
 }
 
 export async function taskHandoverAction(

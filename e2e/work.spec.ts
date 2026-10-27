@@ -231,7 +231,9 @@ test("each work route requires staff access, including detail and reconciliation
     `inquiries/${randomUUID()}/operations?type=accept&key=missing`,
   ]) {
     await page.goto(hostUrl("staff", `/en/${path}`));
-    await expect(page).toHaveURL(hostUrl("staff", "/en/access"));
+    await expect(page).toHaveURL(
+      hostUrl("staff", `/en/access?${new URLSearchParams({ returnTo: `/en/${path}` })}`),
+    );
   }
 });
 

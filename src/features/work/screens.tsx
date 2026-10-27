@@ -8,6 +8,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
+import { caseCopy } from "@/features/cases/copy";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
 import { DuplicateIdentityLink } from "@/features/duplicate-review/identity-link";
 import { StaffPage } from "@/features/shell/staff-ui";
@@ -17,6 +18,7 @@ import type { Session } from "@/server/auth/sessions";
 import { isAppError } from "@/server/errors";
 import { readWorkOperation } from "@/server/work/commands";
 import { readTaskHandover } from "@/server/work/handover";
+import { readReviewedInquiryReply } from "@/server/work/inquiry-reply";
 import { listContacts, listTasks, readContact, readInquiry } from "@/server/work/queries";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
@@ -30,10 +32,10 @@ import {
   taskAction,
   triageAction,
 } from "./actions";
+import { ContactActions } from "./contact-actions";
 import { contactCopy, contactMethodLabel } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
-import { coverageCopy } from "./coverage-copy";
 import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
@@ -55,9 +57,13 @@ import {
   isInquiryDraftKind,
   parseInquiryReference,
 } from "./inquiry-reference";
+import { InquiryReply } from "./inquiry-reply";
 import { inquiryHref, parseInboxScope, queueHref } from "./inquiry-row";
 import { InquirySelectionContext } from "./inquiry-selection-context";
+import { RecordSearch } from "./record-search";
+import { recordSearchAction } from "./record-search-action";
 import { When } from "./when";
+import { staffWorkflowCopy } from "./workflow-completion-copy";
 
 export function checkLocale(locale: string): asserts locale is StaffLocale {
   if (!isStaffLocale(locale)) notFound();
@@ -205,6 +211,16 @@ export async function InquiryScreen({
 }) {
   const detail = await privateRead(() => readInquiry(getDb(), session, id));
   const { inquiry, ownerName } = detail;
+  const canPrepareReply =
+    detail.canRespond &&
+    detail.canCreateTask &&
+    !detail.needsCoverage &&
+    inquiry.ownerId === session.account.id &&
+    ["assigned", "awaiting_client"].includes(inquiry.state);
+  const replyDraft =
+    detail.canAssist && canPrepareReply
+      ? await readReviewedInquiryReply(getDb(), session, id)
+      : null;
   const copy = workCopy(locale);
   const contact = contactCopy(locale);
   const draftOwner = inquiryDraftOwner(session);
@@ -418,6 +434,20 @@ export async function InquiryScreen({
                   initialState={inquiryFormState("accept", { nextAction: "", dueAt: "" })}
                 />
               </section>
+            ) : null}
+            {canPrepareReply ? (
+              <>
+                <ContactActions
+                  locale={locale}
+                  methods={detail.contactMethod ? [detail.contactMethod] : []}
+                />
+                <InquiryReply
+                  locale={locale}
+                  reference={inquiry.reference}
+                  contact={detail.contactMethod}
+                  draft={replyDraft}
+                />
+              </>
             ) : null}
             {detail.canRespond &&
             detail.canCreateTask &&
@@ -668,13 +698,41 @@ export async function TaskScreen({
     task.evidenceRequired || (highImpactTaskTypes as readonly string[]).includes(task.type);
   const targets = (["in_progress", "waiting", "done", "cancelled"] as const).filter(
     (state) =>
-      taskMachine.check(task.state, state).outcome === "allowed" && !(state === "done" && guarded),
+      taskMachine.check(task.state, state).outcome === "allowed" &&
+      !(state === "done" && guarded) &&
+      !(state === "cancelled" && task.purpose === "material_correction"),
   );
   return (
     <Page title={task.title} locale={locale}>
       <a className={link} href={`/${locale}/tasks/${task.id}/effort`}>
         {effortCopy(locale).title}
       </a>
+      {!guarded ? (
+        <section
+          className={
+            targets.includes("done")
+              ? "max-w-2xl space-y-4 rounded-card border border-border p-5"
+              : undefined
+          }
+        >
+          {targets.includes("done") ? (
+            <h2 className="text-subheading font-semibold">{copy.completeTask}</h2>
+          ) : null}
+          <TaskForm
+            locale={locale}
+            id={id}
+            completion
+            available={targets.includes("done")}
+            action={taskAction.bind(null, locale, id)}
+            states={["done"]}
+            initialState={initialFormState(
+              `work.task.${id}`,
+              { state: "done", note: "", followUpAt: "" },
+              task.version,
+            )}
+          />
+        </section>
+      ) : null}
       <dl className="space-y-3">
         <div>
           <dt className="font-semibold">{copy.state}</dt>
@@ -712,31 +770,52 @@ export async function TaskScreen({
           </div>
         ) : null}
       </dl>
-      {task.inquiryId ? (
+      {task.inquiryId && view.canReadInquiry ? (
         <a className={link} href={`/${locale}/inquiries/${task.inquiryId}`}>
           {copy.inbox}
         </a>
       ) : null}
+      {task.caseId && view.canReadCase ? (
+        <a className={link} href={`/${locale}/cases/${task.caseId}`}>
+          {caseCopy(locale).cases}
+        </a>
+      ) : null}
       {guarded ? <p>{copy.guardedTask}</p> : null}
+      {view.listingReference ? (
+        <a
+          className={link}
+          href={`/${locale}/inventory/${view.listingReference}${task.purpose === "material_correction" ? "/correction" : ""}`}
+        >
+          <bdi>{view.listingReference}</bdi> ·{" "}
+          {task.purpose === "material_correction"
+            ? staffWorkflowCopy(locale).correction.title
+            : staffWorkflowCopy(locale).listings}
+        </a>
+      ) : null}
       {!["done", "cancelled"].includes(task.state) ? (
         <TaskHandoverScreen locale={locale} session={session} id={id} view={view} step={step} />
       ) : null}
-      {targets.length ? (
-        <section className="max-w-2xl space-y-4 rounded-card border border-border p-5">
+      <section
+        className={
+          targets.length ? "max-w-2xl space-y-4 rounded-card border border-border p-5" : undefined
+        }
+      >
+        {targets.length ? (
           <h2 className="text-subheading font-semibold">{copy.taskChange}</h2>
-          <TaskForm
-            locale={locale}
-            id={id}
-            action={taskAction.bind(null, locale, id)}
-            states={targets}
-            initialState={initialFormState(
-              `work.task.${id}`,
-              { state: targets[0] as TaskState, note: "", followUpAt: "" },
-              task.version,
-            )}
-          />
-        </section>
-      ) : null}
+        ) : null}
+        <TaskForm
+          locale={locale}
+          id={id}
+          action={taskAction.bind(null, locale, id)}
+          states={targets}
+          available={targets.length > 0}
+          initialState={initialFormState(
+            `work.task.${id}`,
+            { state: (targets[0] ?? task.state) as TaskState, note: "", followUpAt: "" },
+            task.version,
+          )}
+        />
+      </section>
     </Page>
   );
 }
@@ -755,20 +834,32 @@ export async function ContactsScreen({
   return (
     <Page title={copy.contacts} locale={locale}>
       <p>{copy.contactScope}</p>
-      {queue.rows.length ? (
-        <ul className="divide-y divide-border">
-          {queue.rows.map((row) => (
-            <li key={row.id} className="py-4">
-              <a className={link} href={`/${locale}/contacts/${row.id}`}>
-                {row.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>{copy.noContacts}</p>
-      )}
-      <Pagination {...queue} href={`/${locale}/contacts`} locale={locale} />
+      <RecordSearch
+        locale={locale}
+        path={`/${locale}/contacts`}
+        action={recordSearchAction.bind(null, locale, "contacts")}
+      >
+        {queue.rows.length ? (
+          <ul className="divide-y divide-border">
+            {queue.rows.map((row) => (
+              <li key={row.id} className="py-4">
+                <a className={link} href={`/${locale}/contacts/${row.id}`}>
+                  {row.name}
+                </a>
+                <ContactActions locale={locale} methods={row.methods} />
+                <p className="mt-2 text-dense text-text-muted">
+                  {staffWorkflowCopy(locale).lastActivity}:{" "}
+                  <When date={new Date(row.latestInquiryAt)} locale={locale} /> · {copy.inbox}:{" "}
+                  {row.inquiryCount}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>{copy.noContacts}</p>
+        )}
+        <Pagination {...queue} href={`/${locale}/contacts`} locale={locale} />
+      </RecordSearch>
     </Page>
   );
 }
@@ -788,6 +879,21 @@ export async function ContactScreen({
     <Page title={contact.party.displayName} locale={locale}>
       <DuplicateIdentityLink locale={locale} session={session} subject="party" id={id} />
       <p>{copy.contactScope}</p>
+      <ContactActions locale={locale} methods={contact.methods} />
+      {contact.cases.length ? (
+        <section className="space-y-3">
+          <h2 className="text-subheading font-semibold">{staffWorkflowCopy(locale).linkedCases}</h2>
+          <ul className="space-y-3">
+            {contact.cases.map((row) => (
+              <li key={row.id}>
+                <a className={link} href={`/${locale}/cases/${row.id}`}>
+                  <bdi>{row.reference}</bdi> · {row.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <section className="space-y-3">
         <h2 className="text-subheading font-semibold">{copy.methods}</h2>
         {contact.methods.length === 0 ? <p className="text-text-muted">{copy.noMethods}</p> : null}

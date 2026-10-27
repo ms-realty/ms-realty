@@ -1,8 +1,12 @@
 import { isPublicLocale, localeEndonyms } from "@/i18n/config";
 import type { FormCopy } from "@/ui/form/contract";
+import { staffWorkflowCopy } from "../work/workflow-completion-copy";
 
 const en = {
   inventory: "Inventory",
+  rentalTitle: staffWorkflowCopy("en").inventory.rentalTitle,
+  rentalBoundary: staffWorkflowCopy("en").inventory.rentalBoundary,
+  rentalUnreadable: staffWorkflowCopy("en").inventory.rentalUnreadable,
   create: "New listing",
   back: "Back to inventory",
   edit: "Working draft",
@@ -196,6 +200,7 @@ const en = {
     reviewException: "Review the exception",
   },
   o12: {
+    ...staffWorkflowCopy("en").inventory.o12,
     title: "Edit listing",
     instruction: "Change the description, save it and review it for publication.",
     sourceLine: "Bulgarian source · Working draft",
@@ -249,7 +254,7 @@ const en = {
     backToEdit: "Back to editing",
     choose: "Choose…",
     unsupported: "not supported, choose again",
-    needsInput: "Needed before this draft can be saved",
+    needsInput: "Needed before preparing a review candidate",
     unsavedTitle: "You have unsaved changes",
     unsavedBody: "Save the working draft, discard these changes, or stay on this page.",
     saveDraft: "Save draft",
@@ -277,6 +282,7 @@ const en = {
     noscriptLeave: "Save your changes before opening Photos or Review.",
   },
   labels: {
+    ...staffWorkflowCopy("en").inventory.labels,
     propertyType: "Property type",
     purpose: "Sale or rent",
     country: "Country",
@@ -316,6 +322,9 @@ type Copy = typeof en;
 const bg: Copy = {
   ...en,
   inventory: "Имоти и обяви",
+  rentalTitle: staffWorkflowCopy("bg").inventory.rentalTitle,
+  rentalBoundary: staffWorkflowCopy("bg").inventory.rentalBoundary,
+  rentalUnreadable: staffWorkflowCopy("bg").inventory.rentalUnreadable,
   create: "Нова обява",
   back: "Към обявите",
   edit: "Работна чернова",
@@ -510,6 +519,7 @@ const bg: Copy = {
     reviewException: "Прегледайте изключението",
   },
   o12: {
+    ...staffWorkflowCopy("bg").inventory.o12,
     title: "Редактиране на обява",
     instruction: "Променете описанието, запишете го и го прегледайте за публикуване.",
     sourceLine: "Български източник · Работна чернова",
@@ -561,7 +571,7 @@ const bg: Copy = {
     backToEdit: "Към редактирането",
     choose: "Изберете…",
     unsupported: "не се поддържа, изберете отново",
-    needsInput: "Нужно, преди черновата да може да се запише",
+    needsInput: "Нужно, преди да подготвите версия за преглед",
     unsavedTitle: "Имате незаписани промени",
     unsavedBody: "Запишете работната чернова, откажете промените или останете на страницата.",
     saveDraft: "Запишете черновата",
@@ -590,6 +600,7 @@ const bg: Copy = {
     noscriptLeave: "Запишете промените, преди да отворите „Снимки“ или прегледа.",
   },
   labels: {
+    ...staffWorkflowCopy("bg").inventory.labels,
     propertyType: "Вид имот",
     purpose: "Продажба или наем",
     country: "Държава",
@@ -627,6 +638,9 @@ const bg: Copy = {
 const ru: Copy = {
   ...en,
   inventory: "Объекты и объявления",
+  rentalTitle: staffWorkflowCopy("ru").inventory.rentalTitle,
+  rentalBoundary: staffWorkflowCopy("ru").inventory.rentalBoundary,
+  rentalUnreadable: staffWorkflowCopy("ru").inventory.rentalUnreadable,
   create: "Новое объявление",
   back: "К объявлениям",
   edit: "Рабочий черновик",
@@ -821,6 +835,7 @@ const ru: Copy = {
     reviewException: "Посмотреть исключение",
   },
   o12: {
+    ...staffWorkflowCopy("ru").inventory.o12,
     title: "Редактирование объявления",
     instruction: "Измените описание, сохраните его и проверьте перед публикацией.",
     sourceLine: "Болгарский источник · Рабочий черновик",
@@ -873,7 +888,7 @@ const ru: Copy = {
     backToEdit: "К редактированию",
     choose: "Выберите…",
     unsupported: "не поддерживается, выберите заново",
-    needsInput: "Нужно, чтобы черновик можно было сохранить",
+    needsInput: "Нужно перед подготовкой версии для проверки",
     unsavedTitle: "Есть несохранённые изменения",
     unsavedBody: "Сохраните рабочий черновик, отмените изменения или останьтесь на странице.",
     saveDraft: "Сохранить черновик",
@@ -902,6 +917,7 @@ const ru: Copy = {
     noscriptLeave: "Сохраните изменения перед переходом в «Фото» или к проверке.",
   },
   labels: {
+    ...staffWorkflowCopy("ru").inventory.labels,
     propertyType: "Вид объекта",
     purpose: "Продажа или аренда",
     country: "Страна",

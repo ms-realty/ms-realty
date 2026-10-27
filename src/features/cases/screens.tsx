@@ -1,5 +1,7 @@
 import { workflowLabel } from "@/i18n/workflow-labels";
 import { AudienceComposer } from "./audience-composer";
+import { StaffCaseContacts } from "./staff-contacts";
+import { CaseTimeline } from "./timeline";
 import "server-only";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -613,6 +615,9 @@ export async function CaseScreen(
         />
       ) : null}
       {!staff && showOverview ? <ClientCaseOverview locale={props.locale} view={view} /> : null}
+      {staff && view.canReadInternal ? (
+        <StaffCaseContacts locale={props.locale} session={props.session} id={row.id} />
+      ) : null}
       <div className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
         {staff || !showOverview ? (
           <>
@@ -911,6 +916,7 @@ export async function CaseScreen(
                   { name: "nextAction", label: c.next, required: true },
                   { name: "dueAt", label: c.due, type: "datetime-local", required: true },
                   { name: "clientSummary", label: c.clientSummary, type: "textarea" },
+                  { name: "reason", label: c.reason, type: "textarea" },
                 ]}
                 values={{
                   nextAction: row.nextAction ?? "",
@@ -935,7 +941,11 @@ export async function CaseScreen(
                 >
                   <a
                     className={workflowLink}
-                    href={`${getEnv().hosts.public}/bg/properties/${interest.reference}/${interest.reference.toLowerCase()}`}
+                    href={
+                      staff
+                        ? `/${props.locale}/inventory/${interest.reference}`
+                        : `${getEnv().hosts.public}/bg/properties/${interest.reference}/${interest.reference.toLowerCase()}`
+                    }
                   >
                     {interest.reference}
                   </a>
@@ -1185,6 +1195,9 @@ export async function CaseScreen(
             ))}
           </ul>
         </WorkflowSection>
+      ) : null}
+      {staff && view.canReadInternal ? (
+        <CaseTimeline locale={props.locale} session={props.session} id={row.id} />
       ) : null}
     </WorkflowPage>
   );

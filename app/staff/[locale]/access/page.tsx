@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { AccessFrame } from "@/features/identity/access-frame";
 import { ceremonyMessages, identityCopy } from "@/features/identity/copy";
 import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
-import { privacyQueueReturn } from "@/features/privacy/access";
+import { staffReturnPath } from "@/features/privacy/access";
 import { SignedOutInquiryDraftBoundary } from "@/features/work/inquiry-draft";
 import { isStaffLocale } from "@/i18n/config";
 import { currentStaffAccess, staffAccessPath } from "@/server/auth/pages";
@@ -18,9 +18,9 @@ export default async function StaffAccessPage({
 }: PageProps<"/staff/[locale]/access">) {
   const { locale } = await params;
   if (!isStaffLocale(locale)) notFound();
-  // C-12: only a validated privacy queue position survives sign-in; never an action.
+  // F13/C-12: return to a validated workspace page; the destination reauthorizes.
   const query = await searchParams;
-  const returnTo = privacyQueueReturn(
+  const returnTo = staffReturnPath(
     locale,
     typeof query.returnTo === "string" ? query.returnTo : null,
   );

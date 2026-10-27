@@ -34,6 +34,7 @@ import type privacyGovernance from "../../messages/staff/bg/privacyGovernance.js
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
 import type settingsScopes from "../../messages/staff/bg/settingsScopes.json";
 import type tools from "../../messages/staff/bg/tools.json";
+import type workflowCompletion from "../../messages/staff/bg/workflowCompletion.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
 import type workspaceStates from "../../messages/staff/bg/workspaceStates.json";
 import { isStaffLocale, type PublicLocale } from "./config";
@@ -66,6 +67,7 @@ export const staffNamespaces = [
   "tools",
   "workspace",
   "workspaceStates",
+  "workflowCompletion",
   "operations",
   "dataReview",
   "auditHistory",
@@ -111,6 +113,7 @@ export interface StaffMessages {
   tools: typeof tools;
   workspace: typeof workspace;
   workspaceStates: typeof workspaceStates;
+  workflowCompletion: typeof workflowCompletion;
 }
 /** Staff namespaces are present only for staff locales (bg, en, ru). */
 export type Messages = PublicMessages & StaffMessages;

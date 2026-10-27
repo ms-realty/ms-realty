@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FactState } from "@/domain/facts";
-import { draftSchema, priceDecisionSchema } from "./contracts";
+import { draftSchema, emptyDraft, priceDecisionSchema } from "./contracts";
 import {
   uneditablePriceEvidence,
   type WorkingDraftFact,
@@ -143,6 +143,7 @@ describe("workingDraftFrom", () => {
       fact("bedrooms", 2),
     ]);
     expect(draft).toEqual({
+      ...emptyDraft,
       title: "Двустаен апартамент",
       description: "Точният записан текст.",
       brokerNote: "",
