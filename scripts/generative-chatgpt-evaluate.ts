@@ -436,11 +436,14 @@ async function sourceManifest() {
   const migrations = (await readdir("db/migrations"))
     .filter((name) => /^\d{4}_[a-z0-9_]+\.sql$/u.test(name))
     .map((name) => `db/migrations/${name}`);
+  const schemas = (await readdir("src/db/schema"))
+    .filter((name) => name.endsWith(".ts"))
+    .map((name) => `src/db/schema/${name}`);
   return {
     baseRevision,
     workingFilesAreExactSourceEvidence: true,
     files: await Promise.all(
-      [...new Set([...manifestPaths, ...migrations])]
+      [...new Set([...manifestPaths, ...migrations, ...schemas])]
         .sort()
         .map(async (path) => ({ path, sha256: digest(await readFile(resolve(path))) })),
     ),
@@ -463,8 +466,35 @@ const forbiddenTables = [
   "parties",
   "contact_methods",
   "interests",
+  // Human-owned authority and business evidence added by the completion slices.
+  "appointment_participants",
+  "appointment_resources",
+  "appointment_versions",
+  "content_pages",
+  "content_page_versions",
+  "content_locale_editions",
+  "content_locale_versions",
+  "operating_policy_drafts",
+  "operating_policy_versions",
+  "service_scope_drafts",
+  "service_scope_versions",
+  "privacy_requests",
+  "privacy_exports",
+  "privacy_governance_records",
+  "privacy_governance_revisions",
+  "privacy_safety_decisions",
+  "privacy_processing_restrictions",
+  "privacy_propagation_events",
+  "agency_partner_terms",
+  "agency_case_reviews",
+  "agency_evidence_history",
+  "task_effort_entries",
+  "service_agreements",
+  "commission_records",
+  "case_process_reviews",
+  "case_process_items",
 ] as const;
-async function protectedRecords(t: TestDatabase) {
+export async function protectedRecords(t: TestDatabase) {
   const values: Record<string, { count: number; sha256: string }> = {};
   for (const name of forbiddenTables) {
     // Identifiers come only from the fixed source-owned allowlist above.

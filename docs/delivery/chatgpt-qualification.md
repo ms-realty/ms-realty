@@ -102,7 +102,17 @@ access change, price change or legal/tax approval. Scripted `reviewed: true` inp
 actions, not a real broker's acceptance or quality scores.
 
 The driver compares counts **and full-record digests** of protected tables before and after
-execution. It retains these private, redacted files with a SHA-256 artifact manifest:
+execution.
+
+The fixed protected inventory also includes appointment participants/resources/history,
+CMS editions, operating/service policies, privacy requests/exports/safety/registers,
+agency terms/review-consent history, effort entries and legal/commission records. Each
+report enumerates the actual table commitments. A missing table or unreadable snapshot
+fails qualification. The source manifest binds all schema modules and migrations. A
+synthetic database regression changes a policy commitment without changing its row count
+and requires the full-record digest to change; it supplies no human policy approval.
+
+It retains these private, redacted files with a SHA-256 artifact manifest:
 
 - `report.json`: outcome, bounds, observed usage, safe failure, exact non-secret argv,
   redacted database environment, source hashes and protected-effect readback.
