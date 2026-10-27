@@ -1,0 +1,34 @@
+[vitest] TEST_DATABASE_URL is not set: skipping the integration project. Start a disposable Postgres and pass TEST_DATABASE_URL to run it (see README).
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-operating-settings/MS-Realty
+
+ ❯ |unit-dom| src/features/content/forms.test.tsx (9 tests | 1 failed) 468ms
+   ❯ O21 / P15B explicit edition place chooser (9)
+     × filters a large register by source names, Latin names and ancestry without losing the selected identity 45ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit-dom| src/features/content/forms.test.tsx > O21 / P15B explicit edition place chooser > filters a large register by source names, Latin names and ancestry without losing the selected identity
+AssertionError: expected [ <option value></option>, …(9) ] to have a length of 3 but got 10
+
+- Expected
++ Received
+
+- 3
++ 10
+
+ ❯ src/features/content/forms.test.tsx:201:43
+    199|     await userEvent.type(filter, "Test 0");
+    200|     expect(select).toHaveValue(many[39]?.id);
+    201|     expect(screen.getAllByRole("option")).toHaveLength(3); // Unbound,…
+       |                                           ^
+    202|     await userEvent.clear(filter);
+    203|     await userEvent.type(filter, "Община 22");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 59 passed (60)
+   Start at  17:11:06
+   Duration  1.64s (environment 38%, import 28%, transform 16%, tests 12%, setup 6%)

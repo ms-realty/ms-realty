@@ -11,6 +11,9 @@ import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { ContentValues, DecisionValues } from "./actions";
+import { contentBodyCopy } from "./body-copy";
+import { ContentBodyEditor } from "./body-editor";
+import { formatContentBodyValue } from "./body-summary";
 import { contentCopy } from "./copy";
 
 const noSubscription = () => () => {};
@@ -141,6 +144,8 @@ export function ContentForm({
         slug: copy.slug,
         title: copy.pageTitle,
         text: copy.text,
+        bodyFormat: contentBodyCopy(locale).format,
+        composition: contentBodyCopy(locale).blocks,
         jurisdiction: copy.jurisdiction,
         reviewScope: copy.scope,
         placeId: copy.place,
@@ -148,7 +153,7 @@ export function ContentForm({
       formatValue={(name, value) =>
         name === "placeId"
           ? (places.find((place) => place.id === value)?.nameNative ?? (value || copy.unbound))
-          : value
+          : formatContentBodyValue(name, value, locale)
       }
       submitLabel={copy.save}
     >
@@ -192,14 +197,10 @@ export function ContentForm({
             <input type="hidden" name="placeId" value={form.values.placeId} />
           )}
           <FormField {...form.field("title")} label={copy.pageTitle} required maxLength={200} />
-          {/* 20:173 / 25:1837: the page text is the 144 px UI07 Textarea; it resizes. */}
-          <FormField
-            {...form.field("text")}
-            label={copy.text}
-            hint={copy.paragraphs}
-            multiline
-            required
-            maxLength={50000}
+          <ContentBodyEditor
+            form={form}
+            locale={locale}
+            allowBlocks={form.values.kind !== "review"}
           />
           <FormField
             {...form.field("jurisdiction")}

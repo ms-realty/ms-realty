@@ -1,0 +1,61 @@
+[vitest] TEST_DATABASE_URL is not set: skipping the integration project. Start a disposable Postgres and pass TEST_DATABASE_URL to run it (see README).
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-operating-settings/MS-Realty
+
+ ❯ |unit| src/i18n/copy-guard.test.ts (17 tests | 1 failed) 1303ms
+   ❯ copy guard (ratchet over copy-baseline.json) (3)
+     × finds no copy outside the files and counts the baseline allows 3ms
+ ❯ |unit| src/i18n/messages.test.ts (100 tests | 1 failed) 2773ms
+   ❯ message catalogs (ux-spec §19.1) (100)
+     ❯ staff set (28)
+       × ru copies no bg or en value except listed cognates 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |unit| src/i18n/copy-guard.test.ts > copy guard (ratchet over copy-baseline.json) > finds no copy outside the files and counts the baseline allows
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "src/features/tracking/copy.ts: 70 copy literals, baseline allows 56",
++ ]
+
+ ❯ src/i18n/copy-guard.test.ts:186:22
+    184|       if (!counts.get(path))
+    185|         problems.push(`${path}: baseline lists ${allowed}, now 0; remo…
+    186|     expect(problems).toEqual([]);
+       |                      ^
+    187|   });
+    188|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |unit| src/i18n/messages.test.ts > message catalogs (ux-spec §19.1) > staff set > ru copies no bg or en value except listed cognates
+AssertionError: expected [ 'dataReview.contentBody.paragraph' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "dataReview.contentBody.paragraph",
++ ]
+
+ ❯ src/i18n/messages.test.ts:218:89
+    216|             allowedCognates[locale]?.[key],
+    217|           );
+    218|         expect(Object.keys(flat).filter((key) => copied(key) && !liste…
+       |                                                                                         ^
+    219|         // A listed message whose value has changed since is stale: it…
+    220|         expect(listed.filter((key) => !copied(key))).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 9 passed (11)
+      Tests  2 failed | 183 passed (185)
+   Start at  17:18:49
+   Duration  4.60s (tests 30%, transform 26%, import 23%, environment 19%, setup 2%)

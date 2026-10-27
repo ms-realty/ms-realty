@@ -1,4 +1,4 @@
-// O21: immutable plaintext versions and separate human editorial, claim and release decisions.
+// O21: immutable bounded content versions and separate human editorial, claim and release decisions.
 import "server-only";
 import { and, asc, desc, eq, inArray, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -11,6 +11,7 @@ import {
 } from "@/db/schema";
 import { type ApprovalKind, approvalCapability } from "@/domain/approval";
 import { type Capability, hasCapability } from "@/domain/capabilities";
+import { contentBlocks } from "@/domain/content-body";
 import { type PublicLocale, publicLocales } from "@/i18n/config";
 import { recordActivity } from "../activity";
 import { reviewDisplayEligible } from "../agency-obligations/reviews";
@@ -32,7 +33,8 @@ const contentPlaceLevels = ["district", "municipality", "settlement", "neighborh
 const operationId = z.string().min(16).max(200);
 const textInput = {
   title: z.string().trim().min(1).max(200),
-  text: z.string().trim().min(1).max(50000),
+  text: z.string().trim().min(1).max(50000).optional(),
+  blocks: contentBlocks.optional(),
   jurisdiction: z.string().trim().min(2).max(200),
   reviewScope: z.string().trim().min(3).max(1000),
   placeId: z
@@ -294,16 +296,35 @@ export async function readContentOperation(
     : null;
 }
 
-function bodyOf(input: { title: string; text: string; placeId?: string | null }) {
+function bodyOf(input: {
+  title: string;
+  text?: string;
+  blocks?: z.infer<typeof contentBlocks>;
+  placeId?: string | null;
+}) {
+  if (input.blocks) {
+    if (input.text !== undefined)
+      throw new AppError("validation_failed", { fieldErrors: { text: ["choose_one_body"] } });
+    return parseInput(contentBody, {
+      format: "blocks",
+      title: input.title,
+      blocks: input.blocks,
+      placeId: input.placeId ?? null,
+    });
+  }
+  const text = parseInput(z.object({ text: z.string().trim().min(1).max(50000) }), {
+    text: input.text,
+  }).text;
   return parseInput(contentBody, {
     title: input.title,
     placeId: input.placeId ?? null,
-    paragraphs: input.text
+    paragraphs: text
       .split(/\n\s*\n/)
-      .map((p) => p.trim())
+      .map((paragraph) => paragraph.trim())
       .filter(Boolean),
   });
 }
+
 async function history(
   ctx: OperationContext,
   page: Page,
@@ -334,6 +355,10 @@ async function history(
 export async function createContent(db: Executor, session: Session, raw: CreateContent) {
   const input = parseInput(createSchema, raw),
     body = bodyOf(input);
+  if (input.kind === "review" && "blocks" in body)
+    throw new AppError("validation_failed", {
+      fieldErrors: { blocks: ["review_paragraphs_required"] },
+    });
   const live = await liveStaff(db, session);
   await assertCan(db, live.actor, "content.edit", resource());
   return runOperation(
@@ -382,7 +407,11 @@ export async function createContent(db: Executor, session: Session, raw: CreateC
 export async function saveContent(db: Executor, session: Session, raw: ContentDraft) {
   const input = parseInput(saveSchema, raw),
     body = bodyOf(input);
-  const { live } = await pageFor(db, session, input.id, "content.edit");
+  const { live, page: draftPage } = await pageFor(db, session, input.id, "content.edit");
+  if (draftPage.kind === "review" && "blocks" in body)
+    throw new AppError("validation_failed", {
+      fieldErrors: { blocks: ["review_paragraphs_required"] },
+    });
   return runOperation(
     db,
     {

@@ -543,7 +543,7 @@ export async function StaffReviewScreen(
       continue;
     const current = await readContentWorkbench(db, props.session, page.id),
       body = contentBody.parse(current.current.body);
-    if (current.current.reviewedAt && body.paragraphs.length === 2)
+    if (current.current.reviewedAt && "paragraphs" in body && body.paragraphs.length === 2)
       contentOptions.push({
         value: current.current.id,
         pageId: page.id,

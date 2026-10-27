@@ -20,6 +20,8 @@ import { Notice } from "@/ui/notice";
 import { Receipt } from "@/ui/receipt";
 import { TechnicalDetails } from "@/ui/technical-details";
 import type { DecisionValues } from "./actions";
+import { ContentBodyView } from "./body";
+import { contentBodyValues } from "./body-fields";
 import { contentCopy } from "./copy";
 import { ContentEditionLinks } from "./edition-links";
 import { contentLabel } from "./labels";
@@ -153,12 +155,7 @@ export async function ContentLocaleScreen({
             <h3 className="font-semibold">
               <ContentPlaintext text={source.title} />
             </h3>
-            {source.paragraphs.map((paragraph, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: immutable source paragraph positions
-              <p key={`${source.version.id}:${index}`} className="whitespace-pre-wrap">
-                <ContentPlaintext text={paragraph} />
-              </p>
-            ))}
+            <ContentBodyView body={source} headingLevel={4} />
           </article>
         </section>
       ) : null}
@@ -179,12 +176,7 @@ export async function ContentLocaleScreen({
             <h3 className="font-semibold">
               <ContentPlaintext text={original.title} />
             </h3>
-            {original.paragraphs.map((paragraph, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: immutable historical source positions
-              <p key={`${boundSource?.id}:${index}`} className="whitespace-pre-wrap">
-                <ContentPlaintext text={paragraph} />
-              </p>
-            ))}
+            <ContentBodyView body={original} headingLevel={4} />
           </article>
         </section>
       ) : null}
@@ -195,12 +187,7 @@ export async function ContentLocaleScreen({
             <h3 className="font-semibold">
               <ContentPlaintext text={body.title} />
             </h3>
-            {body.paragraphs.map((paragraph, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: immutable target paragraph positions
-              <p key={`${current?.id}:${index}`} className="whitespace-pre-wrap">
-                <ContentPlaintext text={paragraph} />
-              </p>
-            ))}
+            <ContentBodyView body={body} headingLevel={4} />
           </article>
         </section>
       ) : null}
@@ -213,7 +200,7 @@ export async function ContentLocaleScreen({
             target={target}
             initialState={initialFormState<LocaleContentValues>(
               `content.locale.save.${id}.${target}`,
-              { title: body?.title ?? "", text: body?.paragraphs.join("\n\n") ?? "" },
+              { title: body?.title ?? "", ...contentBodyValues(body) },
               edition?.version ?? 1,
             )}
             action={saveContentLocaleAction.bind(null, shell, id, target, binding)}

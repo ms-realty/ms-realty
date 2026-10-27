@@ -25,6 +25,8 @@ import {
   decideContentAction,
   saveContentAction,
 } from "./actions";
+import { ContentBodyView } from "./body";
+import { contentBodyValues } from "./body-fields";
 import { contentCopy } from "./copy";
 import { ContentEditionLinks } from "./edition-links";
 import { ContentForm, ContentReviewForm } from "./forms";
@@ -105,7 +107,7 @@ export async function ContentNewScreen({ locale, session }: { locale: string; se
           kind: "help",
           slug: "",
           title: "",
-          text: "",
+          ...contentBodyValues(null),
           jurisdiction: "",
           reviewScope: "",
           placeId: "",
@@ -245,17 +247,9 @@ export async function ContentWorkbenchScreen({
         <h3 className="font-semibold" lang="bg">
           {body.title}
         </h3>
-        {body.paragraphs.map((paragraph, index) => (
-          // Immutable edition positions distinguish identical paragraphs; there is no local state.
-          <p
-            // biome-ignore lint/suspicious/noArrayIndexKey: immutable edition paragraph position
-            key={`${current.id}:${index}`}
-            lang="bg"
-            className="whitespace-pre-wrap break-words"
-          >
-            {paragraph}
-          </p>
-        ))}
+        <div lang="bg" dir="ltr" className="space-y-5">
+          <ContentBodyView body={body} headingLevel={4} />
+        </div>
         <p className="text-caption">
           {current.reviewedAt
             ? `${copy.reviewDate}: ${formatDateTime(isPublicLocale(locale) ? locale : "bg", current.reviewedAt)}`
@@ -276,7 +270,7 @@ export async function ContentWorkbenchScreen({
                 kind: page.kind,
                 slug: page.slug,
                 title: body.title,
-                text: body.paragraphs.join("\n\n"),
+                ...contentBodyValues(body),
                 jurisdiction: current.jurisdiction ?? "",
                 reviewScope: current.reviewScope ?? "",
                 placeId: body.placeId ?? "",

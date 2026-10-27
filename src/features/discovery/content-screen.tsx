@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import type { ContentReference } from "@/domain/inquiry-content";
+import { ContentBodyView } from "@/features/content/body";
 import { ContentPlaintext } from "@/features/content/plaintext";
 import { serviceCopy } from "@/features/service-intake/copy";
 import { isRoutableLocale, localeDirection } from "@/i18n/config";
@@ -63,12 +64,7 @@ export async function ContentScreen({
           dir={localeDirection(content.locale)}
           className="max-w-reading space-y-5"
         >
-          {content.paragraphs.map((paragraph, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs belong to this immutable, approved version and have no client state.
-            <p key={index} className="whitespace-pre-wrap break-words">
-              <ContentPlaintext text={paragraph} />
-            </p>
-          ))}
+          <ContentBodyView body={content} />
           <dl className="space-y-2 border-t border-border pt-4 text-compact">
             <div>
               <dt>{label.scope}</dt>
@@ -94,7 +90,7 @@ export async function ContentScreen({
       )}
       {source ? (
         <a className="self-start underline" href={`/bg${route}`} hrefLang="bg">
-          {copy.source}
+          {copy.contentSource}
         </a>
       ) : null}
       {kind === "area" && content?.placeId ? (

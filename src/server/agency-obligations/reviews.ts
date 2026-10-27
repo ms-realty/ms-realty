@@ -127,6 +127,7 @@ async function currentWording(db: Executor, versionId: string, lock = false) {
     throw new AppError("approval_stale");
   const body = parseInput(contentBody, row.content.body);
   if (
+    !("paragraphs" in body) ||
     body.paragraphs.length !== 2 ||
     body.placeId ||
     /[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:\+?\d[\s().-]*){7,}/i.test(
