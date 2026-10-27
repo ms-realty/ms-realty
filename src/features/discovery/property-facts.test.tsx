@@ -110,6 +110,25 @@ it("P05 does not render private evidence objects or conflicting candidates as a 
   render(<PropertyFacts listing={listing({ facts: [secret] })} locale="en" />);
   expect(document.body).not.toHaveTextContent("PRIVATE-DO-NOT-RENDER");
 });
+it("P05 retains named inclusions from the approved price without inventing charges", () => {
+  const price = known(
+    {
+      amountMinor: 10000,
+      currency: "EUR",
+      period: "total",
+      basis: "asking",
+      inclusions: ["Synthetic source inclusion"],
+    } as const,
+    provenance,
+  );
+  render(
+    <PropertyFacts
+      listing={listing({ price, facts: [fact("price", price.value, "price")] })}
+      locale="en"
+    />,
+  );
+  expect(screen.getByRole("listitem")).toHaveTextContent("Synthetic source inclusion");
+});
 it("P02 plot summaries use property-appropriate facts without invented bedrooms", () => {
   render(
     <ListingFacts
