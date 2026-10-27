@@ -6,6 +6,14 @@ import { appendFile, mkdir, readFile, realpath, writeFile } from "node:fs/promis
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { tsImport } from "tsx/esm/api";
+
+// Keep the documented Node >=22.13 entry point: native TypeScript loading is not
+// available throughout that range. tsx is already pinned in the verifier lockfile.
+const { presentLegacyPage } = await tsImport(
+  "../src/server/legacy/presentation.ts",
+  import.meta.url,
+);
 
 export const accountId = "921d0224dcd595c87b7928d2b3c479d1";
 export const zoneId = "f0ac7af0721419e8129e5d10ff547372";
@@ -253,7 +261,20 @@ export function qualificationPassed({
 }
 
 export function sourcePageChecks(document, page) {
-  const body = document.querySelector("[data-legacy-source-body]"),
+  const view = presentLegacyPage(page),
+    article = document.querySelector("article"),
+    bodies = document.querySelectorAll("[data-legacy-source-body]"),
+    body = bodies[0],
+    factGroups = document.querySelectorAll("[data-legacy-source-facts]"),
+    factRows = [...(factGroups[0]?.children ?? [])],
+    facts = factRows.map((row) => ({
+      label: row.querySelector("dt")?.textContent,
+      value: row.querySelector("dd")?.textContent,
+    })),
+    linkHeadings = document.querySelectorAll("#archive-links"),
+    links = [...(linkHeadings[0]?.closest("section")?.querySelectorAll("li a") ?? [])].map(
+      (link) => ({ url: link.getAttribute("href"), text: link.textContent }),
+    ),
     images = [...document.querySelectorAll("article img")],
     expectedSources = page.media.map((photo) => {
       const source = new URL(photo.url);
@@ -267,7 +288,22 @@ export function sourcePageChecks(document, page) {
       return `/legacy-media/${source.hostname}${source.pathname}`;
     });
   return {
-    sourceBody: body?.textContent === page.bodyText.replace(/\r\n?/g, "\n"),
+    // P21 keeps the captured bytes in the inventory and presents a reviewed reading
+    // view. Check both identities and every extracted field; never drop the body check.
+    sourceEvidence:
+      hex(64).test(page.sourceHash ?? "") &&
+      digest(page.bodyText) === page.sourceHash &&
+      article?.getAttribute("data-legacy-source-hash") === page.sourceHash,
+    sourceBody: bodies.length === 1 && body.textContent === view.bodyText.replace(/\r\n?/g, "\n"),
+    sourceFacts:
+      factGroups.length === (view.facts.length ? 1 : 0) &&
+      factRows.every(
+        (row) => row.querySelectorAll("dt").length === 1 && row.querySelectorAll("dd").length === 1,
+      ) &&
+      JSON.stringify(facts) === JSON.stringify(view.facts),
+    sourceLinks:
+      linkHeadings.length === (view.contentLinks.length ? 1 : 0) &&
+      JSON.stringify(links) === JSON.stringify(view.contentLinks),
     title: document.querySelector("article h1")?.textContent === page.title,
     locale: document.querySelector("article")?.getAttribute("lang") === page.locale,
     noSourceScriptsOrForms: document.querySelectorAll("article script,article form").length === 0,

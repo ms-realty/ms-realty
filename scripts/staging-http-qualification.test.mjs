@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -298,8 +298,25 @@ test("R07 CLI uploads same-tree provenance after transport report replacement an
         join(directory, "scripts/staging-http-qualification.mjs"),
         await readFile(new URL("./staging-http-qualification.mjs", import.meta.url)),
       );
+      await mkdir(join(directory, "src/server/legacy"), { recursive: true });
+      await writeFile(
+        join(directory, "src/server/legacy/presentation.ts"),
+        await readFile(new URL("../src/server/legacy/presentation.ts", import.meta.url)),
+      );
+      await symlink(
+        await realpath(new URL("../node_modules", import.meta.url)),
+        join(directory, "node_modules"),
+        "dir",
+      );
+      await writeFile(join(directory, "package.json"), '{"type":"module"}\n');
       await writeFile(join(directory, "package-lock.json"), "{}\n");
-      git("add", "scripts/staging-http-qualification.mjs", "package-lock.json");
+      git(
+        "add",
+        "scripts/staging-http-qualification.mjs",
+        "src",
+        "package.json",
+        "package-lock.json",
+      );
       git("commit", "--quiet", "-m", "Qualified verifier and source H");
       const head = git("rev-parse", "HEAD"),
         tree = git("rev-parse", "HEAD^{tree}");
@@ -520,6 +537,7 @@ test("R07 the portable proof matches the complete selected source corpus", async
 
 const sourcePage = {
   bodyText: "Retained source text",
+  sourceHash: createHash("sha256").update("Retained source text").digest("hex"),
   title: "Source gallery",
   locale: "bg",
   media: [
@@ -536,6 +554,9 @@ function galleryChecks(sources, page = sourcePage) {
     '<article lang="bg"><h1>Source gallery</h1><div data-legacy-source-body>Retained source text</div></article>',
   );
   try {
+    dom.window.document
+      .querySelector("article")
+      .setAttribute("data-legacy-source-hash", page.sourceHash);
     for (const src of sources) {
       const image = dom.window.document.createElement("img");
       if (src !== null) image.setAttribute("src", src);
@@ -546,6 +567,168 @@ function galleryChecks(sources, page = sourcePage) {
     dom.window.close();
   }
 }
+
+const readingPage = {
+  ...sourcePage,
+  media: [],
+  bodyText:
+    "No: SYN-12 Country: Recorded place Price: 120000 EUR\nSource gallery\nLiteral […] [unknown-plugin field='retain'] prose.\nTweet Name Email Phone Message Send",
+  listing: {
+    liveSourceFields: [
+      { label: "No:", value: "SYN-12" },
+      { label: "Country:", value: "Recorded place" },
+      { label: "Price:", value: "120000 EUR" },
+    ],
+  },
+  contentLinks: [
+    { url: "https://example.test/item", text: "Recorded source" },
+    { url: "https://example.test/details", text: "Recorded details" },
+  ],
+};
+readingPage.sourceHash = createHash("sha256").update(readingPage.bodyText).digest("hex");
+
+function readingChecks(mutate = () => {}, page = readingPage) {
+  const dom = new JSDOM('<article lang="bg"><h1>Source gallery</h1></article>');
+  const document = dom.window.document,
+    article = document.querySelector("article");
+  article.setAttribute("data-legacy-source-hash", readingPage.sourceHash);
+  const body = document.createElement("div");
+  body.setAttribute("data-legacy-source-body", "");
+  body.textContent = "Source gallery\nLiteral […] [unknown-plugin field='retain'] prose.";
+  article.append(body);
+  const facts = document.createElement("dl");
+  facts.setAttribute("data-legacy-source-facts", "");
+  for (const field of readingPage.listing.liveSourceFields) {
+    const row = document.createElement("div"),
+      label = document.createElement("dt"),
+      value = document.createElement("dd");
+    label.textContent = field.label;
+    value.textContent = field.value;
+    row.append(label, value);
+    facts.append(row);
+  }
+  article.append(facts);
+  const section = document.createElement("section"),
+    heading = document.createElement("h2");
+  heading.id = "archive-links";
+  section.append(heading);
+  for (const link of readingPage.contentLinks) {
+    const row = document.createElement("li"),
+      anchor = document.createElement("a");
+    anchor.setAttribute("href", link.url);
+    anchor.textContent = link.text;
+    row.append(anchor);
+    section.append(row);
+  }
+  article.append(section);
+  try {
+    mutate(document);
+    return sourcePageChecks(document, page);
+  } finally {
+    dom.window.close();
+  }
+}
+
+test("P21/R07 verifies the exact reading view, source fact values and links while binding the unchanged raw capture", () => {
+  assert(Object.values(readingChecks()).every(Boolean));
+  assert.notEqual(
+    readingPage.bodyText,
+    "Source gallery\nLiteral […] [unknown-plugin field='retain'] prose.",
+  );
+});
+
+test("P21/R07 missing, altered, extra or reordered fact labels and values fail", () => {
+  for (const mutate of [
+    (d) => {
+      d.querySelector("dd").textContent = "SYN-13";
+    },
+    (d) => {
+      d.querySelector("dt").textContent = "Inferred reference:";
+    },
+    (d) => {
+      d
+        .querySelector("[data-legacy-source-facts]")
+        .lastElementChild.querySelector("dd").textContent = "1 USD";
+    },
+    (d) => {
+      d.querySelector("[data-legacy-source-facts] > div").remove();
+    },
+    (d) => {
+      const group = d.querySelector("[data-legacy-source-facts]");
+      group.prepend(group.lastElementChild);
+    },
+    (d) => {
+      const group = d.querySelector("[data-legacy-source-facts]");
+      group.append(group.firstElementChild.cloneNode(true));
+    },
+    (d) => {
+      const group = d.querySelector("[data-legacy-source-facts]");
+      group.after(group.cloneNode(true));
+    },
+  ])
+    assert.equal(readingChecks(mutate).sourceFacts, false);
+});
+
+test("P21/R07 changed narrative, lost editorial markup, duplicated bodies and wrong raw identity fail", () => {
+  for (const mutate of [
+    (d) => {
+      d.querySelector("[data-legacy-source-body]").textContent = "Different property narrative.";
+    },
+    (d) => {
+      const body = d.querySelector("[data-legacy-source-body]");
+      body.textContent = body.textContent.replace("[unknown-plugin field='retain']", "");
+    },
+    (d) => {
+      const body = d.querySelector("[data-legacy-source-body]");
+      body.after(body.cloneNode(true));
+    },
+  ])
+    assert.equal(readingChecks(mutate).sourceBody, false);
+  assert.equal(
+    readingChecks((d) => {
+      d.querySelector("article").removeAttribute("data-legacy-source-hash");
+    }).sourceEvidence,
+    false,
+  );
+  assert.equal(
+    readingChecks((d) => {
+      d.querySelector("article").setAttribute("data-legacy-source-hash", "f".repeat(64));
+    }).sourceEvidence,
+    false,
+  );
+  assert.equal(
+    readingChecks(() => {}, { ...readingPage, bodyText: `${readingPage.bodyText} ` })
+      .sourceEvidence,
+    false,
+  );
+});
+
+test("P21/R07 source link destinations, labels, count and order remain exact", () => {
+  for (const mutate of [
+    (d) => {
+      d.querySelector("li a").setAttribute("href", "https://example.test/different");
+    },
+    (d) => {
+      d.querySelector("li a").textContent = "Unrecorded label";
+    },
+    (d) => {
+      d.querySelector("li").remove();
+    },
+    (d) => {
+      const section = d.querySelector("section");
+      section.append(section.querySelector("li").cloneNode(true));
+    },
+    (d) => {
+      const section = d.querySelector("section");
+      section.append(section.querySelector("li"));
+    },
+    (d) => {
+      const heading = d.querySelector("#archive-links");
+      heading.after(heading.cloneNode(true));
+    },
+  ])
+    assert.equal(readingChecks(mutate).sourceLinks, false);
+});
 
 test("R07 source galleries preserve each source host, encoded path and photo order", () => {
   for (const sources of [
