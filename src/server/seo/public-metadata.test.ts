@@ -66,6 +66,7 @@ it("CMS metadata never invents locale siblings or uses another locale's approved
   vi.stubEnv("STAGING", "false");
   mocks.content.mockResolvedValueOnce(null);
   const absent = await publicContentMetadata("en", "help", "privacy", "/help/privacy");
+  expect(absent.title).toBe("Help");
   expect(absent.alternates?.languages).toEqual({});
   expect(absent.robots).toMatchObject({ index: false });
   mocks.content.mockResolvedValueOnce({

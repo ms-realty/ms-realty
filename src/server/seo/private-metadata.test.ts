@@ -38,6 +38,17 @@ it("uses the scoped client task while retaining only a safe object hint", async 
   expect(result.title).toMatchObject({ default: "nav:journey.messages · 00000000 · MS Realty" });
 });
 
+it("distinguishes a saved import from the saved list and a record search from the workspace", async () => {
+  const saved = await privatePageMetadata({
+    surface: "client",
+    locale: "en",
+    path: "/en/saved/import",
+  });
+  const search = await privatePageMetadata({ surface: "staff", locale: "bg", path: "/bg/search" });
+  expect(saved.title).toMatchObject({ default: "nav:saved · Import saved properties · MS Realty" });
+  expect(search.title).toMatchObject({ default: "workspace:search · MS Realty" });
+});
+
 it("never copies access tokens, queries or wrong-locale paths into private titles", async () => {
   for (const path of [
     "/en/invitations/00000000-0000-4000-8000-000000000001?token=secret",

@@ -8,13 +8,62 @@ import type { PublicLocale } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
 
 const actions = {
-  bg: { new: "Нов запис", edit: "Редакция", receipt: "Резултат", review: "Преглед" },
-  en: { new: "New record", edit: "Edit", receipt: "Outcome", review: "Review" },
-  ru: { new: "Новая запись", edit: "Редактирование", receipt: "Результат", review: "Проверка" },
-  de: { new: "Neuer Eintrag", edit: "Bearbeiten", receipt: "Ergebnis", review: "Prüfung" },
-  nl: { new: "Nieuw item", edit: "Bewerken", receipt: "Resultaat", review: "Beoordeling" },
-  el: { new: "Νέα εγγραφή", edit: "Επεξεργασία", receipt: "Αποτέλεσμα", review: "Έλεγχος" },
-  he: { new: "רשומה חדשה", edit: "עריכה", receipt: "תוצאה", review: "בדיקה" },
+  bg: {
+    new: "Нов запис",
+    edit: "Редакция",
+    receipt: "Резултат",
+    review: "Преглед",
+    import: "Добавяне на запазени имоти",
+    correction: "Поправка на информация",
+  },
+  en: {
+    new: "New record",
+    edit: "Edit",
+    receipt: "Outcome",
+    review: "Review",
+    import: "Import saved properties",
+    correction: "Correct published information",
+  },
+  ru: {
+    new: "Новая запись",
+    edit: "Редактирование",
+    receipt: "Результат",
+    review: "Проверка",
+    import: "Добавление сохранённых объектов",
+    correction: "Исправление сведений",
+  },
+  de: {
+    new: "Neuer Eintrag",
+    edit: "Bearbeiten",
+    receipt: "Ergebnis",
+    review: "Prüfung",
+    import: "Gespeicherte Immobilien übernehmen",
+    correction: "Veröffentlichte Angaben korrigieren",
+  },
+  nl: {
+    new: "Nieuw item",
+    edit: "Bewerken",
+    receipt: "Resultaat",
+    review: "Beoordeling",
+    import: "Bewaarde woningen overnemen",
+    correction: "Gepubliceerde informatie corrigeren",
+  },
+  el: {
+    new: "Νέα εγγραφή",
+    edit: "Επεξεργασία",
+    receipt: "Αποτέλεσμα",
+    review: "Έλεγχος",
+    import: "Εισαγωγή αποθηκευμένων ακινήτων",
+    correction: "Διόρθωση δημοσιευμένων στοιχείων",
+  },
+  he: {
+    new: "רשומה חדשה",
+    edit: "עריכה",
+    receipt: "תוצאה",
+    review: "בדיקה",
+    import: "ייבוא נכסים שמורים",
+    correction: "תיקון מידע שפורסם",
+  },
 } as const;
 
 /** Uses route identity only: no extra private-data query and no token/query-string titles. */
@@ -46,13 +95,16 @@ export async function privatePageMetadata(input: {
       .filter((entry) => entry.path)
       .sort((a, b) => (b.path?.length ?? 0) - (a.path?.length ?? 0))
       .find((entry) => path === entry.path || path.startsWith(`${entry.path}/`));
-    title = item
-      ? tools(`items.${item.label}.title`)
-      : path.startsWith("/operations/assistance")
-        ? workspace("butler")
-        : path.startsWith("/operations")
-          ? tools("title")
-          : workspace("label");
+    title =
+      path === "/search"
+        ? workspace("search")
+        : item
+          ? tools(`items.${item.label}.title`)
+          : path.startsWith("/operations/assistance")
+            ? workspace("butler")
+            : path.startsWith("/operations")
+              ? tools("title")
+              : workspace("label");
   } else {
     const nav = await getTranslations({ locale, namespace: "nav" });
     const local = segments[0] === "cases" && segments[1] ? `/${segments.slice(2).join("/")}` : path;

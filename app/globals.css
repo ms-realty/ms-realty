@@ -84,6 +84,13 @@
     color: black !important;
   }
 
+  body * {
+    color: black !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
   nav,
   footer,
   button,

@@ -7,6 +7,7 @@ import { cache } from "react";
 import { getDb } from "@/db/client";
 import { parseReference } from "@/domain/ids";
 import { compareCopy } from "@/features/discovery/compare-copy";
+import { contentFallbackTitle, contentLabels } from "@/features/discovery/content-copy";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { intentCopy } from "@/features/discovery/intent-copy";
 import { searchAlertCopy } from "@/features/discovery/search-alert-copy";
@@ -158,7 +159,17 @@ export async function publicContentMetadata(
   const metadata = await publicPageMetadata({
     locale,
     path,
-    title: content?.title,
+    title:
+      content?.title ??
+      (kind === "review"
+        ? contentLabels(locale).unavailable
+        : contentFallbackTitle(locale, {
+            kind,
+            route: path,
+            ...(kind === "service" && (slug === "sell" || slug === "let")
+              ? { intent: slug === "sell" ? "seller_consultation" : "landlord_consultation" }
+              : {}),
+          })),
     description: content?.paragraphs.join(" "),
     availableIn: content ? [locale] : [],
     indexable: Boolean(content) && localePolicy(locale).indexable,
