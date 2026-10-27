@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   appointmentResources,
@@ -13,6 +13,10 @@ import {
   servicePolicies,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
+import {
+  operatingPolicyFixtureKey,
+  withOperatingPolicyFixture,
+} from "../../../e2e/support/policy-fixture";
 import { createSession } from "../auth/sessions";
 import { createClient, createProperty, createStaff } from "../testing";
 import { readCalendar } from "./calendar";
@@ -24,6 +28,7 @@ import {
   requestPhotography,
   respondToAppointment,
 } from "./service";
+import { createSyntheticBookingCalendar } from "./testing-policy";
 
 let t: TestDatabase;
 beforeAll(async () => {
@@ -59,16 +64,7 @@ async function fixture(propertyId?: string) {
     })),
   );
   const { session } = await createSession(t.db, { kind: "staff", id: staff.id });
-  await t.db.insert(servicePolicies).values({
-    effectiveFrom: new Date(Date.now() - 1000),
-    timezone: "Europe/Sofia",
-    serviceHours: Object.fromEntries(
-      ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map((day) => [day, ["09:00", "18:00"]]),
-    ),
-    coverage: {},
-    responsePolicy: {},
-    approvedById: staff.id,
-  });
+  await createSyntheticBookingCalendar(t.db, staff.id);
   const input = {
     id: listing.id,
     operationId: randomUUID(),
@@ -96,6 +92,91 @@ function confirm(id: string, expectedVersion = 1) {
 }
 
 describe("B10 / O09 property-work photography", () => {
+  it("serializes the global policy fixture and releases its exact session lock after a failed journey", async () => {
+    const probe = await t.sql.reserve();
+    try {
+      await expect(
+        withOperatingPolicyFixture(t.sql, async () => {
+          const [held] = await probe<
+            { acquired: boolean }[]
+          >`select pg_try_advisory_lock(hashtextextended(${operatingPolicyFixtureKey}, 0)) as acquired`;
+          expect(held?.acquired).toBe(false);
+          throw new Error("Synthetic failed browser journey");
+        }),
+      ).rejects.toThrow("Synthetic failed browser journey");
+      const [released] = await probe<
+        { acquired: boolean }[]
+      >`select pg_try_advisory_lock(hashtextextended(${operatingPolicyFixtureKey}, 0)) as acquired`;
+      expect(released?.acquired).toBe(true);
+    } finally {
+      await probe`select pg_advisory_unlock(hashtextextended(${operatingPolicyFixtureKey}, 0))`;
+      probe.release();
+    }
+  });
+  it("holds unknown calendars, then uses an explicitly supplied newer synthetic calendar, then holds a newer unknown again", async () => {
+    await withOperatingPolicyFixture(t.sql, async () => {
+      const f = await fixture();
+      const unknown = async () => {
+        const [row] = await t.db
+          .insert(servicePolicies)
+          .values({
+            effectiveFrom: sql`clock_timestamp()`,
+            timezone: "Europe/Sofia",
+            serviceHours: { kind: "unknown_calendar_v1" },
+            coverage: {},
+            responsePolicy: {},
+            approvedById: f.staff.id,
+          })
+          .returning();
+        if (!row) throw new Error("Missing synthetic unknown calendar");
+        return row;
+      };
+      const current = async () => {
+        const [row] = await t.db
+          .select()
+          .from(servicePolicies)
+          .where(sql`${servicePolicies.effectiveFrom} <= clock_timestamp()`)
+          .orderBy(desc(servicePolicies.effectiveFrom))
+          .limit(1);
+        return row;
+      };
+      const firstUnknown = await unknown();
+      expect((await current())?.id).toBe(firstUnknown.id);
+      const requested = await requestPhotography(t.db, f.session, f.input);
+      await expect(
+        arrangeAppointment(t.db, f.session, confirm(requested.outcome.id)),
+      ).rejects.toMatchObject({
+        code: "validation_failed",
+        fieldErrors: {
+          startsAt: ["An approved service-hours policy covering this time is required."],
+        },
+      });
+      const supplied = await createSyntheticBookingCalendar(t.db, f.staff.id);
+      expect((await current())?.id).toBe(supplied.id);
+      await arrangeAppointment(t.db, f.session, confirm(requested.outcome.id));
+      await respondToAppointment(t.db, f.session, {
+        id: requested.outcome.id,
+        operationId: randomUUID(),
+        expectedVersion: 2,
+        state: "cancelled",
+        reason: "Synthetic release before checking the current unknown policy",
+      });
+      const secondUnknown = await unknown();
+      expect((await current())?.id).toBe(secondUnknown.id);
+      const next = await requestPhotography(t.db, f.session, {
+        ...f.input,
+        operationId: randomUUID(),
+      });
+      await expect(
+        arrangeAppointment(t.db, f.session, confirm(next.outcome.id)),
+      ).rejects.toMatchObject({
+        code: "validation_failed",
+        fieldErrors: {
+          startsAt: ["An approved service-hours policy covering this time is required."],
+        },
+      });
+    });
+  });
   it("creates and reads real property work without any buyer Case or Interest; native calendar includes it", async () => {
     const f = await fixture(),
       result = await requestPhotography(t.db, f.session, f.input);

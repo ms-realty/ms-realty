@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -11,6 +11,7 @@ import { agencyCopy, caseReviewCopy } from "../src/features/agency-obligations/c
 import { caseCopy } from "../src/features/cases/copy";
 import { workCopy } from "../src/features/work/copy";
 import { hostUrl, origins } from "./hosts";
+import { test, withPolicyFixtureTimeout } from "./support/policy-test";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -224,10 +225,10 @@ test("B10 actual private JSON transport enforces surface, replay and original-au
 });
 
 for (const javaScriptEnabled of [true, false]) {
+  const test = withPolicyFixtureTimeout(120000);
   test(`B10 partner exact-source acceptance and honest property photography${javaScriptEnabled ? "" : " without JavaScript"}`, async ({
     browser,
   }, info) => {
-    test.setTimeout(120000);
     const f = seed(true),
       c = agencyCopy("en"),
       context = await browser.newContext({ ...info.project.use, javaScriptEnabled });
@@ -362,7 +363,11 @@ for (const javaScriptEnabled of [true, false]) {
         .select()
         .from(schema.appointments)
         .where(eq(schema.appointments.listingId, f.listingId));
-      expect(appointment).toMatchObject({ purpose: "photography", caseId: null, interestId: null });
+      expect(appointment).toMatchObject({
+        purpose: "photography",
+        caseId: null,
+        interestId: null,
+      });
       await page.screenshot({
         path: info.outputPath(
           `photography-workbench-${javaScriptEnabled ? "enhanced" : "native"}-320.png`,
@@ -455,7 +460,6 @@ for (const javaScriptEnabled of [true, false]) {
   test(`B10 exact author consent, qualified verification, publication and withdrawal${javaScriptEnabled ? "" : " without JavaScript"}`, async ({
     browser,
   }, info) => {
-    test.setTimeout(120000);
     const f = seed(),
       c = agencyCopy("en"),
       client = caseReviewCopy("en"),
@@ -522,7 +526,10 @@ for (const javaScriptEnabled of [true, false]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
-      await page.screenshot({ path: info.outputPath("review-qualified-320.png"), fullPage: true });
+      await page.screenshot({
+        path: info.outputPath("review-qualified-320.png"),
+        fullPage: true,
+      });
       await page.goto(hostUrl("staff", `/en/content/${f.contentPageId}`));
       for (const label of ["Approve editorial text", "Publish reviewed edition"]) {
         const form = page
@@ -533,7 +540,9 @@ for (const javaScriptEnabled of [true, false]) {
           .fill("Synthetic exact publication review only");
         await form.getByLabel("Approval valid until", { exact: true }).fill("2030-01-15T12:00");
         await form
-          .getByLabel("I reviewed this exact edition, its scope and this action.", { exact: true })
+          .getByLabel("I reviewed this exact edition, its scope and this action.", {
+            exact: true,
+          })
           .check();
         await form.getByRole("button", { name: label, exact: true }).click();
         await expect(page).toHaveURL(/content\/operations\?/);
