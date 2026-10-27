@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { operations, principals } from "@/db/schema";
+import { DuplicateIdentityLink } from "@/features/duplicate-review/identity-link";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import { inventorySections } from "@/features/inventory/decision-contract";
 import { EditTabs } from "@/features/inventory/edit-tabs";
@@ -264,6 +265,12 @@ export default async function InventoryDetailPage({
         summary={[property.settlement, ...summary].join(" · ")}
       />
       {error}
+      <DuplicateIdentityLink
+        locale={locale}
+        session={session}
+        subject="property"
+        id={property.id}
+      />
       {/* Text and Facts are one form; the tabs switch panels in place (group/o12). */}
       <div data-o12 className="group/o12 flex flex-col gap-5 sm:gap-6">
         <ListingNavigation locale={locale} reference={reference} current={tab} formId={formId} />

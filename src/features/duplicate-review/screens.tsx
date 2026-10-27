@@ -14,6 +14,7 @@ import { controlClass, fieldClass, labelClass } from "@/ui/field-class";
 import { issueFormOperation } from "@/ui/form/server";
 import { deferContactReviewAction } from "./actions";
 import { ContactReviewForm } from "./form";
+import { duplicateMergeCopy } from "./merge-copy";
 
 const link = "min-h-control py-2 font-semibold text-link underline underline-offset-4";
 type Contact = Awaited<ReturnType<typeof readContactPair>>["left"];
@@ -97,6 +98,12 @@ export async function DuplicateReviewScreen({
     <div className="mx-auto grid w-full max-w-5xl min-w-0 gap-6 p-4 md:p-8" data-duplicate-review>
       <h1 className="text-title font-semibold">{c.title}</h1>
       <p>{c.intro}</p>
+      <a
+        className={link}
+        href={`/${locale}/operations/duplicates/merge${pair ? `?subject=party&left=${pair.left.party.id}&right=${pair.right.party.id}` : ""}`}
+      >
+        {duplicateMergeCopy(locale).mergeEntry}
+      </a>
       <p className="rounded-panel border border-border bg-subtle p-4 font-semibold">{c.boundary}</p>
       {query.error ? (
         <p role="alert" className="text-error">
