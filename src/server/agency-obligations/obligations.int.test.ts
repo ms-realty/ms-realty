@@ -9,7 +9,9 @@ import {
   documents,
   documentVersions,
   grants,
+  inquiries,
   operations,
+  parties,
   passkeys,
   privacyProcessingRestrictions,
 } from "@/db/schema";
@@ -27,6 +29,7 @@ import { hashRequest } from "../crypto";
 import { appendPrivacySafetyDecision } from "../privacy/safety-ledger";
 import { nextReference } from "../references";
 import { createClient } from "../testing";
+import { readAgencyOperation } from "./commands";
 import {
   decidePartnerTerms,
   listPartnerTerms,
@@ -231,6 +234,111 @@ async function consentAndVerify() {
 }
 
 describe("B10 partner/referral current supplied terms", () => {
+  it("keeps original Case-scoped history after a merge while holding positive use and preserving revocation", async () => {
+    const f = await fixture(),
+      input = { ...terms(f), caseId: f.record.id };
+    const saved = await savePartnerTerms(t.db, f.staff.session, input);
+    const approval = {
+      id: input.id,
+      operationId: randomUUID(),
+      expectedVersion: 1,
+      expectedHash: saved.outcome.termsHash,
+      action: "accept",
+      professionalName: "Synthetic qualified reviewer",
+      note: "Synthetic original counterparty exact acceptance",
+      reviewed: true,
+    };
+    await decidePartnerTerms(t.db, f.staff.session, approval);
+    const canonical = await createClient(t.db);
+    await t.db
+      .update(parties)
+      .set({ mergedIntoPartyId: canonical.partyId })
+      .where(eq(parties.id, f.client.partyId));
+    await t.db
+      .update(inquiries)
+      .set({ partyId: canonical.partyId })
+      .where(eq(inquiries.partyId, f.client.partyId));
+    await t.db
+      .update(caseParticipants)
+      .set({ partyId: canonical.partyId })
+      .where(eq(caseParticipants.partyId, f.client.partyId));
+    const retained = await readPartnerTerms(t.db, f.staff.session, input.id);
+    expect(retained.party.id).toBe(f.client.partyId);
+    expect(retained.current).toBe(false);
+    expect(retained.history).toHaveLength(2);
+    await expect(decidePartnerTerms(t.db, f.staff.session, approval)).rejects.toMatchObject({
+      code: "not_found",
+    });
+    await expect(
+      savePartnerTerms(t.db, f.staff.session, {
+        ...input,
+        counterpartyPartyId: canonical.partyId,
+        operationId: randomUUID(),
+        expectedVersion: 2,
+      }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await decidePartnerTerms(t.db, f.staff.session, {
+      ...approval,
+      operationId: randomUUID(),
+      expectedVersion: 2,
+      action: "revoke",
+      note: "Synthetic identity changed; original promises remain retained",
+    });
+    expect((await readPartnerTerms(t.db, f.staff.session, input.id)).row.state).toBe("revoked");
+  });
+  it("retains known failed receipts across the authorization transaction and binds status to actor, type and record", async () => {
+    const f = await fixture(),
+      input = { ...terms(f), validUntil: null };
+    const saved = await savePartnerTerms(t.db, f.staff.session, input);
+    const approval = {
+      id: input.id,
+      operationId: randomUUID(),
+      expectedVersion: 1,
+      expectedHash: saved.outcome.termsHash,
+      action: "accept",
+      professionalName: "Synthetic reviewer",
+      note: "Actual expiry is unknown; acceptance must remain held",
+      reviewed: true,
+    };
+    await expect(decidePartnerTerms(t.db, f.staff.session, approval)).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+    expect(
+      await readAgencyOperation(
+        t.db,
+        f.staff.session,
+        "partnerDecision",
+        input.id,
+        approval.operationId,
+      ),
+    ).toMatchObject({ status: "failed", recordId: input.id });
+    const [receipt] = await t.db
+      .select()
+      .from(operations)
+      .where(eq(operations.idempotencyKey, approval.operationId));
+    expect(receipt?.outcome).toMatchObject({ code: "transition_denied" });
+    await expect(decidePartnerTerms(t.db, f.staff.session, approval)).rejects.toMatchObject({
+      code: "transition_denied",
+    });
+    await expect(
+      savePartnerTerms(t.db, f.staff.session, { ...input, operationId: randomUUID() }),
+    ).rejects.toMatchObject({ code: "version_conflict" });
+    const wrongKey = randomUUID();
+    await t.db.insert(operations).values({
+      actorKind: "staff",
+      actorId: f.staff.id,
+      operationType: "agency.partner.decide",
+      idempotencyKey: wrongKey,
+      requestHash: "synthetic wrong record type",
+      status: "succeeded",
+      resultType: "case_review",
+      resultId: input.id,
+      outcome: { id: input.id },
+    });
+    expect(
+      await readAgencyOperation(t.db, f.staff.session, "partnerDecision", input.id, wrongKey),
+    ).toBeNull();
+  });
   it("accepts a standing relationship without a consumer Case, with one qualified owner and one passkey", async () => {
     const { f, input, approval } = await acceptedTerms();
     expect((await readPartnerTerms(t.db, f.staff.session, input.id)).current).toBe(true);

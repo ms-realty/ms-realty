@@ -17,7 +17,7 @@ import {
 } from "@/db/schema";
 import { appointmentMachine, guardAppointmentTransition } from "@/domain/appointment";
 import type { PublicLocale } from "@/i18n/config";
-import { agencyPendingFence } from "../agency-obligations/shared";
+import { agencyPendingFence, retainedAgencyTransaction } from "../agency-obligations/shared";
 import { requireAvailableStaff } from "../auth/availability";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { assertCan, can, resolveGrants } from "../authz";
@@ -174,7 +174,7 @@ export async function requestPhotography(db: Executor, session: Session, raw: un
     return { live, listing };
   };
   await authorize(db);
-  return db.transaction(async (tx) => {
+  return retainedAgencyTransaction(db, async (tx) => {
     const { live } = await authorize(tx, true);
     await agencyPendingFence(
       tx,

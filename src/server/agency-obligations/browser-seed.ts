@@ -4,6 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
+import { formatListingReference } from "@/domain/ids";
 import { createSession } from "../auth/sessions";
 import { caseFixture } from "../cases/testing";
 import { createContent, decideContent, readContentWorkbench } from "../content/commands";
@@ -92,9 +93,18 @@ try {
     reviewed: true,
   });
   const propertyId = await createProperty(db);
+  const [sequence] = await db
+    .insert(schema.referenceSequences)
+    .values({ kind: "listing", year: 0, lastValue: 1 })
+    .onConflictDoUpdate({
+      target: [schema.referenceSequences.kind, schema.referenceSequences.year],
+      set: { lastValue: sql`${schema.referenceSequences.lastValue} + 1` },
+    })
+    .returning({ value: schema.referenceSequences.lastValue });
+  if (!sequence) throw new Error("Missing synthetic listing reference");
   const [listing] = await db
     .insert(schema.listings)
-    .values({ reference: `MS-PHOTO-${randomUUID()}`, propertyId, purpose: "sale" })
+    .values({ reference: formatListingReference(sequence.value), propertyId, purpose: "sale" })
     .returning();
   if (!listing) throw new Error("Missing synthetic photography listing");
   await db.insert(schema.servicePolicies).values({

@@ -24,7 +24,13 @@ import { documentAccess } from "../files/access";
 import { runOperation } from "../operations";
 import { privacyProcessingRestricted } from "../privacy/restrictions";
 import { commandEnvelope, parseInput, version } from "../work/shared";
-import { agencyHistory, agencyPendingFence, agencyStaff, evidenceHistory } from "./shared";
+import {
+  agencyHistory,
+  agencyPendingFence,
+  agencyStaff,
+  evidenceHistory,
+  retainedAgencyTransaction,
+} from "./shared";
 
 type Review = typeof agencyCaseReviews.$inferSelect;
 const authorRoles = ["buyer", "co_buyer", "tenant", "seller", "landlord"] as const;
@@ -214,7 +220,13 @@ export async function readCaseReview(db: Executor, session: Session, id: string)
       if (!isAppError(error) || !["not_found", "forbidden"].includes(error.code)) throw error;
     }
   }
-  return { row, history };
+  const [verifier] = row.verifiedById
+    ? await db
+        .select({ name: principals.displayName })
+        .from(principals)
+        .where(eq(principals.id, row.verifiedById))
+    : [];
+  return { row, history, verifierName: verifier?.name ?? null };
 }
 export async function reviewConsentPolicy(
   db: Executor,
@@ -227,9 +239,15 @@ export async function saveCaseReview(db: Executor, session: Session, raw: unknow
   const input = parseInput(save, raw);
   await agencyStaff(db, session, input.caseId, null, true);
   if (input.expectedVersion) await readCaseReview(db, session, input.id);
-  return db.transaction(async (tx) => {
+  return retainedAgencyTransaction(db, async (tx) => {
     const { live } = await agencyStaff(tx, session, input.caseId, null, true);
-    const previous = input.expectedVersion ? await rawReview(tx, input.id, true) : null;
+    const [existing] = await tx
+      .select({ id: agencyCaseReviews.id })
+      .from(agencyCaseReviews)
+      .where(eq(agencyCaseReviews.id, input.id))
+      .for("update");
+    const previous = existing ? await rawReview(tx, input.id) : null;
+    if (input.expectedVersion && !previous) throw new AppError("not_found");
     if (previous) await agencyStaff(tx, live, previous.caseId, previous.consentDocumentVersionId);
     const { page, content, body } = await currentWording(tx, input.contentPageVersionId, true);
     await assertCanRead(tx, live.actor, "content.edit", {
@@ -319,7 +337,7 @@ export async function decideReviewConsent(
   const row = await rawReview(db, input.id);
   if (external) await agencyStaff(db, session, row.caseId, row.consentDocumentVersionId, true);
   else await authorAccess(db, session, row);
-  return db.transaction(async (tx) => {
+  return retainedAgencyTransaction(db, async (tx) => {
     const current = await rawReview(tx, input.id, true);
     const live = external
       ? (await agencyStaff(tx, session, current.caseId, current.consentDocumentVersionId, true))
@@ -433,7 +451,7 @@ async function currentConsent(db: Executor, row: Review) {
 export async function verifyCaseReview(db: Executor, session: Session, raw: unknown) {
   const input = parseInput(verify, raw);
   await readCaseReview(db, session, input.id);
-  return db.transaction(async (tx) => {
+  return retainedAgencyTransaction(db, async (tx) => {
     const row = await rawReview(tx, input.id, true);
     const { live, resource } = await agencyStaff(
       tx,
