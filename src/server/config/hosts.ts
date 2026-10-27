@@ -89,6 +89,7 @@ export function hostContextFor(
  */
 const apiFamilies: Readonly<Record<string, HostContext>> = {
   inquiries: "public",
+  "inquiry-attachments": "staff",
   "public-shares": "public",
   ops: "staff",
   media: "public",

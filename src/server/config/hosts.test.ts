@@ -98,6 +98,18 @@ describe("host resolution", () => {
     expect(servesApi("public", "/api/constructor")).toBe(false);
   });
 
+  it("F10/AT42 mounts inquiry photo bytes only on staff and keeps adjacent families closed", () => {
+    const id = crypto.randomUUID();
+    for (const surface of ["public", "client", "staff"] as const) {
+      expect(servesApi(surface, `/api/inquiry-attachments/${id}`, origins), surface).toBe(
+        surface === "staff",
+      );
+      expect(servesApi(surface, `/api/inquiry-attachments-extra/${id}`, origins), surface).toBe(
+        false,
+      );
+    }
+  });
+
   it("never exposes the development mail capture on a real host", () => {
     const local = parseHostOrigins({ PORT: "3161" });
     expect(servesApi("staff", "/api/test-outbox", local)).toBe(true);
