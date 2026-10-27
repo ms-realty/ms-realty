@@ -90,13 +90,31 @@ for (const javascript of [false, true])
         await page.getByLabel(c.confirm, { exact: true }).check();
         if (javascript) expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
         const submit = `**/operations/privacy/${fixture.requestId}/erasure/submit*`;
+        let resolveResponseLost: () => void, rejectResponseLost: (error: unknown) => void;
+        const responseLost = new Promise<void>((resolve, reject) => {
+          resolveResponseLost = resolve;
+          rejectResponseLost = reject;
+        });
         await page.route(submit, async (route) => {
-          const committed = await route.fetch({ maxRedirects: 0 });
-          expect(committed.status()).toBe(303);
-          await route.abort("failed");
+          try {
+            const committed = await route.fetch({ maxRedirects: 0 });
+            expect(committed.status()).toBe(303);
+            expect(
+              new URL(committed.headers().location ?? "", original).searchParams.has("receipt"),
+            ).toBe(true);
+            await route.abort("failed");
+            resolveResponseLost();
+          } catch (error) {
+            rejectResponseLost(error);
+            throw error;
+          }
         });
         // The server commits; deliberately lose its response and recover using the issued key.
-        await page.getByRole("button", { name: c.apply, exact: true }).click();
+        // WebKit may finish the click before it dispatches the native form navigation.
+        await Promise.all([
+          page.getByRole("button", { name: c.apply, exact: true }).click(),
+          responseLost,
+        ]);
         await page.unroute(submit);
         await page.goto(hostUrl("staff", `${path}/submit?${original.searchParams}`));
         await expect(page.getByText(c.statuses.succeeded, { exact: true })).toBeVisible();
