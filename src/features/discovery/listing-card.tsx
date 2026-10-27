@@ -91,7 +91,7 @@ export function ListingCard({
       className="flex min-w-0 flex-col overflow-hidden rounded-panel border border-divider bg-surface shadow-raised data-[map-selected=true]:ring-2 data-[map-selected=true]:ring-action"
       data-listing-reference={listing.reference}
     >
-      {/* UI13: approved photos use a full-width 3:2 frame; plans retain their full extent. */}
+      {/* UI13: approved photos use a full-width 4:3 frame; plans retain their full extent. */}
       <ApprovedMedia
         media={listing.cover}
         presentation="card"

@@ -60,7 +60,11 @@ export function ApprovedMedia({
       <div
         className={cx(
           "relative flex items-center justify-center overflow-hidden bg-subtle text-center text-text-muted",
-          presentation === "preview" ? "aspect-[16/9] rounded-control" : "aspect-[3/2]",
+          presentation === "preview"
+            ? "aspect-[16/9] rounded-control"
+            : presentation === "card"
+              ? "aspect-[4/3]"
+              : "aspect-[3/2]",
           presentation === "gallery" && "rounded-panel",
         )}
       >
