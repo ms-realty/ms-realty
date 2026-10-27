@@ -2,8 +2,9 @@
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
+import { test } from "./support/policy-test";
 
 function seed<T>(...args: string[]): T {
   return JSON.parse(

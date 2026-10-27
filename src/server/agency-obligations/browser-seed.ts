@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
 import { formatListingReference } from "@/domain/ids";
+import { createSyntheticBookingCalendar } from "../appointments/testing-policy";
 import { createSession } from "../auth/sessions";
 import { caseFixture } from "../cases/testing";
 import { createContent, decideContent, readContentWorkbench } from "../content/commands";
@@ -141,16 +142,7 @@ try {
     .values({ reference: formatListingReference(sequence.value), propertyId, purpose: "sale" })
     .returning();
   if (!listing) throw new Error("Missing synthetic photography listing");
-  await db.insert(schema.servicePolicies).values({
-    effectiveFrom: new Date(Date.now() - 1000),
-    timezone: "Europe/Sofia",
-    serviceHours: Object.fromEntries(
-      ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map((day) => [day, ["09:00", "18:00"]]),
-    ),
-    coverage: {},
-    responsePolicy: {},
-    approvedById: staff.id,
-  });
+  await createSyntheticBookingCalendar(db, staff.id);
   console.log(
     JSON.stringify({
       staffToken: issued.token,

@@ -3,12 +3,13 @@
 
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { hostUrl, origins } from "./hosts";
+import { withPolicyFixtureTimeout } from "./support/policy-test";
 import { fillAgencyInstant } from "./time";
 
 const url = process.env.E2E_DATABASE_URL;
@@ -16,6 +17,7 @@ if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
   throw new Error("Case browser tests require the generated disposable database.");
 const connection = postgres(url, { max: 2 });
 const db = drizzle(connection, { schema });
+const test = withPolicyFixtureTimeout(120000);
 test.afterAll(async () => {
   await connection.end();
 });
@@ -30,7 +32,6 @@ test("owned inquiry becomes a scoped case with client feedback, tentative reques
   context,
   browser,
 }, testInfo) => {
-  test.setTimeout(120000);
   const f = JSON.parse(
     execFileSync(
       process.execPath,

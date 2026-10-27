@@ -4,6 +4,7 @@ import { eq, sql as statement } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "@/db/schema";
+import { createSyntheticBookingCalendar } from "../appointments/testing-policy";
 import { createSession } from "../auth/sessions";
 import { createListingFixture, publishForTest } from "../publication/testing";
 import { createClient } from "../testing";
@@ -78,16 +79,7 @@ try {
       reviewDueAt: new Date(Date.now() + 86400000),
     })
     .where(eq(schema.listings.id, listing.listingId));
-  await db.insert(schema.servicePolicies).values({
-    effectiveFrom: new Date(Date.now() - 1000),
-    timezone: "Europe/Sofia",
-    serviceHours: Object.fromEntries(
-      ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map((day) => [day, ["09:00", "18:00"]]),
-    ),
-    coverage: {},
-    responsePolicy: {},
-    approvedById: staff.id,
-  });
+  await createSyntheticBookingCalendar(db, staff.id);
   console.log(
     JSON.stringify({
       inquiryId: inquiry.id,
