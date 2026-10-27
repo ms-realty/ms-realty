@@ -55,6 +55,19 @@ review does not authorize branch promotion, deployment or workflow dispatch.
 
 ## HTTP evidence boundary
 
+P21 retains the exact captured body and its SHA-256 in the source inventory, while the
+reviewed reading view separates literal source facts and removes identified theme/plugin
+residue. The HTTP checker binds the raw body hash to the rendered source marker and checks
+the complete derived prose, every fact label/value in order and every safe source link.
+Unknown markup and editorial prose remain literal. Omitting, changing or reordering facts,
+replacing the body, or claiming a different source hash fails qualification. This uses the
+same reviewed pure presentation function as the renderer; its independent source fixtures
+and full-inventory preservation tests remain necessary. It does not approve source
+equivalence, facts, translations, availability or media rights.
+Only full mode loads that function, using the locked loader installed in the qualified
+source checkout and retaining the module digest. Guard and transport mode require no
+parsing dependencies; the separate verifier checkout does not need an installation.
+
 `passed` applies only to the named HTTP scope. `fullHttpQualificationPassed` records a
 successful complete HTTP run. The ambiguous `fullQualificationPassed` field is omitted.
 `fullLegacyParityQualified`, `seoQualified` and `sitemapConsistencyQualified` remain false
