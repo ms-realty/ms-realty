@@ -211,6 +211,8 @@
     "limitReached": "The photo limit has been reached. Discuss further material with the team.",
     "later": "After the inquiry is received, you may optionally attach private photos from its receipt.",
     "coverage": "The team will check whether it can help with this location and requested service. The inquiry does not confirm coverage or a referral to another provider.",
-    "outside": "Is the location outside confirmed coverage?"
+    "outside": "Is the location outside confirmed coverage?",
+    "evidenceTitle": "Inquiry photos",
+    "evidenceLead": "Private material attached to this inquiry. Each available link rechecks your current access and file evidence."
   }
 }

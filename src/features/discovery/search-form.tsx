@@ -32,8 +32,10 @@ export async function SearchForm({
   const places = await intentPlaces(getDb()).catch(() => []);
   const queryHint = `discovery-query-${locale}-${compact ? "home" : "results"}`;
   const selected = (value: string) => value.split(",").filter(Boolean);
-  const label = (key: string) =>
-    Object.hasOwn(copy, key) ? copy[key as keyof DiscoveryCopy] : copy.check;
+  const label = (key: string) => {
+    const value = Object.hasOwn(copy, key) ? copy[key as keyof DiscoveryCopy] : undefined;
+    return typeof value === "string" ? value : copy.check;
+  };
   const featureLabel = (key: string) =>
     Object.hasOwn(extra, key)
       ? extra[key as keyof typeof extra]

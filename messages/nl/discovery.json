@@ -211,6 +211,8 @@
     "limitReached": "Het maximumaantal foto's is bereikt. Bespreek extra materiaal met het team.",
     "later": "Na ontvangst van de aanvraag kunt u via de ontvangstbevestiging optioneel privéfoto's bijvoegen.",
     "coverage": "Het team controleert of het kan helpen op deze locatie met de gevraagde dienst. De aanvraag bevestigt geen werkgebied of doorverwijzing naar een andere aanbieder.",
-    "outside": "Ligt de locatie buiten het bevestigde werkgebied?"
+    "outside": "Ligt de locatie buiten het bevestigde werkgebied?",
+    "evidenceTitle": "Foto’s bij de aanvraag",
+    "evidenceLead": "Privémateriaal bij deze aanvraag. Elke beschikbare link controleert uw huidige toegang en de bestandsgegevens opnieuw."
   }
 }

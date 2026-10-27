@@ -36,8 +36,7 @@ import { digestOf, MAX_IMAGE_BYTES } from "./storage";
 import { finalizeUpload, receiveUpload, uploadAuthorization } from "./uploads";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "");
-export async function boundedFileForm(request: Request) {
-  const limit = MAX_IMAGE_BYTES + 64 * 1024;
+export async function boundedFileForm(request: Request, limit = MAX_IMAGE_BYTES + 64 * 1024) {
   if (Number(request.headers.get("content-length")) > limit)
     throw new AppError("validation_failed");
   const reader = request.body?.getReader();

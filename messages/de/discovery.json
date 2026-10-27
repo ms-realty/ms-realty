@@ -211,6 +211,8 @@
     "limitReached": "Das Fotolimit wurde erreicht. Besprechen Sie weiteres Material mit dem Team.",
     "later": "Nach Eingang der Anfrage können Sie auf der Bestätigungsseite freiwillig private Fotos anhängen.",
     "coverage": "Das Team prüft, ob es bei diesem Ort und der gewünschten Leistung helfen kann. Die Anfrage bestätigt weder ein betreutes Gebiet noch eine Vermittlung an einen anderen Anbieter.",
-    "outside": "Liegt der Ort außerhalb des bestätigten Gebiets?"
+    "outside": "Liegt der Ort außerhalb des bestätigten Gebiets?",
+    "evidenceTitle": "Fotos zur Anfrage",
+    "evidenceLead": "Private Unterlagen zu dieser Anfrage. Jeder verfügbare Link prüft Ihren aktuellen Zugang und die Dateinachweise erneut."
   }
 }

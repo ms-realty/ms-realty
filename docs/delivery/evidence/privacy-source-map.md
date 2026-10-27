@@ -166,3 +166,24 @@ expanded, and the full catalog suite is not claimed green at this checkpoint.
 These are source and disposable-database results. They do not establish human policy
 acceptance, live provider deletion, independent archive/restore proof, runtime qualification,
 language acceptance or an R05 pass. Existing launch authority is unchanged.
+
+## F10 retained inquiry photo evidence
+
+`inquiry_attachments` retains the original inquiry and its existing Party binding. It is
+private agency-record business evidence, separate from Property publication media. A
+receipt session permits bounded intake and safe status metadata for that original owner
+inquiry; it grants no staff, Case, ownership, rights or byte-download authority.
+
+The own-dossier collector exposes bounded metadata through ordinary inquiry access. An
+opaque revision binds the exact source and scan state to export and erasure review. The
+`private_files` source manifests require a human-reviewed supplement or withholding
+notice; automatic dossier generation includes no original bytes or private object keys.
+Staff byte access requires a current staff file session, ordinary `inquiry.read`, and a
+clean scan bound to the exact sealed content, digest, scanner version and scan instant.
+Unattested, failed, infected, changed or unavailable bytes remain private.
+
+These rows are retained business dependencies, not optional client profile copies. No
+photo deletion, physical object disposal, retention approval or independent recovery
+reopening is inferred. Runtime upload, scanner and download paths honor the existing
+restored-destination quarantine. An operator must separately qualify storage, scanner,
+retention and recoverable disposal behavior before any live acceptance claim.
