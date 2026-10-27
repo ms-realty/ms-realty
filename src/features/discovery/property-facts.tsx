@@ -163,6 +163,22 @@ export function PropertyFacts({
                           : publicFactText(item, locale)}
                       </bdi>
                     </dd>
+                    {item.key === "price" &&
+                    listing.price.state === "known" &&
+                    listing.price.value.inclusions?.length ? (
+                      <dd>
+                        <ul
+                          className="list-disc space-y-1 ps-5"
+                          lang={sourceLanguage(item)}
+                          dir="auto"
+                        >
+                          {listing.price.value.inclusions.map((text, index) => (
+                            // biome-ignore lint/suspicious/noArrayIndexKey: Exact ordered source inclusions may repeat and contain no component state.
+                            <li key={`${index}-${text}`}>{text}</li>
+                          ))}
+                        </ul>
+                      </dd>
+                    ) : null}
                     <dd className="text-caption text-text-muted">{copy[item.verification]}</dd>
                   </div>
                 ))}

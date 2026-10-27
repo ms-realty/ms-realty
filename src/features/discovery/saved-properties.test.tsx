@@ -7,6 +7,12 @@ import { savedCopy } from "./saved-copy";
 import { SavedProperties } from "./saved-properties";
 import type { SavedProperty } from "./saved-property-data";
 
+vi.mock("@/features/account-saves/public-transfer", () => ({
+  AccountSaveTransfer: ({ references }: { references: readonly string[] }) => (
+    <output data-testid="account-transfer-selection">{JSON.stringify(references)}</output>
+  ),
+}));
+
 const copy = discoveryCopy("en");
 const labels = savedCopy("en");
 const refs: [string, string, string, string] = ["MS-00001", "MS-00002", "MS-00003", "MS-00004"];
@@ -62,6 +68,17 @@ afterEach(() => {
   writeSelection("saved", []);
   writeSelection("compare", []);
   localStorage.clear();
+});
+it("P08 transfers only the explicitly checked references and retains every device save", async () => {
+  render(<SavedProperties locale="en" copy={copy} loadAction={load} />);
+  await screen.findByRole("heading", { name: `Synthetic property ${refs[3]}` });
+  expect(screen.getByTestId("account-transfer-selection")).toHaveTextContent("[]");
+  fireEvent.click(checkbox(refs[1]));
+  fireEvent.click(checkbox(refs[3]));
+  expect(screen.getByTestId("account-transfer-selection")).toHaveTextContent(
+    JSON.stringify([refs[1], refs[3]]),
+  );
+  expect(JSON.parse(localStorage.getItem(savedKey) ?? "null")).toEqual(refs);
 });
 
 it("selects second and fourth deliberately, retains all saves, and restores the ordered choice on reopening", async () => {
