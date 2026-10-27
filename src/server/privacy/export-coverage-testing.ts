@@ -20,6 +20,7 @@ export async function privacyExportCoverageFixture(
   db: Executor,
   storage: FileStorage,
   exportScope: "listed_categories" | "additional_material" = "listed_categories",
+  beforePrepare?: (source: Awaited<ReturnType<typeof documentRequestFixture>>) => Promise<void>,
 ) {
   const f = await documentRequestFixture(db);
   await db.insert(grants).values({
@@ -90,6 +91,7 @@ export async function privacyExportCoverageFixture(
     })
     .returning();
   if (!file) throw new Error("Missing synthetic reviewed version");
+  await beforePrepare?.(f);
   const prepared = await preparePrivacyExport(db, f.staff.session, {
     operationId: randomUUID(),
     requestId,

@@ -53,21 +53,52 @@ creates no automatic all-customer source or generic JSON disclosure. Existing Ca
 revision bindings remain applicable. Customer-specific material held outside the declared
 collectors requires the same human additional-material review.
 
+`service_scope_drafts` and `service_scope_versions` are staff operating-policy sources.
+Their Principal references identify the editor or approver; their scope documents contain
+staffing, fallback, approved content/terms and policy configuration. They contain no customer
+subject link and create neither an all-customer dossier source nor an unknown-source blanket
+hold. Their documents, approval notes and raw configuration are never exported. Customer
+material placed outside the declared collectors still requires human additional-material
+review; this classification supplies no generic table or JSON whitelist.
+
+## B11 retained service requests
+
+| Source | Merge classification | Export classification |
+| --- | --- | --- |
+| `inquiries.context.service` | Retain the complete original request/binding under its original Party and inquiry. The existing ordinary inquiry reader must authorize the source. A keyed commitment binds this specific JSON field even if neither row version nor timestamp changes. The binding never enters reference audiences or identity/ownership matching. | A dedicated `serviceContexts` projection requires ordinary inquiry access and includes only the self-declared request plus scope edition and public source URL. Location, needs, requested stay dates and self-declared relationship remain reviewable and removable together. No owner, responsible person, fallback, terms configuration or operating-policy document is disclosed. |
+| `cases.service_context` | Retain the complete original Case copy. Related service Cases require both ordinary `case.read` and `case.read_internal`; a direct JSON edit stales merge review and automatic reversal independently of Case version/timestamp. | The same allowlist may disclose a Case copy only with current ordinary Case grants, an original same-party inquiry, an identical retained request/binding and no foreign-party participant or inquiry provenance. Missing, differing or mixed-party provenance holds the joint category for separate review. The subject's own readable inquiry remains independently available. |
+
+When recorded, the original public `observedSource` locale and CMS edition/hash also enter
+the allowlist. A legacy context does not invent an observation or gain permission to
+qualify or progress new work; historical request disclosure remains possible.
+
+Both stored copies and their explicit original inquiry/Party/Case relationships enter an
+opaque export revision fence. Changing personal fields or hidden binding configuration
+stales category review, issue, completion and frozen delivery, including a partial export
+without a category manifest. Redacting a service row removes its whole projected context
+and duplicated needs text; the native review form shows the complete projected context and
+binds the resulting exact bytes. A same-ID inquiry/Case pair is removed together. Redaction
+changes only the export copy, never the original inquiry or Case.
+
+Historical disclosure reads the retained source; a later scope-policy edit or offering
+expiry does not erase a person's earlier request. A self-declared relationship remains a
+self-declared statement. It establishes no property ownership, brokerage relationship,
+booking, publication, consent or access authority. Invalid/missing service context remains
+held instead of silently disappearing from a supposedly complete disclosure. Source readers
+are bounded to 1000 rows per declared source and 32 KiB per stored service field.
+
 ## New-source integration boundary
 
-The service-intake continuation introduces policy records, self-declared inquiry context
-and `cases.service_context`. It requires a separate allowlisted own-person disclosure
-and revision-binding review once its checkpoint is available. Partner terms, customer
-reviews/consent, and photo-visit work likewise require explicit source classification from
+Partner terms, customer reviews/consent, and photo-visit work require explicit source classification from
 their final schemas, including immutable wording/terms/consent history and ordinary
 Case/document access. This map supplies no generic table whitelist or permission to
 ignore newly introduced customer sources.
 
 ## Local verification and remaining acceptance
 
-The expanded synthetic integration run passed 43 tests across seven files: duplicate
+The expanded synthetic integration run passed 64 tests across eight files: duplicate
 merge/split, export safety fingerprints, coverage, delivery, supplements, review binding
-and recovery. It covered retained completed exports and consent, stable
+and recovery, plus service-source disclosure. It covered retained completed exports and consent, stable
 composite restrictions, generic restricted-actor output, the client-access hold, changed
 history staling a merge review and reversal, unknown-FK holds, new Party safety history
 invalidating category review/frozen delivery, unrelated-Party/staff-register isolation,
@@ -75,6 +106,17 @@ live privacy-grant/fresh-auth checks and an oversized history's safe hold. The r
 `createTestDatabase` with the disposable server passed per command. Owned-file Biome,
 `npm run typecheck` with a dedicated output directory, and `git diff --check` passed.
 No build or browser run was needed for these server-source projections and private labels.
+
+The B11 additions verified historical management/stay requests, original observed public
+locale/edition, legacy and invalid context, both stored copies, same-party Case provenance,
+mixed/foreign/missing/different provenance holds, whole-context redaction with exact-byte
+delivery, current ordinary inquiry/Case grants, unversioned request/binding changes staling
+merge/reversal/category review/frozen delivery, partial exports without a manifest, and
+staff-policy draft/edition isolation. The initial focused run retained three failures: two
+incorrect fixture assertions/states and an overly broad new non-service Case dependency
+read. The fixtures were corrected and the added Case read was limited to service sources;
+the unchanged document-access assertion passed. The final focused and expanded runs passed
+without assertion or timeout weakening.
 
 These are source and disposable-database results. They do not establish human policy
 acceptance, live provider deletion, independent archive/restore proof, runtime qualification,

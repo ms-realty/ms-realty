@@ -20,6 +20,7 @@ import { assertRequestedDocumentAccess } from "@/server/documents/request-access
 import { AppError } from "@/server/errors";
 import { documentAccess, mediaAccess } from "@/server/files/access";
 import { privacyOperator } from "@/server/privacy/access";
+import { serviceContextRevision } from "@/server/privacy/service-sources";
 import { privacySafetyRevision } from "@/server/privacy/source-fingerprint";
 import { liveStaff, visibleWhere } from "@/server/work/shared";
 
@@ -550,6 +551,7 @@ async function referenceReadable(
         }
       : await referenceResource(db, table, row);
   if (!(await can(db, actor, policy, resource))) return false;
+  if (table === "cases") return can(db, actor, "case.read", resource);
   // Permission-management is not a substitute for reading the actual private relationship.
   if (table === "case_participants") return can(db, actor, "case.read", resource);
   if (table === "property_relationships") return can(db, actor, "listing.read", resource);
@@ -587,7 +589,16 @@ export async function readDuplicateImpact(
       held.add("unsupported");
       return;
     }
-    const rows = await db.execute<Row>(sql`select ${sql.join(selected.map(ident), sql`, `)}
+    // Only these two declared B11 fields are read, and only an opaque commitment leaves
+    // the reader. They never enter audience metadata or identity/ownership matching.
+    const serviceColumn =
+      table === "inquiries"
+        ? sql`, context->'service' as retained_service_context`
+        : table === "cases"
+          ? sql`, service_context as retained_service_context`
+          : sql``;
+    const rows =
+      await db.execute<Row>(sql`select ${sql.join(selected.map(ident), sql`, `)}${serviceColumn}
       from ${ident(table)} where ${condition} order by id limit 501 ${lock ? sql`for share` : sql``}`);
     if (rows.length > 500 || references.size + rows.length > 2000) {
       held.add("too_many");
@@ -620,12 +631,23 @@ export async function readDuplicateImpact(
         held.add(directPolicies[table] || policy ? "restricted" : "unsupported");
         continue;
       }
-      const serialized = JSON.stringify(row);
+      const { retained_service_context: service, ...record } = row;
+      let serviceRevision: string | undefined;
+      if (table === "inquiries" || table === "cases") {
+        try {
+          serviceRevision = serviceContextRevision(service);
+        } catch (error) {
+          if (!(error instanceof AppError)) throw error;
+          held.add("unsupported");
+          continue;
+        }
+      }
+      const serialized = JSON.stringify(record);
       references.set(`${table}:${row.id}`, {
         table,
         id: row.id,
         sources: [pair.left, pair.right].filter((id) => serialized.includes(id)),
-        digest: hashRequest(JSON.parse(JSON.stringify(row))),
+        digest: hashRequest(JSON.parse(JSON.stringify({ ...record, serviceRevision }))),
         audience: Object.fromEntries(
           audienceColumns.filter((key) => row[key] !== undefined).map((key) => [key, row[key]]),
         ),
@@ -711,7 +733,14 @@ export async function readDuplicateImpact(
         .filter((id): id is string => typeof id === "string"),
     ),
   ].sort();
-  if (caseIds.length)
+  if (caseIds.length) {
+    await readRows(
+      "cases",
+      sql`id in (${sql.join(
+        caseIds.map((id) => sql`${id}::uuid`),
+        sql`, `,
+      )}) and (kind = 'service_intake' or service_context is not null)`,
+    );
     await readRows(
       "documents",
       sql`case_id in (${sql.join(
@@ -719,6 +748,7 @@ export async function readDuplicateImpact(
         sql`, `,
       )})`,
     );
+  }
   const refs = [...references.values()].sort((a, b) =>
     `${a.table}:${a.id}`.localeCompare(`${b.table}:${b.id}`),
   );

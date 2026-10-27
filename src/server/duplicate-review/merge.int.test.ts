@@ -39,6 +39,7 @@ import {
   appendPrivacySafetyDecision,
   recordPrivacyPropagation,
 } from "@/server/privacy/safety-ledger";
+import { syntheticServiceContext } from "@/server/privacy/service-source-testing";
 import { createStaff } from "@/server/testing";
 import { readContact } from "@/server/work/queries";
 import { issueFormOperation } from "@/ui/form/server";
@@ -78,6 +79,35 @@ async function fixture() {
     right = await reviewContactFixture(t.db, "Synthetic identity A source B");
   const pair: DuplicatePair = { subject: "party", left: left.party.id, right: right.party.id };
   return { staff, left, right, pair };
+}
+async function retainedService(f: Awaited<ReturnType<typeof fixture>>) {
+  const context = syntheticServiceContext(f.staff.id, true);
+  const [record] = await t.db
+    .insert(cases)
+    .values({
+      reference: `CASE-SERVICE-${randomUUID()}`,
+      kind: "service_intake",
+      stage: "request_received",
+      serviceTopic: context.request.topic,
+      serviceContext: context,
+      title: "Synthetic service request",
+      ownerId: f.staff.id,
+      nextAction: "Human reviews the original request",
+    })
+    .returning();
+  if (!record) throw new Error("Missing synthetic service Case");
+  await t.db
+    .insert(caseParticipants)
+    .values({ caseId: record.id, partyId: f.right.party.id, role: "collaborator" });
+  await t.db
+    .update(inquiries)
+    .set({
+      purpose: "service_consultation",
+      caseId: record.id,
+      context: { service: context },
+    })
+    .where(eq(inquiries.id, f.right.inquiry.id));
+  return { context, record };
 }
 async function inputFor(f: { staff: Awaited<ReturnType<typeof operator>>; pair: DuplicatePair }) {
   const preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
@@ -248,6 +278,88 @@ async function privacySourceSnapshot() {
 }
 
 describe("O27/F32/AT56/UX22 human identity merge and safe split", () => {
+  it("preserves both original service context copies through identity association and reversal without projecting the binding", async () => {
+    const f = await fixture(),
+      service = await retainedService(f);
+    const snapshot = async () => ({
+      inquiry: await t.db.select().from(inquiries).where(eq(inquiries.id, f.right.inquiry.id)),
+      record: await t.db.select().from(cases).where(eq(cases.id, service.record.id)),
+      parties: await t.db
+        .select()
+        .from(caseParticipants)
+        .where(eq(caseParticipants.caseId, service.record.id)),
+    });
+    const before = await snapshot(),
+      preview = await previewDuplicateMerge(t.db, f.staff.session, f.pair);
+    expect(preview.held).toEqual([]);
+    expect(
+      preview.references.some((row) => row.table === "cases" && row.id === service.record.id),
+    ).toBe(true);
+    for (const value of [
+      service.context.request.location,
+      service.context.request.needs,
+      "synthetic-internal-fallback",
+      service.context.binding.scopeHash,
+    ])
+      expect(JSON.stringify(preview)).not.toContain(value);
+    const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+    expect(await snapshot()).toEqual(before);
+    await reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId));
+    expect(await snapshot()).toEqual(before);
+    expect(done.outcome.permissionChanges).toEqual([]);
+  });
+
+  it.each(["inquiry_request", "inquiry_binding", "case_request", "case_binding"] as const)(
+    "stales merge review and automatic reversal for an unversioned %s change",
+    async (change) => {
+      const f = await fixture(),
+        service = await retainedService(f),
+        input = await inputFor(f);
+      const mutate = async (suffix: string) => {
+        const context = structuredClone(service.context);
+        if (change.endsWith("request"))
+          context.request.location = `SYNTHETIC_CHANGED_LOCATION_${suffix}`;
+        else context.binding.offering.fallback = { kind: "staff", principalId: randomUUID() };
+        if (change.startsWith("inquiry")) {
+          const [row] = await t.db
+            .select()
+            .from(inquiries)
+            .where(eq(inquiries.id, f.right.inquiry.id));
+          if (!row) throw new Error("Missing synthetic source inquiry");
+          await t.db
+            .update(inquiries)
+            .set({ context: { service: context }, updatedAt: row.updatedAt })
+            .where(eq(inquiries.id, row.id));
+          const [current] = await t.db.select().from(inquiries).where(eq(inquiries.id, row.id));
+          expect(current?.version).toBe(row.version);
+          expect(current?.updatedAt).toEqual(row.updatedAt);
+        } else {
+          const [row] = await t.db.select().from(cases).where(eq(cases.id, service.record.id));
+          if (!row) throw new Error("Missing synthetic source Case");
+          await t.db
+            .update(cases)
+            .set({ serviceContext: context, updatedAt: row.updatedAt })
+            .where(eq(cases.id, row.id));
+          const [current] = await t.db.select().from(cases).where(eq(cases.id, row.id));
+          expect(current?.version).toBe(row.version);
+          expect(current?.updatedAt).toEqual(row.updatedAt);
+        }
+      };
+      await mutate("before");
+      await expect(mergeDuplicate(t.db, f.staff.session, input)).rejects.toMatchObject({
+        code: "version_conflict",
+      });
+      const done = await mergeDuplicate(t.db, f.staff.session, await inputFor(f));
+      await mutate("after");
+      expect(
+        (await previewDuplicateReversal(t.db, f.staff.session, done.outcome.mergeId)).impact.held,
+      ).toContain("changed_after_merge");
+      await expect(
+        reverseDuplicate(t.db, f.staff.session, await reverseInput(f, done.outcome.mergeId)),
+      ).rejects.toMatchObject({ code: "transition_denied" });
+    },
+  );
+
   it("retains completed exports, consent and composite-key restrictions under one opaque pair boundary through merge and split", async () => {
     const f = await fixture(),
       history = await retainedPrivacy(f),
