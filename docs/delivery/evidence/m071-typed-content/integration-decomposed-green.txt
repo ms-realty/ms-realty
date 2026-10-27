@@ -1,0 +1,37 @@
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-operating-settings/MS-Realty
+
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > legacy editions sharing one BG source > keeps en drafts private and releases only exact separately reviewed editions 628ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > legacy editions sharing one BG source > keeps ru drafts private and releases only exact separately reviewed editions 569ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > legacy editions sharing one BG source > keeps de drafts private and releases only exact separately reviewed editions 593ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > legacy editions sharing one BG source > keeps nl drafts private and releases only exact separately reviewed editions 648ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > legacy editions sharing one BG source > keeps el drafts private and releases only exact separately reviewed editions 579ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > legacy editions sharing one BG source > keeps he drafts private and releases only exact separately reviewed editions 596ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > requires target-locale grants and separate claim/publication authority, including replay and receipts 654ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > withdraws locale approvals immediately when the BG source changes, including consent terms and new review 1181ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > keeps an area edition attached to its exact BG place and rejects forged cross-page source bindings 770ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > fences a publish that is already waiting for a concurrently changed BG source 551ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > M071 binds typed en content to exact BG structure and rejects stale review 830ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > M071 binds typed ru content to exact BG structure and rejects stale review 821ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > M071 binds typed de content to exact BG structure and rejects stale review 1446ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > M071 binds typed nl content to exact BG structure and rejects stale review 1331ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > M071 binds typed el content to exact BG structure and rejects stale review 1164ms
+ ✓ |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > M071 binds typed he content to exact BG structure and rejects stale review 955ms
+ ✓ |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > P15B binds scope to the approved hash; saving, replaying and mutating a legacy pointer cannot move the public guide 962ms
+ ✓ |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > P15B leaves legacy approved editions unbound despite mutable page.placeId and prose that names a place 415ms
+ ✓ |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > P15B validates exact place identity and supported levels on authorized create/save and exposes only recorded choices 130ms
+ ✓ |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > P15B reports register outages for areas without blocking service/help workbenches 114ms
+ ✓ |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > returns only exact active approved editions and their recorded geography; unbound guides stay unbound 445ms
+ ✓ |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > removes expired approval, withdrawn content and unsafe guide paths from the public index 676ms
+ ✓ |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > shows no inventory for an unbound guide and removes a restricted listing from area inventory 267ms
+ ✓ |integration| src/server/content/commands.int.test.ts > O21 editorial content authority > reads a durable decision receipt only for its actor, exact page and current authority 228ms
+ ✓ |integration| src/server/content/commands.int.test.ts > O21 editorial content authority > drafts are private; separate exact reviews release BG text; a new draft leaves the published edition intact 412ms
+ ✓ |integration| src/server/content/commands.int.test.ts > O21 editorial content authority > editor-only authority cannot approve claims or publish; stale edits preserve existing text 126ms
+ ✓ |integration| src/server/content/commands.int.test.ts > O21 editorial content authority > expired claim approval removes public content and evidence remains immutable 398ms
+ ✓ |integration| src/server/content/commands.int.test.ts > O21 editorial content authority > M071 / O21 / AT22 requires exact review for typed structure even when plaintext is unchanged 451ms
+ ✓ |integration| src/server/content/commands.int.test.ts > O21 editorial content authority > M071 rejects unsafe links, mixed input and structured review wording before creating an edition 19ms
+
+ Test Files  3 passed (3)
+      Tests  29 passed (29)
+   Start at  17:28:49
+   Duration  23.47s (tests 94%, import 5%, transform 1%)

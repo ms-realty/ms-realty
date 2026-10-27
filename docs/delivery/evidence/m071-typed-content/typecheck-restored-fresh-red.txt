@@ -1,0 +1,1 @@
+src/features/discovery/content-screen.tsx(159,17): error TS2339: Property 'contentSource' does not exist on type 'DiscoveryCopy'.
