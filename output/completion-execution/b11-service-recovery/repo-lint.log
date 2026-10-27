@@ -1,0 +1,427 @@
+
+> lint
+> biome check .
+
+e2e/generative-workspace.spec.ts:70:34 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    68 │           CANONICAL_ORIGIN: "https://makler-realty.com",
+    69 │           STAGING: "true",
+  > 70 │           MEDIA_PUBLIC_BASE_URL: origins.public + "/media",
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │         },
+    72 │       },
+  
+  i Unsafe fix: Use a template literal.
+  
+     68  68 │             CANONICAL_ORIGIN: "https://makler-realty.com",
+     69  69 │             STAGING: "true",
+     70     │ - ··········MEDIA_PUBLIC_BASE_URL:·origins.public·+·"/media",
+         70 │ + ··········MEDIA_PUBLIC_BASE_URL:·`${origins.public}/media`,
+     71  71 │           },
+     72  72 │         },
+  
+
+e2e/generative-workspace.spec.ts:88:20 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    86 │ }
+    87 │ const workspace = (locale: string, id: string) =>
+  > 88 │   hostUrl("staff", "/" + locale + "/operations/assistance/research/" + id);
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 
+    90 │ const browserDiagnostics = new WeakMap<
+  
+  i Unsafe fix: Use a template literal.
+  
+     86  86 │   }
+     87  87 │   const workspace = (locale: string, id: string) =>
+     88     │ - ··hostUrl("staff",·"/"·+·locale·+·"/operations/assistance/research/"·+·id);
+         88 │ + ··hostUrl("staff",·`/${locale}/operations/assistance/research/${id}`);
+     89  89 │   
+     90  90 │   const browserDiagnostics = new WeakMap<
+  
+
+e2e/generative-workspace.spec.ts:154:32 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    152 │       request.resourceType() === "script" &&
+    153 │       error === "csp" &&
+  > 154 │       request.url().startsWith(origins.staff + "/_next/static/");
+        │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    155 │     if (nativeDisabledScript) entries.disabledScripts.push(request.url());
+    156 │     else entries.failedRequests.push({ ...failure, departingPage: entries.departingPage });
+  
+  i Unsafe fix: Use a template literal.
+  
+    152 152 │         request.resourceType() === "script" &&
+    153 153 │         error === "csp" &&
+    154     │ - ······request.url().startsWith(origins.staff·+·"/_next/static/");
+        154 │ + ······request.url().startsWith(`${origins.staff}/_next/static/`);
+    155 155 │       if (nativeDisabledScript) entries.disabledScripts.push(request.url());
+    156 156 │       else entries.failedRequests.push({ ...failure, departingPage: entries.departingPage });
+  
+
+e2e/generative-workspace.spec.ts:244:33 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    242 │     );
+    243 │     await page.screenshot({
+  > 244 │       path: testInfo.outputPath(name + "-" + width + ".png"),
+        │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    245 │       fullPage: true,
+    246 │       animations: "disabled",
+  
+  i Unsafe fix: Use a template literal.
+  
+    242 242 │       );
+    243 243 │       await page.screenshot({
+    244     │ - ······path:·testInfo.outputPath(name·+·"-"·+·width·+·".png"),
+        244 │ + ······path:·testInfo.outputPath(`${name}-${width}.png`),
+    245 245 │         fullPage: true,
+    246 246 │         animations: "disabled",
+  
+
+e2e/generative-workspace.spec.ts:253:17 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    252 │ for (const javaScriptEnabled of [true, false]) {
+  > 253 │   test.describe("F29 with JavaScript " + javaScriptEnabled, () => {
+        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    254 │     test.use({ javaScriptEnabled });
+    255 │     test("saves a free goal while generation is disabled and preserves corrections", async ({
+  
+  i Unsafe fix: Use a template literal.
+  
+    251 251 │   
+    252 252 │   for (const javaScriptEnabled of [true, false]) {
+    253     │ - ··test.describe("F29·with·JavaScript·"·+·javaScriptEnabled,·()·=>·{
+        253 │ + ··test.describe(`F29·with·JavaScript·${javaScriptEnabled}`,·()·=>·{
+    254 254 │       test.use({ javaScriptEnabled });
+    255 255 │       test("saves a free goal while generation is disabled and preserves corrections", async ({
+  
+
+e2e/generative-workspace.spec.ts:567:53 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    565 │           .click(),
+    566 │       );
+  > 567 │       await expect(page).toHaveURL(hostUrl("staff", "/en/tasks/" + rows[0]?.id));
+        │                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    568 │       const artifacts = await db
+    569 │         .select()
+  
+  i Unsafe fix: Use a template literal.
+  
+    565 565 │             .click(),
+    566 566 │         );
+    567     │ - ······await·expect(page).toHaveURL(hostUrl("staff",·"/en/tasks/"·+·rows[0]?.id));
+        567 │ + ······await·expect(page).toHaveURL(hostUrl("staff",·`/en/tasks/${rows[0]?.id}`));
+    568 568 │         const artifacts = await db
+    569 569 │           .select()
+  
+
+e2e/generative-workspace.spec.ts:648:9 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    646 │       await expect(saved.getByRole("link", { name: copy.manualListings })).toHaveAttribute(
+    647 │         "href",
+  > 648 │         "/en/cases/" + f.caseId + "/matching",
+        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    649 │       );
+    650 │       // Axe needs browser timers; the native path keeps scripting disabled throughout.
+  
+  i Unsafe fix: Use a template literal.
+  
+    646 646 │         await expect(saved.getByRole("link", { name: copy.manualListings })).toHaveAttribute(
+    647 647 │           "href",
+    648     │ - ········"/en/cases/"·+·f.caseId·+·"/matching",
+        648 │ + ········`/en/cases/${f.caseId}/matching`,
+    649 649 │         );
+    650 650 │         // Axe needs browser timers; the native path keeps scripting disabled throughout.
+  
+
+e2e/generative-workspace.spec.ts:707:30 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    705 │   await expect(correction).toHaveValue("Keep this draft unchanged while progress updates.");
+    706 │   const response = page.waitForResponse(
+  > 707 │     (item) => item.url() === workspace("en", f.id) + "/progress" && item.status() === 200,
+        │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    708 │   );
+    709 │   await db.transaction(async (tx) => {
+  
+  i Unsafe fix: Use a template literal.
+  
+    705 705 │     await expect(correction).toHaveValue("Keep this draft unchanged while progress updates.");
+    706 706 │     const response = page.waitForResponse(
+    707     │ - ····(item)·=>·item.url()·===·workspace("en",·f.id)·+·"/progress"·&&·item.status()·===·200,
+        707 │ + ····(item)·=>·item.url()·===·`${workspace("en",·f.id)}/progress`·&&·item.status()·===·200,
+    708 708 │     );
+    709 709 │     await db.transaction(async (tx) => {
+  
+
+e2e/generative-workspace.spec.ts:739:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    737 │   await expect(page.getByRole("link", { name: copy.openLatest, exact: true })).toHaveAttribute(
+    738 │     "href",
+  > 739 │     "/en/operations/assistance/research/" + f.id,
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    740 │   );
+    741 │   await expect(correction).toHaveValue("Keep this draft unchanged while progress updates.");
+  
+  i Unsafe fix: Use a template literal.
+  
+    737 737 │     await expect(page.getByRole("link", { name: copy.openLatest, exact: true })).toHaveAttribute(
+    738 738 │       "href",
+    739     │ - ····"/en/operations/assistance/research/"·+·f.id,
+        739 │ + ····`/en/operations/assistance/research/${f.id}`,
+    740 740 │     );
+    741 741 │     await expect(correction).toHaveValue("Keep this draft unchanged while progress updates.");
+  
+
+e2e/generative-workspace.spec.ts:768:5 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    766 │   await openWorkspacePage(
+    767 │     page,
+  > 768 │     workspace("en", f.id) + "?" + new URLSearchParams({ operation: key, command: "message" }),
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    769 │   );
+    770 │   await expect(page.getByText(copy.notFoundOperation, { exact: true })).toBeVisible();
+  
+  i Unsafe fix: Use a template literal.
+  
+    766 766 │     await openWorkspacePage(
+    767 767 │       page,
+    768     │ - ····workspace("en",·f.id)·+·"?"·+·new·URLSearchParams({·operation:·key,·command:·"message"·}),
+        768 │ + ····`${workspace("en",·f.id)}?${new·URLSearchParams({·operation:·key,·command:·"message"·})}`,
+    769 769 │     );
+    770 770 │     await expect(page.getByText(copy.notFoundOperation, { exact: true })).toBeVisible();
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.test.ts:11:19 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    10 │ const origin = "http://app.localhost:3100";
+  > 11 │ const departing = origin + "/bg/operations/assistance/research/synthetic-workspace";
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ const prefetch: WorkspacePrefetchFailure = {
+    13 │   error: "Load request cancelled",
+  
+  i Unsafe fix: Use a template literal.
+  
+      9   9 │   
+     10  10 │   const origin = "http://app.localhost:3100";
+     11     │ - const·departing·=·origin·+·"/bg/operations/assistance/research/synthetic-workspace";
+         11 │ + const·departing·=·`${origin}/bg/operations/assistance/research/synthetic-workspace`;
+     12  12 │   const prefetch: WorkspacePrefetchFailure = {
+     13  13 │     error: "Load request cancelled",
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.test.ts:16:8 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    14 │   method: "GET",
+    15 │   resourceType: "fetch",
+  > 16 │   url: origin + "/bg/operations/assistance?_rsc=synthetic-prefetch",
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │   referer: departing,
+    18 │   rsc: "1",
+  
+  i Unsafe fix: Use a template literal.
+  
+     14  14 │     method: "GET",
+     15  15 │     resourceType: "fetch",
+     16     │ - ··url:·origin·+·"/bg/operations/assistance?_rsc=synthetic-prefetch",
+         16 │ + ··url:·`${origin}/bg/operations/assistance?_rsc=synthetic-prefetch`,
+     17  17 │     referer: departing,
+     18  18 │     rsc: "1",
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.test.ts:25:49 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    23 │   expect(isDepartingWorkspacePrefetch(prefetch, departing, origin)).toBe(true);
+    24 │   expect(isDepartingWorkspacePrefetch(prefetch, null, origin)).toBe(false);
+  > 25 │   expect(isDepartingWorkspacePrefetch(prefetch, departing + "?other=1", origin)).toBe(false);
+       │                                                 ^^^^^^^^^^^^^^^^^^^^^^
+    26 │ });
+    27 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     23  23 │     expect(isDepartingWorkspacePrefetch(prefetch, departing, origin)).toBe(true);
+     24  24 │     expect(isDepartingWorkspacePrefetch(prefetch, null, origin)).toBe(false);
+     25     │ - ··expect(isDepartingWorkspacePrefetch(prefetch,·departing·+·"?other=1",·origin)).toBe(false);
+         25 │ + ··expect(isDepartingWorkspacePrefetch(prefetch,·`${departing}?other=1`,·origin)).toBe(false);
+     26  26 │   });
+     27  27 │   
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.test.ts:69:16 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    67 │   for (const [browser, source] of [
+    68 │     ["webkit", null],
+  > 69 │     ["webkit", departing + "?other=1"],
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    70 │     ["chromium", departing],
+    71 │     ["firefox", departing],
+  
+  i Unsafe fix: Use a template literal.
+  
+     67  67 │     for (const [browser, source] of [
+     68  68 │       ["webkit", null],
+     69     │ - ····["webkit",·departing·+·"?other=1"],
+         69 │ + ····["webkit",·`${departing}?other=1`],
+     70  70 │       ["chromium", departing],
+     71  71 │       ["firefox", departing],
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.test.ts:89:32 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    87 │   ["POST", { method: "POST" }],
+    88 │   ["other origin", { url: "http://other.localhost:3100/bg/operations/assistance?_rsc=x" }],
+  > 89 │   ["other referer", { referer: departing + "?other=1" }],
+       │                                ^^^^^^^^^^^^^^^^^^^^^^
+    90 │   ["other URL", { url: observed.url + "other" }],
+    91 │   ["missing RSC", { rsc: undefined }],
+  
+  i Unsafe fix: Use a template literal.
+  
+     87  87 │     ["POST", { method: "POST" }],
+     88  88 │     ["other origin", { url: "http://other.localhost:3100/bg/operations/assistance?_rsc=x" }],
+     89     │ - ··["other·referer",·{·referer:·departing·+·"?other=1"·}],
+         89 │ + ··["other·referer",·{·referer:·`${departing}?other=1`·}],
+     90  90 │     ["other URL", { url: observed.url + "other" }],
+     91  91 │     ["missing RSC", { rsc: undefined }],
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.test.ts:90:24 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    88 │   ["other origin", { url: "http://other.localhost:3100/bg/operations/assistance?_rsc=x" }],
+    89 │   ["other referer", { referer: departing + "?other=1" }],
+  > 90 │   ["other URL", { url: observed.url + "other" }],
+       │                        ^^^^^^^^^^^^^^^^^^^^^^
+    91 │   ["missing RSC", { rsc: undefined }],
+    92 │   ["access denied response", { status: 403 }],
+  
+  i Unsafe fix: Use a template literal.
+  
+     88  88 │     ["other origin", { url: "http://other.localhost:3100/bg/operations/assistance?_rsc=x" }],
+     89  89 │     ["other referer", { referer: departing + "?other=1" }],
+     90     │ - ··["other·URL",·{·url:·observed.url·+·"other"·}],
+         90 │ + ··["other·URL",·{·url:·`${observed.url}other`·}],
+     91  91 │     ["missing RSC", { rsc: undefined }],
+     92  92 │     ["access denied response", { status: 403 }],
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.test.ts:127:14 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    125 │   [
+    126 │     "no framework frame",
+  > 127 │     { stack: "Fetch API cannot load " + observed.url + " due to access control checks." },
+        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │   ],
+    129 │ ])("retains %s instead of broadly filtering page errors", (_label, changes) => {
+  
+  i Unsafe fix: Use a template literal.
+  
+    125 125 │     [
+    126 126 │       "no framework frame",
+    127     │ - ····{·stack:·"Fetch·API·cannot·load·"·+·observed.url·+·"·due·to·access·control·checks."·},
+        127 │ + ····{·stack:·`Fetch·API·cannot·load·${observed.url}·due·to·access·control·checks.`·},
+    128 128 │     ],
+    129 129 │   ])("retains %s instead of broadly filtering page errors", (_label, changes) => {
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.ts:40:35 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    38 │   try {
+    39 │     const target = new URL(url);
+  > 40 │     const frameTail = frame.split("(" + staffOrigin + "/_next/static/chunks/")[1];
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │     if (
+    42 │       target.origin !== staffOrigin ||
+  
+  i Unsafe fix: Use a template literal.
+  
+     38  38 │     try {
+     39  39 │       const target = new URL(url);
+     40     │ - ····const·frameTail·=·frame.split("("·+·staffOrigin·+·"/_next/static/chunks/")[1];
+         40 │ + ····const·frameTail·=·frame.split(`(${staffOrigin}/_next/static/chunks/`)[1];
+     41  41 │       if (
+     42  42 │         target.origin !== staffOrigin ||
+  
+
+src/features/ai/testing/workspace-browser-diagnostics.ts:44:25 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    42 │       target.origin !== staffOrigin ||
+    43 │       error.name !== prefix + target.protocol.slice(0, -1) ||
+  > 44 │       error.message !== "/" + target.host + target.pathname + target.search + suffix ||
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │       !frameTail ||
+    46 │       !/^[a-zA-Z0-9_-]+\.js:\d+:\d+\)$/.test(frameTail)
+  
+  i Unsafe fix: Use a template literal.
+  
+     42  42 │         target.origin !== staffOrigin ||
+     43  43 │         error.name !== prefix + target.protocol.slice(0, -1) ||
+     44     │ - ······error.message·!==·"/"·+·target.host·+·target.pathname·+·target.search·+·suffix·||
+         44 │ + ······error.message·!==·`/${target.host}${target.pathname}${target.search}${suffix}`·||
+     45  45 │         !frameTail ||
+     46  46 │         !/^[a-zA-Z0-9_-]+\.js:\d+:\d+\)$/.test(frameTail)
+  
+
+src/features/ai/testing/workspace-seed.ts:70:67 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  i Template literals are preferred over string concatenation.
+  
+    68 │   });
+    69 │   const view = await readWorkspace(db, f.staff.session, id);
+  > 70 │   const source = view.context.sources.find((item) => item.key === "case:" + f.record.id);
+       │                                                                   ^^^^^^^^^^^^^^^^^^^^^
+    71 │   if (!source?.text) throw new Error("Synthetic case source missing");
+    72 │   const citations = [{ source: source.key, quote: source.text.split("\n")[0] ?? source.text }];
+  
+  i Unsafe fix: Use a template literal.
+  
+     68  68 │     });
+     69  69 │     const view = await readWorkspace(db, f.staff.session, id);
+     70     │ - ··const·source·=·view.context.sources.find((item)·=>·item.key·===·"case:"·+·f.record.id);
+         70 │ + ··const·source·=·view.context.sources.find((item)·=>·item.key·===·`case:${f.record.id}`);
+     71  71 │     if (!source?.text) throw new Error("Synthetic case source missing");
+     72  72 │     const citations = [{ source: source.key, quote: source.text.split("\n")[0] ?? source.text }];
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 55.
+Checked 1845 files in 368ms. No fixes applied.
+Found 4 warnings.
+Found 71 infos.

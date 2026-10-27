@@ -178,13 +178,26 @@ export async function sendInquiry(
                       "ownerInput.documentSource": "ownerDocumentSource",
                     } as const
                   )[name as "ownerInput.locality"]
-                : name === "ownerInput"
-                  ? "purpose"
-                  : name.startsWith("selectedListings")
-                    ? "selectedListings"
-                    : name.startsWith("comparisonReferences")
-                      ? "comparisonReferences"
-                      : (name as keyof InquiryValues);
+                : name.startsWith("serviceRequest.")
+                  ? (
+                      {
+                        "serviceRequest.location": "serviceLocation",
+                        "serviceRequest.needs": "serviceNeeds",
+                        "serviceRequest.requestedFrom": "serviceFrom",
+                        "serviceRequest.requestedUntil": "serviceUntil",
+                        "serviceRequest.relationship": "serviceRelationship",
+                        "serviceRequest.topic": "serviceScope",
+                        "serviceRequest.regionId": "serviceScope",
+                        "serviceRequest.scopeVersionId": "serviceScope",
+                      } as const
+                    )[name as "serviceRequest.location"]
+                  : name === "ownerInput"
+                    ? "purpose"
+                    : name.startsWith("selectedListings")
+                      ? "selectedListings"
+                      : name.startsWith("comparisonReferences")
+                        ? "comparisonReferences"
+                        : (name as keyof InquiryValues);
         if (field in emptyInquiry)
           fields[field] = [
             name.startsWith("viewingPreferences.windows")

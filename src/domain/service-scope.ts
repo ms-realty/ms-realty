@@ -1,6 +1,7 @@
 // F27/F28/P23/C14/O29/O30: human-decided consultation coverage, never booking authority.
 import { z } from "zod";
 import { serviceIntakeTopics } from "./case";
+import { publicLocales } from "./ids";
 import { settingsResources } from "./settings-resources";
 
 export const serviceScopeId = settingsResources.serviceScope;
@@ -34,22 +35,26 @@ export const offeredServiceSchema = z
     reviewExpiresAt: z.iso.datetime({ offset: true }),
   })
   .strict();
+const unknownDecision = z.object({ ...identity, state: z.literal("unknown") }).strict();
+const notOfferedDecision = z
+  .object({
+    ...identity,
+    state: z.literal("not_offered"),
+    reason: z.string().trim().min(3).max(1500),
+  })
+  .strict();
+/** A form's stable decision intent excludes policy captured only when the save executes. */
+export const serviceScopeDecisionIntentSchema = z.discriminatedUnion("state", [
+  unknownDecision,
+  notOfferedDecision,
+  offeredServiceSchema.omit({ operatingPolicy: true }),
+]);
 export const serviceScopeSchema = z
   .object({
     kind: z.literal("bounded_service_scope_v1"),
     decisions: z
       .array(
-        z.discriminatedUnion("state", [
-          z.object({ ...identity, state: z.literal("unknown") }).strict(),
-          z
-            .object({
-              ...identity,
-              state: z.literal("not_offered"),
-              reason: z.string().trim().min(3).max(1500),
-            })
-            .strict(),
-          offeredServiceSchema,
-        ]),
+        z.discriminatedUnion("state", [unknownDecision, notOfferedDecision, offeredServiceSchema]),
       )
       .max(100),
   })
@@ -118,6 +123,10 @@ export const serviceBindingSchema = z.object({
   offering: offeredServiceSchema,
   responsibleId: z.uuid(),
   sourceUrl: z.url({ protocol: /^https?$/ }),
+  // Legacy bindings remain readable but cannot authorize new service work without this proof.
+  observedSource: source
+    .extend({ kind: z.literal("service"), locale: z.enum(publicLocales) })
+    .optional(),
 });
 export const serviceCaseContextSchema = z.object({
   binding: serviceBindingSchema,

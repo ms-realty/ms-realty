@@ -14,7 +14,9 @@ import {
   type OfferedService,
   type ServiceBinding,
   type ServiceRequest,
+  type ServiceScope,
   serviceCaseContextSchema,
+  serviceScopeDecisionIntentSchema,
   serviceScopeId,
   serviceScopeSchema,
 } from "@/domain/service-scope";
@@ -44,6 +46,7 @@ const envelope = {
   expectedVersion: z.number().int().positive(),
 };
 const saveSchema = z.object({ ...envelope, document: serviceScopeSchema });
+const saveDecisionSchema = z.object({ ...envelope, decision: serviceScopeDecisionIntentSchema });
 const approveSchema = z.object({
   ...envelope,
   expectedHash: z.string().regex(/^[a-f0-9]{64}$/),
@@ -51,6 +54,7 @@ const approveSchema = z.object({
   note: z.string().trim().min(10).max(1500),
 });
 export type SaveServiceScope = z.input<typeof saveSchema>;
+export type SaveServiceScopeDecision = z.input<typeof saveDecisionSchema>;
 export type ApproveServiceScope = z.input<typeof approveSchema>;
 async function authorize(db: Executor, session: Session) {
   const live = await liveStaff(db, session);
@@ -158,8 +162,48 @@ export async function readServiceScope(db: Executor, session: Session) {
   return { draft, current };
 }
 export async function saveServiceScope(db: Executor, session: Session, raw: SaveServiceScope) {
-  const input = parseInput(saveSchema, raw),
-    live = await authorize(db, session);
+  const input = parseInput(saveSchema, raw);
+  return saveScope(db, session, input, async () => input.document);
+}
+/** Resolve mutable policy/draft state only inside first execution, after exact intent replay. */
+export async function saveServiceScopeDecision(
+  db: Executor,
+  session: Session,
+  raw: SaveServiceScopeDecision,
+) {
+  const input = parseInput(saveDecisionSchema, raw);
+  return saveScope(db, session, input, async (tx, draft) => {
+    let decision: ServiceScope["decisions"][number];
+    if (input.decision.state === "offered") {
+      const policy = await captureOperatingPolicy(tx);
+      if (policy.kind !== "approved_operating_policy_v1") throw new AppError("approval_stale");
+      decision = {
+        ...input.decision,
+        operatingPolicy: {
+          id: policy.policyId,
+          version: policy.policyVersion,
+          contentHash: policy.contentHash,
+        },
+      };
+    } else decision = input.decision;
+    return parseInput(serviceScopeSchema, {
+      kind: "bounded_service_scope_v1",
+      decisions: [
+        ...draft.decisions.filter(
+          (row) => row.topic !== decision.topic || row.regionId !== decision.regionId,
+        ),
+        decision,
+      ],
+    });
+  });
+}
+async function saveScope(
+  db: Executor,
+  session: Session,
+  input: SaveServiceScope | SaveServiceScopeDecision,
+  documentFor: (tx: Executor, draft: ServiceScope) => Promise<ServiceScope>,
+) {
+  const live = await authorize(db, session);
   return runOperation(
     db,
     {
@@ -175,14 +219,15 @@ export async function saveServiceScope(db: Executor, session: Session, raw: Save
       await lock(ctx.tx, true);
       const draft = await draftFor(ctx.tx);
       version(draft, input.expectedVersion);
+      const document = await documentFor(ctx.tx, draft.document);
       const revision = draft.version + 1,
-        contentHash = hashRequest(input.document);
+        contentHash = hashRequest(document);
       await ctx.tx
         .insert(serviceScopeDrafts)
         .values({
           id: serviceScopeId,
           version: revision,
-          document: input.document,
+          document,
           contentHash,
           updatedById: live.account.id,
         })
@@ -190,7 +235,7 @@ export async function saveServiceScope(db: Executor, session: Session, raw: Save
           target: serviceScopeDrafts.id,
           set: {
             version: revision,
-            document: input.document,
+            document,
             contentHash,
             updatedById: live.account.id,
             updatedAt: new Date(),
@@ -330,6 +375,13 @@ export async function bindServiceRequest(
       offering,
       responsibleId: offering.ownerId,
       sourceUrl: `${getEnv().canonicalOrigin}/${locale}${contentRoute(reference)}`,
+      observedSource: {
+        kind: "service",
+        slug: offering.publicSource.slug,
+        versionId: content.version.id,
+        contentHash: content.version.contentHash,
+        locale,
+      },
     };
   });
 }
@@ -337,9 +389,20 @@ export async function serviceCaseCoverage(db: Executor, value: unknown) {
   const parsed = serviceCaseContextSchema.safeParse(value);
   if (!parsed.success) return { current: false, context: null };
   const { request, binding } = parsed.data;
+  if (!binding.observedSource) return { current: false, context: parsed.data };
   try {
-    const current = await bindServiceRequest(db, request, binding.offering.publicSource, "bg");
-    return { current: current.scopeHash === binding.scopeHash, context: parsed.data };
+    const current = await bindServiceRequest(
+      db,
+      request,
+      binding.observedSource,
+      binding.observedSource.locale,
+    );
+    return {
+      current:
+        current.scopeHash === binding.scopeHash &&
+        current.observedSource?.contentHash === binding.observedSource.contentHash,
+      context: parsed.data,
+    };
   } catch (error) {
     if (!(error instanceof AppError)) throw error;
     return { current: false, context: parsed.data };

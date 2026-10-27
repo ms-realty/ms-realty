@@ -1,7 +1,7 @@
 "use server";
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { serviceScopeSchema } from "@/domain/service-scope";
+import { serviceScopeDecisionIntentSchema } from "@/domain/service-scope";
 import { operatingPolicyCopy } from "@/features/operating-policy/copy";
 import { serviceStaffCopy } from "@/features/service-intake/copy";
 import {
@@ -14,12 +14,10 @@ import { currentStaffAccess } from "@/server/auth/pages";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
-import { captureOperatingPolicy } from "@/server/operating-policy/service";
 import {
   approveServiceScope,
-  readServiceScope,
   readServiceScopeOperation,
-  saveServiceScope,
+  saveServiceScopeDecision,
 } from "@/server/service-intake/scope";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { readFormEnvelope } from "@/ui/form/server";
@@ -60,10 +58,9 @@ export async function submitServiceScope(
       if (!envelope?.expectedRevision) throw new AppError("validation_failed");
       const base = { operationId: key, expectedVersion: envelope.expectedRevision };
       let done:
-        | Awaited<ReturnType<typeof saveServiceScope>>
+        | Awaited<ReturnType<typeof saveServiceScopeDecision>>
         | Awaited<ReturnType<typeof approveServiceScope>>;
       if (command === "save") {
-        const model = await readServiceScope(db, access.session);
         const decode = (value: string | undefined) => {
           try {
             return JSON.parse(value ?? "");
@@ -76,8 +73,6 @@ export async function submitServiceScope(
         if (values.state === "not_offered")
           decision = { ...(decision as object), reason: values.reason };
         if (values.state === "offered") {
-          const policy = await captureOperatingPolicy(db);
-          if (policy.kind !== "approved_operating_policy_v1") throw new AppError("approval_stale");
           decision = {
             ...(decision as object),
             mode: values.mode,
@@ -89,25 +84,15 @@ export async function submitServiceScope(
               values.fallbackId === "manual"
                 ? { kind: "manual", source: decode(values.fallbackSource) }
                 : { kind: "staff", principalId: values.fallbackId },
-            operatingPolicy: {
-              id: policy.policyId,
-              version: policy.policyVersion,
-              contentHash: policy.contentHash,
-            },
             reviewExpiresAt: formInstant(values, "reviewExpiresAt"),
           };
         }
-        const parsed = serviceScopeSchema.safeParse({
-          kind: "bounded_service_scope_v1",
-          decisions: [
-            ...model.draft.document.decisions.filter(
-              (row) => row.topic !== values.topic || row.regionId !== region.id,
-            ),
-            decision,
-          ],
-        });
+        const parsed = serviceScopeDecisionIntentSchema.safeParse(decision);
         if (!parsed.success) throw new AppError("validation_failed");
-        done = await saveServiceScope(db, access.session, { ...base, document: parsed.data });
+        done = await saveServiceScopeDecision(db, access.session, {
+          ...base,
+          decision: parsed.data,
+        });
       } else
         done = await approveServiceScope(db, access.session, {
           ...base,

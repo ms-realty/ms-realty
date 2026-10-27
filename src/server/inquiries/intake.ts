@@ -267,11 +267,21 @@ function requireFutureViewingPreferences(input: ParsedInquiry, now = Date.now())
       ),
     });
 }
+function requireFutureServiceRequest(input: ParsedInquiry, now = Date.now()) {
+  if (
+    input.serviceRequest?.requestedFrom &&
+    input.serviceRequest.requestedFrom < new Date(now).toISOString().slice(0, 10)
+  )
+    throw new AppError("validation_failed", {
+      fieldErrors: { "serviceRequest.requestedFrom": ["future_required"] },
+    });
+}
 
 /** Review uses the current clock; accepted submission replay uses structural intent. */
 export function parseInquiry(input: unknown): ParsedInquiry {
   const parsed = parseInquiryIntent(input);
   requireFutureViewingPreferences(parsed);
+  requireFutureServiceRequest(parsed);
   return parsed;
 }
 
@@ -467,6 +477,7 @@ export async function submitInquiry(
   // A retry of an accepted submission is answered from its receipt, never rate limited.
   if (!(await findOperation(db, actor, operationType, submissionKey))) {
     requireFutureViewingPreferences(input, context.now?.getTime());
+    requireFutureServiceRequest(input, context.now?.getTime());
     await enforceRateLimit(db, "inquiry.ip", context.ip);
     // Checked before the operation starts so a correctable mistake is not stored as its outcome.
     if (input.listingReference && !input.observedManifestId) {
@@ -485,6 +496,7 @@ export async function submitInquiry(
         async ({ tx, operationId }) => {
           // A successful replay never enters this callback; a new execution rechecks the clock.
           requireFutureViewingPreferences(input, context.now?.getTime());
+          requireFutureServiceRequest(input, context.now?.getTime());
           const now = context.now ?? new Date();
           const content = input.contentReference
             ? await readInquiryContent(tx, input.contentReference, input.locale)
@@ -501,13 +513,6 @@ export async function submitInquiry(
                   ),
                 }
               : null;
-          if (
-            service?.request.requestedFrom &&
-            service.request.requestedFrom < now.toISOString().slice(0, 10)
-          )
-            throw new AppError("validation_failed", {
-              fieldErrors: { serviceRequest: ["future_required"] },
-            });
           const selection: (PublicListingDetail & { sourceUrl: string })[] = [];
           if (input.selectedListings) {
             // Lock in canonical order to avoid deadlocks; snapshots and intent retain visitor order.
@@ -713,8 +718,10 @@ export async function submitInquiry(
         isAppError(error) &&
         (error.code === "version_conflict" ||
           (error.code === "validation_failed" &&
-            Object.keys(error.fieldErrors ?? {}).some((field) =>
-              field.startsWith("viewingPreferences.windows."),
+            Object.keys(error.fieldErrors ?? {}).some(
+              (field) =>
+                field.startsWith("viewingPreferences.windows.") ||
+                field === "serviceRequest.requestedFrom",
             )))
       )
         throw error;

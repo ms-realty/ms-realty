@@ -31,7 +31,7 @@ import { runOperation } from "../operations";
 import { loadPublishedListings, presentationOf } from "../publication/presentation";
 import { nextReference } from "../references";
 import { caseMatchCriteriaInput, offeredStates } from "../search/search";
-import { bindServiceRequest } from "../service-intake/scope";
+import { bindServiceRequest, serviceCaseCoverage } from "../service-intake/scope";
 import {
   allow,
   commandEnvelope,
@@ -167,6 +167,12 @@ export async function createCaseFromInquiry(db: Executor, session: Session, raw:
           content.data,
           content.data.locale,
         );
+        if (
+          service.data.binding.observedSource?.locale !== content.data.locale ||
+          service.data.binding.observedSource?.versionId !== content.data.versionId ||
+          !(await serviceCaseCoverage(ctx.tx, service.data)).current
+        )
+          throw new AppError("approval_stale");
         if (
           binding.responsibleId !== live.account.id &&
           (binding.offering.fallback.kind !== "staff" ||

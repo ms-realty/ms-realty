@@ -1,0 +1,73 @@
+{
+  "kind": "b11_service_recovery_review_v1",
+  "sourceBase": "21655b1c15870cdb81785fc3e25b36adb276709b",
+  "repairBranch": "codex/msr-service-recovery",
+  "businessApproval": "held_C06_actual_services_regions_terms_staffing_fallback_and_language_rights_unknown",
+  "baseline": {
+    "exitCode": 1,
+    "failedTests": 4,
+    "log": "baseline-four-failures.log",
+    "probeSource": "baseline-probes.int.test.ts.txt",
+    "preliminaryFixtureCorrection": "probe-fixture-correction.log",
+    "findings": [
+      "elapsed_stay_start_consumes_key",
+      "ordinary_inquiry_links_service_case",
+      "scope_form_replay_rebuilds_mutable_state",
+      "observed_locale_revocation_ignored_by_case_continuation"
+    ]
+  },
+  "validation": {
+    "servicePg": {
+      "exitCode": 0,
+      "tests": 15,
+      "newRecoveryTests": 8,
+      "log": "focused-pg.log",
+      "command": "TEST_DATABASE_URL=<disposable loopback PG55463>/postgres node node_modules/vitest/vitest.mjs run --project integration src/server/service-intake/recovery.int.test.ts src/server/service-intake/service-intake.int.test.ts"
+    },
+    "caseLinkLifecyclePg": {
+      "exitCode": 0,
+      "tests": 35,
+      "log": "case-link-regression.log",
+      "command": "TEST_DATABASE_URL=<disposable loopback PG55463>/postgres node node_modules/vitest/vitest.mjs run --project integration src/server/cases/cases.int.test.ts src/server/cases/inquiry-link.int.test.ts src/server/cases/lifecycle.int.test.ts"
+    },
+    "focusedUnitDom": {
+      "exitCode": 0,
+      "tests": 30,
+      "log": "focused-unit.log",
+      "command": "node node_modules/vitest/vitest.mjs run --project 'unit*' src/features/discovery/inquiry-review-actions.test.ts src/features/discovery/inquiry-actions.test.ts src/features/discovery/inquiry-review.test.tsx"
+    },
+    "sourceTypecheck": {
+      "exitCode": 0,
+      "log": "source-typecheck.log",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false"
+    },
+    "repoLint": {
+      "exitCode": 0,
+      "log": "repo-lint.log",
+      "command": "npm run lint",
+      "existingAdvisories": {
+        "warnings": 4,
+        "infos": 71
+      }
+    },
+    "buildAndBrowser": {
+      "status": "not_repeated_for_bounded_source_repair",
+      "timeoutsChanged": false
+    }
+  },
+  "bindingExtension": {
+    "path": "binding.observedSource",
+    "optionalForLegacyRead": true,
+    "fields": ["kind", "slug", "versionId", "contentHash", "locale"],
+    "missingLegacyState": "held_for_new_qualification_linking_and_progression",
+    "migrationRequired": false
+  },
+  "boundaries": {
+    "launchAuthorityChanged": false,
+    "providerWrites": false,
+    "stagingWrites": false,
+    "productionWrites": false,
+    "offeringSeeded": false,
+    "privacyAndDuplicateProjectionIntegration": "separate_integrated_owner"
+  }
+}
