@@ -1,0 +1,158 @@
+{
+  "kind": "B10 photo confirmation fixture diagnosis and isolation",
+  "source": {
+    "base": "e9f771ed9a6417b15aae2d790855e18d3c5a3d49",
+    "commit": "d5b01b057072b09cbe9fdb68293b3abaf0b91717",
+    "branch": "codex/msr-photo-confirmation"
+  },
+  "upstreamFailure": {
+    "source": "e9f771ed",
+    "artifacts": "/Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/test-results/94c9536064074a90bc5bb13d9b3c35c0",
+    "traces": [
+      {
+        "profile": "chromium-mobile",
+        "trace": "/Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/test-results/94c9536064074a90bc5bb13d9b3c35c0/agency-obligations-B10-par-5ae22-honest-property-photography-chromium-mobile/trace.zip",
+        "traceSha256": "59d4359ed57885deda392f0e1f6d1321def27b22ada9064377f94e97a2b84a69",
+        "errorContext": "/Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/test-results/94c9536064074a90bc5bb13d9b3c35c0/agency-obligations-B10-par-5ae22-honest-property-photography-chromium-mobile/error-context.md",
+        "errorContextSha256": "6a283792b4dd9b685794d4b69a3635ac3bda7f31633d854bbdbe613f6120ddeb",
+        "extractedDates": [
+          {
+            "fields": [
+              ["_1_startsAt", "2027-01-15T10:00"],
+              ["_1_startsAtWallTime", "yes"],
+              ["_1_startsAtOriginal", ""],
+              ["_1_endsAt", "2027-01-15T11:00"],
+              ["_1_endsAtWallTime", "yes"],
+              ["_1_endsAtOriginal", ""]
+            ],
+            "outcomes": [
+              {
+                "dates": {
+                  "startsAt": "2027-01-15T08:00:00.000Z",
+                  "endsAt": "2027-01-15T09:00:00.000Z"
+                },
+                "outcome": {
+                  "kind": "validation",
+                  "code": "VALIDATION_FAILED",
+                  "message": "Review the highlighted details.",
+                  "fieldErrors": {
+                    "startsAt": ["Check this value."]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "profile": "webkit-mobile",
+        "trace": "/Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/test-results/94c9536064074a90bc5bb13d9b3c35c0/agency-obligations-B10-par-5ae22-honest-property-photography-webkit-mobile/trace.zip",
+        "traceSha256": "36f45b03312d06d8c36884ca11f5106a8f3099e3f4c8da9df37e394f9559d814",
+        "errorContext": "/Users/ivan/.codex/worktrees/msr-privacy-export/MS-Realty/test-results/94c9536064074a90bc5bb13d9b3c35c0/agency-obligations-B10-par-5ae22-honest-property-photography-webkit-mobile/error-context.md",
+        "errorContextSha256": "fca03c62e47ba8879aec58cd9a8b9a576a47b6de507ccbb170fdbcb00e898e56",
+        "extractedDates": [
+          {
+            "fields": [
+              ["_1_startsAt", "2027-01-15T10:00"],
+              ["_1_startsAtWallTime", "yes"],
+              ["_1_startsAtOriginal", ""],
+              ["_1_endsAt", "2027-01-15T11:00"],
+              ["_1_endsAtWallTime", "yes"],
+              ["_1_endsAtOriginal", ""]
+            ],
+            "outcomes": [
+              {
+                "dates": {
+                  "startsAt": "2027-01-15T08:00:00.000Z",
+                  "endsAt": "2027-01-15T09:00:00.000Z"
+                },
+                "outcome": {
+                  "kind": "validation",
+                  "code": "VALIDATION_FAILED",
+                  "message": "Review the highlighted details.",
+                  "fieldErrors": {
+                    "startsAt": ["Check this value."]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "cause": {
+    "observed": "Both requests posted the intended wall times with one WallTime marker and no original-instant override. Responses retained the exact resolved UTC instants and returned only a startsAt validation error.",
+    "sourceInference": "The service-hours branch is the only applicable startsAt-only validation after those normalized instants. Invalid date/range validation reports both endpoints, while resource exclusion reports a transition/conflict. The date parser and mobile paint are not implicated by the captured request.",
+    "fixtureCollision": "B11 syntheticServiceFixture approves an empty operating policy, projecting unknown_calendar_v1. B10 and S4 inserted global known calendars backdated by one second. Parallel fixture journeys could replace the current calendar, and backdating could leave a preceding unknown projection newer.",
+    "identity": "B10 seeds create a fresh staff principal UUID and property for each journey; Test Staff is a shared display name, not a shared broker identity. Production host/property overlap controls remain intact.",
+    "limit": "The exact selected policy row ID was not in the safe action response and the disposable browser database was already cleaned. Calendar-gate attribution follows the captured response plus unchanged source; the new real-booking regression reproduces the unknown/known/current-policy behavior."
+  },
+  "repair": {
+    "advisoryKey": "synthetic-operating-policy-browser",
+    "semantics": "Whole journey, session-level pg_advisory_lock/hashtextextended(key,0), reserved physical connection, unlock and release in finally; connection closes in outer finally.",
+    "newParticipants": [
+      "e2e/agency-obligations.spec.ts",
+      "e2e/service-intake.spec.ts",
+      "e2e/cases.spec.ts"
+    ],
+    "existingUnchangedParticipants": [
+      "e2e/operating-policy.spec.ts",
+      "e2e/privacy-erasure.spec.ts"
+    ],
+    "calendar": "B10/S4 browser seeds now call createSyntheticBookingCalendar: explicitly synthetic approved 09:00-18:00 every-day input with a synthetic source marker and DB clock_timestamp(), never a wait or backdate.",
+    "unknownPolicyScenario": "B11 empty/unknown operating-policy fixture is unchanged. Actual booking still rejects the current unknown calendar before and after the explicit synthetic known calendar.",
+    "timeouts": "Existing 120000 total budgets for B10 review/photo and S4 move from the body to the start of automatic fixture setup, before lock acquisition. B10 HTTP/B11 keep default budgets. No expectation/action timeout, fixture timeout override, retries, force-click or blanket increase."
+  },
+  "checks": [
+    {
+      "name": "real-booking-and-policy-fixture-integration",
+      "command": "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx vitest run --project integration src/server/appointments/photography.int.test.ts",
+      "files": 1,
+      "tests": 8,
+      "exitCode": 0,
+      "log": "output/photo-confirmation/integration-first.log",
+      "logSha256": "9943277fd4a65af5b483e058a76d8d49bf4648e3a668c1d953187b8c46f5bf40"
+    },
+    {
+      "name": "nonincremental-types",
+      "command": "npx tsc --noEmit --incremental false",
+      "exitCode": 0,
+      "log": "output/photo-confirmation/types-final.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "five-policy-dependent-spec-discovery",
+      "command": "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55463/postgres npx playwright test e2e/agency-obligations.spec.ts e2e/service-intake.spec.ts e2e/cases.spec.ts e2e/operating-policy.spec.ts e2e/privacy-erasure.spec.ts --list",
+      "tests": 36,
+      "exitCode": 0,
+      "browserExecuted": false,
+      "log": "output/photo-confirmation/discovery-final.log",
+      "logSha256": "4ddface81c2bd9aaab92cf449d2d5578d56e09e4c0975fe1d14d3e2449b4d69e"
+    },
+    {
+      "name": "scoped-lint",
+      "command": "npx biome check e2e/support/policy-fixture.ts e2e/support/policy-test.ts e2e/agency-obligations.spec.ts e2e/service-intake.spec.ts e2e/cases.spec.ts src/server/appointments/testing-policy.ts src/server/appointments/photography.int.test.ts src/server/agency-obligations/browser-seed.ts src/server/cases/browser-seed.ts",
+      "files": 9,
+      "exitCode": 0,
+      "log": "output/photo-confirmation/lint-scoped.log",
+      "logSha256": "2160522f324e295ff96fbef34616a414adc7a5f294a9e22e660dc7f2f3a354e1"
+    }
+  ],
+  "retainedFailure": {
+    "log": "output/photo-confirmation/format-first.log",
+    "sha256": "7241780ed19b7326253d8c4aefd33cbb86c9bce6cfb2b08ae5ffcc05935e1207",
+    "finding": "New fixture setup used an empty destructuring pattern and void property rejected by Biome. Used the existing browserName dependency and an undefined fixture value; no lint rule relaxed."
+  },
+  "regressions": [
+    "Second real PG session cannot acquire the fixture key while the journey holds it, and can acquire it after a thrown journey.",
+    "Actual confirmation rejects current unknown policy, succeeds after a newer explicitly synthetic known calendar, and rejects a newer unknown again without sleeps/backdating.",
+    "Existing client/ordinary authority, external-busy/access, resource overlap, stable ICS, cancellation and no-media-publication tests still pass."
+  ],
+  "boundaries": {
+    "productCode": "No appointment/date parser, booking/resource guard, B11 service fixture scenario, native UI, schema, grant, provider or launch-authority change.",
+    "browser": "Only test discovery ran. Root owns one fresh combined build/browser qualification on the integrated source.",
+    "publication": "No push, PR, staging, deployment or provider write.",
+    "humanInputs": "Synthetic fixture data is not actual service hours, owner approval, customer consent, rights or launch acceptance."
+  }
+}
