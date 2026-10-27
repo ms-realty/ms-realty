@@ -1484,7 +1484,7 @@ export async function WorkflowStatusScreen(
   if (receipt?.status === "succeeded") {
     const outcome = z.object({ id: z.uuid() }).safeParse(receipt.outcome);
     if (outcome.success)
-      destination = `/${props.locale}/${["request", "arrange", "appointment", "appointmentHost", "appointmentHostHandover"].includes(command) ? (props.session.account.kind === "staff" ? "calendar" : "appointments") : props.session.account.kind === "staff" ? "cases" : "overview"}/${outcome.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
+      destination = `/${props.locale}/${["request", "arrange", "appointment", "appointmentReply", "appointmentHost", "appointmentHostHandover"].includes(command) ? (props.session.account.kind === "staff" ? "calendar" : "appointments") : props.session.account.kind === "staff" ? "cases" : "overview"}/${outcome.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
   }
   return (
     <WorkflowPage
