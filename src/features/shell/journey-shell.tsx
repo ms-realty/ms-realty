@@ -11,6 +11,7 @@ import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { homePaths } from "@/server/config/hosts";
 import { SkipLink } from "@/ui/skip-link";
+import { journeyTabLabels } from "./journey-tab-copy";
 import { LocaleSwitcher } from "./language-switcher";
 import { NavLink } from "./nav-link";
 import { journeyHelpNav, journeyNav, linked } from "./navigation";
@@ -35,6 +36,7 @@ export async function JourneyShell({
   const t = await getTranslations({ locale, namespace: "nav" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
   const client = clientWorkflowCopy(locale);
+  const compact = journeyTabLabels[locale];
   const identity = identityCopy(locale);
   const destinations = linked(journeyNav, locale);
   const account = (
@@ -200,17 +202,24 @@ export async function JourneyShell({
               <NavLink
                 key={item.href}
                 href={item.href}
-                className="flex min-h-control min-w-0 flex-col items-center justify-center gap-1 rounded-control px-1 py-2 text-center text-caption [overflow-wrap:anywhere] no-underline aria-[current=page]:bg-subtle aria-[current=page]:font-semibold"
+                aria-label={t(`journey.${item.label}`)}
+                title={t(`journey.${item.label}`)}
+                className="flex min-h-control min-w-0 flex-col items-center justify-center gap-1 rounded-control px-1 py-2 text-center text-caption no-underline aria-[current=page]:bg-subtle aria-[current=page]:font-semibold"
               >
                 <Image src={`/brand/journey/${item.label}.svg`} alt="" width={20} height={20} />
-                <span>{t(`journey.${item.label}`)}</span>
+                <span className="block max-w-full truncate">
+                  {compact[item.label as keyof typeof compact]}
+                </span>
               </NavLink>
             ))}
           <NavLink
             href={`/${locale}/preferences`}
-            className="flex min-h-control items-center justify-center rounded-control px-1 py-2 text-center text-caption no-underline aria-[current=page]:bg-subtle"
+            aria-label={client.account}
+            title={client.account}
+            className="flex min-h-control min-w-0 flex-col items-center justify-center gap-1 rounded-control px-1 py-2 text-center text-caption no-underline aria-[current=page]:bg-subtle"
           >
-            {client.account}
+            <Image src="/brand/journey/broker.svg" alt="" width={20} height={20} />
+            <span className="block max-w-full truncate">{compact.account}</span>
           </NavLink>
         </nav>
       </div>
