@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { AnalyticsConsent, consentCookie } from "./consent";
 
@@ -17,6 +17,42 @@ afterEach(() => {
   history.replaceState({}, "", "/");
   navigation.pathname = "/bg";
   navigation.discard.mockClear();
+  navigation.discard.mockClear();
+});
+it("records a first choice without replacing the current draft or bootstrapping a tag", () => {
+  history.replaceState({}, "", "/bg");
+  render(
+    <>
+      <input aria-label="Draft question" defaultValue="Keep this exact unsent question." />
+      <AnalyticsConsent locale="en" initialPreference="unset" containerId="GTM-MSJ9W89" />
+    </>,
+  );
+  const draft = screen.getByLabelText("Draft question");
+  fireEvent.click(screen.getByRole("button", { name: "Allow analytics" }));
+  expect(
+    screen.getByText("Choice saved. Analytics will start on the next page you open."),
+  ).toBeVisible();
+  expect(screen.getByLabelText("Draft question")).toBe(draft);
+  expect(draft).toHaveValue("Keep this exact unsent question.");
+  expect(document.cookie).toContain("msr_analytics_consent=v1.granted");
+  expect(document.querySelector("#msr-consented-analytics")).toBeNull();
+  expect(navigation.discard).not.toHaveBeenCalled();
+});
+it("keeps necessary-only choices on the page but discards an already executed analytics document on withdrawal", () => {
+  history.replaceState({}, "", "/bg");
+  const initial = render(
+    <AnalyticsConsent locale="en" initialPreference="unset" containerId="GTM-MSJ9W89" />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Necessary only" }));
+  expect(screen.getByRole("button", { name: "Privacy settings" })).toBeVisible();
+  expect(navigation.discard).not.toHaveBeenCalled();
+  initial.unmount();
+  render(<AnalyticsConsent locale="en" initialPreference="granted" containerId="GTM-MSJ9W89" />);
+  fireEvent.click(screen.getByRole("button", { name: "Privacy settings" }));
+  expect(screen.getByText(/Withdrawing refreshes this page/)).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Withdraw consent" }));
+  expect(navigation.discard).toHaveBeenCalledOnce();
+  expect(document.cookie).toContain("msr_analytics_consent=v1.denied");
 });
 it("sends no analytics request before consent and gives necessary-only equal prominence", () => {
   history.replaceState({}, "", "/bg");

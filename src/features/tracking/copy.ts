@@ -11,6 +11,8 @@ export const trackingCopy: Record<
     withdraw: string;
     enabled: string;
     disabled: string;
+    nextPage: string;
+    withdrawRefresh: string;
   }
 > = {
   bg: {
@@ -23,6 +25,9 @@ export const trackingCopy: Record<
     withdraw: "Оттеглям съгласието",
     enabled: "Аналитичните бисквитки са разрешени.",
     disabled: "Използват се само необходимите бисквитки.",
+    nextPage: "Изборът е запазен. Анализите ще започнат при следващото отваряне на страница.",
+    withdrawRefresh:
+      "Оттеглянето презарежда страницата, за да спре вече заредените анализи. Първо запазете въведения текст.",
   },
   en: {
     title: "Your privacy choice",
@@ -34,6 +39,9 @@ export const trackingCopy: Record<
     withdraw: "Withdraw consent",
     enabled: "Analytics cookies are allowed.",
     disabled: "Only necessary cookies are used.",
+    nextPage: "Choice saved. Analytics will start on the next page you open.",
+    withdrawRefresh:
+      "Withdrawing refreshes this page to stop analytics already loaded. Save any entered text first.",
   },
   ru: {
     title: "Ваш выбор конфиденциальности",
@@ -45,6 +53,9 @@ export const trackingCopy: Record<
     withdraw: "Отозвать согласие",
     enabled: "Аналитические cookies разрешены.",
     disabled: "Используются только необходимые cookies.",
+    nextPage: "Выбор сохранён. Аналитика начнётся при открытии следующей страницы.",
+    withdrawRefresh:
+      "Отзыв согласия обновляет страницу, чтобы остановить загруженную аналитику. Сначала сохраните введённый текст.",
   },
   de: {
     title: "Ihre Datenschutzauswahl",
@@ -56,6 +67,9 @@ export const trackingCopy: Record<
     withdraw: "Einwilligung widerrufen",
     enabled: "Analyse-Cookies sind erlaubt.",
     disabled: "Nur notwendige Cookies werden verwendet.",
+    nextPage: "Auswahl gespeichert. Die Analyse beginnt auf der nächsten geöffneten Seite.",
+    withdrawRefresh:
+      "Beim Widerruf wird diese Seite neu geladen, um die bereits geladene Analyse zu stoppen. Speichern Sie zuerst eingegebenen Text.",
   },
   nl: {
     title: "Uw privacykeuze",
@@ -67,6 +81,9 @@ export const trackingCopy: Record<
     withdraw: "Toestemming intrekken",
     enabled: "Analytische cookies zijn toegestaan.",
     disabled: "Alleen noodzakelijke cookies worden gebruikt.",
+    nextPage: "Keuze opgeslagen. Analyse start op de volgende pagina die u opent.",
+    withdrawRefresh:
+      "Intrekken vernieuwt deze pagina om geladen analyse te stoppen. Bewaar eerst ingevoerde tekst.",
   },
   el: {
     title: "Η επιλογή απορρήτου σας",
@@ -78,6 +95,9 @@ export const trackingCopy: Record<
     withdraw: "Ανάκληση συγκατάθεσης",
     enabled: "Τα cookies ανάλυσης επιτρέπονται.",
     disabled: "Χρησιμοποιούνται μόνο απαραίτητα cookies.",
+    nextPage: "Η επιλογή αποθηκεύτηκε. Η ανάλυση θα ξεκινήσει στην επόμενη σελίδα που θα ανοίξετε.",
+    withdrawRefresh:
+      "Η ανάκληση ανανεώνει αυτή τη σελίδα για να σταματήσει η ήδη φορτωμένη ανάλυση. Αποθηκεύστε πρώτα το κείμενό σας.",
   },
   he: {
     title: "בחירת הפרטיות שלך",
@@ -88,5 +108,8 @@ export const trackingCopy: Record<
     withdraw: "ביטול הסכמה",
     enabled: "קובצי Cookie לניתוח מותרים.",
     disabled: "נעשה שימוש בקובצי Cookie הכרחיים בלבד.",
+    nextPage: "הבחירה נשמרה. הניתוח יתחיל בדף הבא שייפתח.",
+    withdrawRefresh:
+      "ביטול ההסכמה מרענן את הדף כדי לעצור ניתוח שכבר נטען. יש לשמור תחילה טקסט שהוזן.",
   },
 };
