@@ -292,9 +292,11 @@ export function TaskForm({
   action,
   states,
   completion = false,
+  available = true,
 }: Props<TaskValues> & {
   states: (keyof ReturnType<typeof workCopy>["states"])[];
   completion?: boolean;
+  available?: boolean;
 }) {
   const copy = workCopy(locale);
   const path = `/${locale}/tasks/${id}`;
@@ -310,6 +312,7 @@ export function TaskForm({
       action={action}
       initialState={initialState}
       permalink={path}
+      commandAvailable={available}
       reconciliation={status(path, "task", initialState.operationId, copy.statusLink)}
       copy={copy.form}
       labels={{ state: copy.state, note: copy.note, followUpAt: copy.followUpAt }}

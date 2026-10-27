@@ -9,7 +9,7 @@ export function ContactActions({
 }) {
   const copy = staffWorkflowCopy(locale);
   return (
-    <div className="flex flex-wrap gap-3">
+    <div data-print-hide className="flex flex-wrap gap-3">
       {methods.map((method) => {
         const href = nativeContactHref(method.kind, method.value, method.verification);
         return href ? (

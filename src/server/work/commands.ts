@@ -253,6 +253,13 @@ export async function changeTask(db: Executor, session: Session, raw: TaskInput)
     async (ctx) => {
       const { row } = await taskFor(ctx.tx, session, input.id, true);
       version(row, input.expectedVersion);
+      // F31 correction closure belongs to the current impact/owner reconciliation command.
+      if (
+        row.type === "correction" &&
+        row.purpose === "material_correction" &&
+        ["done", "cancelled"].includes(input.state)
+      )
+        throw new AppError("transition_denied");
       allow(taskMachine.check(row.state, input.state));
       // Completing regulated work needs its owning module's evidence, not a generic note.
       if (

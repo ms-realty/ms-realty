@@ -8,7 +8,6 @@ import { getDb } from "@/db/client";
 import { operations, principals } from "@/db/schema";
 import { DuplicateIdentityLink } from "@/features/duplicate-review/identity-link";
 import { bedroomCount, inventoryCopy, optionLabel } from "@/features/inventory/copy";
-import { inventorySections } from "@/features/inventory/decision-contract";
 import { EditTabs } from "@/features/inventory/edit-tabs";
 import { InventoryEditor, type InventoryValues } from "@/features/inventory/editor";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
@@ -347,7 +346,7 @@ export default async function InventoryDetailPage({
                       {published ? (
                         // Text only: the Facts frames (647:12680, 657:12889) keep Save and Review.
                         <LeaveControl
-                          href={`${path}?tab=review#${inventorySections.review}`}
+                          href={`${path}/correction`}
                           formId={formId}
                           className={buttonClass(
                             "tertiary",

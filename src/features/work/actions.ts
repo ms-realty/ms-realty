@@ -581,15 +581,15 @@ export async function taskAction(
     ["state", "note", "followUpAt"],
     async (ctx, envelope, values) => {
       if (!ctx.session) throw new AppError("unauthenticated");
-      return (
-        await changeTask(ctx.db, ctx.session, {
-          id,
-          ...envelope,
-          state: values.state as Parameters<typeof changeTask>[2]["state"],
-          note: values.note,
-          ...(values.followUpAt ? { followUpAt: formInstant(values, "followUpAt") } : {}),
-        })
-      ).outcome;
+      const recorded = await changeTask(ctx.db, ctx.session, {
+        id,
+        ...envelope,
+        state: values.state as Parameters<typeof changeTask>[2]["state"],
+        note: values.note,
+        ...(values.followUpAt ? { followUpAt: formInstant(values, "followUpAt") } : {}),
+      });
+      const { task } = await readTask(ctx.db, ctx.session, id);
+      return { ...recorded.outcome, reference: task.title };
     },
     async (ctx) => {
       if (!ctx.session) throw new AppError("unauthenticated");

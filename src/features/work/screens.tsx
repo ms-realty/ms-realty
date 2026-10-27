@@ -699,13 +699,22 @@ export async function TaskScreen({
       <a className={link} href={`/${locale}/tasks/${task.id}/effort`}>
         {effortCopy(locale).title}
       </a>
-      {targets.includes("done") ? (
-        <section className="max-w-2xl space-y-4 rounded-card border border-border p-5">
-          <h2 className="text-subheading font-semibold">{copy.completeTask}</h2>
+      {!guarded ? (
+        <section
+          className={
+            targets.includes("done")
+              ? "max-w-2xl space-y-4 rounded-card border border-border p-5"
+              : undefined
+          }
+        >
+          {targets.includes("done") ? (
+            <h2 className="text-subheading font-semibold">{copy.completeTask}</h2>
+          ) : null}
           <TaskForm
             locale={locale}
             id={id}
             completion
+            available={targets.includes("done")}
             action={taskAction.bind(null, locale, id)}
             states={["done"]}
             initialState={initialFormState(
@@ -767,22 +776,27 @@ export async function TaskScreen({
       {!["done", "cancelled"].includes(task.state) ? (
         <TaskHandoverScreen locale={locale} session={session} id={id} view={view} step={step} />
       ) : null}
-      {targets.length ? (
-        <section className="max-w-2xl space-y-4 rounded-card border border-border p-5">
+      <section
+        className={
+          targets.length ? "max-w-2xl space-y-4 rounded-card border border-border p-5" : undefined
+        }
+      >
+        {targets.length ? (
           <h2 className="text-subheading font-semibold">{copy.taskChange}</h2>
-          <TaskForm
-            locale={locale}
-            id={id}
-            action={taskAction.bind(null, locale, id)}
-            states={targets}
-            initialState={initialFormState(
-              `work.task.${id}`,
-              { state: targets[0] as TaskState, note: "", followUpAt: "" },
-              task.version,
-            )}
-          />
-        </section>
-      ) : null}
+        ) : null}
+        <TaskForm
+          locale={locale}
+          id={id}
+          action={taskAction.bind(null, locale, id)}
+          states={targets}
+          available={targets.length > 0}
+          initialState={initialFormState(
+            `work.task.${id}`,
+            { state: (targets[0] ?? task.state) as TaskState, note: "", followUpAt: "" },
+            task.version,
+          )}
+        />
+      </section>
     </Page>
   );
 }

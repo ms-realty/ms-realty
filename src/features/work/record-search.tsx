@@ -32,7 +32,7 @@ export function RecordSearch({
   }, [state.responseId]);
   return (
     <div className="space-y-5">
-      <search aria-label={copy.search}>
+      <search data-print-hide aria-label={copy.search}>
         <form
           action={submit}
           onReset={(event) => event.preventDefault()}
