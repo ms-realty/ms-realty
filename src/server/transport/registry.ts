@@ -12,6 +12,11 @@ import { inquiryContentSnapshotSchema } from "@/domain/inquiry-content-snapshot"
 import { inquiryListingReceiptSchema } from "@/domain/inquiry-selection";
 import { ownerInquiryReceiptSchema } from "@/domain/owner-inquiry";
 import { gateIds, gateStatuses, readinessReportSchema } from "@/release/schemas";
+import {
+  agencyCommandSchema,
+  agencyRequestSchema,
+  agencyResponseSchema,
+} from "../agency-obligations/transport-schema";
 import type { HostContext } from "../config/hosts";
 import type { ErrorCode } from "../errors";
 import { inquirySchema } from "../inquiries/intake";
@@ -254,6 +259,50 @@ const receiptExample = {
 } as const;
 
 export const endpoints = [
+  {
+    id: "agency.command",
+    summary: "Record guarded partner terms, review consent or property photography",
+    group: "agency_commands",
+    method: "POST",
+    path: "/api/agency/{command}",
+    host: "private",
+    authorization: "private_session",
+    acceptance: ["AT10", "AT11", "AT40"],
+    idempotency: "operation_id",
+    revision: "expected_revision",
+    pagination: "none",
+    description:
+      "Only clientConsent accepts a current client session on the client host; every other command requires current staff on the staff host. Public host returns 404. Each command uses its named request schema, current ordinary source/record permissions and qualified capability where applicable. Staff mutations require a passkey and fresh authentication. id is the terms/review record, or the Listing for photography; operationId is actor/type/record/payload bound. expectedVersion is 0 only for new partnerSave/reviewSave records, otherwise the exact current revision. expectedHash binds exact terms or review wording for decisions. Unknown outcomes must reconcile the original operation before retrying. No autonomous approval, booking or publication is granted by this transport.",
+    params: z.object({ command: agencyCommandSchema }),
+    body: { schemas: { "application/json": agencyRequestSchema } },
+    responses: [
+      {
+        status: 200,
+        description: "Committed command or identical stored operation replay",
+        schema: agencyResponseSchema,
+        headers: {
+          "cache-control": "private, no-store",
+          "x-correlation-id": "Request correlation",
+        },
+      },
+    ],
+    errors: [
+      "unauthenticated",
+      "step_up_required",
+      "forbidden",
+      "not_found",
+      "cross_origin_request",
+      "validation_failed",
+      "version_conflict",
+      "approval_stale",
+      "transition_denied",
+      "idempotency_key_reused",
+      "operation_pending",
+      "outcome_unknown",
+      "unavailable",
+      "internal_error",
+    ],
+  },
   {
     id: "files.upload",
     summary: "Upload and seal scoped staging bytes",

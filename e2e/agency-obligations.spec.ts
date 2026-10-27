@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
@@ -50,6 +50,175 @@ function seed(): Fixture {
     ),
   );
 }
+
+test("B10 actual private JSON transport enforces surface, replay and original-author consent", async ({
+  browser,
+}, info) => {
+  const f = seed(),
+    context = await browser.newContext({ ...info.project.use });
+  try {
+    await context.addCookies([
+      {
+        name: "msr_staff_session",
+        value: f.staffToken,
+        url: origins.staff,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+      {
+        name: "msr_client_session",
+        value: f.clientToken,
+        url: origins.client,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    const page = await context.newPage();
+    async function command(name: string, body: unknown) {
+      return page.evaluate(
+        async ({ name, body }) => {
+          const response = await fetch(`/api/agency/${name}`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          return {
+            status: response.status,
+            cache: response.headers.get("cache-control"),
+            data: await response.json(),
+          };
+        },
+        { name, body },
+      );
+    }
+    const input = {
+      id: randomUUID(),
+      operationId: randomUUID(),
+      expectedVersion: 0,
+      caseId: null,
+      counterpartyPartyId: f.partyId,
+      relationship: "referral",
+      purpose: "Synthetic HTTP source binding",
+      sourceReference: "Synthetic supplied source",
+      sourceVersion: "http-fixture-1",
+      termsText: "Synthetic exact terms. No actual fee, legal policy or acceptance.",
+      documentVersionId: null,
+      acceptedReference: null,
+      acceptedAt: null,
+      validUntil: null,
+      unknowns: "Actual human terms and counterparty acceptance remain held.",
+      reviewed: true,
+    };
+    for (const name of ["partnerSave", "clientConsent"]) {
+      const publicAttempt = await context.request.post(hostUrl("public", `/api/agency/${name}`), {
+        headers: { origin: origins.public },
+        data: input,
+      });
+      expect(publicAttempt.status()).toBe(404);
+    }
+    await page.goto(hostUrl("staff", "/en/operations/agency"));
+    expect((await command("unknown", input)).status).toBe(404);
+    expect((await command("clientConsent", input)).status).toBe(404);
+    const saved = await command("partnerSave", input);
+    expect(saved).toMatchObject({
+      status: 200,
+      cache: "private, no-store",
+      data: { replayed: false, outcome: { id: input.id, version: 1 } },
+    });
+    const replay = await command("partnerSave", input);
+    expect(replay).toMatchObject({
+      status: 200,
+      data: { operationId: saved.data.operationId, replayed: true, outcome: saved.data.outcome },
+    });
+    expect(
+      await command("partnerSave", { ...input, termsText: `${input.termsText} Changed` }),
+    ).toMatchObject({ status: 409, data: { error: { code: "IDEMPOTENCY_KEY_REUSED" } } });
+    expect(
+      await command("partnerSave", { ...input, operationId: randomUUID(), expectedVersion: 99 }),
+    ).toMatchObject({ status: 409, data: { error: { code: "REVISION_CONFLICT" } } });
+    expect(
+      (
+        await command("partnerSave", {
+          ...input,
+          id: randomUUID(),
+          operationId: randomUUID(),
+          counterpartyPartyId: randomUUID(),
+        })
+      ).status,
+    ).toBe(404);
+    const [review] = await db
+      .select()
+      .from(schema.agencyCaseReviews)
+      .where(eq(schema.agencyCaseReviews.id, f.reviewId));
+    const [policy] = await db
+      .select({ id: schema.contentPageVersions.id })
+      .from(schema.contentPageVersions)
+      .innerJoin(
+        schema.contentPages,
+        eq(schema.contentPages.id, schema.contentPageVersions.contentPageId),
+      )
+      .where(
+        and(
+          eq(schema.contentPages.kind, "help"),
+          eq(schema.contentPages.slug, "review-publication-consent"),
+          eq(schema.contentPages.currentVersionNumber, schema.contentPageVersions.versionNumber),
+        ),
+      );
+    if (!review || !policy) throw new Error("Missing synthetic exact review/policy context");
+    await page.goto(hostUrl("client", `/en/reviews/${f.reviewId}`));
+    expect((await command("partnerSave", input)).status).toBe(404);
+    const assent = {
+      id: review.id,
+      operationId: randomUUID(),
+      expectedVersion: review.version,
+      expectedHash: review.bindingHash,
+      decision: "granted",
+      policyVersionId: policy.id,
+      reviewed: true,
+    };
+    const consent = await command("clientConsent", assent);
+    expect(consent).toMatchObject({
+      status: 200,
+      data: { outcome: { id: review.id, consentState: "granted" } },
+    });
+    expect(await command("clientConsent", assent)).toMatchObject({
+      status: 200,
+      data: {
+        operationId: consent.data.operationId,
+        replayed: true,
+        outcome: consent.data.outcome,
+      },
+    });
+    expect(
+      await command("clientConsent", {
+        ...assent,
+        operationId: randomUUID(),
+        expectedVersion: consent.data.outcome.version,
+        decision: "withdrawn",
+        policyVersionId: null,
+      }),
+    ).toMatchObject({ status: 200, data: { outcome: { consentState: "withdrawn" } } });
+    await db
+      .update(schema.grants)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(
+          eq(schema.grants.principalId, f.staffId),
+          eq(schema.grants.capability, "compliance.review"),
+        ),
+      );
+    await page.goto(hostUrl("staff", "/en/today"));
+    expect((await command("partnerSave", input)).status).toBe(404);
+    const retained = await db
+      .select()
+      .from(schema.agencyPartnerTerms)
+      .where(eq(schema.agencyPartnerTerms.id, input.id));
+    expect(retained).toHaveLength(1);
+    expect(retained[0]).toMatchObject({ version: 1, state: "draft", termsText: input.termsText });
+  } finally {
+    await context.close();
+  }
+});
 
 for (const javaScriptEnabled of [true, false]) {
   test(`B10 partner exact-source acceptance and honest property photography${javaScriptEnabled ? "" : " without JavaScript"}`, async ({

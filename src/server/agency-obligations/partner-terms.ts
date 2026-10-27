@@ -41,12 +41,12 @@ const source = z.object({
   validUntil: instant,
   unknowns: z.string().trim().max(2000),
 });
-const save = source.extend({
+export const partnerTermsSaveSchema = source.extend({
   ...commandEnvelope,
   expectedVersion: z.int().nonnegative(),
   reviewed: z.literal(true),
 });
-const decision = z.object({
+export const partnerTermsDecisionSchema = z.object({
   ...commandEnvelope,
   action: z.enum(["accept", "revoke"]),
   expectedHash: z.string().regex(/^[a-f0-9]{64}$/),
@@ -152,7 +152,7 @@ export async function readPartnerTerms(db: Executor, session: Session, id: strin
 }
 
 export async function savePartnerTerms(db: Executor, session: Session, raw: unknown) {
-  const input = parseInput(save, raw);
+  const input = parseInput(partnerTermsSaveSchema, raw);
   await access(db, session, input, true);
   if (input.expectedVersion) await readPartnerTerms(db, session, input.id);
   return retainedAgencyTransaction(db, async (tx) => {
@@ -226,7 +226,7 @@ export async function savePartnerTerms(db: Executor, session: Session, raw: unkn
 }
 
 export async function decidePartnerTerms(db: Executor, session: Session, raw: unknown) {
-  const input = parseInput(decision, raw);
+  const input = parseInput(partnerTermsDecisionSchema, raw);
   await readPartnerTerms(db, session, input.id);
   return retainedAgencyTransaction(db, async (tx) => {
     const { row } = await readPartnerTerms(tx, session, input.id, true);
