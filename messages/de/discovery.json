@@ -140,5 +140,23 @@
     },
     "boundary": "Diese Anfrage dient der menschlichen Prüfung. Termine sind Wünsche; das Absenden bestätigt weder Verfügbarkeit noch Buchung oder Arbeiten. Diese Webanfrage ist kein Notfalldienst.",
     "held": "Der Leistungsumfang ist nicht mehr bestätigt. Wenden Sie sich zur Klärung oder für eine manuelle Alternative an die zuständige Person."
-  }
+  },
+  "close": "Schließen",
+  "cancel": "Abbrechen",
+  "filterDraftHint": "Änderungen sind ein Entwurf. Anwenden aktualisiert die Ergebnisse; Schließen verwirft die Änderungen.",
+  "clearDraft": "Entwurf leeren",
+  "mediaViewer": "Immobiliengalerie",
+  "openMedia": "Medium {position} öffnen",
+  "previousMedia": "Vorheriges Medium",
+  "nextMedia": "Nächstes Medium",
+  "zoomIn": "Vergrößern",
+  "zoomOut": "Verkleinern",
+  "fitMedia": "Bild einpassen",
+  "mediaPosition": "{position} von {count}",
+  "mediaPhoto": "Foto",
+  "mediaFloorPlan": "Grundriss",
+  "mediaRender": "Architekturvisualisierung",
+  "mediaVideo": "Videofilm",
+  "mediaVirtualTour": "Virtueller Rundgang",
+  "propertyActions": "Immobilienaktionen"
 }

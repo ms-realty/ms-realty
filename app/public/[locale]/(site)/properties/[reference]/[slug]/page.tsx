@@ -7,6 +7,7 @@ import { LocalActions } from "@/features/discovery/local-selection";
 import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { listingHref, locality, priceText } from "@/features/discovery/presentation";
+import { PropertyContactBar } from "@/features/discovery/property-contact";
 import { SearchMap } from "@/features/discovery/search-map";
 import { listingStructuredData } from "@/i18n/structured-data";
 import { publicMapRelease } from "@/server/publication/map-config";
@@ -112,10 +113,12 @@ export default async function PropertyPage({
             media={listing.media}
             unavailable={copy.noPhoto}
             morePhotos={copy.morePhotos}
+            locale={locale}
+            copy={copy}
           />
           <ListingFacts listing={listing} locale={locale} copy={copy} />
         </div>
-        <aside className="flex min-w-0 flex-col gap-5 self-start rounded-panel border border-border bg-surface p-5 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        <aside className="flex min-w-0 flex-col gap-5 self-start rounded-panel border border-divider bg-surface p-5 shadow-raised lg:sticky lg:top-[calc(var(--public-header-height,5rem)+1.5rem)] lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <p className="font-semibold">{listing.responsibleTeam.label}</p>
           {listing.availability.primaryAction === "request_viewing" ? (
             <a className={buttonClass("primary")} href={inquiry("viewing_request")}>
@@ -166,6 +169,33 @@ export default async function PropertyPage({
       {result.alternatives.length ? (
         <ListingGrid items={result.alternatives} locale={locale} copy={copy} />
       ) : null}
+      <PropertyContactBar reference={listing.reference} label={copy.propertyActions}>
+        {listing.availability.primaryAction !== "view_similar" ? (
+          <a
+            className={buttonClass("secondary")}
+            href={inquiry("question")}
+            aria-label={`${copy.ask} · ${listing.reference}`}
+          >
+            {copy.ask}
+          </a>
+        ) : null}
+        {listing.availability.primaryAction === "request_viewing" ? (
+          <a
+            className={buttonClass("primary")}
+            href={inquiry("viewing_request")}
+            aria-label={`${copy.viewing} · ${listing.reference}`}
+          >
+            {copy.viewing}
+          </a>
+        ) : listing.availability.primaryAction === "view_similar" ? (
+          <a
+            className={buttonClass("primary")}
+            href={`/${locale}/properties?purpose=${listing.purpose}`}
+          >
+            {copy.back}
+          </a>
+        ) : null}
+      </PropertyContactBar>
     </DiscoveryPage>
   );
 }

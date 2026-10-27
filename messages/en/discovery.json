@@ -140,5 +140,23 @@
     },
     "boundary": "This request is for human assessment. Dates are preferences; submitting does not confirm availability, a reservation or work. This web request is not an emergency-response service.",
     "held": "Service coverage is no longer confirmed. Contact the responsible person for clarification or a manual alternative."
-  }
+  },
+  "close": "Close",
+  "cancel": "Cancel",
+  "filterDraftHint": "Changes are a draft. Apply updates the results; closing discards these changes.",
+  "clearDraft": "Clear draft",
+  "mediaViewer": "Property gallery",
+  "openMedia": "Open media {position}",
+  "previousMedia": "Previous media",
+  "nextMedia": "Next media",
+  "zoomIn": "Zoom in",
+  "zoomOut": "Zoom out",
+  "fitMedia": "Fit image",
+  "mediaPosition": "{position} of {count}",
+  "mediaPhoto": "Photo",
+  "mediaFloorPlan": "Floor plan",
+  "mediaRender": "Architectural rendering",
+  "mediaVideo": "Video",
+  "mediaVirtualTour": "Virtual tour",
+  "propertyActions": "Property actions"
 }

@@ -27,9 +27,12 @@ const navLinkClass =
 export async function PublicShell({
   locale,
   children,
+  notice,
 }: {
   locale: PublicLocale;
   children: ReactNode;
+  /** Normal-flow public notices, including the shared consent control. */
+  notice?: ReactNode;
 }) {
   const t = await getTranslations({ locale, namespace: "nav" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
@@ -58,6 +61,7 @@ export async function PublicShell({
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <SkipLink targetId={mainId}>{a11y("skipToContent")}</SkipLink>
+      {notice}
       {suggestion ? (
         <LanguageSuggestion
           suggested={suggestion.locale}
