@@ -3,6 +3,10 @@ import type { FormCopy } from "@/ui/form/contract";
 
 const en = {
   inventory: "Inventory",
+  rentalTitle: "Rental source facts",
+  rentalBoundary:
+    "These are recorded source terms for human review. Missing charges are unknown, never zero; availability is not a booking confirmation.",
+  rentalUnreadable: "The recorded value needs review before this editor can display it.",
   create: "New listing",
   back: "Back to inventory",
   edit: "Working draft",
@@ -299,6 +303,15 @@ const en = {
     sourceReference: "Source or evidence reference",
     sourceClass: "Source type",
     sourceLanguage: "Language of the source evidence",
+    rentalDepositState: "Deposit — source state",
+    rentalDeposit: "Deposit (EUR, total)",
+    rentalChargesState: "Recurring charges — source state",
+    rentalCharges: "Known recurring charges (EUR per month)",
+    rentalChargesIncludes: "Named charges included (one per line)",
+    rentalAvailableFromState: "Available from — source state",
+    rentalAvailableFrom: "Available from (YYYY-MM-DD)",
+    rentalRestrictionsState: "Restrictions — source state",
+    rentalRestrictions: "Recorded rental restrictions",
   },
   form: {
     errorSummary: "Check the form",
@@ -318,6 +331,10 @@ type Copy = typeof en;
 const bg: Copy = {
   ...en,
   inventory: "Имоти и обяви",
+  rentalTitle: "Данни за наем от източника",
+  rentalBoundary:
+    "Това са записани условия от източника за човешки преглед. Липсващите разходи са неизвестни, а не нула; датата не потвърждава резервация.",
+  rentalUnreadable: "Записаната стойност изисква преглед, преди редакторът да я покаже.",
   create: "Нова обява",
   back: "Към обявите",
   edit: "Работна чернова",
@@ -614,6 +631,15 @@ const bg: Copy = {
     sourceReference: "Източник или доказателство",
     sourceClass: "Вид източник",
     sourceLanguage: "Език на източника",
+    rentalDepositState: "Депозит — състояние на източника",
+    rentalDeposit: "Депозит (EUR, общо)",
+    rentalChargesState: "Текущи разходи — състояние на източника",
+    rentalCharges: "Известни текущи разходи (EUR на месец)",
+    rentalChargesIncludes: "Включени разходи по име (по един на ред)",
+    rentalAvailableFromState: "Свободен от — състояние на източника",
+    rentalAvailableFrom: "Свободен от (ГГГГ-ММ-ДД)",
+    rentalRestrictionsState: "Ограничения — състояние на източника",
+    rentalRestrictions: "Записани ограничения при наемане",
   },
   form: {
     errorSummary: "Проверете формуляра",
@@ -631,6 +657,10 @@ const bg: Copy = {
 const ru: Copy = {
   ...en,
   inventory: "Объекты и объявления",
+  rentalTitle: "Данные об аренде из источника",
+  rentalBoundary:
+    "Это записанные условия источника для проверки человеком. Отсутствующие расходы неизвестны, а не равны нулю; дата не подтверждает бронирование.",
+  rentalUnreadable: "Записанное значение требует проверки перед отображением в редакторе.",
   create: "Новое объявление",
   back: "К объявлениям",
   edit: "Рабочий черновик",
@@ -928,6 +958,15 @@ const ru: Copy = {
     sourceReference: "Источник или доказательство",
     sourceClass: "Вид источника",
     sourceLanguage: "Язык источника",
+    rentalDepositState: "Депозит — состояние источника",
+    rentalDeposit: "Депозит (EUR, всего)",
+    rentalChargesState: "Текущие расходы — состояние источника",
+    rentalCharges: "Известные текущие расходы (EUR в месяц)",
+    rentalChargesIncludes: "Включённые расходы по названию (по одному в строке)",
+    rentalAvailableFromState: "Доступно с — состояние источника",
+    rentalAvailableFrom: "Доступно с (ГГГГ-ММ-ДД)",
+    rentalRestrictionsState: "Ограничения — состояние источника",
+    rentalRestrictions: "Записанные ограничения аренды",
   },
   form: {
     errorSummary: "Проверьте форму",

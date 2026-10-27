@@ -49,6 +49,7 @@ import {
   type SavedListingDraft,
   savedDraftSchema,
 } from "./contracts";
+import { rentalTermsOf } from "./rental-terms";
 import { uneditablePriceEvidence } from "./working-draft";
 
 export { inventoryList, inventoryListPage } from "./queries";
@@ -454,6 +455,7 @@ export async function freezeListingDraft(
       const terms = {
         purpose: listing.purpose,
         facts: {
+          ...(listing.purpose === "long_term_rent" ? rentalTermsOf(draft) : {}),
           price: {
             state: draft.priceState,
             value: factValue(draft.priceState, draft.price, "price", (n) => ({
@@ -464,6 +466,7 @@ export async function freezeListingDraft(
             })),
             sourceClass: draft.sourceClass,
             sourceReference: draft.sourceReference,
+            sourceLanguage: draft.sourceLanguage,
           },
         },
       };

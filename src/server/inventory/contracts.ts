@@ -27,6 +27,15 @@ export const draftSchema = z.object({
   sourceReference: z.string().trim().min(1).max(1000),
   sourceClass: z.enum(sourceClasses),
   sourceLanguage: z.enum(["bg", "en", "ru", "de", "nl", "el", "he"]),
+  rentalDepositState: z.enum(factStates).default("unknown"),
+  rentalDeposit: z.string().trim().max(160).default(""),
+  rentalChargesState: z.enum(factStates).default("unknown"),
+  rentalCharges: z.string().trim().max(160).default(""),
+  rentalChargesIncludes: z.string().trim().max(4000).default(""),
+  rentalAvailableFromState: z.enum(factStates).default("unknown"),
+  rentalAvailableFrom: z.string().trim().max(100).default(""),
+  rentalRestrictionsState: z.enum(factStates).default("unknown"),
+  rentalRestrictions: z.string().trim().max(4000).default(""),
 });
 export type ListingDraft = z.infer<typeof draftSchema>;
 
@@ -63,6 +72,15 @@ export const emptyDraft: ListingDraft = {
   sourceReference: "",
   sourceClass: "source_supplied",
   sourceLanguage: "bg",
+  rentalDepositState: "unknown",
+  rentalDeposit: "",
+  rentalChargesState: "unknown",
+  rentalCharges: "",
+  rentalChargesIncludes: "",
+  rentalAvailableFromState: "unknown",
+  rentalAvailableFrom: "",
+  rentalRestrictionsState: "unknown",
+  rentalRestrictions: "",
 };
 export const createListingSchema = z.object({
   propertyType: z.enum(propertyTypes),

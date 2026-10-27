@@ -154,7 +154,7 @@ it("persists only on version-checked Save and retains immutable revisions, facts
   expect((await inventoryDetail(t.db, staff.actor, reference)).listing.draft).toEqual(draft);
 });
 
-it("requires real source evidence before a fixture-created projection can be saved", async () => {
+it("keeps an incomplete private draft but requires real source evidence before freezing", async () => {
   const staff = await createStaff(t.db, { roles: ["content_editor"] });
   const fixture = await createListingFixture(t.db, {
     reviewerId: staff.id,
@@ -167,16 +167,25 @@ it("requires real source evidence before a fixture-created projection can be sav
   expect(draft.sourceReference).toBe("");
   expect(draft.sourceLanguage).toBe("");
   expect(draftSchema.safeParse(draft).success).toBe(false);
+  const saved = await saveListingDraft(t.db, {
+    actor: staff.actor,
+    operationId: randomUUID(),
+    expectedRevision: before.detail.listing.version,
+    reference: fixture.reference,
+    draft,
+  });
+  expect(saved.outcome.version).toBe(before.detail.listing.version + 1);
+  const kept = await snapshot(staff.actor, fixture.reference);
+  expect(kept.detail.listing.draft).toMatchObject(draft);
+  expect(kept.detail.revision).toEqual(before.detail.revision);
   await expect(
-    saveListingDraft(t.db, {
+    freezeListingDraft(t.db, {
       actor: staff.actor,
       operationId: randomUUID(),
-      expectedRevision: before.detail.listing.version,
+      expectedRevision: saved.outcome.version,
       reference: fixture.reference,
-      draft,
     }),
   ).rejects.toMatchObject({ code: "validation_failed" });
-  expect(await snapshot(staff.actor, fixture.reference)).toEqual(before);
 });
 
 it("does not reattribute a latest immutable revision's price to different property evidence", async () => {
@@ -215,14 +224,22 @@ it("does not reattribute a latest immutable revision's price to different proper
     sourceClass: "",
     sourceLanguage: "",
   });
+  const saved = await saveListingDraft(t.db, {
+    actor: staff.actor,
+    operationId: randomUUID(),
+    expectedRevision: before.detail.listing.version,
+    reference,
+    draft,
+  });
+  const kept = await snapshot(staff.actor, reference);
+  expect(kept.detail.listing.draft).toMatchObject(draft);
+  expect(kept.detail.revision).toEqual(before.detail.revision);
   await expect(
-    saveListingDraft(t.db, {
+    freezeListingDraft(t.db, {
       actor: staff.actor,
       operationId: randomUUID(),
-      expectedRevision: before.detail.listing.version,
+      expectedRevision: saved.outcome.version,
       reference,
-      draft,
     }),
   ).rejects.toMatchObject({ code: "validation_failed" });
-  expect(await snapshot(staff.actor, reference)).toEqual(before);
 });

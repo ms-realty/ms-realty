@@ -9,6 +9,7 @@ import {
   type SourceClass,
   sourceClasses,
 } from "@/domain/facts";
+import { rentalFact, rentalFactKeys } from "@/domain/rental-facts";
 import type { ListingDraft } from "./contracts";
 
 export type WorkingDraftRevision = Readonly<
@@ -139,6 +140,12 @@ export function workingDraftFrom(
   const copy = record(revision?.sourceCopy);
   const copyText = record(copy.text);
   const priceDraft = editableFact(price, (value) => priceText(value, terms.purpose));
+  const rentalDeposit = rentalFact(terms, "rental.deposit");
+  const rentalCharges = rentalFact(terms, "rental.recurring_charges");
+  const rentalAvailableFrom = rentalFact(terms, "rental.available_from");
+  const rentalRestrictions = rentalFact(terms, "rental.restrictions");
+  const rentalAmount = (value: { amountMinor: number }) =>
+    `${Math.floor(value.amountMinor / 100)}.${String(value.amountMinor % 100).padStart(2, "0")}`;
   const areaFacts = facts.filter(
     (fact) => member(areaBases, fact.fieldKey.slice(5)) && fact.fieldKey.startsWith("area."),
   );
@@ -164,7 +171,11 @@ export function workingDraftFrom(
     (value) => scalarText(value, true),
   );
 
-  const sources: readonly Record<string, unknown>[] = [price, ...facts];
+  const sources: readonly Record<string, unknown>[] = [
+    price,
+    ...facts,
+    ...rentalFactKeys.map((key) => record(record(terms.facts)[key])),
+  ];
   // One draft provenance cannot silently replace different recorded sources or review classes.
   const mixedProvenance = (["sourceReference", "sourceClass", "sourceLanguage"] as const).some(
     (key) => new Set(sources.map((fact) => nonempty(fact[key])).filter(Boolean)).size > 1,
@@ -190,6 +201,15 @@ export function workingDraftFrom(
     title: text(copyText.title),
     description: text(copyText.description),
     brokerNote: "",
+    rentalDepositState: rentalDeposit.state,
+    rentalDeposit: rentalDeposit.values.map(rentalAmount).join("|"),
+    rentalChargesState: rentalCharges.state,
+    rentalCharges: rentalCharges.values.map(rentalAmount).join("|"),
+    rentalChargesIncludes: rentalCharges.values[0]?.inclusions.join("\n") ?? "",
+    rentalAvailableFromState: rentalAvailableFrom.state,
+    rentalAvailableFrom: rentalAvailableFrom.values.join("|"),
+    rentalRestrictionsState: rentalRestrictions.state,
+    rentalRestrictions: rentalRestrictions.values.join("|"),
     priceState: priceDraft.state,
     price: priceDraft.value,
     areaState: areaDraft.state,

@@ -23,7 +23,7 @@ import { resolveGrants } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
-import { draftSchema } from "./contracts";
+import { savedDraftSchema } from "./contracts";
 import { type WorkingDraft, workingDraftFrom } from "./working-draft";
 
 const querySchema = z.object({
@@ -280,7 +280,7 @@ async function readInventory(
   }
   const rows: InventoryListRow[] = selected.map((row) => {
     const facts = factsByRevision.get(row.sourceRevision?.factRevisionId ?? "") ?? [];
-    const draft = draftSchema.safeParse(row.listing.draft);
+    const draft = savedDraftSchema.safeParse(row.listing.draft);
     const translations = row.translations.map((translation) => ({
       ...translation,
       canDraft: translationCapability(

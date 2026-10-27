@@ -12,6 +12,7 @@ import {
   type InventoryField as Field,
   type InventoryValues,
   identity,
+  rentalFields,
   selects,
   textFields,
 } from "./fields";
@@ -27,6 +28,7 @@ const factsFields: Field[] = [
   "areaBasis",
   "bedroomsState",
   "bedrooms",
+  ...rentalFields,
   "sourceClass",
   "sourceLanguage",
   "sourceReference",
@@ -122,7 +124,12 @@ export function InventoryEditor({
             <FormField
               {...field}
               label={labels[name]}
-              multiline={name === "description" || name === "brokerNote"}
+              multiline={[
+                "description",
+                "brokerNote",
+                "rentalRestrictions",
+                "rentalChargesIncludes",
+              ].includes(name)}
             />
           )}
         </div>
@@ -205,7 +212,11 @@ export function InventoryEditor({
       {(form) =>
         view === "create" ? (
           <div className="grid gap-5 sm:grid-cols-2">
-            {fields.map((name) => render(form, name))}
+            {fields
+              .filter(
+                (name) => form.values.purpose === "long_term_rent" || !rentalFields.includes(name),
+              )
+              .map((name) => render(form, name))}
           </div>
         ) : (
           // Ordinary editing comes first. Required source input stays explicit before Save;
@@ -248,7 +259,12 @@ export function InventoryEditor({
             >
               {factPairs.map((pair) => (
                 <div key={pair.join()} className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-                  {pair.map((name) => render(form, name))}
+                  {pair
+                    .filter(
+                      (name) =>
+                        form.values.purpose === "long_term_rent" || !rentalFields.includes(name),
+                    )
+                    .map((name) => render(form, name))}
                 </div>
               ))}
               {missing.includes("brokerNote") ? null : render(form, "brokerNote")}
