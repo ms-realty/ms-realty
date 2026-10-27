@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AccountSaveTransfer } from "@/features/account-saves/public-transfer";
 import type { PublicLocale } from "@/i18n/config";
 import { formatNumber } from "@/i18n/format";
 import { buttonClass } from "@/ui/button-class";
@@ -207,6 +208,7 @@ export function SavedProperties({
                       {share.labels.shareSelected}
                     </a>
                   ) : null}
+                  <AccountSaveTransfer locale={locale} references={selected} />
                 </div>
               </div>
               <ul className="grid items-start gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">

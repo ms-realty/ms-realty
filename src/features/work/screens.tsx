@@ -9,6 +9,7 @@ import { getDb } from "@/db/client";
 import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
+import { InquiryPhotoEvidence } from "@/features/discovery/inquiry-photo-evidence";
 import { DuplicateIdentityLink } from "@/features/duplicate-review/identity-link";
 import { StaffPage } from "@/features/shell/staff-ui";
 import { effortCopy } from "@/features/work/effort-copy";
@@ -33,7 +34,6 @@ import {
 import { contactCopy, contactMethodLabel } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
-import { coverageCopy } from "./coverage-copy";
 import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
@@ -203,6 +203,7 @@ export async function InquiryScreen({
   view?: string | string[];
   page?: number;
 }) {
+  if (!isStaffLocale(locale)) notFound();
   const detail = await privateRead(() => readInquiry(getDb(), session, id));
   const { inquiry, ownerName } = detail;
   const copy = workCopy(locale);
@@ -406,6 +407,7 @@ export async function InquiryScreen({
                 </div>
               </dl>
             </section>
+            <InquiryPhotoEvidence locale={locale} session={session} inquiryId={inquiry.id} />
             {canAccept ? (
               <section className="space-y-4 rounded-card border border-border p-5">
                 <h2 className="text-subheading font-semibold">{copy.accept}</h2>
