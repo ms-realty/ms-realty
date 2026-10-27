@@ -201,7 +201,24 @@ export async function applyPrivacyErasure(db: Executor, session: Session, input:
         erasePreferences: erase("contact_preferences"),
         eraseAliases: erase("matching_aliases"),
         contactIds: erase("optional_contacts") ? ids("optional_contacts") : [],
-        clientProfileIds: erase("client_profile_copies") ? ids("client_profile_copies") : [],
+        clientProfileIds: erase("client_profile_copies")
+          ? inventory.sources
+              .filter(
+                (row) =>
+                  row.category === "client_profile_copies" && row.key.startsWith("principal:"),
+              )
+              .map((row) => row.key.split(":")[1] as string)
+          : [],
+        personalSavedIds: erase("client_profile_copies")
+          ? inventory.sources
+              .filter((row) => row.key.startsWith("saved:"))
+              .map((row) => row.key.split(":")[1] as string)
+          : [],
+        savedTransferIds: erase("client_profile_copies")
+          ? inventory.sources
+              .filter((row) => row.key.startsWith("transfer:"))
+              .map((row) => row.key.split(":")[1] as string)
+          : [],
         searchSubscriptionIds:
           erase("optional_search_criteria") && value.purposes.includes("search_alerts")
             ? ids("optional_search_criteria")

@@ -48,6 +48,13 @@ export async function listCases(db: Executor, session: Session, search = "") {
       stage: cases.stage,
       disposition: cases.disposition,
       ownerName: principals.displayName,
+      nextAction: sql<
+        string | null
+      >`case when ${cases.disposition} = 'active' then ${cases.clientSummary} end`,
+      dueAt:
+        sql<Date | null>`case when ${cases.disposition} = 'active' and ${cases.clientSummary} is not null then ${cases.nextActionDueAt} end`.mapWith(
+          cases.nextActionDueAt,
+        ),
       needsCoverage: ownerNeedsCoverage(cases.ownerId),
     })
     .from(cases)

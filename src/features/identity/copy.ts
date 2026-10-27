@@ -1,10 +1,16 @@
-// Copy for the access pages (F13, C01, C02, O23 access states). English is the reference;
-// Bulgarian (source locale) and Russian (staff locale) are drafts awaiting human review;
-// other client locales fall back to English until the catalogs take these strings over.
+// F13/C01/C02 private interface drafts. BG is the source locale; language review is separate.
 import type { ParticipantRole } from "@/domain/parties";
 import type { PublicLocale } from "@/i18n/config";
+import { workflowLabel } from "@/i18n/workflow-labels";
+import clientBg from "../../../messages/bg/client-access.json" with { type: "json" };
 import commonBg from "../../../messages/bg/common.json" with { type: "json" };
+import clientDe from "../../../messages/de/client-access.json" with { type: "json" };
+import clientEl from "../../../messages/el/client-access.json" with { type: "json" };
+import clientEn from "../../../messages/en/client-access.json" with { type: "json" };
 import commonEn from "../../../messages/en/common.json" with { type: "json" };
+import clientHe from "../../../messages/he/client-access.json" with { type: "json" };
+import clientNl from "../../../messages/nl/client-access.json" with { type: "json" };
+import clientRu from "../../../messages/ru/client-access.json" with { type: "json" };
 import commonRu from "../../../messages/ru/common.json" with { type: "json" };
 
 const en = {
@@ -349,7 +355,17 @@ const ru: IdentityCopy = {
 };
 
 export function identityCopy(locale: PublicLocale | string): IdentityCopy {
-  return locale === "bg" ? bg : locale === "ru" ? ru : en;
+  const drafts = {
+    bg: clientBg,
+    en: clientEn,
+    ru: clientRu,
+    de: clientDe,
+    nl: clientNl,
+    el: clientEl,
+    he: clientHe,
+  };
+  const base = locale === "bg" ? bg : locale === "ru" ? ru : en;
+  return { ...base, ...drafts[locale as keyof typeof drafts] };
 }
 
 /** Replaces `{name}` placeholders. */
@@ -399,6 +415,7 @@ const roleLabels: Record<"en" | "bg" | "ru", Record<ParticipantRole, string>> = 
 };
 
 export function roleLabel(locale: string, role: ParticipantRole): string {
+  if (["de", "nl", "el", "he"].includes(locale)) return workflowLabel(role, locale);
   const table = roleLabels[locale === "bg" || locale === "ru" ? locale : "en"];
   return table[role];
 }

@@ -72,7 +72,7 @@ export const journeyNav: readonly NavItem<JourneyNavLabel>[] = [
 export const journeyHelpNav: NavItem<JourneyNavLabel> = {
   label: "help",
   screen: "P24",
-  path: null,
+  path: "/help",
 };
 
 /** Saved Figma O01 rail: everyday work stays primary; Butler and tools stay secondary.

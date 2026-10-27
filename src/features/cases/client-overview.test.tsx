@@ -22,6 +22,11 @@ vi.mock("@/server/appointments/service", () => ({
 }));
 vi.mock("../work/screens", () => ({ privateRead: (read: () => Promise<unknown>) => read() }));
 
+vi.mock("@/server/cases/client-continuity", () => ({
+  readClientContinuity: vi.fn(async () => []),
+  readClientInterestCards: vi.fn(async () => new Map()),
+}));
+
 const session = { account: { kind: "client", id: "current-client" } } as Session;
 const row = {
   id: "case-one",
@@ -70,9 +75,9 @@ it("opens a compact authorized Case summary and links into its full manual workf
   expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Recorded home search");
   expect(screen.getByText("CA-ONE", { exact: true })).toBeVisible();
   expect(screen.getByRole("heading", { name: baseView.record.nextAction })).toBeVisible();
-  expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute(
+  expect(screen.getByRole("link", { name: "Contact the team" })).toHaveAttribute(
     "href",
-    "/en/overview/case-one#case-brief",
+    "tel:+359879696870",
   );
   expect(screen.getByRole("link", { name: "Conversation" })).toHaveAttribute(
     "href",
@@ -83,7 +88,7 @@ it("opens a compact authorized Case summary and links into its full manual workf
     row.ownerName,
   );
   expect(reads.messages).not.toHaveBeenCalled();
-  expect(reads.appointments).toHaveBeenCalledWith("test-db", session, "case-one");
+  expect(reads.appointments).toHaveBeenCalledWith("test-db", session, "case-one", "en");
   expect(document.querySelector("form")).toBeNull();
   expect(document.querySelector("#case-brief")).toBeNull();
   const nextSteps = within(screen.getByRole("region", { name: "Next steps" }));
@@ -116,7 +121,7 @@ it("uses only the supplied authorized appointment and sends the hero conversatio
   const entry = await CaseIndexScreen({ locale: "bg", session, openSingleCase: true });
   render(await CaseScreen(entry.props));
   const hero = within(screen.getByRole("region", { name: "Следващо действие, видимо за клиента" }));
-  expect(hero.getByRole("link")).toHaveAttribute("href", "/bg/overview/case-one#case-conversation");
+  expect(hero.getByRole("link")).toHaveAttribute("href", "/bg/messages/case-one");
   const appointment = screen.getByRole("link", { name: /AP-ONE/ });
   expect(appointment).toHaveAttribute("href", "/bg/appointments/appointment-one");
   expect(appointment.querySelector("time")).toHaveAttribute("datetime", startsAt.toISOString());
@@ -250,7 +255,10 @@ it("retains the full broker identity and states an absent next action without in
   expect(
     screen.getByRole("heading", { name: "No client action summary has been recorded." }),
   ).toBeVisible();
-  expect(screen.getByRole("link", { name: "Requirements" })).toHaveAttribute("href", "#case-brief");
+  expect(screen.getByRole("link", { name: "Contact the team" })).toHaveAttribute(
+    "href",
+    "tel:+359879696870",
+  );
   expect(document.querySelector("time")).toBeNull();
 });
 

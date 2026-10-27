@@ -77,7 +77,11 @@ export default async function Page({
   const s = searchAlertStatusCopy(locale);
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-gutter py-8">
-      <h1 className="text-title font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
+      <h1
+        className="text-title font-semibold"
+        lang={searchAlertCopyLocale(locale)}
+        dir={locale === "he" ? "rtl" : "ltr"}
+      >
         {statusRequested ? c.status : c.title}
       </h1>
       {statusRequested ? null : search ? (
@@ -85,7 +89,11 @@ export default async function Page({
       ) : (
         <Notice tone="warning">{c.invalid}</Notice>
       )}
-      <div className="space-y-5" lang={searchAlertCopyLocale(locale)} dir="ltr">
+      <div
+        className="space-y-5"
+        lang={searchAlertCopyLocale(locale)}
+        dir={locale === "he" ? "rtl" : "ltr"}
+      >
         <Notice tone="info">{configuredAlertRule() ? c.deliveryBoundary : c.deliveryOff}</Notice>
         {statusRequested ? (
           saved ? (
@@ -98,7 +106,7 @@ export default async function Page({
                   {privacyLabel(locale, saved.state)}
                 </span>
               </p>
-              <p lang={searchAlertCopyLocale(locale)} dir="ltr">
+              <p lang={searchAlertCopyLocale(locale)} dir={locale === "he" ? "rtl" : "ltr"}>
                 {p.frequency}: {saved.frequency === "weekly" ? p.weekly : p.daily} · {p.timezone}:{" "}
                 <bdi>{saved.timezone}</bdi>
               </p>

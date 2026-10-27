@@ -1,6 +1,17 @@
 "use client";
 
-import { type FormHTMLAttributes, useEffect, useRef, useState } from "react";
+import {
+  Children,
+  cloneElement,
+  type FormHTMLAttributes,
+  isValidElement,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { ErrorSummary } from "../error-summary";
 
 const copy = {
   bg: [
@@ -57,12 +68,91 @@ const copy = {
 type Props = Omit<FormHTMLAttributes<HTMLFormElement>, "action" | "method" | "onSubmit"> & {
   action?: string;
   method?: "post";
+  /** Optional localized constraint copy; server POST validation stays authoritative. */
+  validation?: {
+    summary: string;
+    fields: Record<string, { label: string; required?: string; email?: string; error?: string }>;
+  };
 };
 
 /** Native POST fallback, with a synchronous duplicate guard and honest upload phases. */
-export function NativeForm({ children, ...props }: Props) {
+export function NativeForm({ children, validation, ...props }: Props) {
   const form = useRef<HTMLFormElement>(null);
   const submitted = useRef(false);
+  const [errors, setErrors] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      Object.entries(validation?.fields ?? {}).flatMap(([name, field]) =>
+        field.error ? [[name, field.error]] : [],
+      ),
+    ),
+  );
+  const fieldIds: Record<string, string> = {};
+  const namedFields = (nodes: ReactNode): string[] =>
+    Children.toArray(nodes).flatMap((node) =>
+      !isValidElement<Record<string, unknown>>(node)
+        ? []
+        : typeof node.props.name === "string" && validation?.fields[node.props.name]
+          ? [node.props.name]
+          : namedFields(node.props.children as ReactNode),
+    );
+  const localFields = (nodes: ReactNode, inLabel = false): ReactNode =>
+    Children.map(nodes, (node) => {
+      if (!isValidElement<Record<string, unknown>>(node)) return node;
+      const name = typeof node.props.name === "string" ? node.props.name : "";
+      const message = validation?.fields[name];
+      if (
+        message &&
+        typeof node.type === "string" &&
+        ["input", "textarea", "select"].includes(node.type)
+      ) {
+        const id = typeof node.props.id === "string" ? node.props.id : `native-${name}`;
+        fieldIds[name] = id;
+        const described =
+          [node.props["aria-describedby"], errors[name] ? `${id}-error` : undefined]
+            .filter(Boolean)
+            .join(" ") || undefined;
+        return (
+          <>
+            {cloneElement(node, {
+              id,
+              "aria-invalid": errors[name] ? true : node.props["aria-invalid"],
+              "aria-describedby": described,
+            })}
+            {errors[name] && !inLabel ? (
+              <p id={`${id}-error`} className="text-dense text-error">
+                {errors[name]}
+              </p>
+            ) : null}
+          </>
+        );
+      }
+      if (!node.props.children) return node;
+      const label = node.type === "label";
+      const content = cloneElement(
+        node,
+        {},
+        localFields(node.props.children as ReactNode, inLabel || label),
+      );
+      return label ? (
+        <>
+          {content}
+          {namedFields(node.props.children as ReactNode)
+            .filter((name) => errors[name])
+            .map((name) => (
+              <p
+                key={name}
+                id={`${fieldIds[name] ?? `native-${name}`}-error`}
+                className="text-dense text-error"
+              >
+                {errors[name]}
+              </p>
+            ))}
+        </>
+      ) : (
+        content
+      );
+    });
+  const localizedChildren = validation ? localFields(children) : children;
   const request = useRef<XMLHttpRequest | null>(null);
   const [state, setState] = useState<"idle" | "sending" | "checking" | "unknown">("idle");
   const [progress, setProgress] = useState<number | null>(null);
@@ -96,8 +186,39 @@ export function NativeForm({ children, ...props }: Props) {
       {...props}
       ref={form}
       method="post"
+      noValidate={validation ? true : props.noValidate}
       aria-busy={state === "sending" || state === "checking" || undefined}
       onSubmit={(event) => {
+        if (validation) {
+          const next: Record<string, string> = {};
+          for (const [name, messages] of Object.entries(validation.fields)) {
+            const field = event.currentTarget.elements.namedItem(name);
+            if (
+              !(
+                field instanceof HTMLInputElement ||
+                field instanceof HTMLTextAreaElement ||
+                field instanceof HTMLSelectElement
+              )
+            )
+              continue;
+            const missing =
+              field instanceof HTMLInputElement && ["checkbox", "radio"].includes(field.type)
+                ? !field.checked
+                : !field.value.trim();
+            if (messages.required && missing) next[name] = messages.required;
+            else if (
+              messages.email &&
+              field instanceof HTMLInputElement &&
+              field.validity.typeMismatch
+            )
+              next[name] = messages.email;
+          }
+          setErrors(next);
+          if (Object.keys(next).length) {
+            event.preventDefault();
+            return;
+          }
+        }
         if (submitted.current) {
           event.preventDefault();
           return;
@@ -162,7 +283,16 @@ export function NativeForm({ children, ...props }: Props) {
         xhr.send(body);
       }}
     >
-      {children}
+      {validation ? (
+        <ErrorSummary
+          title={validation.summary}
+          errors={Object.entries(errors).map(([name, message]) => ({
+            fieldId: fieldIds[name] ?? `native-${name}`,
+            message: `${validation.fields[name]?.label}: ${message}`,
+          }))}
+        />
+      ) : null}
+      {localizedChildren}
       {state !== "idle" ? (
         <div className="mt-3 space-y-2 text-dense text-text-muted">
           <p role="status">

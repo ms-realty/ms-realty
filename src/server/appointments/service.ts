@@ -130,6 +130,8 @@ export async function recordAppointmentVersion(
       state: row.state,
       purpose: row.purpose,
       photographyScope: row.photographyScope,
+      proposedVersion: row.proposedVersion,
+      proposedBufferMinutes: row.proposedBufferMinutes,
       proposedStartsAt: row.proposedStartsAt?.toISOString(),
       proposedEndsAt: row.proposedEndsAt?.toISOString(),
       confirmedStartsAt: row.confirmedStartsAt?.toISOString(),
@@ -384,7 +386,10 @@ export async function arrangeAppointment(
             endsAt: ["End must follow start, within six hours."],
           },
         });
-      if (row.state !== "reschedule_requested")
+      if (
+        row.state !== "reschedule_requested" &&
+        !(row.state === "proposed" && input.action === "propose")
+      )
         allow(
           appointmentMachine.check(
             row.state,
@@ -576,12 +581,20 @@ export async function arrangeAppointment(
                     ? ("reschedule_requested" as const)
                     : ("proposed" as const),
               }),
+          proposedVersion: input.action === "propose" ? row.version + 1 : row.proposedVersion,
+          proposedBufferMinutes:
+            input.action === "propose" ? input.bufferMinutes : row.proposedBufferMinutes,
           version: row.version + 1,
           updatedAt: new Date(),
         })
         .where(eq(appointments.id, row.id))
         .returning();
       if (!changed) throw new Error("Appointment update failed");
+      if (input.action === "propose")
+        await ctx.tx
+          .update(appointmentParticipants)
+          .set({ acknowledgedSequence: null })
+          .where(eq(appointmentParticipants.appointmentId, row.id));
       await recordAppointmentVersion(ctx.tx, changed, live);
       await caseEvent(
         ctx,
@@ -762,6 +775,9 @@ export async function readAppointment(
         reservation ? new Date(reservation.endsAt) : (row.proposedEndsAt ?? undefined),
       )
     : [];
+  const [caseIdentity] = row.caseId
+    ? await db.select({ title: cases.title }).from(cases).where(eq(cases.id, row.caseId))
+    : [];
   return {
     listing,
     propertyWork: propertyWork
@@ -774,6 +790,9 @@ export async function readAppointment(
     appointment: {
       id: row.id,
       reference: row.reference,
+      caseTitle: caseIdentity?.title ?? null,
+      listingTitle: listing?.card?.title ?? null,
+      listingReference: listing?.reference ?? null,
       version: row.version,
       state: row.state,
       purpose: row.purpose,
@@ -783,6 +802,7 @@ export async function readAppointment(
       hostName: host?.name ?? null,
       timezone: row.timezone,
       requestedWindows: windows.success ? windows.data : [],
+      proposedVersion: row.proposedVersion,
       proposedStartsAt: row.proposedStartsAt,
       proposedEndsAt: row.proposedEndsAt,
       confirmedStartsAt: row.confirmedStartsAt,
@@ -829,7 +849,12 @@ export async function readAppointment(
   };
 }
 
-export async function listAppointments(db: Executor, session: Session, caseId?: string) {
+export async function listAppointments(
+  db: Executor,
+  session: Session,
+  caseId?: string,
+  locale?: PublicLocale,
+) {
   const live = await liveUser(db, session);
   const visibility = await caseVisibility(db, live);
   // First narrow by currently readable cases; appointment-level checks then project safely.
@@ -871,7 +896,7 @@ export async function listAppointments(db: Executor, session: Session, caseId?: 
   const rows = [];
   for (const candidate of candidates) {
     try {
-      rows.push((await readAppointment(db, live, candidate.id)).appointment);
+      rows.push((await readAppointment(db, live, candidate.id, locale)).appointment);
     } catch (error) {
       if (!(error instanceof AppError) || !["not_found", "forbidden"].includes(error.code))
         throw error;

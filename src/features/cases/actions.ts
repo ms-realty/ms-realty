@@ -1,5 +1,6 @@
 "use server";
 import { randomUUID } from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { offsetInputValue } from "@/domain/time";
 import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
@@ -7,6 +8,7 @@ import { formatDateTime } from "@/i18n/format";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { acceptAppointmentHost } from "@/server/appointments/host-handover";
 import { offerAppointmentHost } from "@/server/appointments/host-offer";
+import { respondToProposedSlot } from "@/server/appointments/participant-response";
 import {
   arrangeAppointment,
   requestAppointment,
@@ -29,7 +31,11 @@ import {
   requestCaseProposal,
   transitionCaseStage,
 } from "@/server/cases/lifecycle";
-import { acknowledgeOwnerPreview, bindSellerCase } from "@/server/cases/owner-preview";
+import {
+  acknowledgeOwnerPreview,
+  bindSellerCase,
+  getOwnerPreview,
+} from "@/server/cases/owner-preview";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
@@ -268,6 +274,29 @@ export async function workflowAction(
               reason: values.reason ?? "",
             })
           ).outcome;
+        case "appointmentReply":
+          return (
+            await respondToProposedSlot(db, s, {
+              ...base,
+              decision: values.decision as "accept",
+              note: values.note ?? "",
+            })
+          ).outcome;
+        case "ownerCorrection": {
+          if (context !== "client") throw new AppError("forbidden");
+          if ((values.body ?? "").trim().length < 3)
+            throw new AppError("validation_failed", { fieldErrors: { body: ["required"] } });
+          const preview = await getOwnerPreview(db, s, id, values.reference ?? "");
+          if (preview.hash !== values.previewHash) throw new AppError("approval_stale");
+          return (
+            await postCaseMessage(db, s, {
+              ...base,
+              audience: "case_participants",
+              body: `Искане за корекция · ${preview.reference} · ${preview.hash}\n${values.body ?? ""}`,
+              reviewed: false,
+            })
+          ).outcome;
+        }
         case "message":
         case "note":
           return (
@@ -317,11 +346,28 @@ export async function workflowAction(
     { requireSession: true },
   );
   if (result.ok) {
+    if (command === "message") {
+      const conversation = `/${locale}/${context === "staff" ? "cases" : "messages"}/${id}`;
+      revalidatePath(conversation);
+      const nextOperation = issueFormOperation(scope);
+      return {
+        ...state,
+        operationId: nextOperation,
+        expectedRevision: result.data.version,
+        values: Object.fromEntries(fields.map((name) => [name, ""])),
+        responseId: randomUUID(),
+        reconciliation: {
+          href: workflowStatus(context, locale, command, id, nextOperation),
+          label: copy.status,
+        },
+        outcome: { kind: "idle" },
+      };
+    }
     // Acceptance/cancellation removes the submitted form. Keep the recorded outcome
     // visible after a native POST by opening its actor-bound receipt instead.
     if (["handover", "appointmentHost", "appointmentHostHandover"].includes(command))
       redirect(status.href);
-    const appointment = ["request", "arrange", "appointment"].includes(command);
+    const appointment = ["request", "arrange", "appointment", "appointmentReply"].includes(command);
     const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
     return {
       ...state,

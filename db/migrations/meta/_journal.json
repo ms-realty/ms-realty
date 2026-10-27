@@ -260,6 +260,13 @@
       "when": 1793059177747,
       "tag": "0036_agency_obligations",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793111760299,
+      "tag": "0037_client_workflows",
+      "breakpoints": true
     }
   ]
 }

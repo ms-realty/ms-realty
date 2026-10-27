@@ -24,6 +24,7 @@ import {
   servesApi,
 } from "@/server/config/hosts";
 import { originHeaders } from "@/server/config/origin";
+import { savedHandoffFormTargets } from "@/server/config/saved-handoff-csp";
 
 // One app, three hosts (architecture §11.1): every page request is rewritten to the route tree
 // of the host it was addressed to, app/{public,client,staff}/[locale]/…. The internal prefix is
@@ -44,6 +45,7 @@ function contentSecurityPolicy(
   nonce: string,
   analytics: boolean,
   legacyPreparation: boolean,
+  formTargets: readonly string[] = [],
 ): string {
   const isDev = process.env.NODE_ENV === "development";
   return [
@@ -58,7 +60,7 @@ function contentSecurityPolicy(
     "worker-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
+    `form-action 'self'${formTargets.length ? ` ${formTargets.join(" ")}` : ""}`,
     "frame-ancestors 'none'",
   ].join("; ");
 }
@@ -189,7 +191,12 @@ function route(request: NextRequest) {
     context === "public" &&
     !stagingEnabled() &&
     (process.env.NODE_ENV === "development" || localOrigins);
-  const csp = contentSecurityPolicy(nonce, analytics, legacyPreparation);
+  const csp = contentSecurityPolicy(
+    nonce,
+    analytics,
+    legacyPreparation,
+    savedHandoffFormTargets(context, pathname, origins),
+  );
   const requestHeaders = new Headers(trustedHeaders);
   requestHeaders.set("x-forwarded-host", host ?? "");
   requestHeaders.set("x-nonce", nonce);

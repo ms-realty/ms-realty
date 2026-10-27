@@ -11,11 +11,13 @@ import {
   invitations,
   parties,
   passkeys,
+  personalSavedListings,
   principals,
   privacyExports,
   privacyProcessingRestrictions,
   privacyPropagationEvents,
   privacySafetyDecisions,
+  savedSelectionTransfers,
   sessions,
   subscriptions,
 } from "@/db/schema";
@@ -283,6 +285,24 @@ export async function applyPrivacySafetyEffect(
           eq(principals.id, id),
           eq(principals.partyId, effect.partyId),
           eq(principals.kind, "client"),
+        ),
+      );
+  if (ids.length && effect.personalSavedIds?.length)
+    await db
+      .delete(personalSavedListings)
+      .where(
+        and(
+          inArray(personalSavedListings.id, effect.personalSavedIds),
+          inArray(personalSavedListings.principalId, ids),
+        ),
+      );
+  if (ids.length && effect.savedTransferIds?.length)
+    await db
+      .delete(savedSelectionTransfers)
+      .where(
+        and(
+          inArray(savedSelectionTransfers.id, effect.savedTransferIds),
+          inArray(savedSelectionTransfers.consumedById, ids),
         ),
       );
   if (effect.searchSubscriptionIds.length)

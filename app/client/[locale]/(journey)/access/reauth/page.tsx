@@ -9,10 +9,15 @@ import { currentClientSession, localReturnPath } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
 import { NativeForm } from "@/ui/form/native-form";
 
-export const metadata = {
-  robots: { index: false, follow: false },
-  referrer: "no-referrer" as const,
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  if (!isRoutableLocale(locale)) notFound();
+  return {
+    title: identityCopy(locale).reauthTitle,
+    robots: { index: false, follow: false },
+    referrer: "no-referrer" as const,
+  };
+}
 
 export default async function ClientReauthPage({
   params,
@@ -24,7 +29,9 @@ export default async function ClientReauthPage({
   const { locale } = await params;
   if (!isRoutableLocale(locale)) notFound();
   const query = await searchParams;
-  const returnTo = localReturnPath(query.returnTo, "client", locale) ?? `/${locale}/overview`;
+  const returnTo =
+    localReturnPath(typeof query.returnTo === "string" ? query.returnTo : null, "client", locale) ??
+    `/${locale}/overview`;
   const session = await currentClientSession();
   if (!session) redirect(`/${locale}/access?returnTo=${encodeURIComponent(returnTo)}`);
   const [account] = await getDb()

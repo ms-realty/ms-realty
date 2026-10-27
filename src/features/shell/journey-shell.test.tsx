@@ -42,8 +42,8 @@ it.each(["en", "he"] as const)(
       "reviews",
     ].map((path) => `/${locale}/${path}`);
     const navigations = container.querySelectorAll("nav");
-    expect(navigations).toHaveLength(2);
-    for (const navigation of navigations) {
+    expect(navigations).toHaveLength(3);
+    for (const navigation of Array.from(navigations).slice(0, 2)) {
       expect(
         [...navigation.querySelectorAll("a")].map((link) => link.getAttribute("href")),
       ).toEqual(expected);
@@ -89,5 +89,5 @@ it("keeps the native menu closed initially and locale links outside it so either
   expect(languageLinks).toHaveLength(2);
   for (const link of languageLinks)
     expect(link).toHaveAttribute("href", "/he/overview?source=current");
-  expect(container.querySelector('a[href*="/help"]')).toBeNull();
+  expect(container.querySelector('a[href="/en/help"]')).toBeInTheDocument();
 });
