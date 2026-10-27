@@ -9,7 +9,10 @@ import { isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isAppError } from "@/server/errors";
-import { readOperatingPolicy, readOperatingPolicyVersion } from "@/server/operating-policy/service";
+import {
+  readOperatingPolicyOwnerChoices,
+  readOperatingPolicyVersion,
+} from "@/server/operating-policy/service";
 
 export default async function PolicyVersionPage({
   params,
@@ -22,12 +25,14 @@ export default async function PolicyVersionPage({
     db = getDb(),
     copy = operatingPolicyCopy(locale);
   try {
-    const [edition, model] = await Promise.all([
-      readOperatingPolicyVersion(db, session, Number(version)),
-      readOperatingPolicy(db, session),
-    ]);
+    const edition = await readOperatingPolicyVersion(db, session, Number(version));
     const document = operatingPolicySchema.safeParse(edition.document);
     if (!document.success) notFound();
+    const owners = await readOperatingPolicyOwnerChoices(
+      db,
+      session,
+      Object.values(document.data.responsibilities).filter((id): id is string => Boolean(id)),
+    );
     return (
       <StaffPage
         title={`${copy.version} ${edition.policyVersion}`}
@@ -42,7 +47,7 @@ export default async function PolicyVersionPage({
         }
       >
         <StaffPanel title={copy.active}>
-          <PolicyReview document={document.data} copy={copy} owners={model.owners} />
+          <PolicyReview document={document.data} copy={copy} owners={owners} />
           <p className="mt-5 whitespace-pre-wrap text-dense">{edition.approvalNote}</p>
         </StaffPanel>
         <StaffPanel title={copy.effects}>

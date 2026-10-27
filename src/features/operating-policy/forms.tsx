@@ -2,10 +2,16 @@
 import { policyWeekdays } from "@/domain/operating-policy";
 import { type PolicyFormValues, policyFormFields } from "@/domain/operating-policy-form";
 import { staffUi } from "@/features/shell/staff-ui";
+import { buttonClass } from "@/ui/button-class";
 import type { FormAction, FormCopy, FormState } from "@/ui/form/contract";
 import { ActionForm, type FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { OperatingPolicyCopy } from "./copy";
+import type {
+  PolicyDraftState,
+  PolicyDraftValues,
+  PolicyOwnerDirectory,
+} from "./owner-directory-state";
 
 export type PolicyApprovalValues = { expectedHash: string; note: string; reviewed: string };
 type Shared = { locale: string; copy: OperatingPolicyCopy; formCopy: FormCopy };
@@ -28,8 +34,8 @@ function Select({
   label,
   options,
 }: {
-  form: FormController<PolicyFormValues>;
-  name: keyof PolicyFormValues;
+  form: FormController<PolicyDraftValues>;
+  name: keyof PolicyDraftValues;
   label: string;
   options: { value: string; label: string }[];
 }) {
@@ -54,6 +60,82 @@ function Select({
     </div>
   );
 }
+function currentOwners(
+  form: FormController<PolicyDraftValues>,
+  owners: { id: string; displayName: string }[],
+  initial: PolicyOwnerDirectory,
+) {
+  const state = form.state as PolicyDraftState;
+  return [
+    ...new Map(
+      [...(state.ownerChoices ?? owners), ...(state.ownerDirectory ?? initial).rows].map((row) => [
+        row.id,
+        row,
+      ]),
+    ).values(),
+  ];
+}
+function PolicyOwnerSearch({
+  form,
+  copy,
+  initial,
+}: {
+  form: FormController<PolicyDraftValues>;
+  copy: OperatingPolicyCopy;
+  initial: PolicyOwnerDirectory;
+}) {
+  const directory = (form.state as PolicyDraftState).ownerDirectory ?? initial;
+  const disabled = form.field("ownerSearch").readOnly;
+  return (
+    <div className={staffUi.section}>
+      <FormField
+        {...form.field("ownerSearch")}
+        type="search"
+        label={copy.ownerSearch}
+        hint={copy.ownerSearchHelp}
+        maxLength={120}
+      />
+      <input type="hidden" name="_ownerCurrentPage" value={directory.page} />
+      <button
+        type="submit"
+        name="_ownerPage"
+        value="1"
+        disabled={disabled}
+        className={buttonClass("secondary", "self-start")}
+      >
+        {copy.ownerSearchSubmit}
+      </button>
+      <p role="status" className={staffUi.hint}>
+        {directory.rows.length ? copy.ownerResults : copy.ownerNone} · {copy.ownerPage}{" "}
+        {directory.page}
+      </p>
+      <div className="flex flex-wrap gap-4">
+        {directory.page > 1 ? (
+          <button
+            type="submit"
+            name="_ownerPage"
+            value={directory.page - 1}
+            disabled={disabled}
+            className={buttonClass("secondary", "self-start")}
+          >
+            {copy.ownerPrevious}
+          </button>
+        ) : null}
+        {directory.hasMore ? (
+          <button
+            type="submit"
+            name="_ownerPage"
+            value={directory.page + 1}
+            disabled={disabled}
+            className={buttonClass("secondary", "self-start")}
+          >
+            {copy.ownerNext}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 export function PolicyDraftForm({
   locale,
   copy,
@@ -61,12 +143,14 @@ export function PolicyDraftForm({
   initialState,
   action,
   owners,
+  ownerDirectory,
 }: Shared & {
-  initialState: FormState<PolicyFormValues>;
-  action: FormAction<PolicyFormValues>;
+  initialState: PolicyDraftState;
+  action: FormAction<PolicyDraftValues>;
+  ownerDirectory: PolicyOwnerDirectory;
   owners: { id: string; displayName: string }[];
 }) {
-  const fieldLabels = labels(copy),
+  const fieldLabels = { ...labels(copy), ownerSearch: copy.ownerSearch },
     path = `/${locale}/settings/operating-policy`;
   return (
     <ActionForm
@@ -137,7 +221,10 @@ export function PolicyDraftForm({
               maxLength={100000}
             />
           </details>
-          <details className={staffUi.section}>
+          <details
+            open={Boolean((form.state as PolicyDraftState).ownerDirectory) || undefined}
+            className={staffUi.section}
+          >
             <summary className="min-h-control cursor-pointer border-t border-divider pt-4 text-subheading font-semibold">
               {copy.coverageGroup}
             </summary>
@@ -147,6 +234,7 @@ export function PolicyDraftForm({
               multiline
               maxLength={1500}
             />
+            <PolicyOwnerSearch form={form} copy={copy} initial={ownerDirectory} />
             {(["ownerService", "ownerPrivacy", "ownerAlerts"] as const).map((key) => (
               <Select
                 key={key}
@@ -155,10 +243,15 @@ export function PolicyDraftForm({
                 label={copy.fields[key]}
                 options={[
                   { value: "", label: copy.unknown },
-                  ...(!owners.some((owner) => owner.id === form.values[key]) && form.values[key]
+                  ...(!currentOwners(form, owners, ownerDirectory).some(
+                    (owner) => owner.id === form.values[key],
+                  ) && form.values[key]
                     ? [{ value: form.values[key], label: copy.held }]
                     : []),
-                  ...owners.map((owner) => ({ value: owner.id, label: owner.displayName })),
+                  ...currentOwners(form, owners, ownerDirectory).map((owner) => ({
+                    value: owner.id,
+                    label: owner.displayName,
+                  })),
                 ]}
               />
             ))}

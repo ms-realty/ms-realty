@@ -1,7 +1,7 @@
 // O26/F30 · AT45/UX23: real native POST, lost response, same-key readback and partial outcomes.
 import { execFileSync } from "node:child_process";
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -9,15 +9,8 @@ import * as schema from "../src/db/schema";
 import { erasureCategories } from "../src/domain/privacy-erasure";
 import { privacyErasureCopy } from "../src/features/privacy/erasure-copy";
 import { hostUrl, origins } from "./hosts";
+import { test } from "./support/policy-test";
 
-const url = process.env.E2E_DATABASE_URL;
-if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
-  throw new Error("Disposable browser database required");
-const connection = postgres(url, { max: 1, onnotice: () => {} }),
-  db = drizzle(connection, { schema });
-test.afterAll(async () => {
-  await connection.end();
-});
 // The reviewed policy is one agency singleton; share B08's lock across browser projects.
 test.describe.configure({ mode: "serial" });
 
@@ -25,7 +18,12 @@ for (const javascript of [false, true])
   test(`AT45 reviewed erasure ${javascript ? "enhanced" : "native"}`, async ({
     browser,
   }, testInfo) => {
-    await connection`select pg_advisory_lock(hashtextextended('synthetic-operating-policy-browser', 0))`;
+    // The automatic policy fixture has already validated the disposable URL and owns its lease.
+    const connection = postgres(process.env.E2E_DATABASE_URL as string, {
+        max: 1,
+        onnotice: () => {},
+      }),
+      db = drizzle(connection, { schema });
     try {
       const fixture = JSON.parse(
         execFileSync(
@@ -160,6 +158,6 @@ for (const javascript of [false, true])
         await context.close();
       }
     } finally {
-      await connection`select pg_advisory_unlock(hashtextextended('synthetic-operating-policy-browser', 0))`;
+      await connection.end({ timeout: 2 });
     }
   });
