@@ -12,7 +12,7 @@ import {
 } from "./registry";
 
 /** Bump on any change a client could observe. */
-export const transportVersion = "0.4.0";
+export const transportVersion = "0.5.0";
 
 const servers = {
   public: { url: "https://makler-realty.com", description: "Public host" },
@@ -42,7 +42,23 @@ function jsonSchema(schema: z.ZodType, io: "input" | "output"): Record<string, u
   return rest;
 }
 
-function errorResponses(codes: readonly EndpointDefinition["errors"][number][]) {
+function responseHeaders(headers: Readonly<Record<string, string>> | undefined) {
+  return headers
+    ? {
+        headers: Object.fromEntries(
+          Object.entries(headers).map(([name, description]) => [
+            name,
+            { description, schema: { type: "string" } },
+          ]),
+        ),
+      }
+    : {};
+}
+
+function errorResponses(
+  codes: readonly EndpointDefinition["errors"][number][],
+  headers: EndpointDefinition["errorHeaders"],
+) {
   const byStatus = new Map<number, string[]>();
   for (const code of codes) {
     const status = new AppError(code).status;
@@ -53,6 +69,7 @@ function errorResponses(codes: readonly EndpointDefinition["errors"][number][]) 
       String(status),
       {
         description: wire.join(", "),
+        ...responseHeaders(headers),
         content: {
           "application/json": {
             schema: { $ref: "#/components/schemas/ErrorEnvelope" },
@@ -75,37 +92,41 @@ function errorResponses(codes: readonly EndpointDefinition["errors"][number][]) 
 }
 
 function operation(entry: EndpointDefinition) {
-  const parameters = entry.params
-    ? Object.entries(entry.params.shape).map(([name, schema]) => ({
-        name,
-        in: "path",
-        required: true,
-        schema: jsonSchema(schema as z.ZodType, "input"),
-      }))
-    : undefined;
+  const parameters = (
+    [
+      ["path", entry.params],
+      ["query", entry.query],
+      ["header", entry.requestHeaders],
+    ] as const
+  ).flatMap(([location, fields]) =>
+    fields
+      ? Object.entries(fields.shape).map(([name, schema]) => ({
+          name,
+          in: location,
+          required: location === "path" || !(schema as z.ZodType).isOptional(),
+          schema: jsonSchema(schema as z.ZodType, "input"),
+        }))
+      : [],
+  );
   const responses = Object.fromEntries(
     entry.responses.map((response) => [
       String(response.status),
       {
         description: response.description,
-        ...(response.headers
-          ? {
-              headers: Object.fromEntries(
-                Object.entries(response.headers).map(([name, description]) => [
-                  name,
-                  { description, schema: { type: "string" } },
-                ]),
-              ),
-            }
-          : {}),
+        ...responseHeaders(response.headers),
         ...(response.schema
           ? {
-              content: {
-                [response.contentType ?? "application/json"]: {
-                  schema: jsonSchema(response.schema, "output"),
-                  ...(response.example !== undefined ? { example: response.example } : {}),
-                },
-              },
+              content: Object.fromEntries(
+                (response.contentTypes ?? [response.contentType ?? "application/json"]).map(
+                  (contentType) => [
+                    contentType,
+                    {
+                      schema: jsonSchema(response.schema as z.ZodType, "output"),
+                      ...(response.example !== undefined ? { example: response.example } : {}),
+                    },
+                  ],
+                ),
+              ),
             }
           : {}),
       },
@@ -123,11 +144,14 @@ function operation(entry: EndpointDefinition) {
             entry.host === "private" ? [servers.client, servers.staff] : [servers[entry.host]],
         }),
     security: securityFor[entry.authorization],
-    ...(parameters ? { parameters } : {}),
+    ...(parameters.length ? { parameters } : {}),
     ...(entry.body
       ? {
           requestBody: {
             required: true,
+            ...(entry.body.maxBytes === undefined
+              ? {}
+              : { "x-max-body-bytes": entry.body.maxBytes }),
             content: Object.fromEntries(
               Object.entries(entry.body.schemas).map(([contentType, schema], index) => [
                 contentType,
@@ -142,7 +166,7 @@ function operation(entry: EndpointDefinition) {
           },
         }
       : {}),
-    responses: { ...responses, ...errorResponses(entry.errors) },
+    responses: { ...responses, ...errorResponses(entry.errors, entry.errorHeaders) },
     "x-host-context": entry.host,
     "x-authorization": {
       class: entry.authorization,
@@ -152,6 +176,7 @@ function operation(entry: EndpointDefinition) {
     "x-revision": entry.revision,
     "x-pagination": entry.pagination,
     "x-acceptance": entry.acceptance,
+    ...(entry.redirectErrors ? { "x-redirect-error-codes": entry.redirectErrors } : {}),
   };
 }
 
