@@ -7,68 +7,10 @@ import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { publicServiceOfferings } from "@/server/service-intake/scope";
 import { Notice } from "@/ui/notice";
+import { contentFallbackTitle, contentLabels } from "./content-copy";
 import { readApprovedContent } from "./content-source";
 import { discoveryCopy } from "./copy";
 import { DiscoveryPage } from "./page";
-
-const labels = {
-  bg: {
-    area: "Информация за района",
-    service: "Информация за услугата",
-    help: "Помощ",
-    contact: "Контакт",
-    unavailable: "Одобрена информация за тази страница все още не е достъпна.",
-    scope: "Обхват на прегледа",
-  },
-  en: {
-    area: "Area information",
-    service: "Service information",
-    help: "Help",
-    contact: "Contact",
-    unavailable: "Approved information is not yet available for this page.",
-    scope: "Review scope",
-  },
-  ru: {
-    area: "Информация о районе",
-    service: "Информация об услуге",
-    help: "Помощь",
-    contact: "Контакт",
-    unavailable: "Одобренная информация для этой страницы пока недоступна.",
-    scope: "Область проверки",
-  },
-  de: {
-    area: "Ortsinformationen",
-    service: "Serviceinformationen",
-    help: "Hilfe",
-    contact: "Kontakt",
-    unavailable: "Freigegebene Informationen für diese Seite sind noch nicht verfügbar.",
-    scope: "Prüfumfang",
-  },
-  nl: {
-    area: "Gebiedsinformatie",
-    service: "Dienstinformatie",
-    help: "Hulp",
-    contact: "Contact",
-    unavailable: "Goedgekeurde informatie voor deze pagina is nog niet beschikbaar.",
-    scope: "Reikwijdte van beoordeling",
-  },
-  el: {
-    area: "Πληροφορίες περιοχής",
-    service: "Πληροφορίες υπηρεσίας",
-    help: "Βοήθεια",
-    contact: "Επικοινωνία",
-    unavailable: "Δεν υπάρχουν ακόμη εγκεκριμένες πληροφορίες για αυτή τη σελίδα.",
-    scope: "Πεδίο ελέγχου",
-  },
-  he: {
-    area: "מידע על האזור",
-    service: "מידע על השירות",
-    help: "עזרה",
-    contact: "יצירת קשר",
-    unavailable: "מידע מאושר לעמוד זה עדיין אינו זמין.",
-    scope: "היקף הבדיקה",
-  },
-};
 
 export async function ContentScreen({
   locale,
@@ -85,7 +27,7 @@ export async function ContentScreen({
 }) {
   if (!isRoutableLocale(locale)) notFound();
   const copy = discoveryCopy(locale),
-    label = labels[locale];
+    label = contentLabels(locale);
   let failed = false;
   const bounded = kind === "service" && !intent;
   const offerings = bounded
@@ -102,15 +44,7 @@ export async function ContentScreen({
     !bounded && !failed && !content && locale !== "bg"
       ? await readApprovedContent(getDb(), kind, slug, "bg").catch(() => null)
       : null;
-  const title =
-    content?.title ??
-    (intent === "seller_consultation"
-      ? copy.sell
-      : intent === "landlord_consultation"
-        ? copy.let
-        : route === "/contact"
-          ? label.contact
-          : label[kind]);
+  const title = content?.title ?? contentFallbackTitle(locale, { kind, route, intent });
   const inquiryQuery = new URLSearchParams();
   if (intent) inquiryQuery.set("purpose", intent);
   if (content)
