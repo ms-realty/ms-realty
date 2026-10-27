@@ -7,65 +7,6 @@ import { agencyTools, journeyNav } from "@/features/shell/navigation";
 import type { PublicLocale } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
 
-const actions = {
-  bg: {
-    new: "Нов запис",
-    edit: "Редакция",
-    receipt: "Резултат",
-    review: "Преглед",
-    import: "Добавяне на запазени имоти",
-    correction: "Поправка на информация",
-  },
-  en: {
-    new: "New record",
-    edit: "Edit",
-    receipt: "Outcome",
-    review: "Review",
-    import: "Import saved properties",
-    correction: "Correct published information",
-  },
-  ru: {
-    new: "Новая запись",
-    edit: "Редактирование",
-    receipt: "Результат",
-    review: "Проверка",
-    import: "Добавление сохранённых объектов",
-    correction: "Исправление сведений",
-  },
-  de: {
-    new: "Neuer Eintrag",
-    edit: "Bearbeiten",
-    receipt: "Ergebnis",
-    review: "Prüfung",
-    import: "Gespeicherte Immobilien übernehmen",
-    correction: "Veröffentlichte Angaben korrigieren",
-  },
-  nl: {
-    new: "Nieuw item",
-    edit: "Bewerken",
-    receipt: "Resultaat",
-    review: "Beoordeling",
-    import: "Bewaarde woningen overnemen",
-    correction: "Gepubliceerde informatie corrigeren",
-  },
-  el: {
-    new: "Νέα εγγραφή",
-    edit: "Επεξεργασία",
-    receipt: "Αποτέλεσμα",
-    review: "Έλεγχος",
-    import: "Εισαγωγή αποθηκευμένων ακινήτων",
-    correction: "Διόρθωση δημοσιευμένων στοιχείων",
-  },
-  he: {
-    new: "רשומה חדשה",
-    edit: "עריכה",
-    receipt: "תוצאה",
-    review: "בדיקה",
-    import: "ייבוא נכסים שמורים",
-    correction: "תיקון מידע שפורסם",
-  },
-} as const;
-
 /** Uses route identity only: no extra private-data query and no token/query-string titles. */
 export async function privatePageMetadata(input: {
   surface: "staff" | "client";
@@ -73,6 +14,7 @@ export async function privatePageMetadata(input: {
   path: string | null;
 }): Promise<Pick<Metadata, "title">> {
   const { surface, locale } = input;
+  const actions = workflowCopy(locale, "pageTitles");
   const external = input.path?.split(/[?#]/)[0]?.replace(/^\/(staff|client)(?=\/)/, "");
   const path =
     external === `/${locale}`
@@ -142,8 +84,8 @@ export async function privatePageMetadata(input: {
     reference?.includes("-") && /^[a-f\d]{8}-/i.test(reference) ? reference.slice(0, 8) : reference;
   const last = segments.at(-1);
   const action =
-    !sensitive && last && Object.hasOwn(actions[locale], last)
-      ? actions[locale][last as keyof typeof actions.en]
+    !sensitive && last && Object.hasOwn(actions, last)
+      ? actions[last as keyof typeof actions]
       : null;
   return {
     title: {

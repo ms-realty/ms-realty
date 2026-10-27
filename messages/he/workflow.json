@@ -595,5 +595,20 @@
     "photoMoved": "{photo}: מיקום {position} מתוך {total} בסדר המוצע.",
     "draftDiscarded": "טיוטת התמונה בוטלה",
     "detailsUnchanged": "פרטי התמונה תואמים לגרסה המאושרת"
+  },
+  "pageTitles": {
+    "new": "רשומה חדשה",
+    "edit": "עריכה",
+    "receipt": "תוצאה",
+    "review": "בדיקה",
+    "import": "ייבוא נכסים שמורים",
+    "correction": "תיקון מידע שפורסם"
+  },
+  "journeyTabs": {
+    "overview": "ראשי",
+    "properties": "נכסים",
+    "appointments": "פגישות",
+    "messages": "צ׳אט",
+    "account": "חשבון"
   }
 }

@@ -1,0 +1,12 @@
+{
+  "title": "Your privacy choice",
+  "description": "We use optional analytics cookies only with your consent. You can withdraw it at any time.",
+  "allow": "Allow analytics",
+  "necessary": "Necessary only",
+  "settings": "Privacy settings",
+  "withdraw": "Withdraw consent",
+  "enabled": "Analytics cookies are allowed.",
+  "disabled": "Only necessary cookies are used.",
+  "nextPage": "Choice saved. Analytics will start on the next page you open.",
+  "withdrawRefresh": "Withdrawing refreshes this page to stop analytics already loaded. Save any entered text first."
+}

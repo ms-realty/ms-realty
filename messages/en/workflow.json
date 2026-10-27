@@ -595,5 +595,20 @@
     "photoMoved": "{photo}: position {position} of {total} in the proposed order.",
     "draftDiscarded": "Photo draft discarded",
     "detailsUnchanged": "Photo details match the approved version"
+  },
+  "pageTitles": {
+    "new": "New record",
+    "edit": "Edit",
+    "receipt": "Outcome",
+    "review": "Review",
+    "import": "Import saved properties",
+    "correction": "Correct published information"
+  },
+  "journeyTabs": {
+    "overview": "Home",
+    "properties": "Property",
+    "appointments": "Agenda",
+    "messages": "Chat",
+    "account": "Account"
   }
 }

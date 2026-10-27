@@ -595,5 +595,20 @@
     "photoMoved": "{photo}: Position {position} von {total} in der vorgeschlagenen Reihenfolge.",
     "draftDiscarded": "Fotoentwurf verworfen",
     "detailsUnchanged": "Fotodaten entsprechen der freigegebenen Version"
+  },
+  "pageTitles": {
+    "new": "Neuer Eintrag",
+    "edit": "Bearbeiten",
+    "receipt": "Ergebnis",
+    "review": "Prüfung",
+    "import": "Gespeicherte Immobilien übernehmen",
+    "correction": "Veröffentlichte Angaben korrigieren"
+  },
+  "journeyTabs": {
+    "overview": "Start",
+    "properties": "Objekte",
+    "appointments": "Termine",
+    "messages": "Chat",
+    "account": "Konto"
   }
 }

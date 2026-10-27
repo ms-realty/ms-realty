@@ -1,56 +1,15 @@
 import type { PublicLocale } from "@/i18n/config";
+import { workflowCopy } from "@/i18n/workflow-copy";
 
-// C03 compact task labels. BG source; these interface translations remain human-review drafts.
+// Compact labels retain full accessible names; interface drafts only.
 export const journeyTabLabels = {
-  bg: {
-    overview: "Начало",
-    properties: "Имоти",
-    appointments: "Срещи",
-    messages: "Чат",
-    account: "Профил",
-  },
-  en: {
-    overview: "Home",
-    properties: "Property",
-    appointments: "Agenda",
-    messages: "Chat",
-    account: "Account",
-  },
-  ru: {
-    overview: "Обзор",
-    properties: "Объекты",
-    appointments: "Планы",
-    messages: "Чат",
-    account: "Профиль",
-  },
-  de: {
-    overview: "Start",
-    properties: "Objekte",
-    appointments: "Termine",
-    messages: "Chat",
-    account: "Konto",
-  },
-  nl: {
-    overview: "Start",
-    properties: "Aanbod",
-    appointments: "Agenda",
-    messages: "Chat",
-    account: "Account",
-  },
-  el: {
-    overview: "Αρχή",
-    properties: "Ακίνητα",
-    appointments: "Ραντεβού",
-    messages: "Συνομιλία",
-    account: "Προφίλ",
-  },
-  he: {
-    overview: "ראשי",
-    properties: "נכסים",
-    appointments: "פגישות",
-    messages: "צ׳אט",
-    account: "חשבון",
-  },
+  bg: workflowCopy("bg", "journeyTabs"),
+  en: workflowCopy("en", "journeyTabs"),
+  ru: workflowCopy("ru", "journeyTabs"),
+  de: workflowCopy("de", "journeyTabs"),
+  nl: workflowCopy("nl", "journeyTabs"),
+  el: workflowCopy("el", "journeyTabs"),
+  he: workflowCopy("he", "journeyTabs"),
 } satisfies Record<
   PublicLocale,
   Record<"overview" | "properties" | "appointments" | "messages" | "account", string>

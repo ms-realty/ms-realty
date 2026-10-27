@@ -20,6 +20,7 @@ import type privacy from "../../messages/bg/privacy.json";
 import type privacyExportClient from "../../messages/bg/privacy-export.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
+import type tracking from "../../messages/bg/tracking.json";
 import type workflow from "../../messages/bg/workflow.json";
 import type agency from "../../messages/staff/bg/agency.json";
 import type auditHistory from "../../messages/staff/bg/auditHistory.json";
@@ -57,6 +58,7 @@ export const publicNamespaces = [
   "privacy-export",
   "server",
   "states",
+  "tracking",
   "workflow",
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
@@ -97,6 +99,7 @@ export interface PublicMessages {
   "privacy-export": typeof privacyExportClient;
   server: typeof server;
   states: typeof states;
+  tracking: typeof tracking;
   workflow: typeof workflow;
 }
 export interface StaffMessages {

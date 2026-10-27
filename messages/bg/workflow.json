@@ -595,5 +595,20 @@
     "photoMoved": "{photo}: позиция {position} от {total} в предложения ред.",
     "draftDiscarded": "Черновата на снимката е отхвърлена",
     "detailsUnchanged": "Данните на снимката съвпадат с одобрената версия"
+  },
+  "pageTitles": {
+    "new": "Нов запис",
+    "edit": "Редакция",
+    "receipt": "Резултат",
+    "review": "Преглед",
+    "import": "Добавяне на запазени имоти",
+    "correction": "Поправка на информация"
+  },
+  "journeyTabs": {
+    "overview": "Начало",
+    "properties": "Имоти",
+    "appointments": "Срещи",
+    "messages": "Чат",
+    "account": "Профил"
   }
 }

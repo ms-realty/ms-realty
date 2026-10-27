@@ -1,0 +1,12 @@
+{
+  "title": "Ihre Datenschutzauswahl",
+  "description": "Optionale Analyse-Cookies verwenden wir nur mit Ihrer Einwilligung. Sie können sie jederzeit widerrufen.",
+  "allow": "Analyse erlauben",
+  "necessary": "Nur notwendige",
+  "settings": "Datenschutzeinstellungen",
+  "withdraw": "Einwilligung widerrufen",
+  "enabled": "Analyse-Cookies sind erlaubt.",
+  "disabled": "Nur notwendige Cookies werden verwendet.",
+  "nextPage": "Auswahl gespeichert. Die Analyse beginnt auf der nächsten geöffneten Seite.",
+  "withdrawRefresh": "Beim Widerruf wird diese Seite neu geladen, um die bereits geladene Analyse zu stoppen. Speichern Sie zuerst eingegebenen Text."
+}

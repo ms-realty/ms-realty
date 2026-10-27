@@ -595,5 +595,20 @@
     "photoMoved": "{photo}: positie {position} van {total} in de voorgestelde volgorde.",
     "draftDiscarded": "Fotoconcept verworpen",
     "detailsUnchanged": "Fotogegevens komen overeen met de goedgekeurde versie"
+  },
+  "pageTitles": {
+    "new": "Nieuw item",
+    "edit": "Bewerken",
+    "receipt": "Resultaat",
+    "review": "Beoordeling",
+    "import": "Bewaarde woningen overnemen",
+    "correction": "Gepubliceerde informatie corrigeren"
+  },
+  "journeyTabs": {
+    "overview": "Start",
+    "properties": "Aanbod",
+    "appointments": "Agenda",
+    "messages": "Chat",
+    "account": "Account"
   }
 }

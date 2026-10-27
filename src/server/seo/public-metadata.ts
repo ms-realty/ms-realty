@@ -170,7 +170,7 @@ export async function publicContentMetadata(
               ? { intent: slug === "sell" ? "seller_consultation" : "landlord_consultation" }
               : {}),
           })),
-    description: content?.paragraphs.join(" "),
+    description: content?.paragraphs.join(" ") ?? contentLabels(locale).unavailable,
     availableIn: content ? [locale] : [],
     indexable: Boolean(content) && localePolicy(locale).indexable,
   });

@@ -333,6 +333,43 @@
         "reviewer": null,
         "reviewedAt": null
       }
+    },
+    "tracking": {
+      "bg": {
+        "status": "draft_unreviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "en": {
+        "status": "draft_unreviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "ru": {
+        "status": "draft_unreviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "de": {
+        "status": "draft_unreviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "nl": {
+        "status": "draft_unreviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "el": {
+        "status": "draft_unreviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "he": {
+        "status": "draft_unreviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      }
     }
   },
   "locales": {
