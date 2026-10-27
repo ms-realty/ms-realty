@@ -184,3 +184,36 @@ test("map failure and retry leave the listing usable; no-JavaScript list still w
   await expect(native.getByText("The map needs JavaScript.", { exact: false })).toBeVisible();
   await context.close();
 });
+
+test("UI16 actual map movement proposes bounded criteria until explicit area search", async ({
+  page,
+}, testInfo) => {
+  const data = fixture();
+  await page.goto(`/en/properties?q=${data.published.reference}&purpose=sale&sort=price_asc`);
+  const committed = page.url();
+  await page.getByRole("button", { name: "Show map", exact: true }).click();
+  await expect(page.getByText("Loading map…", { exact: true })).not.toBeVisible({ timeout: 20000 });
+  await expect(page.locator(".msr-map-marker")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Search this area", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  const area = page.getByRole("link", { name: "Search this area", exact: true });
+  await expect(area).toBeVisible();
+  expect(page.url()).toBe(committed);
+  const target = new URL((await area.getAttribute("href")) ?? "", page.url());
+  expect(target.searchParams.get("q")).toBe(data.published.reference);
+  expect(target.searchParams.get("sort")).toBe("price_asc");
+  expect(target.searchParams.has("cursor")).toBe(false);
+  const bounds = target.searchParams.get("mapBounds")?.split(",").map(Number);
+  expect(bounds).toHaveLength(4);
+  expect(bounds?.every(Number.isFinite)).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("synthetic-map-area-draft.png"),
+    fullPage: true,
+  });
+  await area.click();
+  await expect(page.locator("#results-heading")).toBeFocused();
+  expect(new URL(page.url()).searchParams.get("mapBounds")).toBe(
+    target.searchParams.get("mapBounds"),
+  );
+  await expect(page.getByRole("link", { name: data.published.title, exact: true })).toBeVisible();
+});
