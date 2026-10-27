@@ -206,6 +206,9 @@ export function ApprovedGallery({
         className="group/media relative block rounded-panel no-underline outline-offset-4"
         onClick={(event) => {
           event.preventDefault();
+          // Safari does not focus pointer-clicked links. Give the modal an exact
+          // return target before its focus scope records the active element.
+          event.currentTarget.focus({ preventScroll: true });
           select(entryIndex);
           viewer.open();
         }}

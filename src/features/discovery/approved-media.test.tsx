@@ -186,9 +186,11 @@ it("P06 Back closes the viewer without leaving the parent; RTL arrows retain log
       copy={copy}
     />,
   );
-  await user.click(
-    screen.getByRole("link", { name: new RegExp(copy.openMedia.replace("{position}", "1")) }),
-  );
+  const launcher = screen.getByRole("link", {
+    name: new RegExp(copy.openMedia.replace("{position}", "1")),
+  });
+  // A pointer click need not natively focus its anchor (Safari).
+  fireEvent.click(launcher);
   const dialog = screen.getByRole("dialog", { name: copy.mediaViewer });
   dialog.focus();
   await user.keyboard("{ArrowLeft}");
@@ -197,5 +199,6 @@ it("P06 Back closes the viewer without leaving the parent; RTL arrows retain log
   );
   act(() => window.history.back());
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  await waitFor(() => expect(launcher).toHaveFocus());
   expect(window.location.pathname).toBe("/");
 });
