@@ -1,0 +1,136 @@
+name: Staging HTTP qualification (read only)
+run-name: R07/R08 ${{ inputs.mode }} check of ${{ inputs.source_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Bounded transport check, or full route/media and continuous observations
+        required: true
+        type: choice
+        default: transport
+        options: [transport, full]
+      source_sha:
+        description: Full source SHA of the existing qualified staging deployment
+        required: true
+        type: string
+      deployment_run_id:
+        description: Successful staging.yml run that produced its immutable candidate bundle
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+# Serialize with deployment so a writer cannot change the image during the full observations.
+concurrency:
+  group: ms-realty-staging
+  cancel-in-progress: false
+
+jobs:
+  prerequisites:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      source: ${{ steps.guard.outputs.source }}
+      run_id: ${{ steps.guard.outputs.run_id }}
+      attempt: ${{ steps.guard.outputs.attempt }}
+      mode: ${{ steps.guard.outputs.mode }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Bind the read-only request before resolving the protected environment
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SOURCE: ${{ inputs.source_sha }}
+          DEPLOYMENT_RUN_ID: ${{ inputs.deployment_run_id }}
+          QUALIFICATION_MODE: ${{ inputs.mode }}
+          STAGING_ENVIRONMENT_CONFIGURED: ${{ vars.STAGING_ENVIRONMENT_CONFIGURED }}
+          STAGING_SOURCE_QUALIFIED_SHA: ${{ vars.STAGING_SOURCE_QUALIFIED_SHA }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SOURCE" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$DEPLOYMENT_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          test "$GITHUB_REF" = refs/heads/codex/msr-staging
+          test "$GITHUB_SHA" = "$EXPECTED_SOURCE"
+          gh api "repos/ms-realty/ms-realty/actions/runs/${DEPLOYMENT_RUN_ID}" > "$RUNNER_TEMP/deployment-run.json"
+          # The guard also requires an exact clean checkout integrated in origin/main.
+          node scripts/staging-http-qualification.mjs guard "$RUNNER_TEMP/deployment-run.json"
+
+  qualify:
+    needs: prerequisites
+    environment: staging
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prerequisites.outputs.source }}
+          path: verifier
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prerequisites.outputs.source }}
+          path: qualified-source
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install the exact deployed source's locked parsing dependencies
+        if: needs.prerequisites.outputs.mode == 'full'
+        working-directory: qualified-source
+        run: npm ci --no-audit --no-fund
+      - name: Obtain the existing deployment bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPLOYMENT_RUN_ID: ${{ needs.prerequisites.outputs.run_id }}
+          QUALIFIED_SOURCE: ${{ needs.prerequisites.outputs.source }}
+          DEPLOYMENT_ATTEMPT: ${{ needs.prerequisites.outputs.attempt }}
+        run: |
+          set -euo pipefail
+          gh run download "$DEPLOYMENT_RUN_ID" --repo ms-realty/ms-realty \
+            --name "staging-candidate-${QUALIFIED_SOURCE}-${DEPLOYMENT_ATTEMPT}" \
+            --dir "$RUNNER_TEMP/staging-deployment-bundle"
+      - name: Observe protected health and staff session gates once
+        if: needs.prerequisites.outputs.mode == 'transport'
+        env:
+          QUALIFIED_SOURCE: ${{ needs.prerequisites.outputs.source }}
+          STAGING_ACCESS_SERVICE_CLIENT_SECRET: ${{ secrets.STAGING_ACCESS_SERVICE_CLIENT_SECRET }}
+        run: |
+          node verifier/scripts/staging-http-qualification.mjs run \
+            "$GITHUB_WORKSPACE/qualified-source" \
+            "$RUNNER_TEMP/staging-deployment-bundle" \
+            "$RUNNER_TEMP/staging-http-qualification" \
+            "$QUALIFIED_SOURCE" transport
+      - name: Observe exact roles, initial access, every source page and every media byte
+        if: needs.prerequisites.outputs.mode == 'full'
+        env:
+          QUALIFIED_SOURCE: ${{ needs.prerequisites.outputs.source }}
+          STAGING_ACCESS_SERVICE_CLIENT_SECRET: ${{ secrets.STAGING_ACCESS_SERVICE_CLIENT_SECRET }}
+          STAGING_CONTROL_SECRET: ${{ secrets.STAGING_CONTROL_SECRET }}
+          STAGING_CLOUDFLARE_READ_TOKEN: ${{ secrets.STAGING_CLOUDFLARE_READ_TOKEN }}
+        run: |
+          node verifier/scripts/staging-http-qualification.mjs run \
+            "$GITHUB_WORKSPACE/qualified-source" \
+            "$RUNNER_TEMP/staging-deployment-bundle" \
+            "$RUNNER_TEMP/staging-http-qualification" \
+            "$QUALIFIED_SOURCE" full
+      - name: Preserve passing, failed and partial observations
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: staging-http-${{ needs.prerequisites.outputs.mode }}-${{ needs.prerequisites.outputs.source }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/staging-http-qualification/
+          if-no-files-found: error
+          retention-days: 30
