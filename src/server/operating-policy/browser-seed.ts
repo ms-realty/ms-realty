@@ -50,7 +50,7 @@ try {
       backedUp: false,
     });
     const issued = await createSession(db, { kind: "staff", id: actor.id });
-    const displayName = `Z synthetic O24 owner ${actor.id}`;
+    const displayName = directory ? `Z synthetic O24 owner ${actor.id}` : "Test Staff";
     if (directory)
       await db
         .update(schema.principals)
