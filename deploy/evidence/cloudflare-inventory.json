@@ -541,18 +541,14 @@
       "name": "Hyperdrive",
       "status": "unverified",
       "http_status": 403,
-      "error_codes": [
-        10000
-      ],
+      "error_codes": [10000],
       "resources": []
     },
     {
       "name": "D1",
       "status": "unverified",
       "http_status": 401,
-      "error_codes": [
-        10000
-      ],
+      "error_codes": [10000],
       "resources": []
     },
     {
@@ -1137,18 +1133,14 @@
       "name": "Staging DNS: makler-realty.com",
       "status": "unverified",
       "http_status": 403,
-      "error_codes": [
-        10000
-      ],
+      "error_codes": [10000],
       "resources": []
     },
     {
       "name": "Email routing: makler-realty.com",
       "status": "unverified",
       "http_status": 403,
-      "error_codes": [
-        10000
-      ],
+      "error_codes": [10000],
       "resources": []
     }
   ],
