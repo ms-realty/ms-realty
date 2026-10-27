@@ -68,12 +68,26 @@ try {
         .update(schema.geographyPlaces)
         .set(
           country === "GR"
-            ? { latitude: "40.64", longitude: "22.94" }
-            : { latitude: "41.55", longitude: "23.28" },
+            ? {
+                latitude: "40.64",
+                longitude: "22.94",
+                nameNative: "Συνθετικός οικισμός",
+                nameLatin: "Synthetic review town",
+              }
+            : {
+                latitude: "41.55",
+                longitude: "23.28",
+                nameNative: "Синтетичен учебен град",
+                nameLatin: "Synthetic review town",
+              },
         )
         .where(eq(schema.geographyPlaces.id, placeId));
     const make = async (label: string) => {
-      const title = `Synthetic ${label} ${suffix}`;
+      const title = isMap
+        ? label === "published"
+          ? "Synthetic courtyard apartment"
+          : "Synthetic unavailable reference"
+        : `Synthetic ${label} ${suffix}`;
       const f = await db.transaction(async (tx) => {
         // Official helpers use process-local counters. Namespace each temporary identity
         // before releasing this lock so concurrent browser projects cannot collide.

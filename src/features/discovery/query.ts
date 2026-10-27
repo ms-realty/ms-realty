@@ -1,3 +1,4 @@
+import { parseMapBounds } from "@/domain/search/map-bounds";
 import type { PublicLocale } from "@/i18n/config";
 
 export type QueryParams = Record<string, string | string[] | undefined>;
@@ -19,6 +20,7 @@ export const filterNames = [
   "maxArea",
   "sort",
   "includeUnconfirmed",
+  "mapBounds",
 ] as const;
 export type Filters = Record<(typeof filterNames)[number], string>;
 export function readFilters(params: QueryParams): Filters {
@@ -73,6 +75,7 @@ export function searchInput(locale: PublicLocale, filters: Filters, cursor?: str
         }
       : {}),
     includeUnconfirmed: filters.includeUnconfirmed === "1",
+    ...(filters.mapBounds ? { mapBounds: parseMapBounds(filters.mapBounds) ?? "invalid" } : {}),
     ...(cursor ? { cursor } : {}),
   };
 }

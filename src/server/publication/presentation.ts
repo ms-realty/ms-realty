@@ -278,6 +278,7 @@ export interface StoredFact {
   readonly unit: string | null;
   readonly basis: string | null;
   readonly sourceClass: SourceClass;
+  readonly sourceLanguage?: string | null;
   readonly observedAt: Date | null;
   readonly reviewedAt: Date | null;
 }
@@ -295,6 +296,7 @@ export function termsFacts(terms: unknown): Record<string, StoredFact> {
       basis: f.basis ?? null,
       // Terms carry no review record of their own: the editorial approval covers them.
       sourceClass: f.sourceClass ?? "source_supplied",
+      sourceLanguage: f.sourceLanguage ?? null,
       observedAt: null,
       reviewedAt: null,
     };
@@ -345,6 +347,9 @@ function verificationOf(sourceClass: SourceClass): FactVerification {
 export function toPublicFact(key: string, stored: StoredFact): PublicFact {
   const provenance: Provenance = {
     sourceClass: stored.sourceClass,
+    ...(stored.sourceLanguage && /^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(stored.sourceLanguage)
+      ? { sourceLanguage: stored.sourceLanguage }
+      : {}),
     ...(stored.observedAt ? { observedAt: stored.observedAt.toISOString() } : {}),
     ...(stored.reviewedAt ? { reviewedAt: stored.reviewedAt.toISOString() } : {}),
   };
@@ -448,6 +453,7 @@ export async function loadPublishedListings(
       unit: propertyFacts.unit,
       basis: propertyFacts.basis,
       sourceClass: propertyFacts.sourceClass,
+      sourceLanguage: propertyFacts.sourceLanguage,
       observedAt: propertyFacts.observedAt,
       reviewedAt: propertyFacts.reviewedAt,
     })

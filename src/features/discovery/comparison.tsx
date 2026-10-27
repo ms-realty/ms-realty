@@ -8,7 +8,8 @@ import { compareCopy } from "./compare-copy";
 import type { DiscoveryCopy } from "./copy";
 import { Availability } from "./listing-card";
 import { RemoveComparison } from "./local-selection";
-import { listingHref, locality, priceText, scalarFact } from "./presentation";
+import { Locality } from "./locality";
+import { listingHref, priceText, scalarFact } from "./presentation";
 
 export type ComparisonItem = { reference: string; result: PublicListingResult | null };
 export function comparisonSelection(value: unknown): {
@@ -135,7 +136,11 @@ export function Comparison({
         label: copy.bedrooms,
         value: (listing) => scalarFact(listing.bedrooms, locale, copy),
       },
-      { key: "location", label: labels.location, value: locality },
+      {
+        key: "location",
+        label: labels.location,
+        value: (listing) => <Locality listing={listing} />,
+      },
       {
         key: "lift",
         label: labels.lift,

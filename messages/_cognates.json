@@ -73,7 +73,10 @@
     "operations.serviceIntake.reason": "Причина",
     "operations.serviceIntake.version": "Версия",
     "discovery.pagePosition": "Страница {position}",
-    "discovery.contentLabels.contact": "Контакт"
+    "discovery.contentLabels.contact": "Контакт",
+    "discovery.propertyFacts.facilities": "Удобства",
+    "discovery.propertyFacts.deposit": "Депозит",
+    "discovery.propertyFacts.restrictions": "Ограничения"
   },
   "de": {
     "discovery.hotel": "Hotel",

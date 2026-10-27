@@ -40,12 +40,13 @@ try {
     roles: ["content_editor", "publishing_approver"],
     email: "synthetic-decision-" + randomUUID() + "@example.test",
   });
-  const title = "Synthetic property decision " + randomUUID().slice(0, 8);
+  const title = "Synthetic courtyard apartment";
   const description = process.env.MSR_DECISION_DESCRIPTION;
   const placeId = await insertPlace(db, {
     country: "BG", level: "settlement", parentId: null,
     nameNative: "Синтетично място " + randomUUID(), nameLatin: "Synthetic place " + randomUUID(),
   });
+  await db.update(schema.geographyPlaces).set({ nameNative: "Синтетичен учебен град", nameLatin: "Synthetic review town" }).where(eq(schema.geographyPlaces.id, placeId));
   const fixture = await db.transaction(async (tx) => {
     await tx.execute(statement\`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))\`);
     const item = await createListingFixture(tx, {
@@ -115,7 +116,7 @@ for (const width of [320, 390, 1440]) {
     // The cover leads; the remaining photos are disclosed on demand. A failed image
     // still has a visible figure and must not make the geometry assertion wait for an img.
     const gallery = main.locator("figure").first();
-    const facts = main.locator("dl").first();
+    const facts = main.locator("[data-property-facts]");
     const price = main.locator("header > p").last();
     const panel = main.getByRole("complementary");
     const description = main.getByText(longDescription, { exact: true });
@@ -128,9 +129,14 @@ for (const width of [320, 390, 1440]) {
     await expect(price).toContainText(/€|EUR/);
     await expect(facts).toContainText("Bedrooms");
     await expect(
-      panel.getByRole("button", { name: "Save in this browser", exact: true }),
+      panel.getByRole("button", {
+        name: `Save in this browser · ${listing.reference}`,
+        exact: true,
+      }),
     ).toBeVisible();
-    await expect(panel.getByRole("button", { name: "Compare", exact: true })).toBeVisible();
+    await expect(
+      panel.getByRole("button", { name: `Compare · ${listing.reference}`, exact: true }),
+    ).toBeVisible();
     for (const [name, purpose] of [
       ["Send an inquiry", "question"],
       ["Request a viewing", "viewing_request"],

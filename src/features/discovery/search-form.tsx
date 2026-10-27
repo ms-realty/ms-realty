@@ -56,6 +56,7 @@ export async function SearchForm({
       .join(" · ");
   const rules = appliedCriteria(locale, values, {
     query: copy.query,
+    mapArea: copy.mapArea,
     propertyType: copy.propertyType,
     places: extra.locations,
     price: extra.amount,
@@ -77,6 +78,8 @@ export async function SearchForm({
   });
   return (
     <form
+      id={compact ? "home-property-search" : "property-search"}
+      tabIndex={-1}
       action={`/${locale}/properties`}
       method="get"
       className="min-w-0 space-y-4 rounded-control border border-border bg-surface p-4 sm:p-5"
@@ -358,6 +361,9 @@ export async function SearchForm({
               </div>
             </fieldset>
             <input type="hidden" name="sort" value={values.sort || "relevance"} />
+            {values.mapBounds ? (
+              <input type="hidden" name="mapBounds" value={values.mapBounds} />
+            ) : null}
             <label className="flex min-h-11 items-center gap-3 sm:col-span-2">
               <input
                 type="checkbox"

@@ -10,6 +10,7 @@ import { areaCopy } from "./area-copy";
 import type { AreaData, AreaLocation } from "./area-data";
 import { AreaPhotograph } from "./area-media";
 import { discoveryCopy } from "./copy";
+import { Locality } from "./locality";
 import { listingHref, locality } from "./presentation";
 
 export function AreaLayout({ children }: { children: ReactNode }) {
@@ -183,7 +184,7 @@ export function AreaIndex({ locale, data }: { locale: PublicLocale; data: AreaDa
                 <a href={listingHref(featured, locale)}>
                   <bdi>{featured.reference}</bdi>
                 </a>{" "}
-                · <bdi>{locality(featured)}</bdi>
+                · <Locality listing={featured} />
               </p>
               {featured.cover?.kind === "photo" && featured.cover.caption ? (
                 <p>{featured.cover.caption}</p>

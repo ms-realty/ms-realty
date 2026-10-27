@@ -1,4 +1,4 @@
 import type { PublicLocale } from "@/i18n/config";
-import { discoveryCopy } from "./copy";
+import { inquiryPhotosCopy } from "./copy";
 
-export const inquiryPhotoCopy = (locale: PublicLocale) => discoveryCopy(locale).inquiryPhotos;
+export const inquiryPhotoCopy = (locale: PublicLocale) => inquiryPhotosCopy(locale);

@@ -22,6 +22,13 @@ import { isIssuedSubmissionKey, readInquiryReceipt, validReceiptSession } from "
 
 export const maxInquiryPhotoBytes = 8 * 1024 * 1024;
 export const maxInquiryPhotos = 3;
+async function privateStorage<T>(work: () => Promise<T>): Promise<T> {
+  try {
+    return await work();
+  } catch (cause) {
+    throw new AppError("unavailable", { cause });
+  }
+}
 type Photo = typeof inquiryAttachments.$inferSelect;
 export type InquiryPhotoStage =
   | "upload_incomplete"
@@ -218,8 +225,10 @@ export async function receiveInquiryPhoto(
   });
   if (reservation.state === "sealed") return inquiryPhotoReceipt(reservation);
   // The reserved record survives a storage interruption and keeps the same retry identity.
-  await services.storage.writeStaging(reservation.stagingKey, input.bytes);
-  const staged = await services.storage.read(reservation.stagingKey, maxInquiryPhotoBytes);
+  await privateStorage(() => services.storage.writeStaging(reservation.stagingKey, input.bytes));
+  const staged = await privateStorage(() =>
+    services.storage.read(reservation.stagingKey, maxInquiryPhotoBytes),
+  );
   const actual = await inspectFile(staged, "media");
   if (
     !sameSource(reservation, {
@@ -230,8 +239,12 @@ export async function receiveInquiryPhoto(
     })
   )
     throw new AppError("unavailable");
-  await services.storage.writeImmutable(reservation.sealedKey, staged, actual.contentType);
-  const sealed = await services.storage.read(reservation.sealedKey, maxInquiryPhotoBytes);
+  await privateStorage(() =>
+    services.storage.writeImmutable(reservation.sealedKey, staged, actual.contentType),
+  );
+  const sealed = await privateStorage(() =>
+    services.storage.read(reservation.sealedKey, maxInquiryPhotoBytes),
+  );
   if (digestOf(sealed) !== reservation.sha256 || sealed.length !== reservation.byteSize)
     throw new AppError("unavailable");
   return db.transaction(async (tx) => {

@@ -4,7 +4,8 @@ import { cx } from "@/ui/cx";
 import { ApprovedMedia } from "./approved-media";
 import type { DiscoveryCopy } from "./copy";
 import { Availability, ListingFacts } from "./listing-card";
-import { listingHref, locality, priceText } from "./presentation";
+import { Locality } from "./locality";
+import { listingHref, priceText } from "./presentation";
 
 /** Only the approved public card projection crosses the inquiry form's client boundary. */
 export function inquiryListingSummary(listing: ListingCard): ListingCard {
@@ -64,7 +65,7 @@ export function InquiryListingSummaries({
                 <bdi>{listing.reference}</bdi>
               </p>
               <p className="text-price font-semibold">{priceText(listing.price, locale, copy)}</p>
-              <p className="text-compact">{locality(listing)}</p>
+              <p className="text-compact">{<Locality listing={listing} />}</p>
             </div>
           </div>
           <Heading className="text-compact font-semibold">

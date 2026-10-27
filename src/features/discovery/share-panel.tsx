@@ -10,7 +10,8 @@ import { nativeFormPermalink } from "@/ui/form/form";
 import { Notice } from "@/ui/notice";
 import type { DiscoveryCopy } from "./copy";
 import { Availability, ListingFacts } from "./listing-card";
-import { locality, priceText } from "./presentation";
+import { Locality } from "./locality";
+import { priceText } from "./presentation";
 import type { ShareCopy } from "./share-copy";
 import { shareReferenceLimit } from "./share-model";
 import { type CreateShareAction, type ShareCreateState, shareFields } from "./share-state";
@@ -188,7 +189,8 @@ function Review({
                       <bdi>{listing.reference}</bdi> · {copy[listing.propertyType]}
                     </p>
                     <p className="text-compact">
-                      <bdi>{priceText(listing.price, locale, copy)}</bdi> · {locality(listing)}
+                      <bdi>{priceText(listing.price, locale, copy)}</bdi> ·{" "}
+                      {<Locality listing={listing} />}
                     </p>
                   </div>
                   <div className="max-w-sm">

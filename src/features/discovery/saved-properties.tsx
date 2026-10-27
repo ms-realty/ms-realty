@@ -8,7 +8,8 @@ import { ApprovedMedia } from "./approved-media";
 import type { DiscoveryCopy } from "./copy";
 import { Availability, ListingFacts } from "./listing-card";
 import { useSelection, writeSelection } from "./local-selection";
-import { listingHref, locality, priceText } from "./presentation";
+import { Locality } from "./locality";
+import { listingHref, priceText } from "./presentation";
 import { savedCopy } from "./saved-copy";
 import type { LoadSavedProperties, SavedProperty } from "./saved-property-data";
 import { SharePanel, type SharePanelProps } from "./share-panel";
@@ -235,7 +236,9 @@ export function SavedProperties({
                                 {listing.title || reference}
                               </a>
                             </h2>
-                            <p className="text-compact text-text-muted">{locality(listing)}</p>
+                            <p className="text-compact text-text-muted">
+                              {<Locality listing={listing} />}
+                            </p>
                           </>
                         ) : null}
                         <a

@@ -5,7 +5,7 @@ import { discoveryCopy } from "@/features/discovery/copy";
 import { ListingGrid } from "@/features/discovery/listing-card";
 import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage } from "@/features/discovery/page";
-import { listingHref, locality } from "@/features/discovery/presentation";
+import { listingHref, locality, priceText } from "@/features/discovery/presentation";
 import {
   ambiguousFilters,
   filterUrl,
@@ -95,7 +95,7 @@ export default async function PropertiesPage({
                 className="inline-flex min-h-control items-center text-action underline underline-offset-4"
                 href={alertSearch(locale, values).publicHref}
                 lang={searchAlertCopyLocale(locale)}
-                dir="ltr"
+                dir={locale === "he" ? "rtl" : "ltr"}
               >
                 {searchAlertCopy(locale).entry}
               </a>
@@ -128,50 +128,53 @@ export default async function PropertiesPage({
             locale={locale}
             release={publicMapRelease()}
             copy={mapCopy(locale)}
+            filters={values}
             items={result.items.flatMap((item) =>
               item.place.mapPoint
                 ? [
                     {
                       reference: item.reference,
                       href: listingHref(item, locale),
-                      label: `${item.reference} · ${locality(item)}`,
+                      label: `${item.reference} · ${locality(item)} · ${priceText(item.price, locale, copy)}`,
+                      price: priceText(item.price, locale, copy).split(" · ")[0],
                       point: item.place.mapPoint,
                     },
                   ]
                 : [],
             )}
-          />
-          {result.items.length ? (
-            <section id="property-results" tabIndex={-1} aria-labelledby="results-heading">
-              <ListingGrid
-                items={result.items}
-                locale={locale}
-                copy={copy}
-                headingLevel={3}
-                returnTo={filterUrl(
-                  locale,
-                  values,
-                  typeof query.cursor === "string" ? query.cursor : undefined,
-                )}
-              />
-            </section>
-          ) : (
-            <div className="space-y-4">
-              <a className="underline" href="#active-search-criteria">
-                {copy.filters}
-              </a>
-              <a className="underline" href={`/${locale}/inquire`}>
-                {copy.ask}
-              </a>
-              {locale !== "bg" ? (
-                <p>
-                  <a className="underline" href={filterUrl("bg", values)} hrefLang="bg">
-                    {copy.source}
-                  </a>
-                </p>
-              ) : null}
-            </div>
-          )}
+          >
+            {result.items.length ? (
+              <section id="property-results" tabIndex={-1} aria-labelledby="results-heading">
+                <ListingGrid
+                  items={result.items}
+                  locale={locale}
+                  copy={copy}
+                  headingLevel={3}
+                  returnTo={filterUrl(
+                    locale,
+                    values,
+                    typeof query.cursor === "string" ? query.cursor : undefined,
+                  )}
+                />
+              </section>
+            ) : (
+              <div className="space-y-4">
+                <a className="underline" href="#property-search">
+                  {copy.filters}
+                </a>
+                <a className="underline" href={`/${locale}/inquire`}>
+                  {copy.ask}
+                </a>
+                {locale !== "bg" ? (
+                  <p>
+                    <a className="underline" href={filterUrl("bg", values)} hrefLang="bg">
+                      {copy.source}
+                    </a>
+                  </p>
+                ) : null}
+              </div>
+            )}
+          </SearchMap>
           <nav
             aria-label={copy.results}
             className="flex flex-wrap items-center gap-3"

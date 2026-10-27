@@ -1,8 +1,8 @@
 import type { PublicLocale } from "@/i18n/config";
-import { discoveryCopy } from "./copy";
+import { discoveryCopy, publicContentCopy } from "./copy";
 
 // Interface labels only; an eligible approved content title always takes precedence.
-export const contentLabels = (locale: PublicLocale) => discoveryCopy(locale).contentLabels;
+export const contentLabels = publicContentCopy;
 export function contentFallbackTitle(
   locale: PublicLocale,
   input: {

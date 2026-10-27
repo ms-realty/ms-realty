@@ -293,7 +293,10 @@ test("P07: URL selection, removal, reload, Back and reopening stay consistent wi
     )
     .toEqual(references());
   await page.goto("/en/compare");
-  await page.getByRole("link", { name: "Compare", exact: true }).click();
+  await page
+    .getByRole("banner")
+    .getByRole("link", { name: /^Compare / })
+    .click();
   await assertChoice(page, references());
 });
 

@@ -14,5 +14,12 @@
   "list": "Naar de lijst",
   "open": "Woning openen",
   "listingTitle": "Omgeving van de woning",
-  "listingPrecision": "De markering toont het gebieds- of plaatscentrum, niet het adres van de woning."
+  "listingPrecision": "De markering toont het gebieds- of plaatscentrum, niet het adres van de woning.",
+  "searchArea": "In dit gebied zoeken",
+  "areaDraft": "De kaart is verplaatst. Resultaten blijven gelijk tot u bevestigt.",
+  "select": "In lijst selecteren",
+  "cooperativeTouch": "Gebruik twee vingers om de kaart te verplaatsen",
+  "cooperativeWindows": "Gebruik Ctrl en scrollen om in te zoomen",
+  "cooperativeMac": "Gebruik ⌘ en scrollen om in te zoomen",
+  "selected": "Geselecteerde woning"
 }

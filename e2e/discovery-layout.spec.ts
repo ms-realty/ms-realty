@@ -66,9 +66,13 @@ for (const javaScriptEnabled of [true, false]) {
       const details = form.locator("details");
       const disclosure = form.getByRole("button", { name: /^Filters/ });
       await expect(details).not.toHaveAttribute("open");
-      await expect(page.getByRole("list", { name: "Active filters" })).toContainText(
-        "Apartment, House",
-      );
+      const applied = page.getByRole("list", { name: "Active filters" });
+      await expect(
+        applied.getByRole("link", { name: /Remove: Property type.*Apartment/ }),
+      ).toBeVisible();
+      await expect(
+        applied.getByRole("link", { name: /Remove: Property type.*House/ }),
+      ).toBeVisible();
       // Native summary must be usable with the keyboard even without hydration.
       await disclosure.focus();
       await page.keyboard.press("Enter");

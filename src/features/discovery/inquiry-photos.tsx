@@ -37,12 +37,18 @@ export async function InquiryPhotos({
   } catch {
     /* Keep the already accepted inquiry and its manual path useful. */
   }
-  const operationId = z.uuid().safeParse(requestedOperation).success
+  const requested = z.uuid().safeParse(requestedOperation).success
     ? String(requestedOperation)
-    : randomUUID();
+    : null;
+  const requestedPhoto = result?.photos.find((photo) => photo.operationId === requested);
+  const incomplete = result?.photos.find((photo) => photo.stage === "upload_incomplete");
+  // A lost response must not strand a durable reservation or mint a replacement on reload.
+  const operationId =
+    requestedPhoto?.operationId ?? incomplete?.operationId ?? requested ?? randomUUID();
   const current = result?.photos.find((photo) => photo.operationId === operationId);
-  const canAttach = configured && result?.canUpload && result.photos.length < maxInquiryPhotos;
   const retry = current?.stage === "upload_incomplete";
+  const canAttach =
+    configured && result?.canUpload && (retry || result.photos.length < maxInquiryPhotos);
   const failed =
     typeof error === "string" &&
     [
@@ -74,6 +80,15 @@ export async function InquiryPhotos({
                 <bdi>{formatNumber(locale, photo.byteSize)} B</bdi>
               </p>
               <p className="text-compact">{labels[photo.stage]}</p>
+              {photo.stage === "upload_incomplete" && configured && result.canUpload ? (
+                <a
+                  className="inline-flex min-h-control items-center underline"
+                  href={`/${locale}/requests/${encodeURIComponent(receiptId)}?${new URLSearchParams({ photoOperation: photo.operationId })}#inquiry-photo-title`}
+                  data-print-hide
+                >
+                  {labels.retry} · {copy.mediaPhoto} {index + 1}
+                </a>
+              ) : null}
             </li>
           ))}
         </ol>

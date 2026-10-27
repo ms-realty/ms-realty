@@ -11,7 +11,7 @@ import "server-only";
 import { and, arrayOverlaps, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
-import { listingSearchDocuments as doc, listings } from "@/db/schema";
+import { listingSearchDocuments as doc, listings, publicationManifests } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
 import { listingPurposes, propertyTypes } from "@/domain/facts";
 import { currencyCodes, type PublicLocale, parseReference, publicLocales } from "@/domain/ids";
@@ -21,6 +21,7 @@ import {
   commercialStates,
 } from "@/domain/listing";
 import { type SearchCriteria, searchPricePeriod } from "@/domain/search/filters";
+import { mapBoundsSchema } from "@/domain/search/map-bounds";
 import { sha256Hex } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
@@ -69,6 +70,7 @@ const searchInput = z
     purpose: z.enum(listingPurposes),
     propertyTypes: z.array(z.enum(propertyTypes)).max(propertyTypes.length).optional(),
     placeIds: z.array(z.uuid()).max(20).optional(),
+    mapBounds: mapBoundsSchema.optional(),
     availability: z.array(z.enum(commercialStates)).max(commercialStates.length).optional(),
     /** Minor units in `currency`, for the purpose's price period (total or month). */
     price: z
@@ -157,6 +159,7 @@ export function normalizeSearch(input: unknown): NormalizedSearch {
     purpose: v.purpose,
     ...(propertyTypes ? { propertyTypes } : {}),
     ...(placeIds ? { placeIds } : {}),
+    ...(v.mapBounds ? { mapBounds: v.mapBounds } : {}),
     // Sold, let and withdrawn listings are history, not offers: shown only when asked for.
     availability: sortedUnique(v.availability) ?? [...offeredStates].sort(),
     ...(v.price ? { price: v.price } : {}),
@@ -444,6 +447,18 @@ export async function searchListings(
   const cursor = search.cursor ? decodeCursor(search.cursor, queryId) : null;
   const eligible = eligiblePublications(db, search.locale);
   const { where, rank, unconfirmed } = plan(search, now);
+  const bounds = search.criteria.mapBounds;
+  const publicCoordinate = (key: "latitude" | "longitude") =>
+    sql`(case when jsonb_typeof(${publicationManifests.disclosure}->'mapPoint'->${key}) = 'number' then (${publicationManifests.disclosure}->'mapPoint'->>${key})::numeric end)`;
+  const mapArea = bounds
+    ? and(
+        sql`${publicationManifests.disclosure}->'mapPoint'->>'level' in ('district', 'settlement')`,
+        sql`jsonb_typeof(${publicationManifests.disclosure}->'mapPoint'->'placeId') = 'string' and length(${publicationManifests.disclosure}->'mapPoint'->>'placeId') > 0`,
+        sql`(${publicationManifests.disclosure}->>'precision' in ('exact', 'street', 'neighborhood', 'settlement') or ${publicationManifests.disclosure}->'mapPoint'->>'level' = 'district')`,
+        sql`${publicCoordinate("longitude")} between ${bounds.west} and ${bounds.east}`,
+        sql`${publicCoordinate("latitude")} between ${bounds.south} and ${bounds.north}`,
+      )
+    : undefined;
   const [k1, k2] = sortKeys(search, rank, sql`${eligible.activatedAt}`);
   // Share this statement's eligible, filtered projection across page, facets and freshness.
   // Keep all selective criteria inside the CTE except property type, which facets ignore.
@@ -465,7 +480,8 @@ export async function searchListings(
         and(eq(eligible.listingId, doc.listingId), eq(eligible.manifestId, doc.manifestId)),
       )
       .innerJoin(listings, eq(listings.id, doc.listingId))
-      .where(where({ withoutPropertyTypes: true })),
+      .innerJoin(publicationManifests, eq(publicationManifests.id, eligible.manifestId))
+      .where(and(where({ withoutPropertyTypes: true }), mapArea)),
   );
   const selectedTypes = search.criteria.propertyTypes
     ? inArray(base.propertyType, [...search.criteria.propertyTypes])
