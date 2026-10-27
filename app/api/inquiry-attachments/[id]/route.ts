@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { getEnv } from "@/server/config/env";
 import { fileServices } from "@/server/files/config";
+import { downloadResponse } from "@/server/files/download";
 import {
   correlationIdFrom,
   errorResponse,
@@ -24,15 +25,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       requireSession(await identify(db, request.headers, env)),
       id,
     );
-    return new Response(new Uint8Array(file.bytes), {
-      headers: {
-        "content-type": file.contentType,
-        "cache-control": "private, no-store",
-        "content-disposition": "inline",
-        "x-content-type-options": "nosniff",
-        "content-security-policy": "default-src 'none'; sandbox",
-      },
-    });
+    return downloadResponse(
+      { ...file, fileName: "inquiry-photo", inline: true },
+      request.headers.get("range"),
+    );
   } catch (error) {
     return errorResponse(error, correlationIdFrom(request.headers));
   }

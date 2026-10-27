@@ -70,17 +70,83 @@ function hash(copy: Readonly<Record<string, string>>): string {
     .digest("hex");
 }
 
+// Explicit interface additions are tested separately; retain the original migration hashes
+// over their original keys so an unrelated wording change cannot refresh a frozen golden.
+const discoveryAdditions = new Set([
+  "close",
+  "cancel",
+  "filterDraftHint",
+  "clearDraft",
+  "mediaViewer",
+  "openMedia",
+  "previousMedia",
+  "nextMedia",
+  "zoomIn",
+  "zoomOut",
+  "fitMedia",
+  "mediaPosition",
+  "mediaPhoto",
+  "mediaFloorPlan",
+  "mediaRender",
+  "mediaVideo",
+  "mediaVirtualTour",
+  "propertyActions",
+  "homeTitle",
+  "homeLead",
+  "forSale",
+  "forRent",
+  "exploreAreas",
+  "exploreServices",
+  "searchPurpose",
+  "searchHint",
+  "searchPlaceholder",
+  "priceUnknown",
+  "priceWithheld",
+  "priceConflicting",
+  "contentSource",
+  "alternatives",
+  "askReference",
+  "removeCriterion",
+  "firstPage",
+  "previousPage",
+  "pagePosition",
+  "shownResults",
+  "resultsUpdated",
+  "messageCount",
+  "messageOverLimit",
+  "saveLimit",
+  "offlineSearch",
+  "emptyPage",
+  "mapArea",
+  "mapAreaPrecision",
+]);
+const mapAdditions = new Set([
+  "searchArea",
+  "areaDraft",
+  "select",
+  "cooperativeTouch",
+  "cooperativeWindows",
+  "cooperativeMac",
+  "selected",
+]);
+const originalKeys = (copy: Readonly<Record<string, string>>, additions: ReadonlySet<string>) =>
+  Object.fromEntries(Object.entries(copy).filter(([key]) => !additions.has(key)));
+
 describe.each([...publicLocales])("%s accessors preserve the catalog migration", (locale) => {
   it("preserves discovery except the revised intent question, and every intent key and value", () => {
     const { morePhotos, ...discovery } = discoveryCopy(locale);
     expect(morePhotos).toContain("{count}");
     expect(Object.hasOwn(discovery, "purpose")).toBe(true);
-    expect(hash({ ...discovery, purpose: originalPurpose[locale] })).toBe(golden.discovery[locale]);
+    expect(
+      hash({ ...originalKeys(discovery, discoveryAdditions), purpose: originalPurpose[locale] }),
+    ).toBe(golden.discovery[locale]);
     expect(hash(intentCopy(locale))).toBe(golden.intent[locale]);
   });
   it("preserves the search and listing map text independently", () => {
-    expect(hash(mapCopy(locale))).toBe(golden.map[locale]);
-    expect(hash(mapCopy(locale, "listing"))).toBe(golden.mapListing[locale]);
+    expect(hash(originalKeys(mapCopy(locale), mapAdditions))).toBe(golden.map[locale]);
+    expect(hash(originalKeys(mapCopy(locale, "listing"), mapAdditions))).toBe(
+      golden.mapListing[locale],
+    );
   });
   it("keeps each caller's returned object independent", () => {
     expect(discoveryCopy(locale)).not.toBe(discoveryCopy(locale));

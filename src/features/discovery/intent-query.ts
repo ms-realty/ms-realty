@@ -1,4 +1,5 @@
 import type { SearchCriteria } from "@/domain/search/filters";
+import { serializeMapBounds } from "@/domain/search/map-bounds";
 import { readFilters } from "./query";
 
 /** Every accepted supported criterion is serialized; no hidden prose query is added. */
@@ -21,5 +22,6 @@ export function criteriaFilters(criteria: SearchCriteria) {
     minArea: bound(criteria.area?.min),
     maxArea: bound(criteria.area?.max),
     includeUnconfirmed: criteria.includeNeedsConfirmation ? "1" : "",
+    mapBounds: criteria.mapBounds ? serializeMapBounds(criteria.mapBounds) : "",
   });
 }

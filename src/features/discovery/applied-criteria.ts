@@ -8,6 +8,7 @@ export function appliedCriteria(
   values: Filters,
   names: {
     query: string;
+    mapArea?: string;
     propertyType: string;
     places: string;
     price: string;
@@ -26,6 +27,7 @@ export function appliedCriteria(
   const rules: AppliedCriterion[] = [];
   const add = (id: string, label: string, value: string, changes: Partial<Filters>) =>
     rules.push({ id, label, value, href: filterUrl(locale, { ...values, ...changes }) });
+  if (values.mapBounds) add("mapBounds", names.mapArea ?? names.places, "", { mapBounds: "" });
   if (values.q) add("q", names.query, values.q, { q: "" });
   for (const [key, label, render] of [
     ["type", names.propertyType, names.label],

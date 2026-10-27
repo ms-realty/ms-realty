@@ -13,8 +13,11 @@ import {
 } from "../facts";
 import type { CurrencyCode } from "../ids";
 import type { CommercialState } from "../listing";
+import { type MapBounds, pointWithinMapBounds } from "./map-bounds";
 
 export interface ListingSearchView {
+  /** Only an approved public area centre may satisfy a map filter. */
+  readonly publicMapPoint?: { readonly latitude: number; readonly longitude: number } | null;
   readonly listingId: string;
   readonly reference: string;
   readonly purpose: ListingPurpose;
@@ -35,6 +38,7 @@ export interface Range {
 }
 
 export interface SearchCriteria {
+  readonly mapBounds?: MapBounds;
   readonly purpose: ListingPurpose;
   readonly propertyTypes?: readonly PropertyType[];
   readonly placeIds?: readonly string[];
@@ -127,6 +131,11 @@ export function evaluateListing(
   ];
   if (criteria.price)
     checks.push(["price", priceCheck(view.price, criteria.price, criteria.purpose)]);
+  if (criteria.mapBounds)
+    checks.push([
+      "mapBounds",
+      pointWithinMapBounds(view.publicMapPoint, criteria.mapBounds) ? "match" : "no_match",
+    ]);
   if (criteria.bedrooms) checks.push(["bedrooms", factInRange(view.bedrooms, criteria.bedrooms)]);
   if (criteria.rooms) checks.push(["rooms", factInRange(view.rooms, criteria.rooms)]);
   if (criteria.area) checks.push([`area.${criteria.area.basis}`, areaCheck(view, criteria.area)]);

@@ -5,6 +5,7 @@ import { inquiryAttachments } from "@/db/schema/inquiry-attachments";
 import { inquiries } from "@/db/schema/work";
 import type { Actor } from "@/domain/capabilities";
 import type { PrivacyExportSource } from "@/domain/privacy-export";
+import { countActivePasskeys, staffPasskeyMinimum } from "../auth/passkeys";
 import { can } from "../authz";
 import { getEnv } from "../config/env";
 import { hashRequest, keyedHash } from "../crypto";
@@ -88,8 +89,11 @@ export async function collectInquiryAttachmentPrivacy(db: Executor, actor: Actor
     .limit(301);
   if (records.length > 300) throw new AppError("validation_failed");
   const readable = new Set<string>();
+  const readableActor =
+    actor.kind === "staff" && (await countActivePasskeys(db, actor.id)) >= staffPasskeyMinimum;
   for (const id of new Set(records.map((row) => row.inquiry.id)))
-    if (await can(db, actor, "inquiry.read", { type: "inquiry", id })) readable.add(id);
+    if (readableActor && (await can(db, actor, "inquiry.read", { type: "inquiry", id })))
+      readable.add(id);
   const revision = keyedHash(
     getEnv().authSecret,
     `inquiry-attachment-privacy:v1:${hashRequest(JSON.parse(JSON.stringify(records)))}`,

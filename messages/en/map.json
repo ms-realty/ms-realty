@@ -14,5 +14,12 @@
   "list": "Go to list",
   "open": "Open property",
   "listingTitle": "Property area",
-  "listingPrecision": "The marker shows the area or settlement centre, not the property address."
+  "listingPrecision": "The marker shows the area or settlement centre, not the property address.",
+  "searchArea": "Search this area",
+  "areaDraft": "The map moved. Results stay unchanged until you confirm.",
+  "select": "Select in list",
+  "cooperativeTouch": "Use two fingers to move the map",
+  "cooperativeWindows": "Use Ctrl + scroll to zoom the map",
+  "cooperativeMac": "Use ⌘ + scroll to zoom the map",
+  "selected": "Selected property"
 }

@@ -33,14 +33,22 @@ export default async function Page({
   }
   return (
     <DiscoveryPage>
-      <h1 className="text-title font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
+      <h1
+        className="text-title font-semibold"
+        lang={searchAlertCopyLocale(locale)}
+        dir={locale === "he" ? "rtl" : "ltr"}
+      >
         {copy.title}
       </h1>
       {search ? (
         <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="min-w-0 space-y-6">
             <SearchAlertCriteria locale={locale} search={search} />
-            <div className="space-y-4" lang={searchAlertCopyLocale(locale)} dir="ltr">
+            <div
+              className="space-y-4"
+              lang={searchAlertCopyLocale(locale)}
+              dir={locale === "he" ? "rtl" : "ltr"}
+            >
               <p>{copy.lead}</p>
               <p>{copy.accountHint}</p>
               <a
@@ -57,7 +65,7 @@ export default async function Page({
           <aside
             className="min-w-0 space-y-5 rounded-panel bg-subtle p-5"
             lang={searchAlertCopyLocale(locale)}
-            dir="ltr"
+            dir={locale === "he" ? "rtl" : "ltr"}
           >
             <Notice tone="info">
               {configuredAlertRule() ? copy.deliveryBoundary : copy.deliveryOff}
@@ -69,7 +77,11 @@ export default async function Page({
           </aside>
         </div>
       ) : (
-        <div className="space-y-4" lang={searchAlertCopyLocale(locale)} dir="ltr">
+        <div
+          className="space-y-4"
+          lang={searchAlertCopyLocale(locale)}
+          dir={locale === "he" ? "rtl" : "ltr"}
+        >
           <Notice tone="warning" title={copy.check}>
             {copy.invalid}
           </Notice>

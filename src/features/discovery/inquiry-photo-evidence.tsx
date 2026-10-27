@@ -3,7 +3,7 @@ import type { PublicLocale } from "@/i18n/config";
 import type { Session } from "@/server/auth/sessions";
 import { staffInquiryPhotos } from "@/server/inquiries/attachments";
 import { buttonClass } from "@/ui/button-class";
-import { discoveryCopy } from "./copy";
+import { discoveryCopy, inquiryPhotosCopy } from "./copy";
 
 /** O02: staff can assess a receipt's real private evidence without creating a Property. */
 export async function InquiryPhotoEvidence({
@@ -18,7 +18,7 @@ export async function InquiryPhotoEvidence({
   const photos = await staffInquiryPhotos(getDb(), session, inquiryId);
   if (!photos.length) return null;
   const copy = discoveryCopy(locale),
-    labels = copy.inquiryPhotos;
+    labels = inquiryPhotosCopy(locale);
   return (
     <section
       className="min-w-0 space-y-3 rounded-panel border border-divider bg-surface p-5"

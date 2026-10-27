@@ -33,7 +33,6 @@
     "src/features/discovery/inquiry-review-copy.ts": 203,
     "src/features/discovery/receipt-listings.ts": 84,
     "src/features/discovery/saved-copy.ts": 84,
-    "src/features/discovery/search-alert-copy.ts": 87,
     "src/features/discovery/share-copy.ts": 532,
     "src/features/discovery/viewing-copy.ts": 112,
     "src/features/identity/capability-copy.ts": 135,

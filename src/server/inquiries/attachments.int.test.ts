@@ -149,16 +149,19 @@ describe("F10/AT42 receipt-owned inquiry photo quarantine", () => {
   it("retains a retryable reservation after interrupted storage and seals the same source", async () => {
     const bound = await owner(),
       operationId = randomUUID();
+    await attach(bound);
+    await attach(bound);
     const write = vi
       .spyOn(storage, "writeStaging")
       .mockRejectedValueOnce(new Error("synthetic interruption"));
-    await expect(attach(bound, { operationId })).rejects.toThrow("synthetic interruption");
+    await expect(attach(bound, { operationId })).rejects.toMatchObject({ code: "unavailable" });
     write.mockRestore();
     const receipt = await ownerInquiryPhotos(t.db, bound);
-    expect(receipt.photos).toHaveLength(1);
-    expect(receipt.photos[0]).toMatchObject({ operationId, stage: "upload_incomplete" });
+    expect(receipt.photos).toHaveLength(3);
+    const interrupted = receipt.photos.find((photo) => photo.operationId === operationId);
+    expect(interrupted).toMatchObject({ operationId, stage: "upload_incomplete" });
     expect(await attach(bound, { operationId })).toMatchObject({
-      id: receipt.photos[0]?.id,
+      id: interrupted?.id,
       stage: "scanning",
     });
   });

@@ -63,7 +63,10 @@ export function ResultsCompletion({
       target?.focus();
       announce(message);
     } else if (/^#property-result-MS-\d{5,}$/.test(window.location.hash)) {
-      document.getElementById(window.location.hash.slice(1))?.focus({ preventScroll: false });
+      (
+        document.getElementById(window.location.hash.slice(1)) ??
+        document.getElementById("results-heading")
+      )?.focus({ preventScroll: false });
     }
     const remember = (href: string) => {
       const target = searchCompletionTarget(locale, href);

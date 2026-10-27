@@ -115,3 +115,16 @@ it("F10 bounds native body size and one-file fields without changing the durable
   }
   expect(adapters.receive).not.toHaveBeenCalled();
 });
+it("F10 a normalized raw-adapter failure returns to the authorized receipt with the original retry identity", async () => {
+  const value = request();
+  adapters.receive.mockRejectedValueOnce(
+    new AppError("unavailable", { cause: new Error("synthetic private storage interruption") }),
+  );
+  const result = await post(value);
+  expect(result.status).toBe(303);
+  const next = new URL(result.headers.get("location") ?? "");
+  expect(next.pathname).toBe(`/en/requests/${value.receiptId}`);
+  expect(next.searchParams.get("photoOperation")).toBe(value.operationId);
+  expect(next.searchParams.get("photoError")).toBe("unavailable");
+  expect(next.href).not.toContain("private storage");
+});

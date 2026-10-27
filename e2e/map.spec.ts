@@ -13,10 +13,11 @@ async function returnFromOpenMap(page: Page) {
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   const panelId = await toggle.getAttribute("aria-controls");
   expect(panelId).toBeTruthy();
-  await page
+  const nativeLink = page
     .locator(`[id="${panelId}"]`)
-    .getByRole("link", { name: "Go to list", exact: true })
-    .click();
+    .getByRole("link", { name: "Go to list", exact: true });
+  if (await nativeLink.count()) await nativeLink.click();
+  else await page.getByRole("button", { name: "Go to list", exact: true }).first().click();
 }
 
 function fixture(command = "map", reference?: string) {
@@ -66,8 +67,13 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
   await expect(page.getByRole("region", { name: mapCopy("en").title, exact: true })).toHaveCount(1);
   const marker = page.getByRole("button", { name: new RegExp(data.published.reference) });
+  await expect(marker).toContainText(/€|EUR/);
   await marker.focus();
   await page.keyboard.press("Enter");
+  await expect(
+    page.locator(`article[data-listing-reference="${data.published.reference}"]`),
+  ).toHaveAttribute("data-map-selected", "true");
+  await expect(marker).toHaveAttribute("aria-pressed", "true");
   await expect(
     page.getByRole("link", { name: new RegExp(`Open property: ${data.published.reference}`) }),
   ).toBeVisible();

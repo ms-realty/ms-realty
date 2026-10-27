@@ -6,7 +6,8 @@ import { StatusBadge } from "@/ui/status-badge";
 import { ApprovedMedia } from "./approved-media";
 import type { DiscoveryCopy } from "./copy";
 import { LocalActions } from "./local-selection";
-import { listingHref, locality, priceText, scalarFact } from "./presentation";
+import { Locality } from "./locality";
+import { listingHref, priceText, scalarFact } from "./presentation";
 
 export function ListingFacts({
   listing,
@@ -20,10 +21,12 @@ export function ListingFacts({
   const area = listing.area;
   return (
     <dl className="grid grid-cols-2 gap-3 text-compact">
-      <div>
-        <dt className="text-text-muted">{copy.bedrooms}</dt>
-        <dd>{scalarFact(listing.bedrooms, locale, copy)}</dd>
-      </div>
+      {listing.propertyType === "apartment" || listing.propertyType === "house" ? (
+        <div>
+          <dt className="text-text-muted">{copy.bedrooms}</dt>
+          <dd>{scalarFact(listing.bedrooms, locale, copy)}</dd>
+        </div>
+      ) : null}
       <div>
         <dt className="text-text-muted">
           {area.state === "known" ? copy[area.value.basis] : copy.area}
@@ -85,7 +88,7 @@ export function ListingCard({
   const Heading = `h${headingLevel}` as const;
   return (
     <article
-      className="flex min-w-0 flex-col overflow-hidden rounded-panel border border-divider bg-surface shadow-raised"
+      className="flex min-w-0 flex-col overflow-hidden rounded-panel border border-divider bg-surface shadow-raised data-[map-selected=true]:ring-2 data-[map-selected=true]:ring-action"
       data-listing-reference={listing.reference}
     >
       {/* UI13: approved photos use a full-width 3:2 frame; plans retain their full extent. */}
@@ -109,7 +112,7 @@ export function ListingCard({
               {listing.title || listing.reference}
             </a>
           </Heading>
-          <p className="mt-1 text-compact text-text-muted">{locality(listing)}</p>
+          <p className="mt-1 text-compact text-text-muted">{<Locality listing={listing} />}</p>
         </div>
         <p className="text-price font-semibold">
           <bdi>{priceText(listing.price, locale, copy)}</bdi>
@@ -138,7 +141,7 @@ export function ListingGrid({
   returnTo?: string;
 }) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" data-listing-grid>
       {items.map((listing) => (
         <ListingCard
           key={listing.reference}

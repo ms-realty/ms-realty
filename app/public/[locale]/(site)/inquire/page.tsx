@@ -77,6 +77,17 @@ export default async function InquiryPage({
       (typeof query.manifest !== "string" || !isUuid(query.manifest) || !query.reference)) ||
     (query.contentReference !== undefined && !content) ||
     (query.serviceScope !== undefined && !serviceEntry) ||
+    (query.aboutReference !== undefined &&
+      (typeof query.aboutReference !== "string" ||
+        parseReference(query.aboutReference)?.kind !== "listing" ||
+        [
+          query.reference,
+          query.manifest,
+          query.selection,
+          query.contentReference,
+          query.serviceScope,
+        ].some((value) => value !== undefined) ||
+        (query.purpose !== undefined && query.purpose !== "question"))) ||
     (query.purpose === "service_consultation" && content?.kind !== "service") ||
     [
       "purpose",
@@ -143,6 +154,11 @@ export default async function InquiryPage({
     );
   const values = {
     ...emptyInquiry,
+    // An original reference is visitor-authored message context, never an active listing binding.
+    message:
+      typeof query.aboutReference === "string"
+        ? `${copy.askReference}: ${query.aboutReference}`
+        : "",
     serviceScope:
       typeof query.serviceScope === "string"
         ? parseServiceEntry(query.serviceScope)
@@ -248,6 +264,11 @@ export default async function InquiryPage({
       <header className="space-y-3">
         <h1 className="text-title font-semibold">{copy.ask}</h1>
         <p className="max-w-reading text-text-muted">{copy.next}</p>
+        {typeof query.aboutReference === "string" ? (
+          <p className="text-compact">
+            {copy.askReference}: <bdi>{query.aboutReference}</bdi>
+          </p>
+        ) : null}
       </header>
       <InquiryForm
         action={sendInquiry.bind(null, locale)}
