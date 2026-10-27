@@ -34,7 +34,7 @@ import {
 
 type Review = typeof agencyCaseReviews.$inferSelect;
 const authorRoles = ["buyer", "co_buyer", "tenant", "seller", "landlord"] as const;
-const save = z.object({
+export const caseReviewSaveSchema = z.object({
   ...commandEnvelope,
   expectedVersion: z.int().nonnegative(),
   caseId: z.uuid(),
@@ -43,18 +43,18 @@ const save = z.object({
   displayChoice: z.enum(["anonymous", "name"]),
   reviewed: z.literal(true),
 });
-const consent = z.object({
+export const caseReviewConsentSchema = z.object({
   ...commandEnvelope,
   expectedHash: z.string().regex(/^[a-f0-9]{64}$/),
   decision: z.enum(["granted", "refused", "withdrawn"]),
   policyVersionId: z.uuid().nullable(),
   reviewed: z.literal(true),
 });
-const documentConsent = consent.extend({
+export const caseReviewDocumentConsentSchema = caseReviewConsentSchema.extend({
   documentVersionId: z.uuid().nullable(),
   sourceReference: z.string().trim().min(3).max(1000),
 });
-const verify = z.object({
+export const caseReviewVerifySchema = z.object({
   ...commandEnvelope,
   expectedHash: z.string().regex(/^[a-f0-9]{64}$/),
   note: z.string().trim().min(10).max(2000),
@@ -236,7 +236,7 @@ export async function reviewConsentPolicy(
 }
 
 export async function saveCaseReview(db: Executor, session: Session, raw: unknown) {
-  const input = parseInput(save, raw);
+  const input = parseInput(caseReviewSaveSchema, raw);
   await agencyStaff(db, session, input.caseId, null, true);
   if (input.expectedVersion) await readCaseReview(db, session, input.id);
   return retainedAgencyTransaction(db, async (tx) => {
@@ -333,7 +333,10 @@ export async function decideReviewConsent(
   raw: unknown,
   external = false,
 ) {
-  const input = parseInput(external ? documentConsent : consent, raw);
+  const input = parseInput(
+    external ? caseReviewDocumentConsentSchema : caseReviewConsentSchema,
+    raw,
+  );
   const row = await rawReview(db, input.id);
   if (external) await agencyStaff(db, session, row.caseId, row.consentDocumentVersionId, true);
   else await authorAccess(db, session, row);
@@ -351,7 +354,7 @@ export async function decideReviewConsent(
       await currentWording(tx, current.contentPageVersionId, true);
       if (input.expectedHash !== current.bindingHash) throw new AppError("approval_stale");
       if (external) {
-        const supplied = documentConsent.parse(input);
+        const supplied = caseReviewDocumentConsentSchema.parse(input);
         if (!supplied.documentVersionId) throw new AppError("transition_denied");
         await documentAccess(tx, live, supplied.documentVersionId);
         evidence = await reviewedEvidence(tx, supplied.documentVersionId, {
@@ -386,7 +389,7 @@ export async function decideReviewConsent(
         version(current, input.expectedVersion);
         if (input.expectedHash !== current.bindingHash) throw new AppError("approval_stale");
         if (input.decision !== "granted") await restrictReviewContent(ctx.tx, current);
-        const supplied = external ? documentConsent.parse(input) : null;
+        const supplied = external ? caseReviewDocumentConsentSchema.parse(input) : null;
         const [changed] = await ctx.tx
           .update(agencyCaseReviews)
           .set({
@@ -449,7 +452,7 @@ async function currentConsent(db: Executor, row: Review) {
 }
 
 export async function verifyCaseReview(db: Executor, session: Session, raw: unknown) {
-  const input = parseInput(verify, raw);
+  const input = parseInput(caseReviewVerifySchema, raw);
   await readCaseReview(db, session, input.id);
   return retainedAgencyTransaction(db, async (tx) => {
     const row = await rawReview(tx, input.id, true);

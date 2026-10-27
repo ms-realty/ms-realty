@@ -107,4 +107,15 @@ describe("host resolution", () => {
       expect(servesApi(surface, "/api/test-outbox", origins)).toBe(false);
     }
   });
+
+  it("mounts agency commands on both private production hosts and never on public", () => {
+    for (const path of [
+      "/api/agency/clientConsent",
+      "/api/agency/partnerSave",
+      "/api/agency/unknown",
+    ])
+      for (const surface of ["public", "client", "staff"] as const)
+        expect(servesApi(surface, path, origins), `${surface} ${path}`).toBe(surface !== "public");
+    expect(servesApi("staff", "/api/agency-extra/partnerSave", origins)).toBe(false);
+  });
 });

@@ -148,7 +148,7 @@ export async function recordAppointmentVersion(
   });
 }
 
-const photographySchema = z.object({
+export const photographyRequestSchema = z.object({
   ...commandEnvelope,
   preferredWindow: z.string().trim().min(3).max(500),
   photographyScope: z.string().trim().min(10).max(2000),
@@ -157,7 +157,7 @@ const photographySchema = z.object({
 
 /** O10/F23 property preparation, with no customer Case, Interest or implied media license. */
 export async function requestPhotography(db: Executor, session: Session, raw: unknown) {
-  const input = parseInput(photographySchema, raw);
+  const input = parseInput(photographyRequestSchema, raw);
   const authorize = async (tx: Executor, lock = false) => {
     const live = await liveUser(tx, session);
     if (live.account.kind !== "staff") throw new AppError("not_found");

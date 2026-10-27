@@ -102,7 +102,7 @@ export function servesApi(
   origins: HostOrigins = hostOrigins(),
 ): boolean {
   const family = pathname.split("/")[2] ?? "";
-  if (family === "files") return context === "staff" || context === "client";
+  if (family === "files" || family === "agency") return context === "staff" || context === "client";
   // The route also requires ENABLE_TEST_OUTBOX. Real hosts cannot reach captured sign-in
   // links even if an operator accidentally enables the development flag.
   if (family === "test-outbox") {
