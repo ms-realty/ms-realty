@@ -12,7 +12,8 @@ import ru from "../../../messages/ru/discovery.json" with { type: "json" };
 
 const copyFor = catalogCopy({ bg, en, ru, de, nl, el, he });
 
-export type DiscoveryCopy = Record<keyof typeof bg, string>;
+export type DiscoveryCopy = Omit<typeof bg, "serviceIntake">;
 export function discoveryCopy(locale: PublicLocale): DiscoveryCopy {
-  return { ...copyFor(locale) };
+  const { serviceIntake: _serviceIntake, ...copy } = copyFor(locale);
+  return copy;
 }
