@@ -1,5 +1,39 @@
 import { expect, it } from "vitest";
 import { extractLiveSource } from "./capture";
+import { projectListingFacts } from "./listing-facts";
+
+it("R07/AT57 preserves the measured hyphenated source reference through fact projection", () => {
+  const source = extractLiveSource(
+    '<html lang="bg"><title>Source reference fragment</title><div class="post_content"><div class="propslist"><span class="proptitle">№:</span><span class="propval">567-1</span></div></div></html>',
+    "https://makler-realty.com/listing/source/",
+  );
+  expect(source.listing_reference).toBe("567-1");
+  const projected = projectListingFacts(null, {
+    reference: source.listing_reference,
+    locale: source.locale,
+    title: source.title,
+    fields: source.source_fields,
+  });
+  expect(projected).toMatchObject({
+    reference: "567-1",
+    sold: null,
+    price: { amount: null },
+    sourceStatedFacts: [{ label: "№:", value: "567-1" }],
+    statusParityVerified: false,
+  });
+});
+
+it.each(["567--1", "567-", "-567", "567-1 notes"])(
+  "R07/AT57 retains unsupported reference %s as raw evidence without inventing a listing",
+  (reference) => {
+    const source = extractLiveSource(
+      `<html lang="bg"><title>Source</title><div class="post_content"><div class="propslist"><span class="proptitle">№:</span><span class="propval">${reference}</span></div></div></html>`,
+      "https://makler-realty.com/listing/source/",
+    );
+    expect(source.listing_reference).toBeNull();
+    expect(source.source_fields).toEqual([{ label: "№:", value: reference }]);
+  },
+);
 
 it("recognizes the measured Russian source reference label without accepting unrelated labels", () => {
   const html = (label: string) =>

@@ -195,7 +195,7 @@ function extractDocument(document: Document, url: string) {
     ),
     // A visible source status needs field-level verification. Archive/freeze labels are not status.
     sold: null,
-    listing_reference: reference && /^\d+$/u.test(reference) ? reference : null,
+    listing_reference: reference && /^\d+(?:-\d+)?$/u.test(reference) ? reference : null,
     source_fields: fields,
     content_links: contentLinks.filter(
       (link, index) =>
