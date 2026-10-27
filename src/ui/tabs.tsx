@@ -26,9 +26,9 @@ export function Tabs({ label, items, defaultSelectedKey }: TabsProps) {
           <Tab
             id={item.id}
             className={cx(
-              "-mb-px flex min-h-control cursor-pointer items-center whitespace-nowrap border-b-[3px] border-transparent px-4 text-compact text-text-muted outline-offset-[-2px]",
+              "-mb-px flex min-h-control cursor-pointer items-center whitespace-nowrap border-b-[3px] border-transparent px-4 text-compact text-text-muted outline-offset-2",
               "data-hovered:text-text data-selected:border-action data-selected:font-semibold data-selected:text-text",
-              "data-focus-visible:outline-2 data-focus-visible:outline-focus",
+              "data-focus-visible:outline-3 data-focus-visible:outline-focus",
               "forced-colors:border-[Canvas] forced-colors:data-selected:border-[Highlight]",
             )}
           >

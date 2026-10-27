@@ -13,6 +13,7 @@ import {
   sellerInstructions,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
+import { rentalFact } from "@/domain/rental-facts";
 import { createStaff } from "../testing";
 import {
   confirmListingAvailability,
@@ -50,6 +51,45 @@ const input = (): CreateListing => ({
     area: "74.5",
     bedroomsState: "unknown",
   },
+});
+
+it("F26 freezes exact rental money, dates and explicit unknown charges without publication", async () => {
+  const staff = await createStaff(t.db, { roles: ["content_editor"] });
+  const source = input();
+  const created = await createListingDraft(t.db, {
+    actor: staff.actor,
+    operationId: randomUUID(),
+    expectedRevision: 0,
+    input: {
+      ...source,
+      purpose: "long_term_rent",
+      draft: {
+        ...source.draft,
+        rentalDepositState: "known",
+        rentalDeposit: "1200.03",
+        rentalAvailableFromState: "known",
+        rentalAvailableFrom: "2030-04-05",
+      },
+    },
+  });
+  await freezeListingDraft(t.db, {
+    actor: staff.actor,
+    operationId: randomUUID(),
+    reference: created.outcome.reference,
+    expectedRevision: created.outcome.version,
+  });
+  const detail = await inventoryDetail(t.db, staff.actor, created.outcome.reference);
+  expect(rentalFact(detail.revision?.terms, "rental.deposit")).toMatchObject({
+    state: "known",
+    values: [{ amountMinor: 120003, currency: "EUR", period: "total" }],
+    provenance: { sourceReference: "synthetic-evidence-1", sourceLanguage: "bg" },
+  });
+  expect(rentalFact(detail.revision?.terms, "rental.recurring_charges")).toMatchObject({
+    state: "unknown",
+    values: [],
+  });
+  expect(detail.listing.approvedRevisionId).toBeNull();
+  expect(detail.publications).toEqual([]);
 });
 
 it("creates one recoverable draft on retry and never grants approval/publication", async () => {

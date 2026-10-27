@@ -595,5 +595,20 @@
     "photoMoved": "{photo}: позиция {position} из {total} в предлагаемом порядке.",
     "draftDiscarded": "Черновик фото удалён",
     "detailsUnchanged": "Данные фото совпадают с одобренной версией"
+  },
+  "pageTitles": {
+    "new": "Новая запись",
+    "edit": "Редактирование",
+    "receipt": "Результат",
+    "review": "Проверка",
+    "import": "Добавление сохранённых объектов",
+    "correction": "Исправление сведений"
+  },
+  "journeyTabs": {
+    "overview": "Обзор",
+    "properties": "Объекты",
+    "appointments": "Планы",
+    "messages": "Чат",
+    "account": "Профиль"
   }
 }

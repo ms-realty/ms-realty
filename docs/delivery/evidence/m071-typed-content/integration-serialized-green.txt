@@ -1,0 +1,8 @@
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-operating-settings/MS-Realty
+
+
+ Test Files  3 passed (3)
+      Tests  24 passed (24)
+   Start at  17:21:56
+   Duration  14.79s (tests 92%, import 7%, transform 1%)

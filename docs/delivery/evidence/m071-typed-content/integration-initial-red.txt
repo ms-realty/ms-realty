@@ -1,0 +1,115 @@
+
+ RUN  v5.0.5 /Users/ivan/.codex/worktrees/msr-operating-settings/MS-Realty
+
+ ❯ |integration| src/server/content/public-areas.int.test.ts (7 tests | 1 failed) 25897ms
+   ❯ P15 approved areas and current inventory (7)
+     × P15B binds scope to the approved hash; saving, replaying and mutating a legacy pointer cannot move the public guide 5004ms
+ ❯ |integration| src/server/content/commands.int.test.ts (6 tests | 1 failed) 19628ms
+   ❯ O21 editorial content authority (6)
+     × drafts are private; separate exact reviews release BG text; a new draft leaves the published edition intact 5011ms
+ ❯ |integration| src/server/content/locale-commands.int.test.ts (6 tests | 5 failed) 49377ms
+   ❯ O21 / F24 / AT22 / AT23 BG-bound CMS language editions (6)
+     × keeps all six target drafts private and releases only exact separately reviewed editions 5005ms
+     × requires target-locale grants and separate claim/publication authority, including replay and receipts 5002ms
+     × withdraws locale approvals immediately when the BG source changes, including consent terms and new review 5000ms
+     × keeps an area edition attached to its exact BG place and rejects forged cross-page source bindings 5000ms
+     × M071 binds all typed locale editions to the exact BG composition and invalidates them after a source structure edit 20003ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |integration| src/server/content/commands.int.test.ts > O21 editorial content authority > drafts are private; separate exact reviews release BG text; a new draft leaves the published edition intact
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/server/content/commands.int.test.ts:116:3
+    114|     ).rejects.toMatchObject({ code: "not_found" });
+    115|   });
+    116|   it("drafts are private; separate exact reviews release BG text; a ne…
+       |   ^
+    117|     const actor = await staff(),
+    118|       input = draft();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > keeps all six target drafts private and releases only exact separately reviewed editions
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/server/content/locale-commands.int.test.ts:154:3
+    152|
+    153| describe("O21 / F24 / AT22 / AT23 BG-bound CMS language editions", () …
+    154|   it("keeps all six target drafts private and releases only exact sepa…
+       |   ^
+    155|     const actor = await staff(),
+    156|       page = await source(actor);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > requires target-locale grants and separate claim/publication authority, including replay and receipts
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/server/content/locale-commands.int.test.ts:204:3
+    202|   });
+    203|
+    204|   it("requires target-locale grants and separate claim/publication aut…
+       |   ^
+    205|     const owner = await staff(),
+    206|       languageOnly = await staff(["translation.review"], ["en"]),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > withdraws locale approvals immediately when the BG source changes, including consent terms and new review
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/server/content/locale-commands.int.test.ts:275:3
+    273|   });
+    274|
+    275|   it("withdraws locale approvals immediately when the BG source change…
+       |   ^
+    276|     const actor = await staff(),
+    277|       page = await source(actor, "search-alert-consent");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > keeps an area edition attached to its exact BG place and rejects forged cross-page source bindings
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/server/content/locale-commands.int.test.ts:348:3
+    346|   });
+    347|
+    348|   it("keeps an area edition attached to its exact BG place and rejects…
+       |   ^
+    349|     const actor = await staff(),
+    350|       page = await source(actor, `area-${randomUUID()}`, "area"),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  |integration| src/server/content/locale-commands.int.test.ts > O21 / F24 / AT22 / AT23 BG-bound CMS language editions > M071 binds all typed locale editions to the exact BG composition and invalidates them after a source structure edit
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/server/content/locale-commands.int.test.ts:463:3
+    461|     expect(active).toEqual([]);
+    462|   }, 15000);
+    463|   it("M071 binds all typed locale editions to the exact BG composition…
+       |   ^
+    464|     const actor = await staff();
+    465|     const sourceBlocks: ContentBlock[] = [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  |integration| src/server/content/public-areas.int.test.ts > P15 approved areas and current inventory > P15B binds scope to the approved hash; saving, replaying and mutating a legacy pointer cannot move the public guide
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/server/content/public-areas.int.test.ts:90:3
+     88|
+     89| describe("P15 approved areas and current inventory", () => {
+     90|   it("P15B binds scope to the approved hash; saving, replaying and mut…
+       |   ^
+     91|     const oldPlace = await createPlaces(t.db, {
+     92|       settlement: ["Старо тестово място", "Old test location"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  7 failed | 12 passed (19)
+   Start at  17:18:11
+   Duration  51.72s (tests 95%, import 3%, transform 2%)

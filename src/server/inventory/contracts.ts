@@ -27,8 +27,27 @@ export const draftSchema = z.object({
   sourceReference: z.string().trim().min(1).max(1000),
   sourceClass: z.enum(sourceClasses),
   sourceLanguage: z.enum(["bg", "en", "ru", "de", "nl", "el", "he"]),
+  rentalDepositState: z.enum(factStates).default("unknown"),
+  rentalDeposit: z.string().trim().max(160).default(""),
+  rentalChargesState: z.enum(factStates).default("unknown"),
+  rentalCharges: z.string().trim().max(160).default(""),
+  rentalChargesIncludes: z.string().trim().max(4000).default(""),
+  rentalAvailableFromState: z.enum(factStates).default("unknown"),
+  rentalAvailableFrom: z.string().trim().max(100).default(""),
+  rentalRestrictionsState: z.enum(factStates).default("unknown"),
+  rentalRestrictions: z.string().trim().max(4000).default(""),
 });
 export type ListingDraft = z.infer<typeof draftSchema>;
+
+// O12: incomplete provenance may be kept privately. Freezing still parses draftSchema and
+// requires the original source/area prerequisites before creating reviewable revisions.
+export const savedDraftSchema = draftSchema.extend({
+  areaBasis: z.union([z.enum(areaBases), z.literal("")]),
+  sourceReference: z.string().trim().max(1000),
+  sourceClass: z.union([z.enum(sourceClasses), z.literal("")]),
+  sourceLanguage: z.union([draftSchema.shape.sourceLanguage, z.literal("")]),
+});
+export type SavedListingDraft = z.infer<typeof savedDraftSchema>;
 
 // A broker decision belongs to one Save command, never to the mutable draft.
 export const priceDecisionSchema = z
@@ -53,6 +72,15 @@ export const emptyDraft: ListingDraft = {
   sourceReference: "",
   sourceClass: "source_supplied",
   sourceLanguage: "bg",
+  rentalDepositState: "unknown",
+  rentalDeposit: "",
+  rentalChargesState: "unknown",
+  rentalCharges: "",
+  rentalChargesIncludes: "",
+  rentalAvailableFromState: "unknown",
+  rentalAvailableFrom: "",
+  rentalRestrictionsState: "unknown",
+  rentalRestrictions: "",
 };
 export const createListingSchema = z.object({
   propertyType: z.enum(propertyTypes),

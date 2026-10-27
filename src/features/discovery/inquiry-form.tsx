@@ -374,8 +374,16 @@ export function InquiryForm({
                 {...form.field("message")}
                 label={copy.message}
                 multiline
-                maxLength={2000}
-                hint={copy.messageHint}
+                error={
+                  form.field("message").error ||
+                  (form.values.message.length > 2000
+                    ? copy.messageOverLimit.replace(
+                        "{count}",
+                        String(form.values.message.length - 2000),
+                      )
+                    : undefined)
+                }
+                hint={`${copy.messageHint} ${copy.messageCount.replace("{count}", String(form.values.message.length))}`}
                 required={form.values.purpose === "question"}
                 optionalLabel={form.values.purpose !== "question" ? copy.optional : undefined}
               />

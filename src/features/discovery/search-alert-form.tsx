@@ -24,7 +24,7 @@ export function SearchAlertForm({
   const c = searchAlertCopy(locale),
     p = privacyCopy(locale);
   return (
-    <div lang={searchAlertCopyLocale(locale)} dir="ltr">
+    <div lang={searchAlertCopyLocale(locale)} dir={locale === "he" ? "rtl" : "ltr"}>
       <ActionForm
         action={action}
         initialState={initialState}

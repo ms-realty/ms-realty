@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { normalizeSearch } from "@/server/search/search";
@@ -192,5 +192,82 @@ describe("P02 native advanced filters", () => {
     const submitted = submittedFilters(form);
     for (const key of ["minPrice", "type", "currency", "areaBasis"] as const)
       expect(submitted[key]).toBe(values[key]);
+  });
+});
+
+describe("P03/UI15 compact filter draft", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const compactViewport = () =>
+    vi.stubGlobal("matchMedia", () => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+
+  it("contains focus, snapshots the main search, clears only the draft and discards it on Cancel", async () => {
+    compactViewport();
+    const user = userEvent.setup();
+    const { container } = render(
+      await SearchForm({
+        locale: "en",
+        copy: discoveryCopy("en"),
+        values: readFilters({ minBeds: "2", type: "apartment" }),
+      }),
+    );
+    const base = container.querySelector("form");
+    if (!base) throw new Error("Native GET form missing");
+    await user.type(screen.getByLabelText("Place, text or reference"), "MS-synthetic");
+    const trigger = screen.getByRole("button", { name: /^Filters/ });
+    await user.click(trigger);
+    const dialog = screen.getByRole("dialog", { name: "Filters" });
+    expect(dialog).toHaveTextContent("Changes are a draft");
+    expect(within(dialog).getByLabelText("Place, text or reference")).toHaveValue("MS-synthetic");
+    const minimum = within(dialog).getByLabelText("Minimum bedrooms", { exact: true });
+    await user.clear(minimum);
+    await user.type(minimum, "3");
+    expect(submittedFilters(base)).toMatchObject({
+      minBeds: "2",
+      type: "apartment",
+      q: "MS-synthetic",
+    });
+    await user.click(within(dialog).getByRole("button", { name: "Clear draft" }));
+    expect(minimum).toHaveValue("");
+    expect(within(dialog).getByRole("checkbox", { name: "Apartment" })).not.toBeChecked();
+    expect(submittedFilters(base)).toMatchObject({ minBeds: "2", type: "apartment" });
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+    await user.click(trigger);
+    expect(
+      within(screen.getByRole("dialog")).getByLabelText("Minimum bedrooms", { exact: true }),
+    ).toHaveValue("2");
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("shows rejected values in the compact correction dialog and Back discards local edits", async () => {
+    compactViewport();
+    const user = userEvent.setup();
+    render(
+      await SearchForm({
+        locale: "en",
+        copy: discoveryCopy("en"),
+        values: readFilters({ minBeds: "invalid" }),
+        filtersOpen: true,
+      }),
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Filters" });
+    const minimum = within(dialog).getByLabelText("Minimum bedrooms", { exact: true });
+    expect(minimum).toHaveValue("invalid");
+    await user.clear(minimum);
+    await user.type(minimum, "4");
+    act(() => window.history.back());
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: /^Filters/ }));
+    expect(
+      within(screen.getByRole("dialog")).getByLabelText("Minimum bedrooms", { exact: true }),
+    ).toHaveValue("invalid");
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });

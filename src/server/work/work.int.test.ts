@@ -29,6 +29,7 @@ import {
   readToday,
   searchInquiries,
 } from "./queries";
+import { searchWorkspace, workspaceCounts } from "./workspace-search";
 
 let t: TestDatabase;
 beforeAll(async () => {
@@ -80,6 +81,38 @@ async function received(locale: "bg" | "en" = "en") {
 }
 
 describe("staff work against durable inquiry intake", () => {
+  it("O01/O06 searches and counts only live scoped records without widening contact fragments", async () => {
+    const visible = await received("bg");
+    const hidden = await received("en");
+    const scoped = await staff({
+      grants: [
+        {
+          capability: "inquiry.read",
+          recordType: "inquiry",
+          recordId: visible.id,
+          locales: ["bg"],
+        },
+      ],
+    });
+    const found = await searchWorkspace(t.db, scoped.session, "Synthetic");
+    expect(found.filter((row) => row.kind === "inquiries").map((row) => row.id)).toEqual([
+      visible.id,
+    ]);
+    expect(found.filter((row) => row.kind === "contacts").map((row) => row.id)).toEqual([
+      visible.partyId,
+    ]);
+    expect(found.some((row) => row.id === hidden.id || row.id === hidden.partyId)).toBe(false);
+    expect(await workspaceCounts(t.db, scoped.session)).toEqual({ inquiries: 1, tasks: 0 });
+    const [captured] = await t.db
+      .select()
+      .from(contactMethods)
+      .where(eq(contactMethods.id, visible.contactMethodId as string));
+    expect(
+      (await listContacts(t.db, scoped.session, 1, captured?.value.slice(0, 8))).rows.map(
+        (row) => row.id,
+      ),
+    ).toEqual([visible.partyId]);
+  });
   it("public intake enters the authorized queue; acceptance atomically owns it and records exactly one follow-up on replay", async () => {
     const broker = await staff();
     const row = await received();

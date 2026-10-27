@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
+import { SelectionLink } from "@/features/discovery/selection-link";
 import { isolateText, Ltr } from "@/i18n/bidi";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { agencyYear } from "@/i18n/format";
@@ -13,9 +14,9 @@ import { brandPhone } from "./agency";
 import { LanguageSuggestion } from "./language-suggestion";
 import { LocaleSwitcher } from "./language-switcher";
 import { MenuDisclosure } from "./menu-disclosure";
-import { NavLink } from "./nav-link";
 import { footerNav, linked, publicPrimaryNav, publicUtilityNav } from "./navigation";
 import { NavigationLoading } from "./navigation-loading";
+import { PublicNavLink } from "./public-nav-link";
 import { StickyHeader } from "./sticky-header";
 import { languageSuggestionFor, publicPageLocaleAvailability } from "./suggestion";
 
@@ -27,9 +28,12 @@ const navLinkClass =
 export async function PublicShell({
   locale,
   children,
+  notice,
 }: {
   locale: PublicLocale;
   children: ReactNode;
+  /** Normal-flow public notices, including the shared consent control. */
+  notice?: ReactNode;
 }) {
   const t = await getTranslations({ locale, namespace: "nav" });
   const a11y = await getTranslations({ locale, namespace: "a11y" });
@@ -47,9 +51,9 @@ export async function PublicShell({
     <ul className="flex flex-col gap-1 lg:flex-row lg:items-center">
       {primary.map((item) => (
         <li key={item.label}>
-          <NavLink href={item.href} className={navLinkClass}>
+          <PublicNavLink href={item.href} className={navLinkClass}>
             {t(item.label)}
-          </NavLink>
+          </PublicNavLink>
         </li>
       ))}
     </ul>
@@ -58,6 +62,7 @@ export async function PublicShell({
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
       <SkipLink targetId={mainId}>{a11y("skipToContent")}</SkipLink>
+      {notice}
       {suggestion ? (
         <LanguageSuggestion
           suggested={suggestion.locale}
@@ -82,10 +87,16 @@ export async function PublicShell({
           <ul aria-label={t("utilitiesLabel")} className="flex items-center gap-1 lg:ms-auto">
             {utilities.map((item) => (
               <li key={item.label} className="hidden sm:block">
-                <NavLink href={item.href} className={navLinkClass}>
-                  {item.label === "saved" ? <icons.SaveIcon className="me-2" /> : null}
-                  {t(item.label)}
-                </NavLink>
+                {item.label === "saved" || item.label === "compare" ? (
+                  <SelectionLink kind={item.label} locale={locale} className={navLinkClass}>
+                    {item.label === "saved" ? <icons.SaveIcon /> : null}
+                    {t(item.label)}
+                  </SelectionLink>
+                ) : (
+                  <PublicNavLink href={item.href} className={navLinkClass}>
+                    {t(item.label)}
+                  </PublicNavLink>
+                )}
               </li>
             ))}
             <li>
@@ -96,24 +107,41 @@ export async function PublicShell({
                 availability={availability}
               />
             </li>
-            {utilities.some((item) => item.label === "contact") ? null : (
-              <li>
-                <a
-                  href={`tel:${brandPhone.e164}`}
-                  className={buttonClass("secondary", "px-3 sm:px-4")}
-                >
-                  <icons.PhoneIcon className="size-[1.125rem]" />
-                  <span className="sr-only">{footer("callLabel")}</span>
-                  <span className="max-sm:sr-only">
-                    <Ltr>{brandPhone.display}</Ltr>
-                  </span>
-                </a>
-              </li>
-            )}
+            <li>
+              <a
+                href={`tel:${brandPhone.e164}`}
+                className={buttonClass("secondary", "px-3 sm:px-4")}
+              >
+                <icons.PhoneIcon className="size-[1.125rem]" />
+                <span className="sr-only">{footer("callLabel")}</span>
+                <span className="max-sm:sr-only">
+                  <Ltr>{brandPhone.display}</Ltr>
+                </span>
+              </a>
+            </li>
           </ul>
           {primary.length > 0 ? (
             <MenuDisclosure label={t("menu")} className="lg:hidden" panelClassName="lg:hidden pb-3">
-              <nav aria-label={t("primaryLabel")}>{primaryList}</nav>
+              <div className="space-y-3">
+                <nav aria-label={t("primaryLabel")}>{primaryList}</nav>
+                <nav aria-label={t("utilitiesLabel")} className="border-t border-divider pt-3">
+                  <ul className="flex flex-wrap gap-2">
+                    {utilities.map((item) => (
+                      <li key={item.label}>
+                        {item.label === "saved" || item.label === "compare" ? (
+                          <SelectionLink kind={item.label} locale={locale} className={navLinkClass}>
+                            {t(item.label)}
+                          </SelectionLink>
+                        ) : (
+                          <PublicNavLink href={item.href} className={navLinkClass}>
+                            {t(item.label)}
+                          </PublicNavLink>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              </div>
             </MenuDisclosure>
           ) : null}
         </div>
@@ -136,9 +164,9 @@ export async function PublicShell({
             <p className="text-compact text-text-muted">{footer("agencyKind")}</p>
             <a
               href={`tel:${brandPhone.e164}`}
-              className="inline-flex w-fit items-center gap-2 text-compact font-semibold text-link no-underline hover:underline"
+              className="inline-flex min-h-control min-w-control w-fit max-w-full items-center gap-2 py-2 text-compact font-semibold text-link no-underline hover:underline"
             >
-              <icons.PhoneIcon className="size-[1.125rem]" />
+              <icons.PhoneIcon className="size-[1.125rem] shrink-0" />
               {footer("call", { phone: isolateText(brandPhone.display, "ltr") })}
             </a>
           </div>
@@ -147,12 +175,12 @@ export async function PublicShell({
               <ul className="grid gap-2.5 lg:grid-cols-2">
                 {footerLinks.map((item) => (
                   <li key={item.label}>
-                    <NavLink
+                    <PublicNavLink
                       href={item.href}
-                      className="text-compact text-text no-underline hover:underline"
+                      className="inline-flex min-h-control min-w-control max-w-full items-center py-2 text-compact text-text no-underline hover:underline"
                     >
                       {footer(item.label)}
-                    </NavLink>
+                    </PublicNavLink>
                   </li>
                 ))}
               </ul>

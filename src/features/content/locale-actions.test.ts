@@ -3,6 +3,7 @@ import { AppError, toErrorBody } from "@/server/errors";
 import type { HandlerContext } from "@/server/http/next";
 import { formFields } from "@/ui/form/contract";
 import { initialFormState } from "@/ui/form/server";
+import { contentBodyValues } from "./body-fields";
 import {
   type ContentLocaleBinding,
   type LocaleContentValues,
@@ -47,7 +48,12 @@ const binding: ContentLocaleBinding = {
 function form() {
   const initial = initialFormState<LocaleContentValues>(
     `content.locale.save.${id}.he`,
-    { title: "כותרת בדיקה", text: "טקסט MS-00001 https://example.test/" },
+    {
+      title: "כותרת בדיקה",
+      text: "טקסט MS-00001 https://example.test/",
+      bodyFormat: "paragraphs",
+      composition: "[]",
+    },
     2,
   );
   const data = new FormData();
@@ -122,5 +128,37 @@ describe("O21 target edition native action boundary", () => {
     expect(mocks.save).not.toHaveBeenCalled();
     expect(result.values).toEqual(initial.values);
     expect(result.outcome.kind).toBe("validation");
+  });
+  it("M071 retains exact typed draft and latest structure in a source-current conflict comparison", async () => {
+    const { initial, data } = form();
+    data.set("bodyFormat", "blocks");
+    data.set("bodyBlocks.0.type", "step");
+    data.set("bodyBlocks.0.title", "טיוטת צעד");
+    data.set("bodyBlocks.0.text", "טקסט מדויק MS-00001");
+    const latest = {
+      format: "blocks" as const,
+      title: "Latest synthetic draft",
+      blocks: [{ type: "heading" as const, text: "Latest reviewed structure" }],
+    };
+    mocks.save.mockRejectedValueOnce(new AppError("version_conflict"));
+    mocks.view.mockResolvedValueOnce({
+      page: { version: binding.sourceExpectedVersion },
+      edition: { version: 4 },
+      sourceReady: true,
+      source: {
+        version: { id: binding.sourceVersionId, contentHash: binding.sourceVersionHash, number: 3 },
+      },
+      current: { body: latest },
+    });
+    const result = await saveContentLocaleAction("en", id, "he", binding, initial, data);
+    expect(result.values.bodyFormat).toBe("blocks");
+    expect(JSON.parse(result.values.composition)).toMatchObject([
+      { type: "step", title: "טיוטת צעד", text: "טקסט מדויק MS-00001" },
+    ]);
+    expect(result.outcome).toMatchObject({
+      kind: "conflict",
+      latest: { revision: 4, values: { title: latest.title, ...contentBodyValues(latest) } },
+      reapply: { expectedRevision: 4 },
+    });
   });
 });

@@ -12,8 +12,28 @@ import ru from "../../../messages/ru/discovery.json" with { type: "json" };
 
 const copyFor = catalogCopy({ bg, en, ru, de, nl, el, he });
 
-export type DiscoveryCopy = Omit<typeof bg, "serviceIntake">;
+type Section =
+  | "serviceIntake"
+  | "contentLabels"
+  | "inquiryPhotos"
+  | "propertyFacts"
+  | "searchAlerts"
+  | "searchAlertStatus";
+export type DiscoveryCopy = Omit<typeof bg, Section>;
 export function discoveryCopy(locale: PublicLocale): DiscoveryCopy {
-  const { serviceIntake: _serviceIntake, ...copy } = copyFor(locale);
+  const {
+    serviceIntake: _serviceIntake,
+    contentLabels: _contentLabels,
+    inquiryPhotos: _inquiryPhotos,
+    propertyFacts: _propertyFacts,
+    searchAlerts: _searchAlerts,
+    searchAlertStatus: _searchAlertStatus,
+    ...copy
+  } = copyFor(locale);
   return copy;
 }
+export const publicContentCopy = (locale: PublicLocale) => copyFor(locale).contentLabels;
+export const inquiryPhotosCopy = (locale: PublicLocale) => copyFor(locale).inquiryPhotos;
+export const propertyFactsCopy = (locale: PublicLocale) => copyFor(locale).propertyFacts;
+export const searchAlertsCopy = (locale: PublicLocale) => copyFor(locale).searchAlerts;
+export const searchAlertStatusesCopy = (locale: PublicLocale) => copyFor(locale).searchAlertStatus;

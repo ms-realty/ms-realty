@@ -41,6 +41,9 @@ export function AnalyticsConsent({
   const titleId = useId();
   const copy = trackingCopy[locale];
   const [expanded, setExpanded] = useState(initialPreference === "unset");
+  const [preference, setPreference] = useState(initialPreference);
+  const [nextPage, setNextPage] = useState(false);
+  const preferenceChanged = useRef(false);
   const pathname = usePathname();
   const documentPath = useRef(pathname);
   const runtimeStarted = useRef(false);
@@ -60,6 +63,7 @@ export function AnalyticsConsent({
     const path = analyticsPagePath(location.pathname, location.search, location.hash);
     if (
       initialPreference !== "granted" ||
+      preferenceChanged.current ||
       !valid ||
       !path ||
       pathname !== documentPath.current ||
@@ -93,10 +97,11 @@ export function AnalyticsConsent({
     // The document navigation boundary, rather than script removal, clears GTM.
   }, [containerId, initialPreference, nonce, pathname]);
 
-  const choose = (preference: Exclude<AnalyticsPreference, "unset">) => {
+  const choose = (choice: Exclude<AnalyticsPreference, "unset">) => {
+    preferenceChanged.current = true;
     // biome-ignore lint/suspicious/noDocumentCookie: first-party preference with no visitor ID or personal data.
-    document.cookie = consentCookie(preference, location.protocol === "https:");
-    if (preference === "denied") {
+    document.cookie = consentCookie(choice, location.protocol === "https:");
+    if (choice === "denied") {
       const target = window as TrackingWindow;
       if (target.dataLayer) {
         function command(..._values: unknown[]) {
@@ -122,14 +127,21 @@ export function AnalyticsConsent({
         }
       }
     }
-    // A new response installs a CSP matching the updated consent, and discards any
-    // already-executed third-party runtime after withdrawal.
-    location.reload();
+    // An executed third-party runtime must be discarded on withdrawal. With no runtime,
+    // retain the user's current page/draft and apply a new grant on the next document.
+    if (choice === "denied" && runtimeStarted.current) {
+      discardAnalyticsDocument();
+      return;
+    }
+    setPreference(choice);
+    setNextPage(choice === "granted" && !runtimeStarted.current);
+    setExpanded(false);
   };
   return (
     <aside
+      data-analytics-consent=""
       aria-labelledby={expanded ? titleId : undefined}
-      className="border-t border-divider bg-surface"
+      className="border-b border-divider bg-surface"
     >
       <div className="mx-auto flex max-w-page flex-col gap-3 px-gutter py-5 lg:px-gutter-wide">
         {expanded ? (
@@ -138,13 +150,16 @@ export function AnalyticsConsent({
               {copy.title}
             </h2>
             <p className="max-w-reading text-compact text-text-muted">{copy.description}</p>
+            {runtimeStarted.current ? (
+              <p className="max-w-reading text-compact text-text-muted">{copy.withdrawRefresh}</p>
+            ) : null}
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 className={buttonClass("secondary")}
                 onClick={() => choose("denied")}
               >
-                {initialPreference === "granted" ? copy.withdraw : copy.necessary}
+                {preference === "granted" ? copy.withdraw : copy.necessary}
               </button>
               <button
                 type="button"
@@ -158,7 +173,7 @@ export function AnalyticsConsent({
         ) : (
           <>
             <p className="text-compact text-text-muted">
-              {initialPreference === "granted" ? copy.enabled : copy.disabled}
+              {nextPage ? copy.nextPage : preference === "granted" ? copy.enabled : copy.disabled}
             </p>
             <button
               type="button"

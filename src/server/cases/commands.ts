@@ -70,6 +70,7 @@ const nextSchema = z.object({
   nextAction: z.string().trim().min(3).max(500),
   dueAt: z.iso.datetime({ offset: true }),
   clientSummary: z.string().trim().max(2000),
+  reason: z.string().trim().max(1500).default(""),
 });
 const briefSchema = z.object({
   ...commandEnvelope,
@@ -308,7 +309,23 @@ export async function updateNextAction(
         waitingOn: null,
         reviewAt: null,
       });
-      await caseEvent(ctx, "case", row.id, "case.next_action_recorded", "case.transition");
+      await caseEvent(
+        ctx,
+        "case",
+        row.id,
+        "case.next_action_recorded",
+        "case.transition",
+        {
+          previousNextAction: row.nextAction,
+          nextAction: input.nextAction,
+          previousDueAt: row.nextActionDueAt?.toISOString() ?? null,
+          dueAt: input.dueAt,
+          reason: input.reason || null,
+          previousRevision: row.version,
+          revision: row.version + 1,
+        },
+        "internal",
+      );
       return {
         id: row.id,
         reference: row.reference,

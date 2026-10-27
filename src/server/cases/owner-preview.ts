@@ -361,6 +361,11 @@ export async function getOwnerPreview(
     caseId,
     caseReference: source.record.reference,
     caseVersion: source.record.version,
+    canCorrect: await can(db, source.live.actor, "portal.message.write", {
+      type: "case",
+      id: caseId,
+      audience: "case_participants",
+    }),
     reference,
     revision: source.revision.revisionNumber,
     hash: source.hash,

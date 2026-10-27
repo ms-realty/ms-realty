@@ -1,7 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { createListingSchema, draftSchema, emptyDraft } from "./contracts";
+import { createListingSchema, draftSchema, emptyDraft, savedDraftSchema } from "./contracts";
 
 const draft = { ...emptyDraft, sourceReference: "synthetic-source-record" };
+
+it("O12 saves incomplete private source fields while freeze and creation retain their prerequisites", () => {
+  const incomplete = {
+    ...emptyDraft,
+    title: "Synthetic draft",
+    areaBasis: "",
+    sourceClass: "",
+    sourceLanguage: "",
+  };
+  expect(savedDraftSchema.parse(incomplete)).toMatchObject(incomplete);
+  expect(draftSchema.safeParse(incomplete).success).toBe(false);
+  expect(savedDraftSchema.safeParse({ ...incomplete, areaBasis: "invented" }).success).toBe(false);
+});
 
 describe("O11/O12 listing title contract", () => {
   it.each(["\n", "\r", "\r\n", "\n\n", "\v", "\f", "\u0085", "\u2028", "\u2029"])(

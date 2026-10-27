@@ -1,0 +1,16 @@
+{
+  "title": "Saved in your account",
+  "review": "Review selected properties",
+  "bring": "Bring selected saves to my account",
+  "continueLabel": "Continue to the client account",
+  "hint": "Review the additions. Existing saves remain; no Case access is created.",
+  "confirm": "Add selected properties",
+  "added": "New",
+  "existing": "Already saved",
+  "unavailable": "Unavailable",
+  "empty": "No properties are saved in this account yet.",
+  "cancel": "Cancel",
+  "complete": "The selection was merged with your account saves.",
+  "restart": "Start from the saves on this device",
+  "error": "We could not prepare the transfer. Your device selection is retained."
+}

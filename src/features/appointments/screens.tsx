@@ -7,10 +7,16 @@ import { appointmentMachine } from "@/domain/appointment";
 import { isPublicLocale } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { type CalendarData, readCalendar } from "@/server/appointments/calendar";
+import { listSlotResponses, ownSlotResponse } from "@/server/appointments/participant-response";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import { isAppError } from "@/server/errors";
 import { Notice } from "@/ui/notice";
 import { agencyCopy } from "../agency-obligations/copy";
+import {
+  clientLogisticsUnknown,
+  clientWorkflowCopy,
+  participantResponseTitle,
+} from "../cases/client-workflow-copy";
 import { workflowScope } from "../cases/contract";
 import { caseCopy } from "../cases/copy";
 import { caseEmailCopy } from "../cases/email-copy";
@@ -24,8 +30,10 @@ import {
   workflowLink,
 } from "../cases/screens";
 import { StaffPage } from "../shell/staff-ui";
+import { ContactActions } from "../work/contact-actions";
 import { coverageCopy } from "../work/coverage-copy";
 import { privateRead } from "../work/screens";
+import { staffWorkflowCopy } from "../work/workflow-completion-copy";
 import calendarStyles from "./calendar.module.css";
 import { type CalendarSearch, parseCalendarQuery } from "./calendar-period";
 import { CalendarView } from "./calendar-view";
@@ -34,7 +42,14 @@ import { AppointmentListingContext } from "./listing-context";
 /** The client journey retains its relationship-scoped list in every public locale. */
 export async function ClientCalendarScreen(props: ScreenProps) {
   const c = caseCopy(props.locale);
-  const rows = await privateRead(() => listAppointments(getDb(), props.session));
+  const rows = await privateRead(() =>
+    listAppointments(
+      getDb(),
+      props.session,
+      undefined,
+      isPublicLocale(props.locale) ? props.locale : "bg",
+    ),
+  );
   return (
     <WorkflowPage {...props} title={c.calendar}>
       <p>{c.requestNote}</p>
@@ -87,6 +102,9 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
   const { appointment: row } = detail;
   const c = caseCopy(props.locale);
   const staff = props.session.account.kind === "staff";
+  const ownAnswer = !staff ? await ownSlotResponse(getDb(), props.session, row.id) : null;
+  const client = clientWorkflowCopy(props.locale);
+  const participantAnswers = staff ? await listSlotResponses(getDb(), props.session, row.id) : [];
   const hostCopy = hostHandoverCopy(props.locale);
   const path = `/${props.locale}/${staff ? "calendar" : "appointments"}/${row.id}`;
   const windows = z.array(z.object({ text: z.string() })).safeParse(row.requestedWindows);
@@ -130,7 +148,9 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               name: "action",
               label: c.action,
               type: "select",
+              required: true,
               options: [
+                { value: "", label: c.action },
                 ...(row.state !== "proposed" ? [{ value: "propose", label: c.propose }] : []),
                 { value: "confirm", label: c.confirm },
               ],
@@ -143,7 +163,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             { name: "accessNotes", label: c.logistics, type: "textarea" },
           ]}
           values={{
-            action: row.state === "proposed" ? "confirm" : "propose",
+            action: "",
             bufferMinutes: "30",
           }}
           submit={c.change}
@@ -211,7 +231,11 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             locale={props.locale}
             zoneLabel={props.session.account.kind === "client"}
           />
-          {row.accessNotes ? <p className="whitespace-pre-wrap">{row.accessNotes}</p> : null}
+          {row.accessNotes ? (
+            <p dir="auto" className="whitespace-pre-wrap">
+              {row.accessNotes}
+            </p>
+          ) : null}
           <p>{c.calendarNote}</p>
           {detail.canDownload ? (
             <a className={workflowLink} href={`${path}/calendar`} download>
@@ -220,7 +244,56 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           ) : null}
         </WorkflowSection>
       ) : null}
-      {row.proposedStartsAt && ["proposed", "reschedule_requested"].includes(row.state) ? (
+      {staff && detail.staffContext ? (
+        <section className="space-y-3">
+          {detail.staffContext.contacts.length ? (
+            <>
+              <h2 className="text-subheading font-semibold">
+                {staffWorkflowCopy(props.locale).contacts}
+              </h2>
+              {[...new Set(detail.staffContext.contacts.map((contact) => contact.partyId))].map(
+                (partyId) => (
+                  <div key={partyId} className="space-y-2">
+                    <p className="font-semibold">
+                      {
+                        detail.staffContext?.contacts.find((contact) => contact.partyId === partyId)
+                          ?.name
+                      }
+                    </p>
+                    <ContactActions
+                      locale={props.locale}
+                      methods={
+                        detail.staffContext?.contacts.filter(
+                          (contact) => contact.partyId === partyId,
+                        ) ?? []
+                      }
+                    />
+                  </div>
+                ),
+              )}
+            </>
+          ) : null}
+          {detail.staffContext.location ? (
+            <>
+              <p>
+                <bdi>{detail.staffContext.location.address}</bdi>
+              </p>
+              <a
+                className="inline-flex min-h-control items-center rounded-control border border-border px-3 py-2 font-semibold text-link"
+                href={`https://www.google.com/maps/search/?${new URLSearchParams({ api: "1", query: detail.staffContext.location.address })}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {staffWorkflowCopy(props.locale).openMap}
+              </a>
+            </>
+          ) : null}
+        </section>
+      ) : null}
+      {row.proposedStartsAt &&
+      ["proposed", "reschedule_requested"].includes(row.state) &&
+      (row.proposedStartsAt.getTime() !== row.confirmedStartsAt?.getTime() ||
+        row.proposedEndsAt?.getTime() !== row.confirmedEndsAt?.getTime()) ? (
         <WorkflowSection title={c.proposedTime}>
           <WorkflowTimeRange
             start={row.proposedStartsAt}
@@ -230,7 +303,64 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           />
         </WorkflowSection>
       ) : null}
+      {!staff &&
+      detail.canRespond &&
+      row.proposedVersion &&
+      row.proposedStartsAt &&
+      ["proposed", "reschedule_requested"].includes(row.state) ? (
+        <WorkflowSection title={c.change}>
+          <p>{client.acceptSlotHint}</p>
+          {ownAnswer ? (
+            <p role="status">
+              {ownAnswer.decision === "accept"
+                ? client.slotAccepted
+                : ownAnswer.decision === "decline"
+                  ? client.declineSlot
+                  : client.alternative}
+            </p>
+          ) : null}
+          <div className="grid gap-5 lg:grid-cols-3">
+            {(["accept", "decline", "alternative"] as const).map((decision) => (
+              <BoundWorkflowForm
+                key={decision}
+                {...props}
+                command="appointmentReply"
+                commandAvailable={!ownAnswer}
+                id={row.id}
+                revision={row.version}
+                nativeIdentity={`${workflowScope("appointmentReply", row.id)}:${decision}`}
+                path={path}
+                fields={[
+                  { name: "decision", label: c.action, type: "hidden" },
+                  {
+                    name: "note",
+                    label: decision === "alternative" ? c.preferredWindow : c.reason,
+                    type: "textarea",
+                    required: decision !== "accept",
+                  },
+                ]}
+                values={{ decision }}
+                submit={
+                  decision === "accept"
+                    ? client.acceptSlot
+                    : decision === "decline"
+                      ? client.declineSlot
+                      : client.alternative
+                }
+              />
+            ))}
+          </div>
+        </WorkflowSection>
+      ) : null}
       <AppointmentListingContext listing={detail.listing} locale={locale} />
+      {!staff ? (
+        <WorkflowSection title={c.logistics}>
+          <p dir="auto">{row.accessNotes ?? clientLogisticsUnknown(props.locale)}</p>
+          <a className={workflowLink} href="tel:+359879696870">
+            {client.contactTeam} · <bdi>+359879696870</bdi>
+          </a>
+        </WorkflowSection>
+      ) : null}
       {staff && detail.needsCoverage ? (
         <Notice tone="warning">
           <a href={`/${props.locale}/coverage`} className={workflowLink}>
@@ -413,44 +543,93 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           />
         </SecondaryAppointmentTask>
       ) : null}
+      {staff && participantAnswers.length ? (
+        <WorkflowSection title={participantResponseTitle(props.locale)}>
+          <ul className="space-y-4">
+            {participantAnswers.map((answer) => (
+              <li key={answer.id}>
+                <p>
+                  {answer.name}:{" "}
+                  {answer.decision === "accept"
+                    ? client.acceptSlot
+                    : answer.decision === "decline"
+                      ? client.declineSlot
+                      : client.alternative}
+                </p>
+                {answer.note ? (
+                  <p dir="auto" className="whitespace-pre-wrap">
+                    {answer.note}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </WorkflowSection>
+      ) : null}
       {row.purpose !== "photography" ? arrangement : null}
       {(detail.canRespond && targets.length) || photography ? (
         <SecondaryAppointmentTask
           folded={photography}
           title={photography ? photoCopy.photoActions : c.change}
         >
-          <BoundWorkflowForm
-            {...props}
-            command="appointment"
-            id={row.id}
-            revision={row.version}
-            path={path}
-            commandAvailable={Boolean(detail.canRespond && targets.length)}
-            disclosure={photography ? photoCopy.photoActions : undefined}
-            fields={[
-              {
-                name: "state",
-                label: c.action,
-                type: "select",
-                options: targets.map((value) => ({
-                  value,
-                  label:
-                    value === "reschedule_requested"
-                      ? c.reschedule
-                      : value === "cancelled"
-                        ? c.cancel
-                        : value === "completed"
-                          ? c.complete
-                          : value === "no_show"
-                            ? c.noShow
-                            : c.decline,
-                })),
-              },
-              { name: "reason", label: c.reason, type: "textarea", required: true },
-            ]}
-            values={{ state: targets[0] ?? "" }}
-            submit={c.change}
-          />
+          {!staff ? (
+            <div className="grid gap-5 sm:grid-cols-2">
+              {targets.map((state) => (
+                <BoundWorkflowForm
+                  key={state}
+                  {...props}
+                  command="appointment"
+                  id={row.id}
+                  revision={row.version}
+                  nativeIdentity={`${workflowScope("appointment", row.id)}:${state}`}
+                  path={path}
+                  fields={[
+                    { name: "state", label: c.action, type: "hidden" },
+                    { name: "reason", label: c.reason, type: "textarea", required: true },
+                  ]}
+                  values={{ state }}
+                  submit={state === "cancelled" ? c.cancel : c.reschedule}
+                />
+              ))}
+            </div>
+          ) : (
+            <BoundWorkflowForm
+              {...props}
+              command="appointment"
+              id={row.id}
+              revision={row.version}
+              path={path}
+              commandAvailable={Boolean(detail.canRespond && targets.length)}
+              disclosure={photography ? photoCopy.photoActions : undefined}
+              fields={[
+                {
+                  name: "state",
+                  label: c.action,
+                  type: "select",
+                  required: true,
+                  options: [
+                    { value: "", label: c.action },
+                    ...targets.map((value) => ({
+                      value,
+                      label:
+                        value === "reschedule_requested"
+                          ? c.reschedule
+                          : value === "cancelled"
+                            ? c.cancel
+                            : value === "completed"
+                              ? c.complete
+                              : value === "no_show"
+                                ? c.noShow
+                                : c.decline,
+                    })),
+                  ],
+                },
+                { name: "reason", label: c.reason, type: "textarea", required: true },
+              ]}
+              values={{ state: "" }}
+              submit={c.change}
+            />
+          )}
         </SecondaryAppointmentTask>
       ) : null}
       {row.cancelReason || row.outcomeNote ? <p>{row.cancelReason ?? row.outcomeNote}</p> : null}

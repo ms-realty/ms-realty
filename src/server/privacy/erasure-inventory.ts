@@ -18,8 +18,10 @@ import { hasPrivacyRetentionHold } from "../compliance/retention";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { collectInquiryAttachmentPrivacy } from "../inquiries/attachment-privacy";
 import { captureOperatingPolicy } from "../operating-policy/service";
 import { privacyOperator } from "./access";
+import { ownClientWorkflowData } from "./client-workflow-sources";
 
 type Dependency = { tableName: string; columnName: string; targetName: string };
 async function dependencyColumns(db: Executor) {
@@ -54,6 +56,7 @@ export async function lockErasureSources(db: Executor) {
       "operating_policy_versions",
       "consent_events",
       "cases",
+      "inquiry_attachments",
       "case_stage_history",
       "case_process_reviews",
       "case_process_items",
@@ -107,6 +110,8 @@ async function dependencyEvidence(
     "email_sign_in_tokens",
     "invitations",
     "webauthn_challenges",
+    "personal_saved_listings",
+    "saved_selection_transfers",
   ]);
   for (const column of columns) {
     const ids =
@@ -173,12 +178,21 @@ export async function collectErasureInventory(
     .where(eq(subscriptions.partyId, partyId))
     .orderBy(asc(subscriptions.id));
   if (contacts.length + accounts.length + streams.length > 450) throw new AppError("unavailable");
-  const dependency = await dependencyEvidence(
+  const dependencyBase = await dependencyEvidence(
     db,
     partyId,
     contacts.map((row) => row.id),
     clients.map((row) => row.id),
   );
+  const attachments = await collectInquiryAttachmentPrivacy(db, live.actor, partyId);
+  const dependency = {
+    ...dependencyBase,
+    businessDependencies: dependencyBase.businessDependencies || attachments.hasRetainedBusiness,
+    dependencyDigest: hashRequest({
+      dependencies: dependencyBase.dependencyDigest,
+      attachments: attachments.revision,
+    }),
+  };
   const retentionHold = await hasPrivacyRetentionHold(db, partyId);
   const eligible =
     !retentionHold &&
@@ -195,7 +209,17 @@ export async function collectErasureInventory(
     digest: hashRequest(JSON.parse(JSON.stringify(value))),
     eligible: canErase,
   });
+  const workflow = await ownClientWorkflowData(
+    db,
+    clients.map((row) => row.id),
+  );
   const sources: ErasureSource[] = [
+    ...workflow.personalSaves.map((row) =>
+      source(`saved:${row.id}:selection`, "client_profile_copies", row, eligible),
+    ),
+    ...workflow.savedTransfers.map((row) =>
+      source(`transfer:${row.id}:selection`, "client_profile_copies", row, eligible),
+    ),
     ...optionalProcessingPurposes.map((purpose) =>
       source(
         `purpose:${purpose}`,
@@ -287,7 +311,15 @@ export async function erasureSourcePreviews(db: Executor, inventory: ErasureInve
     .select()
     .from(subscriptions)
     .where(eq(subscriptions.partyId, inventory.partyId));
+  const workflow = await ownClientWorkflowData(
+    db,
+    clients.map((row) => row.id),
+  );
   const values: Record<string, unknown> = {
+    ...Object.fromEntries(workflow.personalSaves.map((row) => [`saved:${row.id}:selection`, row])),
+    ...Object.fromEntries(
+      workflow.savedTransfers.map((row) => [`transfer:${row.id}:selection`, row]),
+    ),
     [`party:${inventory.partyId}:preferences`]: party?.contactPreferences,
     [`party:${inventory.partyId}:aliases`]: party?.matchingAliases,
   };

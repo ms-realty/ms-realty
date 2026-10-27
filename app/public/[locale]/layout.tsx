@@ -1,18 +1,17 @@
 import "../../globals.css";
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { setRequestLocale } from "next-intl/server";
 import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
-import { AnalyticsConsent } from "@/features/tracking/consent";
 import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { stagingEnabled } from "@/i18n/seo";
 import { organizationStructuredData } from "@/i18n/structured-data";
-import { analyticsPreference, trackingConfig } from "@/i18n/tracking";
+import { trackingConfig } from "@/i18n/tracking";
 import { publicSeoOrigin } from "@/server/seo/public-metadata";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
+import { LiveAnnouncer } from "@/ui/live-announcer";
 import { LocaleProvider } from "@/ui/locale-provider";
 import { StructuredData } from "@/ui/structured-data";
 import { appViewport } from "@/ui/viewport";
@@ -37,27 +36,15 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/p
   if (!isRoutableLocale(locale)) notFound();
   setRequestLocale(locale);
   preloadFonts(locale);
-  const config = trackingConfig();
-  const requestHeaders = await headers();
 
   return (
     <html lang={locale} dir={localeDirection(locale)}>
       <body>
         <CspNonceMeta />
+        <LiveAnnouncer />
         <StructuredData value={organizationStructuredData(publicSeoOrigin())} />
         <DisclosureBehavior />
-        <LocaleProvider locale={locale}>
-          {children}
-          {/* P09: proxy marks share-token routes; no analytics may read their URL token. */}
-          {config.gtmContainerId && requestHeaders.get("x-msr-share-token-route") !== "1" ? (
-            <AnalyticsConsent
-              locale={locale}
-              initialPreference={analyticsPreference(requestHeaders.get("cookie"))}
-              containerId={config.gtmContainerId}
-              nonce={requestHeaders.get("x-nonce") ?? undefined}
-            />
-          ) : null}
-        </LocaleProvider>
+        <LocaleProvider locale={locale}>{children}</LocaleProvider>
       </body>
     </html>
   );

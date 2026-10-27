@@ -158,7 +158,8 @@ it("compares the exact three ordered public identities, approved images and fact
   expect(cell("lift", values[0].reference)).toHaveTextContent(copy.unknown);
   expect(cell("lift", values[1].reference)).toHaveTextContent(labels.no);
   expect(cell("lift", values[2].reference)).toHaveTextContent(copy.conflicting);
-  expect(cell("price", values[2].reference)).toHaveTextContent(copy.not_supplied);
+  expect(cell("price", values[2].reference)).toHaveTextContent(copy.priceUnknown);
+  expect(values[2].price).toEqual({ state: "not_supplied" });
   const collective = screen.getByRole("link", { name: labels.collective });
   const query = new URL(collective.getAttribute("href") ?? "", "https://example.test").searchParams;
   expect(query.get("purpose")).toBe("question");

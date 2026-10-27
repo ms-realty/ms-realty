@@ -5,6 +5,7 @@ import { termsFacts } from "@/server/publication/presentation";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { inventoryCopy, optionLabel } from "./copy";
 import { evidenceCopy } from "./evidence-copy";
+import { RentalFacts } from "./rental-facts";
 
 function valueText(value: unknown, locale: string): string {
   if (Array.isArray(value)) return value.map((v) => valueText(v, locale)).join(" / ");
@@ -99,6 +100,7 @@ export function FrozenPreview({
           </div>
         ))}
       </dl>
+      <RentalFacts terms={revision.terms} locale={locale} />
       <TechnicalDetails locale={locale}>
         {copy.revision} {revision.revisionNumber}
       </TechnicalDetails>

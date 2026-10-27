@@ -1,6 +1,7 @@
 // C01 / F13: invited client authentication, explicit email verification and optional passkey.
 
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { invitations, principals } from "@/db/schema";
@@ -8,6 +9,7 @@ import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
 import { accessErrorMessage, ceremonyMessages, fill, identityCopy } from "@/features/identity/copy";
 import { PasskeyCeremony } from "@/features/identity/passkey-ceremony";
 import { isRoutableLocale } from "@/i18n/config";
+import { clientInputCookieName, openClientInput } from "@/server/auth/client-input";
 import { currentClientSession, localReturnPath } from "@/server/auth/pages";
 import { buttonClass } from "@/ui/button-class";
 import { controlClass, labelClass } from "@/ui/field-class";
@@ -19,10 +21,15 @@ import {
   completeClientPasskey,
   completeClientRegistration,
 } from "./actions";
-export const metadata = {
-  robots: { index: false, follow: false },
-  referrer: "no-referrer" as const,
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  if (!isRoutableLocale(locale)) notFound();
+  return {
+    title: identityCopy(locale).clientAccessTitle,
+    robots: { index: false, follow: false },
+    referrer: "same-origin" as const,
+  };
+}
 export default async function ClientAccessPage({
   params,
   searchParams,
@@ -31,8 +38,12 @@ export default async function ClientAccessPage({
   if (!isRoutableLocale(locale)) notFound();
   const c = identityCopy(locale);
   const query = await searchParams;
+  const draft =
+    typeof query.error === "string"
+      ? openClientInput((await cookies()).get(clientInputCookieName())?.value, locale)
+      : null;
   const returnTo = localReturnPath(
-    typeof query.returnTo === "string" ? query.returnTo : null,
+    typeof query.returnTo === "string" ? query.returnTo : (draft?.returnTo ?? null),
     "client",
     locale,
   );
@@ -109,28 +120,39 @@ export default async function ClientAccessPage({
       title={query.sent === "1" ? c.linkSentTitle : c.clientAccessTitle}
       lead={query.sent === "1" ? c.linkSent : c.clientAccessLead}
     >
-      {error ? <Notice tone="error">{error}</Notice> : null}
+      {error && code !== "VALIDATION_FAILED" ? <Notice tone="error">{error}</Notice> : null}
       <NativeForm
         method="post"
         action={`/${locale}/access/request`}
         className="flex flex-col gap-4"
+        validation={{
+          summary: c.invalidEmail,
+          fields: {
+            email: {
+              label: c.emailLabel,
+              required: c.invalidEmail,
+              email: c.invalidEmail,
+              error: code === "VALIDATION_FAILED" ? c.invalidEmail : undefined,
+            },
+          },
+        }}
       >
-        <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="returnTo" value={returnTo ?? ""} />
-        <label className="flex flex-col gap-2" htmlFor="client-email">
+        <label htmlFor="client-email" className="flex flex-col gap-2">
           <span className={labelClass}>{c.emailLabel}</span>
           <input
-            className={controlClass}
             id="client-email"
             name="email"
             type="email"
             autoComplete="email"
+            className={controlClass}
             maxLength={254}
             required
             dir="ltr"
+            defaultValue={draft?.email ?? ""}
           />
         </label>
-        <button className={buttonClass()} type="submit">
+        <button type="submit" className={buttonClass()}>
           {c.sendLink}
         </button>
       </NativeForm>

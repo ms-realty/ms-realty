@@ -2,7 +2,10 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { PublicLocale } from "@/i18n/config";
+import { announce } from "@/ui/announce";
 import { buttonClass } from "@/ui/button-class";
+import { cx } from "@/ui/cx";
+import { CheckIcon, SaveIcon } from "@/ui/icons";
 import type { DiscoveryCopy } from "./copy";
 
 type Kind = "saved" | "compare";
@@ -81,40 +84,51 @@ export function LocalActions({ reference, copy }: { reference: string; copy: Dis
     const refs = selectedReferences(read(kind), kind);
     const exists = refs.includes(reference);
     if (!exists && refs.length >= (kind === "compare" ? 3 : 50)) {
-      setNotice(copy.compareLimit);
+      const limit = kind === "saved" ? copy.saveLimit : copy.compareLimit;
+      setNotice(limit);
+      announce(limit);
       return;
     }
-    setNotice(
-      writeSelection(kind, exists ? refs.filter((r) => r !== reference) : [...refs, reference])
-        ? ""
-        : copy.storageFailed,
+    const durable = writeSelection(
+      kind,
+      exists ? refs.filter((r) => r !== reference) : [...refs, reference],
     );
+    setNotice(durable ? "" : copy.storageFailed);
+    if (!durable) announce(copy.storageFailed);
   };
   return (
     <div>
-      {saved.hydrated ? (
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={buttonClass("secondary")}
-            aria-pressed={saved.refs.includes(reference)}
-            onClick={() => toggle("saved")}
-          >
-            {saved.refs.includes(reference) ? copy.remove : copy.save}
-          </button>
-          <button
-            type="button"
-            className={buttonClass("secondary")}
-            aria-pressed={compare.refs.includes(reference)}
-            onClick={() => toggle("compare")}
-          >
-            {copy.compare}
-          </button>
-        </div>
-      ) : null}
-      <p role="status" className="text-caption text-text-muted">
-        {notice}
-      </p>
+      <div data-print-hide="" className="flex min-h-control flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={!saved.hydrated}
+          className={cx(
+            buttonClass("secondary"),
+            saved.refs.includes(reference) && "border-action bg-selected",
+          )}
+          aria-label={`${copy.save} · ${reference}`}
+          aria-pressed={saved.refs.includes(reference)}
+          onClick={() => toggle("saved")}
+        >
+          {saved.refs.includes(reference) ? <CheckIcon /> : <SaveIcon />}
+          {copy.save}
+        </button>
+        <button
+          type="button"
+          disabled={!compare.hydrated}
+          className={cx(
+            buttonClass("secondary"),
+            compare.refs.includes(reference) && "border-action bg-selected",
+          )}
+          aria-label={`${copy.compare} · ${reference}`}
+          aria-pressed={compare.refs.includes(reference)}
+          onClick={() => toggle("compare")}
+        >
+          <CheckIcon className={compare.refs.includes(reference) ? undefined : "invisible"} />
+          {copy.compare}
+        </button>
+      </div>
+      {notice ? <p className="mt-2 text-caption text-text-muted">{notice}</p> : null}
       <noscript>
         <p className="text-caption text-text-muted">{copy.noJsSaved}</p>
       </noscript>

@@ -1,10 +1,12 @@
 import { propertyTypes } from "@/domain/facts";
 import type { OwnerInquiry } from "@/domain/owner-inquiry";
+import { brandPhone } from "@/features/shell/agency";
 import type { PublicLocale } from "@/i18n/config";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
 import type { FormController } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import { discoveryCopy } from "./copy";
+import { inquiryPhotoCopy } from "./inquiry-photo-copy";
 import { inquiryReviewCopy } from "./inquiry-review-copy";
 import type { InquiryValues } from "./inquiry-state";
 
@@ -46,6 +48,20 @@ export function OwnerInquiryFields({
     <fieldset className="min-w-0 space-y-5 rounded-panel border border-divider p-5">
       <legend className="px-1 text-heading font-semibold">{c.ownerTitle}</legend>
       <p className="text-dense text-text-muted">{c.ownerNote}</p>
+      <p className="text-compact text-text-muted">{inquiryPhotoCopy(locale).coverage}</p>
+      <details className="rounded-control border border-divider p-3">
+        <summary className="min-h-11 cursor-pointer font-semibold">
+          {inquiryPhotoCopy(locale).outside}
+        </summary>
+        <p className="mt-2 text-compact">{inquiryPhotoCopy(locale).coverage}</p>
+        <a
+          href={`tel:${brandPhone.e164}`}
+          className="mt-2 inline-flex min-h-11 items-center gap-2 underline"
+        >
+          {copy.callAgency} <bdi>{brandPhone.display}</bdi>
+        </a>
+      </details>
+      <p className="text-compact text-text-muted">{inquiryPhotoCopy(locale).later}</p>
       <FormField
         {...form.field("ownerLocality")}
         label={c.locality}

@@ -14,7 +14,7 @@ export async function SearchAlertCriteria({
 }: {
   locale: PublicLocale;
   search: Pick<AlertSearch, "normalized">;
-  /** A heading in the page locale; the default heading is bg/en-only copy. */
+  /** A heading in the page locale. */
   title?: string;
 }) {
   const c = discoveryCopy(locale),
@@ -23,7 +23,10 @@ export async function SearchAlertCriteria({
   const { criteria, q } = search.normalized;
   const price = criteria.price;
   const places = criteria.placeIds?.length ? await intentPlaces(getDb()).catch(() => []) : [];
-  const label = (key: string) => (Object.hasOwn(c, key) ? c[key as keyof typeof c] : key);
+  const label = (key: string) => {
+    const value = Object.hasOwn(c, key) ? c[key as keyof typeof c] : undefined;
+    return typeof value === "string" ? value : key;
+  };
   const feature = (key: string) =>
     Object.hasOwn(extra, key) ? extra[key as keyof typeof extra] : key;
   const range = (value: { min?: number; max?: number }, format: (n: number) => string) =>
@@ -56,6 +59,7 @@ export async function SearchAlertCriteria({
           ],
         ]
       : []),
+    ...(criteria.mapBounds ? [[c.mapArea, c.mapAreaPrecision]] : []),
     ...(price ? [[extra.amount, range(price, (n) => formatMoney(locale, n, price.currency))]] : []),
     ...(criteria.bedrooms
       ? [[c.bedrooms, range(criteria.bedrooms, (n) => formatNumber(locale, n))]]
@@ -76,7 +80,11 @@ export async function SearchAlertCriteria({
       {title ? (
         <h2 className="text-heading font-semibold">{title}</h2>
       ) : (
-        <h2 className="text-heading font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
+        <h2
+          className="text-heading font-semibold"
+          lang={searchAlertCopyLocale(locale)}
+          dir={locale === "he" ? "rtl" : "ltr"}
+        >
           {copy.criteria}
         </h2>
       )}
@@ -88,14 +96,14 @@ export async function SearchAlertCriteria({
           </div>
         ))}
       </dl>
-      <p lang={searchAlertCopyLocale(locale)} dir="ltr">
+      <p lang={searchAlertCopyLocale(locale)} dir={locale === "he" ? "rtl" : "ltr"}>
         {copy.source}: <bdi>{localeEndonyms[search.normalized.locale]}</bdi>
       </p>
       <p>
         {criteria.includeNeedsConfirmation ? (
           c.includeUnconfirmed
         ) : (
-          <span lang={searchAlertCopyLocale(locale)} dir="ltr">
+          <span lang={searchAlertCopyLocale(locale)} dir={locale === "he" ? "rtl" : "ltr"}>
             {copy.unknown}
           </span>
         )}

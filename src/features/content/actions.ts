@@ -18,8 +18,11 @@ import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
+import { contentBodyCopy } from "./body-copy";
+import { type ContentBodyValues, contentBodyValues, readCompositionFields } from "./body-fields";
+import { contentDraftInput } from "./body-input";
 import { contentCopy } from "./copy";
-export type ContentValues = {
+export type ContentValues = ContentBodyValues & {
   kind: string;
   slug: string;
   title: string;
@@ -96,10 +99,13 @@ export async function saveContentAction(
     "slug",
     "title",
     "text",
+    "bodyFormat",
+    "composition",
     "jurisdiction",
     "reviewScope",
     "placeId",
   ]);
+  base.values.composition = readCompositionFields(data, base.values.composition);
   const result = await action(
     async (ctx) => {
       await requireAuthHost("staff");
@@ -110,6 +116,7 @@ export async function saveContentAction(
         return (
           await createContent(ctx.db, ctx.session, {
             ...base.values,
+            ...contentDraftInput(base.values),
             // The native create form also offers the area field when JS is unavailable.
             placeId: base.values.kind === "area" ? base.values.placeId || null : null,
             kind: base.values.kind as "help",
@@ -119,6 +126,7 @@ export async function saveContentAction(
       return (
         await saveContent(ctx.db, ctx.session, {
           ...base.values,
+          ...contentDraftInput(base.values),
           placeId: base.values.placeId || null,
           id,
           expectedVersion: envelope.expectedRevision as number,
@@ -164,7 +172,7 @@ export async function saveContentAction(
               kind: current.page.kind,
               slug: current.page.slug,
               title: body.title,
-              text: body.paragraphs.join("\n\n"),
+              ...contentBodyValues(body),
               jurisdiction: current.current.jurisdiction ?? "",
               reviewScope: current.current.reviewScope ?? "",
               placeId: body.placeId ?? "",
@@ -191,15 +199,20 @@ export async function saveContentAction(
         message: copy.validation,
         fieldErrors: Object.fromEntries(
           Object.entries(result.error.fieldErrors ?? {})
+            .map(
+              ([field, reasons]) => [field === "blocks" ? "composition" : field, reasons] as const,
+            )
             .filter(([field]) => field in base.values)
             .map(([field, reasons]) => [
               field,
               [
-                field === "placeId" && reasons.includes("place_not_available")
-                  ? copy.placeUnavailable
-                  : field === "placeId" && reasons.includes("area_content_required")
-                    ? copy.areaPlaceOnly
-                    : copy.invalid,
+                field === "composition" || field === "bodyFormat"
+                  ? contentBodyCopy(locale).invalid
+                  : field === "placeId" && reasons.includes("place_not_available")
+                    ? copy.placeUnavailable
+                    : field === "placeId" && reasons.includes("area_content_required")
+                      ? copy.areaPlaceOnly
+                      : copy.invalid,
               ],
             ]),
         ),

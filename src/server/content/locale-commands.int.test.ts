@@ -11,6 +11,7 @@ import {
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { Capability } from "@/domain/capabilities";
+import type { ContentBlock } from "@/domain/content-body";
 import type { PublicLocale } from "@/i18n/config";
 import { createSession } from "../auth/sessions";
 import { readInquiryContent } from "../inquiries/content-context";
@@ -67,6 +68,7 @@ async function source(
   actor: Staff,
   slug = `synthetic-${randomUUID()}`,
   kind: "help" | "area" | "service" = "help",
+  blocks?: ContentBlock[],
 ) {
   const input = {
     operationId: randomUUID(),
@@ -76,6 +78,7 @@ async function source(
     text: "Само синтетичен тест. Не е реална политика или професионален съвет.",
     jurisdiction: "Synthetic jurisdiction",
     reviewScope: "Synthetic test review only",
+    ...(blocks ? { text: undefined, blocks } : {}),
   };
   const { outcome } = await createContent(t.db, actor.session, input);
   for (const decision of ["claims", "editorial", "publish"] as const) {
@@ -148,54 +151,63 @@ async function publish(
 }
 
 describe("O21 / F24 / AT22 / AT23 BG-bound CMS language editions", () => {
-  it("keeps all six target drafts private and releases only exact separately reviewed editions", async () => {
-    const actor = await staff(),
+  describe("legacy editions sharing one BG source", () => {
+    let actor: Staff;
+    let page: Awaited<ReturnType<typeof source>>;
+    beforeAll(async () => {
+      actor = await staff();
       page = await source(actor);
-    for (const locale of contentTargetLocales) {
-      const { input, result } = await draft(actor, page.id, locale);
-      expect((await saveContentLocale(t.db, actor.session, input)).outcome).toEqual(result.outcome);
-      expect(await readApprovedContent(t.db, "help", page.input.slug, locale)).toBeNull();
-      await expect(decision(actor, page.id, locale, "publish")).rejects.toMatchObject({
-        code: "approval_stale",
-      });
-      await publish(actor, page.id, locale);
-      const edition = await readApprovedContent(t.db, "help", page.input.slug, locale);
-      expect(edition).toMatchObject({
-        title: input.title,
-        paragraphs: [input.text],
-        locale,
-        placeId: null,
-      });
-      expect(edition?.version.id).not.toBe(input.sourceVersionId);
-      if (!edition) throw new Error("Missing synthetic target edition");
-      expect(
-        await t.db.transaction((tx) =>
-          readInquiryContent(
-            tx,
-            { kind: "help", slug: page.input.slug, versionId: edition.version.id },
-            locale,
+    });
+    it.each(contentTargetLocales)(
+      "keeps %s drafts private and releases only exact separately reviewed editions",
+      async (locale) => {
+        const { input, result } = await draft(actor, page.id, locale);
+        expect((await saveContentLocale(t.db, actor.session, input)).outcome).toEqual(
+          result.outcome,
+        );
+        expect(await readApprovedContent(t.db, "help", page.input.slug, locale)).toBeNull();
+        await expect(decision(actor, page.id, locale, "publish")).rejects.toMatchObject({
+          code: "approval_stale",
+        });
+        await publish(actor, page.id, locale);
+        const edition = await readApprovedContent(t.db, "help", page.input.slug, locale);
+        expect(edition).toMatchObject({
+          title: input.title,
+          paragraphs: [input.text],
+          locale,
+          placeId: null,
+        });
+        expect(edition?.version.id).not.toBe(input.sourceVersionId);
+        if (!edition) throw new Error("Missing synthetic target edition");
+        expect(
+          await t.db.transaction((tx) =>
+            readInquiryContent(
+              tx,
+              { kind: "help", slug: page.input.slug, versionId: edition.version.id },
+              locale,
+            ),
           ),
-        ),
-      ).toMatchObject({ title: input.title, locale });
-      const edited = await draft(actor, page.id, locale);
-      expect((await readApprovedContent(t.db, "help", page.input.slug, locale))?.version.id).toBe(
-        edition.version.id,
-      );
-      const view = await readContentLocaleWorkbench(t.db, actor.session, page.id, locale);
-      expect(view.decisions).toEqual([]);
-      expect(view.current?.versionNumber).toBe(2);
-      await expect(
-        decideContentLocale(t.db, actor.session, {
-          ...edited.input,
-          operationId: randomUUID(),
-          expectedVersion: edited.result.outcome.version,
-          decision: "publish",
-          reviewed: true,
-          note: "Old decisions cannot approve a new edition",
-          expiresAt: expiry(),
-        }),
-      ).rejects.toMatchObject({ code: "approval_stale" });
-    }
+        ).toMatchObject({ title: input.title, locale });
+        const edited = await draft(actor, page.id, locale);
+        expect((await readApprovedContent(t.db, "help", page.input.slug, locale))?.version.id).toBe(
+          edition.version.id,
+        );
+        const view = await readContentLocaleWorkbench(t.db, actor.session, page.id, locale);
+        expect(view.decisions).toEqual([]);
+        expect(view.current?.versionNumber).toBe(2);
+        await expect(
+          decideContentLocale(t.db, actor.session, {
+            ...edited.input,
+            operationId: randomUUID(),
+            expectedVersion: edited.result.outcome.version,
+            decision: "publish",
+            reviewed: true,
+            note: "Old decisions cannot approve a new edition",
+            expiresAt: expiry(),
+          }),
+        ).rejects.toMatchObject({ code: "approval_stale" });
+      },
+    );
   });
 
   it("requires target-locale grants and separate claim/publication authority, including replay and receipts", async () => {
@@ -457,4 +469,99 @@ describe("O21 / F24 / AT22 / AT23 BG-bound CMS language editions", () => {
       );
     expect(active).toEqual([]);
   }, 15000);
+  it.each(contentTargetLocales)(
+    "M071 binds typed %s content to exact BG structure and rejects stale review",
+    async (locale) => {
+      const actor = await staff();
+      const sourceBlocks: ContentBlock[] = [
+        { type: "heading", text: "Синтетичен процес" },
+        {
+          type: "step",
+          title: "Синтетична стъпка",
+          text: "Само тест, без реално твърдение за услуга.",
+        },
+      ];
+      const page = await source(actor, undefined, "service", sourceBlocks);
+
+      const blocks: ContentBlock[] = [
+        { type: "heading", text: `Synthetic ${locale} process` },
+        {
+          type: "step",
+          title: "Synthetic step",
+          text: "MS-00001 · 123 EUR · 45 m² · 2 bedrooms · Sandanski",
+        },
+        { type: "list", items: ["Synthetic first fact", "Synthetic second fact"] },
+        { type: "callout", title: "Synthetic scope", text: "Test-only boundary" },
+        { type: "link", text: "Synthetic contact", href: `/${locale}/contact` },
+      ];
+      const input = {
+        ...(await bound(actor, page.id, locale)),
+        title: `Synthetic ${locale} title`,
+        blocks,
+      };
+      await saveContentLocale(t.db, actor.session, input);
+      expect(await readApprovedContent(t.db, "service", page.input.slug, locale)).toBeNull();
+      await publish(actor, page.id, locale, false);
+      expect(await readApprovedContent(t.db, "service", page.input.slug, locale)).toBeNull();
+      await decision(actor, page.id, locale, "publish");
+      const approved = await readApprovedContent(t.db, "service", page.input.slug, locale);
+      expect(approved).toMatchObject({
+        format: "blocks",
+        blocks,
+        paragraphs: [
+          `Synthetic ${locale} process`,
+          "Synthetic step",
+          "MS-00001 · 123 EUR · 45 m² · 2 bedrooms · Sandanski",
+          "Synthetic first fact",
+          "Synthetic second fact",
+          "Synthetic scope",
+          "Test-only boundary",
+          "Synthetic contact",
+          `/${locale}/contact`,
+        ],
+      });
+      const before = await readContentLocaleWorkbench(t.db, actor.session, page.id, locale);
+      const changed: ContentBlock[] = [
+        { type: "paragraph", text: `Synthetic ${locale} process` },
+        ...blocks.slice(1),
+      ];
+      await saveContentLocale(t.db, actor.session, {
+        ...(await bound(actor, page.id, locale)),
+        title: input.title,
+        blocks: changed,
+      });
+      const after = await readContentLocaleWorkbench(t.db, actor.session, page.id, locale);
+      expect(after.current?.contentHash).not.toBe(before.current?.contentHash);
+      expect(after.decisions).toEqual([]);
+      await expect(decision(actor, page.id, locale, "publish")).rejects.toMatchObject({
+        code: "approval_stale",
+      });
+      expect(
+        (await readApprovedContent(t.db, "service", page.input.slug, locale))?.version.id,
+      ).toBe(approved?.version.id);
+
+      const view = await readContentWorkbench(t.db, actor.session, page.id);
+      await saveContent(t.db, actor.session, {
+        ...page.input,
+        id: page.id,
+        expectedVersion: view.page.version,
+        operationId: randomUUID(),
+        text: undefined,
+        blocks: [{ type: "paragraph", text: "Синтетичен процес" }, ...sourceBlocks.slice(1)],
+      });
+
+      expect(await readApprovedContent(t.db, "service", page.input.slug, locale)).toBeNull();
+      const stale = await readContentLocaleWorkbench(t.db, actor.session, page.id, locale);
+      expect(stale.edition?.reviewState).toBe("stale");
+      expect(stale.decisions.filter((entry) => entry.state === "approved")).toEqual([]);
+      await expect(
+        saveContentLocale(t.db, actor.session, {
+          ...(await bound(actor, page.id, locale)),
+          title: "Stale draft",
+          blocks: sourceBlocks,
+        }),
+      ).rejects.toMatchObject({ code: "approval_stale" });
+    },
+    20000,
+  );
 });

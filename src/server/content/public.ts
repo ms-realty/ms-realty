@@ -1,6 +1,5 @@
 import "server-only";
 import { and, asc, eq } from "drizzle-orm";
-import { z } from "zod";
 import {
   approvals,
   contentLocaleEditions,
@@ -9,27 +8,16 @@ import {
   contentPageVersions,
 } from "@/db/schema";
 import { type ApprovalKind, approvalCapability } from "@/domain/approval";
+import { contentBody, contentParagraphs } from "@/domain/content-body";
+
+export { contentBody } from "@/domain/content-body";
+
 import type { PublicLocale } from "@/i18n/config";
 import { hashRequest } from "@/server/crypto";
 import { type Executor, inTransaction } from "@/server/db";
 import { loadPlaceChains, placeName } from "@/server/publication/presentation";
 import { reviewDisplayEligible } from "../agency-obligations/reviews";
 
-// A deliberately narrow plaintext projection. Rich text, embedded scripts and remote media
-// have no renderer here. Operator-authored CMS content must use an explicit supported shape.
-export const contentBody = z
-  .object({
-    title: z.string().trim().min(1).max(200),
-    paragraphs: z.array(z.string().trim().min(1).max(5000)).min(1).max(30),
-    // New bindings belong to the immutable, hashed edition. Legacy editions without this
-    // field stay unbound; the mutable content_pages.place_id is never approval evidence.
-    placeId: z
-      .uuid()
-      .transform((value) => value.toLowerCase())
-      .nullable()
-      .optional(),
-  })
-  .strict();
 type Version = typeof contentPageVersions.$inferSelect;
 type Approval = typeof approvals.$inferSelect;
 type LocaleVersion = typeof contentLocaleVersions.$inferSelect;
@@ -95,6 +83,7 @@ export function approvedContent(
   }
   return {
     ...body.data,
+    paragraphs: contentParagraphs(body.data),
     placeId: body.data.placeId ?? null,
     version: {
       id: version.id,
@@ -142,6 +131,7 @@ export function approvedLocaleContent(
   if (!claims?.decidedAt) return null;
   return {
     ...body.data,
+    paragraphs: contentParagraphs(body.data),
     placeId: body.data.placeId ?? null,
     version: {
       id: edition.id,

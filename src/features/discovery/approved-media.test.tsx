@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, expect, it, vi } from "vitest";
 import type { PublicMedia } from "@/server/listings/view-models";
@@ -8,6 +9,7 @@ import {
   approvedMediaHref,
   approvedMediaSrcSet,
 } from "./approved-media";
+import { discoveryCopy } from "./copy";
 
 afterEach(() => {
   cleanup();
@@ -72,6 +74,8 @@ it("renders only real width descriptors, keeps lazy sizes tied to layout and pri
       media={[responsive, { ...responsive, relationId: "second" }]}
       unavailable="Unavailable"
       morePhotos="More photos ({count})"
+      locale="en"
+      copy={discoveryCopy("en")}
     />,
   );
   const disclosure = screen.getByText("More photos (1)").closest("details");
@@ -93,6 +97,8 @@ it("renders only real width descriptors, keeps lazy sizes tied to layout and pri
       media={[responsive]}
       unavailable="Unavailable"
       morePhotos="More photos ({count})"
+      locale="en"
+      copy={discoveryCopy("en")}
     />,
   );
   expect(markup).toContain('rel="preload"');
@@ -109,4 +115,90 @@ it("renders only real width descriptors, keeps lazy sizes tied to layout and pri
       renditions: [{ digest: "private/storage", width: 480, height: 270 }],
     }),
   ).toBeUndefined();
+});
+
+it("P06/UI17 opens the selected item, bounds zoom, keeps a failed item navigable and restores the launcher's focus", async () => {
+  const user = userEvent.setup();
+  const plan = {
+    ...media,
+    relationId: "plan",
+    digest: "b".repeat(64),
+    kind: "floor_plan" as const,
+    alt: "Synthetic full floor plan",
+    caption: "Synthetic plan caption",
+    modificationDisclosure: null,
+  };
+  const third = {
+    ...media,
+    relationId: "third",
+    digest: "c".repeat(64),
+    alt: "Synthetic third photo",
+  };
+  render(
+    <ApprovedGallery
+      media={[media, plan, third]}
+      unavailable="Unavailable"
+      morePhotos="More photos ({count})"
+      locale="en"
+      copy={discoveryCopy("en")}
+    />,
+  );
+  await user.click(screen.getByText("More photos (2)"));
+  const launcher = screen.getByRole("link", { name: "Open media 2 · Synthetic full floor plan" });
+  expect(launcher).toHaveAttribute("href", `/api/media/${plan.assetId}/${plan.digest}`);
+  await user.click(launcher);
+  const dialog = screen.getByRole("dialog", { name: "Property gallery" });
+  await waitFor(() => expect(within(dialog).getByRole("button", { name: "Close" })).toHaveFocus());
+  expect(dialog).toHaveTextContent("Floor plan · 2 of 3");
+  expect(within(dialog).getByRole("img", { name: plan.alt })).toHaveClass("object-contain");
+  for (let step = 0; step < 4; step += 1)
+    await user.click(within(dialog).getByRole("button", { name: "Zoom in" }));
+  expect(within(dialog).getByRole("button", { name: "Zoom in" })).toBeDisabled();
+  expect(dialog).toHaveTextContent("300%");
+  await user.click(within(dialog).getByRole("button", { name: /Fit image/ }));
+  expect(dialog).toHaveTextContent("100%");
+  fireEvent.error(within(dialog).getByRole("img"));
+  expect(within(dialog).getByRole("status")).toHaveTextContent("Unavailable");
+  await user.click(within(dialog).getByRole("button", { name: "Next media" }));
+  expect(dialog).toHaveTextContent("3 of 3");
+  expect(within(dialog).getByRole("img")).toHaveAttribute("alt", third.alt);
+  expect(within(dialog).getByRole("button", { name: "Next media" })).toHaveAttribute(
+    "aria-disabled",
+    "true",
+  );
+  dialog.focus();
+  await user.keyboard("{ArrowLeft}");
+  expect(dialog).toHaveTextContent("2 of 3");
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  await waitFor(() => expect(launcher).toHaveFocus());
+});
+
+it("P06 Back closes the viewer without leaving the parent; RTL arrows retain logical item order", async () => {
+  const user = userEvent.setup();
+  const copy = discoveryCopy("he");
+  render(
+    <ApprovedGallery
+      media={[media, { ...media, relationId: "second", digest: "d".repeat(64) }]}
+      unavailable="Unavailable"
+      morePhotos="More ({count})"
+      locale="he"
+      copy={copy}
+    />,
+  );
+  const launcher = screen.getByRole("link", {
+    name: new RegExp(copy.openMedia.replace("{position}", "1")),
+  });
+  // A pointer click need not natively focus its anchor (Safari).
+  fireEvent.click(launcher);
+  const dialog = screen.getByRole("dialog", { name: copy.mediaViewer });
+  dialog.focus();
+  await user.keyboard("{ArrowLeft}");
+  expect(dialog).toHaveTextContent(
+    copy.mediaPosition.replace("{position}", "2").replace("{count}", "2"),
+  );
+  act(() => window.history.back());
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  await waitFor(() => expect(launcher).toHaveFocus());
+  expect(window.location.pathname).toBe("/");
 });

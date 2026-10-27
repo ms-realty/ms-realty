@@ -1,0 +1,30 @@
+.dock {
+  display: none;
+}
+
+@media (width < 64rem) {
+  .dock {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: var(--z-sticky);
+    display: block;
+    border-top: 1px solid var(--color-divider);
+    background: var(--color-surface);
+    box-shadow: 0 -4px 20px rgb(0 0 0 / 5%);
+  }
+
+  .dock[data-keyboard="true"] {
+    display: none;
+  }
+
+  /* biome-ignore lint/correctness/noUnknownPseudoClass: CSS Modules document selector, scoped by this dock. */
+  :global(body):has(.dock) {
+    padding-bottom: var(--msr-property-dock-height, 9rem);
+  }
+
+  /* biome-ignore lint/correctness/noUnknownPseudoClass: CSS Modules document selector, scoped by this dock. */
+  :global(html):has(.dock) {
+    scroll-padding-block-end: calc(var(--msr-property-dock-height, 9rem) + 1rem);
+  }
+}

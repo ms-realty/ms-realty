@@ -34,7 +34,7 @@ import {
   reviewSellerAuthority,
   saveListingDraft,
 } from "@/server/inventory/commands";
-import { draftSchema, emptyDraft } from "@/server/inventory/contracts";
+import { emptyDraft, savedDraftSchema } from "@/server/inventory/contracts";
 import { workingDraftFrom } from "@/server/inventory/working-draft";
 import {
   activateManifest,
@@ -92,7 +92,7 @@ export async function saveInventory(
       { requireSession: true },
     );
     if (current.ok) {
-      const stored = draftSchema.safeParse(current.data.listing.draft);
+      const stored = savedDraftSchema.safeParse(current.data.listing.draft);
       const saved: Record<string, string> = stored.success
         ? stored.data
         : workingDraftFrom(current.data.revision, current.data.facts);

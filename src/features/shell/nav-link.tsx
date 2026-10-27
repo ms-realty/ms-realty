@@ -14,6 +14,7 @@ export function NavLink({
   exact = false,
   prefetch,
   title,
+  "aria-label": ariaLabel,
   excludePaths = [],
 }: {
   /** Must come from the navigation registry, which checks that the route exists. */
@@ -24,6 +25,7 @@ export function NavLink({
   exact?: boolean;
   prefetch?: boolean;
   title?: string;
+  "aria-label"?: string;
   /** A separately navigable child section owns its own active item. */
   excludePaths?: readonly string[];
 }) {
@@ -37,6 +39,7 @@ export function NavLink({
       href={href}
       prefetch={prefetch}
       title={title}
+      aria-label={ariaLabel}
       onNavigate={() =>
         window.dispatchEvent(new CustomEvent(navigationStartEvent, { detail: { href } }))
       }

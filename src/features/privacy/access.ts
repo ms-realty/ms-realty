@@ -1,6 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { requireClientPage } from "@/features/cases/access";
+import { staffWorkspacePath } from "@/features/shell/staff-return-path";
 import { currentStaffAccess, localReturnPath, staffAccessPath } from "@/server/auth/pages";
 import { isFresh } from "@/server/auth/sessions";
 import { getEnv } from "@/server/config/env";
@@ -26,9 +27,17 @@ export function privacyQueueReturn(locale: string, path: string | null | undefin
   return privacyQueueQuery.safeParse(query).success ? privacyQueuePath(locale, query) : null;
 }
 
-/** The staff sign-in page, carrying a validated privacy queue position when there is one. */
+/** Same-locale workspace navigation only; privacy cursors retain their stricter validation. */
+export function staffReturnPath(locale: string, path: string | null | undefined) {
+  const candidate = localReturnPath(path, "staff", locale);
+  if (candidate?.split(/[?#]/, 1)[0] === `/${locale}/operations/privacy`)
+    return privacyQueueReturn(locale, candidate);
+  return staffWorkspacePath(locale, candidate);
+}
+
+/** The staff sign-in page, carrying the authorized navigation destination, never an action. */
 export function staffSignInPath(locale: string, path: string | null | undefined) {
-  const returnTo = privacyQueueReturn(locale, path);
+  const returnTo = staffReturnPath(locale, path);
   return `/${locale}/access${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`;
 }
 

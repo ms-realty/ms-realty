@@ -19,6 +19,8 @@ import {
 } from "../agency-obligations/transport-schema";
 import type { HostContext } from "../config/hosts";
 import type { ErrorCode } from "../errors";
+import { imageContentTypes } from "../files/inspect";
+import { maxInquiryPhotoBytes, maxInquiryPhotos } from "../inquiries/attachments";
 import { inquirySchema } from "../inquiries/intake";
 
 /** The §19.3 transport groups. */
@@ -71,6 +73,7 @@ export interface ResponseDefinition {
   readonly schema?: z.ZodType;
   /** Defaults to application/json when a schema is given. */
   readonly contentType?: string;
+  readonly contentTypes?: readonly string[];
   readonly headers?: Readonly<Record<string, string>>;
   readonly example?: unknown;
 }
@@ -99,12 +102,18 @@ export interface EndpointDefinition {
   readonly revision: "none" | "expected_revision";
   readonly pagination: "none" | "cursor";
   readonly params?: z.ZodObject;
+  readonly query?: z.ZodObject;
+  readonly requestHeaders?: z.ZodObject;
   readonly body?: {
     readonly schemas: Readonly<Record<string, z.ZodType>>;
     readonly example?: unknown;
+    readonly maxBytes?: number;
   };
   readonly responses: readonly ResponseDefinition[];
   readonly errors: readonly ErrorCode[];
+  readonly errorHeaders?: Readonly<Record<string, string>>;
+  /** Native-form failures carried as internal codes in the fixed redirect's query. */
+  readonly redirectErrors?: readonly ErrorCode[];
 }
 
 // Shared shapes.
@@ -258,6 +267,40 @@ const receiptExample = {
   comparisonReferences: [],
 } as const;
 
+/** F10/AT42: one native file part, one retry identity and explicit assessment permission. */
+export const inquiryPhotoFormSchema = z.strictObject({
+  operationId: z
+    .uuid()
+    .describe("Inquiry-scoped retry identity; keep it and the same bytes on retry"),
+  file: z
+    .file()
+    .min(1)
+    .max(maxInquiryPhotoBytes)
+    .describe(
+      "One JPEG, PNG or WebP image. The server verifies signatures and full bounded decoding; filename and declared MIME do not establish its type.",
+    ),
+  sharedForInquiry: z.literal("1").describe("Self-declared permission for inquiry assessment only"),
+});
+
+const inquiryPhotoBytesSchema = z
+  .string()
+  .min(1)
+  .max(maxInquiryPhotoBytes)
+  .meta({ format: "binary" });
+const inquiryPhotoErrorHeaders = {
+  "cache-control": "no-store",
+  "x-correlation-id": "Request correlation",
+} as const;
+const inquiryPhotoDownloadHeaders = {
+  "cache-control": "private, no-store",
+  "x-content-type-options": "nosniff",
+  "content-security-policy": "sandbox; default-src 'none'",
+  "cross-origin-resource-policy": "same-origin",
+  "referrer-policy": "no-referrer",
+  "accept-ranges": "bytes",
+  "content-disposition": "Inline; fixed inquiry-photo filename, never the supplied filename",
+} as const;
+
 export const endpoints = [
   {
     id: "agency.command",
@@ -362,6 +405,58 @@ export const endpoints = [
       { status: 416, description: "Invalid byte range" },
     ],
     errors: ["unauthenticated", "forbidden", "not_found", "unavailable"],
+  },
+  {
+    id: "inquiries.photoDownload",
+    summary: "Read an authorized inquiry assessment photo",
+    group: "files",
+    method: "GET",
+    path: "/api/inquiry-attachments/{id}",
+    host: "staff",
+    authorization: "staff_session",
+    capability: "inquiry.read",
+    acceptance: ["AT39", "AT42"],
+    idempotency: "none",
+    revision: "none",
+    pagination: "none",
+    description:
+      "F10: requires a current staff session, active membership, enrolled passkey and the current inquiry.read grant on the attachment's Inquiry. The receipt cookie grants no byte or Case access. Recovery quarantine must be open. Every full or single-range request requires sealed, non-erased bytes with a clean scan, matching scanned digest, scan time and scanner version; stored size and digest are verified and the live session and inquiry grant rechecked before response. Pending, failed, infected, erased or inaccessible photos return the same not-found. A wrong host or malformed UUID returns an empty 404 before session lookup. Other errors use the standard JSON envelope with no-store and request correlation. Scan acceptance grants neither human review, publication rights nor retention approval.",
+    params: z.object({ id: z.uuid() }),
+    requestHeaders: z.object({
+      range: z
+        .string()
+        .optional()
+        .describe(
+          "Optional single bytes=start-end, bytes=start- or bytes=-suffix range; invalid or unsatisfiable ranges return 416 after authorization",
+        ),
+    }),
+    responses: [
+      {
+        status: 200,
+        description: "Authorized, verified full image bytes",
+        contentTypes: imageContentTypes,
+        schema: inquiryPhotoBytesSchema,
+        headers: { ...inquiryPhotoDownloadHeaders, "content-length": "Full byte length" },
+      },
+      {
+        status: 206,
+        description: "Authorized, verified single image byte range",
+        contentTypes: imageContentTypes,
+        schema: inquiryPhotoBytesSchema,
+        headers: {
+          ...inquiryPhotoDownloadHeaders,
+          "content-length": "Returned range byte length",
+          "content-range": "bytes start-end/total",
+        },
+      },
+      {
+        status: 416,
+        description: "Invalid or unsatisfiable single range; empty body",
+        headers: { ...inquiryPhotoDownloadHeaders, "content-range": "bytes */total" },
+      },
+    ],
+    errors: ["unauthenticated", "forbidden", "not_found", "unavailable", "internal_error"],
+    errorHeaders: inquiryPhotoErrorHeaders,
   },
   {
     id: "files.publicMedia",
@@ -589,6 +684,56 @@ export const endpoints = [
       },
     ],
     errors: ["not_found", "internal_error"],
+  },
+  {
+    id: "inquiries.attachPhoto",
+    summary: "Attach one optional assessment photo to an accepted owner inquiry",
+    description:
+      "F10: requires the original host-only receipt-session cookie and a server-issued receiptId belonging to that session, with ownerInput and seller_consultation or landlord_consultation purpose. Uploads require no Case and current Inquiry state received, assigned or awaiting_client; ownership and state are rechecked under the inquiry lock. Recovery quarantine and same-origin checks run before multipart bytes are read. Exact public Origin is required when supplied; opaque Origin null is accepted only for Sec-Fetch-Site same-origin, Sec-Fetch-Mode navigate and Sec-Fetch-Dest document together. Other missing-Origin/Fetch Metadata combinations follow the shared same-origin guard. IP and inquiry rate limits apply. Exactly one of each named form field is accepted, with no extra fields. One nonempty image is at most 8 MiB; the complete multipart body is at most 8 MiB plus 64 KiB. Signatures and full decoding establish JPEG, PNG or WebP, with at most 40 million pixels and one page. At most " +
+      maxInquiryPhotos +
+      " non-erased photos belong to an Inquiry. The operation UUID is bound to that Inquiry and measured bytes, type and dimensions; the same operation and bytes reconcile the reservation or sealed result, while different bytes or an erased reservation conflict. Storage interruption retains the retry identity; reconcile the receipt before retrying. Acceptance seals verified private bytes and queues scanning, without establishing a clean scan, human review, publication rights or retention approval. Always returns a fixed receipt redirect on success and declared form failures; no JSON success or photo-byte URL. Wrong host or unsupported locale returns an empty 404. Receipt, Origin and forbidden failures use the standard JSON envelope; unexpected failures use its internal error with no-store and request correlation.",
+    group: "public_submission",
+    method: "POST",
+    path: "/api/inquiries/{submission}/photos",
+    host: "public",
+    authorization: "receipt_session",
+    acceptance: ["AT10", "AT11", "AT42"],
+    idempotency: "operation_id",
+    revision: "none",
+    pagination: "none",
+    params: z.object({
+      submission: z
+        .string()
+        .regex(/^[A-Za-z0-9_-]{43}\.[0-9a-f]{32}$/)
+        .describe(
+          "Original server-issued submission key; the server verifies its MAC and receipt-session ownership",
+        ),
+    }),
+    query: z.object({ locale: z.enum(publicLocales).default("bg") }),
+    body: {
+      schemas: { "multipart/form-data": inquiryPhotoFormSchema },
+      maxBytes: maxInquiryPhotoBytes + 64 * 1024,
+    },
+    responses: [
+      {
+        status: 303,
+        description:
+          "Fixed /{locale}/requests/{receiptId} on the public origin; photoOperation retains a parsed valid operation UUID. Declared form failures add photoError with the internal error code; the accepted Inquiry is preserved. No response body.",
+        headers: {
+          location: "Public receipt URL with optional photoOperation and photoError query",
+          "cache-control": "no-store",
+        },
+      },
+    ],
+    errors: ["not_found", "cross_origin_request", "forbidden", "internal_error"],
+    errorHeaders: inquiryPhotoErrorHeaders,
+    redirectErrors: [
+      "validation_failed",
+      "rate_limited",
+      "idempotency_key_reused",
+      "transition_denied",
+      "unavailable",
+    ],
   },
   {
     id: "providers.resend.ingest",

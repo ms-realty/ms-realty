@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, type RefObject, useLayoutEffect } from "react";
 import { Button, Heading, Modal, ModalOverlay, Dialog as RACDialog } from "react-aria-components";
 import { cx } from "./cx";
 import { CloseIcon } from "./icons";
@@ -24,10 +24,26 @@ export type DialogProps = {
   /** Controlled use; inside a DialogTrigger these come from the trigger. */
   isOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
+  /** A safe first action, such as Cancel in a consequential confirmation. */
+  initialFocusRef?: RefObject<HTMLElement | null>;
 };
 
+function InitialFocus({ target }: { target?: RefObject<HTMLElement | null> }) {
+  useLayoutEffect(() => {
+    target?.current?.focus();
+  }, [target]);
+  return null;
+}
+
 /** Modal dialog: focus moves in, stays in, and returns to the trigger on close. */
-export function Dialog({ title, closeLabel, children, role = "dialog", ...state }: DialogProps) {
+export function Dialog({
+  title,
+  closeLabel,
+  children,
+  role = "dialog",
+  initialFocusRef,
+  ...state
+}: DialogProps) {
   return (
     <ModalOverlay
       {...state}
@@ -42,12 +58,18 @@ export function Dialog({ title, closeLabel, children, role = "dialog", ...state 
                 <Heading slot="title" className="pt-2 text-heading font-semibold">
                   {title}
                 </Heading>
-                <Button aria-label={closeLabel} onPress={close} className={closeButtonClass}>
+                <Button
+                  aria-label={closeLabel}
+                  onPress={close}
+                  autoFocus={role === "alertdialog" && !initialFocusRef}
+                  className={closeButtonClass}
+                >
                   <CloseIcon />
                 </Button>
               </div>
               <div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-6 pt-2 pb-6">
                 {typeof children === "function" ? children(close) : children}
+                <InitialFocus target={initialFocusRef} />
               </div>
             </>
           )}

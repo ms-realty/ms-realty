@@ -10,6 +10,7 @@ import {
 } from "@/db/schema";
 import { type ApprovalKind, approvalCapability } from "@/domain/approval";
 import type { Capability } from "@/domain/capabilities";
+import { contentBlocks } from "@/domain/content-body";
 import { type PublicLocale, publicLocales } from "@/i18n/config";
 import type { Session } from "../auth/sessions";
 import { can } from "../authz";
@@ -49,7 +50,8 @@ const binding = {
 const saveSchema = z.object({
   ...binding,
   title: z.string().trim().min(1).max(200),
-  text: z.string().trim().min(1).max(50000),
+  text: z.string().trim().min(1).max(50000).optional(),
+  blocks: contentBlocks.optional(),
 });
 export const contentLocaleDecisions = [
   "request_review",

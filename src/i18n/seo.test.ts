@@ -104,6 +104,22 @@ describe("zero-loss public crawl policy", () => {
       }).alternates?.languages,
     ).toEqual({ bg: `${origin.origin}/bg/areas/x`, "x-default": `${origin.origin}/bg/areas/x` });
   });
+  it.each([
+    { availableIn: [] },
+    { availableIn: ["bg"] as const },
+    { availableIn: ["ru"] as const, indexable: false },
+  ])("keeps an ineligible current content locale out of indexing: %j", (eligibility) => {
+    const metadata = localizedMetadata({
+      locale: "ru",
+      path: "/properties/MS-00101/ms-00101",
+      host: origin.host,
+      origin,
+      staging: false,
+      ...eligibility,
+    });
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+    expect(metadata.alternates?.canonical).toBe(`${origin.origin}/ru/properties/MS-00101/ms-00101`);
+  });
   it("normalizes localized paths without indexing tracking strings or fragments", () => {
     expect(localizedPath("bg", "/")).toBe("/bg");
     expect(localizedPath("en", "/areas?utm_source=x#top")).toBe("/en/areas");

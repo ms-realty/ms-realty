@@ -66,6 +66,7 @@ it("CMS metadata never invents locale siblings or uses another locale's approved
   vi.stubEnv("STAGING", "false");
   mocks.content.mockResolvedValueOnce(null);
   const absent = await publicContentMetadata("en", "help", "privacy", "/help/privacy");
+  expect(absent.title).toBe("Help");
   expect(absent.alternates?.languages).toEqual({});
   expect(absent.robots).toMatchObject({ index: false });
   mocks.content.mockResolvedValueOnce({
@@ -76,6 +77,19 @@ it("CMS metadata never invents locale siblings or uses another locale's approved
   expect(present.title).toBe("Одобрено заглавие");
   expect(Object.keys(present.alternates?.languages ?? {})).toEqual(["bg", "x-default"]);
   expect(present.robots).toMatchObject({ index: true });
+});
+it("a reviewed CMS translation also retains the locale's human indexability gate", async () => {
+  vi.stubEnv("STAGING", "false");
+  mocks.content.mockResolvedValueOnce({
+    title: "Reviewed translated title",
+    paragraphs: ["Reviewed translated copy."],
+  });
+  const result = await publicContentMetadata("en", "help", "privacy", "/help/privacy");
+  expect(result.title).toBe("Reviewed translated title");
+  expect(result.alternates?.languages).toEqual({
+    en: "https://staging.makler-realty.com/en/help/privacy",
+  });
+  expect(result.robots).toEqual({ index: false, follow: true });
 });
 it("fails closed on missing production origin rather than adopting an incoming header", () => {
   vi.stubEnv("NODE_ENV", "production");

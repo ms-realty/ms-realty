@@ -92,6 +92,13 @@
     "active": "Ενεργή",
     "paused": "Σε παύση",
     "withdrawn": "Η εγγραφή καταργήθηκε",
-    "pending_verification": "Αναμένεται επιβεβαίωση"
+    "pending_verification": "Αναμένεται επιβεβαίωση",
+    "Europe/Sofia": "Σόφια",
+    "Europe/London": "Λονδίνο",
+    "Europe/Berlin": "Βερολίνο",
+    "Europe/Amsterdam": "Άμστερνταμ",
+    "Europe/Athens": "Αθήνα",
+    "Europe/Moscow": "Μόσχα",
+    "Asia/Jerusalem": "Ιερουσαλήμ"
   }
 }

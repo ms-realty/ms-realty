@@ -43,8 +43,8 @@ describe("P02 committed search and exact public facts", () => {
   });
   it("does not turn unknown or withheld prices into zero or price-on-request", () => {
     const copy = discoveryCopy("en");
-    expect(priceText({ state: "unknown" }, "en", copy)).toBe(copy.unknown);
-    expect(priceText({ state: "withheld" }, "en", copy)).toBe(copy.withheld);
+    expect(priceText({ state: "unknown" }, "en", copy)).toBe(copy.priceUnknown);
+    expect(priceText({ state: "withheld" }, "en", copy)).toBe(copy.priceWithheld);
     expect(
       priceText(
         {

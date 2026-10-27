@@ -88,25 +88,32 @@ export function Button({
     );
   }
 
-  // Not RAC's isDisabled, which removes the button from the tab order and hides the reason
-  // from keyboard and screen-reader users. A plain button keeps focus and never submits.
+  // Keep the same DOM/form/ARIA contract and focusability while blocking every activation
+  // callback. The reason replaces the action; it never submits the associated form.
   return (
     <span className="inline-flex flex-col items-start gap-1">
-      <button
+      <RACButton
+        {...props}
         type="button"
-        id={props.id}
-        aria-label={props["aria-label"]}
+        isDisabled={false}
+        isPending={isPending}
         aria-disabled="true"
         aria-describedby={describedBy}
         data-disabled="true"
+        onPress={() => announce(disabledReason)}
+        onPressStart={undefined}
+        onPressEnd={undefined}
+        onPressUp={undefined}
+        onPressChange={undefined}
         onClick={(event) => {
           event.preventDefault();
-          announce(disabledReason);
         }}
         className={buttonClass(variant, className)}
       >
-        {children}
-      </button>
+        <Label pendingLabel={pendingLabel} isPending={Boolean(isPending)}>
+          {children}
+        </Label>
+      </RACButton>
       <span id={reasonId} className="text-caption text-text-muted">
         {disabledReason}
       </span>

@@ -63,7 +63,7 @@ export function Radio({ children, className, ...props }: RadioProps) {
           // The selected state is a thick ring, which survives forced-colors mode.
           "size-6 shrink-0 rounded-full border-2 border-border bg-surface transition-[border-width] duration-(--duration-fast)",
           "group-data-hovered/radio:border-text",
-          "group-data-focus-visible/radio:outline-2 group-data-focus-visible/radio:outline-offset-2 group-data-focus-visible/radio:outline-focus",
+          "group-data-focus-visible/radio:outline-3 group-data-focus-visible/radio:outline-offset-2 group-data-focus-visible/radio:outline-focus",
           "group-data-selected/radio:border-[7px] group-data-selected/radio:border-action",
           "group-data-invalid/radio:border-error",
           "group-data-readonly/radio:border-dashed",

@@ -25,7 +25,7 @@ export function Switch({ children, className, ...props }: SwitchProps) {
         className={cx(
           "flex h-7 w-12 shrink-0 items-center rounded-full border-2 border-border bg-subtle px-0.5 transition-colors duration-(--duration-fast)",
           "group-data-hovered/switch:border-text",
-          "group-data-focus-visible/switch:outline-2 group-data-focus-visible/switch:outline-offset-2 group-data-focus-visible/switch:outline-focus",
+          "group-data-focus-visible/switch:outline-3 group-data-focus-visible/switch:outline-offset-2 group-data-focus-visible/switch:outline-focus",
           "group-data-selected/switch:border-action group-data-selected/switch:bg-action",
           "group-data-readonly/switch:border-dashed",
           "group-data-disabled/switch:border-disabled-text group-data-disabled/switch:bg-disabled",

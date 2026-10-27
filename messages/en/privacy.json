@@ -92,6 +92,13 @@
     "active": "Active",
     "paused": "Paused",
     "withdrawn": "Unsubscribed",
-    "pending_verification": "Awaiting verification"
+    "pending_verification": "Awaiting verification",
+    "Europe/Sofia": "Sofia",
+    "Europe/London": "London",
+    "Europe/Berlin": "Berlin",
+    "Europe/Amsterdam": "Amsterdam",
+    "Europe/Athens": "Athens",
+    "Europe/Moscow": "Moscow",
+    "Asia/Jerusalem": "Jerusalem"
   }
 }

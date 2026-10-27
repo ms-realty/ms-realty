@@ -9,7 +9,7 @@ import type { Session } from "@/server/auth/sessions";
 import type { FormState } from "@/ui/form/contract";
 import { initialFormState } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
-import { proposalEnhancementField, proposalStatus } from "./contract";
+import { proposalEnhancementField, proposalScope, proposalStatus } from "./contract";
 import { proposalCopy } from "./copy";
 import { counterofferCopy } from "./counteroffer-copy";
 import { ProposalScreen } from "./screens";
@@ -192,10 +192,21 @@ it.each(["unknown", "confirmed"] as const)(
               },
             },
     };
-    // The form hook restores this state from the native POST; the page's fresh read has
-    // already lost revise eligibility. This isolates whether that hook is still mounted.
-    vi.mocked(initialFormState).mockReturnValueOnce(returned);
-    render(await ProposalScreen({ locale: "en", session: session("client"), id: "proposal-one" }));
+    // Native restoration belongs to the revise identity, independent of the other retained
+    // decision hooks. The page's fresh read has already lost revise eligibility.
+    const fresh = vi.mocked(initialFormState).getMockImplementation();
+    if (!fresh) throw new Error("Missing initial form implementation");
+    await vi.mocked(initialFormState).withImplementation(
+      (scope, values, revision) =>
+        scope === proposalScope("revise", "proposal-one")
+          ? returned
+          : fresh(scope, values, revision),
+      async () => {
+        render(
+          await ProposalScreen({ locale: "en", session: session("client"), id: "proposal-one" }),
+        );
+      },
+    );
     if (kind === "unknown") {
       expect(screen.getByLabelText("Amount (GBP)")).toHaveValue("119,000.03");
       expect(screen.getByLabelText("Amount (GBP)")).toHaveAttribute("readonly");

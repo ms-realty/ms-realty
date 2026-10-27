@@ -1,0 +1,16 @@
+{
+  "title": "Opgeslagen in uw account",
+  "review": "Geselecteerde woningen bekijken",
+  "bring": "Selectie naar mijn account brengen",
+  "continueLabel": "Doorgaan naar het klantaccount",
+  "hint": "Bekijk de toevoegingen. Bestaande woningen blijven bewaard; er ontstaat geen dossiertoegang.",
+  "confirm": "Geselecteerde woningen toevoegen",
+  "added": "Nieuw",
+  "existing": "Al bewaard",
+  "unavailable": "Niet beschikbaar",
+  "empty": "Er zijn nog geen woningen in dit account bewaard.",
+  "cancel": "Annuleren",
+  "complete": "De selectie is samengevoegd met uw bewaarde woningen.",
+  "restart": "Begin met de woningen op dit apparaat",
+  "error": "De overdracht kon niet worden voorbereid. Uw apparaatselectie blijft bewaard."
+}

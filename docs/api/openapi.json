@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "MS Realty application transport",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "Generated from src/server/transport/registry.ts by scripts/openapi.mjs; do not edit. Application endpoints only (architecture §19.3), never raw collections. Mutations follow the §5.1 envelope: server-derived Principal, logical operation identity, expected revision where applicable, and one of the §5.1 results."
   },
   "servers": [
@@ -1337,6 +1337,464 @@
         "x-host-context": "private",
         "x-authorization": {
           "class": "private_session"
+        },
+        "x-idempotency": "none",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT39", "AT42"]
+      }
+    },
+    "/api/inquiry-attachments/{id}": {
+      "get": {
+        "operationId": "inquiries.photoDownload",
+        "summary": "Read an authorized inquiry assessment photo",
+        "description": "F10: requires a current staff session, active membership, enrolled passkey and the current inquiry.read grant on the attachment's Inquiry. The receipt cookie grants no byte or Case access. Recovery quarantine must be open. Every full or single-range request requires sealed, non-erased bytes with a clean scan, matching scanned digest, scan time and scanner version; stored size and digest are verified and the live session and inquiry grant rechecked before response. Pending, failed, infected, erased or inaccessible photos return the same not-found. A wrong host or malformed UUID returns an empty 404 before session lookup. Other errors use the standard JSON envelope with no-store and request correlation. Scan acceptance grants neither human review, publication rights nor retention approval.",
+        "tags": ["files"],
+        "servers": [
+          {
+            "url": "https://app.makler-realty.com",
+            "description": "Staff host"
+          }
+        ],
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          },
+          {
+            "name": "range",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "description": "Optional single bytes=start-end, bytes=start- or bytes=-suffix range; invalid or unsatisfiable ranges return 416 after authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized, verified full image bytes",
+            "headers": {
+              "cache-control": {
+                "description": "private, no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-content-type-options": {
+                "description": "nosniff",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-security-policy": {
+                "description": "sandbox; default-src 'none'",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "cross-origin-resource-policy": {
+                "description": "same-origin",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "referrer-policy": {
+                "description": "no-referrer",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "accept-ranges": {
+                "description": "bytes",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-disposition": {
+                "description": "Inline; fixed inquiry-photo filename, never the supplied filename",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-length": {
+                "description": "Full byte length",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8388608,
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8388608,
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8388608,
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Authorized, verified single image byte range",
+            "headers": {
+              "cache-control": {
+                "description": "private, no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-content-type-options": {
+                "description": "nosniff",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-security-policy": {
+                "description": "sandbox; default-src 'none'",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "cross-origin-resource-policy": {
+                "description": "same-origin",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "referrer-policy": {
+                "description": "no-referrer",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "accept-ranges": {
+                "description": "bytes",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-disposition": {
+                "description": "Inline; fixed inquiry-photo filename, never the supplied filename",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-length": {
+                "description": "Returned range byte length",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-range": {
+                "description": "bytes start-end/total",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8388608,
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8388608,
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8388608,
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "UNAUTHENTICATED": {
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHENTICATED",
+                        "message": "Please sign in to continue.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["UNAUTHENTICATED"]
+          },
+          "403": {
+            "description": "NOT_AUTHORIZED",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_AUTHORIZED": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_AUTHORIZED",
+                        "message": "You do not have permission for this action.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_AUTHORIZED"]
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "We could not find this item.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_FOUND"]
+          },
+          "416": {
+            "description": "Invalid or unsatisfiable single range; empty body",
+            "headers": {
+              "cache-control": {
+                "description": "private, no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-content-type-options": {
+                "description": "nosniff",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-security-policy": {
+                "description": "sandbox; default-src 'none'",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "cross-origin-resource-policy": {
+                "description": "same-origin",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "referrer-policy": {
+                "description": "no-referrer",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "accept-ranges": {
+                "description": "bytes",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-disposition": {
+                "description": "Inline; fixed inquiry-photo filename, never the supplied filename",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "content-range": {
+                "description": "bytes */total",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Something went wrong on our side.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["INTERNAL_ERROR"]
+          },
+          "503": {
+            "description": "DEPENDENCY_UNAVAILABLE",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "DEPENDENCY_UNAVAILABLE": {
+                    "value": {
+                      "error": {
+                        "code": "DEPENDENCY_UNAVAILABLE",
+                        "message": "This service is temporarily unavailable. Please try again shortly.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["DEPENDENCY_UNAVAILABLE"]
+          }
+        },
+        "x-host-context": "staff",
+        "x-authorization": {
+          "class": "staff_session",
+          "capability": "inquiry.read"
         },
         "x-idempotency": "none",
         "x-revision": "none",
@@ -3539,6 +3997,240 @@
         "x-revision": "none",
         "x-pagination": "none",
         "x-acceptance": ["AT10", "AT11"]
+      }
+    },
+    "/api/inquiries/{submission}/photos": {
+      "post": {
+        "operationId": "inquiries.attachPhoto",
+        "summary": "Attach one optional assessment photo to an accepted owner inquiry",
+        "description": "F10: requires the original host-only receipt-session cookie and a server-issued receiptId belonging to that session, with ownerInput and seller_consultation or landlord_consultation purpose. Uploads require no Case and current Inquiry state received, assigned or awaiting_client; ownership and state are rechecked under the inquiry lock. Recovery quarantine and same-origin checks run before multipart bytes are read. Exact public Origin is required when supplied; opaque Origin null is accepted only for Sec-Fetch-Site same-origin, Sec-Fetch-Mode navigate and Sec-Fetch-Dest document together. Other missing-Origin/Fetch Metadata combinations follow the shared same-origin guard. IP and inquiry rate limits apply. Exactly one of each named form field is accepted, with no extra fields. One nonempty image is at most 8 MiB; the complete multipart body is at most 8 MiB plus 64 KiB. Signatures and full decoding establish JPEG, PNG or WebP, with at most 40 million pixels and one page. At most 3 non-erased photos belong to an Inquiry. The operation UUID is bound to that Inquiry and measured bytes, type and dimensions; the same operation and bytes reconcile the reservation or sealed result, while different bytes or an erased reservation conflict. Storage interruption retains the retry identity; reconcile the receipt before retrying. Acceptance seals verified private bytes and queues scanning, without establishing a clean scan, human review, publication rights or retention approval. Always returns a fixed receipt redirect on success and declared form failures; no JSON success or photo-byte URL. Wrong host or unsupported locale returns an empty 404. Receipt, Origin and forbidden failures use the standard JSON envelope; unexpected failures use its internal error with no-store and request correlation.",
+        "tags": ["public_submission"],
+        "servers": [
+          {
+            "url": "https://makler-realty.com",
+            "description": "Public host"
+          }
+        ],
+        "security": [
+          {
+            "receiptSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "submission",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{43}\\.[0-9a-f]{32}$",
+              "description": "Original server-issued submission key; the server verifies its MAC and receipt-session ownership"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "bg",
+              "type": "string",
+              "enum": ["bg", "en", "ru", "de", "nl", "el", "he"]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "x-max-body-bytes": 8454144,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "operationId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                    "description": "Inquiry-scoped retry identity; keep it and the same bytes on retry"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "contentEncoding": "binary",
+                    "minLength": 1,
+                    "maxLength": 8388608,
+                    "description": "One JPEG, PNG or WebP image. The server verifies signatures and full bounded decoding; filename and declared MIME do not establish its type."
+                  },
+                  "sharedForInquiry": {
+                    "type": "string",
+                    "const": "1",
+                    "description": "Self-declared permission for inquiry assessment only"
+                  }
+                },
+                "required": ["operationId", "file", "sharedForInquiry"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Fixed /{locale}/requests/{receiptId} on the public origin; photoOperation retains a parsed valid operation UUID. Declared form failures add photoError with the internal error code; the accepted Inquiry is preserved. No response body.",
+            "headers": {
+              "location": {
+                "description": "Public receipt URL with optional photoOperation and photoError query",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "CROSS_ORIGIN_REQUEST, NOT_AUTHORIZED",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "CROSS_ORIGIN_REQUEST": {
+                    "value": {
+                      "error": {
+                        "code": "CROSS_ORIGIN_REQUEST",
+                        "message": "This request did not come from this site.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  },
+                  "NOT_AUTHORIZED": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_AUTHORIZED",
+                        "message": "You do not have permission for this action.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["CROSS_ORIGIN_REQUEST", "NOT_AUTHORIZED"]
+          },
+          "404": {
+            "description": "NOT_FOUND",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "NOT_FOUND": {
+                    "value": {
+                      "error": {
+                        "code": "NOT_FOUND",
+                        "message": "We could not find this item.",
+                        "retryable": false,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "not_applied"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["NOT_FOUND"]
+          },
+          "500": {
+            "description": "INTERNAL_ERROR",
+            "headers": {
+              "cache-control": {
+                "description": "no-store",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-correlation-id": {
+                "description": "Request correlation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                },
+                "examples": {
+                  "INTERNAL_ERROR": {
+                    "value": {
+                      "error": {
+                        "code": "INTERNAL_ERROR",
+                        "message": "Something went wrong on our side.",
+                        "retryable": true,
+                        "correlationId": "example-correlation-id",
+                        "outcome": "unknown"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "x-error-codes": ["INTERNAL_ERROR"]
+          }
+        },
+        "x-host-context": "public",
+        "x-authorization": {
+          "class": "receipt_session"
+        },
+        "x-idempotency": "operation_id",
+        "x-revision": "none",
+        "x-pagination": "none",
+        "x-acceptance": ["AT10", "AT11", "AT42"],
+        "x-redirect-error-codes": [
+          "validation_failed",
+          "rate_limited",
+          "idempotency_key_reused",
+          "transition_denied",
+          "unavailable"
+        ]
       }
     },
     "/api/providers/resend/webhook": {

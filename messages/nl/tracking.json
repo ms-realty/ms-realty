@@ -1,0 +1,12 @@
+{
+  "title": "Uw privacykeuze",
+  "description": "We gebruiken optionele analytische cookies alleen met uw toestemming. U kunt die op elk moment intrekken.",
+  "allow": "Analyse toestaan",
+  "necessary": "Alleen noodzakelijke",
+  "settings": "Privacyinstellingen",
+  "withdraw": "Toestemming intrekken",
+  "enabled": "Analytische cookies zijn toegestaan.",
+  "disabled": "Alleen noodzakelijke cookies worden gebruikt.",
+  "nextPage": "Keuze opgeslagen. Analyse start op de volgende pagina die u opent.",
+  "withdrawRefresh": "Intrekken vernieuwt deze pagina om geladen analyse te stoppen. Bewaar eerst ingevoerde tekst."
+}

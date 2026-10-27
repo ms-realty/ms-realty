@@ -1,7 +1,14 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @import "../src/ui/tokens.css";
 @import "../src/ui/fonts.css";
 @import "../src/ui/base.css";
+@source "./";
+@source "../src";
+@source not "../src/**/*.test.{ts,tsx}";
+@source not "../src/**/*.stories.tsx";
+@source not "../src/test";
+@source not "../src/**/__tests__";
+@source not "./**/*.test.{ts,tsx}";
 
 /* Map controls inherit product tokens; the list remains the accessible task alternative. */
 .msr-map-marker {
@@ -27,7 +34,8 @@
   background: var(--color-surface);
   color: var(--color-text);
   padding: 0.25rem 0.5rem;
-  font-size: 12px;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
 }
 .msr-map-attribution a {
   text-decoration: underline;
@@ -52,4 +60,91 @@
 .maplibregl-map a:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/* Receipts, eligible listing facts and review readbacks keep their content on paper.
+   Navigation, floating task controls and tracking choices do not become document content. */
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  :root {
+    --color-canvas: #ffffff;
+    --color-surface: #ffffff;
+    --color-text: #000000;
+  }
+
+  /* biome-ignore-start lint/complexity/noImportantStyles: print must override component chrome and fixed positioning across CSS layers. */
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  body * {
+    color: black !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  nav,
+  footer,
+  button,
+  [data-public-header],
+  [data-analytics-consent],
+  [data-print-hide],
+  #workspace-sidebar,
+  [data-client-navigation],
+  [data-sidebar] > div > header,
+  [data-client-shell] > div > header,
+  [role="dialog"],
+  [role="alertdialog"] {
+    display: none !important;
+  }
+
+  [data-sidebar],
+  [data-client-shell] {
+    display: block !important;
+  }
+
+  main,
+  [data-route-content] {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  [class~="fixed"],
+  [class~="sticky"] {
+    position: static !important;
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: print overrides end. */
+
+  h1,
+  h2,
+  h3,
+  caption {
+    break-after: avoid;
+  }
+
+  figure,
+  tr,
+  [data-receipt] {
+    break-inside: avoid;
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 10cm;
+    object-fit: contain;
+  }
+
+  thead {
+    display: table-header-group;
+  }
 }

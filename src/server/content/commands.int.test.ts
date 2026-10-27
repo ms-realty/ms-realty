@@ -254,4 +254,98 @@ describe("O21 editorial content authority", () => {
         ?.publicationState,
     ).toBe("active");
   });
+  it("M071 / O21 / AT22 requires exact review for typed structure even when plaintext is unchanged", async () => {
+    const actor = await staff(),
+      input = draft();
+    const blocks = [
+      { type: "heading" as const, text: "Synthetic process" },
+      {
+        type: "step" as const,
+        title: "Synthetic first step",
+        text: "MS-00001 · 123 EUR · 45 m² · 2 bedrooms · Sandanski",
+      },
+      { type: "link" as const, text: "Synthetic contact", href: "/bg/contact" },
+    ];
+    const { outcome } = await createContent(t.db, actor.session, {
+      ...input,
+      text: undefined,
+      blocks,
+    });
+    expect(await readApprovedContent(t.db, "help", input.slug, "bg")).toBeNull();
+    await publish(actor, outcome.id);
+    const before = await readContentWorkbench(t.db, actor.session, outcome.id);
+    const publicBefore = await readApprovedContent(t.db, "help", input.slug, "bg");
+    expect(publicBefore).toMatchObject({
+      format: "blocks",
+      blocks,
+      paragraphs: [
+        "Synthetic process",
+        "Synthetic first step",
+        "MS-00001 · 123 EUR · 45 m² · 2 bedrooms · Sandanski",
+        "Synthetic contact",
+        "/bg/contact",
+      ],
+    });
+    const changed = [{ type: "paragraph" as const, text: "Synthetic process" }, ...blocks.slice(1)];
+    await saveContent(t.db, actor.session, {
+      ...input,
+      id: outcome.id,
+      expectedVersion: before.page.version,
+      operationId: randomUUID(),
+      text: undefined,
+      blocks: changed,
+    });
+    const after = await readContentWorkbench(t.db, actor.session, outcome.id);
+    expect(after.current.contentHash).not.toBe(before.current.contentHash);
+    expect(after.decisions).toEqual([]);
+    expect(before.current.body).toEqual({
+      format: "blocks",
+      title: input.title,
+      blocks,
+      placeId: null,
+    });
+    await expect(
+      decideContent(t.db, actor.session, {
+        id: outcome.id,
+        expectedVersion: after.page.version,
+        operationId: randomUUID(),
+        decision: "publish",
+        note: "Structure needs new human review",
+        reviewed: true,
+        expiresAt: expiry(),
+      }),
+    ).rejects.toMatchObject({ code: "approval_stale" });
+    expect((await readApprovedContent(t.db, "help", input.slug, "bg"))?.version.id).toBe(
+      publicBefore?.version.id,
+    );
+    await publish(actor, outcome.id);
+    expect(await readApprovedContent(t.db, "help", input.slug, "bg")).toMatchObject({
+      blocks: changed,
+      paragraphs: publicBefore?.paragraphs,
+    });
+  });
+  it("M071 rejects unsafe links, mixed input and structured review wording before creating an edition", async () => {
+    const actor = await staff();
+    await expect(
+      createContent(t.db, actor.session, {
+        ...draft(),
+        text: undefined,
+        blocks: [{ type: "link", text: "Unsafe", href: "javascript:alert(1)" }],
+      }),
+    ).rejects.toMatchObject({ code: "validation_failed" });
+    await expect(
+      createContent(t.db, actor.session, {
+        ...draft(),
+        blocks: [{ type: "paragraph", text: "Ambiguous body" }],
+      }),
+    ).rejects.toMatchObject({ code: "validation_failed" });
+    await expect(
+      createContent(t.db, actor.session, {
+        ...draft(),
+        kind: "review",
+        text: undefined,
+        blocks: [{ type: "paragraph", text: "Must retain exact assent schema" }],
+      }),
+    ).rejects.toMatchObject({ code: "validation_failed" });
+  });
 });

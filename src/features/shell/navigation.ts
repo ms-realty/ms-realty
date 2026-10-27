@@ -38,13 +38,13 @@ export const publicPrimaryNav: readonly NavItem<PublicNavLabel>[] = [
   { label: "buy", screen: "P02", path: "/properties?purpose=sale" },
   { label: "rent", screen: "P02", path: "/properties?purpose=long_term_rent" },
   { label: "sellLet", screen: "P17", path: "/sell" },
-  { label: "areas", screen: "P15", path: null },
+  { label: "areas", screen: "P15", path: "/areas" },
   { label: "aboutContact", screen: "P20", path: "/contact" },
 ];
 
 export const publicUtilityNav: readonly NavItem<PublicNavLabel>[] = [
   { label: "saved", screen: "P08", path: "/saved" },
-  { label: "contact", screen: "P20", path: "/contact" },
+  { label: "compare", screen: "P07", path: "/compare" },
 ];
 
 /** Shown only to a returning verified client; the destination is on the client host. */
@@ -72,7 +72,7 @@ export const journeyNav: readonly NavItem<JourneyNavLabel>[] = [
 export const journeyHelpNav: NavItem<JourneyNavLabel> = {
   label: "help",
   screen: "P24",
-  path: null,
+  path: "/help",
 };
 
 /** Saved Figma O01 rail: everyday work stays primary; Butler and tools stay secondary.

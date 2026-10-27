@@ -21,7 +21,22 @@ export const selects: Partial<Record<Field, readonly string[]>> = {
   bedroomsState: factStates,
   sourceClass: sourceClasses,
   sourceLanguage: ["bg", "en", "ru", "de", "nl", "el", "he"],
+  rentalDepositState: factStates,
+  rentalChargesState: factStates,
+  rentalAvailableFromState: factStates,
+  rentalRestrictionsState: factStates,
 };
+export const rentalFields: Field[] = [
+  "rentalDepositState",
+  "rentalDeposit",
+  "rentalChargesState",
+  "rentalCharges",
+  "rentalChargesIncludes",
+  "rentalAvailableFromState",
+  "rentalAvailableFrom",
+  "rentalRestrictionsState",
+  "rentalRestrictions",
+];
 export const identity: Field[] = [
   "propertyType",
   "purpose",

@@ -70,6 +70,9 @@ export const appointments = pgTable(
     timezone: text("timezone").notNull(),
     /** Preferred windows the requester gave; a request is never a booking. */
     requestedWindows: jsonb("requested_windows").notNull().default([]),
+    /** Exact staff-proposed version, unchanged by each participant response. */
+    proposedVersion: integer("proposed_version"),
+    proposedBufferMinutes: integer("proposed_buffer_minutes"),
     proposedStartsAt: instant("proposed_starts_at"),
     proposedEndsAt: instant("proposed_ends_at"),
     /** The arrangement in force; kept while a reschedule is pending (AT32). */

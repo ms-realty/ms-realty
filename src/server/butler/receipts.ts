@@ -1,5 +1,5 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { operations } from "@/db/schema";
 import type { ButlerReceipt } from "@/domain/butler";
@@ -34,4 +34,31 @@ export async function readButlerReceipt(
   const receipt = outcome?.butlerReceipt ?? outcome?.current?.butlerReceipt;
   if (!receipt) throw new AppError("not_found");
   return receipt;
+}
+
+/** Case-scoped persisted domain receipts. A later read rechecks the source Case again. */
+export async function listCaseButlerReceipts(db: Executor, session: Session, caseId: string) {
+  await caseFor(db, session, caseId, "case.read_internal");
+  const rows = await db
+    .select({ id: operations.id })
+    .from(operations)
+    .where(
+      and(
+        eq(operations.actorKind, "system"),
+        eq(operations.actorId, "butler"),
+        eq(operations.resultType, "case"),
+        eq(operations.resultId, caseId),
+      ),
+    )
+    .orderBy(desc(operations.createdAt))
+    .limit(20);
+  const receipts: ButlerReceipt[] = [];
+  for (const row of rows) {
+    try {
+      receipts.push(await readButlerReceipt(db, session, row.id));
+    } catch (error) {
+      if (!(error instanceof AppError) || error.code !== "not_found") throw error;
+    }
+  }
+  return receipts;
 }

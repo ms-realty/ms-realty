@@ -108,7 +108,7 @@ export function ComboBox({
       </div>
       <FieldError>{errorMessage}</FieldError>
       <ListPopover>
-        <ListBox items={options} className="py-1 outline-none">
+        <ListBox items={options} className="p-1.5 outline-none">
           {(option) => (
             <ListBoxItem id={option.id} textValue={option.name} className={optionClass}>
               {({ isSelected }) => (

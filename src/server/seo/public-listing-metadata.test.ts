@@ -44,9 +44,15 @@ it("rejects malformed and non-listing identities without a lookup or a redirect"
   expect(mocks.listing).not.toHaveBeenCalled();
 });
 it("uses only eligible fact locales for a public listing's hreflang", async () => {
+  vi.stubEnv("STAGING", "false");
   mocks.listing.mockResolvedValue({
     status: "listing",
-    listing: { reference: input.reference, title: "Approved title", description: "Approved copy." },
+    listing: {
+      reference: input.reference,
+      title: "Approved title",
+      description: "Approved copy.",
+      indexable: true,
+    },
   });
   mocks.catalogue.mockResolvedValue(
     ["bg", "en"].map((locale) => ({ reference: input.reference, locale })),
@@ -60,10 +66,12 @@ it("uses only eligible fact locales for a public listing's hreflang", async () =
       "x-default": "https://staging.makler-realty.com/bg/properties/MS-00101/ms-00101",
     },
   });
+  expect(result.robots).toMatchObject({ index: true });
 });
 it.each(["unavailable", "not_found"])(
   "a %s placeholder has no approved fact alternates",
   async (status) => {
+    vi.stubEnv("STAGING", "false");
     mocks.listing.mockResolvedValue({
       status,
       reference: input.reference,
@@ -73,24 +81,111 @@ it.each(["unavailable", "not_found"])(
     const result = await publicListingMetadata(input);
     expect(result.title).toBe(input.reference);
     expect(result.alternates?.languages).toEqual({});
+    expect(result.robots).toMatchObject({ index: false });
     expect(JSON.stringify(result)).not.toContain("Private draft title");
   },
 );
 it("metadata failure preserves the page's recovery path without emitting database error text or facts", async () => {
+  vi.stubEnv("STAGING", "false");
   mocks.listing.mockRejectedValue(new Error("private database connection details"));
   const result = await publicListingMetadata(input);
   expect(result.title).toBe(input.reference);
   expect(result.alternates?.languages).toEqual({});
+  expect(result.robots).toMatchObject({ index: false });
   expect(JSON.stringify(result)).not.toContain("private database");
   expect(mocks.catalogue).not.toHaveBeenCalled();
 });
 it("hreflang read failure does not discard independently read approved public copy", async () => {
+  vi.stubEnv("STAGING", "false");
   mocks.listing.mockResolvedValue({
     status: "listing",
-    listing: { reference: input.reference, title: "Approved title", description: "Approved copy." },
+    listing: {
+      reference: input.reference,
+      title: "Approved title",
+      description: "Approved copy.",
+      indexable: true,
+    },
   });
   mocks.catalogue.mockRejectedValue(new Error("catalogue unavailable"));
   const result = await publicListingMetadata(input);
   expect(result.title).toBe("Approved title");
   expect(result.alternates?.languages).toEqual({});
+  expect(result.robots).toMatchObject({ index: false });
+});
+
+it("does not index a translated listing whose publication presentation holds indexability", async () => {
+  vi.stubEnv("STAGING", "false");
+  mocks.listing.mockResolvedValue({
+    status: "listing",
+    listing: {
+      reference: input.reference,
+      title: "Reviewed translated title",
+      description: "Reviewed translated copy.",
+      indexable: false,
+    },
+  });
+  mocks.catalogue.mockResolvedValue([{ reference: input.reference, locale: "en" }]);
+  const result = await publicListingMetadata({ ...input, locale: "en" });
+  expect(result.robots).toEqual({ index: false, follow: true });
+  expect(result.title).toBe("Reviewed translated title");
+  expect(result.alternates?.languages).toEqual({
+    en: "https://staging.makler-realty.com/en/properties/MS-00101/ms-00101",
+  });
+});
+
+it("does not infer current-locale eligibility from another published sibling", async () => {
+  vi.stubEnv("STAGING", "false");
+  mocks.listing.mockResolvedValue({
+    status: "listing",
+    listing: { reference: input.reference, title: "Approved title", indexable: true },
+  });
+  mocks.catalogue.mockResolvedValue([{ reference: input.reference, locale: "en" }]);
+  const result = await publicListingMetadata(input);
+  expect(result.robots).toEqual({ index: false, follow: true });
+  expect(Object.keys(result.alternates?.languages ?? {})).toEqual(["en"]);
+});
+
+it("uses only the currently eligible publication photo for social cards and drops it on withdrawal", async () => {
+  const photo = {
+    assetId: "00000000-0000-4000-8000-000000000001",
+    digest: "a".repeat(64),
+    kind: "photo",
+    contentType: "image/jpeg",
+    alt: "Exact reviewed photo description",
+    width: 1280,
+    height: 960,
+  };
+  mocks.listing.mockResolvedValue({
+    status: "listing",
+    listing: {
+      reference: input.reference,
+      title: "Current reviewed title",
+      description: "Current reviewed description.",
+      indexable: true,
+      media: [{ ...photo, kind: "floor_plan" }, photo],
+    },
+  });
+  mocks.catalogue.mockResolvedValue([{ reference: input.reference, locale: "bg" }]);
+  const current = await publicListingMetadata(input);
+  expect(current.openGraph).toMatchObject({
+    title: "Current reviewed title",
+    description: "Current reviewed description.",
+    images: [
+      {
+        url: `https://staging.makler-realty.com/api/media/${photo.assetId}/${photo.digest}`,
+        alt: photo.alt,
+        width: 1280,
+        height: 960,
+      },
+    ],
+  });
+  expect(current.twitter).toMatchObject({ card: "summary_large_image" });
+  mocks.listing.mockResolvedValue({ status: "unavailable", reference: input.reference });
+  const withdrawn = await publicListingMetadata(input);
+  expect(withdrawn.openGraph).toMatchObject({
+    title: input.reference,
+    images: [{ url: "https://staging.makler-realty.com/brand/logo-ms-realty.png" }],
+  });
+  expect(JSON.stringify(withdrawn)).not.toContain("Current reviewed");
+  expect(JSON.stringify(withdrawn)).not.toContain(photo.digest);
 });

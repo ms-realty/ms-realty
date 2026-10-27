@@ -1,11 +1,13 @@
 // Resend's fixed API, with no provider-side template fetching or arbitrary message rendering.
 import "server-only";
 import { z } from "zod";
+import { isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { caseEmailConfig, renderCaseEmail } from "../cases/email-contract";
 import type { HostOrigins } from "../config/hosts";
 import { renderInquiryCoverageNotice } from "../inquiries/notifications";
 import { renderSearchAlert } from "../subscriptions/template";
+import { clientAuthCopy } from "./auth-copy";
 import type { MessageProvider, OutboundMessage, ProviderResult } from "./provider";
 
 const authTemplates = [
@@ -46,7 +48,7 @@ function authEmail(message: OutboundMessage, hosts: HostOrigins, now: Date) {
   const template = message.template as AuthTemplate;
   const staff = template === "auth.staff_enrolment" || template === "auth.staff_recovery";
   const language = message.params.locale;
-  if (typeof language !== "string" || !/^(bg|en|ru|de|nl|el|he)$/.test(language)) return null;
+  if (typeof language !== "string" || !isPublicLocale(language)) return null;
   const expiresAt = message.params.expiresAt;
   if (
     typeof expiresAt !== "string" ||
@@ -79,6 +81,7 @@ function authEmail(message: OutboundMessage, hosts: HostOrigins, now: Date) {
   )
     return null;
   const displayLanguage = language === "bg" || language === "ru" ? language : "en";
+  const client = clientAuthCopy(language, template === "auth.client_invitation");
   const instructions =
     displayLanguage === "bg"
       ? "Отворете връзката, за да продължите. Не я препращайте. Ако не очаквате това писмо, можете да го игнорирате."
@@ -93,8 +96,8 @@ function authEmail(message: OutboundMessage, hosts: HostOrigins, now: Date) {
         : "The link works until";
   // Plain text avoids provider tracking pixels and has no interpolated HTML or customer data.
   return {
-    subject: subject[displayLanguage][template],
-    text: `MS Realty\n\n${instructions}\n\n${url.toString()}\n\n${validUntil}: ${formatDateTime(displayLanguage, expiresAt, { zoneLabel: true, now })}`,
+    subject: staff ? subject[displayLanguage][template] : client.subject,
+    text: `MS Realty\n\n${staff ? instructions : client.instructions}\n\n${url.toString()}\n\n${staff ? validUntil : client.until}: ${formatDateTime(language, expiresAt, { zoneLabel: true, now })}`,
   };
 }
 

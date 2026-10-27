@@ -200,5 +200,30 @@
       "target_changed": "A later record change prevents automatic reversal.",
       "dependent_records": "A later relationship or record depends on this identity. Review it manually before reversal."
     }
+  },
+  "contentBody": {
+    "format": "Page structure",
+    "paragraphs": "Paragraphs",
+    "blocks": "Headings and steps",
+    "hint": "Choose the structure to save. All text, steps and links need the same human review as the page. No HTML or media embeds.",
+    "block": "Block",
+    "empty": "Unused / remove",
+    "paragraph": "Paragraph",
+    "heading": "Subheading",
+    "step": "Process step",
+    "list": "Bullet list",
+    "callout": "Callout",
+    "link": "Page link",
+    "type": "Block type",
+    "title": "Step or callout title",
+    "text": "Block text",
+    "items": "List items",
+    "itemsHint": "One item per line, in reading order.",
+    "href": "Public page path",
+    "hrefHint": "Use a path to a public page, for example /bg/contact. Private pages, files and external URLs are not supported.",
+    "up": "Move earlier",
+    "down": "Move later",
+    "native": "Open an unused block to add content. Saving a draft does not approve it.",
+    "invalid": "Review the block type, required text and public page path."
   }
 }

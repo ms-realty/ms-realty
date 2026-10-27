@@ -1,0 +1,189 @@
+{
+  "evidenceId": "M071",
+  "status": "source_local_only",
+  "baseCommit": "28b35371",
+  "sourceCommits": [
+    "b1fcfea10f171597741b20550d22cc5fab383583",
+    "cc6c49f0b13ea30fb8b41fb60a13952ae7e38d96"
+  ],
+  "branch": "codex/msr-typed-content-composition",
+  "migrationChanges": false,
+  "temporaryDependencyCommit": "a6b9e89f",
+  "temporaryDependencyGitBlobs": {
+    "messages/bg/discovery.json": "e2619685b5a3781ad90bbf83d4d739494742128c",
+    "messages/en/discovery.json": "bd74773b6bf1c1ee98a4418b8c1fd555464ecdd2",
+    "messages/ru/discovery.json": "c12dce4bdaa6cff82942c7e01f0f396bd2cb50a0",
+    "messages/de/discovery.json": "83f901f2d6a86a12703f38e710014f78a7ef4618",
+    "messages/nl/discovery.json": "6910c14d40d7403b5c1c185f8f95268e83bb5e0e",
+    "messages/el/discovery.json": "06ebbcb3b25218513347fd4f279acda39a58e8ec",
+    "messages/he/discovery.json": "9f194b39ecf455108dc50e206e13e35585b878ce",
+    "src/features/discovery/content-copy.ts": "e55e2ed258da5cfe59f58f826d06bb786713389e",
+    "messages/_cognates.json": "3033894075857b2afbca4474fb889292d09cc300"
+  },
+  "temporaryDependencyState": "all exact temporary files restored to HEAD before handoff",
+  "cleanExactHeadTypecheckClaim": false,
+  "checks": {
+    "unitDomAndCatalogs": {
+      "files": 10,
+      "passed": 169
+    },
+    "database": {
+      "files": 3,
+      "passed": 29,
+      "maxWorkers": 1,
+      "existingTimeoutChanges": false,
+      "legacyLoopSplit": "one six-target case becomes six cases sharing one BG source, default 5000ms each",
+      "typedLoopSplit": "one independent six-target case becomes six cases, original 20000ms each"
+    },
+    "directTsc": {
+      "exitCode": 1,
+      "incremental": false,
+      "restoredDependencyFailure": "ContentScreen.contentSource is absent from the pre-a6 DiscoveryCopy catalog type",
+      "temporaryDependencyFailure": "a6 nested catalog objects widen the older DiscoveryCopy scalar-key API in external discovery tests/search controls",
+      "ownedImportClosureExitCode": 1,
+      "ownedCompilerErrors": 0,
+      "earlierIncrementalGreens": "not accepted; cached JSON-dependent types hid changes",
+      "requiredRootCheck": "fresh full integrated typecheck with incremental disabled and the complete public copy API fix"
+    },
+    "copyGuard": {
+      "exitCode": 1,
+      "externalFailure": "src/features/tracking/copy.ts has 70 literals; baseline allows 56",
+      "baselineModified": false
+    },
+    "disposableDatabaseCleanup": "msr-typed-composition-pg stopped"
+  },
+  "receipts": {
+    "unit-initial-red.txt": {
+      "exitCode": 1,
+      "sha256": "a18fd2f00be1fcd3000f4b99cced38a59a98091540b1531236e6571dc55bc8cc",
+      "rawSha256": "75a8f3fe2afd52232b7972d68b5e172a713b47f9e4bd2482db086270b65f4a66"
+    },
+    "unit-second-red.txt": {
+      "exitCode": 1,
+      "sha256": "bf36fef0e03e249ba6dae84ef807433c4c5cd085b04506c4df231bfdd835a27d",
+      "rawSha256": "39d38442c985bfbd8c408d4752e59093d8279f8ffad71c8fed8363811aae38b9"
+    },
+    "catalog-third-red.txt": {
+      "exitCode": 1,
+      "sha256": "dfff1cb5986094a1af708840787d84e113ff737665821575e0dea81c552fd92c",
+      "rawSha256": "a409a8a6de0f1799a32f6dc81f0f5fbcdfd51627f41700c47f13f952ccaab15c"
+    },
+    "integration-initial-red.txt": {
+      "exitCode": 1,
+      "sha256": "fe3add5dfa3cb1a95956be7184c322887db84ad4ae2ae1d1f8ebf952c972e621",
+      "rawSha256": "9cf0b84eb5e8264519e8aceec0efcd8cb87d813c4cfaf5f6eaa7ccd94d7570a5"
+    },
+    "integration-raised-interrupted.txt": {
+      "exitCode": 130,
+      "sha256": "12ada89a594c96ea89a11267d4b1caa09399c2cd44af9ee7278f630ab98b13ba",
+      "rawSha256": "a009733e9d8b67a0a93f8ad316f5412bb2180e144c137afd70256d6fcef9ac95"
+    },
+    "integration-serialized-green.txt": {
+      "exitCode": 0,
+      "sha256": "cee2748b65541933d5b46d7491927841cddd08dc157d1b8f77719d1b50c59a02",
+      "rawSha256": "0bf9b944901241fc8365a1c89fc76c166e064650b1a54f06a2cee0eb796c73a5"
+    },
+    "integration-checkpoint-red.txt": {
+      "exitCode": 1,
+      "sha256": "2ec90ba402ee1cabe1b8b4f2fcbcb61666ebec9517ef76ebdee324b45c7d8d60",
+      "rawSha256": "a4e74bac8514b2530f9510614b0cbacd0e925e3197926075c6d440b074f846a5"
+    },
+    "integration-decomposed-green.txt": {
+      "exitCode": 0,
+      "sha256": "7a6ec02f70df585936da91e04247de250de97e5a9cfa24470df6d49582f7ba68",
+      "rawSha256": "a9229db0000215696603f85ccd0e7f4824750bd3604a53a45becab38e81b1643"
+    },
+    "unit-source-green.txt": {
+      "exitCode": 0,
+      "sha256": "48524a7b8337f57ade251cf0df21590e6b1bf78452d272648926b546d3eea0da",
+      "rawSha256": "cd1d843c8762bb84ad5ccc420c59a258a7f598864408680b36ad9a1d8203271b"
+    },
+    "author-controls-green.txt": {
+      "exitCode": 0,
+      "sha256": "d145ea59a1e55ba679d9b394a4735c21ec94a37df7efac0b9057f78ca7617d28",
+      "rawSha256": "28f91a83ea8d394b1d6eb98fd657d44d41bc985c9f4ef75b6f6dff2c27be87b6"
+    },
+    "link-routes-green.txt": {
+      "exitCode": 0,
+      "sha256": "adf337e3ba7341b2e3ddc266fc1a63317a1660f357c288381a1fea9614de096a",
+      "rawSha256": "70645282ecbd51dbe71103a9244a28a0db325a02bbcd3df1c6872acb43872435"
+    },
+    "typecheck-initial-red.txt": {
+      "exitCode": 1,
+      "sha256": "9b5461143426dfb38af6fbd0da6c93b502d38d9b7bdf63199af48baea519bad8"
+    },
+    "biome-green.txt": {
+      "exitCode": 0,
+      "sha256": "be94fffba75a63e8e6a1c23d852384633a40318e8ef799913365c6a73454ec3b"
+    },
+    "typecheck-incremental-cache-untrusted.txt": {
+      "exitCode": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "acceptedEvidence": false
+    },
+    "typecheck-restored-incremental-untrusted.txt": {
+      "exitCode": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "acceptedEvidence": false
+    },
+    "typecheck-restored-fresh-red.txt": {
+      "exitCode": 1,
+      "sha256": "e8edc97a5ad33ad58cc9d2646d129f3f35afdd407a5f4ebda0241207c8233e3b"
+    },
+    "typecheck-dependencies-fresh-red.txt": {
+      "exitCode": 1,
+      "sha256": "615630bb8081305de62e94dc3517f270079f3d4f35df8759d258c440a1530433"
+    },
+    "typecheck-owned-closure-fresh-red.txt": {
+      "exitCode": 1,
+      "sha256": "c42635d7c9999e2c2bb50fb75bd54bf54415c44bd895f254c4e29e65bfe55be5"
+    }
+  },
+  "externalAcceptance": [
+    "actual reviewed area/service/owner copy",
+    "actual approved photos and counts",
+    "human translation approval and indexability",
+    "human visual acceptance",
+    "runtime/release gates R00-R12"
+  ],
+  "actionsNotPerformed": ["push", "PR", "merge", "deploy", "provider change", "customer send"],
+  "commands": {
+    "unitDomAndCatalogs": [
+      "npx",
+      "vitest",
+      "run",
+      "--project",
+      "unit",
+      "--project",
+      "unit-dom",
+      "src/domain/content-body.test.ts",
+      "src/features/content/body.test.tsx",
+      "src/features/content/body-fields.test.ts",
+      "src/features/content/body-editor.test.tsx",
+      "src/features/content/actions.test.ts",
+      "src/features/content/forms.test.tsx",
+      "src/features/content/locale-actions.test.ts",
+      "src/features/content/locale-forms.test.tsx",
+      "src/features/content/screens-labels.test.tsx",
+      "src/i18n/messages.test.ts"
+    ],
+    "database": [
+      "npx",
+      "vitest",
+      "run",
+      "--project",
+      "integration",
+      "--maxWorkers",
+      "1",
+      "--reporter",
+      "verbose",
+      "src/server/content/commands.int.test.ts",
+      "src/server/content/locale-commands.int.test.ts",
+      "src/server/content/public-areas.int.test.ts"
+    ],
+    "databaseContext": "TEST_DATABASE_URL passed per command to a unique disposable loopback Postgres; no shared database",
+    "freshTypes": ["npx", "tsc", "--noEmit", "--incremental", "false"],
+    "copyGuard": ["npx", "vitest", "run", "--project", "unit", "src/i18n/copy-guard.test.ts"]
+  },
+  "receiptNormalization": "Only terminal blank lines normalized in committed text receipts; diagnostic content retained. rawSha256 records original bytes when different."
+}

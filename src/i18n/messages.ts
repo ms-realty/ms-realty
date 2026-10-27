@@ -5,7 +5,10 @@
 //   messages/staff/<locale>/<namespace>.json  staff host only, bg/en/ru
 
 import type a11y from "../../messages/bg/a11y.json";
+import type accountSaves from "../../messages/bg/account-saves.json";
 import type caseReview from "../../messages/bg/caseReview.json";
+import type clientAccess from "../../messages/bg/client-access.json";
+import type clientWorkflow from "../../messages/bg/client-workflow.json";
 import type common from "../../messages/bg/common.json";
 import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
@@ -19,6 +22,7 @@ import type privacy from "../../messages/bg/privacy.json";
 import type privacyExportClient from "../../messages/bg/privacy-export.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
+import type tracking from "../../messages/bg/tracking.json";
 import type workflow from "../../messages/bg/workflow.json";
 import type agency from "../../messages/staff/bg/agency.json";
 import type auditHistory from "../../messages/staff/bg/auditHistory.json";
@@ -34,12 +38,16 @@ import type privacyGovernance from "../../messages/staff/bg/privacyGovernance.js
 import type serverStaff from "../../messages/staff/bg/serverStaff.json";
 import type settingsScopes from "../../messages/staff/bg/settingsScopes.json";
 import type tools from "../../messages/staff/bg/tools.json";
+import type workflowCompletion from "../../messages/staff/bg/workflowCompletion.json";
 import type workspace from "../../messages/staff/bg/workspace.json";
 import type workspaceStates from "../../messages/staff/bg/workspaceStates.json";
 import { isStaffLocale, type PublicLocale } from "./config";
 
 export const publicNamespaces = [
   "caseReview",
+  "client-access",
+  "account-saves",
+  "client-workflow",
   "a11y",
   "common",
   "discovery",
@@ -54,6 +62,7 @@ export const publicNamespaces = [
   "privacy-export",
   "server",
   "states",
+  "tracking",
   "workflow",
 ] as const;
 /** `serverStaff` overrides `server` entries whose staff wording differs (no email sign-in). */
@@ -66,6 +75,7 @@ export const staffNamespaces = [
   "tools",
   "workspace",
   "workspaceStates",
+  "workflowCompletion",
   "operations",
   "dataReview",
   "auditHistory",
@@ -78,6 +88,9 @@ export const staffNamespaces = [
 
 export interface PublicMessages {
   caseReview: typeof caseReview;
+  "client-access": typeof clientAccess;
+  "account-saves": typeof accountSaves;
+  "client-workflow": typeof clientWorkflow;
   a11y: typeof a11y;
   common: typeof common;
   discovery: typeof discovery;
@@ -92,6 +105,7 @@ export interface PublicMessages {
   "privacy-export": typeof privacyExportClient;
   server: typeof server;
   states: typeof states;
+  tracking: typeof tracking;
   workflow: typeof workflow;
 }
 export interface StaffMessages {
@@ -111,6 +125,7 @@ export interface StaffMessages {
   tools: typeof tools;
   workspace: typeof workspace;
   workspaceStates: typeof workspaceStates;
+  workflowCompletion: typeof workflowCompletion;
 }
 /** Staff namespaces are present only for staff locales (bg, en, ru). */
 export type Messages = PublicMessages & StaffMessages;

@@ -7,6 +7,11 @@ const regions = new Map<Politeness, HTMLElement>();
 function region(politeness: Politeness): HTMLElement {
   const existing = regions.get(politeness);
   if (existing?.isConnected) return existing;
+  const rendered = document.querySelector<HTMLElement>(`[data-announcer="${politeness}"]`);
+  if (rendered) {
+    regions.set(politeness, rendered);
+    return rendered;
+  }
   const element = document.createElement("div");
   element.setAttribute("aria-live", politeness);
   element.setAttribute("aria-atomic", "true");

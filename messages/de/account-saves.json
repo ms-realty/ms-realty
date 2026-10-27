@@ -1,0 +1,16 @@
+{
+  "title": "In Ihrem Konto gespeichert",
+  "review": "Ausgewählte Immobilien prüfen",
+  "bring": "Auswahl in mein Konto übernehmen",
+  "continueLabel": "Zum Kundenkonto weitergehen",
+  "hint": "Prüfen Sie die Ergänzungen. Bestehende Einträge bleiben; es entsteht kein Fallzugang.",
+  "confirm": "Ausgewählte Immobilien hinzufügen",
+  "added": "Neu",
+  "existing": "Bereits gespeichert",
+  "unavailable": "Nicht verfügbar",
+  "empty": "In diesem Konto sind noch keine Immobilien gespeichert.",
+  "cancel": "Abbrechen",
+  "complete": "Die Auswahl wurde mit Ihren gespeicherten Immobilien zusammengeführt.",
+  "restart": "Mit den auf diesem Gerät gespeicherten Immobilien beginnen",
+  "error": "Die Übertragung konnte nicht vorbereitet werden. Ihre Geräteauswahl bleibt erhalten."
+}

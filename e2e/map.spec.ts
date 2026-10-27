@@ -13,10 +13,11 @@ async function returnFromOpenMap(page: Page) {
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   const panelId = await toggle.getAttribute("aria-controls");
   expect(panelId).toBeTruthy();
-  await page
+  const nativeLink = page
     .locator(`[id="${panelId}"]`)
-    .getByRole("link", { name: "Go to list", exact: true })
-    .click();
+    .getByRole("link", { name: "Go to list", exact: true });
+  if (await nativeLink.count()) await nativeLink.click();
+  else await page.getByRole("button", { name: "Go to list", exact: true }).first().click();
 }
 
 function fixture(command = "map", reference?: string) {
@@ -66,8 +67,13 @@ test("real PMTiles map opens on demand, retains list, and loses withdrawn pins",
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
   await expect(page.getByRole("region", { name: mapCopy("en").title, exact: true })).toHaveCount(1);
   const marker = page.getByRole("button", { name: new RegExp(data.published.reference) });
+  await expect(marker).toContainText(/€|EUR/);
   await marker.focus();
   await page.keyboard.press("Enter");
+  await expect(
+    page.locator(`article[data-listing-reference="${data.published.reference}"]`),
+  ).toHaveAttribute("data-map-selected", "true");
+  await expect(marker).toHaveAttribute("aria-pressed", "true");
   await expect(
     page.getByRole("link", { name: new RegExp(`Open property: ${data.published.reference}`) }),
   ).toBeVisible();
@@ -177,4 +183,37 @@ test("map failure and retry leave the listing usable; no-JavaScript list still w
   await expect(native.getByRole("link", { name: data.published.title, exact: true })).toBeVisible();
   await expect(native.getByText("The map needs JavaScript.", { exact: false })).toBeVisible();
   await context.close();
+});
+
+test("UI16 actual map movement proposes bounded criteria until explicit area search", async ({
+  page,
+}, testInfo) => {
+  const data = fixture();
+  await page.goto(`/en/properties?q=${data.published.reference}&purpose=sale&sort=price_asc`);
+  const committed = page.url();
+  await page.getByRole("button", { name: "Show map", exact: true }).click();
+  await expect(page.getByText("Loading map…", { exact: true })).not.toBeVisible({ timeout: 20000 });
+  await expect(page.locator(".msr-map-marker")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Search this area", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  const area = page.getByRole("link", { name: "Search this area", exact: true });
+  await expect(area).toBeVisible();
+  expect(page.url()).toBe(committed);
+  const target = new URL((await area.getAttribute("href")) ?? "", page.url());
+  expect(target.searchParams.get("q")).toBe(data.published.reference);
+  expect(target.searchParams.get("sort")).toBe("price_asc");
+  expect(target.searchParams.has("cursor")).toBe(false);
+  const bounds = target.searchParams.get("mapBounds")?.split(",").map(Number);
+  expect(bounds).toHaveLength(4);
+  expect(bounds?.every(Number.isFinite)).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("synthetic-map-area-draft.png"),
+    fullPage: true,
+  });
+  await area.click();
+  await expect(page.locator("#results-heading")).toBeFocused();
+  expect(new URL(page.url()).searchParams.get("mapBounds")).toBe(
+    target.searchParams.get("mapBounds"),
+  );
+  await expect(page.getByRole("link", { name: data.published.title, exact: true })).toBeVisible();
 });

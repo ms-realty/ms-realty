@@ -133,6 +133,33 @@ describe("host routing (§11.1)", () => {
     expect(run(hosts.public, "/api/unknown").status).toBe(404);
   });
 
+  it("F10/AT42 forwards inquiry photo downloads only to trusted staff transport", () => {
+    const path = `/api/inquiry-attachments/${crypto.randomUUID()}`;
+    const proof = crypto.randomUUID();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ORIGIN_VERIFY_SECRET", proof);
+    for (const [context, host] of Object.entries(hosts)) {
+      const direct = run(host, path);
+      expect(direct.status, context).toBe(404);
+      expect(direct.headers.get("x-middleware-next"), context).toBeNull();
+      const trusted = run("origin.invalid", path, {
+        "x-msr-public-host": host,
+        "x-msr-origin-token": proof,
+      });
+      expect(trusted.status, context).toBe(context === "staff" ? 200 : 404);
+      expect(trusted.headers.get("x-middleware-next"), context).toBe(
+        context === "staff" ? "1" : null,
+      );
+    }
+    expect(
+      run("origin.invalid", path, {
+        "x-msr-public-host": hosts.staff,
+        "x-msr-origin-token": "untrusted-proof",
+      }).status,
+    ).toBe(404);
+    // Reaching the route grants no session, passkey, inquiry scope or clean-byte evidence.
+  });
+
   it("suppresses referrers and caching on recipient pages and share APIs", () => {
     const recipient = run(hosts.public, "/bg/share/view-token");
     expect(recipient.headers.get("cache-control")).toBe("private, no-store");

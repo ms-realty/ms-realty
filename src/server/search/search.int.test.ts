@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { geographyPlaceAliases, listings, localizedRevisions } from "@/db/schema";
+import { geographyPlaceAliases, geographyPlaces, listings, localizedRevisions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { Actor } from "@/domain/capabilities";
 import type { Fact } from "@/domain/facts";
@@ -32,6 +32,60 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await t?.drop();
+});
+
+it("UI16 map bounds filter the frozen approved area centres, counts and facets while retaining locality constraints", async () => {
+  const q = "Synthetic spatial boundary proof";
+  const near = await createPlaces(t.db),
+    far = await createPlaces(t.db),
+    unlocated = await createPlaces(t.db);
+  await t.db
+    .update(geographyPlaces)
+    .set({ latitude: "41", longitude: "23" })
+    .where(eq(geographyPlaces.id, near.settlementId));
+  await t.db
+    .update(geographyPlaces)
+    .set({ latitude: "43", longitude: "25" })
+    .where(eq(geographyPlaces.id, far.settlementId));
+  const fixtures = [];
+  for (const places of [near, far, unlocated]) {
+    const fixture = await createListingFixture(t.db, {
+      reviewerId: staff.id,
+      placeId: places.settlementId,
+      title: q,
+    });
+    await publishForTest(t.db, staff.actor, fixture);
+    fixtures.push(fixture);
+  }
+  const input = {
+    locale: "bg",
+    purpose: "sale",
+    q,
+    mapBounds: { west: 22, south: 40, east: 24, north: 42 },
+    includeUnconfirmed: true,
+  };
+  const first = await searchListings(t.db, input);
+  expect(first.items.map((item) => item.reference)).toEqual([fixtures[0]?.reference]);
+  expect(first.count).toEqual({ type: "exact", value: 1 });
+  expect(first.facets.propertyType.reduce((sum, facet) => sum + facet.count, 0)).toBe(1);
+  expect((await searchListings(t.db, { ...input, placeIds: [far.settlementId] })).items).toEqual(
+    [],
+  );
+  await t.db
+    .update(geographyPlaces)
+    .set({ latitude: "44", longitude: "26" })
+    .where(eq(geographyPlaces.id, near.settlementId));
+  expect((await searchListings(t.db, input)).items.map((item) => item.reference)).toEqual([
+    fixtures[0]?.reference,
+  ]);
+  expect(
+    (
+      await searchListings(t.db, {
+        ...input,
+        mapBounds: { west: 24, south: 42, east: 26, north: 44 },
+      })
+    ).items.map((item) => item.reference),
+  ).toEqual([fixtures[1]?.reference]);
 });
 
 function factFixture(fact: Fact<unknown>): FactFixture {
@@ -280,6 +334,31 @@ describe("pagination, sorting and availability", () => {
     } while (cursor && pages < 5);
     expect(pages).toBe(3);
     expect(seen).toEqual([refs[1], refs[4], refs[3], refs[0], refs[2]]);
+  });
+
+  it("F02/UI14 reconstructs previous pages and current position from the same eligible sorted set", async () => {
+    const first = await searchListings(t.db, query(), { now: new Date() });
+    expect(first.position).toEqual({ before: 0, shown: first.items.length });
+    expect(first.hasPrevious).toBe(false);
+    expect(first.nextCursor).not.toBeNull();
+    const second = await searchListings(t.db, query({ cursor: first.nextCursor }), {
+      now: new Date(),
+    });
+    expect(second.position.before).toBe(2);
+    expect(second.hasPrevious).toBe(true);
+    expect(second.previousCursor).toBeNull();
+    const third = await searchListings(t.db, query({ cursor: second.nextCursor }), {
+      now: new Date(),
+    });
+    expect(third.position.before).toBe(4);
+    expect(third.previousCursor).not.toBeNull();
+    const previous = await searchListings(t.db, query({ cursor: third.previousCursor }), {
+      now: new Date(),
+    });
+    expect(previous.items.map((item) => item.reference)).toEqual(
+      second.items.map((item) => item.reference),
+    );
+    expect(previous.position.before).toBe(2);
   });
 
   it("refuses a cursor from another query and a page size above 60", async () => {

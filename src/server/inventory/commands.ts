@@ -46,7 +46,10 @@ import {
   type ListingDraft,
   type PriceDecision,
   priceDecisionSchema,
+  type SavedListingDraft,
+  savedDraftSchema,
 } from "./contracts";
+import { rentalTermsOf } from "./rental-terms";
 import { uneditablePriceEvidence } from "./working-draft";
 
 export { inventoryList, inventoryListPage } from "./queries";
@@ -213,10 +216,10 @@ class DraftPriceValidation extends Error {
 async function checkDraftPrice(
   db: Executor,
   listing: typeof listings.$inferSelect,
-  draft: ListingDraft,
+  draft: SavedListingDraft,
   decision: PriceDecision | undefined,
 ) {
-  const storedDraftValid = draftSchema.safeParse(listing.draft).success;
+  const storedDraftValid = savedDraftSchema.safeParse(listing.draft).success;
   if (storedDraftValid && !decision) return;
   const [revision] = await db
     .select()
@@ -277,7 +280,7 @@ async function checkDraftPrice(
 
 export async function saveListingDraft(db: Executor, command: SaveListingDraftCommand) {
   const { priceDecision } = parse(saveDraftEnvelope, command);
-  const draft = parse(draftSchema, command.draft);
+  const draft = parse(savedDraftSchema, command.draft);
   await human(db, command.actor);
   await edited(db, command.actor, command.reference);
   try {
@@ -452,6 +455,7 @@ export async function freezeListingDraft(
       const terms = {
         purpose: listing.purpose,
         facts: {
+          ...(listing.purpose === "long_term_rent" ? rentalTermsOf(draft) : {}),
           price: {
             state: draft.priceState,
             value: factValue(draft.priceState, draft.price, "price", (n) => ({
@@ -462,6 +466,7 @@ export async function freezeListingDraft(
             })),
             sourceClass: draft.sourceClass,
             sourceReference: draft.sourceReference,
+            sourceLanguage: draft.sourceLanguage,
           },
         },
       };

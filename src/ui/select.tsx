@@ -65,7 +65,7 @@ export function Select({
       </Button>
       <FieldError>{errorMessage}</FieldError>
       <ListPopover>
-        <ListBox items={options} className="py-1 outline-none">
+        <ListBox items={options} className="p-1.5 outline-none">
           {(option) => (
             <ListBoxItem id={option.id} textValue={option.label} className={optionClass}>
               {({ isSelected }) => (

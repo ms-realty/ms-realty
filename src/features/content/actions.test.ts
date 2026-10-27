@@ -4,6 +4,7 @@ import type { HandlerContext } from "@/server/http/next";
 import { formFields } from "@/ui/form/contract";
 import { initialFormState } from "@/ui/form/server";
 import { type ContentValues, saveContentAction } from "./actions";
+import { contentBodyCopy } from "./body-copy";
 import { contentCopy } from "./copy";
 
 const mocks = vi.hoisted(() => ({ save: vi.fn(), host: vi.fn() }));
@@ -41,6 +42,8 @@ function form(kind: string) {
       slug: "synthetic-area",
       title: "Синтетичен материал",
       text: "Synthetic action test only.",
+      bodyFormat: "paragraphs",
+      composition: "[]",
       jurisdiction: "Synthetic scope",
       reviewScope: "Synthetic review",
       placeId,
@@ -85,4 +88,43 @@ describe.each(["bg", "ru", "en"])("CMS location validation in %s", (locale) => {
     });
     expect(result.values.placeId).toBe(placeId);
   });
+});
+
+it("M071 / O21 saves named block controls as typed input rather than the stale hidden snapshot", async () => {
+  const { initial, data } = form("service");
+  data.set("bodyFormat", "blocks");
+  data.set("bodyBlocks.0.type", "heading");
+  data.set("bodyBlocks.0.text", "Synthetic process");
+  data.set("bodyBlocks.1.type", "step");
+  data.set("bodyBlocks.1.title", "Synthetic first step");
+  data.set("bodyBlocks.1.text", "Exact instruction");
+  mocks.save.mockResolvedValueOnce({ outcome: { id, recordedAt: new Date().toISOString() } });
+  const result = await saveContentAction("en", id, initial, data);
+  expect(mocks.save).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.anything(),
+    expect.objectContaining({
+      text: undefined,
+      blocks: [
+        { type: "heading", text: "Synthetic process" },
+        { type: "step", title: "Synthetic first step", text: "Exact instruction" },
+      ],
+    }),
+  );
+  expect(result.outcome.kind).toBe("confirmed");
+});
+
+it("M071 / O21 rejects an unsafe authored link, retains the draft and names the failed composition field", async () => {
+  const { initial, data } = form("service");
+  data.set("bodyFormat", "blocks");
+  data.set("bodyBlocks.0.type", "link");
+  data.set("bodyBlocks.0.text", "Synthetic link");
+  data.set("bodyBlocks.0.href", "javascript:alert(1)");
+  const result = await saveContentAction("en", id, initial, data);
+  expect(mocks.save).not.toHaveBeenCalled();
+  expect(result.outcome).toMatchObject({
+    kind: "validation",
+    fieldErrors: { composition: [contentBodyCopy("en").invalid] },
+  });
+  expect(result.values.composition).toContain("javascript:alert(1)");
 });

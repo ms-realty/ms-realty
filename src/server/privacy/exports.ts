@@ -35,10 +35,12 @@ import { AppError } from "../errors";
 import { fileServices } from "../files/config";
 import type { FileDownload } from "../files/download";
 import type { FileStorage } from "../files/storage";
+import { collectInquiryAttachmentPrivacy } from "../inquiries/attachment-privacy";
 import { runOperation } from "../operations";
 import { parseInput } from "../work/shared";
 import { privacyClient, privacyOperator } from "./access";
 import { collectPartyAgencySources } from "./agency-sources";
+import { ownClientWorkflowData } from "./client-workflow-sources";
 import {
   assertCoverageDecision,
   collectExportInventory,
@@ -62,6 +64,7 @@ export const exportSections = [
   "messages",
   "feedback",
   "serviceContexts",
+  "appointmentResponses",
 ] as const;
 const redaction = z.object({ section: z.enum(exportSections), id: z.uuid() }).strict();
 const envelope = {
@@ -270,7 +273,9 @@ async function collectPersonDossier(db: Executor, partyId: string, actor: Actor)
   const service = await collectServiceSources(db, actor, partyId);
   const agency = await collectPartyAgencySources(db, actor, partyId);
   const photography = await collectPartyPhotographySources(db, actor, partyId);
+  const attachments = await collectInquiryAttachmentPrivacy(db, actor, partyId);
   return {
+    attachmentRevision: attachments.revision,
     serviceRevision: service.revision,
     agencyRevision: agency.revision,
     photographyRevision: photography.revision,
@@ -288,6 +293,8 @@ async function collectPersonDossier(db: Executor, partyId: string, actor: Actor)
       messages: ownMessages,
       feedback: ownFeedback,
       serviceContexts: service.rows,
+      ...(await ownClientWorkflowData(db, accountIds)),
+      inquiryAttachments: attachments.rows,
     },
   };
 }
@@ -302,6 +309,7 @@ function personDossierSourceDigest(
       serviceRevision: source.serviceRevision,
       agencyRevision: source.agencyRevision,
       photographyRevision: source.photographyRevision,
+      attachmentRevision: source.attachmentRevision,
     },
     requestId,
   );
@@ -773,7 +781,7 @@ export async function redactPrivacyExport(db: Executor, session: Session, input:
       // Save removals before final review. The issue command must deliver the digest that
       // was actually displayed, including removals retained after an invalid submission.
       for (const omit of value.omitTexts) {
-        const items = dossier.data[omit.section].filter((item) => item.id === omit.id);
+        const items = (dossier.data[omit.section] ?? []).filter((item) => item.id === omit.id);
         if (!items.length) throw new AppError("validation_failed");
         for (const item of items) {
           item.text = "[redacted during privacy disclosure review]";

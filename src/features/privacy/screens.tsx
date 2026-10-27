@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
-import { type PublicLocale, publicLocales } from "@/domain/ids";
+import { currencyMinorDigits, type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
 import { isPublicLocale, localeEndonyms } from "@/i18n/config";
 import { formatDate } from "@/i18n/format";
@@ -27,6 +27,7 @@ import type { NormalizedSearch } from "@/server/search/search";
 import { controlClass, labelClass } from "@/ui/field-class";
 import { NativeForm } from "@/ui/form/native-form";
 import { Notice } from "@/ui/notice";
+import { clientWorkflowCopy } from "../cases/client-workflow-copy";
 import { caseCopy } from "../cases/copy";
 import { privacyCopy, privacyLabel } from "./copy";
 import { privacyErasureCopy } from "./erasure-copy";
@@ -83,6 +84,8 @@ export function SearchEditor({
 }) {
   const c = privacyCopy(locale);
   const current = subscription.criteria as NormalizedSearch | null;
+  if (current?.criteria.price && current.criteria.price.currency !== "EUR")
+    return <p dir="auto">{subscription.criteriaSummary}</p>;
   return (
     <details>
       <summary className="cursor-pointer underline">{c.editSearch}</summary>
@@ -113,10 +116,13 @@ export function SearchEditor({
           value={
             current?.criteria?.price?.max === undefined
               ? ""
-              : String(current.criteria.price.max / 100)
+              : String(
+                  current.criteria.price.max /
+                    10 ** currencyMinorDigits[current.criteria.price.currency],
+                )
           }
         />
-        <TextField name="timezone" label={c.timezone} value={subscription.timezone} required />
+        <TimezoneChoice locale={locale} value={subscription.timezone} />
         <label className="grid gap-2">
           <span className={labelClass}>{c.frequency}</span>
           <select
@@ -294,12 +300,7 @@ export async function PreferencesScreen({
             ))}
           </select>
         </label>
-        <TextField
-          name="timezone"
-          label={c.timezone}
-          value={preferences.timezone ?? "Europe/Sofia"}
-          required
-        />
+        <TimezoneChoice locale={locale} value={preferences.timezone ?? "Europe/Sofia"} />
         <label className="grid gap-2">
           <span className={labelClass}>{c.channel}</span>
           <select
@@ -314,7 +315,54 @@ export async function PreferencesScreen({
         <TextField name="contactWindow" label={c.window} value={preferences.contactWindow} />
         <Submit>{c.save}</Submit>
       </NativeForm>
-      <h2 className="text-section font-semibold">{c.purposeChoices}</h2>
+      <section className="space-y-3">
+        <h2 className="text-section font-semibold">{c.purposeChoices}</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-start">
+            <thead>
+              <tr>
+                <th scope="col" className="p-3 text-start">
+                  {c.purposeChoices}
+                </th>
+                <th scope="col" className="p-3 text-start">
+                  {c.channel}
+                </th>
+                <th scope="col" className="p-3 text-start">
+                  {c.history}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {preferencePurposes.map((purpose) => (
+                <tr key={purpose}>
+                  <th scope="row" className="p-3 text-start">
+                    {privacyLabel(locale, purpose)}
+                  </th>
+                  <td className="p-3">
+                    {purpose === "service_updates"
+                      ? preferences.channel === "phone"
+                        ? c.phone
+                        : c.email
+                      : c.email}
+                  </td>
+                  <td className="p-3">
+                    {data.subscriptions
+                      .filter((row) => row.purpose === purpose)
+                      .map((row) => privacyLabel(locale, row.state))
+                      .join(" · ") || "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <a
+          className="inline-flex min-h-control items-center py-2 underline"
+          href={`/${locale}/privacy`}
+        >
+          {clientWorkflowCopy(locale).privacy}
+        </a>
+      </section>
       {preferencePurposes.map((purpose) => {
         const terms = data.terms[purpose];
         return (
@@ -649,5 +697,41 @@ export async function StaffPrivacyScreen({
         </nav>
       ) : null}
     </Frame>
+  );
+}
+
+function TimezoneChoice({ locale, value }: { locale: string; value: string }) {
+  const zones = [
+    ...new Set([
+      "Europe/Sofia",
+      "Europe/London",
+      "Europe/Berlin",
+      "Europe/Amsterdam",
+      "Europe/Athens",
+      "Europe/Moscow",
+      "Asia/Jerusalem",
+      "UTC",
+      value,
+    ]),
+  ];
+  const language = isPublicLocale(locale) ? locale : "bg";
+  return (
+    <label className="grid gap-2">
+      <span className={labelClass}>{privacyCopy(locale).timezone}</span>
+      <select name="timezone" className={controlClass} defaultValue={value} required>
+        {zones.map((zone) => {
+          const place = privacyLabel(locale, zone);
+          return (
+            <option key={zone} value={zone}>
+              {new Intl.DateTimeFormat(language, { timeZone: zone, timeZoneName: "long" })
+                .formatToParts(new Date())
+                .find((part) => part.type === "timeZoneName")?.value ??
+                privacyCopy(locale).timezone}
+              {place !== zone ? ` · ${place}` : null}
+            </option>
+          );
+        })}
+      </select>
+    </label>
   );
 }
