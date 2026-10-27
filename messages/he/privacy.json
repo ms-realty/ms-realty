@@ -92,6 +92,13 @@
     "active": "פעיל",
     "paused": "מושהה",
     "withdrawn": "המינוי בוטל",
-    "pending_verification": "ממתין לאימות"
+    "pending_verification": "ממתין לאימות",
+    "Europe/Sofia": "סופיה",
+    "Europe/London": "לונדון",
+    "Europe/Berlin": "ברלין",
+    "Europe/Amsterdam": "אמסטרדם",
+    "Europe/Athens": "אתונה",
+    "Europe/Moscow": "מוסקבה",
+    "Asia/Jerusalem": "ירושלים"
   }
 }

@@ -719,14 +719,18 @@ function TimezoneChoice({ locale, value }: { locale: string; value: string }) {
     <label className="grid gap-2">
       <span className={labelClass}>{privacyCopy(locale).timezone}</span>
       <select name="timezone" className={controlClass} defaultValue={value} required>
-        {zones.map((zone) => (
-          <option key={zone} value={zone}>
-            {new Intl.DateTimeFormat(language, { timeZone: zone, timeZoneName: "long" })
-              .formatToParts(new Date())
-              .find((part) => part.type === "timeZoneName")?.value ?? zone}{" "}
-            · {zone.split("/").at(-1)?.replaceAll("_", " ")}
-          </option>
-        ))}
+        {zones.map((zone) => {
+          const place = privacyLabel(locale, zone);
+          return (
+            <option key={zone} value={zone}>
+              {new Intl.DateTimeFormat(language, { timeZone: zone, timeZoneName: "long" })
+                .formatToParts(new Date())
+                .find((part) => part.type === "timeZoneName")?.value ??
+                privacyCopy(locale).timezone}
+              {place !== zone ? ` · ${place}` : null}
+            </option>
+          );
+        })}
       </select>
     </label>
   );

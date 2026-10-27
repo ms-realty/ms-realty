@@ -92,6 +92,13 @@
     "active": "Actief",
     "paused": "Onderbroken",
     "withdrawn": "Afgemeld",
-    "pending_verification": "Wacht op verificatie"
+    "pending_verification": "Wacht op verificatie",
+    "Europe/Sofia": "Sofia",
+    "Europe/London": "Londen",
+    "Europe/Berlin": "Berlijn",
+    "Europe/Amsterdam": "Amsterdam",
+    "Europe/Athens": "Athene",
+    "Europe/Moscow": "Moskou",
+    "Asia/Jerusalem": "Jeruzalem"
   }
 }
