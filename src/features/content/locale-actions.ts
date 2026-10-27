@@ -17,10 +17,13 @@ import { action } from "@/server/http/next";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import type { DecisionValues } from "./actions";
+import { contentBodyCopy } from "./body-copy";
+import { type ContentBodyValues, contentBodyValues, readCompositionFields } from "./body-fields";
+import { contentDraftInput } from "./body-input";
 import { contentCopy } from "./copy";
 import { contentLocaleCopy } from "./locale-copy";
 
-export type LocaleContentValues = { title: string; text: string };
+export type LocaleContentValues = ContentBodyValues & { title: string };
 export type ContentLocaleBinding = {
   sourceExpectedVersion: number;
   sourceVersionId: string;
@@ -76,8 +79,9 @@ export async function saveContentLocaleAction(
     "save",
     scope,
     data,
-    ["title", "text"],
+    ["title", "text", "bodyFormat", "composition"],
   );
+  base.values.composition = readCompositionFields(data, base.values.composition);
   const copy = contentCopy(shell),
     localized = contentLocaleCopy(shell);
   const result = await action(
@@ -92,6 +96,7 @@ export async function saveContentLocaleAction(
           locale: target,
           ...binding,
           ...base.values,
+          ...contentDraftInput(base.values),
           expectedVersion: envelope.expectedRevision,
           operationId: envelope.operationId,
         })
@@ -141,7 +146,7 @@ export async function saveContentLocaleAction(
           message: localized.conflict,
           latest: {
             revision: current.edition?.version ?? 1,
-            values: { title: body?.title ?? "", text: body?.paragraphs.join("\n\n") ?? "" },
+            values: { title: body?.title ?? "", ...contentBodyValues(body) },
             details: [
               {
                 label: localized.sourceRevision,
@@ -172,8 +177,16 @@ export async function saveContentLocaleAction(
         message: copy.validation,
         fieldErrors: Object.fromEntries(
           Object.keys(result.error.fieldErrors ?? {})
+            .map((field) => (field === "blocks" ? "composition" : field))
             .filter((field) => field in base.values)
-            .map((field) => [field, [copy.invalid]]),
+            .map((field) => [
+              field,
+              [
+                field === "composition" || field === "bodyFormat"
+                  ? contentBodyCopy(shell).invalid
+                  : copy.invalid,
+              ],
+            ]),
         ),
       },
     };

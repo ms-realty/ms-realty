@@ -9,6 +9,9 @@ import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { DecisionValues } from "./actions";
+import { contentBodyCopy } from "./body-copy";
+import { ContentBodyEditor } from "./body-editor";
+import { formatContentBodyValue } from "./body-summary";
 import { contentCopy } from "./copy";
 import type { LocaleContentValues } from "./locale-actions";
 import { contentLocaleCopy } from "./locale-copy";
@@ -40,7 +43,13 @@ export function ContentLocaleForm({
         label: copy.check,
       }}
       copy={workCopy(shell).form}
-      labels={{ title: copy.pageTitle, text: copy.text }}
+      labels={{
+        title: copy.pageTitle,
+        text: copy.text,
+        bodyFormat: contentBodyCopy(shell).format,
+        composition: contentBodyCopy(shell).blocks,
+      }}
+      formatValue={(name, value) => formatContentBodyValue(name, value, shell)}
       submitLabel={copy.save}
     >
       {(form) => (
@@ -55,16 +64,7 @@ export function ContentLocaleForm({
               required
               maxLength={200}
             />
-            <FormField
-              {...form.field("text")}
-              lang={target}
-              dir={localeDirection(target)}
-              label={copy.text}
-              hint={copy.paragraphs}
-              required
-              multiline
-              maxLength={50000}
-            />
+            <ContentBodyEditor form={form} locale={shell} target={target} />
           </div>
         </>
       )}

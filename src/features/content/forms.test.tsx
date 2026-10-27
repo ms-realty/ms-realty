@@ -39,6 +39,8 @@ function initial(placeId = ""): FormState<ContentValues> {
       slug: "test-guide",
       title: "Тестов материал",
       text: "Synthetic test only.",
+      bodyFormat: "paragraphs",
+      composition: "[]",
       jurisdiction: "Test scope",
       reviewScope: "Synthetic review",
       placeId,
@@ -216,7 +218,7 @@ describe("O21 / P15B explicit edition place chooser", () => {
         action={idle}
       />,
     );
-    expect(container.querySelectorAll("option")).toHaveLength(41);
+    expect(container.querySelectorAll('select[name="placeId"] option')).toHaveLength(41);
     expect(container.querySelector('input[type="search"]')).toBeNull();
   });
 

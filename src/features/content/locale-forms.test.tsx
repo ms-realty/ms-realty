@@ -14,7 +14,12 @@ const initial: FormState<LocaleContentValues> = {
   operationId: "synthetic-operation-key",
   expectedRevision: 2,
   responseId: "first",
-  values: { title: "כותרת בדיקה", text: "טקסט MS-00001 https://example.test/" },
+  values: {
+    title: "כותרת בדיקה",
+    text: "טקסט MS-00001 https://example.test/",
+    bodyFormat: "paragraphs",
+    composition: "[]",
+  },
   outcome: { kind: "idle" },
 };
 it("O21 / AT03: Hebrew fields preserve native names, exact mixed-direction text and their own language", () => {
