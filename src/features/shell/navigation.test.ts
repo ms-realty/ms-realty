@@ -77,7 +77,7 @@ describe("navigation registry (§06)", () => {
       "areas",
       "aboutContact",
     ]);
-    expect(publicUtilityNav.map((item) => item.label)).toEqual(["saved", "contact"]);
+    expect(publicUtilityNav.map((item) => item.label)).toEqual(["saved", "compare"]);
     expect(journeyNav.map((item) => item.label)).toEqual([
       "overview",
       "properties",

@@ -23,7 +23,7 @@ export interface JobPayloads {
   "outbox.dispatch": { outboxId: string };
   "outbox.sweep": Record<string, never>;
   "rate_limit.prune": Record<string, never>;
-  "files.process": { kind: "media" | "document"; id: string };
+  "files.process": { kind: "media" | "document" | "inquiry_attachment"; id: string };
   "ai.draft": { runId: string };
   "ai.workspace.step": { runId: string; generation: number; step: number; phase: "plan" | "tool" };
   "inbox.reconcile": { afterId?: string };
@@ -142,6 +142,17 @@ export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies)
     await pruneRateLimits(deps.db);
   });
   await queue.work("files.process", async ({ kind, id }) => {
+    if (kind === "inquiry_attachment") {
+      const { processInquiryPhoto } = await import("../inquiries/attachments");
+      const { fileServices } = await import("../files/config");
+      await processInquiryPhoto(
+        deps.db,
+        fileServices(),
+        { kind: "system", id: "file-scanner" },
+        id,
+      );
+      return;
+    }
     const { processFileWorker } = await import("../files/process");
     const { fileServices } = await import("../files/config");
     await processFileWorker(

@@ -8,7 +8,10 @@ import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { listingHref, locality, priceText } from "@/features/discovery/presentation";
 import { PropertyContactBar } from "@/features/discovery/property-contact";
+import type { QueryParams } from "@/features/discovery/query";
 import { SearchMap } from "@/features/discovery/search-map";
+import { safeSearchReturn } from "@/features/discovery/search-return";
+import { brandPhone } from "@/features/shell/agency";
 import { listingStructuredData } from "@/i18n/structured-data";
 import { publicMapRelease } from "@/server/publication/map-config";
 import {
@@ -29,11 +32,14 @@ export async function generateMetadata({
 }
 export default async function PropertyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; reference: string; slug: string }>;
+  searchParams?: Promise<QueryParams>;
 }) {
   const { locale, reference, slug } = normalizePublicListingRoute(await params);
   const copy = discoveryCopy(locale);
+  const returnTo = safeSearchReturn(locale, (await searchParams)?.returnTo);
   let result: Awaited<ReturnType<typeof readPublicSeoListing>>;
   let source: Awaited<ReturnType<typeof readPublicSeoListing>> | null = null;
   try {
@@ -91,7 +97,10 @@ export default async function PropertyPage({
   return (
     <DiscoveryPage>
       <StructuredData value={structured} />
-      <a className="self-start underline" href={`/${locale}/properties?purpose=${listing.purpose}`}>
+      <a
+        className="self-start underline"
+        href={returnTo ?? `/${locale}/properties?purpose=${listing.purpose}`}
+      >
         {copy.back}
       </a>
       <div className="grid gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
@@ -126,7 +135,12 @@ export default async function PropertyPage({
             </a>
           ) : null}
           {listing.availability.primaryAction !== "view_similar" ? (
-            <a className={buttonClass("secondary")} href={inquiry("question")}>
+            <a
+              className={buttonClass(
+                listing.availability.primaryAction === "request_viewing" ? "secondary" : "primary",
+              )}
+              href={inquiry("question")}
+            >
               {copy.ask}
             </a>
           ) : (
@@ -137,6 +151,12 @@ export default async function PropertyPage({
               {copy.back}
             </a>
           )}
+          <a
+            className={buttonClass("tertiary", "justify-start px-0")}
+            href={`tel:${brandPhone.e164}`}
+          >
+            {copy.callAgency} <bdi>{brandPhone.display}</bdi>
+          </a>
           <LocalActions reference={listing.reference} copy={copy} />
           <p className="text-caption text-text-muted">{copy.localOnly}</p>
         </aside>
@@ -172,7 +192,9 @@ export default async function PropertyPage({
       <PropertyContactBar reference={listing.reference} label={copy.propertyActions}>
         {listing.availability.primaryAction !== "view_similar" ? (
           <a
-            className={buttonClass("secondary")}
+            className={buttonClass(
+              listing.availability.primaryAction === "request_viewing" ? "secondary" : "primary",
+            )}
             href={inquiry("question")}
             aria-label={`${copy.ask} · ${listing.reference}`}
           >

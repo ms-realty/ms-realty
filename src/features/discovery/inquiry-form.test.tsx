@@ -179,3 +179,34 @@ it("identifies only the individual inquiry subject on immediate confirmation, no
   expect(receipt.listings?.items.map((item) => item.reference)).toEqual(["MS-00101"]);
   expect(JSON.stringify(receipt)).not.toMatch(/MS-00303|MS-00202/);
 });
+
+it("P11/M128 preserves an over-limit paste and gives visible recovery instead of truncating the draft", async () => {
+  const user = userEvent.setup();
+  render(
+    <InquiryForm
+      locale="en"
+      copy={discoveryCopy("en")}
+      initialState={{
+        operationId: "server-key",
+        expectedRevision: null,
+        responseId: "initial",
+        values: emptyInquiry,
+        outcome: { kind: "idle" },
+      }}
+      action={async (previous) => previous}
+    />,
+  );
+  const message = screen.getByLabelText("Your inquiry", { exact: true });
+  expect(message).not.toHaveAttribute("maxlength");
+  await user.click(message);
+  const text = "x".repeat(2105);
+  await user.paste(text);
+  expect(message).toHaveValue(text);
+  expect(screen.getByText(/2105 of 2000 characters/)).toBeVisible();
+  expect(screen.getByText(/105 characters over the limit/)).toBeVisible();
+  expect(message).toHaveAttribute("aria-invalid", "true");
+  await user.clear(message);
+  await user.type(message, "Retained question");
+  expect(message).toHaveValue("Retained question");
+  expect(screen.queryByText(/characters over the limit/)).not.toBeInTheDocument();
+});

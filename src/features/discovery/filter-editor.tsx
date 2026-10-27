@@ -166,7 +166,7 @@ export function FilterEditor({
           </p>
           <div className="grid gap-4">
             <label className="flex min-w-0 flex-col gap-2">
-              <span className={labelClass}>{copy.purpose}</span>
+              <span className={labelClass}>{copy.searchPurpose}</span>
               <select name="purpose" defaultValue={primary.purpose} className={controlClass}>
                 <option value="sale">{copy.buy}</option>
                 <option value="long_term_rent">{copy.rent}</option>
@@ -177,7 +177,15 @@ export function FilterEditor({
             </label>
             <label className="flex min-w-0 flex-col gap-2">
               <span className={labelClass}>{copy.query}</span>
-              <input name="q" defaultValue={primary.q} maxLength={100} className={controlClass} />
+              <input
+                name="q"
+                type="search"
+                enterKeyHint="search"
+                placeholder={copy.searchPlaceholder}
+                defaultValue={primary.q}
+                maxLength={100}
+                className={controlClass}
+              />
             </label>
           </div>
           {children}

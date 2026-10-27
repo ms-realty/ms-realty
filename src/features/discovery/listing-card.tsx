@@ -49,13 +49,7 @@ export function Availability({
     <div className="flex flex-col items-start gap-2">
       <StatusBadge
         family="availability"
-        tone={
-          state === "available"
-            ? "positive"
-            : state === "sold" || state === "let" || state === "withdrawn"
-              ? "neutral"
-              : "attention"
-        }
+        tone={state === "available" ? "positive" : "neutral"}
         label={state === "let" ? copy.letStatus : copy[state]}
       />
       {listing.availability.confirmedAt ? (
@@ -77,13 +71,18 @@ export function ListingCard({
   locale,
   copy,
   actions,
+  headingLevel = 2,
+  returnTo,
 }: {
   listing: Listing;
   locale: PublicLocale;
   copy: DiscoveryCopy;
   /** Context-specific links under the local save/compare toggles (P09: contact). */
   actions?: ReactNode;
+  headingLevel?: 2 | 3 | 4;
+  returnTo?: string;
 }) {
+  const Heading = `h${headingLevel}` as const;
   return (
     <article
       className="flex min-w-0 flex-col overflow-hidden rounded-panel border border-divider bg-surface shadow-raised"
@@ -101,14 +100,15 @@ export function ListingCard({
           <p className="text-caption text-text-muted">
             <bdi>{listing.reference}</bdi> · {copy[listing.propertyType]}
           </p>
-          <h2 className="mt-1 break-words text-subheading font-semibold">
+          <Heading className="mt-1 break-words text-subheading font-semibold">
             <a
               className="text-text no-underline hover:underline hover:underline-offset-4"
-              href={listingHref(listing, locale)}
+              id={`property-result-${listing.reference}`}
+              href={listingHref(listing, locale, returnTo)}
             >
               {listing.title || listing.reference}
             </a>
-          </h2>
+          </Heading>
           <p className="mt-1 text-compact text-text-muted">{locality(listing)}</p>
         </div>
         <p className="text-price font-semibold">
@@ -128,15 +128,26 @@ export function ListingGrid({
   items,
   locale,
   copy,
+  headingLevel = 2,
+  returnTo,
 }: {
   items: readonly Listing[];
   locale: PublicLocale;
   copy: DiscoveryCopy;
+  headingLevel?: 2 | 3 | 4;
+  returnTo?: string;
 }) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((listing) => (
-        <ListingCard key={listing.reference} listing={listing} locale={locale} copy={copy} />
+        <ListingCard
+          key={listing.reference}
+          listing={listing}
+          locale={locale}
+          copy={copy}
+          headingLevel={headingLevel}
+          returnTo={returnTo}
+        />
       ))}
     </div>
   );

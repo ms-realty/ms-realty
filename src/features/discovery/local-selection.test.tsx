@@ -32,7 +32,7 @@ it("lets the URL selection populate empty storage without showing an empty or co
       <LocalActions reference="MS-00003" copy={copy} />
     </>,
   );
-  expect(screen.getByRole("button", { name: copy.compare })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: `${copy.compare} · MS-00003` })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
@@ -102,7 +102,7 @@ it("shows storage failure while retaining the canonical selection for this docum
       <LocalActions reference="MS-00003" copy={copy} />
     </>,
   );
-  expect(screen.getByRole("button", { name: copy.compare })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: `${copy.compare} · MS-00003` })).toHaveAttribute(
     "aria-pressed",
     "true",
   );

@@ -23,7 +23,10 @@ export async function SearchAlertCriteria({
   const { criteria, q } = search.normalized;
   const price = criteria.price;
   const places = criteria.placeIds?.length ? await intentPlaces(getDb()).catch(() => []) : [];
-  const label = (key: string) => (Object.hasOwn(c, key) ? c[key as keyof typeof c] : key);
+  const label = (key: string) => {
+    const value = Object.hasOwn(c, key) ? c[key as keyof typeof c] : undefined;
+    return typeof value === "string" ? value : key;
+  };
   const feature = (key: string) =>
     Object.hasOwn(extra, key) ? extra[key as keyof typeof extra] : key;
   const range = (value: { min?: number; max?: number }, format: (n: number) => string) =>

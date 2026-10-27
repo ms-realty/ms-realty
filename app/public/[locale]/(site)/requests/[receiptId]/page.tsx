@@ -6,8 +6,10 @@ import { comparisonReturnHref } from "@/domain/inquiry-selection";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { InquiryContent } from "@/features/discovery/inquiry-content";
 import { OwnerInquirySummary } from "@/features/discovery/inquiry-owner";
+import { InquiryPhotos } from "@/features/discovery/inquiry-photos";
 import { inquiryReceiptView, inquiryStatus } from "@/features/discovery/inquiry-state";
 import { DiscoveryPage, discoveryMetadata } from "@/features/discovery/page";
+import type { QueryParams } from "@/features/discovery/query";
 import { brandPhone } from "@/features/shell/agency";
 import { isRoutableLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
@@ -26,12 +28,15 @@ import { ReceiptListings } from "@/ui/receipt-listings";
 export const metadata = discoveryMetadata;
 export default async function ReceiptPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; receiptId: string }>;
+  searchParams?: Promise<QueryParams>;
 }) {
   const { locale, receiptId } = await params;
   if (!isRoutableLocale(locale)) notFound();
   const copy = discoveryCopy(locale);
+  const query = await searchParams;
   // The brand line is the one verified channel that cannot start a duplicate inquiry.
   const call = (
     <a className={buttonClass("primary", "self-start")} href={`tel:${brandPhone.e164}`}>
@@ -118,6 +123,15 @@ export default async function ReceiptPage({
           input={receipt.ownerInput}
           locale={locale}
           includePrivateDetails={false}
+        />
+      ) : null}
+      {receipt.ownerInput ? (
+        <InquiryPhotos
+          locale={locale}
+          receiptId={receiptId}
+          receiptSession={receiptSession}
+          requestedOperation={query?.photoOperation}
+          error={query?.photoError}
         />
       ) : null}
       <a
