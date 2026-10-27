@@ -24,7 +24,7 @@ import { workflowCopy } from "@/i18n/workflow-copy";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { inventoryDetail } from "@/server/inventory/commands";
-import { draftSchema } from "@/server/inventory/contracts";
+import { savedDraftSchema } from "@/server/inventory/contracts";
 import { uneditablePriceEvidence, workingDraftFrom } from "@/server/inventory/working-draft";
 import { publicationReadiness } from "@/server/publication/commands";
 import { buttonClass } from "@/ui/button-class";
@@ -116,7 +116,7 @@ export default async function InventoryDetailPage({
   const workspace = workflowCopy(locale, "listingWorkspace");
   const path = `/${locale}/inventory/${reference}`;
   const ref = <bdi>{listing.reference}</bdi>;
-  const parsed = draftSchema.safeParse(listing.draft);
+  const parsed = savedDraftSchema.safeParse(listing.draft);
   const values: InventoryValues = {
     // No saved draft yet: start from the latest immutable revision (Codex 8021808b); nothing
     // is written until the broker saves through the version-checked command.

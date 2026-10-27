@@ -15,8 +15,7 @@ export default async function WorkspaceLayout({
 }: LayoutProps<"/staff/[locale]">) {
   const { locale } = await params;
   if (!isStaffLocale(locale)) notFound();
-  // Signed out, the guard here runs before any page: keep a validated privacy queue position
-  // (C-12) so sign-in returns there; every other state is the usual access route.
+  // F13/C-12: preserve a validated navigation destination through initial sign-in.
   const access = await currentStaffAccess();
   if (access.state === "signed_out")
     redirect(staffSignInPath(locale, (await headers()).get(requestPathHeader)));

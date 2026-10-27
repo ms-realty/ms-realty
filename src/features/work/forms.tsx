@@ -291,7 +291,11 @@ export function TaskForm({
   initialState,
   action,
   states,
-}: Props<TaskValues> & { states: (keyof ReturnType<typeof workCopy>["states"])[] }) {
+  completion = false,
+}: Props<TaskValues> & {
+  states: (keyof ReturnType<typeof workCopy>["states"])[];
+  completion?: boolean;
+}) {
   const copy = workCopy(locale);
   const path = `/${locale}/tasks/${id}`;
   return (
@@ -309,31 +313,39 @@ export function TaskForm({
       reconciliation={status(path, "task", initialState.operationId, copy.statusLink)}
       copy={copy.form}
       labels={{ state: copy.state, note: copy.note, followUpAt: copy.followUpAt }}
-      submitLabel={copy.taskChange}
+      submitLabel={completion ? copy.completeTask : copy.taskChange}
     >
       {(form) => (
         <>
-          <SelectField
-            form={form}
-            name="state"
-            label={copy.state}
-            options={states.map((value) => ({ value, label: copy.states[value] }))}
-          />
+          {completion ? (
+            <input type="hidden" name="state" value="done" />
+          ) : (
+            <SelectField
+              form={form}
+              name="state"
+              label={copy.state}
+              options={states.map((value) => ({ value, label: copy.states[value] }))}
+            />
+          )}
           <FormField
             {...form.field("note")}
-            label={copy.note}
+            label={completion ? copy.completionOutcome : copy.note}
             multiline
             required={form.values.state !== "in_progress"}
             maxLength={1500}
           />
-          <DateTimeField
-            {...form.field("followUpAt")}
-            label={copy.followUpAt}
-            hint={copy.utcHint}
-            locale={isPublicLocale(locale) ? locale : "bg"}
-            onValueChange={(value) => form.setValue("followUpAt", value)}
-            required={form.values.state === "waiting"}
-          />
+          {completion ? (
+            <input type="hidden" name="followUpAt" value="" />
+          ) : (
+            <DateTimeField
+              {...form.field("followUpAt")}
+              label={copy.followUpAt}
+              hint={copy.utcHint}
+              locale={isPublicLocale(locale) ? locale : "bg"}
+              onValueChange={(value) => form.setValue("followUpAt", value)}
+              required={form.values.state === "waiting"}
+            />
+          )}
         </>
       )}
     </ActionForm>

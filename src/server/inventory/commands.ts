@@ -46,6 +46,8 @@ import {
   type ListingDraft,
   type PriceDecision,
   priceDecisionSchema,
+  type SavedListingDraft,
+  savedDraftSchema,
 } from "./contracts";
 import { uneditablePriceEvidence } from "./working-draft";
 
@@ -213,10 +215,10 @@ class DraftPriceValidation extends Error {
 async function checkDraftPrice(
   db: Executor,
   listing: typeof listings.$inferSelect,
-  draft: ListingDraft,
+  draft: SavedListingDraft,
   decision: PriceDecision | undefined,
 ) {
-  const storedDraftValid = draftSchema.safeParse(listing.draft).success;
+  const storedDraftValid = savedDraftSchema.safeParse(listing.draft).success;
   if (storedDraftValid && !decision) return;
   const [revision] = await db
     .select()
@@ -277,7 +279,7 @@ async function checkDraftPrice(
 
 export async function saveListingDraft(db: Executor, command: SaveListingDraftCommand) {
   const { priceDecision } = parse(saveDraftEnvelope, command);
-  const draft = parse(draftSchema, command.draft);
+  const draft = parse(savedDraftSchema, command.draft);
   await human(db, command.actor);
   await edited(db, command.actor, command.reference);
   try {

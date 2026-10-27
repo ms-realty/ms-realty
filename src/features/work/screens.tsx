@@ -8,6 +8,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
+import { caseCopy } from "@/features/cases/copy";
 import { InquiryCaseLink } from "@/features/cases/inquiry-link";
 import { DuplicateIdentityLink } from "@/features/duplicate-review/identity-link";
 import { StaffPage } from "@/features/shell/staff-ui";
@@ -675,6 +676,23 @@ export async function TaskScreen({
       <a className={link} href={`/${locale}/tasks/${task.id}/effort`}>
         {effortCopy(locale).title}
       </a>
+      {targets.includes("done") ? (
+        <section className="max-w-2xl space-y-4 rounded-card border border-border p-5">
+          <h2 className="text-subheading font-semibold">{copy.completeTask}</h2>
+          <TaskForm
+            locale={locale}
+            id={id}
+            completion
+            action={taskAction.bind(null, locale, id)}
+            states={["done"]}
+            initialState={initialFormState(
+              `work.task.${id}`,
+              { state: "done", note: "", followUpAt: "" },
+              task.version,
+            )}
+          />
+        </section>
+      ) : null}
       <dl className="space-y-3">
         <div>
           <dt className="font-semibold">{copy.state}</dt>
@@ -715,6 +733,11 @@ export async function TaskScreen({
       {task.inquiryId ? (
         <a className={link} href={`/${locale}/inquiries/${task.inquiryId}`}>
           {copy.inbox}
+        </a>
+      ) : null}
+      {task.caseId ? (
+        <a className={link} href={`/${locale}/cases/${task.caseId}`}>
+          {caseCopy(locale).cases}
         </a>
       ) : null}
       {guarded ? <p>{copy.guardedTask}</p> : null}

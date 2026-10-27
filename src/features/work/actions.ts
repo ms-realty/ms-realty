@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { isPublicLocale, isStaffLocale } from "@/i18n/config";
@@ -572,7 +573,7 @@ export async function taskAction(
   _previous: FormState<TaskValues>,
   data: FormData,
 ) {
-  return perform<TaskValues>(
+  const result = await perform<TaskValues>(
     locale,
     id,
     "task",
@@ -603,6 +604,8 @@ export async function taskAction(
       };
     },
   );
+  if (result.outcome.kind === "confirmed") revalidatePath(`/${locale}/tasks/${id}`);
+  return result;
 }
 
 export async function taskHandoverAction(

@@ -211,6 +211,15 @@ export function InventoryEditor({
           // Ordinary editing comes first. Required source input stays explicit before Save;
           // rejected fields remain reachable through the shared error summary.
           <div className="flex flex-col gap-6">
+            <p role="status" className="text-dense font-semibold">
+              {form.pending
+                ? copy.form.pending
+                : Object.keys(form.values).some(
+                      (name) => form.values[name as Field] !== initialState.values[name as Field],
+                    )
+                  ? copy.o12.unsavedStatus
+                  : copy.o12.savedState}
+            </p>
             {lead}
             {draftKey ? (
               <DraftKeeper
@@ -249,7 +258,7 @@ export function InventoryEditor({
               // and WebKit keeps it there even when floated.
               <fieldset
                 aria-labelledby="o12-needed"
-                className="grid gap-x-6 gap-y-4 rounded-panel border border-warning p-4 sm:grid-cols-2"
+                className="hidden gap-x-6 gap-y-4 rounded-panel border border-warning p-4 sm:grid-cols-2 group-has-[#o12-facts:checked]/o12:grid has-[[aria-invalid=true]]:grid!"
               >
                 <p id="o12-needed" className="text-dense font-semibold sm:col-span-2">
                   {copy.o12.needsInput}

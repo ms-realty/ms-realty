@@ -30,6 +30,16 @@ export const draftSchema = z.object({
 });
 export type ListingDraft = z.infer<typeof draftSchema>;
 
+// O12: incomplete provenance may be kept privately. Freezing still parses draftSchema and
+// requires the original source/area prerequisites before creating reviewable revisions.
+export const savedDraftSchema = draftSchema.extend({
+  areaBasis: z.union([z.enum(areaBases), z.literal("")]),
+  sourceReference: z.string().trim().max(1000),
+  sourceClass: z.union([z.enum(sourceClasses), z.literal("")]),
+  sourceLanguage: z.union([draftSchema.shape.sourceLanguage, z.literal("")]),
+});
+export type SavedListingDraft = z.infer<typeof savedDraftSchema>;
+
 // A broker decision belongs to one Save command, never to the mutable draft.
 export const priceDecisionSchema = z
   .object({

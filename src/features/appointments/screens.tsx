@@ -130,7 +130,9 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
               name: "action",
               label: c.action,
               type: "select",
+              required: true,
               options: [
+                { value: "", label: c.action },
                 ...(row.state !== "proposed" ? [{ value: "propose", label: c.propose }] : []),
                 { value: "confirm", label: c.confirm },
               ],
@@ -143,7 +145,7 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
             { name: "accessNotes", label: c.logistics, type: "textarea" },
           ]}
           values={{
-            action: row.state === "proposed" ? "confirm" : "propose",
+            action: "",
             bufferMinutes: "30",
           }}
           submit={c.change}
@@ -220,7 +222,10 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           ) : null}
         </WorkflowSection>
       ) : null}
-      {row.proposedStartsAt && ["proposed", "reschedule_requested"].includes(row.state) ? (
+      {row.proposedStartsAt &&
+      ["proposed", "reschedule_requested"].includes(row.state) &&
+      (row.proposedStartsAt.getTime() !== row.confirmedStartsAt?.getTime() ||
+        row.proposedEndsAt?.getTime() !== row.confirmedEndsAt?.getTime()) ? (
         <WorkflowSection title={c.proposedTime}>
           <WorkflowTimeRange
             start={row.proposedStartsAt}
@@ -432,23 +437,27 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
                 name: "state",
                 label: c.action,
                 type: "select",
-                options: targets.map((value) => ({
-                  value,
-                  label:
-                    value === "reschedule_requested"
-                      ? c.reschedule
-                      : value === "cancelled"
-                        ? c.cancel
-                        : value === "completed"
-                          ? c.complete
-                          : value === "no_show"
-                            ? c.noShow
-                            : c.decline,
-                })),
+                required: true,
+                options: [
+                  { value: "", label: c.action },
+                  ...targets.map((value) => ({
+                    value,
+                    label:
+                      value === "reschedule_requested"
+                        ? c.reschedule
+                        : value === "cancelled"
+                          ? c.cancel
+                          : value === "completed"
+                            ? c.complete
+                            : value === "no_show"
+                              ? c.noShow
+                              : c.decline,
+                  })),
+                ],
               },
               { name: "reason", label: c.reason, type: "textarea", required: true },
             ]}
-            values={{ state: targets[0] ?? "" }}
+            values={{ state: "" }}
             submit={c.change}
           />
         </SecondaryAppointmentTask>

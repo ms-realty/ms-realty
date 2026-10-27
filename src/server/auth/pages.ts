@@ -5,6 +5,8 @@ import "server-only";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getDb } from "@/db/client";
+import { staffWorkspacePath } from "@/features/shell/staff-return-path";
+import { requestPathHeader } from "@/i18n/config";
 import { getEnv } from "../config/env";
 import type { PrivateHostContext } from "../config/hosts";
 import { AppError } from "../errors";
@@ -51,6 +53,13 @@ export function staffAccessPath(locale: string, state: StaffAccess["state"]): st
 /** Guard for every staff workspace page: an active member with a passkey, or a redirect. */
 export async function requireStaffPage(locale: string): Promise<Session> {
   const access = await currentStaffAccess();
+  if (access.state === "signed_out") {
+    const path = staffWorkspacePath(
+      locale,
+      localReturnPath((await headers()).get(requestPathHeader), "staff", locale),
+    );
+    redirect(`/${locale}/access${path ? `?returnTo=${encodeURIComponent(path)}` : ""}`);
+  }
   if (access.state !== "ready") redirect(staffAccessPath(locale, access.state));
   return access.session;
 }

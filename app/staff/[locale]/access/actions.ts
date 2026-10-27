@@ -8,7 +8,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from "@simplewebauthn/server";
-import { privacyQueueReturn } from "@/features/privacy/access";
+import { staffReturnPath } from "@/features/privacy/access";
 import { isStaffLocale } from "@/i18n/config";
 import { staffAccess } from "@/server/auth/access";
 import { setCeremony, takeCeremony } from "@/server/auth/ceremony";
@@ -62,7 +62,7 @@ export async function completeStaffPasskey(
     });
     await setSessionCookie("staff", issued.token, issued.session.expiresAt);
     // Revalidated here too: the bound value came from the page, not from the person.
-    return { next: privacyQueueReturn(page, returnTo) ?? `/${page}/today` };
+    return { next: staffReturnPath(page, returnTo) ?? `/${page}/today` };
   });
 }
 
