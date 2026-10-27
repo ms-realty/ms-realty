@@ -1,11 +1,13 @@
 import "../../globals.css";
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { setRequestLocale } from "next-intl/server";
 import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
-import { isRoutableLocale, localeDirection } from "@/i18n/config";
+import { isRoutableLocale, localeDirection, requestPathHeader } from "@/i18n/config";
 import { privateRobots } from "@/i18n/seo";
+import { privatePageMetadata } from "@/server/seo/private-metadata";
 import { CspNonceMeta } from "@/ui/csp-nonce-meta";
 import { preloadFonts } from "@/ui/fonts";
 import { LiveAnnouncer } from "@/ui/live-announcer";
@@ -16,11 +18,21 @@ import { appViewport } from "@/ui/viewport";
 // lang/dir from the URL. Access control, not robots, keeps it private (§20.4).
 export const viewport: Viewport = appViewport;
 
-export const metadata: Metadata = {
-  title: { template: "%s · MS Realty", default: "MS Realty" },
-  icons: { icon: "/brand/logo-ms-realty.png" },
-  robots: privateRobots,
-};
+export async function generateMetadata({
+  params,
+}: Pick<LayoutProps<"/client/[locale]">, "params">): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isRoutableLocale(locale)) notFound();
+  return {
+    ...(await privatePageMetadata({
+      surface: "client",
+      locale,
+      path: (await headers()).get(requestPathHeader),
+    })),
+    icons: { icon: "/brand/logo-ms-realty.png" },
+    robots: privateRobots,
+  };
+}
 
 export default async function ClientLayout({ children, params }: LayoutProps<"/client/[locale]">) {
   // Dynamic rendering is required for the per-request CSP nonce, 404s included.
