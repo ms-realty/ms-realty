@@ -56,6 +56,7 @@ const expectedWork = [
   "/en/calendar",
   "/en/tasks",
   "/en/contacts",
+  "/en/operations/consultations",
   "/en/coverage",
   "/en/operations/inbound",
 ];
