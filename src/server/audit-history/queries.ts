@@ -36,7 +36,6 @@ const querySchema = z
     pageSize: z.int().min(1).max(50).default(20),
   })
   .strict();
-export type HistoryQuery = z.input<typeof querySchema>;
 const cursorSchema = z
   .object({
     v: z.literal(1),

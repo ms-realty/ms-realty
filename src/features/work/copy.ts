@@ -612,4 +612,3 @@ const ru: Copy = {
 export function workCopy(locale: string): Copy {
   return locale === "bg" ? bg : locale === "ru" ? ru : en;
 }
-export type WorkCopy = Copy;

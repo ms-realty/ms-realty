@@ -16,7 +16,6 @@ export const privacyExportDispositions = [
   "held",
   "unsupported",
 ] as const;
-export type PrivacyExportDisposition = (typeof privacyExportDispositions)[number];
 export const privacyExportScope = z.enum(["listed_categories", "additional_material"]);
 export const privacyExportBasis = z.enum([
   "no_sources",

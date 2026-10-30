@@ -19,7 +19,6 @@ export type CaseKind = (typeof caseKinds)[number];
 
 /** What a service-intake Case is about: a consultation request, never a reservation. */
 export const serviceIntakeTopics = ["short_stay_consultation", "management_consultation"] as const;
-export type ServiceIntakeTopic = (typeof serviceIntakeTopics)[number];
 
 // Buyer / tenant.
 

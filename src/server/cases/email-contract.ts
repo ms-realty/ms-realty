@@ -42,7 +42,6 @@ export const emailContent = z
     documents: emailFiles.optional(),
   })
   .strict();
-export type EmailContent = z.infer<typeof emailContent>;
 export type EmailConfig = { from: string; replyDomain: string };
 export function caseEmailConfig(): EmailConfig | null {
   if (process.env.CASE_EMAIL_ENABLED !== "1") return null;

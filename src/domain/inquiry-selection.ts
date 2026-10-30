@@ -36,7 +36,6 @@ export const selectedListingsSchema = z
     (items) => new Set(items.map((item) => item.reference)).size === items.length,
     "duplicate_reference",
   );
-export type SelectedListing = z.infer<typeof selectedListingsSchema>[number];
 
 /** Public identity saved at submission; never refreshed from a later publication. */
 export const inquiryListingReceiptSchema = z.object({

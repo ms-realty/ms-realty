@@ -9,9 +9,10 @@ The records follow `docs/architecture.md` §4.1.
 - `migrate.ts` — `runMigrations(url)`; also the `npm run db:migrate` entry point.
 - `test-utils.ts` — `createTestDatabase()` gives each integration test file its own migrated database.
 
-SQL migrations live in `db/migrations`: `0000_extensions` (custom: pg_trgm, unaccent,
+SQL migration history lives in `db/migrations`, starting with `0000_extensions` (custom: pg_trgm, unaccent,
 btree_gist, `immutable_unaccent`), `0001_schema` (generated), `0002_constraints` (custom:
-immutability triggers and the appointment-resource exclusion constraint). Nothing has been
-deployed, so this is the baseline. Schema changes from here: edit `schema/`, then
+immutability triggers and the appointment-resource exclusion constraint). The committed
+journal records the subsequent migrations; source history does not establish which migrations
+have run in a deployed environment. For schema changes, edit `schema/`, then
 `npm run db:generate`. Rules Drizzle cannot express are custom migrations created with
 `npx drizzle-kit generate --custom --name <name>`.

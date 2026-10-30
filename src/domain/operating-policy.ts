@@ -65,7 +65,6 @@ export const serviceCalendarSchema = z
       seen.add(exception.date);
     }
   });
-export type ServiceCalendar = z.infer<typeof serviceCalendarSchema>;
 
 export const operatingPolicySchema = z.object({
   kind: z.literal("agency_operating_policy_v1"),

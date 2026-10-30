@@ -22,7 +22,7 @@ Requires Node.js 22.13 or newer (CI uses Node 24) and Docker for the database.
 npm ci
 npx playwright install chromium webkit  # once, for end-to-end tests
 cp .env.example .env.local        # then fill in local values
-docker run -d --name ms-realty-local-pg -e POSTGRES_PASSWORD=pg -p 127.0.0.1:5432:5432 postgres:18-alpine
+docker run -d --name ms-realty-local-pg -e POSTGRES_PASSWORD=pg -p 127.0.0.1:5432:5432 postgres:16.14-alpine -c max_locks_per_transaction=256
 DATABASE_URL=postgres://postgres:pg@127.0.0.1:5432/postgres npm run db:migrate
 npm run dev                       # http://localhost:3000/bg
 ```
@@ -30,7 +30,8 @@ npm run dev                       # http://localhost:3000/bg
 One app serves three hosts (architecture §11.1): public `http://localhost:3000/bg`, client
 `http://my.localhost:3000/bg/access` and staff `http://app.localhost:3000/bg/today`. Browsers
 resolve `*.localhost` to loopback; any other host (`127.0.0.1` too) answers only `/api/health`.
-Staff routes require an active session and two passkeys. To enroll the first local manager,
+Staff routes require an active session and one verified passkey; backup passkeys are optional
+under [ADR 0005](docs/adr/0005-one-staff-passkey.md). To enroll the first local manager,
 run the offline operator command with a new absolute private output path:
 
 ```sh
@@ -67,7 +68,7 @@ Integration tests need a disposable Postgres; without `TEST_DATABASE_URL` they a
 locally (CI always runs them):
 
 ```sh
-docker run -d --rm --name ms-realty-test-pg -e POSTGRES_PASSWORD=pg -p 55432:5432 postgres:18-alpine
+docker run -d --rm --name ms-realty-test-pg -e POSTGRES_PASSWORD=pg -p 127.0.0.1:55432:5432 postgres:16.14-alpine -c max_locks_per_transaction=256
 TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/postgres npm run test:integration
 TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/postgres make e2e
 docker stop ms-realty-test-pg

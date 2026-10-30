@@ -2,14 +2,12 @@
 // verification, consent and authority to act are separate facts; none is a sign-in permission.
 
 export const partyKinds = ["person", "organization"] as const;
-export type PartyKind = (typeof partyKinds)[number];
 
 export const contactMethodKinds = ["email", "phone", "whatsapp", "viber", "postal"] as const;
 export type ContactMethodKind = (typeof contactMethodKinds)[number];
 
 /** Verification proves control of a channel, not identity, ownership or authority. */
 export const contactVerificationStates = ["unverified", "pending", "verified", "failed"] as const;
-export type ContactVerificationState = (typeof contactVerificationStates)[number];
 
 /**
  * Explicitly scoped roles a party holds in a Case (CaseParticipant) or towards a Property.

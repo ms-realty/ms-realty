@@ -118,8 +118,6 @@ export const caseMatchCriteriaInput = searchInput.pick({
   mustHave: true,
 });
 
-export type SearchInput = z.input<typeof searchInput>;
-
 export interface NormalizedSearch {
   readonly locale: PublicLocale;
   readonly criteria: SearchCriteria;

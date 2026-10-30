@@ -30,7 +30,6 @@ export const consentEventKinds = [
   "resumed",
   "withdrawn",
 ] as const;
-export type ConsentEventKind = (typeof consentEventKinds)[number];
 
 /** Saved-search alerts default to a daily digest in the subscriber's timezone. */
 export const alertFrequencies = ["daily", "weekly"] as const;

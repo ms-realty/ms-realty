@@ -177,12 +177,6 @@ export interface Location {
   readonly precision: LocationPrecision;
 }
 
-/** Rooms and bedrooms are separate facts; one never implies the other. */
-export interface RoomFacts {
-  readonly rooms: Fact<number>;
-  readonly bedrooms: Fact<number>;
-}
-
 export const propertyTypes = [
   "apartment",
   "house",

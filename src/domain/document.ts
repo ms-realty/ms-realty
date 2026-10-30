@@ -34,7 +34,6 @@ export const professionalValidationStates = [
   "validated",
   "declined",
 ] as const;
-export type ProfessionalValidationState = (typeof professionalValidationStates)[number];
 
 export const documentClassifications = [
   "identity",
@@ -44,7 +43,6 @@ export const documentClassifications = [
   "property",
   "other",
 ] as const;
-export type DocumentClassification = (typeof documentClassifications)[number];
 
 export const documentMachine = defineMachine<DocumentState>(documentStates, {
   selected: ["uploading"],

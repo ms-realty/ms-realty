@@ -33,7 +33,6 @@ import {
 import { contactCopy, contactMethodLabel } from "./contact-copy";
 import { ContactForm } from "./contact-form";
 import { workCopy } from "./copy";
-import { coverageCopy } from "./coverage-copy";
 import { CoverageOwner } from "./coverage-owner";
 import { AcceptForm, TaskForm, TriageForm } from "./forms";
 import { taskHandoverCopy } from "./handover-copy";
