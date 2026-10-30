@@ -17,6 +17,7 @@ import {
 import { type Capability, type CapabilityGrant, hasCapability } from "@/domain/capabilities";
 import { workerHealth } from "../ai/operations";
 import type { Session } from "../auth/sessions";
+import { caseGrantVisibility } from "../cases/grant-visibility";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
@@ -78,21 +79,6 @@ export function todayQueueResult<Row>(
     return { rows: [], total: null, hasMore: false, status: "unavailable", asOf: now, page: 1 };
   }
   return result.value === null ? null : { ...result.value, status: "ready", asOf: now, page: 1 };
-}
-
-// Match caseVisibility / caseEmailWorkbench authority using the one live request context.
-function caseScope(
-  grants: readonly CapabilityGrant[],
-  capability: Capability = "case.read",
-): SQL<boolean> {
-  return (or(
-    ...grants
-      .filter((grant) => grant.capability === capability)
-      .flatMap(({ scope }) => {
-        if (scope?.locales || (scope?.recordType && scope.recordType !== "case")) return [];
-        return [scope?.recordId ? eq(cases.id, scope.recordId) : sql`true`];
-      }),
-  ) ?? sql`false`) as SQL<boolean>;
 }
 
 // Same listing/property resource contexts as the inventory and translation workbenches.
@@ -164,7 +150,7 @@ export async function viewingQuery(db: Executor, context: Context, now: Date) {
     .leftJoin(principals, eq(principals.id, appointments.hostId))
     .where(
       and(
-        caseScope(context.grants),
+        caseGrantVisibility(context.grants, "case.read"),
         visibleWhere(context.grants, "appointment.manage", "appointment"),
         inArray(appointments.state, [...openAppointmentStates]),
       ),
@@ -177,7 +163,7 @@ export async function viewingQuery(db: Executor, context: Context, now: Date) {
 export async function caseContinueQuery(db: Executor, context: Context) {
   // Match readCase's shared-summary fallback. Private work, review dates and private
   // update ordering require the Case's own case.read_internal grant, not another Case's.
-  const internal = caseScope(context.grants, "case.read_internal");
+  const internal = caseGrantVisibility(context.grants, "case.read_internal");
   const nextAction = sql<string | null>`case when ${cases.disposition} = 'active'
     then case when ${internal} then ${cases.nextAction} else ${cases.clientSummary} end
     else null end`;
@@ -215,7 +201,7 @@ export async function caseContinueQuery(db: Executor, context: Context) {
     .leftJoin(principals, eq(principals.id, cases.ownerId))
     .where(
       and(
-        caseScope(context.grants),
+        caseGrantVisibility(context.grants, "case.read"),
         eq(cases.ownerId, context.live.account.id),
         inArray(cases.disposition, ["active", "paused"]),
       ),
@@ -438,8 +424,8 @@ export async function deliveryExceptionQuery(db: Executor, context: Context) {
     .leftJoin(principals, eq(principals.id, cases.ownerId))
     .where(
       and(
-        caseScope(context.grants),
-        caseScope(context.grants, "message.draft"),
+        caseGrantVisibility(context.grants, "case.read"),
+        caseGrantVisibility(context.grants, "message.draft"),
         eq(messages.channel, "email"),
         eq(messages.direction, "outbound"),
         inArray(messages.state, ["failed", "bounced", "outcome_unknown"]),
