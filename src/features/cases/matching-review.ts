@@ -5,9 +5,6 @@
 import { z } from "zod";
 import { commercialStates } from "@/domain/listing";
 
-/** Hidden field of the `interest` workflow command (`workflowFields.interest`). */
-export const matchReviewField = "matchReview";
-
 const reviewSchema = z
   .object({
     briefRevision: z.number().int().min(1),

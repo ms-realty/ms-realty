@@ -17,15 +17,6 @@ import type { TransitionSpec } from "./transition";
 export const caseKinds = ["buyer", "tenant", "seller", "landlord", "service_intake"] as const;
 export type CaseKind = (typeof caseKinds)[number];
 
-/** Which labels a kind uses; tenant and landlord share the buyer and seller pipelines. */
-export const caseVocabulary: Readonly<Record<CaseKind, "sale" | "letting" | "service">> = {
-  buyer: "sale",
-  seller: "sale",
-  tenant: "letting",
-  landlord: "letting",
-  service_intake: "service",
-};
-
 /** What a service-intake Case is about: a consultation request, never a reservation. */
 export const serviceIntakeTopics = ["short_stay_consultation", "management_consultation"] as const;
 export type ServiceIntakeTopic = (typeof serviceIntakeTopics)[number];

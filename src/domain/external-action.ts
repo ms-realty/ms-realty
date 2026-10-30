@@ -40,9 +40,6 @@ export const externalActionMachine = defineMachine<ExternalActionState>(external
   cancelled: [],
 });
 
-/** Initial default retry limit (§15); a provider's idempotency deadline can end it earlier. */
-export const defaultMaxAttempts = 8;
-
 export interface ExecutionCheck {
   /** Generation the action was created under, and the subject's generation now. */
   readonly sourceGeneration: number | null;

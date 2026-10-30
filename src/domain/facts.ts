@@ -118,9 +118,6 @@ export function money(
   return { amountMinor, currency, period, basis };
 }
 
-/** New BG/GR prices are presented in euro; historical amounts keep their own currency. */
-export const defaultPresentationCurrency = "EUR" satisfies CurrencyCode;
-
 /** Council fixed conversion rate: 1 EUR = 1.95583 BGN (Bulgaria adopted the euro 2026-01-01). */
 export const bgnPerEur = { numerator: 195_583n, denominator: 100_000n } as const;
 

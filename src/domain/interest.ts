@@ -1,9 +1,8 @@
 // Interest: the one current relationship between a Case and a Listing (architecture §4.1,
 // §6.2). It carries shortlist state, fit explanation, feedback revisions and the listing
 // revision it was judged against. Losing one Interest never closes the others or the Case.
-import type { Actor, Capability } from "./capabilities";
+import type { Actor } from "./capabilities";
 import { allowed, type Decision, defineMachine, denied, firstDenial, need } from "./state-machine";
-import type { TransitionSpec } from "./transition";
 
 export const interestStates = [
   "suggested",
@@ -68,14 +67,6 @@ export function guardInterestTransition(
       return allowed;
   }
 }
-
-export const interestTransitions: TransitionSpec<InterestState, InterestEvidence> = {
-  recordType: "interest",
-  machine: interestMachine,
-  capabilityFor: (_from, _to, actor): Capability =>
-    actor.kind === "client" ? "portal.interest.respond" : "interest.manage",
-  guard: guardInterestTransition,
-};
 
 export interface InterestView {
   readonly listingId: string;

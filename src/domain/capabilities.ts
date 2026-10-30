@@ -60,12 +60,6 @@ export const draftOnlyCapabilities = [
   "message.draft",
 ] as const satisfies readonly Capability[];
 
-/** Capabilities whose grant may be narrowed to a set of locales. */
-export const localeScopedCapabilities = [
-  "translation.draft",
-  "translation.review",
-] as const satisfies readonly Capability[];
-
 export const roles = [
   "visitor",
   "verified_client",

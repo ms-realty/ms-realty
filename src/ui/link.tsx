@@ -2,7 +2,6 @@
 
 import { type ReactNode, useId } from "react";
 import { Link as RACLink, type LinkProps as RACLinkProps } from "react-aria-components";
-import { type ButtonVariant, buttonClass } from "./button-class";
 import { cx } from "./cx";
 import { ExternalIcon } from "./icons";
 
@@ -39,22 +38,6 @@ export function Link({ variant = "inline", className, ...props }: LinkProps) {
         variant === "standalone" && "inline-flex min-h-control items-center gap-1.5 font-semibold",
         className,
       )}
-    />
-  );
-}
-
-export type ButtonLinkProps = Omit<RACLinkProps, "className" | "children"> & {
-  children: ReactNode;
-  className?: string;
-  variant?: ButtonVariant;
-};
-
-/** Navigation that is the page's call to action: a link that looks like a Button. */
-export function ButtonLink({ variant = "primary", className, ...props }: ButtonLinkProps) {
-  return (
-    <RACLink
-      {...props}
-      className={buttonClass(variant, cx(variant !== "tertiary" && "no-underline", className))}
     />
   );
 }

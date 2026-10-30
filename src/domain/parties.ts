@@ -39,10 +39,6 @@ export const authorityStates = [
 ] as const;
 export type AuthorityState = (typeof authorityStates)[number];
 
-export function hasReviewedAuthority(state: AuthorityState): boolean {
-  return state === "reviewed";
-}
-
 /** Who can see a private item (§8.2). Participation in a Case does not imply every audience. */
 export const audiences = ["internal", "case_participants", "specialist", "public"] as const;
 export type Audience = (typeof audiences)[number];

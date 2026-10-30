@@ -180,15 +180,6 @@ export interface ContentItem {
 }
 
 export type ImportItem = PlaceItem | ListingItem | MediaItem | UrlDecisionItem | ContentItem;
-export type ImportItemType = ImportItem["type"];
-/** Apply order: every item's dependencies come earlier. */
-export const itemTypes: readonly ImportItemType[] = [
-  "place",
-  "listing",
-  "media",
-  "url_decision",
-  "content_page",
-];
 
 export function sha256Json(value: unknown): string {
   return createHash("sha256").update(canonicalJson(value)).digest("hex");
