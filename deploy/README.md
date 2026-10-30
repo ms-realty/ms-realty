@@ -99,8 +99,8 @@ missing artifacts and placeholders fail validation. Never use `PRODUCTION_ENV_FI
 An explicitly authorized `purpose: protected_partial_preview` may use the pinned partial
 staging map and manifest only with `scope: staging_only`, `productionAllowed: false` and exact
 manifest/exclusions SHA-256. Its exclusions remain visible and it cannot pass the promotion
-validator. The current pinned map has 1,108 unique route identities (991 retained 200s and 117
-redirected 301s) and 243 explicit exclusions; it is not complete
+validator. Read the exact route identities and explicit exclusions from the pinned map and
+its reviewed manifest; this partial projection is not complete
 baseline or fresh-delta parity. Full coverage with zero exclusions remains a hard promotion gate.
 For Actions install that reviewed nonsecret JSON in the staging environment's `STAGING_INPUTS_JSON`
 variable with `sourceCommit: null`. Only after the exact qualified-SHA guard succeeds does
@@ -192,8 +192,8 @@ before origin forwarding. Builders do not modify the independent checker or manu
 
 Photos use `/legacy-media/<sourceHost><encodedSourcePath>` or original `/wp-content/uploads/`,
 backed only by the exact public-media allowlist in staging MEDIA. There is no private-object lookup,
-arbitrary host, source-bucket fallback or runtime import. Missing objects fail to load. The current
-1,710-row allowlist proves identity, not bytes or load success. Local development/loopback may
+arbitrary host, source-bucket fallback or runtime import. Missing objects fail to load. The pinned
+`data/legacy/migration/public-media.json` allowlist proves identity, not bytes or load success. Local development/loopback may
 read only the two original public `/wp-content/uploads/` origins under CSP; staging uses isolated
 media. Google origins enter CSP only with valid GTM and explicit public consent. Actual tags and
 tracking parity remain separate proof.

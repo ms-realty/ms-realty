@@ -31,77 +31,124 @@ jobs:
               return;
             }
 
-            const { data: pull } = await github.rest.pulls.get({
-              owner,
-              repo,
-              pull_number: reference.number,
-            });
-
-            if (pull.state !== "open" || pull.draft) {
-              core.notice("The pull request is closed or explicitly marked as draft.");
-              return;
-            }
-            if (pull.base.ref !== "main" || pull.head.repo?.full_name !== `${owner}/${repo}`) {
-              core.setFailed("Only same-repository pull requests targeting main can be merged automatically.");
-              return;
-            }
-            if (pull.head.sha !== workflowRun.head_sha) {
-              core.setFailed("The pull-request head changed after this CI run.");
-              return;
-            }
-            // `ci / gate` is CI's single required check; it must have passed in this very run.
-            const { data: gate } = await github.rest.checks.listForRef({
-              owner,
-              repo,
-              ref: workflowRun.head_sha,
-              check_name: "ci / gate",
-            });
-            const gatePassed = gate.check_runs.some(
-              (run) => run.check_suite?.id === workflowRun.check_suite_id && run.conclusion === "success",
-            );
-            if (!gatePassed) {
-              core.setFailed("The ci / gate check of this CI run did not succeed.");
-              return;
-            }
-            if (!["OWNER", "MEMBER", "COLLABORATOR"].includes(pull.author_association)) {
-              core.setFailed("The pull-request author is not a repository collaborator.");
-              return;
-            }
             const expectedBaseSha = reference.base?.sha;
-            if (expectedBaseSha && pull.base.sha !== expectedBaseSha) {
-              await github.rest.pulls.updateBranch({
+            const requiredChecks = ["ci / gate", "npm run check"];
+            // Share one bounded budget for check publication and branch-protection propagation.
+            const maxAttempts = 12;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              if (attempt > 1) await new Promise((resolve) => setTimeout(resolve, 5000));
+              const { data: pull } = await github.rest.pulls.get({
                 owner,
                 repo,
-                pull_number: pull.number,
-                expected_head_sha: pull.head.sha,
+                pull_number: reference.number,
               });
-              core.notice("Main advanced after CI; the pull-request branch was updated for a fresh run.");
+
+              if (pull.state !== "open" || pull.draft) {
+                core.notice("The pull request is closed or explicitly marked as draft.");
+                return;
+              }
+              if (pull.base.ref !== "main" || pull.head.repo?.full_name !== `${owner}/${repo}`) {
+                core.setFailed("Only same-repository pull requests targeting main can be merged automatically.");
+                return;
+              }
+              if (pull.head.sha !== workflowRun.head_sha) {
+                core.setFailed("The pull-request head changed after this CI run.");
+                return;
+              }
+              if (!["OWNER", "MEMBER", "COLLABORATOR"].includes(pull.author_association)) {
+                core.setFailed("The pull-request author is not a repository collaborator.");
+                return;
+              }
+
+              // Both protected names must finish successfully in this CI suite at its exact head.
+              const checks = await Promise.all(requiredChecks.map((checkName) =>
+                github.rest.checks.listForRef({
+                  owner,
+                  repo,
+                  ref: workflowRun.head_sha,
+                  check_name: checkName,
+                  filter: "latest",
+                  per_page: 100,
+                }),
+              ));
+              const pending = [];
+              for (let index = 0; index < requiredChecks.length; index++) {
+                const checkName = requiredChecks[index];
+                const runs = checks[index].data.check_runs.filter((run) =>
+                  run.name === checkName &&
+                  run.check_suite?.id === workflowRun.check_suite_id &&
+                  run.head_sha === workflowRun.head_sha,
+                );
+                if (runs.some((run) => run.status === "completed" && run.conclusion !== "success")) {
+                  core.setFailed(`The ${checkName} check of this CI run did not succeed.`);
+                  return;
+                }
+                if (!runs.length || runs.some((run) => run.status !== "completed")) {
+                  pending.push(checkName);
+                }
+              }
+              if (pending.length) {
+                core.notice(`Waiting for this CI run's required checks: ${pending.join(", ")} (${attempt}/${maxAttempts}).`);
+                continue;
+              }
+              if (expectedBaseSha && pull.base.sha !== expectedBaseSha) {
+                await github.rest.pulls.updateBranch({
+                  owner,
+                  repo,
+                  pull_number: pull.number,
+                  expected_head_sha: pull.head.sha,
+                });
+                core.notice("Main advanced after CI; the pull-request branch was updated for a fresh run.");
+                return;
+              }
+
+              let result;
+              try {
+                ({ data: result } = await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: pull.number,
+                  merge_method: "squash",
+                  sha: pull.head.sha,
+                  commit_title: `${pull.title} (#${pull.number})`,
+                }));
+              } catch (error) {
+                // This definitive rejection cannot have merged. Never retry an uncertain write.
+                if (error.status !== 405 || error.response?.data?.message !==
+                    'Required status check "npm run check" is in progress.') throw error;
+                core.notice(`Waiting for required-status propagation (${attempt}/${maxAttempts}).`);
+                continue;
+              }
+              if (!result.merged) {
+                core.setFailed(result.message || "GitHub refused the merge.");
+                return;
+              }
+
+              await github.rest.repos.createDispatchEvent({
+                owner,
+                repo,
+                event_type: "auto_merged",
+                client_payload: { merge_sha: result.sha },
+              });
+
+              const { data: dependents } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: "open",
+                base: pull.head.ref,
+                per_page: 1,
+              });
+              if (dependents.length) {
+                core.notice("The merged branch is still the base of an open pull request; keeping it.");
+                return;
+              }
+
+              try {
+                await github.rest.git.deleteRef({ owner, repo, ref: `heads/${pull.head.ref}` });
+              } catch (error) {
+                if (![404, 422].includes(error.status)) throw error;
+                core.notice("The merged branch was already deleted.");
+              }
               return;
             }
-
-            const { data: result } = await github.rest.pulls.merge({
-              owner,
-              repo,
-              pull_number: pull.number,
-              merge_method: "squash",
-              sha: pull.head.sha,
-              commit_title: `${pull.title} (#${pull.number})`,
-            });
-            if (!result.merged) {
-              core.setFailed(result.message || "GitHub refused the merge.");
-              return;
-            }
-
-            await github.rest.repos.createDispatchEvent({
-              owner,
-              repo,
-              event_type: "auto_merged",
-              client_payload: { merge_sha: result.sha },
-            });
-
-            try {
-              await github.rest.git.deleteRef({ owner, repo, ref: `heads/${pull.head.ref}` });
-            } catch (error) {
-              if (![404, 422].includes(error.status)) throw error;
-              core.notice("The merged branch was already deleted.");
-            }
+            core.setFailed(`Required checks or their merge protection status did not settle after ${maxAttempts} attempts.`);
