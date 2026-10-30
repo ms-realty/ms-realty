@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "ms-realty-staging",
   "main": "opennext-worker.mjs",
   "account_id": "921d0224dcd595c87b7928d2b3c479d1",
