@@ -131,6 +131,18 @@ jobs:
                 client_payload: { merge_sha: result.sha },
               });
 
+              const { data: dependents } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: "open",
+                base: pull.head.ref,
+                per_page: 1,
+              });
+              if (dependents.length) {
+                core.notice("The merged branch is still the base of an open pull request; keeping it.");
+                return;
+              }
+
               try {
                 await github.rest.git.deleteRef({ owner, repo, ref: `heads/${pull.head.ref}` });
               } catch (error) {

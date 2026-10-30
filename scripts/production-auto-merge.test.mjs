@@ -98,6 +98,19 @@ function scenario(options = {}) {
           record("updateBranch", args);
           return response(options.updateError ?? {});
         },
+        async list(args) {
+          record("dependents", args);
+          if (options.dependentsError) throw options.dependentsError;
+          return response(
+            (options.dependents ?? [])
+              .filter(
+                (dependent) =>
+                  (args.state === "all" || dependent.state === args.state) &&
+                  dependent.base.ref === args.base,
+              )
+              .slice(0, args.per_page),
+          );
+        },
       },
       checks: {
         async listForRef(args) {
@@ -156,6 +169,7 @@ function scenario(options = {}) {
 
 function assertNoPostMerge(run) {
   assert.equal(run.events("dispatch").length, 0);
+  assert.equal(run.events("dependents").length, 0);
   assert.equal(run.events("delete").length, 0);
 }
 
@@ -171,7 +185,7 @@ test("both protected checks permit an exact-head squash before dispatch and bran
   assert.deepEqual(run.failures, []);
   assert.deepEqual(
     run.calls.map(({ method }) => method),
-    ["get", "checks", "checks", "merge", "dispatch", "delete"],
+    ["get", "checks", "checks", "merge", "dispatch", "dependents", "delete"],
   );
   assert.deepEqual(run.events("get")[0].args, { ...repository, pull_number: 350 });
   assert.deepEqual(
@@ -196,6 +210,12 @@ test("both protected checks permit an exact-head squash before dispatch and bran
     event_type: "auto_merged",
     client_payload: { merge_sha: mergeSha },
   });
+  assert.deepEqual(run.events("dependents")[0].args, {
+    ...repository,
+    state: "open",
+    base: "codex/maintenance-fixture",
+    per_page: 1,
+  });
   assert.deepEqual(run.events("delete")[0].args, {
     ...repository,
     ref: "heads/codex/maintenance-fixture",
@@ -208,7 +228,19 @@ test("pending legacy check waits and rereads the PR and both checks before mergi
   assert.deepEqual(run.failures, []);
   assert.deepEqual(
     run.calls.map(({ method }) => method),
-    ["get", "checks", "checks", "sleep", "get", "checks", "checks", "merge", "dispatch", "delete"],
+    [
+      "get",
+      "checks",
+      "checks",
+      "sleep",
+      "get",
+      "checks",
+      "checks",
+      "merge",
+      "dispatch",
+      "dependents",
+      "delete",
+    ],
   );
   assert.equal(run.events("sleep")[0].args, 5000);
 });
@@ -312,6 +344,7 @@ test("the known 405 rejection retries only after fresh PR and check reads", asyn
       "checks",
       "merge",
       "dispatch",
+      "dependents",
       "delete",
     ],
   );
@@ -495,7 +528,7 @@ for (const status of [404, 422]) {
   });
 }
 
-for (const operation of ["dispatch", "delete"]) {
+for (const operation of ["dispatch", "dependents", "delete"]) {
   test(`a ${operation} failure after a successful merge cannot retry the merge`, async () => {
     const error = httpError(405, propagationMessage);
     const run = scenario({ [`${operation}Error`]: error });
@@ -505,3 +538,65 @@ for (const operation of ["dispatch", "delete"]) {
     assert.equal(run.events("delete").length, Number(operation === "delete"));
   });
 }
+
+for (const draft of [true, false]) {
+  test(`an open ${draft ? "draft" : "non-draft"} dependent retains its base after merge and dispatch`, async () => {
+    const run = scenario({
+      dependents: [
+        {
+          number: 351,
+          state: "open",
+          draft,
+          base: { ref: "codex/maintenance-fixture" },
+        },
+      ],
+    });
+    await run.run();
+    assert.deepEqual(run.failures, []);
+    assert.deepEqual(
+      run.calls.map(({ method }) => method),
+      ["get", "checks", "checks", "merge", "dispatch", "dependents"],
+    );
+    assert.equal(run.events("delete").length, 0);
+    assert.equal(run.events("updateBranch").length, 0);
+    assert.ok(
+      run.notices.includes(
+        "The merged branch is still the base of an open pull request; keeping it.",
+      ),
+    );
+  });
+}
+
+test("closed dependents are excluded by the API's explicit open-state query", async () => {
+  const run = scenario({
+    dependents: [
+      {
+        number: 351,
+        state: "closed",
+        draft: true,
+        base: { ref: "codex/maintenance-fixture" },
+      },
+    ],
+  });
+  await run.run();
+  assert.deepEqual(run.failures, []);
+  assert.equal(run.events("dependents")[0].args.state, "open");
+  assert.equal(run.events("delete").length, 1);
+});
+
+test("open PRs targeting a different branch do not retain this merged branch", async () => {
+  const run = scenario({
+    dependents: [
+      {
+        number: 351,
+        state: "open",
+        draft: true,
+        base: { ref: "main" },
+      },
+    ],
+  });
+  await run.run();
+  assert.deepEqual(run.failures, []);
+  assert.equal(run.events("dependents")[0].args.base, "codex/maintenance-fixture");
+  assert.equal(run.events("delete").length, 1);
+});
