@@ -12,8 +12,14 @@
 
 check: lint typecheck typecheck-gateway test test-release build
 
-lint typecheck test build e2e: node_modules/.package-lock.json
+lint typecheck test build: node_modules/.package-lock.json
 	npm run $@
+
+# Erasure deliberately refuses concurrent source-table writers. Each invocation
+# starts its own disposable database; keep its success proof out of the shared suite.
+e2e: node_modules/.package-lock.json
+	npm run e2e -- --grep-invert "AT45 reviewed erasure"
+	npm run e2e -- e2e/privacy-erasure.spec.ts --workers=1 --retries=0
 
 typecheck-gateway: node_modules/.package-lock.json gateway/node_modules/.package-lock.json
 	npm run typecheck:gateway

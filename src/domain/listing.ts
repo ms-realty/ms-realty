@@ -96,13 +96,6 @@ export function guardCommercialTransition(
   }
 }
 
-export const commercialTransitions: TransitionSpec<CommercialState, CommercialEvidence> = {
-  recordType: "listing",
-  machine: commercialMachine,
-  capabilityFor: () => "listing.edit",
-  guard: guardCommercialTransition,
-};
-
 // Editorial. Draft edits never alter an already approved revision: approval binds one
 // immutable ListingRevision, and a new draft starts a new candidate.
 

@@ -1,59 +1,12 @@
 // Identifiers, human references, locales and currencies (architecture §4, §4.2, §3.2).
 
 declare const brand: unique symbol;
-export type Brand<T, B extends string> = T & { readonly [brand]: B };
-
-export const entityKinds = [
-  "principal",
-  "party",
-  "property",
-  "property_fact_revision",
-  "listing",
-  "listing_revision",
-  "localized_revision",
-  "publication_manifest",
-  "media_asset",
-  "media_relation",
-  "inquiry",
-  "case",
-  "brief_revision",
-  "interest",
-  "appointment",
-  "proposal",
-  "message",
-  "document",
-  "task",
-  "approval",
-  "seller_instruction",
-  "subscription",
-  "content_page",
-  "privacy_request",
-  "import_batch",
-  "operation",
-  "external_action",
-] as const;
-export type EntityKind = (typeof entityKinds)[number];
-
-/** A uuid primary key that cannot be passed where another entity's id is expected. */
-export type Id<K extends EntityKind> = Brand<string, K>;
-
-export type ListingId = Id<"listing">;
-export type PropertyId = Id<"property">;
-export type CaseId = Id<"case">;
-export type InquiryId = Id<"inquiry">;
-export type PrincipalId = Id<"principal">;
-export type PartyId = Id<"party">;
-export type OperationId = Id<"operation">;
+type Brand<T, B extends string> = T & { readonly [brand]: B };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function isUuid(value: string): boolean {
   return uuidPattern.test(value);
-}
-
-export function asId<K extends EntityKind>(_kind: K, value: string): Id<K> {
-  if (!isUuid(value)) throw new Error(`Invalid ${_kind} id: ${value}`);
-  return value as Id<K>;
 }
 
 // Human references. Listings keep the legacy lot-number format (MS-00100) so every

@@ -93,6 +93,11 @@ for (const javascript of [false, true])
         await page.route(submit, async (route) => {
           const committed = await route.fetch({ maxRedirects: 0 });
           expect(committed.status()).toBe(303);
+          const receipt = new URL(committed.headers().location ?? "", origins.staff);
+          expect(receipt.pathname).toBe(path);
+          expect(receipt.searchParams.get("error")).toBeNull();
+          expect(receipt.searchParams.get("operation")).toBe(operation);
+          expect(receipt.searchParams.get("receipt")).toBeTruthy();
           await route.abort("failed");
         });
         // The server commits; deliberately lose its response and recover using the issued key.

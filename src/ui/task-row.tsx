@@ -56,7 +56,7 @@ export type TaskRowProps = {
   status?: ReactNode;
   /** Draws the rail and icon tile; omit for a plain row. */
   severity?: TaskSeverity;
-  /** The one direct action, e.g. a secondary ButtonLink "Reply". */
+  /** The one direct action, e.g. a secondary link labelled "Reply". */
   directAction?: ReactNode;
 };
 

@@ -221,7 +221,7 @@ export const briefRevisions = pgTable(
       .notNull()
       .references(() => cases.id),
     revisionNumber: integer("revision_number").notNull(),
-    /** [{ kind, origin, text, criterion? }] with kind in briefItemKinds. */
+    /** Brief items: [{ kind, origin, text, criterion? }]. */
     items: jsonb("items").notNull(),
     /** Structured criteria in the shape of SearchCriteria (src/domain/search/filters.ts). */
     criteria: jsonb("criteria").notNull().default({}),

@@ -3,7 +3,6 @@
 // bound to one exact payload.
 import type { Actor } from "./capabilities";
 import { allowed, type Decision, defineMachine, denied, firstDenial, need } from "./state-machine";
-import type { TransitionSpec } from "./transition";
 
 export const messageStates = [
   "draft",
@@ -117,13 +116,6 @@ export function guardRetry(evidence: MessageEvidence): Decision {
     windowPassed ? denied("idempotency_window_passed") : allowed,
   );
 }
-
-export const messageTransitions: TransitionSpec<MessageState, MessageEvidence> = {
-  recordType: "message",
-  machine: messageMachine,
-  capabilityFor: (_from, to) => (to === "draft" ? "message.draft" : "message.send_external"),
-  guard: guardMessageTransition,
-};
 
 export interface LogicalSend {
   readonly logicalSendId: string;
