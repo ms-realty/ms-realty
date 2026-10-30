@@ -21,7 +21,6 @@ await build({
   packages: "external",
   conditions: ["react-server"],
   sourcemap: false,
-  metafile: true,
   banner: {
     js: 'import { createRequire as __runtimeCreateRequire } from "node:module"; const require = __runtimeCreateRequire(import.meta.url);',
   },
