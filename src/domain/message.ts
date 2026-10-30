@@ -25,7 +25,6 @@ export const messageKinds = ["case_message", "service_message", "internal_note"]
 export type MessageKind = (typeof messageKinds)[number];
 
 export const messageDirections = ["outbound", "inbound"] as const;
-export type MessageDirection = (typeof messageDirections)[number];
 
 /** Email is the only launch transport; the others record truthful manual summaries (§9). */
 export const messageChannels = ["email", "phone", "whatsapp", "viber", "in_app"] as const;

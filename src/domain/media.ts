@@ -7,7 +7,6 @@ export type MediaKind = (typeof mediaKinds)[number];
 
 /** Why the asset exists; a gallery candidate and private evidence are different purposes. */
 export const mediaPurposes = ["listing_gallery", "floor_plan", "tour", "private_evidence"] as const;
-export type MediaPurpose = (typeof mediaPurposes)[number];
 
 export const mediaRightsStates = [
   "unknown",

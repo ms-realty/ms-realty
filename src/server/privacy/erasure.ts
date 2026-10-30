@@ -53,7 +53,6 @@ const applySchema = z
     confirmed: z.literal(true),
   })
   .strict();
-export type ApplyPrivacyErasure = z.input<typeof applySchema>;
 
 async function authorizeEffect(db: Executor, session: Session, requestId: string) {
   const live = await privacyOperator(db, session, requestId);

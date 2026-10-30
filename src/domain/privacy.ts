@@ -11,7 +11,6 @@ export const privacyRequestKinds = [
   "restriction",
   "objection",
 ] as const;
-export type PrivacyRequestKind = (typeof privacyRequestKinds)[number];
 
 export const privacyRequestStates = [
   "received",
