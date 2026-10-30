@@ -220,9 +220,6 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.desktopSnapshot {
-  display: none;
-}
 .legend {
   display: flex;
   flex-wrap: wrap;
@@ -666,23 +663,6 @@
   align-items: center;
   gap: 0.75rem;
 }
-.dayNumber {
-  font-size: 1.5rem;
-  font-weight: 500;
-  line-height: 1.25;
-}
-.dayName {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-.dayName > span {
-  font-size: 0.6875rem;
-  font-weight: 400;
-}
 .dayAppointments {
   display: grid;
   min-width: 0;
@@ -722,7 +702,6 @@
   width: 1rem;
 }
 .state,
-.hostLine,
 .caseContext {
   color: var(--color-text-muted);
   font-size: 0.75rem;
@@ -747,16 +726,6 @@
 .state[data-state="reschedule_requested"]::before {
   border: 1px solid var(--color-action);
   background: transparent;
-}
-.hostLine {
-  display: flex;
-  gap: 0.375rem;
-  align-items: center;
-  margin-block-start: 0.625rem;
-}
-.hostLine > svg {
-  width: 0.875rem;
-  height: 0.875rem;
 }
 .arrangements {
   display: grid;
@@ -831,12 +800,6 @@
 }
 .buffer {
   margin-block-start: 0.75rem;
-}
-.itemActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 1.5rem;
 }
 .openLink,
 .textLink {
@@ -1186,33 +1149,9 @@
     overflow: hidden;
     clip-path: inset(50%);
   }
-  .itemActions {
-    gap: 0.25rem 0.5rem;
-  }
-  .itemActions .textLink > :where(span) {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
   .openLink,
   .textLink {
     font-size: 0.6875rem;
-  }
-  .dayNumber {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    font-weight: 500;
-  }
-  .dayName {
-    display: inline-flex;
-    flex-direction: row;
-    gap: 0.375rem;
-    font-size: 0.75rem;
-  }
-  .dayName > span {
-    font-size: inherit;
   }
   .appointmentHeader h4 {
     margin-block: 0.5rem;
@@ -1225,8 +1164,7 @@
   .appointment {
     padding-block-end: 1.25rem;
   }
-  .caseContext,
-  .hostLine {
+  .caseContext {
     font-size: 0.6875rem;
   }
   .arrangements {
