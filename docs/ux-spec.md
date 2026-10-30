@@ -41,15 +41,15 @@ The public experience primarily supports evaluation and action. The client works
 
 ### 01.2 People and successful outcomes
 
-| Person and situation | Core task | Design must make easy | Evidence of success |
-|---|---|---|---|
-| Local buyer/tenant, often on a phone | Find plausible properties and arrange contact/viewing | Specific criteria, useful facts, honest availability, short request | Accepted request with the intended reference and next step |
-| Cross-border buyer, unfamiliar with the process | Reduce uncertainty before spending time or travelling | Language choice, location context, known/unknown facts, human explanation | A broker-owned Case, acknowledged Brief and realistic viewing plan |
-| Seller/landlord | Explore representation and approve accurate marketing | Minimal intake, scope/authority explanation, exact preview and change requests | Versioned instructions and reviewed publication, not an untracked email attachment |
-| Existing client/co-buyer | Return to an ongoing decision | Correct Case, private audience, changed facts, proposals and next action | Complete the intended task without repeating context or exposing another participant |
-| Broker/coordinator, interrupted during the day | Keep promises and progress Cases | Today queue, original context, next action, schedule and handover | Owned work with a durable result and no forgotten commitments |
-| Editor/translator/publisher | Turn evidence into correct public content | Source binding, diffs, rights, locale and publication distinctions | The exact reviewed version appears on the permitted destination |
-| Manager/privacy/release operator | Maintain service, access and safe operation | Exceptions, proof, impact and named ownership | A resolved exception or evidence-backed decision, not a green-looking dashboard |
+| Person and situation                            | Core task                                             | Design must make easy                                                          | Evidence of success                                                                  |
+| ----------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| Local buyer/tenant, often on a phone            | Find plausible properties and arrange contact/viewing | Specific criteria, useful facts, honest availability, short request            | Accepted request with the intended reference and next step                           |
+| Cross-border buyer, unfamiliar with the process | Reduce uncertainty before spending time or travelling | Language choice, location context, known/unknown facts, human explanation      | A broker-owned Case, acknowledged Brief and realistic viewing plan                   |
+| Seller/landlord                                 | Explore representation and approve accurate marketing | Minimal intake, scope/authority explanation, exact preview and change requests | Versioned instructions and reviewed publication, not an untracked email attachment   |
+| Existing client/co-buyer                        | Return to an ongoing decision                         | Correct Case, private audience, changed facts, proposals and next action       | Complete the intended task without repeating context or exposing another participant |
+| Broker/coordinator, interrupted during the day  | Keep promises and progress Cases                      | Today queue, original context, next action, schedule and handover              | Owned work with a durable result and no forgotten commitments                        |
+| Editor/translator/publisher                     | Turn evidence into correct public content             | Source binding, diffs, rights, locale and publication distinctions             | The exact reviewed version appears on the permitted destination                      |
+| Manager/privacy/release operator                | Maintain service, access and safe operation           | Exceptions, proof, impact and named ownership                                  | A resolved exception or evidence-backed decision, not a green-looking dashboard      |
 
 ### 01.3 Non-negotiable experience principles
 
@@ -66,16 +66,16 @@ The public experience primarily supports evaluation and action. The client works
 
 ### 01.4 The service blueprint
 
-| Stage | Customer experience | Agency responsibility | Durable system result | Failure that must be visible |
-|---|---|---|---|---|
-| Discover | Search, read, compare | Keep approved facts and availability current | Eligible public presentation and preserved criteria | Unavailable locale/map/inventory, not fake results |
-| Ask | Submit an intent-specific request | Coverage queue owns it immediately | Inquiry and receipt committed together | Unknown/not-received outcome distinct from accepted |
-| Agree needs | Discuss and acknowledge requirements | Broker owns Case, Brief and next action | Case participants and Brief revision | Conflicting or unanswered requirements |
-| Evaluate | Review suggested Listings and trade-offs | Maintain separate Interests and feedback | One Case with several independently progressing Interests | A withdrawn/changed Listing does not close the Case |
-| View | Propose and agree an arrangement | Check host, access, resources and time | Versioned Appointment and notification intent | Request/proposal is not confirmation |
-| Propose | Review exact terms and decide next step | Coordinate scoped review and responses | Versioned Proposal with recorded decisions | Expired/stale terms or unknown message delivery |
-| Coordinate | Supply requested evidence and complete actions | Human professional/process ownership | Purpose-bound documents and commitments | Scan/review/completion cannot be conflated |
-| Close | Understand actual outcome and remaining obligations | Resolve commitments, availability, retention and aftercare | Truthful closeout record | “Closed Case” is not automatically “sold Property” |
+| Stage       | Customer experience                                 | Agency responsibility                                      | Durable system result                                     | Failure that must be visible                        |
+| ----------- | --------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------- |
+| Discover    | Search, read, compare                               | Keep approved facts and availability current               | Eligible public presentation and preserved criteria       | Unavailable locale/map/inventory, not fake results  |
+| Ask         | Submit an intent-specific request                   | Coverage queue owns it immediately                         | Inquiry and receipt committed together                    | Unknown/not-received outcome distinct from accepted |
+| Agree needs | Discuss and acknowledge requirements                | Broker owns Case, Brief and next action                    | Case participants and Brief revision                      | Conflicting or unanswered requirements              |
+| Evaluate    | Review suggested Listings and trade-offs            | Maintain separate Interests and feedback                   | One Case with several independently progressing Interests | A withdrawn/changed Listing does not close the Case |
+| View        | Propose and agree an arrangement                    | Check host, access, resources and time                     | Versioned Appointment and notification intent             | Request/proposal is not confirmation                |
+| Propose     | Review exact terms and decide next step             | Coordinate scoped review and responses                     | Versioned Proposal with recorded decisions                | Expired/stale terms or unknown message delivery     |
+| Coordinate  | Supply requested evidence and complete actions      | Human professional/process ownership                       | Purpose-bound documents and commitments                   | Scan/review/completion cannot be conflated          |
+| Close       | Understand actual outcome and remaining obligations | Resolve commitments, availability, retention and aftercare | Truthful closeout record                                  | “Closed Case” is not automatically “sold Property”  |
 
 Seller work joins the same loop through intake → scope/authority → assessment → instructions → parallel preparation → exact preview/review → marketing → proposal coordination → handover. Corrections and withdrawals can interrupt any public stage and must propagate through affected commitments.
 
@@ -91,17 +91,17 @@ An object header must provide stable identity, human-readable title, current sta
 
 ### 02.2 Capability and audience matrix
 
-| Actor | Normal visible work | Can request/perform | Never infer from this role |
-|---|---|---|---|
-| Visitor | Approved public facts and own receipt outcome | Search/save locally/inquire/request a viewing | Private address, owner identity, Case information or confirmation authority |
-| Invited client | Specifically granted Cases/actions/documents | Propose Brief edits, feedback, messages, agreed instruction/decision tasks | All documents belonging to other Case participants |
-| Client collaborator | Explicitly scoped shared decision material | Only granted feedback/message/decision actions | Household or shared email implies unlimited access |
-| Assigned broker | Assigned/team-authorized work | Case progression, permitted facts, proposals and commitments | Publishing or legal authority without its separate capability |
-| Coordinator | Necessary scheduling/coverage/contact context | Propose and confirm with required checks | Broad access to identity/financial/legal evidence |
-| Editor/translator | Assigned source/draft/locale work | Draft and scoped review | Commercial, publishing or professional approval |
-| Publisher | Eligible exact publication candidates | Activate, restrict, withdraw, reconcile | Team administration or legal verification |
-| Manager/privacy/release operator | Explicit capability-specific operations | Assign, grant/revoke, handle privacy/evidence | An invisible superuser bypass or unlogged document access |
-| Hermes | Task-scoped sources and drafts | Produce proposals for human review | Send, publish, index, grant access or approve facts/legal claims |
+| Actor                            | Normal visible work                           | Can request/perform                                                        | Never infer from this role                                                  |
+| -------------------------------- | --------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Visitor                          | Approved public facts and own receipt outcome | Search/save locally/inquire/request a viewing                              | Private address, owner identity, Case information or confirmation authority |
+| Invited client                   | Specifically granted Cases/actions/documents  | Propose Brief edits, feedback, messages, agreed instruction/decision tasks | All documents belonging to other Case participants                          |
+| Client collaborator              | Explicitly scoped shared decision material    | Only granted feedback/message/decision actions                             | Household or shared email implies unlimited access                          |
+| Assigned broker                  | Assigned/team-authorized work                 | Case progression, permitted facts, proposals and commitments               | Publishing or legal authority without its separate capability               |
+| Coordinator                      | Necessary scheduling/coverage/contact context | Propose and confirm with required checks                                   | Broad access to identity/financial/legal evidence                           |
+| Editor/translator                | Assigned source/draft/locale work             | Draft and scoped review                                                    | Commercial, publishing or professional approval                             |
+| Publisher                        | Eligible exact publication candidates         | Activate, restrict, withdraw, reconcile                                    | Team administration or legal verification                                   |
+| Manager/privacy/release operator | Explicit capability-specific operations       | Assign, grant/revoke, handle privacy/evidence                              | An invisible superuser bypass or unlogged document access                   |
+| Hermes                           | Task-scoped sources and drafts                | Produce proposals for human review                                         | Send, publish, index, grant access or approve facts/legal claims            |
 
 Server authorization is capability plus current membership/grant, record relationship, field audience and action state. Hidden controls are not access control. Every mutation and protected read must be checked independently of navigation. A forbidden response must not reveal the secret title, amount, recipient or existence of another person's Case.
 
@@ -121,11 +121,11 @@ The public host is `makler-realty.com`; client context is `my.makler-realty.com`
 
 Public and client routes begin with one of the seven supported locale codes; staff routes with BG/EN/RU. The locale controls labels, formatting and eligible public content, not identity or facts. Private authentication contexts and cookies remain separate. A staff member signed into the client host must not suddenly see agency controls there.
 
-| Context | Primary navigation | Secondary/contextual navigation |
-|---|---|---|
-| Public | Buy, Rent, Sell/Let, Areas, About/Contact, Saved, language | Compare tray, Help, privacy/accessibility, service/guide links |
-| Client | Overview, Properties, Appointments, Messages, Documents | Case switcher; Brief, Proposal, Listing preview and Closeout when relevant; preferences/participants/privacy |
-| Staff | Today, Inquiries, Cases, Calendar, Inventory, Reviews, Content, Operations | Record tabs; team/access, service policy, release evidence and account settings |
+| Context | Primary navigation                                                         | Secondary/contextual navigation                                                                              |
+| ------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Public  | Buy, Rent, Sell/Let, Areas, About/Contact, Saved, language                 | Compare tray, Help, privacy/accessibility, service/guide links                                               |
+| Client  | Overview, Properties, Appointments, Messages, Documents                    | Case switcher; Brief, Proposal, Listing preview and Closeout when relevant; preferences/participants/privacy |
+| Staff   | Today, Inquiries, Cases, Calendar, Inventory, Reviews, Content, Operations | Record tabs; team/access, service policy, release evidence and account settings                              |
 
 Hide an unoffered service from normal navigation. An existing legacy URL still needs its truthful approved response. Missing permission removes unavailable navigation entries; known work blocked by a prerequisite stays visible with the safe reason and recovery action.
 
@@ -133,34 +133,34 @@ Hide an unoffered service from normal navigation. An existing legacy URL still n
 
 All paths below are under the appropriate host and `/{locale}` unless a legacy manifest says otherwise. Screen IDs describe contracts; related IDs can be panels or states of one route.
 
-| Route family | Screen contracts | Canonical purpose |
-|---|---|---|
-| `/` | P01 | Intent-led entry |
-| `/properties` | P02, P03, P04, P22 | One search state with list/map/filter/recovery variants |
-| `/properties/{reference}/{slug}` | P05, P06, P21 | Eligible detail and media; truthful unavailable/preservation states |
-| `/saved`, `/compare`, `/share/{token}` | P07, P08, P09 | Local selection, comparison and public-facts sharing |
-| `/preferences` and subscription task routes | P10, P24 | Verify/edit/pause/unsubscribe alerts; no personal data in query strings |
-| `/inquire`, `/requests/{receiptId}` | P11, P12 | Contextual request and durable outcome |
-| Public `/viewings/request`; client `/appointments/{id}` | P13, P14/C06 | Public request; private arrangement status always on the client host |
-| `/areas`, `/areas/{slug}`, `/services/{slug}`, `/guides/{slug}` | P15, P16, P23 | Approved geography/guidance and bounded supported-service entry |
-| `/sell`, `/let`, `/owners/request`, receipt | P17, P18, P19 | Owner consultation and intake |
-| `/contact`, `/help/{topic}` | P20, P24 | Real contact, policies and assistance |
-| Client `/access`, `/invitations/{id}` | C01, C02 | Verify identity and accept access intentionally |
-| Client `/saved`, `/saved/import` | C05 account-saves variant | Explicit cross-host import and personal saves; selecting a Case is a separate action |
-| Client `/cases`, `/cases/{id}` | C03, C11, C16 | Case index and role-appropriate overview/closeout |
-| Client Case `/brief`, `/properties`, `/appointments`, `/messages`, `/documents`, `/proposals`, `/listing-preview` | C04–C10, C12 | Contextual private tasks |
-| Client `/preferences`, scoped `/participants`, `/privacy-requests` | C13, C17, C18 | Personal choices and access/data requests |
-| Client supported service Case | C14 | Owned consultation, not maintenance tracking |
-| Staff `/access`, `/access/recovery` | O23 access variant | Staff-only passkey sign-in, one-passkey enrolment with optional backups, denial and recovery |
-| Staff `/today`, `/inquiries`, `/inquiries/{id}` | O01–O03, O18 | Coverage, triage and commitments |
-| Staff `/cases`, `/cases/{id}`, `/parties/{id}` | O04–O07, O19, O20 | Work and relationship context |
-| Staff `/calendar`, `/appointments/{id}` | O08, O09 | Resource-aware scheduling |
-| Staff `/inventory`, `/inventory/{propertyId}` | O10–O14 | One Property workbench containing its Listings |
-| Staff `/reviews`, `/publications/{id}`, `/corrections/{id}` | O15–O17, O32, O33 | Exact review, assistance and publication/correction outcomes |
-| Staff `/content` | O21 | Approved editorial content |
-| Staff `/operations/{section}` | O22, O25–O30 | Reports, exceptions, privacy, imports, merges and bounded service Cases |
-| Staff `/settings`, `?section=preferences`, `?section=security` | O23 personal variant; F30 | Own display name, browser navigation preference, interface locale and optional passkey backup; no agency role required after staff enrolment |
-| Staff `/settings?section=agency`, `/access/manage`, `/settings/{section}` | O23, O24; release-evidence panel | Capability-gated policy, team and release work |
+| Route family                                                                                                      | Screen contracts                 | Canonical purpose                                                                                                                            |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                                                                                               | P01                              | Intent-led entry                                                                                                                             |
+| `/properties`                                                                                                     | P02, P03, P04, P22               | One search state with list/map/filter/recovery variants                                                                                      |
+| `/properties/{reference}/{slug}`                                                                                  | P05, P06, P21                    | Eligible detail and media; truthful unavailable/preservation states                                                                          |
+| `/saved`, `/compare`, `/share/{token}`                                                                            | P07, P08, P09                    | Local selection, comparison and public-facts sharing                                                                                         |
+| `/preferences` and subscription task routes                                                                       | P10, P24                         | Verify/edit/pause/unsubscribe alerts; no personal data in query strings                                                                      |
+| `/inquire`, `/requests/{receiptId}`                                                                               | P11, P12                         | Contextual request and durable outcome                                                                                                       |
+| Public&#32;`/viewings/request`; client `/appointments/{id}`                                                       | P13, P14/C06                     | Public request; private arrangement status always on the client host                                                                         |
+| `/areas`, `/areas/{slug}`, `/services/{slug}`, `/guides/{slug}`                                                   | P15, P16, P23                    | Approved geography/guidance and bounded supported-service entry                                                                              |
+| `/sell`, `/let`, `/owners/request`, receipt                                                                       | P17, P18, P19                    | Owner consultation and intake                                                                                                                |
+| `/contact`, `/help/{topic}`                                                                                       | P20, P24                         | Real contact, policies and assistance                                                                                                        |
+| Client&#32;`/access`, `/invitations/{id}`                                                                         | C01, C02                         | Verify identity and accept access intentionally                                                                                              |
+| Client&#32;`/saved`, `/saved/import`                                                                              | C05 account-saves variant        | Explicit cross-host import and personal saves; selecting a Case is a separate action                                                         |
+| Client&#32;`/cases`, `/cases/{id}`                                                                                | C03, C11, C16                    | Case index and role-appropriate overview/closeout                                                                                            |
+| Client Case `/brief`, `/properties`, `/appointments`, `/messages`, `/documents`, `/proposals`, `/listing-preview` | C04–C10, C12                     | Contextual private tasks                                                                                                                     |
+| Client&#32;`/preferences`, scoped `/participants`, `/privacy-requests`                                            | C13, C17, C18                    | Personal choices and access/data requests                                                                                                    |
+| Client supported service Case                                                                                     | C14                              | Owned consultation, not maintenance tracking                                                                                                 |
+| Staff&#32;`/access`, `/access/recovery`                                                                           | O23 access variant               | Staff-only passkey sign-in, one-passkey enrolment with optional backups, denial and recovery                                                 |
+| Staff&#32;`/today`, `/inquiries`, `/inquiries/{id}`                                                               | O01–O03, O18                     | Coverage, triage and commitments                                                                                                             |
+| Staff&#32;`/cases`, `/cases/{id}`, `/parties/{id}`                                                                | O04–O07, O19, O20                | Work and relationship context                                                                                                                |
+| Staff&#32;`/calendar`, `/appointments/{id}`                                                                       | O08, O09                         | Resource-aware scheduling                                                                                                                    |
+| Staff&#32;`/inventory`, `/inventory/{propertyId}`                                                                 | O10–O14                          | One Property workbench containing its Listings                                                                                               |
+| Staff&#32;`/reviews`, `/publications/{id}`, `/corrections/{id}`                                                   | O15–O17, O32, O33                | Exact review, assistance and publication/correction outcomes                                                                                 |
+| Staff&#32;`/content`                                                                                              | O21                              | Approved editorial content                                                                                                                   |
+| Staff&#32;`/operations/{section}`                                                                                 | O22, O25–O30                     | Reports, exceptions, privacy, imports, merges and bounded service Cases                                                                      |
+| Staff&#32;`/settings`, `?section=preferences`, `?section=security`                                                | O23 personal variant; F30        | Own display name, browser navigation preference, interface locale and optional passkey backup; no agency role required after staff enrolment |
+| Staff&#32;`/settings?section=agency`, `/access/manage`, `/settings/{section}`                                     | O23, O24; release-evidence panel | Capability-gated policy, team and release work                                                                                               |
 
 C15 and O31 are retired, with no replacement financial route. Do not create disabled “coming soon” statement tabs. Architecture route families prevail if route naming is normalized during implementation; retain stable object identity and these task contracts.
 
@@ -186,14 +186,14 @@ Interest state is suggested, shortlisted, viewing requested, viewed, proposal, d
 
 ### 04.2 Listing state is several answers
 
-| Axis | Visible labels | UX implication |
-|---|---|---|
-| Availability | Available; confirmation required; negotiating; reserved with recorded basis; sold/let; withdrawn | Controls truthful availability and viewing prerequisites, not approval |
-| Editorial revision | Draft; needs facts; in review; changes requested; approved revision | Save is not publish; live and working versions can differ |
-| Locale | Missing; draft; reviewing; approved for source; stale; rejected | An available language switch is not proof that this Listing has an approved translation |
-| Publication | Never published; eligible; active; restricted; withdrawn | Exact manifest/pointer and current generation decide exposure |
-| Destination | Queued; attempting; acknowledged; verified; failed; unknown; withdrawing; withdrawn | Sending a request is not verified external publication |
-| Freshness | Current under policy; review due; conflicting; unknown | A timer creates review work; it never reconfirms facts |
+| Axis               | Visible labels                                                                                   | UX implication                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Availability       | Available; confirmation required; negotiating; reserved with recorded basis; sold/let; withdrawn | Controls truthful availability and viewing prerequisites, not approval                  |
+| Editorial revision | Draft; needs facts; in review; changes requested; approved revision                              | Save is not publish; live and working versions can differ                               |
+| Locale             | Missing; draft; reviewing; approved for source; stale; rejected                                  | An available language switch is not proof that this Listing has an approved translation |
+| Publication        | Never published; eligible; active; restricted; withdrawn                                         | Exact manifest/pointer and current generation decide exposure                           |
+| Destination        | Queued; attempting; acknowledged; verified; failed; unknown; withdrawing; withdrawn              | Sending a request is not verified external publication                                  |
+| Freshness          | Current under policy; review due; conflicting; unknown                                           | A timer creates review work; it never reconfirms facts                                  |
 
 Public detail normally shows only the decision-relevant availability, confirmation time and known limitations. Staff can inspect every axis in the workbench. Do not make a single red/amber/green dot carry this model.
 
@@ -201,14 +201,14 @@ Availability review defaults to 14 days for sales and 7 days for long-term renta
 
 ### 04.3 Appointments, proposals, messages and documents
 
-| Object | Required visible distinction | Consequential guard |
-|---|---|---|
-| Appointment | Requested, proposed, confirmed, reschedule requested, completed, declined, cancelled, no-show | Confirm only after host, access, resource/time and availability checks; keep old confirmation during a proposed reschedule |
-| Proposal | Draft, reviewed, submitted, awaiting response, countered, declined, withdrawn, expired, agreed for next step | Decisions reference an exact revision; changed terms invalidate earlier approval |
-| Message | Draft, approved, queued, attempting, provider accepted, delivered, bounced/failed, outcome unknown | Display only observed delivery; unknown outcome does not offer blind resend |
-| Document | Uploading, sealing/verifying, scanning, processing, ready for scoped review, reviewed for named purpose, replacement required, superseded, restricted | Upload success is not scan success; scan success is not professional validation |
-| Task/Commitment | Open, in progress, waiting, done, cancelled | Owner, due condition, dependency and evidence/outcome; waiting has a review date |
-| AI draft | Requested, generating, ready for review, unsupported/conflicting, stale, accepted as draft, rejected, failed | No publish/send/grant; accepting generated text does not approve its next consequential action |
+| Object          | Required visible distinction                                                                                                                          | Consequential guard                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Appointment     | Requested, proposed, confirmed, reschedule requested, completed, declined, cancelled, no-show                                                         | Confirm only after host, access, resource/time and availability checks; keep old confirmation during a proposed reschedule |
+| Proposal        | Draft, reviewed, submitted, awaiting response, countered, declined, withdrawn, expired, agreed for next step                                          | Decisions reference an exact revision; changed terms invalidate earlier approval                                           |
+| Message         | Draft, approved, queued, attempting, provider accepted, delivered, bounced/failed, outcome unknown                                                    | Display only observed delivery; unknown outcome does not offer blind resend                                                |
+| Document        | Uploading, sealing/verifying, scanning, processing, ready for scoped review, reviewed for named purpose, replacement required, superseded, restricted | Upload success is not scan success; scan success is not professional validation                                            |
+| Task/Commitment | Open, in progress, waiting, done, cancelled                                                                                                           | Owner, due condition, dependency and evidence/outcome; waiting has a review date                                           |
+| AI draft        | Requested, generating, ready for review, unsupported/conflicting, stale, accepted as draft, rejected, failed                                          | No publish/send/grant; accepting generated text does not approve its next consequential action                             |
 
 ### 04.4 Transition review pattern
 
@@ -222,32 +222,32 @@ An action result must say whether it changed local state, queued external work, 
 
 Each screen draws the applicable states below plus its specific states. The screen register identifies its critical variants; the designer/frontender annotates any inapplicable state rather than duplicating meaningless combinations.
 
-| ID | State | Presentation and recovery contract |
-|---|---|---|
-| S01 | Initial loading | Preserve route identity and shell; content-shaped placeholder, textual status; no fabricated counts or enabled consequences |
-| S02 | Refreshing | Keep authorized committed content visibly marked as updating; stale responses cannot replace newer state |
-| S03 | First-use empty | Explain the object's purpose and one appropriate next action; never invent sample private records as real |
-| S04 | Filtered empty | Keep criteria, distinguish no matches, offer explicit individual relaxations and reset |
-| S05 | Partial | Identify the missing section/provider; preserve independently usable actions; counts state their scope |
-| S06 | Stale | Show which observation/version is old and how to refresh/review; no false live badge |
-| S07 | Permission limited | Explain safe missing capability or offer authorized contact; do not expose hidden record details |
-| S08 | Session expired | Preserve only safe local work, reauthenticate in the correct context, reload/review before action |
-| S09 | Offline | Explain offline capability; keep safe in-tab drafts, no automatic consequential replay |
-| S10 | Slow | Retain progress/status identity; offer status check or leaving safely, not repeated submissions |
-| S11 | Validation error | Linked summary plus field-specific explanation; keep valid input; focus error summary after submission |
-| S12 | Rejected command | State no accepted effect where known, show reason and correctable prerequisite; do not erase input |
-| S13 | Unknown outcome | “We could not confirm the result”; check same operation; no new logical action until reconciled |
-| S14 | Revision conflict | Keep local values, show latest/current diff, allow explicit reapply/review; no last-write-wins |
-| S15 | Unsaved draft | Clear local-versus-server state and navigation guard; do not imply another staff member can see it |
-| S16 | Server-saved draft | Timestamp/version acknowledgment; separate review/send/publish action remains explicit |
-| S17 | Confirmed success | State exactly what committed and what remains pending, durable destination/reference and next action |
-| S18 | Revoked/deleted | Remove protected content on detection; safe reason/action; public historical content follows approved policy |
-| S19 | Rate limited | Explain temporary limit without exposing anti-abuse internals; retain inputs, safe retry timing and contact alternative |
-| S20 | Unsupported/unavailable capability | Useful alternative; no deceptive enabled stub, phantom instant booking or empty service workspace |
-| S21 | Queued/running | Durable Operation and truthful phase; changing screen is safe; cancel only if an actual cancellation contract exists |
-| S22 | External failure | Local record remains intact; identify failed delivery/verification, owner and permitted reconciliation |
-| S23 | Long/overflowing content | Wrap, expand or labeled scroll; no missing amounts, recipients, errors or primary actions |
-| S24 | Restricted/correcting content | Suppress inaccurate/private material; explain safe availability and next step without showing the removed fact |
+| ID  | State                              | Presentation and recovery contract                                                                                          |
+| --- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| S01 | Initial loading                    | Preserve route identity and shell; content-shaped placeholder, textual status; no fabricated counts or enabled consequences |
+| S02 | Refreshing                         | Keep authorized committed content visibly marked as updating; stale responses cannot replace newer state                    |
+| S03 | First-use empty                    | Explain the object's purpose and one appropriate next action; never invent sample private records as real                   |
+| S04 | Filtered empty                     | Keep criteria, distinguish no matches, offer explicit individual relaxations and reset                                      |
+| S05 | Partial                            | Identify the missing section/provider; preserve independently usable actions; counts state their scope                      |
+| S06 | Stale                              | Show which observation/version is old and how to refresh/review; no false live badge                                        |
+| S07 | Permission limited                 | Explain safe missing capability or offer authorized contact; do not expose hidden record details                            |
+| S08 | Session expired                    | Preserve only safe local work, reauthenticate in the correct context, reload/review before action                           |
+| S09 | Offline                            | Explain offline capability; keep safe in-tab drafts, no automatic consequential replay                                      |
+| S10 | Slow                               | Retain progress/status identity; offer status check or leaving safely, not repeated submissions                             |
+| S11 | Validation error                   | Linked summary plus field-specific explanation; keep valid input; focus error summary after submission                      |
+| S12 | Rejected command                   | State no accepted effect where known, show reason and correctable prerequisite; do not erase input                          |
+| S13 | Unknown outcome                    | “We could not confirm the result”; check same operation; no new logical action until reconciled                             |
+| S14 | Revision conflict                  | Keep local values, show latest/current diff, allow explicit reapply/review; no last-write-wins                              |
+| S15 | Unsaved draft                      | Clear local-versus-server state and navigation guard; do not imply another staff member can see it                          |
+| S16 | Server-saved draft                 | Timestamp/version acknowledgment; separate review/send/publish action remains explicit                                      |
+| S17 | Confirmed success                  | State exactly what committed and what remains pending, durable destination/reference and next action                        |
+| S18 | Revoked/deleted                    | Remove protected content on detection; safe reason/action; public historical content follows approved policy                |
+| S19 | Rate limited                       | Explain temporary limit without exposing anti-abuse internals; retain inputs, safe retry timing and contact alternative     |
+| S20 | Unsupported/unavailable capability | Useful alternative; no deceptive enabled stub, phantom instant booking or empty service workspace                           |
+| S21 | Queued/running                     | Durable Operation and truthful phase; changing screen is safe; cancel only if an actual cancellation contract exists        |
+| S22 | External failure                   | Local record remains intact; identify failed delivery/verification, owner and permitted reconciliation                      |
+| S23 | Long/overflowing content           | Wrap, expand or labeled scroll; no missing amounts, recipients, errors or primary actions                                   |
+| S24 | Restricted/correcting content      | Suppress inaccurate/private material; explain safe availability and next step without showing the removed fact              |
 
 ### 05.2 Feedback and focus
 
@@ -269,15 +269,15 @@ Only reversible local choices may be optimistic: selecting a comparison item, ch
 
 ### 05.4 Notification policy and microcopy
 
-| Event | In-product behavior | External behavior |
-|---|---|---|
-| Inquiry accepted | Persistent receipt with reference and next staffed step | Approved receipt template if a valid route exists; failure does not revoke acceptance |
-| Broker needs input | Case next-action item with owner/due condition | Approved service notification to permitted recipients |
-| Viewing proposal/confirmation/change | Persistent exact arrangement and response task | Versioned ICS/template; acceptance by email provider is not attendance |
-| New Case message | Visible thread/unread state | Safe notification without unnecessary private content; audience checked at execution |
-| Listing materially changes | Changed/stale indicator on relevant Interest and owned staff correction | Reviewed client communication if needed; no uncontrolled bulk notification |
-| Saved-search match | Subscription state and history where useful | Verified opt-in daily digest; current eligible facts only |
-| Provider/worker failure | Staff exception with affected work and owner | Technical alert through independent monitoring, not customer-facing panic |
+| Event                                | In-product behavior                                                     | External behavior                                                                     |
+| ------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Inquiry accepted                     | Persistent receipt with reference and next staffed step                 | Approved receipt template if a valid route exists; failure does not revoke acceptance |
+| Broker needs input                   | Case next-action item with owner/due condition                          | Approved service notification to permitted recipients                                 |
+| Viewing proposal/confirmation/change | Persistent exact arrangement and response task                          | Versioned ICS/template; acceptance by email provider is not attendance                |
+| New Case message                     | Visible thread/unread state                                             | Safe notification without unnecessary private content; audience checked at execution  |
+| Listing materially changes           | Changed/stale indicator on relevant Interest and owned staff correction | Reviewed client communication if needed; no uncontrolled bulk notification            |
+| Saved-search match                   | Subscription state and history where useful                             | Verified opt-in daily digest; current eligible facts only                             |
+| Provider/worker failure              | Staff exception with affected work and owner                            | Technical alert through independent monitoring, not customer-facing panic             |
 
 Use “Request received” only after commit; “Viewing requested” until confirmed; “Sent to email provider” when that is all that is known; “Reviewed for [purpose]” instead of “verified document.” Unknown outcome copy must not say “failed—send again.” Explain a blocked action beside it, rather than requiring a tooltip a keyboard/touch user cannot reach.
 
@@ -289,16 +289,16 @@ Owner decision 2026-10-02 (palette B): this section is the architecture §11.3 f
 
 Use the architecture's light, grounded agency identity. Property photography, useful facts and human service are the visual content. Public pages are spacious enough to evaluate; operational pages are denser and quieter. Do not introduce a different dashboard theme, decorative gradients, full-screen introduction, artificial scarcity, autoplay hero or floating chatbot over the task.
 
-| Token role | Baseline | Usage constraint |
-|---|---|---|
-| Canvas / surface | `#F8F7F3` / `#FFFFFF` | Reading background and actual surface hierarchy |
-| Primary / secondary text | `#192E27` / `#52625A` | Essential facts and supporting context; never make required data faint |
-| Subtle border | `#D9DFD8` | Separation only; not the sole essential input/focus boundary |
-| Primary action / inverse | `#214F3C` / `#FFFFFF` | Primary action and deliberate selection, not every badge |
-| Interactive outline | `#687A6F` baseline | Validate non-text contrast on actual surrounding surfaces |
-| Focus | `#174EA6`, 3 px outline, 2 px offset baseline | Remains visible on every surface and in forced colors |
-| Butler (assistance) | `#5B45A0` | Marks Butler's work, verdicts and receipts; never the primary action color |
-| Error / warning / success text | `#A12A25` / `#775000` / `#21603C` baseline | Always paired with words/icon; test actual backgrounds and states |
+| Token role                     | Baseline                                      | Usage constraint                                                           |
+| ------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------- |
+| Canvas / surface               | `#F8F7F3` / `#FFFFFF`                         | Reading background and actual surface hierarchy                            |
+| Primary / secondary text       | `#192E27` / `#52625A`                         | Essential facts and supporting context; never make required data faint     |
+| Subtle border                  | `#D9DFD8`                                     | Separation only; not the sole essential input/focus boundary               |
+| Primary action / inverse       | `#214F3C` / `#FFFFFF`                         | Primary action and deliberate selection, not every badge                   |
+| Interactive outline            | `#687A6F` baseline                            | Validate non-text contrast on actual surrounding surfaces                  |
+| Focus                          | `#174EA6`, 3 px outline, 2 px offset baseline | Remains visible on every surface and in forced colors                      |
+| Butler (assistance)            | `#5B45A0`                                     | Marks Butler's work, verdicts and receipts; never the primary action color |
+| Error / warning / success text | `#A12A25` / `#775000` / `#21603C` baseline    | Always paired with words/icon; test actual backgrounds and states          |
 
 Use self-hosted licensed Noto Sans and Noto Sans Hebrew. Public/client body is 16 px or larger, 1.5–1.65 line height. Staff supporting data may be 14 px; inputs and essential messages remain comfortably readable. Use tabular figures for aligned amounts/times; do not force identifiers into a decorative mono style. Body copy stays around 60–75 characters per line.
 
@@ -310,12 +310,12 @@ Form fields follow Figma UI06 Input (`6:74`) and UI07 Textarea (`6:85`) on publi
 
 ### 06.2 Layout ranges and density
 
-| Range | Default structural behavior | Required adaptation |
-|---|---|---|
-| Compact 320–639 CSS px | Single primary column, 20 px gutters; task navigation replaces desktop rails | Full-height sheets, dedicated detail routes, visible keyboard-safe actions |
-| Medium 640–1023 | 24 px gutters, one or two content columns by fit | Do not force desktop map/review splits before both panes are readable |
-| Desktop 1024–1439 | 24–32 px gutters, stable navigation and optional inspector | Filter rail 240–280 px; app rail about 224 px; inspector 320–360 px only when space permits |
-| Wide 1440+ | Content bounded near 1440 px; prose/form columns stay narrower | Use extra room for meaningful comparison, not stretched inputs or more decoration |
+| Range                  | Default structural behavior                                                  | Required adaptation                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Compact 320–639 CSS px | Single primary column, 20 px gutters; task navigation replaces desktop rails | Full-height sheets, dedicated detail routes, visible keyboard-safe actions                  |
+| Medium 640–1023        | 24 px gutters, one or two content columns by fit                             | Do not force desktop map/review splits before both panes are readable                       |
+| Desktop 1024–1439      | 24–32 px gutters, stable navigation and optional inspector                   | Filter rail 240–280 px; app rail about 224 px; inspector 320–360 px only when space permits |
+| Wide 1440+             | Content bounded near 1440 px; prose/form columns stay narrower               | Use extra room for meaningful comparison, not stretched inputs or more decoration           |
 
 Public cards use a consistent approximately 4:3 image window with approved crop/focal point. Detail galleries preserve the full image through an inspect/view action; floor plans use contain, not destructive cover cropping. Reserve media dimensions to avoid jumping layouts. Document and image previews must not crop out qualifications, watermarks or relevant evidence.
 
@@ -1529,40 +1529,40 @@ Show exact fact/version and affected locale/destination/commitment. A normal dra
 
 Components own interaction behavior, not business authority. Share tokens and tested primitives across public/client/staff; do not share private caches or authentication contexts. Each interactive component must define default, hover, focus, active/selected, disabled-with-reason, loading and error where meaningful.
 
-| ID | Component | Required anatomy, variants and behavior |
-|---|---|---|
-| UI01 | Surface shell | Public/client/staff variants; skip link, landmarks, page title, safe session context, reserved loading layout; private data absent until authorized |
-| UI02 | Navigation | Current item conveyed semantically, complete compact menu, keyboard order and close/return focus; counts only from permitted data |
-| UI03 | Breadcrumb/return | Human-readable context and stable route; preserve authorized list/query position; never use arbitrary unvalidated return URLs |
-| UI04 | Language switch | Native language names, current locale, explicit missing-content state; preserve object/intent; no flags-as-language or automatic forced redirect |
-| UI05 | Action button | Effect-specific label, priority/danger variant, pending indicator without width jump, disabled explanation, keyboard activation; no duplicate effect on double activation |
-| UI06 | Link/handoff | Real URL for navigation, external/download/phone behavior when relevant; copied/share status; no action disguised as a dead anchor |
-| UI07 | Form field | Persistent label, value, optional/required/unknown meaning, hint, error association, autocomplete/inputmode; no placeholder-only labels |
-| UI08 | Searchable choice | Keyboard/touch selection, selected identity separate from search text, no-results/loading/error, clear action and long labels; use a tested combobox pattern where needed |
-| UI09 | Multi-select facet | OR-within-facet meaning, selected count/chips, clear/remove labels, draft versus committed state, keyboard-accessible complete list |
-| UI10 | Typed quantity | Amount/unit/basis/currency/period explicit; localized parsing/formatting and validation; unknown/withheld separate from zero |
-| UI11 | Date/time/zone | Typed entry and picker, explicit timezone, invalid/past/ambiguous states, readable final absolute instant; not a date picker alone |
-| UI12 | Status/freshness | Text plus optional icon, exact dimension/scope and meaningful timestamp; no single universal green badge; tooltip is supplementary |
-| UI13 | Listing card | Approved image/reference/location/price/basis/facts/availability, real detail link, separate save/compare controls, unavailable and long-content variants |
-| UI14 | Result toolbar | Count type/scope, sort, pagination state and accessible updates; stable query identity; no stale count paired with newer results without disclosure |
-| UI15 | Filter rail/sheet | Shared field semantics, desktop nonmodal and compact modal variants, Apply/Clear/Cancel, explicit draft handling and keyboard-safe footer |
-| UI16 | Map selection | Approved-coordinate marker/cluster and linked accessible result; Search this area, selected state, attribution, failure and list fallback |
-| UI17 | Gallery/viewer | Correct starting item, item count/caption/type, non-swipe navigation, zoom/fit, media failure, focus return and closed-media pause |
-| UI18 | Comparison | Semantically associated row/column labels, two/three desktop and narrow pair variants, unknown/current-change/withdrawn states |
-| UI19 | Dialog/sheet | Declared modality, name, intentional entry/return focus, visible Close/Cancel, Escape/platform-close/Back coordination, unsaved-work policy |
-| UI20 | Data table | Stable rows, labeled sort, keyboard controls, page/all-matching selection distinction, responsive relationship-preserving alternative and empty/error states |
-| UI21 | Timeline | Attributable events, actual local time/zone where needed, explicit client/internal projection, grouped date and source/related-object links |
-| UI22 | Composer | Audience/channel, draft/approved revision, attachment eligibility, review/send and durable outcome; internal note has a separate unmistakable mode |
-| UI23 | Upload queue | Chooser plus optional drop, item identity, size/type hints, per-phase progress, retry/remove permitted by state, immutable sealed result |
-| UI24 | Evidence/document | Purpose, audience, scan/review distinction, version/supersession, safe preview, current download authorization and replacement workflow |
-| UI25 | Revision diff | Current/proposed/source labels, protected-fact changes first, long text/media changes, stale candidate, stacked compact version and scope-bound decision |
-| UI26 | Readiness checklist | Required blocker versus optional enhancement, owner, exact evidence/version, actionable link; completeness percentage never grants authority |
-| UI27 | Operation result | Logical ID, accepted/local/external outcome, phase, per-item result, permitted cancel/retry/reconcile, safe support reference |
-| UI28 | Owner/next action | Accountable person or coverage queue, due condition, waiting dependency/review date, handover state and safe contact |
-| UI29 | Purpose preference | Service/alerts/marketing separated, channel verification, policy version, active/pending/paused/revoked, explicit save/receipt |
-| UI30 | Invitation/grant | Recipient-bound scope, expiry, intentional accept/revoke, wrong identity and reauthentication, no private GET-preview disclosure |
-| UI31 | AI review | Task/source boundary, generated diff, actual source pointers, unknown/conflict/stale/budget/error state, accept-as-draft only |
-| UI32 | Notification/feedback | Inline durable status for consequences, nonintrusive live announcement for routine updates, linked recovery; no toast-only confirmation |
+| ID   | Component             | Required anatomy, variants and behavior                                                                                                                                   |
+| ---- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| UI01 | Surface shell         | Public/client/staff variants; skip link, landmarks, page title, safe session context, reserved loading layout; private data absent until authorized                       |
+| UI02 | Navigation            | Current item conveyed semantically, complete compact menu, keyboard order and close/return focus; counts only from permitted data                                         |
+| UI03 | Breadcrumb/return     | Human-readable context and stable route; preserve authorized list/query position; never use arbitrary unvalidated return URLs                                             |
+| UI04 | Language switch       | Native language names, current locale, explicit missing-content state; preserve object/intent; no flags-as-language or automatic forced redirect                          |
+| UI05 | Action button         | Effect-specific label, priority/danger variant, pending indicator without width jump, disabled explanation, keyboard activation; no duplicate effect on double activation |
+| UI06 | Link/handoff          | Real URL for navigation, external/download/phone behavior when relevant; copied/share status; no action disguised as a dead anchor                                        |
+| UI07 | Form field            | Persistent label, value, optional/required/unknown meaning, hint, error association, autocomplete/inputmode; no placeholder-only labels                                   |
+| UI08 | Searchable choice     | Keyboard/touch selection, selected identity separate from search text, no-results/loading/error, clear action and long labels; use a tested combobox pattern where needed |
+| UI09 | Multi-select facet    | OR-within-facet meaning, selected count/chips, clear/remove labels, draft versus committed state, keyboard-accessible complete list                                       |
+| UI10 | Typed quantity        | Amount/unit/basis/currency/period explicit; localized parsing/formatting and validation; unknown/withheld separate from zero                                              |
+| UI11 | Date/time/zone        | Typed entry and picker, explicit timezone, invalid/past/ambiguous states, readable final absolute instant; not a date picker alone                                        |
+| UI12 | Status/freshness      | Text plus optional icon, exact dimension/scope and meaningful timestamp; no single universal green badge; tooltip is supplementary                                        |
+| UI13 | Listing card          | Approved image/reference/location/price/basis/facts/availability, real detail link, separate save/compare controls, unavailable and long-content variants                 |
+| UI14 | Result toolbar        | Count type/scope, sort, pagination state and accessible updates; stable query identity; no stale count paired with newer results without disclosure                       |
+| UI15 | Filter rail/sheet     | Shared field semantics, desktop nonmodal and compact modal variants, Apply/Clear/Cancel, explicit draft handling and keyboard-safe footer                                 |
+| UI16 | Map selection         | Approved-coordinate marker/cluster and linked accessible result; Search this area, selected state, attribution, failure and list fallback                                 |
+| UI17 | Gallery/viewer        | Correct starting item, item count/caption/type, non-swipe navigation, zoom/fit, media failure, focus return and closed-media pause                                        |
+| UI18 | Comparison            | Semantically associated row/column labels, two/three desktop and narrow pair variants, unknown/current-change/withdrawn states                                            |
+| UI19 | Dialog/sheet          | Declared modality, name, intentional entry/return focus, visible Close/Cancel, Escape/platform-close/Back coordination, unsaved-work policy                               |
+| UI20 | Data table            | Stable rows, labeled sort, keyboard controls, page/all-matching selection distinction, responsive relationship-preserving alternative and empty/error states              |
+| UI21 | Timeline              | Attributable events, actual local time/zone where needed, explicit client/internal projection, grouped date and source/related-object links                               |
+| UI22 | Composer              | Audience/channel, draft/approved revision, attachment eligibility, review/send and durable outcome; internal note has a separate unmistakable mode                        |
+| UI23 | Upload queue          | Chooser plus optional drop, item identity, size/type hints, per-phase progress, retry/remove permitted by state, immutable sealed result                                  |
+| UI24 | Evidence/document     | Purpose, audience, scan/review distinction, version/supersession, safe preview, current download authorization and replacement workflow                                   |
+| UI25 | Revision diff         | Current/proposed/source labels, protected-fact changes first, long text/media changes, stale candidate, stacked compact version and scope-bound decision                  |
+| UI26 | Readiness checklist   | Required blocker versus optional enhancement, owner, exact evidence/version, actionable link; completeness percentage never grants authority                              |
+| UI27 | Operation result      | Logical ID, accepted/local/external outcome, phase, per-item result, permitted cancel/retry/reconcile, safe support reference                                             |
+| UI28 | Owner/next action     | Accountable person or coverage queue, due condition, waiting dependency/review date, handover state and safe contact                                                      |
+| UI29 | Purpose preference    | Service/alerts/marketing separated, channel verification, policy version, active/pending/paused/revoked, explicit save/receipt                                            |
+| UI30 | Invitation/grant      | Recipient-bound scope, expiry, intentional accept/revoke, wrong identity and reauthentication, no private GET-preview disclosure                                          |
+| UI31 | AI review             | Task/source boundary, generated diff, actual source pointers, unknown/conflict/stale/budget/error state, accept-as-draft only                                             |
+| UI32 | Notification/feedback | Inline durable status for consequences, nonintrusive live announcement for routine updates, linked recovery; no toast-only confirmation                                   |
 
 Native semantic elements are preferred where their behavior fits. A component library's claim of accessibility is not evidence that MS Realty's composition, labeling, focus or whole task passes. Long operational tables need proper table semantics; do not add an ARIA grid unless grid keyboard interaction is intentionally implemented and tested.
 
@@ -1584,36 +1584,36 @@ Known numbers use explicit unit/basis and localized parsing with a review summar
 
 ### 18.2 Search fields
 
-| Field | UI/meaning | Validation and recovery |
-|---|---|---|
-| Purpose | Buy/sale or long-term rent | Required committed context; switching clears/reviews incompatible period-specific criteria explicitly |
-| Country/location | Approved IDs with localized labels and aliases | Multiple locations OR; no raw private address; unknown text offers supported choice/help |
-| Property type | Approved taxonomy, multi-choice | Preserve stable IDs across language; do not reinterpret an untranslated label as another type |
-| Price min/max | Typed amount, currency and period | Nonnegative search bounds, min ≤ max; no cross-currency comparison without an explicitly supported rate policy |
-| Bedrooms | Exact/range with studio semantics | Nonnegative integer bounds; unknown does not satisfy a confirmed minimum |
-| Area | Min/max plus basis and unit | Basis visible, min ≤ max; unsupported conversions not invented |
-| Features | Confirmed true criteria | Unknown is distinct; explicit include-unconfirmed behavior must explain scope |
-| Map bounds | Approved public spatial area | Changes are draft until Search this area; safe bounded query and selected locality relationship |
-| Sort | Documented relevance/price/recent choices | Stable tie-breaker and cursor tied to query; unsupported sort rejected safely |
-| Reference/text | Exact reference first, approved aliases | Bounded length/cost; never arbitrary database query or a private Brief in a public URL |
+| Field            | UI/meaning                                     | Validation and recovery                                                                                        |
+| ---------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Purpose          | Buy/sale or long-term rent                     | Required committed context; switching clears/reviews incompatible period-specific criteria explicitly          |
+| Country/location | Approved IDs with localized labels and aliases | Multiple locations OR; no raw private address; unknown text offers supported choice/help                       |
+| Property type    | Approved taxonomy, multi-choice                | Preserve stable IDs across language; do not reinterpret an untranslated label as another type                  |
+| Price min/max    | Typed amount, currency and period              | Nonnegative search bounds, min ≤ max; no cross-currency comparison without an explicitly supported rate policy |
+| Bedrooms         | Exact/range with studio semantics              | Nonnegative integer bounds; unknown does not satisfy a confirmed minimum                                       |
+| Area             | Min/max plus basis and unit                    | Basis visible, min ≤ max; unsupported conversions not invented                                                 |
+| Features         | Confirmed true criteria                        | Unknown is distinct; explicit include-unconfirmed behavior must explain scope                                  |
+| Map bounds       | Approved public spatial area                   | Changes are draft until Search this area; safe bounded query and selected locality relationship                |
+| Sort             | Documented relevance/price/recent choices      | Stable tie-breaker and cursor tied to query; unsupported sort rejected safely                                  |
+| Reference/text   | Exact reference first, approved aliases        | Bounded length/cost; never arbitrary database query or a private Brief in a public URL                         |
 
 The UI does not promise exact search-quality behavior merely because PostgreSQL supports trigram matching. Reviewed query fixtures cover each locale and relevant transliterations. Parameter changes show what actually applied, including any validated canonical normalization.
 
 ### 18.3 Inquiry, callback and owner intake
 
-| Field | Inquiry/callback | Owner intake | Privacy/interaction rule |
-|---|---|---|---|
-| Intent | Required: question/callback/viewing context | Required: sell/let/consultation | Prefilled from entry; user can inspect/correct |
-| Reference/criteria/topic | Present when selected | Existing reference optional | Preserve stable reference/source URL; no hidden invented context |
-| Name | Optional unless genuinely needed | Optional at first contact | One inclusive display-name field |
-| Contact method/value | One required reachable route | One required reachable route | Do not force both phone/email or marketing permission |
-| Language | Explicit preference with current locale default | Same | Do not promise response staffing that does not exist |
-| Question/note | Required for a general question; optional where intent is complete | Optional useful context | 2,000-character bound, plain text, no early identity/financial evidence |
-| Preferred contact time | Optional callback preference, timezone explicit | Optional | Never a confirmed Appointment |
-| Approximate location/type | Only if relevant to general search | Required where known, unknown option available | Exact owner address not needed for casual contact |
-| Relationship to Property | Not normally required | Self-declared owner/representative/other | Does not establish legal authority |
-| Media | Not general inquiry scope by default | Optional safe initial photos | No publication; use quarantine/sealing contract |
-| Marketing | Separate optional choice if offered | Same | Unchecked; service request remains usable without it |
+| Field                     | Inquiry/callback                                                   | Owner intake                                   | Privacy/interaction rule                                                |
+| ------------------------- | ------------------------------------------------------------------ | ---------------------------------------------- | ----------------------------------------------------------------------- |
+| Intent                    | Required: question/callback/viewing context                        | Required: sell/let/consultation                | Prefilled from entry; user can inspect/correct                          |
+| Reference/criteria/topic  | Present when selected                                              | Existing reference optional                    | Preserve stable reference/source URL; no hidden invented context        |
+| Name                      | Optional unless genuinely needed                                   | Optional at first contact                      | One inclusive display-name field                                        |
+| Contact method/value      | One required reachable route                                       | One required reachable route                   | Do not force both phone/email or marketing permission                   |
+| Language                  | Explicit preference with current locale default                    | Same                                           | Do not promise response staffing that does not exist                    |
+| Question/note             | Required for a general question; optional where intent is complete | Optional useful context                        | 2,000-character bound, plain text, no early identity/financial evidence |
+| Preferred contact time    | Optional callback preference, timezone explicit                    | Optional                                       | Never a confirmed Appointment                                           |
+| Approximate location/type | Only if relevant to general search                                 | Required where known, unknown option available | Exact owner address not needed for casual contact                       |
+| Relationship to Property  | Not normally required                                              | Self-declared owner/representative/other       | Does not establish legal authority                                      |
+| Media                     | Not general inquiry scope by default                               | Optional safe initial photos                   | No publication; use quarantine/sealing contract                         |
+| Marketing                 | Separate optional choice if offered                                | Same                                           | Unchecked; service request remains usable without it                    |
 
 Before submission show the selected recipient/purpose at the appropriate level: “MS Realty will use these details to respond to this request.” Final wording/legal basis is operator-reviewed. A checkbox labeled “I accept everything” is not a substitute for clear purposes. Do not invent legal-consent requirements or promise statutory compliance.
 
@@ -1625,17 +1625,17 @@ Each Interest contains Listing reference, relevant revision, selection/progress 
 
 ### 18.5 Appointment form and confirmation review
 
-| Field/check | Required before confirmation | Client-visible presentation |
-|---|---|---|
-| Case/Interest/Listing | Correct authorized relationship and current Listing eligibility | Safe identity/reference and purpose |
-| Date/time/duration | Valid local wall time resolved to an instant | Full date, local time, timezone; second timezone where helpful |
-| Host/participants | Named authorized host and intended participants | Only permitted participants/contact details |
-| Availability | Current confirmation under policy | Actual status, not a newly verified badge created by scheduling |
-| Access | Property access permission/logistics confirmed | Relevant meeting detail, scoped and timed |
-| Resources/buffers | No exclusive-resource conflict, travel/working hours checked | Proposed or confirmed without other clients' private calendar details |
-| External busy check | Staff enters/checks it manually | No automatic Google/Microsoft sync claim |
-| Notification | Approved template/rule and current recipients | Business confirmation separate from delivery/attendance |
-| Change reason | Required for cancellation/material rearrangement where useful | Clear updated arrangement and next response |
+| Field/check           | Required before confirmation                                    | Client-visible presentation                                           |
+| --------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Case/Interest/Listing | Correct authorized relationship and current Listing eligibility | Safe identity/reference and purpose                                   |
+| Date/time/duration    | Valid local wall time resolved to an instant                    | Full date, local time, timezone; second timezone where helpful        |
+| Host/participants     | Named authorized host and intended participants                 | Only permitted participants/contact details                           |
+| Availability          | Current confirmation under policy                               | Actual status, not a newly verified badge created by scheduling       |
+| Access                | Property access permission/logistics confirmed                  | Relevant meeting detail, scoped and timed                             |
+| Resources/buffers     | No exclusive-resource conflict, travel/working hours checked    | Proposed or confirmed without other clients' private calendar details |
+| External busy check   | Staff enters/checks it manually                                 | No automatic Google/Microsoft sync claim                              |
+| Notification          | Approved template/rule and current recipients                   | Business confirmation separate from delivery/attendance               |
+| Change reason         | Required for cancellation/material rearrangement where useful   | Clear updated arrangement and next response                           |
 
 `datetime-local` has no timezone and does not reject all timezone/DST-invalid wall times. Collect IANA zone separately, reject nonexistent times and request an explicit choice for a repeated time. Show the resolved instant in the final review. [Date/time input](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/datetime-local), [DateTimeFormat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat)
 
@@ -1691,19 +1691,19 @@ Dates use explicit month/day meaning and timezone where ambiguity affects a comm
 
 ### 19.4 Copy matrix and forbidden overclaims
 
-| Situation | Approved meaning to communicate | Do not say |
-|---|---|---|
-| Inquiry committed | Request received; reference; next staffed step | Broker contacted, viewing booked, message delivered |
-| Viewing preferences submitted | Viewing requested; agency will confirm | Your booking is confirmed |
-| Provider accepted email | Accepted by email provider; delivery pending/unknown if so | Read by client |
-| Document passed malware scan | Scan complete; named human review pending | Legally verified, ownership proven |
-| Translation reviewed | Approved for specified source/locale | Property facts independently verified |
-| AI output applied | Draft inserted for human review | AI approved/published/sent |
-| Proposal accepted for next step | Recorded agreement to proceed under stated process | Sale completed, legally signed, money secured |
-| Availability review expired | Confirmation required; last meaningful observation | Available now, freshly verified |
-| External portal task recorded | Manual action pending or evidence recorded | Automatically published everywhere |
-| Privacy request received | Received; owned review under approved policy | All data erased immediately |
-| Snapshot restored | Restored candidate under validation; safety checks pending | Everything is safe because backup succeeded |
+| Situation                       | Approved meaning to communicate                            | Do not say                                          |
+| ------------------------------- | ---------------------------------------------------------- | --------------------------------------------------- |
+| Inquiry committed               | Request received; reference; next staffed step             | Broker contacted, viewing booked, message delivered |
+| Viewing preferences submitted   | Viewing requested; agency will confirm                     | Your booking is confirmed                           |
+| Provider accepted email         | Accepted by email provider; delivery pending/unknown if so | Read by client                                      |
+| Document passed malware scan    | Scan complete; named human review pending                  | Legally verified, ownership proven                  |
+| Translation reviewed            | Approved for specified source/locale                       | Property facts independently verified               |
+| AI output applied               | Draft inserted for human review                            | AI approved/published/sent                          |
+| Proposal accepted for next step | Recorded agreement to proceed under stated process         | Sale completed, legally signed, money secured       |
+| Availability review expired     | Confirmation required; last meaningful observation         | Available now, freshly verified                     |
+| External portal task recorded   | Manual action pending or evidence recorded                 | Automatically published everywhere                  |
+| Privacy request received        | Received; owned review under approved policy               | All data erased immediately                         |
+| Snapshot restored               | Restored candidate under validation; safety checks pending | Everything is safe because backup succeeded         |
 
 Errors explain action and recovery in plain language. Do not paste database/provider errors into the interface. Retain a safe support/Operation reference; private raw payloads and tokens never appear in toasts, screenshots intended for support, analytics or logs.
 
@@ -1723,33 +1723,33 @@ Server/domain commands own persistence, authorization, state transitions, exact 
 
 ### 20.2 View-model minimums
 
-| View model | Data the UI must receive explicitly | Must not infer |
-|---|---|---|
-| PublicListing | Stable reference, manifest/revision, locale/purpose, typed public facts, price basis, public location precision, availability/freshness, approved media and allowed actions | Ownership/legal validity, unknown feature truth, exact private location |
-| SearchResult | Query identity, normalized filters, eligible items, count classification, cursor, source timestamp and partial scope | Zero results from an error; total count from loaded rows |
-| CaseSummary | Type, stage, disposition, owner, next action, blockers, safe participant projection and revision | Progress from activity count or one Interest's result |
-| Interest | Case/Listing/revision identity, explicit state/feedback, known match reasons and questions | Universal probability-of-fit score |
-| Appointment | Requested/proposed/current arrangements, zone/instant, host/access checks, revision, allowed actions and notification outcomes | Confirmed slot from a calendar click or provider acceptance |
-| ReviewCandidate | Subject/source hashes, scoped approvals, diff, prerequisites, affected destinations and eligibility | Publish permission from a full form or translated draft |
-| Message | Audience/channel, draft/approval revision, logical ID and observed transport state | Read receipt, delivery or recipient permission from local submission |
-| Document | Purpose/classification/audience, immutable version, upload/scan/review states and allowed actions | Safety/legality from filename, MIME string or upload completion |
-| Operation | Logical ID, accepted/local/external classification, durable status, per-item outcomes and allowed recovery | Failure from timeout or cancellation from closing a view |
+| View model      | Data the UI must receive explicitly                                                                                                                                         | Must not infer                                                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| PublicListing   | Stable reference, manifest/revision, locale/purpose, typed public facts, price basis, public location precision, availability/freshness, approved media and allowed actions | Ownership/legal validity, unknown feature truth, exact private location |
+| SearchResult    | Query identity, normalized filters, eligible items, count classification, cursor, source timestamp and partial scope                                                        | Zero results from an error; total count from loaded rows                |
+| CaseSummary     | Type, stage, disposition, owner, next action, blockers, safe participant projection and revision                                                                            | Progress from activity count or one Interest's result                   |
+| Interest        | Case/Listing/revision identity, explicit state/feedback, known match reasons and questions                                                                                  | Universal probability-of-fit score                                      |
+| Appointment     | Requested/proposed/current arrangements, zone/instant, host/access checks, revision, allowed actions and notification outcomes                                              | Confirmed slot from a calendar click or provider acceptance             |
+| ReviewCandidate | Subject/source hashes, scoped approvals, diff, prerequisites, affected destinations and eligibility                                                                         | Publish permission from a full form or translated draft                 |
+| Message         | Audience/channel, draft/approval revision, logical ID and observed transport state                                                                                          | Read receipt, delivery or recipient permission from local submission    |
+| Document        | Purpose/classification/audience, immutable version, upload/scan/review states and allowed actions                                                                           | Safety/legality from filename, MIME string or upload completion         |
+| Operation       | Logical ID, accepted/local/external classification, durable status, per-item outcomes and allowed recovery                                                                  | Failure from timeout or cancellation from closing a view                |
 
 A public read returns one internally coherent presentation snapshot. A later action rechecks current data; a detail page need not constantly erase itself while someone reads, but it must not commit using obsolete authority. Changes relevant to a decision are shown before the action completes.
 
 ### 20.3 State ownership and persistence
 
-| State | Owner/persistence | Restore rule |
-|---|---|---|
-| Public committed search | Validated URL plus server query | Back/refresh/direct link reruns eligible query |
-| Draft filters | Local view state | Cancel discards; Apply commits; not silently mixed with previous query |
-| Selected/open media | Safe route/history state where useful | Restore valid item after media/eligibility load; safe parent fallback |
-| Device saves | Local storage where available, Listing IDs only | Explain scope/failure; merge explicitly for invited signed-in client |
-| Private server records | Server with current grants | Every read reauthorizes; no private service-worker cache |
-| Staff/client draft | In-memory plus server draft where explicitly saved | Revision-guarded acknowledgment; no automatic localStorage of private bodies |
-| Anonymous submission | Server-issued logical key plus host-only receipt-session cookie | Reconcile same logical request; public reference alone exposes no body |
-| Consequential operation | Durable server Operation | Refresh/return polls same identity; never infer resend from lost response |
-| Layout preference | Local nonsensitive preference | Cannot change permission, grant or canonical business state |
+| State                   | Owner/persistence                                               | Restore rule                                                                 |
+| ----------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Public committed search | Validated URL plus server query                                 | Back/refresh/direct link reruns eligible query                               |
+| Draft filters           | Local view state                                                | Cancel discards; Apply commits; not silently mixed with previous query       |
+| Selected/open media     | Safe route/history state where useful                           | Restore valid item after media/eligibility load; safe parent fallback        |
+| Device saves            | Local storage where available, Listing IDs only                 | Explain scope/failure; merge explicitly for invited signed-in client         |
+| Private server records  | Server with current grants                                      | Every read reauthorizes; no private service-worker cache                     |
+| Staff/client draft      | In-memory plus server draft where explicitly saved              | Revision-guarded acknowledgment; no automatic localStorage of private bodies |
+| Anonymous submission    | Server-issued logical key plus host-only receipt-session cookie | Reconcile same logical request; public reference alone exposes no body       |
+| Consequential operation | Durable server Operation                                        | Refresh/return polls same identity; never infer resend from lost response    |
+| Layout preference       | Local nonsensitive preference                                   | Cannot change permission, grant or canonical business state                  |
 
 Safe in-tab draft preservation is allowed, but it is not a guarantee against tab/process loss. Tell the user when work is only local. Sensitive drafts must not survive sign-out into another person's session. Do not store auth/share capability tokens in analytics, query parameters used for tracking, or public logs.
 
@@ -1779,17 +1779,17 @@ Native modal close requests and router Back must be coordinated: one gesture clo
 
 Commands submit logical `operationId`, expected revision where relevant and validated payload. The server derives Principal/authority. Same logical key with changed payload is a conflict. Successful mutation/audit/outbox commits atomically; external work follows independently. The response contract is more important than any specific HTTP library.
 
-| Result/error class | Frontend behavior | Forbidden behavior |
-|---|---|---|
-| Accepted local command | Show committed state/version and any pending effects; durable link | Pretend all external work completed |
-| Accepted asynchronous work | Show durable phase/status and safe navigation away | Invent a progress percentage or requeue on refresh |
-| Validation, normally 422 | Retain input, linked field summary, focus recovery | Clear form or expose raw server exception |
-| Session/authentication, normally 401 | Correct-context reauthentication, safe draft handling, re-review | Auto-replay send/approval after login |
-| Forbidden/not found | Safe limited/not-found state under disclosure policy | Reveal another Case's title, participants or hidden field values |
-| Revision/idempotency conflict, normally 409 | Preserve local input; current diff or deliberate new intent | Blind retry with a new key or last-write-wins |
-| Rate/quota, normally 429 | Explain permitted retry/alternative and retain input | Rapid retry loop or fake task completion |
-| Explicitly rejected with no effect | State known nonacceptance and correctable reason | Call it accepted because optimistic UI already changed |
-| Timeout/connection lost/ambiguous failure | Reconcile existing Operation; show unknown until resolved | Treat every 5xx as definitely unsent and encourage duplication |
+| Result/error class                          | Frontend behavior                                                  | Forbidden behavior                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Accepted local command                      | Show committed state/version and any pending effects; durable link | Pretend all external work completed                              |
+| Accepted asynchronous work                  | Show durable phase/status and safe navigation away                 | Invent a progress percentage or requeue on refresh               |
+| Validation, normally 422                    | Retain input, linked field summary, focus recovery                 | Clear form or expose raw server exception                        |
+| Session/authentication, normally 401        | Correct-context reauthentication, safe draft handling, re-review   | Auto-replay send/approval after login                            |
+| Forbidden/not found                         | Safe limited/not-found state under disclosure policy               | Reveal another Case's title, participants or hidden field values |
+| Revision/idempotency conflict, normally 409 | Preserve local input; current diff or deliberate new intent        | Blind retry with a new key or last-write-wins                    |
+| Rate/quota, normally 429                    | Explain permitted retry/alternative and retain input               | Rapid retry loop or fake task completion                         |
+| Explicitly rejected with no effect          | State known nonacceptance and correctable reason                   | Call it accepted because optimistic UI already changed           |
+| Timeout/connection lost/ambiguous failure   | Reconcile existing Operation; show unknown until resolved          | Treat every 5xx as definitely unsent and encourage duplication   |
 
 Do not build a global toast interceptor that treats every 2xx as a business success or every timeout as a safe retry. Use typed outcome semantics. Redacted support references may be copied; no client-facing dump of protected payload/provider credentials.
 
@@ -1813,20 +1813,20 @@ Use the architecture's p95 API and load targets, then profile the real complete 
 
 ### 21.1 Dependency-degradation matrix
 
-| Dependency/problem | Public/client experience | Staff/operations experience | Recovery invariant |
-|---|---|---|---|
-| Database/app unavailable | No false request receipt; truthful maintenance/contact fallback | Incident and frozen consequential work | Preserve/reconcile logical requests; do not assume acceptance |
-| Search unavailable | Retained filters, explicit error/retry/contact | Affected query/runtime evidence | Never display an outage as zero matches |
-| Map tiles (self-hosted Protomaps) blocked/slow | Full list and textual location remain usable | Map release/asset exception where relevant | No exact-private-coordinate fallback |
-| Sign-in unavailable (database, email link or passkey verification) | Safe sign-in/retry/contact; no private exposure | Identity incident, existing sessions governed by policy | No emergency password or code bypass |
-| Resend delayed/unknown | Committed Inquiry/Case message remains; delivery state truthful | Owned delivery/ingress reconciliation | No blind duplicate send, especially beyond dedupe window |
-| R2/media unavailable | Facts/contact still usable where eligible; missing media explained | Asset/publication coverage exception | Missing required media blocks relevant new publication |
-| Scanner stale/down | Upload remains processing/quarantined | Queue with owner and freshness issue | No unscanned file becomes ready/public |
-| AI unavailable/budget exhausted | Ordinary search/contact/client tasks unaffected | Existing human draft/manual task remains usable | No authority or accepted work depends on model success |
-| Worker stopped/backlogged | Local acceptance distinct from pending notification/job | Backlog/lease/heartbeat incident | Resume idempotently, fence stale approvals/generations |
-| Monitoring unavailable | No fabricated status promise | Explicit loss of observability and alternate incident check | Missing telemetry is not healthy state |
-| Backup/safety-ledger lag | Usually no public interruption by itself | Prominent recovery risk and blocked promotion | Newer restrictions must not be lost on restore |
-| Privacy/access revoked | Subsequent requests denied; detected UI clears | Current grant/audit visible to authorized staff | Old sessions/callbacks/caches cannot regrant access |
+| Dependency/problem                                                 | Public/client experience                                           | Staff/operations experience                                 | Recovery invariant                                            |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------- |
+| Database/app unavailable                                           | No false request receipt; truthful maintenance/contact fallback    | Incident and frozen consequential work                      | Preserve/reconcile logical requests; do not assume acceptance |
+| Search unavailable                                                 | Retained filters, explicit error/retry/contact                     | Affected query/runtime evidence                             | Never display an outage as zero matches                       |
+| Map tiles (self-hosted Protomaps) blocked/slow                     | Full list and textual location remain usable                       | Map release/asset exception where relevant                  | No exact-private-coordinate fallback                          |
+| Sign-in unavailable (database, email link or passkey verification) | Safe sign-in/retry/contact; no private exposure                    | Identity incident, existing sessions governed by policy     | No emergency password or code bypass                          |
+| Resend delayed/unknown                                             | Committed Inquiry/Case message remains; delivery state truthful    | Owned delivery/ingress reconciliation                       | No blind duplicate send, especially beyond dedupe window      |
+| R2/media unavailable                                               | Facts/contact still usable where eligible; missing media explained | Asset/publication coverage exception                        | Missing required media blocks relevant new publication        |
+| Scanner stale/down                                                 | Upload remains processing/quarantined                              | Queue with owner and freshness issue                        | No unscanned file becomes ready/public                        |
+| AI unavailable/budget exhausted                                    | Ordinary search/contact/client tasks unaffected                    | Existing human draft/manual task remains usable             | No authority or accepted work depends on model success        |
+| Worker stopped/backlogged                                          | Local acceptance distinct from pending notification/job            | Backlog/lease/heartbeat incident                            | Resume idempotently, fence stale approvals/generations        |
+| Monitoring unavailable                                             | No fabricated status promise                                       | Explicit loss of observability and alternate incident check | Missing telemetry is not healthy state                        |
+| Backup/safety-ledger lag                                           | Usually no public interruption by itself                           | Prominent recovery risk and blocked promotion               | Newer restrictions must not be lost on restore                |
+| Privacy/access revoked                                             | Subsequent requests denied; detected UI clears                     | Current grant/audit visible to authorized staff             | Old sessions/callbacks/caches cannot regrant access           |
 
 ### 21.2 Maintenance and cutover
 
@@ -1856,136 +1856,136 @@ Each frame/prototype/test records screen ID, flow ID, actor, relevant S-states, 
 
 This table maps every architecture scenario exactly once; the architecture retains its original pass conditions. “Coverage” means a required design/test home, not a claim that the scenario has passed.
 
-| Architecture ID | Designer/frontend obligation and primary home |
-|---|---|
-| AT01 | Public no-registration and no-JavaScript browse/search/detail/inquiry; F01–F06, P01/P02/P05/P11/P12 |
-| AT02 | Filter/detail/Back/refresh and obsolete-query response; F02, P02/P03, §20.4 |
-| AT03 | Seven-locale complete search/inquiry/recovery and Hebrew composition; public/client contracts, §19 |
-| AT04 | Unknown fact/feature/price basis and explicit hard-filter behavior; P03/P05/P07/O07/O14 |
-| AT05 | Unapproved/stale-locale exclusion across results/counts/map/metadata; P02/P04/P05/O15/O16 |
-| AT06 | Map failure retains equivalent list task; P04/P22, §21.1 |
-| AT07 | Exact reference, spelling and locale alias fixture results; P02/P03, §18.2 |
-| AT08 | Saved/compare persistence failure, changed/withdrawn Listing, actual cross-host reviewed merge and retry; P07/P08/C05, §20.3.1 |
-| AT09 | Public share privacy, creator management, expiry, lost-session limit and authoritative revocation; P08/P09/C05 |
-| AT10 | Double submission and lost acknowledgment; P11/P12/P18/P19 |
-| AT11 | Changed-payload conflict and safe receipt access; P11/P12, §20.5 |
-| AT12 | Accepted Inquiry survives mail/AI/process failure with owner; P12/O01/O03/O25 |
-| AT13 | Database failure has no success receipt; P11/P12 and maintenance fallback |
-| AT14 | Staffed-hour escalation and useful human response distinct from receipt; O01/O03/O18/O24 |
-| AT15 | One Case, five Interests, independent outcomes; C03/C05/O05/O07 |
-| AT16 | Same person buyer/seller and scoped Case audiences; C03/C11/C17/O06 |
-| AT17 | Handover/revocation preserves work ownership; O01/O18/O23 |
-| AT18 | Owner intake versus assessed authority/instructions/preview; P18/C11/C12/O11/O14 |
-| AT19 | Concurrent draft/fact edits preserve input and diff; O12/O14 and shared S14 |
-| AT20 | Relation-safe media reorder with hidden/paginated items; O13, UI23, §20.6 |
-| AT21 | Protected facts survive input/import/translation; O12/O14/O15/O28, §18/§19 |
-| AT22 | Exact approval scope and honest same-person review; C12/O15/O16/O21 |
-| AT23 | Source change invalidates affected stale approval; O15/O16/O32/O33 |
-| AT24 | Correct/restrict affected public views before replacement; P05/P21/C05/O33 |
-| AT25 | Withdrawn generation cannot be resurrected; O17/O33 and stale-Operation result |
-| AT26 | No alternate CRUD/admin/job publishing bypass; O12/O16/O24, integration/permission tests |
-| AT27 | Eligible revision consistency across all public representations; P02/P05/P07/P10/O17 and deployed checks |
-| AT28 | Media restriction/purge and no private original/EXIF leakage; P06/O13/O17/O33 |
-| AT29 | Request/proposal distinct from confirmation; P13/P14/C06/O09 |
-| AT30 | Concurrent resource conflict with preserved proposed input; O08/O09 |
-| AT31 | DST/timezone/travel-buffer intent preserved; C06/O08/O09, §18.5 |
-| AT32 | Reschedule old/current/replacement and ICS state; P14/C06/O09 |
-| AT33 | Cancel/no-show/completion resource and follow-up; C06/O09/O18 |
-| AT34 | Proposal revision/expiry/counter prevents obsolete decision; C10/O19 |
-| AT35 | Closeout evidence and remaining obligations without legal overclaim; C16/O05/O19 |
-| AT36 | Correct identity application/token and local membership; C01/O23 and protected-route negative tests |
-| AT37 | Real staff one-passkey enrolment and sign-in, optional backups, lost-passkey recovery and safe step-up return; F13 staff variant, O23/O24 |
-| AT38 | Invitation GET/scanner/wrong-recipient/revocation; C01/C02/C17 |
-| AT39 | Subsequent-access revocation, cache clear and history reauthorization; C07–C09/C17, §20.6 |
-| AT40 | Record/field/audience allow-and-deny coverage; §02 and every protected contract |
-| AT41 | CSRF/host/header/direct-origin/hidden-endpoint denial; transport integration tests, no UI-only claim |
-| AT42 | Upload/seal/type/size/scan/object failures and non-overwritable reviewed bytes; C09/O13/O20 |
-| AT43 | Authorized private download/range/export and bucket isolation; C08/O20/O26 |
-| AT44 | Purpose withdrawal stops queued alerts; P10/C13/O25 |
-| AT45 | Privacy export isolation and restore-safe restriction; C18/O26, §21.3 |
-| AT46 | Human-reviewed send once across retry/crash; C07/O02/UI22/UI27 |
-| AT47 | Unknown send and provider dedupe-window reconciliation; O25 and message-status UI |
-| AT48 | Forged/replayed/out-of-order webhook outcome handling; O02/O25 and integration tests |
-| AT49 | Ambiguous/spoofed incoming sender and quarantine; O02/O03/O20 |
-| AT50 | At-least-once work/recovery without duplicate logical effect; O17/O25/O28/UI27 |
-| AT51 | Stale source/revoked actor cancels consequential queued action; O16/O25/O32/O33 |
-| AT52 | Untrusted AI input cannot authorize effects; protected facts/source validation; O32 |
-| AT53 | AI timeout/refusal/budget/source change keeps manual workflow; O12/O15/O32 |
-| AT54 | Human-reviewed AI corpus and correction-effort evidence; O32/assistance acceptance packet |
-| AT55 | Dry run/no-overwrite/import per-row outcomes; O28 |
-| AT56 | Merge cannot widen access; aliases/split history; O06/O27 |
-| AT57 | Exact frozen legacy URL/canonical/locale outcomes on both domains; P21 and cutover packet |
-| AT58 | Correct media manifest units and actual referenced assets; P06/O13/O17 and migration packet |
-| AT59 | Single authoritative write/worker owner at cutover; read-only/maintenance and O24/O25 |
-| AT60 | Pinned deployed web/worker/migration artifacts; release-evidence panel, not a prototype badge |
-| AT61 | Complete-task keyboard/screen-reader/zoom/motion/forced-colors/mobile-keyboard tests; §06/§22 |
-| AT62 | Architecture performance/load and urgent-work prioritization; P02/P05/O01/O25, §20.7 |
-| AT63 | Real alert delivery and affected-work ownership; O25 and incident handoff |
-| AT64 | Recovery, newer safety tail, session invalidation and no external replay; §21.3/O24/O25/O26 |
-| AT65 | Rollback preserves postdeployment inquiries/commitments; P12/O03/O18 and release drill |
-| AT66 | Agency can operate accounts/access/budgets/runbooks; O23–O25 and operator training |
-| AT67 | One release/policy/evidence verdict; blocked cannot appear passed; O24 release panel |
-| AT68 | Real post-cutover domain/mail/search/intake/auth/media/SEO proof; release panel and deployed packet |
+| Architecture ID | Designer/frontend obligation and primary home                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| AT01            | Public no-registration and no-JavaScript browse/search/detail/inquiry; F01–F06, P01/P02/P05/P11/P12                                       |
+| AT02            | Filter/detail/Back/refresh and obsolete-query response; F02, P02/P03, §20.4                                                               |
+| AT03            | Seven-locale complete search/inquiry/recovery and Hebrew composition; public/client contracts, §19                                        |
+| AT04            | Unknown fact/feature/price basis and explicit hard-filter behavior; P03/P05/P07/O07/O14                                                   |
+| AT05            | Unapproved/stale-locale exclusion across results/counts/map/metadata; P02/P04/P05/O15/O16                                                 |
+| AT06            | Map failure retains equivalent list task; P04/P22, §21.1                                                                                  |
+| AT07            | Exact reference, spelling and locale alias fixture results; P02/P03, §18.2                                                                |
+| AT08            | Saved/compare persistence failure, changed/withdrawn Listing, actual cross-host reviewed merge and retry; P07/P08/C05, §20.3.1            |
+| AT09            | Public share privacy, creator management, expiry, lost-session limit and authoritative revocation; P08/P09/C05                            |
+| AT10            | Double submission and lost acknowledgment; P11/P12/P18/P19                                                                                |
+| AT11            | Changed-payload conflict and safe receipt access; P11/P12, §20.5                                                                          |
+| AT12            | Accepted Inquiry survives mail/AI/process failure with owner; P12/O01/O03/O25                                                             |
+| AT13            | Database failure has no success receipt; P11/P12 and maintenance fallback                                                                 |
+| AT14            | Staffed-hour escalation and useful human response distinct from receipt; O01/O03/O18/O24                                                  |
+| AT15            | One Case, five Interests, independent outcomes; C03/C05/O05/O07                                                                           |
+| AT16            | Same person buyer/seller and scoped Case audiences; C03/C11/C17/O06                                                                       |
+| AT17            | Handover/revocation preserves work ownership; O01/O18/O23                                                                                 |
+| AT18            | Owner intake versus assessed authority/instructions/preview; P18/C11/C12/O11/O14                                                          |
+| AT19            | Concurrent draft/fact edits preserve input and diff; O12/O14 and shared S14                                                               |
+| AT20            | Relation-safe media reorder with hidden/paginated items; O13, UI23, §20.6                                                                 |
+| AT21            | Protected facts survive input/import/translation; O12/O14/O15/O28, §18/§19                                                                |
+| AT22            | Exact approval scope and honest same-person review; C12/O15/O16/O21                                                                       |
+| AT23            | Source change invalidates affected stale approval; O15/O16/O32/O33                                                                        |
+| AT24            | Correct/restrict affected public views before replacement; P05/P21/C05/O33                                                                |
+| AT25            | Withdrawn generation cannot be resurrected; O17/O33 and stale-Operation result                                                            |
+| AT26            | No alternate CRUD/admin/job publishing bypass; O12/O16/O24, integration/permission tests                                                  |
+| AT27            | Eligible revision consistency across all public representations; P02/P05/P07/P10/O17 and deployed checks                                  |
+| AT28            | Media restriction/purge and no private original/EXIF leakage; P06/O13/O17/O33                                                             |
+| AT29            | Request/proposal distinct from confirmation; P13/P14/C06/O09                                                                              |
+| AT30            | Concurrent resource conflict with preserved proposed input; O08/O09                                                                       |
+| AT31            | DST/timezone/travel-buffer intent preserved; C06/O08/O09, §18.5                                                                           |
+| AT32            | Reschedule old/current/replacement and ICS state; P14/C06/O09                                                                             |
+| AT33            | Cancel/no-show/completion resource and follow-up; C06/O09/O18                                                                             |
+| AT34            | Proposal revision/expiry/counter prevents obsolete decision; C10/O19                                                                      |
+| AT35            | Closeout evidence and remaining obligations without legal overclaim; C16/O05/O19                                                          |
+| AT36            | Correct identity application/token and local membership; C01/O23 and protected-route negative tests                                       |
+| AT37            | Real staff one-passkey enrolment and sign-in, optional backups, lost-passkey recovery and safe step-up return; F13 staff variant, O23/O24 |
+| AT38            | Invitation GET/scanner/wrong-recipient/revocation; C01/C02/C17                                                                            |
+| AT39            | Subsequent-access revocation, cache clear and history reauthorization; C07–C09/C17, §20.6                                                 |
+| AT40            | Record/field/audience allow-and-deny coverage; §02 and every protected contract                                                           |
+| AT41            | CSRF/host/header/direct-origin/hidden-endpoint denial; transport integration tests, no UI-only claim                                      |
+| AT42            | Upload/seal/type/size/scan/object failures and non-overwritable reviewed bytes; C09/O13/O20                                               |
+| AT43            | Authorized private download/range/export and bucket isolation; C08/O20/O26                                                                |
+| AT44            | Purpose withdrawal stops queued alerts; P10/C13/O25                                                                                       |
+| AT45            | Privacy export isolation and restore-safe restriction; C18/O26, §21.3                                                                     |
+| AT46            | Human-reviewed send once across retry/crash; C07/O02/UI22/UI27                                                                            |
+| AT47            | Unknown send and provider dedupe-window reconciliation; O25 and message-status UI                                                         |
+| AT48            | Forged/replayed/out-of-order webhook outcome handling; O02/O25 and integration tests                                                      |
+| AT49            | Ambiguous/spoofed incoming sender and quarantine; O02/O03/O20                                                                             |
+| AT50            | At-least-once work/recovery without duplicate logical effect; O17/O25/O28/UI27                                                            |
+| AT51            | Stale source/revoked actor cancels consequential queued action; O16/O25/O32/O33                                                           |
+| AT52            | Untrusted AI input cannot authorize effects; protected facts/source validation; O32                                                       |
+| AT53            | AI timeout/refusal/budget/source change keeps manual workflow; O12/O15/O32                                                                |
+| AT54            | Human-reviewed AI corpus and correction-effort evidence; O32/assistance acceptance packet                                                 |
+| AT55            | Dry run/no-overwrite/import per-row outcomes; O28                                                                                         |
+| AT56            | Merge cannot widen access; aliases/split history; O06/O27                                                                                 |
+| AT57            | Exact frozen legacy URL/canonical/locale outcomes on both domains; P21 and cutover packet                                                 |
+| AT58            | Correct media manifest units and actual referenced assets; P06/O13/O17 and migration packet                                               |
+| AT59            | Single authoritative write/worker owner at cutover; read-only/maintenance and O24/O25                                                     |
+| AT60            | Pinned deployed web/worker/migration artifacts; release-evidence panel, not a prototype badge                                             |
+| AT61            | Complete-task keyboard/screen-reader/zoom/motion/forced-colors/mobile-keyboard tests; §06/§22                                             |
+| AT62            | Architecture performance/load and urgent-work prioritization; P02/P05/O01/O25, §20.7                                                      |
+| AT63            | Real alert delivery and affected-work ownership; O25 and incident handoff                                                                 |
+| AT64            | Recovery, newer safety tail, session invalidation and no external replay; §21.3/O24/O25/O26                                               |
+| AT65            | Rollback preserves postdeployment inquiries/commitments; P12/O03/O18 and release drill                                                    |
+| AT66            | Agency can operate accounts/access/budgets/runbooks; O23–O25 and operator training                                                        |
+| AT67            | One release/policy/evidence verdict; blocked cannot appear passed; O24 release panel                                                      |
+| AT68            | Real post-cutover domain/mail/search/intake/auth/media/SEO proof; release panel and deployed packet                                       |
 
 ### 22.3 High-value complete prototype/test scenarios
 
 These 24 scenarios are the required end-to-end demonstrators. They supplement, rather than replace, all flow/screen contracts and the 68 architecture tests. Each has a controllable fixture and a visible, inspectable final state; a clickable happy path alone is not sufficient.
 
-| ID | Scenario | Required end state/evidence |
-|---|---|---|
-| UX01 | Mobile visitor searches, applies two filters, opens detail, inspects media and returns | Same committed criteria, loaded position and meaningful focus; no stale overwrite |
-| UX02 | Visitor encounters zero results, then map failure | Explicit criterion change produces results; list task remains complete without tiles |
-| UX03 | Three Listings compared; one price changes and another withdraws | Current safe facts/unknowns shown, selection intent preserved, no stale decision |
+| ID   | Scenario                                                                                                                                                     | Required end state/evidence                                                                                                                                                    |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| UX01 | Mobile visitor searches, applies two filters, opens detail, inspects media and returns                                                                       | Same committed criteria, loaded position and meaningful focus; no stale overwrite                                                                                              |
+| UX02 | Visitor encounters zero results, then map failure                                                                                                            | Explicit criterion change produces results; list task remains complete without tiles                                                                                           |
+| UX03 | Three Listings compared; one price changes and another withdraws                                                                                             | Current safe facts/unknowns shown, selection intent preserved, no stale decision                                                                                               |
 | UX04 | Device storage blocked; invited client crosses actual public/client hosts, interrupts login, resumes import with existing saves, then revokes a public share | Temporary/expired states truthful; reviewed idempotent merge preserves server saves/audience; creator revocation blocks recipient access without exposing management authority |
-| UX05 | Inquiry double tap plus lost acknowledgment after commit | One received Inquiry and receipt; next staffed step; no duplicate retry |
-| UX06 | Database fails before Inquiry commit; JavaScript is unavailable | No false success, usable HTML recovery/contact and safe retained input where possible |
-| UX07 | Owner consultation with unknown facts and failed optional photo | Accepted minimal request; no ownership verification or public Listing claimed |
-| UX08 | Seller reviews exact preview while broker changes source | Old acknowledgment rejected as stale; new diff and correct scope shown |
-| UX09 | Invitation scanner opens link, then wrong client, then right client | GET consumes nothing; no wrong-person disclosure; explicit scoped acceptance |
-| UX10 | One person has buyer and seller Cases; collaborator has narrower grants | Correct context/fields/documents; no cross-Case or participant leakage |
-| UX11 | Buyer evaluates five Interests, declines one and proposes a Brief change | Other Interests intact; proposed Brief revision does not rewrite Proposal terms |
-| UX12 | Two staff propose then confirm overlapping viewings across a DST edge | Proposals hold no resources; one valid resource commitment, lost-proposed-slot recovery and correct instant |
-| UX13 | Client requests reschedule while email notification fails | Old confirmation retained until replacement; business state separate from delivery |
-| UX14 | Sensitive upload completes transfer, scan stalls, then staging URL is reused | Reviewed bytes stay immutable; pending/quarantine and recovery truthful |
-| UX15 | Access revoked while a document view and another request are open | Subsequent access denied; detected cache clear/history reauthorization; no new leakage |
-| UX16 | Message succeeds at provider but acknowledgment is lost, then retry window expires | Outcome remains unknown/reconciled; no blind second send |
-| UX17 | Proposal is countered/expires while a client is reviewing it | Exact stale version cannot be accepted; preserved question/current review |
-| UX18 | Staff enrollment, lost-factor recovery and sensitive-action reauthentication; then absence/revocation with appointments and due promises | Real provider/local checks, no automatic action replay or recovery bypass; receiving owner/coverage acceptance and all commitments retained |
-| UX19 | Locale draft approved, then material price/disclosure correction arrives | Affected exposure restricted before replacement; valid generation/approvals respected |
-| UX20 | Media reorder with hidden relations, two editors and keyboard/tap controls | Complete correct order, conflict recovery, usable non-drag operation and announcement |
-| UX21 | AI draft contains unsupported fact/source pointer, then provider becomes unavailable | Unsafe proposal rejected, no effect, manual work remains usable |
-| UX22 | Import has protected-field conflicts and partial failure; duplicate merge would widen access | Explicit subset/per-row outcome and protected permissions, safe reversal path |
-| UX23 | Alert unsubscribe/privacy restriction occurs after a backup; restore loses primary data | Newer safety decisions replayed or access/publications remain closed; no old send replay |
-| UX24 | Authorized cutover with legacy URLs, missing evidence and an incident | Single active writer, truthful public behavior, blocked verdict cannot be made green |
+| UX05 | Inquiry double tap plus lost acknowledgment after commit                                                                                                     | One received Inquiry and receipt; next staffed step; no duplicate retry                                                                                                        |
+| UX06 | Database fails before Inquiry commit; JavaScript is unavailable                                                                                              | No false success, usable HTML recovery/contact and safe retained input where possible                                                                                          |
+| UX07 | Owner consultation with unknown facts and failed optional photo                                                                                              | Accepted minimal request; no ownership verification or public Listing claimed                                                                                                  |
+| UX08 | Seller reviews exact preview while broker changes source                                                                                                     | Old acknowledgment rejected as stale; new diff and correct scope shown                                                                                                         |
+| UX09 | Invitation scanner opens link, then wrong client, then right client                                                                                          | GET consumes nothing; no wrong-person disclosure; explicit scoped acceptance                                                                                                   |
+| UX10 | One person has buyer and seller Cases; collaborator has narrower grants                                                                                      | Correct context/fields/documents; no cross-Case or participant leakage                                                                                                         |
+| UX11 | Buyer evaluates five Interests, declines one and proposes a Brief change                                                                                     | Other Interests intact; proposed Brief revision does not rewrite Proposal terms                                                                                                |
+| UX12 | Two staff propose then confirm overlapping viewings across a DST edge                                                                                        | Proposals hold no resources; one valid resource commitment, lost-proposed-slot recovery and correct instant                                                                    |
+| UX13 | Client requests reschedule while email notification fails                                                                                                    | Old confirmation retained until replacement; business state separate from delivery                                                                                             |
+| UX14 | Sensitive upload completes transfer, scan stalls, then staging URL is reused                                                                                 | Reviewed bytes stay immutable; pending/quarantine and recovery truthful                                                                                                        |
+| UX15 | Access revoked while a document view and another request are open                                                                                            | Subsequent access denied; detected cache clear/history reauthorization; no new leakage                                                                                         |
+| UX16 | Message succeeds at provider but acknowledgment is lost, then retry window expires                                                                           | Outcome remains unknown/reconciled; no blind second send                                                                                                                       |
+| UX17 | Proposal is countered/expires while a client is reviewing it                                                                                                 | Exact stale version cannot be accepted; preserved question/current review                                                                                                      |
+| UX18 | Staff enrollment, lost-factor recovery and sensitive-action reauthentication; then absence/revocation with appointments and due promises                     | Real provider/local checks, no automatic action replay or recovery bypass; receiving owner/coverage acceptance and all commitments retained                                    |
+| UX19 | Locale draft approved, then material price/disclosure correction arrives                                                                                     | Affected exposure restricted before replacement; valid generation/approvals respected                                                                                          |
+| UX20 | Media reorder with hidden relations, two editors and keyboard/tap controls                                                                                   | Complete correct order, conflict recovery, usable non-drag operation and announcement                                                                                          |
+| UX21 | AI draft contains unsupported fact/source pointer, then provider becomes unavailable                                                                         | Unsafe proposal rejected, no effect, manual work remains usable                                                                                                                |
+| UX22 | Import has protected-field conflicts and partial failure; duplicate merge would widen access                                                                 | Explicit subset/per-row outcome and protected permissions, safe reversal path                                                                                                  |
+| UX23 | Alert unsubscribe/privacy restriction occurs after a backup; restore loses primary data                                                                      | Newer safety decisions replayed or access/publications remain closed; no old send replay                                                                                       |
+| UX24 | Authorized cutover with legacy URLs, missing evidence and an incident                                                                                        | Single active writer, truthful public behavior, blocked verdict cannot be made green                                                                                           |
 
 ### 22.4 Cross-cutting validation matrix
 
-| Dimension | Minimum required coverage | Acceptance rule |
-|---|---|---|
-| Viewports | 320, representative 390/414, 768, 1024 and 1440 CSS px; wide operational review where relevant | No lost action/data or whole-page overflow; narrow alternatives complete the task |
-| Input | Keyboard only, pointer/touch, screen reader, mobile virtual keyboard | All task actions operable; drag/swipe/hover are never sole mechanisms |
-| Access | Visitor, invited client, narrow collaborator, broker, coordinator, editor/translator, publisher, manager/privacy/release capability | Positive and negative record/field/action tests; same human in different contexts |
-| Public/client locale | BG, EN, RU, DE, NL, EL, HE | Complete representative task, all shipped strings/templates reviewed; real Hebrew mixed-direction content |
-| Staff locale | BG, EN, RU | Complete triage, workbench, review and privileged error/recovery flows |
-| Content | Minimum, typical, maximum and missing/conflicting values from §18.8 | No semantic truncation, fabricated data, broken reading order or shifted actions |
-| Network | Normal, slow, offline, interrupted, lost acknowledgment, provider-specific failure | Honest local/external outcomes and durable recovery without duplicate effects |
-| Concurrency | Two editors, two confirmers, source changed mid-review, route A→B→A, sign-out/sign-in | Revision/session guards; input preserved; no cross-identity display |
-| User settings | 200% text zoom, 400% zoom/reflow, reduced motion, forced colors | Content/function remains perceivable and usable under applicable WCAG requirements |
-| Lifecycle | New, active, paused, closed, restricted, withdrawn, revoked and restored | Actual authority and history preserved; unsafe stale action not executable |
+| Dimension            | Minimum required coverage                                                                                                           | Acceptance rule                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Viewports            | 320, representative 390/414, 768, 1024 and 1440 CSS px; wide operational review where relevant                                      | No lost action/data or whole-page overflow; narrow alternatives complete the task                         |
+| Input                | Keyboard only, pointer/touch, screen reader, mobile virtual keyboard                                                                | All task actions operable; drag/swipe/hover are never sole mechanisms                                     |
+| Access               | Visitor, invited client, narrow collaborator, broker, coordinator, editor/translator, publisher, manager/privacy/release capability | Positive and negative record/field/action tests; same human in different contexts                         |
+| Public/client locale | BG, EN, RU, DE, NL, EL, HE                                                                                                          | Complete representative task, all shipped strings/templates reviewed; real Hebrew mixed-direction content |
+| Staff locale         | BG, EN, RU                                                                                                                          | Complete triage, workbench, review and privileged error/recovery flows                                    |
+| Content              | Minimum, typical, maximum and missing/conflicting values from §18.8                                                                 | No semantic truncation, fabricated data, broken reading order or shifted actions                          |
+| Network              | Normal, slow, offline, interrupted, lost acknowledgment, provider-specific failure                                                  | Honest local/external outcomes and durable recovery without duplicate effects                             |
+| Concurrency          | Two editors, two confirmers, source changed mid-review, route A→B→A, sign-out/sign-in                                               | Revision/session guards; input preserved; no cross-identity display                                       |
+| User settings        | 200% text zoom, 400% zoom/reflow, reduced motion, forced colors                                                                     | Content/function remains perceivable and usable under applicable WCAG requirements                        |
+| Lifecycle            | New, active, paused, closed, restricted, withdrawn, revoked and restored                                                            | Actual authority and history preserved; unsafe stale action not executable                                |
 
 Do not mechanically multiply every cosmetic variant into thousands of identical frames. Cover every distinct authority, behavior, task, layout and meaningful content state. Reuse annotated component/state references; do not use reuse to omit the most dangerous combinations, such as RTL + validation, mobile keyboard + sticky actions, and revoked session + pending download.
 
 The supported browser policy is the current and previous stable major versions of Chrome, Edge and Firefox on supported Windows/macOS releases, and Safari on the current and previous supported macOS/iOS major releases. Android Chrome is supported on the current and previous stable browser major on devices capable of the baseline web platform. Freeze exact OS/browser versions in each release's test manifest; “latest” is a support policy, not a reproducible test result. Older/embedded browsers receive progressive fallback and a truthful unsupported-capability message rather than a blanket denial of public information/contact.
 
-| Test environment | Required representative tasks |
-|---|---|
-| Windows 11, Chrome and Edge; Firefox separately | Public acquisition, staff workbench/review, concurrency, keyboard, downloads and actual provider authentication |
-| Supported macOS, Safari; Chrome smoke coverage | Public/client continuity, history/cache, upload, dialog/focus and staff critical tasks |
-| iOS Safari, current and previous supported major | Search/filter/media, virtual keyboard, inquiry, invitation, document upload, viewing response and mobile Back |
-| Android Chrome | The same compact critical journeys, upload/picker behavior and recovery under poor connectivity |
-| NVDA with Firefox and Chrome on Windows | Form errors/status, data/compare tables, modal entry/return, Case/document task and permission recovery |
-| VoiceOver with Safari on macOS and iOS | Reading order, dialog dismissal, compact navigation, mixed-language/RTL task and authentication |
-| TalkBack with Chrome on Android | Touch exploration, form entry, non-drag media controls, upload status and client task completion |
+| Test environment                                 | Required representative tasks                                                                                   |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Windows 11, Chrome and Edge; Firefox separately  | Public acquisition, staff workbench/review, concurrency, keyboard, downloads and actual provider authentication |
+| Supported macOS, Safari; Chrome smoke coverage   | Public/client continuity, history/cache, upload, dialog/focus and staff critical tasks                          |
+| iOS Safari, current and previous supported major | Search/filter/media, virtual keyboard, inquiry, invitation, document upload, viewing response and mobile Back   |
+| Android Chrome                                   | The same compact critical journeys, upload/picker behavior and recovery under poor connectivity                 |
+| NVDA with Firefox and Chrome on Windows          | Form errors/status, data/compare tables, modal entry/return, Case/document task and permission recovery         |
+| VoiceOver with Safari on macOS and iOS           | Reading order, dialog dismissal, compact navigation, mixed-language/RTL task and authentication                 |
+| TalkBack with Chrome on Android                  | Touch exploration, form entry, non-drag media controls, upload status and client task completion                |
 
 Use real-device checks for mobile virtual keyboards, platform Back and file selection, not only desktop viewport emulation. Record assistive-technology version and speech language/voice used, with any availability limitation; a missing Hebrew voice is not a successful Hebrew task review. Browser/assistive-technology combinations differ, so one unspecified screen-reader run cannot establish support. [W3C implementation/testing caution](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/dialog/)
 
@@ -2050,17 +2050,17 @@ A change to scope, domain meaning, permissions, persistence, provider behavior o
 
 ### 23.5 Asset and operator-input ledger
 
-| Input | Owner | Safe design/development treatment until supplied |
-|---|---|---|
-| Legal agency identity, contacts, office/media rights | Agency owner | Explicit labeled fixture; no invented production claim |
-| Staffed hours, languages, services and geographic coverage | Agency manager | Internal configurable fixture; no public response guarantee |
-| Approved Listing/media/source corpus and review dispositions | Broker/publisher | Synthetic private fixtures and genuinely approved public examples only |
-| Locale reviewers, terminology and notification copy | Content/locale lead | Unreviewed content remains nonpublic/nonindexable |
-| Professional-process claims/checklists | Appropriate agency/professional owner | Guidance boundary, no invented legal/tax/completion claim |
-| Privacy purpose/retention/holds and vendor terms | Authorized privacy/procurement owner | No real personal-data capture without accepted policy |
-| Provider accounts/credentials and domain routing approval | Technical/agency/domain owners | Isolated tests; no purchase/provisioning/DNS inferred from design |
-| Legacy URL/media/data manifests and current launch policy | Migration/release owners | Exact mappings and unresolved gates retained; no blanket redirects |
-| Monitoring/recovery custody and on-call ownership | Operations owner | Explicit blocked acceptance until exercised with real evidence |
+| Input                                                        | Owner                                 | Safe design/development treatment until supplied                       |
+| ------------------------------------------------------------ | ------------------------------------- | ---------------------------------------------------------------------- |
+| Legal agency identity, contacts, office/media rights         | Agency owner                          | Explicit labeled fixture; no invented production claim                 |
+| Staffed hours, languages, services and geographic coverage   | Agency manager                        | Internal configurable fixture; no public response guarantee            |
+| Approved Listing/media/source corpus and review dispositions | Broker/publisher                      | Synthetic private fixtures and genuinely approved public examples only |
+| Locale reviewers, terminology and notification copy          | Content/locale lead                   | Unreviewed content remains nonpublic/nonindexable                      |
+| Professional-process claims/checklists                       | Appropriate agency/professional owner | Guidance boundary, no invented legal/tax/completion claim              |
+| Privacy purpose/retention/holds and vendor terms             | Authorized privacy/procurement owner  | No real personal-data capture without accepted policy                  |
+| Provider accounts/credentials and domain routing approval    | Technical/agency/domain owners        | Isolated tests; no purchase/provisioning/DNS inferred from design      |
+| Legacy URL/media/data manifests and current launch policy    | Migration/release owners              | Exact mappings and unresolved gates retained; no blanket redirects     |
+| Monitoring/recovery custody and on-call ownership            | Operations owner                      | Explicit blocked acceptance until exercised with real evidence         |
 
 These are operating inputs, not invitations to reopen the selected product architecture. A missing value has a named safe state and acceptance gate. Do not hide it behind plausible-looking production text.
 
@@ -2084,21 +2084,21 @@ These slices define dependency and proof, not a calendar or permission to ship a
 
 ### 24.2 Release gate UX obligations
 
-| Gate | Required UX/frontend/design contribution | What does not pass it |
-|---|---|---|
-| R00 Authority | Accepted scope, role/service/content policy, coherent evidence schema and resolution of existing authority conflicts | A newer attractive document or manually changed green badge |
-| R01 Foundation | Correct identity context, permission/field projections, command outcomes and negative tests | Hidden buttons without server enforcement |
-| R02 Inventory/publication | Exact reviews/manifests, truthful unknowns, locale/rights/disclosure and correction/withdrawal | Complete editor fields or AI draft accepted |
-| R03 Discovery/intake | Complete public task and durable staffed follow-through in every enabled locale | Marketing pages plus a form that sends an untracked email |
-| R04 Case continuity | Brief/Interests, schedule, Proposal, evidence, handover and closeout | A generic CRM board with missing downstream work |
-| R05 Communication/privacy | Real send/receive/failure/revocation/consent/private-file behavior | Mocked “message sent,” public signed-download shortcut or bundled consent |
-| R06 Assistance | Three live-evaluated draft tasks, source/diff review and manual fallback | A general chatbot or model confidence badge |
-| R07 Migration/media | Exact legacy behavior, real asset references, final-delta/read-only user states | Redirect all old URLs to home or count media rows as unique objects |
-| R08 Reliability/security | Designed failures plus actual load/alert/recovery/rollback proof | A polished maintenance page without a usable recovery process |
-| R09 UX/content | Complete task, responsive/RTL/accessibility/localization and approved real content | Hero-only frames, English-only tests or automated scanner alone |
-| R10 Candidate attestation | Exact release/evidence view, no unmet pre-cutover gate and named operator approval | “Ready” label without freshness/version/scope |
-| R11 Cutover verification | Actual hosts/login/intake/media/mail/legacy/SEO observations recorded | Local browser preview or build success |
-| R12 Operating acceptance | Complete staffed cycle including scheduled overnight/backup work, support handoff and no unresolved release-severity incident | Launch-day screenshot or elapsed time without evidence |
+| Gate                      | Required UX/frontend/design contribution                                                                                      | What does not pass it                                                     |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| R00 Authority             | Accepted scope, role/service/content policy, coherent evidence schema and resolution of existing authority conflicts          | A newer attractive document or manually changed green badge               |
+| R01 Foundation            | Correct identity context, permission/field projections, command outcomes and negative tests                                   | Hidden buttons without server enforcement                                 |
+| R02 Inventory/publication | Exact reviews/manifests, truthful unknowns, locale/rights/disclosure and correction/withdrawal                                | Complete editor fields or AI draft accepted                               |
+| R03 Discovery/intake      | Complete public task and durable staffed follow-through in every enabled locale                                               | Marketing pages plus a form that sends an untracked email                 |
+| R04 Case continuity       | Brief/Interests, schedule, Proposal, evidence, handover and closeout                                                          | A generic CRM board with missing downstream work                          |
+| R05 Communication/privacy | Real send/receive/failure/revocation/consent/private-file behavior                                                            | Mocked “message sent,” public signed-download shortcut or bundled consent |
+| R06 Assistance            | Three live-evaluated draft tasks, source/diff review and manual fallback                                                      | A general chatbot or model confidence badge                               |
+| R07 Migration/media       | Exact legacy behavior, real asset references, final-delta/read-only user states                                               | Redirect all old URLs to home or count media rows as unique objects       |
+| R08 Reliability/security  | Designed failures plus actual load/alert/recovery/rollback proof                                                              | A polished maintenance page without a usable recovery process             |
+| R09 UX/content            | Complete task, responsive/RTL/accessibility/localization and approved real content                                            | Hero-only frames, English-only tests or automated scanner alone           |
+| R10 Candidate attestation | Exact release/evidence view, no unmet pre-cutover gate and named operator approval                                            | “Ready” label without freshness/version/scope                             |
+| R11 Cutover verification  | Actual hosts/login/intake/media/mail/legacy/SEO observations recorded                                                         | Local browser preview or build success                                    |
+| R12 Operating acceptance  | Complete staffed cycle including scheduled overnight/backup work, support handoff and no unresolved release-severity incident | Launch-day screenshot or elapsed time without evidence                    |
 
 The architecture's authority-reconciliation requirement remains: PostgreSQL is the selected runtime search, but the existing Typesense/Meilisearch report obligation is not silently waived. Search Console, Yandex Webmaster and backlink exports are optional at every lifecycle stage by the owner decision of 2026-09-24. Human listing review, live service/runtime evidence, crawl parity and signed recovery obligations retain their required authority until explicitly reconciled. This document does not change those files or claim the current live system passed.
 

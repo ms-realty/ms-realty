@@ -4,13 +4,13 @@ Captured: 2026-10-25T16:01:26.709Z. Account: 921d0224dcd595c87b7928d2b3c479d1. R
 
 Historical source: `legacy-app-final:wrangler.jsonc` and preserved launch checklist. This is not a live resource claim:
 
-| Resource | Name | Purpose |
-| --- | --- | --- |
-| Worker | ms-realty | Legacy application gateway; do not change its production routes. |
-| Container / Durable Object | MsRealtyContainer / MS_REALTY | Legacy Node runtime; container disk is ephemeral. |
-| R2 | ms-realty-media | Legacy media; staging must use a different bucket. |
-| Email binding | EMAIL | Legacy send_email binding restricted to the verified agency inbox. |
-| Database | Neon PostgreSQL (historical launch checklist) | Provider and server major version require a fresh runtime readback. |
+| Resource                   | Name                                          | Purpose                                                             |
+| -------------------------- | --------------------------------------------- | ------------------------------------------------------------------- |
+| Worker                     | ms-realty                                     | Legacy application gateway; do not change its production routes.    |
+| Container / Durable Object | MsRealtyContainer / MS_REALTY                 | Legacy Node runtime; container disk is ephemeral.                   |
+| R2                         | ms-realty-media                               | Legacy media; staging must use a different bucket.                  |
+| Email binding              | EMAIL                                         | Legacy send_email binding restricted to the verified agency inbox.  |
+| Database                   | Neon PostgreSQL (historical launch checklist) | Provider and server major version require a fresh runtime readback. |
 
 ## Current account readback
 

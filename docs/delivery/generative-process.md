@@ -12,15 +12,15 @@ connect the complete target journeys to the staff implementation and its separat
 
 ## Implemented seams
 
-| Review gap | Implementation | Observable completion check |
-| --- | --- | --- |
-| Durable working session | Private `generative_sessions`, runs, checkpoints and artifact revisions; generation fencing on correction/cancellation | Reload/resume retains context; old workers cannot overwrite a correction |
-| Authorized business context | Selected inquiry and Deal, current buyer requirements, scoped messages/commitments, approved BG listing manifests and CMS editions | Current grants, saved source lineage and source digests are checked before history readback, inference, saving and person commands; private contacts/restricted records stay excluded |
-| Research and planning tools | Strict planner turns request search, read, approved-listing search/comparison, finite arithmetic or draft preparation | Persisted typed tool requests/results drive subsequent inference; unsupported actions and fabricated citations are rejected |
-| Usable proposals | Editable task and buyer handoff versions with source evidence; ordinary person-invoked task creation and buyer Brief/Interest commands | Exactly one internal task or reviewed Brief/handoff, with a real operation receipt; suggestions require the existing candidate-review contract |
-| Operation policy | Current Butler eligibility is connected to proposal review; model tools expose no business command, person commands retain their ordinary capability/precondition checks | No autonomous sends, bookings, publication, access changes, price/contract changes or legal approval; replay returns the original receipt |
-| Execution budgets and recovery | Explicit step, total-token, input/output, elapsed, cost and read-retry limits; shared actor/daily reservation with existing drafts | Cancel/correction fences in-flight results; saved tools resume without repeated inference; unknown provider charges retain reservations and require acknowledgment |
-| Whole-job evaluation | Real-PostgreSQL process corpus, positive/negative state assertions, source fingerprints, metrics and blind broker rubric | Offline harness fails on any failed/skipped required test; live quality and human usefulness retain separate qualification |
+| Review gap                     | Implementation                                                                                                                                                           | Observable completion check                                                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Durable working session        | Private `generative_sessions`, runs, checkpoints and artifact revisions; generation fencing on correction/cancellation                                                   | Reload/resume retains context; old workers cannot overwrite a correction                                                                                                              |
+| Authorized business context    | Selected inquiry and Deal, current buyer requirements, scoped messages/commitments, approved BG listing manifests and CMS editions                                       | Current grants, saved source lineage and source digests are checked before history readback, inference, saving and person commands; private contacts/restricted records stay excluded |
+| Research and planning tools    | Strict planner turns request search, read, approved-listing search/comparison, finite arithmetic or draft preparation                                                    | Persisted typed tool requests/results drive subsequent inference; unsupported actions and fabricated citations are rejected                                                           |
+| Usable proposals               | Editable task and buyer handoff versions with source evidence; ordinary person-invoked task creation and buyer Brief/Interest commands                                   | Exactly one internal task or reviewed Brief/handoff, with a real operation receipt; suggestions require the existing candidate-review contract                                        |
+| Operation policy               | Current Butler eligibility is connected to proposal review; model tools expose no business command, person commands retain their ordinary capability/precondition checks | No autonomous sends, bookings, publication, access changes, price/contract changes or legal approval; replay returns the original receipt                                             |
+| Execution budgets and recovery | Explicit step, total-token, input/output, elapsed, cost and read-retry limits; shared actor/daily reservation with existing drafts                                       | Cancel/correction fences in-flight results; saved tools resume without repeated inference; unknown provider charges retain reservations and require acknowledgment                    |
+| Whole-job evaluation           | Real-PostgreSQL process corpus, positive/negative state assertions, source fingerprints, metrics and blind broker rubric                                                 | Offline harness fails on any failed/skipped required test; live quality and human usefulness retain separate qualification                                                            |
 
 ## Provider and tool contract
 
@@ -55,15 +55,15 @@ is off. Operators must qualify the exact selected route/model, broader source pr
 planner schema, tools, usage accounting and limits before real material is transmitted.
 This implementation does not discover credentials, change the chosen model or force effort.
 
-| Workspace setting suffix | Default | Bound |
-| --- | --- | --- |
-| `MAX_STEPS` | 8 | 1–24 inference turns |
-| `MAX_TOTAL_TOKENS` | 100000 | 1024–2000000 input plus output tokens per run |
-| `MAX_OUTPUT_TOKENS` | 4096 | 256–8192 per inference |
-| `MAX_INPUT_BYTES` | 49152 | 1024–131072 UTF-8 bytes per inference |
-| `TIMEOUT_MS` | 30000 | 1000–120000 per inference |
-| `MAX_ELAPSED_MS` | 180000 | 1000–900000 per run, at least the call timeout |
-| `READ_RETRIES` | 2 | 0–2 additional attempts for explicitly transient read-only failures |
+| Workspace setting suffix | Default | Bound                                                               |
+| ------------------------ | ------- | ------------------------------------------------------------------- |
+| `MAX_STEPS`              | 8       | 1–24 inference turns                                                |
+| `MAX_TOTAL_TOKENS`       | 100000  | 1024–2000000 input plus output tokens per run                       |
+| `MAX_OUTPUT_TOKENS`      | 4096    | 256–8192 per inference                                              |
+| `MAX_INPUT_BYTES`        | 49152   | 1024–131072 UTF-8 bytes per inference                               |
+| `TIMEOUT_MS`             | 30000   | 1000–120000 per inference                                           |
+| `MAX_ELAPSED_MS`         | 180000  | 1000–900000 per run, at least the call timeout                      |
+| `READ_RETRIES`           | 2       | 0–2 additional attempts for explicitly transient read-only failures |
 
 Suffixes use the `BUTLER_WORKSPACE_` prefix. An absent Butler setting can use the matching
 legacy Hermes prefix; an explicit invalid Butler value never falls back. Existing assistance

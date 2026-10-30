@@ -81,24 +81,24 @@ Next.js 16 app on PostgreSQL 18. The legacy app was removed from `main`; tag
 
 ## 4. What is merged on `main` (`aa2860d5`)
 
-| PR | Content |
-|---|---|
-| #260 | Deploy freeze (deploy jobs only on manual `release=production`, since removed with the CI v2 migration) and the first plan |
-| #261 | Legacy app removed. Legacy facts extracted to `data/legacy/` (165 listings, 457 URL decisions, 1725 media objects, 31 places, guides), verified by `node data/legacy/verify.mjs`. New scaffold |
-| #263 | S1 foundations: domain, schema, server core (authz, sessions, email link, passkeys, operation receipts, transitions, audit, rate limits, pg-boss outbox), UI kit, i18n shells, staged legacy import |
-| #265, #272 | CI v2: `.github/workflows/ci.yml` calls `Mindburn-Labs/platform-actions` `ci.yml@v2` (Postgres, `make check`, Playwright, dependency scan). Opened by another session |
-| #274 | Design uplift by another session, in a deep-blue + Noto Serif Display direction. That direction is **withdrawn**; architecture §11.3 green wins |
-| #278 | S2 server services by another session (inquiry intake, search, listing detail, minimal publication path), built against the old schema |
-| #276 | Final architecture adopted as authority; plan rewritten; ADR 0002 |
+| PR         | Content                                                                                                                                                                                             |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #260       | Deploy freeze (deploy jobs only on manual `release=production`, since removed with the CI v2 migration) and the first plan                                                                          |
+| #261       | Legacy app removed. Legacy facts extracted to `data/legacy/` (165 listings, 457 URL decisions, 1725 media objects, 31 places, guides), verified by `node data/legacy/verify.mjs`. New scaffold      |
+| #263       | S1 foundations: domain, schema, server core (authz, sessions, email link, passkeys, operation receipts, transitions, audit, rate limits, pg-boss outbox), UI kit, i18n shells, staged legacy import |
+| #265, #272 | CI v2: `.github/workflows/ci.yml` calls `Mindburn-Labs/platform-actions` `ci.yml@v2` (Postgres, `make check`, Playwright, dependency scan). Opened by another session                               |
+| #274       | Design uplift by another session, in a deep-blue + Noto Serif Display direction. That direction is **withdrawn**; architecture §11.3 green wins                                                     |
+| #278       | S2 server services by another session (inquiry intake, search, listing detail, minimal publication path), built against the old schema                                                              |
+| #276       | Final architecture adopted as authority; plan rewritten; ADR 0002                                                                                                                                   |
 
 ## 5. The open branch: `rebuild/s1b-foundation` (PR opened with this file)
 
-| Commit | State |
-|---|---|
+| Commit                               | State                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `c60c9050` Realign schema and domain | **Green** when made. Architecture records: fact, listing and localized revisions; publication manifests and current-publication pointer with generation; Interest; SellerInstruction; ExternalAction/InboxEvent; privacy and release evidence. Retired scope removed. Fresh PostgreSQL 18 migration baseline. Legacy import rewritten (dry run, apply and re-apply verified: 165 listings unpublished, 1659 media private, 990 draft translations) |
-| `34e66afa` Merge `main` | Brought in #274 and #278 |
-| `5d2c87e2` WIP | #278 services ported onto the new schema (green per stage report: 586 tests, build). Three-host routing started |
-| `6bab7df5` WIP | Three-host routing finished (`app/public`, `app/client`, `app/staff`; `proxy.ts` adds the host prefix; `src/server/config/hosts.ts`; 146/146 Playwright on its own build). Plus **unfinished** work from four stages cut off by the session limit (see §6) |
+| `34e66afa` Merge `main`              | Brought in #274 and #278                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `5d2c87e2` WIP                       | #278 services ported onto the new schema (green per stage report: 586 tests, build). Three-host routing started                                                                                                                                                                                                                                                                                                                                    |
+| `6bab7df5` WIP                       | Three-host routing finished (`app/public`, `app/client`, `app/staff`; `proxy.ts` adds the host prefix; `src/server/config/hosts.ts`; 146/146 Playwright on its own build). Plus **unfinished** work from four stages cut off by the session limit (see §6)                                                                                                                                                                                         |
 
 ### State after the CI fix (2026-10-03)
 

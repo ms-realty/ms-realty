@@ -60,12 +60,12 @@ bounded local evidence, not independent review or whole-product acceptance.
 
 ## Combined results and Today follow-up
 
-| Source in this slice | Search p95 ms | Today p95 ms | Task page p95 ms | Command p95 ms | Public / staff cycles |
-|---|---:|---:|---:|---:|---:|
-| eb538812 baseline | 1410.24 | 1291.23 | 5432.09 | 5381.48 | 1796 / 60 |
-| Search CTE | 1049.07 | 983.24 | 4740.87 | 4933.64 | 2134 / 70 |
-| CTE + batch recipients / shared task read | 1499.70 | 1293.72 | 1471.95 | 3056.76 | 1741 / 160 |
-| Also shared Today authorization context | 2071.32 | 1847.38 | 2234.16 | 4894.52 | 1151 / 100 |
+| Source in this slice                      | Search p95 ms | Today p95 ms | Task page p95 ms | Command p95 ms | Public / staff cycles |
+| ----------------------------------------- | ------------: | -----------: | ---------------: | -------------: | --------------------: |
+| eb538812 baseline                         |       1410.24 |      1291.23 |          5432.09 |        5381.48 |             1796 / 60 |
+| Search CTE                                |       1049.07 |       983.24 |          4740.87 |        4933.64 |             2134 / 70 |
+| CTE + batch recipients / shared task read |       1499.70 |      1293.72 |          1471.95 |        3056.76 |            1741 / 160 |
+| Also shared Today authorization context   |       2071.32 |      1847.38 |          2234.16 |        4894.52 |            1151 / 100 |
 
 Every session completed, with zero operation failures. The latest run was slower than the
 preceding run. A closed-loop workload changes its actual request mix when staff pages become
@@ -107,13 +107,13 @@ would improve the publication eligibility join. The database was analyzed before
 The indexes existed only in that disposable database and were dropped before the final baseline;
 the database and its private fixture files were removed when the probe completed successfully.
 
-| Stage | Eligible-ID read ms | EXPLAIN count execution ms |
-|---|---:|---:|
-| Baseline | 337.43 | 455.31 |
-| Authority expression index | 343.19 | 451.69 |
-| Document-version expression index | 404.97 | 487.31 |
-| Both expression indexes | 350.37 | 464.72 |
-| Baseline after removing indexes | 344.31 | 463.20 |
+| Stage                             | Eligible-ID read ms | EXPLAIN count execution ms |
+| --------------------------------- | ------------------: | -------------------------: |
+| Baseline                          |              337.43 |                     455.31 |
+| Authority expression index        |              343.19 |                     451.69 |
+| Document-version expression index |              404.97 |                     487.31 |
+| Both expression indexes           |              350.37 |                     464.72 |
+| Baseline after removing indexes   |              344.31 |                     463.20 |
 
 Every stage returned the same 2,000 eligible IDs (SHA-256
 `c91fdbed9afb34c7d5429619caf5bd974b6331dd36f8258a684845031a541544`). Empty-query and
@@ -140,12 +140,12 @@ A fresh 3,500-Listing fixture with Bulgarian plus rotating approved translations
 the original join, a boundary inside the authority subquery, and a manifest-bound LATERAL
 consent read. All four stages, including a repeated baseline, returned identical eligible IDs:
 
-| Variant | Eligible-ID read ms | EXPLAIN execution ms |
-|---|---:|---:|
-| Original | 4925.37 | 6188.01 |
-| Boundary inside authority subquery | 4997.57 | 5872.53 |
-| Manifest-bound current consent | 44.43 | 46.36 |
-| Original repeated | 4770.48 | 5911.99 |
+| Variant                            | Eligible-ID read ms | EXPLAIN execution ms |
+| ---------------------------------- | ------------------: | -------------------: |
+| Original                           |             4925.37 |              6188.01 |
+| Boundary inside authority subquery |             4997.57 |              5872.53 |
+| Manifest-bound current consent     |               44.43 |                46.36 |
+| Original repeated                  |             4770.48 |              5911.99 |
 
 `eligiblePublications` now evaluates the unchanged current-consent predicate inside an
 `INNER JOIN LATERAL` bound to the manifest's instruction ID and Listing. `LIMIT 1` retains
@@ -177,13 +177,13 @@ A fresh Linux build of `ebebf03156e9f816dc2e70e2585a07584033e9ac` (build ID
 The bare eligibility plan executed in 192.30 ms. There were zero operation failures,
 2,059 public cycles and 180 staff cycles. Every budgeted lane still failed:
 
-| Lane | p95 ms | Unchanged budget ms |
-|---|---:|---:|
-| Search HTML | 1086.01 | 500 |
-| Detail HTML | 629.96 | 500 |
-| Today HTML | 775.38 | 500 |
-| Task HTML | 1285.84 | 500 |
-| Command POST, actual network timing | 1920.34 | 800 |
+| Lane                                |  p95 ms | Unchanged budget ms |
+| ----------------------------------- | ------: | ------------------: |
+| Search HTML                         | 1086.01 |                 500 |
+| Detail HTML                         |  629.96 |                 500 |
+| Today HTML                          |  775.38 |                 500 |
+| Task HTML                           | 1285.84 |                 500 |
+| Command POST, actual network timing | 1920.34 |                 800 |
 
 Media p95 was 312.20 ms with no assigned latency budget. The closed-loop request mix and
 shared host vary between runs; the improvements do not prove isolated throughput causality.

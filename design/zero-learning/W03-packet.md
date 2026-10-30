@@ -86,18 +86,18 @@ If a tier cannot read the 720 px Desktop images, re-export those frames at scale
 
 ### Start screen per run
 
-| Task | VD | VM | VH | SD | SM |
-|---|---|---|---|---|---|
-| T1 | `P11-filled-desktop.png` | `P11-filled-mobile.png` | | | |
-| T2 | | `P11-offline-mobile.png` | | | |
-| T3 | `P11-rejected-desktop.png` | | | | |
-| T4 | | `P11-invalid-mobile.png` | | | |
-| T5 | `P12-unknown-desktop.png` | `P12-unknown-mobile.png` | | | |
-| T6 | | | `P11-filled-he-rtl-mobile.png` | | |
-| T7 | | | | `O02-new-in-queue-desktop.png` | `O02-new-in-queue-mobile.png` |
-| T8 | | | | `O03-default-desktop.png` | `O03-default-mobile.png` |
-| T9 | | | | `O03-default-desktop.png` | `O03-default-mobile.png` |
-| T10 | | | | `O23-default-desktop.png` | `O23-default-mobile.png` |
+| Task | VD                         | VM                       | VH                             | SD                             | SM                            |
+| ---- | -------------------------- | ------------------------ | ------------------------------ | ------------------------------ | ----------------------------- |
+| T1   | `P11-filled-desktop.png`   | `P11-filled-mobile.png`  |                                |                                |                               |
+| T2   |                            | `P11-offline-mobile.png` |                                |                                |                               |
+| T3   | `P11-rejected-desktop.png` |                          |                                |                                |                               |
+| T4   |                            | `P11-invalid-mobile.png` |                                |                                |                               |
+| T5   | `P12-unknown-desktop.png`  | `P12-unknown-mobile.png` |                                |                                |                               |
+| T6   |                            |                          | `P11-filled-he-rtl-mobile.png` |                                |                               |
+| T7   |                            |                          |                                | `O02-new-in-queue-desktop.png` | `O02-new-in-queue-mobile.png` |
+| T8   |                            |                          |                                | `O03-default-desktop.png`      | `O03-default-mobile.png`      |
+| T9   |                            |                          |                                | `O03-default-desktop.png`      | `O03-default-mobile.png`      |
+| T10  |                            |                          |                                | `O23-default-desktop.png`      | `O23-default-mobile.png`      |
 
 16 runs per tier, 32 in total. The other 31 exported images are not in any batch: variants not on an expected path (for example `O03-assign-recorded-*`, `O05-wait-*`, `O06-default-*`, `O02-unclaimed-*`), the O01 states added in Phase C1b (`O01-loading-*`, `O01-empty-*`, `O01-error-*`, `O01-offline-*`) and the revoke state (`O23-revoke-staff-access-*`). They are reference for the judge and the G2 / G3 re-scan.
 

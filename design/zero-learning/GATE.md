@@ -33,23 +33,22 @@ Scope (owner rule: the entire UI is zero-training, no exemptions): every screen 
 
 Primary surfaces (navigation, headings, body copy, buttons, field labels, alerts, empty states) use everyday words. The terms below may appear only inside an explicit «Технически подробности / Technical details / Технические подробности» disclosure. Sources: `design/audit.md` 7A (Z-1, Z-6) and section 9, the owner starter list in `design/acceptance/g2-terms.md`, and the W03 journey brief.
 
-| Internal concept | bg (banned) | en (banned) | ru (banned) | Say instead |
-|---|---|---|---|---|
-| Case object | Случай, Преписка / преписки, `DEMO-CASE-NN` | case, case file | дело, кейс, случай | owner pick: «Сделка / Сделки» (en «Deal / Deals», ru «Сделка / Сделки») in staff nav, titles, search and buttons; titles name the person and the deal («Покупката на Алекс») |
-| Disposition | Разпореждане, диспозиция | disposition | распоряжение, диспозиция | a sentence: «Приключено без сделка, защото …» |
-| Brief | Бриф, Brief vN | brief | бриф | «Какво търси клиентът» |
-| Coverage / queue ownership | Покритие, опашка за покритие | coverage | покрытие | «Още няма отговорник», «екипът в Сандански» |
-| Engagement / commitment / mandate as an object | Ангажимент, Мандат | engagement, commitment, mandate | обязательство, мандат | «Следваща стъпка»; for the Mandate object the section 9 labels «Възлагане» (staff) and «Нашето споразумение» (client) |
-| Interest (lettered) | Интерес A / B, интереси | interest A / B | интерес A / B | name the property («Имот №202») |
-| Operation / operation id | операция, идентификатор на операцията, `DEMO-OP-NNN` | operation, operation id, idempotency key | операция, идентификатор операции | «същата заявка», «номер на запитването» |
-| Party / party candidate | страна, кандидат-страна | party, party candidate | сторона | «човек или фирма», «възможен дубликат» |
-| Editable model fields | Етап, Състояние (as fields), Цел | stage, state, purpose (as fields) | этап, статус (as fields) | one sentence that says where the work stands |
-| Version labels on work screens | v3, Версия N | v3, version N | версия N | «последна промяна …»; the number stays in the history view |
-| Technical jargon | worker, runtime, Payload, MFA, principal, ai_service, idempotency, receipt hash, digest, webhook | same | same | «потвърждение с втора стъпка», «фонова услуга» |
-| Assistant internal names | Hermes, Jev | Hermes, Jev | Hermes, Jev | Butler |
-| Assumed states (Z-6) | «Остаряло следващо действие», «Конфликт на версии» | stale next action, version conflict | устаревшее действие, конфликт версий | «Следващата стъпка е просрочена», «Някой е променил това междувременно» |
-| Prototype markers | DEMO, ДЕМО, Демонстрационен, Демо среда | DEMO | ДЕМО | one «Пример» ribbon outside the product area in prototypes; never shipped |
-
+| Internal concept                               | bg (banned)                                                                                      | en (banned)                              | ru (banned)                          | Say instead                                                                                                                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Case object                                    | Случай, Преписка / преписки, `DEMO-CASE-NN`                                                      | case, case file                          | дело, кейс, случай                   | owner pick: «Сделка / Сделки» (en «Deal / Deals», ru «Сделка / Сделки») in staff nav, titles, search and buttons; titles name the person and the deal («Покупката на Алекс») |
+| Disposition                                    | Разпореждане, диспозиция                                                                         | disposition                              | распоряжение, диспозиция             | a sentence: «Приключено без сделка, защото …»                                                                                                                                |
+| Brief                                          | Бриф, Brief vN                                                                                   | brief                                    | бриф                                 | «Какво търси клиентът»                                                                                                                                                       |
+| Coverage / queue ownership                     | Покритие, опашка за покритие                                                                     | coverage                                 | покрытие                             | «Още няма отговорник», «екипът в Сандански»                                                                                                                                  |
+| Engagement / commitment / mandate as an object | Ангажимент, Мандат                                                                               | engagement, commitment, mandate          | обязательство, мандат                | «Следваща стъпка»; for the Mandate object the section 9 labels «Възлагане» (staff) and «Нашето споразумение» (client)                                                        |
+| Interest (lettered)                            | Интерес A / B, интереси                                                                          | interest A / B                           | интерес A / B                        | name the property («Имот №202»)                                                                                                                                              |
+| Operation / operation id                       | операция, идентификатор на операцията, `DEMO-OP-NNN`                                             | operation, operation id, idempotency key | операция, идентификатор операции     | «същата заявка», «номер на запитването»                                                                                                                                      |
+| Party / party candidate                        | страна, кандидат-страна                                                                          | party, party candidate                   | сторона                              | «човек или фирма», «възможен дубликат»                                                                                                                                       |
+| Editable model fields                          | Етап, Състояние (as fields), Цел                                                                 | stage, state, purpose (as fields)        | этап, статус (as fields)             | one sentence that says where the work stands                                                                                                                                 |
+| Version labels on work screens                 | v3, Версия N                                                                                     | v3, version N                            | версия N                             | «последна промяна …»; the number stays in the history view                                                                                                                   |
+| Technical jargon                               | worker, runtime, Payload, MFA, principal, ai_service, idempotency, receipt hash, digest, webhook | same                                     | same                                 | «потвърждение с втора стъпка», «фонова услуга»                                                                                                                               |
+| Assistant internal names                       | Hermes, Jev                                                                                      | Hermes, Jev                              | Hermes, Jev                          | Butler                                                                                                                                                                       |
+| Assumed states (Z-6)                           | «Остаряло следващо действие», «Конфликт на версии»                                               | stale next action, version conflict      | устаревшее действие, конфликт версий | «Следващата стъпка е просрочена», «Някой е променил това междувременно»                                                                                                      |
+| Prototype markers                              | DEMO, ДЕМО, Демонстрационен, Демо среда                                                          | DEMO                                     | ДЕМО                                 | one «Пример» ribbon outside the product area in prototypes; never shipped                                                                                                    |
 - Any remaining domain word (оглед, отговорник, възлагане) is explained where it first appears on that screen by a subtitle, an example or a hover.
 - Pass: **0 banned terms on primary surfaces**, counted per text node across every journey frame at every width and locale.
 
@@ -70,24 +69,24 @@ Primary surfaces (navigation, headings, body copy, buttons, field labels, alerts
 
 For each job, one verdict against the best leader for that job: **better / equal / worse**, with a one-line reason and the evidence used. A single «worse» fails the gate. Evidence comes from public pages and public help-centre documentation only; the evaluator does not create accounts, sign in or send inquiries to a leader.
 
-| Side | Job | Leaders compared |
-|---|---|---|
-| Public | Contact the agent about a specific listing | Rightmove, Zillow, Idealista, Airbnb |
-| Public | Know the inquiry arrived, who has it and what happens next | Rightmove, Zillow, Idealista, Airbnb |
-| Public | Recover from a failed or uncertain send without sending twice | Rightmove, Zillow, Idealista, Airbnb |
-| Staff | See new inquiries in a shared inbox and know which are unowned | Front, HubSpot inbox, Linear |
-| Staff | Take or assign an inquiry with an owner and a follow-up time | Front, HubSpot inbox, Linear |
-| Staff | Respond and set the next step | Front, HubSpot inbox, Linear |
-| Staff | Hand over open work before an absence | Front, HubSpot inbox, Linear |
+| Side   | Job                                                            | Leaders compared                     |
+| ------ | -------------------------------------------------------------- | ------------------------------------ |
+| Public | Contact the agent about a specific listing                     | Rightmove, Zillow, Idealista, Airbnb |
+| Public | Know the inquiry arrived, who has it and what happens next     | Rightmove, Zillow, Idealista, Airbnb |
+| Public | Recover from a failed or uncertain send without sending twice  | Rightmove, Zillow, Idealista, Airbnb |
+| Staff  | See new inquiries in a shared inbox and know which are unowned | Front, HubSpot inbox, Linear         |
+| Staff  | Take or assign an inquiry with an owner and a follow-up time   | Front, HubSpot inbox, Linear         |
+| Staff  | Respond and set the next step                                  | Front, HubSpot inbox, Linear         |
+| Staff  | Hand over open work before an absence                          | Front, HubSpot inbox, Linear         |
 
 ## Where it runs
 
 The gate runs in dependency order. A stage starts when its inputs pass and ships when its gate passes.
 
-| Stage | Input that must exist | Run by | Fixes by |
-|---|---|---|---|
-| Figma journey, before code | journey frames at Desktop 1440 and Mobile 390 (and Hebrew 390 for public journeys), wired prototype on pages 12 / 13, journey key, gate packet | an independent evaluator, never the designer | design session |
-| Journey PR, before merge | PR preview deployed, same key | the PR owner with evidence attached to the PR | owning frontend session |
-| Staging, before it counts as launch evidence | staging build with live services | controller acceptance | owning lane |
+| Stage                                        | Input that must exist                                                                                                                          | Run by                                        | Fixes by                |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ----------------------- |
+| Figma journey, before code                   | journey frames at Desktop 1440 and Mobile 390 (and Hebrew 390 for public journeys), wired prototype on pages 12 / 13, journey key, gate packet | an independent evaluator, never the designer  | design session          |
+| Journey PR, before merge                     | PR preview deployed, same key                                                                                                                  | the PR owner with evidence attached to the PR | owning frontend session |
+| Staging, before it counts as launch evidence | staging build with live services                                                                                                               | controller acceptance                         | owning lane             |
 
 Results go to `Mindburn-Labs/output/msr-launch/zero-learning/<journey>-<stage>-<run timestamp>.md`, with the screens, the raw tester answers per tier and the verdicts.

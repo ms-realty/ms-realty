@@ -22,47 +22,47 @@ Readers can start with §1–3 for decisions and scope, §4–9 for domain and w
 
 The earlier work had useful experience detail but did not constitute a final architecture. The audit changes the recommendation, not just its wording.
 
-| Finding | Consequence if left unresolved | Final correction |
-|---|---|---|
-| Back-office ownership depended on an uncompleted vendor trial | Engineering could not choose its schema or write path | Own the agency core and its authoritative database; no external CRM or property-platform dependency at launch |
-| Catalogue plus CRM divided the central buyer–property relationship | Duplicate entry, conflicting stages, permanent reconciliation | A first-class Case–Listing Interest lives with the Case, Brief, viewing, feedback, and commitments |
-| “Simplify” risked losing the earlier multidimensional listing lifecycle | Published could be mistaken for available or approved | Separate factual revision, editorial review, translation approval, availability, publication, and distribution |
-| Publication was described as a package without a concrete execution contract | Stale approval, stale jobs, or an admin bypass could publish incorrect data | Immutable publication manifests, explicit eligibility, guarded commands, transactionally switched pointers, and withdrawal fencing |
-| Material corrections lacked a complete propagation policy | Old prices or claims could survive in another locale or channel | Atomic local restriction, dependency invalidation, scoped replacement approval, and external reconciliation |
-| Secure client continuity was deferred behind AI | The core service story would break across repeated visits | Brief, shortlist, case access, viewing, messages, documents, and next action are release scope; AI follows those contracts |
-| Seven-locale and Hebrew coverage became vaguely “multilingual” | Forms and recovery could fail outside the default language | BG, EN, RU, DE, NL, EL, HE public/client support; BG, EN, RU staff support; complete Hebrew RTL acceptance |
-| Identity, storage, mail, and deployment remained abstract | Important security and delivery work was hidden | Select concrete providers, isolate authentication contexts, define application authorization, and test the integration |
-| Adjacent services were inconsistently presented as both core and optional | A small agency could acquire an unbounded product backlog | Sale and long-term brokerage are complete release workflows; stays/management use bounded service intake only where actually offered |
-| Checked-in readiness views conflict | A stale or permissive report could become a false release verdict | Mandatory policy/evidence reconciliation gate; no silent replacement or waiver |
-| The prior screen count could be mistaken for a build count | Redundant pages and duplicated business rules | Map every previous flow/screen to a smaller set of shared surfaces, with explicit exclusions |
-| “Current tools” was insufficiently distinguished from proven fit | Beta features or retiring products could become critical dependencies | Use stable documented primitives, pinned versions, qualification tests, and replaceable provider adapters |
-| The first final-draft upload flow did not freeze uploaded bytes before scan | A still-valid upload URL could replace an approved file | Seal a server-only immutable copy first; bind scan, review and serving to its verified digest |
-| The first final-draft restore flow relied on an older snapshot's restrictions | Recovery could resurrect revoked access, consent or publication | Independently retain the newer safety ledger; replay it or fail closed before reopening |
-| Staging identity and outage detection were not isolated explicitly enough | Test identities could share production scope; failed infrastructure could hide its own failure | Separate first-party identity contexts and independent external monitoring/heartbeat alerts |
-| “Independent recovery” did not name the restored runtime or failure scenario | Off-site backup could be mistaken for whole-provider failover | Specify fresh resources for the selected runtime, database and R2 recovery, and the available-provider assumption; do not promise a second cloud |
+| Finding                                                                       | Consequence if left unresolved                                                                 | Final correction                                                                                                                                 |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Back-office ownership depended on an uncompleted vendor trial                 | Engineering could not choose its schema or write path                                          | Own the agency core and its authoritative database; no external CRM or property-platform dependency at launch                                    |
+| Catalogue plus CRM divided the central buyer–property relationship            | Duplicate entry, conflicting stages, permanent reconciliation                                  | A first-class Case–Listing Interest lives with the Case, Brief, viewing, feedback, and commitments                                               |
+| “Simplify” risked losing the earlier multidimensional listing lifecycle       | Published could be mistaken for available or approved                                          | Separate factual revision, editorial review, translation approval, availability, publication, and distribution                                   |
+| Publication was described as a package without a concrete execution contract  | Stale approval, stale jobs, or an admin bypass could publish incorrect data                    | Immutable publication manifests, explicit eligibility, guarded commands, transactionally switched pointers, and withdrawal fencing               |
+| Material corrections lacked a complete propagation policy                     | Old prices or claims could survive in another locale or channel                                | Atomic local restriction, dependency invalidation, scoped replacement approval, and external reconciliation                                      |
+| Secure client continuity was deferred behind AI                               | The core service story would break across repeated visits                                      | Brief, shortlist, case access, viewing, messages, documents, and next action are release scope; AI follows those contracts                       |
+| Seven-locale and Hebrew coverage became vaguely “multilingual”                | Forms and recovery could fail outside the default language                                     | BG, EN, RU, DE, NL, EL, HE public/client support; BG, EN, RU staff support; complete Hebrew RTL acceptance                                       |
+| Identity, storage, mail, and deployment remained abstract                     | Important security and delivery work was hidden                                                | Select concrete providers, isolate authentication contexts, define application authorization, and test the integration                           |
+| Adjacent services were inconsistently presented as both core and optional     | A small agency could acquire an unbounded product backlog                                      | Sale and long-term brokerage are complete release workflows; stays/management use bounded service intake only where actually offered             |
+| Checked-in readiness views conflict                                           | A stale or permissive report could become a false release verdict                              | Mandatory policy/evidence reconciliation gate; no silent replacement or waiver                                                                   |
+| The prior screen count could be mistaken for a build count                    | Redundant pages and duplicated business rules                                                  | Map every previous flow/screen to a smaller set of shared surfaces, with explicit exclusions                                                     |
+| “Current tools” was insufficiently distinguished from proven fit              | Beta features or retiring products could become critical dependencies                          | Use stable documented primitives, pinned versions, qualification tests, and replaceable provider adapters                                        |
+| The first final-draft upload flow did not freeze uploaded bytes before scan   | A still-valid upload URL could replace an approved file                                        | Seal a server-only immutable copy first; bind scan, review and serving to its verified digest                                                    |
+| The first final-draft restore flow relied on an older snapshot's restrictions | Recovery could resurrect revoked access, consent or publication                                | Independently retain the newer safety ledger; replay it or fail closed before reopening                                                          |
+| Staging identity and outage detection were not isolated explicitly enough     | Test identities could share production scope; failed infrastructure could hide its own failure | Separate first-party identity contexts and independent external monitoring/heartbeat alerts                                                      |
+| “Independent recovery” did not name the restored runtime or failure scenario  | Off-site backup could be mistaken for whole-provider failover                                  | Specify fresh resources for the selected runtime, database and R2 recovery, and the available-provider assumption; do not promise a second cloud |
 
 The final choice is not a claim that custom development is always cheaper. It is a decision that this product's versioned property truth, multilingual authority, and private Case–Listing relationship must remain coherent. The owned scope is deliberately narrower than a general CRM.
 
 ## 2. Final architecture decisions
 
-| ID | Binding decision | Rejected launch alternative |
-|---|---|---|
-| D01 | One TypeScript modular application using Next.js, React, Drizzle and PostgreSQL (ADR 0002) | Independent microservices or a second canonical CRM |
-| D02 | Application modules own business transitions, persistence commands, access and drafts; the staff workspace is the admin (ADR 0002) | Letting generated CRUD, hooks, or UI state independently define business authority |
-| D03 | PostgreSQL owns canonical records, search projections, command receipts, audit references, and durable work | Concurrent authorities in spreadsheets, vendor CRM, search engine, or model memory |
-| D04 | PostgreSQL structured search plus tested aliases/trigram matching | Typesense and Meilisearch as additional required runtime dependencies |
-| D05 | pg-boss on PostgreSQL, one dedicated worker process, application-owned outbox and external-action ledger (ADR 0002) | Inngest/Temporal/n8n plus a competing native queue |
-| D06 | Cloudflare gateway and Containers candidate for web/worker/migration with one image digest; PostgreSQL 16.14 behind a qualified private path (ADR 0004) | Edge-only execution of the full Node application; public database exposure |
-| D07 | Cloudflare edge protection and a thin gateway; R2 EU-jurisdiction object storage | Serving private evidence from a public bucket or relying on a location hint as a residency guarantee |
-| D08 | First-party passwordless identity with separate staff/client contexts, one verified staff passkey, optional backups and local authorization (ADRs 0002/0005) | Password/OTP bypass or email address as a role |
-| D09 | Resend for application email and reply ingestion; the application owns conversations and delivery records | Rebuilding a general mailbox or requiring full personal mailbox synchronization |
-| D10 | Application-owned viewing calendar and ICS invitations/updates | Unverified instant booking or mandatory bidirectional Google/Microsoft calendar sync |
-| D11 | MapLibre with a self-hosted Protomaps extract; list mode always works independently (ADR 0002) | A map-only interface or a bespoke map stack |
-| D12 | Hermes/Butler is draft-only; qualified OpenRouter/Jev adapters with explicit legacy OpenAI selection (ADR 0003) | Autonomous agents with publish/send permissions or a mandatory self-hosted model |
-| D13 | Public/client/staff share domain modules and design tokens, not private caches or authentication contexts | Separate duplicate applications with competing records |
-| D14 | One release manifest and machine-readable gate evaluation generate readiness views | Manually maintained reports that can disagree on the same release |
-| D15 | Better Stack for independent uptime/heartbeat alerting and centralized redacted telemetry, alongside provider-native metrics | Detecting a provider outage only through that provider or through the application email queue |
-| D16 | Independently controlled S3 recovery archive, with rehearsed restoration into clean resources of the selected runtime | Calling an off-site backup a working second cloud or promising automatic whole-provider failover |
+| ID  | Binding decision                                                                                                                                             | Rejected launch alternative                                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| D01 | One TypeScript modular application using Next.js, React, Drizzle and PostgreSQL (ADR 0002)                                                                   | Independent microservices or a second canonical CRM                                                  |
+| D02 | Application modules own business transitions, persistence commands, access and drafts; the staff workspace is the admin (ADR 0002)                           | Letting generated CRUD, hooks, or UI state independently define business authority                   |
+| D03 | PostgreSQL owns canonical records, search projections, command receipts, audit references, and durable work                                                  | Concurrent authorities in spreadsheets, vendor CRM, search engine, or model memory                   |
+| D04 | PostgreSQL structured search plus tested aliases/trigram matching                                                                                            | Typesense and Meilisearch as additional required runtime dependencies                                |
+| D05 | pg-boss on PostgreSQL, one dedicated worker process, application-owned outbox and external-action ledger (ADR 0002)                                          | Inngest/Temporal/n8n plus a competing native queue                                                   |
+| D06 | Cloudflare gateway and Containers candidate for web/worker/migration with one image digest; PostgreSQL 16.14 behind a qualified private path (ADR 0004)      | Edge-only execution of the full Node application; public database exposure                           |
+| D07 | Cloudflare edge protection and a thin gateway; R2 EU-jurisdiction object storage                                                                             | Serving private evidence from a public bucket or relying on a location hint as a residency guarantee |
+| D08 | First-party passwordless identity with separate staff/client contexts, one verified staff passkey, optional backups and local authorization (ADRs 0002/0005) | Password/OTP bypass or email address as a role                                                       |
+| D09 | Resend for application email and reply ingestion; the application owns conversations and delivery records                                                    | Rebuilding a general mailbox or requiring full personal mailbox synchronization                      |
+| D10 | Application-owned viewing calendar and ICS invitations/updates                                                                                               | Unverified instant booking or mandatory bidirectional Google/Microsoft calendar sync                 |
+| D11 | MapLibre with a self-hosted Protomaps extract; list mode always works independently (ADR 0002)                                                               | A map-only interface or a bespoke map stack                                                          |
+| D12 | Hermes/Butler is draft-only; qualified OpenRouter/Jev adapters with explicit legacy OpenAI selection (ADR 0003)                                              | Autonomous agents with publish/send permissions or a mandatory self-hosted model                     |
+| D13 | Public/client/staff share domain modules and design tokens, not private caches or authentication contexts                                                    | Separate duplicate applications with competing records                                               |
+| D14 | One release manifest and machine-readable gate evaluation generate readiness views                                                                           | Manually maintained reports that can disagree on the same release                                    |
+| D15 | Better Stack for independent uptime/heartbeat alerting and centralized redacted telemetry, alongside provider-native metrics                                 | Detecting a provider outage only through that provider or through the application email queue        |
+| D16 | Independently controlled S3 recovery archive, with rehearsed restoration into clean resources of the selected runtime                                        | Calling an off-site backup a working second cloud or promising automatic whole-provider failover     |
 
 Version targets are Node 24 LTS, Next.js 16, React 19 and PostgreSQL 16.14 for the selected provider contract. Exact compatible patch versions, container digests, SDK versions, schemas, and model policies/snapshots are pinned in the release manifest after qualification. “Latest” tags are forbidden in a release. A failed compatibility test requires an explicit patch/minor adjustment or versioned architecture change, not an undocumented fallback.
 
@@ -104,31 +104,31 @@ All business IDs are immutable opaque identifiers, independent of slugs, titles,
 
 ### 4.1 Required records and relationships
 
-| Record | Purpose and essential relationships |
-|---|---|
-| Property | Physical asset; country/location, private address, public location precision, current approved fact revision, source relationships |
-| PropertyFactRevision | Versioned typed facts, source references, review decisions, unknown/conflict states, material-change classification |
-| Listing | Commercial purpose for one Property; stable reference, availability, current approved terms, editorial draft and publication generation |
-| ListingRevision | Immutable review candidate: fact revision, commercial terms, BG copy, ordered media manifest, disclosure instructions |
-| LocalizedRevision | Locale-specific copy bound to a source revision; translation state and explicit reviewed factual references |
-| PublicationManifest | Immutable binding of ListingRevision, LocalizedRevision, media, policy, approvals, locale and destination |
-| CurrentPublication | One authoritative active publication pointer per listing/locale/destination, subject to the listing's current publication generation |
-| Party / ContactMethod | Person or organization; verified contact methods, language/contact preferences, matching aliases; not a sign-in permission |
-| Principal / StaffMembership / Grant | Authenticated identity, active staff role and record/action grants; external identity mapping by immutable issuer/subject |
-| Inquiry | Original request, channel/source, submission receipt, property/criteria snapshot, contact route, owner/disposition and linked Case |
-| Case / CaseParticipant | One agency outcome; type, stage, disposition, responsible broker, explicitly scoped participant roles and client-visible summary |
-| BriefRevision | Case requirements, hard constraints, preferences, unknowns, timing, author and client acknowledgment |
-| Interest | Unique current relationship between a Case and Listing; shortlist state, fit explanation, questions, feedback and relevant listing revision |
-| Appointment | Case/Interest, participants, host, resource interval, timezone, access check, confirmation and notification state |
-| ProposalRevision | Exact parties, terms, amounts/currency, conditions, expiry, source listing revision and recorded decision thread |
-| Task / Commitment | Owner, due condition, dependency, completion evidence, relation to Case/Property and whether promised to a client |
-| Message / MessageAttempt | Explicit audience, channel, approved content/attachments, logical send ID, provider reference and observed outcomes |
-| Document / MediaAsset / MediaRelation | Purpose, classification, original object and digest, scan/processing state, rights, audience, review and ordered placement |
-| Approval / SellerInstruction | Subject revision/hash, actor, capability, scope, decision, evidence, time, invalidation and expiry where relevant |
-| Subscription / ConsentEvent | Purpose-specific contact eligibility, channel verification, policy/template version and changes |
-| Operation / OutboxEvent / ExternalAction | Durable command result, pending work, logical effect identity, source generation, attempts and reconciliation |
-| ImportBatch / MergeRecord | Staged source/mapping/diffs, per-row outcomes, legacy aliases and reversible identity changes |
-| AuditEvent / PrivacyRequest / ReleaseEvidence | Restricted attributable history, owned privacy work and release-bound proof |
+| Record                                        | Purpose and essential relationships                                                                                                         |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Property                                      | Physical asset; country/location, private address, public location precision, current approved fact revision, source relationships          |
+| PropertyFactRevision                          | Versioned typed facts, source references, review decisions, unknown/conflict states, material-change classification                         |
+| Listing                                       | Commercial purpose for one Property; stable reference, availability, current approved terms, editorial draft and publication generation     |
+| ListingRevision                               | Immutable review candidate: fact revision, commercial terms, BG copy, ordered media manifest, disclosure instructions                       |
+| LocalizedRevision                             | Locale-specific copy bound to a source revision; translation state and explicit reviewed factual references                                 |
+| PublicationManifest                           | Immutable binding of ListingRevision, LocalizedRevision, media, policy, approvals, locale and destination                                   |
+| CurrentPublication                            | One authoritative active publication pointer per listing/locale/destination, subject to the listing's current publication generation        |
+| Party / ContactMethod                         | Person or organization; verified contact methods, language/contact preferences, matching aliases; not a sign-in permission                  |
+| Principal / StaffMembership / Grant           | Authenticated identity, active staff role and record/action grants; external identity mapping by immutable issuer/subject                   |
+| Inquiry                                       | Original request, channel/source, submission receipt, property/criteria snapshot, contact route, owner/disposition and linked Case          |
+| Case / CaseParticipant                        | One agency outcome; type, stage, disposition, responsible broker, explicitly scoped participant roles and client-visible summary            |
+| BriefRevision                                 | Case requirements, hard constraints, preferences, unknowns, timing, author and client acknowledgment                                        |
+| Interest                                      | Unique current relationship between a Case and Listing; shortlist state, fit explanation, questions, feedback and relevant listing revision |
+| Appointment                                   | Case/Interest, participants, host, resource interval, timezone, access check, confirmation and notification state                           |
+| ProposalRevision                              | Exact parties, terms, amounts/currency, conditions, expiry, source listing revision and recorded decision thread                            |
+| Task / Commitment                             | Owner, due condition, dependency, completion evidence, relation to Case/Property and whether promised to a client                           |
+| Message / MessageAttempt                      | Explicit audience, channel, approved content/attachments, logical send ID, provider reference and observed outcomes                         |
+| Document / MediaAsset / MediaRelation         | Purpose, classification, original object and digest, scan/processing state, rights, audience, review and ordered placement                  |
+| Approval / SellerInstruction                  | Subject revision/hash, actor, capability, scope, decision, evidence, time, invalidation and expiry where relevant                           |
+| Subscription / ConsentEvent                   | Purpose-specific contact eligibility, channel verification, policy/template version and changes                                             |
+| Operation / OutboxEvent / ExternalAction      | Durable command result, pending work, logical effect identity, source generation, attempts and reconciliation                               |
+| ImportBatch / MergeRecord                     | Staged source/mapping/diffs, per-row outcomes, legacy aliases and reversible identity changes                                               |
+| AuditEvent / PrivacyRequest / ReleaseEvidence | Restricted attributable history, owned privacy work and release-bound proof                                                                 |
 
 Use foreign keys, explicit uniqueness, check constraints, and atomic revision guards. PostgreSQL constraints are part of the protection; UI validation is not a substitute. [PostgreSQL constraints](https://www.postgresql.org/docs/current/ddl-constraints.html)
 
@@ -154,18 +154,18 @@ The application owns every record above, including first-party authentication cr
 
 Use a small number of deep modules: substantial business behavior behind a narrow, testable interface. A module is not automatically a separate process. No module may bypass another module's consequential invariants by writing its records directly.
 
-| Module | Interface responsibilities | Implementation kept inside |
-|---|---|---|
-| Identity & Access | Resolve Principal; authorize action/resource; invite/revoke scoped access | First-party passkey/email-link verification, separate host sessions, local revocation, capability and audience evaluation |
-| Inventory | Revise facts/listing; record seller instruction; manage media placement | Provenance, units, duplicate candidates, revision guards, material-impact computation |
-| Publication | Submit review; decide approval; publish/restrict/withdraw exact version | Eligibility, locale dependencies, manifests, pointer changes, generation fencing, read-back |
-| Agency Work | Receive inquiry; update Case/Brief/Interest; assign/hand over; record commitment | Dedupe suggestions, private relationships, stage guards, ownership and escalation |
-| Scheduling & Proposals | Propose/confirm/change Appointment; submit/version/respond to Proposal | Resource conflict checks, timezone, authority, expiry, ICS sequence, next-action requirements |
-| Communication | Draft/approve/send logical Message; ingest authenticated transport event | Audience checks, consent, templates, provider idempotency window, delivery reconciliation |
-| Evidence & Media | Start/finalize upload; authorize download; record review/export | Quarantine, scans, object integrity, metadata stripping, derivatives, grants, retention |
-| Search & Discovery | Execute normalized search; resolve approved public presentation | Locale-aware aliases, indices, safe filters, availability eligibility and pagination |
-| Assistance | Produce typed draft for one authorized task | Prompt/schema/model version, scoped sources, budget, validators, evaluated inference adapter |
-| Operations | Run/reconcile work; import staged data; evaluate release evidence | Retry scheduling, dead-letter work, audit, metrics, backup/restore controls |
+| Module                 | Interface responsibilities                                                       | Implementation kept inside                                                                                                |
+| ---------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Identity & Access      | Resolve Principal; authorize action/resource; invite/revoke scoped access        | First-party passkey/email-link verification, separate host sessions, local revocation, capability and audience evaluation |
+| Inventory              | Revise facts/listing; record seller instruction; manage media placement          | Provenance, units, duplicate candidates, revision guards, material-impact computation                                     |
+| Publication            | Submit review; decide approval; publish/restrict/withdraw exact version          | Eligibility, locale dependencies, manifests, pointer changes, generation fencing, read-back                               |
+| Agency Work            | Receive inquiry; update Case/Brief/Interest; assign/hand over; record commitment | Dedupe suggestions, private relationships, stage guards, ownership and escalation                                         |
+| Scheduling & Proposals | Propose/confirm/change Appointment; submit/version/respond to Proposal           | Resource conflict checks, timezone, authority, expiry, ICS sequence, next-action requirements                             |
+| Communication          | Draft/approve/send logical Message; ingest authenticated transport event         | Audience checks, consent, templates, provider idempotency window, delivery reconciliation                                 |
+| Evidence & Media       | Start/finalize upload; authorize download; record review/export                  | Quarantine, scans, object integrity, metadata stripping, derivatives, grants, retention                                   |
+| Search & Discovery     | Execute normalized search; resolve approved public presentation                  | Locale-aware aliases, indices, safe filters, availability eligibility and pagination                                      |
+| Assistance             | Produce typed draft for one authorized task                                      | Prompt/schema/model version, scoped sources, budget, validators, evaluated inference adapter                              |
+| Operations             | Run/reconcile work; import staged data; evaluate release evidence                | Retry scheduling, dead-letter work, audit, metrics, backup/restore controls                                               |
 
 Each consequential command requires authenticated or explicitly public submission context, a stable logical operation ID, expected record revision where applicable, a validated payload, and a declared purpose. Successful business mutation, audit reference, and required outbox event commit together. Provider calls occur after commit, never inside the database transaction.
 
@@ -251,14 +251,14 @@ Handover presents open commitments, recent communications, upcoming appointments
 
 ### 7.1 Independent lifecycle dimensions
 
-| Dimension | States | Controlling meaning |
-|---|---|---|
-| Commercial availability | available, confirmation_required, negotiating, reserved_with_recorded_basis, sold/let, withdrawn | Publication does not establish current availability |
-| Editorial | draft, needs_facts, in_review, approved_revision, changes_requested | Draft edits never alter an already approved revision |
-| Locale | missing, draft, reviewing, approved_for_source, stale, rejected | Approved text is tied to the source it was reviewed against |
-| Publication | never_published, eligible, active, restricted, withdrawn | Derived from current permissions, manifest and generation |
-| Destination delivery | queued, attempting, acknowledged, verified, failed, outcome_unknown, withdrawing, withdrawn | Local website and each external destination have separate outcomes |
-| Freshness | current_under_policy, review_due, conflicting, unknown | A timer creates work; it cannot verify availability |
+| Dimension               | States                                                                                           | Controlling meaning                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Commercial availability | available, confirmation_required, negotiating, reserved_with_recorded_basis, sold/let, withdrawn | Publication does not establish current availability                |
+| Editorial               | draft, needs_facts, in_review, approved_revision, changes_requested                              | Draft edits never alter an already approved revision               |
+| Locale                  | missing, draft, reviewing, approved_for_source, stale, rejected                                  | Approved text is tied to the source it was reviewed against        |
+| Publication             | never_published, eligible, active, restricted, withdrawn                                         | Derived from current permissions, manifest and generation          |
+| Destination delivery    | queued, attempting, acknowledged, verified, failed, outcome_unknown, withdrawing, withdrawn      | Local website and each external destination have separate outcomes |
+| Freshness               | current_under_policy, review_due, conflicting, unknown                                           | A timer creates work; it cannot verify availability                |
 
 Default availability-review interval is 14 days for sale and 7 days for long-term rental. These are conservative operational defaults, not market facts. At expiry, display confirmation required, stop describing a listing as newly confirmed, and require broker reconfirmation before a viewing is confirmed. A known conflicting price, rights issue, or withdrawal restricts publication immediately instead of merely adding a freshness badge.
 
@@ -320,16 +320,16 @@ Initial session limits: staff 12-hour absolute/30-minute idle; clients 7-day abs
 
 Authorization is `Principal capability + active membership/grant + record relationship + field/audience + current action state`. Navigation visibility is never enforcement.
 
-| Actor | Allowed scope | Required exclusions |
-|---|---|---|
-| Visitor | Approved public records, own anonymous submissions, local saves | Owners, exact private addresses, private evidence, case counts |
-| Invited client/collaborator | Explicit Case participation and permitted actions/documents | Other participants' confidential documents, internal notes, competing Cases |
-| Assigned broker | Assigned/team-authorized Cases, permitted property work and commitments | Unrelated sensitive documents, publishing without capability |
-| Coordinator | Scheduling, coverage and necessary contact/access fields | Broad financial/identity evidence access |
-| Editor / translator | Relevant source/draft material and assigned locale work | Client documents unrelated to the task, commercial approval by translation alone |
-| Publisher | Exact eligible publication decisions and correction/withdrawal | Implicit legal approval or unrestricted team administration |
-| Manager / privacy operator | Explicit allocation, access/privacy and audit capabilities | Unlogged bypass of document purpose or professional authority |
-| Hermes task | Scoped approved source/draft inputs and draft output | Publish/send/index/access-grant/authority commands |
+| Actor                       | Allowed scope                                                           | Required exclusions                                                              |
+| --------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Visitor                     | Approved public records, own anonymous submissions, local saves         | Owners, exact private addresses, private evidence, case counts                   |
+| Invited client/collaborator | Explicit Case participation and permitted actions/documents             | Other participants' confidential documents, internal notes, competing Cases      |
+| Assigned broker             | Assigned/team-authorized Cases, permitted property work and commitments | Unrelated sensitive documents, publishing without capability                     |
+| Coordinator                 | Scheduling, coverage and necessary contact/access fields                | Broad financial/identity evidence access                                         |
+| Editor / translator         | Relevant source/draft material and assigned locale work                 | Client documents unrelated to the task, commercial approval by translation alone |
+| Publisher                   | Exact eligible publication decisions and correction/withdrawal          | Implicit legal approval or unrestricted team administration                      |
+| Manager / privacy operator  | Explicit allocation, access/privacy and audit capabilities              | Unlogged bypass of document purpose or professional authority                    |
+| Hermes task                 | Scoped approved source/draft inputs and draft output                    | Publish/send/index/access-grant/authority commands                               |
 
 Property staff visibility does not imply visibility of every buyer Case connected to that Property. Private documents have an explicit audience independent of general Case participation. Internal notes and client messages are separate fields/record types; they are never two display modes of the same unrestricted body.
 
@@ -395,30 +395,30 @@ Editorial area/service/guide content uses review dates, geographic scope and nam
 
 Use three hosts with one application: public `makler-realty.com`, client `my.makler-realty.com`, and staff `app.makler-realty.com`. The new private hostnames are target configuration requiring domain approval; they do not authorize a change to either legacy domain. Local/staging equivalents use isolated host/cookie contexts.
 
-| Surface | Route family | Primary job and information |
-|---|---|---|
-| Public home | `/{locale}` | Choose Buy/Rent/Sell/Let; understand actual service coverage; search/contact |
-| Results | `/{locale}/properties` | Inspect applied filters, count, sort, cards and optional map without losing context |
-| Property | `/{locale}/properties/{reference}/{slug}` | Evaluate one eligible Listing; ask or request viewing; inspect media/facts/unknowns |
-| Saved / compare | `/{locale}/saved`, `/{locale}/compare` | Device-local persistence, up to three comparison columns, explicit signed-in merge |
-| Shared shortlist | `/{locale}/share/{token}` | Public facts only; expired/revoked/unavailable variants |
-| Inquiry / receipt | `/{locale}/inquire`, `/{locale}/requests/{receiptId}` | Minimal request, durable outcome and actual next step |
-| Viewing request | `/{locale}/viewings/request` | Preferred windows, timezone, contact method; no false booking claim |
-| Owner entry/intake | `/{locale}/sell`, `/{locale}/let`, `/{locale}/owners/request` | Scope, minimum facts, unknown answers, preview and receipt |
-| Editorial/contact | `/{locale}/areas/{slug}`, `/services/{slug}`, `/guides/{slug}`, `/contact` under the locale | Accurate local context, supported service and reachable staff |
-| Help/preferences | `/{locale}/help/{topic}`, `/{locale}/preferences` | Assistance, privacy/accessibility information and verified subscription control |
-| Client access | `/{locale}/access`, `/{locale}/invitations/{id}` on client host | Verify correct identity and explicitly accept the permitted invitation |
-| Client home/case | `/{locale}/cases`, `/{locale}/cases/{id}` on client host | Next action, broker, progress, Brief, Interests and permitted participants |
-| Client case tasks | Case subroutes `/properties`, `/appointments`, `/messages`, `/documents`, `/proposals`, `/listing-preview`, `/closeout` | Complete a specific private task with explicit audience and version |
-| Client settings | `/{locale}/preferences`, `/privacy-requests`, `/participants` where scoped | Contact choices, data request, view/revoke permitted participation |
-| Staff Today/inquiries | `/{locale}/today`, `/inquiries`, `/inquiries/{id}` on staff host | Work requiring action, coverage queue, original request and disposition |
-| Staff Cases | `/{locale}/cases`, `/cases/{id}`, `/parties/{id}` | Case/Brief/Interest/commitment work and scoped relationship history |
-| Staff scheduling | `/{locale}/calendar`, `/appointments/{id}` | Agenda/day/week, conflicts, proposals, confirmations and changes |
-| Staff inventory | `/{locale}/inventory`, `/inventory/{propertyId}` | Property, Listings, facts/evidence, media, source copy and lifecycle |
-| Staff reviews | `/{locale}/reviews`, `/publications/{id}`, `/corrections/{id}` | Exact-version translation/approval, destination outcome and material correction |
-| Staff content | `/{locale}/content` and record routes | Approved area/service/guide authoring with the same publication rules |
-| Staff operations | `/{locale}/operations/{section}` | Imports, duplicates, privacy, integrations, delivery exceptions, audit and reports |
-| Staff settings | `/{locale}/settings/{section}` | Team/access, coverage, policy and release evidence; capability-gated |
+| Surface               | Route family                                                                                                            | Primary job and information                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Public home           | `/{locale}`                                                                                                             | Choose Buy/Rent/Sell/Let; understand actual service coverage; search/contact        |
+| Results               | `/{locale}/properties`                                                                                                  | Inspect applied filters, count, sort, cards and optional map without losing context |
+| Property              | `/{locale}/properties/{reference}/{slug}`                                                                               | Evaluate one eligible Listing; ask or request viewing; inspect media/facts/unknowns |
+| Saved / compare       | `/{locale}/saved`, `/{locale}/compare`                                                                                  | Device-local persistence, up to three comparison columns, explicit signed-in merge  |
+| Shared shortlist      | `/{locale}/share/{token}`                                                                                               | Public facts only; expired/revoked/unavailable variants                             |
+| Inquiry / receipt     | `/{locale}/inquire`, `/{locale}/requests/{receiptId}`                                                                   | Minimal request, durable outcome and actual next step                               |
+| Viewing request       | `/{locale}/viewings/request`                                                                                            | Preferred windows, timezone, contact method; no false booking claim                 |
+| Owner entry/intake    | `/{locale}/sell`, `/{locale}/let`, `/{locale}/owners/request`                                                           | Scope, minimum facts, unknown answers, preview and receipt                          |
+| Editorial/contact     | `/{locale}/areas/{slug}`, `/services/{slug}`, `/guides/{slug}`, `/contact` under the locale                             | Accurate local context, supported service and reachable staff                       |
+| Help/preferences      | `/{locale}/help/{topic}`, `/{locale}/preferences`                                                                       | Assistance, privacy/accessibility information and verified subscription control     |
+| Client access         | `/{locale}/access`, `/{locale}/invitations/{id}` on client host                                                         | Verify correct identity and explicitly accept the permitted invitation              |
+| Client home/case      | `/{locale}/cases`, `/{locale}/cases/{id}` on client host                                                                | Next action, broker, progress, Brief, Interests and permitted participants          |
+| Client case tasks     | Case subroutes `/properties`, `/appointments`, `/messages`, `/documents`, `/proposals`, `/listing-preview`, `/closeout` | Complete a specific private task with explicit audience and version                 |
+| Client settings       | `/{locale}/preferences`, `/privacy-requests`, `/participants` where scoped                                              | Contact choices, data request, view/revoke permitted participation                  |
+| Staff Today/inquiries | `/{locale}/today`, `/inquiries`, `/inquiries/{id}` on staff host                                                        | Work requiring action, coverage queue, original request and disposition             |
+| Staff Cases           | `/{locale}/cases`, `/cases/{id}`, `/parties/{id}`                                                                       | Case/Brief/Interest/commitment work and scoped relationship history                 |
+| Staff scheduling      | `/{locale}/calendar`, `/appointments/{id}`                                                                              | Agenda/day/week, conflicts, proposals, confirmations and changes                    |
+| Staff inventory       | `/{locale}/inventory`, `/inventory/{propertyId}`                                                                        | Property, Listings, facts/evidence, media, source copy and lifecycle                |
+| Staff reviews         | `/{locale}/reviews`, `/publications/{id}`, `/corrections/{id}`                                                          | Exact-version translation/approval, destination outcome and material correction     |
+| Staff content         | `/{locale}/content` and record routes                                                                                   | Approved area/service/guide authoring with the same publication rules               |
+| Staff operations      | `/{locale}/operations/{section}`                                                                                        | Imports, duplicates, privacy, integrations, delivery exceptions, audit and reports  |
+| Staff settings        | `/{locale}/settings/{section}`                                                                                          | Team/access, coverage, policy and release evidence; capability-gated                |
 
 Route names above are canonical for new surfaces. Existing legacy URLs remain governed by the reviewed migration manifest. A slug mismatch may redirect to the current canonical form only under that route policy; it never changes the stable identity.
 
@@ -476,17 +476,17 @@ Server-render public semantic content and core forms. React Server Components ha
 
 Use shared validated transport schemas, but treat server validation/authorization as decisive. Frontend view models contain only the authorized projection and enough explicit state to avoid guessing. Do not send a complete internal object and hide fields in CSS.
 
-| View model | Mandatory contract |
-|---|---|
+| View model     | Mandatory contract                                                                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Public listing | Stable reference, current manifest/revision, locale, purpose, typed price/facts, public location precision, availability/freshness, approved media, allowed actions |
-| Search | Query identity, normalized filters, count type, result eligibility, cursor and partial/stale scope |
-| Case summary | Type, stage, disposition, owner, next action, blockers, permitted participant view and revision |
-| Interest | Listing reference/revision, explicit selection/feedback, known match reasons and unresolved criteria |
-| Approval view | Subject/source hashes, reviewer scope, diff, missing prerequisites, affected destinations and current eligibility |
-| Message | Explicit audience, channel, draft/approval revision, logical send and observed transport state |
-| Appointment | Proposal/current arrangement, time/zone, access/host state, revision and notification outcome |
-| Document | Purpose, classification, audience, upload/scan/review state, allowed actions and current version |
-| Operation | ID, accepted/local/external outcome, status route, per-item results and permitted recovery |
+| Search         | Query identity, normalized filters, count type, result eligibility, cursor and partial/stale scope                                                                  |
+| Case summary   | Type, stage, disposition, owner, next action, blockers, permitted participant view and revision                                                                     |
+| Interest       | Listing reference/revision, explicit selection/feedback, known match reasons and unresolved criteria                                                                |
+| Approval view  | Subject/source hashes, reviewer scope, diff, missing prerequisites, affected destinations and current eligibility                                                   |
+| Message        | Explicit audience, channel, draft/approval revision, logical send and observed transport state                                                                      |
+| Appointment    | Proposal/current arrangement, time/zone, access/host state, revision and notification outcome                                                                       |
+| Document       | Purpose, classification, audience, upload/scan/review state, allowed actions and current version                                                                    |
+| Operation      | ID, accepted/local/external outcome, status route, per-item results and permitted recovery                                                                          |
 
 Keep committed and draft filters separate. Every async read/mutation callback carries request identity, record revision, and current identity/session generation. Ignore responses from a previous route, query or authenticated Principal. Test A→B→A navigation and sign-out/sign-in while requests are pending; an old response must not populate another person's view.
 
@@ -526,11 +526,11 @@ Hermes/Butler is a product role implemented by bounded worker tasks, not a separ
 
 The release manifest pins an evaluated router policy/model pool and response snapshot, prompt revision, schema revision and budget limits. Model selection is a release-qualification input within this chosen architecture, like a dependency patch version; it does not delegate business authority to the model. A model/provider change reruns the relevant evaluation suite before activation.
 
-| Task | Authorized inputs | Output and review |
-|---|---|---|
-| `intake.extract` | Selected permissioned property sources and broker notes | Candidate typed facts with document/page/span references, missing/conflicting values; human review before authoritative change |
-| `locale.draft` | Approved BG revision, protected facts and terminology | Draft for one target locale, source binding and warnings; human language approval required |
-| `case.assist` | Permitted Case summary and approved relevant property facts | Internal summary, proposed next action or reply draft; broker decides and sends |
+| Task                  | Authorized inputs                                                                                 | Output and review                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `intake.extract`      | Selected permissioned property sources and broker notes                                           | Candidate typed facts with document/page/span references, missing/conflicting values; human review before authoritative change                                                                                         |
+| `locale.draft`        | Approved BG revision, protected facts and terminology                                             | Draft for one target locale, source binding and warnings; human language approval required                                                                                                                             |
+| `case.assist`         | Permitted Case summary and approved relevant property facts                                       | Internal summary, proposed next action or reply draft; broker decides and sends                                                                                                                                        |
 | `work.research` (F29) | Staff-owned goal, selected minimized history/commitments and current approved listing/CMS sources | Durable conversation, questions, alternatives, plan and source-bound editable work; typed read/compare/calculate/prepare tools only. A person materializes reviewed tasks or buyer handoffs through ordinary commands. |
 
 F29's [generative process](delivery/generative-process.md) adds a separately qualified,
@@ -627,16 +627,16 @@ CI runs types/lint, domain and permission tests, real PostgreSQL/queue/storage i
 
 ### 17.1 Engineering targets
 
-| Concern | Initial release target and measurement |
-|---|---|
-| Public performance | Core Web Vitals good thresholds at p75: LCP ≤2.5 s, INP ≤200 ms, CLS ≤0.1; test lab conditions before launch and observe field data after sufficient traffic |
-| Interactive API | p95 ≤500 ms for ordinary reads/search and ≤800 ms for local commands, excluding deliberately queued external work, under the recorded baseline load |
-| Load qualification | At least 10× frozen launch inventory (minimum 10,000 test Listings), 50 concurrent public sessions and 10 active staff sessions; include worst realistic multilingual queries and media |
-| Inquiry durability | One committed receipt per logical accepted submission across double-submit, process restart and lost acknowledgment; no dependency on AI/mail completion |
-| Queue timeliness | Eligible urgent delivery/restriction jobs start within 30 s at baseline; backlog age and lease health are monitored |
-| Service objective | 99.9% monthly availability objective for core read/intake paths; this is a target, not a guaranteed provider SLA or measured result |
-| Local database recovery | Target RPO ≤5 min and RTO ≤4 h for supported within-provider recovery scenarios, proved by drill |
-| Independent recovery | Sealed off-site recovery point age ≤60 min and full product RTO ≤8 h for the rehearsed loss-of-primary-data scenario, restoring into clean selected-runtime resources while required providers are available |
+| Concern                 | Initial release target and measurement                                                                                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Public performance      | Core Web Vitals good thresholds at p75: LCP ≤2.5 s, INP ≤200 ms, CLS ≤0.1; test lab conditions before launch and observe field data after sufficient traffic                                                 |
+| Interactive API         | p95 ≤500 ms for ordinary reads/search and ≤800 ms for local commands, excluding deliberately queued external work, under the recorded baseline load                                                          |
+| Load qualification      | At least 10× frozen launch inventory (minimum 10,000 test Listings), 50 concurrent public sessions and 10 active staff sessions; include worst realistic multilingual queries and media                      |
+| Inquiry durability      | One committed receipt per logical accepted submission across double-submit, process restart and lost acknowledgment; no dependency on AI/mail completion                                                     |
+| Queue timeliness        | Eligible urgent delivery/restriction jobs start within 30 s at baseline; backlog age and lease health are monitored                                                                                          |
+| Service objective       | 99.9% monthly availability objective for core read/intake paths; this is a target, not a guaranteed provider SLA or measured result                                                                          |
+| Local database recovery | Target RPO ≤5 min and RTO ≤4 h for supported within-provider recovery scenarios, proved by drill                                                                                                             |
+| Independent recovery    | Sealed off-site recovery point age ≤60 min and full product RTO ≤8 h for the rehearsed loss-of-primary-data scenario, restoring into clean selected-runtime resources while required providers are available |
 
 Web Vitals targets follow current published definitions. Low-traffic field data may be insufficient at first release; do not replace missing field evidence with a claimed measured percentile. [Web Vitals](https://web.dev/articles/vitals)
 
@@ -714,99 +714,99 @@ The earlier identifiers are retained solely to demonstrate that consolidation ha
 
 ### 19.1 All 32 prior flows
 
-| Flow | Final disposition and implementation home |
-|---|---|
-| F01 Arrive with intention | Included: public home/service entry and supported geography/locale |
-| F02 Search/refine/recover | Included: results/filter/map with normalized query and recovery |
-| F03 Evaluate property | Included: approved property detail, facts/media/uncertainty |
-| F04 Save/compare/decide together | Included: local saves, authenticated Interests and scoped sharing |
-| F05 Saved-search alerts | Included: verified opt-in, deterministic daily digest and revocation |
-| F06 Question/callback | Included: durable anonymous Inquiry and staffed follow-through |
-| F07 Viewing | Included: request/propose/confirm/reschedule/complete; no instant booking claim |
-| F08 Area/process guidance | Included: approved content with country/service scope and professional-review rules |
-| F09 Old/unavailable listing | Included: truthful historical/preservation surface and exact legacy mapping |
-| F10 Seller/landlord assessment | Included: minimal intake, source context, scope/authority review |
-| F11 Service and instructions | Included: Seller Instructions, participant scope and agreement evidence |
-| F12 Publication/marketing progress | Included: exact preview, instructions, publication and client-visible factual summary |
-| F13 Verify/return | Included: client-context AuthKit, invitation and safe recovery |
-| F14 Progress/next action | Included: contextual client Case overview and owned commitments |
-| F15 Documents | Included: purpose-bound upload, quarantine, audience, review and private download |
-| F16 Proposal/decision | Included: versioned terms and coordination; no electronic-signature or legal-completion claim |
-| F17 Conversation continuity | Included: Case messages, application email/reply ingestion, truthful manual external-channel notes |
-| F18 Triage | Included: Inquiry queue, duplicate suggestion, assignment and disposition |
-| F19 Today/handover | Included: commitments, coverage and receiving-owner acceptance |
-| F20 Case work | Included: stage/disposition/next action and closeout |
-| F21 Matching | Included: deterministic criteria and Interest explanations; no opaque eligibility score |
-| F22 Calendar/itinerary | Included: internal resources, manual external-busy check and ICS updates |
-| F23 Property preparation | Included: integrated property workbench and source/media review |
-| F24 Translate/publish/withdraw | Included: exact manifests, human approvals, atomic eligibility and generation fences |
-| F25 Service quality/integrations | Included: actionable metrics, delivery exceptions and ownership |
-| F26 Long-term renting/letting | Included: brokerage workflow with rental vocabulary/cost basis; ongoing management excluded |
-| F27 Short stay | Bounded intake only where staffed: request/quote coordination; no reservation/payment engine |
-| F28 Property management | Bounded intake/referral only where offered: no dispatch, owner ledger or statements |
-| F29 AI assistance | Included: three private draft workflows; no general public chatbot |
-| F30 Preferences/access/privacy | Included: purpose-specific eligibility, grants, export/correction/deletion work |
-| F31 Material correction | Included: affected-publication restriction and dependency reconciliation |
-| F32 Import/merge/bulk work | Included: staged diffs, exact scope, durable per-item outcomes and safe reversal |
+| Flow                               | Final disposition and implementation home                                                          |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| F01 Arrive with intention          | Included: public home/service entry and supported geography/locale                                 |
+| F02 Search/refine/recover          | Included: results/filter/map with normalized query and recovery                                    |
+| F03 Evaluate property              | Included: approved property detail, facts/media/uncertainty                                        |
+| F04 Save/compare/decide together   | Included: local saves, authenticated Interests and scoped sharing                                  |
+| F05 Saved-search alerts            | Included: verified opt-in, deterministic daily digest and revocation                               |
+| F06 Question/callback              | Included: durable anonymous Inquiry and staffed follow-through                                     |
+| F07 Viewing                        | Included: request/propose/confirm/reschedule/complete; no instant booking claim                    |
+| F08 Area/process guidance          | Included: approved content with country/service scope and professional-review rules                |
+| F09 Old/unavailable listing        | Included: truthful historical/preservation surface and exact legacy mapping                        |
+| F10 Seller/landlord assessment     | Included: minimal intake, source context, scope/authority review                                   |
+| F11 Service and instructions       | Included: Seller Instructions, participant scope and agreement evidence                            |
+| F12 Publication/marketing progress | Included: exact preview, instructions, publication and client-visible factual summary              |
+| F13 Verify/return                  | Included: client-context AuthKit, invitation and safe recovery                                     |
+| F14 Progress/next action           | Included: contextual client Case overview and owned commitments                                    |
+| F15 Documents                      | Included: purpose-bound upload, quarantine, audience, review and private download                  |
+| F16 Proposal/decision              | Included: versioned terms and coordination; no electronic-signature or legal-completion claim      |
+| F17 Conversation continuity        | Included: Case messages, application email/reply ingestion, truthful manual external-channel notes |
+| F18 Triage                         | Included: Inquiry queue, duplicate suggestion, assignment and disposition                          |
+| F19 Today/handover                 | Included: commitments, coverage and receiving-owner acceptance                                     |
+| F20 Case work                      | Included: stage/disposition/next action and closeout                                               |
+| F21 Matching                       | Included: deterministic criteria and Interest explanations; no opaque eligibility score            |
+| F22 Calendar/itinerary             | Included: internal resources, manual external-busy check and ICS updates                           |
+| F23 Property preparation           | Included: integrated property workbench and source/media review                                    |
+| F24 Translate/publish/withdraw     | Included: exact manifests, human approvals, atomic eligibility and generation fences               |
+| F25 Service quality/integrations   | Included: actionable metrics, delivery exceptions and ownership                                    |
+| F26 Long-term renting/letting      | Included: brokerage workflow with rental vocabulary/cost basis; ongoing management excluded        |
+| F27 Short stay                     | Bounded intake only where staffed: request/quote coordination; no reservation/payment engine       |
+| F28 Property management            | Bounded intake/referral only where offered: no dispatch, owner ledger or statements                |
+| F29 AI assistance                  | Included: three private draft workflows; no general public chatbot                                 |
+| F30 Preferences/access/privacy     | Included: purpose-specific eligibility, grants, export/correction/deletion work                    |
+| F31 Material correction            | Included: affected-publication restriction and dependency reconciliation                           |
+| F32 Import/merge/bulk work         | Included: staged diffs, exact scope, durable per-item outcomes and safe reversal                   |
 
 ### 19.2 All 75 prior screen contracts
 
 Grouped rows enumerate every ID exactly once. Panels share record shells and business commands; they still require the relevant states in §11.4.
 
-| Prior IDs | Final surface and disposition |
-|---|---|
-| P01 | Home/service entry — included |
-| P02, P03, P04, P22 | Results with filter sheet, map and recovery states — included |
-| P05, P06, P21 | Property detail with media viewer and unavailable/preservation states — included |
-| P07, P08, P09 | Compare, saved and public-facts shortlist — included |
-| P10 | Saved-search subscription/preferences — included |
-| P11, P12 | Inquiry and durable receipt — included |
-| P13, P14 | Viewing request and authorized appointment status — included |
-| P15, P16 | Areas and approved service/guidance content — included |
-| P17, P18, P19 | Sell/Let entry, owner intake and receipt — included |
-| P20, P24 | Contact, help, privacy/preferences and accessibility — included |
-| P23 | Supported short-stay service request — bounded intake only; no booking surface |
-| C01, C02 | Client sign-in and invitation acceptance — included |
-| C03, C11, C16 | Role-appropriate Case overview and closeout — included |
-| C04, C05 | Brief and Interests/shortlist/feedback — included |
-| C06 | Appointment detail and change proposals — included |
-| C07 | Scoped Case messages — included |
-| C08, C09 | Documents and upload workflow — included |
-| C10, C12 | Proposal review and owner listing preview — included |
-| C13, C17, C18 | Preferences, scoped participants and privacy requests — included |
-| C14 | Service-intake receipt/owned Case only; maintenance lifecycle excluded |
-| C15 | Owner financial statement — explicitly excluded; no empty placeholder route |
-| O01, O18 | Today and commitments — included |
-| O02, O03 | Inquiry/communications triage with original request — included |
-| O04, O05, O06, O07 | Cases, Case detail, Party relationships and Interest matching — included |
-| O08, O09 | Calendar and Appointment — included |
-| O10, O11, O12, O13, O14 | Inventory and property workbench tabs — included |
-| O15, O16, O17, O33 | Translation/release/distribution/material-correction review — included |
-| O19, O20 | Proposal and document review in Case workspace — included |
-| O21 | Editorial content workspace — included |
-| O22, O25, O26 | Reports, integration exceptions, audit/privacy operations — included |
-| O23, O24 | Team/access and service-policy settings — included |
-| O27, O28 | Duplicate resolution and staged import/bulk results — included |
-| O29, O30 | Supported service-intake Case handling only; booking/dispatch operations excluded |
-| O31 | Owner-statement reconciliation — explicitly excluded; no financial ledger |
-| O32 | Contextual AI draft review within each owning task — included, not a separate chat app |
+| Prior IDs               | Final surface and disposition                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| P01                     | Home/service entry — included                                                          |
+| P02, P03, P04, P22      | Results with filter sheet, map and recovery states — included                          |
+| P05, P06, P21           | Property detail with media viewer and unavailable/preservation states — included       |
+| P07, P08, P09           | Compare, saved and public-facts shortlist — included                                   |
+| P10                     | Saved-search subscription/preferences — included                                       |
+| P11, P12                | Inquiry and durable receipt — included                                                 |
+| P13, P14                | Viewing request and authorized appointment status — included                           |
+| P15, P16                | Areas and approved service/guidance content — included                                 |
+| P17, P18, P19           | Sell/Let entry, owner intake and receipt — included                                    |
+| P20, P24                | Contact, help, privacy/preferences and accessibility — included                        |
+| P23                     | Supported short-stay service request — bounded intake only; no booking surface         |
+| C01, C02                | Client sign-in and invitation acceptance — included                                    |
+| C03, C11, C16           | Role-appropriate Case overview and closeout — included                                 |
+| C04, C05                | Brief and Interests/shortlist/feedback — included                                      |
+| C06                     | Appointment detail and change proposals — included                                     |
+| C07                     | Scoped Case messages — included                                                        |
+| C08, C09                | Documents and upload workflow — included                                               |
+| C10, C12                | Proposal review and owner listing preview — included                                   |
+| C13, C17, C18           | Preferences, scoped participants and privacy requests — included                       |
+| C14                     | Service-intake receipt/owned Case only; maintenance lifecycle excluded                 |
+| C15                     | Owner financial statement — explicitly excluded; no empty placeholder route            |
+| O01, O18                | Today and commitments — included                                                       |
+| O02, O03                | Inquiry/communications triage with original request — included                         |
+| O04, O05, O06, O07      | Cases, Case detail, Party relationships and Interest matching — included               |
+| O08, O09                | Calendar and Appointment — included                                                    |
+| O10, O11, O12, O13, O14 | Inventory and property workbench tabs — included                                       |
+| O15, O16, O17, O33      | Translation/release/distribution/material-correction review — included                 |
+| O19, O20                | Proposal and document review in Case workspace — included                              |
+| O21                     | Editorial content workspace — included                                                 |
+| O22, O25, O26           | Reports, integration exceptions, audit/privacy operations — included                   |
+| O23, O24                | Team/access and service-policy settings — included                                     |
+| O27, O28                | Duplicate resolution and staged import/bulk results — included                         |
+| O29, O30                | Supported service-intake Case handling only; booking/dispatch operations excluded      |
+| O31                     | Owner-statement reconciliation — explicitly excluded; no financial ledger              |
+| O32                     | Contextual AI draft review within each owning task — included, not a separate chat app |
 
 ### 19.3 Required transport surface
 
 These are application endpoints, not a promise to expose raw collections. The same domain command implementation serves UI forms and authenticated API routes. Public/client/staff routes are mounted only on their appropriate host and validate the correct Principal context.
 
-| Group | Required endpoints/commands | Contract |
-|---|---|---|
-| Public read | Search, published listing, approved editorial content | Public projection only, locale/eligibility enforced, bounded query |
-| Public submission | Receive Inquiry, reconcile receipt, seller intake, viewing request | Application-owned idempotency, rate/abuse controls, durable acceptance |
-| Client read/update | Permitted Cases/Interests; propose Brief/feedback; request change; post Case message | Record/field audience and revision checks |
-| Invitations/preferences | Accept/revoke invitation, verify contact, edit/unsubscribe alert, privacy request | Explicit POST, current recipient identity, purpose-specific state |
-| Agency commands | Assign/handover Case, transition stage, manage Interest/commitment, confirm/change Appointment, version Proposal | Capability, revision, evidence and atomic side-effect intent |
-| Inventory/publication | Revise facts/listing/media, submit review, approve, publish/restrict/withdraw/correct | Exact manifest, source/actor checks, generation fence |
-| Files | Start/finalize upload, request/review document, authorized download/export | Purpose, type/size/digest, scan, audience and no public caching |
-| Jobs/imports | Preview/execute selected batch, inspect Operation, reconcile/retry allowed work | Stable logical identity, no unsafe replay or public queue runner |
-| Provider ingress | Resend and other approved provider webhook receivers | Signature/account checks, durable deduplicated inbox, no untrusted authority |
-| Operations | Minimal health; authorized readiness/audit/provider status | No secrets; exact release/evidence identity; permissioned detail |
+| Group                   | Required endpoints/commands                                                                                      | Contract                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Public read             | Search, published listing, approved editorial content                                                            | Public projection only, locale/eligibility enforced, bounded query           |
+| Public submission       | Receive Inquiry, reconcile receipt, seller intake, viewing request                                               | Application-owned idempotency, rate/abuse controls, durable acceptance       |
+| Client read/update      | Permitted Cases/Interests; propose Brief/feedback; request change; post Case message                             | Record/field audience and revision checks                                    |
+| Invitations/preferences | Accept/revoke invitation, verify contact, edit/unsubscribe alert, privacy request                                | Explicit POST, current recipient identity, purpose-specific state            |
+| Agency commands         | Assign/handover Case, transition stage, manage Interest/commitment, confirm/change Appointment, version Proposal | Capability, revision, evidence and atomic side-effect intent                 |
+| Inventory/publication   | Revise facts/listing/media, submit review, approve, publish/restrict/withdraw/correct                            | Exact manifest, source/actor checks, generation fence                        |
+| Files                   | Start/finalize upload, request/review document, authorized download/export                                       | Purpose, type/size/digest, scan, audience and no public caching              |
+| Jobs/imports            | Preview/execute selected batch, inspect Operation, reconcile/retry allowed work                                  | Stable logical identity, no unsafe replay or public queue runner             |
+| Provider ingress        | Resend and other approved provider webhook receivers                                                             | Signature/account checks, durable deduplicated inbox, no untrusted authority |
+| Operations              | Minimal health; authorized readiness/audit/provider status                                                       | No secrets; exact release/evidence identity; permissioned detail             |
 
 Produce a versioned OpenAPI/transport-schema artifact for these endpoints during implementation. It must include status/error shapes, pagination, idempotency, authorization class, revisions and representative examples. Do not invent a separate API implementation whose behavior diverges from the UI command path.
 
@@ -820,96 +820,96 @@ Every evidence artifact records schema version, environment, release SHA/image/g
 
 ### 20.2 Required executable acceptance scenarios
 
-| ID | Scenario and required result |
-|---|---|
-| AT01 | Anonymous browse/search/detail/inquiry completes without registration and with delayed/disabled JavaScript |
-| AT02 | Filters survive detail/back/refresh; an old query response cannot overwrite a newer query |
-| AT03 | All seven locales complete search, inquiry, receipt and recovery; Hebrew passes full RTL/mixed-direction review |
-| AT04 | Unknown feature/area/price basis remains unknown; hard filters never silently relax |
-| AT05 | Draft/unapproved/stale-locale records appear in no public result, count, map, metadata or sitemap |
-| AT06 | Map provider failure leaves a usable list, facts, filters and contact path |
-| AT07 | Exact reference, misspelling and approved Cyrillic/Latin/local-name variants return the reviewed expected inventory |
-| AT08 | Saved/compare works with unavailable storage, changed price and withdrawn listing; sign-in merge does not drop server items |
-| AT09 | Public share contains public facts only; revoked/expired links reveal no private Case information |
-| AT10 | Double tap, browser retry and lost response create one Inquiry receipt for one logical payload |
-| AT11 | Reusing an Inquiry key with a different payload is rejected; receipt enumeration cannot read personal data |
-| AT12 | Process restart/mail/AI outage after commit retains accepted Inquiry and its accountable queue ownership |
-| AT13 | DB outage returns no false receipt and shows verified contact fallback; safe draft is retained in the current tab |
-| AT14 | Unowned/due Inquiry escalates under actual staffed hours; first useful response is distinct from auto-acknowledgment |
-| AT15 | One buyer considers five Listings with separate Interests/feedback and one Case; declining one does not close the others |
-| AT16 | A party with buyer and seller roles sees only each explicitly permitted Case audience |
-| AT17 | Handover preserves commitments, context and grants; revoked staff cannot leave live Cases unowned |
-| AT18 | Seller intake does not infer ownership; exact Seller Instruction and preview scope are recorded before publishing |
-| AT19 | Two simultaneous draft/fact edits produce a revision conflict with preserved input, not last-write-wins loss |
-| AT20 | Media reorder preserves hidden/paginated/unsupported relations and duplicate asset placements |
-| AT21 | Price, area, bedroom, location, reference and source URL survive import/translation without silent transformation |
-| AT22 | Same-person review is honestly recorded; a locale reviewer cannot approve publication or legal claims without separate capability |
-| AT23 | Source changes after translation approval invalidate affected publication and stale acceptance |
-| AT24 | Material correction removes inaccurate affected views before replacement; unaffected eligible locales remain consistent |
-| AT25 | Old queued publication after withdrawal cannot resurrect any locale/destination |
-| AT26 | Direct CRUD, internal admin, job and API paths cannot bypass publication or authorization commands |
-| AT27 | Website, public API, JSON-LD, sitemap, hreflang, comparison, alert and enabled feed agree on eligibility/current revision |
-| AT28 | Public-media restriction/purge is verified; private originals, EXIF location and documents never leak |
-| AT29 | Viewing request is never shown as confirmed before host/access/resource checks |
-| AT30 | Concurrent Appointment confirmations cannot overlap the same exclusive resource |
-| AT31 | DST ambiguity, travel buffer and client/broker timezone displays preserve the intended instant |
-| AT32 | Rescheduling retains the old confirmation until replacement; ICS UID/SEQUENCE and reminders reflect the committed change |
-| AT33 | Cancellation/no-show/completion releases or preserves resources correctly and creates appropriate follow-up |
-| AT34 | Proposal amount/party/deadline change invalidates old approval; expired/countered version cannot be accepted as current |
-| AT35 | Completion needs the configured evidence and remaining-obligation disposition; it does not assert legal completion automatically |
-| AT36 | Client-token substitution, wrong application/issuer/audience, expired token and missing staff membership are rejected |
-| AT37 | Staff MFA, reauthentication and recovery are exercised through real provider configuration |
-| AT38 | Invite preview/scanner GET cannot consume or accept; wrong-recipient and revoked-invite cases are safe |
-| AT39 | Local revocation blocks subsequent requests/downloads; detected revocation clears private view caches; history restoration reauthorizes before revealing content |
-| AT40 | Client/co-buyer/broker/coordinator/reviewer permissions pass explicit allow-and-deny tests for records and fields |
-| AT41 | CSRF, forged origin/internal headers, direct provider origin and hidden collection/runner paths cannot bypass controls |
-| AT42 | Upload interruption, wrong type, oversize, malicious file, stale scan and missing object remain non-public/quarantined; reusing an upload URL cannot change sealed/scanned bytes |
-| AT43 | Private download/range/export reauthorizes; public bucket and CDN cannot retrieve restricted evidence |
-| AT44 | Consent withdrawal stops already queued alerts; service and marketing choices do not merge |
-| AT45 | Privacy export excludes other parties; deletion/revocation survives derived stores and a restore |
-| AT46 | Human-reviewed Message sends once across retry/crash; changed payload cannot reuse approval/idempotency identity |
-| AT47 | Provider timeout is unknown; replay beyond the 24-hour dedupe window requires reconciliation, not blind send |
-| AT48 | Forged/replayed/out-of-order webhooks do not grant access, duplicate work or falsify delivery |
-| AT49 | Incoming spoofed/ambiguous sender or attachment reaches safe triage/quarantine, not automatic private access |
-| AT50 | Worker crash, expired lease, repeat schedule and partial batch complete without lost or duplicated logical effects |
-| AT51 | Revoked actor or stale source generation prevents queued consequential action |
-| AT52 | AI injected instructions cannot publish/send/grant access; outputs have verified source pointers and protected-field checks |
-| AT53 | AI source changes, refusal, timeout, budget exhaustion and provider outage leave manual workflows intact |
-| AT54 | AI locale/extraction/adversarial corpus meets §14 gates and records human correction effort |
-| AT55 | Import dry run changes no live record; selected execution preserves reviewed fields and gives per-row outcomes |
-| AT56 | Duplicate merge cannot widen access; alias references and split/recovery preserve history |
-| AT57 | Every frozen legacy URL on both domains matches its exact approved response and canonical/locale behavior |
-| AT58 | Media completeness compares the correct unit/key manifest, with zero missing public runtime references |
-| AT59 | Old and new write paths/workers cannot both own consequential work during cutover |
-| AT60 | Web/worker/migration images run the pinned release, with build-time DB isolation and backward-compatible migration |
-| AT61 | Accessible complete tasks pass keyboard/screen-reader/zoom/reduced-motion/forced-colors and mobile virtual-keyboard checks |
-| AT62 | Performance/load targets hold under the frozen dataset/network assumptions; queue maintenance does not starve urgent work |
-| AT63 | Alerts reach the named owner during representative dependency, queue, publication, intake and backup failures |
+| ID   | Scenario and required result                                                                                                                                                        |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AT01 | Anonymous browse/search/detail/inquiry completes without registration and with delayed/disabled JavaScript                                                                          |
+| AT02 | Filters survive detail/back/refresh; an old query response cannot overwrite a newer query                                                                                           |
+| AT03 | All seven locales complete search, inquiry, receipt and recovery; Hebrew passes full RTL/mixed-direction review                                                                     |
+| AT04 | Unknown feature/area/price basis remains unknown; hard filters never silently relax                                                                                                 |
+| AT05 | Draft/unapproved/stale-locale records appear in no public result, count, map, metadata or sitemap                                                                                   |
+| AT06 | Map provider failure leaves a usable list, facts, filters and contact path                                                                                                          |
+| AT07 | Exact reference, misspelling and approved Cyrillic/Latin/local-name variants return the reviewed expected inventory                                                                 |
+| AT08 | Saved/compare works with unavailable storage, changed price and withdrawn listing; sign-in merge does not drop server items                                                         |
+| AT09 | Public share contains public facts only; revoked/expired links reveal no private Case information                                                                                   |
+| AT10 | Double tap, browser retry and lost response create one Inquiry receipt for one logical payload                                                                                      |
+| AT11 | Reusing an Inquiry key with a different payload is rejected; receipt enumeration cannot read personal data                                                                          |
+| AT12 | Process restart/mail/AI outage after commit retains accepted Inquiry and its accountable queue ownership                                                                            |
+| AT13 | DB outage returns no false receipt and shows verified contact fallback; safe draft is retained in the current tab                                                                   |
+| AT14 | Unowned/due Inquiry escalates under actual staffed hours; first useful response is distinct from auto-acknowledgment                                                                |
+| AT15 | One buyer considers five Listings with separate Interests/feedback and one Case; declining one does not close the others                                                            |
+| AT16 | A party with buyer and seller roles sees only each explicitly permitted Case audience                                                                                               |
+| AT17 | Handover preserves commitments, context and grants; revoked staff cannot leave live Cases unowned                                                                                   |
+| AT18 | Seller intake does not infer ownership; exact Seller Instruction and preview scope are recorded before publishing                                                                   |
+| AT19 | Two simultaneous draft/fact edits produce a revision conflict with preserved input, not last-write-wins loss                                                                        |
+| AT20 | Media reorder preserves hidden/paginated/unsupported relations and duplicate asset placements                                                                                       |
+| AT21 | Price, area, bedroom, location, reference and source URL survive import/translation without silent transformation                                                                   |
+| AT22 | Same-person review is honestly recorded; a locale reviewer cannot approve publication or legal claims without separate capability                                                   |
+| AT23 | Source changes after translation approval invalidate affected publication and stale acceptance                                                                                      |
+| AT24 | Material correction removes inaccurate affected views before replacement; unaffected eligible locales remain consistent                                                             |
+| AT25 | Old queued publication after withdrawal cannot resurrect any locale/destination                                                                                                     |
+| AT26 | Direct CRUD, internal admin, job and API paths cannot bypass publication or authorization commands                                                                                  |
+| AT27 | Website, public API, JSON-LD, sitemap, hreflang, comparison, alert and enabled feed agree on eligibility/current revision                                                           |
+| AT28 | Public-media restriction/purge is verified; private originals, EXIF location and documents never leak                                                                               |
+| AT29 | Viewing request is never shown as confirmed before host/access/resource checks                                                                                                      |
+| AT30 | Concurrent Appointment confirmations cannot overlap the same exclusive resource                                                                                                     |
+| AT31 | DST ambiguity, travel buffer and client/broker timezone displays preserve the intended instant                                                                                      |
+| AT32 | Rescheduling retains the old confirmation until replacement; ICS UID/SEQUENCE and reminders reflect the committed change                                                            |
+| AT33 | Cancellation/no-show/completion releases or preserves resources correctly and creates appropriate follow-up                                                                         |
+| AT34 | Proposal amount/party/deadline change invalidates old approval; expired/countered version cannot be accepted as current                                                             |
+| AT35 | Completion needs the configured evidence and remaining-obligation disposition; it does not assert legal completion automatically                                                    |
+| AT36 | Client-token substitution, wrong application/issuer/audience, expired token and missing staff membership are rejected                                                               |
+| AT37 | Staff MFA, reauthentication and recovery are exercised through real provider configuration                                                                                          |
+| AT38 | Invite preview/scanner GET cannot consume or accept; wrong-recipient and revoked-invite cases are safe                                                                              |
+| AT39 | Local revocation blocks subsequent requests/downloads; detected revocation clears private view caches; history restoration reauthorizes before revealing content                    |
+| AT40 | Client/co-buyer/broker/coordinator/reviewer permissions pass explicit allow-and-deny tests for records and fields                                                                   |
+| AT41 | CSRF, forged origin/internal headers, direct provider origin and hidden collection/runner paths cannot bypass controls                                                              |
+| AT42 | Upload interruption, wrong type, oversize, malicious file, stale scan and missing object remain non-public/quarantined; reusing an upload URL cannot change sealed/scanned bytes    |
+| AT43 | Private download/range/export reauthorizes; public bucket and CDN cannot retrieve restricted evidence                                                                               |
+| AT44 | Consent withdrawal stops already queued alerts; service and marketing choices do not merge                                                                                          |
+| AT45 | Privacy export excludes other parties; deletion/revocation survives derived stores and a restore                                                                                    |
+| AT46 | Human-reviewed Message sends once across retry/crash; changed payload cannot reuse approval/idempotency identity                                                                    |
+| AT47 | Provider timeout is unknown; replay beyond the 24-hour dedupe window requires reconciliation, not blind send                                                                        |
+| AT48 | Forged/replayed/out-of-order webhooks do not grant access, duplicate work or falsify delivery                                                                                       |
+| AT49 | Incoming spoofed/ambiguous sender or attachment reaches safe triage/quarantine, not automatic private access                                                                        |
+| AT50 | Worker crash, expired lease, repeat schedule and partial batch complete without lost or duplicated logical effects                                                                  |
+| AT51 | Revoked actor or stale source generation prevents queued consequential action                                                                                                       |
+| AT52 | AI injected instructions cannot publish/send/grant access; outputs have verified source pointers and protected-field checks                                                         |
+| AT53 | AI source changes, refusal, timeout, budget exhaustion and provider outage leave manual workflows intact                                                                            |
+| AT54 | AI locale/extraction/adversarial corpus meets §14 gates and records human correction effort                                                                                         |
+| AT55 | Import dry run changes no live record; selected execution preserves reviewed fields and gives per-row outcomes                                                                      |
+| AT56 | Duplicate merge cannot widen access; alias references and split/recovery preserve history                                                                                           |
+| AT57 | Every frozen legacy URL on both domains matches its exact approved response and canonical/locale behavior                                                                           |
+| AT58 | Media completeness compares the correct unit/key manifest, with zero missing public runtime references                                                                              |
+| AT59 | Old and new write paths/workers cannot both own consequential work during cutover                                                                                                   |
+| AT60 | Web/worker/migration images run the pinned release, with build-time DB isolation and backward-compatible migration                                                                  |
+| AT61 | Accessible complete tasks pass keyboard/screen-reader/zoom/reduced-motion/forced-colors and mobile virtual-keyboard checks                                                          |
+| AT62 | Performance/load targets hold under the frozen dataset/network assumptions; queue maintenance does not starve urgent work                                                           |
+| AT63 | Alerts reach the named owner during representative dependency, queue, publication, intake and backup failures                                                                       |
 | AT64 | Managed and independent recovery drills restore coherent data/media, replay the newer safety ledger or fail closed, invalidate restored sessions and prevent external-action replay |
-| AT65 | Application rollback preserves inquiries and commitments accepted after deployment |
-| AT66 | Provider account custody, budgets, secrets rotation, access revocation and operational runbooks are usable by the agency |
-| AT67 | Readiness JSON, checklist and signed evidence views agree on one release/policy/scope; any blocked gate prevents a pass |
-| AT68 | Post-cutover host/certificate/mail-DNS/search/intake/auth/media and exact URL/crawl checks are recorded; historical SEO analytics are optional |
+| AT65 | Application rollback preserves inquiries and commitments accepted after deployment                                                                                                  |
+| AT66 | Provider account custody, budgets, secrets rotation, access revocation and operational runbooks are usable by the agency                                                            |
+| AT67 | Readiness JSON, checklist and signed evidence views agree on one release/policy/scope; any blocked gate prevents a pass                                                             |
+| AT68 | Post-cutover host/certificate/mail-DNS/search/intake/auth/media and exact URL/crawl checks are recorded; historical SEO analytics are optional                                      |
 
 Cross-cut this portfolio by representative desktop/mobile widths (including 320 px), the three staff languages, seven public/client locales, guest/client/collaborator/staff role contexts, and success/failure/recovery. Do not run every cosmetic combination mechanically; cover every authority/behavior distinction and every advertised complete journey.
 
 ### 20.3 Gate order and pass conditions
 
-| Gate | Required exit evidence | Dependency |
-|---|---|---|
-| R00 Authority and release contract | Current instruction/artifact conflicts explicitly reconciled; final scope, owners, policy and evidence schema accepted | Before a new readiness verdict or production transition |
-| R01 Foundation | Typed domain/migrations; real identity context; allow/deny tests; command/transaction/queue invariants | Before private operational features depend on it |
-| R02 Inventory/publication | Seller/source/media review, exact manifests, locales, correction/withdrawal and historical dispositions | Before public inventory is enabled |
-| R03 Discovery/intake | Complete approved search/detail/saved/compare plus durable inquiry and staffed assignment/response | Before acquisition traffic is routed to the candidate |
-| R04 Case continuity | Brief/Interests, handover, viewing/resource/ICS, proposals, documents and closeout | Before complete agency-service acceptance |
-| R05 Communication/privacy | Real provider send/receive/failure proof, grants/revocation, consent and privacy workflows | Before customer messaging/private access is enabled |
-| R06 Assistance | Three evaluated draft workflows, live provider evidence and manual fallback | Before AI capability is enabled or full feature acceptance |
-| R07 Migration/media | Complete URL/data/media mapping and rehearsed final-delta procedure | Before canonical-domain cutover |
-| R08 Reliability/security | Packaging/load/security checks, alerts, HA, independent recovery and rollback drills | Before cutover authorization |
-| R09 UX/content | All advertised task paths, seven-locale/RTL/accessibility review, real approved copy and measured performance | Before general public release |
-| R10 Candidate attestation | Fresh exact-release evidence; no unmet pre-cutover gate; operator custody and cutover approval | Before the authorized routing change |
-| R11 Cutover verification | Real domains/certificates/mail DNS, intake, identity, media, URL/SEO observations and external proof for the deployed release | Before declaring the public deployment verified |
-| R12 Operational acceptance | A complete staffed operating cycle including overnight scheduled work and backup completes without an unresolved release-severity incident; named owner signs handoff | Final release acceptance, with ongoing monitoring thereafter |
+| Gate                               | Required exit evidence                                                                                                                                                | Dependency                                                   |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| R00 Authority and release contract | Current instruction/artifact conflicts explicitly reconciled; final scope, owners, policy and evidence schema accepted                                                | Before a new readiness verdict or production transition      |
+| R01 Foundation                     | Typed domain/migrations; real identity context; allow/deny tests; command/transaction/queue invariants                                                                | Before private operational features depend on it             |
+| R02 Inventory/publication          | Seller/source/media review, exact manifests, locales, correction/withdrawal and historical dispositions                                                               | Before public inventory is enabled                           |
+| R03 Discovery/intake               | Complete approved search/detail/saved/compare plus durable inquiry and staffed assignment/response                                                                    | Before acquisition traffic is routed to the candidate        |
+| R04 Case continuity                | Brief/Interests, handover, viewing/resource/ICS, proposals, documents and closeout                                                                                    | Before complete agency-service acceptance                    |
+| R05 Communication/privacy          | Real provider send/receive/failure proof, grants/revocation, consent and privacy workflows                                                                            | Before customer messaging/private access is enabled          |
+| R06 Assistance                     | Three evaluated draft workflows, live provider evidence and manual fallback                                                                                           | Before AI capability is enabled or full feature acceptance   |
+| R07 Migration/media                | Complete URL/data/media mapping and rehearsed final-delta procedure                                                                                                   | Before canonical-domain cutover                              |
+| R08 Reliability/security           | Packaging/load/security checks, alerts, HA, independent recovery and rollback drills                                                                                  | Before cutover authorization                                 |
+| R09 UX/content                     | All advertised task paths, seven-locale/RTL/accessibility review, real approved copy and measured performance                                                         | Before general public release                                |
+| R10 Candidate attestation          | Fresh exact-release evidence; no unmet pre-cutover gate; operator custody and cutover approval                                                                        | Before the authorized routing change                         |
+| R11 Cutover verification           | Real domains/certificates/mail DNS, intake, identity, media, URL/SEO observations and external proof for the deployed release                                         | Before declaring the public deployment verified              |
+| R12 Operational acceptance         | A complete staffed operating cycle including overnight scheduled work and backup completes without an unresolved release-severity incident; named owner signs handoff | Final release acceptance, with ongoing monitoring thereafter |
 
 These are dependency gates, not an implementation calendar. Some work can proceed in parallel, but an upstream invariant cannot be replaced by a downstream polished screen. Controlled cutover is an explicitly authorized verification stage, not permission to call unmet post-cutover evidence passed beforehand.
 
@@ -954,19 +954,19 @@ Keep the required human listing review CSV, redacted live search/worker/runtime 
 
 ### 21.4 Inputs required from the operating business
 
-| Input | Accountable owner | Safe behavior until supplied | Gate |
-|---|---|---|---|
-| Legal entity, real contact details, office/service coverage and supported regions | Agency owner | No invented contact or geographic/service claim | R00/R09 |
-| Named team, reviewer/publisher/privacy/release roles, absences and business hours | Agency manager | No public speed promise; no unowned live intake operation | R00/R03 |
-| Locale reviewers and supported response arrangements for all enabled languages | Content/service lead | Unapproved locale content remains unpublished | R02/R09 |
-| Seller authority, rights, public-address precision and review dispositions | Assigned broker/publisher | Restricted/unpublished material remains private | R02 |
-| Country-specific commercial/professional-process copy and document policy | Agency plus appropriate professionals | No legal/tax/ownership conclusion asserted by software | R02/R04 |
-| Contact purpose, retention, deletion/hold and vendor data-processing policy | Authorized privacy owner | No production personal-data capture without accepted policy | R00/R05 |
-| Agency-owned provider accounts, plans, data terms, quotas and billing | Agency/technical owner | Staging/synthetic tests only; no silent use of personal accounts | R01/R08 |
-| Domain/DNS/certificate ownership and change authorization | Domain owner | No cutover or mail-DNS change | R07/R10 |
-| Actual legacy exports, approvals, URL/media maps and source reconciliation | Migration owner | No invented redirect or asset-completeness assertion | R07 |
-| Required external search/SEO/Hermes/Payload/media evidence and policy conflict resolution | Release owner | Readiness remains blocked | R00/R10/R11 |
-| Recovery custody, signing authority, tested fallback and incident contacts | Operations owner | No release without usable recovery and accountable response | R08/R10 |
+| Input                                                                                     | Accountable owner                     | Safe behavior until supplied                                     | Gate        |
+| ----------------------------------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------- | ----------- |
+| Legal entity, real contact details, office/service coverage and supported regions         | Agency owner                          | No invented contact or geographic/service claim                  | R00/R09     |
+| Named team, reviewer/publisher/privacy/release roles, absences and business hours         | Agency manager                        | No public speed promise; no unowned live intake operation        | R00/R03     |
+| Locale reviewers and supported response arrangements for all enabled languages            | Content/service lead                  | Unapproved locale content remains unpublished                    | R02/R09     |
+| Seller authority, rights, public-address precision and review dispositions                | Assigned broker/publisher             | Restricted/unpublished material remains private                  | R02         |
+| Country-specific commercial/professional-process copy and document policy                 | Agency plus appropriate professionals | No legal/tax/ownership conclusion asserted by software           | R02/R04     |
+| Contact purpose, retention, deletion/hold and vendor data-processing policy               | Authorized privacy owner              | No production personal-data capture without accepted policy      | R00/R05     |
+| Agency-owned provider accounts, plans, data terms, quotas and billing                     | Agency/technical owner                | Staging/synthetic tests only; no silent use of personal accounts | R01/R08     |
+| Domain/DNS/certificate ownership and change authorization                                 | Domain owner                          | No cutover or mail-DNS change                                    | R07/R10     |
+| Actual legacy exports, approvals, URL/media maps and source reconciliation                | Migration owner                       | No invented redirect or asset-completeness assertion             | R07         |
+| Required external search/SEO/Hermes/Payload/media evidence and policy conflict resolution | Release owner                         | Readiness remains blocked                                        | R00/R10/R11 |
+| Recovery custody, signing authority, tested fallback and incident contacts                | Operations owner                      | No release without usable recovery and accountable response      | R08/R10     |
 
 These inputs do not choose between competing products or data models. They supply the real-world authority, accounts, content and operating conditions that no architecture document can truthfully manufacture.
 

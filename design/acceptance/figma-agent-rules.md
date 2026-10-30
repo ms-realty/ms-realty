@@ -1,4 +1,5 @@
 ## Common rules for MS Realty Figma agents (read fully)
+
 - Access: `cd ~/.local/share/msr-figma-bridge && python3 fig.py /path/job.js 180` runs an async plugin-API function body in the design file "MS Realty — AI-native OS & Website · 2027" (PxfBJ2tdrj9A923fpgqzDn) and prints JSON (`return` a value). `await shot(node, 0.5)` exports a PNG to ~/.local/share/msr-figma-bridge/shots/ (path in "shots"; view with the Read tool). dynamic-page: `await page.loadAsync()` before reading a page's children; `await figma.getNodeByIdAsync(id)`; before editing text load every font in it (`node.getRangeAllFontNames(0, node.characters.length)`), then set characters.
 - Never pass a third argument to fig.py (that routes to the FigJam board). Never use UI/computer-use. Never change the user's current page or viewport. Never delete nodes.
 - Other agents write to the same file in parallel on DIFFERENT aspects (listed in your task). Stay strictly inside your aspect; jobs are atomic, so parallel jobs are safe if you don't touch the same properties.

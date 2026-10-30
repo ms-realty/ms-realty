@@ -45,23 +45,23 @@ recovery. For nonlocal use, provide the real host settings and secrets per comma
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| `npm run dev` / `build` / `start` | Next.js dev server, production build, production server |
-| `npm run lint` / `format` | Biome check / apply fixes |
-| `npm run typecheck` | Generate route types and run `tsc --noEmit` |
-| `npm test` | All Vitest projects (`test:unit`, `test:integration`) |
-| `npm run e2e` | Fresh isolated database, production build, Chromium desktop/mobile and mobile WebKit journeys |
-| `npm run storybook` / `storybook:build` | Interactive component catalog / static build |
-| `npm run test:visual:docker` | Screenshot checks in the pinned Linux browser image |
-| `npm run tokens:check` | Verify generated CSS and Figma token files match their source |
-| `npm run openapi:generate` / `release:schemas` | Regenerate transport contracts and evidence schemas |
-| `npm run release:evaluate -- --help` | Validate exact-candidate evidence; missing evidence blocks release |
-| `npm run db:generate` / `db:migrate` | Generate SQL migrations / apply them to `DATABASE_URL` |
-| `npm run import:legacy` | One-time import of `data/legacy/` |
-| `make check` | Lint, typecheck, tests and build (runs `npm ci` first when the lockfile changed) |
-| `make e2e` | `npm run e2e`; CI runs it after `make check` inside `ci / gate` |
-| `npm run check` | `make check`'s steps, then e2e |
+| Command                                        | What it does                                                                                  |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run dev` / `build` / `start`              | Next.js dev server, production build, production server                                       |
+| `npm run lint` / `format`                      | Biome check / apply fixes                                                                     |
+| `npm run typecheck`                            | Generate route types and run `tsc --noEmit`                                                   |
+| `npm test`                                     | All Vitest projects (`test:unit`, `test:integration`)                                         |
+| `npm run e2e`                                  | Fresh isolated database, production build, Chromium desktop/mobile and mobile WebKit journeys |
+| `npm run storybook` / `storybook:build`        | Interactive component catalog / static build                                                  |
+| `npm run test:visual:docker`                   | Screenshot checks in the pinned Linux browser image                                           |
+| `npm run tokens:check`                         | Verify generated CSS and Figma token files match their source                                 |
+| `npm run openapi:generate` / `release:schemas` | Regenerate transport contracts and evidence schemas                                           |
+| `npm run release:evaluate -- --help`           | Validate exact-candidate evidence; missing evidence blocks release                            |
+| `npm run db:generate` / `db:migrate`           | Generate SQL migrations / apply them to `DATABASE_URL`                                        |
+| `npm run import:legacy`                        | One-time import of `data/legacy/`                                                             |
+| `make check`                                   | Lint, typecheck, tests and build (runs `npm ci` first when the lockfile changed)              |
+| `make e2e`                                     | `npm run e2e`; CI runs it after `make check` inside `ci / gate`                               |
+| `npm run check`                                | `make check`'s steps, then e2e                                                                |
 
 Integration tests need a disposable Postgres; without `TEST_DATABASE_URL` they are skipped
 locally (CI always runs them):
