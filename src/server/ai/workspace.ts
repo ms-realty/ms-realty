@@ -40,7 +40,6 @@ import { workspaceProposalPolicy } from "./workspace-policy";
 
 export type Workspace = typeof generativeSessions.$inferSelect;
 export type WorkspaceRun = typeof generativeRuns.$inferSelect;
-export type WorkspaceArtifact = typeof generativeArtifacts.$inferSelect;
 export type WorkspaceQueue = Pick<JobQueue, "send">;
 export const createWorkspaceSchema = z
   .object({

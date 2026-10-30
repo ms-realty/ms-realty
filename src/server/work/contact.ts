@@ -33,7 +33,6 @@ const contactSchema = z.object({
   promisedToClient: z.boolean(),
   reviewed: z.literal(true),
 });
-export type ContactInput = z.input<typeof contactSchema>;
 
 async function authorize(db: Executor, session: Session, id: string, lock = false) {
   const query = db.select().from(inquiries).where(eq(inquiries.id, id));

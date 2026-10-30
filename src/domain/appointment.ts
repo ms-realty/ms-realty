@@ -18,14 +18,12 @@ export const appointmentStates = [
 export type AppointmentState = (typeof appointmentStates)[number];
 
 export const appointmentFormats = ["in_person", "remote"] as const;
-export type AppointmentFormat = (typeof appointmentFormats)[number];
 
 export const propertyAccessStates = ["unknown", "requested", "confirmed", "unavailable"] as const;
 export type PropertyAccessState = (typeof propertyAccessStates)[number];
 
 /** Resources a confirmed appointment occupies exclusively for its interval (AT30). */
 export const appointmentResourceKinds = ["broker", "property_access"] as const;
-export type AppointmentResourceKind = (typeof appointmentResourceKinds)[number];
 
 export const appointmentMachine = defineMachine<AppointmentState>(appointmentStates, {
   requested: ["proposed", "confirmed", "declined", "cancelled"],

@@ -99,8 +99,6 @@ const rows = {
   ],
 } satisfies Record<string, Row>;
 
-export type TimeReason = "invalid_local_time" | "nonexistent_local_time" | "ambiguous_local_time";
-
 export function timeCopy(locale: PublicLocale) {
   const index = locales.indexOf(locale);
   return Object.fromEntries(Object.entries(rows).map(([key, row]) => [key, row[index]])) as Record<

@@ -23,7 +23,6 @@ export const termInputSchema = z.object({
     .string()
     .refine((value) => Boolean(sofiaInstant(value)), "valid_sofia_offset_required"),
 });
-export type TermInput = z.infer<typeof termInputSchema>;
 export function amountToMinor(
   value: string,
   locale?: PublicLocale,
