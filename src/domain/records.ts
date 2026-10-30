@@ -1,10 +1,6 @@
 // Enumerations for records without a state machine of their own. Kept here so the database
 // schema derives its enums from the domain and the two cannot drift.
 
-/** BriefRevision items (architecture §4.1, §6.2). */
-export const briefItemKinds = ["hard_constraint", "preference", "unknown", "timing"] as const;
-export const briefItemOrigins = ["client_stated", "broker_interpretation"] as const;
-
 /** Where an inquiry came from. */
 export const inquirySources = [
   "website",

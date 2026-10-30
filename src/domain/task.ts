@@ -3,7 +3,6 @@
 // in bulk. A commitment promised to a client is flagged as such; a count of activities is not
 // completion evidence.
 import { allowed, type Decision, defineMachine, firstDenial, need } from "./state-machine";
-import type { TransitionSpec } from "./transition";
 
 export const taskStates = ["open", "in_progress", "waiting", "done", "cancelled"] as const;
 export type TaskState = (typeof taskStates)[number];
@@ -75,13 +74,6 @@ export function guardTaskTransition(
       return allowed;
   }
 }
-
-export const taskTransitions: TransitionSpec<TaskState, TaskEvidence> = {
-  recordType: "task",
-  machine: taskMachine,
-  capabilityFor: () => "task.manage",
-  guard: (from, to, evidence) => guardTaskTransition(from, to, evidence),
-};
 
 export interface BulkCandidate {
   readonly id: string;

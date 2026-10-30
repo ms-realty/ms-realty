@@ -105,12 +105,3 @@ export async function setSessionCookie(
     sessionCookieOptions(env, context, expires),
   );
 }
-
-export async function clearSessionCookie(context: PrivateHostContext): Promise<void> {
-  const env = getEnv();
-  (await cookies()).set(
-    sessionCookieName(env, context),
-    "",
-    sessionCookieOptions(env, context, new Date(0)),
-  );
-}

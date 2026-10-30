@@ -1,4 +1,4 @@
-Application services, capability checks, repositories, jobs and integrations (plan AD5, AD6, AD7, AD11).
+Application services, capability checks, repositories, jobs and integrations (architecture §5 and §15).
 Every module imports `server-only`; services take a `db` (pool or open transaction) so callers can
 compose several of them into one transaction.
 
@@ -42,5 +42,6 @@ compose several of them into one transaction.
   `app/api/inquiries` serves them (JSON and no-JavaScript POST/Redirect/GET).
 - `testing.ts`, `publication/testing.ts` — fixtures for integration tests only.
 
-The email-link confirm route must live at `emailLinkPath` (`/sign-in/confirm`): GET renders a confirm page
+The client-host email-link confirm route is `/{locale}/access/confirm`, built by `emailLinkUrl()`:
+GET renders a confirm page
 from `inspectEmailLink()`, and only its POST calls `consumeEmailLink()`.

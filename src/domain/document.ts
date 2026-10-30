@@ -4,7 +4,6 @@
 import type { Actor } from "./capabilities";
 import type { ScanState } from "./media";
 import { allowed, type Decision, defineMachine, firstDenial, need } from "./state-machine";
-import type { TransitionSpec } from "./transition";
 
 export const documentStates = [
   "selected",
@@ -35,7 +34,6 @@ export const professionalValidationStates = [
   "validated",
   "declined",
 ] as const;
-export type ProfessionalValidationState = (typeof professionalValidationStates)[number];
 
 export const documentClassifications = [
   "identity",
@@ -45,7 +43,6 @@ export const documentClassifications = [
   "property",
   "other",
 ] as const;
-export type DocumentClassification = (typeof documentClassifications)[number];
 
 export const documentMachine = defineMachine<DocumentState>(documentStates, {
   selected: ["uploading"],
@@ -110,16 +107,6 @@ export function guardDocumentTransition(
       return allowed;
   }
 }
-
-export const documentTransitions: TransitionSpec<DocumentState, DocumentEvidence> = {
-  recordType: "document",
-  machine: documentMachine,
-  capabilityFor: (_from, to) =>
-    to === "reviewed" || to === "rejected" || to === "needs_replacement" || to === "expired"
-      ? "document.review"
-      : "portal.document.upload",
-  guard: guardDocumentTransition,
-};
 
 /** Only scanned-clean content may be exposed to its audience (AT42). */
 export function isDocumentExposable(state: DocumentState, scan: ScanState): boolean {

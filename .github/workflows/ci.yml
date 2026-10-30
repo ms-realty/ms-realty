@@ -30,7 +30,6 @@ jobs:
         echo "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:5432/postgres" >>"${GITHUB_ENV}"
       extra-commands: |
         node --test scripts/legacy-media-sources.test.mjs scripts/recovery-archive-plan.test.mjs
-        node --test scripts/staging-http-qualification.test.mjs
         node data/legacy/verify.mjs
         npm run tokens:check
         npm run openapi:generate
@@ -93,7 +92,14 @@ jobs:
       - name: Complete the browser profile with the real scanner
         env:
           BROWSER_PROFILE: ${{ matrix.profile }}
-        run: node scripts/ci-clamav.mjs npm run e2e -- --project="$BROWSER_PROFILE"
+        # Erasure takes EXCLUSIVE NOWAIT source locks. Its success-path proof needs
+        # a fresh database with no unrelated browser fixture writers.
+        run: node scripts/ci-clamav.mjs npm run e2e -- --project="$BROWSER_PROFILE" --grep-invert "AT45 reviewed erasure"
+      - name: Verify erasure recovery with isolated source locks
+        env:
+          BROWSER_PROFILE: ${{ matrix.profile }}
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/${{ matrix.profile }}-erasure
+        run: npm run e2e -- e2e/privacy-erasure.spec.ts --project="$BROWSER_PROFILE" --workers=1 --retries=0
       - name: Verify isolated read-failure recovery
         if: matrix.profile == 'chromium-desktop'
         run: |

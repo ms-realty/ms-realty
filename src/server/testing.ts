@@ -191,5 +191,3 @@ export async function relate(
   if (!row) throw new Error("relationship insert failed");
   return row.id;
 }
-
-export const uuid = () => randomUUID();

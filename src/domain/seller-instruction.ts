@@ -3,11 +3,9 @@
 // privacy/location disclosure, media usage rights, representation scope, exclusivity,
 // commission terms and publication permission as evidence for the agency. It is not a
 // substitute for staff publishing capability or for professional title review.
-import { canonicalJson } from "./approval";
 import type { Actor } from "./capabilities";
 import type { LocationPrecision, Money } from "./facts";
 import { allowed, type Decision, defineMachine, firstDenial, need } from "./state-machine";
-import type { TransitionSpec } from "./transition";
 
 export const sellerInstructionStates = [
   "draft",
@@ -52,11 +50,6 @@ export interface SellerInstructionContent {
   readonly expiresAt?: string;
 }
 
-/** The canonical content an acknowledgment or approval digest is computed from. */
-export function sellerInstructionDigestContent(content: SellerInstructionContent): string {
-  return canonicalJson(content);
-}
-
 export interface SellerInstructionEvidence {
   /** Signed agreement document or recorded consent that evidences the instruction. */
   readonly evidenceDocumentIds?: readonly string[];
@@ -87,16 +80,6 @@ export function guardSellerInstructionTransition(
       return allowed;
   }
 }
-
-export const sellerInstructionTransitions: TransitionSpec<
-  SellerInstructionState,
-  SellerInstructionEvidence
-> = {
-  recordType: "seller_instruction",
-  machine: sellerInstructionMachine,
-  capabilityFor: () => "listing.edit",
-  guard: guardSellerInstructionTransition,
-};
 
 /** An instruction supports publication only while agreed, unexpired and permitting it. */
 export function permitsPublication(

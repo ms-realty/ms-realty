@@ -3,7 +3,6 @@
 // bound to one exact payload.
 import type { Actor } from "./capabilities";
 import { allowed, type Decision, defineMachine, denied, firstDenial, need } from "./state-machine";
-import type { TransitionSpec } from "./transition";
 
 export const messageStates = [
   "draft",
@@ -26,7 +25,6 @@ export const messageKinds = ["case_message", "service_message", "internal_note"]
 export type MessageKind = (typeof messageKinds)[number];
 
 export const messageDirections = ["outbound", "inbound"] as const;
-export type MessageDirection = (typeof messageDirections)[number];
 
 /** Email is the only launch transport; the others record truthful manual summaries (§9). */
 export const messageChannels = ["email", "phone", "whatsapp", "viber", "in_app"] as const;
@@ -117,13 +115,6 @@ export function guardRetry(evidence: MessageEvidence): Decision {
     windowPassed ? denied("idempotency_window_passed") : allowed,
   );
 }
-
-export const messageTransitions: TransitionSpec<MessageState, MessageEvidence> = {
-  recordType: "message",
-  machine: messageMachine,
-  capabilityFor: (_from, to) => (to === "draft" ? "message.draft" : "message.send_external"),
-  guard: guardMessageTransition,
-};
 
 export interface LogicalSend {
   readonly logicalSendId: string;

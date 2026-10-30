@@ -5,7 +5,6 @@
 import { type Decision, defineMachine, denied, need } from "./state-machine";
 
 export const outboxEventStates = ["pending", "dispatched", "completed", "cancelled"] as const;
-export type OutboxEventState = (typeof outboxEventStates)[number];
 
 export const externalActionKinds = [
   "email_send",
@@ -13,7 +12,6 @@ export const externalActionKinds = [
   "destination_withdraw",
   "media_purge",
 ] as const;
-export type ExternalActionKind = (typeof externalActionKinds)[number];
 
 export const externalActionStates = [
   "queued",
@@ -40,9 +38,6 @@ export const externalActionMachine = defineMachine<ExternalActionState>(external
   cancelled: [],
 });
 
-/** Initial default retry limit (§15); a provider's idempotency deadline can end it earlier. */
-export const defaultMaxAttempts = 8;
-
 export interface ExecutionCheck {
   /** Generation the action was created under, and the subject's generation now. */
   readonly sourceGeneration: number | null;
@@ -60,4 +55,3 @@ export function checkExecution(check: ExecutionCheck): Decision {
 }
 
 export const inboxEventStates = ["received", "processed", "rejected", "ignored"] as const;
-export type InboxEventState = (typeof inboxEventStates)[number];

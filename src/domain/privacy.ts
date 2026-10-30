@@ -2,7 +2,6 @@
 // responsible person, a due condition, scope, legal-hold disposition and recorded completion.
 import type { Actor } from "./capabilities";
 import { allowed, type Decision, defineMachine, firstDenial, need } from "./state-machine";
-import type { TransitionSpec } from "./transition";
 
 export const privacyRequestKinds = [
   "access",
@@ -12,7 +11,6 @@ export const privacyRequestKinds = [
   "restriction",
   "objection",
 ] as const;
-export type PrivacyRequestKind = (typeof privacyRequestKinds)[number];
 
 export const privacyRequestStates = [
   "received",
@@ -69,13 +67,3 @@ export function guardPrivacyRequestTransition(
       return allowed;
   }
 }
-
-export const privacyRequestTransitions: TransitionSpec<
-  PrivacyRequestState,
-  PrivacyRequestEvidence
-> = {
-  recordType: "privacy_request",
-  machine: privacyRequestMachine,
-  capabilityFor: () => "privacy.manage",
-  guard: guardPrivacyRequestTransition,
-};
