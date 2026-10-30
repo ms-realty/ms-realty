@@ -24,6 +24,7 @@ e2e/**
 !e2e/support/map-fixture.mjs
 !e2e/support/map-fixture.d.mts
 docs
+output
 graft
 *.tsbuildinfo
 # Include only reviewed public runtime projections. Raw captures and operator/private import

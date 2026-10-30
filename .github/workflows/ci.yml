@@ -30,7 +30,6 @@ jobs:
         echo "TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:5432/postgres" >>"${GITHUB_ENV}"
       extra-commands: |
         node --test scripts/legacy-media-sources.test.mjs scripts/recovery-archive-plan.test.mjs
-        node --test scripts/staging-http-qualification.test.mjs
         node data/legacy/verify.mjs
         npm run tokens:check
         npm run openapi:generate

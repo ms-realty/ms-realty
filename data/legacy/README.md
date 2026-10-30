@@ -30,9 +30,10 @@ uses Python urllib, the proven read-only inventory User-Agent, normal TLS verifi
 only allowed public hosts. Raw non-parking responses are archived by exact byte hash.
 `migration/required-inputs.json` preserves unresolved baseline URLs and the discovered live
 URL delta. The initial eight fresh responses include six exact BG/EN listing bodies for references
-958, 961 and 962, absent from the frozen 165. Their 30 unique full gallery URLs have no
-recorded staging R2 keys or load proof yet; the media allowlist contains only the 1710
-already-recorded public photo keys. Neither the bounded delta nor the staged snapshots
+958, 961 and 962, absent from the frozen 165. Their 30 unique full gallery URLs require
+matched object identities and load proof. Read current approved source/key mappings from
+`migration/public-media.json`; a source capture or allowlist entry alone does not prove a successful load.
+Neither the bounded delta nor the staged snapshots
 establishes complete current-site coverage. Main-content fallback and equivalence reviews
 remain blocked, and the full exporter exits nonzero without writing a production route map.
 `staging-legacy-routes.json` and `staging-route-manifest.json` contain only body-preserving
