@@ -15,13 +15,13 @@ passed. Failure traces, screenshots and width diagnostics remain in the artifact
 
 Artifact root: `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260930/`.
 
-| Check | Result and boundary |
-| --- | --- |
-| Unit checks | `composed-candidate-unit.log`: 973 / 973, 93 files |
-| Email and intent taxonomy, PostgreSQL 18.6 | `composed-candidate-email-db.log`: 37 / 37, three files |
-| Types / lint | Pass; `composed-candidate-types.log`, `composed-candidate-lint.log` (953 files) |
-| Fresh Linux production build | Pass; `composed-candidate-build.log`, build ID `ZIbTEpZ7TqlCwEDKvNTO9` |
-| Chromium desktop/mobile and WebKit mobile | `composed-candidate-browser.log`: 72 / 72, 1.8 minutes |
+| Check                                      | Result and boundary                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------- |
+| Unit checks                                | `composed-candidate-unit.log`: 973 / 973, 93 files                              |
+| Email and intent taxonomy, PostgreSQL 18.6 | `composed-candidate-email-db.log`: 37 / 37, three files                         |
+| Types / lint                               | Pass; `composed-candidate-types.log`, `composed-candidate-lint.log` (953 files) |
+| Fresh Linux production build               | Pass; `composed-candidate-build.log`, build ID `ZIbTEpZ7TqlCwEDKvNTO9`          |
+| Chromium desktop/mobile and WebKit mobile  | `composed-candidate-browser.log`: 72 / 72, 1.8 minutes                          |
 
 The subset covers discovery, collective/individual inquiry, native receipt-to-broker context,
 changed/withdrawn criteria, Hebrew narrow comparison, client overview, neighboring email

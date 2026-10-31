@@ -199,7 +199,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     sellerName: string;
     policyOwner: { id: string; token: string };
   };
-  const useStaffSession = (token: string) =>
+  const setStaffSession = (token: string) =>
     context.addCookies([
       {
         name: "msr_staff_session",
@@ -213,7 +213,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
 
   // Other synthetic journeys intentionally leave availability unknown. Establish this journey's
   // prerequisite through native save/review, under the same lease as those singleton writers.
-  await useStaffSession(fixture.policyOwner.token);
+  await setStaffSession(fixture.policyOwner.token);
   const policyCopy = operatingPolicyCopy("en"),
     policyPath = "/en/settings/operating-policy",
     policyReference = `Synthetic joined S2 availability prerequisite ${randomUUID()}`;
@@ -256,7 +256,7 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     processReference: policyReference,
     availabilityReviewDays: { sale: 14, long_term_rent: null },
   });
-  await useStaffSession(fixture.token);
+  await setStaffSession(fixture.token);
   const title = `Синтетична обява за проверка ${randomUUID().slice(0, 8)}`;
   const description = "Измислен имот само за автоматизиран тест. Не е предложение за продажба.";
   await page.goto(hostUrl("staff", "/en/inventory/new"));

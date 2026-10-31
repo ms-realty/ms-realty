@@ -1,6 +1,6 @@
 // Private configuration template; generate an immutable image-bound config before provisioning.
 {
-  "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "ms-realty-route-watchdog",
   "main": "route-watchdog.ts",
   "account_id": "921d0224dcd595c87b7928d2b3c479d1",

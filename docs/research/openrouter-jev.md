@@ -70,14 +70,14 @@ TypeSafe's [use-case map](https://docs.typesafe.ai/concepts/use-case-map),
 [confidence guidance](https://docs.typesafe.ai/confidence) and
 [model limitations](https://docs.typesafe.ai/model-jaggedness/jev-1.13) inform the following scope:
 
-| MS Realty need | Suitable Jev judgment | Deterministic boundary |
-| --- | --- | --- |
-| Grounding a generated draft | Noul unsupported assertion; Choice supported/uncertain/conflicting | Exact source spans, protected facts and human approval remain mandatory |
-| Search candidates | Score relevance against an explicit rubric | Retrieve only authorized published records first; do not let ranking grant access |
-| Ambiguous note extraction | Choice among pre-parsed candidate values, including unknown | Arithmetic, units, dates and source-span validation stay in code |
-| Duplicate candidates | Pairwise matching judgments | Human merge/split decision and reversible record operations |
-| Inquiry/task triage | Choice from bounded purposes or queues; Score urgency | No autonomous assignment, promise, sending or permission change |
-| Translation review | Separate rubric questions for meaning, terminology and unsupported claims | BG source authority and human indexing approval unchanged |
+| MS Realty need              | Suitable Jev judgment                                                     | Deterministic boundary                                                            |
+| --------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Grounding a generated draft | Noul unsupported assertion; Choice supported/uncertain/conflicting        | Exact source spans, protected facts and human approval remain mandatory           |
+| Search candidates           | Score relevance against an explicit rubric                                | Retrieve only authorized published records first; do not let ranking grant access |
+| Ambiguous note extraction   | Choice among pre-parsed candidate values, including unknown               | Arithmetic, units, dates and source-span validation stay in code                  |
+| Duplicate candidates        | Pairwise matching judgments                                               | Human merge/split decision and reversible record operations                       |
+| Inquiry/task triage         | Choice from bounded purposes or queues; Score urgency                     | No autonomous assignment, promise, sending or permission change                   |
+| Translation review          | Separate rubric questions for meaning, terminology and unsupported claims | BG source authority and human indexing approval unchanged                         |
 
 Follow-up implementation adds source-grounding, untrusted-instruction following and usefulness
 assessments to the existing inquiry/translation/note-extraction draft pipeline. Choice, Noul

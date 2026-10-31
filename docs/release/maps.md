@@ -1,6 +1,6 @@
 # Public map delivery
 
-The optional map uses pinned MapLibre GL 6.11.2, PMTiles 4.5.0 and Protomaps basemap styles 5.7.2. Search and property detail share the same map. Opening it loads the renderer; the server-rendered results and filters work independently. No geolocation request or third-party tile request is made. This implements ADR 0002's self-hosted Protomaps decision.
+The optional map uses pinned MapLibre GL 6.16.0, PMTiles 4.5.0 and Protomaps basemap styles 5.7.2. Search and property detail share the same map. Opening it loads the renderer; the server-rendered results and filters work independently. No geolocation request or third-party tile request is made. This implements ADR 0002's self-hosted Protomaps decision.
 
 ## Publication and privacy
 
@@ -24,7 +24,7 @@ The gateway serves only its configured prefix on the public host. Closed single 
 
 `gateway/wrangler.jsonc` is explicitly a local-development configuration with a fixture bucket name and no public routes. It is not a deployable agency configuration. Provisioned release configuration must supply the existing reviewed host/origin/route artifact values and origin secret, plus the agency-owned map bucket and release ID. No provider mutation, credentials or live bucket approval are implied by this file.
 
-Regenerate scoped Worker declarations with `node scripts/gateway-types.mjs` (pinned Wrangler 4.143.0). The generator scopes runtime declarations to one module so Cloudflare types do not replace the Next app's DOM/Node types. The generated declaration file is excluded from formatting, not from TypeScript validation.
+Regenerate scoped Worker declarations with `node scripts/gateway-types.mjs` (pinned Wrangler 4.153.0). The generator scopes runtime declarations to one module so Cloudflare types do not replace the Next app's DOM/Node types. The generated declaration file is excluded from formatting, not from TypeScript validation.
 
 `npm run build` and `npm run dev` generate same-origin worker assets from the pinned MapLibre package using `scripts/map-runtime.mjs`. Direct invocation of `next` must first run that script. The worker and its shared module use `worker-src 'self'`; there is no blob-worker or third-party CSP exception.
 

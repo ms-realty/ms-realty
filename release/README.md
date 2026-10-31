@@ -46,12 +46,12 @@ Source-as-is publication authorization supplies no factual, gallery or broker ap
 Translations need separate human approval before indexing. All five warning reviews are required:
 
 | Warning in the preserved readiness JSON | Open count |
-| --- | ---: |
-| `structured_data.missing_area` | 11 |
-| `structured_data.missing_bedrooms` | 9 |
-| `structured_data.missing_public_images` | 7 |
-| `listing_quality.missing_area` | 165 |
-| `listing_quality.thin_public_gallery` | 17 |
+| --------------------------------------- | ---------: |
+| `structured_data.missing_area`          |         11 |
+| `structured_data.missing_bedrooms`      |          9 |
+| `structured_data.missing_public_images` |          7 |
+| `listing_quality.missing_area`          |        165 |
+| `listing_quality.thin_public_gallery`   |         17 |
 
 The reviewer must retain the reviewed rows and approved disposition behind each warning
 assertion. The evaluator checks signed assertion presence, result and release bindings; it does

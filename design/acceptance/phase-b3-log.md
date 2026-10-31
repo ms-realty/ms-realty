@@ -37,16 +37,16 @@ Counting only natural, in-context triggers (excluding the hotspots below): **8 o
 
 A hotspot on existing, non-link content was wired so the prototype is complete, but a first-time user would not find it. Each needs a visible link or row in a layout pass.
 
-| Screen | Where a natural trigger is missing | Hotspot wired (D · M) | Natural fix |
-|---|---|---|---|
-| C02 | C01 `63:7036` · `66:40847` has no invitation link (real entry is the email link) | subtitle `63:7048` · `66:40863` | «Имам покана» link on C01 |
-| O28 | staff tools X02 `63:28535` · `66:58212` and O10 `63:16325` · `66:47858` have no import entry | O12 source card `63:16894` · `66:48146` | X02 row «Импорт и групови промени» or O10 action |
-| O29 | X02 `63:28535` · `66:58212` and O01 `63:12217` · `66:45141` have no consultations entry | O27 «DEMO-CASE-02 · Консултация» `63:23474` · `66:53466` | X02 row or O01 item for consultation requests |
-| O33 | O12 `63:16795` · `66:48113` and O15 `63:17557` · `66:48611` have no correction action | O15 BG source block `63:17646` · `66:48632` | «Съществена корекция» action on O12 |
-| P16 | P01 `63:25603` · `66:55092` and the public footer have no services link | P01 service promise block `63:25673` · `66:55159` | footer or P01 link «Услуги» |
-| P21 | no saved or shared listing is shown as inactive | P01 №912 availability line `63:25668` · `66:55154` | inactive item on P08 or P09 |
-| P22 | P03 `63:25892` · `66:55543` / P02B have no no-results path | P02R no-offers line `63:25844` · `66:55321` | no-results branch from P03 |
-| P23 | P16 `63:27177` · `66:56863` has no short-stay row | P03R «Продължителност» field `63:26011` · `66:55662` | P16 row «Кратък престой» |
+| Screen | Where a natural trigger is missing                                                           | Hotspot wired (D · M)                                    | Natural fix                                      |
+| ------ | -------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------ |
+| C02    | C01 `63:7036` · `66:40847` has no invitation link (real entry is the email link)             | subtitle `63:7048` · `66:40863`                          | «Имам покана» link on C01                        |
+| O28    | staff tools X02 `63:28535` · `66:58212` and O10 `63:16325` · `66:47858` have no import entry | O12 source card `63:16894` · `66:48146`                  | X02 row «Импорт и групови промени» or O10 action |
+| O29    | X02 `63:28535` · `66:58212` and O01 `63:12217` · `66:45141` have no consultations entry      | O27 «DEMO-CASE-02 · Консултация» `63:23474` · `66:53466` | X02 row or O01 item for consultation requests    |
+| O33    | O12 `63:16795` · `66:48113` and O15 `63:17557` · `66:48611` have no correction action        | O15 BG source block `63:17646` · `66:48632`              | «Съществена корекция» action on O12              |
+| P16    | P01 `63:25603` · `66:55092` and the public footer have no services link                      | P01 service promise block `63:25673` · `66:55159`        | footer or P01 link «Услуги»                      |
+| P21    | no saved or shared listing is shown as inactive                                              | P01 №912 availability line `63:25668` · `66:55154`       | inactive item on P08 or P09                      |
+| P22    | P03 `63:25892` · `66:55543` / P02B have no no-results path                                   | P02R no-offers line `63:25844` · `66:55321`              | no-results branch from P03                       |
+| P23    | P16&#32;`63:27177` · `66:56863` has no short-stay row                                        | P03R «Продължителност» field `63:26011` · `66:55662`     | P16 row «Кратък престой»                         |
 
 System states: X16, X22, X23, X24, X27 are failure branches of buttons that already lead to the success screen (C12/X15 save, C01HOSTED sign-in, C13 save, P11 send, O32COPY apply); a prototype cannot branch on an outcome, so they hang on in-context hotspots: C12 «За версия 3 на български» `63:10381` · `66:43743`, C01HOSTED alert `63:7114` · `66:40927`, C13 alert `63:10827` · `66:43956`, P11 contact field `63:26522` · `66:56183`, O32COPY source line `201:15811` · `201:15819`. X26 hangs on the Butler draft side of O32 (`I63:24440;6:299` · `I66:54310;6:299`), which is in context.
 

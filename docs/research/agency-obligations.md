@@ -125,12 +125,12 @@ the product target; record the microenterprise test annually in release evidence
 
 ## 7. Everyday agency workflows (GP)
 
-| Workflow | Architecture coverage | Addition |
-|---|---|---|
-| Portal leads | Inquiry records channel and source (§4.1) | Portal name and portal reference on manual entry |
-| Call logging | Communication summaries (§9) | — |
-| Keys | Access permission only (§6.4) | Key register: holder, check-out, due-back reminder |
-| Photography | None | Property-work appointment type tied to media rights (§6.3) |
-| Owner price feedback | Partial (§6.2, §6.3) | Periodic owner report approved by a human |
-| Referral partners and fees | None (F28 is intake only) | Partner record and fee agreement; GEMI number for Greek co-agents |
-| Staff offboarding | Reassignment (§6.6) | Checklist: keys returned, client data on personal devices handed back, mailbox access revoked |
+| Workflow                   | Architecture coverage                     | Addition                                                                                      |
+| -------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Portal leads               | Inquiry records channel and source (§4.1) | Portal name and portal reference on manual entry                                              |
+| Call logging               | Communication summaries (§9)              | —                                                                                             |
+| Keys                       | Access permission only (§6.4)             | Key register: holder, check-out, due-back reminder                                            |
+| Photography                | None                                      | Property-work appointment type tied to media rights (§6.3)                                    |
+| Owner price feedback       | Partial (§6.2, §6.3)                      | Periodic owner report approved by a human                                                     |
+| Referral partners and fees | None (F28 is intake only)                 | Partner record and fee agreement; GEMI number for Greek co-agents                             |
+| Staff offboarding          | Reassignment (§6.6)                       | Checklist: keys returned, client data on personal devices handed back, mailbox access revoked |

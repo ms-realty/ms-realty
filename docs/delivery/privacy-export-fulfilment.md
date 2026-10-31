@@ -29,13 +29,13 @@ review. Issue preserves the exact reviewed bytes and digest.
 The operator captures a private manifest for every fixed category. A form cannot remove a
 category or source. Source bounds fail closed instead of silently truncating the inventory.
 
-| Category | Supported source evidence |
-| --- | --- |
-| Personal activity | Digest of allowlisted collected data and exact own free-text removals |
+| Category                                            | Supported source evidence                                                                                                                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Personal activity                                   | Digest of allowlisted collected data and exact own free-text removals                                                                                                     |
 | Shared business records and received communications | Explicit case, timeline, brief, interest, feedback, task, appointment, proposal, message and seller-instruction revision metadata; scoped received inquiry communications |
-| Private files | Current document/version manifests linked to the person's cases, requests or uploads |
-| Restricted material and security boundary | Opaque purpose-keyed revision fingerprint and boundary signal; no restricted identities, counts or contents |
-| Additional requested material | Client scope declaration; additional or legacy unspecified scope stays unsupported |
+| Private files                                       | Current document/version manifests linked to the person's cases, requests or uploads                                                                                      |
+| Restricted material and security boundary           | Opaque purpose-keyed revision fingerprint and boundary signal; no restricted identities, counts or contents                                                               |
+| Additional requested material                       | Client scope declaration; additional or legacy unspecified scope stays unsupported                                                                                        |
 
 Ordinary case/internal-case, inquiry and document permissions are required before staff can
 see source identities or counts. A missing dependency hides the category's source list and

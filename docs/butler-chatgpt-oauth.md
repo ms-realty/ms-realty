@@ -103,18 +103,18 @@ the latest rotating token rather than refreshing the same old session concurrent
 
 The runtime secret/configuration boundary is:
 
-| Setting | Meaning |
-| --- | --- |
-| `BUTLER_PROVIDER=chatgpt_oauth` | Explicit provider; no automatic fallback |
-| `BUTLER_MODEL` | Slug observed in this account's current catalog |
-| `BUTLER_CHATGPT_CREDENTIAL_ID` | Validated registration's 64-hex ID |
-| `BUTLER_CHATGPT_DATABASE_URL` | Constrained runtime SQL identity |
-| `BUTLER_CHATGPT_DATABASE_ROLE` | Independently reviewed credential runtime SQL role |
-| `BUTLER_CHATGPT_HOST_KEY` | Stable durable installation key |
-| `BUTLER_CHATGPT_ENCRYPTION_KEY` | Separate encryption secret |
-| `BUTLER_CHATGPT_QUALIFIED=1` | Operator records actual connection/entitlement qualification |
-| `BUTLER_ENABLED=1`, `BUTLER_PROCESSING_APPROVED=1` | Existing operator activation and processing gates |
-| `BUTLER_WORKSPACE_QUALIFIED=1` | Existing separate workspace qualification |
+| Setting                                            | Meaning                                                      |
+| -------------------------------------------------- | ------------------------------------------------------------ |
+| `BUTLER_PROVIDER=chatgpt_oauth`                    | Explicit provider; no automatic fallback                     |
+| `BUTLER_MODEL`                                     | Slug observed in this account's current catalog              |
+| `BUTLER_CHATGPT_CREDENTIAL_ID`                     | Validated registration's 64-hex ID                           |
+| `BUTLER_CHATGPT_DATABASE_URL`                      | Constrained runtime SQL identity                             |
+| `BUTLER_CHATGPT_DATABASE_ROLE`                     | Independently reviewed credential runtime SQL role           |
+| `BUTLER_CHATGPT_HOST_KEY`                          | Stable durable installation key                              |
+| `BUTLER_CHATGPT_ENCRYPTION_KEY`                    | Separate encryption secret                                   |
+| `BUTLER_CHATGPT_QUALIFIED=1`                       | Operator records actual connection/entitlement qualification |
+| `BUTLER_ENABLED=1`, `BUTLER_PROCESSING_APPROVED=1` | Existing operator activation and processing gates            |
+| `BUTLER_WORKSPACE_QUALIFIED=1`                     | Existing separate workspace qualification                    |
 
 Existing nonmonetary workspace limits still apply. USD rates and a USD maximum do not apply
 to the subscription provider and stay null in retained records. A known usage-limit error

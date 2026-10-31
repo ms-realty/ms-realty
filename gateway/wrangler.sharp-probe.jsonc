@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/wrangler@4.143.0/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "msr-sharp-local-qualification",
   "main": "sharp-probe.mjs",
   "compatibility_date": "2026-10-01",

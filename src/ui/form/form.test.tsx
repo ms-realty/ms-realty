@@ -32,6 +32,59 @@ function mount(action: FormAction<SpecimenValues>, state = initialState) {
   );
 }
 
+function NativeChoices({ count }: { count: number }) {
+  return (
+    <ActionForm
+      action={async (state) => state}
+      initialState={initialState}
+      permalink="/practice"
+      reconciliation={{ href: "/status", label: "Status" }}
+      copy={copy.form}
+      labels={{ subject: "Recipient", note: "Scope" }}
+      submitLabel="Submit"
+    >
+      {(form) => (
+        <>
+          {Array.from({ length: count }, (_, index) => `recipient-${index}`).map((recipient) => (
+            <label key={recipient}>
+              {recipient}
+              <input
+                type="radio"
+                name="subject"
+                value={recipient}
+                checked={form.values.subject === recipient}
+                onChange={form.field("subject").onChange}
+              />
+            </label>
+          ))}
+          {["first", "second"].map((scope) => (
+            <label key={scope}>
+              Scope {scope}
+              <input
+                type="checkbox"
+                name="note"
+                value={scope}
+                checked={form.values.note.split("\n").includes(scope)}
+                onChange={() => {}}
+              />
+            </label>
+          ))}
+        </>
+      )}
+    </ActionForm>
+  );
+}
+
+const PrefilledSpecimen = ({ state }: { state: FormState<SpecimenValues> }) => (
+  <SpecimenForm
+    action={async (state) => state}
+    initialState={state}
+    permalink="/practice"
+    statusHref="/status"
+    copy={copy}
+  />
+);
+
 describe("UI07 / S11–S17 progressive form", () => {
   it("keeps an unavailable idle command mounted for recovery without exposing its controls", () => {
     const props = {
@@ -137,53 +190,9 @@ describe("UI07 / S11–S17 progressive form", () => {
   it.each([1, 2])(
     "adopts a native radio choice before hydration with %i options and keeps checkbox groups",
     async (count) => {
-      function NativeChoices() {
-        return (
-          <ActionForm
-            action={async (state) => state}
-            initialState={initialState}
-            permalink="/practice"
-            reconciliation={{ href: "/status", label: "Status" }}
-            copy={copy.form}
-            labels={{ subject: "Recipient", note: "Scope" }}
-            submitLabel="Submit"
-          >
-            {(form) => (
-              <>
-                {Array.from({ length: count }, (_, index) => `recipient-${index}`).map(
-                  (recipient) => (
-                    <label key={recipient}>
-                      {recipient}
-                      <input
-                        type="radio"
-                        name="subject"
-                        value={recipient}
-                        checked={form.values.subject === recipient}
-                        onChange={form.field("subject").onChange}
-                      />
-                    </label>
-                  ),
-                )}
-                {["first", "second"].map((scope) => (
-                  <label key={scope}>
-                    Scope {scope}
-                    <input
-                      type="checkbox"
-                      name="note"
-                      value={scope}
-                      checked={form.values.note.split("\n").includes(scope)}
-                      onChange={() => {}}
-                    />
-                  </label>
-                ))}
-              </>
-            )}
-          </ActionForm>
-        );
-      }
       const container = document.createElement("div");
       document.body.append(container);
-      container.innerHTML = renderToString(<NativeChoices />);
+      container.innerHTML = renderToString(<NativeChoices count={count} />);
       // A visitor chooses before JavaScript arrives; hydration must not drop that choice.
       const chosen = container.querySelector<HTMLInputElement>(
         `input[value="recipient-${count - 1}"]`,
@@ -195,7 +204,7 @@ describe("UI07 / S11–S17 progressive form", () => {
       let root: ReturnType<typeof hydrateRoot> | undefined;
       try {
         await act(async () => {
-          root = hydrateRoot(container, <NativeChoices />);
+          root = hydrateRoot(container, <NativeChoices count={count} />);
         });
         expect(chosen).toBeChecked();
         const form = container.querySelector("form");
@@ -468,18 +477,10 @@ describe("UI07 / S11–S17 progressive form", () => {
       ...initialState,
       values: { subject: "Server subject", note: "Server note" },
     };
-    const Specimen = () => (
-      <SpecimenForm
-        action={async (state) => state}
-        initialState={prefilled}
-        permalink="/practice"
-        statusHref="/status"
-        copy={copy}
-      />
-    );
+
     const container = document.createElement("div");
     document.body.append(container);
-    container.innerHTML = renderToString(<Specimen />);
+    container.innerHTML = renderToString(<PrefilledSpecimen state={prefilled} />);
     const subject = container.querySelector<HTMLInputElement>('input[name="subject"]');
     const note = container.querySelector<HTMLTextAreaElement>('textarea[name="note"]');
     if (!subject || !note) throw new Error("Missing server-rendered fields");
@@ -489,7 +490,7 @@ describe("UI07 / S11–S17 progressive form", () => {
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
       await act(async () => {
-        root = hydrateRoot(container, <Specimen />);
+        root = hydrateRoot(container, <PrefilledSpecimen state={prefilled} />);
       });
       expect(note).toHaveValue("Typed note");
       expect(subject).toHaveValue("Typed subject");

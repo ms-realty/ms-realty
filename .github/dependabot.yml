@@ -15,7 +15,7 @@ updates:
         update-types: [patch, minor]
 
   - package-ecosystem: npm
-    directories: ['**/*']
+    directories: ["**/*"]
     schedule:
       interval: weekly
     commit-message:
@@ -25,8 +25,8 @@ updates:
     # @types/node follows the runtime major (Node 24 in the selected image);
     # bump it by hand together with the image.
     ignore:
-      - dependency-name: '@types/node'
-        update-types: ['version-update:semver-major']
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       patch-and-minor:
         update-types: [patch, minor]

@@ -103,8 +103,8 @@ jobs:
       - name: Verify isolated read-failure recovery
         if: matrix.profile == 'chromium-desktop'
         run: |
-          E2E_TODAY_UNAVAILABLE=1 npx playwright test e2e/today-unavailable.spec.ts --workers=1 --project=chromium-desktop
-          E2E_O03_UNAVAILABLE=1 npx playwright test e2e/inquiry-case-link.spec.ts --workers=1 --project=chromium-desktop --grep "a failed candidate read"
+          E2E_TODAY_UNAVAILABLE=1 PLAYWRIGHT_HTML_OUTPUT_DIR=playwright-report/chromium-desktop-today-unavailable npx playwright test e2e/today-unavailable.spec.ts --workers=1 --project=chromium-desktop
+          E2E_O03_UNAVAILABLE=1 PLAYWRIGHT_HTML_OUTPUT_DIR=playwright-report/chromium-desktop-inquiry-unavailable npx playwright test e2e/inquiry-case-link.spec.ts --workers=1 --project=chromium-desktop --grep "a failed candidate read"
       - name: Verify analytics cannot read a shared-link token
         env:
           GTM_CONTAINER_ID: GTM-SYNTHETIC

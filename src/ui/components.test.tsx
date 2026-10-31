@@ -1,7 +1,7 @@
 // Behaviour of design-system components that carries spec requirements (§16.3, §17, §20.1).
 import { act, cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Button } from "./button";
 import { Chip, ChipList } from "./chip";
@@ -18,25 +18,62 @@ import { TextField } from "./text-field";
 // Vitest runs without globals here, so Testing Library cannot register its own cleanup.
 afterEach(cleanup);
 
-describe("ErrorSummary (A17)", () => {
-  function Form() {
-    const [errors, setErrors] = useState<ErrorSummaryItem[]>([]);
-    return (
-      <form
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          setErrors([{ fieldId: "email", message: "Enter an email address" }]);
-        }}
-      >
-        <ErrorSummary title="There is a problem" errors={errors} />
-        <TextField id="title" label="Listing title" validationBehavior="aria" />
-        <TextField id="email" label="Email address" validationBehavior="aria" />
-        <button type="submit">Send question to the team</button>
-      </form>
-    );
-  }
+function Form() {
+  const [errors, setErrors] = useState<ErrorSummaryItem[]>([]);
+  return (
+    <form
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        setErrors([{ fieldId: "email", message: "Enter an email address" }]);
+      }}
+    >
+      <ErrorSummary title="There is a problem" errors={errors} />
+      <TextField id="title" label="Listing title" validationBehavior="aria" />
+      <TextField id="email" label="Email address" validationBehavior="aria" />
+      <button type="submit">Send question to the team</button>
+    </form>
+  );
+}
 
+function FilterSheet() {
+  const sheet = useSheet();
+  return (
+    <>
+      <button type="button" onClick={sheet.open}>
+        Filters
+      </button>
+      <Sheet state={sheet} title="Filters" closeLabel="Close">
+        <p>Filter groups</p>
+      </Sheet>
+    </>
+  );
+}
+
+function Card(props: ComponentProps<typeof PropertyCard>) {
+  const [saved, setSaved] = useState(false);
+  return <PropertyCard {...props} isSaved={saved} onSavedChange={setSaved} />;
+}
+
+function Criteria() {
+  const [chips, setChips] = useState(["Sandanski", "Up to €220,000"]);
+  return (
+    <ChipList label="Interpreted criteria">
+      {chips.map((label) => (
+        <Chip
+          key={label}
+          kind="assist"
+          label={label}
+          removeLabel="Remove"
+          onRemove={() => setChips((all) => all.filter((chip) => chip !== label))}
+        />
+      ))}
+      <Chip kind="question" label="Parking: required or preferred?" onPress={() => {}} />
+    </ChipList>
+  );
+}
+
+describe("ErrorSummary (A17)", () => {
   it("renders nothing without errors", () => {
     render(<ErrorSummary title="There is a problem" errors={[]} />);
     expect(screen.queryByText("There is a problem")).not.toBeInTheDocument();
@@ -115,20 +152,6 @@ describe("ErrorSummary (A17)", () => {
 });
 
 describe("Sheet and browser Back (spec §17.2)", () => {
-  function FilterSheet() {
-    const sheet = useSheet();
-    return (
-      <>
-        <button type="button" onClick={sheet.open}>
-          Filters
-        </button>
-        <Sheet state={sheet} title="Filters" closeLabel="Close">
-          <p>Filter groups</p>
-        </Sheet>
-      </>
-    );
-  }
-
   it("closes on Back without leaving the page", async () => {
     const user = userEvent.setup();
     render(<FilterSheet />);
@@ -170,11 +193,8 @@ describe("PropertyCard (L02)", () => {
 
   it("has exactly one main link and independent Save/Compare controls", async () => {
     const user = userEvent.setup();
-    function Card() {
-      const [saved, setSaved] = useState(false);
-      return <PropertyCard {...base} isSaved={saved} onSavedChange={setSaved} />;
-    }
-    render(<Card />);
+
+    render(<Card {...base} />);
 
     const card = screen.getByRole("article", { name: "Two-bedroom apartment" });
     const links = within(card).getAllByRole("link");
@@ -337,23 +357,7 @@ describe("PriceDisplay (protected price fact)", () => {
 describe("Chip (F01/F02 criteria)", () => {
   it("names each remove control after its criterion and keeps assist chips visibly distinct", async () => {
     const user = userEvent.setup();
-    function Criteria() {
-      const [chips, setChips] = useState(["Sandanski", "Up to €220,000"]);
-      return (
-        <ChipList label="Interpreted criteria">
-          {chips.map((label) => (
-            <Chip
-              key={label}
-              kind="assist"
-              label={label}
-              removeLabel="Remove"
-              onRemove={() => setChips((all) => all.filter((chip) => chip !== label))}
-            />
-          ))}
-          <Chip kind="question" label="Parking: required or preferred?" onPress={() => {}} />
-        </ChipList>
-      );
-    }
+
     render(<Criteria />);
     const list = screen.getByRole("list", { name: "Interpreted criteria" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(3);

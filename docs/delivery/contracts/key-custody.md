@@ -12,12 +12,12 @@ count (1–50), authority/receipt reference, storage label, evidence note and ex
 confirmation. The reference is stored as text; the service does not fetch it or infer legal
 authority from it. A recorded declaration is not independent evidence of a real handover.
 
-| Current state | Allowed next states | Required evidence |
-|---|---|---|
-| In storage | Checked out, returned to owner, lost | Reviewed handover/loss note |
-| Checked out | In storage, returned to owner, lost | Reviewed return/loss note |
-| Lost | In storage, returned to owner | Reviewed recovery and destination evidence |
-| Returned to owner | None | New receipt needs a new set tag and record |
+| Current state     | Allowed next states                  | Required evidence                          |
+| ----------------- | ------------------------------------ | ------------------------------------------ |
+| In storage        | Checked out, returned to owner, lost | Reviewed handover/loss note                |
+| Checked out       | In storage, returned to owner, lost  | Reviewed return/loss note                  |
+| Lost              | In storage, returned to owner        | Reviewed recovery and destination evidence |
+| Returned to owner | None                                 | New receipt needs a new set tag and record |
 
 Check-out requires an active staff holder with current membership and an enrolled passkey plus a
 future due-back instant. Forms interpret native local input in Europe/Sofia and reject

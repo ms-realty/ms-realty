@@ -32,9 +32,13 @@ export default {
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aL7sAAAAASUVORK5CYII=",
       "base64",
     );
-    return Response.json(await sharp(pixel, {
-      limitInputPixels: 40_000_000, failOn: "warning", pages: 1,
-    }).metadata());
+    return Response.json(
+      await sharp(pixel, {
+        limitInputPixels: 40_000_000,
+        failOn: "warning",
+        pages: 1,
+      }).metadata(),
+    );
   },
 };
 ```

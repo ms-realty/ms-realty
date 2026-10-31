@@ -17,7 +17,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // Registered once per browser module, independent of map mount/unmount.
 const protocol = new Protocol();
 addProtocol("pmtiles", protocol.tile);
-setWorkerUrl("/map-runtime/v6.15.0/maplibre-gl-worker.mjs");
+setWorkerUrl("/map-runtime/v6.16.0/maplibre-gl-worker.mjs");
 
 export function renderMap(
   container: HTMLElement,

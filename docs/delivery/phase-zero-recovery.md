@@ -10,27 +10,27 @@ Readback covers 37 professional sections, 32 task contracts, 138 unique main/alt
 
 ## Preserved source integration
 
-| Slice | Unique original commits | Integrated commits |
-| --- | --- | --- |
-| Permission and recovery | `8aee7a93`, `c5856d20`, `05dc2568` | `25eee7a2`, `d41e9644`, `67af9cac` |
-| Local time and exact instants | `2c595f0f`, `d54823a0`, `e30626b9` | `1ab1de82`, `bec2cd04`, `4093973f` |
-| Browser time contracts | `b0aeffd0` | `69e2febc` |
-| Cache, layout and sealed renditions | `d25a5b39`, `ba704449`, `fdfb0464` | `77263921`, `9deec883`, `213ac596` |
-| Exact counteroffers and native result recovery | `944b6566`, `904658dd` | `5cef1f86`, `93ee94d0` |
-| Readable workflow labels | `afd57ac1` | `c1de27a0` |
+| Slice                                          | Unique original commits            | Integrated commits                 |
+| ---------------------------------------------- | ---------------------------------- | ---------------------------------- |
+| Permission and recovery                        | `8aee7a93`, `c5856d20`, `05dc2568` | `25eee7a2`, `d41e9644`, `67af9cac` |
+| Local time and exact instants                  | `2c595f0f`, `d54823a0`, `e30626b9` | `1ab1de82`, `bec2cd04`, `4093973f` |
+| Browser time contracts                         | `b0aeffd0`                         | `69e2febc`                         |
+| Cache, layout and sealed renditions            | `d25a5b39`, `ba704449`, `fdfb0464` | `77263921`, `9deec883`, `213ac596` |
+| Exact counteroffers and native result recovery | `944b6566`, `904658dd`             | `5cef1f86`, `93ee94d0`             |
+| Readable workflow labels                       | `afd57ac1`                         | `c1de27a0`                         |
 
 ## Phase 0 behavior
 
-| Findings | Implemented behavior | Qualification |
-| --- | --- | --- |
-| M-003, M-096 | Grant-aware rail, Today and Inventory; named manager, usual-work-channel instructions and the approved agency call link | No-grant and resource-scoped browser contracts; no automatic contact or access grant |
-| M-004, M-140, M-046 | Localized host/global errors, missing-page and parent recovery, navigation feedback and skeletons | Recovered route crawl plus history and isolated read-failure browser checks |
-| M-037, M-039 | Disposition without a default, required review time, authorized human-reference duplicate selection, separate message/note audiences and retained drafts | Native and enhanced browser paths retain authorization, exact outcomes and uncertain-result locking |
-| M-050, M-051 | Sofia-local entry/display with DST handling, exact instants and currency minor units, closed counteroffer disclosure and eligible completion-document choices | Seven-locale native/enhanced money contracts across three browser profiles |
-| M-052 | Localized workflow, role, fact and document-purpose labels; opaque bindings and exact controlled-purpose citation values under localized technical disclosures | Original and newly exposed candidate nodes adjudicated; targeted rendered replays qualify the repaired nodes without changing source quotes or property facts |
-| M-047, M-019 | Public cache allowlist, hashed fonts, sealed 480/960/1600 responsive images, manifest/digest checks and targeted withdrawal | Real upload and ClamAV browser proof; live edge headers and purge remain separate |
-| M-049, M-017, M-107 | Semantic utility merging, sticky-header focus clearance, viewport/safe-area support and bounded grant-directory rendering | Browser viewport, keyboard and performance evidence; physical-device/assistive-technology acceptance remains |
-| M-110, M-111 | Private reauthorization restores focus/scroll/drafts; native submit latch and pending/upload feedback; exact same-operation result recovery | Privacy still requires reauthorization after a real hide; no uncertain write is automatically resent |
+| Findings            | Implemented behavior                                                                                                                                           | Qualification                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M-003, M-096        | Grant-aware rail, Today and Inventory; named manager, usual-work-channel instructions and the approved agency call link                                        | No-grant and resource-scoped browser contracts; no automatic contact or access grant                                                                          |
+| M-004, M-140, M-046 | Localized host/global errors, missing-page and parent recovery, navigation feedback and skeletons                                                              | Recovered route crawl plus history and isolated read-failure browser checks                                                                                   |
+| M-037, M-039        | Disposition without a default, required review time, authorized human-reference duplicate selection, separate message/note audiences and retained drafts       | Native and enhanced browser paths retain authorization, exact outcomes and uncertain-result locking                                                           |
+| M-050, M-051        | Sofia-local entry/display with DST handling, exact instants and currency minor units, closed counteroffer disclosure and eligible completion-document choices  | Seven-locale native/enhanced money contracts across three browser profiles                                                                                    |
+| M-052               | Localized workflow, role, fact and document-purpose labels; opaque bindings and exact controlled-purpose citation values under localized technical disclosures | Original and newly exposed candidate nodes adjudicated; targeted rendered replays qualify the repaired nodes without changing source quotes or property facts |
+| M-047, M-019        | Public cache allowlist, hashed fonts, sealed 480/960/1600 responsive images, manifest/digest checks and targeted withdrawal                                    | Real upload and ClamAV browser proof; live edge headers and purge remain separate                                                                             |
+| M-049, M-017, M-107 | Semantic utility merging, sticky-header focus clearance, viewport/safe-area support and bounded grant-directory rendering                                      | Browser viewport, keyboard and performance evidence; physical-device/assistive-technology acceptance remains                                                  |
+| M-110, M-111        | Private reauthorization restores focus/scroll/drafts; native submit latch and pending/upload feedback; exact same-operation result recovery                    | Privacy still requires reauthorization after a real hide; no uncertain write is automatically resent                                                          |
 
 The native lost-acknowledgment regression commits one guarded counteroffer, marks that exact operation unresolved, and submits the original native request after the revision becomes historical. The exact draft, money, currency, parties, condition, inclusion, deadline, revision and operation key remain read-only. The status page stays unknown until the recorded result is reconciled, then shows saved. Re-entry creates no extra command; revoked access returns 404. This is a deterministic exact-key ledger simulation, not a physical network-drop claim. The screen explicitly distinguishes retained draft values from proof of a save. Unknown status explains that the change may already be recorded, and its explicit check-again link performs a GET for the same signed operation. It creates no new command. Native responses also land on a real form-fragment target, so the unknown-result message is immediately in view without JavaScript; all three browser profiles assert this before any test scrolling.
 

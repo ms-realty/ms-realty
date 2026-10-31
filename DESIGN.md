@@ -1,139 +1,140 @@
 ---
+
 name: "MS Realty"
 description: "The existing MS Realty interface: grounded agency identity, readable facts and clear human actions."
 colors:
-  action: "#214f3c"
-  action-hover: "#1a3f30"
-  action-pressed: "#133024"
-  selected: "#e4eee7"
-  canvas: "#f8f7f3"
-  surface: "#ffffff"
-  subtle: "#eef1ec"
-  text: "#192e27"
-  text-muted: "#52625a"
-  text-inverse: "#ffffff"
-  divider: "#d9dfd8"
-  border: "#687a6f"
-  focus: "#174ea6"
-  disabled: "#eceeea"
-  disabled-text: "#5c6962"
-  success: "#21603c"
-  success-soft: "#e5f0e8"
-  warning: "#775000"
-  warning-soft: "#fbf0d9"
-  error: "#a12a25"
-  error-hover: "#86221e"
-  error-pressed: "#6b1b18"
-  error-soft: "#fbeae8"
-  info: "#245a86"
-  info-soft: "#e6eef6"
-  assist: "#5b45a0"
-  assist-soft: "#f1edf9"
-  assist-line: "#5b45a0"
+action: "#214f3c"
+action-hover: "#1a3f30"
+action-pressed: "#133024"
+selected: "#e4eee7"
+canvas: "#f8f7f3"
+surface: "#ffffff"
+subtle: "#eef1ec"
+text: "#192e27"
+text-muted: "#52625a"
+text-inverse: "#ffffff"
+divider: "#d9dfd8"
+border: "#687a6f"
+focus: "#174ea6"
+disabled: "#eceeea"
+disabled-text: "#5c6962"
+success: "#21603c"
+success-soft: "#e5f0e8"
+warning: "#775000"
+warning-soft: "#fbf0d9"
+error: "#a12a25"
+error-hover: "#86221e"
+error-pressed: "#6b1b18"
+error-soft: "#fbeae8"
+info: "#245a86"
+info-soft: "#e6eef6"
+assist: "#5b45a0"
+assist-soft: "#f1edf9"
+assist-line: "#5b45a0"
 typography:
-  title:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "2rem"
-    fontWeight: 600
-    lineHeight: "2.5rem"
-  page:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "1.75rem"
-    fontWeight: 600
-    lineHeight: "2.25rem"
-  heading:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "1.375rem"
-    fontWeight: 600
-    lineHeight: "1.875rem"
-  subheading:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "1.125rem"
-    fontWeight: 600
-    lineHeight: "1.625rem"
-  price:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "1.375rem"
-    fontWeight: 700
-    lineHeight: "1.875rem"
-  body:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 400
-    lineHeight: "1.625rem"
-  compact:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 400
-    lineHeight: "1.5rem"
-  dense:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: "1.25rem"
-  caption:
-    fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: "1.25rem"
+title:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "2rem"
+fontWeight: 600
+lineHeight: "2.5rem"
+page:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "1.75rem"
+fontWeight: 600
+lineHeight: "2.25rem"
+heading:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "1.375rem"
+fontWeight: 600
+lineHeight: "1.875rem"
+subheading:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "1.125rem"
+fontWeight: 600
+lineHeight: "1.625rem"
+price:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "1.375rem"
+fontWeight: 700
+lineHeight: "1.875rem"
+body:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "1rem"
+fontWeight: 400
+lineHeight: "1.625rem"
+compact:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "1rem"
+fontWeight: 400
+lineHeight: "1.5rem"
+dense:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "0.875rem"
+fontWeight: 400
+lineHeight: "1.25rem"
+caption:
+fontFamily: "Noto Sans, Noto Sans Hebrew, Noto Sans Fallback, system-ui, sans-serif"
+fontSize: "0.875rem"
+fontWeight: 400
+lineHeight: "1.25rem"
 rounded:
-  control: "0.375rem"
-  panel: "0.5rem"
-  card: "0.5rem"
+control: "0.375rem"
+panel: "0.5rem"
+card: "0.5rem"
 spacing:
-  base: "0.25rem"
-  control: "2.75rem"
-  input: "3.25rem"
-  gutter: "1.25rem"
-  gutter-medium: "1.5rem"
-  gutter-wide: "2rem"
+base: "0.25rem"
+control: "2.75rem"
+input: "3.25rem"
+gutter: "1.25rem"
+gutter-medium: "1.5rem"
+gutter-wide: "2rem"
 components:
-  button-primary:
-    backgroundColor: "{colors.action}"
-    textColor: "{colors.text-inverse}"
-    rounded: "{rounded.control}"
-    padding: "0.5rem 1.25rem"
-  button-secondary:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.action}"
-    rounded: "{rounded.control}"
-    padding: "0.5rem 1.25rem"
-  button-tertiary:
-    backgroundColor: "transparent"
-    textColor: "{colors.action}"
-    rounded: "{rounded.control}"
-    padding: "0.5rem 1.25rem"
-  button-destructive:
-    backgroundColor: "{colors.error}"
-    textColor: "{colors.text-inverse}"
-    rounded: "{rounded.control}"
-    padding: "0.5rem 1.25rem"
-  button-assist:
-    backgroundColor: "{colors.assist-soft}"
-    textColor: "{colors.assist}"
-    rounded: "{rounded.control}"
-    padding: "0.5rem 1.25rem"
-  input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.text}"
-    typography: "{typography.body}"
-    rounded: "{rounded.control}"
-    padding: "0.75rem"
-  listing-nav-current:
-    textColor: "{colors.action}"
-    padding: "0.75rem"
-  chip-selected:
-    backgroundColor: "{colors.selected}"
-    textColor: "{colors.action}"
-  property-card:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.text}"
-    rounded: "{rounded.panel}"
-  notice-warning:
-    backgroundColor: "{colors.warning-soft}"
-    textColor: "{colors.text}"
-    rounded: "{rounded.panel}"
-    padding: "1rem"
+button-primary:
+backgroundColor: "{colors.action}"
+textColor: "{colors.text-inverse}"
+rounded: "{rounded.control}"
+padding: "0.5rem 1.25rem"
+button-secondary:
+backgroundColor: "{colors.surface}"
+textColor: "{colors.action}"
+rounded: "{rounded.control}"
+padding: "0.5rem 1.25rem"
+button-tertiary:
+backgroundColor: "transparent"
+textColor: "{colors.action}"
+rounded: "{rounded.control}"
+padding: "0.5rem 1.25rem"
+button-destructive:
+backgroundColor: "{colors.error}"
+textColor: "{colors.text-inverse}"
+rounded: "{rounded.control}"
+padding: "0.5rem 1.25rem"
+button-assist:
+backgroundColor: "{colors.assist-soft}"
+textColor: "{colors.assist}"
+rounded: "{rounded.control}"
+padding: "0.5rem 1.25rem"
+input:
+backgroundColor: "{colors.canvas}"
+textColor: "{colors.text}"
+typography: "{typography.body}"
+rounded: "{rounded.control}"
+padding: "0.75rem"
+listing-nav-current:
+textColor: "{colors.action}"
+padding: "0.75rem"
+chip-selected:
+backgroundColor: "{colors.selected}"
+textColor: "{colors.action}"
+property-card:
+backgroundColor: "{colors.surface}"
+textColor: "{colors.text}"
+rounded: "{rounded.panel}"
+notice-warning:
+backgroundColor: "{colors.warning-soft}"
+textColor: "{colors.text}"
+rounded: "{rounded.panel}"
+padding: "1rem"
 ---
 
 # Design System: MS Realty

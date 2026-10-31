@@ -68,10 +68,10 @@ Build `Dockerfile` once from the exact qualified source descendant of #280 base
 pins Node 24 Debian, bundles standalone Next, queue and migration against the same locked
 dependency tree, and runs as the unprivileged `node` user.
 
-| Role | Command | Database credentials |
-| --- | --- | --- |
-| Web | `node server.js` | staging web role only |
-| Queue | `node --conditions=react-server dist-runtime/worker.mjs` | staging worker role only |
+| Role      | Command                                                   | Database credentials       |
+| --------- | --------------------------------------------------------- | -------------------------- |
+| Web       | `node server.js`                                          | staging web role only      |
+| Queue     | `node --conditions=react-server dist-runtime/worker.mjs`  | staging worker role only   |
 | Migration | `node --conditions=react-server dist-runtime/migrate.mjs` | staging migrator role only |
 
 The deploy configuration references `registry.cloudflare.com/<account>/<repository>@sha256:D`
