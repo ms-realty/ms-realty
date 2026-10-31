@@ -7,7 +7,7 @@
     "jose": "6.2.13"
   },
   "devDependencies": {
-    "wrangler": "4.153.0"
+    "wrangler": "4.155.0"
   },
   "overrides": {
     "miniflare": {

@@ -44,7 +44,7 @@
     "privacy:reapply-synthetic-tail": "tsx --conditions=react-server scripts/privacy-reapply-synthetic-tail.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1157.0",
+    "@aws-sdk/client-s3": "3.1159.0",
     "@internationalized/date": "3.12.4",
     "@protomaps/basemaps": "5.7.2",
     "@simplewebauthn/browser": "14.0.0",
@@ -71,9 +71,9 @@
     "@axe-core/playwright": "4.14.0",
     "@babel/parser": "8.0.8",
     "@biomejs/biome": "2.6.3",
-    "@opennextjs/cloudflare": "1.20.13",
+    "@opennextjs/cloudflare": "1.20.14",
     "@playwright/test": "1.64.1",
-    "@storybook/nextjs-vite": "10.6.4",
+    "@storybook/nextjs-vite": "10.6.5",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",
@@ -88,13 +88,13 @@
     "playwright": "1.64.1",
     "playwright-core": "1.64.1",
     "postcss": "8.5.32",
-    "storybook": "10.6.4",
+    "storybook": "10.6.5",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vite": "8.3.5",
     "vitest": "5.0.5",
-    "wrangler": "4.153.0"
+    "wrangler": "4.155.0"
   },
   "overrides": {
     "express": {
