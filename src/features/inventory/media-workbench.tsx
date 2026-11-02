@@ -16,7 +16,7 @@ export function MediaGallery({
   version,
   draftKey,
   confirmedOrder,
-  confirmedOperation,
+  confirmedRequestKey,
   copy,
 }: {
   items: { id: string; label: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
@@ -26,7 +26,7 @@ export function MediaGallery({
   version: number;
   draftKey: string;
   confirmedOrder?: string[];
-  confirmedOperation?: string;
+  confirmedRequestKey?: string;
   copy: {
     reorder: string;
     hint: string;
@@ -85,7 +85,7 @@ export function MediaGallery({
         order?: unknown;
         recovery?: unknown;
         previousOrder?: unknown;
-        submission?: { operationId?: unknown; order?: unknown };
+        submission?: { requestKey?: unknown; order?: unknown };
       } | null;
       const validOrder = (value: unknown): value is string[] =>
         Array.isArray(value) &&
@@ -110,8 +110,8 @@ export function MediaGallery({
             ? "version"
             : null;
       const ownSave =
-        confirmedOperation &&
-        stored.submission?.operationId === confirmedOperation &&
+        confirmedRequestKey &&
+        stored.submission?.requestKey === confirmedRequestKey &&
         validOrder(stored.submission.order) &&
         stored.submission.order.join() === stored.order.join() &&
         confirmed === stored.order.join() &&
@@ -136,7 +136,7 @@ export function MediaGallery({
             : null,
       );
     } catch {}
-  }, [initial, confirmed, confirmedOperation, draftKey, version]);
+  }, [initial, confirmed, confirmedRequestKey, draftKey, version]);
   useEffect(() => {
     if (!hydrated) return;
     try {
@@ -334,7 +334,7 @@ export function MediaGallery({
                       order,
                       recovery: restored,
                       previousOrder,
-                      submission: { operationId, order },
+                      submission: { requestKey: operationId, order },
                     }),
                   );
                 } catch {}

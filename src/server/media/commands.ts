@@ -9,6 +9,7 @@ import {
   listings,
   mediaAssets,
   mediaRelations,
+  operations,
   properties,
 } from "@/db/schema";
 import { mediaModifications, moveRelation } from "@/domain/media";
@@ -216,7 +217,15 @@ export async function mediaReceipt(
       relations.find((row) => row.id === placement && row.assetId === assetId) ??
       relations.find((row) => row.assetId === assetId);
     return relation
-      ? { id, relationId: relation.id, move: false, order: null, action, details }
+      ? {
+          id,
+          relationId: relation.id,
+          move: false,
+          order: null,
+          requestKey: undefined,
+          action,
+          details,
+        }
       : null;
   };
   const [event] = await db
@@ -225,8 +234,10 @@ export async function mediaReceipt(
       recordType: auditEvents.recordType,
       recordId: auditEvents.recordId,
       payload: auditEvents.payload,
+      requestKey: operations.idempotencyKey,
     })
     .from(auditEvents)
+    .innerJoin(operations, eq(operations.id, auditEvents.operationId))
     .where(
       and(
         eq(auditEvents.operationId, id),
@@ -257,6 +268,7 @@ export async function mediaReceipt(
     return {
       id,
       action: event.action,
+      requestKey: event.requestKey,
       details: null,
       relationId,
       move: Boolean(payload.move),
