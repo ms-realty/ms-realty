@@ -195,6 +195,9 @@ export default async function MediaPage({
             }}
             copy={inventoryCopy(locale).form}
             retryLabel={workspace.retryOrderSave}
+            modifications={Object.fromEntries(
+              mediaModifications.map((value) => [value, fileLabel(copy, value)]),
+            )}
             commands={{
               details: workspace.saveDetails,
               discard: workspace.discardDraft,

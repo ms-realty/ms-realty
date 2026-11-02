@@ -1,8 +1,11 @@
 "use client";
 
 import { type ReactNode, useEffect, useState } from "react";
+import { mediaModifications } from "@/domain/media";
+import { controlClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormCopy, FormState, RecoveryLink } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
+import { FormField } from "@/ui/form/form-field";
 import type { MediaReviewValues } from "./media-review-editor";
 
 const fields = [
@@ -45,7 +48,9 @@ export function MediaRequestKeeper({
   }, [storageKey, acknowledgedKey]);
   return (
     <div
-      onSubmitCapture={(event) => {
+      onSubmit={(event) => {
+        // Bubble after ActionForm has rejected a duplicate pending submission.
+        if (event.defaultPrevented) return;
         const form = event.target;
         if (!(form instanceof HTMLFormElement)) return;
         const kind =
@@ -132,6 +137,7 @@ export function MediaRequestRecovery({
   copy,
   retryLabel,
   commands,
+  modifications,
 }: {
   storageKey: string;
   operationId: string;
@@ -143,6 +149,7 @@ export function MediaRequestRecovery({
   copy: FormCopy;
   retryLabel: string;
   commands: { details: string; discard: string; approve: string; reject: string };
+  modifications: Record<string, string>;
 }) {
   const [draft, setDraft] = useState<Draft | null>(null);
   useEffect(
@@ -166,46 +173,97 @@ export function MediaRequestRecovery({
         },
   };
   return (
-    <ActionForm
-      action={action}
-      initialState={initialState}
-      permalink={status.href}
-      nativeIdentity="retained-photo-request"
-      commandAvailable={missing}
-      reconciliation={status}
-      labels={labels}
-      copy={copy}
-      submitLabel={retryLabel}
-      layout="full"
-    >
-      {() => (
-        <>
-          <input
-            type="hidden"
-            name="_decision"
-            value={draft.decision === "reject" ? "reject" : ""}
-          />
-          <input type="hidden" name="_detailsAction" value={draft.discard ? "discard" : ""} />
-          <p className="font-semibold">
-            {draft.kind === "review"
-              ? commands[draft.decision]
-              : draft.discard
-                ? commands.discard
-                : commands.details}
-          </p>
-          <dl className="grid gap-3 text-dense">
-            {fields
-              .filter((name) => kind === "review" || fields.indexOf(name) < 4)
-              .map((name) => (
-                <div key={name}>
-                  <dt className="font-semibold">{labels[name]}</dt>
-                  <dd className="whitespace-pre-wrap break-words">{draft.values[name]}</dd>
-                  <input type="hidden" name={name} value={draft.values[name]} />
-                </div>
-              ))}
-          </dl>
-        </>
-      )}
-    </ActionForm>
+    <MediaRequestKeeper storageKey={storageKey}>
+      <ActionForm
+        action={action}
+        formId={kind === "review" ? "photo-review-form" : "photo-details-form"}
+        initialState={initialState}
+        permalink={status.href}
+        nativeIdentity="retained-photo-request"
+        commandAvailable={missing}
+        reconciliation={status}
+        labels={labels}
+        copy={copy}
+        submitLabel={retryLabel}
+        layout="full"
+      >
+        {(form) => (
+          <>
+            <input
+              type="hidden"
+              name="_decision"
+              value={draft.decision === "reject" ? "reject" : ""}
+            />
+            <input type="hidden" name="_detailsAction" value={draft.discard ? "discard" : ""} />
+            <p className="font-semibold">
+              {draft.kind === "review"
+                ? commands[draft.decision]
+                : draft.discard
+                  ? commands.discard
+                  : commands.details}
+            </p>
+            <div className="grid gap-3 text-dense">
+              {fields
+                .filter((name) => kind === "review" || fields.indexOf(name) < 4)
+                .map((name) =>
+                  form.state.outcome.kind === "validation" ? (
+                    <div key={name}>
+                      {name === "privacyReviewed" || name === "rightsConfirmed" ? (
+                        <label className="flex items-start gap-2">
+                          <input
+                            id={form.field(name).id}
+                            type="checkbox"
+                            name={name}
+                            value="yes"
+                            checked={form.values[name] === "yes"}
+                            disabled={form.field(name).readOnly}
+                            onChange={(event) =>
+                              form.setValue(name, event.target.checked ? "yes" : "")
+                            }
+                          />
+                          {labels[name]}
+                        </label>
+                      ) : name === "modification" ? (
+                        <>
+                          <label className={labelClass} htmlFor={form.field(name).id}>
+                            {labels[name]}
+                          </label>
+                          <select
+                            id={form.field(name).id}
+                            name={name}
+                            value={form.values[name]}
+                            disabled={form.field(name).readOnly}
+                            className={controlClass}
+                            onChange={form.field(name).onChange}
+                          >
+                            {mediaModifications.map((value) => (
+                              <option key={value} value={value}>
+                                {modifications[value]}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      ) : (
+                        <FormField
+                          {...form.field(name)}
+                          label={labels[name]}
+                          multiline="wrap"
+                          maxLength={2000}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <dl key={name}>
+                      <dt className="font-semibold">{labels[name]}</dt>
+                      <dd className="whitespace-pre-wrap break-words">{draft.values[name]}</dd>
+                      <input type="hidden" name={name} value={draft.values[name]} />
+                    </dl>
+                  ),
+                )}
+            </div>
+          </>
+        )}
+      </ActionForm>
+    </MediaRequestKeeper>
   );
 }
