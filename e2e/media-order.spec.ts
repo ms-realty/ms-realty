@@ -240,7 +240,12 @@ for (const javaScriptEnabled of [false, true])
         .where(eq(schema.listings.id, f.listingId));
       await openPlacement(page);
       await page.getByRole("button", { name: "Include in next gallery", exact: true }).click();
-      await expect(page.getByRole("alert").filter({ hasText: "This item changed." })).toBeVisible();
+      await expect(
+        page.getByText(
+          "This item changed. Refresh and review the latest version before trying again.",
+          { exact: true },
+        ),
+      ).toBeVisible();
       await expect(heading(2)).toBeVisible();
 
       // The cover comparison uses the first photo that is not hidden: with photo 1 (second)
@@ -284,7 +289,9 @@ for (const javaScriptEnabled of [false, true])
       const version = await listingVersion(f.listingId);
       const published = await publicMedia(f.listingId);
       await openMedia(page, f);
-      await page.getByRole("link", { name: "Show photo 3", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Show photo 3", exact: true })
+        .click();
       await openPlacement(page);
       await page.getByLabel("Place before photo", { exact: true }).selectOption(first ?? "");
       await page.getByRole("button", { name: "Review the new order", exact: true }).click();
