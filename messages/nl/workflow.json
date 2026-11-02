@@ -597,6 +597,9 @@
     "detailsUnchanged": "Fotogegevens komen overeen met de goedgekeurde versie",
     "orderConflict": "De galerij is gewijzigd. Uw eerdere volgorde blijft behouden voor de overgebleven foto’s, met nieuwe foto’s achteraan. Vergelijk de huidige en voorgestelde posities voordat u opslaat.",
     "unsavedOrderTitle": "Niet-opgeslagen fotovolgorde",
-    "currentOrderPosition": "Huidige positie: {position}"
+    "currentOrderPosition": "Huidige positie: {position}",
+    "orderOutcomeUnknown": "Het resultaat van het opslaan van deze volgorde is niet bevestigd. Controleer dit voordat u verdere wijzigingen maakt.",
+    "checkOrderResult": "Opgeslagen resultaat controleren",
+    "retryOrderSave": "Dezelfde opslag opnieuw proberen"
   }
 }

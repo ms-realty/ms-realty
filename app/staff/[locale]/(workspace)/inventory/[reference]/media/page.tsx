@@ -28,7 +28,7 @@ import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspa
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isAppError } from "@/server/errors";
-import { mediaForListing, mediaReceipt } from "@/server/media/commands";
+import { mediaForListing, mediaOperationResult, mediaReceipt } from "@/server/media/commands";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
@@ -82,6 +82,8 @@ export default async function MediaPage({
     panel?: string;
     upload?: string;
     inline?: string;
+    operation?: string;
+    operationType?: string;
   }>;
 }) {
   const { locale, reference } = await params;
@@ -96,7 +98,17 @@ export default async function MediaPage({
   const workspace = workflowCopy(locale, "listingWorkspace");
   const query = await searchParams;
   // Readback: a receipt counts only for this listing, and it names its own target photo.
-  const receipt = await mediaReceipt(getDb(), session, listing.id, query.saved, query.photo);
+  const orderResult = await mediaOperationResult(
+    getDb(),
+    session,
+    reference,
+    query.operation,
+    query.operationType ?? "order",
+    query.photo,
+  );
+  const receipt =
+    orderResult?.receipt ??
+    (await mediaReceipt(getDb(), session, listing.id, query.saved, query.photo));
   const path = `/${locale}/inventory/${reference}/media`;
   const action = `${path}/submit`;
   const ref = <bdi>{listing.reference}</bdi>;
@@ -604,6 +616,11 @@ export default async function MediaPage({
             draftKey={`msr-media-order:${session.actor.id}:${listing.id}`}
             confirmedOrder={receipt?.move ? receipt.order?.after : undefined}
             confirmedRequestKey={receipt?.move ? receipt.requestKey : undefined}
+            operationResult={
+              !query.operationType || query.operationType === "order"
+                ? (orderResult ?? undefined)
+                : undefined
+            }
             copy={{
               reorder: workspace.reorder,
               hint: workspace.orderHint,
@@ -619,6 +636,9 @@ export default async function MediaPage({
               conflict: copy.conflict,
               membershipConflict: workspace.orderConflict,
               currentPosition: workspace.currentOrderPosition,
+              outcomeUnknown: workspace.orderOutcomeUnknown,
+              checkResult: workspace.checkOrderResult,
+              retrySave: workspace.retryOrderSave,
               guard: { ...guard, title: workspace.unsavedOrderTitle },
             }}
           />
@@ -746,7 +766,7 @@ function PhotoEditor({
             responseId: randomUUID(),
             values: details as MediaDetailsValues,
             reconciliation: {
-              href: `${path}&saved=${operationId}`,
+              href: `${path}&operation=${operationId}&operationType=details`,
               label: inventoryCopy(locale).operation,
             },
             outcome: { kind: "idle" },
@@ -791,7 +811,7 @@ function PhotoEditor({
           expectedRevision: asset.version,
           responseId: randomUUID(),
           reconciliation: {
-            href: `${path}&panel=review&saved=${operationId}`,
+            href: `${path}&panel=review&operation=${operationId}&operationType=review`,
             label: inventoryCopy(locale).operation,
           },
           outcome: { kind: "idle" },

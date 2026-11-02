@@ -597,6 +597,9 @@
     "detailsUnchanged": "פרטי התמונה תואמים לגרסה המאושרת",
     "orderConflict": "הגלריה השתנתה. הסדר הקודם שלך נשמר עבור התמונות שנותרו, ותמונות חדשות נוספו בסוף. יש להשוות בין המיקומים הנוכחיים למוצעים לפני השמירה.",
     "unsavedOrderTitle": "סדר תמונות שלא נשמר",
-    "currentOrderPosition": "מיקום נוכחי: {position}"
+    "currentOrderPosition": "מיקום נוכחי: {position}",
+    "orderOutcomeUnknown": "תוצאת שמירת הסדר הזה לא אושרה. יש לבדוק אותה לפני ביצוע שינויים נוספים.",
+    "checkOrderResult": "בדיקת תוצאת השמירה",
+    "retryOrderSave": "ניסיון חוזר של אותה שמירה"
   }
 }

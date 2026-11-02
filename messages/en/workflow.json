@@ -597,6 +597,9 @@
     "detailsUnchanged": "Photo details match the approved version",
     "orderConflict": "The gallery changed. Your earlier order is kept for the remaining photos, with new photos at the end. Compare the current and proposed positions before saving.",
     "unsavedOrderTitle": "Unsaved photo order",
-    "currentOrderPosition": "Current position: {position}"
+    "currentOrderPosition": "Current position: {position}",
+    "orderOutcomeUnknown": "The result of this order save is not confirmed. Check it before making further changes.",
+    "checkOrderResult": "Check the save result",
+    "retryOrderSave": "Retry the same save"
   }
 }

@@ -597,6 +597,9 @@
     "detailsUnchanged": "Fotodaten entsprechen der freigegebenen Version",
     "orderConflict": "Die Galerie hat sich geändert. Ihre frühere Reihenfolge bleibt für die vorhandenen Fotos erhalten, neue Fotos stehen am Ende. Vergleichen Sie vor dem Speichern die aktuellen und vorgeschlagenen Positionen.",
     "unsavedOrderTitle": "Ungespeicherte Fotoreihenfolge",
-    "currentOrderPosition": "Aktuelle Position: {position}"
+    "currentOrderPosition": "Aktuelle Position: {position}",
+    "orderOutcomeUnknown": "Das Ergebnis dieses Speichervorgangs ist nicht bestätigt. Prüfen Sie es vor weiteren Änderungen.",
+    "checkOrderResult": "Speicherergebnis prüfen",
+    "retryOrderSave": "Denselben Speichervorgang wiederholen"
   }
 }

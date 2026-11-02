@@ -17,6 +17,7 @@ export function MediaGallery({
   draftKey,
   confirmedOrder,
   confirmedRequestKey,
+  operationResult,
   copy,
 }: {
   items: { id: string; label: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
@@ -27,6 +28,7 @@ export function MediaGallery({
   draftKey: string;
   confirmedOrder?: string[];
   confirmedRequestKey?: string;
+  operationResult?: { requestKey: string; status: "missing" | "pending" | "failed" | "succeeded" };
   copy: {
     reorder: string;
     hint: string;
@@ -42,6 +44,9 @@ export function MediaGallery({
     conflict: string;
     membershipConflict: string;
     currentPosition: string;
+    outcomeUnknown: string;
+    checkResult: string;
+    retrySave: string;
     guard: { title: string; body: string; stay: string; discard: string };
   };
 }) {
@@ -55,9 +60,11 @@ export function MediaGallery({
   const [restored, setRestored] = useState<"version" | "membership" | null>(null);
   const [draftVersion, setDraftVersion] = useState(version);
   const [previousOrder, setPreviousOrder] = useState<string[] | null>(null);
-  const [submission, setSubmission] = useState<{ requestKey: string; order: string[] } | null>(
-    null,
-  );
+  const [submission, setSubmission] = useState<{
+    requestKey: string;
+    order: string[];
+    expectedRevision: number;
+  } | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const root = useRef<HTMLDivElement>(null);
@@ -88,7 +95,7 @@ export function MediaGallery({
         order?: unknown;
         recovery?: unknown;
         previousOrder?: unknown;
-        submission?: { requestKey?: unknown; order?: unknown };
+        submission?: { requestKey?: unknown; order?: unknown; expectedRevision?: unknown };
       } | null;
       const validOrder = (value: unknown): value is string[] =>
         Array.isArray(value) &&
@@ -116,8 +123,14 @@ export function MediaGallery({
         typeof stored.submission?.requestKey === "string" &&
         stored.submission.requestKey.length >= 8 &&
         stored.submission.requestKey.length <= 160 &&
+        Number.isSafeInteger(stored.submission.expectedRevision) &&
+        Number(stored.submission.expectedRevision) >= 0 &&
         validOrder(stored.submission.order)
-          ? { requestKey: stored.submission.requestKey, order: stored.submission.order }
+          ? {
+              requestKey: stored.submission.requestKey,
+              order: stored.submission.order,
+              expectedRevision: Number(stored.submission.expectedRevision),
+            }
           : null;
       const ownSave =
         confirmedRequestKey &&
@@ -135,7 +148,12 @@ export function MediaGallery({
       setReviewing(false);
       setRestored(recovery);
       setDraftVersion(Number(stored.version));
-      setSubmission(storedSubmission);
+      setSubmission(
+        operationResult?.requestKey === storedSubmission?.requestKey &&
+          operationResult?.status === "failed"
+          ? null
+          : storedSubmission,
+      );
       setPreviousOrder(
         validOrder(stored.previousOrder)
           ? stored.previousOrder
@@ -144,7 +162,7 @@ export function MediaGallery({
             : null,
       );
     } catch {}
-  }, [initial, confirmed, confirmedRequestKey, draftKey, version]);
+  }, [initial, confirmed, confirmedRequestKey, operationResult, draftKey, version]);
   useEffect(() => {
     if (!hydrated) return;
     try {
@@ -163,6 +181,7 @@ export function MediaGallery({
     } catch {}
   }, [order, pending, hydrated, draftKey, draftVersion, restored, previousOrder, submission]);
   const recordMove = (next: string[], id: string, direction?: "up" | "down") => {
+    if (submission) return;
     setSubmission(null);
     focusAfterMove.current = { id, direction };
     const values = {
@@ -199,6 +218,7 @@ export function MediaGallery({
   const before = cover(initial),
     after = cover(order);
   const cancel = () => {
+    if (submission) return;
     try {
       window.sessionStorage.removeItem(draftKey);
     } catch {}
@@ -258,7 +278,7 @@ export function MediaGallery({
             data-photo={id}
             tabIndex={editing ? -1 : undefined}
             aria-label={editing ? item.label : undefined}
-            draggable={editing && !reviewing}
+            draggable={editing && !reviewing && !submission}
             className={cx(
               "relative min-w-0 rounded-panel",
               over === id && "outline-2 outline-action",
@@ -280,7 +300,7 @@ export function MediaGallery({
                 <button
                   type="button"
                   data-move="up"
-                  disabled={index === 0}
+                  disabled={index === 0 || Boolean(submission)}
                   aria-label={`${copy.up} · ${index + 1}`}
                   className={buttonClass("tertiary", "px-3")}
                   onClick={() => moveOne(id, "up")}
@@ -290,7 +310,7 @@ export function MediaGallery({
                 <button
                   type="button"
                   data-move="down"
-                  disabled={index === order.length - 1}
+                  disabled={index === order.length - 1 || Boolean(submission)}
                   aria-label={`${copy.down} · ${index + 1}`}
                   className={buttonClass("tertiary", "px-3")}
                   onClick={() => moveOne(id, "down")}
@@ -333,7 +353,22 @@ export function MediaGallery({
               {restored === "membership" ? copy.membershipConflict : copy.conflict}
             </p>
           ) : null}
-          <MediaReviewGuard copy={copy.guard} hasUnsavedChanges={pending} onDiscard={cancel}>
+          {submission ? (
+            <p role="status" className="rounded-control bg-warning-soft p-3 text-dense">
+              {copy.outcomeUnknown}{" "}
+              <a
+                className="text-action underline"
+                href={`${action.replace(/\/submit$/, "")}?operation=${encodeURIComponent(submission.requestKey)}`}
+              >
+                {copy.checkResult}
+              </a>
+            </p>
+          ) : null}
+          <MediaReviewGuard
+            copy={copy.guard}
+            hasUnsavedChanges={pending && !submission}
+            onDiscard={cancel}
+          >
             <NativeForm
               action={action}
               method="post"
@@ -342,7 +377,12 @@ export function MediaGallery({
                 const operationId = String(
                   new FormData(event.currentTarget).get("operationId") ?? "",
                 );
-                setSubmission({ requestKey: operationId, order });
+                const submitted = {
+                  requestKey: operationId,
+                  order: submission?.order ?? order,
+                  expectedRevision: submission?.expectedRevision ?? version,
+                };
+                setSubmission(submitted);
                 try {
                   window.sessionStorage.setItem(
                     draftKey,
@@ -351,16 +391,39 @@ export function MediaGallery({
                       order,
                       recovery: restored,
                       previousOrder,
-                      submission: { requestKey: operationId, order },
+                      submission: submitted,
                     }),
                   );
                 } catch {}
               }}
             >
-              {envelope}
-              <input type="hidden" name="order" value={JSON.stringify(order)} />
+              {submission ? (
+                <>
+                  <input type="hidden" name="intent" value="order" />
+                  <input type="hidden" name="operationId" value={submission.requestKey} />
+                  <input
+                    type="hidden"
+                    name="expectedRevision"
+                    value={submission.expectedRevision}
+                  />
+                </>
+              ) : (
+                envelope
+              )}
+              <input
+                type="hidden"
+                name="order"
+                value={JSON.stringify(submission?.order ?? order)}
+              />
               <div className="sticky top-0 z-10 flex flex-wrap gap-2 border-b border-divider bg-canvas py-3">
-                {reviewing ? (
+                {submission ? (
+                  operationResult?.requestKey === submission.requestKey &&
+                  operationResult.status === "missing" ? (
+                    <button type="submit" className={buttonClass("primary")}>
+                      {copy.retrySave}
+                    </button>
+                  ) : null
+                ) : reviewing ? (
                   <>
                     <button type="submit" className={buttonClass("primary")}>
                       {copy.save}
@@ -383,7 +446,12 @@ export function MediaGallery({
                     {copy.review}
                   </button>
                 )}
-                <button type="button" className={buttonClass("tertiary")} onClick={cancel}>
+                <button
+                  type="button"
+                  disabled={Boolean(submission)}
+                  className={buttonClass("tertiary")}
+                  onClick={cancel}
+                >
                   {copy.cancel}
                 </button>
               </div>

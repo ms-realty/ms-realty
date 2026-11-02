@@ -109,7 +109,9 @@ for (const javaScriptEnabled of [false, true])
 
       // Staging is a read: the review shows before/proposal and nothing is written.
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await expect(
         page.getByRole("heading", { level: 1, name: "Review the new order" }),
       ).toBeVisible();
@@ -129,7 +131,9 @@ for (const javaScriptEnabled of [false, true])
       expect(await listingVersion(f.listingId)).toBe(version);
 
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
       await expect(
         page.getByRole("heading", { level: 1, name: "The new order is saved" }),
@@ -153,7 +157,9 @@ for (const javaScriptEnabled of [false, true])
 
       // A review prepared before another change reports a conflict and writes nothing.
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await db
         .update(schema.listings)
         .set({ version: (version ?? 0) + 2 })
@@ -175,7 +181,9 @@ for (const javaScriptEnabled of [false, true])
 
       // Save A (1 ↓), then save B (1 ↓ again): A's receipt still states A's recorded order.
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
       await expect(page.getByRole("status")).toContainText("New photo order: 2, 1, 3.");
       const receiptA = page.url();
@@ -195,7 +203,9 @@ for (const javaScriptEnabled of [false, true])
       await page.getByRole("link", { name: "Back to the current task", exact: true }).click();
       await expect(heading(2)).toBeVisible();
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
       await expect(page.getByRole("status")).toContainText("New photo order: 1, 3, 2.");
       expect(await workingOrder(f.listingId)).toEqual([second, third, first]);
@@ -245,7 +255,9 @@ for (const javaScriptEnabled of [false, true])
       await expect(heading(1)).toBeVisible();
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}/media?photo=${third}`));
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await expect(page.getByText("Before · cover 2", { exact: true })).toBeVisible();
       await expect(page.getByText("After · cover 3", { exact: true })).toBeVisible();
       expect(await workingOrder(f.listingId)).toEqual([second, third, first]);
@@ -398,7 +410,12 @@ for (const javaScriptEnabled of [false, true])
         .set({ version: sql`${schema.mediaAssets.version} + 1` })
         .where(eq(schema.mediaAssets.id, first?.assetId ?? ""));
       await review();
-      await expect(page.getByRole("alert").filter({ hasText: "This item changed." })).toBeVisible();
+      await expect(
+        page.getByText(
+          "This item changed. Refresh and review the latest version before trying again.",
+          { exact: true },
+        ),
+      ).toBeVisible();
       await expect(fourth).toBeVisible();
 
       // A scan retry on placement 4 returns to placement 4.
