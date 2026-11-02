@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { mediaModifications, moveRelation } from "@/domain/media";
 import { fileError, fileLabel, filesCopy, fillCopy } from "@/features/files/copy";
-import { FileButton, FileCheck, FileEnvelope, FileField } from "@/features/files/forms";
+import { FileButton, FileEnvelope } from "@/features/files/forms";
 import { inventoryCopy } from "@/features/inventory/copy";
 import { FocusedState } from "@/features/inventory/focused-state";
 import { LeaveControl } from "@/features/inventory/leave-control";
@@ -16,6 +16,8 @@ import {
   MediaDetailsEditor,
   type MediaDetailsValues,
 } from "@/features/inventory/media-details-editor";
+import { MediaPlacementControls } from "@/features/inventory/media-placement-controls";
+import { MediaReviewEditor } from "@/features/inventory/media-review-editor";
 import {
   MediaFilePicker,
   MediaGallery,
@@ -41,7 +43,7 @@ import {
 } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 
-import { savePhotoDetails } from "./actions";
+import { reviewPhoto, savePhotoDetails } from "./actions";
 
 type MediaRow = Awaited<ReturnType<typeof mediaForListing>>["assets"][number];
 
@@ -246,7 +248,12 @@ export default async function MediaPage({
     discard: workspace.discard,
   };
   const review = Boolean(selected && query.panel === "review");
-  const detailsFormId = selected && !review ? "photo-details-form" : undefined;
+  const detailsFormId =
+    selected && previewable(selected)
+      ? review
+        ? "photo-review-form"
+        : "photo-details-form"
+      : undefined;
   const detailsHref = selected ? photoHref(selected.relation.id) : path;
   const galleryHref = selected ? `${path}#photo-${selected.relation.id}` : path;
   const tile = (row: MediaRow, index: number) => (
@@ -403,10 +410,10 @@ export default async function MediaPage({
               <ol className="flex gap-2 overflow-x-auto pb-2">
                 {assets.map((row, index) => (
                   <li key={row.relation.id} className="shrink-0">
-                    <a
+                    <LeaveControl
                       href={photoHref(row.relation.id)}
-                      aria-label={fillCopy(copy.showPhoto, { n: index + 1 })}
-                      aria-current={row === selected ? "true" : undefined}
+                      formId={detailsFormId}
+                      current={row === selected}
                       className={cx(
                         "block w-16 overflow-hidden rounded-control border-2",
                         row === selected
@@ -414,12 +421,15 @@ export default async function MediaPage({
                           : "border-transparent hover:border-border",
                       )}
                     >
-                      <Preview
-                        row={row}
-                        label={workspace.noPhoto}
-                        className="aspect-4/3 rounded-none object-cover!"
-                      />
-                    </a>
+                      <span className="sr-only">{fillCopy(copy.showPhoto, { n: index + 1 })}</span>
+                      <span aria-hidden="true">
+                        <Preview
+                          row={row}
+                          label={workspace.noPhoto}
+                          className="aspect-4/3 rounded-none object-cover!"
+                        />
+                      </span>
+                    </LeaveControl>
                   </li>
                 ))}
               </ol>
@@ -477,65 +487,64 @@ export default async function MediaPage({
               </summary>
               <div className="mt-2 space-y-3">
                 <p className="text-dense text-text-muted">{copy.permission}</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedIndex > 0 ? (
-                    <a href={`${detailsHref}&move=up`} className={buttonClass("secondary")}>
-                      <ArrowUpIcon className="size-4" />
-                      {copy.moveUp}
-                    </a>
-                  ) : (
-                    <button type="button" disabled className={buttonClass("secondary")}>
-                      {copy.firstAlready}
-                    </button>
+                <MediaPlacementControls
+                  formId={detailsFormId}
+                  action={action}
+                  path={path}
+                  relationId={selected.relation.id}
+                  hidden={selected.relation.hidden}
+                  version={listing.version}
+                  operationId={randomUUID()}
+                  options={assets.flatMap((row, index) =>
+                    row === selected
+                      ? []
+                      : [
+                          {
+                            id: row.relation.id,
+                            label: `${index + 1}. ${row.asset.caption || fileLabel(copy, row.asset.kind)}`,
+                          },
+                        ],
                   )}
-                  {selectedIndex + 1 < total ? (
-                    <a href={`${detailsHref}&move=down`} className={buttonClass("secondary")}>
-                      <ArrowDownIcon className="size-4" />
-                      {copy.moveDown}
-                    </a>
-                  ) : (
-                    <button type="button" disabled className={buttonClass("secondary")}>
-                      {copy.lastAlready}
-                    </button>
-                  )}
-                  <NativeForm action={action} method="post">
-                    <FileEnvelope intent="place" version={listing.version} />
-                    <input type="hidden" name="relationId" value={selected.relation.id} />
-                    <input type="hidden" name="hidden" value={String(!selected.relation.hidden)} />
-                    <button type="submit" className={buttonClass("tertiary")}>
-                      {selected.relation.hidden ? copy.show : copy.hide}
-                    </button>
-                  </NativeForm>
-                </div>
-                {total > 2 ? (
-                  <form method="get" action={path} className="flex flex-wrap items-end gap-2">
-                    <input type="hidden" name="photo" value={selected.relation.id} />
-                    <div className="grid min-w-0 flex-1 gap-2">
-                      <label className={labelClass} htmlFor="media-position">
-                        {workspace.position}
-                      </label>
-                      <select
-                        id="media-position"
-                        name="before"
-                        required
-                        defaultValue=""
-                        className={controlClass}
-                      >
-                        <option value="">{workspace.choosePosition}</option>
-                        {assets.map((row, index) =>
-                          row === selected ? null : (
-                            <option key={row.relation.id} value={row.relation.id}>
-                              {index + 1}. {row.asset.caption || fileLabel(copy, row.asset.kind)}
-                            </option>
-                          ),
-                        )}
-                      </select>
-                    </div>
-                    <button type="submit" className={buttonClass("secondary")}>
-                      {copy.reviewOrder}
-                    </button>
-                  </form>
-                ) : null}
+                  copy={{
+                    hide: copy.hide,
+                    show: copy.show,
+                    position: workspace.position,
+                    choosePosition: workspace.choosePosition,
+                    review: copy.reviewOrder,
+                  }}
+                  moves={
+                    <>
+                      {selectedIndex > 0 ? (
+                        <LeaveControl
+                          formId={detailsFormId}
+                          href={`${detailsHref}&move=up`}
+                          className={buttonClass("secondary")}
+                        >
+                          <ArrowUpIcon className="size-4" />
+                          {copy.moveUp}
+                        </LeaveControl>
+                      ) : (
+                        <button type="button" disabled className={buttonClass("secondary")}>
+                          {copy.firstAlready}
+                        </button>
+                      )}
+                      {selectedIndex + 1 < total ? (
+                        <LeaveControl
+                          formId={detailsFormId}
+                          href={`${detailsHref}&move=down`}
+                          className={buttonClass("secondary")}
+                        >
+                          <ArrowDownIcon className="size-4" />
+                          {copy.moveDown}
+                        </LeaveControl>
+                      ) : (
+                        <button type="button" disabled className={buttonClass("secondary")}>
+                          {copy.lastAlready}
+                        </button>
+                      )}
+                    </>
+                  }
+                />
               </div>
             </details>
             <details className="border-t border-divider pt-2" open={!previewable(selected)}>
@@ -569,56 +578,55 @@ export default async function MediaPage({
         </section>
       ) : (
         <section id="o13-all" aria-labelledby="o13-all-heading" className="min-w-0 space-y-4">
-          {total ? (
-            <MediaGallery
-              key={`${listing.id}:${listing.version}`}
-              heading={
-                <h2 id="o13-all-heading" className="text-section font-semibold">
-                  {fillCopy(copy.allPhotos, { total })}
-                </h2>
-              }
-              items={assets.map((row, index) => ({
-                id: row.relation.id,
-                label: `${fileLabel(copy, "photo")} ${index + 1}`,
-                hidden: row.relation.hidden,
-                content: tile(row, index),
-                preview: (
-                  <Preview
-                    row={row}
-                    label={workspace.noPhoto}
-                    className="h-full rounded-none object-cover!"
-                  />
-                ),
-              }))}
-              action={action}
-              envelope={<FileEnvelope intent="order" version={listing.version} />}
-              version={listing.version}
-              draftKey={`msr-media-order:${session.actor.id}:${listing.id}`}
-              confirmedOrder={receipt?.move ? receipt.order?.after : undefined}
-              copy={{
-                reorder: workspace.reorder,
-                hint: workspace.orderHint,
-                review: copy.reviewOrder,
-                save: copy.saveOrder,
-                cancel: copy.cancel,
-                before: workspace.currentCover,
-                after: workspace.proposedCover,
-                up: copy.moveUp,
-                down: copy.moveDown,
-                cover: workspace.coverShort,
-                moved: workspace.photoMoved,
-                conflict: copy.conflict,
-                guard,
-              }}
-            />
-          ) : (
-            <div>
-              <h2 id="o13-all-heading" className="mb-4 text-section font-semibold">
+          <MediaGallery
+            key={`${listing.id}:${listing.version}`}
+            heading={
+              <h2 id="o13-all-heading" className="text-section font-semibold">
                 {fillCopy(copy.allPhotos, { total })}
               </h2>
+            }
+            items={assets.map((row, index) => ({
+              id: row.relation.id,
+              label: `${fileLabel(copy, "photo")} ${index + 1}`,
+              hidden: row.relation.hidden,
+              content: tile(row, index),
+              preview: (
+                <Preview
+                  row={row}
+                  label={workspace.noPhoto}
+                  className="h-full rounded-none object-cover!"
+                />
+              ),
+            }))}
+            action={action}
+            envelope={<FileEnvelope intent="order" version={listing.version} />}
+            version={listing.version}
+            draftKey={`msr-media-order:${session.actor.id}:${listing.id}`}
+            confirmedOrder={receipt?.move ? receipt.order?.after : undefined}
+            confirmedRequestKey={receipt?.move ? receipt.requestKey : undefined}
+            copy={{
+              reorder: workspace.reorder,
+              hint: workspace.orderHint,
+              review: copy.reviewOrder,
+              save: copy.saveOrder,
+              cancel: copy.cancel,
+              before: workspace.currentCover,
+              after: workspace.proposedCover,
+              up: copy.moveUp,
+              down: copy.moveDown,
+              cover: workspace.coverShort,
+              moved: workspace.photoMoved,
+              conflict: copy.conflict,
+              membershipConflict: workspace.orderConflict,
+              currentPosition: workspace.currentOrderPosition,
+              guard: { ...guard, title: workspace.unsavedOrderTitle },
+            }}
+          />
+          {!total ? (
+            <div>
               <p className="rounded-panel bg-subtle p-6">{copy.empty}</p>
             </div>
-          )}
+          ) : null}
           {query.upload === "1" || !total ? (
             <section
               id="media-upload"
@@ -689,7 +697,7 @@ function PhotoEditor({
     modification: asset.modification,
     modificationDisclosure: asset.modificationDisclosure ?? "",
   };
-  if (!ready)
+  if (!ready && !review)
     return (
       <div className="space-y-4">
         <Notice tone="warning">{copy.noPreview}</Notice>
@@ -772,117 +780,38 @@ function PhotoEditor({
       </MediaReviewGuard>
     );
   }
-  const recordedRights = asset.rights === "cleared" && asset.rightsHolder && asset.rightsReference;
+  const operationId = randomUUID();
   return (
-    <MediaReviewGuard key={`${asset.id}:${asset.version}:review`} copy={guard}>
-      <NativeForm action={action} method="post" className="grid gap-4">
-        <FileEnvelope intent="review" version={asset.version} id={asset.id} />
-        <input type="hidden" name="relationId" value={relation.id} />
-        {Object.entries(details).map(([name, value]) => (
-          <input key={name} type="hidden" name={name} value={value} />
-        ))}
-        <p className="text-dense text-text-muted">{workspace.reviewHint}</p>
-        <dl className="grid gap-3 text-dense">
-          <div>
-            <dt className="font-semibold">{copy.caption}</dt>
-            <dd className="whitespace-pre-wrap text-text-muted">{details.caption || copy.none}</dd>
-          </div>
-          <div>
-            <dt className="font-semibold">{copy.altText}</dt>
-            <dd className="whitespace-pre-wrap text-text-muted">{details.altText || copy.none}</dd>
-          </div>
-          {details.modification !== "none" ? (
-            <>
-              <div>
-                <dt className="font-semibold">{copy.modification}</dt>
-                <dd>{fileLabel(copy, details.modification)}</dd>
-              </div>
-              <div>
-                <dt className="font-semibold">{copy.disclosure}</dt>
-                <dd className="whitespace-pre-wrap text-text-muted">
-                  {details.modificationDisclosure || copy.none}
-                </dd>
-              </div>
-            </>
-          ) : null}
-        </dl>
-        {recordedRights ? (
-          <>
-            <dl className="grid gap-3 text-dense">
-              <div>
-                <dt className="font-semibold">{copy.rightsHolder}</dt>
-                <dd>{asset.rightsHolder}</dd>
-              </div>
-              <div>
-                <dt className="font-semibold">{copy.rightsReference}</dt>
-                <dd>{asset.rightsReference}</dd>
-              </div>
-            </dl>
-            <details>
-              <summary className="min-h-control cursor-pointer py-2 text-dense text-action">
-                {workspace.editPermissions}
-              </summary>
-              <div className="grid gap-4 pt-3">
-                <FileField
-                  name="rightsHolder"
-                  label={copy.rightsHolder}
-                  value={asset.rightsHolder ?? ""}
-                />
-                <FileField
-                  name="rightsReference"
-                  label={copy.rightsReference}
-                  value={asset.rightsReference ?? ""}
-                />
-              </div>
-            </details>
-          </>
-        ) : (
-          <>
-            <FileField
-              name="rightsHolder"
-              label={copy.rightsHolder}
-              value={asset.rightsHolder ?? ""}
-            />
-            <FileField
-              name="rightsReference"
-              label={copy.rightsReference}
-              value={asset.rightsReference ?? ""}
-            />
-          </>
+    <MediaReviewGuard key={`${asset.id}:review`} copy={guard} requireAcknowledgment>
+      {!ready ? <Notice tone="warning">{copy.noPreview}</Notice> : null}
+      <MediaReviewEditor
+        action={reviewPhoto.bind(null, locale, reference, asset.id, relation.id)}
+        initialState={{
+          operationId,
+          expectedRevision: asset.version,
+          responseId: randomUUID(),
+          reconciliation: {
+            href: `${path}&panel=review&saved=${operationId}`,
+            label: inventoryCopy(locale).operation,
+          },
+          outcome: { kind: "idle" },
+          values: {
+            ...details,
+            rightsHolder: asset.rightsHolder ?? "",
+            rightsReference: asset.rightsReference ?? "",
+            privacyReviewed: "",
+            rightsConfirmed: "",
+          },
+        }}
+        path={`${path}&panel=review`}
+        copy={copy}
+        workspace={workspace}
+        formCopy={inventoryCopy(locale).form}
+        ready={ready}
+        recordedRights={Boolean(
+          asset.rights === "cleared" && asset.rightsHolder && asset.rightsReference,
         )}
-        <FileCheck name="privacyReviewed">{copy.privacy}</FileCheck>
-        <FileCheck name="rightsConfirmed">{copy.rightsCheck}</FileCheck>
-        {!details.altText.trim() ||
-        (details.modification !== "none" && !details.modificationDisclosure.trim()) ? (
-          <p className="text-dense text-warning">{workspace.reviewNeedsDetails}</p>
-        ) : null}
-        <button
-          type="submit"
-          name="decision"
-          value="approve"
-          disabled={
-            !details.altText.trim() ||
-            (details.modification !== "none" && !details.modificationDisclosure.trim())
-          }
-          className={buttonClass("primary")}
-        >
-          {copy.approve}
-        </button>
-        <details className="border-t border-divider pt-3">
-          <summary className="min-h-control cursor-pointer py-2 text-dense text-error">
-            {copy.reject}
-          </summary>
-          <button
-            type="submit"
-            name="decision"
-            value="reject"
-            formNoValidate
-            className={buttonClass("destructive")}
-          >
-            {copy.reject}
-          </button>
-        </details>
-      </NativeForm>
+      />
     </MediaReviewGuard>
   );
 }
