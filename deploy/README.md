@@ -56,10 +56,10 @@ No Hyperdrive configuration currently exists in the recorded account inventory.
 
 `gateway/cloudflare.ts` implements the selected **Containers staging adapter**, with its own
 `wrangler.containers.types.jsonc` and strict `gateway/tsconfig.json`. It does not replace
-`gateway/wrangler.jsonc` or an OpenNext entry. `STAGING` is exactly `true` or `false`; `1`, `TRUE`
-and other strings fail closed. The other owner's `STAGING=1` convention must be reconciled.
-The staging workflow requires the controller's explicit reviewed mode. It currently refuses
-OpenNext until the coordinated artifact contract is integrated; there is no automatic fallback.
+`gateway/wrangler.jsonc`; the qualification-only OpenNext entry has been removed. `STAGING` is
+exactly `true` or `false`; `1`, `TRUE` and other strings fail closed. The other owner's
+`STAGING=1` convention must be reconciled. The staging workflow requires the controller's
+explicit reviewed mode and accepts only `containers`; there is no automatic fallback.
 
 ## One immutable Containers image
 

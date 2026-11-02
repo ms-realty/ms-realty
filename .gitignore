@@ -44,3 +44,9 @@ __pycache__/
 
 # Local synthetic map fixture; real assets are a separate immutable R2 release.
 /public/maps/
+
+# Local evidence, backups and recovery scratch kept outside Git (multi-GB). The few
+# files already tracked under output/ stay tracked.
+/output/
+/.local-backups/
+/.recovery-work/
