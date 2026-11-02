@@ -17,6 +17,10 @@ import {
   type MediaDetailsValues,
 } from "@/features/inventory/media-details-editor";
 import { MediaPlacementControls } from "@/features/inventory/media-placement-controls";
+import {
+  MediaRequestKeeper,
+  MediaRequestRecovery,
+} from "@/features/inventory/media-request-recovery";
 import { MediaReviewEditor } from "@/features/inventory/media-review-editor";
 import {
   MediaFilePicker,
@@ -43,7 +47,7 @@ import {
 } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 
-import { reviewPhoto, savePhotoDetails } from "./actions";
+import { retryPhotoRequest, reviewPhoto, savePhotoDetails } from "./actions";
 
 type MediaRow = Awaited<ReturnType<typeof mediaForListing>>["assets"][number];
 
@@ -123,6 +127,8 @@ export default async function MediaPage({
     ({ relation, asset }) => relation.id === target || asset.id === target,
   );
   const selected = assets[selectedIndex];
+  const requestStorageKey = (id: string) =>
+    `msr-photo-request:${session.actor.id}:${listing.id}:${id}`;
   const photoHref = (id: string) => `${path}?photo=${id}`;
   const order = assets.map(({ relation }) => relation.id);
   const numberOf = new Map(order.map((id, index) => [id, index + 1]));
@@ -137,6 +143,7 @@ export default async function MediaPage({
     const failed = operationResult?.status === "failed";
     const status = `${path}?${new URLSearchParams({
       photo: typeof query.photo === "string" ? query.photo : "",
+      ...(query.panel === "review" ? { panel: "review" } : {}),
       operation: query.operation,
       operationType: query.operationType ?? "",
     })}`;
@@ -161,6 +168,41 @@ export default async function MediaPage({
         <a href={status} className={buttonClass("primary")}>
           {workspace.checkOrderResult}
         </a>
+        {selected && (query.operationType === "details" || query.operationType === "review") ? (
+          <MediaRequestRecovery
+            storageKey={requestStorageKey(selected.relation.id)}
+            operationId={query.operation}
+            kind={query.operationType}
+            missing={operationResult?.status === "missing"}
+            action={retryPhotoRequest.bind(
+              null,
+              query.operationType,
+              locale,
+              reference,
+              selected.asset.id,
+              selected.relation.id,
+            )}
+            status={{ href: status, label: inventoryCopy(locale).operation }}
+            labels={{
+              caption: copy.caption,
+              altText: copy.altText,
+              modification: copy.modification,
+              modificationDisclosure: copy.disclosure,
+              rightsHolder: copy.rightsHolder,
+              rightsReference: copy.rightsReference,
+              privacyReviewed: copy.privacy,
+              rightsConfirmed: copy.rightsCheck,
+            }}
+            copy={inventoryCopy(locale).form}
+            retryLabel={workspace.retryOrderSave}
+            commands={{
+              details: workspace.saveDetails,
+              discard: workspace.discardDraft,
+              approve: copy.approve,
+              reject: copy.reject,
+            }}
+          />
+        ) : null}
         {failed && selected ? (
           <a href={photoHref(selected.relation.id)} className={buttonClass("secondary")}>
             {copy.toTask}
@@ -522,18 +564,23 @@ export default async function MediaPage({
                 {workspace.detailsPending}
               </p>
             ) : null}
-            <PhotoEditor
-              row={selected}
-              copy={copy}
-              workspace={workspace}
-              action={action}
-              fileChooser={fileChooser}
-              locale={locale}
-              reference={reference}
-              path={detailsHref}
-              review={review}
-              guard={guard}
-            />
+            <MediaRequestKeeper
+              storageKey={requestStorageKey(selected.relation.id)}
+              acknowledgedKey={receipt?.requestKey}
+            >
+              <PhotoEditor
+                row={selected}
+                copy={copy}
+                workspace={workspace}
+                action={action}
+                fileChooser={fileChooser}
+                locale={locale}
+                reference={reference}
+                path={detailsHref}
+                review={review}
+                guard={guard}
+              />
+            </MediaRequestKeeper>
           </div>
           <div className="min-w-0 space-y-4 min-[48rem]:col-start-1">
             <details className="border-t border-divider pt-2">

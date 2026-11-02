@@ -402,3 +402,41 @@ export async function reviewPhoto(
     },
   };
 }
+
+/** Retry the retained envelope only. A conflict must lead to readback, never silently
+ * carry its old human confirmations into a new review command. */
+export async function retryPhotoRequest(
+  kind: "details" | "review",
+  locale: string,
+  reference: string,
+  assetId: string,
+  relationId: string,
+  previous: FormState<MediaReviewValues>,
+  form: FormData,
+): Promise<FormState<MediaReviewValues>> {
+  const result =
+    kind === "review"
+      ? await reviewPhoto(locale, reference, assetId, relationId, previous, form)
+      : await savePhotoDetails(locale, reference, assetId, relationId, previous, form);
+  const outcome = result.outcome;
+  if (outcome.kind === "conflict") {
+    return {
+      ...result,
+      values: result.values as MediaReviewValues,
+      outcome: {
+        kind: "conflict",
+        code: outcome.code,
+        message: outcome.message,
+        recovery: result.reconciliation,
+      },
+    };
+  }
+  if (outcome.kind === "rejected") {
+    return {
+      ...result,
+      values: result.values as MediaReviewValues,
+      outcome: { ...outcome, retryable: false },
+    };
+  }
+  return result as FormState<MediaReviewValues>;
+}

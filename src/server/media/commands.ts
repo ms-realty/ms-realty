@@ -222,7 +222,7 @@ export async function mediaReceipt(
           relationId: relation.id,
           move: false,
           order: null,
-          requestKey: undefined,
+          requestKey: event?.requestKey,
           action,
           details,
         }
