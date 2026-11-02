@@ -9,6 +9,7 @@ import {
   listings,
   mediaAssets,
   mediaRelations,
+  operations,
   properties,
 } from "@/db/schema";
 import { mediaModifications, moveRelation } from "@/domain/media";
@@ -23,7 +24,7 @@ import { fileSession, mediaAccess } from "../files/access";
 import { imageContentTypes } from "../files/inspect";
 import { fileReceipt } from "../files/receipts";
 import { reserveUpload } from "../files/uploads";
-import { runOperation } from "../operations";
+import { findOperation, runOperation } from "../operations";
 
 const envelope = z.object({
   operationId: z.string().min(8).max(160),
@@ -216,7 +217,15 @@ export async function mediaReceipt(
       relations.find((row) => row.id === placement && row.assetId === assetId) ??
       relations.find((row) => row.assetId === assetId);
     return relation
-      ? { id, relationId: relation.id, move: false, order: null, action, details }
+      ? {
+          id,
+          relationId: relation.id,
+          move: false,
+          order: null,
+          requestKey: event?.requestKey,
+          action,
+          details,
+        }
       : null;
   };
   const [event] = await db
@@ -225,8 +234,10 @@ export async function mediaReceipt(
       recordType: auditEvents.recordType,
       recordId: auditEvents.recordId,
       payload: auditEvents.payload,
+      requestKey: operations.idempotencyKey,
     })
     .from(auditEvents)
+    .innerJoin(operations, eq(operations.id, id))
     .where(
       and(
         eq(auditEvents.operationId, id),
@@ -257,6 +268,7 @@ export async function mediaReceipt(
     return {
       id,
       action: event.action,
+      requestKey: event.requestKey,
       details: null,
       relationId,
       move: Boolean(payload.move),
@@ -312,6 +324,7 @@ export async function saveMediaDetails(
       actor: command.session.actor,
       type: "media.details.save",
       idempotencyKey: command.operationId,
+      subject: { type: "media_asset", id: command.id },
       requestHash: hashRequest({
         id: command.id,
         input,
@@ -396,6 +409,7 @@ export async function reviewMedia(
       actor: command.session.actor,
       type: "media.review",
       idempotencyKey: command.operationId,
+      subject: { type: "media_asset", id: command.id },
       requestHash: hashRequest({
         id: command.id,
         input,
@@ -504,6 +518,7 @@ export async function placeMedia(
       actor: command.session.actor,
       type: "media.place",
       idempotencyKey: command.operationId,
+      subject: { type: "media_relation", id: command.relationId },
       requestHash: hashRequest({
         reference: command.reference,
         relationId: command.relationId,
@@ -574,6 +589,52 @@ export async function placeMedia(
   );
 }
 
+/** Read-only reconciliation of this actor's command, bound to the accessible listing/photo. */
+export async function mediaOperationResult(
+  db: Executor,
+  session: Session,
+  reference: string,
+  requestKey: unknown,
+  kind: unknown = "order",
+  placement?: string,
+) {
+  if (typeof requestKey !== "string" || requestKey.length < 8 || requestKey.length > 160)
+    return null;
+  const type =
+    kind === "order" || kind === "placement"
+      ? "media.place"
+      : kind === "review"
+        ? "media.review"
+        : kind === "details"
+          ? "media.details.save"
+          : null;
+  if (!type) return null;
+  const { listing, assets } = await mediaForListing(db, session, reference);
+  const target = kind === "order" ? null : assets.find((row) => row.relation.id === placement);
+  if (kind !== "order" && !target) return null;
+  const operation = await findOperation(db, session.actor, type, requestKey);
+  if (!operation) return { requestKey, status: "missing" as const, receipt: null };
+  const receipt =
+    operation.status === "succeeded"
+      ? await mediaReceipt(db, session, listing.id, operation.operationId, placement)
+      : null;
+  if (receipt && (kind === "order" ? receipt.move : receipt.relationId === placement))
+    return { requestKey, status: "succeeded" as const, receipt };
+  if (operation.status === "succeeded") return null;
+  const expectedType =
+    kind === "order" ? "listing" : kind === "placement" ? "media_relation" : "media_asset";
+  const expectedId =
+    kind === "order" ? listing.id : kind === "placement" ? target?.relation.id : target?.asset.id;
+  // Terminal failures and pending commands require the same subject, too. Historical
+  // successes without a subject remain bound by the actor-scoped audit event above.
+  if (operation.resultType !== expectedType || operation.resultId !== expectedId) return null;
+  return {
+    requestKey,
+    status: operation.status === "failed" ? ("failed" as const) : ("pending" as const),
+    receipt: null,
+  };
+}
+
 /** One reviewed gallery change, regardless of how many local moves produced it. */
 export async function reorderMedia(
   db: Executor,
@@ -581,13 +642,14 @@ export async function reorderMedia(
 ) {
   parseFileInput(envelope, command);
   const order = parseFileInput(z.array(z.uuid()).min(1).max(1000), command.order);
-  await managedListing(db, command.session, command.reference);
+  const listing = await managedListing(db, command.session, command.reference);
   return runOperation(
     db,
     {
       actor: command.session.actor,
       type: "media.place",
       idempotencyKey: command.operationId,
+      subject: { type: "listing", id: listing.id },
       requestHash: hashRequest({
         reference: command.reference,
         order,

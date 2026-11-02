@@ -2,7 +2,9 @@
 set -euo pipefail
 
 # Baselines and comparisons use the same Linux browser/font environment locally and in CI.
-# The image version must equal the pinned @playwright/test dependency.
+# The image version must equal the pinned @playwright/test dependency. The immutable
+# digest and platform preserve the qualified browser/fonts/Node runtime: version tags can
+# be rebuilt. Qualify any replacement against every unchanged baseline before updating it.
 task_root="$(cd "$(dirname "$0")/.." && pwd)"
 test_mode="${1:-check}"
 case "$test_mode" in
@@ -11,12 +13,12 @@ case "$test_mode" in
   *) printf '%s\n' 'Usage: scripts/visual-docker.sh [check|update]' >&2; exit 2 ;;
 esac
 
-docker run --rm --init --ipc=host \
+docker run --rm --init --ipc=host --platform linux/amd64 \
   --mount "type=bind,source=$task_root,target=/workspace" \
   --mount type=volume,destination=/workspace/node_modules \
   --workdir /workspace \
   --env CI=1 \
   --env PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
-  mcr.microsoft.com/playwright:v1.64.1-noble \
+  mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea \
   bash -euc 'npm ci; npm run storybook:build; npx playwright test --config playwright.visual.config.ts --workers=2 "$@"' \
   bash "${snapshot_args[@]}"

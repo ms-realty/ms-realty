@@ -16,6 +16,8 @@ export function MediaGallery({
   version,
   draftKey,
   confirmedOrder,
+  confirmedRequestKey,
+  operationResult,
   copy,
 }: {
   items: { id: string; label: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
@@ -25,6 +27,8 @@ export function MediaGallery({
   version: number;
   draftKey: string;
   confirmedOrder?: string[];
+  confirmedRequestKey?: string;
+  operationResult?: { requestKey: string; status: "missing" | "pending" | "failed" | "succeeded" };
   copy: {
     reorder: string;
     hint: string;
@@ -38,6 +42,11 @@ export function MediaGallery({
     cover: string;
     moved: string;
     conflict: string;
+    membershipConflict: string;
+    currentPosition: string;
+    outcomeUnknown: string;
+    checkResult: string;
+    retrySave: string;
     guard: { title: string; body: string; stay: string; discard: string };
   };
 }) {
@@ -48,13 +57,21 @@ export function MediaGallery({
   const [reviewing, setReviewing] = useState(false);
   const [dragged, setDragged] = useState<string | null>(null);
   const [over, setOver] = useState<string | null>(null);
-  const [restored, setRestored] = useState(false);
+  const [restored, setRestored] = useState<"version" | "membership" | null>(null);
+  const [draftVersion, setDraftVersion] = useState(version);
+  const [previousOrder, setPreviousOrder] = useState<string[] | null>(null);
+  const [submission, setSubmission] = useState<{
+    requestKey: string;
+    order: string[];
+    expectedRevision: number;
+  } | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const root = useRef<HTMLDivElement>(null);
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const focusAfterMove = useRef<{ id: string; direction?: "up" | "down" } | null>(null);
   const changed = order.join() !== initial.join();
+  const pending = changed || restored !== null || submission !== null;
   useLayoutEffect(() => {
     const pending = focusAfterMove.current;
     if (!pending || !order.includes(pending.id)) return;
@@ -73,32 +90,99 @@ export function MediaGallery({
     try {
       const raw = window.sessionStorage.getItem(draftKey);
       if (!raw) return;
-      const stored = JSON.parse(raw) as { version?: unknown; order?: unknown };
+      const stored = JSON.parse(raw) as {
+        version?: unknown;
+        order?: unknown;
+        recovery?: unknown;
+        previousOrder?: unknown;
+        submission?: { requestKey?: unknown; order?: unknown; expectedRevision?: unknown };
+      } | null;
+      const validOrder = (value: unknown): value is string[] =>
+        Array.isArray(value) &&
+        value.length <= 10_000 &&
+        value.every((id) => typeof id === "string" && /^[a-f0-9-]{36}$/i.test(id)) &&
+        new Set(value).size === value.length;
       if (
-        !Array.isArray(stored.order) ||
-        stored.order.length !== initial.length ||
-        new Set(stored.order).size !== initial.length ||
-        stored.order.some((id) => !initial.includes(id))
-      )
-        return;
-      if (confirmed === stored.order.join() || initial.join() === stored.order.join()) {
+        !stored ||
+        !Number.isSafeInteger(stored.version) ||
+        Number(stored.version) < 0 ||
+        !validOrder(stored.order)
+      ) {
         window.sessionStorage.removeItem(draftKey);
         return;
       }
-      setOrder(stored.order);
+      const membershipChanged =
+        stored.order.length !== initial.length || stored.order.some((id) => !initial.includes(id));
+      const recovery =
+        membershipChanged || stored.recovery === "membership"
+          ? "membership"
+          : stored.version !== version || stored.recovery === "version"
+            ? "version"
+            : null;
+      const storedSubmission =
+        typeof stored.submission?.requestKey === "string" &&
+        stored.submission.requestKey.length >= 8 &&
+        stored.submission.requestKey.length <= 160 &&
+        Number.isSafeInteger(stored.submission.expectedRevision) &&
+        Number(stored.submission.expectedRevision) >= 0 &&
+        validOrder(stored.submission.order)
+          ? {
+              requestKey: stored.submission.requestKey,
+              order: stored.submission.order,
+              expectedRevision: Number(stored.submission.expectedRevision),
+            }
+          : null;
+      const ownSave =
+        confirmedRequestKey &&
+        storedSubmission?.requestKey === confirmedRequestKey &&
+        confirmed === storedSubmission.order.join();
+      if (ownSave || (!recovery && !storedSubmission && initial.join() === stored.order.join())) {
+        window.sessionStorage.removeItem(draftKey);
+        return;
+      }
+      // Only currently authorized relations enter the proposal. Retain earlier placement
+      // order and append new photos; the operator still reviews and explicitly saves it.
+      const retained = stored.order.filter((id) => initial.includes(id));
+      setOrder([...retained, ...initial.filter((id) => !retained.includes(id))]);
       setEditing(true);
       setReviewing(false);
-      setRestored(stored.version !== version);
+      setRestored(recovery);
+      setDraftVersion(Number(stored.version));
+      setSubmission(
+        operationResult?.requestKey === storedSubmission?.requestKey &&
+          operationResult?.status === "failed"
+          ? null
+          : storedSubmission,
+      );
+      setPreviousOrder(
+        validOrder(stored.previousOrder)
+          ? stored.previousOrder
+          : membershipChanged
+            ? stored.order
+            : null,
+      );
     } catch {}
-  }, [initial, confirmed, draftKey, version]);
+  }, [initial, confirmed, confirmedRequestKey, operationResult, draftKey, version]);
   useEffect(() => {
     if (!hydrated) return;
     try {
-      if (changed) window.sessionStorage.setItem(draftKey, JSON.stringify({ version, order }));
+      if (pending)
+        window.sessionStorage.setItem(
+          draftKey,
+          JSON.stringify({
+            version: draftVersion,
+            order,
+            recovery: restored,
+            previousOrder,
+            submission,
+          }),
+        );
       else window.sessionStorage.removeItem(draftKey);
     } catch {}
-  }, [order, changed, hydrated, draftKey, version]);
+  }, [order, pending, hydrated, draftKey, draftVersion, restored, previousOrder, submission]);
   const recordMove = (next: string[], id: string, direction?: "up" | "down") => {
+    if (submission) return;
+    setSubmission(null);
     focusAfterMove.current = { id, direction };
     const values = {
       photo: items.find((item) => item.id === id)?.label ?? "",
@@ -134,10 +218,17 @@ export function MediaGallery({
   const before = cover(initial),
     after = cover(order);
   const cancel = () => {
+    if (submission) return;
+    try {
+      window.sessionStorage.removeItem(draftKey);
+    } catch {}
     setOrder(initial);
     setEditing(false);
     setReviewing(false);
-    setRestored(false);
+    setRestored(null);
+    setDraftVersion(version);
+    setPreviousOrder(null);
+    setSubmission(null);
     setAnnouncement("");
   };
   const gallery = (
@@ -187,7 +278,7 @@ export function MediaGallery({
             data-photo={id}
             tabIndex={editing ? -1 : undefined}
             aria-label={editing ? item.label : undefined}
-            draggable={editing && !reviewing}
+            draggable={editing && !reviewing && !submission}
             className={cx(
               "relative min-w-0 rounded-panel",
               over === id && "outline-2 outline-action",
@@ -195,6 +286,11 @@ export function MediaGallery({
             )}
           >
             <div inert={editing}>{item.content}</div>
+            {reviewing ? (
+              <p className="mt-2 text-caption text-text-muted">
+                {copy.currentPosition.replace("{position}", String(initial.indexOf(id) + 1))}
+              </p>
+            ) : null}
             <span className="pointer-events-none absolute start-2 top-2 inline-flex max-w-[calc(100%_-_1rem)] flex-wrap gap-x-1 rounded-control bg-canvas px-2 py-1 text-caption font-semibold">
               <span className="tabular-nums">{index + 1}</span>
               {after?.id === id ? <span>{copy.cover}</span> : null}
@@ -204,7 +300,7 @@ export function MediaGallery({
                 <button
                   type="button"
                   data-move="up"
-                  disabled={index === 0}
+                  disabled={index === 0 || Boolean(submission)}
                   aria-label={`${copy.up} · ${index + 1}`}
                   className={buttonClass("tertiary", "px-3")}
                   onClick={() => moveOne(id, "up")}
@@ -214,7 +310,7 @@ export function MediaGallery({
                 <button
                   type="button"
                   data-move="down"
-                  disabled={index === order.length - 1}
+                  disabled={index === order.length - 1 || Boolean(submission)}
                   aria-label={`${copy.down} · ${index + 1}`}
                   className={buttonClass("tertiary", "px-3")}
                   onClick={() => moveOne(id, "down")}
@@ -254,15 +350,80 @@ export function MediaGallery({
           <p className="text-dense text-text-muted">{copy.hint}</p>
           {restored ? (
             <p role="status" className="rounded-control bg-warning-soft p-3 text-dense">
-              {copy.conflict}
+              {restored === "membership" ? copy.membershipConflict : copy.conflict}
             </p>
           ) : null}
-          <MediaReviewGuard copy={copy.guard}>
-            <NativeForm action={action} method="post" className="space-y-4">
-              {envelope}
-              <input type="hidden" name="order" value={JSON.stringify(order)} />
+          {submission ? (
+            <p role="status" className="rounded-control bg-warning-soft p-3 text-dense">
+              {copy.outcomeUnknown}{" "}
+              <a
+                className="text-action underline"
+                href={`${action.replace(/\/submit$/, "")}?operation=${encodeURIComponent(submission.requestKey)}&inline=1`}
+              >
+                {copy.checkResult}
+              </a>
+            </p>
+          ) : null}
+          <MediaReviewGuard
+            copy={copy.guard}
+            hasUnsavedChanges={pending && !submission}
+            onDiscard={cancel}
+          >
+            <NativeForm
+              action={action}
+              method="post"
+              className="space-y-4"
+              onSubmitCapture={(event) => {
+                const operationId = String(
+                  new FormData(event.currentTarget).get("operationId") ?? "",
+                );
+                const submitted = {
+                  requestKey: operationId,
+                  order: submission?.order ?? order,
+                  expectedRevision: submission?.expectedRevision ?? version,
+                };
+                setSubmission(submitted);
+                try {
+                  window.sessionStorage.setItem(
+                    draftKey,
+                    JSON.stringify({
+                      version: draftVersion,
+                      order,
+                      recovery: restored,
+                      previousOrder,
+                      submission: submitted,
+                    }),
+                  );
+                } catch {}
+              }}
+            >
+              {submission ? (
+                <>
+                  <input type="hidden" name="intent" value="order" />
+                  <input type="hidden" name="operationId" value={submission.requestKey} />
+                  <input
+                    type="hidden"
+                    name="expectedRevision"
+                    value={submission.expectedRevision}
+                  />
+                </>
+              ) : (
+                envelope
+              )}
+              <input
+                type="hidden"
+                name="order"
+                value={JSON.stringify(submission?.order ?? order)}
+              />
               <div className="sticky top-0 z-10 flex flex-wrap gap-2 border-b border-divider bg-canvas py-3">
-                {reviewing ? (
+                {submission ? (
+                  operationResult?.requestKey === submission.requestKey &&
+                  operationResult.status === "missing" ? (
+                    <button type="submit" className={buttonClass("primary")}>
+                      {copy.retrySave}
+                    </button>
+                  ) : null
+                ) : reviewing ? (
                   <>
                     <button type="submit" className={buttonClass("primary")}>
                       {copy.save}
@@ -278,14 +439,19 @@ export function MediaGallery({
                 ) : (
                   <button
                     type="button"
-                    disabled={!changed}
+                    disabled={!pending || order.length === 0}
                     className={buttonClass("primary")}
                     onClick={() => setReviewing(true)}
                   >
                     {copy.review}
                   </button>
                 )}
-                <button type="button" className={buttonClass("tertiary")} onClick={cancel}>
+                <button
+                  type="button"
+                  disabled={Boolean(submission)}
+                  className={buttonClass("tertiary")}
+                  onClick={cancel}
+                >
                   {copy.cancel}
                 </button>
               </div>
@@ -411,12 +577,18 @@ export function MediaReviewGuard({
   children,
   copy,
   requireAcknowledgment = false,
+  hasUnsavedChanges,
+  onDiscard,
 }: {
   children: ReactNode;
   requireAcknowledgment?: boolean;
+  hasUnsavedChanges?: boolean;
+  onDiscard?: () => void;
   copy: { title: string; body: string; stay: string; discard: string };
 }) {
   const root = useRef<HTMLDivElement>(null);
+  const unsaved = useRef(hasUnsavedChanges);
+  unsaved.current = hasUnsavedChanges;
   const dialog = useRef<HTMLDialogElement>(null);
   const continueLeaving = useRef<() => void>(() => {});
   const leaving = useRef(false);
@@ -425,9 +597,24 @@ export function MediaReviewGuard({
     if (!form) return;
     const snapshot = (of: HTMLFormElement) =>
       JSON.stringify(
-        [...new FormData(of)]
-          .filter(([key]) => !key.startsWith("_"))
-          .map(([key, value]) => [key, String(value)]),
+        // Pending UI disables selects/checkboxes. They still belong to the submitted
+        // draft: FormData would omit them and reject even a matching save acknowledgment.
+        Array.from(of.elements).flatMap((field) => {
+          if (
+            !(field instanceof HTMLInputElement) &&
+            !(field instanceof HTMLTextAreaElement) &&
+            !(field instanceof HTMLSelectElement)
+          )
+            return [];
+          if (!field.name || field.name.startsWith("_")) return [];
+          if (field instanceof HTMLInputElement) {
+            if (["submit", "reset", "button", "image", "file"].includes(field.type)) return [];
+            if (["checkbox", "radio"].includes(field.type) && !field.checked) return [];
+          }
+          return field instanceof HTMLSelectElement
+            ? Array.from(field.selectedOptions, (option) => [field.name, option.value])
+            : [[field.name, field.value]];
+        }),
       );
     const original = form.cloneNode(true) as HTMLFormElement;
     original.reset();
@@ -439,13 +626,24 @@ export function MediaReviewGuard({
         submitted &&
         now === submitted.snapshot &&
         document.cookie.split("; ").includes(`${savedOperationCookie}=${submitted.ack}`);
-      return !leaving.current && now !== initial && !acknowledged;
+      return !leaving.current && (unsaved.current ?? now !== initial) && !acknowledged;
     };
     const click = (event: MouseEvent) => {
       if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = (event.target as Element)?.closest<HTMLAnchorElement>("a[href]");
       if (!link || link.download || link.target === "_blank" || !dirty()) return;
       const url = new URL(link.href, window.location.href);
+      // The retained submission's own status read is neither a new command nor a discard.
+      if (
+        root.current?.contains(link) &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname &&
+        link.dataset.formReconciliation &&
+        link.dataset.formReconciliation === url.searchParams.get("operation")
+      ) {
+        leaving.current = true;
+        return;
+      }
       if (
         url.origin === window.location.origin &&
         url.pathname === window.location.pathname &&
@@ -524,6 +722,7 @@ export function MediaReviewGuard({
             type="button"
             className={buttonClass("tertiary")}
             onClick={() => {
+              onDiscard?.();
               leaving.current = true;
               continueLeaving.current();
             }}

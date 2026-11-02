@@ -594,6 +594,15 @@
     "opensNewTab": "Opent in een nieuw tabblad",
     "photoMoved": "{photo}: positie {position} van {total} in de voorgestelde volgorde.",
     "draftDiscarded": "Fotoconcept verworpen",
-    "detailsUnchanged": "Fotogegevens komen overeen met de goedgekeurde versie"
+    "detailsUnchanged": "Fotogegevens komen overeen met de goedgekeurde versie",
+    "orderConflict": "De galerij is gewijzigd. Uw eerdere volgorde blijft behouden voor de overgebleven foto’s, met nieuwe foto’s achteraan. Vergelijk de huidige en voorgestelde posities voordat u opslaat.",
+    "unsavedOrderTitle": "Niet-opgeslagen fotovolgorde",
+    "currentOrderPosition": "Huidige positie: {position}",
+    "orderOutcomeUnknown": "Het resultaat van het opslaan van deze volgorde is niet bevestigd. Controleer dit voordat u verdere wijzigingen maakt.",
+    "checkOrderResult": "Opgeslagen resultaat controleren",
+    "retryOrderSave": "Dezelfde opslag opnieuw proberen",
+    "photoOperationMissing": "Er is geen resultaat vastgelegd voor dit verzoek en deze foto. Controleer hetzelfde verzoek opnieuw voordat u een andere wijziging maakt.",
+    "photoOperationPending": "Dit verzoek is nog niet afgehandeld. Controleer het opnieuw voordat u een andere wijziging maakt.",
+    "photoOperationFailed": "Het verzoek is mislukt zonder de wijziging toe te passen. Ga terug naar de foto en controleer de huidige staat voordat u het opnieuw probeert."
   }
 }
