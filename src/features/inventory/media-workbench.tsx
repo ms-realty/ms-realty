@@ -597,9 +597,24 @@ export function MediaReviewGuard({
     if (!form) return;
     const snapshot = (of: HTMLFormElement) =>
       JSON.stringify(
-        [...new FormData(of)]
-          .filter(([key]) => !key.startsWith("_"))
-          .map(([key, value]) => [key, String(value)]),
+        // Pending UI disables selects/checkboxes. They still belong to the submitted
+        // draft: FormData would omit them and reject even a matching save acknowledgment.
+        Array.from(of.elements).flatMap((field) => {
+          if (
+            !(field instanceof HTMLInputElement) &&
+            !(field instanceof HTMLTextAreaElement) &&
+            !(field instanceof HTMLSelectElement)
+          )
+            return [];
+          if (!field.name || field.name.startsWith("_")) return [];
+          if (field instanceof HTMLInputElement) {
+            if (["submit", "reset", "button", "image", "file"].includes(field.type)) return [];
+            if (["checkbox", "radio"].includes(field.type) && !field.checked) return [];
+          }
+          return field instanceof HTMLSelectElement
+            ? Array.from(field.selectedOptions, (option) => [field.name, option.value])
+            : [[field.name, field.value]];
+        }),
       );
     const original = form.cloneNode(true) as HTMLFormElement;
     original.reset();
