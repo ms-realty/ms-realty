@@ -182,7 +182,7 @@ describe("AT45 category/source-bound controlled completion", () => {
     expect(JSON.stringify(audits)).not.toContain("Synthetic exact source review evidence");
   });
 
-  it("requires every category and actual evidence, refuses fake empty/nonexistent proofs and keeps additional material unresolved", async () => {
+  it("requires every category and actual evidence, refusing fake empty/nonexistent proofs", async () => {
     const f = await fixture();
     await captureCoverage(f);
     const direct = await categoryDecision(f, "personal_activity");
@@ -215,6 +215,9 @@ describe("AT45 category/source-bound controlled completion", () => {
     await expect(
       completePrivacyExport(t.db, f.staff.session, await completion(f), storage),
     ).rejects.toMatchObject({ code: "transition_denied" });
+  });
+
+  it("keeps additional requested material unresolved after reviewing listed categories", async () => {
     const additional = await fixture("additional_material");
     await resolveCoverage(additional);
     const work = await staffPrivacyExports(

@@ -66,6 +66,15 @@ async function fixture() {
   return { ...f, agency };
 }
 type Fixture = Awaited<ReturnType<typeof fixture>>;
+const privateAgencyValues = (f: Fixture) => [
+  "SYNTHETIC_PRIVATE_PARTNER_TERMS",
+  "SYNTHETIC_REVIEW_WORDING",
+  "SYNTHETIC_PRIVATE_VERIFICATION_STATEMENT",
+  f.agency.termsHistory.id,
+  f.agency.reviewHistory.id,
+  f.agency.policy.id,
+  f.agency.wording.id,
+];
 const collected = (f: Fixture, actor = f.staff.actor) =>
   collectAgencySources(t.db, actor, [f.client.partyId as string], [f.record.id]);
 async function completion(f: Fixture) {
@@ -93,7 +102,7 @@ async function inventory(f: Fixture) {
 }
 
 describe("B10/AT45 exact agency source classification", () => {
-  it("accounts for every terms/review source with a concrete redacted supplement and never auto-exports private wording or history", async () => {
+  it("accounts for every terms/review source without exposing private wording or history", async () => {
     const f = await fixture(),
       source = await collected(f);
     expect(source.blocked).toBe(false);
@@ -104,6 +113,11 @@ describe("B10/AT45 exact agency source classification", () => {
     );
     expect(bucket?.blocked).toBe(false);
     expect(bucket?.sources.filter((row) => row.kind === "agency_record")).toHaveLength(2);
+    for (const value of privateAgencyValues(f)) expect(JSON.stringify(source)).not.toContain(value);
+  });
+
+  it("requires a concrete redacted supplement and keeps completed exports private after rejected category edits", async () => {
+    const f = await fixture();
     await resolveCoverage(f);
     const decision = await categoryDecision(f, "joint_records_and_received_communications");
     await expect(
@@ -124,22 +138,9 @@ describe("B10/AT45 exact agency source classification", () => {
     await issueCoverage(f);
     await completePrivacyExport(t.db, f.staff.session, await completion(f), storage);
     const delivered = await privacyExportDownload(t.db, f.client.session, f.exportId);
-    const copies = [
-      JSON.stringify(source),
-      JSON.stringify((await work(f))?.dossier),
-      delivered.bytes.toString(),
-    ];
+    const copies = [JSON.stringify((await work(f))?.dossier), delivered.bytes.toString()];
     for (const copy of copies)
-      for (const value of [
-        "SYNTHETIC_PRIVATE_PARTNER_TERMS",
-        "SYNTHETIC_REVIEW_WORDING",
-        "SYNTHETIC_PRIVATE_VERIFICATION_STATEMENT",
-        f.agency.termsHistory.id,
-        f.agency.reviewHistory.id,
-        f.agency.policy.id,
-        f.agency.wording.id,
-      ])
-        expect(copy).not.toContain(value);
+      for (const value of privateAgencyValues(f)) expect(copy).not.toContain(value);
   });
 
   it.each(
