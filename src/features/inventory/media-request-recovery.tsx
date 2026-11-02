@@ -140,6 +140,7 @@ export function MediaRequestRecovery({
   commands,
   modifications,
   guard,
+  failedMessage,
 }: {
   storageKey: string;
   operationId: string;
@@ -153,6 +154,7 @@ export function MediaRequestRecovery({
   commands: { details: string; discard: string; approve: string; reject: string };
   modifications: Record<string, string>;
   guard: { title: string; body: string; stay: string; discard: string };
+  failedMessage?: string;
 }) {
   const [draft, setDraft] = useState<Draft | null>(null);
   useEffect(
@@ -168,12 +170,14 @@ export function MediaRequestRecovery({
     reconciliation: status,
     outcome: missing
       ? { kind: "idle" }
-      : {
-          kind: "unknown",
-          code: "OUTCOME_UNKNOWN",
-          message: copy.unknown,
-          status,
-        },
+      : failedMessage
+        ? { kind: "rejected", code: "REQUEST_FAILED", message: failedMessage, retryable: false }
+        : {
+            kind: "unknown",
+            code: "OUTCOME_UNKNOWN",
+            message: copy.unknown,
+            status,
+          },
   };
   return (
     <MediaRequestKeeper storageKey={storageKey}>
@@ -260,8 +264,8 @@ export function MediaRequestRecovery({
                     ) : (
                       <dl key={name}>
                         <dt className="font-semibold">{labels[name]}</dt>
-                        <dd className="whitespace-pre-wrap break-words">{draft.values[name]}</dd>
-                        <input type="hidden" name={name} value={draft.values[name]} />
+                        <dd className="whitespace-pre-wrap break-words">{form.values[name]}</dd>
+                        <input type="hidden" name={name} value={form.values[name]} />
                       </dl>
                     ),
                   )}

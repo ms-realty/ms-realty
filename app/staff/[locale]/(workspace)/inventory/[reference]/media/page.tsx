@@ -174,6 +174,7 @@ export default async function MediaPage({
             operationId={query.operation}
             kind={query.operationType}
             missing={operationResult?.status === "missing"}
+            failedMessage={failed ? workspace.photoOperationFailed : undefined}
             action={retryPhotoRequest.bind(
               null,
               query.operationType,
