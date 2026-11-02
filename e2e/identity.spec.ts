@@ -366,6 +366,8 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
       .check();
     await page.getByLabel("I reviewed the stated usage rights and permission evidence.").check();
     await page.getByRole("button", { name: "Approve as a public candidate", exact: true }).click();
+    // The saved receipt replaces the review page and resets its native disclosures.
+    await expect(page.getByRole("status").filter({ hasText: /^Saved\./ })).toBeVisible();
     await showPhotoChecks(page);
     await expect(page.getByText("Publication candidate", { exact: true })).toBeVisible();
     const original = await page.evaluate(
