@@ -9,11 +9,12 @@ names and PRs.
 ## Launch boundary
 
 - `production/data/launch-readiness.json` and `production/data/launch-input-checklist.md`
-  remain the current launch authority. They are preserved verbatim from the primary
-  checkout; their historical pass entries are not fresh evidence for this rebuild.
-  The owner-approved successor mapping is in `docs/delivery/r00-successor-policy.md`.
-  Implement and verify its replacement checks before regenerating launch authority;
-  approval of the mapping alone clears no launch gate.
+  are frozen history from the legacy app, preserved verbatim; they are no longer the launch
+  authority and nothing regenerates them. Their pass entries are not evidence for this
+  rebuild, and their blocked obligations carry over through the owner-approved successor
+  mapping in `docs/delivery/r00-successor-policy.md`. The executable promotion gate is
+  `scripts/launch-gate.mjs`: it accepts only independently signed, exact-release evidence
+  and cannot create a pass. Approval of the mapping alone clears no launch gate.
 - The release gates are R00–R12 in `docs/architecture.md` §20.3. Do not call the system
   production-ready, and do not deploy, while any gate is not passed with exact-release
   evidence. Merges to `main` never deploy.

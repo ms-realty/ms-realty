@@ -39,8 +39,6 @@
     "prebuild": "node scripts/map-runtime.mjs",
     "predev": "node scripts/map-runtime.mjs",
     "test:load": "playwright test --config playwright.load.config.ts",
-    "build:cloudflare": "CLOUDFLARE_BUILD=1 opennextjs-cloudflare build --config gateway/wrangler.opennext-qualification.jsonc",
-    "preview:cloudflare": "opennextjs-cloudflare preview --config gateway/wrangler.opennext-qualification.jsonc",
     "privacy:reapply-synthetic-tail": "tsx --conditions=react-server scripts/privacy-reapply-synthetic-tail.ts"
   },
   "dependencies": {
@@ -71,7 +69,6 @@
     "@axe-core/playwright": "4.14.0",
     "@babel/parser": "8.0.8",
     "@biomejs/biome": "2.6.3",
-    "@opennextjs/cloudflare": "1.20.13",
     "@playwright/test": "1.64.1",
     "@storybook/nextjs-vite": "10.6.4",
     "@tailwindcss/postcss": "4.3.3",

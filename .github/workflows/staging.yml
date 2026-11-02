@@ -4,8 +4,8 @@ on:
     inputs:
       runtime:
         type: choice
-        description: Containers selected for measured Sharp blocker; OpenNext requires separate qualification
-        options: [containers, opennext]
+        description: Cloudflare Containers (ADR 0004); the only reviewed runtime
+        options: [containers]
         required: true
   push:
     branches: [codex/msr-staging]
@@ -36,7 +36,7 @@ jobs:
           test "$QUALIFIED_SHA" = "$GITHUB_SHA"
           test "$REQUESTED_RUNTIME" = "$REVIEWED_RUNTIME"
           if [ "$REQUESTED_RUNTIME" != containers ]; then
-            echo 'OpenNext web/queue/migrator artifacts require coordinated qualification; no automatic fallback.' >&2
+            echo 'Only the reviewed Containers runtime is supported; there is no automatic fallback.' >&2
             exit 1
           fi
   staging:

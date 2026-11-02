@@ -15,7 +15,7 @@ playwright-report/
 # Machine-local runtime state the legacy app left in existing checkouts. The legacy
 # code is gone (tag legacy-app-final); these must never be committed.
 /production/
-# Preserve only the two owner-designated launch-authority inputs from the legacy checkout.
+# Preserve only the two frozen legacy launch records (history, not launch authority).
 !/production/
 /production/*
 !/production/data/
@@ -44,3 +44,9 @@ __pycache__/
 
 # Local synthetic map fixture; real assets are a separate immutable R2 release.
 /public/maps/
+
+# Local evidence, backups and recovery scratch kept outside Git (multi-GB). The few
+# files already tracked under output/ stay tracked.
+/output/
+/.local-backups/
+/.recovery-work/
