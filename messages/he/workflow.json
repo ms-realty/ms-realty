@@ -594,6 +594,9 @@
     "opensNewTab": "נפתח בכרטיסייה חדשה",
     "photoMoved": "{photo}: מיקום {position} מתוך {total} בסדר המוצע.",
     "draftDiscarded": "טיוטת התמונה בוטלה",
-    "detailsUnchanged": "פרטי התמונה תואמים לגרסה המאושרת"
+    "detailsUnchanged": "פרטי התמונה תואמים לגרסה המאושרת",
+    "orderConflict": "הגלריה השתנתה. הסדר הקודם שלך נשמר עבור התמונות שנותרו, ותמונות חדשות נוספו בסוף. יש להשוות בין המיקומים הנוכחיים למוצעים לפני השמירה.",
+    "unsavedOrderTitle": "סדר תמונות שלא נשמר",
+    "currentOrderPosition": "מיקום נוכחי: {position}"
   }
 }

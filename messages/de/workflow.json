@@ -594,6 +594,9 @@
     "opensNewTab": "Öffnet in einem neuen Tab",
     "photoMoved": "{photo}: Position {position} von {total} in der vorgeschlagenen Reihenfolge.",
     "draftDiscarded": "Fotoentwurf verworfen",
-    "detailsUnchanged": "Fotodaten entsprechen der freigegebenen Version"
+    "detailsUnchanged": "Fotodaten entsprechen der freigegebenen Version",
+    "orderConflict": "Die Galerie hat sich geändert. Ihre frühere Reihenfolge bleibt für die vorhandenen Fotos erhalten, neue Fotos stehen am Ende. Vergleichen Sie vor dem Speichern die aktuellen und vorgeschlagenen Positionen.",
+    "unsavedOrderTitle": "Ungespeicherte Fotoreihenfolge",
+    "currentOrderPosition": "Aktuelle Position: {position}"
   }
 }

@@ -594,6 +594,9 @@
     "opensNewTab": "Opens in a new tab",
     "photoMoved": "{photo}: position {position} of {total} in the proposed order.",
     "draftDiscarded": "Photo draft discarded",
-    "detailsUnchanged": "Photo details match the approved version"
+    "detailsUnchanged": "Photo details match the approved version",
+    "orderConflict": "The gallery changed. Your earlier order is kept for the remaining photos, with new photos at the end. Compare the current and proposed positions before saving.",
+    "unsavedOrderTitle": "Unsaved photo order",
+    "currentOrderPosition": "Current position: {position}"
   }
 }

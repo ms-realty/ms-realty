@@ -594,6 +594,9 @@
     "opensNewTab": "Opent in een nieuw tabblad",
     "photoMoved": "{photo}: positie {position} van {total} in de voorgestelde volgorde.",
     "draftDiscarded": "Fotoconcept verworpen",
-    "detailsUnchanged": "Fotogegevens komen overeen met de goedgekeurde versie"
+    "detailsUnchanged": "Fotogegevens komen overeen met de goedgekeurde versie",
+    "orderConflict": "De galerij is gewijzigd. Uw eerdere volgorde blijft behouden voor de overgebleven foto’s, met nieuwe foto’s achteraan. Vergelijk de huidige en voorgestelde posities voordat u opslaat.",
+    "unsavedOrderTitle": "Niet-opgeslagen fotovolgorde",
+    "currentOrderPosition": "Huidige positie: {position}"
   }
 }
