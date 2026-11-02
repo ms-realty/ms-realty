@@ -6,8 +6,8 @@ provider deployment, an exact-release parity PASS or production acceptance.
 
 On 1 October 2026, Next 16.3.6 and OpenNext 1.20.7 built successfully with Wrangler 4.143.0.
 The original pg-cloudflare error was repaired: Node tracing includes only the Node empty
-export by default; the Worker needs the workerd export. The Cloudflare build now explicitly
-traces that package's small dist/esm runtime directories. Wrangler dry-run also passed.
+export by default; the Worker needs the workerd export. The qualification build explicitly
+traced that package's small dist/esm runtime directories. Wrangler dry-run also passed.
 
 The complete candidate remains **blocked on the Worker runtime**. Importing its pinned
 Sharp 0.35.4 in workerd fails in `createRequire` initialization before the Worker can start.
@@ -54,8 +54,8 @@ The separate raw OpenNext preview intentionally had an unconnected diagnostic da
 its recovery startup rejection is a fixture dependency failure, not a claimed runtime blocker.
 
 The deployment candidate therefore uses the **owner-authorized Cloudflare Containers
-fallback**, keeping web, pg-boss and migrations on one immutable image digest. OpenNext
-tooling is retained for reproducible qualification, not silently selected for deployment.
+fallback**, keeping web, pg-boss and migrations on one immutable image digest. The OpenNext
+qualification tooling has since been removed and is never selected for deployment.
 A future Worker web/image-processing split needs its own architecture, security and
 complete journey proof. Do not rebuild a different runtime at production promotion.
 

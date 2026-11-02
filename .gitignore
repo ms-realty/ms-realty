@@ -15,7 +15,7 @@ playwright-report/
 # Machine-local runtime state the legacy app left in existing checkouts. The legacy
 # code is gone (tag legacy-app-final); these must never be committed.
 /production/
-# Preserve only the two frozen legacy launch records (history, not launch authority).
+# Preserve only the two owner-designated launch-authority inputs from the legacy checkout.
 !/production/
 /production/*
 !/production/data/
