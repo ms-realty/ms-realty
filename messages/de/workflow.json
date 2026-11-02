@@ -600,6 +600,9 @@
     "currentOrderPosition": "Aktuelle Position: {position}",
     "orderOutcomeUnknown": "Das Ergebnis dieses Speichervorgangs ist nicht bestätigt. Prüfen Sie es vor weiteren Änderungen.",
     "checkOrderResult": "Speicherergebnis prüfen",
-    "retryOrderSave": "Denselben Speichervorgang wiederholen"
+    "retryOrderSave": "Denselben Speichervorgang wiederholen",
+    "photoOperationMissing": "Für diese Anfrage und dieses Foto liegt kein Ergebnis vor. Prüfen Sie dieselbe Anfrage erneut, bevor Sie eine weitere Änderung vornehmen.",
+    "photoOperationPending": "Das Ergebnis dieser Anfrage ist noch offen. Prüfen Sie es erneut, bevor Sie eine weitere Änderung vornehmen.",
+    "photoOperationFailed": "Die Anfrage ist fehlgeschlagen; die Änderung wurde nicht angewendet. Kehren Sie zum Foto zurück und prüfen Sie den aktuellen Stand, bevor Sie es erneut versuchen."
   }
 }

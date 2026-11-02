@@ -600,6 +600,9 @@
     "currentOrderPosition": "Current position: {position}",
     "orderOutcomeUnknown": "The result of this order save is not confirmed. Check it before making further changes.",
     "checkOrderResult": "Check the save result",
-    "retryOrderSave": "Retry the same save"
+    "retryOrderSave": "Retry the same save",
+    "photoOperationMissing": "No result is recorded for this request and photo. Check this same request again before making another change.",
+    "photoOperationPending": "This request is still unresolved. Check it again before making another change.",
+    "photoOperationFailed": "This request failed without applying its change. Return to the photo and review its current state before trying again."
   }
 }

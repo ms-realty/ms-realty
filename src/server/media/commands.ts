@@ -511,14 +511,14 @@ export async function placeMedia(
       .refine((value) => Boolean(value.move) !== (value.hidden !== undefined)),
     command,
   );
-  const listing = await managedListing(db, command.session, command.reference);
+  await managedListing(db, command.session, command.reference);
   return runOperation(
     db,
     {
       actor: command.session.actor,
       type: "media.place",
       idempotencyKey: command.operationId,
-      subject: { type: "listing", id: listing.id },
+      subject: { type: "media_relation", id: command.relationId },
       requestHash: hashRequest({
         reference: command.reference,
         relationId: command.relationId,
@@ -620,8 +620,11 @@ export async function mediaOperationResult(
       : null;
   if (receipt && (kind === "order" ? receipt.move : receipt.relationId === placement))
     return { requestKey, status: "succeeded" as const, receipt };
-  const expectedType = kind === "order" || kind === "placement" ? "listing" : "media_asset";
-  const expectedId = kind === "order" || kind === "placement" ? listing.id : target?.asset.id;
+  if (operation.status === "succeeded") return null;
+  const expectedType =
+    kind === "order" ? "listing" : kind === "placement" ? "media_relation" : "media_asset";
+  const expectedId =
+    kind === "order" ? listing.id : kind === "placement" ? target?.relation.id : target?.asset.id;
   // Terminal failures and pending commands require the same subject, too. Historical
   // successes without a subject remain bound by the actor-scoped audit event above.
   if (operation.resultType !== expectedType || operation.resultId !== expectedId) return null;

@@ -794,14 +794,25 @@ test("O13 reconciles a committed order after a lost receipt without another save
   await page.getByRole("button", { name: "Move down · 1", exact: true }).click();
   await page.getByRole("button", { name: "Review the new order", exact: true }).click();
   let resolveReceipt: (url: string) => void = () => {};
-  const receiptReached = new Promise<string>((resolve) => {
+  let rejectReceipt: (reason: unknown) => void = () => {};
+  const receiptReached = new Promise<string>((resolve, reject) => {
     resolveReceipt = resolve;
+    rejectReceipt = reject;
   });
-  const receiptPattern = "**/media?saved=*";
+  const receiptPattern = hostUrl("staff", `/en/inventory/${f.reference}/media/submit`);
   await page.route(receiptPattern, async (route) => {
-    const url = route.request().url();
-    await route.abort("failed");
-    resolveReceipt(url);
+    try {
+      const response = await route.fetch({ maxRedirects: 0 });
+      expect(response.status()).toBe(303);
+      const location = response.headers().location;
+      if (!location) throw new Error("Committed save has no receipt location");
+      const url = new URL(location, route.request().url()).href;
+      expect(new URL(url).searchParams.has("saved")).toBe(true);
+      await route.abort("failed");
+      resolveReceipt(url);
+    } catch (error) {
+      rejectReceipt(error);
+    }
   });
   let receiptUrl: string;
   try {

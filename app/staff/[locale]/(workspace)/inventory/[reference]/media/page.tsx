@@ -98,7 +98,7 @@ export default async function MediaPage({
   const workspace = workflowCopy(locale, "listingWorkspace");
   const query = await searchParams;
   // Readback: a receipt counts only for this listing, and it names its own target photo.
-  const orderResult = await mediaOperationResult(
+  const operationResult = await mediaOperationResult(
     getDb(),
     session,
     reference,
@@ -107,7 +107,7 @@ export default async function MediaPage({
     query.photo,
   );
   const receipt =
-    orderResult?.receipt ??
+    operationResult?.receipt ??
     (await mediaReceipt(getDb(), session, listing.id, query.saved, query.photo));
   const path = `/${locale}/inventory/${reference}/media`;
   const action = `${path}/submit`;
@@ -126,6 +126,49 @@ export default async function MediaPage({
   const photoHref = (id: string) => `${path}?photo=${id}`;
   const order = assets.map(({ relation }) => relation.id);
   const numberOf = new Map(order.map((id, index) => [id, index + 1]));
+
+  // A status read is never a new command. Keep the exact request visible until a
+  // receipt or terminal failure resolves it, including an unrecorded/lost request.
+  if (
+    typeof query.operation === "string" &&
+    ["details", "review", "placement"].includes(query.operationType ?? "") &&
+    operationResult?.status !== "succeeded"
+  ) {
+    const failed = operationResult?.status === "failed";
+    const status = `${path}?${new URLSearchParams({
+      photo: typeof query.photo === "string" ? query.photo : "",
+      operation: query.operation,
+      operationType: query.operationType ?? "",
+    })}`;
+    return (
+      <FocusedState closeHref={`/${locale}/inventory`} closeLabel={inventoryCopy(locale).back}>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">
+          {failed ? inventoryCopy(locale).blocked : inventoryCopy(locale).pending}
+        </h1>
+        <p role="status">
+          {failed
+            ? workspace.photoOperationFailed
+            : operationResult?.status === "pending"
+              ? workspace.photoOperationPending
+              : workspace.photoOperationMissing}
+        </p>
+        <dl className="space-y-2 text-dense">
+          <dt className="font-semibold">{inventoryCopy(locale).operation}</dt>
+          <dd>
+            <bdi className="break-all">{query.operation}</bdi>
+          </dd>
+        </dl>
+        <a href={status} className={buttonClass("primary")}>
+          {workspace.checkOrderResult}
+        </a>
+        {failed && selected ? (
+          <a href={photoHref(selected.relation.id)} className={buttonClass("secondary")}>
+            {copy.toTask}
+          </a>
+        ) : null}
+      </FocusedState>
+    );
+  }
 
   // O13ORDERSAVED: the order this staff member saved on this listing, as it was recorded.
   if (receipt?.move && query.inline !== "1") {
@@ -618,7 +661,7 @@ export default async function MediaPage({
             confirmedRequestKey={receipt?.move ? receipt.requestKey : undefined}
             operationResult={
               !query.operationType || query.operationType === "order"
-                ? (orderResult ?? undefined)
+                ? (operationResult ?? undefined)
                 : undefined
             }
             copy={{

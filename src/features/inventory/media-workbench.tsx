@@ -358,7 +358,7 @@ export function MediaGallery({
               {copy.outcomeUnknown}{" "}
               <a
                 className="text-action underline"
-                href={`${action.replace(/\/submit$/, "")}?operation=${encodeURIComponent(submission.requestKey)}`}
+                href={`${action.replace(/\/submit$/, "")}?operation=${encodeURIComponent(submission.requestKey)}&inline=1`}
               >
                 {copy.checkResult}
               </a>
