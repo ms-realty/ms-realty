@@ -55,13 +55,16 @@ export function MediaGallery({
   const [restored, setRestored] = useState<"version" | "membership" | null>(null);
   const [draftVersion, setDraftVersion] = useState(version);
   const [previousOrder, setPreviousOrder] = useState<string[] | null>(null);
+  const [submission, setSubmission] = useState<{ requestKey: string; order: string[] } | null>(
+    null,
+  );
   const [hydrated, setHydrated] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const root = useRef<HTMLDivElement>(null);
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const focusAfterMove = useRef<{ id: string; direction?: "up" | "down" } | null>(null);
   const changed = order.join() !== initial.join();
-  const pending = changed || restored !== null;
+  const pending = changed || restored !== null || submission !== null;
   useLayoutEffect(() => {
     const pending = focusAfterMove.current;
     if (!pending || !order.includes(pending.id)) return;
@@ -109,14 +112,18 @@ export function MediaGallery({
           : stored.version !== version || stored.recovery === "version"
             ? "version"
             : null;
+      const storedSubmission =
+        typeof stored.submission?.requestKey === "string" &&
+        stored.submission.requestKey.length >= 8 &&
+        stored.submission.requestKey.length <= 160 &&
+        validOrder(stored.submission.order)
+          ? { requestKey: stored.submission.requestKey, order: stored.submission.order }
+          : null;
       const ownSave =
         confirmedRequestKey &&
-        stored.submission?.requestKey === confirmedRequestKey &&
-        validOrder(stored.submission.order) &&
-        stored.submission.order.join() === stored.order.join() &&
-        confirmed === stored.order.join() &&
-        initial.join() === stored.order.join();
-      if (ownSave || (!recovery && initial.join() === stored.order.join())) {
+        storedSubmission?.requestKey === confirmedRequestKey &&
+        confirmed === storedSubmission.order.join();
+      if (ownSave || (!recovery && !storedSubmission && initial.join() === stored.order.join())) {
         window.sessionStorage.removeItem(draftKey);
         return;
       }
@@ -128,6 +135,7 @@ export function MediaGallery({
       setReviewing(false);
       setRestored(recovery);
       setDraftVersion(Number(stored.version));
+      setSubmission(storedSubmission);
       setPreviousOrder(
         validOrder(stored.previousOrder)
           ? stored.previousOrder
@@ -143,12 +151,19 @@ export function MediaGallery({
       if (pending)
         window.sessionStorage.setItem(
           draftKey,
-          JSON.stringify({ version: draftVersion, order, recovery: restored, previousOrder }),
+          JSON.stringify({
+            version: draftVersion,
+            order,
+            recovery: restored,
+            previousOrder,
+            submission,
+          }),
         );
       else window.sessionStorage.removeItem(draftKey);
     } catch {}
-  }, [order, pending, hydrated, draftKey, draftVersion, restored, previousOrder]);
+  }, [order, pending, hydrated, draftKey, draftVersion, restored, previousOrder, submission]);
   const recordMove = (next: string[], id: string, direction?: "up" | "down") => {
+    setSubmission(null);
     focusAfterMove.current = { id, direction };
     const values = {
       photo: items.find((item) => item.id === id)?.label ?? "",
@@ -193,6 +208,7 @@ export function MediaGallery({
     setRestored(null);
     setDraftVersion(version);
     setPreviousOrder(null);
+    setSubmission(null);
     setAnnouncement("");
   };
   const gallery = (
@@ -326,6 +342,7 @@ export function MediaGallery({
                 const operationId = String(
                   new FormData(event.currentTarget).get("operationId") ?? "",
                 );
+                setSubmission({ requestKey: operationId, order });
                 try {
                   window.sessionStorage.setItem(
                     draftKey,
