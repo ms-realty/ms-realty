@@ -55,6 +55,35 @@ export function MediaReviewEditor({
       formatValue={(name, value) => (name === "modification" ? fileLabel(copy, value) : value)}
       submitLabel={copy.approve}
       layout="full"
+      secondaryActions={(state) => {
+        const outcome = state.outcome;
+        if (
+          !ready ||
+          outcome.kind === "unknown" ||
+          outcome.kind === "accepted" ||
+          (outcome.kind === "rejected" && !outcome.retryable) ||
+          (outcome.kind === "conflict" && !outcome.reapply)
+        )
+          return null;
+        return (
+          <details className="basis-full border-t border-divider pt-3">
+            <summary className="min-h-control cursor-pointer py-2 text-dense text-error">
+              {copy.reject}
+            </summary>
+            <button
+              type="submit"
+              name="_decision"
+              // ActionForm snapshots the fresh identity for any explicit reapply submitter.
+              // The distinct field name keeps this human decision a rejection.
+              value={outcome.kind === "conflict" && outcome.reapply ? "reapply" : "reject"}
+              formNoValidate
+              className={buttonClass("destructive")}
+            >
+              {copy.reject}
+            </button>
+          </details>
+        );
+      }}
     >
       {(form) => {
         const details =
@@ -152,22 +181,6 @@ export function MediaReviewEditor({
             {!details.altText.trim() ||
             (details.modification !== "none" && !details.modificationDisclosure.trim()) ? (
               <p className="text-dense text-warning">{workspace.reviewNeedsDetails}</p>
-            ) : null}
-            {!form.field("rightsHolder").readOnly ? (
-              <details className="border-t border-divider pt-3">
-                <summary className="min-h-control cursor-pointer py-2 text-dense text-error">
-                  {copy.reject}
-                </summary>
-                <button
-                  type="submit"
-                  name="_decision"
-                  value="reject"
-                  formNoValidate
-                  className={buttonClass("destructive")}
-                >
-                  {copy.reject}
-                </button>
-              </details>
             ) : null}
           </div>
         );

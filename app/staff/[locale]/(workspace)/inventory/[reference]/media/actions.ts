@@ -73,7 +73,7 @@ async function finishPhotoNavigation<V extends FormValues>(
   if (leave) redirect(leave);
   const operationId = String(form.get("_placementOperationId") ?? "");
   const status = {
-    href: `${back}&saved=${encodeURIComponent(operationId)}`,
+    href: `${back}&operation=${encodeURIComponent(operationId)}&operationType=placement`,
     label: inventoryCopy(locale).operation,
   };
   const result = await action(
@@ -147,7 +147,7 @@ export async function savePhotoDetails(
   );
   const path = `/${locale}/inventory/${encodeURIComponent(reference)}/media`;
   const status = {
-    href: `${path}?photo=${relationId}&saved=${encodeURIComponent(operationId)}`,
+    href: `${path}?photo=${relationId}&operation=${encodeURIComponent(operationId)}&operationType=details`,
     label: copy.operation,
   };
   const state: FormState<MediaDetailsValues> = {
@@ -220,7 +220,10 @@ export async function savePhotoDetails(
           reapply: {
             operationId: key,
             expectedRevision: asset.version,
-            status: { href: `${path}?photo=${relationId}&saved=${key}`, label: copy.operation },
+            status: {
+              href: `${path}?photo=${relationId}&operation=${key}&operationType=details`,
+              label: copy.operation,
+            },
           },
         },
       };
@@ -266,9 +269,8 @@ export async function reviewPhoto(
       "rightsConfirmed",
     ].map((key) => [key, String(form.get(key) ?? "")]),
   ) as MediaReviewValues;
-  const reapply =
-    form.get(formFields.intent) === "reapply" ||
-    (form.get("_decision") === "reject" && form.has(formFields.reapplyOperationId));
+  const reject = form.get("_decision") === "reject" || form.get("_decision") === "reapply";
+  const reapply = form.get(formFields.intent) === "reapply" || form.get("_decision") === "reapply";
   const operationId = String(
     form.get(reapply ? formFields.reapplyOperationId : formFields.operationId) ?? "",
   );
@@ -278,7 +280,7 @@ export async function reviewPhoto(
   const path = `/${locale}/inventory/${encodeURIComponent(reference)}/media`;
   const reviewPath = `${path}?photo=${relationId}&panel=review`;
   const status = {
-    href: `${reviewPath}&saved=${encodeURIComponent(operationId)}`,
+    href: `${reviewPath}&operation=${encodeURIComponent(operationId)}&operationType=review`,
     label: copy.operation,
   };
   const state: FormState<MediaReviewValues> = {
@@ -315,7 +317,7 @@ export async function reviewPhoto(
         id: assetId,
         input: {
           ...values,
-          decision: form.get("_decision") === "reject" ? "reject" : "approve",
+          decision: reject ? "reject" : "approve",
           privacyReviewed: values.privacyReviewed === "yes",
           rightsConfirmed: values.rightsConfirmed === "yes",
         },
@@ -360,7 +362,10 @@ export async function reviewPhoto(
           reapply: {
             operationId: operation,
             expectedRevision: asset.version,
-            status: { href: `${reviewPath}&saved=${operation}`, label: copy.operation },
+            status: {
+              href: `${reviewPath}&operation=${operation}&operationType=review`,
+              label: copy.operation,
+            },
           },
         },
       };

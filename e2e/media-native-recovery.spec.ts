@@ -31,6 +31,122 @@ function seed(): Seed {
     ).trim(),
   );
 }
+
+test("O13 a lost rejection response reconciles the fresh conflict request without replay", async ({
+  page,
+  context,
+  playwright,
+}) => {
+  const f = seed();
+  const original = await snapshot(f);
+  if (!original.asset) throw new Error("Missing fixture asset");
+  await openPhoto(page, f, true);
+  await fillReview(page);
+  const oldKey = await page.locator('input[name="_operationId"]').inputValue();
+  await db
+    .update(schema.mediaAssets)
+    .set({ version: sql`${schema.mediaAssets.version} + 1` })
+    .where(eq(schema.mediaAssets.id, original.asset.id));
+  await page.getByRole("button", { name: "Approve as a public candidate", exact: true }).click();
+  await expect(
+    page.getByText(
+      "This item changed. Refresh and review the latest version before trying again.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  const requestKey = await page.locator('input[name="_reapplyOperationId"]').inputValue();
+  expect(requestKey).not.toBe(oldKey);
+  const before = await snapshot(f);
+  await page
+    .locator("summary")
+    .filter({ hasText: /^Reject \/ withdraw public permission$/ })
+    .click();
+
+  // Keep the real committed rejection, but lose both response headers and body. An isolated
+  // request context prevents response cookies from acknowledging the browser's submission.
+  const transport = await playwright.request.newContext({
+    storageState: { cookies: await context.cookies(origins.staff), origins: [] },
+  });
+  let submissions = 0;
+  await page.route(
+    (target) => target.pathname === `/en/inventory/${f.reference}/media`,
+    async (route) => {
+      if (route.request().method() !== "POST") return route.continue();
+      submissions += 1;
+      const response = await transport.fetch(route.request(), {
+        maxRedirects: 0,
+        headers: await route.request().allHeaders(),
+      });
+      expect(response.status()).toBeLessThan(500);
+      await route.abort("failed");
+    },
+  );
+  try {
+    await page
+      .getByRole("button", { name: "Reject / withdraw public permission", exact: true })
+      .click();
+    const receipt = page.getByRole("link", { name: "Receipt for this request", exact: true });
+    await expect(receipt).toBeVisible();
+    await expect(receipt).toHaveAttribute(
+      "href",
+      new RegExp(`operation=${requestKey}&operationType=review$`),
+    );
+    await expect(
+      page.getByRole("button", { name: "Approve as a public candidate", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Reject / withdraw public permission", exact: true }),
+    ).toHaveCount(0);
+    const committed = await snapshot(f);
+    expect(committed.asset).toMatchObject({
+      review: "rejected",
+      rights: "rejected",
+      audience: "private",
+      version: (before.asset?.version ?? 0) + 1,
+    });
+    expect(committed.publicMedia).toEqual(before.publicMedia);
+    const recorded = await db
+      .select()
+      .from(schema.operations)
+      .where(eq(schema.operations.idempotencyKey, requestKey));
+    expect(recorded).toHaveLength(1);
+    expect(recorded[0]).toMatchObject({ status: "succeeded", operationType: "media.review" });
+    await receipt.click();
+    await expect(page.getByRole("status").first()).toContainText("Saved.");
+    await page.reload();
+    expect(await snapshot(f)).toEqual(committed);
+    expect(submissions).toBe(1);
+  } finally {
+    await transport.dispose();
+  }
+});
+
+test("O13 Enter in review evidence never selects the concealed Reject action", async ({ page }) => {
+  const f = seed();
+  const original = await snapshot(f);
+  if (!original.asset) throw new Error("Missing fixture asset");
+  await db
+    .update(schema.mediaAssets)
+    .set({ rights: "pending", review: "pending", rightsHolder: null, rightsReference: null })
+    .where(eq(schema.mediaAssets.id, original.asset.id));
+  const before = await snapshot(f);
+  await openPhoto(page, f, true);
+  await expect(page.getByRole("link", { name: "Review this photo", exact: true })).toBeVisible();
+  await page.getByLabel("Rights holder", { exact: true }).fill("Synthetic entered holder");
+  const evidence = page.getByLabel("Rights evidence / permission reference", { exact: true });
+  await evidence.fill("synthetic-entered-permission");
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname === `/en/inventory/${f.reference}/media`,
+    ),
+    evidence.press("Enter"),
+  ]);
+  expect(await snapshot(f)).toEqual(before);
+  await expect(page.getByRole("link", { name: /private addresses, people/ })).toBeVisible();
+  await expect(evidence).toHaveValue("synthetic-entered-permission");
+});
 async function openPhoto(page: Page, f: Seed, review = false) {
   await page.context().addCookies([
     {
@@ -244,6 +360,44 @@ for (const javaScriptEnabled of [false, true]) {
         page.getByLabel("Rights evidence / permission reference", { exact: true }),
       ).toHaveValue("synthetic-recovered-permission");
       expect(await snapshot(f)).toEqual(before);
+    });
+
+    test("O13 explicitly rejects the current photo after a review conflict", async ({ page }) => {
+      const f = seed();
+      const original = await snapshot(f);
+      if (!original.asset) throw new Error("Missing fixture asset");
+      await openPhoto(page, f, true);
+      await fillReview(page);
+      await db
+        .update(schema.mediaAssets)
+        .set({ version: sql`${schema.mediaAssets.version} + 1` })
+        .where(eq(schema.mediaAssets.id, original.asset.id));
+      await page
+        .getByRole("button", { name: "Approve as a public candidate", exact: true })
+        .click();
+      await expect(
+        page.getByText(
+          "This item changed. Refresh and review the latest version before trying again.",
+          { exact: true },
+        ),
+      ).toBeVisible();
+      const before = await snapshot(f);
+      await page
+        .locator("summary")
+        .filter({ hasText: /^Reject \/ withdraw public permission$/ })
+        .click();
+      await page
+        .getByRole("button", { name: "Reject / withdraw public permission", exact: true })
+        .click();
+      await expect(page.getByRole("status").first()).toContainText("Saved.");
+      const rejected = await snapshot(f);
+      expect(rejected.asset).toMatchObject({
+        review: "rejected",
+        rights: "rejected",
+        audience: "private",
+        version: (before.asset?.version ?? 0) + 1,
+      });
+      expect(rejected.publicMedia).toEqual(before.publicMedia);
     });
 
     test("O13 native placement and navigation still complete when the editor is unchanged", async ({
