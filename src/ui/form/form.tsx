@@ -80,8 +80,9 @@ export type ActionFormProps<V extends FormValues> = {
   enhancementField?: string;
   /** Public source review can use the page width; entry fields retain their reading width. */
   layout?: "reading" | "full";
-  /** Navigation beside the one submit (links only; never a second command). */
-  secondaryActions?: ReactNode;
+  /** Controls after the primary submit. Stateful alternatives receive restored native state
+   * too, so their operation identity cannot depend on hydration or a later effect. */
+  secondaryActions?: ReactNode | ((state: FormState<V>) => ReactNode);
   /** Lets controls outside the form (tab radios, leave buttons) belong to it natively. */
   formId?: string;
   /** Feature-owned draft retention; observes confirmation without wrapping the Server Action. */
@@ -167,7 +168,11 @@ class TransportBoundary extends Component<
       <FocusResult>
         <Notice tone="warning" title={this.props.copy.unknown}>
           <p>{this.props.copy.draftRetained}</p>
-          <a href={reconciliation.href} className="font-semibold underline">
+          <a
+            href={reconciliation.href}
+            data-form-reconciliation={operationId}
+            className="font-semibold underline"
+          >
             {reconciliation.label}
           </a>
         </Notice>
@@ -506,7 +511,11 @@ function FormSession<V extends FormValues>({
             tone={outcome.kind === "unknown" ? "warning" : "info"}
             title={outcome.message}
             action={
-              <a href={outcome.status.href} className="underline">
+              <a
+                href={outcome.status.href}
+                data-form-reconciliation={state.operationId}
+                className="underline"
+              >
                 {outcome.status.label}
               </a>
             }
@@ -615,7 +624,9 @@ function FormSession<V extends FormValues>({
       {secondaryActions ? (
         <div className="flex flex-wrap items-center gap-3">
           {submit}
-          {secondaryActions}
+          {typeof secondaryActions === "function"
+            ? secondaryActions({ ...state, values })
+            : secondaryActions}
         </div>
       ) : (
         submit

@@ -4,7 +4,7 @@
 // recorded order, target photo and listing. Real PostgreSQL, synthetic records.
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
@@ -40,7 +40,9 @@ async function workingOrder(listingId: string) {
   const rows = await db
     .select({ id: schema.mediaRelations.id })
     .from(schema.mediaRelations)
-    .where(eq(schema.mediaRelations.listingId, listingId))
+    .where(
+      and(eq(schema.mediaRelations.listingId, listingId), isNull(schema.mediaRelations.removedAt)),
+    )
     .orderBy(asc(schema.mediaRelations.position));
   return rows.map(({ id }) => id);
 }
@@ -107,7 +109,9 @@ for (const javaScriptEnabled of [false, true])
 
       // Staging is a read: the review shows before/proposal and nothing is written.
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await expect(
         page.getByRole("heading", { level: 1, name: "Review the new order" }),
       ).toBeVisible();
@@ -127,7 +131,9 @@ for (const javaScriptEnabled of [false, true])
       expect(await listingVersion(f.listingId)).toBe(version);
 
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
       await expect(
         page.getByRole("heading", { level: 1, name: "The new order is saved" }),
@@ -151,7 +157,9 @@ for (const javaScriptEnabled of [false, true])
 
       // A review prepared before another change reports a conflict and writes nothing.
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await db
         .update(schema.listings)
         .set({ version: (version ?? 0) + 2 })
@@ -173,7 +181,9 @@ for (const javaScriptEnabled of [false, true])
 
       // Save A (1 ↓), then save B (1 ↓ again): A's receipt still states A's recorded order.
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
       await expect(page.getByRole("status")).toContainText("New photo order: 2, 1, 3.");
       const receiptA = page.url();
@@ -193,7 +203,9 @@ for (const javaScriptEnabled of [false, true])
       await page.getByRole("link", { name: "Back to the current task", exact: true }).click();
       await expect(heading(2)).toBeVisible();
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await page.getByRole("button", { name: "Save the order", exact: true }).click();
       await expect(page.getByRole("status")).toContainText("New photo order: 1, 3, 2.");
       expect(await workingOrder(f.listingId)).toEqual([second, third, first]);
@@ -228,7 +240,12 @@ for (const javaScriptEnabled of [false, true])
         .where(eq(schema.listings.id, f.listingId));
       await openPlacement(page);
       await page.getByRole("button", { name: "Include in next gallery", exact: true }).click();
-      await expect(page.getByRole("alert").filter({ hasText: "This item changed." })).toBeVisible();
+      await expect(
+        page.getByText(
+          "This item changed. Refresh and review the latest version before trying again.",
+          { exact: true },
+        ),
+      ).toBeVisible();
       await expect(heading(2)).toBeVisible();
 
       // The cover comparison uses the first photo that is not hidden: with photo 1 (second)
@@ -243,7 +260,9 @@ for (const javaScriptEnabled of [false, true])
       await expect(heading(1)).toBeVisible();
       await page.goto(hostUrl("staff", `/en/inventory/${f.reference}/media?photo=${third}`));
       await openPlacement(page);
-      await page.getByRole("link", { name: "Move down", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
+        .click();
       await expect(page.getByText("Before · cover 2", { exact: true })).toBeVisible();
       await expect(page.getByText("After · cover 3", { exact: true })).toBeVisible();
       expect(await workingOrder(f.listingId)).toEqual([second, third, first]);
@@ -270,7 +289,9 @@ for (const javaScriptEnabled of [false, true])
       const version = await listingVersion(f.listingId);
       const published = await publicMedia(f.listingId);
       await openMedia(page, f);
-      await page.getByRole("link", { name: "Show photo 3", exact: true }).click();
+      await page
+        .getByRole(javaScriptEnabled ? "link" : "button", { name: "Show photo 3", exact: true })
+        .click();
       await openPlacement(page);
       await page.getByLabel("Place before photo", { exact: true }).selectOption(first ?? "");
       await page.getByRole("button", { name: "Review the new order", exact: true }).click();
@@ -396,7 +417,12 @@ for (const javaScriptEnabled of [false, true])
         .set({ version: sql`${schema.mediaAssets.version} + 1` })
         .where(eq(schema.mediaAssets.id, first?.assetId ?? ""));
       await review();
-      await expect(page.getByRole("alert").filter({ hasText: "This item changed." })).toBeVisible();
+      await expect(
+        page.getByText(
+          "This item changed. Refresh and review the latest version before trying again.",
+          { exact: true },
+        ),
+      ).toBeVisible();
       await expect(fourth).toBeVisible();
 
       // A scan retry on placement 4 returns to placement 4.
@@ -626,4 +652,270 @@ test("O13 tablet keeps the contextual photo beside visible editing fields", asyn
   expect(caption.x).toBeGreaterThan(preview.x + preview.width - 1);
   expect(caption.y + caption.height).toBeLessThan(1024);
   expect(description.y + description.height).toBeLessThan(1024);
+});
+
+test("O13 discarded proposed order stays discarded after a restored draft", async ({ page }) => {
+  const f = seed();
+  const version = await listingVersion(f.listingId);
+  const published = await publicMedia(f.listingId);
+  await openGallery(page, f);
+  await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
+  await page.getByRole("button", { name: "Move down · 1", exact: true }).click();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Review the new order", exact: true }),
+  ).toBeEnabled();
+  await page.getByRole("link", { name: "Listing", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Unsaved photo order" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Keep editing", exact: true }).click();
+  expect(
+    await page
+      .locator("[data-photo]")
+      .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-photo"))),
+  ).toEqual([f.relations[1], f.relations[0], f.relations[2]]);
+  await page.getByRole("link", { name: "Listing", exact: true }).click();
+  await dialog.getByRole("button", { name: "Discard and leave", exact: true }).click();
+  await page.getByRole("link", { name: "Photos", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Reorder photos", exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Reorder photos", exact: true })).toBeVisible();
+  expect(await workingOrder(f.listingId)).toEqual(f.relations);
+  expect(await listingVersion(f.listingId)).toBe(version);
+  expect(await publicMedia(f.listingId)).toBe(published);
+});
+
+test("O13 changed gallery retains the proposed order and requires a current comparison", async ({
+  page,
+}) => {
+  const f = seed();
+  const published = await publicMedia(f.listingId);
+  await openGallery(page, f);
+  await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
+  await page.getByRole("button", { name: "Move down · 1", exact: true }).click();
+  // Another editing session adds a placement, including the supported same-asset case.
+  const [source] = await db
+    .select()
+    .from(schema.mediaRelations)
+    .where(eq(schema.mediaRelations.id, f.relations[0] ?? ""));
+  if (!source) throw new Error("Missing original photo placement");
+  const added = await db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(schema.mediaRelations)
+      .values({ listingId: f.listingId, mediaAssetId: source.mediaAssetId, position: 3 })
+      .returning({ id: schema.mediaRelations.id });
+    await tx
+      .update(schema.listings)
+      .set({ version: sql`${schema.listings.version} + 1` })
+      .where(eq(schema.listings.id, f.listingId));
+    if (!row) throw new Error("Missing added photo placement");
+    return row.id;
+  });
+  const current = [...f.relations, added];
+  const proposed = [f.relations[1], f.relations[0], f.relations[2], added];
+  for (let pass = 0; pass < 2; pass++) {
+    await page.reload();
+    await expect(
+      page.getByRole("status").filter({ hasText: "The gallery changed." }),
+    ).toBeVisible();
+    expect(
+      await page
+        .locator("[data-photo]")
+        .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-photo"))),
+    ).toEqual(proposed);
+    expect(await workingOrder(f.listingId)).toEqual(current);
+  }
+  await page.getByRole("button", { name: "Review the new order", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Review the new order", exact: true }),
+  ).toBeVisible();
+  for (let i = 0; i < current.length; i++)
+    await expect(
+      page
+        .locator(`[data-photo="${current[i]}"]`)
+        .getByText(`Current position: ${i + 1}`, { exact: true }),
+    ).toBeVisible();
+  await page.getByRole("button", { name: "Save the order", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Reorder photos", exact: true })).toBeVisible();
+  expect(await workingOrder(f.listingId)).toEqual(proposed);
+  expect(await publicMedia(f.listingId)).toBe(published);
+  await page.reload();
+  await expect(page.getByRole("status").filter({ hasText: "The gallery changed." })).toHaveCount(0);
+});
+
+test("O13 removed photos keep explicit recovery even when the remaining order matches", async ({
+  page,
+}) => {
+  const f = seed();
+  await openGallery(page, f);
+  await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
+  await page.getByRole("button", { name: "Move down · 1", exact: true }).click();
+  await db.transaction(async (tx) => {
+    for (const id of [f.relations[0], f.relations[2]])
+      await tx
+        .update(schema.mediaRelations)
+        .set({ removedAt: new Date() })
+        .where(eq(schema.mediaRelations.id, id ?? ""));
+    await tx
+      .update(schema.listings)
+      .set({ version: sql`${schema.listings.version} + 1` })
+      .where(eq(schema.listings.id, f.listingId));
+  });
+  for (let pass = 0; pass < 2; pass++) {
+    await page.reload();
+    await expect(
+      page.getByRole("status").filter({ hasText: "The gallery changed." }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Review the new order", exact: true }),
+    ).toBeEnabled();
+  }
+  // Removing the final placement still leaves an explicit Cancel, with no empty save.
+  await db
+    .update(schema.mediaRelations)
+    .set({ removedAt: new Date() })
+    .where(eq(schema.mediaRelations.id, f.relations[1] ?? ""));
+  await db
+    .update(schema.listings)
+    .set({ version: sql`${schema.listings.version} + 1` })
+    .where(eq(schema.listings.id, f.listingId));
+  await page.reload();
+  await expect(page.getByRole("status").filter({ hasText: "The gallery changed." })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Review the new order", exact: true }),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("status").filter({ hasText: "The gallery changed." })).toHaveCount(0);
+  expect(await workingOrder(f.listingId)).toEqual([]);
+});
+
+test("O13 reconciles a committed order after a lost receipt without another save", async ({
+  page,
+}) => {
+  const f = seed();
+  const version = await listingVersion(f.listingId);
+  const published = await publicMedia(f.listingId);
+  await openGallery(page, f);
+  await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
+  await page.getByRole("button", { name: "Move down · 1", exact: true }).click();
+  await page.getByRole("button", { name: "Review the new order", exact: true }).click();
+  let resolveReceipt: (url: string) => void = () => {};
+  let rejectReceipt: (reason: unknown) => void = () => {};
+  const receiptReached = new Promise<string>((resolve, reject) => {
+    resolveReceipt = resolve;
+    rejectReceipt = reject;
+  });
+  const receiptPattern = hostUrl("staff", `/en/inventory/${f.reference}/media/submit`);
+  await page.route(receiptPattern, async (route) => {
+    try {
+      const response = await route.fetch({ maxRedirects: 0 });
+      expect(response.status()).toBe(303);
+      const location = response.headers().location;
+      if (!location) throw new Error("Committed save has no receipt location");
+      const url = new URL(location, route.request().url()).href;
+      expect(new URL(url).searchParams.has("saved")).toBe(true);
+      await route.abort("failed");
+      resolveReceipt(url);
+    } catch (error) {
+      rejectReceipt(error);
+    }
+  });
+  let receiptUrl: string;
+  try {
+    await page.getByRole("button", { name: "Save the order", exact: true }).click();
+    receiptUrl = await receiptReached;
+  } finally {
+    await page.unroute(receiptPattern);
+  }
+  // The response is lost only after the real POST has committed and redirected to its receipt.
+  expect(new URL(receiptUrl).searchParams.get("saved")).toMatch(/^[a-f0-9-]{36}$/);
+  expect(await listingVersion(f.listingId)).toBe((version ?? 0) + 1);
+  expect(await workingOrder(f.listingId)).toEqual([f.relations[1], f.relations[0], f.relations[2]]);
+  await page.goto(hostUrl("staff", `/en/inventory/${f.reference}/media`));
+  for (let pass = 0; pass < 2; pass++) {
+    await expect(
+      page.getByRole("link", { name: "Check the save result", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Save the order", exact: true })).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Review the new order", exact: true }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Cancel", exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Move down · 1", exact: true })).toBeDisabled();
+    await page.reload();
+  }
+  // A later server edit does not turn our already-completed save back into unsaved work.
+  await db.transaction(async (tx) => {
+    for (const [position, id] of f.relations.entries())
+      await tx
+        .update(schema.mediaRelations)
+        .set({ position })
+        .where(eq(schema.mediaRelations.id, id));
+    await tx
+      .update(schema.listings)
+      .set({ version: sql`${schema.listings.version} + 1` })
+      .where(eq(schema.listings.id, f.listingId));
+  });
+  await page.reload();
+  await page.getByRole("link", { name: "Check the save result", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Reorder photos", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("status").filter({ hasText: "New photo order: 2, 1, 3." }),
+  ).toBeVisible();
+  expect(await workingOrder(f.listingId)).toEqual(f.relations);
+  expect(await listingVersion(f.listingId)).toBe((version ?? 0) + 2);
+  expect(await publicMedia(f.listingId)).toBe(published);
+
+  // Returning to a historical receipt must not clear a new, not-yet-submitted proposal,
+  // even when that proposal happens to match the old receipt's order.
+  await page.goto(receiptUrl);
+  await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
+  await page.getByRole("button", { name: "Move down · 1", exact: true }).click();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Review the new order", exact: true }),
+  ).toBeEnabled();
+  expect(await workingOrder(f.listingId)).toEqual(f.relations);
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+});
+
+test("O13 retries an unrecorded order with the original key and payload", async ({ page }) => {
+  const f = seed();
+  const version = await listingVersion(f.listingId);
+  await openGallery(page, f);
+  await page.getByRole("button", { name: "Reorder photos", exact: true }).click();
+  await page.getByRole("button", { name: "Move down · 1", exact: true }).click();
+  await page.getByRole("button", { name: "Review the new order", exact: true }).click();
+  let resolveAttempt: (body: string) => void = () => {};
+  const attempted = new Promise<string>((resolve) => {
+    resolveAttempt = resolve;
+  });
+  const submitUrl = hostUrl("staff", `/en/inventory/${f.reference}/media/submit`);
+  await page.route(submitUrl, async (route) => {
+    const body = route.request().postData() ?? "";
+    await route.abort("failed");
+    resolveAttempt(body);
+  });
+  let original: string;
+  try {
+    await page.getByRole("button", { name: "Save the order", exact: true }).click();
+    original = await attempted;
+  } finally {
+    await page.unroute(submitUrl);
+  }
+  expect(await listingVersion(f.listingId)).toBe(version);
+  await page.goto(hostUrl("staff", `/en/inventory/${f.reference}/media`));
+  await page.getByRole("link", { name: "Check the save result", exact: true }).click();
+  const firstRequest = new URLSearchParams(original);
+  const retry = page.waitForRequest(
+    (request) => request.url() === submitUrl && request.method() === "POST",
+  );
+  await page.getByRole("button", { name: "Retry the same save", exact: true }).click();
+  const secondRequest = new URLSearchParams((await retry).postData() ?? "");
+  for (const field of ["intent", "operationId", "expectedRevision", "order"])
+    expect(secondRequest.get(field)).toBe(firstRequest.get(field));
+  await expect(page.getByRole("button", { name: "Reorder photos", exact: true })).toBeVisible();
+  expect(await listingVersion(f.listingId)).toBe((version ?? 0) + 1);
+  expect(await workingOrder(f.listingId)).toEqual([f.relations[1], f.relations[0], f.relations[2]]);
 });

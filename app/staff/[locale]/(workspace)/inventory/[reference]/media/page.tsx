@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
 import { mediaModifications, moveRelation } from "@/domain/media";
 import { fileError, fileLabel, filesCopy, fillCopy } from "@/features/files/copy";
-import { FileButton, FileCheck, FileEnvelope, FileField } from "@/features/files/forms";
+import { FileButton, FileEnvelope } from "@/features/files/forms";
 import { inventoryCopy } from "@/features/inventory/copy";
 import { FocusedState } from "@/features/inventory/focused-state";
 import { LeaveControl } from "@/features/inventory/leave-control";
@@ -16,6 +16,12 @@ import {
   MediaDetailsEditor,
   type MediaDetailsValues,
 } from "@/features/inventory/media-details-editor";
+import { MediaPlacementControls } from "@/features/inventory/media-placement-controls";
+import {
+  MediaRequestKeeper,
+  MediaRequestRecovery,
+} from "@/features/inventory/media-request-recovery";
+import { MediaReviewEditor } from "@/features/inventory/media-review-editor";
 import {
   MediaFilePicker,
   MediaGallery,
@@ -26,7 +32,7 @@ import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspa
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { requireStaffPage } from "@/server/auth/pages";
 import { isAppError } from "@/server/errors";
-import { mediaForListing, mediaReceipt } from "@/server/media/commands";
+import { mediaForListing, mediaOperationResult, mediaReceipt } from "@/server/media/commands";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
@@ -41,7 +47,7 @@ import {
 } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 
-import { savePhotoDetails } from "./actions";
+import { retryPhotoRequest, reviewPhoto, savePhotoDetails } from "./actions";
 
 type MediaRow = Awaited<ReturnType<typeof mediaForListing>>["assets"][number];
 
@@ -80,6 +86,8 @@ export default async function MediaPage({
     panel?: string;
     upload?: string;
     inline?: string;
+    operation?: string;
+    operationType?: string;
   }>;
 }) {
   const { locale, reference } = await params;
@@ -94,7 +102,17 @@ export default async function MediaPage({
   const workspace = workflowCopy(locale, "listingWorkspace");
   const query = await searchParams;
   // Readback: a receipt counts only for this listing, and it names its own target photo.
-  const receipt = await mediaReceipt(getDb(), session, listing.id, query.saved, query.photo);
+  const operationResult = await mediaOperationResult(
+    getDb(),
+    session,
+    reference,
+    query.operation,
+    query.operationType ?? "order",
+    query.photo,
+  );
+  const receipt =
+    operationResult?.receipt ??
+    (await mediaReceipt(getDb(), session, listing.id, query.saved, query.photo));
   const path = `/${locale}/inventory/${reference}/media`;
   const action = `${path}/submit`;
   const ref = <bdi>{listing.reference}</bdi>;
@@ -109,9 +127,100 @@ export default async function MediaPage({
     ({ relation, asset }) => relation.id === target || asset.id === target,
   );
   const selected = assets[selectedIndex];
+  const requestStorageKey = (id: string) =>
+    `msr-photo-request:${session.actor.id}:${listing.id}:${id}`;
   const photoHref = (id: string) => `${path}?photo=${id}`;
   const order = assets.map(({ relation }) => relation.id);
   const numberOf = new Map(order.map((id, index) => [id, index + 1]));
+
+  // A status read is never a new command. Keep the exact request visible until a
+  // receipt or terminal failure resolves it, including an unrecorded/lost request.
+  if (
+    typeof query.operation === "string" &&
+    ["details", "review", "placement"].includes(query.operationType ?? "") &&
+    operationResult?.status !== "succeeded"
+  ) {
+    const failed = operationResult?.status === "failed";
+    const status = `${path}?${new URLSearchParams({
+      photo: typeof query.photo === "string" ? query.photo : "",
+      ...(query.panel === "review" ? { panel: "review" } : {}),
+      operation: query.operation,
+      operationType: query.operationType ?? "",
+    })}`;
+    return (
+      <FocusedState closeHref={`/${locale}/inventory`} closeLabel={inventoryCopy(locale).back}>
+        <h1 className="pe-12 text-heading font-semibold sm:text-title">
+          {failed ? inventoryCopy(locale).blocked : inventoryCopy(locale).pending}
+        </h1>
+        <p role="status">
+          {failed
+            ? workspace.photoOperationFailed
+            : operationResult?.status === "pending"
+              ? workspace.photoOperationPending
+              : workspace.photoOperationMissing}
+        </p>
+        <dl className="space-y-2 text-dense">
+          <dt className="font-semibold">{inventoryCopy(locale).operation}</dt>
+          <dd>
+            <bdi className="break-all">{query.operation}</bdi>
+          </dd>
+        </dl>
+        <a href={status} className={buttonClass("primary")}>
+          {workspace.checkOrderResult}
+        </a>
+        {selected && (query.operationType === "details" || query.operationType === "review") ? (
+          <MediaRequestRecovery
+            storageKey={requestStorageKey(selected.relation.id)}
+            operationId={query.operation}
+            kind={query.operationType}
+            missing={operationResult?.status === "missing"}
+            failedMessage={failed ? workspace.photoOperationFailed : undefined}
+            action={retryPhotoRequest.bind(
+              null,
+              query.operationType,
+              locale,
+              reference,
+              selected.asset.id,
+              selected.relation.id,
+            )}
+            status={{ href: status, label: inventoryCopy(locale).operation }}
+            labels={{
+              caption: copy.caption,
+              altText: copy.altText,
+              modification: copy.modification,
+              modificationDisclosure: copy.disclosure,
+              rightsHolder: copy.rightsHolder,
+              rightsReference: copy.rightsReference,
+              privacyReviewed: copy.privacy,
+              rightsConfirmed: copy.rightsCheck,
+            }}
+            copy={inventoryCopy(locale).form}
+            retryLabel={workspace.retryOrderSave}
+            guard={{
+              title: workspace.unsavedTitle,
+              body: workspace.unsavedBody,
+              stay: workspace.stay,
+              discard: workspace.discard,
+            }}
+            modifications={Object.fromEntries(
+              mediaModifications.map((value) => [value, fileLabel(copy, value)]),
+            )}
+            commands={{
+              details: workspace.saveDetails,
+              discard: workspace.discardDraft,
+              approve: copy.approve,
+              reject: copy.reject,
+            }}
+          />
+        ) : null}
+        {failed && selected ? (
+          <a href={photoHref(selected.relation.id)} className={buttonClass("secondary")}>
+            {copy.toTask}
+          </a>
+        ) : null}
+      </FocusedState>
+    );
+  }
 
   // O13ORDERSAVED: the order this staff member saved on this listing, as it was recorded.
   if (receipt?.move && query.inline !== "1") {
@@ -246,7 +355,12 @@ export default async function MediaPage({
     discard: workspace.discard,
   };
   const review = Boolean(selected && query.panel === "review");
-  const detailsFormId = selected && !review ? "photo-details-form" : undefined;
+  const detailsFormId =
+    selected && previewable(selected)
+      ? review
+        ? "photo-review-form"
+        : "photo-details-form"
+      : undefined;
   const detailsHref = selected ? photoHref(selected.relation.id) : path;
   const galleryHref = selected ? `${path}#photo-${selected.relation.id}` : path;
   const tile = (row: MediaRow, index: number) => (
@@ -403,10 +517,10 @@ export default async function MediaPage({
               <ol className="flex gap-2 overflow-x-auto pb-2">
                 {assets.map((row, index) => (
                   <li key={row.relation.id} className="shrink-0">
-                    <a
+                    <LeaveControl
                       href={photoHref(row.relation.id)}
-                      aria-label={fillCopy(copy.showPhoto, { n: index + 1 })}
-                      aria-current={row === selected ? "true" : undefined}
+                      formId={detailsFormId}
+                      current={row === selected}
                       className={cx(
                         "block w-16 overflow-hidden rounded-control border-2",
                         row === selected
@@ -414,12 +528,15 @@ export default async function MediaPage({
                           : "border-transparent hover:border-border",
                       )}
                     >
-                      <Preview
-                        row={row}
-                        label={workspace.noPhoto}
-                        className="aspect-4/3 rounded-none object-cover!"
-                      />
-                    </a>
+                      <span className="sr-only">{fillCopy(copy.showPhoto, { n: index + 1 })}</span>
+                      <span aria-hidden="true">
+                        <Preview
+                          row={row}
+                          label={workspace.noPhoto}
+                          className="aspect-4/3 rounded-none object-cover!"
+                        />
+                      </span>
+                    </LeaveControl>
                   </li>
                 ))}
               </ol>
@@ -457,18 +574,23 @@ export default async function MediaPage({
                 {workspace.detailsPending}
               </p>
             ) : null}
-            <PhotoEditor
-              row={selected}
-              copy={copy}
-              workspace={workspace}
-              action={action}
-              fileChooser={fileChooser}
-              locale={locale}
-              reference={reference}
-              path={detailsHref}
-              review={review}
-              guard={guard}
-            />
+            <MediaRequestKeeper
+              storageKey={requestStorageKey(selected.relation.id)}
+              acknowledgedKey={receipt?.requestKey}
+            >
+              <PhotoEditor
+                row={selected}
+                copy={copy}
+                workspace={workspace}
+                action={action}
+                fileChooser={fileChooser}
+                locale={locale}
+                reference={reference}
+                path={detailsHref}
+                review={review}
+                guard={guard}
+              />
+            </MediaRequestKeeper>
           </div>
           <div className="min-w-0 space-y-4 min-[48rem]:col-start-1">
             <details className="border-t border-divider pt-2">
@@ -477,65 +599,64 @@ export default async function MediaPage({
               </summary>
               <div className="mt-2 space-y-3">
                 <p className="text-dense text-text-muted">{copy.permission}</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedIndex > 0 ? (
-                    <a href={`${detailsHref}&move=up`} className={buttonClass("secondary")}>
-                      <ArrowUpIcon className="size-4" />
-                      {copy.moveUp}
-                    </a>
-                  ) : (
-                    <button type="button" disabled className={buttonClass("secondary")}>
-                      {copy.firstAlready}
-                    </button>
+                <MediaPlacementControls
+                  formId={detailsFormId}
+                  action={action}
+                  path={path}
+                  relationId={selected.relation.id}
+                  hidden={selected.relation.hidden}
+                  version={listing.version}
+                  operationId={randomUUID()}
+                  options={assets.flatMap((row, index) =>
+                    row === selected
+                      ? []
+                      : [
+                          {
+                            id: row.relation.id,
+                            label: `${index + 1}. ${row.asset.caption || fileLabel(copy, row.asset.kind)}`,
+                          },
+                        ],
                   )}
-                  {selectedIndex + 1 < total ? (
-                    <a href={`${detailsHref}&move=down`} className={buttonClass("secondary")}>
-                      <ArrowDownIcon className="size-4" />
-                      {copy.moveDown}
-                    </a>
-                  ) : (
-                    <button type="button" disabled className={buttonClass("secondary")}>
-                      {copy.lastAlready}
-                    </button>
-                  )}
-                  <NativeForm action={action} method="post">
-                    <FileEnvelope intent="place" version={listing.version} />
-                    <input type="hidden" name="relationId" value={selected.relation.id} />
-                    <input type="hidden" name="hidden" value={String(!selected.relation.hidden)} />
-                    <button type="submit" className={buttonClass("tertiary")}>
-                      {selected.relation.hidden ? copy.show : copy.hide}
-                    </button>
-                  </NativeForm>
-                </div>
-                {total > 2 ? (
-                  <form method="get" action={path} className="flex flex-wrap items-end gap-2">
-                    <input type="hidden" name="photo" value={selected.relation.id} />
-                    <div className="grid min-w-0 flex-1 gap-2">
-                      <label className={labelClass} htmlFor="media-position">
-                        {workspace.position}
-                      </label>
-                      <select
-                        id="media-position"
-                        name="before"
-                        required
-                        defaultValue=""
-                        className={controlClass}
-                      >
-                        <option value="">{workspace.choosePosition}</option>
-                        {assets.map((row, index) =>
-                          row === selected ? null : (
-                            <option key={row.relation.id} value={row.relation.id}>
-                              {index + 1}. {row.asset.caption || fileLabel(copy, row.asset.kind)}
-                            </option>
-                          ),
-                        )}
-                      </select>
-                    </div>
-                    <button type="submit" className={buttonClass("secondary")}>
-                      {copy.reviewOrder}
-                    </button>
-                  </form>
-                ) : null}
+                  copy={{
+                    hide: copy.hide,
+                    show: copy.show,
+                    position: workspace.position,
+                    choosePosition: workspace.choosePosition,
+                    review: copy.reviewOrder,
+                  }}
+                  moves={
+                    <>
+                      {selectedIndex > 0 ? (
+                        <LeaveControl
+                          formId={detailsFormId}
+                          href={`${detailsHref}&move=up`}
+                          className={buttonClass("secondary")}
+                        >
+                          <ArrowUpIcon className="size-4" />
+                          {copy.moveUp}
+                        </LeaveControl>
+                      ) : (
+                        <button type="button" disabled className={buttonClass("secondary")}>
+                          {copy.firstAlready}
+                        </button>
+                      )}
+                      {selectedIndex + 1 < total ? (
+                        <LeaveControl
+                          formId={detailsFormId}
+                          href={`${detailsHref}&move=down`}
+                          className={buttonClass("secondary")}
+                        >
+                          <ArrowDownIcon className="size-4" />
+                          {copy.moveDown}
+                        </LeaveControl>
+                      ) : (
+                        <button type="button" disabled className={buttonClass("secondary")}>
+                          {copy.lastAlready}
+                        </button>
+                      )}
+                    </>
+                  }
+                />
               </div>
             </details>
             <details className="border-t border-divider pt-2" open={!previewable(selected)}>
@@ -569,56 +690,63 @@ export default async function MediaPage({
         </section>
       ) : (
         <section id="o13-all" aria-labelledby="o13-all-heading" className="min-w-0 space-y-4">
-          {total ? (
-            <MediaGallery
-              key={`${listing.id}:${listing.version}`}
-              heading={
-                <h2 id="o13-all-heading" className="text-section font-semibold">
-                  {fillCopy(copy.allPhotos, { total })}
-                </h2>
-              }
-              items={assets.map((row, index) => ({
-                id: row.relation.id,
-                label: `${fileLabel(copy, "photo")} ${index + 1}`,
-                hidden: row.relation.hidden,
-                content: tile(row, index),
-                preview: (
-                  <Preview
-                    row={row}
-                    label={workspace.noPhoto}
-                    className="h-full rounded-none object-cover!"
-                  />
-                ),
-              }))}
-              action={action}
-              envelope={<FileEnvelope intent="order" version={listing.version} />}
-              version={listing.version}
-              draftKey={`msr-media-order:${session.actor.id}:${listing.id}`}
-              confirmedOrder={receipt?.move ? receipt.order?.after : undefined}
-              copy={{
-                reorder: workspace.reorder,
-                hint: workspace.orderHint,
-                review: copy.reviewOrder,
-                save: copy.saveOrder,
-                cancel: copy.cancel,
-                before: workspace.currentCover,
-                after: workspace.proposedCover,
-                up: copy.moveUp,
-                down: copy.moveDown,
-                cover: workspace.coverShort,
-                moved: workspace.photoMoved,
-                conflict: copy.conflict,
-                guard,
-              }}
-            />
-          ) : (
-            <div>
-              <h2 id="o13-all-heading" className="mb-4 text-section font-semibold">
+          <MediaGallery
+            key={`${listing.id}:${listing.version}`}
+            heading={
+              <h2 id="o13-all-heading" className="text-section font-semibold">
                 {fillCopy(copy.allPhotos, { total })}
               </h2>
+            }
+            items={assets.map((row, index) => ({
+              id: row.relation.id,
+              label: `${fileLabel(copy, "photo")} ${index + 1}`,
+              hidden: row.relation.hidden,
+              content: tile(row, index),
+              preview: (
+                <Preview
+                  row={row}
+                  label={workspace.noPhoto}
+                  className="h-full rounded-none object-cover!"
+                />
+              ),
+            }))}
+            action={action}
+            envelope={<FileEnvelope intent="order" version={listing.version} />}
+            version={listing.version}
+            draftKey={`msr-media-order:${session.actor.id}:${listing.id}`}
+            confirmedOrder={receipt?.move ? receipt.order?.after : undefined}
+            confirmedRequestKey={receipt?.move ? receipt.requestKey : undefined}
+            operationResult={
+              !query.operationType || query.operationType === "order"
+                ? (operationResult ?? undefined)
+                : undefined
+            }
+            copy={{
+              reorder: workspace.reorder,
+              hint: workspace.orderHint,
+              review: copy.reviewOrder,
+              save: copy.saveOrder,
+              cancel: copy.cancel,
+              before: workspace.currentCover,
+              after: workspace.proposedCover,
+              up: copy.moveUp,
+              down: copy.moveDown,
+              cover: workspace.coverShort,
+              moved: workspace.photoMoved,
+              conflict: copy.conflict,
+              membershipConflict: workspace.orderConflict,
+              currentPosition: workspace.currentOrderPosition,
+              outcomeUnknown: workspace.orderOutcomeUnknown,
+              checkResult: workspace.checkOrderResult,
+              retrySave: workspace.retryOrderSave,
+              guard: { ...guard, title: workspace.unsavedOrderTitle },
+            }}
+          />
+          {!total ? (
+            <div>
               <p className="rounded-panel bg-subtle p-6">{copy.empty}</p>
             </div>
-          )}
+          ) : null}
           {query.upload === "1" || !total ? (
             <section
               id="media-upload"
@@ -689,7 +817,7 @@ function PhotoEditor({
     modification: asset.modification,
     modificationDisclosure: asset.modificationDisclosure ?? "",
   };
-  if (!ready)
+  if (!ready && !review)
     return (
       <div className="space-y-4">
         <Notice tone="warning">{copy.noPreview}</Notice>
@@ -738,7 +866,7 @@ function PhotoEditor({
             responseId: randomUUID(),
             values: details as MediaDetailsValues,
             reconciliation: {
-              href: `${path}&saved=${operationId}`,
+              href: `${path}&operation=${operationId}&operationType=details`,
               label: inventoryCopy(locale).operation,
             },
             outcome: { kind: "idle" },
@@ -772,117 +900,38 @@ function PhotoEditor({
       </MediaReviewGuard>
     );
   }
-  const recordedRights = asset.rights === "cleared" && asset.rightsHolder && asset.rightsReference;
+  const operationId = randomUUID();
   return (
-    <MediaReviewGuard key={`${asset.id}:${asset.version}:review`} copy={guard}>
-      <NativeForm action={action} method="post" className="grid gap-4">
-        <FileEnvelope intent="review" version={asset.version} id={asset.id} />
-        <input type="hidden" name="relationId" value={relation.id} />
-        {Object.entries(details).map(([name, value]) => (
-          <input key={name} type="hidden" name={name} value={value} />
-        ))}
-        <p className="text-dense text-text-muted">{workspace.reviewHint}</p>
-        <dl className="grid gap-3 text-dense">
-          <div>
-            <dt className="font-semibold">{copy.caption}</dt>
-            <dd className="whitespace-pre-wrap text-text-muted">{details.caption || copy.none}</dd>
-          </div>
-          <div>
-            <dt className="font-semibold">{copy.altText}</dt>
-            <dd className="whitespace-pre-wrap text-text-muted">{details.altText || copy.none}</dd>
-          </div>
-          {details.modification !== "none" ? (
-            <>
-              <div>
-                <dt className="font-semibold">{copy.modification}</dt>
-                <dd>{fileLabel(copy, details.modification)}</dd>
-              </div>
-              <div>
-                <dt className="font-semibold">{copy.disclosure}</dt>
-                <dd className="whitespace-pre-wrap text-text-muted">
-                  {details.modificationDisclosure || copy.none}
-                </dd>
-              </div>
-            </>
-          ) : null}
-        </dl>
-        {recordedRights ? (
-          <>
-            <dl className="grid gap-3 text-dense">
-              <div>
-                <dt className="font-semibold">{copy.rightsHolder}</dt>
-                <dd>{asset.rightsHolder}</dd>
-              </div>
-              <div>
-                <dt className="font-semibold">{copy.rightsReference}</dt>
-                <dd>{asset.rightsReference}</dd>
-              </div>
-            </dl>
-            <details>
-              <summary className="min-h-control cursor-pointer py-2 text-dense text-action">
-                {workspace.editPermissions}
-              </summary>
-              <div className="grid gap-4 pt-3">
-                <FileField
-                  name="rightsHolder"
-                  label={copy.rightsHolder}
-                  value={asset.rightsHolder ?? ""}
-                />
-                <FileField
-                  name="rightsReference"
-                  label={copy.rightsReference}
-                  value={asset.rightsReference ?? ""}
-                />
-              </div>
-            </details>
-          </>
-        ) : (
-          <>
-            <FileField
-              name="rightsHolder"
-              label={copy.rightsHolder}
-              value={asset.rightsHolder ?? ""}
-            />
-            <FileField
-              name="rightsReference"
-              label={copy.rightsReference}
-              value={asset.rightsReference ?? ""}
-            />
-          </>
+    <MediaReviewGuard key={`${asset.id}:review`} copy={guard} requireAcknowledgment>
+      {!ready ? <Notice tone="warning">{copy.noPreview}</Notice> : null}
+      <MediaReviewEditor
+        action={reviewPhoto.bind(null, locale, reference, asset.id, relation.id)}
+        initialState={{
+          operationId,
+          expectedRevision: asset.version,
+          responseId: randomUUID(),
+          reconciliation: {
+            href: `${path}&panel=review&operation=${operationId}&operationType=review`,
+            label: inventoryCopy(locale).operation,
+          },
+          outcome: { kind: "idle" },
+          values: {
+            ...details,
+            rightsHolder: asset.rightsHolder ?? "",
+            rightsReference: asset.rightsReference ?? "",
+            privacyReviewed: "",
+            rightsConfirmed: "",
+          },
+        }}
+        path={`${path}&panel=review`}
+        copy={copy}
+        workspace={workspace}
+        formCopy={inventoryCopy(locale).form}
+        ready={ready}
+        recordedRights={Boolean(
+          asset.rights === "cleared" && asset.rightsHolder && asset.rightsReference,
         )}
-        <FileCheck name="privacyReviewed">{copy.privacy}</FileCheck>
-        <FileCheck name="rightsConfirmed">{copy.rightsCheck}</FileCheck>
-        {!details.altText.trim() ||
-        (details.modification !== "none" && !details.modificationDisclosure.trim()) ? (
-          <p className="text-dense text-warning">{workspace.reviewNeedsDetails}</p>
-        ) : null}
-        <button
-          type="submit"
-          name="decision"
-          value="approve"
-          disabled={
-            !details.altText.trim() ||
-            (details.modification !== "none" && !details.modificationDisclosure.trim())
-          }
-          className={buttonClass("primary")}
-        >
-          {copy.approve}
-        </button>
-        <details className="border-t border-divider pt-3">
-          <summary className="min-h-control cursor-pointer py-2 text-dense text-error">
-            {copy.reject}
-          </summary>
-          <button
-            type="submit"
-            name="decision"
-            value="reject"
-            formNoValidate
-            className={buttonClass("destructive")}
-          >
-            {copy.reject}
-          </button>
-        </details>
-      </NativeForm>
+      />
     </MediaReviewGuard>
   );
 }
