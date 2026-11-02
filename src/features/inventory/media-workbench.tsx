@@ -618,6 +618,17 @@ export function MediaReviewGuard({
       const link = (event.target as Element)?.closest<HTMLAnchorElement>("a[href]");
       if (!link || link.download || link.target === "_blank" || !dirty()) return;
       const url = new URL(link.href, window.location.href);
+      // The retained submission's own status read is neither a new command nor a discard.
+      if (
+        root.current?.contains(link) &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname &&
+        link.dataset.formReconciliation &&
+        link.dataset.formReconciliation === url.searchParams.get("operation")
+      ) {
+        leaving.current = true;
+        return;
+      }
       if (
         url.origin === window.location.origin &&
         url.pathname === window.location.pathname &&
