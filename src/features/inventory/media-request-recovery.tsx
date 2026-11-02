@@ -206,7 +206,8 @@ export function MediaRequestRecovery({
               {fields
                 .filter((name) => kind === "review" || fields.indexOf(name) < 4)
                 .map((name) =>
-                  form.state.outcome.kind === "validation" ? (
+                  form.state.outcome.kind === "validation" &&
+                  (kind === "details" || fields.indexOf(name) >= 4) ? (
                     <div key={name}>
                       {name === "privacyReviewed" || name === "rightsConfirmed" ? (
                         <label className="flex items-start gap-2">
