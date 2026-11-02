@@ -16,6 +16,7 @@ export function MediaGallery({
   version,
   draftKey,
   confirmedOrder,
+  confirmedOperation,
   copy,
 }: {
   items: { id: string; label: string; hidden: boolean; content: ReactNode; preview: ReactNode }[];
@@ -25,6 +26,7 @@ export function MediaGallery({
   version: number;
   draftKey: string;
   confirmedOrder?: string[];
+  confirmedOperation?: string;
   copy: {
     reorder: string;
     hint: string;
@@ -38,6 +40,8 @@ export function MediaGallery({
     cover: string;
     moved: string;
     conflict: string;
+    membershipConflict: string;
+    currentPosition: string;
     guard: { title: string; body: string; stay: string; discard: string };
   };
 }) {
@@ -48,13 +52,16 @@ export function MediaGallery({
   const [reviewing, setReviewing] = useState(false);
   const [dragged, setDragged] = useState<string | null>(null);
   const [over, setOver] = useState<string | null>(null);
-  const [restored, setRestored] = useState(false);
+  const [restored, setRestored] = useState<"version" | "membership" | null>(null);
+  const [draftVersion, setDraftVersion] = useState(version);
+  const [previousOrder, setPreviousOrder] = useState<string[] | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const root = useRef<HTMLDivElement>(null);
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const focusAfterMove = useRef<{ id: string; direction?: "up" | "down" } | null>(null);
   const changed = order.join() !== initial.join();
+  const pending = changed || restored !== null;
   useLayoutEffect(() => {
     const pending = focusAfterMove.current;
     if (!pending || !order.includes(pending.id)) return;
@@ -73,31 +80,74 @@ export function MediaGallery({
     try {
       const raw = window.sessionStorage.getItem(draftKey);
       if (!raw) return;
-      const stored = JSON.parse(raw) as { version?: unknown; order?: unknown };
+      const stored = JSON.parse(raw) as {
+        version?: unknown;
+        order?: unknown;
+        recovery?: unknown;
+        previousOrder?: unknown;
+        submission?: { operationId?: unknown; order?: unknown };
+      } | null;
+      const validOrder = (value: unknown): value is string[] =>
+        Array.isArray(value) &&
+        value.length <= 10_000 &&
+        value.every((id) => typeof id === "string" && /^[a-f0-9-]{36}$/i.test(id)) &&
+        new Set(value).size === value.length;
       if (
-        !Array.isArray(stored.order) ||
-        stored.order.length !== initial.length ||
-        new Set(stored.order).size !== initial.length ||
-        stored.order.some((id) => !initial.includes(id))
-      )
-        return;
-      if (confirmed === stored.order.join() || initial.join() === stored.order.join()) {
+        !stored ||
+        !Number.isSafeInteger(stored.version) ||
+        Number(stored.version) < 0 ||
+        !validOrder(stored.order)
+      ) {
         window.sessionStorage.removeItem(draftKey);
         return;
       }
-      setOrder(stored.order);
+      const membershipChanged =
+        stored.order.length !== initial.length || stored.order.some((id) => !initial.includes(id));
+      const recovery =
+        membershipChanged || stored.recovery === "membership"
+          ? "membership"
+          : stored.version !== version || stored.recovery === "version"
+            ? "version"
+            : null;
+      const ownSave =
+        confirmedOperation &&
+        stored.submission?.operationId === confirmedOperation &&
+        validOrder(stored.submission.order) &&
+        stored.submission.order.join() === stored.order.join() &&
+        confirmed === stored.order.join() &&
+        initial.join() === stored.order.join();
+      if (ownSave || (!recovery && initial.join() === stored.order.join())) {
+        window.sessionStorage.removeItem(draftKey);
+        return;
+      }
+      // Only currently authorized relations enter the proposal. Retain earlier placement
+      // order and append new photos; the operator still reviews and explicitly saves it.
+      const retained = stored.order.filter((id) => initial.includes(id));
+      setOrder([...retained, ...initial.filter((id) => !retained.includes(id))]);
       setEditing(true);
       setReviewing(false);
-      setRestored(stored.version !== version);
+      setRestored(recovery);
+      setDraftVersion(Number(stored.version));
+      setPreviousOrder(
+        validOrder(stored.previousOrder)
+          ? stored.previousOrder
+          : membershipChanged
+            ? stored.order
+            : null,
+      );
     } catch {}
-  }, [initial, confirmed, draftKey, version]);
+  }, [initial, confirmed, confirmedOperation, draftKey, version]);
   useEffect(() => {
     if (!hydrated) return;
     try {
-      if (changed) window.sessionStorage.setItem(draftKey, JSON.stringify({ version, order }));
+      if (pending)
+        window.sessionStorage.setItem(
+          draftKey,
+          JSON.stringify({ version: draftVersion, order, recovery: restored, previousOrder }),
+        );
       else window.sessionStorage.removeItem(draftKey);
     } catch {}
-  }, [order, changed, hydrated, draftKey, version]);
+  }, [order, pending, hydrated, draftKey, draftVersion, restored, previousOrder]);
   const recordMove = (next: string[], id: string, direction?: "up" | "down") => {
     focusAfterMove.current = { id, direction };
     const values = {
@@ -134,10 +184,15 @@ export function MediaGallery({
   const before = cover(initial),
     after = cover(order);
   const cancel = () => {
+    try {
+      window.sessionStorage.removeItem(draftKey);
+    } catch {}
     setOrder(initial);
     setEditing(false);
     setReviewing(false);
-    setRestored(false);
+    setRestored(null);
+    setDraftVersion(version);
+    setPreviousOrder(null);
     setAnnouncement("");
   };
   const gallery = (
@@ -195,6 +250,11 @@ export function MediaGallery({
             )}
           >
             <div inert={editing}>{item.content}</div>
+            {reviewing ? (
+              <p className="mt-2 text-caption text-text-muted">
+                {copy.currentPosition.replace("{position}", String(initial.indexOf(id) + 1))}
+              </p>
+            ) : null}
             <span className="pointer-events-none absolute start-2 top-2 inline-flex max-w-[calc(100%_-_1rem)] flex-wrap gap-x-1 rounded-control bg-canvas px-2 py-1 text-caption font-semibold">
               <span className="tabular-nums">{index + 1}</span>
               {after?.id === id ? <span>{copy.cover}</span> : null}
@@ -254,11 +314,32 @@ export function MediaGallery({
           <p className="text-dense text-text-muted">{copy.hint}</p>
           {restored ? (
             <p role="status" className="rounded-control bg-warning-soft p-3 text-dense">
-              {copy.conflict}
+              {restored === "membership" ? copy.membershipConflict : copy.conflict}
             </p>
           ) : null}
-          <MediaReviewGuard copy={copy.guard}>
-            <NativeForm action={action} method="post" className="space-y-4">
+          <MediaReviewGuard copy={copy.guard} hasUnsavedChanges={pending} onDiscard={cancel}>
+            <NativeForm
+              action={action}
+              method="post"
+              className="space-y-4"
+              onSubmitCapture={(event) => {
+                const operationId = String(
+                  new FormData(event.currentTarget).get("operationId") ?? "",
+                );
+                try {
+                  window.sessionStorage.setItem(
+                    draftKey,
+                    JSON.stringify({
+                      version: draftVersion,
+                      order,
+                      recovery: restored,
+                      previousOrder,
+                      submission: { operationId, order },
+                    }),
+                  );
+                } catch {}
+              }}
+            >
               {envelope}
               <input type="hidden" name="order" value={JSON.stringify(order)} />
               <div className="sticky top-0 z-10 flex flex-wrap gap-2 border-b border-divider bg-canvas py-3">
@@ -278,7 +359,7 @@ export function MediaGallery({
                 ) : (
                   <button
                     type="button"
-                    disabled={!changed}
+                    disabled={!pending || order.length === 0}
                     className={buttonClass("primary")}
                     onClick={() => setReviewing(true)}
                   >
@@ -411,12 +492,18 @@ export function MediaReviewGuard({
   children,
   copy,
   requireAcknowledgment = false,
+  hasUnsavedChanges,
+  onDiscard,
 }: {
   children: ReactNode;
   requireAcknowledgment?: boolean;
+  hasUnsavedChanges?: boolean;
+  onDiscard?: () => void;
   copy: { title: string; body: string; stay: string; discard: string };
 }) {
   const root = useRef<HTMLDivElement>(null);
+  const unsaved = useRef(hasUnsavedChanges);
+  unsaved.current = hasUnsavedChanges;
   const dialog = useRef<HTMLDialogElement>(null);
   const continueLeaving = useRef<() => void>(() => {});
   const leaving = useRef(false);
@@ -439,7 +526,7 @@ export function MediaReviewGuard({
         submitted &&
         now === submitted.snapshot &&
         document.cookie.split("; ").includes(`${savedOperationCookie}=${submitted.ack}`);
-      return !leaving.current && now !== initial && !acknowledged;
+      return !leaving.current && (unsaved.current ?? now !== initial) && !acknowledged;
     };
     const click = (event: MouseEvent) => {
       if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -524,6 +611,7 @@ export function MediaReviewGuard({
             type="button"
             className={buttonClass("tertiary")}
             onClick={() => {
+              onDiscard?.();
               leaving.current = true;
               continueLeaving.current();
             }}
