@@ -168,7 +168,11 @@ class TransportBoundary extends Component<
       <FocusResult>
         <Notice tone="warning" title={this.props.copy.unknown}>
           <p>{this.props.copy.draftRetained}</p>
-          <a href={reconciliation.href} className="font-semibold underline">
+          <a
+            href={reconciliation.href}
+            data-form-reconciliation={operationId}
+            className="font-semibold underline"
+          >
             {reconciliation.label}
           </a>
         </Notice>
@@ -507,7 +511,11 @@ function FormSession<V extends FormValues>({
             tone={outcome.kind === "unknown" ? "warning" : "info"}
             title={outcome.message}
             action={
-              <a href={outcome.status.href} className="underline">
+              <a
+                href={outcome.status.href}
+                data-form-reconciliation={state.operationId}
+                className="underline"
+              >
                 {outcome.status.label}
               </a>
             }

@@ -91,6 +91,13 @@ test("O13 a lost rejection response reconciles the fresh conflict request withou
       "href",
       new RegExp(`operation=${requestKey}&operationType=review$`),
     );
+    await expect(receipt).toHaveAttribute("data-form-reconciliation", requestKey);
+    await expect(
+      page.getByRole("definition").filter({ hasText: /^Synthetic recovered holder$/ }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("definition").filter({ hasText: /^synthetic-recovered-permission$/ }),
+    ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Approve as a public candidate", exact: true }),
     ).toHaveCount(0);
