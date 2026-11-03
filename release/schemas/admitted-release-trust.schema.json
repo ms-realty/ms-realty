@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "policyDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "trustedKeysDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "owner": {
+      "type": "string",
+      "const": "Ivan"
+    },
+    "ownerKeyId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+    },
+    "ownerKeyFingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "custodyReference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyDigest",
+    "trustedKeysDigest",
+    "owner",
+    "ownerKeyId",
+    "ownerKeyFingerprint",
+    "custodyReference"
+  ],
+  "additionalProperties": false,
+  "$id": "admitted-release-trust.schema.json",
+  "title": "AdmittedReleaseTrust"
+}

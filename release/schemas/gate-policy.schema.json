@@ -21,6 +21,119 @@
       "maxLength": 200,
       "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
     },
+    "approvalModel": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "const": "separate_reviewers"
+            }
+          },
+          "required": ["mode"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "const": "single_operator_owner_review"
+            },
+            "owner": {
+              "type": "string",
+              "const": "Ivan"
+            },
+            "authorityEvidenceId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+            },
+            "amendments": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200,
+                      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^sha256:[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": ["ref", "digest"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "limitations": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200,
+                      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^sha256:[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": ["ref", "digest"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "phasePermissions": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "ref": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200,
+                      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+                    },
+                    "digest": {
+                      "type": "string",
+                      "pattern": "^sha256:[0-9a-f]{64}$"
+                    }
+                  },
+                  "required": ["ref", "digest"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "mode",
+            "owner",
+            "authorityEvidenceId",
+            "amendments",
+            "limitations",
+            "phasePermissions"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
     "snapshotMaxAgeMinutes": {
       "type": "integer",
       "exclusiveMinimum": 0,
@@ -51,6 +164,26 @@
             "items": {
               "type": "string",
               "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+            }
+          },
+          "actorKind": {
+            "type": "string",
+            "enum": ["human", "machine"]
+          },
+          "purposes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "policy_ratification",
+                "candidate_review",
+                "deployment_acceptance",
+                "operational_acceptance",
+                "human_review",
+                "recovery_review",
+                "machine_observation"
+              ]
             }
           }
         },
