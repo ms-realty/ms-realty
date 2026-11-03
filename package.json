@@ -94,6 +94,9 @@
     "wrangler": "4.153.0"
   },
   "overrides": {
+    "@joshwooding/vite-plugin-react-docgen-typescript@0.7.0": {
+      "glob": "14.0.3"
+    },
     "miniflare": {
       "undici": "7.30.1"
     },
