@@ -69,6 +69,13 @@ export const recoveryPoint = z.strictObject({
   configurationManifest: encrypted,
 });
 
+const restrictiveKinds = [
+  "access_revocation",
+  "privacy_restriction",
+  "deletion_decision",
+  "consent_withdrawal",
+  "publication_withdrawal",
+] as const;
 const entryFields = z.strictObject({
   sequence: z.int().positive(),
   previousDigest: sha,
@@ -76,15 +83,7 @@ const entryFields = z.strictObject({
   effects: z
     .array(
       z.strictObject({
-        kind: z.enum([
-          "access_revocation",
-          "privacy_restriction",
-          "deletion_decision",
-          "consent_withdrawal",
-          "publication_withdrawal",
-          "accepted_operation",
-          "external_outcome",
-        ]),
+        kind: z.enum([...restrictiveKinds, "accepted_operation", "external_outcome"]),
         subjectDigest: sha,
         payloadDigest: sha,
       }),
@@ -92,16 +91,26 @@ const entryFields = z.strictObject({
     .min(1),
 });
 const journalEntry = entryFields.extend({ digest: sha });
+// The encrypted object contains the source-schema replay payload. Its measured plaintext
+// SHA-256 is the journal's payloadDigest. Public evidence contains only hashes and receipts.
+const replayPayload = z.strictObject({
+  kind: z.enum(restrictiveKinds),
+  subjectDigest: sha,
+  object: encrypted,
+  copies,
+});
 const segment = z.strictObject({
   from: cursor,
   through: cursor,
   entries: z.array(journalEntry).min(1),
   // Committed rows can be available while encryption or either copy is pending.
-  archive: z.strictObject({ object: encrypted, copies }).nullable(),
+  archive: z
+    .strictObject({ object: encrypted, copies, replayPayloads: z.array(replayPayload) })
+    .nullable(),
 });
 
 const watermark = z.strictObject({
-  kind: z.literal("recovery_watermark_v1"),
+  kind: z.literal("recovery_watermark_v2"),
   contextDigest: sha,
   pointDigest: sha,
   generation: z.int().positive(),
@@ -199,11 +208,20 @@ function checkCopies(
   object: z.infer<typeof encrypted>,
   records: Copies,
   bindings: Map<string, string>,
+  purpose: "point_component" | "journal_segment" | "restrictive_payload",
 ) {
   requireMatch(
     object.encryptionProfileDigest === context.encryptionProfileDigest,
     "encryption profile",
   );
+  requireMatch(
+    object.plaintext.sha256 !== object.ciphertext.sha256,
+    "cleartext declared as ciphertext",
+  );
+  for (const content of [object.plaintext, object.ciphertext]) {
+    bindOnce(bindings, `bytes/${content.sha256}`, content.size, "conflicting byte length");
+  }
+  bindOnce(bindings, `format/${object.plaintext.sha256}`, purpose, "conflicting content purpose");
   bindOnce(
     bindings,
     `ciphertext/${object.ciphertext.sha256}`,
@@ -240,6 +258,46 @@ function checkCopies(
   }
 }
 
+function replayCoverage(
+  context: RecoveryExpectation["context"],
+  batch: RecoveryPacket["segments"][number],
+  bindings: Map<string, string>,
+) {
+  const required = new Map<string, { kind: string; subjectDigest: string }>();
+  for (const entry of batch.entries) {
+    for (const effect of entry.effects) {
+      if (effect.kind === "accepted_operation" || effect.kind === "external_outcome") continue;
+      const scope = { kind: effect.kind, subjectDigest: effect.subjectDigest };
+      bindOnce(
+        bindings,
+        `restrictive/${effect.payloadDigest}`,
+        scope,
+        "conflicting replay payload scope",
+      );
+      required.set(effect.payloadDigest, scope);
+    }
+  }
+  const seen = new Set<string>();
+  const available = { euR2: 0, outsideAccount: 0 };
+  for (const payload of batch.archive?.replayPayloads ?? []) {
+    const digest = payload.object.plaintext.sha256;
+    const effect = required.get(digest);
+    requireMatch(
+      !seen.has(digest) &&
+        effect?.kind === payload.kind &&
+        effect.subjectDigest === payload.subjectDigest,
+      "unreferenced, duplicate or mis-scoped replay payload",
+    );
+    seen.add(digest);
+    checkCopies(context, payload.object, payload.copies, bindings, "restrictive_payload");
+    for (const target of destinations) if (payload.copies[target]) available[target]++;
+  }
+  return {
+    euR2: available.euR2 === required.size,
+    outsideAccount: available.outsideAccount === required.size,
+  };
+}
+
 /** Validates an ordered window from the independently pinned point. Every result stays quarantined. */
 export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unknown) {
   const expected = recoveryExpectation.parse(expectedInput);
@@ -273,7 +331,13 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
   };
   const bindings = new Map<string, string>();
   for (const component of components) {
-    checkCopies(expected.context, point[component], pointCopies[component], bindings);
+    checkCopies(
+      expected.context,
+      point[component],
+      pointCopies[component],
+      bindings,
+      "point_component",
+    );
     for (const target of destinations) {
       if (!pointCopies[component][target]) prefixes[target] = null;
     }
@@ -294,6 +358,7 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
       head = { sequence: fields.sequence, digest };
     }
     requireMatch(sameCursor(batch.through, head), "segment head");
+    const recoverable = replayCoverage(expected.context, batch, bindings);
     if (!batch.archive) continue;
     const encoded = recoverySegmentBytes(contextDigest, batch.from, batch.through, batch.entries);
     const { object, copies: stored } = batch.archive;
@@ -302,9 +367,10 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
         object.plaintext.sha256 === createHash("sha256").update(encoded).digest("hex"),
       "segment plaintext",
     );
-    checkCopies(expected.context, object, stored, bindings);
+    checkCopies(expected.context, object, stored, bindings, "journal_segment");
     for (const target of destinations) {
-      if (stored[target] && sameCursor(prefixes[target], batch.from)) prefixes[target] = head;
+      if (stored[target] && recoverable[target] && sameCursor(prefixes[target], batch.from))
+        prefixes[target] = head;
     }
   }
   requireMatch(sameCursor(mark.committed, head), "committed head");
@@ -314,12 +380,12 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
       "destination prefix",
     );
   }
-  const copySetDigest = recoveryDigest("copies-v1", [
+  const copySetDigest = recoveryDigest("copies-v2", [
     pointCopies,
     segments.map((batch) => batch.archive),
   ]);
   requireMatch(mark.copySetDigest === copySetDigest, "copy receipt set");
-  const watermarkDigest = recoveryDigest("watermark-v1", mark);
+  const watermarkDigest = recoveryDigest("watermark-v2", mark);
   const seal = packet.barrier;
   if (seal) {
     requireMatch(
@@ -334,6 +400,18 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
         sameCursor(seal.finalHead, head),
       "final source fence",
     );
+    for (const purpose of [
+      "writerFenceReceiptDigest",
+      "acceptedWriteLedgerDigest",
+      "coverageReceiptDigest",
+    ] as const) {
+      bindOnce(
+        bindings,
+        `receipt/${seal[purpose]}`,
+        [purpose, contextDigest, pointDigest, mark.generation, head],
+        "conflicting receipt binding",
+      );
+    }
   }
   const observed = expected.authorityRead;
   if (observed) {

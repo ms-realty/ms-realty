@@ -57,26 +57,41 @@ function copyRecords(object: Point["databaseDump"]): Copies {
 }
 
 function makeBatch(from: Point["anchor"], kind: "consent_withdrawal" | "access_revocation"): Batch {
+  // A private source codec would encode the full scoped restriction. All identities here are synthetic.
+  const target = kind === "access_revocation" ? "synthetic-grant" : "synthetic-subscription";
+  const replay = syntheticObject(
+    JSON.stringify({ schema: "synthetic-v1", kind, target, action: "deny" }),
+  );
+  const subjectDigest = sha(target);
   const fields = {
     sequence: from.sequence + 1,
     previousDigest: from.digest,
     transactionRef: `tx-${from.sequence + 1}`,
-    effects: [{ kind, subjectDigest: sha("subject"), payloadDigest: sha(kind) }],
+    effects: [{ kind, subjectDigest, payloadDigest: replay.plaintext.sha256 }],
   };
   const digest = recoveryEntryDigest(contextDigest, fields);
   const through = { sequence: fields.sequence, digest };
   const entries = [{ ...fields, digest }];
   const object = syntheticObject(recoverySegmentBytes(contextDigest, from, through, entries));
-  return { from, through, entries, archive: { object, copies: copyRecords(object) } };
+  return {
+    from,
+    through,
+    entries,
+    archive: {
+      object,
+      copies: copyRecords(object),
+      replayPayloads: [{ kind, subjectDigest, object: replay, copies: copyRecords(replay) }],
+    },
+  };
 }
 
 function pinPacket(packet: RecoveryPacket): RecoveryExpectation {
   const pointDigest = recoveryDigest("point-v1", packet.point);
-  packet.watermark.copySetDigest = recoveryDigest("copies-v1", [
+  packet.watermark.copySetDigest = recoveryDigest("copies-v2", [
     packet.pointCopies,
     packet.segments.map((s) => s.archive),
   ]);
-  const watermarkDigest = recoveryDigest("watermark-v1", packet.watermark);
+  const watermarkDigest = recoveryDigest("watermark-v2", packet.watermark);
   if (packet.barrier) packet.barrier.watermarkDigest = watermarkDigest;
   return {
     context: { ...context },
@@ -93,6 +108,14 @@ function pinPacket(packet: RecoveryPacket): RecoveryExpectation {
       barrierDigest: packet.barrier && recoveryDigest("barrier-v1", packet.barrier),
     },
   };
+}
+function replaceTail(packet: RecoveryPacket, tail: Batch) {
+  packet.segments[packet.segments.length - 1] = tail;
+  packet.watermark.committed = tail.through;
+  packet.watermark.destinationPrefixes = { euR2: tail.through, outsideAccount: tail.through };
+  if (!packet.barrier) throw Error("missing fixture");
+  packet.barrier.finalHead = tail.through;
+  return pinPacket(packet);
 }
 function fixture(anchor: Point["anchor"] = genesis) {
   const point: Point = {
@@ -119,7 +142,7 @@ function fixture(anchor: Point["anchor"] = genesis) {
     },
     segments: [first, last],
     watermark: {
-      kind: "recovery_watermark_v1",
+      kind: "recovery_watermark_v2",
       contextDigest,
       pointDigest,
       generation: 3,
@@ -147,6 +170,139 @@ function fixture(anchor: Point["anchor"] = genesis) {
 }
 
 describe("R08 / AT64 recovery archive contracts", () => {
+  it("rejects using a copied point manifest as the replay command for a later revocation", () => {
+    const { packet, last } = fixture();
+    const entry = last.entries[0];
+    const effect = entry?.effects[0];
+    const archive = last.archive;
+    const replay = archive?.replayPayloads[0];
+    if (!entry || !effect || !archive || !replay) throw Error("missing fixture");
+    replay.object = packet.point.configurationManifest;
+    replay.copies = packet.pointCopies.configurationManifest;
+    effect.payloadDigest = replay.object.plaintext.sha256;
+    const { digest: _oldDigest, ...fields } = entry;
+    entry.digest = recoveryEntryDigest(contextDigest, fields);
+    last.through = { sequence: entry.sequence, digest: entry.digest };
+    archive.object = syntheticObject(
+      recoverySegmentBytes(contextDigest, last.from, last.through, last.entries),
+    );
+    archive.copies = copyRecords(archive.object);
+    expect(() => inspectRecoveryArchive(replaceTail(packet, last), packet)).toThrow(
+      /content purpose/,
+    );
+  });
+
+  it("allows the same scoped restrictive object and matching receipts in multiple segments", () => {
+    const { packet, first } = fixture();
+    const tail = makeBatch(first.through, "consent_withdrawal");
+    expect(inspectRecoveryArchive(replaceTail(packet, tail), packet)).toMatchObject({
+      commonArchivePrefix: tail.through,
+      currentness: "closed_barrier_bound",
+      quarantine: "required",
+    });
+  });
+
+  it("rejects destination watermarks that count restrictive hashes with no replay objects", () => {
+    const { packet, last } = fixture();
+    for (const batch of packet.segments) {
+      if (batch.archive) batch.archive.replayPayloads = [];
+    }
+    expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow(/destination prefix/);
+    packet.watermark.destinationPrefixes = { euR2: genesis, outsideAccount: genesis };
+    expect(inspectRecoveryArchive(pinPacket(packet), packet)).toMatchObject({
+      committed: last.through,
+      commonArchivePrefix: genesis,
+      currentness: "unknown",
+      quarantine: "required",
+    });
+  });
+
+  it.each(["euR2", "outsideAccount"] as const)(
+    "holds %s at the first missing replay payload despite later complete copies",
+    (target) => {
+      const { first, last, packet } = fixture();
+      const payload = first.archive?.replayPayloads[0];
+      if (!payload) throw Error("missing fixture");
+      payload.copies[target] = null;
+      packet.watermark.destinationPrefixes[target] = genesis;
+      const other = target === "euR2" ? "outsideAccount" : "euR2";
+      expect(inspectRecoveryArchive(pinPacket(packet), packet)).toMatchObject({
+        committed: last.through,
+        destinationPrefixes: { [target]: genesis, [other]: last.through },
+        commonArchivePrefix: genesis,
+        currentness: "unknown",
+        quarantine: "required",
+      });
+    },
+  );
+
+  it.each(["kind", "subject", "ciphertext", "digest", "extra object"] as const)(
+    "rejects substituted replay payload %s",
+    (fault) => {
+      const { packet, first } = fixture();
+      const archive = first.archive;
+      const payload = archive?.replayPayloads[0];
+      if (!archive || !payload) throw Error("missing fixture");
+      switch (fault) {
+        case "kind":
+          payload.kind = "deletion_decision";
+          break;
+        case "subject":
+          payload.subjectDigest = sha("wrong party");
+          break;
+        case "ciphertext":
+          payload.object.ciphertext.sha256 = sha("wrong ciphertext");
+          break;
+        case "digest":
+          payload.object.plaintext.sha256 = sha("wrong payload");
+          break;
+        case "extra object":
+          archive.replayPayloads.push(structuredClone(payload));
+          break;
+      }
+      expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow();
+    },
+  );
+
+  it.each(["conflicting length", "cleartext copy"] as const)(
+    "rejects a newly pinned %s",
+    (fault) => {
+      const { packet } = fixture();
+      const { databaseDump: dump, configurationManifest: config } = packet.point;
+      if (fault === "conflicting length") {
+        config.plaintext = { sha256: dump.plaintext.sha256, size: dump.plaintext.size + 1 };
+      } else {
+        config.ciphertext = { ...config.plaintext };
+        packet.pointCopies.configurationManifest = copyRecords(config);
+      }
+      const pointDigest = recoveryDigest("point-v1", packet.point);
+      packet.watermark.pointDigest = pointDigest;
+      if (!packet.barrier) throw Error("missing fixture");
+      packet.barrier.pointDigest = pointDigest;
+      expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow(
+        fault === "conflicting length" ? /byte length/ : /cleartext/,
+      );
+    },
+  );
+
+  it("rejects a storage creation receipt redeclared as the source writer fence", () => {
+    const { packet } = fixture();
+    const stored = packet.pointCopies.databaseDump.euR2;
+    if (!stored || !packet.barrier) throw Error("missing fixture");
+    packet.barrier.writerFenceReceiptDigest = stored.createReceiptDigest;
+    expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow(/receipt binding/);
+  });
+
+  it.each(["acceptedWriteLedgerDigest", "coverageReceiptDigest"] as const)(
+    "requires a separate typed reference for %s",
+    (purpose) => {
+      const { packet } = fixture();
+      if (!packet.barrier) throw Error("missing fixture");
+      packet.barrier[purpose] = packet.barrier.writerFenceReceiptDigest;
+      expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow(/receipt binding/);
+    },
+  );
+
   it("roots a journal window at the actual nonzero snapshot cursor", () => {
     const anchor = { sequence: 17, digest: sha("prior verified snapshot head") };
     const { packet, expected, last } = fixture(anchor);
