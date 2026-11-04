@@ -37,7 +37,8 @@ The receipt describes tests on synthetic fixtures in CI. It has no admitted rele
 
 A full `ci_test_report` also needs lint, typecheck, unit, integration, browser and build evidence bound to an admitted candidate and policy. This collector measures two browser cases. It does not ingest individual Vitest results or establish the full AT09 obligation. The release evaluator and R00 authority control any later counting.
 
+`make check` runs the Node scenario and Python archive suites through `npm run test:release`. To run only the R03 checks, use the same discovered test file.
+
 ```sh
-node --test scripts/release-ci-scenarios.test.mjs
-python3 -B scripts/release-ci-archive.test.py
+node --test scripts/production-release-ci-scenarios.test.mjs
 ```

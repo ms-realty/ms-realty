@@ -519,3 +519,15 @@ test("CLI refuses submitted and synthetic receipts before creating an output", (
   assert.equal(child.status, 1);
   assert.match(child.stderr, /Unknown option/);
 });
+
+test("R03 archive transport and credential checks run offline", () => {
+  const child = spawnSync("python3", ["-I", "-B", "scripts/release-ci-archive.test.py"], {
+    cwd: new URL("..", import.meta.url),
+    encoding: "utf8",
+    timeout: 60_000,
+    maxBuffer: 64 * 1024,
+  });
+  assert.ifError(child.error);
+  const diagnostics = `${child.stdout}\n${child.stderr}`.trim().slice(-2400);
+  assert.equal(child.status, 0, diagnostics || `Python stopped on signal ${child.signal}`);
+});
