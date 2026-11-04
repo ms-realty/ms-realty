@@ -19,7 +19,13 @@ Supply the following two JSON files. Keep the pin file under the release operato
 **Pin file.** Each unknown input is explicitly null. `releaseSha` is the exact 40-character lowercase Git SHA. `releaseContextDigest` comes from the evaluator's `releaseContextDigest(manifest)`. `datasetDigest` hashes the exact dataset file bytes. `scope` addresses the independently frozen reconciliation record described below. Every addressed digest is `sha256:` followed by 64 lowercase hexadecimal digits.
 
 ```json
-{"schemaVersion":1,"releaseSha":null,"releaseContextDigest":null,"datasetDigest":null,"scope":null}
+{
+  "schemaVersion": 1,
+  "releaseSha": null,
+  "releaseContextDigest": null,
+  "datasetDigest": null,
+  "scope": null
+}
 ```
 
 **Dataset v2.** Freeze one row per exact, case-sensitive reference, including withheld rows, legacy references and missing values. Preserve the original redacted public observations separately from the candidate facts. The row digest and CSV bind both. Changing a fact or its state requires a fresh freeze. The earlier v1 dataset requires explicit conversion and new pins. The example below is synthetic. Include only public-scope facts and opaque references or digests for private evidence. Omit customer identities, private coordinates, seller instructions, credentials and keys from this packet.
@@ -27,24 +33,38 @@ Supply the following two JSON files. Keep the pin file under the release operato
 ```json
 {
   "schemaVersion": 2,
-  "listings": [{
-    "reference": "MS-00001",
-    "sourceLocale": "bg",
-    "sourceUrls": ["https://legacy.example/listing/one"],
-    "sourceRevision": null,
-    "observations": {"price": null, "area": {"unit":"sqm","recordedOnListing":[],"recordedOnProperty":[]}, "bedrooms": null, "location": null},
-    "facts": {
-      "price": {"state":"unknown","value":null}, "area": {"state":"unknown","value":null},
-      "bedrooms": {"state":"unknown","value":null}, "location": {"state":"unknown","value":null}
-    },
-    "availability": null,
-    "mediaDigest": null,
-    "sourceAsIs": "unrecorded",
-    "translations": {"ru": {"revision": null, "indexable": null}},
-    "warnings": [{
-      "family": "structured_data.missing_area", "url": "/bg/imoti/MS-00001", "locale": "bg", "occurrence": 1
-    }]
-  }]
+  "listings": [
+    {
+      "reference": "MS-00001",
+      "sourceLocale": "bg",
+      "sourceUrls": ["https://legacy.example/listing/one"],
+      "sourceRevision": null,
+      "observations": {
+        "price": null,
+        "area": { "unit": "sqm", "recordedOnListing": [], "recordedOnProperty": [] },
+        "bedrooms": null,
+        "location": null
+      },
+      "facts": {
+        "price": { "state": "unknown", "value": null },
+        "area": { "state": "unknown", "value": null },
+        "bedrooms": { "state": "unknown", "value": null },
+        "location": { "state": "unknown", "value": null }
+      },
+      "availability": null,
+      "mediaDigest": null,
+      "sourceAsIs": "unrecorded",
+      "translations": { "ru": { "revision": null, "indexable": null } },
+      "warnings": [
+        {
+          "family": "structured_data.missing_area",
+          "url": "/bg/imoti/MS-00001",
+          "locale": "bg",
+          "occurrence": 1
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -60,15 +80,15 @@ Supply the following two JSON files. Keep the pin file under the release operato
 
 The draft fills the candidate identity, reference, row digest, source URLs and revision, public facts, observed availability, media selection and source-as-is observation. Leave these columns byte-for-byte as generated after CSV decoding. Start another freeze after a material change. CSV supports UTF-8, an optional BOM, quoted commas/quotes/newlines, CRLF and reordered header columns. Every required header appears once. Duplicate, missing and unexpected listing rows block the review.
 
-| CSV field | Recorded human choice |
-| --- | --- |
-| `review_origin`, `broker_owner` | `current_ivan` and `Ivan` only after the actual review. A draft has `pending` and an empty owner. |
-| `broker_decision`, `publication_decision` | Broker chooses `approve`, `hold`, `reject` or `pending`. Publication chooses `publish`, `withhold`, `withdraw`, `hold` or `pending`. A hold blocks completeness. A final withhold/withdraw needs the independently frozen negative projection evidence below. |
-| `source_decision`, `availability_decision`, `seller_authority`, `media_rights` | `verified`, `unknown`, `hold`, `denied` or `pending` for each separate decision. An explicit final non-public decision may record a reviewed unknown or denial. Pending and hold still block. |
-| `fact_decisions` | JSON object with separate price, area, bedrooms and location decisions. Match each frozen state to `verified`, `retain_unknown`, `retain_not_supplied`, `accept_not_applicable`, `retain_withheld` or `retain_conflicting`. Proposed publication requires known location and either known price or explicitly withheld price (price on request). A conflict blocks proposed publication. Reviewed non-public rows may retain unknown price and location. `hold` and `pending` block inventory completeness. |
-| `warning_decisions` | Preserve each occurrence and one choice from `retain_unknown`, `not_applicable`, `accepted_limitation`, `corrected`, `non_public`, `hold` or `pending`. A corrected occurrence requires a bound `correctionDigest`. Other dispositions use null. A non-public disposition requires verified absence across every projection. |
-| `translation_decisions` | Preserve each locale's `revision` and `indexable`. Explicit `noindex` uses null `receiptDigest`. Proposed indexing requires `approve_indexing` and a separate exact-revision translation receipt. `hold` and `pending` block. |
-| `review_receipt_digest` | Digest of Ivan's retained review record. The command displays the exact expected `decisionDigest` for each row even while its record is missing. A batch review record can cover multiple listings. |
+| CSV field                                                                      | Recorded human choice                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `review_origin`, `broker_owner`                                                | `current_ivan` and `Ivan` only after the actual review. A draft has `pending` and an empty owner.                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `broker_decision`, `publication_decision`                                      | Broker chooses `approve`, `hold`, `reject` or `pending`. Publication chooses `publish`, `withhold`, `withdraw`, `hold` or `pending`. A hold blocks completeness. A final withhold/withdraw needs the independently frozen negative projection evidence below.                                                                                                                                                                                                                                               |
+| `source_decision`, `availability_decision`, `seller_authority`, `media_rights` | `verified`, `unknown`, `hold`, `denied` or `pending` for each separate decision. An explicit final non-public decision may record a reviewed unknown or denial. Pending and hold still block.                                                                                                                                                                                                                                                                                                               |
+| `fact_decisions`                                                               | JSON object with separate price, area, bedrooms and location decisions. Match each frozen state to `verified`, `retain_unknown`, `retain_not_supplied`, `accept_not_applicable`, `retain_withheld` or `retain_conflicting`. Proposed publication requires known location and either known price or explicitly withheld price (price on request). A conflict blocks proposed publication. Reviewed non-public rows may retain unknown price and location. `hold` and `pending` block inventory completeness. |
+| `warning_decisions`                                                            | Preserve each occurrence and one choice from `retain_unknown`, `not_applicable`, `accepted_limitation`, `corrected`, `non_public`, `hold` or `pending`. A corrected occurrence requires a bound `correctionDigest`. Other dispositions use null. A non-public disposition requires verified absence across every projection.                                                                                                                                                                                |
+| `translation_decisions`                                                        | Preserve each locale's `revision` and `indexable`. Explicit `noindex` uses null `receiptDigest`. Proposed indexing requires `approve_indexing` and a separate exact-revision translation receipt. `hold` and `pending` block.                                                                                                                                                                                                                                                                               |
+| `review_receipt_digest`                                                        | Digest of Ivan's retained review record. The command displays the exact expected `decisionDigest` for each row even while its record is missing. A batch review record can cover multiple listings.                                                                                                                                                                                                                                                                                                         |
 
 ## Retained redacted records
 
