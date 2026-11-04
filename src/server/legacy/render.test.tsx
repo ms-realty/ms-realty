@@ -76,7 +76,7 @@ it("renders actual source text without executing source HTML, recreating WordPre
     path: `/legacy/${source.id}`,
     title: source.title,
     description: source.description,
-    availableIn: ["ru"],
+    availableIn: [],
   });
 });
 it("uses the exact absolute source head title and untrimmed long description while retaining the visible heading", async () => {
