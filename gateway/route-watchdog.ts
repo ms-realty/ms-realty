@@ -98,6 +98,21 @@ interface Intent extends Change {
   id?: string;
   restored?: boolean;
 }
+interface ExecutionAcceptanceReceipt {
+  schemaVersion: 1;
+  purpose: "conditional_cutover_acceptance";
+  operationId: string;
+  leaseId: string;
+  grantRequestDigest: string;
+  admissionDigest: string;
+  planDigest: string;
+  snapshotId: string;
+  planSha256: string;
+  reportSha256: string;
+  requestDigest: string;
+  decisionAt: number;
+  forwardDeadline: number;
+}
 interface State {
   mode?: "rehearsal";
   scope: Scope;
@@ -128,6 +143,8 @@ interface State {
   restoredAt?: number;
   providerFailure?: boolean;
   acceptedReportSha256?: string;
+  acceptance?: ExecutionAcceptanceReceipt;
+  selectedAdmissionDigest?: string;
   lateWriteFaults?: number;
   originIndex?: number;
   originChecks?: { host: string; address: string; strictTls: true; status: number }[];
@@ -282,6 +299,122 @@ export class OriginProbe extends Container<Env> {
 }
 
 export class RouteWatchdog extends DurableObject<Env> {
+  private async completedAcceptance(state: State) {
+    if (state.status !== "accepted") return false;
+    if (!state.execution) return true; // Existing legacy acceptance has no v2 finalization record.
+    const receipt = state.acceptance;
+    if (receipt?.schemaVersion !== 1 || receipt.purpose !== "conditional_cutover_acceptance")
+      return false;
+    const record = await this.ctx.storage.get<ExecutionRecord>(state.execution.recordKey);
+    return (
+      !!record &&
+      receipt.operationId === state.scope.operationId &&
+      receipt.operationId === record.operationId &&
+      receipt.leaseId === state.scope.leaseId &&
+      receipt.leaseId === record.leaseId &&
+      receipt.grantRequestDigest === state.execution.requestDigest &&
+      receipt.grantRequestDigest === record.requestDigest &&
+      receipt.admissionDigest === state.execution.admissionDigest &&
+      receipt.admissionDigest === record.admissionDigest &&
+      receipt.planDigest === record.planDigest &&
+      receipt.snapshotId === record.snapshotId &&
+      receipt.planSha256 === state.planSha256 &&
+      receipt.reportSha256 === state.acceptedReportSha256 &&
+      state.deadline === record.deadline &&
+      state.execution.forwardExpiresAt === record.forwardExpiresAt &&
+      hex(64, receipt.requestDigest) &&
+      hex(64, receipt.reportSha256) &&
+      Number.isSafeInteger(receipt.decisionAt) &&
+      receipt.decisionAt >= record.admittedAt &&
+      receipt.forwardDeadline === Math.min(state.deadline, record.forwardExpiresAt) &&
+      receipt.decisionAt < receipt.forwardDeadline
+    );
+  }
+  private acceptanceResponse(state: State) {
+    return {
+      status: "accepted",
+      reportSha256: state.acceptedReportSha256,
+      acceptance: state.acceptance,
+    };
+  }
+  private async finalizeExecutionAcceptance(
+    state: State,
+    input: Record<string, unknown>,
+    packet: RuntimeExecutionPacket,
+  ) {
+    const execution = required(state.execution);
+    const requestDigest = hash(canonical(input));
+    const reportSha256 = hash((input.report as Envelope).payload);
+    try {
+      return await this.ctx.storage.transaction(async (txn) => {
+        const active = required(await txn.get<State>("active"));
+        demand(
+          active.status === "armed" &&
+            same(active.scope, state.scope) &&
+            active.execution?.requestDigest === execution.requestDigest &&
+            active.planSha256 === state.planSha256 &&
+            same(active.intents, state.intents) &&
+            active.deadline === state.deadline,
+        );
+        const accepted: State = {
+          ...state,
+          status: "accepted",
+          acceptedReportSha256: reportSha256,
+          acceptance: undefined,
+        };
+        // This label alone is never terminal. Both awaited operations roll back together.
+        await txn.put("active", accepted);
+        await txn.deleteAlarm();
+        // SQLite's synchronous KV participates in this enclosing transaction. No await follows
+        // this decision instant inside the callback; a throw rolls back the receipt and alarm.
+        const installed = required(
+          loadExecutionAdmission(this.env as unknown as Record<string, unknown>, "watchdog"),
+        );
+        const decisionAt = Date.now();
+        demand(installed.digest === execution.admissionDigest && decisionAt < state.deadline);
+        const verified = verifyRuntimeExecution(
+          packet,
+          installed,
+          this.leaseState(state),
+          new Date(decisionAt),
+          true,
+        );
+        accepted.acceptance = {
+          schemaVersion: 1,
+          purpose: "conditional_cutover_acceptance",
+          operationId: state.scope.operationId,
+          leaseId: state.scope.leaseId,
+          grantRequestDigest: execution.requestDigest,
+          admissionDigest: installed.digest,
+          planDigest: verified.receipt.planDigest,
+          snapshotId: verified.plan.snapshotId,
+          planSha256: required(state.planSha256),
+          reportSha256,
+          requestDigest,
+          decisionAt,
+          forwardDeadline: Math.min(state.deadline, verified.forwardExpiresAt),
+        };
+        this.ctx.storage.kv.put("active", accepted);
+        demand(
+          loadExecutionAdmission(this.env as unknown as Record<string, unknown>, "watchdog")
+            ?.digest === installed.digest && Date.now() < accepted.acceptance.forwardDeadline,
+        );
+        return this.acceptanceResponse(accepted);
+      });
+    } catch {
+      // A failed acknowledgement is not evidence of an aborted transaction. Read the exact
+      // terminal receipt before deciding; a valid commit survives later expiry/config drift.
+      const retained = await this.ctx.storage.get<State>("active");
+      if (retained && same(retained.scope, state.scope)) {
+        if (await this.completedAcceptance(retained)) {
+          demand(retained.acceptance?.requestDigest === requestDigest);
+          return this.acceptanceResponse(retained);
+        }
+        if (["armed", "accepted"].includes(retained.status)) await this.startRestore(retained);
+      }
+      throw new Error("Acceptance finalization requires original-operation recovery");
+    }
+  }
   private async executionPacket(
     recordKey: string,
     record: ExecutionRecord,
@@ -408,6 +541,7 @@ export class RouteWatchdog extends DurableObject<Env> {
       state &&
         state.mode !== "rehearsal" &&
         state.status === "reserved" &&
+        (!state.selectedAdmissionDigest || state.selectedAdmissionDigest === installed.digest) &&
         state.scope.operationId === input.operationId &&
         state.scope.leaseId === input.leaseId,
     );
@@ -501,7 +635,10 @@ export class RouteWatchdog extends DurableObject<Env> {
       await txn.put({
         ...chunks,
         active: armed,
-        "execution-mode": { schemaVersion: 2, mode: "single_operator_owner_review" },
+        "execution-mode": (await txn.get("execution-mode")) ?? {
+          schemaVersion: 2,
+          mode: "single_operator_owner_review",
+        },
         [recordKey]: record,
         [`execution-lease:${state.scope.leaseId}`]: state.scope.operationId,
       });
@@ -576,6 +713,38 @@ export class RouteWatchdog extends DurableObject<Env> {
   private async save(state: State) {
     await this.ctx.storage.put("active", state);
   }
+  private async selectReservationMode(
+    state: State,
+    installed: InstalledExecutionAdmission,
+    prior?: State,
+  ) {
+    await this.ctx.storage.transaction(async (txn) => {
+      demand(same(await txn.get<State>("active"), prior));
+      const retained = structuredClone(state);
+      if (retained.status === "reserved") {
+        demand(
+          !retained.selectedAdmissionDigest ||
+            retained.selectedAdmissionDigest === installed.digest,
+        );
+        retained.selectedAdmissionDigest = installed.digest;
+      }
+      if (prior && prior.scope.operationId !== state.scope.operationId)
+        await txn.put(`history:${prior.scope.operationId}`, prior);
+      const latch = (await txn.get("execution-mode")) ?? {
+        schemaVersion: 2,
+        mode: "single_operator_owner_review",
+        selectedBy: "reservation",
+        admissionDigest: installed.digest,
+      };
+      await txn.put({ active: retained, "execution-mode": latch });
+      if (!prior || prior.scope.operationId !== state.scope.operationId)
+        await txn.setAlarm(state.deadline);
+      demand(
+        loadExecutionAdmission(this.env as unknown as Record<string, unknown>, "watchdog")
+          ?.digest === installed.digest,
+      );
+    });
+  }
   private async reserve(scope: Scope) {
     const installed = await this.executionMode();
     if (installed) {
@@ -601,8 +770,10 @@ export class RouteWatchdog extends DurableObject<Env> {
         scope.zoneIds.includes(comZone),
     );
     const prior = await this.ctx.storage.get<State>("active");
-    if (prior && same(prior.scope, scope))
+    if (prior && same(prior.scope, scope)) {
+      if (installed) await this.selectReservationMode(prior, installed, prior);
       return { ...prior.receipt, evidenceSha256: hash(canonical(prior.receipt)) };
+    }
     if (installed)
       demand(
         !(await this.ctx.storage.get(`execution-lease:${scope.leaseId}`)) &&
@@ -613,7 +784,6 @@ export class RouteWatchdog extends DurableObject<Env> {
       prior?.scope.operationId !== scope.operationId &&
         !(await this.ctx.storage.get(`history:${scope.operationId}`)),
     );
-    if (prior) await this.ctx.storage.put(`history:${prior.scope.operationId}`, prior);
     const now = Date.now(),
       expiresAt = now + 1_800_000;
     const receipt = {
@@ -637,7 +807,7 @@ export class RouteWatchdog extends DurableObject<Env> {
         runtime: "isolated-native-node-container",
       },
     };
-    await this.save({
+    const reserved: State = {
       scope,
       reservedAt: now,
       expiresAt,
@@ -646,8 +816,13 @@ export class RouteWatchdog extends DurableObject<Env> {
       receipt,
       intents: [],
       cleanReads: 0,
-    });
-    await this.ctx.storage.setAlarm(now + 600_000);
+    };
+    if (installed) await this.selectReservationMode(reserved, installed, prior);
+    else {
+      if (prior) await this.ctx.storage.put(`history:${prior.scope.operationId}`, prior);
+      await this.save(reserved);
+      await this.ctx.storage.setAlarm(now + 600_000);
+    }
     return { ...receipt, evidenceSha256: hash(canonical(receipt)) };
   }
   private async bind(
@@ -1015,7 +1190,7 @@ export class RouteWatchdog extends DurableObject<Env> {
   async alarm() {
     await this.ctx.blockConcurrencyWhile(async () => {
       const state = await this.ctx.storage.get<State>("active");
-      if (!state || ["accepted", "released"].includes(state.status)) return;
+      if (!state || state.status === "released" || (await this.completedAcceptance(state))) return;
       // Persist the next wake before external I/O: retry exhaustion must not silently disarm it.
       await this.ctx.storage.setAlarm(Date.now() + 30_000);
       if (state.execution && state.status === "armed") {
@@ -1039,6 +1214,16 @@ export class RouteWatchdog extends DurableObject<Env> {
       try {
         const path = new URL(request.url).pathname,
           state = await this.ctx.storage.get<State>("active");
+        if (
+          state?.execution &&
+          state.status === "accepted" &&
+          !(await this.completedAcceptance(state))
+        ) {
+          // Old v2 labels have no proof that the final authority/storage boundary completed.
+          // Establish a wake before migration so an interrupted repair remains recoverable.
+          await this.ctx.storage.setAlarm(Date.now() + 100);
+          await this.startRestore(state);
+        }
         if (request.method === "GET" && path === "/status")
           return response(state ? { ...state, journal: undefined } : { status: "empty" });
         if (request.method === "GET" && path === "/origin") {
@@ -1068,7 +1253,11 @@ export class RouteWatchdog extends DurableObject<Env> {
             throw new Error("Forward operation is unavailable");
           }
         }
-        const input = await boundedJson(request, 2 * 1024 * 1024, !!installed);
+        const input = await boundedJson(
+          request,
+          2 * 1024 * 1024,
+          !!installed || (path === "/accept" && !!state?.execution),
+        );
         if (path === "/reserve") return response(await this.reserve(input));
         if (path === "/rehearsal") {
           demand(!installed);
@@ -1151,6 +1340,13 @@ export class RouteWatchdog extends DurableObject<Env> {
           });
         }
         if (path === "/accept") {
+          if (state.status === "accepted" && state.execution) {
+            demand(
+              (await this.completedAcceptance(state)) &&
+                state.acceptance?.requestDigest === hash(canonical(input)),
+            );
+            return response(this.acceptanceResponse(state));
+          }
           if (
             state.status === "accepted" &&
             state.acceptedReportSha256 === hash(input.report?.payload ?? "")
@@ -1171,12 +1367,14 @@ export class RouteWatchdog extends DurableObject<Env> {
             !!state.execution,
           );
           let acceptedNotBefore = state.deadline - 600_000;
+          let executionPacket: RuntimeExecutionPacket | undefined;
           if (state.execution) {
             const record = required(
               await this.ctx.storage.get<ExecutionRecord>(state.execution.recordKey),
             );
             acceptedNotBefore = record.admittedAt;
             const packet = await this.executionPacket(state.execution.recordKey, record);
+            executionPacket = packet;
             const verifier = JSON.parse(packet.verification.payload);
             demand(
               report.purpose === "conditional_cutover_acceptance" &&
@@ -1282,6 +1480,8 @@ export class RouteWatchdog extends DurableObject<Env> {
           }
           if (state.execution) await this.verifyForward(state, false);
           demand(Date.now() < state.deadline);
+          if (executionPacket)
+            return response(await this.finalizeExecutionAcceptance(state, input, executionPacket));
           state.status = "accepted";
           state.acceptedReportSha256 = hash(input.report.payload);
           await this.save(state);

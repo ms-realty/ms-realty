@@ -38,6 +38,8 @@ function fixture() {
   let failTransaction = false;
   let commitAdvance = 0;
   let commits = 0;
+  let transactionRows: Map<string, unknown> | undefined;
+  let storageHook: (kind: string, key: string, value?: unknown) => void = () => {};
   const storageApi = (rows: Map<string, unknown>, setAlarm: (at: number | null) => void) => ({
     get: async (key: string) => structuredClone(rows.get(key)),
     put: async (key: string | Record<string, unknown>, value?: unknown) => {
@@ -45,10 +47,14 @@ function fixture() {
       for (const [name, item] of entries) {
         expect(Buffer.byteLength(canonicalJson(item))).toBeLessThan(128 * 1024);
         rows.set(name, structuredClone(item));
+        storageHook("put", name, item);
       }
     },
     setAlarm: async (at: number) => setAlarm(at),
-    deleteAlarm: async () => setAlarm(null),
+    deleteAlarm: async () => {
+      setAlarm(null);
+      storageHook("deleteAlarm", "alarm");
+    },
   });
   const storage = {
     get: async (key: string) => structuredClone(values.get(key)),
@@ -61,20 +67,35 @@ function fixture() {
     },
     deleteAlarm: async () => {
       alarm = null;
+      storageHook("deleteAlarm", "alarm");
+    },
+    kv: {
+      put: (key: string, value: unknown) => {
+        (transactionRows ?? values).set(key, structuredClone(value));
+        storageHook("syncPut", key, value);
+      },
     },
     transaction: async (callback: (txn: ReturnType<typeof storageApi>) => Promise<void>) => {
       const staged = structuredClone(values);
       let stagedAlarm = alarm;
-      await callback(
-        storageApi(staged, (at) => {
-          stagedAlarm = at;
-        }),
-      );
-      if (failTransaction) throw new Error("Synthetic storage failure before atomic commit");
-      values = staged;
-      alarm = stagedAlarm;
-      commits++;
-      clock += commitAdvance;
+      transactionRows = staged;
+      try {
+        const result = await callback(
+          storageApi(staged, (at) => {
+            stagedAlarm = at;
+          }),
+        );
+        if (failTransaction) throw new Error("Synthetic storage failure before atomic commit");
+        storageHook("beforeCommit", "active", staged.get("active"));
+        values = staged;
+        alarm = stagedAlarm;
+        commits++;
+        clock += commitAdvance;
+        storageHook("committed", "active", values.get("active"));
+        return result;
+      } finally {
+        transactionRows = undefined;
+      }
     },
   };
   let queue = Promise.resolve();
@@ -343,6 +364,10 @@ function fixture() {
     values: () => values,
     alarm: () => alarm,
     commits: () => commits,
+    onStorage: (hook: typeof storageHook) => {
+      storageHook = hook;
+    },
+    runAlarm: () => instance.alarm(),
     restart: () => {
       instance = new RouteWatchdog(ctx as never, env as never);
     },
@@ -365,6 +390,12 @@ function fixture() {
   };
 }
 
+async function applied(r: ReturnType<typeof fixture>) {
+  const packet = await r.arm();
+  for (let i = 0; i < r.plan.routes.length; i++) expect((await r.mutate(i)).status).toBe(200);
+  return { packet, input: { ...r.f.scope, report: r.productionReport(packet) } };
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
@@ -372,13 +403,270 @@ afterEach(() => {
 });
 
 describe("R00 watchdog installed execution and durable replay", () => {
+  it.each(["put", "deleteAlarm", "syncPut"])(
+    "rolls back acceptance and alarm deletion on expiry during %s",
+    async (boundary) => {
+      const r = fixture();
+      const { input } = await applied(r);
+      r.advance(59_999);
+      let injected = false;
+      r.onStorage((kind, key, value) => {
+        if (
+          kind === boundary &&
+          (key === "alarm" || (value as { status?: string }).status === "accepted")
+        ) {
+          injected = true;
+          r.onStorage(() => {});
+          r.advance(2);
+        }
+      });
+      expect((await r.call("/accept", input)).status).toBe(409);
+      expect(injected).toBe(true);
+      expect(r.active().status).toBe("restoring");
+      expect(r.alarm()).not.toBeNull();
+      r.restart();
+      await r.runAlarm();
+      expect(r.active().status).toBe("restoring");
+      await r.sweep();
+      expect(r.active().status).toBe("restored");
+    },
+  );
+
+  it.each(["put", "deleteAlarm", "syncPut"])(
+    "rolls back acceptance and preserves recovery on installation removal during %s",
+    async (boundary) => {
+      const r = fixture();
+      const { input } = await applied(r);
+      let injected = false;
+      r.onStorage((kind, key, value) => {
+        if (
+          kind === boundary &&
+          (key === "alarm" || (value as { status?: string }).status === "accepted")
+        ) {
+          injected = true;
+          r.onStorage(() => {});
+          delete r.env.MS_REALTY_EXECUTION_ADMISSION;
+        }
+      });
+      expect((await r.call("/accept", input)).status).toBe(409);
+      expect(injected).toBe(true);
+      r.restart();
+      await r.runAlarm();
+      expect(r.active().status).toBe("restoring");
+      expect(r.alarm()).not.toBeNull();
+      await r.sweep();
+      expect(r.active().status).toBe("restored");
+    },
+  );
+
+  it.each(["put", "beforeCommit"])(
+    "retains original recovery when acceptance storage fails at %s",
+    async (boundary) => {
+      const r = fixture();
+      const { input } = await applied(r);
+      r.advance(59_999);
+      let injected = false;
+      r.onStorage((kind, _key, value) => {
+        if (kind === boundary && (value as { status?: string })?.status === "accepted") {
+          injected = true;
+          r.onStorage(() => {});
+          r.advance(2);
+          throw new Error("Synthetic interrupted acceptance transaction");
+        }
+      });
+      expect((await r.call("/accept", input)).status).toBe(409);
+      expect(injected).toBe(true);
+      expect((r.values().get("active") as { acceptance?: unknown }).acceptance).toBeUndefined();
+      r.restart();
+      await r.runAlarm();
+      expect(r.active().status).toBe("restoring");
+      expect(r.alarm()).not.toBeNull();
+    },
+  );
+
+  it("resolves post-commit ACK loss only from the exact final receipt and preserves terminal acceptance after drift", async () => {
+    const r = fixture();
+    const { input, packet } = await applied(r);
+    r.onStorage((kind, _key, value) => {
+      if (kind === "committed" && (value as { status?: string })?.status === "accepted") {
+        r.onStorage(() => {});
+        r.advance(60_001);
+        delete r.env.MS_REALTY_EXECUTION_ADMISSION;
+        throw new Error("Synthetic ACK lost after valid atomic commit");
+      }
+    });
+    const result = await r.call("/accept", input);
+    expect(result.status).toBe(200);
+    const outcome = await result.json();
+    expect(outcome).toMatchObject({
+      status: "accepted",
+      acceptance: {
+        schemaVersion: 1,
+        purpose: "conditional_cutover_acceptance",
+        operationId: packet.plan.operationId,
+        leaseId: packet.plan.leaseId,
+        snapshotId: packet.plan.snapshotId,
+        planDigest: sha256Digest(canonicalJson(packet.plan)),
+        admissionDigest: packet.plan.admissionDigest,
+        decisionAt: r.f.at,
+        forwardDeadline: r.f.at + 60_000,
+      },
+    });
+    r.restart();
+    await r.runAlarm();
+    expect(r.active().status).toBe("accepted");
+    expect(r.alarm()).toBeNull();
+    const writes = r.writes.length,
+      commits = r.commits();
+    expect(await (await r.call("/accept", input)).json()).toEqual(outcome);
+    expect(
+      (await r.call("/accept", { ...input, report: { ...input.report, extra: "conflict" } }))
+        .status,
+    ).toBe(409);
+    expect((await r.mutate()).status).toBe(409);
+    expect(
+      (await r.call("/reserve", { ...r.f.scope, operationId: randomUUID(), leaseId: randomUUID() }))
+        .status,
+    ).toBe(409);
+    expect(r.writes).toHaveLength(writes);
+    expect(r.commits()).toBe(commits);
+    expect(r.active().status).toBe("accepted");
+  });
+
+  it("records the decision instant after the transaction's final await", async () => {
+    const r = fixture();
+    const { input } = await applied(r);
+    r.onStorage((kind) => {
+      if (kind === "deleteAlarm") {
+        r.onStorage(() => {});
+        r.advance(500);
+      }
+    });
+    const response = await r.call("/accept", input);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      acceptance: { decisionAt: r.f.at + 500, forwardDeadline: r.f.at + 60_000 },
+    });
+    r.advance(60_000);
+    r.env.MS_REALTY_EXECUTION_ADMISSION = "malformed";
+    r.restart();
+    await r.runAlarm();
+    expect(r.active().status).toBe("accepted");
+    expect((await r.call("/accept", input)).status).toBe(200);
+  });
+
+  it.each(["absent", "wrong S", "wrong P", "wrong grant", "wrong lease", "wrong deadline"])(
+    "recovers an unverified terminal label with %s receipt on restart",
+    async (damage) => {
+      const r = fixture();
+      const { input } = await applied(r);
+      expect((await r.call("/accept", input)).status).toBe(200);
+      const state = r.values().get("active") as { acceptance?: Record<string, unknown> };
+      if (damage === "absent") delete state.acceptance;
+      else if (state.acceptance)
+        state.acceptance[
+          {
+            "wrong S": "snapshotId",
+            "wrong P": "planDigest",
+            "wrong grant": "grantRequestDigest",
+            "wrong lease": "leaseId",
+            "wrong deadline": "forwardDeadline",
+          }[damage] ?? "invalid"
+        ] = "unverified";
+      delete r.env.MS_REALTY_EXECUTION_ADMISSION;
+      r.restart();
+      expect((await r.call("/status")).status).toBe(200);
+      expect(r.active().status).toBe("restoring");
+      expect(r.alarm()).not.toBeNull();
+      expect((await r.call("/accept", input)).status).toBe(409);
+      await r.sweep();
+      expect(r.active().status).toBe("restored");
+    },
+  );
+
+  it.each(["", "{malformed", undefined])(
+    "retains reservation-selected mode after unused restore and installation %s",
+    async (removed) => {
+      const r = fixture();
+      await r.reserve();
+      expect(r.values().get("execution-mode")).toMatchObject({
+        selectedBy: "reservation",
+        admissionDigest: r.f.installed.digest,
+      });
+      expect((await r.call("/restore", r.f.scope)).status).toBe(200);
+      expect(r.active().status).toBe("released");
+      r.env.MS_REALTY_EXECUTION_ADMISSION = removed;
+      r.restart();
+      expect(
+        (
+          await r.call("/reserve", {
+            ...r.f.scope,
+            operationId: randomUUID(),
+            leaseId: randomUUID(),
+          })
+        ).status,
+      ).toBe(409);
+      expect((await r.call("/rehearsal", { operationId: randomUUID() })).status).toBe(409);
+      expect(r.active().status).toBe("released");
+      expect(r.writes).toEqual([]);
+    },
+  );
+
+  it("atomically selects mode on an existing unmarked reservation replay without extending custody", async () => {
+    const r = fixture();
+    const installed = r.env.MS_REALTY_EXECUTION_ADMISSION;
+    delete r.env.MS_REALTY_EXECUTION_ADMISSION;
+    expect((await r.call("/reserve", r.f.scope)).status).toBe(200);
+    expect(r.values().get("execution-mode")).toBeUndefined();
+    const deadline = r.active().deadline,
+      alarm = r.alarm();
+    r.advance(1000);
+    r.env.MS_REALTY_EXECUTION_ADMISSION = installed;
+    expect((await r.call("/reserve", r.f.scope)).status).toBe(200);
+    expect(r.active().deadline).toBe(deadline);
+    expect(r.alarm()).toBe(alarm);
+    expect(r.values().get("execution-mode")).toMatchObject({ selectedBy: "reservation" });
+    delete r.env.MS_REALTY_EXECUTION_ADMISSION;
+    expect((await r.call("/restore", r.f.scope)).status).toBe(200);
+    r.restart();
+    expect(
+      (await r.call("/reserve", { ...r.f.scope, operationId: randomUUID(), leaseId: randomUUID() }))
+        .status,
+    ).toBe(409);
+  });
+
+  it("commits no reservation or latch when selected-mode storage fails", async () => {
+    const r = fixture();
+    r.failTransaction();
+    expect((await r.call("/reserve", r.f.scope)).status).toBe(409);
+    expect(r.values().size).toBe(0);
+    expect(r.alarm()).toBeNull();
+    r.failTransaction(false);
+    expect((await r.call("/reserve", r.f.scope)).status).toBe(200);
+    expect(r.values().get("execution-mode")).toBeDefined();
+  });
+
+  it("preserves genuinely unmarked legacy reservation behavior without inventing historical mode evidence", async () => {
+    const r = fixture();
+    delete r.env.MS_REALTY_EXECUTION_ADMISSION;
+    expect((await r.call("/reserve", r.f.scope)).status).toBe(200);
+    expect((await r.call("/restore", r.f.scope)).status).toBe(200);
+    r.restart();
+    expect(
+      (await r.call("/reserve", { ...r.f.scope, operationId: randomUUID(), leaseId: randomUUID() }))
+        .status,
+    ).toBe(200);
+    expect(r.values().get("execution-mode")).toBeUndefined();
+    expect(r.writes).toEqual([]);
+  });
+
   it("admits full S/P conjunction from real state and makes exact bind replay read-only across restart", async () => {
     const r = fixture();
     const packet = await r.arm();
     const deadline = r.active().deadline,
       alarm = r.alarm(),
       calls = r.calls.length;
-    expect(r.commits()).toBe(1);
+    expect(r.commits()).toBe(2);
     expect(r.values().get("execution-mode")).toMatchObject({
       mode: "single_operator_owner_review",
     });
@@ -390,14 +678,14 @@ describe("R00 watchdog installed execution and durable replay", () => {
     expect(await again.json()).toMatchObject({ idempotent: true });
     expect(r.active().deadline).toBe(deadline);
     expect(r.alarm()).toBe(alarm);
-    expect(r.commits()).toBe(1);
+    expect(r.commits()).toBe(2);
     expect(r.calls.length).toBe(calls);
     expect((await r.mutate()).status).toBe(200);
     expect((await r.mutate()).status).toBe(200);
     expect(r.writes).toEqual(["PUT"]);
   });
 
-  it("commits no chunk, latch, grant or armed state when the durable transaction fails", async () => {
+  it("commits no grant or armed state on bind failure and retains the chosen-mode latch", async () => {
     const r = fixture();
     const packet = await r.reserve();
     const before = structuredClone(r.values()),
@@ -410,7 +698,7 @@ describe("R00 watchdog installed execution and durable replay", () => {
     r.restart();
     r.failTransaction(false);
     expect((await r.call("/bind", r.binding(packet))).status).toBe(200);
-    expect(r.commits()).toBe(1);
+    expect(r.commits()).toBe(2);
   });
 
   it("keeps a committed grant consumed and starts restoration if storage completion crosses expiry", async () => {
@@ -418,14 +706,14 @@ describe("R00 watchdog installed execution and durable replay", () => {
     const packet = await r.reserve();
     r.advanceOnCommit(60_000);
     expect((await r.call("/bind", r.binding(packet))).status).toBe(409);
-    expect(r.commits()).toBe(1);
+    expect(r.commits()).toBe(2);
     expect(r.values().get("execution-mode")).toBeDefined();
     expect(r.active().status).toBe("restoring");
     expect(r.writes).toEqual([]);
     r.restart();
     expect((await r.call("/bind", r.binding(packet))).status).toBe(200);
     expect(r.active().status).toBe("restoring");
-    expect(r.commits()).toBe(1);
+    expect(r.commits()).toBe(2);
     await r.sweep();
     expect(r.active().status).toBe("restored");
   });
@@ -472,8 +760,8 @@ describe("R00 watchdog installed execution and durable replay", () => {
       expect((await r.call("/bind", r.binding(packet))).status).toBe(409);
       expect(r.calls).toEqual([]);
       expect(r.writes).toEqual([]);
-      expect(r.commits()).toBe(0);
-      expect(r.values().get("execution-mode")).toBeUndefined();
+      expect(r.commits()).toBe(1); // The preceding reservation selected the mode, without consuming a grant.
+      expect(r.values().get(`execution:${r.f.scope.operationId}`)).toBeUndefined();
     },
   );
 
@@ -734,7 +1022,7 @@ describe("R00 watchdog installed execution and durable replay", () => {
     expect(r.active().status).toBe("accepted");
     expect(r.alarm()).toBeNull();
     expect(r.writes).toHaveLength(r.plan.routes.length);
-    expect(r.commits()).toBe(1);
+    expect(r.commits()).toBe(3); // Reservation, bind and final acceptance are separate atomic transitions.
   });
 
   it("cannot replace conditional acceptance with R11/R12 or an execution grant", async () => {

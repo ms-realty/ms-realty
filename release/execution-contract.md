@@ -134,11 +134,25 @@ export reader. Those retained bounds are material limits, not fresh remote datab
 
 ## Durable consumption, bounds and replay
 
-Admission atomically commits the armed state, immutable operation-grant record, lease-use index,
-canonical packet chunks, next alarm and permanent single-operator mode latch. Transaction failure
-commits none of them. There is no request-level reset. Once the latch exists, removed, empty or
-malformed installation blocks every new forward operation, including a fresh operation ID and
-rehearsal entry points. Installing v2 does not promote an existing legacy operation.
+The first reservation handled under valid installed admission atomically commits the reservation,
+alarm and permanent single-operator mode latch. An existing reservation replay under installed
+admission stamps the same choice without extending its original deadline or alarm. The reserved
+state pins that admission digest for its later bind. An unused reservation can be restored and
+released under original custody, but neither action erases the mode choice. Removed, empty or
+malformed installation then blocks every new forward operation, including a fresh operation ID
+and rehearsal entry points. There is no request-level reset.
+
+Bind atomically commits the armed state, immutable operation-grant record, lease-use index,
+canonical packet chunks and next alarm while preserving the latch. Transaction failure commits
+none of those bind writes; the earlier reservation and mode choice remain. Installing v2 does
+not promote an existing armed legacy operation.
+
+Migration has an explicit limit: old unmarked reservation records cannot identify whether their
+creator ever had installed admission. If that installation has already disappeared, those records
+are indistinguishable from genuinely legacy records. The upgrade sequence must retain valid
+installation while this version handles or replays the reservation and durably stamps its choice,
+before configuration may be removed. Genuinely never-selected legacy behavior remains supported;
+no historical mode selection or live migration is inferred from source tests.
 
 The complete request and canonical packet are each limited to 2 MiB. Packets use at most 43
 ordered 49,152-byte chunks, each base64 value at most 65,536 characters. At most 47 keys are
@@ -164,7 +178,32 @@ Conditional cutover acceptance is the existing complete production-parity disarm
 an explicit `conditional_cutover_acceptance` machine purpose and the original S/P/admission/key
 bindings. It must be observed after admission, cover every production host and parity domain,
 match the actual resulting state and arrive inside the original forward window. The same original
-controller key is used. This receipt is not an R11/R12 evidence artifact or execution permission.
+controller key is used. This is terminal operational acceptance of the completed routing operation,
+not later R11/R12 owner acceptance, an evidence artifact for those gates or execution permission.
+
+Installed-mode finalization uses one SQLite transaction for the tentative accepted state, alarm
+deletion and final versioned receipt. After the final awaited storage operation, it rechecks the
+installed admission and full S/P/grant conjunction at the decision instant, writes the receipt
+through synchronous storage KV, and checks expiry/admission once more without another await.
+The receipt binds the exact operation, lease, consumed grant request, admission, P, S, raw plan,
+production report and complete acceptance request, plus that decision instant and the original
+forward deadline. A bare `accepted` label is insufficient. The synchronous KV write and alarm
+deletion participate in the enclosing transaction; an exception rolls them all back. This uses
+the [SQLite Durable Object transaction contract](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/).
+
+Expiry, installation drift or storage failure inside that transaction preserves the original
+alarm/state and starts original-operation restoration. A lost acknowledgement after a valid commit
+is different: readback may return accepted only from the exact validated final receipt. A valid
+committed acceptance survives later expiry or configuration drift, and exact request retries return
+the same outcome without writes, alarm changes or additional provider calls. Conflicting retries,
+forward replay and fresh operations remain subject to the original mode and consumed-grant fences.
+Local pinned workerd/SQLite tests exercise rollback and full restart for both outcomes; they do not
+establish deployed runtime behavior.
+
+Pre-finalization v2 accepted records without a valid receipt are uncertain. Their next handler or
+alarm establishes a recovery wake and uses their original plan, baseline and keys to restore;
+they cannot be upgraded by trusting the label. Existing legacy accepted records without an
+execution binding retain their original semantics. This repair claims no live record migration.
 
 Snapshot/grant expiry and trust-configuration removal do not disable original-operation restore,
 alarms, late-write reconciliation or accepted-write preservation. The remote controller retains
