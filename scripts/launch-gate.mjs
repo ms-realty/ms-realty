@@ -1,12 +1,17 @@
 // Read-only CLI for the same pure protected-parity validator used by execution admission.
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { installedExecution } from "../src/release/execution-node.mjs";
 import { promotionGate } from "../src/release/execution-parity.mjs";
 
 export { gates, promotionGate, signedPayload } from "../src/release/execution-parity.mjs";
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
+    if (installedExecution())
+      throw new Error(
+        "Installed execution mode requires the full candidate and remote watchdog admission",
+      );
     const [reportPath, ownerPath, controllerPath, expectedPath] = process.argv.slice(2);
     const [report, owner, controller, expected] = await Promise.all(
       [reportPath, ownerPath, controllerPath, expectedPath].map(async (path) =>

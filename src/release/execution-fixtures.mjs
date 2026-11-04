@@ -699,6 +699,16 @@ export function executionScenario() {
     encodeRaw,
     candidate,
     refreshCandidate,
+    resignCandidate: () => {
+      candidate.evidence = candidate.evidence.map((artifact) =>
+        signArtifact({
+          ...artifact,
+          policyDigest: sha256Digest(canonicalJson(candidate.policy)),
+          dataDigest: releaseContextDigest(candidate.manifest),
+        }),
+      );
+      refreshCandidate();
+    },
     production,
   };
 }

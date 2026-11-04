@@ -213,5 +213,64 @@ export const executionPreparationSchema = executionPacketSchema.omit({
   verification: true,
 });
 
+// v2 runtime uses the authoritative Durable Object receipt directly, never a third signer.
+export const runtimePhaseSchema = executionPhaseSchema.extend({
+  schemaVersion: z.literal(2),
+  execution: executionPhaseSchema.shape.execution.extend({
+    leaseAuthority: z.literal("watchdog_durable_state"),
+    recoveryAuthority: z.literal("original_operation_restore_and_separate_lease_release"),
+    conditionalAcceptance: z.literal("original_operation_complete_production_parity"),
+  }),
+});
+export const runtimePlanSchema = executionPlanSchema.extend({
+  schemaVersion: z.literal(2),
+  admissionDigest: digest,
+  leaseAuthority: z.literal("watchdog_durable_state"),
+});
+export const runtimeDecisionSchema = executionDecisionSchema.extend({
+  schemaVersion: z.literal(2),
+  admissionDigest: digest,
+  leaseAuthority: z.literal("watchdog_durable_state"),
+});
+export const runtimeExecutionPacketSchema = executionPacketSchema.omit({ lease: true }).extend({
+  protocolVersion: z.literal(2),
+  plan: runtimePlanSchema,
+});
+export const runtimePreparationSchema = runtimeExecutionPacketSchema.omit({
+  plan: true,
+  grant: true,
+  verification: true,
+});
+
+/** Constructed from authenticated transport or actual storage, never taken from packet fields. */
+export const remoteLeaseStateSchema = z
+  .object({
+    scope: z
+      .object({
+        operationId: z.uuid(),
+        leaseId: z.uuid(),
+        sourceCommit: sha,
+        digest,
+        baselineSha256: hex,
+        zoneIds: z.array(z.string().regex(/^[a-f0-9]{32}$/)).length(2),
+      })
+      .strict(),
+    reservedAt: z.number().int(),
+    expiresAt: z.number().int(),
+    status: z.enum([
+      "reserved",
+      "armed",
+      "restoring",
+      "restored",
+      "reconciliation_required",
+      "accepted",
+      "released",
+    ]),
+    receipt: z.record(z.string(), z.unknown()),
+  })
+  .strict();
+export type RemoteLeaseState = z.infer<typeof remoteLeaseStateSchema>;
+export type RuntimeExecutionPacket = z.infer<typeof runtimeExecutionPacketSchema>;
+
 export type ExecutionPacket = z.infer<typeof executionPacketSchema>;
 export type ExecutionAdmission = z.infer<typeof executionAdmissionSchema>;

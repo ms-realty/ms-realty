@@ -11,6 +11,9 @@ import * as cutover from "../../scripts/production-cutover.mjs";
 import { routeWatchdog } from "../../scripts/production-watchdog.mjs";
 // @ts-expect-error Synthetic JavaScript fixture; no real keys or provider calls.
 import { executionScenario } from "./execution-fixtures.mjs";
+// @ts-expect-error Synthetic installed-mode packet; private keys stay in fixture memory.
+import { runtimeExecutionScenario } from "./execution-runtime-fixtures.mjs";
+import { canonicalJson } from "./signature";
 
 const { applyProductionCutover, restoreProductionRoutes } = cutover;
 
@@ -162,6 +165,81 @@ describe("R00 execution remains unavailable at real forward entry points", () =>
       );
       expect(result.status).toBe(1);
       expect(result.stderr).toContain("execution unavailable");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("R00 installed mode at native Node entry points", () => {
+  it("loads fixed environment trust and a detached packet through the native adapter without a global TS loader", () => {
+    const f = runtimeExecutionScenario();
+    const dir = mkdtempSync(join(tmpdir(), "msr-execution-native-"));
+    try {
+      const input = join(dir, "input.json");
+      writeFileSync(input, canonicalJson({ packet: f.packet, state: f.lease, now: f.at }));
+      const script = `
+        import {readFile} from "node:fs/promises";
+        import {verifyInstalledExecution} from "./src/release/execution-node.mjs";
+        const {packet,state,now}=JSON.parse(await readFile(process.argv[1],"utf8"));
+        const pending=verifyInstalledExecution(packet,state,now);
+        packet.plan.sourceCommit="mutated after verification started";
+        const result=await pending;
+        console.log(JSON.stringify({source:result.plan.sourceCommit,mode:result.plan.leaseAuthority}));
+      `;
+      const result = spawnSync(process.execPath, ["--input-type=module", "-e", script, input], {
+        encoding: "utf8",
+        env: { PATH: process.env.PATH, NODE_ENV: "test", ...f.environment },
+      });
+      expect(result.status, result.stderr).toBe(0);
+      expect(JSON.parse(result.stdout)).toEqual({
+        source: f.packet.plan.sourceCommit,
+        mode: "watchdog_durable_state",
+      });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("cannot downgrade native cutover or parity CLI by omitting the new packet marker", () => {
+    const f = runtimeExecutionScenario();
+    const dir = mkdtempSync(join(tmpdir(), "msr-execution-mode-"));
+    try {
+      const input = join(dir, "legacy.json");
+      writeFileSync(input, '{"plan":"never-opened.json"}');
+      const env = {
+        PATH: process.env.PATH,
+        NODE_ENV: "test",
+        CLOUDFLARE_API_TOKEN: "synthetic-only",
+        ...f.environment,
+      };
+      for (const args of [
+        ["scripts/production-cutover.mjs", "apply", input, join(dir, "receipt.json")],
+        ["scripts/launch-gate.mjs", input, input, input, input],
+      ]) {
+        const result = spawnSync(process.execPath, args, { encoding: "utf8", env });
+        expect(result.status).toBe(1);
+        expect(result.stderr).not.toContain("ENOENT");
+        expect(result.stdout).not.toContain("accepted");
+      }
+      const script = `
+        import {productionConfig} from "./scripts/production-config.mjs";
+        import {applyProductionCutover} from "./scripts/production-cutover.mjs";
+        import {routeWatchdog} from "./scripts/production-watchdog.mjs";
+        const transport=()=>{throw new Error("Unexpected external access")};
+        const results=await Promise.allSettled([
+          Promise.resolve().then(()=>productionConfig("{}",{},{},{},{})),
+          applyProductionCutover({}, {transport}),
+          routeWatchdog({secret:"synthetic-only-".repeat(4),transport}).bind({})
+        ]);
+        console.log(JSON.stringify(results.map(r=>r.status)));
+      `;
+      const result = spawnSync(process.execPath, ["--input-type=module", "-e", script], {
+        encoding: "utf8",
+        env,
+      });
+      expect(result.status, result.stderr).toBe(0);
+      expect(JSON.parse(result.stdout)).toEqual(["rejected", "rejected", "rejected"]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

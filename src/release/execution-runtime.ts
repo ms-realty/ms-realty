@@ -1,5 +1,4 @@
-// No request field, environment flag, public key or signature can install this missing adapter.
-// Import-free so the Node CLI and remote Worker enforce the same explicit hold.
+// Import-free legacy guard: new-mode requests require the separately installed runtime adapter.
 export class ExecutionUnavailableError extends Error {
   constructor() {
     super("Single-operator execution unavailable: installed trust and remote admission required");
@@ -11,6 +10,8 @@ export function rejectExecutionActivation(value: unknown): void {
     value &&
     typeof value === "object" &&
     (Object.hasOwn(value, "execution") ||
+      Object.hasOwn(value, "executionPacket") ||
+      Object.hasOwn(value, "protocolVersion") ||
       ("purpose" in value && value.purpose !== "complete_parity") ||
       Object.hasOwn(value, "approvalModel"))
   ) {

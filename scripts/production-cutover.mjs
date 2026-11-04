@@ -6,6 +6,11 @@ import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import {
+  executionBundle,
+  installedExecution,
+  verifyInstalledExecution,
+} from "../src/release/execution-node.mjs";
+import {
   authorizations,
   planAndBaseline,
   productionHosts,
@@ -27,7 +32,7 @@ export {
 } from "../src/release/execution-production.mjs";
 
 export { probeLegacyOrigin, sourceHosts };
-// Read-only tooling seam. Use tsx; no CLI trust loader or runtime activation exists.
+// Accepted v1 read-only seam remains available; runtime v2 uses the fixed environment adapter.
 export async function inspectExecutionCandidate(packet, installedAdmission, now = new Date()) {
   const bridge = await import("../src/release/execution-bridge.ts");
   return bridge.inspectExecutionCandidate(packet, installedAdmission, now);
@@ -537,6 +542,7 @@ export async function applyProductionCutover(
   {
     provider,
     providerToken,
+    custody,
     persist,
     readRecheck,
     probe = probeLegacyOrigin,
@@ -547,15 +553,31 @@ export async function applyProductionCutover(
     wait = delay,
   } = {},
 ) {
-  rejectExecutionActivation(bundle);
-  const context = validateProductionCutover(bundle, now()),
-    { plan, baseline } = context;
+  const installed = installedExecution();
+  let context;
+  let forwardExpiresAt = Number.POSITIVE_INFINITY;
+  if (installed) {
+    const packet = structuredClone(bundle.executionPacket);
+    demand(
+      packet && custody?.status && custody?.provider && custody?.accept,
+      "installed execution packet and remote custody",
+    );
+    const verified = await verifyInstalledExecution(packet, await custody.status(), now(), true);
+    context = verified.context;
+    bundle = verified.bundle;
+    forwardExpiresAt = verified.forwardExpiresAt;
+    provider = custody.provider(provider, context.plan.workerName);
+  } else {
+    rejectExecutionActivation(bundle);
+    context = validateProductionCutover(bundle, now());
+  }
+  const { plan, baseline } = context;
   demand(
     typeof persist === "function" && typeof readRecheck === "function" && provider,
     "durable journal and independent checker reader",
   );
   const started = now(),
-    deadline = started + plan.timeoutSeconds * 1000;
+    deadline = Math.min(started + plan.timeoutSeconds * 1000, forwardExpiresAt);
   const journal = {
     schemaVersion: 1,
     operationId: plan.operationId,
@@ -673,6 +695,7 @@ export async function applyProductionCutover(
       intendedState(baseline, plan, journal.operations),
     );
     await persist(structuredClone(journal));
+    let acceptedEnvelope;
     for (;;) {
       const envelope = await bounded(
         (s) => readRecheck(structuredClone(journal), s),
@@ -682,6 +705,7 @@ export async function applyProductionCutover(
       );
       if (envelope) {
         journal.productionReportSha256 = validateRecheck(envelope, bundle, context, journal, now());
+        acceptedEnvelope = envelope;
         break;
       }
       await bounded(
@@ -711,6 +735,13 @@ export async function applyProductionCutover(
       routeStateSha256(final) === journal.appliedStateSha256,
       "final route/DNS/SSL state unchanged during independent recheck",
     );
+    if (installed) {
+      const receipt = await bounded(() => custody.accept(acceptedEnvelope), deadline, now, signal);
+      demand(
+        receipt.status === "accepted" && receipt.reportSha256 === journal.productionReportSha256,
+        "remote conditional acceptance for the original S/P operation",
+      );
+    }
     journal.status = "accepted";
     await persist(structuredClone(journal));
     return journal;
@@ -766,11 +797,28 @@ export async function writeJournal(path, value, { exclusive = false } = {}) {
 async function readBundle(path, forward = false) {
   const specification = parsed(await readFile(path), "bundle file"),
     base = dirname(resolve(path));
-  if (forward) rejectExecutionActivation(specification);
+  const installed = forward ? installedExecution() : null;
+  if (forward && !installed) rejectExecutionActivation(specification);
   const raw = async (name) => {
     demand(typeof name === "string" && !name.includes("\0"), "explicit artifact path");
     return readFile(resolve(base, name));
   };
+  if (installed || (!forward && specification.executionPacket)) {
+    demand(
+      same(Object.keys(specification).sort(), ["executionPacket", "recheck"]),
+      "exact runtime packet specification",
+    );
+    const bytes = await raw(specification.executionPacket);
+    const packet = parsed(bytes, "runtime execution packet");
+    demand(
+      bytes.length <= 2 * 1024 * 1024 && canonical(packet) === bytes.toString(),
+      "canonical bounded runtime packet bytes",
+    );
+    return {
+      bundle: executionBundle(packet, installed?.keys ?? {}),
+      recheck: resolve(base, specification.recheck),
+    };
+  }
   const bundle = {
     plan: await raw(specification.plan),
     baseline: await raw(specification.baseline),
@@ -818,7 +866,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       console.log("Read-only routing/DNS/SSL snapshot retained; no readiness claim.");
     } else {
       const { bundle, recheck } = await readBundle(input, mode === "apply");
-      if (mode === "apply") rejectExecutionActivation(bundle);
+      if (mode === "apply" && !installedExecution()) rejectExecutionActivation(bundle);
       const plan = parsed(bundle.plan, "reviewed cutover plan"),
         ownership = parsed(bundle.artifacts.ownership, "off-runner custody binding"),
         recovery = parsed(bundle.artifacts.recovery, "off-runner recovery binding");
@@ -843,8 +891,15 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         "actual independently retained watchdog receipt matches signed custody artifacts",
       );
       if (mode === "apply") {
-        validateProductionCutover(bundle);
+        if (installedExecution()) await verifyInstalledExecution(bundle.executionPacket, custody);
+        else validateProductionCutover(bundle);
         await watchdog.bind(bundle);
+      } else if (bundle.executionPacket) {
+        demand(
+          custody.execution?.originalKeys && custody.planSha256 === sha256(bundle.plan),
+          "original retained recovery authority",
+        );
+        bundle.trustedKeys = custody.execution.originalKeys;
       }
       let first = mode === "apply";
       const persist = async (value) => {
@@ -860,6 +915,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         provider: watchdog.provider(provider, plan.workerName),
         providerToken: process.env.CLOUDFLARE_API_TOKEN,
         persist,
+        custody: watchdog,
       };
       let result;
       if (mode === "restore")

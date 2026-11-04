@@ -1,6 +1,7 @@
 // Read-only source inspection. Success deliberately returns no runtime capability.
 import { createPublicKey, verify } from "node:crypto";
 import { evaluateRelease } from "./evaluate";
+import { type InstalledExecutionAdmission, runtimeAdmissionSchema } from "./execution-admission";
 import {
   executionAdmissionSchema,
   executionDecisionSchema,
@@ -10,6 +11,13 @@ import {
   executionPlanSchema,
   executionPreparationSchema,
   executionRawPlanSchema,
+  type RemoteLeaseState,
+  remoteLeaseStateSchema,
+  runtimeDecisionSchema,
+  runtimeExecutionPacketSchema,
+  runtimePhaseSchema,
+  runtimePlanSchema,
+  runtimePreparationSchema,
 } from "./execution-contract";
 // Existing operator validators remain mandatory; their inputs are bound below.
 // @ts-expect-error Existing Node operator script has no TypeScript declaration.
@@ -31,9 +39,20 @@ const canonicalBytes = (bytes: string, what: string) => {
   return value;
 };
 
-function prepare(input: unknown, installedAdmission: unknown, now: Date) {
-  const packet = executionPreparationSchema.parse(input);
-  const admission = executionAdmissionSchema.parse(installedAdmission);
+type RuntimeContext = {
+  installed: InstalledExecutionAdmission;
+  lease: RemoteLeaseState;
+  forward: boolean;
+};
+function prepare(input: unknown, installedAdmission: unknown, now: Date, runtime?: RuntimeContext) {
+  const packet = runtime
+    ? runtimePreparationSchema.parse(input)
+    : executionPreparationSchema.parse(input);
+  const admission = runtime
+    ? runtimeAdmissionSchema.parse(installedAdmission)
+    : executionAdmissionSchema.parse(installedAdmission);
+  if (runtime)
+    demand(hash(admission) === runtime.installed.digest, "exact independently installed admission");
   const { policy, manifest, snapshot, evidence } = packet.candidate;
   const model = policy.approvalModel;
   demand(model?.mode === "single_operator_owner_review", "explicit admitted candidate mode");
@@ -67,7 +86,7 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date) {
     sha256Digest(packet.phasePermissions) === model.phasePermissions?.digest,
     "actual R00-pinned phase-permission bytes",
   );
-  const phase = executionPhaseSchema.parse(
+  const phase = (runtime ? runtimePhaseSchema : executionPhaseSchema).parse(
     canonicalBytes(packet.phasePermissions, "phase permissions"),
   ).execution;
   demand(phase.keysDigest === hash(admission.keys), "ratified and installed key purposes");
@@ -109,7 +128,7 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date) {
     }),
   );
   demand(
-    new Set(Object.values(admission.keys).map((key) => key.fingerprint)).size === 3,
+    new Set(Object.values(admission.keys).map((key) => key.fingerprint)).size === (runtime ? 2 : 3),
     "distinct owner, machine verifier and remote watchdog keys",
   );
   const signed = (envelope: { payload: string; signature: string }, role: string) => {
@@ -190,11 +209,61 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date) {
     `sha256:${database?.schemaSha256}` === manifest.database.schemaDigest,
     "candidate database schema",
   );
-  const lease = executionLeaseSchema.parse(signed(packet.lease, "watchdog"));
+  let lease: {
+    operationId: string;
+    leaseId: string;
+    sourceCommit: string;
+    imageDigest: string;
+    baselineDigest: string;
+    zoneIds: string[];
+    observedAt: string;
+    expiresAt: string;
+  };
+  let leaseDigest: string;
+  if (runtime) {
+    const state = remoteLeaseStateSchema.parse(runtime.lease);
+    const receipt = state.receipt;
+    demand(
+      state.status === (runtime.forward ? "armed" : "reserved") &&
+        state.reservedAt <= now.getTime() &&
+        (runtime.forward || now.getTime() - state.reservedAt < 300_000) &&
+        receipt.holder === state.scope.operationId &&
+        receipt.id === state.scope.leaseId &&
+        receipt.sourceCommit === state.scope.sourceCommit &&
+        receipt.digest === state.scope.digest &&
+        receipt.baselineSha256 === state.scope.baselineSha256 &&
+        same(receipt.zoneIds, [...state.scope.zoneIds].sort()) &&
+        receipt.observedAt === new Date(state.reservedAt).toISOString() &&
+        receipt.expiresAt === new Date(state.expiresAt).toISOString(),
+      "actual reserved durable lease state",
+    );
+    lease = {
+      operationId: state.scope.operationId,
+      leaseId: state.scope.leaseId,
+      sourceCommit: state.scope.sourceCommit,
+      imageDigest: state.scope.digest,
+      baselineDigest: `sha256:${state.scope.baselineSha256}`,
+      zoneIds: state.scope.zoneIds,
+      observedAt: new Date(state.reservedAt).toISOString(),
+      expiresAt: new Date(state.expiresAt).toISOString(),
+    };
+    leaseDigest = hash(receipt);
+  } else {
+    demand("lease" in packet && "watchdog" in admission.keys, "v1 authenticated lease envelope");
+    if (!("lease" in packet) || !("watchdog" in admission.keys))
+      throw new Error("Missing v1 lease");
+    const signedLease = executionLeaseSchema.parse(signed(packet.lease, "watchdog"));
+    demand(
+      signedLease.keyId === admission.keys.watchdog.keyId &&
+        signedLease.actor.name === keys.watchdog?.owner &&
+        now.getTime() - Date.parse(signedLease.observedAt) < 60_000,
+      "fresh authenticated watchdog signature",
+    );
+    lease = signedLease;
+    leaseDigest = sha256Digest(packet.lease.payload);
+  }
   demand(
-    lease.keyId === admission.keys.watchdog.keyId &&
-      lease.actor.name === keys.watchdog?.owner &&
-      lease.operationId === rawPlan.operationId &&
+    lease.operationId === rawPlan.operationId &&
       lease.sourceCommit === manifest.releaseSha &&
       lease.imageDigest === rawPlan.digest &&
       lease.baselineDigest === sha256Digest(packet.production.baseline) &&
@@ -206,7 +275,6 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date) {
       ) &&
       Date.parse(lease.observedAt) >= Date.parse(snapshot.evaluatedAt) &&
       Date.parse(lease.observedAt) <= now.getTime() &&
-      now.getTime() - Date.parse(lease.observedAt) < 60_000 &&
       Date.parse(lease.expiresAt) > now.getTime() + 720_000,
     "fresh authenticated exact remote lease and restoration reserve",
   );
@@ -215,12 +283,15 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date) {
     ownership?.routeLease?.id === lease.leaseId &&
       ownership.routeLease.holder === lease.operationId &&
       ownership.routeLease.expiresAt === lease.expiresAt &&
-      ownership.routeLease.evidenceSha256 === unprefix(sha256Digest(packet.lease.payload)) &&
+      ownership.routeLease.evidenceSha256 === unprefix(leaseDigest) &&
       ownership.recoveryPointId === manifest.recoveryPoint?.id,
     "same lease in concrete production plan",
   );
-  const plan = executionPlanSchema.parse({
-    schemaVersion: 1,
+  const plan = (runtime ? runtimePlanSchema : executionPlanSchema).parse({
+    schemaVersion: runtime ? 2 : 1,
+    ...(runtime
+      ? { admissionDigest: runtime.installed.digest, leaseAuthority: "watchdog_durable_state" }
+      : {}),
     action: phase.action,
     snapshotId: snapshot.snapshotId,
     policyDigest: snapshot.policy.policyDigest,
@@ -236,7 +307,7 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date) {
     parityReportDigest: sha256Digest(packet.production.report.payload),
     operationId: lease.operationId,
     leaseId: lease.leaseId,
-    leaseObservationDigest: sha256Digest(packet.lease.payload),
+    leaseObservationDigest: leaseDigest,
   });
   return { plan, packet, admission, keys, signed, lease };
 }
@@ -247,20 +318,32 @@ export function prepareExecutionPlan(input: unknown, installedAdmission: unknown
 }
 
 /** Verifies the conjunction without admitting, reserving, consuming or executing anything. */
-export function inspectExecutionCandidate(input: unknown, installedAdmission: unknown, now: Date) {
-  const supplied = executionPacketSchema.parse(input);
+function inspect(input: unknown, installedAdmission: unknown, now: Date, runtime?: RuntimeContext) {
+  const supplied = runtime
+    ? runtimeExecutionPacketSchema.parse(input)
+    : executionPacketSchema.parse(input);
   const { plan: _plan, grant: _grant, verification: _verification, ...preparation } = supplied;
   const { plan, packet, admission, keys, signed, lease } = prepare(
     preparation,
     installedAdmission,
     now,
+    runtime,
   );
   demand(same(supplied.plan, plan), "exact constructed P");
+  const expiry = [Date.parse(packet.candidate.snapshot.expiresAt)];
   for (const [role, envelope] of [
     ["owner", supplied.grant],
     ["verifier", supplied.verification],
   ] as const) {
-    const decision = executionDecisionSchema.parse(signed(envelope, role));
+    const decision = (runtime ? runtimeDecisionSchema : executionDecisionSchema).parse(
+      signed(envelope, role),
+    );
+    if (runtime)
+      demand(
+        "admissionDigest" in decision && decision.admissionDigest === runtime.installed.digest,
+        "decision binds installed admission",
+      );
+    expiry.push(Date.parse(decision.expiresAt));
     demand(
       decision.purpose === admission.keys[role].purpose &&
         decision.keyId === admission.keys[role].keyId &&
@@ -295,21 +378,57 @@ export function inspectExecutionCandidate(input: unknown, installedAdmission: un
       keys[role ?? ""]?.publicKey.export({ type: "spki", format: "pem" }),
     ]),
   );
-  validateProductionCutover(
-    {
-      ...packet.production,
-      trustedKeys,
-      approvals: { owner: supplied.grant, controller: supplied.verification },
-    },
-    now.getTime(),
-  );
+  const bundle = {
+    ...packet.production,
+    trustedKeys,
+    approvals: { owner: supplied.grant, controller: supplied.verification },
+  };
+  const context = validateProductionCutover(bundle, now.getTime());
   return {
-    inspection: "verified" as const,
-    execution: "unavailable" as const,
-    planDigest: hash(plan),
-    snapshotId: plan.snapshotId,
-    operationId: plan.operationId,
-    leaseId: plan.leaseId,
-    remaining: ["installed_trust_adapter", "durable_remote_admission_and_replay_fencing"],
+    plan,
+    packet: supplied,
+    bundle,
+    context,
+    forwardExpiresAt: Math.min(...expiry),
+    receipt: {
+      inspection: "verified" as const,
+      execution: runtime ? ("remote_admission_required" as const) : ("unavailable" as const),
+      planDigest: hash(plan),
+      snapshotId: plan.snapshotId,
+      operationId: plan.operationId,
+      leaseId: plan.leaseId,
+      remaining: runtime
+        ? ["actual_remote_atomic_admission"]
+        : ["installed_trust_adapter", "durable_remote_admission_and_replay_fencing"],
+    },
+  };
+}
+
+export function inspectExecutionCandidate(input: unknown, installedAdmission: unknown, now: Date) {
+  return inspect(input, installedAdmission, now).receipt;
+}
+export function prepareRuntimeExecutionPlan(
+  input: unknown,
+  installed: InstalledExecutionAdmission,
+  lease: RemoteLeaseState,
+  now: Date,
+) {
+  return runtimePlanSchema.parse(
+    prepare(input, installed.admission, now, { installed, lease, forward: false }).plan,
+  );
+}
+/** Pure verification only: the adapter must still read live provider state and commit admission. */
+export function verifyRuntimeExecution(
+  input: unknown,
+  installed: InstalledExecutionAdmission,
+  lease: RemoteLeaseState,
+  now: Date,
+  forward = false,
+) {
+  const result = inspect(input, installed.admission, now, { installed, lease, forward });
+  return {
+    ...result,
+    packet: runtimeExecutionPacketSchema.parse(result.packet),
+    plan: runtimePlanSchema.parse(result.plan),
   };
 }
