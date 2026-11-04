@@ -76,6 +76,7 @@
     "operations.serviceIntake.version": "Версия"
   },
   "de": {
+    "workflow.clientIdentity.optional": "(optional)",
     "discovery.hotel": "Hotel",
     "discovery.name": "Name",
     "discovery.optional": "(optional)",
