@@ -2,6 +2,7 @@
 // scripts/release-schemas.mjs so evidence producers outside this codebase can validate.
 import { z } from "zod";
 import {
+  admittedReleaseTrustSchema,
   evidenceArtifactSchema,
   gatePolicySchema,
   readinessReportSchema,
@@ -9,6 +10,10 @@ import {
 } from "./schemas";
 
 const schemas = {
+  "admitted-release-trust.schema.json": {
+    schema: admittedReleaseTrustSchema,
+    title: "AdmittedReleaseTrust",
+  },
   "release-manifest.schema.json": { schema: releaseManifestSchema, title: "ReleaseManifest" },
   "evidence-artifact.schema.json": { schema: evidenceArtifactSchema, title: "EvidenceArtifact" },
   "gate-policy.schema.json": { schema: gatePolicySchema, title: "GatePolicy" },

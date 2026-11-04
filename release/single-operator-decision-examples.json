@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 0,
+  "kind": "unsigned_decision_scope_examples",
+  "status": "disabled_not_authority",
+  "note": "Unknown values remain null. These are contract illustrations, not valid evidence or executable grants. No signature or reviewed scope has been supplied.",
+  "decisions": [
+    {
+      "purpose": "candidate_review",
+      "owner": "Ivan",
+      "policyDigest": null,
+      "candidateContextDigest": null,
+      "completeEvidenceSetDigest": null,
+      "reviewedProcedureBytesDigest": null,
+      "reviewedScope": null,
+      "operatorCompletion": null,
+      "ownerSelfReview": null,
+      "custodyLimitationsAcknowledged": null,
+      "signature": null,
+      "permits": "Candidate qualification only; no operation execution"
+    },
+    {
+      "purpose": "execution_grant",
+      "owner": "Ivan",
+      "policyDigest": null,
+      "candidateContextDigest": null,
+      "authenticatedReadinessSnapshotDigest": null,
+      "concretePlanDigest": null,
+      "reviewedProcedureBytesDigest": null,
+      "approvedScope": null,
+      "sourceImageConfigDataBindings": null,
+      "productionBaselineDigest": null,
+      "operationId": null,
+      "remoteLeaseId": null,
+      "completeParityDigest": null,
+      "machineVerification": null,
+      "expiresAt": null,
+      "signature": null,
+      "permits": "Only the exact admitted operation; requires the later remote bridge"
+    },
+    {
+      "purpose": "deployment_acceptance",
+      "owner": "Ivan",
+      "policyDigest": null,
+      "candidateContextDigest": null,
+      "expandedCompleteEvidenceSetDigest": null,
+      "authenticatedPreviousSnapshotDigest": null,
+      "pinnedEarlierOwnerDecisionDigests": null,
+      "originalOperationId": null,
+      "originalExecutionGrantDigest": null,
+      "actualReleasedPathReview": null,
+      "signature": null,
+      "permits": "Acceptance of observed deployment only; no new or replayed operation"
+    },
+    {
+      "purpose": "operational_acceptance",
+      "owner": "Ivan",
+      "policyDigest": null,
+      "candidateContextDigest": null,
+      "expandedCompleteEvidenceSetDigest": null,
+      "authenticatedPreviousSnapshotDigest": null,
+      "pinnedEarlierOwnerDecisionDigests": null,
+      "originalOperationId": null,
+      "originalExecutionGrantDigest": null,
+      "actualOperatingCycleAndHandoff": null,
+      "signature": null,
+      "permits": "Operating acceptance only; no execution, recovery reopening or restored-lease release"
+    }
+  ]
+}

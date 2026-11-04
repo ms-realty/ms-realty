@@ -103,6 +103,62 @@
       "maxLength": 200,
       "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
     },
+    "actor": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "human"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+            }
+          },
+          "required": ["kind", "name"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "machine"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+            }
+          },
+          "required": ["kind", "name", "version"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "policy_ratification",
+        "candidate_review",
+        "deployment_acceptance",
+        "operational_acceptance",
+        "human_review",
+        "recovery_review",
+        "machine_observation"
+      ]
+    },
     "reviewer": {
       "anyOf": [
         {
