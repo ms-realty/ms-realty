@@ -607,5 +607,21 @@
     "photoOperationMissing": "No result is recorded for this request and photo. Check this same request again before making another change.",
     "photoOperationPending": "This request is still unresolved. Check it again before making another change.",
     "photoOperationFailed": "This request failed without applying its change. Return to the photo and review its current state before trying again."
+  },
+  "form": {
+    "errorSummary": "There is a problem",
+    "pending": "Recording…",
+    "reapply": "Apply my reviewed changes",
+    "yourValue": "Your draft",
+    "latestValue": "Latest value",
+    "revision": "Revision",
+    "reference": "Reference",
+    "recordedAt": "Recorded at",
+    "unknown": "Result not confirmed",
+    "draftRetained": "The values below are your draft. They do not confirm that anything was saved. Use the link below to check this same request before trying again."
+  },
+  "workflowAuth": {
+    "notice": "Confirm your identity again. Your draft is retained.",
+    "recovery": "Confirm your identity"
   }
 }

@@ -607,5 +607,21 @@
     "photoOperationMissing": "Er is geen resultaat vastgelegd voor dit verzoek en deze foto. Controleer hetzelfde verzoek opnieuw voordat u een andere wijziging maakt.",
     "photoOperationPending": "Dit verzoek is nog niet afgehandeld. Controleer het opnieuw voordat u een andere wijziging maakt.",
     "photoOperationFailed": "Het verzoek is mislukt zonder de wijziging toe te passen. Ga terug naar de foto en controleer de huidige staat voordat u het opnieuw probeert."
+  },
+  "form": {
+    "errorSummary": "Er is een probleem",
+    "pending": "Bezig met opslaan…",
+    "reapply": "Mijn gecontroleerde wijzigingen toepassen",
+    "yourValue": "Uw concept",
+    "latestValue": "Laatste waarde",
+    "revision": "Versie",
+    "reference": "Referentie",
+    "recordedAt": "Opgeslagen op",
+    "unknown": "Resultaat niet bevestigd",
+    "draftRetained": "De waarden hieronder vormen uw concept. Ze bevestigen niet dat er iets is opgeslagen. Controleer via de onderstaande link hetzelfde verzoek voordat u het opnieuw probeert."
+  },
+  "workflowAuth": {
+    "notice": "Bevestig uw identiteit opnieuw. Uw concept blijft behouden.",
+    "recovery": "Identiteit bevestigen"
   }
 }

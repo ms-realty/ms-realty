@@ -607,5 +607,21 @@
     "photoOperationMissing": "Für diese Anfrage und dieses Foto liegt kein Ergebnis vor. Prüfen Sie dieselbe Anfrage erneut, bevor Sie eine weitere Änderung vornehmen.",
     "photoOperationPending": "Das Ergebnis dieser Anfrage ist noch offen. Prüfen Sie es erneut, bevor Sie eine weitere Änderung vornehmen.",
     "photoOperationFailed": "Die Anfrage ist fehlgeschlagen; die Änderung wurde nicht angewendet. Kehren Sie zum Foto zurück und prüfen Sie den aktuellen Stand, bevor Sie es erneut versuchen."
+  },
+  "form": {
+    "errorSummary": "Es gibt ein Problem",
+    "pending": "Wird gespeichert…",
+    "reapply": "Meine geprüften Änderungen anwenden",
+    "yourValue": "Ihr Entwurf",
+    "latestValue": "Aktueller Wert",
+    "revision": "Version",
+    "reference": "Referenz",
+    "recordedAt": "Gespeichert am",
+    "unknown": "Ergebnis nicht bestätigt",
+    "draftRetained": "Die unten stehenden Werte sind Ihr Entwurf. Sie bestätigen nicht, dass etwas gespeichert wurde. Prüfen Sie über den Link unten dieselbe Anfrage, bevor Sie es erneut versuchen."
+  },
+  "workflowAuth": {
+    "notice": "Bestätigen Sie Ihre Identität erneut. Ihr Entwurf bleibt erhalten.",
+    "recovery": "Identität bestätigen"
   }
 }
