@@ -292,6 +292,10 @@ for (const javaScriptEnabled of [false, true])
       await page
         .getByRole(javaScriptEnabled ? "link" : "button", { name: "Show photo 3", exact: true })
         .click();
+      // The native POST can leave the previous photo's open disclosure in view until navigation commits.
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Photo 3 of 3", exact: true }),
+      ).toBeVisible();
       await openPlacement(page);
       await page.getByLabel("Place before photo", { exact: true }).selectOption(first ?? "");
       await page.getByRole("button", { name: "Review the new order", exact: true }).click();
