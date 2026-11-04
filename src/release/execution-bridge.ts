@@ -1,10 +1,5 @@
 // Read-only source inspection. Success deliberately returns no runtime capability.
 import { createPublicKey, verify } from "node:crypto";
-// Existing operator validators remain mandatory; their inputs are bound below.
-// @ts-expect-error Existing Node operator script has no TypeScript declaration.
-import { gates as parityGates } from "../../scripts/launch-gate.mjs";
-// @ts-expect-error Existing Node operator script has no TypeScript declaration.
-import { validateProductionCutover } from "../../scripts/production-cutover.mjs";
 import { evaluateRelease } from "./evaluate";
 import {
   executionAdmissionSchema,
@@ -16,6 +11,11 @@ import {
   executionPreparationSchema,
   executionRawPlanSchema,
 } from "./execution-contract";
+// Existing operator validators remain mandatory; their inputs are bound below.
+// @ts-expect-error Existing Node operator script has no TypeScript declaration.
+import { gates as parityGates } from "./execution-parity.mjs";
+// @ts-expect-error Existing Node operator script has no TypeScript declaration.
+import { validateProductionCutover } from "./execution-production.mjs";
 import { evidenceArtifactSchema, gateIds } from "./schemas";
 import { canonicalJson, releaseContextDigest, sha256Digest } from "./signature";
 
