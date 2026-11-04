@@ -36,7 +36,11 @@ export function evidenceDigest(artifact: EvidenceArtifact): string {
   return sha256Digest(canonicalJson(artifact));
 }
 
-/** Approval artifacts cannot hash themselves. Their signed scope covers every other proof. */
+/**
+ * Only the current manifest approvals are excluded to avoid self-reference. Earlier owner
+ * decisions remain pinned proof; adding R11/R12 evidence invalidates the old set signature.
+ * The evaluator rejects extra/duplicate approval slots before accepting this digest.
+ */
 export function approvalEvidenceDigest(manifest: ReleaseManifest): string {
   const approvalIds = new Set(manifest.approvals.map((approval) => approval.evidenceId));
   return sha256Digest(
@@ -87,6 +91,16 @@ export function checkSignature(artifact: EvidenceArtifact, policy: GatePolicy): 
     (key) => key.keyId === signature.keyId && key.evidenceTypes.includes(artifact.type),
   );
   if (!trusted) return "untrusted_key";
+  if (
+    policy.approvalModel?.mode === "single_operator_owner_review" &&
+    (!artifact.actor ||
+      !artifact.purpose ||
+      trusted.actorKind !== artifact.actor.kind ||
+      trusted.owner !== artifact.actor.name ||
+      !trusted.purposes?.includes(artifact.purpose) ||
+      (artifact.actor.kind === "human" && artifact.actor.name !== policy.approvalModel.owner))
+  )
+    return "untrusted_key";
   try {
     const bytes = Buffer.from(signature.value, "base64");
     if (bytes.length !== 64 || bytes.toString("base64") !== signature.value)
