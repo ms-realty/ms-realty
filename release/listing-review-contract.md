@@ -84,4 +84,4 @@ Put each JSON record at `<receipts>/<64 hex>.json`. Its filename is the SHA-256 
 
 Ivan can review the observed data and choices, run the blocked check to obtain the row and decision digests, record his decision through the accountable channel, then insert the received receipt digest and rerun. The digest excludes its own receipt address. The independent reviewer checks the original evidence, authenticity and timing of Ivan's decisions, authority for every scope exclusion, warning dispositions, exact manifests and R02's other acceptance evidence. A structurally complete checklist still awaits this review and the release policy's trusted signature.
 
-Run the focused command tests with `python3 scripts/release-listing-review.test.py -v`. They exercise synthetic records only.
+Run the focused command tests with `python3 scripts/release-listing-review.test.py -v`. The existing `npm run test:release` command also discovers the R02 suite through `scripts/production-listing-review.test.mjs`, including during `make check`. The tests exercise synthetic records only.
