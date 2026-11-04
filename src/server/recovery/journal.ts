@@ -1,5 +1,6 @@
 // R08 / AT64: transaction-owned local journal. No archive, signer or admission adapter.
 import "server-only";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import { and, asc, eq, gt, is } from "drizzle-orm";
 import { PostgresJsTransaction } from "drizzle-orm/postgres-js";
@@ -94,25 +95,69 @@ type Entry = RecoveryPacket["segments"][number]["entries"][number];
 type Effect = Entry["effects"][number];
 type AcceptedReference = { operationId: string; receiptDigest: string };
 type OwnedTransaction = {
+  tx: Transaction;
+  parent: OwnedTransaction | undefined;
+  root: object;
   admission: RecoveryAdmission;
   contextDigest: string;
   effects: Effect[];
   accepted: AcceptedReference[];
+  /** The wrapper can still fail its DB callback, including during its final flush. */
   active: boolean;
+  accepting: boolean;
   childOpen: boolean;
   pending: number;
   failed: boolean;
 };
-const owned = new WeakMap<object, OwnedTransaction>();
+// Separate server bundles must agree about ownership, as with the DB request scope.
+const scopeKey = Symbol.for("ms-realty.recovery-owned-transactions-v1");
+const runtime = globalThis as typeof globalThis & {
+  [scopeKey]?: {
+    owned: WeakMap<object, OwnedTransaction>;
+    callbacks: AsyncLocalStorage<OwnedTransaction>;
+  };
+};
+runtime[scopeKey] ??= {
+  owned: new WeakMap<object, OwnedTransaction>(),
+  callbacks: new AsyncLocalStorage<OwnedTransaction>(),
+};
+const { owned, callbacks } = runtime[scopeKey];
+
+function poisonLiveScope(state: OwnedTransaction | undefined) {
+  while (state && !state.active) state = state.parent;
+  if (state) state.failed = true;
+}
+
+/** The calling callback owns the failure, even when the rejected handle names another scope. */
+function poisonHandleFailure(db: Executor) {
+  const caller = callbacks.getStore();
+  poisonLiveScope(caller);
+  const target = owned.get(db);
+  // A foreign live tree may also have received direct writes through its retained handle.
+  // Same-tree ancestor misuse belongs to the current savepoint, whose rollback contains it.
+  if (target && target.root !== caller?.root) poisonLiveScope(target);
+}
 
 function requireOwned(db: Executor, expected?: RecoverySourceContext) {
   const state = owned.get(db);
-  if (!is(db, PostgresJsTransaction) || !state?.active || state.childOpen)
-    throw new Error("Recovery append requires the active owned transaction or managed savepoint.");
-  if (state.failed) throw new Error("Recovery transaction contains a failed append.");
-  if (expected && sourceContextDigest(expected) !== state.contextDigest)
-    throw new Error("Recovery transaction context differs.");
-  return state;
+  try {
+    if (
+      !is(db, PostgresJsTransaction) ||
+      !state?.active ||
+      !state.accepting ||
+      state.childOpen ||
+      callbacks.getStore() !== state ||
+      state.tx !== db
+    )
+      throw new Error("Recovery requires the active owned transaction or managed savepoint.");
+    if (state.failed) throw new Error("Recovery transaction contains a failed append.");
+    if (expected && sourceContextDigest(expected) !== state.contextDigest)
+      throw new Error("Recovery transaction context differs.");
+    return state;
+  } catch (error) {
+    poisonHandleFailure(db);
+    throw error;
+  }
 }
 
 /** An unregistered transaction cannot be adopted after it may already have taken domain locks. */
@@ -121,26 +166,36 @@ export async function withRecoveryTransaction<T>(
   input: RecoveryAdmission,
   fn: (tx: Transaction) => Promise<T>,
 ): Promise<T> {
-  const admission = recoveryAdmission.parse(input);
-  const parent = owned.get(db);
-  if (parent) {
-    requireOwned(db, admission.context);
-    if (parent.admission.writer !== admission.writer || parent.pending !== 0)
-      throw new Error("Recovery nested writer or pending append differs.");
-    parent.childOpen = true;
-  } else {
-    requireRecoveryPool(db);
+  let admission: RecoveryAdmission;
+  let parent: OwnedTransaction | undefined;
+  try {
+    admission = recoveryAdmission.parse(input);
+    if (owned.has(db) || callbacks.getStore()) {
+      parent = requireOwned(db, admission.context);
+      if (parent.admission.writer !== admission.writer || parent.pending !== 0)
+        throw new Error("Recovery nested writer or pending append differs.");
+      parent.childOpen = true;
+    } else {
+      requireRecoveryPool(db);
+    }
+  } catch (error) {
+    poisonHandleFailure(db);
+    throw error;
   }
   let child: OwnedTransaction | undefined;
   try {
     const result = await db.transaction(async (tx) => {
       const contextDigest = parent?.contextDigest ?? (await lockRecoveryWriteFence(tx, admission));
       const state: OwnedTransaction = {
+        tx,
+        parent,
+        root: parent?.root ?? {},
         admission,
         contextDigest,
         effects: [],
         accepted: [],
         active: true,
+        accepting: true,
         childOpen: false,
         pending: 0,
         failed: false,
@@ -148,16 +203,23 @@ export async function withRecoveryTransaction<T>(
       child = state;
       owned.set(tx, state);
       try {
-        const result = await fn(tx);
+        let result: T;
+        try {
+          result = await callbacks.run(state, () => fn(tx));
+        } finally {
+          // Detached callbacks cannot append while the final flush waits on database locks.
+          state.accepting = false;
+        }
         if (state.failed) throw new Error("Recovery transaction contains a failed append.");
         if (state.pending !== 0 || state.childOpen)
           throw new Error("Recovery transaction has unfinished append or savepoint work.");
         // A savepoint never flushes. Only the owner of the true PostgreSQL transaction does.
         if (!parent) await flushJournal(tx, state);
+        if (state.failed) throw new Error("Recovery transaction contains a failed append.");
         return result;
       } finally {
         state.active = false;
-        owned.delete(tx);
+        // Keep weak ancestry for retained handles/detached callbacks; never re-adopt them.
       }
     });
     if (parent && child) {
@@ -178,8 +240,13 @@ export function operationRecoveryTransaction<T>(
   fn: (tx: Transaction) => Promise<T>,
 ) {
   const inherited = owned.get(db)?.admission;
-  if (admission || inherited)
-    return withRecoveryTransaction(db, admission ?? (inherited as RecoveryAdmission), fn);
+  const calling = callbacks.getStore()?.admission;
+  if (admission || inherited || calling)
+    return withRecoveryTransaction(
+      db,
+      admission ?? inherited ?? (calling as RecoveryAdmission),
+      fn,
+    );
   return db.transaction(fn);
 }
 
@@ -271,7 +338,8 @@ async function acceptedReceiptDigest(tx: Transaction, contextDigest: string, ope
   const [row] = await tx
     .select()
     .from(operations)
-    .where(eq(operations.id, z.uuid().parse(operationId)));
+    .where(eq(operations.id, z.uuid().parse(operationId)))
+    .for("share");
   if (row?.status !== "succeeded" || !row.completedAt)
     throw new Error("Recovery accepted operation requires a persisted succeeded receipt.");
   return recoveryDigest("accepted-operation-v1", {
@@ -325,7 +393,7 @@ async function flushJournal(tx: Transaction, state: OwnedTransaction) {
 }
 
 export function hasRecoveryTransaction(tx: Transaction) {
-  return owned.has(tx);
+  return owned.get(tx)?.active === true;
 }
 
 /** Reads only committed rows through a separate pool transaction; never an in-memory buffer. */

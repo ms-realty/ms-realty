@@ -636,3 +636,329 @@ it("R08 a caught acceptance failure rolls back its child while the healthy paren
   expect(batch.entries[0]?.effects.map((e) => e.kind)).toEqual(["accepted_operation"]);
   expect(await t.db.select().from(operations)).toHaveLength(1);
 });
+
+it.each(["restrictive", "accepted"] as const)(
+  "R08 caught retained-ancestor %s append poisons the actual runOperation child",
+  async (kind) => {
+    await admit();
+    const f = await fixture();
+    await expect(
+      withRecoveryTransaction(t.db, admission, (outer) =>
+        runOperation(outer, input(), async ({ tx, operationId }) => {
+          await tx.update(grants).set({ revokedAt: new Date() }).where(eq(grants.id, f.grantId));
+          await (kind === "restrictive"
+            ? appendRecoveryEvent(outer, admission.context, f.restriction)
+            : appendAcceptedRecoveryOperation(outer, operationId)
+          ).catch(() => {});
+          return { denialSaved: true };
+        }),
+      ),
+    ).rejects.toThrow("failed append");
+    expect(await f.revoked()).toBe(false);
+    expect(await t.db.select().from(operations)).toEqual([]);
+    await assertEmpty();
+  },
+);
+
+it.each(["pool", "expired", "raw_child"] as const)(
+  "R08 caught %s handle rejection poisons the calling operation for both append APIs",
+  async (misuse) => {
+    await admit();
+    const f = await fixture();
+    let expired!: Transaction;
+    await withRecoveryTransaction(t.db, admission, async (tx) => {
+      expired = tx;
+    });
+    for (const kind of ["restrictive", "accepted"] as const) {
+      await expect(
+        runOperation(t.db, input(), async ({ tx, operationId }) => {
+          await tx.update(grants).set({ revokedAt: new Date() }).where(eq(grants.id, f.grantId));
+          const attempt = async (wrong: Transaction) => {
+            await (kind === "restrictive"
+              ? appendRecoveryEvent(wrong, admission.context, f.restriction)
+              : appendAcceptedRecoveryOperation(wrong, operationId)
+            ).catch(() => {});
+          };
+          if (misuse === "raw_child") await tx.transaction(attempt);
+          else await attempt(misuse === "pool" ? (t.db as unknown as Transaction) : expired);
+          return { denialSaved: true };
+        }),
+      ).rejects.toThrow("failed append");
+      expect(await f.revoked()).toBe(false);
+      expect(await t.db.select().from(operations)).toEqual([]);
+      await assertEmpty();
+    }
+  },
+);
+
+it("R08 a genuine child rollback contains ancestor-handle poison and leaves its parent usable", async () => {
+  await admit();
+  const denied = await fixture(),
+    kept = await fixture();
+  await withRecoveryTransaction(t.db, admission, async (outer) => {
+    await expect(
+      runOperation(outer, input(), async ({ tx }) => {
+        await tx.update(grants).set({ revokedAt: new Date() }).where(eq(grants.id, denied.grantId));
+        await appendRecoveryEvent(outer, admission.context, denied.restriction).catch(() => {});
+        return "must roll back";
+      }),
+    ).rejects.toThrow("failed append");
+    await runOperation(outer, input({ recovery: undefined }), ({ tx }) => kept.apply(tx));
+  });
+  expect(await denied.revoked()).toBe(false);
+  expect(await kept.revoked()).toBe(true);
+  expect(await t.db.select().from(operations)).toHaveLength(1);
+  expect(await t.db.select().from(recoveryPayloads)).toHaveLength(1);
+  const batch = await readCommittedRecoveryBatch(t.db, admission.context);
+  expect(batch.entries).toHaveLength(1);
+  expect(batch.entries[0]?.effects.map((e) => e.kind)).toEqual([
+    "access_revocation",
+    "accepted_operation",
+  ]);
+});
+
+it.each(["restrictive", "accepted"] as const)(
+  "R08 foreign-root %s misuse poisons both live owned scopes",
+  async (kind) => {
+    await admit();
+    const first = await fixture(),
+      second = await fixture();
+    const historical = await runOperation(
+      t.db,
+      input({ recovery: undefined }),
+      async () => "historical",
+    );
+    const captured = deferred<Transaction>(),
+      release = deferred();
+    const other = withRecoveryTransaction(t.db, admission, async (tx) => {
+      captured.resolve(tx);
+      await release.promise;
+    }).then(
+      () => "wrong success",
+      (e: Error) => e.message,
+    );
+    const foreign = await captured.promise;
+    let caller: unknown;
+    try {
+      caller = await runOperation(t.db, input(), async ({ tx }) => {
+        await tx.update(grants).set({ revokedAt: new Date() }).where(eq(grants.id, first.grantId));
+        await foreign
+          .update(grants)
+          .set({ revokedAt: new Date() })
+          .where(eq(grants.id, second.grantId));
+        await (kind === "restrictive"
+          ? appendRecoveryEvent(foreign, admission.context, second.restriction)
+          : appendAcceptedRecoveryOperation(foreign, historical.operationId)
+        ).catch(() => {});
+        return "must roll back";
+      }).then(
+        () => "wrong success",
+        (e: Error) => e.message,
+      );
+    } finally {
+      release.resolve();
+    }
+    expect(caller).toContain("failed append");
+    expect(await other).toContain("failed append");
+    expect(await first.revoked()).toBe(false);
+    expect(await second.revoked()).toBe(false);
+    expect(await t.db.select().from(operations)).toHaveLength(1);
+    await assertEmpty();
+  },
+);
+
+it.each(["explicit", "legacy_operation"] as const)(
+  "R08 a managed callback cannot start a separate root via %s pool use",
+  async (mode) => {
+    await admit();
+    const f = await fixture();
+    const extra = vi.fn(async () => "independent command");
+    await expect(
+      runOperation(t.db, input(), async ({ tx }) => {
+        await tx.update(grants).set({ revokedAt: new Date() }).where(eq(grants.id, f.grantId));
+        await (mode === "explicit"
+          ? withRecoveryTransaction(t.db, admission, extra)
+          : runOperation(t.db, input({ recovery: undefined }), extra)
+        ).catch(() => {});
+        return "must roll back";
+      }),
+    ).rejects.toThrow("failed append");
+    expect(extra).not.toHaveBeenCalled();
+    expect(await f.revoked()).toBe(false);
+    expect(await t.db.select().from(operations)).toEqual([]);
+    await assertEmpty();
+  },
+);
+
+it.each(["append", "new_root"] as const)(
+  "R08 detached expired child cannot %s while its owned ancestor remains live",
+  async (mode) => {
+    await admit();
+    const f = await fixture();
+    const release = deferred();
+    const extra = vi.fn(async () => "independent command");
+    let detached!: Promise<void>;
+    await expect(
+      withRecoveryTransaction(t.db, admission, async (outer) => {
+        await withRecoveryTransaction(outer, admission, async (child) => {
+          detached = (async () => {
+            await release.promise;
+            await outer
+              .update(grants)
+              .set({ revokedAt: new Date() })
+              .where(eq(grants.id, f.grantId));
+            await (mode === "append"
+              ? appendRecoveryEvent(child, admission.context, f.restriction)
+              : withRecoveryTransaction(t.db, admission, extra)
+            ).catch(() => {});
+          })();
+        });
+        release.resolve();
+        await detached;
+      }),
+    ).rejects.toThrow("failed append");
+    expect(extra).not.toHaveBeenCalled();
+    expect(await f.revoked()).toBe(false);
+    await assertEmpty();
+  },
+);
+
+it("R08 a callback detached from a completed root cannot later start another root", async () => {
+  await admit();
+  const release = deferred();
+  let detached!: Promise<unknown>;
+  const extra = vi.fn(async () => "independent command");
+  await withRecoveryTransaction(t.db, admission, async () => {
+    detached = (async () => {
+      await release.promise;
+      return runOperation(t.db, input({ recovery: undefined }), extra);
+    })().then(
+      () => "wrong success",
+      (e: Error) => e.message,
+    );
+  });
+  release.resolve();
+  expect(await detached).toContain("active owned transaction");
+  expect(extra).not.toHaveBeenCalled();
+  expect(await t.db.select().from(operations)).toEqual([]);
+  await assertEmpty();
+  // Independent entry outside that asynchronous scope still follows the unchanged legacy path.
+  expect(
+    (await runOperation(t.db, input({ recovery: undefined }), async () => "ordinary")).outcome,
+  ).toBe("ordinary");
+  await assertEmpty();
+});
+
+it("R08 receipt lock spans journal-head wait and the true outer COMMIT", async () => {
+  await admit();
+  const original = await runOperation(
+    t.db,
+    input({ recovery: undefined }),
+    async () => "original succeeded receipt",
+  );
+  await t.sql`create function synthetic_commit_pause() returns trigger language plpgsql as $$ begin perform pg_advisory_xact_lock(614937); return new; end; $$`;
+  await t.sql`create constraint trigger synthetic_commit_pause after insert on recovery_journal deferrable initially deferred for each row execute function synthetic_commit_pause()`;
+  const commitReady = deferred<number>(),
+    releaseCommit = deferred(),
+    headReady = deferred<number>(),
+    releaseHead = deferred(),
+    recorderReady = deferred<number>();
+  const commitHolder = t.db.transaction(async (tx) => {
+    const [row] = await tx.execute<{ pid: number }>(
+      sql`select pg_backend_pid() as pid, pg_advisory_xact_lock(614937)`,
+    );
+    commitReady.resolve(row?.pid ?? 0);
+    await releaseCommit.promise;
+  });
+  const commitPid = await commitReady.promise;
+  const headHolder = t.db.transaction(async (tx) => {
+    await tx.select().from(recoveryJournalHead).for("update");
+    const [row] = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
+    headReady.resolve(row?.pid ?? 0);
+    await releaseHead.promise;
+  });
+  const headPid = await headReady.promise;
+  const recorder = withRecoveryTransaction(t.db, admission, async (tx) => {
+    const [row] = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
+    recorderReady.resolve(row?.pid ?? 0);
+    await appendAcceptedRecoveryOperation(tx, original.operationId);
+  });
+  const recorderPid = await recorderReady.promise;
+  const blockedUpdate = () =>
+    t.sql.begin(async (tx) => {
+      await tx`set local lock_timeout = '100ms'`;
+      await tx`update operations set status = 'failed', outcome = '{"code":"forbidden"}'::jsonb where id = ${original.operationId}`;
+    });
+  try {
+    await waitBlockedBy(headPid);
+    await expect(blockedUpdate()).rejects.toMatchObject({ code: "55P03" });
+    releaseHead.resolve();
+    await headHolder;
+    await waitBlockedBy(commitPid);
+    const [activity] = await t.sql`select query from pg_stat_activity where pid = ${recorderPid}`;
+    expect(activity?.query.toLowerCase()).toContain("commit");
+    await expect(blockedUpdate()).rejects.toMatchObject({ code: "55P03" });
+  } finally {
+    releaseHead.resolve();
+    releaseCommit.resolve();
+    await headHolder;
+    await commitHolder;
+    await recorder;
+  }
+  const [committed] = await t.db
+    .select()
+    .from(operations)
+    .where(eq(operations.id, original.operationId));
+  expect(committed?.status).toBe("succeeded");
+  expect(await t.db.select().from(recoveryOperationReferences)).toHaveLength(1);
+  // A later uninstrumented mutation is not prevented or qualified as complete coverage.
+  await blockedUpdate();
+  expect((await readCommittedRecoveryBatch(t.db, admission.context)).coverage).toBe("incomplete");
+});
+
+it.each(["restrictive", "accepted"] as const)(
+  "R08 detached %s append after callback return cannot enter the final envelope",
+  async (kind) => {
+    await admit();
+    const f = await fixture();
+    const headReady = deferred<number>(),
+      releaseHead = deferred(),
+      releaseAppend = deferred();
+    const holder = t.db.transaction(async (tx) => {
+      await tx.select().from(recoveryJournalHead).for("update");
+      const [row] = await tx.execute<{ pid: number }>(sql`select pg_backend_pid() as pid`);
+      headReady.resolve(row?.pid ?? 0);
+      await releaseHead.promise;
+    });
+    const headPid = await headReady.promise;
+    let detached!: Promise<unknown>;
+    const writer = withRecoveryTransaction(t.db, admission, async (outer) => {
+      const saved = await runOperation(outer, input(), ({ tx }) => f.apply(tx));
+      detached = (async () => {
+        await releaseAppend.promise;
+        return kind === "restrictive"
+          ? appendRecoveryEvent(outer, admission.context, f.restriction)
+          : appendAcceptedRecoveryOperation(outer, saved.operationId);
+      })().then(
+        () => "wrong success",
+        (e: Error) => e.message,
+      );
+    }).then(
+      () => "wrong success",
+      (e: Error) => e.message,
+    );
+    try {
+      await waitBlockedBy(headPid);
+      releaseAppend.resolve();
+      expect(await detached).toContain("active owned transaction");
+    } finally {
+      releaseAppend.resolve();
+      releaseHead.resolve();
+      await holder;
+    }
+    expect(await writer).toContain("failed append");
+    expect(await f.revoked()).toBe(false);
+    expect(await t.db.select().from(operations)).toEqual([]);
+    await assertEmpty();
+  },
+);
