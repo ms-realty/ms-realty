@@ -31,6 +31,7 @@ export default async function Page({
 }) {
   const { locale } = await params;
   if (!isRoutableLocale(locale)) notFound();
+  const copyLocale = searchAlertCopyLocale(locale);
   const query = await searchParams,
     c = searchAlertCopy(locale),
     p = privacyCopy(locale);
@@ -77,7 +78,7 @@ export default async function Page({
   const s = searchAlertStatusCopy(locale);
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-gutter py-8">
-      <h1 className="text-title font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
+      <h1 className="text-title font-semibold" lang={copyLocale} dir={localeDirection(copyLocale)}>
         {statusRequested ? c.status : c.title}
       </h1>
       {statusRequested ? null : search ? (
@@ -85,7 +86,7 @@ export default async function Page({
       ) : (
         <Notice tone="warning">{c.invalid}</Notice>
       )}
-      <div className="space-y-5" lang={searchAlertCopyLocale(locale)} dir="ltr">
+      <div className="space-y-5" lang={copyLocale} dir={localeDirection(copyLocale)}>
         <Notice tone="info">{configuredAlertRule() ? c.deliveryBoundary : c.deliveryOff}</Notice>
         {statusRequested ? (
           saved ? (
@@ -94,11 +95,11 @@ export default async function Page({
               <p>{s.historicalNote}</p>
               <p>
                 {s.currentState}:{" "}
-                <span lang={searchAlertCopyLocale(locale)}>
+                <span lang={copyLocale} dir={localeDirection(copyLocale)}>
                   {privacyLabel(locale, saved.state)}
                 </span>
               </p>
-              <p lang={searchAlertCopyLocale(locale)} dir="ltr">
+              <p lang={copyLocale} dir={localeDirection(copyLocale)}>
                 {p.frequency}: {saved.frequency === "weekly" ? p.weekly : p.daily} · {p.timezone}:{" "}
                 <bdi>{saved.timezone}</bdi>
               </p>
