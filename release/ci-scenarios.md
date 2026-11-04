@@ -14,10 +14,10 @@ The collector writes `receipt.json` together with the provider responses and sel
 
 The F04 browser checks exercise the public shared-shortlist portion of AT09. Each row runs on Chromium desktop, Chromium mobile and WebKit mobile with the CI application and disposable database.
 
-| Browser case | Required observations from the reviewed test |
-| --- | --- |
+| Browser case                    | Required observations from the reviewed test                                                                                                                                                                           |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Public recipient and revocation | The recipient sees the selected public listings and price. The omitted reference, creator controls and creator session value are absent. Revocation removes recipient cards and the listing title on the next request. |
-| Expired recipient and creator | The recipient sees an expired state without the listing title. The creator’s card also shows expiry and offers no action buttons. |
+| Expired recipient and creator   | The recipient sees an expired state without the listing title. The creator’s card also shows expiry and offers no action buttons.                                                                                      |
 
 The map fixes the source file, titles, lines and columns, per-project test IDs, native expectation matchers and selectors. The creator’s card identifies the two selected listing references and the omitted one. Each recipient selector must match the appropriate reference, and the collector requires individual observations for Revoke and Copy link. The candidate Git object pins the workflow, package manifest and lifecycle scripts, dependency lock, scanner wrapper and readiness probe, browser configuration, server entry point and test source. Changes to these inputs require reviewing the map and updating the pins. A job conclusion or a test name containing an acceptance ID supplies no case evidence by itself.
 
