@@ -170,26 +170,99 @@ function fixture(anchor: Point["anchor"] = genesis) {
 }
 
 describe("R08 / AT64 recovery archive contracts", () => {
-  it("rejects using a copied point manifest as the replay command for a later revocation", () => {
-    const { packet, last } = fixture();
-    const entry = last.entries[0];
-    const effect = entry?.effects[0];
-    const archive = last.archive;
-    const replay = archive?.replayPayloads[0];
-    if (!entry || !effect || !archive || !replay) throw Error("missing fixture");
-    replay.object = packet.point.configurationManifest;
-    replay.copies = packet.pointCopies.configurationManifest;
-    effect.payloadDigest = replay.object.plaintext.sha256;
-    const { digest: _oldDigest, ...fields } = entry;
-    entry.digest = recoveryEntryDigest(contextDigest, fields);
-    last.through = { sequence: entry.sequence, digest: entry.digest };
-    archive.object = syntheticObject(
-      recoverySegmentBytes(contextDigest, last.from, last.through, last.entries),
+  it.each(["clear manifest", "rewrapped configuration ciphertext"] as const)(
+    "rejects %s as the replay command for a later revocation",
+    (substitution) => {
+      const { packet, last } = fixture();
+      const entry = last.entries[0];
+      const effect = entry?.effects[0];
+      const archive = last.archive;
+      const replay = archive?.replayPayloads[0];
+      if (!entry || !effect || !archive || !replay) throw Error("missing fixture");
+      replay.object =
+        substitution === "clear manifest"
+          ? packet.point.configurationManifest
+          : syntheticObject(Buffer.from("synthetic encrypted object: config"));
+      if (substitution === "rewrapped configuration ciphertext") {
+        expect(replay.object.plaintext).toEqual(packet.point.configurationManifest.ciphertext);
+      }
+      replay.copies = copyRecords(replay.object);
+      effect.payloadDigest = replay.object.plaintext.sha256;
+      const { digest: _oldDigest, ...fields } = entry;
+      entry.digest = recoveryEntryDigest(contextDigest, fields);
+      last.through = { sequence: entry.sequence, digest: entry.digest };
+      archive.object = syntheticObject(
+        recoverySegmentBytes(contextDigest, last.from, last.through, last.entries),
+      );
+      archive.copies = copyRecords(archive.object);
+      expect(() => inspectRecoveryArchive(replaceTail(packet, last), packet)).toThrow(
+        /content purpose/,
+      );
+    },
+  );
+
+  it("rejects a known encrypted dump redeclared as a writer-fence artifact", () => {
+    const { packet } = fixture();
+    if (!packet.barrier) throw Error("missing fixture");
+    packet.barrier.writerFenceReceiptDigest = packet.point.databaseDump.ciphertext.sha256;
+    expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow(/receipt binding/);
+  });
+
+  it.each([
+    "point index",
+    "source schema",
+    "journal head",
+    "journal segment",
+    "effect subject",
+    "restrictive payload",
+    "copy set",
+    "predecessor watermark",
+    "current watermark",
+  ] as const)("rejects %s bytes reused as coverage evidence under fresh pins", (source) => {
+    const { packet, first } = fixture();
+    const effect = first.entries[0]?.effects[0];
+    if (!packet.barrier || !first.archive || !effect || !packet.watermark.predecessor)
+      throw Error("missing fixture");
+    const identity = {
+      "point index": packet.watermark.pointDigest,
+      "source schema": context.schemaDigest,
+      "journal head": first.through.digest,
+      "journal segment": first.archive.object.plaintext.sha256,
+      "effect subject": effect.subjectDigest,
+      "restrictive payload": effect.payloadDigest,
+      "copy set": packet.watermark.copySetDigest,
+      "predecessor watermark": packet.watermark.predecessor.digest,
+      "current watermark": recoveryDigest("watermark-v2", packet.watermark),
+    }[source];
+    packet.barrier.coverageReceiptDigest = identity;
+    expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow(/receipt binding/);
+  });
+
+  it("rejects one byte-identical plaintext assigned to different named point components", () => {
+    const { packet } = fixture();
+    packet.point.configurationManifest.plaintext = { ...packet.point.databaseManifest.plaintext };
+    const pointDigest = recoveryDigest("point-v1", packet.point);
+    packet.watermark.pointDigest = pointDigest;
+    if (!packet.barrier) throw Error("missing fixture");
+    packet.barrier.pointDigest = pointDigest;
+    expect(() => inspectRecoveryArchive(pinPacket(packet), packet)).toThrow(
+      /content purpose or scope/,
     );
-    archive.copies = copyRecords(archive.object);
-    expect(() => inspectRecoveryArchive(replaceTail(packet, last), packet)).toThrow(
-      /content purpose/,
-    );
+  });
+
+  it("allows another encrypted copy of the identical typed payload under its original scope", () => {
+    const { packet, first } = fixture();
+    const tail = makeBatch(first.through, "consent_withdrawal");
+    const payload = tail.archive?.replayPayloads[0];
+    if (!payload) throw Error("missing fixture");
+    payload.object.ciphertext = measured("another synthetic encryption envelope");
+    payload.copies = copyRecords(payload.object);
+    expect(inspectRecoveryArchive(replaceTail(packet, tail), packet)).toMatchObject({
+      evidenceClass: "structural_only",
+      commonArchivePrefix: tail.through,
+      currentness: "closed_barrier_bound",
+      quarantine: "required",
+    });
   });
 
   it("allows the same scoped restrictive object and matching receipts in multiple segments", () => {

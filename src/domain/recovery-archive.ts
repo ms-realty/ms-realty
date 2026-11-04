@@ -170,11 +170,15 @@ export const recoveryExpectation = z.strictObject({
 export type RecoveryPacket = z.infer<typeof recoveryPacket>;
 export type RecoveryExpectation = z.infer<typeof recoveryExpectation>;
 
+function measure(encoded: Buffer) {
+  return { sha256: createHash("sha256").update(encoded).digest("hex"), size: encoded.length };
+}
+function measureCommitment(kind: string, value: unknown) {
+  return measure(Buffer.from(canonicalJson([kind, value])));
+}
 /** Domain separation and canonical key order are part of the wire format. */
 export function recoveryDigest(kind: string, value: unknown): string {
-  return createHash("sha256")
-    .update(canonicalJson([kind, value]))
-    .digest("hex");
+  return measureCommitment(kind, value).sha256;
 }
 export function recoveryEntryDigest(
   contextDigest: string,
@@ -197,18 +201,59 @@ function requireMatch(condition: boolean, detail: string): asserts condition {
 function sameCursor(a: Cursor | null, b: Cursor | null) {
   return a === null || b === null ? a === b : a.sequence === b.sequence && a.digest === b.digest;
 }
-function bindOnce(bindings: Map<string, string>, identity: string, value: unknown, detail: string) {
-  const canonical = canonicalJson(value);
-  const prior = bindings.get(identity);
-  requireMatch(prior === undefined || prior === canonical, detail);
-  bindings.set(identity, canonical);
+type DigestRole =
+  | "point_component"
+  | "journal_segment"
+  | "restrictive_payload"
+  | "ciphertext"
+  | "receipt"
+  | "source_metadata"
+  | "context"
+  | "point"
+  | "journal_head"
+  | "effect_subject"
+  | "accepted_operation"
+  | "external_outcome"
+  | "copy_set"
+  | "watermark"
+  | "barrier";
+type ByteUse = { role: DigestRole; scope: string; size?: number };
+
+// One registry per inspected source/point. A reference and a later measurement of the
+// same artifact can coexist. The raw hash is always the key, including for receipts.
+class DigestRegistry {
+  private readonly uses = new Map<string, ByteUse>();
+  claim(digest: string, role: DigestRole, scope: unknown, size?: number) {
+    const semantics = canonicalJson(scope);
+    const prior = this.uses.get(digest);
+    if (prior) {
+      requireMatch(
+        prior.size === undefined || size === undefined || prior.size === size,
+        "conflicting byte length",
+      );
+      const detail =
+        role === "receipt"
+          ? "conflicting receipt binding"
+          : role === "ciphertext"
+            ? "conflicting ciphertext binding"
+            : "conflicting content purpose or scope";
+      requireMatch(prior.role === role && prior.scope === semantics, detail);
+    }
+    this.uses.set(digest, { role, scope: semantics, size: prior?.size ?? size });
+  }
+  canonical(kind: string, value: unknown, role: DigestRole, scope: unknown) {
+    const { sha256, size } = measureCommitment(kind, value);
+    this.claim(sha256, role, scope, size);
+    return sha256;
+  }
 }
 function checkCopies(
   context: RecoveryExpectation["context"],
   object: z.infer<typeof encrypted>,
   records: Copies,
-  bindings: Map<string, string>,
+  bindings: DigestRegistry,
   purpose: "point_component" | "journal_segment" | "restrictive_payload",
+  scope: unknown,
 ) {
   requireMatch(
     object.encryptionProfileDigest === context.encryptionProfileDigest,
@@ -218,15 +263,12 @@ function checkCopies(
     object.plaintext.sha256 !== object.ciphertext.sha256,
     "cleartext declared as ciphertext",
   );
-  for (const content of [object.plaintext, object.ciphertext]) {
-    bindOnce(bindings, `bytes/${content.sha256}`, content.size, "conflicting byte length");
-  }
-  bindOnce(bindings, `format/${object.plaintext.sha256}`, purpose, "conflicting content purpose");
-  bindOnce(
-    bindings,
-    `ciphertext/${object.ciphertext.sha256}`,
-    object,
-    "conflicting ciphertext binding",
+  bindings.claim(object.plaintext.sha256, purpose, scope, object.plaintext.size);
+  bindings.claim(
+    object.ciphertext.sha256,
+    "ciphertext",
+    [object.encryptionProfileDigest, object.plaintext, purpose, scope],
+    object.ciphertext.size,
   );
   for (const target of destinations) {
     const record = records[target];
@@ -248,12 +290,15 @@ function checkCopies(
       ["create", record.createReceiptDigest],
       ["readback", record.readbackReceiptDigest],
     ] as const) {
-      bindOnce(
-        bindings,
-        `receipt/${rawDigest}`,
-        [kind, target, record.destinationId, key, object],
-        "conflicting receipt binding",
-      );
+      bindings.claim(rawDigest, "receipt", [
+        kind,
+        target,
+        record.destinationId,
+        key,
+        object,
+        purpose,
+        scope,
+      ]);
     }
   }
 }
@@ -261,19 +306,18 @@ function checkCopies(
 function replayCoverage(
   context: RecoveryExpectation["context"],
   batch: RecoveryPacket["segments"][number],
-  bindings: Map<string, string>,
+  bindings: DigestRegistry,
 ) {
   const required = new Map<string, { kind: string; subjectDigest: string }>();
   for (const entry of batch.entries) {
     for (const effect of entry.effects) {
-      if (effect.kind === "accepted_operation" || effect.kind === "external_outcome") continue;
+      bindings.claim(effect.subjectDigest, "effect_subject", null);
+      if (effect.kind === "accepted_operation" || effect.kind === "external_outcome") {
+        bindings.claim(effect.payloadDigest, effect.kind, effect.subjectDigest);
+        continue;
+      }
       const scope = { kind: effect.kind, subjectDigest: effect.subjectDigest };
-      bindOnce(
-        bindings,
-        `restrictive/${effect.payloadDigest}`,
-        scope,
-        "conflicting replay payload scope",
-      );
+      bindings.claim(effect.payloadDigest, "restrictive_payload", scope);
       required.set(effect.payloadDigest, scope);
     }
   }
@@ -289,7 +333,7 @@ function replayCoverage(
       "unreferenced, duplicate or mis-scoped replay payload",
     );
     seen.add(digest);
-    checkCopies(context, payload.object, payload.copies, bindings, "restrictive_payload");
+    checkCopies(context, payload.object, payload.copies, bindings, "restrictive_payload", effect);
     for (const target of destinations) if (payload.copies[target]) available[target]++;
   }
   return {
@@ -307,8 +351,17 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
     expected.destinationInstance !== expected.context.sourceInstance,
     "isolated restore destination",
   );
-  const contextDigest = recoveryDigest("context-v1", expected.context);
-  const pointDigest = recoveryDigest("point-v1", point);
+  const bindings = new DigestRegistry();
+  const contextDigest = bindings.canonical("context-v1", expected.context, "context", null);
+  for (const field of [
+    "releaseContextDigest",
+    "schemaDigest",
+    "writerRegistryDigest",
+    "encryptionProfileDigest",
+  ] as const) {
+    bindings.claim(expected.context[field], "source_metadata", field);
+  }
+  const pointDigest = bindings.canonical("point-v1", point, "point", contextDigest);
   requireMatch(
     pointDigest === expected.pointDigest && point.contextDigest === contextDigest,
     "expected recovery point",
@@ -329,7 +382,13 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
     euR2: point.anchor,
     outsideAccount: point.anchor,
   };
-  const bindings = new Map<string, string>();
+  bindings.claim(zero, "journal_head", [contextDigest, 0]);
+  bindings.claim(point.anchor.digest, "journal_head", [contextDigest, point.anchor.sequence]);
+  if (mark.predecessor)
+    bindings.claim(mark.predecessor.digest, "watermark", [
+      contextDigest,
+      mark.predecessor.generation,
+    ]);
   for (const component of components) {
     checkCopies(
       expected.context,
@@ -337,6 +396,7 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
       pointCopies[component],
       bindings,
       "point_component",
+      [pointDigest, component],
     );
     for (const target of destinations) {
       if (!pointCopies[component][target]) prefixes[target] = null;
@@ -353,21 +413,30 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
         "journal continuity",
       );
       requireMatch(!transactions.has(fields.transactionRef), "duplicate transaction envelope");
-      requireMatch(recoveryEntryDigest(contextDigest, fields) === digest, "journal entry digest");
+      const expectedDigest = bindings.canonical(
+        "journal-entry-v1",
+        [contextDigest, fields],
+        "journal_head",
+        [contextDigest, fields.sequence],
+      );
+      requireMatch(expectedDigest === digest, "journal entry digest");
       transactions.add(fields.transactionRef);
       head = { sequence: fields.sequence, digest };
     }
     requireMatch(sameCursor(batch.through, head), "segment head");
     const recoverable = replayCoverage(expected.context, batch, bindings);
+    const encoded = measure(
+      recoverySegmentBytes(contextDigest, batch.from, batch.through, batch.entries),
+    );
+    const segmentScope = [contextDigest, batch.from, batch.through];
+    bindings.claim(encoded.sha256, "journal_segment", segmentScope, encoded.size);
     if (!batch.archive) continue;
-    const encoded = recoverySegmentBytes(contextDigest, batch.from, batch.through, batch.entries);
     const { object, copies: stored } = batch.archive;
     requireMatch(
-      object.plaintext.size === encoded.length &&
-        object.plaintext.sha256 === createHash("sha256").update(encoded).digest("hex"),
+      object.plaintext.size === encoded.size && object.plaintext.sha256 === encoded.sha256,
       "segment plaintext",
     );
-    checkCopies(expected.context, object, stored, bindings, "journal_segment");
+    checkCopies(expected.context, object, stored, bindings, "journal_segment", segmentScope);
     for (const target of destinations) {
       if (stored[target] && recoverable[target] && sameCursor(prefixes[target], batch.from))
         prefixes[target] = head;
@@ -380,13 +449,21 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
       "destination prefix",
     );
   }
-  const copySetDigest = recoveryDigest("copies-v2", [
-    pointCopies,
-    segments.map((batch) => batch.archive),
-  ]);
+  const copySetDigest = bindings.canonical(
+    "copies-v2",
+    [pointCopies, segments.map((batch) => batch.archive)],
+    "copy_set",
+    [contextDigest, pointDigest],
+  );
   requireMatch(mark.copySetDigest === copySetDigest, "copy receipt set");
-  const watermarkDigest = recoveryDigest("watermark-v2", mark);
+  const watermarkDigest = bindings.canonical("watermark-v2", mark, "watermark", [
+    contextDigest,
+    mark.generation,
+  ]);
   const seal = packet.barrier;
+  const barrierDigest = seal
+    ? bindings.canonical("barrier-v1", seal, "barrier", [pointDigest, watermarkDigest])
+    : null;
   if (seal) {
     requireMatch(
       mark.epochState === "closed" &&
@@ -405,12 +482,13 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
       "acceptedWriteLedgerDigest",
       "coverageReceiptDigest",
     ] as const) {
-      bindOnce(
-        bindings,
-        `receipt/${seal[purpose]}`,
-        [purpose, contextDigest, pointDigest, mark.generation, head],
-        "conflicting receipt binding",
-      );
+      bindings.claim(seal[purpose], "receipt", [
+        purpose,
+        contextDigest,
+        pointDigest,
+        mark.generation,
+        head,
+      ]);
     }
   }
   const observed = expected.authorityRead;
@@ -425,10 +503,7 @@ export function inspectRecoveryArchive(expectedInput: unknown, packetInput: unkn
       observed.generation === mark.generation && observed.watermarkDigest === watermarkDigest,
       "current authority watermark",
     );
-    requireMatch(
-      observed.barrierDigest === (seal ? recoveryDigest("barrier-v1", seal) : null),
-      "current authority barrier",
-    );
+    requireMatch(observed.barrierDigest === barrierDigest, "current authority barrier");
   }
   const { euR2, outsideAccount } = prefixes;
   const common =
