@@ -146,7 +146,7 @@ export async function publicListingMetadata(input: {
   const result = await readPublicSeoListing(route.reference, route.locale).catch(() => null);
   const copy = discoveryCopy(route.locale);
   const availableIn =
-    result?.status === "listing"
+    result?.status === "listing" && result.listing.indexable
       ? (await publicCataloguePages(route.reference).catch(() => []))
           .filter((page) => page.reference === route.reference)
           .map((page) => page.locale)

@@ -84,5 +84,17 @@ Use `NEXT_DIST_DIR=.next-other E2E_PORT=3150` for a concurrent browser run. Upda
 baselines with `npm run test:visual:docker:update`, inspect the images, then run the check.
 Local tests and synthetic records are development evidence; they do not pass live release gates.
 
+R09/AT27 production indexability checks use the same disposable browser harness with
+`STAGING=false`. Run them separately from the ordinary staging suite:
+
+```sh
+TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/postgres NEXT_DIST_DIR=.next-indexability E2E_PORT=3199 npm run e2e -- --config=playwright.indexability.config.ts --project=chromium-desktop
+```
+
+The dedicated configuration discovers `e2e/indexability.production.ts`; ordinary `make e2e`
+and CI staging runs do not include it. These checks cover robots, canonical URLs, approved
+sitemap/hreflang entries, and unavailable, fallback and pending legacy editions using
+synthetic records. They do not establish real content approval or live indexing behavior.
+
 Every environment variable is documented in [`.env.example`](.env.example). Agent and
 contributor rules are in [`AGENTS.md`](AGENTS.md).
