@@ -65,6 +65,51 @@ const reference = z
 
 export const manifestApprovalRoles = ["operator", "reviewer"] as const;
 
+/** Optional on legacy signed JSON: parsing must never add a mode or purpose. */
+export const ownerReviewPurposes = [
+  "candidate_review",
+  "deployment_acceptance",
+  "operational_acceptance",
+] as const;
+export const evidencePurposes = [
+  "policy_ratification",
+  ...ownerReviewPurposes,
+  "human_review",
+  "recovery_review",
+  "machine_observation",
+] as const;
+export const singleOperatorAuthorityAssertions = [
+  "authority:single_operator_owner_review",
+  "authority:shared_custody_limitations",
+  "authority:phase_permissions",
+  "authority:amendments_reviewed",
+] as const;
+export const singleOperatorReviewAssertions = [
+  "approval:owner_self_review",
+  "release:operator_completion",
+  "release:owner_self_review",
+  "release:operator_custody",
+  "release:cutover_procedure_scope_reviewed",
+  "release:evidence_bundle_captured",
+  "release:evidence_bundle_verified",
+  "release:protected_staging_parity",
+] as const;
+
+/** Installed by an operator-controlled trust path, never derived from incoming evidence. */
+export const admittedReleaseTrustSchema = z
+  .object({
+    schemaVersion: z.literal(1),
+    policyDigest: digest,
+    trustedKeysDigest: digest,
+    owner: z.literal("Ivan"),
+    ownerKeyId: identifier,
+    /** SHA-256 of the DER SubjectPublicKeyInfo bytes, not of a key label. */
+    ownerKeyFingerprint: digest,
+    custodyReference: name,
+  })
+  .strict();
+export type AdmittedReleaseTrust = z.infer<typeof admittedReleaseTrustSchema>;
+
 export const releaseManifestSchema = z
   .object({
     $schema: z.string().optional(),
@@ -130,16 +175,18 @@ export const releaseManifestSchema = z
     evidenceIds: z.array(identifier),
     /** SHA-256 of canonical JSON including the signature, keyed by every evidence id. */
     evidenceDigests: z.record(identifier, digest),
-    /** Named operator and reviewer approvals of this manifest. */
+    /** Legacy separate approvals, or exactly one explicitly opted-in owner self-review. */
     approvals: z.array(
       z
         .object({
-          role: z.enum(manifestApprovalRoles),
+          role: z.enum([...manifestApprovalRoles, "owner_self_review"]),
           name,
           approvedAt: instant,
           scope: z.literal("release"),
           /** A signed release_attestation by this approver, containing approval:<role>. */
           evidenceId: identifier,
+          /** Required only by the single-operator mode; never an execution grant. */
+          purpose: z.enum(ownerReviewPurposes).optional(),
         })
         .strict(),
     ),
@@ -199,7 +246,15 @@ export const evidenceArtifactSchema = z
     expiresAt: known(instant),
     /** Tool or source identity that produced the observation, with its version. */
     source: name,
-    /** The named human reviewer, where the evidence type requires one. */
+    /** In the new mode the signer kind is explicit; a checker is never a human approver. */
+    actor: z
+      .discriminatedUnion("kind", [
+        z.object({ kind: z.literal("human"), name }).strict(),
+        z.object({ kind: z.literal("machine"), name, version: name }).strict(),
+      ])
+      .optional(),
+    purpose: z.enum(evidencePurposes).optional(),
+    /** Review provenance; this label alone confers no human authority. */
     reviewer: known(name),
     assertions: z
       .array(
@@ -239,6 +294,22 @@ export const gatePolicySchema = z
     schemaVersion: z.literal(1),
     policyRevision: name,
     specVersion: name,
+    approvalModel: z
+      .discriminatedUnion("mode", [
+        z.object({ mode: z.literal("separate_reviewers") }).strict(),
+        z
+          .object({
+            mode: z.literal("single_operator_owner_review"),
+            owner: z.literal("Ivan"),
+            authorityEvidenceId: identifier,
+            /** Exact reviewed bytes; null remains a blocking, unratified input. */
+            amendments: known(reference),
+            limitations: known(reference),
+            phasePermissions: known(reference),
+          })
+          .strict(),
+      ])
+      .optional(),
     /** Upper bound on a saved snapshot, even for evidence bound only by revision. */
     snapshotMaxAgeMinutes: z.number().int().positive().max(1440),
     /** Operators whose Ed25519 public keys verify signed evidence. Private keys never here. */
@@ -253,6 +324,8 @@ export const gatePolicySchema = z
             .regex(/^MCowBQYDK2VwAyEA[A-Za-z0-9+/]{43}=$/, "base64 Ed25519 SPKI public key"),
           /** The evidence types this key may sign. */
           evidenceTypes: z.array(identifier).min(1),
+          actorKind: z.enum(["human", "machine"]).optional(),
+          purposes: z.array(z.enum(evidencePurposes)).min(1).optional(),
         })
         .strict(),
     ),
@@ -384,6 +457,47 @@ export const gatePolicySchema = z
         if (!types.has(type)) issue(["trustedKeys", index, "evidenceTypes"], `unknown ${type}`);
       }
     });
+    if (policy.approvalModel?.mode === "single_operator_owner_review") {
+      const model = policy.approvalModel;
+      policy.trustedKeys.forEach((key, index) => {
+        if (!key.actorKind || !key.purposes)
+          issue(["trustedKeys", index], "single-operator keys need actor kind and purposes");
+        if (key.actorKind === "human" && key.owner !== model.owner)
+          issue(["trustedKeys", index, "owner"], "Ivan is the sole human authority");
+        if (
+          key.purposes?.some((purpose) =>
+            key.actorKind === "machine"
+              ? purpose !== "machine_observation"
+              : purpose === "machine_observation",
+          )
+        )
+          issue(["trustedKeys", index, "purposes"], "human and machine purposes cannot mix");
+      });
+      const requireAssertions = (typeId: string, assertions: readonly string[]) => {
+        const type = policy.evidenceTypes.find((candidate) => candidate.id === typeId);
+        if (!type?.signatureRequired || !type.reviewerRequired)
+          issue(["evidenceTypes"], `${typeId} requires signed owner review`);
+        for (const assertion of assertions) {
+          if (!type?.requiredAssertions.includes(assertion))
+            issue(["evidenceTypes"], `${typeId} must require ${assertion}`);
+        }
+      };
+      requireAssertions("authority_decision_record", singleOperatorAuthorityAssertions);
+      requireAssertions("release_attestation", singleOperatorReviewAssertions);
+      if (
+        policy.evidenceTypes
+          .find((type) => type.id === "release_attestation")
+          ?.requiredAssertions.includes("release:cutover_approved")
+      )
+        issue(["evidenceTypes"], "candidate review cannot authorize a cutover operation");
+      for (const [gateId, typeId] of [
+        ["R00", "authority_decision_record"],
+        ["R10", "release_attestation"],
+      ] as const) {
+        if (!policy.gates.find((gate) => gate.id === gateId)?.requiredEvidence.includes(typeId))
+          issue(["gates"], `${gateId} must require ${typeId}`);
+      }
+    }
   });
 export type GatePolicy = z.infer<typeof gatePolicySchema>;
 

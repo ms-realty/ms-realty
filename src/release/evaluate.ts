@@ -5,6 +5,8 @@
 // passes only when every requirement is met by evidence that counts.
 import type { z } from "zod";
 import {
+  type AdmittedReleaseTrust,
+  admittedReleaseTrustSchema,
   type EvidenceArtifact,
   evidenceArtifactSchema,
   type GatePolicy,
@@ -14,6 +16,8 @@ import {
   type ReleaseManifest,
   readinessReportSchema,
   releaseManifestSchema,
+  singleOperatorAuthorityAssertions,
+  singleOperatorReviewAssertions,
 } from "./schemas";
 import {
   approvalEvidenceDigest,
@@ -41,6 +45,8 @@ export interface EvaluationInput {
   readonly policy: unknown;
   readonly evidence: readonly EvidenceFile[];
   readonly now: Date;
+  /** Trusted caller configuration, not an evidence/policy field. No CLI loader exists yet. */
+  readonly admittedTrust?: unknown;
 }
 
 function parse<S extends z.ZodType>(schema: S, value: unknown, what: string): z.output<S> {
@@ -55,7 +61,7 @@ function parse<S extends z.ZodType>(schema: S, value: unknown, what: string): z.
 }
 
 /** Unknown manifest fields (null or empty scope lists) and missing named approvals. */
-export function manifestGaps(manifest: ReleaseManifest): string[] {
+export function manifestGaps(manifest: ReleaseManifest, policy?: GatePolicy): string[] {
   const gaps: string[] = [];
   const walk = (value: unknown, path: string) => {
     if (value === null) gaps.push(path);
@@ -68,6 +74,16 @@ export function manifestGaps(manifest: ReleaseManifest): string[] {
   walk(manifest, "");
   if (/^0+$/.test(manifest.releaseSha)) gaps.push("/releaseSha/placeholder");
   if (!Object.keys(manifest.providerAccounts).length) gaps.push("/providerAccounts");
+  if (policy?.approvalModel?.mode === "single_operator_owner_review") {
+    const approval = manifest.approvals[0];
+    if (manifest.approvals.length !== 1 || approval?.role !== "owner_self_review")
+      gaps.push("/approvals/single_owner_required");
+    if (approval?.name !== policy.approvalModel.owner) gaps.push("/approvals/wrong_owner");
+    if (approval?.purpose !== "candidate_review") gaps.push("/approvals/candidate_review_required");
+    return gaps;
+  }
+  if (manifest.approvals.some((approval) => approval.role === "owner_self_review"))
+    gaps.push("/approvals/unsupported_role");
   for (const role of manifestApprovalRoles) {
     if (manifest.approvals.filter((approval) => approval.role === role).length !== 1) {
       gaps.push(`/approvals/${role}`);
@@ -89,13 +105,72 @@ interface Assessed {
   readonly reasons: string[];
 }
 
+/** Checks pins supplied by a trusted adapter; this library cannot establish their origin. */
+function admissionProblems(policy: GatePolicy, trust: AdmittedReleaseTrust | undefined): string[] {
+  if (policy.approvalModel?.mode !== "single_operator_owner_review")
+    return trust ? ["admitted_mode_mismatch"] : [];
+  if (!trust) return ["admitted_trust_missing"];
+  const problems: string[] = [];
+  if (trust.policyDigest !== sha256Digest(canonicalJson(policy)))
+    problems.push("admitted_policy_mismatch");
+  if (trust.trustedKeysDigest !== sha256Digest(canonicalJson(policy.trustedKeys)))
+    problems.push("admitted_keys_mismatch");
+  const ownerKey = policy.trustedKeys.find((key) => key.keyId === trust.ownerKeyId);
+  if (
+    ownerKey?.actorKind !== "human" ||
+    ownerKey.owner !== trust.owner ||
+    !ownerKey.evidenceTypes.includes("authority_decision_record") ||
+    !ownerKey.purposes?.includes("policy_ratification") ||
+    sha256Digest(Buffer.from(ownerKey.publicKey, "base64")) !== trust.ownerKeyFingerprint
+  )
+    problems.push("admitted_owner_key_mismatch");
+  return problems;
+}
+
+/** Purpose checks are fixed by the contract, not selectable by an incoming evidence label. */
+function singleOperatorArtifactProblems(artifact: EvidenceArtifact, policy: GatePolicy): string[] {
+  const model = policy.approvalModel;
+  if (model?.mode !== "single_operator_owner_review") return [];
+  const humanPurposes: Record<string, EvidenceArtifact["purpose"]> = {
+    authority_decision_record: "policy_ratification",
+    release_attestation: "candidate_review",
+    human_review: "human_review",
+    listing_review_report: "human_review",
+    recovery_owner_review: "recovery_review",
+    operational_acceptance: "operational_acceptance",
+  };
+  const humanPurpose = humanPurposes[artifact.type];
+  const reasons: string[] = [];
+  if (artifact.purpose !== (humanPurpose ?? "machine_observation"))
+    reasons.push("wrong_evidence_purpose");
+  if (artifact.actor?.kind !== (humanPurpose ? "human" : "machine"))
+    reasons.push("wrong_actor_kind");
+  if (humanPurpose) {
+    if (artifact.actor?.name !== model.owner) reasons.push("owner_identity_mismatch");
+    if (artifact.reviewer !== model.owner) reasons.push("owner_review_missing");
+    if (!["human", "operator"].includes(artifact.evidenceClass))
+      reasons.push("human_evidence_class_required");
+  } else if (!["test", "live"].includes(artifact.evidenceClass)) {
+    reasons.push("machine_cannot_approve_human_evidence");
+  }
+  if (artifact.type === "authority_decision_record" && artifact.gate !== "R00")
+    reasons.push("authority_gate_mismatch");
+  if (artifact.type === "release_attestation") {
+    if (artifact.gate !== "R10") reasons.push("candidate_gate_mismatch");
+    if (artifact.assertions.some((assertion) => assertion.id === "release:cutover_approved"))
+      reasons.push("execution_authorization_not_supported");
+  }
+  return reasons;
+}
+
 function assessArtifact(
   artifact: EvidenceArtifact,
   manifest: ReleaseManifest,
   policy: GatePolicy,
   now: Date,
+  admission: readonly string[],
 ): string[] {
-  const reasons: string[] = [];
+  const reasons = [...admission, ...singleOperatorArtifactProblems(artifact, policy)];
   const type = policy.evidenceTypes.find((candidate) => candidate.id === artifact.type);
   if (!type) return ["unknown_type"];
   if (!manifest.evidenceIds.includes(artifact.id)) reasons.push("not_in_manifest");
@@ -133,7 +208,11 @@ function assessArtifact(
   if (artifact.expiresAt && now.getTime() >= Date.parse(artifact.expiresAt))
     reasons.push("expired");
   if (type.reviewerRequired && !artifact.reviewer) reasons.push("reviewer_missing");
-  if (type.signatureRequired || artifact.signature) {
+  if (
+    type.signatureRequired ||
+    artifact.signature ||
+    policy.approvalModel?.mode === "single_operator_owner_review"
+  ) {
     const signature = checkSignature(artifact, policy);
     if (signature !== "valid") reasons.push(signature);
   }
@@ -151,6 +230,7 @@ function assessEvidence(
   manifest: ReleaseManifest,
   policy: GatePolicy,
   now: Date,
+  admission: readonly string[],
 ): Assessed[] {
   if (new Set(files.map((file) => file.file)).size !== files.length) {
     throw new ReleaseInputError("Evidence file paths must be unique");
@@ -187,7 +267,7 @@ function assessEvidence(
         digest,
         artifactDigest: evidenceDigest(artifact),
         artifact,
-        reasons: assessArtifact(artifact, manifest, policy, now),
+        reasons: assessArtifact(artifact, manifest, policy, now, admission),
       };
     });
   // Two artifacts with one id make the binding ambiguous: neither counts.
@@ -204,14 +284,21 @@ function assessEvidence(
 export function evaluateRelease(input: EvaluationInput): ReadinessReport {
   const policy = parse(gatePolicySchema, input.policy, "gate policy");
   const manifest = parse(releaseManifestSchema, input.manifest, "release manifest");
+  const trust =
+    input.admittedTrust === undefined
+      ? undefined
+      : parse(admittedReleaseTrustSchema, input.admittedTrust, "admitted release trust");
+  const model = policy.approvalModel;
+  const singleOperator = model?.mode === "single_operator_owner_review";
+  const admission = admissionProblems(policy, trust);
   const now = input.now;
   if (!(now instanceof Date) || !Number.isFinite(now.getTime()))
     throw new ReleaseInputError("Invalid evaluation time");
   const evaluatedAt = now.toISOString();
   const manifestDigest = sha256Digest(canonicalJson(manifest));
   const policyDigest = sha256Digest(canonicalJson(policy));
-  const gaps = manifestGaps(manifest);
-  const evidence = assessEvidence(input.evidence, manifest, policy, now);
+  const gaps = manifestGaps(manifest, policy);
+  const evidence = assessEvidence(input.evidence, manifest, policy, now, admission);
   const counted = evidence.flatMap((item) =>
     item.artifact && item.reasons.length === 0 ? [item.artifact] : [],
   );
@@ -228,6 +315,13 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
       proof.attestedEvidenceDigest !== approvalEvidenceDigest(manifest) ||
       checkSignature(proof, policy) !== "valid" ||
       signer(proof) !== approval.name ||
+      (singleOperator &&
+        (proof.purpose !== approval.purpose ||
+          proof.actor?.kind !== "human" ||
+          proof.actor.name !== model.owner ||
+          singleOperatorReviewAssertions.some(
+            (id) => !proof.assertions.some((assertion) => assertion.id === id && assertion.passed),
+          ))) ||
       Date.parse(approval.approvedAt) > now.getTime() ||
       proof.observedAt !== approval.approvedAt ||
       !proof.assertions.some(
@@ -243,6 +337,8 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
   ) {
     gaps.push("/approvals/evidence_not_separate");
   }
+  if (singleOperator && counted.some((artifact) => ["R11", "R12"].includes(artifact.gate)))
+    gaps.push("/approvals/expanded_acceptance_bridge_unimplemented");
   const recoveryAge = policy.evidenceTypes.find(
     (type) => type.id === "recovery_point",
   )?.maxAgeMinutes;
@@ -305,6 +401,27 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
         }
       }
     }
+    if (singleOperator && gate.id === "R00") {
+      if (admission.length) blockers.push("single_operator_trust_unadmitted");
+      if (!model.amendments || !model.limitations || !model.phasePermissions)
+        blockers.push("single_operator_ratification_incomplete");
+      if (Object.values(manifest.scope).some((values) => values.length === 0))
+        blockers.push("single_operator_scope_unknown");
+      const authority = own.find(
+        (artifact) =>
+          artifact.id === model.authorityEvidenceId &&
+          artifact.type === "authority_decision_record" &&
+          artifact.signature?.keyId === trust?.ownerKeyId &&
+          singleOperatorAuthorityAssertions.every((id) =>
+            artifact.assertions.some((assertion) => assertion.id === id && assertion.passed),
+          ),
+      );
+      if (!authority) blockers.push("single_operator_authority_unapproved");
+    }
+    // This package has no authenticated predecessor/operation lineage or remote bridge.
+    // Even caller-supplied signed acceptance labels must not enable post-cutover acceptance.
+    if (singleOperator && ["R11", "R12"].includes(gate.id))
+      blockers.push("single_operator_acceptance_bridge_unimplemented");
     const status = blockers.length === 0 ? "pass" : "blocked";
     statuses.set(gate.id, status);
     return {
