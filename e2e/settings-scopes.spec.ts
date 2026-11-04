@@ -62,6 +62,8 @@ for (const javaScriptEnabled of [false, true])
       await form.getByRole("checkbox").check();
       await form.getByRole("button", { name: "Record capability grant", exact: true }).click();
       await expect(page.getByText("Access change recorded:", { exact: false })).toBeVisible();
+      const grantReceipt = new URL(page.url()).searchParams.get("receipt");
+      expect(grantReceipt).toBeTruthy();
       const [grant] = await db<{ id: string; record_type: string; record_id: string }[]>`
       select id, record_type, record_id from grants where principal_id = ${f.target.id} and capability = 'settings.manage' and revoked_at is null`;
       expect(grant).toMatchObject({
@@ -98,6 +100,9 @@ for (const javaScriptEnabled of [false, true])
           .getByLabel("Search current grants by name or email", { exact: true })
           .fill(person?.email ?? "");
         await page.getByRole("button", { name: "Search", exact: true }).click();
+        await expect(page).toHaveURL(
+          (url) => url.searchParams.get("grantsSearch") === person?.email,
+        );
         const revoke = page
           .locator("form")
           .filter({ has: page.locator(`input[name="grantId"][value="${grant.id}"]`) });
@@ -105,7 +110,16 @@ for (const javaScriptEnabled of [false, true])
           .locator('[name="reason"]')
           .fill("Synthetic browser assignment revoked after explicit review");
         await revoke.getByRole("button").click();
-        await expect(page.getByText("Access change recorded:", { exact: false })).toBeVisible();
+        // Search retains the earlier grant receipt until the revoke navigation commits.
+        await expect(page).toHaveURL(
+          (url) =>
+            Boolean(url.searchParams.get("receipt")) &&
+            url.searchParams.get("receipt") !== grantReceipt,
+        );
+        const revokeReceipt = new URL(page.url()).searchParams.get("receipt");
+        await expect(
+          page.getByText(`Access change recorded: ${revokeReceipt}`, { exact: true }),
+        ).toBeVisible();
         await targetPage.goto(hostUrl("staff", "/en/settings/operating-policy"));
         await expect(targetPage).toHaveURL(/\/en\/access(?:\?|$)/);
       } finally {
