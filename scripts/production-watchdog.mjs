@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
+import { rejectExecutionActivation } from "../src/release/execution-runtime.ts";
 
 const origin = "https://ms-realty-route-watchdog.ms-realty-bg.workers.dev";
 const demand = (ok) => {
@@ -63,6 +64,7 @@ export function routeWatchdog({
     status: bound,
     reserve: (scope) => call("/reserve", scope),
     async bind(bundle) {
+      rejectExecutionActivation(bundle);
       await bound();
       return call("/bind", {
         ...binding,

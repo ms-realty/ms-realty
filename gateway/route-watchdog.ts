@@ -6,6 +6,7 @@
 import { DurableObject } from "cloudflare:workers";
 import { createHash, createPublicKey, timingSafeEqual, verify } from "node:crypto";
 import { Container } from "@cloudflare/containers";
+import { rejectExecutionActivation } from "../src/release/execution-runtime";
 
 const accountId = "921d0224dcd595c87b7928d2b3c479d1";
 const comZone = "f0ac7af0721419e8129e5d10ff547372";
@@ -355,6 +356,7 @@ export class RouteWatchdog extends DurableObject<Env> {
       report: Envelope;
     },
   ) {
+    rejectExecutionActivation(input);
     demand(state.status === "reserved" && Date.now() - state.reservedAt < 300_000);
     demand(
       typeof input.plan === "string" &&

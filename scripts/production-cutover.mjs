@@ -5,6 +5,10 @@ import { link, lstat, mkdir, open, readFile, rename, unlink } from "node:fs/prom
 import { dirname, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
+import {
+  ExecutionUnavailableError,
+  rejectExecutionActivation,
+} from "../src/release/execution-runtime.ts";
 import { gates, promotionGate, signedPayload } from "./launch-gate.mjs";
 import { probeLegacyOrigin, sourceHosts } from "./legacy-origin-probe.mjs";
 import { routeWatchdog } from "./production-watchdog.mjs";
@@ -12,6 +16,15 @@ import { accountId, sha256 } from "./staging-config.mjs";
 import { observeRuntimeRollout, validateRuntimeIdentity } from "./staging-rollout-proof.mjs";
 
 export { probeLegacyOrigin, sourceHosts };
+// Read-only tooling seam. Use tsx; no CLI trust loader or runtime activation exists.
+export async function inspectExecutionCandidate(packet, installedAdmission, now = new Date()) {
+  const bridge = await import("../src/release/execution-bridge.ts");
+  return bridge.inspectExecutionCandidate(packet, installedAdmission, now);
+}
+export async function prepareExecutionPlan(packet, installedAdmission, now = new Date()) {
+  const bridge = await import("../src/release/execution-bridge.ts");
+  return bridge.prepareExecutionPlan(packet, installedAdmission, now);
+}
 export const productionHosts = [
   ...sourceHosts,
   "www.makler-realty.com",
@@ -882,6 +895,7 @@ export async function applyProductionCutover(
     wait = delay,
   } = {},
 ) {
+  rejectExecutionActivation(bundle);
   const context = validateProductionCutover(bundle, now()),
     { plan, baseline } = context;
   demand(
@@ -1097,9 +1111,10 @@ export async function writeJournal(path, value, { exclusive = false } = {}) {
   }
 }
 
-async function readBundle(path) {
+async function readBundle(path, forward = false) {
   const specification = parsed(await readFile(path), "bundle file"),
     base = dirname(resolve(path));
+  if (forward) rejectExecutionActivation(specification);
   const raw = async (name) => {
     demand(typeof name === "string" && !name.includes("\0"), "explicit artifact path");
     return readFile(resolve(base, name));
@@ -1150,7 +1165,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       await writeJournal(output, await provider.snapshot(specification.zones), { exclusive: true });
       console.log("Read-only routing/DNS/SSL snapshot retained; no readiness claim.");
     } else {
-      const { bundle, recheck } = await readBundle(input);
+      const { bundle, recheck } = await readBundle(input, mode === "apply");
+      if (mode === "apply") rejectExecutionActivation(bundle);
       const plan = parsed(bundle.plan, "reviewed cutover plan"),
         ownership = parsed(bundle.artifacts.ownership, "off-runner custody binding"),
         recovery = parsed(bundle.artifacts.recovery, "off-runner recovery binding");
@@ -1234,9 +1250,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       )
         process.exitCode = 1;
     }
-  } catch {
+  } catch (error) {
     console.error(
-      "Production routing adapter stopped; inspect private evidence and journal. No secret values are logged.",
+      error instanceof ExecutionUnavailableError
+        ? error.message
+        : "Production routing adapter stopped; inspect private evidence and journal. No secret values are logged.",
     );
     process.exitCode = 1;
   }

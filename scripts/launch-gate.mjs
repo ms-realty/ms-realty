@@ -1,6 +1,7 @@
 import { createPublicKey, verify } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { rejectExecutionActivation } from "../src/release/execution-runtime.ts";
 import { launchBase, sha256 } from "./staging-config.mjs";
 
 export const gates = [
@@ -31,6 +32,8 @@ export function signedPayload(envelope, trustedPem) {
 }
 /** Verifies external evidence. Contains no checker implementation and cannot create a PASS. */
 export function promotionGate(reportEnvelope, approvals, trustedKeys, expected, now = Date.now()) {
+  // This validator checks parity only; a new execution packet cannot select a runtime mode.
+  rejectExecutionActivation(expected);
   const fingerprints = [trustedKeys.controller, trustedKeys.owner].map((key) =>
     sha256(createPublicKey(key).export({ type: "spki", format: "der" })),
   );
