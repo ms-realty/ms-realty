@@ -160,6 +160,12 @@ for (const javaScriptEnabled of [false, true])
       await page
         .getByRole(javaScriptEnabled ? "link" : "button", { name: "Move down", exact: true })
         .click();
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Review the new order", exact: true }),
+      ).toBeVisible();
+      await expect(page.locator('input[name="expectedRevision"]')).toHaveValue(
+        String((version ?? 0) + 1),
+      );
       await db
         .update(schema.listings)
         .set({ version: (version ?? 0) + 2 })
