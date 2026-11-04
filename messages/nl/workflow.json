@@ -510,6 +510,9 @@
     "note": "Dit is de huidige versie. Beoordeling voor een genoemd doel staat los van een professionele conclusie."
   },
   "ownerPreviewValues": {
+    "sale": "Verkoop",
+    "letting": "Verhuur",
+    "sale_and_letting": "Verkoop en verhuur",
     "known": "Vastgelegd",
     "unknown": "Onbekend",
     "not_recorded": "Niet vastgelegd",

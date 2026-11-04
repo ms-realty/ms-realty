@@ -358,7 +358,7 @@
     "case_check": "Zugriffsbeschränkte Vorgangsprüfung",
     "process_policy": "Nachweis freigegebener Verfahrensregeln",
     "case_completion": "Nachweis des Agenturergebnisses",
-    "client_requested": "Vom Kunden angefordertes Dokument",
+    "client_requested": "Beim Kunden angefordertes Dokument",
     "client_review": "Zur Prüfung durch den Kunden geteiltes Dokument",
     "back": "Zurück zum Inserat",
     "upload": "Datei hochladen",
@@ -510,6 +510,9 @@
     "note": "Dies ist die aktuelle Fassung. Eine Prüfung für einen genannten Zweck ist von einem fachlichen Ergebnis getrennt."
   },
   "ownerPreviewValues": {
+    "sale": "Verkauf",
+    "letting": "Vermietung",
+    "sale_and_letting": "Verkauf und Vermietung",
     "known": "Erfasst",
     "unknown": "Unbekannt",
     "not_recorded": "Nicht erfasst",
