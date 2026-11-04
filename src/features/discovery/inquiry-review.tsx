@@ -1,4 +1,5 @@
 import { serviceCopy } from "@/features/service-intake/copy";
+import { Ltr } from "@/i18n/bidi";
 import { localeEndonyms, type PublicLocale } from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
@@ -31,13 +32,13 @@ export function InquiryReview({
     viewing_request: copy.viewing,
     service_consultation: c.service,
   }[values.purpose];
-  const rows = [
+  const rows: readonly [string, string | undefined, "ltr"?][] = [
     [c.recipient, "MS Realty"],
     [copy.purpose, purpose],
     [c.language, localeEndonyms[locale]],
     [copy.name, values.name],
     [copy.contactMethod, values.contactKind === "phone" ? copy.phone : copy.email],
-    [values.contactKind === "phone" ? copy.phone : copy.email, values.contactValue],
+    [values.contactKind === "phone" ? copy.phone : copy.email, values.contactValue, "ltr"],
     [copy.callbackWindow, values.callbackWindow],
     [copy.message, values.message],
   ];
@@ -110,13 +111,15 @@ export function InquiryReview({
         </div>
       ) : null}
       <dl className="grid min-w-0 gap-x-8 gap-y-5 sm:grid-cols-2">
-        {rows.map(([label, value]) => (
+        {rows.map(([label, value, direction]) => (
           <div
             key={label}
             className={cx("min-w-0 space-y-2", label === copy.message && "sm:col-span-2")}
           >
             <dt className="text-dense text-text-muted">{label}</dt>
-            <dd className="whitespace-pre-wrap">{value || c.notProvided}</dd>
+            <dd className="whitespace-pre-wrap" dir={value ? direction : undefined}>
+              {value ? direction === "ltr" ? <Ltr>{value}</Ltr> : value : c.notProvided}
+            </dd>
           </div>
         ))}
       </dl>
