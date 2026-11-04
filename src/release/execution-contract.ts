@@ -1,5 +1,6 @@
 // Disabled R00–R10 execution inspection contracts. No schema is runtime permission.
 import { z } from "zod";
+import { bundleBindingSchema } from "./bundle";
 import {
   admittedReleaseTrustSchema,
   gatePolicySchema,
@@ -174,6 +175,7 @@ export const executionPacketSchema = z
         manifest: releaseManifestSchema,
         snapshot: readinessReportSchema,
         evidence: z.array(z.object({ file: z.string().min(1), content: z.string() }).strict()),
+        bundle: bundleBindingSchema.optional(),
       })
       .strict(),
     phasePermissions: z.string(),

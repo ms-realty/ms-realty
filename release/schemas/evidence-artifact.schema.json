@@ -103,6 +103,27 @@
       "maxLength": 200,
       "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
     },
+    "supportingFiles": {
+      "maxItems": 1024,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "required": ["ref", "digest"],
+        "additionalProperties": false
+      }
+    },
     "actor": {
       "oneOf": [
         {

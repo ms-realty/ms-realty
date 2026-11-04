@@ -1,6 +1,7 @@
 // JSON Schema (draft 2020-12) views of the release contracts, written to release/schemas by
 // scripts/release-schemas.mjs so evidence producers outside this codebase can validate.
 import { z } from "zod";
+import { bundleBindingSchema, bundleIndexSchema } from "./bundle";
 import {
   admittedReleaseTrustSchema,
   evidenceArtifactSchema,
@@ -10,6 +11,11 @@ import {
 } from "./schemas";
 
 const schemas = {
+  "evidence-bundle-index.schema.json": { schema: bundleIndexSchema, title: "EvidenceBundleIndex" },
+  "evidence-bundle-binding.schema.json": {
+    schema: bundleBindingSchema,
+    title: "EvidenceBundleBinding",
+  },
   "admitted-release-trust.schema.json": {
     schema: admittedReleaseTrustSchema,
     title: "AdmittedReleaseTrust",

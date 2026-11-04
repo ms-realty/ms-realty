@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "string",
+      "maxLength": 2097152
+    },
+    "capture": {
+      "type": "string",
+      "maxLength": 2097152
+    },
+    "verification": {
+      "type": "string",
+      "maxLength": 2097152
+    }
+  },
+  "required": ["index", "capture", "verification"],
+  "additionalProperties": false,
+  "$id": "evidence-bundle-binding.schema.json",
+  "title": "EvidenceBundleBinding"
+}
