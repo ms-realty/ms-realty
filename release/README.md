@@ -12,6 +12,10 @@ the current launch authority; historical passes do not qualify this rebuild. The
 `manifest.template.json` has unknown inputs and always evaluates as blocked. This directory
 supplies no live evidence or release acceptance.
 
+The separate [single-operator source foundation](single-operator-source-contract.md) and
+`policy.single-operator.proposed.json` prepare an unratified, disabled candidate-review mode.
+They do not replace this active policy, install trust or enable CLI/runtime acceptance.
+
 Search Console, Yandex Webmaster and backlink exports are optional historical analytics at
 **every** lifecycle stage. Exact crawl/URL parity for both legacy domains remains required.
 This does not waive the required monitoring `analytics_export`. Provisioning and Payload
