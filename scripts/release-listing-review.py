@@ -448,6 +448,11 @@ def review_row(row, cells, frozen, context, receipts, dataset_pinned, nonpublic)
             state = row["facts"][key]["state"]
             if facts[key] != FACT_DISPOSITIONS[state] or (state == "conflicting" and not private_decision):
                 blockers.append(key + "_decision_unresolved")
+    if cells["publication_decision"] == "publish":
+        # Public minima from src/domain/listing-readiness.ts (mustBeDecided).
+        for key, allowed in (("price", ("known", "withheld")), ("location", ("known",))):
+            if row["facts"][key]["state"] not in allowed:
+                blockers.append(key + "_publication_minimum_unmet")
 
     translations = decisions["translation_decisions"]
     translation_summary = {}

@@ -477,6 +477,36 @@ class ReviewCLI(unittest.TestCase):
         choices[1]["correctionDigest"] = self.store({**schema, "publicAssets": []})
         self.assertFalse(run(2)[1]["reviewed"])
 
+    def test_required_price_and_location_apply_only_to_proposed_publication(self):
+        original = self.row["facts"].copy()
+        for price, location, publication, expected_exit in (
+                ("unknown", "known", "publish", 2), ("known", "unknown", "publish", 2),
+                ("withheld", "known", "publish", 0), ("unknown", "unknown", "withhold", 0)):
+            with self.subTest(price=price, location=location, publication=publication):
+                self.row["facts"] = {**original, **{key: {"state": state, "value": None} for key, state in
+                                     (("price", price), ("location", location)) if state != "known"}}
+                self.row["translations"]["ru"]["indexable"] = publication == "publish"
+                self.refreeze()
+                review = self.set_decisions()
+                facts = json.loads(review["fact_decisions"])
+                dispositions = {"known": "verified", "unknown": "retain_unknown", "withheld": "retain_withheld"}
+                facts.update(price=dispositions[price], location=dispositions[location])
+                review.update(fact_decisions=encode(facts), publication_decision=publication)
+                if publication == "withhold":
+                    self.add_projection_evidence()
+                    translations = json.loads(review["translation_decisions"])
+                    translations["ru"].update(decision="noindex", receiptDigest=None)
+                    review["translation_decisions"] = encode(translations)
+                self.synthetic_record(review)
+                result = self.check(expected_exit)
+                self.assertEqual(result["inventoryReview"]["complete"], expected_exit == 0)
+                self.assertEqual(result["inventoryReview"]["reviewedForProposedPublication"],
+                                 int(expected_exit == 0 and publication == "publish"))
+                self.assertEqual(result["inventoryReview"]["reviewedNonPublic"], int(publication == "withhold"))
+                if expected_exit:
+                    field = "price" if price == "unknown" else "location"
+                    self.assertIn(field + "_publication_minimum_unmet", result["rows"][0]["blockers"])
+
     def test_reviewed_non_public_requires_complete_negative_projections_and_human_outcome(self):
         self.row["facts"]["price"] = {"state": "conflicting", "value": None}
         self.row["availability"] = None
