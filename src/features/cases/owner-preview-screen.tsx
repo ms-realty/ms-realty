@@ -1,6 +1,11 @@
 import "server-only";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
+import { isCurrencyCode, isPublicLocale, type PublicLocale } from "@/domain/ids";
+import { Ltr } from "@/i18n/bidi";
+import { formatExactArea, formatMoney, formatNumber } from "@/i18n/format";
+import { workflowCopy } from "@/i18n/workflow-copy";
 import { getOwnerPreview } from "@/server/cases/owner-preview";
 import { isAppError } from "@/server/errors";
 import { ownerPreviewCopy, ownerPreviewLabel } from "./owner-preview-copy";
@@ -12,28 +17,78 @@ import {
   workflowLink,
 } from "./screens";
 
-const scalar = (value: unknown, locale: string): string => {
+const separated = (values: ReactNode[], separator: string) =>
+  values.reduce<ReactNode>(
+    (result, value, index) =>
+      index ? (
+        <>
+          {result}
+          {separator}
+          {value}
+        </>
+      ) : (
+        value
+      ),
+    null,
+  );
+
+const scalar = (value: unknown, locale: PublicLocale): ReactNode => {
   const label = (value: string) => ownerPreviewLabel(value, locale);
   if (value && typeof value === "object" && !Array.isArray(value)) {
     const object = value as Record<string, unknown>;
-    if (typeof object.amountMinor === "number" && typeof object.currency === "string")
-      return `${new Intl.NumberFormat(locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB", { style: "currency", currency: object.currency }).format(object.amountMinor / 100)}${object.period === "month" ? ` / ${label("month")}` : ""}${typeof object.basis === "string" ? ` · ${label(object.basis)}` : ""}${Array.isArray(object.inclusions) && object.inclusions.length ? ` · ${scalar(object.inclusions, locale)}` : ""}`;
+    // Only the source money domain has a known minor-unit scale. Other objects retain
+    // their recorded fields instead of being converted or assigned a currency meaning.
+    if (
+      typeof object.amountMinor === "number" &&
+      Number.isSafeInteger(object.amountMinor) &&
+      object.amountMinor >= 0 &&
+      typeof object.currency === "string" &&
+      isCurrencyCode(object.currency)
+    )
+      return (
+        <>
+          <bdi>{formatMoney(locale, object.amountMinor, object.currency)}</bdi>
+          {object.period === "month" ? ` / ${label("month")}` : ""}
+          {typeof object.basis === "string" ? ` · ${label(object.basis)}` : ""}
+          {Array.isArray(object.inclusions) && object.inclusions.length ? (
+            <> · {scalar(object.inclusions, locale)}</>
+          ) : null}
+        </>
+      );
     if (typeof object.value === "number" && typeof object.unit === "string")
-      return `${object.value} ${object.unit === "m2" ? "m²" : object.unit}${typeof object.basis === "string" ? ` · ${label(object.basis)}` : ""}`;
-    return Object.entries(object)
-      .map(([key, v]) => `${label(key)}: ${scalar(v, locale)}`)
-      .join(" · ");
+      return (
+        <>
+          <Ltr>
+            {object.unit === "m2" && Number.isFinite(object.value) && object.value > 0
+              ? formatExactArea(locale, object.value)
+              : `${formatNumber(locale, object.value, { maximumFractionDigits: 20 })} ${object.unit}`}
+          </Ltr>
+          {typeof object.basis === "string" ? ` · ${label(object.basis)}` : ""}
+        </>
+      );
+    return separated(
+      Object.entries(object).map(([key, v]) => (
+        <>
+          {label(key)}: {scalar(v, locale)}
+        </>
+      )),
+      " · ",
+    );
   }
-  return typeof value === "string" || typeof value === "number" || typeof value === "boolean"
-    ? typeof value === "boolean"
-      ? label(String(value))
-      : String(value)
-    : Array.isArray(value)
-      ? value.map((value) => scalar(value, locale)).join(", ")
-      : "—";
+  if (typeof value === "number")
+    return <Ltr>{formatNumber(locale, value, { maximumFractionDigits: 20 })}</Ltr>;
+  if (typeof value === "boolean") return label(String(value));
+  if (typeof value === "string") return value;
+  return Array.isArray(value)
+    ? separated(
+        value.map((value) => scalar(value, locale)),
+        ", ",
+      )
+    : "—";
 };
 export async function OwnerPreviewScreen(props: ScreenProps & { id: string; reference: string }) {
-  const c = ownerPreviewCopy(props.locale);
+  const locale = isPublicLocale(props.locale) ? props.locale : "en";
+  const c = ownerPreviewCopy(locale);
   let view: Awaited<ReturnType<typeof getOwnerPreview>>;
   try {
     view = await getOwnerPreview(getDb(), props.session, props.id, props.reference);
@@ -57,9 +112,11 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
         <p>{view.caseReference}</p>
         <details>
           <summary className="cursor-pointer font-semibold">{c.technical}</summary>
-          <p>Revision {view.revision}</p>
+          <p>
+            {workflowCopy(locale, "cases").revision} {scalar(view.revision, locale)}
+          </p>
         </details>
-        <div lang="bg">
+        <div lang="bg" dir="ltr">
           <h2 className="font-semibold">{view.title}</h2>
           <p className="whitespace-pre-wrap">{view.description}</p>
         </div>
@@ -68,21 +125,30 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
         <dl className="space-y-3">
           {[...view.terms, ...view.facts].map((fact) => (
             <div key={fact.key}>
-              <dt className="font-semibold">{ownerPreviewLabel(fact.key, props.locale)}</dt>
+              <dt className="font-semibold">{ownerPreviewLabel(fact.key, locale)}</dt>
               <dd>
                 {fact.state === "known"
-                  ? scalar(fact.value, props.locale)
-                  : ownerPreviewLabel(fact.state, props.locale)}
-                {fact.unit && typeof fact.value !== "object" ? ` ${fact.unit}` : ""}
-                {fact.basis && typeof fact.value !== "object"
-                  ? ` · ${ownerPreviewLabel(fact.basis, props.locale)}`
+                  ? scalar(
+                      typeof fact.value === "number" && fact.unit
+                        ? { value: fact.value, unit: fact.unit, basis: fact.basis }
+                        : fact.value,
+                      locale,
+                    )
+                  : ownerPreviewLabel(fact.state, locale)}
+                {fact.unit && typeof fact.value !== "object" && typeof fact.value !== "number"
+                  ? ` ${fact.unit}`
+                  : ""}
+                {fact.basis &&
+                typeof fact.value !== "object" &&
+                !(typeof fact.value === "number" && fact.unit)
+                  ? ` · ${ownerPreviewLabel(fact.basis, locale)}`
                   : ""}
               </dd>
             </div>
           ))}
         </dl>
         <p>
-          {c.privacy}: {ownerPreviewLabel(view.location.precision, props.locale)}
+          {c.privacy}: {ownerPreviewLabel(view.location.precision, locale)}
         </p>
         <p>
           {[
@@ -116,13 +182,13 @@ export async function OwnerPreviewScreen(props: ScreenProps & { id: string; refe
       </WorkflowSection>
       <WorkflowSection title={c.authorised}>
         <p>{view.instruction.reference}</p>
-        <p>{view.instruction.scope}</p>
+        <p>{ownerPreviewLabel(view.instruction.scope, locale)}</p>
         <p>{view.instruction.commissionTerms}</p>
         <p>
-          {c.rights}: {scalar(view.instruction.mediaUsageRights, props.locale)}
+          {c.rights}: {scalar(view.instruction.mediaUsageRights, locale)}
         </p>
         <p>
-          {c.permission}: {scalar(view.instruction.publicationPermission, props.locale)}
+          {c.permission}: {scalar(view.instruction.publicationPermission, locale)}
         </p>
         <p>{c.consequences}</p>
       </WorkflowSection>

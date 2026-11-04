@@ -510,6 +510,9 @@
     "note": "This is the current version. Review for a stated purpose is separate from a professional conclusion."
   },
   "ownerPreviewValues": {
+    "sale": "Sale",
+    "letting": "Letting",
+    "sale_and_letting": "Sale and letting",
     "known": "Recorded",
     "unknown": "Unknown",
     "not_recorded": "Not recorded",

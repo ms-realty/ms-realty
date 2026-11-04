@@ -510,6 +510,9 @@
     "note": "זו הגרסה הנוכחית. בדיקה למטרה שצוינה נפרדת ממסקנה מקצועית."
   },
   "ownerPreviewValues": {
+    "sale": "מכירה",
+    "letting": "השכרה",
+    "sale_and_letting": "מכירה והשכרה",
     "known": "מתועד",
     "unknown": "לא ידוע",
     "not_recorded": "לא תועד",
