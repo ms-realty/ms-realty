@@ -132,3 +132,85 @@ test("R09 retains pending legacy source pages and missing CMS recovery without i
     }
   }
 });
+
+test("R09/AT27 CMS native entries follow current approvals and generic services follow their visible body guard", async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(60_000);
+  const nativePaths = ["/contact", "/sell", "/let"];
+  const allPaths = [...nativePaths, "/help/contact", "/services/sell", "/services/let"];
+  for (const path of allPaths) {
+    expect((await page.goto(`/bg${path}`))?.status()).toBe(200);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      `${origin}/bg${path}`,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+  }
+  const missingXml = await (await request.get("/sitemap.xml")).text();
+  for (const path of allPaths) expect(missingXml).not.toContain(`<loc>${origin}/bg${path}</loc>`);
+
+  const seed = (...args: string[]) =>
+    JSON.parse(
+      execFileSync(
+        process.execPath,
+        [
+          "--conditions=react-server",
+          "--import",
+          "tsx",
+          "src/server/seo/testing/cms-fixture.ts",
+          ...args,
+        ],
+        {
+          encoding: "utf8",
+          env: { ...process.env, AUTH_SECRET: process.env.E2E_AUTH_SECRET },
+        },
+      ),
+    );
+  type Edition = {
+    path: string;
+    content: { title: string; paragraphs: string[]; version: { id: string } };
+  };
+  const fixture = seed() as { native: Edition[]; generic: Edition };
+  const approved = [...fixture.native, fixture.generic];
+  const approvedXml = await (await request.get("/sitemap.xml")).text();
+  for (const edition of approved) {
+    expect((await page.goto(`/bg${edition.path}`))?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(edition.content.title);
+    await expect(page.locator("article")).toContainText(edition.content.paragraphs.join(" "));
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      `${origin}/bg${edition.path}`,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(2);
+    expect(approvedXml).toContain(`<loc>${origin}/bg${edition.path}</loc>`);
+    expect((await page.goto(`/en${edition.path}`))?.status()).toBe(200);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+    await expect(page.locator("article")).toHaveCount(0);
+    expect(approvedXml).not.toContain(`${origin}/en${edition.path}`);
+  }
+  for (const slug of ["sell", "let"]) {
+    await page.goto(`/bg/services/${slug}`);
+    await expect(page.locator("article")).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      `${origin}/bg/services/${slug}`,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+    expect(approvedXml).not.toContain(`<loc>${origin}/bg/services/${slug}</loc>`);
+  }
+  seed("expire", ...approved.map((edition) => edition.content.version.id));
+  const staleXml = await (await request.get("/sitemap.xml")).text();
+  for (const edition of approved) {
+    await page.goto(`/bg${edition.path}`);
+    await expect(page.locator("article")).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+    expect(staleXml).not.toContain(`<loc>${origin}/bg${edition.path}</loc>`);
+  }
+});

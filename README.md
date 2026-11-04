@@ -93,8 +93,9 @@ TEST_DATABASE_URL=postgres://postgres:pg@127.0.0.1:55432/postgres NEXT_DIST_DIR=
 
 The dedicated configuration discovers `e2e/indexability.production.ts`; ordinary `make e2e`
 and CI staging runs do not include it. These checks cover robots, canonical URLs, approved
-sitemap/hreflang entries, and unavailable, fallback and pending legacy editions using
-synthetic records. They do not establish real content approval or live indexing behavior.
+sitemap/hreflang entries, CMS native entry paths, generic service offering guards, and
+missing, expired, fallback and pending legacy editions using synthetic records. They do
+not establish real content approval or live indexing behavior.
 
 Every environment variable is documented in [`.env.example`](.env.example). Agent and
 contributor rules are in [`AGENTS.md`](AGENTS.md).
