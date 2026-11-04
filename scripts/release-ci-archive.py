@@ -29,9 +29,13 @@ FILE = "shared-shortlist.spec.ts"
 FILE_ID = hashlib.sha1(FILE.encode()).hexdigest()[:20]  # Playwright's file identifier
 
 
+class CaptureError(ValueError):
+    """A fixed public diagnostic, never exception text from HTTP, a header or a provider."""
+
+
 def require(condition, message):
     if not condition:
-        raise ValueError(message)
+        raise CaptureError(message)
 
 
 def digest(data):
@@ -63,6 +67,7 @@ def blob_location(route):
             .decode()
             .strip()
         )
+    require(re.fullmatch(r"[\x21-\x7e]+", token), "invalid GitHub credential format")
     url = "https://api.github.com/repos/ms-realty/ms-realty/actions/" + route
     request = Request(
         url,
@@ -73,7 +78,7 @@ def blob_location(route):
     )
     try:
         with retry_transport(lambda: http.open(request, timeout=18)):
-            raise ValueError("expected artifact download redirect")
+            raise CaptureError("expected artifact download redirect")
     except HTTPError as error:
         require(error.code == 302, "artifact download redirect unavailable")
         target = error.headers.get("Location", "")
@@ -94,7 +99,8 @@ class ArtifactRanges(io.RawIOBase):
 
     def __init__(self, url, size):
         self.url, self.size, self.pos = url, size, 0
-        self.cache, self.etag, self.total = [], None, 0
+        self.cache, self.etag = [], None
+        self.bytes_requested = self.bytes_read = self.bytes_verified = 0
 
     def seekable(self):
         return True
@@ -125,14 +131,15 @@ class ArtifactRanges(io.RawIOBase):
         hi = min(self.size, max(end, lo + 64 * 1024))
 
         def read_range():
-            self.total += hi - lo
             require(
-                0 < hi - lo <= MAX_MEMBER and self.total <= 2 * MAX_MEMBER,
+                0 < hi - lo <= MAX_MEMBER
+                and self.bytes_requested + hi - lo <= 2 * MAX_MEMBER,
                 "ZIP range budget exceeded",
             )
             headers = {"Range": f"bytes={lo}-{hi - 1}", "Accept-Encoding": "identity"}
             if self.etag:
                 headers["If-Match"] = self.etag
+            self.bytes_requested += hi - lo
             with http.open(Request(self.url, headers=headers), timeout=25) as response:
                 require(
                     response.status == 206
@@ -146,8 +153,14 @@ class ArtifactRanges(io.RawIOBase):
                     "artifact object changed",
                 )
                 self.etag = current
-                data = response.read(hi - lo + 1)
+                try:
+                    data = response.read(hi - lo + 1)
+                except IncompleteRead as error:
+                    self.bytes_read += len(error.partial)
+                    raise
+                self.bytes_read += len(data)
                 require(len(data) == hi - lo, "truncated artifact range")
+                self.bytes_verified += len(data)
             return data
 
         data = retry_transport(read_range)
@@ -235,7 +248,9 @@ def main():
                 "integrityScope": "provider-range-read",
                 "wholeArchiveVerified": False,
                 "etag": blob.etag,
-                "rangeBytesRead": blob.total,
+                "rangeBytesRequested": blob.bytes_requested,
+                "rangeBytesRead": blob.bytes_read,
+                "rangeBytesVerified": blob.bytes_verified,
             }
         )
     )
@@ -244,12 +259,10 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception as error:
-        # Network exception text can contain the signed URL. Only disclose known-safe validation messages.
-        print(
-            str(error)
-            if type(error) is ValueError
-            else f"artifact read failed ({type(error).__name__})",
-            file=sys.stderr,
-        )
+    except CaptureError as error:
+        print(str(error), file=sys.stderr)
+        sys.exit(1)
+    except Exception:
+        # HTTP libraries may include full headers, credentials and signed URLs in exceptions.
+        print("artifact read failed", file=sys.stderr)
         sys.exit(1)

@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { parseArgs } from "node:util";
+import { parseArgs, stripVTControlCharacters } from "node:util";
 
 const REPO = "ms-realty/ms-realty";
 const REPO_ID = 1311414066;
@@ -19,11 +19,17 @@ const file = "shared-shortlist.spec.ts";
 const fileId = "52c3b5d0ca593b879aa5";
 const sourcePins = {
   [WORKFLOW]: "5246aaffc1452db84c149df7544c2e647c447d82b2a9fde3e2a993cf6b14d6a2",
+  "package.json": "be87438dc1fd2cb7e8e7adfa6edeb114203d7d9a67125416f8f9fbe924f6ccdd",
+  "scripts/ci-clamav.mjs": "f1b4feeec582635c69537f7f2663648c2ec31337ab4308cba82b3071021119aa",
+  "scripts/wait-clamav.ts": "5c647adaf1c27ca920740250c46d7a2ea3340b03058bc311928f1e13c2ce2f9b",
+  "scripts/e2e-server.ts": "54faf79b105c8abb80adc7e740e56ee278dfe660626d2786cadf6e1e5c64501a",
   "package-lock.json": "5e4bd53175d665e5f15badec0897e8e2776f044969630ff2cc62f6bd27b448d1",
   "playwright.config.ts": "ffa8bafab57ae97025294cfac1f14609673c43de6c2f4a108169b747ea573932",
   [`e2e/${file}`]: "a37b6fa63c8740fbfb9701d56dfae7e22a52ebd6ffff25ce28897c33c8162672",
 };
-// Each entry identifies a native Expect step in a pinned test, including loop multiplicity.
+const creatorCard = "locator('article[data-share-state]').first()";
+const recipientListing = (reference) => `locator('article[data-listing-reference="${reference}"]')`;
+// Ordered selectors come from the pinned spec. Dynamic references are checked against its creator card.
 const cases = [
   {
     id: "public-facts-and-revocation",
@@ -36,18 +42,38 @@ const cases = [
       "webkit-mobile": "8caa85f7db32faf1fe68",
     },
     steps: [
-      [301, "toHaveCount"],
-      [305, "toContainText", 2],
-      [308, "toHaveText"],
-      [309, "not toContain"],
-      [313, "toHaveCount", 2],
-      [315, "not toContain"],
-      [316, "not toContain"],
-      [337, "toHaveCount"],
-      [351, "toHaveAttribute"],
-      [362, "toBeVisible"],
-      [363, "toHaveCount"],
-      [364, "not toContain"],
+      [301, 71, "toHaveCount", ["locator('article[data-listing-reference]')"]],
+      [
+        305,
+        7,
+        "toContainText",
+        ([first, second]) => [recipientListing(first), recipientListing(second)],
+      ],
+      [
+        308,
+        5,
+        "toHaveText",
+        ([first]) => [`locator('article[data-listing-reference="${first}"] .text-price')`],
+      ],
+      [309, 42, "not toContain"],
+      [
+        313,
+        60,
+        "toHaveCount",
+        ["getByRole('button', { name: /Revoke/ })", "getByRole('button', { name: /Copy link/ })"],
+      ],
+      [315, 48, "not toContain"],
+      [316, 42, "not toContain"],
+      [337, 35, "toHaveCount", ["locator('article[data-share-state]')"]],
+      [351, 22, "toHaveAttribute", [creatorCard]],
+      [
+        362,
+        5,
+        "toBeVisible",
+        ["getByRole('heading', { name: 'Access through this link has been stopped', level: 1 })"],
+      ],
+      [363, 47, "toHaveCount", ["locator('article')"]],
+      [364, 42, "not toContain"],
     ],
   },
   {
@@ -60,10 +86,10 @@ const cases = [
       "webkit-mobile": "48dc93f85597ab33e217",
     },
     steps: [
-      [453, "toBeVisible"],
-      [454, "not toContain"],
-      [466, "toHaveAttribute"],
-      [467, "toHaveCount"],
+      [453, 69, "toBeVisible", [`locator('[data-share-status="expired"]')`]],
+      [454, 42, "not toContain"],
+      [466, 22, "toHaveAttribute", [creatorCard]],
+      [467, 42, "toHaveCount", [`${creatorCard}.getByRole('button')`]],
     ],
   },
 ];
@@ -174,25 +200,154 @@ export function verifyUpload(artifact, job, run, log) {
     );
 }
 
-function recordedSteps(steps) {
-  check(Array.isArray(steps), "invalid native assertion steps");
-  const accepted = [];
-  for (const step of steps) {
-    check(typeof step.skipped === "boolean" && Array.isArray(step.steps), "invalid native step");
-    if (step.skipped || step.error || !Number.isFinite(step.duration) || step.duration < 0)
-      continue;
-    if (step.location?.file === file && safeId(step.count))
-      accepted.push({ line: step.location.line, title: step.title, count: step.count });
-    accepted.push(...recordedSteps(step.steps));
-  }
-  return accepted;
+export function verifySources(loadBytes) {
+  for (const [path, hash] of Object.entries(sourcePins))
+    check(sha256(loadBytes(path)) === `sha256:${hash}`, `review changed scenario input: ${path}`);
 }
 
-function assessTest(spec, summary, detail, profile, index) {
+function bodyWindow(result, index) {
+  const raw = result.steps;
+  check(Array.isArray(raw), "invalid native test steps");
+  const before = only(
+    raw.filter((s) => s.title === "Before Hooks"),
+    "missing or duplicate setup",
+  );
+  const after = only(
+    raw.filter((s) => s.title === "After Hooks"),
+    "missing or duplicate teardown",
+  );
+  const start = Date.parse(before.startTime) + before.duration;
+  const end = Date.parse(after.startTime);
+  check(
+    raw[0] === before &&
+      raw.at(-1) === after &&
+      [before, after].every(
+        (s) =>
+          s.skipped === false &&
+          !s.error &&
+          s.count === 1 &&
+          Number.isFinite(s.duration) &&
+          s.duration >= 0,
+      ) &&
+      Date.parse(result.startTime) <= Date.parse(before.startTime) &&
+      start <= end &&
+      end + after.duration <= index.startTime + index.duration + 1,
+    "invalid native test hook window",
+  );
+  // The reporter measures test duration separately from setup. Its hooks delimit wall-clock execution.
+  return { steps: raw.slice(1, -1), start, end, nextStep: 0, previousEnd: start };
+}
+
+function observedAtLine(body, source, line, column, matcher) {
+  const rows = body.steps.filter(
+    (s) => s.location?.file === file && s.location.line === line && s.title?.startsWith("Expect "),
+  );
+  return rows.map((step) => {
+    const started = Date.parse(step.startTime);
+    const position = body.steps.indexOf(step);
+    check(
+      position >= body.nextStep && started + 1 >= body.previousEnd,
+      "native assertion order mismatch",
+    );
+    body.nextStep = position + 1;
+    body.previousEnd = started + step.duration;
+    check(
+      step.title === `Expect "${matcher}"` &&
+        step.count === 1 &&
+        step.location.column === column &&
+        step.skipped === false &&
+        !step.error &&
+        Array.isArray(step.steps) &&
+        step.steps.length === 0 &&
+        Number.isFinite(step.duration) &&
+        step.duration >= 0 &&
+        started >= body.start &&
+        started + step.duration <= body.end + 1,
+      `invalid native assertion at line ${line}`,
+    );
+    // Playwright records the adjacent source lines and a caret at the observed column.
+    check(typeof step.snippet === "string", `missing native source excerpt at line ${line}`);
+    const frame = stripVTControlCharacters(step.snippet).split("\n");
+    const matchesSource = (text, n) => {
+      const match = /^ *(\d+) \| ?(.*)$/.exec(text);
+      return match && Number(match[1]) === n && match[2] === source[n - 1];
+    };
+    check(
+      frame.length === 4 &&
+        matchesSource(frame[0], line - 1) &&
+        matchesSource(frame[1], line) &&
+        matchesSource(frame[3], line + 1) &&
+        frame[2].trimStart() === `|${" ".repeat(column)}^`,
+      `source excerpt mismatch at line ${line}`,
+    );
+    return {
+      selector: step.subtitle ?? null,
+      startTime: step.startTime,
+      durationMs: step.duration,
+    };
+  });
+}
+
+function verifyAssertions(spec, result, index, source) {
+  const body = bodyWindow(result, index);
+  let refs;
+  if (spec.id === "public-facts-and-revocation") {
+    refs = [
+      [269, 67, "toBeVisible"],
+      [270, 68, "toBeVisible"],
+      [271, 67, "toHaveCount"],
+    ].map(([line, column, matcher]) => {
+      const row = only(
+        observedAtLine(body, source, line, column, matcher),
+        "ambiguous creator listing assertion",
+      );
+      const reference = /(MS-(?:0|[1-9]\d{0,14}))/.exec(row.selector)?.[1];
+      check(
+        reference && row.selector === `${creatorCard}.getByRole('link', { name: '${reference}' })`,
+        "invalid creator listing selector",
+      );
+      return reference;
+    });
+    check(new Set(refs).size === 3, "creator listings must be distinct");
+  }
+  return spec.steps.map(([line, column, matcher, selectors = [null]]) => {
+    const wanted = typeof selectors === "function" ? selectors(refs) : selectors;
+    const observations = observedAtLine(body, source, line, column, matcher);
+    check(
+      observations.length === wanted.length &&
+        observations.every((row, i) => row.selector === wanted[i]),
+      `native selector or multiplicity mismatch at line ${line}`,
+    );
+    return {
+      line,
+      column,
+      matcher,
+      expectedCount: wanted.length,
+      observedCount: observations.length,
+      observations,
+    };
+  });
+}
+
+function assessTest(spec, summary, detail, profile, index, globalTests, source) {
   const base = { id: spec.id, title: spec.title, sourceLine: spec.line };
-  const entries = [summary, detail].map((rows) => rows.filter((t) => t.title === spec.title));
+  const expectedId = `${fileId}-${spec.ids[profile]}`;
+  const entries = [globalTests, summary, detail].map((rows) =>
+    rows.filter(
+      (t) =>
+        t.testId === expectedId ||
+        t.title === spec.title ||
+        (t.projectName === profile && t.location?.file === file && t.location.line === spec.line),
+    ),
+  );
   if (entries.every((rows) => rows.length === 0)) return { ...base, state: "not_run" };
-  const [short, test] = entries.map((rows) => only(rows, "missing or duplicate expected test"));
+  const [global, short, test] = entries.map((rows) =>
+    only(rows, "missing or duplicate expected test"),
+  );
+  check(
+    global === short && test.title === spec.title && short.title === spec.title,
+    "contradictory test identity",
+  );
   const projected = (t) => [
     t.testId,
     t.projectName,
@@ -214,8 +369,7 @@ function assessTest(spec, summary, detail, profile, index) {
       Array.isArray(test.path) &&
       test.path.length === 0 &&
       !test.repeatEachIndex &&
-      !short.repeatEachIndex &&
-      [summary, detail].every((rows) => rows.filter((t) => t.testId === test.testId).length === 1),
+      !short.repeatEachIndex,
     "test identity mismatch",
   );
   check(
@@ -267,17 +421,7 @@ function assessTest(spec, summary, detail, profile, index) {
       result.annotations.length === 0,
     "unexpected native outcome",
   );
-  const observed = recordedSteps(result.steps);
-  const checks = spec.steps.map(([line, matcher, count = 1]) => {
-    const match = observed.filter((s) => s.line === line && s.title === `Expect "${matcher}"`);
-    const total = match.reduce((sum, step) => sum + step.count, 0);
-    return { line, matcher, expectedCount: count, observedCount: total };
-  });
-  return {
-    ...record,
-    checks,
-    state: checks.every((s) => s.observedCount === s.expectedCount) ? "passed" : "unknown",
-  };
+  return { ...record, checks: verifyAssertions(spec, result, index, source), state: "passed" };
 }
 
 export function inspectReport(index, detail, profile, run, job) {
@@ -303,24 +447,33 @@ export function inspectReport(index, detail, profile, run, job) {
       index.startTime + index.duration <= Date.parse(step.completed_at) + 999,
     "report outside browser step",
   );
+  const globalTests = index.files.flatMap((f) => {
+    check(Array.isArray(f.tests), "unreadable native test index");
+    return f.tests;
+  });
   const files = index.files.filter((f) => f.fileName === file || f.fileId === fileId);
-  if (!files.length && detail === null)
-    return cases.map((spec) => ({
-      id: spec.id,
-      title: spec.title,
-      sourceLine: spec.line,
-      state: "not_run",
-    }));
-  const summary = only(files, "missing or duplicate report file");
+  let summaryTests = [],
+    detailTests = [];
+  if (files.length || detail !== null) {
+    const summary = only(files, "missing or duplicate report file");
+    check(
+      [summary, detail].every(
+        (f) => f?.fileId === fileId && f.fileName === file && Array.isArray(f.tests),
+      ),
+      "native detail file mismatch",
+    );
+    summaryTests = summary.tests;
+    detailTests = detail.tests;
+  }
+  const bytes = readFileSync(new URL(`../e2e/${file}`, import.meta.url));
   check(
-    [summary, detail].every(
-      (f) => f?.fileId === fileId && f.fileName === file && Array.isArray(f.tests),
-    ),
-    "native detail file mismatch",
+    sha256(bytes) === `sha256:${sourcePins[`e2e/${file}`]}`,
+    "collector's mapped test source changed",
   );
+  const source = bytes.toString("utf8").split("\n");
   return cases.map((spec) => {
     try {
-      return assessTest(spec, summary.tests, detail.tests, profile, index);
+      return assessTest(spec, summaryTests, detailTests, profile, index, globalTests, source);
     } catch (error) {
       return {
         id: spec.id,
@@ -475,12 +628,9 @@ function main() {
   const response = github(route, "run.json", dir);
   const run = response.data;
   verifyRun(run, values.sha, runId, attempt);
-  for (const [path, hash] of Object.entries(sourcePins)) {
-    const raw = execFileSync("git", ["show", `${values.sha}:${path}`], {
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    check(sha256(raw) === `sha256:${hash}`, `review changed scenario input: ${path}`);
-  }
+  verifySources((path) =>
+    execFileSync("git", ["show", `${values.sha}:${path}`], { stdio: ["ignore", "pipe", "pipe"] }),
+  );
   const jobs = github(`${route}/jobs?per_page=100`, "jobs.json", dir);
   const artifacts = github(`runs/${runId}/artifacts?per_page=100`, "artifacts.json", dir);
   const attemptJobs = completePage(jobs.data, "jobs");

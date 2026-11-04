@@ -3,10 +3,16 @@
 import base64
 import importlib.util
 import io
+import os
+import secrets
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError
+from http.client import IncompleteRead
 import warnings
 import zipfile
 
@@ -98,6 +104,69 @@ class NativeReportTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 archive.retry_transport(invalid)
             self.assertEqual(invalid.call_count, 1)
+
+    def test_range_attempts_and_received_payload_are_counted_separately(self):
+        class Response(io.BytesIO):
+            status = 206
+            headers = {"Content-Range": "bytes 0-2/3", "ETag": '"a"'}
+
+        class Partial(Response):
+            def read(self, size):
+                raise IncompleteRead(b"x", 2)
+
+        for first, read_total in [
+            (HTTPError("unused", 503, "unavailable", {}, None), 3),
+            (Partial(), 4),
+        ]:
+            stream = archive.ArtifactRanges("https://example.invalid", 3)
+            with (
+                self.subTest(),
+                patch.object(archive.time, "sleep"),
+                patch.object(
+                    archive.http, "open", side_effect=[first, Response(b"abc")]
+                ) as request,
+            ):
+                self.assertEqual(stream.read(3), b"abc")
+                stream.seek(0)
+                self.assertEqual(stream.read(3), b"abc")
+                self.assertEqual(request.call_count, 2)
+                self.assertEqual(
+                    (stream.bytes_requested, stream.bytes_read, stream.bytes_verified),
+                    (6, read_total, 3),
+                )
+
+    def test_direct_helper_never_prints_credential_or_http_exception_text(self):
+        path = Path(__file__).with_name("release-ci-archive.py")
+        sentinel = "fixture-" + secrets.token_hex(16)
+        with tempfile.TemporaryDirectory() as d:
+            Path(d, "sitecustomize.py").write_text(
+                "import os, urllib.request\n"
+                "def intercepted(*args, **kwargs):\n"
+                "    raise ValueError('upstream header and signed URL ' + os.environ['GH_TOKEN'])\n"
+                "urllib.request.OpenerDirector.open = intercepted\n"
+            )
+            for token in (sentinel + "\n", sentinel + "\r\nx: extra", sentinel):
+                for args in (["job-log", "123"], ["123", "3", "chromium-desktop", d]):
+                    result = subprocess.run(
+                        [sys.executable, "-B", str(path), *args],
+                        env={"GH_TOKEN": token, "PYTHONPATH": d, "PATH": os.defpath},
+                        capture_output=True,
+                        timeout=5,
+                    )
+                    self.assertEqual(result.returncode, 1)
+                    self.assertTrue(
+                        sentinel.encode() not in (result.stdout + result.stderr),
+                        "helper exposed a synthetic credential",
+                    )
+                    self.assertTrue(
+                        result.stderr.strip()
+                        in (
+                            b"invalid GitHub credential format",
+                            b"artifact read failed",
+                        ),
+                        "non-public exception detail escaped",
+                    )
+                    self.assertEqual(result.stdout, b"")
 
     def test_partial_transport_requires_exact_range_object_and_size(self):
         class Response(io.BytesIO):
