@@ -100,12 +100,19 @@ export function WorkspaceLiveProgress({
   }, [initial, locale, workspaceId]);
 
   const unavailable = updateState === "unavailable" || updateState === "access_changed";
+  // Reserve the localized label's space in HTML so starting the poll can't move the Stop button.
+  const awaitingLive = updateState === "idle" && canPoll(initial);
   return (
     <div className="space-y-4">
       <WorkspaceProgress locale={locale} view={progress} />
       <div aria-live="polite">
-        {updateState === "live" ? (
-          <p className="text-compact text-text-muted">{copy.liveProgress}</p>
+        {awaitingLive || updateState === "live" ? (
+          <p
+            aria-hidden={awaitingLive || undefined}
+            className="text-compact text-text-muted aria-hidden:invisible"
+          >
+            {copy.liveProgress}
+          </p>
         ) : null}
         {updateState === "ready" ? (
           <Notice

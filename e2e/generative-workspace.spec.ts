@@ -674,6 +674,54 @@ for (const javaScriptEnabled of [true, false]) {
   });
 }
 
+test("F29 Stop stays under the pointer when live progress starts", async ({ page, context }) => {
+  const f = await fixture(context, "active");
+  const copy = workspaceCopy("en");
+  const href = workspace("en", f.id);
+  let releaseScripts!: () => void;
+  const scripts = new Promise<void>((resolve) => {
+    releaseScripts = resolve;
+  });
+  await page.route("**/_next/static/chunks/*.js", async (route) => {
+    await scripts;
+    await route.continue();
+  });
+
+  try {
+    await page.goto(href, { waitUntil: "commit" });
+    const stop = page.getByRole("button", { name: copy.stop, exact: true });
+    await expect(stop).toBeVisible();
+    await expect(page.getByText(copy.liveProgress, { exact: true })).toBeHidden();
+    // Aim at the HTML control before enhancement. A browser can leave the scroll offset
+    // unchanged while content above it grows, so the control itself must stay in place.
+    await page.evaluate(() => {
+      document.documentElement.style.overflowAnchor = "none";
+    });
+    await stop.scrollIntoViewIfNeeded();
+    const box = await stop.boundingBox();
+    if (!box) throw new Error("The running workspace has no visible Stop control");
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  } finally {
+    releaseScripts();
+  }
+
+  await expect(page.getByText(copy.liveProgress, { exact: true })).toBeVisible();
+  const posts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "POST" && request.url() === href) posts.push(request.url());
+  });
+  // Keep the originally aimed coordinates across the first enhanced render.
+  await page.mouse.down();
+  await page.mouse.up();
+  await expect(page.getByRole("heading", { name: copy.stopSaved, exact: true })).toBeVisible();
+  expect(posts).toHaveLength(1);
+  const [saved] = await db
+    .select()
+    .from(schema.generativeSessions)
+    .where(eq(schema.generativeSessions.id, f.id));
+  expect(saved).toMatchObject({ state: "cancelled", generation: 2 });
+});
+
 test("F29 live progress updates without navigating or replacing a dirty correction", async ({
   page,
   context,
