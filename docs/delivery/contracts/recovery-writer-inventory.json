@@ -1,0 +1,381 @@
+{
+  "kind": "r08_candidate_writer_inventory_v1",
+  "sourceBase": "97f2698ae50aff5cd0bf9c9c28462919b1411e92",
+  "status": "all_identified_sites_uninstrumented",
+  "method": "Tracked application, import, gateway and script source. Collect direct insert/update/delete calls whose first argument names a Drizzle pgTable export. Enclosing named functions identify inner helpers. Test, fixture, rehearsal and seed modules excluded. This detects write sites and cannot establish writer coverage.",
+  "unresolved": [
+    "Raw SQL, dynamic tables/aliases, delegated calls, stored procedures/triggers, pg-boss internal writes and SQL outside scanned paths",
+    "All deployed roles, legacy import utilities, administrative tools, provider callbacks and external side effects",
+    "Which accepted business writes require restoration beyond a receipt, baseline/epoch activation and historical coverage"
+  ],
+  "modules": {
+    "src/db/import/pipeline.ts": {
+      "applyBatch": "insert:auditEvents, update:importBatches, update:importRows",
+      "applyContent": "insert:approvals, insert:contentPageVersions, insert:contentPages",
+      "applyListing": "insert:activityEvents, insert:approvals, insert:listingRevisions, insert:listings, insert:localizedRevisions, insert:properties, insert:propertyFactRevisions, insert:propertyFacts, insert:referenceSequences",
+      "applyMedia": "insert:mediaAssets",
+      "applyPlace": "insert:geographyPlaceAliases, insert:geographyPlaces",
+      "applyUrlDecision": "insert:legacyUrlDecisions",
+      "nextSequence": "insert:referenceSequences",
+      "placeMedia": "insert:listingRevisionMedia, insert:mediaRelations",
+      "stageBatch": "insert:importBatches, insert:importRows"
+    },
+    "src/server/activity.ts": {
+      "recordActivity": "insert:activityEvents"
+    },
+    "src/server/agency-obligations/partner-terms.ts": {
+      "decidePartnerTerms": "update:agencyPartnerTerms",
+      "savePartnerTerms": "insert:agencyPartnerTerms, update:agencyPartnerTerms"
+    },
+    "src/server/agency-obligations/reviews.ts": {
+      "decideReviewConsent": "update:agencyCaseReviews",
+      "restrictReviewContent": "update:approvals, update:contentPages",
+      "saveCaseReview": "insert:agencyCaseReviews, update:agencyCaseReviews",
+      "verifyCaseReview": "update:agencyCaseReviews"
+    },
+    "src/server/agency-obligations/shared.ts": {
+      "agencyHistory": "insert:agencyEvidenceHistory"
+    },
+    "src/server/ai/assistance.ts": {
+      "processAssistanceRun": "update:assistanceRuns",
+      "requestAssistance": "insert:assistanceRuns, update:assistanceRuns",
+      "reviewAssistance": "update:assistanceRuns"
+    },
+    "src/server/ai/chatgpt/store.ts": {
+      "<module>": "insert:chatgptOauthHosts",
+      "withRegistration": "insert:chatgptOauthRegistrations, update:chatgptOauthRegistrations"
+    },
+    "src/server/ai/workspace-jobs.ts": {
+      "processWorkspaceStep": "insert:generativeArtifacts, insert:generativeCheckpoints, update:generativeCheckpoints, update:generativeRuns, update:generativeSessions",
+      "updateSessionState": "update:generativeSessions"
+    },
+    "src/server/ai/workspace.ts": {
+      "appendWorkspaceMessage": "update:generativeSessions",
+      "cancelWorkspace": "update:generativeSessions",
+      "createWorkspace": "insert:generativeSessions",
+      "materializeWorkspaceArtifact": "update:generativeArtifacts",
+      "requestWorkspaceRun": "insert:generativeRuns, update:generativeRuns, update:generativeSessions",
+      "reviseWorkspaceArtifact": "insert:generativeArtifacts, update:generativeArtifacts",
+      "stopActive": "update:generativeRuns"
+    },
+    "src/server/appointments/host-handover.ts": {
+      "acceptAppointmentHost": "insert:appointmentResources, update:appointmentParticipants, update:appointmentResources, update:appointments"
+    },
+    "src/server/appointments/host-offer.ts": {
+      "offerAppointmentHost": "update:appointments"
+    },
+    "src/server/appointments/service.ts": {
+      "arrangeAppointment": "insert:appointmentResources, update:appointmentResources, update:appointments",
+      "recordAppointmentVersion": "insert:appointmentVersions",
+      "requestAppointment": "insert:appointmentParticipants, insert:appointments",
+      "requestPhotography": "insert:appointmentParticipants, insert:appointments",
+      "respondToAppointment": "update:appointmentResources, update:appointments"
+    },
+    "src/server/audit.ts": {
+      "recordAudit": "insert:auditEvents"
+    },
+    "src/server/auth/absence.ts": {
+      "changeStaffAbsence": "update:staffMemberships"
+    },
+    "src/server/auth/email-link.ts": {
+      "consumeEmailLink": "insert:contactMethods, update:contactMethods, update:emailSignInTokens",
+      "issueEmailLink": "insert:emailSignInTokens"
+    },
+    "src/server/auth/grants.ts": {
+      "grantStaffCapability": "insert:grants",
+      "offboardStaff": "update:grants, update:principals, update:staffMemberships",
+      "revokeStaffGrant": "update:grants"
+    },
+    "src/server/auth/invitations.ts": {
+      "acceptStaffInvitation": "insert:grants, insert:staffMemberships, update:grants, update:invitations, update:passkeys",
+      "ensurePrincipal": "insert:parties, insert:principals",
+      "insertStaffInvitation": "insert:invitations",
+      "issueClientInvitation": "insert:invitations, update:cases",
+      "lockOutStaff": "update:passkeys",
+      "respondToClientInvitation": "insert:caseParticipants, update:caseParticipants, update:cases, update:invitations",
+      "revokeInvitation": "update:cases, update:invitations",
+      "revokePending": "update:invitations"
+    },
+    "src/server/auth/passkeys.ts": {
+      "consumeChallenge": "update:webauthnChallenges",
+      "finishPasskeyAuthentication": "update:passkeys",
+      "finishPasskeyRegistration": "insert:passkeys",
+      "storeChallenge": "insert:webauthnChallenges"
+    },
+    "src/server/auth/profile.ts": {
+      "saveStaffProfile": "update:principals"
+    },
+    "src/server/auth/sessions.ts": {
+      "insertSession": "insert:sessions",
+      "resolveSession": "update:sessions",
+      "revokeAllSessions": "update:sessions",
+      "revokeSession": "update:sessions",
+      "rotateSession": "update:sessions"
+    },
+    "src/server/cases/access-requests.ts": {
+      "decideCaseAccessRequest": "update:caseAccessRequests, update:tasks",
+      "requestCaseAccess": "insert:caseAccessRequests, insert:tasks, update:cases"
+    },
+    "src/server/cases/commands.ts": {
+      "addInterest": "insert:interests",
+      "createCaseFromInquiry": "insert:briefRevisions, insert:caseParticipants, insert:caseStageHistory, insert:cases, update:inquiries, update:tasks",
+      "postCaseMessage": "insert:approvals, insert:messages",
+      "respondToInterest": "insert:interestFeedback, update:interests",
+      "reviseBrief": "insert:briefRevisions"
+    },
+    "src/server/cases/email-dispatch.ts": {
+      "cancel": "update:externalActions, update:messageAttempts, update:messages",
+      "dispatchCaseEmail": "insert:messageAttempts, update:externalActions, update:messageAttempts, update:messages"
+    },
+    "src/server/cases/email.ts": {
+      "approveCaseEmail": "insert:approvals, update:messages",
+      "draftCaseEmail": "insert:messages"
+    },
+    "src/server/cases/inquiry-link.ts": {
+      "linkInquiryToExistingCase": "update:inquiries, update:tasks"
+    },
+    "src/server/cases/lifecycle.ts": {
+      "acknowledgeBrief": "update:briefRevisions",
+      "handoverCase": "update:tasks",
+      "history": "insert:caseStageHistory"
+    },
+    "src/server/cases/owner-preview.ts": {
+      "acknowledgeOwnerPreview": "insert:approvals",
+      "bindSellerCase": "update:sellerInstructions"
+    },
+    "src/server/cases/participants.ts": {
+      "revokeCaseParticipant": "update:caseParticipants, update:grants, update:invitations"
+    },
+    "src/server/cases/shared.ts": {
+      "bumpCase": "update:cases"
+    },
+    "src/server/complaints/service.ts": {
+      "createComplaint": "insert:complaints",
+      "recordReview": "insert:complaintReviews",
+      "reviewComplaint": "update:complaints"
+    },
+    "src/server/compliance/commands.ts": {
+      "approveCaseProcess": "update:caseProcessReviews",
+      "approveProcessPolicy": "insert:processPolicies",
+      "recordCommission": "insert:commissionRecords",
+      "recordProcessItem": "insert:processItemDecisions, update:caseProcessItems, update:caseProcessReviews",
+      "recordServiceAgreement": "insert:serviceAgreements",
+      "recordSuspicion": "insert:suspicionReports",
+      "revokeCaseEvidence": "update:caseProcessReviews, update:processPolicies, update:serviceAgreements",
+      "startCaseProcessReview": "insert:caseProcessItems, insert:caseProcessReviews"
+    },
+    "src/server/content/commands.ts": {
+      "createContent": "insert:contentPageVersions, insert:contentPages",
+      "decideContent": "insert:approvals, insert:contentPageVersions, update:contentPages",
+      "saveContent": "insert:contentPageVersions, update:contentPages"
+    },
+    "src/server/content/invalidation.ts": {
+      "invalidateContentLocales": "update:approvals, update:contentLocaleEditions"
+    },
+    "src/server/content/locale-commands.ts": {
+      "decideContentLocale": "insert:approvals, update:approvals, update:contentLocaleEditions",
+      "saveContentLocale": "insert:contentLocaleEditions, insert:contentLocaleVersions, update:contentLocaleEditions"
+    },
+    "src/server/documents/case.ts": {
+      "startCaseDocumentUpload": "insert:documentVersions, insert:documents, update:documentVersions, update:documents"
+    },
+    "src/server/documents/commands.ts": {
+      "reviewDocument": "update:documentVersions, update:documents",
+      "startDocumentUpload": "insert:documentVersions, insert:documents, update:documentVersions, update:documents"
+    },
+    "src/server/documents/requests.ts": {
+      "cancelDocumentRequest": "update:documentRequests, update:grants, update:tasks",
+      "createDocumentRequest": "insert:documentRequests, insert:documents, insert:grants, insert:tasks, update:cases",
+      "reviewRequestedDocument": "update:documentRequests, update:tasks",
+      "startRequestedDocumentUpload": "insert:documentVersions, update:documentRequests, update:documentVersions, update:documents"
+    },
+    "src/server/duplicate-review/merge.ts": {
+      "mergeDuplicate": "insert:mergeRecords",
+      "reverseDuplicate": "update:mergeRecords",
+      "setMapping": "update:parties, update:properties"
+    },
+    "src/server/duplicate-review/review.ts": {
+      "deferContactReview": "insert:tasks"
+    },
+    "src/server/files/process.ts": {
+      "process": "update:documentVersions, update:mediaAssets"
+    },
+    "src/server/files/uploads.ts": {
+      "finalizeUpload": "update:documentVersions, update:fileUploads, update:mediaAssets",
+      "receiveUpload": "update:documentVersions, update:fileUploads",
+      "reserveUpload": "insert:fileUploads"
+    },
+    "src/server/import-review/commands.ts": {
+      "batchProgress": "update:importBatches",
+      "cancelStaffImport": "update:importBatches, update:staffImportReviews",
+      "executeStaffImport": "insert:listings, insert:properties, insert:referenceSequences, update:importRows, update:listings",
+      "prepareStaffImport": "insert:importBatches, insert:importRows, insert:staffImportReviews",
+      "reverseStaffImport": "update:importRows, update:listings",
+      "sealStaffImport": "update:importBatches, update:staffImportReviews"
+    },
+    "src/server/inbound/attachments.ts": {
+      "importInboundAttachment": "insert:inboundAttachmentImports, update:inboundEmails"
+    },
+    "src/server/inbound/service.ts": {
+      "retrieveInboundEmail": "insert:inboundEmails, update:inboxEvents",
+      "reviewInboundEmail": "insert:messages, update:inboundEmails",
+      "sweepInboundEmails": "update:inboxEvents"
+    },
+    "src/server/inquiries/intake.ts": {
+      "submitInquiry": "insert:contactMethods, insert:inquiries, insert:parties"
+    },
+    "src/server/inquiries/notifications.ts": {
+      "cancelIntent": "update:outboxEvents",
+      "sweepInquiryCoverageNotices": "update:outboxEvents"
+    },
+    "src/server/inventory/commands.ts": {
+      "confirmListingAvailability": "update:listings",
+      "createListingDraft": "insert:listings, insert:properties, insert:referenceSequences",
+      "freezeListingDraft": "insert:listingRevisionMedia, insert:listingRevisions, insert:propertyFactRevisions, insert:propertyFacts, update:listings",
+      "recordSellerInstruction": "delete:listingSearchDocuments, insert:destinationDeliveries, insert:sellerInstructions, update:currentPublications, update:listings, update:sellerInstructions",
+      "reviewSellerAuthority": "insert:propertyRelationships, update:listings",
+      "saveListingDraft": "update:listings"
+    },
+    "src/server/inventory/translations.ts": {
+      "decideTranslation": "insert:approvals, update:localizedRevisions",
+      "saveTranslation": "insert:localizedRevisions, update:localizedRevisions"
+    },
+    "src/server/jobs/heartbeat.ts": {
+      "recordWorkerProgress": "insert:workerProgress"
+    },
+    "src/server/jobs/outbox.ts": {
+      "dispatchMessage": "update:externalActions",
+      "enqueueMessage": "insert:externalActions",
+      "finish": "update:externalActions",
+      "reconcileMessage": "update:externalActions",
+      "recordDeliveryReport": "update:externalActions",
+      "recordOutboxEvent": "insert:outboxEvents",
+      "syncMessageOutcome": "update:messageAttempts, update:messages"
+    },
+    "src/server/jobs/resend-inbox.ts": {
+      "processResendEvent": "update:inboxEvents",
+      "receiveResendWebhook": "insert:inboxEvents"
+    },
+    "src/server/key-custody/service.ts": {
+      "amendKeyDeadline": "update:keySets",
+      "moveKeys": "update:keySets",
+      "receiveKeys": "insert:keySets",
+      "recordCustody": "insert:keyCustodyEvents"
+    },
+    "src/server/media/commands.ts": {
+      "placeMedia": "update:listings, update:mediaRelations",
+      "reorderMedia": "update:listings, update:mediaRelations",
+      "reviewMedia": "update:mediaAssets",
+      "saveMediaDetails": "update:mediaAssets",
+      "startMediaUpload": "insert:mediaAssets, insert:mediaRelations, update:listings"
+    },
+    "src/server/operating-policy/service.ts": {
+      "approveOperatingPolicy": "insert:operatingPolicyVersions, insert:servicePolicies, update:operatingPolicyDrafts",
+      "saveOperatingPolicy": "insert:operatingPolicyDrafts"
+    },
+    "src/server/operations.ts": {
+      "reconcileOperation": "update:operations",
+      "runOperation": "insert:operations",
+      "settle": "update:operations"
+    },
+    "src/server/privacy-governance/service.ts": {
+      "recordRevision": "insert:privacyGovernanceRevisions",
+      "reviewGovernance": "update:privacyGovernanceRecords",
+      "saveGovernance": "insert:privacyGovernanceRecords, update:privacyGovernanceRecords"
+    },
+    "src/server/privacy/erasure.ts": {
+      "applyPrivacyErasure": "update:privacyRequests"
+    },
+    "src/server/privacy/exports.ts": {
+      "attachPrivacyExportSupplement": "update:privacyExports",
+      "capturePrivacyExportManifest": "update:privacyExports",
+      "completePrivacyExport": "update:privacyExports, update:privacyRequests",
+      "issuePrivacyExport": "update:privacyExports",
+      "preparePrivacyExport": "insert:privacyExports",
+      "redactPrivacyExport": "update:privacyExports",
+      "reviewPrivacyExportCategory": "update:privacyExports",
+      "revokePrivacyExport": "update:privacyExports"
+    },
+    "src/server/privacy/preferences.ts": {
+      "changeSubscription": "insert:consentEvents, update:subscriptions",
+      "editSearchSubscription": "insert:consentEvents, update:subscriptions",
+      "optIn": "insert:consentEvents, insert:subscriptions",
+      "saveContactPreferences": "update:parties"
+    },
+    "src/server/privacy/requests.ts": {
+      "reviewPrivacyRequest": "update:privacyRequests",
+      "submitPrivacyRequest": "insert:privacyRequests"
+    },
+    "src/server/privacy/safety-ledger.ts": {
+      "appendPrivacySafetyDecision": "insert:privacySafetyDecisions",
+      "applyPrivacySafetyEffect": "insert:consentEvents, insert:privacyProcessingRestrictions, update:contactMethods, update:emailSignInTokens, update:externalActions, update:grants, update:invitations, update:parties, update:passkeys, update:principals, update:privacyExports, update:sessions, update:subscriptions",
+      "recordPrivacyPropagation": "insert:privacyPropagationEvents"
+    },
+    "src/server/proposals/service.ts": {
+      "bumpProposal": "update:proposals",
+      "createProposal": "insert:proposalRevisions, insert:proposals",
+      "invalidateApproval": "update:approvals",
+      "recordProposalDecision": "insert:proposalResponses, update:proposalRevisions",
+      "reviseProposal": "insert:proposalResponses, insert:proposalRevisions, update:proposalRevisions",
+      "transitionProposal": "insert:approvals, update:proposalRevisions"
+    },
+    "src/server/publication/commands.ts": {
+      "activateManifest": "insert:currentPublications, insert:destinationDeliveries, update:currentPublications",
+      "approveFactRevision": "update:properties",
+      "approveListingRevision": "update:listings",
+      "insertApproval": "insert:approvals",
+      "prepareManifest": "insert:publicationManifests",
+      "removeExposure": "delete:listingSearchDocuments, insert:destinationDeliveries, update:currentPublications, update:listings"
+    },
+    "src/server/rate-limit.ts": {
+      "consumeRateLimit": "insert:rateLimitBuckets, update:rateLimitBuckets",
+      "pruneRateLimits": "delete:rateLimitBuckets"
+    },
+    "src/server/recovery/privacy-tail.ts": {
+      "reapplySyntheticPrivacyTail": "insert:privacySafetyDecisions"
+    },
+    "src/server/recovery/quarantine.ts": {
+      "quarantineRestoredDatabase": "update:emailSignInTokens, update:invitations, update:recoveryControl, update:sessions, update:webauthnChallenges"
+    },
+    "src/server/references.ts": {
+      "nextReference": "insert:referenceSequences"
+    },
+    "src/server/search/projection.ts": {
+      "writeSearchDocument": "insert:listingSearchDocuments"
+    },
+    "src/server/service-intake/scope.ts": {
+      "approveServiceScope": "insert:serviceScopeVersions",
+      "saveScope": "insert:serviceScopeDrafts"
+    },
+    "src/server/shares/public.ts": {
+      "createPublicShare": "insert:publicShares",
+      "revokePublicShare": "update:publicShares",
+      "revokePublicShareAsOperator": "update:publicShares"
+    },
+    "src/server/subscriptions/alerts.ts": {
+      "cancel": "update:externalActions",
+      "dispatchSearchAlert": "update:externalActions, update:subscriptions",
+      "planSearchAlerts": "insert:externalActions"
+    },
+    "src/server/subscriptions/approval.ts": {
+      "decideAlertRule": "insert:approvals, update:approvals, update:externalActions"
+    },
+    "src/server/work/commands.ts": {
+      "acceptInquiry": "insert:tasks, update:inquiries",
+      "changeTask": "update:tasks",
+      "triageInquiry": "update:inquiries"
+    },
+    "src/server/work/contact.ts": {
+      "recordInquiryContact": "insert:tasks, update:inquiries"
+    },
+    "src/server/work/create-task.ts": {
+      "createTask": "insert:tasks, update:inquiries"
+    },
+    "src/server/work/effort.ts": {
+      "recordTaskEffort": "insert:taskEffortEntries"
+    },
+    "src/server/work/handover.ts": {
+      "handoverTask": "update:tasks"
+    }
+  }
+}
