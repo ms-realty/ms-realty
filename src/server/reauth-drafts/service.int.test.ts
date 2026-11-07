@@ -24,6 +24,7 @@ import {
 import { createSession, readSession, revokeSession } from "../auth/sessions";
 import { getEnv } from "../config/env";
 import { sha256Hex } from "../crypto";
+import type { Executor } from "../db";
 import { dispatchMessage } from "../jobs/outbox";
 import { TestMessageProvider } from "../jobs/provider";
 import type { JobQueue } from "../jobs/queue";
@@ -137,6 +138,51 @@ const confirm = (
   currentSessionToken: string | undefined = f.client.token,
   now?: Date,
 ) => consumeEmailLink(t.db, token, { currentSessionToken, reauthDraftTokens: [draft], now });
+
+function trackedTransaction<T>(marker: string, run: (tx: Executor) => Promise<T>) {
+  const pid = deferred<number>();
+  const result = t.db
+    .transaction(async (tx) => {
+      await tx.execute(statement`set local statement_timeout = '8s'`);
+      await tx.execute(statement`select set_config('msr.reauth_lock_probe', ${marker}, true)`);
+      const [row] = await tx.execute<{ pid: number }>(statement`select pg_backend_pid() as pid`);
+      if (!row) throw new Error("Missing test backend");
+      pid.resolve(row.pid);
+      return run(tx);
+    })
+    .then(
+      (value) => ({ status: "fulfilled" as const, value }),
+      (reason: unknown) => ({ status: "rejected" as const, reason }),
+    );
+  return {
+    result,
+    pid: Promise.race([
+      pid.promise,
+      result.then(() => {
+        throw new Error("Test transaction ended before publishing its backend");
+      }),
+    ]),
+  };
+}
+
+function outcome(result: PromiseSettledResult<unknown>) {
+  if (result.status === "fulfilled") return { status: "fulfilled" };
+  const error = result.reason as { code?: string; cause?: { code?: string } };
+  // Assertions report only codes, never driver messages or private SQL parameters.
+  return { status: "rejected", code: error.code ?? null, causeCode: error.cause?.code ?? null };
+}
+
+async function blockedBy(pid: number, blocker: number) {
+  await expect
+    .poll(
+      async () => {
+        const [row] = await t.sql`select ${blocker} = any(pg_blocking_pids(${pid})) as blocked`;
+        return row?.blocked;
+      },
+      { timeout: 5_000 },
+    )
+    .toBe(true);
+}
 
 describe("R09 / C10 / UX S08 explicit proposal draft continuation", () => {
   it("saves only on explicit intent, restores after the same-browser challenge, and executes exactly once only on fresh submission", async () => {
@@ -466,4 +512,163 @@ describe("R09 / C10 / UX S08 explicit proposal draft continuation", () => {
         .where(eq(reauthEmailLineage.tokenId, link?.id ?? randomUUID())),
     ).toHaveLength(0);
   });
+});
+
+describe("R09 / C10 draft and confirmation lock ordering", () => {
+  beforeAll(async () => {
+    // Native barriers pause the real functions after their own first locks. No test
+    // caller pre-locks a session or imposes the lock order being verified.
+    await t.sql.unsafe(`
+      create function r09_reauth_lock_probe() returns trigger language plpgsql as $$
+      begin
+        if current_setting('msr.reauth_lock_probe', true) = TG_ARGV[0] then
+          perform pg_advisory_xact_lock(90938);
+        end if;
+        return NEW;
+      end $$;
+      create trigger r09_save_barrier before insert on reauth_drafts
+        for each row execute function r09_reauth_lock_probe('save');
+      create trigger r09_confirm_barrier before insert or update on contact_methods
+        for each row execute function r09_reauth_lock_probe('confirm');
+    `);
+  });
+
+  it.each(["save", "confirm"] as const)(
+    "serializes %s first without a deadlock or adopting a later replacement",
+    async (first) => {
+      const original = await save();
+      const token = await issue(await lineage([original.token]));
+      const replacementReason = "Synthetic later response with a different private body";
+      const gate = await t.sql.reserve();
+      const [controller] = await gate`select pg_backend_pid() as pid`;
+      if (!controller) throw new Error("Missing barrier backend");
+      await gate`select pg_advisory_lock(90938)`;
+      const startSave = () =>
+        trackedTransaction(first === "save" ? "save" : "", (tx) =>
+          saveProposalReauthDraft(tx, f.client.session, host, {
+            ...input(),
+            reason: replacementReason,
+          }),
+        );
+      const startConfirm = () =>
+        trackedTransaction(first === "confirm" ? "confirm" : "", (tx) =>
+          consumeEmailLink(tx, token, {
+            currentSessionToken: f.client.token,
+            reauthDraftTokens: [original.token],
+          }),
+        );
+      let saving: ReturnType<typeof startSave> | undefined;
+      let confirming: ReturnType<typeof startConfirm> | undefined;
+      try {
+        if (first === "save") {
+          saving = startSave();
+          const pid = await saving.pid;
+          await blockedBy(pid, controller.pid);
+          confirming = startConfirm();
+          await blockedBy(await confirming.pid, pid);
+        } else {
+          confirming = startConfirm();
+          const pid = await confirming.pid;
+          await blockedBy(pid, controller.pid);
+          saving = startSave();
+          await blockedBy(await saving.pid, pid);
+        }
+      } finally {
+        await gate`select pg_advisory_unlock(90938)`;
+        gate.release();
+      }
+      if (!saving || !confirming) throw new Error("Missing concurrent test attempt");
+      const [saved, confirmed] = await Promise.all([saving.result, confirming.result]);
+      expect([outcome(saved), outcome(confirmed)]).toEqual([
+        first === "save"
+          ? { status: "fulfilled" }
+          : { status: "rejected", code: "unauthenticated", causeCode: null },
+        { status: "fulfilled" },
+      ]);
+      if (confirmed.status !== "fulfilled") throw new Error("Confirmation did not serialize");
+      expect(await inspectEmailLink(t.db, token)).toMatchObject({ state: "consumed" });
+      expect(await readSession(t.db, f.client.token)).toBeNull();
+      const rows = await t.db
+        .select()
+        .from(reauthDrafts)
+        .where(eq(reauthDrafts.proposalId, f.proposal.id));
+      expect(rows).toHaveLength(1);
+      if (first === "save") {
+        if (saved.status !== "fulfilled") throw new Error("Replacement did not serialize");
+        expect(rows[0]?.tokenHash === sha256Hex(saved.value.token)).toBe(true);
+        expect(rows[0]?.reason === replacementReason).toBe(true);
+        expect(rows[0]?.restoredAt).toBeNull();
+        expect(rows[0]?.sessionId).toBe(f.client.session.id);
+        expect(await read(saved.value.token, confirmed.value.session)).toEqual({
+          status: "unavailable",
+        });
+        expect(await read(original.token, confirmed.value.session)).toEqual({
+          status: "unavailable",
+        });
+      } else {
+        expect(rows[0]?.tokenHash === sha256Hex(original.token)).toBe(true);
+        expect(rows[0]?.reason === reason).toBe(true);
+        expect(rows[0]?.sessionId).toBe(confirmed.value.session.id);
+        expect(await read(original.token, confirmed.value.session)).toEqual({
+          status: "restored",
+          values: { state: "declined", reason },
+        });
+        if (saved.status === "rejected") {
+          expect(String(saved.reason)).not.toContain(replacementReason);
+          expect((saved.reason as Error).cause).toBeUndefined();
+        }
+      }
+      expect(await effects()).toEqual({ responses: 0, operations: 0 });
+    },
+    30_000,
+  );
+
+  it.each(["principal", "revision", "source", "expiry"] as const)(
+    "rechecks current %s authority after waiting for the principal lock",
+    async (changed) => {
+      const gate = await t.sql.reserve();
+      await gate`begin`;
+      let saving: ReturnType<typeof trackedTransaction> | undefined;
+      try {
+        const [controller] = await gate`select pg_backend_pid() as pid`;
+        if (!controller) throw new Error("Missing authority-change backend");
+        await gate`select id from principals where id = ${f.client.id} for update`;
+        saving = trackedTransaction("", (tx) =>
+          saveProposalReauthDraft(tx, f.client.session, host, input()),
+        );
+        await blockedBy(await saving.pid, controller.pid);
+        if (changed === "principal")
+          await gate`update principals set status = 'suspended' where id = ${f.client.id}`;
+        else if (changed === "expiry")
+          await gate`update sessions set expires_at = ${new Date().toISOString()} where id = ${f.client.session.id}`;
+        else if (changed === "source")
+          await gate`update listings set approved_revision_id = null where id = ${f.listing.listingId}`;
+        else await gate`update proposals set version = version + 1 where id = ${f.proposal.id}`;
+        await gate`commit`;
+      } finally {
+        await gate`rollback`;
+        gate.release();
+      }
+      if (!saving) throw new Error("Missing authority-check attempt");
+      const result = await saving.result;
+      expect(outcome(result)).toEqual({
+        status: "rejected",
+        code: {
+          principal: "unauthenticated",
+          revision: "version_conflict",
+          source: "transition_denied",
+          expiry: "unauthenticated",
+        }[changed],
+        causeCode: null,
+      });
+      expect(
+        await t.db
+          .select({ id: reauthDrafts.id })
+          .from(reauthDrafts)
+          .where(eq(reauthDrafts.proposalId, f.proposal.id)),
+      ).toHaveLength(0);
+      expect(await effects()).toEqual({ responses: 0, operations: 0 });
+    },
+    30_000,
+  );
 });

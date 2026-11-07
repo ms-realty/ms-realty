@@ -2,7 +2,7 @@
 import "server-only";
 import { and, eq, gt, inArray, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
-import { reauthDrafts, reauthEmailLineage, sessions } from "@/db/schema";
+import { principals, reauthDrafts, reauthEmailLineage, sessions } from "@/db/schema";
 import { readSession, requireFreshAuth, requireLiveSession, type Session } from "../auth/sessions";
 import { getEnv } from "../config/env";
 import { randomToken, sha256Hex } from "../crypto";
@@ -62,7 +62,7 @@ export async function saveProposalReauthDraft(
   session: Session,
   host: string,
   raw: z.input<typeof inputSchema>,
-  now = new Date(),
+  now?: Date,
 ) {
   clientHost(host);
   const parsed = inputSchema.safeParse(raw);
@@ -71,18 +71,27 @@ export async function saveProposalReauthDraft(
   const input = parsed.data;
   return db
     .transaction(async (tx) => {
+      // Match email confirmation's principal -> session order. The draft insert's
+      // principal foreign-key lock must not meet confirmation while holding only a session.
+      await tx
+        .select({ id: principals.id })
+        .from(principals)
+        .where(eq(principals.id, session.account.id))
+        .for("update");
       // Serializes replacement and the per-session cap, including concurrent browser tabs.
       await tx
         .select({ id: sessions.id })
         .from(sessions)
         .where(eq(sessions.id, session.id))
         .for("update");
-      const live = await requireLiveSession(tx, session, now);
+      // Recheck current authority and expiry after either lock has finished waiting.
+      const checkedAt = now ?? new Date();
+      const live = await requireLiveSession(tx, session, checkedAt);
       if (live.account.kind !== "client") throw new AppError("not_found");
       const view = await currentProposal(tx, live, input.proposalId);
       if (view.proposal.version !== input.expectedVersion || view.revision.id !== input.revisionId)
         throw new AppError("version_conflict");
-      await pruneReauthDrafts(tx, now);
+      await pruneReauthDrafts(tx, checkedAt);
       await tx
         .delete(reauthDrafts)
         .where(
@@ -94,7 +103,7 @@ export async function saveProposalReauthDraft(
         .where(eq(reauthDrafts.sessionId, live.id));
       if (pending.length >= maxReauthDrafts) throw new AppError("validation_failed");
       const token = randomToken();
-      const expiresAt = new Date(now.getTime() + reauthDraftTtlMs);
+      const expiresAt = new Date(checkedAt.getTime() + reauthDraftTtlMs);
       await tx.insert(reauthDrafts).values({
         ...input,
         tokenHash: sha256Hex(token),
@@ -103,7 +112,7 @@ export async function saveProposalReauthDraft(
         host,
         command: "proposal.decide",
         sourceRevisionId: view.sourceRevisionId,
-        createdAt: now,
+        createdAt: checkedAt,
         expiresAt,
       });
       return { token, expiresAt };
