@@ -22,6 +22,12 @@ import { enqueueMessage } from "../jobs/outbox";
 import type { JobPayloads, JobQueue } from "../jobs/queue";
 import { privacyProcessingRestricted } from "../privacy/restrictions";
 import { enforceRateLimit } from "../rate-limit";
+import {
+  bindReauthEmailLineage,
+  completeReauthDraftTransfer,
+  prepareReauthDraftTransfer,
+  type ReauthLineage,
+} from "../reauth-drafts/service";
 import { emailLinkSubject, emailLinkTemplate } from "./email-link-delivery";
 import { createSession, type IssuedSession, revokeSession } from "./sessions";
 
@@ -66,6 +72,8 @@ export interface EmailLinkRequest {
   readonly now?: Date;
   /** Receives the `auth.email_link` job; its worker calls issueEmailLink. */
   readonly queue: Pick<JobQueue, "send">;
+  /** Optional server-derived continuation; absent for ordinary sign-in requests. */
+  readonly reauth?: ReauthLineage;
 }
 
 export type EmailLinkJob = JobPayloads["auth.email_link"];
@@ -111,6 +119,7 @@ export async function requestEmailLink(
       email,
       returnTo: request.returnTo ?? null,
       locale: request.locale ?? "bg",
+      ...(request.reauth ? { reauth: request.reauth } : {}),
     },
     { db },
   );
@@ -150,6 +159,7 @@ export async function issueEmailLink(
       })
       .returning({ id: emailSignInTokens.id });
     if (!row) throw new Error("Sign-in token insert returned no row.");
+    await bindReauthEmailLineage(tx, row.id, account.id, job.reauth, now);
     const link = emailLinkUrl(env.hosts.client, job.locale, token);
     await enqueueMessage(
       tx,
@@ -218,7 +228,13 @@ export interface ConsumedEmailLink extends IssuedSession {
 export async function consumeEmailLink(
   db: Executor,
   token: string,
-  options: { now?: Date; currentSessionToken?: string; correlationId?: string } = {},
+  options: {
+    now?: Date;
+    currentSessionToken?: string;
+    correlationId?: string;
+    /** Opaque host-only draft cookies from this browser, never submitted body fields. */
+    reauthDraftTokens?: readonly string[];
+  } = {},
 ): Promise<ConsumedEmailLink> {
   const now = options.now ?? new Date();
   const result = await db.transaction(async (tx) => {
@@ -267,8 +283,17 @@ export async function consumeEmailLink(
         verifiedAt: now,
       });
 
+    const draftIds = await prepareReauthDraftTransfer(
+      tx,
+      row.id,
+      account.id,
+      options.currentSessionToken,
+      options.reauthDraftTokens,
+      now,
+    );
     if (options.currentSessionToken) await revokeSession(tx, options.currentSessionToken, now);
     const issued = await createSession(tx, { kind: "client", id: account.id }, now);
+    await completeReauthDraftTransfer(tx, draftIds, issued.session, now);
     await recordAudit(tx, {
       action: "session.sign_in",
       actor: issued.session.actor,

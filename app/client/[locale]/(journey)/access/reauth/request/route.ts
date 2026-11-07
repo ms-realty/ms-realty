@@ -2,8 +2,11 @@ import type { PublicLocale } from "@/i18n/config";
 import { requestEmailLink } from "@/server/auth/email-link";
 import { nativeAuthRoute } from "@/server/auth/native";
 import { currentClientSession, localReturnPath, requestClientIp } from "@/server/auth/pages";
+import { getEnv } from "@/server/config/env";
 import { AppError } from "@/server/errors";
 import { getJobQueue } from "@/server/jobs/web";
+import { proposalDraftTokens } from "@/server/reauth-drafts/cookies";
+import { reauthLineageForRequest } from "@/server/reauth-drafts/service";
 
 export const POST = nativeAuthRoute(
   "client",
@@ -19,14 +22,20 @@ export const POST = nativeAuthRoute(
     const returnTo =
       localReturnPath(String(form.get("returnTo") ?? ""), "client", locale) ??
       `/${locale}/overview`;
-    await requestEmailLink(db, {
-      // The recipient comes from the current principal, never the submitted form.
-      email: account.email,
-      locale: locale as PublicLocale,
-      returnTo,
-      clientIp: await requestClientIp(),
-      queue: await getJobQueue(),
-    });
+    const tokens = await proposalDraftTokens();
+    const clientIp = await requestClientIp();
+    const queue = await getJobQueue();
+    await db.transaction(async (tx) =>
+      requestEmailLink(tx, {
+        // The recipient comes from the current principal, never the submitted form.
+        email: account.email,
+        locale: locale as PublicLocale,
+        returnTo,
+        clientIp,
+        queue,
+        reauth: await reauthLineageForRequest(tx, session, getEnv().hosts.client, returnTo, tokens),
+      }),
+    );
     return `/${locale}/access/reauth?${new URLSearchParams({ sent: "1", returnTo })}`;
   },
 );

@@ -1,0 +1,62 @@
+{
+  "country": "Cyprus",
+  "code": "CY",
+  "checked": "CyLaw consolidated texts as published on the day of research; KDP 131/88 from the CyLaw regulatory archive.",
+  "estate_agency": {
+    "law": "Ο περί Κτηματομεσιτών Νόμος του 2010, 71(I)/2010 as amended by 157(I)/2012 and 100(I)/2017 (s. 17, 19, 20, 33, 42); the 1988 Estate Agents Regulations (KDP 131/88, reg. 16 and Schedule II), status under the 2010 Law unconfirmed",
+    "regulated": "Yes. No one may practise or act as an estate agent, advertise as one or claim a fee for estate-agency work unless registered with the Estate Agents Registration Council and holding a valid annual licence (s. 17, s. 33(1)); offence punishable by up to 12 months' imprisonment (s. 33(3)). Professional indemnity insurance of EUR 200,000 is mandatory (s. 19).",
+    "dual_agency": "unclear",
+    "rule": "The 2010 Law has no express rule on acting for both parties. An agent with an interest in the property may broker only after informing the buyer in writing (s. 20(4)). The fee is what was agreed; failing agreement 3% of the transaction value, due on conclusion of the sale or rental agreement (s. 20(2)). Regulations may fix maximum or minimum commission and the person who pays it (s. 42(2)(b)). The 1988 Regulations set a maximum of 3% on sales 'payable by the seller unless the contracting parties agree otherwise', and split exchange commission equally between both parties.",
+    "quote": "s. 20(2) proviso: 'unless otherwise agreed, the agreed fee shall amount to 3% of the value of the real-estate transaction and shall be due and payable upon achievement of the transaction, i.e. upon conclusion of the sale or rental agreement.'",
+    "commission_both_sides": "Not prohibited by the 2010 Law; who pays is a matter of agreement (s. 20(2)). Under the 1988 Regulations the seller pays the sales commission by default, and both parties pay half on exchanges.",
+    "sources": [
+      "http://www.cylaw.org/nomoi/enop/non-ind/2010_1_71/full.html",
+      "http://www.cylaw.org/KDP/data/1988_1_131.pdf"
+    ]
+  },
+  "aml": {
+    "law": "Ο περί της Παρεμπόδισης και Καταπολέμησης της Νομιμοποίησης Εσόδων από Παράνομες Δραστηριότητες Νόμος, 188(I)/2007 as amended (incl. 13(I)/2018, 81(I)/2019, 13(I)/2021): s. 2A(e) scope, s. 61 CDD, s. 68 retention. Supervisor named in the law: Estate Agents Registration Council.",
+    "sale_scope": "Estate agents are obliged entities (s. 2A(e)).",
+    "letting_threshold": "Letting intermediation only for transactions with a monthly rent of EUR 10,000 or more (s. 2A(e)).",
+    "both_parties": "unclear - the law refers to the 'customer'; no express buyer-and-seller rule was found, and the Council's AML directive for estate agents was not reviewed.",
+    "retention_years": 5,
+    "retention_trigger": "Five years after the end of the business relationship with the customer or after the date of the occasional transaction (s. 68(1)).",
+    "extension": "A further 5 years where retention is reasonably justified for preventing, detecting or investigating money laundering or terrorist financing (s. 68(1A) proviso); then personal data must be deleted unless another law provides otherwise.",
+    "id_copy": "Must keep a 'copy of the documents and information required to comply with the customer due diligence requirements' (s. 68(1)(a)).",
+    "sources": ["http://www.cylaw.org/nomoi/enop/non-ind/2007_1_188/full.html"]
+  },
+  "accounting": {
+    "books_years": 6,
+    "annual_accounts_years": 6,
+    "source_documents_years": 6,
+    "trigger": "Companies law: six years after the end of the calendar year to which the records relate (Cap. 113 s. 141(3)). Tax: at least six years from the tax-return filing deadline (or filing date), extended if a tax audit starts in the last year (Law 4/1978 s. 30(2); s. 5(7)(a) for documents supporting the return).",
+    "law": "Companies Law Cap. 113 s. 141(1) and (3): accounting books and records, including supporting documents such as contracts and invoices, 'kept for a period of six (6) years after the end of the calendar year to which they relate'; Assessment and Collection of Taxes Law 4/1978 s. 30(2); VAT Law 95(I)/2000 Tenth Schedule para. 5(3) lets regulations require VAT records for up to seven years.",
+    "sources": [
+      "http://www.cylaw.org/nomoi/enop/non-ind/0_113/full.html",
+      "http://www.cylaw.org/nomoi/enop/non-ind/1978_1_4/full.html",
+      "http://www.cylaw.org/nomoi/enop/non-ind/2000_1_95/full.html"
+    ]
+  },
+  "limitation": {
+    "general_years": 6,
+    "commission_years": 3,
+    "trigger": "From the day on which the cause of action was completed (s. 7).",
+    "law": "Limitation of Actionable Rights Law 66(I)/2012: s. 7(1) actions on contract, six years; s. 7(2) actions for the agreed or reasonable fee of a lawyer, doctor, dentist, architect, civil engineer, contractor or 'other independent professional', three years. Plan for 3 years for commission claims; it is unconfirmed whether a licensed estate agent counts as an 'independent professional' (otherwise 6 years).",
+    "sources": ["http://www.cylaw.org/nomoi/enop/non-ind/2012_1_66/full.html"]
+  },
+  "id_copies": {
+    "rule": "No national statute restricting ID copying outside AML was found in this pass; the GDPR applies.",
+    "law": "GDPR; Law 125(I)/2018 (not reviewed)",
+    "sources": []
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Dual agency: no statutory rule found; Council code-of-conduct regulations under s. 42(2)(d) not located.",
+    "Whether KDP 131/88 (1988 Regulations) still applies under the 2010 Law.",
+    "Whether estate agents must apply CDD to both buyer and seller (Council AML directive not reviewed).",
+    "Reported transfer of AML supervision of estate agents to the Tax Commissioner (secondary source; date and status unverified).",
+    "Whether s. 7(2) of Law 66(I)/2012 (3 years) covers estate-agent commission.",
+    "VAT record retention period actually set by regulations (up to 7 years).",
+    "Absence of an ID-copy rule outside AML."
+  ]
+}
