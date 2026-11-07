@@ -1,0 +1,67 @@
+{
+  "country": "Malta",
+  "code": "MT",
+  "estate_agency": {
+    "law": "Property Market Agency Act (Cap. 644, Act XXVII of 2024, in force 26 Sept 2024; repealed Cap. 615). Commercial Code (Cap. 13) arts 82-94 on brokers apply to brokers in sale or letting of immovables (art 87 exempts them only from arts 79-81). Civil Code (Cap. 16) arts 1361(2), 1362.",
+    "regulated": "Licensed. Cap. 644 art 18(2): no one may act as property broker or real estate agent, or be employed or engaged as branch manager or property consultant, without a licence from the Property Market Agency. Registered occasional brokers are exempt (art 18(3): at most 2 transactions a year, total value up to EUR 1m, no advertising).",
+    "dual_agency": "allowed",
+    "rule": "Maltese law makes the broker a neutral intermediary between both parties, paid by both by default. Commercial Code art 89: a broker is not the agent of the parties; if he acts as agent of one party, he loses his broker's commission. Art 92: unless agreed otherwise, the brokerage fee is payable by the contracting parties in equal shares. Civil Code art 1361(2): brokerage is borne by seller and buyer half each. Art 1362: default rate 2% for immovables. Art 88: no own-account dealing or interest in the deal. Any Cap. 644 code-of-conduct rule on dual representation is unconfirmed.",
+    "quote": "Commercial Code art 89: 'A public broker is not the agent of the parties in concluding any transaction; and if in concluding any transaction he acts as agent of one of the parties, he shall not be entitled to the commission as broker.' Art 92: 'Saving any agreement to the contrary, the fee for brokerage is payable by the contracting parties in equal shares.'",
+    "commission_both_sides": "Allowed and the statutory default. Commission is split 50/50 between buyer and seller unless agreed otherwise (Commercial Code art 92; Civil Code art 1361(2)). Market contracts commonly shift it to one side by agreement.",
+    "sources": [
+      "https://legislation.mt/eli/cap/644/eng/pdf",
+      "https://legislation.mt/eli/cap/13/eng/pdf",
+      "https://legislation.mt/eli/cap/16/eng/pdf",
+      "https://legislation.mt/eli/cap/615/eng/pdf"
+    ]
+  },
+  "aml": {
+    "law": "Prevention of Money Laundering and Funding of Terrorism Regulations (S.L. 373.01, as amended up to L.N. 82 of 2026), reg 2 'relevant activity' (b); reg 13 record keeping. Supervisor: FIAU.",
+    "sale_scope": "Every transaction by a 'real estate agent', meaning anyone licensed or required to be licensed as property broker or real estate agent under Cap. 644 (reg 2).",
+    "letting_threshold": "Lettings only where monthly rent is EUR 10,000 or more (reg 2 'relevant activity' (b); also item (j) of the related list).",
+    "both_parties": "yes. FIAU Guidance Paper for the Property Sector: where a real estate agent brokers a deal, 'customer' includes both purchaser and vendor (or lessor and lessee), even if only one party approached or paid the agent.",
+    "retention_years": 5,
+    "retention_trigger": "Reg 13(2): 5 years from the end of the business relationship or the date of the occasional transaction (linked operations: the last operation). If the relationship could not be formally ended, from the last transaction.",
+    "extension": "Reg 13(2) proviso: may be extended up to a maximum of 10 years total, after a necessity and proportionality assessment, for ML/FT prevention, detection or investigation.",
+    "id_copy": "Allowed and expected. Reg 13(1)(a) requires keeping the CDD documentation, data and information. Reg 13(1)(b) requires original documents or copies admissible in court for transaction records. Reliance provisions refer to 'relevant copies of the identification and verification data'.",
+    "sources": [
+      "https://legislation.mt/eli/sl/373.1/eng/pdf",
+      "https://fiaumalta.org/app/uploads/2020/06/18.02.2020-Guidance-Paper-Property-Sector.pdf"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": null,
+    "source_documents_years": 10,
+    "trigger": "Companies Act 163(5): 10 years; where records are kept in bound or unified form, from the date of the last entry. Income Tax Management Act 19(5): at least 9 years after completion of the transactions, but the proviso disapplies it where Companies Act 163(5) applies. VAT Act 48(4): at least 6 years from the end of the year concerned.",
+    "law": "Companies Act (Cap. 386) art 163(5); Income Tax Management Act (Cap. 372) art 19(5); VAT Act (Cap. 406) art 48(4)",
+    "sources": [
+      "https://legislation.mt/eli/cap/386/eng/pdf",
+      "https://legislation.mt/eli/cap/372/eng/pdf",
+      "https://legislation.mt/eli/cap/406/eng/pdf"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 1.5,
+    "trigger": "Civil Code art 2137: from the day the action can be exercised. Brokers' fee claims (art 2148(e)) lapse after 18 months. These short periods are presumptive: per art 2160 they fail unless the debtor declares on oath that nothing is owed or that they do not remember. Art 2151(2): if the debt is acknowledged in an approved account or written declaration, the period becomes 5 years from that document. Commercial debts: 5 years (art 2156(f)). Residual: 30 years (art 2143).",
+    "law": "Civil Code (Cap. 16) arts 2137, 2143, 2148(e), 2151, 2156(f), 2160",
+    "sources": ["https://legislation.mt/eli/cap/16/eng/pdf"]
+  },
+  "id_copies": {
+    "rule": "Data Protection Act art 8: an identity document may be processed only when clearly justified by the purpose and by (a) the importance of secure identification or (b) another valid reason provided by law. The national identity number may be used only under appropriate GDPR safeguards. Identity Card Act art 22(1): no one other than the holder (or the holder's agent acting under a legal requirement) may possess or use an identity document, so never retain the original card.",
+    "law": "Data Protection Act (Cap. 586) art 8; Identity Card and other Identity Documents Act (Cap. 258) art 22",
+    "sources": [
+      "https://legislation.mt/eli/cap/586/eng/pdf",
+      "https://legislation.mt/eli/cap/258/eng/pdf"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Whether Cap. 644 subsidiary legislation (codes of conduct or ethics under art 34(2)(b)) adds dual-representation or disclosure rules; none was found.",
+    "That Commercial Code arts 88-94 apply to Cap. 644 licensees: inferred from art 87, which names brokers in sale or letting of immovables; no case law checked.",
+    "No separate statutory retention period found for annual financial statements; a conservative product rule would use 10 years.",
+    "Whether art 2148(e) (18 months, brokers) or art 2156(f) (5 years, commercial debts) governs a licensed estate agency company's commission claim; the text names 'brokers', case law not checked.",
+    "FIAU Implementing Procedures Part II (real estate) not fetched; the both-parties rule rests on the 2020 FIAU Guidance Paper."
+  ]
+}

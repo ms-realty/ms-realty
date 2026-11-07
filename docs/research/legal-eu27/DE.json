@@ -1,0 +1,92 @@
+{
+  "country": "Germany",
+  "code": "DE",
+  "estate_agency": {
+    "law": "BGB §§ 652-656d (brokerage contract; §§ 656a-656d for flats and single-family houses); GewO § 34c (licence); Makler- und Bauträgerverordnung (MaBV) §§ 10, 11, 14; Wohnungsvermittlungsgesetz (WoVermittG) § 2 for residential lettings",
+    "regulated": "Yes, licensed. GewO § 34c(1) sentence 1 no. 1: whoever commercially brokers or evidences the opportunity to conclude contracts on land, land-equivalent rights, commercial premises or residential premises 'bedarf der Erlaubnis der zuständigen Behörde' (requires the permission of the competent authority). Refusal grounds (§ 34c(2)): lack of reliability (e.g. conviction for fraud, money laundering in the last five years) or disorderly finances. No qualification exam; the 20-hour/3-year training duty in the current § 34c(2a) text names only residential property managers (no. 4). MaBV § 10(1): records, documents and receipts must be kept 'von der Annahme des Auftrages an' (from acceptance of the mandate), promptly and in German, incl. the client's name/address and the agreed fee (§ 10(2)) and, for sales, location, size, price and seller's name/address (§ 10(3) no. 1). MaBV § 11: fee and contract term must be given to the client in text form and in German immediately after accepting the mandate. MaBV § 14(1): these business records are kept 5 years in the business premises from the end of the calendar year of the last recordable event for the mandate. BGB § 656a: a brokerage contract for the purchase of a flat or single-family house requires text form. WoVermittG § 2(1): a residential letting brokerage contract requires text form.",
+    "dual_agency": "disclosure",
+    "rule": "Acting for both sides is lawful unless the brokerage contract excludes it: BGB § 654 forfeits commission and expenses only where the broker acted for the other party 'dem Inhalt des Vertrags zuwider' (contrary to the content of the contract). For the purchase of a flat or single-family house by a consumer buyer (§ 656b), § 656c expressly regulates dual activity: both parties must owe the same amount, otherwise the brokerage contract is void (§ 656c(2)). BGH, judgment of 21.03.2024, I ZR 185/22 (BGHZ): § 656c permits successive engagement by both parties at half the total commission each; within § 656c the broker owes the client, under good faith (§ 242 BGB), information on all circumstances relevant to the commission, and the client may demand sight of the broker's contract with the other party (§ 810 BGB); no forfeiture where the buyer learned of the dual activity from the exposé before the notary appointment. Forfeiture under § 654 is penal and requires an intentional or near-intentional, grossly reckless breach of loyalty (BGH, 18.10.2012, III ZR 106/11). Product rule: state the dual role and each side's commission in the exposé and in both brokerage contracts, keep strict impartiality, and for consumer home purchases use equal halves only.",
+    "quote": "BGB § 654: 'Der Anspruch auf den Maklerlohn und den Ersatz von Aufwendungen ist ausgeschlossen, wenn der Makler dem Inhalt des Vertrags zuwider auch für den anderen Teil tätig gewesen ist.' = 'The claim to brokerage fee and reimbursement of expenses is excluded if the broker, contrary to the content of the contract, also acted for the other party.' BGB § 656c(1) sentence 1: 'Lässt sich der Makler von beiden Parteien des Kaufvertrags über eine Wohnung oder ein Einfamilienhaus einen Maklerlohn versprechen, so kann dies nur in der Weise erfolgen, dass sich die Parteien in gleicher Höhe verpflichten.' = 'If the broker has both parties to the purchase of a flat or single-family house promise a fee, this may only be done so that the parties undertake to pay the same amount.' BGH I ZR 185/22 headnote b): the broker is obliged 'über alle Umstände Auskunft zu erteilen, die für die Entstehung und das Fortbestehen des Provisionsanspruchs von Bedeutung sind' = 'to give information on all circumstances relevant to the arising and continuation of the commission claim'.",
+    "commission_both_sides": "Flat or single-family house bought by a consumer (§ 656b): (1) dual engagement only with equal amounts from both parties (§ 656c(1) s.1); (2) if the broker works free of charge for one party, it may not take a fee from the other (§ 656c(1) s.2); (3) a waiver or reduction for one party also benefits the other, non-derogable (§ 656c(1) s.3-4); a deviating brokerage contract is void (§ 656c(2)). If only one party engaged the broker, an agreement making the other party pay or reimburse the fee is valid only if the engaging party stays liable for at least the same amount, and the claim against the other party falls due only after the engaging party has paid and this is proven (§ 656d(1)). Total commission is not capped by statute (BGH I ZR 185/22 para. 36; § 655/§ 138 BGB as outer limits). Other objects (land, multi-family, commercial) and non-consumer buyers: free agreement, subject to § 654. Residential lettings: WoVermittG § 2(1a) 'Bestellerprinzip' - the agent may not demand or accept a fee from the tenant-seeker unless it obtained the landlord's mandate to offer the flat exclusively because of the brokerage contract with the tenant-seeker; an agreement obliging the tenant to pay a fee owed by the landlord or a third party is void (§ 2(5) no. 2); no fee where the agent is owner, manager, tenant or landlord of the flat (§ 2(2)); no advance payments (§ 2(4)).",
+    "sources": [
+      "https://www.gesetze-im-internet.de/bgb/__652.html",
+      "https://www.gesetze-im-internet.de/bgb/__654.html",
+      "https://www.gesetze-im-internet.de/bgb/__656a.html",
+      "https://www.gesetze-im-internet.de/bgb/__656b.html",
+      "https://www.gesetze-im-internet.de/bgb/__656c.html",
+      "https://www.gesetze-im-internet.de/bgb/__656d.html",
+      "https://www.gesetze-im-internet.de/gewo/__34c.html",
+      "https://www.gesetze-im-internet.de/gewo_34cdv/__10.html",
+      "https://www.gesetze-im-internet.de/gewo_34cdv/__11.html",
+      "https://www.gesetze-im-internet.de/gewo_34cdv/__14.html",
+      "https://www.gesetze-im-internet.de/wovermrg/__2.html",
+      "https://www.bundesgerichtshof.de/SharedDocs/Entscheidungen/DE/Zivilsenate/I_ZS/2022/I_ZR_185-22.pdf?__blob=publicationFile&v=1",
+      "https://www.bundesgerichtshof.de/SharedDocs/Entscheidungen/DE/Zivilsenate/III_ZS/2011/III_ZR_106-11.pdf?__blob=publicationFile&v=1"
+    ]
+  },
+  "aml": {
+    "law": "Geldwäschegesetz (GwG) § 2(1) no. 14 (obliged entity 'Immobilienmakler'), § 1(11) (definition), § 1(5) s.2 (transaction = the brokered contract), § 10(6) (thresholds), § 11(2) and (6) (identification of the parties), § 12 (verification), § 8 (records and retention), § 50 no. 9 (supervisor = competent Land authority); joint Länder interpretation guidance 'Auslegungs- und Anwendungshinweise zum GwG für Güterhändler, Immobilienmakler und andere Nichtfinanzunternehmen' (Stand 18.06.2025)",
+    "sale_scope": "Every brokered purchase contract, no value threshold: § 10(6) no. 1 GwG ('bei der Vermittlung von Kaufverträgen'). Covers brokers who 'vermitteln' (broker) purchase, lease or rental contracts on land, land-equivalent rights, commercial or residential premises (§ 1(11)). The Länder guidance (section 1.6) treats a pure finder (Nachweismakler) who only evidences the opportunity and is not actively involved in the deal as outside the GwG definition.",
+    "letting_threshold": "EUR 10,000 monthly net cold rent or lease (§ 10(6) no. 2: 'mit einer monatlichen Nettokaltmiete oder Nettokaltpacht in Höhe von mindestens 10 000 Euro'). Guidance 2.3.2: measured by the rent agreed at the start of the lease, not the commission; later increases ignored; incentives ignored; rent for ancillary areas included. Letting-only brokers below the threshold need no risk management (guidance 3.1.1).",
+    "both_parties": "yes - § 11(2) GwG: the estate agent must identify 'die Vertragsparteien des vermittelten Rechtsgeschäfts' (the contracting parties of the brokered transaction), persons acting for them and beneficial owners, as soon as the parties have a serious interest in carrying out the transaction and are sufficiently determined. Exception: if a GwG-obliged estate agent acts for each side, each identifies only the party it acts for. § 11(6) s.5 obliges a party that is not the agent's client to provide the information. Guidance 4.2.3.4: identify the parties 'nicht nur die Personen, mit denen sie einen Maklervertrag abgeschlossen haben' (not only those with whom a brokerage contract was concluded); serious interest exists at the latest when a draft contract has been received, a reservation agreement or preliminary contract concluded, or a reservation fee paid to the broker.",
+    "retention_years": 5,
+    "retention_trigger": "§ 8(4) s.3-4 GwG: for a business relationship (§ 10(3) s.1 no. 1), from the end of the calendar year in which the business relationship ends; otherwise from the end of the calendar year in which the information was established.",
+    "extension": "§ 8(4) s.1-2: 5 years 'soweit nicht andere gesetzliche Bestimmungen ... eine längere Frist vorsehen' (unless other statutes require longer, e.g. HGB/AO when the same paper is also an accounting voucher); 'In jedem Fall sind die Aufzeichnungen und sonstigen Belege spätestens nach Ablauf von zehn Jahren zu vernichten' (in any case destroy at the latest after 10 years). Guidance 5.3: absent a longer period, ID copies are to be deleted after five years. No supervisor-ordered extension in the text.",
+    "id_copy": "Mandatory. § 8(2) s.2 GwG: where an ID document under § 12(1) s.1 no. 1, 4 or 5 is presented, obliged entities 'haben ... das Recht und die Pflicht, Kopien dieser Dokumente ... anzufertigen oder sie optisch digitalisiert zu erfassen' (have the right and the duty to copy or optically digitise these documents); also record type, number and issuing authority (§ 8(2) s.1). Guidance 4.4.3.1 and 5.2.2: copy must be complete (ID card front and back); lawful under GDPR Art. 6(1)(c). Verification documents: valid official photo ID, eID, qualified e-signature, notified eID scheme (§ 12(1)).",
+    "sources": [
+      "https://www.gesetze-im-internet.de/gwg_2017/__1.html",
+      "https://www.gesetze-im-internet.de/gwg_2017/__2.html",
+      "https://www.gesetze-im-internet.de/gwg_2017/__8.html",
+      "https://www.gesetze-im-internet.de/gwg_2017/__10.html",
+      "https://www.gesetze-im-internet.de/gwg_2017/__11.html",
+      "https://www.gesetze-im-internet.de/gwg_2017/__12.html",
+      "https://www.gesetze-im-internet.de/gwg_2017/__50.html",
+      "https://www.stmi.bayern.de/media/a-z/geldwaesche/auslegungs-und-anwendungshinweisen-2025-1.pdf"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 8,
+    "trigger": "End of the calendar year in which the last book entry was made, the inventory/opening balance/annual accounts were prepared or adopted, the business letter was received or sent, or the voucher arose (HGB § 257(5); AO § 147(4)). Invoices: end of the calendar year of issue (UStG § 14b(1) s.3). Tax extension: the period does not expire while documents matter for taxes whose assessment period has not expired (AO § 147(3) s.5). The 8-year voucher period (from 1.1.2025) applies to all documents whose old 10-year period had not expired by 31.12.2024 (EGHGB Art. 95; EGAO Art. 97 § 19a(2)). Received/sent business letters: 6 years.",
+    "law": "HGB § 257(1), (4), (5): books, inventories, opening balances, annual accounts, management reports 10 years; vouchers (Buchungsbelege) 8 years; other documents (business letters) 6 years. AO § 147(1), (3), (4): same 10/8/6 split for tax. UStG § 14b(1): invoices 8 years. MaBV § 14(1): broker business records 5 years (longer statutory periods prevail).",
+    "sources": [
+      "https://www.gesetze-im-internet.de/hgb/__257.html",
+      "https://www.gesetze-im-internet.de/ao_1977/__147.html",
+      "https://www.gesetze-im-internet.de/ustg_1980/__14b.html",
+      "https://www.gesetze-im-internet.de/hgbeg/art_95.html",
+      "https://www.gesetze-im-internet.de/aoeg_1977/art_97__19a.html",
+      "https://www.gesetze-im-internet.de/gewo_34cdv/__14.html"
+    ]
+  },
+  "limitation": {
+    "general_years": 3,
+    "commission_years": 3,
+    "trigger": "BGB § 199(1): from the end of the year in which the claim arose and the creditor knew or, without gross negligence, should have known the circumstances and the debtor; § 199(4): in any case 10 years from the claim arising, regardless of knowledge. The commission claim arises when the main contract is concluded as a result of the broker's evidencing or brokering (§ 652(1) s.1); under a condition precedent, only when the condition occurs (§ 652(1) s.2). No special period for real-estate commission: the regular period applies.",
+    "law": "BGB § 195 ('Die regelmäßige Verjährungsfrist beträgt drei Jahre' = 'The regular limitation period is three years'), § 199(1), (4); § 652(1)",
+    "sources": [
+      "https://www.gesetze-im-internet.de/bgb/__195.html",
+      "https://www.gesetze-im-internet.de/bgb/__199.html",
+      "https://www.gesetze-im-internet.de/bgb/__652.html"
+    ]
+  },
+  "id_copies": {
+    "rule": "German ID card (Personalausweis): may be copied only by the holder or by others with the holder's consent, and only so that the copy is clearly and permanently recognisable as a copy; persons other than the holder may not pass the copy to third parties; personal data may be collected or processed by copying only with the holder's consent; general data protection law stays applicable (PAuswG § 20(2)). German passport: same rule, with an exception for passing the copy on for a visa application with consent (PassG § 18(3)). Inside AML, GwG § 8(2) s.2 gives the right and duty to copy. Outside AML (e.g. letting below EUR 10,000, tenant screening, non-AML identity checks): copy only with consent, mark it as a copy (e.g. 'Kopie' watermark), do not forward it, and keep only what is needed (GDPR).",
+    "law": "Personalausweisgesetz (PAuswG) § 20(2); Passgesetz (PassG) § 18(3); GwG § 8(2) s.2 for the AML exception",
+    "sources": [
+      "https://www.gesetze-im-internet.de/pauswg/__20.html",
+      "https://www.gesetze-im-internet.de/pa_g_1986/__18.html",
+      "https://www.gesetze-im-internet.de/gwg_2017/__8.html"
+    ]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "Disclosure outside § 656c: the statute (§ 654) only sanctions dual activity contrary to the contract; the case-law standard that a disclosed, strictly impartial 'honest broker' keeps the commission (BGH III ZR 318/02 of 30.04.2003, III ZR 186/99) was seen only in secondary sources, not read in the original. The primary BGH I ZR 185/22 covers § 656c cases only.",
+    "Whether limitation of a § 656d claim against the non-client party starts only when it falls due (after proof of the client's payment) was not verified.",
+    "PAuswG § 20 and PassG § 18 govern German documents only; that foreign ID documents fall only under GDPR (no national copying rule) is an inference.",
+    "Länder-specific annexes to the joint AML guidance (supervisor per Land) were not checked; the Bavarian-hosted copy of the joint guidance (Stand 18.06.2025) was used.",
+    "The current GewO § 34c(2a) training duty names only residential property managers (no. 4); when and why estate agents were dropped from it was not verified.",
+    "Not analysed: EU AML Regulation 2024/1624 (applies from 10.07.2027), which will directly govern estate agents' due diligence and retention and displace parts of the GwG.",
+    "Commission rules for commercial property and non-consumer buyers rely on § 654 and freedom of contract; no case law was read for those segments."
+  ]
+}

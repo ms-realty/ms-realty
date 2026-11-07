@@ -1,0 +1,71 @@
+{
+  "country": "Slovakia",
+  "code": "SK",
+  "researched_against": "Consolidated texts on static.slov-lex.sk (official Ministry of Justice portal), versions in force on 2026-11-07: AML 297/2008 version 20260817; Obchodny zakonnik 513/1991 version 20260817; Obciansky zakonnik 40/1964 version 20260731; 431/2002 version 20260601 (sec. 35 periods unchanged in the 20270101 version); 455/1991 version 20260817 (annex item unchanged in 20261201); 18/2018 version 20260818; 395/2019 version 20260515.",
+  "estate_agency": {
+    "law": "Real-estate brokerage is a contract type, not a separate statute: Obchodny zakonnik (Commercial Code) 513/1991 Zb. secs. 642-651 'Zmluva o sprostredkovani' for business-to-business contracts (sec. 261(1)) or where the parties choose the Code in writing (sec. 262(1)-(2)); Obciansky zakonnik (Civil Code) 40/1964 Zb. secs. 774-777 'Sprostredkovatelska zmluva' for consumer contracts. No real-estate agency act has been adopted.",
+    "regulated": "Yes. 'Sprostredkovanie predaja, prenajmu a kupy nehnutelnosti (realitna cinnost)' is a bound trade (viazana zivnost): Zivnostensky zakon 455/1991 Zb., Annex 2 (Viazane zivnosti), Group 214, item 61. Qualification: university education in economics, law, construction or architecture, or full secondary education plus a certificate of an accredited education programme (with reference to sec. 21(7) of Act 292/2024 Z. z.). Sec. 9(a): a legal person whose beneficial owner is not of good repute may not operate this trade.",
+    "dual_agency": "allowed",
+    "rule": "Commercial Code sec. 647(1): acting as broker for the counterparty as well is permitted unless the brokerage contract forbids it; if the broker does so contrary to the contract, he loses the commission. The rule is dispositive (not listed among the mandatory provisions in sec. 263(1)). The Civil Code (secs. 774-777, consumer contracts) has no dual-agency rule; sec. 777 obliges the broker and the principal to tell each other all important circumstances that may influence the principal's decision, which in practice argues for disclosing a dual role. Commercial Code sec. 643 imposes the same information duty on the broker.",
+    "quote": "Commercial Code sec. 647(1): 'The broker is not, however, entitled to commission if the contract with the third party was concluded without his cooperation or if, contrary to the contract, he was also active as broker for the person with whom the brokered contract was concluded.' Civil Code sec. 777: 'The principal and the broker are obliged to inform each other of all important circumstances related to the brokerage, especially circumstances that may influence the principal's decision to conclude the brokered contract.'",
+    "commission_both_sides": "Not prohibited by statute. Under Commercial Code sec. 647(1) commission from both sides is possible unless the brokerage contract excludes activity for the counterparty; breach of such a clause forfeits commission. Commission arises when the brokered contract is concluded (Commercial Code sec. 644) or, under the Civil Code, when the result is achieved through the broker's efforts (sec. 774); commission must be agreed (Civil Code sec. 775).",
+    "sources": [
+      "https://static.slov-lex.sk/static/SK/ZZ/1991/513/20260817.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/1964/40/20260731.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/1991/455/20260817.html"
+    ]
+  },
+  "aml": {
+    "law": "Zakon 297/2008 Z. z. o ochrane pred legalizaciou prijmov z trestnej cinnosti a o ochrane pred financovanim terorizmu; obliged person under sec. 5(1)(i).",
+    "sale_scope": "Every brokered sale or purchase of real estate, no value threshold: sec. 5(1)(i) covers 'a legal or natural person authorised to broker the sale, lease and purchase of real estate'. Basic due diligence (sec. 10(1): identification and verification, beneficial owner, purpose of the transaction, PEP and sanctions check, source of funds by risk, own-name check, ongoing monitoring) is due when establishing a business relationship (sec. 10(2)(a)), for an occasional transaction of EUR 15,000 or more (EUR 10,000 in cash) (sec. 10(2)(b)), on suspicion regardless of value (sec. 10(2)(c)) and on doubts about earlier data (sec. 10(2)(d)); identification and verification also for any transaction of EUR 1,000 or more (sec. 10(3)). Identity must be verified before the relationship or transaction (sec. 8(2)).",
+    "letting_threshold": "Lettings only where the monthly rent is at least EUR 10,000 (sec. 5(1)(i): 'in the case of lease of real estate, only if the value of the monthly rent is at least EUR 10,000').",
+    "both_parties": "unclear. The Act requires due diligence on the 'klient'. Sec. 9(d) defines a client broadly as a person who (1) is a party to an obligation connected with the obliged person's business, (2) takes part in a process by which it is to become such a party, (3) represents such a party, or (4) is otherwise entitled to dispose of the subject of that obligation. The Act does not say whether the counterparty of the agency's principal is a client. The FIU's 2024-2025 thematic survey of 220 agencies treats buyers as the agencies' clients and states that the agency must verify the origin of a buyer's own funds, which points to checking both parties in practice, but it is a survey, not a binding rule.",
+    "retention_years": 5,
+    "retention_trigger": "Sec. 19(2): five years from the end of the contractual relationship with the client or from the occasional transaction outside a business relationship. Covers CDD data and documents (secs. 10, 11, 12, 14), all data and documents on executed transactions, risk-profile records, business correspondence, analyses and records of all steps.",
+    "extension": "Sec. 19(3): longer than five years only on a written request of the Financial Intelligence Unit after assessing necessity and proportionality; the request states a period that may not exceed a further five years. Sec. 19(4): the duty survives the person ceasing the obliged activity.",
+    "id_copy": "Permitted, not expressly mandated. Sec. 19(1) entitles the obliged person, without the data subject's consent, to obtain the necessary personal data 'by copying, scanning or other recording of official documents onto an information carrier' and to process birth numbers, within the scope of secs. 10(1), 11(3) and 12(1)-(2). Sec. 19(5): copies must be legible and the photograph good enough to verify the person's likeness.",
+    "sources": [
+      "https://static.slov-lex.sk/static/SK/ZZ/2008/297/20260817.html",
+      "https://www.minv.sk/swift_data/source/policia/fsj/kpo/TPU-RS.pdf"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 10,
+    "trigger": "Ten years following the year to which the records relate (Accounting Act sec. 35(3)(a) annual accounts and annual report; sec. 35(3)(c) accounting documents, books, chart of accounts, inventories; sec. 35(3)(d) records on the accounting method: ten years after the year last used; sec. 35(3)(b) income-tax information report: five years; sec. 35(3)(e) other records: per the entity's registry plan). Tax: VAT Act 222/2004 sec. 76(1)(a) invoices issued and received ten years following the year to which they relate; Tax Procedure Code 563/2009 sec. 69(1) tax may not be assessed after five years from the end of the year in which the return was due, extended by any assessment step, at most ten years (sec. 69(2)).",
+    "law": "Zakon 431/2002 Z. z. o uctovnictve sec. 35; Zakon 222/2004 Z. z. o DPH sec. 76; Zakon 563/2009 Z. z. (danovy poriadok) sec. 69",
+    "sources": [
+      "https://static.slov-lex.sk/static/SK/ZZ/2002/431/20260601.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/2002/431/20270101.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/2004/222/20260101.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/2009/563/20260901.html"
+    ]
+  },
+  "limitation": {
+    "general_years": 3,
+    "commission_years": 3,
+    "trigger": "Civil Code sec. 101: 'Unless otherwise provided, the limitation period is three years and runs from the day on which the right could be exercised for the first time.' This governs consumer brokerage contracts (Civil Code secs. 774-777). For business-to-business brokerage under the Commercial Code (or where the Code was chosen in writing) the period is four years (sec. 397: 'Unless the law provides otherwise for individual rights, the limitation period is four years'), running from the due date of the obligation (sec. 392(1)); these limitation rules are mandatory (sec. 263(1) lists secs. 386-408).",
+    "law": "Obciansky zakonnik 40/1964 Zb. secs. 100-101; Obchodny zakonnik 513/1991 Zb. secs. 391-392, 397, 263(1)",
+    "sources": [
+      "https://static.slov-lex.sk/static/SK/ZZ/1964/40/20260731.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/1991/513/20260817.html"
+    ]
+  },
+  "id_copies": {
+    "rule": "No general statutory ban on copying identity documents outside AML. The former explicit rule (Act 122/2013 sec. 15(6): copying or scanning official documents only with the data subject's written consent or where a special law expressly allows it) lapsed on 24 May 2018 and was not carried into Act 18/2018. What applies now: GDPR data minimisation and a lawful basis; Act 18/2018 sec. 78(4): the general identifier (birth number, rodne cislo) may be used to identify a person 'only if its use is necessary to achieve the given purpose of processing', and publishing it is prohibited; Identity Cards Act 395/2019 sec. 15(4): an identity card 'may not be handed over or accepted as a deposit' and may not be handed over or taken away in connection with the provision of services. Showing the document and recording that it was checked is the low-risk default outside AML.",
+    "law": "Zakon 18/2018 Z. z. o ochrane osobnych udajov sec. 78(4); Zakon 395/2019 Z. z. o obcianskych preukazoch sec. 15(4); repealed Zakon 122/2013 Z. z. sec. 15(6) (in force until 2018-05-24); Regulation (EU) 2016/679 art. 5(1)(c)",
+    "sources": [
+      "https://static.slov-lex.sk/static/SK/ZZ/2018/18/20260818.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/2019/395/20260515.html",
+      "https://static.slov-lex.sk/static/SK/ZZ/2013/122/20140415.html"
+    ]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "Whether a Slovak agency must run AML due diligence on the counterparty (the other side of the sale) when it acts for one side only: the statutory 'client' definition (sec. 9(d) of Act 297/2008) is broad and the FIU survey treats buyers as clients, but no binding FIU guidance or court ruling states it.",
+    "Whether a dual role must be disclosed to a consumer under Civil Code sec. 777: inferred from the general duty to report important circumstances; no statute or court ruling found that names dual agency for consumer brokerage contracts.",
+    "Whether a consumer brokerage contract can validly be put under the Commercial Code by written choice (sec. 262) so that sec. 647(1) and the four-year period apply: not verified against consumer-protection rules or case law.",
+    "Any current position of the Slovak data protection authority (UOOU) on copying identity documents after 2018: not found; the rule given rests on statute only."
+  ]
+}
