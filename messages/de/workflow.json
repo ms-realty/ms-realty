@@ -680,5 +680,14 @@
     "signedInTitle": "Sie sind angemeldet",
     "switchAccount": "Abmelden und anderes Konto verwenden",
     "unexpected": "Wir konnten das Ergebnis nicht bestätigen. Aktualisieren Sie diese Seite, um den Status zu prüfen, bevor Sie es erneut versuchen."
+  },
+  "proposalReauth": {
+    "save": "Antwortentwurf speichern und Zugang bestätigen",
+    "notice": "Ihre Antwort bleibt auf dieser Seite. Speichern Sie sie für bis zu 15 Minuten, während Sie den Zugang bestätigen. Prüfen und senden Sie sie danach selbst.",
+    "failed": "Der Antwortentwurf konnte nicht gespeichert werden. Ihre Eingaben bleiben auf dieser Seite. Versuchen Sie es erneut oder kopieren Sie sie vor dem Verlassen.",
+    "restored": "Ihre gespeicherte Antwort wurde als Entwurf wiederhergestellt. Prüfen Sie die aktuellen Bedingungen und senden Sie sie selbst. Es wurde nichts gesendet.",
+    "pending": "Ihre gespeicherte Antwort wartet auf die Zugangsbestätigung in diesem Browser. Es wurde nichts gesendet.",
+    "unavailable": "Die gespeicherte Antwort konnte nicht wiederhergestellt werden. Prüfen Sie die aktuellen Bedingungen und geben Sie Ihre Antwort erneut ein. Die Wiederherstellung hat nichts gesendet.",
+    "localOnly": "Ihre Eingaben bleiben auf dieser Seite. Kopieren Sie sie, bevor Sie zur Zugangsbestätigung wechseln; dieses Formular speichert sie während der Bestätigung nicht."
   }
 }

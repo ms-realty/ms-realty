@@ -680,5 +680,14 @@
     "signedInTitle": "You are signed in",
     "switchAccount": "Sign out and use another account",
     "unexpected": "We could not confirm the result. Refresh this page to check its status before trying again."
+  },
+  "proposalReauth": {
+    "save": "Save response draft and verify access",
+    "notice": "Your response is still on this page. Save it for up to 15 minutes while you verify access, then review and submit it yourself.",
+    "failed": "The response draft could not be saved. Your entries are still on this page. Try again, or copy them before leaving.",
+    "restored": "Your saved response is restored as a draft. Review the current terms and submit it yourself. Nothing has been sent.",
+    "pending": "Your saved response is waiting for access verification in this browser. Nothing has been sent.",
+    "unavailable": "The saved response could not be restored. Review the current terms and enter your response again. Nothing was submitted by recovery.",
+    "localOnly": "Your entries are kept on this page. Copy them before leaving to verify access; this form does not save them across verification."
   }
 }
