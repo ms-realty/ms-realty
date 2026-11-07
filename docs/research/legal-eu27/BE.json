@@ -1,0 +1,69 @@
+{
+  "country": "Belgium",
+  "code": "BE",
+  "checked": "Justel consolidated texts and Moniteur belge publications on ejustice.just.fgov.be as published on the day of research.",
+  "estate_agency": {
+    "law": "Loi du 11 fevrier 2013 organisant la profession d'agent immobilier (art. 2, 5); Code de deontologie de l'IPI/BIV approved by royal decree of 20 July 2026, in force 1 October 2026 (repeals and replaces the code approved by royal decree of 29 June 2018), art. 17, 34, 35, 40-42",
+    "regulated": "Yes, protected profession. 'No one may practise as a self-employed person ... the profession of intermediary estate agent or syndic, or bear the title, unless entered' on the roll or trainee list of the Institut professionnel des agents immobiliers (Law 2013 art. 5 §1). Intermediary = whoever assists decisively for third parties in a sale, purchase, exchange, letting or transfer of real estate (art. 2, 5°).",
+    "dual_agency": "consent",
+    "rule": "No express ban on acting for both sides was found in the law or the 2026 code. The agent must avoid any conflict of interest and state unambiguously in what capacity he acts (code art. 17), and may take fees only from his principal unless there are special agreements between all parties concerned (art. 34). Fees must be set on mission-related criteria and communicated before any contractual relationship (art. 35). In practice, acting for and charging both sides needs the documented agreement of all parties.",
+    "quote": "Code art. 34: 'The estate agent may not, save for special agreements between all the parties concerned, receive fees, commissions, benefits or gratuities other than from his principal or, where applicable, from a colleague with whom he has a collaboration agreement.'",
+    "commission_both_sides": "Only with special agreements between all parties concerned (code art. 34).",
+    "sources": [
+      "https://www.ejustice.just.fgov.be/eli/loi/2013/02/11/2013011368/justel",
+      "https://www.ejustice.just.fgov.be/eli/arrete/2026/07/20/2026A06656/justel",
+      "https://www.ejustice.just.fgov.be/eli/arrete/2018/06/29/2018040256/justel"
+    ]
+  },
+  "aml": {
+    "law": "Loi du 18 septembre 2017 relative a la prevention du blanchiment de capitaux et du financement du terrorisme (art. 5 §1 30°, 21, 26, 60-62); Reglement concerning estate agents approved by royal decree of 1 April 2022, in force 1 July 2022 (art. 2-3). Supervisor: SPF Economie, which adopted the regulation under art. 86 §1.",
+    "sale_scope": "Every registered intermediary or managing estate agent is an obliged entity (art. 5 §1 30°). CDD towards the principal before the mandate contract, and towards the contracting parties before any legal act that makes the deal possible, such as a compromis or a promise to sell or buy (regulation art. 3).",
+    "letting_threshold": "No EUR 10,000 monthly-rent threshold was found in the Belgian law. The 2022 regulation applies the client rules to letting intermediation ('location') as well, so every letting brokered by the agent is in scope.",
+    "both_parties": "yes - regulation art. 2: the client rules apply to the persons who contracted with the agent and also to 'persons who, without having contracted with the estate agent, conclude through his intermediation a contract' for sale, purchase, exchange, letting or transfer; co-owners each count.",
+    "retention_years": 10,
+    "retention_trigger": "Identification data and copies: 10 years from the end of the business relationship or the occasional transaction. Transaction records: 10 years from execution of the transaction (art. 60).",
+    "extension": "None in the AML law. Personal data must be erased at the end of the retention period, subject to other legislation (art. 62 §1).",
+    "id_copy": "Must keep: 'a copy of the supporting documents' used to verify identity (art. 60, 1°). Art. 61 lets the obliged entity keep references to those documents instead of a copy.",
+    "sources": [
+      "https://www.ejustice.just.fgov.be/eli/loi/2017/09/18/2017013368/justel",
+      "https://www.ejustice.just.fgov.be/eli/arrete/2022/04/01/2022031871/moniteur",
+      "https://www.ipi.be/kb/la-profession/antiblanchiment/10-obligations-anti-blanchiment"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 10,
+    "trigger": "Accounting law: books for 7 years from 1 January of the year after their closure (CDE art. III.88); supporting documents for 7 years, or 3 years for documents that do not serve as proof against third parties (art. III.86). Tax law: until the end of the tenth year or tenth financial year after the taxable period (CIR 92 art. 315 al. 3, from assessment year 2023); VAT records 10 years (VAT Code art. 60 §§3-4). The 10-year tax periods govern in practice.",
+    "law": "Code de droit economique art. III.86 and III.88 (7 years); Code des impots sur les revenus 1992 art. 315 al. 3 and 315bis as amended by the law of 20 November 2022 art. 92-93, 102; VAT Code art. 60 §§3-4 as amended by art. 103 of the same law (7 to 10 years).",
+    "sources": [
+      "https://www.ejustice.just.fgov.be/eli/loi/2013/02/28/2013A11134/justel",
+      "https://www.ejustice.just.fgov.be/eli/loi/2022/11/20/2022034191/justel"
+    ]
+  },
+  "limitation": {
+    "general_years": 10,
+    "commission_years": 10,
+    "trigger": "From when the claim becomes due; for claims on a fixed date, not before that date (old Civil Code art. 2257).",
+    "law": "Old Civil Code art. 2262bis §1: 'All personal actions are time-barred after ten years.' No shorter special period for estate-agent fees was found (art. 2272's one-year rule covers merchants' goods sold to non-merchants).",
+    "sources": [
+      "https://www.ejustice.just.fgov.be/eli/loi/1804/03/21/1804032155/justel"
+    ]
+  },
+  "id_copies": {
+    "rule": "The National Register number and the holder's photo on the Belgian eID 'may only be used where authorised by or under a law, decree or ordinance'. The eID may be read or used only with the holder's free, specific and informed consent, and the holder may refuse that his data be read or recorded. Outside a legal duty such as AML, an agent therefore needs consent and should not keep the photo or National Register number.",
+    "law": "Loi du 19 juillet 1991 relative aux registres de la population, aux cartes d'identite ... art. 6 §4",
+    "sources": [
+      "https://www.ejustice.just.fgov.be/eli/loi/1991/07/19/1991000380/justel"
+    ]
+  },
+  "notes": [
+    "The 2026 code of ethics (art. 40-42) adds AI rules: AI use may not undermine the agent's duties; the agent must critically evaluate AI output, be transparent to third parties about AI use where the law requires it, and 'may not enter personal data into an open artificial-intelligence system'. Relevant to Butler.",
+    "Real-estate sale prices may be paid only by transfer or cheque; agents must report breaches to CTIF (AML law art. 66 §2)."
+  ],
+  "confidence": "high",
+  "unconfirmed": [
+    "Whether any Belgian rule caps or prescribes the split of commission between buyer and seller beyond code art. 34.",
+    "Exact conditions of AML law art. 61 for keeping references instead of ID copies (text only partly read)."
+  ]
+}

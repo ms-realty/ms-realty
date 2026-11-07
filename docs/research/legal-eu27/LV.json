@@ -1,0 +1,63 @@
+{
+  "country": "Latvia",
+  "code": "LV",
+  "estate_agency": {
+    "law": "Nekustamā īpašuma darījumu starpnieku darbības likums (Law on the Activities of Real Estate Transaction Intermediaries), ss. 1, 4, 5, 8, 9, 11, 14, 18; Komerclikums (Commercial Law) ss. 64-73 (Mākleris / broker).",
+    "regulated": "Yes, registration. s.4: services 'may be provided only by a private person included in the register of real estate transaction intermediaries'. s.5 conditions: an AML/CTF internal control system, no relevant convictions, professional liability insurance, and VID registration. Intermediation contracts must be in writing (s.8). The Ministry of Economics supervises and keeps the register (s.14). Unregistered activity is fined under s.18. 'Real estate transaction' covers alienation, lease, rent or other transfer for use (s.1(1)).",
+    "dual_agency": "allowed",
+    "rule": "No prohibition or consent rule was found in the Intermediaries Law. The Commercial Law broker model is expressly two-sided. s.64(1) defines a broker as a merchant intermediating 'in the conclusion of transactions for the benefit of other persons, without being permanently bound to those persons by contract'. s.65 requires the broker to give each party a broker-certified final text of the transaction. s.69 makes the broker 'liable to each of the parties for losses caused by his fault'. s.70(2) splits the fee equally if the parties have not agreed who pays. Intermediaries Law s.11(1)-(2): the intermediary must give 'comprehensive and truthful information' about the property, including defects, encumbrances and taxes, and is liable for damage from undisclosed defects it knew or should have known of. Product rule: a two-sided role is lawful; disclose it and agree the fee split in writing (s.8).",
+    "quote": "Commercial Law s.69: 'The broker is liable to each of the parties to the transaction for losses caused by his fault.' [Mākleris atbild katrai no darījuma pusēm par zaudējumiem, kas radušies viņa vainas dēļ.] s.70(2): 'If the parties have not agreed which of them must pay the broker's fee, they pay this fee in equal shares.' [... tās šo atlīdzību maksā vienādās daļās.]",
+    "commission_both_sides": "Yes. Commercial Law s.70(1): the right to the broker fee arises at the moment the transaction is concluded; s.70(2): absent agreement both parties pay in equal shares. Expenses are reimbursable only if expressly agreed (s.71).",
+    "sector_records": "Commercial Law s.72: the broker keeps a daily, signed, chronological transaction journal; s.72(5): kept 'five years after the end of the calendar year in which the last entry was made'. s.73: any party may request certified extracts.",
+    "sources": [
+      "https://likumi.lv/ta/id/315656",
+      "https://likumi.lv/ta/id/5490"
+    ]
+  },
+  "aml": {
+    "law": "Noziedzīgi iegūtu līdzekļu legalizācijas un terorisma un proliferācijas finansēšanas novēršanas likums (AML/CTPF Law): s.3(1)6 subjects; s.11(9) counterparty CDD; s.14(1) ID copies; s.37 retention. Supervisor: State Revenue Service (VID) for real estate transaction intermediaries.",
+    "sale_scope": "All real estate intermediation, with no value threshold. s.3(1)6 lists 'nekustamā īpašuma darījumu starpnieki' (real estate transaction intermediaries) without limitation. Exception s.3(8): a group company intermediating property owned by another group company is not a subject.",
+    "letting_threshold": "None found. The AML Law sets no EUR 10,000 monthly-rent limit for intermediaries, and lettings fall within 'real estate transaction' (Intermediaries Law s.1(1): lease and rent). s.11(9) expressly covers deals for 'purchase, sale or lease'. Treat all intermediated lettings as in scope (stricter than the EU minimum).",
+    "both_parties": "yes: s.11(9) 'The subject referred to in Section 3(1)6 performs customer due diligence measures in respect of the person with whom the customer concludes a transaction for the purchase, sale or lease of real estate, and does so before such transaction is concluded.' [... klienta izpētes pasākumus veic attiecībā uz personu, ar kuru klients slēdz darījumu par nekustamā īpašuma pirkšanu, pārdošanu vai iznomāšanu, un dara to pirms šāda darījuma noslēgšanas.]",
+    "retention_years": 5,
+    "retention_trigger": "s.37(2): retained 'five years after the termination of the business relationship or the execution of the occasional transaction'. Covers all CDD information, including copies of identification documents, CDD results, payment information and correspondence. s.37(2.1): on expiry the subject destroys the documents and information about the person.",
+    "extension": "s.37(3): the FIU, the supervisory authority, an operational-activity body (incl. state security), or an investigating body, prosecutor or court may extend the period 'for a time, but not longer than five years'.",
+    "id_copy": "Mandatory: s.14(1): 'when starting a business relationship or performing the transactions referred to in Section 11, [the subject] makes copies of the documents on the basis of which the customer was identified.' [... izgatavo to dokumentu kopijas, uz kuru pamata veikta klienta identifikācija.]",
+    "sources": ["https://likumi.lv/ta/id/178987"]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": null,
+    "source_documents_years": 5,
+    "trigger": "Grāmatvedības likums (Accounting Law, in force 2022) s.28 minimum periods: 1) annual reports 'until the reorganisation or termination of the undertaking's activity', unless other acts provide otherwise; 2) inventory lists, accounting registers and accounting-organisation documents: 10 years; 4) payroll source documents (from 1999): 10 years; 5) other source documents: until no longer needed to trace the transaction (s.6(2)), 'but not shorter than five years'. s.28 does not state a start date. On reorganisation or termination, further retention is set by the liquidator or manager in agreement with the National Archives.",
+    "law": "Grāmatvedības likums s.28 (and s.29 on digitising paper documents).",
+    "sources": ["https://likumi.lv/ta/id/324249"]
+  },
+  "limitation": {
+    "general_years": 10,
+    "commission_years": 3,
+    "trigger": "Civil Law s.1896: limitation runs from the day the claim arose such that suit could immediately be brought against the debtor. Commercial Law s.70(1): the right to the broker fee arises at the moment the transaction is concluded.",
+    "law": "Civillikums s.1895: obligation rights not subject to a shorter statutory term expire 'if the entitled person does not exercise them within ten years'. Komerclikums s.406: 'Claims arising from a commercial transaction expire within three years, unless the law provides another limitation period.' Komerclikums s.389 applies the commercial-transaction rules to all parties when the deal is commercial for only one of them, unless consumer-protection or other laws provide otherwise. A broker company's fee claim is therefore 3 years. (A commercial agent's claims: 4 years from the end of the calendar year in which they arose, s.55.)",
+    "sources": [
+      "https://likumi.lv/ta/id/225418",
+      "https://likumi.lv/ta/id/5490"
+    ]
+  },
+  "id_copies": {
+    "rule": "No statutory rule on copying identity documents outside AML was found; the Personal Identification Documents Law (Personu apliecinošu dokumentu likums) contains no copy provision. A pre-GDPR position of the Data State Inspectorate (DVI), reported in 2015, says bodies without a legal right to request ID copies must not ask for them. Outside AML s.14 the agent should not take ID copies; record the document number only where needed.",
+    "law": "AML Law s.14 (mandatory copies within AML); otherwise GDPR Art. 5(1)(c) and DVI practice (not confirmed in current DVI guidance).",
+    "sources": [
+      "https://likumi.lv/ta/id/243484",
+      "https://lvportals.lv/skaidrojumi/273826-vai-drikst-kila-nemt-pasi-un-kas-var-pieprasit-tas-kopiju-2015"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Whether real estate intermediaries are 'brokers' (mākleris) under Commercial Law ss.64-73 when they hold an exclusive one-sided mandate. If the contract is a mandate (pilnvarojums) under the Civil Law, the two-sided broker rules and the equal fee split may not apply.",
+    "The 3-year commission limitation (Commercial Law s.406) assumes the intermediation is a commercial transaction and that no consumer-protection rule displaces s.389 for consumer clients; otherwise the 10-year Civil Law s.1895 period applies.",
+    "No EUR 10,000 letting threshold exists in the current AML Law text read; a secondary source attributed such a threshold to Ministry of Finance commentary. Treated as no threshold.",
+    "Accounting Law s.28 states no start date for the retention periods (commonly counted from the end of the reporting year; not confirmed).",
+    "Annual reports have no fixed number of years: they must be kept until reorganisation or termination (annual_accounts_years = null).",
+    "The DVI position on ID copies outside AML comes from a 2015 secondary report and predates the GDPR."
+  ]
+}

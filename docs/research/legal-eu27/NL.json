@@ -1,0 +1,64 @@
+{
+  "country": "Netherlands",
+  "code": "NL",
+  "estate_agency": {
+    "law": "Burgerlijk Wetboek Book 7: bemiddelingsovereenkomst arts 7:425-7:427, applying arts 7:417-7:418 (lastgeving) via 7:427",
+    "regulated": "Not licensed. Title protection and sworn status for makelaars were abolished in 2001; anyone may carry on estate agency (Kamerbrief BZK 'Voortgang koopproces', ref 2026-0000499455). Only voluntary self-regulation (NVM, VBO, Vastgoedpro). The minister is exploring a licence or register duty; nothing enacted.",
+    "dual_agency": "consent",
+    "rule": "BW 7:427 applies 7:417/7:418 to brokers (tussenpersonen). 7:417(1): an agent may act for the other party too only if the terms are fixed so precisely that a conflict of interest is excluded. 7:417(2): if the principal is a consumer (7:408(3)), written consent is required for the dual role. 7:417(3): breach costs the commission against that principal plus damages, mandatory in the principal's favour. 7:417(4): where any principal is a consumer and the deal is sale or lease of immovable property, the agent has NO right to commission from the buyer or tenant, mandatory. 7:418: any other direct or indirect interest must be disclosed, otherwise no commission.",
+    "quote": "BW 7:417(1): 'Een lasthebber mag slechts tevens als lasthebber van de wederpartij optreden, indien de inhoud van de rechtshandeling zo nauwkeurig vaststaat dat strijd tussen de belangen van beide lastgevers is uitgesloten.' (EN: An agent may also act as agent of the other party only if the content of the transaction is fixed so precisely that a conflict between both principals' interests is excluded.) 7:417(4): '... heeft de lasthebber geen recht op loon jegens de koper of huurder.' (EN: ... the agent has no right to remuneration from the buyer or tenant.)",
+    "commission_both_sides": "Prohibited in consumer real-estate deals: if either principal is a consumer, no commission from buyer or tenant, whatever the seller or landlord pays (7:417(4), mandatory). B2B-only deals: dual commission only when 7:417(1) conditions are met; otherwise the commission is forfeited (7:417(3)).",
+    "sources": [
+      "https://wetten.overheid.nl/BWBR0005290/2025-01-01",
+      "https://omgevingsweb.nl/wp-content/uploads/2026/10/Kamerbrief-over-regulering-makelaardij.pdf"
+    ]
+  },
+  "aml": {
+    "law": "Wet ter voorkoming van witwassen en financieren van terrorisme (Wwft), art 1a(4)(h) scope; art 3 CDD; art 33 records; art 34a data protection. Supervisor: Belastingdienst/Bureau Toezicht Wwft.",
+    "sale_scope": "Every brokered sale or purchase. Wwft 1a(4)(h) covers anyone who professionally brokers agreements on immovable property and rights in rem over it.",
+    "letting_threshold": "Lettings under BW 7:201 only where monthly rent is EUR 10,000 or more (Wwft 1a(4)(h)).",
+    "both_parties": "yes. Wwft 3(12): for a 1a(4)(h) intermediary, 'client' also includes the client's counterparty to the brokered real-estate agreement ('onder cliënt mede verstaan: de wederpartij van de cliënt').",
+    "retention_years": 5,
+    "retention_trigger": "Wwft 33(3): 5 years after the business relationship ends, or 5 years after the transaction is carried out. Wwft 34(2): 5 years after an unusual-transaction report to the FIU.",
+    "extension": "No extension mechanism in the Wwft. Art 34a(3): personal data obtained under the Wwft must be destroyed immediately after the 33(3)/34 period, unless another statute requires otherwise. Art 34a(1): no reuse for commercial purposes.",
+    "id_copy": "Allowed. Wwft 33(2)(a)(1) lets the record be either the listed identity data or a copy of the document containing a personal identification number (e.g. BSN) used for verification. 33(2)(a)(2) also requires document type, number, and date and place of issue.",
+    "sources": ["https://wetten.overheid.nl/BWBR0024282/2026-07-01"]
+  },
+  "accounting": {
+    "books_years": 7,
+    "annual_accounts_years": 7,
+    "source_documents_years": 7,
+    "trigger": "The statutes give no start event ('gedurende zeven jaren'). Practice counts from the end of the financial year concerned; unconfirmed from a primary source.",
+    "law": "BW 2:10(3): the board keeps the books, documents and data carriers of 2:10(1), plus the balance sheet and P&L of 2:10(2), for seven years. AWR art 52(4): administration-liable persons keep data carriers for seven years unless tax law provides otherwise.",
+    "sources": [
+      "https://wetten.overheid.nl/BWBR0003045",
+      "https://wetten.overheid.nl/BWBR0002320"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 5,
+    "trigger": "BW 3:307(1): 5 years from the start of the day after the claim became due. For a broker's fee, BW 7:426(1) makes it due once the agreement is concluded through the broker's mediation. Residual default (3:306) is 20 years.",
+    "law": "BW 3:307(1) (performance of contractual obligation to give or do: 5 years); BW 3:306 (default 20 years); BW 7:426 (right to commission arises on conclusion of the brokered agreement)",
+    "sources": [
+      "https://wetten.overheid.nl/BWBR0005291",
+      "https://wetten.overheid.nl/BWBR0005290/2025-01-01"
+    ]
+  },
+  "id_copies": {
+    "rule": "The BSN may be used only where a statute prescribes it (Wabb art 1(d): private parties are 'users' only where BSN use is prescribed by law; UAVG art 46: a statutory ID number is used only to carry out that statute). Outside the Wwft, an estate agent may not process the BSN: a requested ID copy must have the BSN (and per Rijksoverheid guidance the photo) masked. Inside the Wwft, an ID copy including the number is expressly allowed (Wwft 33(2)(a)(1)). Rijksoverheid: 'moeten de pasfoto en het burgerservicenummer (BSN) afschermen' (EN: must mask the passport photo and the BSN).",
+    "law": "Uitvoeringswet AVG art 46; Wet algemene bepalingen burgerservicenummer art 1(d) and 10; Wwft art 33(2)",
+    "sources": [
+      "https://wetten.overheid.nl/BWBR0040940",
+      "https://wetten.overheid.nl/BWBR0022428",
+      "https://www.rijksoverheid.nl/onderwerpen/identiteitsfraude/vraag-en-antwoord/ben-ik-verplicht-om-een-kopie-van-mijn-identiteitsbewijs-te-geven-aan-een-bedrijf"
+    ]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "Start event for the 7-year accounting retention (BW 2:10(3), AWR 52(4)): the statutes give none; end of financial year is practice only.",
+    "Autoriteit Persoonsgegevens guidance on ID copies could not be fetched (HTTP 403/404). The masking rule rests on the statutes and Rijksoverheid Q&A.",
+    "Whether 'wederpartij' in Wwft 3(12) also covers the landlord or tenant side of a lease of EUR 10,000/month or more: text says 'overeenkomst inzake onroerende zaken', read as yes; no supervisor guidance checked.",
+    "The NL makelaar regulation plan (licence or register) is exploratory per the BZK letter; no bill was found."
+  ]
+}
