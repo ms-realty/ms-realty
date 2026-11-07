@@ -26,6 +26,7 @@ export * from "./privacy-governance";
 export * from "./publication";
 export * from "./reauth-drafts";
 export * from "./records";
+export * from "./recovery-archive";
 export * from "./runtime";
 export * from "./service-scope";
 export * from "./settings";

@@ -1,6 +1,6 @@
 {
   "id": "e5f63772-fcc9-4d6b-9bac-428e13ee3c03",
-  "prevId": "5a406cf1-3ed4-460a-856f-c56562e4b848",
+  "prevId": "05c0378a-00ee-4ba4-8668-2d3c9deb500c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -18999,6 +18999,414 @@
         "tasks_promise_has_client_context": {
           "name": "tasks_promise_has_client_context",
           "value": "not \"tasks\".\"promised_to_client\" or num_nonnulls(\"tasks\".\"case_id\", \"tasks\".\"inquiry_id\") >= 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recovery_operation_references": {
+      "name": "recovery_operation_references",
+      "schema": "",
+      "columns": {
+        "operation_id": {
+          "name": "operation_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sequence": {
+          "name": "sequence",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "receipt_digest": {
+          "name": "receipt_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "recovery_operation_references_operation_id_operations_id_fk": {
+          "name": "recovery_operation_references_operation_id_operations_id_fk",
+          "tableFrom": "recovery_operation_references",
+          "tableTo": "operations",
+          "columnsFrom": [
+            "operation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "recovery_operation_references_sequence_recovery_journal_sequence_fk": {
+          "name": "recovery_operation_references_sequence_recovery_journal_sequence_fk",
+          "tableFrom": "recovery_operation_references",
+          "tableTo": "recovery_journal",
+          "columnsFrom": [
+            "sequence"
+          ],
+          "columnsTo": [
+            "sequence"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recovery_operation_receipt_digest": {
+          "name": "recovery_operation_receipt_digest",
+          "value": "\"recovery_operation_references\".\"receipt_digest\" ~ '^[a-f0-9]{64}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recovery_journal_head": {
+      "name": "recovery_journal_head",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sequence": {
+          "name": "sequence",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "digest": {
+          "name": "digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0000000000000000000000000000000000000000000000000000000000000000'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "recovery_journal_head_key_recovery_source_key_fk": {
+          "name": "recovery_journal_head_key_recovery_source_key_fk",
+          "tableFrom": "recovery_journal_head",
+          "tableTo": "recovery_source",
+          "columnsFrom": [
+            "key"
+          ],
+          "columnsTo": [
+            "key"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recovery_journal_head_key": {
+          "name": "recovery_journal_head_key",
+          "value": "\"recovery_journal_head\".\"key\" = 'source'"
+        },
+        "recovery_journal_head_sequence": {
+          "name": "recovery_journal_head_sequence",
+          "value": "\"recovery_journal_head\".\"sequence\" between 0 and 9007199254740991"
+        },
+        "recovery_journal_head_digest": {
+          "name": "recovery_journal_head_digest",
+          "value": "\"recovery_journal_head\".\"digest\" ~ '^[a-f0-9]{64}$' and ((\"recovery_journal_head\".\"sequence\" = 0) = (\"recovery_journal_head\".\"digest\" = repeat('0', 64)))"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recovery_journal": {
+      "name": "recovery_journal",
+      "schema": "",
+      "columns": {
+        "sequence": {
+          "name": "sequence",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "context_digest": {
+          "name": "context_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_ref": {
+          "name": "transaction_ref",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previous_digest": {
+          "name": "previous_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "digest": {
+          "name": "digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "effects": {
+          "name": "effects",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "recovery_journal_context_digest_recovery_source_context_digest_fk": {
+          "name": "recovery_journal_context_digest_recovery_source_context_digest_fk",
+          "tableFrom": "recovery_journal",
+          "tableTo": "recovery_source",
+          "columnsFrom": [
+            "context_digest"
+          ],
+          "columnsTo": [
+            "context_digest"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "recovery_journal_transaction_ref_unique": {
+          "name": "recovery_journal_transaction_ref_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "transaction_ref"
+          ]
+        },
+        "recovery_journal_digest_unique": {
+          "name": "recovery_journal_digest_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "digest"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "recovery_journal_sequence": {
+          "name": "recovery_journal_sequence",
+          "value": "\"recovery_journal\".\"sequence\" between 1 and 9007199254740991"
+        },
+        "recovery_journal_digests": {
+          "name": "recovery_journal_digests",
+          "value": "\"recovery_journal\".\"context_digest\" ~ '^[a-f0-9]{64}$' and \"recovery_journal\".\"previous_digest\" ~ '^[a-f0-9]{64}$' and \"recovery_journal\".\"digest\" ~ '^[a-f0-9]{64}$'"
+        },
+        "recovery_journal_effects": {
+          "name": "recovery_journal_effects",
+          "value": "jsonb_typeof(\"recovery_journal\".\"effects\") = 'array' and jsonb_array_length(\"recovery_journal\".\"effects\") > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recovery_payloads": {
+      "name": "recovery_payloads",
+      "schema": "",
+      "columns": {
+        "digest": {
+          "name": "digest",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "context_digest": {
+          "name": "context_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subject_digest": {
+          "name": "subject_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "canonical_body": {
+          "name": "canonical_body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "byte_length": {
+          "name": "byte_length",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "recovery_payloads_context_digest_recovery_source_context_digest_fk": {
+          "name": "recovery_payloads_context_digest_recovery_source_context_digest_fk",
+          "tableFrom": "recovery_payloads",
+          "tableTo": "recovery_source",
+          "columnsFrom": [
+            "context_digest"
+          ],
+          "columnsTo": [
+            "context_digest"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recovery_payload_kind": {
+          "name": "recovery_payload_kind",
+          "value": "\"recovery_payloads\".\"kind\" in ('access_revocation','privacy_restriction','deletion_decision','consent_withdrawal','publication_withdrawal')"
+        },
+        "recovery_payload_digests": {
+          "name": "recovery_payload_digests",
+          "value": "\"recovery_payloads\".\"digest\" ~ '^[a-f0-9]{64}$' and \"recovery_payloads\".\"context_digest\" ~ '^[a-f0-9]{64}$' and \"recovery_payloads\".\"subject_digest\" ~ '^[a-f0-9]{64}$'"
+        },
+        "recovery_payload_length": {
+          "name": "recovery_payload_length",
+          "value": "\"recovery_payloads\".\"byte_length\" > 0 and \"recovery_payloads\".\"byte_length\" = octet_length(\"recovery_payloads\".\"canonical_body\")"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recovery_source": {
+      "name": "recovery_source",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'inactive'"
+        },
+        "context": {
+          "name": "context",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "context_digest": {
+          "name": "context_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "admitted_writers": {
+          "name": "admitted_writers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "coverage_state": {
+          "name": "coverage_state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'incomplete'"
+        },
+        "unresolved_writers": {
+          "name": "unresolved_writers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[\"domain_writers_uninstrumented\",\"external_and_unclassified_writers\"]'::jsonb"
+        },
+        "closed_head": {
+          "name": "closed_head",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "close_receipt_digest": {
+          "name": "close_receipt_digest",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "recovery_source_context_digest_unique": {
+          "name": "recovery_source_context_digest_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "context_digest"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "recovery_source_singleton": {
+          "name": "recovery_source_singleton",
+          "value": "\"recovery_source\".\"key\" = 'source'"
+        },
+        "recovery_source_state": {
+          "name": "recovery_source_state",
+          "value": "\"recovery_source\".\"state\" in ('inactive', 'admitted', 'closed')"
+        },
+        "recovery_source_incomplete": {
+          "name": "recovery_source_incomplete",
+          "value": "\"recovery_source\".\"coverage_state\" = 'incomplete'"
+        },
+        "recovery_source_writers": {
+          "name": "recovery_source_writers",
+          "value": "jsonb_typeof(\"recovery_source\".\"admitted_writers\") = 'array' and jsonb_typeof(\"recovery_source\".\"unresolved_writers\") = 'array' and jsonb_array_length(\"recovery_source\".\"unresolved_writers\") > 0"
+        },
+        "recovery_source_context": {
+          "name": "recovery_source_context",
+          "value": "(\"recovery_source\".\"state\" = 'inactive' and \"recovery_source\".\"context\" is null and \"recovery_source\".\"context_digest\" is null and jsonb_array_length(\"recovery_source\".\"admitted_writers\") = 0) or (\"recovery_source\".\"state\" <> 'inactive' and \"recovery_source\".\"context\" is not null and \"recovery_source\".\"context_digest\" is not null and \"recovery_source\".\"context_digest\" ~ '^[a-f0-9]{64}$' and jsonb_array_length(\"recovery_source\".\"admitted_writers\") > 0)"
+        },
+        "recovery_source_close": {
+          "name": "recovery_source_close",
+          "value": "(\"recovery_source\".\"state\" <> 'closed' and \"recovery_source\".\"closed_head\" is null and \"recovery_source\".\"close_receipt_digest\" is null) or (\"recovery_source\".\"state\" = 'closed' and \"recovery_source\".\"closed_head\" is not null and \"recovery_source\".\"close_receipt_digest\" is not null and \"recovery_source\".\"close_receipt_digest\" ~ '^[a-f0-9]{64}$')"
         }
       },
       "isRLSEnabled": false

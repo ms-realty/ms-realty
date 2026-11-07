@@ -46,14 +46,16 @@ it("submits every checked party and restores the selection after a hydrated vali
   );
   await userEvent.click(screen.getByRole("checkbox", { name: "Second buyer" }));
   await userEvent.click(screen.getByRole("button", { name: "Save revision" }));
-  await waitFor(() => expect(action).toHaveBeenCalledOnce());
+  await waitFor(() =>
+    expect(screen.getByRole("group", { name: "Additional parties" })).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    ),
+  );
+  expect(action).toHaveBeenCalledOnce();
   expect(action.mock.calls[0]?.[1].getAll("parties")).toEqual(["one", "two"]);
   expect(screen.getByRole("checkbox", { name: "First buyer" })).toBeChecked();
   expect(screen.getByRole("checkbox", { name: "Second buyer" })).toBeChecked();
-  expect(screen.getByRole("group", { name: "Additional parties" })).toHaveAttribute(
-    "aria-invalid",
-    "true",
-  );
 });
 
 it("compares exact repeated-hour instants in words without exposing ISO values", () => {
