@@ -9,7 +9,7 @@ import { evidenceCopy } from "./evidence-copy";
 function valueText(value: unknown, locale: string): string {
   if (Array.isArray(value)) return value.map((v) => valueText(v, locale)).join(" / ");
   if (typeof value === "number")
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 4 }).format(value);
+    return new Intl.NumberFormat(locale, { maximumSignificantDigits: 21 }).format(value);
   if (typeof value === "string") return value;
   if (typeof value === "boolean")
     return locale === "bg"
@@ -67,7 +67,7 @@ export function FrozenPreview({
       </p>
       <dl className="space-y-3">
         <div>
-          <dt className="font-semibold">{copy.labels.price}</dt>
+          <dt className="font-semibold">{copy.o16.price}</dt>
           <dd>
             {optionLabel(price?.state ?? "unknown", locale)} · {valueText(price?.value, locale)}
           </dd>

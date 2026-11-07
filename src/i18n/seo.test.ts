@@ -11,7 +11,7 @@ import {
 
 const origin = new URL("https://makler-realty.com");
 afterEach(() => vi.unstubAllEnvs());
-describe("zero-loss public crawl policy", () => {
+describe("R09/AT27 public crawl and indexability policy", () => {
   it("requires a bare trusted HTTPS origin, with HTTP reserved for local development", () => {
     expect(canonicalOrigin({ CANONICAL_ORIGIN: origin.origin })?.origin).toBe(origin.origin);
     expect(canonicalOrigin({ CANONICAL_ORIGIN: "http://localhost:3100" })?.host).toBe(
@@ -46,12 +46,12 @@ describe("zero-loss public crawl policy", () => {
     for (const flag of ["1", "0", "TRUE", "", " true "])
       expect(() => stagingEnabled({ STAGING: flag })).toThrow("STAGING");
   });
-  it("only the explicit staging flag adds public noindex, independently of hostname and locale", () => {
+  it("keeps unapproved locales crawlable but noindex regardless of hostname", () => {
     vi.stubEnv("STAGING", "false");
     for (const host of [origin.host, "makler-realty.ru", "preview.workers.dev", null]) {
       for (const locale of publicLocales)
         expect(localizedMetadata({ locale, path: "/", host, origin }).robots).toEqual({
-          index: true,
+          index: locale === "bg",
           follow: true,
         });
     }
@@ -60,7 +60,7 @@ describe("zero-loss public crawl policy", () => {
       localizedMetadata({ locale: "bg", path: "/", host: origin.host, origin }).robots,
     ).toEqual({ index: false, follow: false });
   });
-  it("gives each locale its own canonical and all real static locale siblings", () => {
+  it("keeps every routable canonical while advertising only approved static locale siblings", () => {
     const metadata = localizedMetadata({
       locale: "he",
       path: "/properties",
@@ -71,12 +71,6 @@ describe("zero-loss public crawl policy", () => {
     expect(metadata.alternates?.canonical).toBe(`${origin.origin}/he/properties`);
     expect(metadata.alternates?.languages).toEqual({
       bg: `${origin.origin}/bg/properties`,
-      en: `${origin.origin}/en/properties`,
-      ru: `${origin.origin}/ru/properties`,
-      de: `${origin.origin}/de/properties`,
-      nl: `${origin.origin}/nl/properties`,
-      el: `${origin.origin}/el/properties`,
-      he: `${origin.origin}/he/properties`,
       "x-default": `${origin.origin}/bg/properties`,
     });
   });
@@ -91,7 +85,7 @@ describe("zero-loss public crawl policy", () => {
     });
     expect(metadata.alternates).toEqual({
       canonical: `${origin.origin}/ru/legacy/source`,
-      languages: { ru: `${origin.origin}/ru/legacy/source` },
+      languages: {},
     });
     expect(
       localizedMetadata({
@@ -104,6 +98,24 @@ describe("zero-loss public crawl policy", () => {
       }).alternates?.languages,
     ).toEqual({ bg: `${origin.origin}/bg/areas/x`, "x-default": `${origin.origin}/bg/areas/x` });
   });
+  it.each([{ availableIn: [] }, { availableIn: ["en"] }] as const)(
+    "an absent BG edition is noindex even when its locale is approved: $availableIn",
+    ({ availableIn }) => {
+      const metadata = localizedMetadata({
+        locale: "bg",
+        path: "/help/missing",
+        host: origin.host,
+        origin,
+        availableIn,
+        staging: false,
+      });
+      expect(metadata.robots).toEqual({ index: false, follow: true });
+      expect(metadata.alternates).toEqual({
+        canonical: `${origin.origin}/bg/help/missing`,
+        languages: {},
+      });
+    },
+  );
   it("normalizes localized paths without indexing tracking strings or fragments", () => {
     expect(localizedPath("bg", "/")).toBe("/bg");
     expect(localizedPath("en", "/areas?utm_source=x#top")).toBe("/en/areas");

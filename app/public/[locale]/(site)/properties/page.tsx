@@ -17,7 +17,7 @@ import { searchAlertCopy, searchAlertCopyLocale } from "@/features/discovery/sea
 import { alertSearch } from "@/features/discovery/search-alert-state";
 import { SearchForm } from "@/features/discovery/search-form";
 import { SearchMap } from "@/features/discovery/search-map";
-import { isRoutableLocale } from "@/i18n/config";
+import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { formatNumber } from "@/i18n/format";
 import { AppError, isAppError } from "@/server/errors";
 import { publicMapRelease } from "@/server/publication/map-config";
@@ -37,6 +37,7 @@ export default async function PropertiesPage({
 }) {
   const { locale } = await params;
   if (!isRoutableLocale(locale)) notFound();
+  const copyLocale = searchAlertCopyLocale(locale);
   const copy = discoveryCopy(locale),
     query = await searchParams,
     values = readFilters(query);
@@ -73,8 +74,8 @@ export default async function PropertiesPage({
               <a
                 className="inline-flex min-h-control items-center text-action underline underline-offset-4"
                 href={alertSearch(locale, values).publicHref}
-                lang={searchAlertCopyLocale(locale)}
-                dir="ltr"
+                lang={copyLocale}
+                dir={localeDirection(copyLocale)}
               >
                 {searchAlertCopy(locale).entry}
               </a>

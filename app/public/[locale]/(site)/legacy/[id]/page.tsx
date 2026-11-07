@@ -17,7 +17,8 @@ export async function generateMetadata({ params }: Props) {
     path: `/legacy/${id}`,
     title: page.title,
     description: page.description ?? undefined,
-    availableIn: [page.locale],
+    // Source capture preserves identity and text; pending equivalence is not index approval.
+    availableIn: [],
   });
   return {
     ...metadata,

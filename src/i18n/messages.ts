@@ -17,6 +17,7 @@ import type map from "../../messages/bg/map.json";
 import type nav from "../../messages/bg/nav.json";
 import type privacy from "../../messages/bg/privacy.json";
 import type privacyExportClient from "../../messages/bg/privacy-export.json";
+import type searchAlert from "../../messages/bg/search-alert.json";
 import type server from "../../messages/bg/server.json";
 import type states from "../../messages/bg/states.json";
 import type workflow from "../../messages/bg/workflow.json";
@@ -52,6 +53,7 @@ export const publicNamespaces = [
   "nav",
   "privacy",
   "privacy-export",
+  "search-alert",
   "server",
   "states",
   "workflow",
@@ -90,6 +92,7 @@ export interface PublicMessages {
   nav: typeof nav;
   privacy: typeof privacy;
   "privacy-export": typeof privacyExportClient;
+  "search-alert": typeof searchAlert;
   server: typeof server;
   states: typeof states;
   workflow: typeof workflow;

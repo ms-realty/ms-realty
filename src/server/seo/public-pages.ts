@@ -13,14 +13,12 @@ import {
   publicDestination,
 } from "@/server/publication/presentation";
 import { publicServiceOfferings } from "../service-intake/scope";
+import { publicNativeContentPath } from "./public-content-paths";
 
 export const publicStaticPaths = [
   "/",
   "/properties",
   "/inquire",
-  "/sell",
-  "/let",
-  "/contact",
   "/saved",
   "/compare",
   "/properties/intent",
@@ -136,10 +134,9 @@ export async function readPublicListingRoutePages(db: Executor): Promise<PublicL
 
 export const publicListingRoutePages = cache(() => readPublicListingRoutePages(getDb()));
 
-export async function publicContentPages(): Promise<
-  { locale: PublicLocale; path: string; publishedAt: string }[]
-> {
-  const db = getDb();
+export async function readPublicContentPages(
+  db: Executor,
+): Promise<{ locale: PublicLocale; path: string; publishedAt: string }[]> {
   const rows = await db
     .select({ kind: contentPages.kind, slug: contentPages.slug })
     .from(contentPages)
@@ -147,15 +144,15 @@ export async function publicContentPages(): Promise<
   const result: { locale: PublicLocale; path: string; publishedAt: string }[] = [];
   for (const row of rows) {
     for (const locale of publicLocales) {
+      const approved = await readApprovedContent(db, row.kind, row.slug, locale).catch(() => null);
+      if (!approved) continue;
+      const nativePath = publicNativeContentPath(row.kind, row.slug);
+      if (nativePath) result.push({ locale, path: nativePath, publishedAt: approved.reviewedAt });
       if (
         row.kind === "service" &&
-        row.slug !== "sell" &&
-        row.slug !== "let" &&
-        !(await publicServiceOfferings(db, row.slug, locale)).length
+        !(await publicServiceOfferings(db, row.slug, locale).catch(() => [])).length
       )
         continue;
-      const approved = await readApprovedContent(db, row.kind, row.slug, locale);
-      if (!approved) continue;
       const directory =
         row.kind === "area"
           ? "areas"
@@ -173,3 +170,5 @@ export async function publicContentPages(): Promise<
   }
   return result;
 }
+
+export const publicContentPages = () => readPublicContentPages(getDb());

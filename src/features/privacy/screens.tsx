@@ -33,6 +33,7 @@ import { privacyErasureCopy } from "./erasure-copy";
 import { privacyExportCopy } from "./export-copy";
 import { Area, Check, Envelope, Submit, TextField } from "./forms";
 import { ReviewEnvelope } from "./review-envelope";
+import { localizedSavedSearchSummary } from "./search-summary";
 
 type Query = { error?: string; receipt?: string; after?: string; before?: string };
 function Frame({ title, lead, children }: { title: string; lead: string; children: ReactNode }) {
@@ -69,6 +70,46 @@ async function Result({
         </Notice>
       ) : null}
     </>
+  );
+}
+
+export function SearchSummary({
+  locale,
+  subscription,
+}: {
+  locale: string;
+  subscription: Pick<
+    Awaited<ReturnType<typeof getPreferences>>["subscriptions"][number],
+    "purpose" | "criteria" | "criteriaSummary"
+  >;
+}) {
+  const summary =
+    subscription.purpose === "search_alerts"
+      ? localizedSavedSearchSummary(subscription.criteria, subscription.criteriaSummary, locale)
+      : subscription.criteriaSummary;
+  if (!summary) return null;
+  if (typeof summary === "string")
+    return (
+      <p>
+        <bdi>{summary}</bdi>
+      </p>
+    );
+  return (
+    <p>
+      {summary.purpose}
+      {summary.query ? (
+        <>
+          {" "}
+          · <bdi>{summary.query}</bdi>
+        </>
+      ) : null}
+      {summary.price ? (
+        <>
+          {" "}
+          · <bdi dir="ltr">{summary.price}</bdi>
+        </>
+      ) : null}
+    </p>
   );
 }
 
@@ -406,7 +447,7 @@ export async function PreferencesScreen({
             {privacyLabel(locale, subscription.purpose)} ·{" "}
             {privacyLabel(locale, subscription.state)}
           </h3>
-          {subscription.criteriaSummary ? <p>{subscription.criteriaSummary}</p> : null}
+          <SearchSummary locale={locale} subscription={subscription} />
           <p>{subscription.timezone}</p>
           {subscription.purpose === "search_alerts" &&
           ["active", "paused"].includes(subscription.state) &&
