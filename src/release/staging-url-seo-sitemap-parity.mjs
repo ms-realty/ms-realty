@@ -165,6 +165,7 @@ export function sourceIdentity(value) {
   safePath(match[1]);
   const url = new URL(value);
   requireValue(!url.port && !url.username && !url.password && !url.hash, "unsupported_source");
+  requireValue(url.href === url.origin + match[1], "unsupported_source_serialization");
   const identity = {
     host: url.hostname,
     path: decodeURIComponent(url.pathname),
@@ -173,7 +174,9 @@ export function sourceIdentity(value) {
   return {
     ...identity,
     id: sha256(JSON.stringify(identity)).slice(0, 24),
-    pathAndQuery: url.pathname + url.search,
+    // Preserve the validated raw request target, including a trailing '?'.
+    // Spellings the transport URL serializer would rewrite are rejected above.
+    pathAndQuery: match[1],
   };
 }
 export const urlId = (url) => sha256(url).slice(0, 24);
@@ -650,15 +653,15 @@ export function htmlProjection(bytes, JSDOM) {
     const jsonLd = [...d.querySelectorAll('script[type="application/ld+json"]')].map((s) =>
       parseJson(Buffer.from(s.textContent)),
     );
+    const excluded = "script,style,template,noscript,[hidden],[aria-hidden=true i]";
     const visible = (selector) =>
-      [...d.querySelectorAll(selector)].map((node) => {
-        const copy = node.cloneNode(true);
-        for (const hidden of copy.querySelectorAll(
-          "script,style,template,noscript,[hidden],[aria-hidden=true]",
-        ))
-          hidden.remove();
-        return sha256(normalizeVisible(copy.textContent));
-      });
+      [...d.querySelectorAll(selector)]
+        .filter((node) => !node.closest(excluded))
+        .map((node) => {
+          const copy = node.cloneNode(true);
+          for (const hidden of copy.querySelectorAll(excluded)) hidden.remove();
+          return sha256(normalizeVisible(copy.textContent));
+        });
     return {
       lang: d.documentElement.lang,
       canonical: [...d.querySelectorAll('link[rel="canonical"]')].map((n) =>
@@ -761,12 +764,23 @@ export function verifyCapture({ files, supportingFiles, JSDOM }) {
     blockers.add(id);
   };
   const budget = packageBudget(files);
+  // Preserve only the finite declared class before any custody/binding failure.
+  // This is an unverified raw label, never proof that transport was live.
+  let declaredClass = null;
+  try {
+    const claim = parseJson(files.get("raw-index.json"))?.evidenceClass;
+    if (["test", "live"].includes(claim)) declaredClass = claim;
+  } catch {
+    /* Missing, malformed or over-limit indices leave the class unknown. */
+  }
   const report = {
     schemaVersion: 1,
     kind: "staging-url-seo-sitemap-parity",
     producer,
     environment: "staging",
-    evidenceClass: "test",
+    evidenceClass: declaredClass,
+    evidenceClassAuthenticated: false,
+    producerSourcesAuthenticated: false,
     status: "BLOCKED",
     technicalStatus: "BLOCKED",
     captureComplete: false,
@@ -804,6 +818,8 @@ export function verifyCapture({ files, supportingFiles, JSDOM }) {
       same([...files.keys()].sort(), refs.map((f) => f.path).sort()),
       "undeclared_supporting_file",
     );
+    for (const name of ["collector-source.mjs", "verifier-source.mjs"])
+      requireValue(files.has(name) && files.get(name).length > 0, "missing_producer_source");
     const p = validatePlan(parseJson(files.get("plan.json")));
     const e = validateExpectations(
       parseJson(files.get("expectations.json")),
@@ -917,6 +933,39 @@ export function verifyCapture({ files, supportingFiles, JSDOM }) {
         decoded.metadata.bodyState !== "complete" || decoded.metadata.failure === null,
         "failed_body_claimed_complete",
       );
+      const m = decoded.metadata;
+      requireValue(
+        m.bodyState === "complete" || m.failure !== null,
+        "incomplete_body_missing_failure",
+      );
+      if (m.request.method === "HEAD")
+        requireValue(m.receivedBytes === 0 && m.retainedBytes === 0, "head_body_byte_counts");
+      if (m.bodyState === "complete")
+        requireValue(
+          m.receivedBytes === m.retainedBytes && m.status !== null,
+          "complete_body_byte_counts",
+        );
+      else if (m.bodyState === "redacted")
+        // Replacement text can expand retained bytes, so do not compare those
+        // lengths. No redaction is possible without receiving source bytes.
+        requireValue(
+          m.receivedBytes > 0 && m.failure === "body_credentials_redacted",
+          "redacted_body_byte_counts",
+        );
+      else if (m.bodyState === "omitted")
+        requireValue(m.receivedBytes === 0 && m.retainedBytes === 0, "omitted_body_byte_counts");
+      else requireValue(m.receivedBytes >= m.retainedBytes, "partial_body_byte_counts");
+      if (
+        m.bodyState === "complete" &&
+        m.request.method === "GET" &&
+        m.headers["content-length"] !== undefined &&
+        !m.headers["content-encoding"]
+      )
+        requireValue(
+          /^\d+$/.test(m.headers["content-length"]) &&
+            Number(m.headers["content-length"]) === m.receivedBytes,
+          "complete_content_length",
+        );
       requireValue(
         Date.parse(decoded.metadata.finishedAt) >= Date.parse(decoded.metadata.startedAt) &&
           Date.parse(decoded.metadata.startedAt) >= Date.parse(index.startedAt) &&
@@ -966,6 +1015,11 @@ export function verifyCapture({ files, supportingFiles, JSDOM }) {
     const retainedByFamily = { html: 0, sitemap: 0, robots: 0, protection: 0 };
     for (const [id, record] of records) {
       const m = record.metadata;
+      if (m.failure)
+        requireValue(
+          failures.some((f) => f.id === id && f.code === m.failure),
+          "missing_failure_journal_entry",
+        );
       const initial = requests.find((r) => r.id === id || `${r.id}:hop` === id);
       requireValue(initial, "unknown_request_identity");
       const expectedRequest =
@@ -1051,11 +1105,6 @@ export function verifyCapture({ files, supportingFiles, JSDOM }) {
       }
       if (["redirect_not_allowed", "transport_followed_redirect"].includes(m.failure))
         check("redirect_safety", false, request.id);
-      if (m.failure)
-        requireValue(
-          failures.some((f) => f.id === m.id && f.code === m.failure),
-          "missing_failure_journal_entry",
-        );
       if (request.family === "protection") {
         check(
           "protected_noindex",

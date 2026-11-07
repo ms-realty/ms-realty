@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createServer } from "node:http";
 import { tmpdir } from "node:os";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import test from "node:test";
 import {
   accountId,
@@ -264,6 +265,47 @@ async function readCapture(outputDir) {
     ),
   };
 }
+const references = (files) =>
+  [...files].map(([path, bytes]) => ({ path, sha256: sha256(bytes), bytes: bytes.length }));
+function rewriteMember(files, id, change) {
+  const index = parseJson(files.get("raw-index.json")),
+    chunks = [],
+    failures = [];
+  let offset = 0;
+  for (const entry of index.members) {
+    const record = decodeMember(
+      files.get(entry.shard).subarray(entry.offset, entry.offset + entry.length),
+    );
+    if (entry.id === id) change(record.metadata);
+    if (record.metadata.failure) failures.push({ id: entry.id, code: record.metadata.failure });
+    const bytes = encodeMember(record.metadata, record.body);
+    chunks.push(bytes);
+    Object.assign(entry, {
+      shard: "raw-0000.bin",
+      offset,
+      length: bytes.length,
+      sha256: sha256(bytes),
+    });
+    offset += bytes.length;
+  }
+  for (const name of files.keys()) if (/^raw-\d+\.bin$/.test(name)) files.delete(name);
+  files.set("raw-0000.bin", Buffer.concat(chunks));
+  files.set("raw-index.json", jsonBytes(index));
+  files.set("failure-journal.json", jsonBytes(failures));
+  files.set("failure-events.jsonl", Buffer.concat(failures.map(jsonBytes)));
+}
+async function writeEnvelope(directory, input, report) {
+  const files = new Map(input);
+  files.set("staging-url-seo-sitemap-parity.json", jsonBytes(report));
+  await mkdir(directory);
+  for (const [name, bytes] of files) {
+    await mkdir(dirname(resolve(directory, name)), { recursive: true });
+    await writeFile(resolve(directory, name), bytes, { flag: "wx" });
+  }
+  await writeFile(resolve(directory, "supporting-files.json"), jsonBytes(references(files)), {
+    flag: "wx",
+  });
+}
 
 test("R07 mechanical parity passes with independent synthetic expectations; no authority is granted", async (t) => {
   const f = await fixture();
@@ -286,6 +328,8 @@ test("R07 mechanical parity passes with independent synthetic expectations; no a
     "identityAuthenticated",
     "eligibilityAuthenticated",
     "revisionCoherenceProven",
+    "evidenceClassAuthenticated",
+    "producerSourcesAuthenticated",
   ])
     assert.equal(report[key], false);
   assert.deepEqual(await verifyDirectory(outputDir), report);
@@ -864,4 +908,278 @@ test("R07 immutable output refuses overwrite; invalid caller approvals retain on
   );
   for (const name of await readdir(out))
     assert(!(await readFile(resolve(out, name))).includes(Buffer.from(credentials.clientSecret)));
+});
+
+test("R07 F1 excludes an explicitly hidden selected element or ancestor from the DOM text projection", async (t) => {
+  const f = await fixture(1),
+    original = html(f.expectations.urls[0]);
+  for (const body of [
+    original.replace("<main>", "<main hidden>"),
+    original.replace("<main>", '<main aria-hidden="true">'),
+    original
+      .replace("<main>", '<section aria-hidden="true"><main>')
+      .replace("</main>", "</main></section>"),
+    original.replace("<body>", "<body hidden>"),
+    original
+      .replace("<main>", '<section aria-hidden="TRUE"><main aria-hidden="false">')
+      .replace("</main>", "</main></section>"),
+  ]) {
+    const { report } = await run(t, f, (url) =>
+      url.endsWith("/bg/example-0") ? response(body) : undefined,
+    );
+    assert(failed(report, "visible_exact_projection"));
+    assert.equal(report.technicalStatus, "FAIL");
+    assert.equal(report.captureComplete, true);
+  }
+  const visible = original.replace(
+    "Example 0 Price unknown</main>",
+    'Example 0 Price unknown<span hidden>not visible</span><span aria-hidden="TRUE">also hidden</span></main>',
+  );
+  const good = await run(t, f, (url) =>
+    url.endsWith("/bg/example-0") ? response(visible) : undefined,
+  );
+  assert.equal(good.report.technicalStatus, "PASS");
+});
+
+test("R07 F2 requires both nonempty producer source files even with a refreshed unsigned inventory", async (t) => {
+  const f = await fixture(1),
+    capture = await run(t, f),
+    JSDOM = await loadParser(f.plan);
+  for (const [index, names] of [
+    ["collector-source.mjs"],
+    ["verifier-source.mjs"],
+    ["collector-source.mjs", "verifier-source.mjs"],
+  ].entries()) {
+    const { files } = await readCapture(capture.outputDir);
+    for (const name of names) files.delete(name);
+    const report = verifyCapture({ files, supportingFiles: references(files), JSDOM });
+    assert.equal(report.integrityError, "missing_producer_source");
+    assert.equal(report.technicalStatus, "FAIL");
+    const directory = resolve(capture.parent, `missing-source-${index}`);
+    await writeEnvelope(directory, files, report);
+    assert.equal((await verifyDirectory(directory)).integrityError, "missing_producer_source");
+  }
+  const { files } = await readCapture(capture.outputDir);
+  files.set("collector-source.mjs", Buffer.alloc(0));
+  assert.equal(
+    verifyCapture({ files, supportingFiles: references(files), JSDOM }).integrityError,
+    "missing_producer_source",
+  );
+  assert.equal(capture.report.producerSourcesAuthenticated, false);
+});
+
+test("R07 F3 enforces physical received/retained counters through pure and public offline verification", async (t) => {
+  const f = await fixture(1),
+    capture = await run(t, f),
+    JSDOM = await loadParser(f.plan);
+  const cases = [
+    {
+      id: f.plan.urls[0].id,
+      error: "complete_body_byte_counts",
+      mutate: (m) => {
+        m.receivedBytes = 0;
+      },
+    },
+    {
+      id: f.plan.urls[0].id,
+      error: "complete_body_byte_counts",
+      mutate: (m) => {
+        m.receivedBytes = m.retainedBytes - 1;
+      },
+    },
+    {
+      id: f.plan.urls[0].id,
+      error: "complete_body_byte_counts",
+      mutate: (m) => {
+        m.receivedBytes = m.retainedBytes + 1;
+      },
+    },
+    {
+      id: f.plan.urls[0].id,
+      error: "partial_body_byte_counts",
+      mutate: (m) => {
+        m.bodyState = "partial";
+        m.fullResponseSha256 = null;
+        m.failure = "truncated_body";
+        m.receivedBytes = m.retainedBytes - 1;
+      },
+    },
+    {
+      id: f.plan.urls[0].id,
+      error: "redacted_body_byte_counts",
+      mutate: (m) => {
+        m.bodyState = "redacted";
+        m.fullResponseSha256 = null;
+        m.failure = "body_credentials_redacted";
+        m.receivedBytes = 0;
+      },
+    },
+    {
+      id: f.plan.urls[0].id,
+      error: "omitted_body_byte_counts",
+      mutate: (m) => {
+        m.bodyState = "omitted";
+        m.fullResponseSha256 = null;
+        m.failure = "access_denied";
+      },
+    },
+    {
+      id: "anonymous:public",
+      error: "head_body_byte_counts",
+      mutate: (m) => {
+        m.receivedBytes = 1;
+      },
+    },
+  ];
+  for (const [index, c] of cases.entries()) {
+    const { files } = await readCapture(capture.outputDir);
+    rewriteMember(files, c.id, c.mutate);
+    const report = verifyCapture({ files, supportingFiles: references(files), JSDOM });
+    assert.equal(report.integrityError, c.error);
+    const directory = resolve(capture.parent, `byte-counters-${index}`);
+    await writeEnvelope(directory, files, report);
+    assert.equal((await verifyDirectory(directory)).integrityError, c.error);
+  }
+  const expanded = await run(
+    t,
+    f,
+    (url) =>
+      url.endsWith("/bg/example-0") ? response(`${html(f.expectations.urls[0])}r7!`) : undefined,
+    { credentials: { ...credentials, clientSecret: "r7!" } },
+  );
+  const expandedFiles = (await readCapture(expanded.outputDir)).files;
+  const index = parseJson(expandedFiles.get("raw-index.json")),
+    entry = index.members.find((r) => r.id === f.plan.urls[0].id);
+  const record = decodeMember(
+    expandedFiles.get(entry.shard).subarray(entry.offset, entry.offset + entry.length),
+  );
+  assert.equal(record.metadata.bodyState, "redacted");
+  assert(record.metadata.retainedBytes > record.metadata.receivedBytes);
+  assert.equal(expanded.report.integrityError, undefined);
+  assert.equal((await verifyDirectory(expanded.outputDir)).captureComplete, false);
+  const head = await run(t, f, (_url, init) =>
+    init.method === "HEAD"
+      ? response(null, init.headers["CF-Access-Client-Secret"] ? 200 : 403, {
+          "content-length": "4000",
+        })
+      : undefined,
+  );
+  assert.equal(head.report.technicalStatus, "PASS");
+});
+
+test("R07 F4 every failed redirect member requires exactly one matching event in both journals", async (t) => {
+  const f = await fixture(1),
+    original = f.plan.urls[0],
+    target = f.expectations.urls[0],
+    alias = "https://makler-realty.ru/alias";
+  f.plan.urls.push({
+    ...original,
+    id: urlId(alias),
+    sourceUrl: alias,
+    normalizedId: sourceIdentity(alias).id,
+    followPath: "/bg/example-0",
+  });
+  f.expectations.urls.push({
+    ...structuredClone(target),
+    id: urlId(alias),
+    disposition: { ...target.disposition, status: 301 },
+  });
+  const capture = await run(t, f, (url, init) => {
+    if (url.endsWith("/alias"))
+      return response("", 301, { location: `${origins.public}/bg/example-0` });
+    if (url.endsWith("/bg/example-0") && !init.headers["x-msr-legacy-host"])
+      throw new Error("synthetic hop failure");
+    return undefined;
+  });
+  assert.equal(capture.report.integrityError, undefined);
+  assert.equal(capture.report.captureComplete, false);
+  const JSDOM = await loadParser(f.plan);
+  for (const [index, entries] of [
+    [],
+    [{ id: `${urlId(alias)}:hop`, code: "request_timeout" }],
+  ].entries()) {
+    const { files } = await readCapture(capture.outputDir);
+    files.set("failure-journal.json", jsonBytes(entries));
+    files.set("failure-events.jsonl", Buffer.concat(entries.map(jsonBytes)));
+    const report = verifyCapture({ files, supportingFiles: references(files), JSDOM });
+    assert.equal(report.integrityError, "missing_failure_journal_entry");
+    const directory = resolve(capture.parent, `hop-journal-${index}`);
+    await writeEnvelope(directory, files, report);
+    assert.equal(
+      (await verifyDirectory(directory)).integrityError,
+      "missing_failure_journal_entry",
+    );
+  }
+});
+
+test("AT57 F5 preserves a trailing query delimiter through plan, capture and Node transport", async (t) => {
+  const f = await fixture(1),
+    old = f.plan.urls[0],
+    source = `${old.sourceUrl}?`;
+  f.plan.urls[0] = {
+    ...old,
+    sourceUrl: source,
+    id: urlId(source),
+    normalizedId: sourceIdentity(source).id,
+  };
+  f.expectations.urls[0].id = urlId(source);
+  assert.equal(sourceIdentity(source).pathAndQuery, "/bg/example-0?");
+  assert.equal(sourceIdentity(source).id, sourceIdentity(old.sourceUrl).id);
+  assert.equal(
+    sourceIdentity("https://makler-realty.com/bg/%D0%B8%D0%BC%D0%BE%D1%82?s=O%27Neill")
+      .pathAndQuery,
+    "/bg/%D0%B8%D0%BC%D0%BE%D1%82?s=O%27Neill",
+  );
+  for (const unsupported of [
+    "https://makler-realty.com/bg/имот",
+    "https://makler-realty.com/bg/unit?s=O'Neill",
+  ])
+    assert.throws(() => sourceIdentity(unsupported), /unsupported_source_serialization/);
+  const capture = await run(t, f);
+  assert(capture.calls.some((r) => r.url === `${origins.public}/bg/example-0?`));
+  assert.equal(capture.report.technicalStatus, "PASS");
+  const seen = [],
+    server = createServer((request, response) => {
+      seen.push(request.url);
+      response.end("synthetic loopback only");
+    });
+  t.after(
+    () =>
+      new Promise((done) => {
+        server.close(done);
+        server.closeAllConnections();
+      }),
+  );
+  await new Promise((done, reject) => {
+    server.once("error", reject);
+    server.listen(3296, "127.0.0.1", done);
+  });
+  const result = await fetch(`http://127.0.0.1:3296${sourceIdentity(source).pathAndQuery}`, {
+    redirect: "manual",
+  });
+  await result.arrayBuffer();
+  assert.deepEqual(seen, ["/bg/example-0?"]);
+  assert.equal(result.url, "http://127.0.0.1:3296/bg/example-0?");
+});
+
+test("R07 F6 preserves unverified declared transport class on early failures and uses null for unknown", async (t) => {
+  const f = await fixture(1),
+    capture = await run(t, f),
+    JSDOM = await loadParser(f.plan);
+  for (const declaredClass of ["live", "not-an-evidence-class"]) {
+    const { files } = await readCapture(capture.outputDir),
+      index = parseJson(files.get("raw-index.json"));
+    index.evidenceClass = declaredClass;
+    files.set("raw-index.json", jsonBytes(index));
+    const report = verifyCapture({ files, supportingFiles: references(files), JSDOM });
+    assert.equal(report.technicalStatus, "FAIL");
+    assert.equal(report.evidenceClass, declaredClass === "live" ? "live" : null);
+    assert.equal(report.evidenceClassAuthenticated, false);
+    assert.equal(report.identityAuthenticated, false);
+  }
+  const { files } = await readCapture(capture.outputDir);
+  files.delete("raw-index.json");
+  const missing = verifyCapture({ files, supportingFiles: references(files), JSDOM });
+  assert.equal(missing.evidenceClass, null);
+  assert.equal(missing.technicalStatus, "FAIL");
 });

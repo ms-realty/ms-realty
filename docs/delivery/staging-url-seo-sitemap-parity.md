@@ -18,6 +18,12 @@ authority adapter or override that can turn this into verified release parity.
 false. The existing HTTP checker's three parity flags also remain false. Neither receipt
 authorizes publication, translation/indexability, deployment or cutover.
 
+`evidenceClass` preserves the finite class declared by the raw index even when a later
+binding or custody check fails. It is null if that class is unavailable or malformed;
+failed declared-live input is never silently labeled test. `evidenceClassAuthenticated`
+and `producerSourcesAuthenticated` remain false. These labels do not authenticate a
+transport, source publisher or running candidate.
+
 ## Source and authority boundary
 
 The scope audit pinned application `e130f5f72f98a85daff009304a653dfc11fe9cca` and accepted
@@ -32,7 +38,10 @@ from its actual plan and observed identity inputs:
 Capture counts never replace those facts. The plan records each exact spelling, including
 spellings sharing a normalized identity, and every exclusion with its reason. A normalized
 identity uses the source host, decoded pathname and exact serialized query. A request keeps
-its encoded path/query; HTTP and HTTPS source spellings are retained as separate records.
+its encoded path/query, including a literal trailing `?` independently of the normalized
+query identity; HTTP and HTTPS source spellings are retained as separate records. A source
+spelling that URL serialization would rewrite, such as an unencoded Unicode path or query
+apostrophe, is explicitly rejected and is never silently counted as exact coverage.
 Host simulation on protected staging tests gateway routing logic, not public DNS or TLS.
 
 The audited tree has no complete, independently authenticated expected-state/eligibility
@@ -97,7 +106,10 @@ exact production target, rationale and provenance), production canonical identit
 eligibility, exact publication/fact/terms/localized/CMS/source revisions, metadata,
 alternates, JSON-LD and a visible projection. The visible projection names `main` or
 `article` and hashes its normalized visible text after removing scripts, styles, templates,
-noscript and explicitly hidden content. It is a DOM text projection, not browser visual QA.
+noscript and explicitly hidden content. A selected element is excluded if it or any ancestor
+is explicitly hidden, including `hidden` or `aria-hidden="true"`; hidden descendants are
+also removed. A child cannot undo an ancestor's explicit hidden state. This is a bounded
+DOM text projection, not CSS/layout visibility inference or browser visual QA.
 
 Titles and descriptions distinguish `{state: pending}`, `{state: absent}` and
 `{state: value, value: ...}`. Recorded absence is compared explicitly. Empty or missing
@@ -201,6 +213,14 @@ and failure code are in the metadata. Body bytes are explicitly labeled `fetch_d
 they are the document bytes returned by Fetch, not a claim about compressed wire bytes.
 Only complete bodies have `fullResponseSha256`.
 
+For a complete unredacted `fetch_decoded` body, received and retained byte lengths must
+equal the actual retained bytes. An unredacted partial body cannot retain more than was
+received. Redacted replacement text may expand or shrink, so its retained length is checked
+against the stored bytes separately; redaction requires nonzero received input and its
+explicit failure marker. HEAD and omitted bodies have zero received and retained body
+bytes. A HEAD Content-Length can describe the GET representation and is not counted as
+received bytes. Complete uncompressed GET Content-Length must agree with received bytes.
+
 `failure-journal.json` reconciles the append-only events. `source-binding-before.json`,
 `source-binding-after.json`, exact collector/verifier source bytes, the input packet,
 every input/provenance file and every shard/index/journal are retained. The verifier
@@ -209,6 +229,18 @@ parsed-projection hashes. It verifies internal member lengths,
 hashes, ranges, gap/overlap absence, exact request identity, failure reconciliation and
 coverage. Tampering, missing/duplicate members and undeclared raw files fail. An interrupted
 capture without a final index remains failed/partial evidence; it is never resumed over.
+Every failed member, including each redirect `:hop`, must have exactly one matching event
+in both journals. A missing event is a custody failure even when the HTTP comparison
+already fails for another reason.
+
+Both nonempty `collector-source.mjs` and `verifier-source.mjs` are mandatory members of the
+finite supporting inventory. The collector writes its executing source copies; offline
+verification checks their presence and the declared byte lengths/hashes. It does not
+authenticate these as the expected candidate's exact code against an independently trusted
+source-byte anchor. Rewriting the entire unsigned envelope, source copies, references and
+report can create another self-consistent envelope. That is outside this mechanical custody
+claim; caller-supplied hashes cannot resolve it or establish authority. The genuine expected
+source anchor and the existing signed R10 admission remain separate requirements.
 
 `supporting-files.json` explicitly lists the receipt and every dependency with length/hash.
 It is an inventory, not a recursive importer or signed authority. A later R10 artifact must
