@@ -1,7 +1,7 @@
-# ADR 0009 — One tenant profile for the agency's jurisdiction, locale, currency and identity values
+# ADR 0010 — One tenant profile for the agency's jurisdiction, locale, currency and identity values
 
 Status: accepted for implementation as part of the property-management pack preparation. Changes
-no behaviour for the agency. ADR 0008 is reserved by the retention-policy decision record.
+no behaviour for the agency. ADRs 0008 and 0009 record the owner decisions on customer due diligence and consumer brokerage contracts (#374).
 
 ## Context
 
