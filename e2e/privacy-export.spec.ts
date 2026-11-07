@@ -94,6 +94,9 @@ for (const javascript of [false, true])
       expect(range.headers()["cache-control"]).toBe("private, no-store");
       await page.getByLabel(c.revokeConfirm, { exact: true }).check();
       await page.getByRole("button", { name: c.revoke, exact: true }).click();
+      // WebKit can finish the click before dispatching the native POST; await committed state.
+      await expect(page.getByRole("heading", { name: c.revoked, exact: true })).toBeVisible();
+      await expect(page.getByText(c.saved, { exact: true })).toBeVisible();
       expect(
         (
           await context.request.get(hostUrl("client", href ?? ""), {
@@ -233,6 +236,9 @@ for (const javascript of [false, true])
       expect(range.headers()["cache-control"]).toBe("private, no-store");
       await page.getByLabel(c.revokeConfirm, { exact: true }).check();
       await page.getByRole("button", { name: c.revoke, exact: true }).click();
+      // The preceding completion receipt does not establish that revocation has committed.
+      await expect(page.getByRole("heading", { name: c.revoked, exact: true })).toBeVisible();
+      await expect(page.getByText(c.saved, { exact: true })).toBeVisible();
       expect(
         (
           await context.request.get(hostUrl("client", href ?? ""), {
