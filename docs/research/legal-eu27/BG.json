@@ -49,9 +49,7 @@
   "id_copies": {
     "rule": "Copying an identity document, driving licence or residence document is allowed only where a law provides for it. ЗМИП art. 53(1) is such a law for AML customer due diligence; outside an AML-scoped relationship the agency may not copy ID documents and should record that the document was seen.",
     "law": "Personal Data Protection Act (ЗЗЛД) art. 25г (new, ДВ бр. 17/2019): \"A controller or processor of personal data may copy an identity document, a driving licence or a residence document only if this is provided for by law.\"",
-    "sources": [
-      "https://trudipravo.bg/znanie-za-vas/zakon-za-zashtita-na-lichnite-danni/"
-    ]
+    "sources": ["https://trudipravo.bg/znanie-za-vas/zakon-za-zashtita-na-lichnite-danni/"]
   },
   "confidence": "high",
   "unconfirmed": [

@@ -46,16 +46,12 @@
     "commission_years": 10,
     "trigger": "From when the claim becomes due; for claims on a fixed date, not before that date (old Civil Code art. 2257).",
     "law": "Old Civil Code art. 2262bis §1: 'All personal actions are time-barred after ten years.' No shorter special period for estate-agent fees was found (art. 2272's one-year rule covers merchants' goods sold to non-merchants).",
-    "sources": [
-      "https://www.ejustice.just.fgov.be/eli/loi/1804/03/21/1804032155/justel"
-    ]
+    "sources": ["https://www.ejustice.just.fgov.be/eli/loi/1804/03/21/1804032155/justel"]
   },
   "id_copies": {
     "rule": "The National Register number and the holder's photo on the Belgian eID 'may only be used where authorised by or under a law, decree or ordinance'. The eID may be read or used only with the holder's free, specific and informed consent, and the holder may refuse that his data be read or recorded. Outside a legal duty such as AML, an agent therefore needs consent and should not keep the photo or National Register number.",
     "law": "Loi du 19 juillet 1991 relative aux registres de la population, aux cartes d'identite ... art. 6 §4",
-    "sources": [
-      "https://www.ejustice.just.fgov.be/eli/loi/1991/07/19/1991000380/justel"
-    ]
+    "sources": ["https://www.ejustice.just.fgov.be/eli/loi/1991/07/19/1991000380/justel"]
   },
   "notes": [
     "The 2026 code of ethics (art. 40-42) adds AI rules: AI use may not undermine the agent's duties; the agent must critically evaluate AI output, be transparent to third parties about AI use where the law requires it, and 'may not enter personal data into an open artificial-intelligence system'. Relevant to Butler.",

@@ -9,10 +9,7 @@
     "quote": "Commercial Law s.69: 'The broker is liable to each of the parties to the transaction for losses caused by his fault.' [Mākleris atbild katrai no darījuma pusēm par zaudējumiem, kas radušies viņa vainas dēļ.] s.70(2): 'If the parties have not agreed which of them must pay the broker's fee, they pay this fee in equal shares.' [... tās šo atlīdzību maksā vienādās daļās.]",
     "commission_both_sides": "Yes. Commercial Law s.70(1): the right to the broker fee arises at the moment the transaction is concluded; s.70(2): absent agreement both parties pay in equal shares. Expenses are reimbursable only if expressly agreed (s.71).",
     "sector_records": "Commercial Law s.72: the broker keeps a daily, signed, chronological transaction journal; s.72(5): kept 'five years after the end of the calendar year in which the last entry was made'. s.73: any party may request certified extracts.",
-    "sources": [
-      "https://likumi.lv/ta/id/315656",
-      "https://likumi.lv/ta/id/5490"
-    ]
+    "sources": ["https://likumi.lv/ta/id/315656", "https://likumi.lv/ta/id/5490"]
   },
   "aml": {
     "law": "Noziedzīgi iegūtu līdzekļu legalizācijas un terorisma un proliferācijas finansēšanas novēršanas likums (AML/CTPF Law): s.3(1)6 subjects; s.11(9) counterparty CDD; s.14(1) ID copies; s.37 retention. Supervisor: State Revenue Service (VID) for real estate transaction intermediaries.",
@@ -38,10 +35,7 @@
     "commission_years": 3,
     "trigger": "Civil Law s.1896: limitation runs from the day the claim arose such that suit could immediately be brought against the debtor. Commercial Law s.70(1): the right to the broker fee arises at the moment the transaction is concluded.",
     "law": "Civillikums s.1895: obligation rights not subject to a shorter statutory term expire 'if the entitled person does not exercise them within ten years'. Komerclikums s.406: 'Claims arising from a commercial transaction expire within three years, unless the law provides another limitation period.' Komerclikums s.389 applies the commercial-transaction rules to all parties when the deal is commercial for only one of them, unless consumer-protection or other laws provide otherwise. A broker company's fee claim is therefore 3 years. (A commercial agent's claims: 4 years from the end of the calendar year in which they arose, s.55.)",
-    "sources": [
-      "https://likumi.lv/ta/id/225418",
-      "https://likumi.lv/ta/id/5490"
-    ]
+    "sources": ["https://likumi.lv/ta/id/225418", "https://likumi.lv/ta/id/5490"]
   },
   "id_copies": {
     "rule": "No statutory rule on copying identity documents outside AML was found; the Personal Identification Documents Law (Personu apliecinošu dokumentu likums) contains no copy provision. A pre-GDPR position of the Data State Inspectorate (DVI), reported in 2015, says bodies without a legal right to request ID copies must not ask for them. Outside AML s.14 the agent should not take ID copies; record the document number only where needed.",

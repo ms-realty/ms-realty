@@ -30,10 +30,7 @@
     "source_documents_years": 7,
     "trigger": "The statutes give no start event ('gedurende zeven jaren'). Practice counts from the end of the financial year concerned; unconfirmed from a primary source.",
     "law": "BW 2:10(3): the board keeps the books, documents and data carriers of 2:10(1), plus the balance sheet and P&L of 2:10(2), for seven years. AWR art 52(4): administration-liable persons keep data carriers for seven years unless tax law provides otherwise.",
-    "sources": [
-      "https://wetten.overheid.nl/BWBR0003045",
-      "https://wetten.overheid.nl/BWBR0002320"
-    ]
+    "sources": ["https://wetten.overheid.nl/BWBR0003045", "https://wetten.overheid.nl/BWBR0002320"]
   },
   "limitation": {
     "general_years": 5,

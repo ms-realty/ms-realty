@@ -48,9 +48,7 @@
     "commission_years": 6,
     "trigger": "Statute of Limitations 1957 s.11(1): actions 'shall not be brought after the expiration of six years from the date on which the cause of action accrued', incl. (a) 'actions founded on simple contract'. A commission claim is a simple-contract claim and accrues when the fee falls due under the letter of engagement, typically on completion of the sale or signing of the letting.",
     "law": "Statute of Limitations 1957 s.11(1)(a). No special shorter period for estate-agent commission was found.",
-    "sources": [
-      "https://revisedacts.lawreform.ie/eli/1957/act/6/section/11/revised/en/html"
-    ]
+    "sources": ["https://revisedacts.lawreform.ie/eli/1957/act/6/section/11/revised/en/html"]
   },
   "id_copies": {
     "rule": "No Irish statute restricting the copying of identity documents outside AML was found. Outside the 2010 Act, only the GDPR principles apply (lawful basis, data minimisation, storage limitation). The AML copy duty in s.55(2) does not authorise copies for non-AML purposes such as ordinary lettings below EUR 10,000/month.",
