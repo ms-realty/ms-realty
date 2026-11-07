@@ -14,7 +14,8 @@ const golden = {
     ru: "37bb832e708598478f6001ec3f3671101e598567ca19b40a1974d525e812b7b3",
     de: "b1904c90c03cb712631238906b7a3dbcd5277400a926ebf2a329c6625f77c57e",
     nl: "3b9eced36ce7ecc5ca4813bf2c98b8c5025d4560e838b32e734ecd1bb3928e10",
-    el: "a0eb2d273d0935085f73c0a0e0f4a3c900a1e9fe6d5f5a658846c3a12ee86f50",
+    // Corrected living-area label; usable-area wording and fact basis remain distinct.
+    el: "56848c047bd3d4e6a666f406b19e1a44bb8343cd81265f08b7375aea13964048",
     he: "fd6d75b45cd28e659bd2f5b43db48fa054ee2d30021c96cb33a7ab683e32835d",
   },
   intent: {

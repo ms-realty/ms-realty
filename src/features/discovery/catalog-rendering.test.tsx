@@ -164,3 +164,19 @@ describe.each([...publicLocales])("%s catalogs in current discovery components",
     },
   );
 });
+
+it.each([
+  ["living", "Κατοικήσιμη επιφάνεια"],
+  ["usable", "Χρησιμοποιήσιμη επιφάνεια"],
+] as const)("P05 Greek %s area keeps its source basis and exact value", (basis, label) => {
+  const source = listing("el");
+  const property = {
+    ...source,
+    area: known(areaFact(74.513, basis), { sourceClass: "source_supplied" } as const),
+  };
+  const before = structuredClone(property);
+  render(<ListingGrid items={[property]} locale="el" copy={discoveryCopy("el")} />);
+  const value = screen.getByText(label, { exact: true }).parentElement?.querySelector("dd");
+  expect(value?.textContent).toBe("74,513\u00a0m²");
+  expect(property).toEqual(before);
+});

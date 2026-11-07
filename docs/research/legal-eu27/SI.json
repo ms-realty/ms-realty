@@ -1,0 +1,78 @@
+{
+  "country": "Slovenia",
+  "code": "SI",
+  "estate_agency": {
+    "law": "Zakon o nepremičninskem posredovanju (ZNPosr), Uradni list RS 42/03 as amended up to 76/25 (PISRS unofficial consolidated text no. 9, applicable from 3 Oct 2025); Obligacijski zakonik (OZ) arts. 837-850 (posredniška pogodba)",
+    "regulated": "Yes. Brokers acquire status only on entry in the register of real-estate brokers (ZNPosr art. 7(1): 'A person acquires the status of real-estate broker on the day of entry in the register of real-estate brokers') and receive a licence from the competent ministry (art. 7.c(4)). A real-estate company may have brokerage done only by brokers who meet the statutory conditions (art. 4), must carry liability insurance of at least EUR 150,000 per claim / EUR 350,000 per year (art. 6), and must use a written brokerage contract (art. 13) of at most nine months (art. 26(1)).",
+    "dual_agency": "disclosure",
+    "rule": "The statutory default is an impartial intermediary for both sides: ZNPosr art. 20(1) requires the company to protect the interests of the client and of the third party equally and act impartially, unless by express agreement it represents only the client; then it must tell the third party clearly and in writing that it acts as an agent, not a broker (art. 20(2)). Art. 21 requires a clear written warning to the client of possible conflicts between the client's interests and those of the company or its other clients (so a written conflict notice is due when both buyer and seller are clients). OZ art. 849 expressly governs brokerage for both parties: the broker must look after the interests of both parties as a good businessman, and absent other agreement may claim only half the fee from each. OZ art. 850: a broker who works for the other party against the contract or against its client's interests loses the fee and costs. OZ art. 845: a broker in commerce keeps a broker's journal (posredniški dnevnik) of contracts concluded through it.",
+    "quote": "ZNPosr art. 20(1): 'In providing brokerage services the real-estate company must care equally for the protection of the interests of both the client and the third party ... and act impartially, unless on the basis of an express agreement with the client it represents only the client's interests.' ZNPosr art. 21: 'The real-estate company must clearly and in writing warn the client of possible conflicts between the client's interests and the interests of the real-estate company or of other clients.' OZ art. 849(2): 'The broker must, as a good businessman, look after the interests of both parties between which he mediates.'",
+    "commission_both_sides": "Allowed only from parties that are clients under their own written brokerage contract. ZNPosr art. 5(3) (upheld by the Constitutional Court, U-I-230/19, Ur. l. RS 116/23): 'The real-estate company may charge the brokerage fee only to the client on the basis of a real-estate brokerage contract'; shifting the fee to a non-client buyer/tenant is void (art. 5(4)-(5)). Where both parties instructed the broker, OZ art. 849(1): 'Unless otherwise agreed, a broker who received a brokerage instruction from both parties may claim from each party only half of the brokerage fee'. The former statutory caps (art. 5(1)-(2): 4% of the price for sales; for leases 4% of contract value, max one month's rent, min EUR 150) were annulled by U-I-205/19, U-I-230/19 (Ur. l. RS 76/25) insofar as they concern residential property with a natural-person buyer or tenant; paras. 6-7 annulled.",
+    "sources": [
+      "https://pisrs.si/api/datoteke/integracije/364584552",
+      "https://pisrs.si/pregledPredpisa?id=ZAKO4497",
+      "https://pisrs.si/api/datoteke/integracije/645694658",
+      "https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2019-01-2285/zakon-o-spremembah-in-dopolnitvah-zakona-o-nepremicninskem-posredovanju-znposr-c",
+      "https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2023-01-3357/odlocba-o-ugotovitvi-da-tretji-odstavek-5--clena-zakona-o-nepremicninskem-posredovanju-ni-v-neskladnju-z-ustavo",
+      "https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2025-01-2643"
+    ]
+  },
+  "aml": {
+    "law": "Zakon o preprečevanju pranja denarja in financiranja terorizma (ZPPDFT-2), Uradni list RS 48/22 as amended by ZPPDFT-2A to 2D and U-I-331/22 (PISRS unofficial consolidated text no. 5, applicable from 24 Sep 2026); obliged entity under art. 4(1) point 19 subpoint p) ('real-estate business, including ... brokerage in real-estate transactions'); supervisor Tržni inšpektorat RS (art. 164(7)), guidelines 'Smernice za izvajanje ZPPDFT-2 - dejavnost poslovanja z nepremičninami' (TIRS, no. 029-15/2024-10, 10 Jun 2024)",
+    "sale_scope": "Every brokered sale, no value threshold: CDD is due 'when entering into a business relationship with a customer' (art. 22(1) point 1), plus any transaction of EUR 15,000 or more (point 2), doubts about earlier data (point 4) and any suspicion regardless of value (point 5).",
+    "letting_threshold": "EUR 10,000 monthly rent. Art. 7: obliged entities that let or broker the letting of real estate 'perform the tasks under Article 17 of this Act if the monthly rent for an individual property amounts to EUR 10,000 or more.'",
+    "both_parties": "yes - per the supervisor's guidance: 'From the ZPPDFT-2 perspective the customer is therefore not only the client who concludes the brokerage contract with the real-estate company, but also the person in the position of third party who merely responds to a specific property advertisement and concludes a contract on the property (sale, lease contract etc.) with the client of the brokerage service' (TIRS guidelines 2024, section 3.3). The statute itself defines the business relationship broadly (art. 3 point 41) but does not name both parties expressly.",
+    "retention_years": 10,
+    "retention_trigger": "End of the business relationship or the executed transaction; for a business relationship the period runs from the first day after it ends (art. 142(1): 'ten years after the termination of the business relationship, the executed transaction ... unless another law provides for a longer retention period').",
+    "extension": "No authority-ordered extension for obliged entities; only a longer period set by another law (art. 142(1)). After the period personal data are deleted unless another law provides otherwise (art. 142(4)). Records on the compliance officer, training and internal controls: 4 years (art. 142(3)).",
+    "id_copy": "In-person identification is by inspecting the identity document in the customer's presence (art. 29(1): '... by inspecting the customer's personal document in the customer's personal presence'); no copy is required. Copies of an ID received in remote/electronic identification (arts. 32(2), 33(3), 34(4), 35(4)) must be destroyed once the required data are taken (art. 141(1): '... after obtaining the required data from the personal document, destroys the copy'); only credit and financial institutions may keep digital copies, for at most 5 years (art. 141(2)-(3)). Art. 142(2) nonetheless lists 'copies, records or originals' of official identification documents among the 10-year records.",
+    "sources": [
+      "https://pisrs.si/api/datoteke/integracije/643254428",
+      "https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2022-01-0977",
+      "https://gov.si/assets/organi-v-sestavi/UPPD/Dokumenti/Smernice/Smernice-za-izvajanje-ZPPDFT-2-dejavnost-poslovanja-z-nepremicninami.pdf"
+    ]
+  },
+  "accounting": {
+    "books_years": "permanent",
+    "annual_accounts_years": "permanent",
+    "source_documents_years": 10,
+    "trigger": "Books and annual reports: kept permanently (no trigger). Source documents and tax records: until the absolute limitation of the right to collect the tax they relate to, which is 10 years from the day limitation first started to run (ZDavP-2 art. 32(1) with art. 126(7)). Invoices: 10 years after the end of the year they relate to; 20 years for invoices relating to immovable property (ZDDV-1 art. 86(5)-(6)).",
+    "law": "ZGD-1 art. 54(6): 'Business books, balance sheets, income statements and annual and business reports under Articles 56 and 60 and the first paragraph of Article 70 of this Act must be kept permanently. Bookkeeping documents may be kept only for a specified period.' ZDavP-2 art. 32(1): documentation 'must be kept in physical or electronic form until the expiry of the absolute limitation period of the right to collect the tax to which it relates'; art. 126(7): the tax obligation ceases 'when ten years have passed from the day when limitation ... first began to run'. ZDDV-1 art. 86(5): invoices kept 'at least 10 years after the end of the year to which the invoices relate'; art. 86(6): invoices relating to immovable property 'at least 20 years'.",
+    "sources": [
+      "https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2006-01-1799",
+      "https://www.racunovodstvo.net/zakonodaja/predpis/14657/clen/33630",
+      "https://pisrs.si/api/datoteke/integracije/594731150",
+      "https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2011-01-0554/zakon-o-davku-na-dodano-vrednost-uradno-precisceno-besedilo-zddv-1-upb3"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 5,
+    "trigger": "First day after the day the creditor became entitled to demand performance (OZ art. 336(1)); the broker's fee becomes due when the brokered contract is concluded (OZ art. 847(1); ZNPosr art. 25(1)), or when a suspensive condition is fulfilled (OZ art. 847(2)). commission_years is 5 for a consumer or other non-business client; it is 3 years when the client is a business entity, because claims from commercial contracts (contracts between business entities, OZ art. 13(2)-(3)) expire in 3 years (OZ art. 349(1)).",
+    "law": "OZ art. 346: 'Claims expire in five years unless the law provides a different limitation period.' OZ art. 349(1): 'Claims from commercial contracts, and claims for reimbursement of expenses incurred in connection with these contracts, expire in three years.' No special limitation period for brokerage fees in OZ arts. 837-850 or ZNPosr.",
+    "sources": [
+      "https://pisrs.si/api/datoteke/integracije/645694658",
+      "https://pisrs.si/api/datoteke/integracije/364584552"
+    ]
+  },
+  "id_copies": {
+    "rule": "Identity cards may be copied by data controllers only where a law provides (ZOIzk-1 art. 4(1)); besides the holder, notaries and financial companies may copy them to prove identity (art. 4(2)); otherwise only 'for predetermined purposes ... on the basis of the written consent of the holder' (art. 4(3)). Inspection, and where necessary transcription of the data, is allowed for identification (art. 4(4)). Any copy must be marked so it is not used for other purposes, and copying a copy is prohibited (art. 4(5)); on request the controller issues a certificate stating the purpose and retention period of the copy (art. 4(6)). ZVOP-2 art. 94: any controller may inspect official identity documents (ID card, passport, driving licence, foreign IDs) to identify a person (para. 1), but only 'a controller performing a task prescribed by law may, for the purpose of identifying the individual, also transcribe, copy or otherwise process data' from them (para. 2). Product rule: outside AML scope record that the document was seen; copy an ID card only with the holder's prior written consent for a stated purpose, marked as such.",
+    "law": "Zakon o osebni izkaznici (ZOIzk-1), Uradni list RS 35/11 as amended to 17/25, art. 4; Zakon o varstvu osebnih podatkov (ZVOP-2), Uradni list RS 163/22, art. 94",
+    "sources": [
+      "https://pisrs.si/api/datoteke/integracije/358597443",
+      "https://www.uradni-list.si/glasilo-uradni-list-rs/vsebina/2022-01-4187/zakon-o-varstvu-osebnih-podatkov-zvop-2"
+    ]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "AML both parties: the statute does not name the counterparty; 'both parties' rests on the Market Inspectorate's advisory guidelines (June 2024), not on an express article.",
+    "Whether a non-financial obliged entity may keep a copy of an ID taken in person for AML: art. 141(1) orders destruction only of remote-identification copies, art. 142(2) lists ID copies among 10-year records, and ZOIzk-1 art. 4(1) allows copying only where a law provides. A lawyer should settle this.",
+    "ZGD-1 art. 54(6) checked in the original 2006 text (Ur. l. RS 42/06) and in an unofficial current version (racunovodstvo.net, in force 24 Jul 2026), not in the PISRS consolidated text.",
+    "ZDDV-1 art. 86(5)-(6) checked in the official consolidated text ZDDV-1-UPB3 (Ur. l. RS 13/11), not the current PISRS consolidation; whether a broker's commission invoice 'relates to immovable property' (20-year rule) is not confirmed.",
+    "Commission limitation of 3 vs 5 years depends on whether the client is a business entity; no Slovenian court ruling on the limitation of brokerage fees was checked.",
+    "Scope of the 2025 annulment of ZNPosr art. 5(1)-(2): the Constitutional Court limited it to residential property with a natural-person buyer or tenant, while the PISRS consolidation marks the paragraphs repealed; whether the 4% cap still applies to commercial property is not confirmed.",
+    "VSL judgment I Cpg 82/2024 (22 Oct 2024; ZNPosr has no lex specialis displacing OZ art. 849 for dual brokerage) seen only through a tax-fin-lex.si summary, not sodnapraksa.si.",
+    "OZ text read from PISRS consolidated text no. 4 (amendments to 2016); later amendments, if any, not checked, although the cited articles are unlikely to have changed.",
+    "Whether the Travel Documents Act (Zakon o potnih listinah) contains a passport-copy rule parallel to ZOIzk-1 art. 4 was not checked."
+  ]
+}

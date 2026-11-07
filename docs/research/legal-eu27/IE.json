@@ -1,0 +1,65 @@
+{
+  "country": "Ireland",
+  "code": "IE",
+  "estate_agency": {
+    "law": "Property Services (Regulation) Act 2011 (No. 40 of 2011), esp. ss. 43 (letter of engagement), 44 and 61 (records), 59, 60 (financial services to purchaser); Property Services (Regulation) Act 2011 (Minimum Standards) Regulations 2020, S.I. No. 564/2020, Regs. 8 and 21 (made by the PSRA under s.95; breach = 'improper conduct' under s.2(1)).",
+    "regulated": "Yes, licensed. Property services may only be provided under a PSRA licence; the PSRA is the regulator and also the AML competent authority for property service providers. A signed letter of engagement in the specified form must be given within 7 working days of starting or agreeing to provide a service, and the service must stop if the client does not return a signed copy within the next 7 working days (s.43).",
+    "dual_agency": "disclosure",
+    "rule": "No provision of the 2011 Act or S.I. 564/2020 prohibits acting for both vendor and purchaser. S.I. 564/2020 Reg. 21 requires written notice to the client of any actual or potential conflict of interest as soon as reasonably possible. The PSRA explanatory note to the Regulations adds that if the client proceeds 'in full knowledge of the conflict', 'it is advisable to get this confirmation in writing' (advice, not a statutory consent requirement). Specific consent rule: s.60(1) bars a licensee who acts for the vendor from providing a financial service to the purchaser unless, before the sale, both vendor and purchaser receive notice in the specified form and each states in writing that they have no objection. Fees: Reg. 8(2) bars charging a sale/letting fee to anyone other than the licensee's client, and Reg. 8(3) bars implying to a non-client that the client's fees are to be borne by that person. Product rule: the other side may only be charged if it is itself a client under its own letter of engagement, with a Reg. 21 written conflict notice to both clients.",
+    "quote": "S.I. 564/2020 Reg. 21: 'A licensee shall inform the client in writing, as soon as is reasonably possible on becoming aware of any conflict of interest, or potential conflict of interest'. Reg. 8(2): a licensee 'shall not charge any fee in respect of the sale or letting of land ... to any person other than the licensee's client'.",
+    "commission_both_sides": "Only from persons who are the licensee's clients (Reg. 8(2)). Charging the non-client counterparty (buyer or tenant) is prohibited, and so is implying that the counterparty must bear the client's fees (Reg. 8(3)). Charging both sides therefore requires two client engagements, each with its own s.43 letter of engagement and a Reg. 21 written conflict notice.",
+    "sector_records": "s.44: record of each property service retained 'for a period of not less than 6 years after the completion of the transactions, acts or operations to which the record relates'. s.61: record of all offers received on a non-auction sale (including conditional acceptances) retained for not less than 6 years.",
+    "sources": [
+      "https://www.irishstatutebook.ie/eli/2011/act/40/enacted/en/print.html",
+      "https://revisedacts.lawreform.ie/eli/2011/act/40/section/43/revised/en/html",
+      "https://www.irishstatutebook.ie/2020/en/si/0564.html",
+      "https://www.psr.ie/wp-content/uploads/2021/09/SI-Minimum-Standards-Regulation-Plain-English-Guide.pdf"
+    ]
+  },
+  "aml": {
+    "law": "Criminal Justice (Money Laundering and Terrorist Financing) Act 2010 (as amended, incl. 2018 and 2021 Amendment Acts): s.25(1)(f) designated persons; s.33 CDD; s.55 record keeping. Supervisor: PSRA (State competent authority for property service providers).",
+    "sale_scope": "Every property service provider is a designated person for sales, purchases and auctions, with no value threshold. s.25(1)(f): 'a property service provider including a property service provider acting as an intermediary in the letting of immovable property, but only in respect of transactions for which the monthly rent amounts to a total of at least €10,000'. 'Property service provider' = a person providing a property service within the meaning of the 2011 Act (s.24 definition).",
+    "letting_threshold": "Letting intermediation is covered only for transactions with monthly rent totalling at least EUR 10,000 (s.25(1)(f)).",
+    "both_parties": "unclear: CDD is mandatory for all clients, and for a non-client counterparty only in an occasional transaction of EUR 15,000 or more. The statute does not define 'customer' for property service providers. PSRA guidance (Quick Guide, updated July 2022): PSPs must complete CDD 'on all clients' before signing the letter of engagement, and 'must also complete CDD on customers with whom they do not have a contracted business relationship but with whom they are carrying out an occasional transaction ... greater than or equal to €15,000 (e.g. a purchaser paying a booking deposit)'. When ML/TF is suspected, CDD is required regardless of amount. Product rule: CDD the vendor-client always, and the purchaser whenever the agent takes a booking deposit or other payment of EUR 15,000 or more, or acts for the purchaser.",
+    "retention_years": 5,
+    "retention_trigger": "s.55(4): 'not less than 5 years after' (a) for CDD records, the date the designated person ceases to provide any service to the customer or the date of the last transaction, whichever is later; (c)-(e) for transaction/service records, the date the transaction or service is completed or discontinued.",
+    "extension": "s.55(4A)-(4C): a Garda not below the rank of Sergeant may direct in writing retention for up to a further 5 years for a ML/TF investigation or likely prosecution; the direction expires when notified as no longer needed. PSRA guidance: delete personal data on AML records when the retention period ends; records survive ceasing to trade.",
+    "id_copy": "Required: s.55(2): 'a designated person shall take the original or a copy of all documents used by the designated person for the purposes of Chapter 3, including all documents used to verify the identity of customers ... or beneficial owners'.",
+    "sources": [
+      "https://revisedacts.lawreform.ie/eli/2010/act/6/revised/en/html",
+      "https://revisedacts.lawreform.ie/eli/2010/act/6/section/25/revised/en/html",
+      "https://www.psr.ie/wp-content/uploads/2022/07/Quick-Guide-PSPs-Key-AML-Responsibilities-Updated-July-2022-1.pdf",
+      "https://www.psr.ie/licensees/anti-money-laundering/"
+    ]
+  },
+  "accounting": {
+    "books_years": 6,
+    "annual_accounts_years": null,
+    "source_documents_years": 6,
+    "trigger": "Companies Act 2014 s.285: accounting records (and s.283(2) information/returns) 'shall be preserved ... for a period of at least 6 years after the end of the financial year containing the latest date to which the record, information or return relates'. Taxes Consolidation Act 1997 s.886(4)(a): tax records and linking documents retained 'for a period of 6 years after the completion of the transactions, acts or operations to which they relate'. If the tax return was filed late, retention runs 6 years from the end of the year of assessment/accounting period in which the return was delivered.",
+    "law": "Companies Act 2014 s.285 (with s.281 duty to keep accounting records); Taxes Consolidation Act 1997 s.886(4). No separate statutory retention period for annual financial statements was located; they are filed publicly with the CRO.",
+    "sources": [
+      "https://revisedacts.lawreform.ie/eli/2014/act/38/section/285/revised/en/html",
+      "https://www.irishstatutebook.ie/eli/1997/act/39/section/886/enacted/en/html"
+    ]
+  },
+  "limitation": {
+    "general_years": 6,
+    "commission_years": 6,
+    "trigger": "Statute of Limitations 1957 s.11(1): actions 'shall not be brought after the expiration of six years from the date on which the cause of action accrued', incl. (a) 'actions founded on simple contract'. A commission claim is a simple-contract claim and accrues when the fee falls due under the letter of engagement, typically on completion of the sale or signing of the letting.",
+    "law": "Statute of Limitations 1957 s.11(1)(a). No special shorter period for estate-agent commission was found.",
+    "sources": ["https://revisedacts.lawreform.ie/eli/1957/act/6/section/11/revised/en/html"]
+  },
+  "id_copies": {
+    "rule": "No Irish statute restricting the copying of identity documents outside AML was found. Outside the 2010 Act, only the GDPR principles apply (lawful basis, data minimisation, storage limitation). The AML copy duty in s.55(2) does not authorise copies for non-AML purposes such as ordinary lettings below EUR 10,000/month.",
+    "law": "GDPR Art. 5(1)(c),(e) and Data Protection Act 2018 (general); no specific provision located.",
+    "sources": []
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "No Data Protection Commission guidance on copying ID documents was checked, so no specific Irish rule on ID copies outside AML is confirmed.",
+    "No separate statutory retention period was found for annual financial statements (annual_accounts_years = null).",
+    "The rule that a purchaser must be CDD'd only for occasional transactions of EUR 15,000 or more comes from PSRA guidance; the statutory basis (the 'occasional transaction' threshold in the 2010 Act) was not re-read.",
+    "Whether an agent may lawfully hold client engagements with both vendor and purchaser in the same sale is not addressed expressly; the 'disclosure' classification rests on the absence of a prohibition plus Reg. 21."
+  ]
+}

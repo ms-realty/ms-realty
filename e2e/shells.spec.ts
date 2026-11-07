@@ -383,7 +383,7 @@ test.describe("not found without JavaScript (§17.1, WCAG 3.1.1)", () => {
 });
 
 test.describe("crawl policy (§20.4)", () => {
-  test("explicit staging blocks crawling while preserving canonical, hreflang and sitemap", async ({
+  test("R09 explicit staging blocks crawling while preserving canonical and approved sitemap siblings", async ({
     page,
     request,
   }) => {
@@ -394,11 +394,11 @@ test.describe("crawl policy (§20.4)", () => {
       "https://makler-realty.com/bg",
     );
     const locales = ["bg", "en", "ru", "de", "nl", "el", "he"];
-    for (const locale of locales)
-      await expect(page.locator(`link[rel="alternate"][hreflang="${locale}"]`)).toHaveAttribute(
-        "href",
-        `https://makler-realty.com/${locale}`,
-      );
+    await expect(page.locator('link[rel="alternate"][hreflang="bg"]')).toHaveAttribute(
+      "href",
+      "https://makler-realty.com/bg",
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(2);
     await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
       "href",
       "https://makler-realty.com/bg",
@@ -413,8 +413,10 @@ test.describe("crawl policy (§20.4)", () => {
     const sitemap = await request.get("/sitemap.xml");
     expect(sitemap.status()).toBe(200);
     const sitemapBody = await sitemap.text();
-    for (const locale of locales)
-      expect(sitemapBody).toContain(`<loc>https://makler-realty.com/${locale}</loc>`);
+    expect(sitemapBody).toContain("<loc>https://makler-realty.com/bg</loc>");
+    for (const locale of locales.filter((locale) => locale !== "bg"))
+      expect(sitemapBody).not.toContain(`https://makler-realty.com/${locale}`);
+    expect(sitemapBody).not.toContain("/legacy/");
   });
 });
 

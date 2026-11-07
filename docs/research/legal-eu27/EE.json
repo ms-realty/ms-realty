@@ -1,0 +1,76 @@
+{
+  "country": "Estonia",
+  "code": "EE",
+  "estate_agency": {
+    "law": "Law of Obligations Act (Võlaõigusseadus, VÕS) Chapter 37 'Brokerage contract' §§ 658–669, with authorisation-agreement rules applied via § 658(2) (incl. § 620 loyalty, § 623 conflict of interests). Checked against the current Estonian text (RT I, 20.06.2026, 18; in force 01.09.2026–31.12.2026) and the official English translation (version 01.01.2024).",
+    "regulated": "Not licensed. No statute requires a licence or professional certificate to work as a real-estate broker; the Kutsekoda occupational standard 'Kinnisvaramaakler, tase 5' (30.06.2023) states: 'Legislation does not set a professional-certificate requirement for working as a broker' ('Õigusaktides ei ole sätestatud kutsetunnistuse nõuet maaklerina töötamiseks'). The qualification (levels 5/6) is voluntary. Brokers are AML obliged entities (RahaPTS § 2(1) clauses 4 and 4^1) supervised by the Financial Intelligence Unit (RahaPTS § 64(1)); real-estate brokerage is not among the activities needing AML authorisation (RahaPTS § 70(1)). Broker must keep documents of its brokerage activity at least 3 years (VÕS § 662) and keep chronological records of brokered contracts (VÕS § 663).",
+    "dual_agency": "consent",
+    "rule": "No statutory prohibition on acting for both sides. VÕS § 668(1): a broker who, contrary to the brokerage contract, also acted for the benefit of the other party loses the right to the fee and to expense reimbursement from its mandator. VÕS § 668(2): where the broker acted for both, the parties are presumed to pay the fee in equal shares. Subsidiary authorisation-agreement rule VÕS § 623(1)-(2) (via § 658(2)): a mandatary may be the mandatary of the other party only if a conflict of interests is precluded, and must inform the mandator of any direct or indirect interest. Product rule: allow dual representation only where each brokerage contract expressly permits it in writing, with disclosure to both parties. VÕS § 661: at a party's request the broker may withhold that party's identity from the other party (broker then liable for that party's performance, § 669(2)).",
+    "quote": "VÕS § 668(1) (official EN translation): 'If, contrary to a brokerage contract, the broker has also acted for the benefit of another party to a contract ... the broker does not have the right to demand payment of a brokerage fee or the reimbursement of expenses by the mandator.' § 668(2): 'it is presumed that the parties to the contract shall pay an equal share of the brokerage fee.'",
+    "commission_both_sides": "Allowed. No cap or mandatory consumer split comparable to German BGB § 656c. Fee arises on entry into the brokered contract (VÕS § 664(1)); if unagreed, the customary local fee or a reasonable amount applies (§ 665). Where the broker acted for both parties, equal sharing is presumed (§ 668(2)); acting for the other side contrary to the brokerage contract forfeits the fee from the mandator (§ 668(1)).",
+    "sources": [
+      "https://www.riigiteataja.ee/akt/120062026018",
+      "https://www.riigiteataja.ee/en/eli/527122023005/consolide",
+      "https://www.kutsekoda.ee/wp-content/uploads/2023/07/Kinnisvaramaakler-tase-5_30.06.2023.docx",
+      "https://www.riigiteataja.ee/en/eli/520072026005/consolide"
+    ]
+  },
+  "aml": {
+    "law": "Money Laundering and Terrorist Financing Prevention Act (Rahapesu ja terrorismi rahastamise tõkestamise seadus, RahaPTS), version in force 21.07.2026–30.03.2029 (RT I, 11.07.2026, 93): § 2(1) clauses 4 and 4^1 (scope), § 19 (when due diligence applies), § 20 (measures), § 21 (natural persons), § 46 (registration), § 47 (retention). Supervisor guidance: Rahapesu Andmebüroo 'Rahapesu ja terrorismi rahastamise riskide juhtimine ning hoolsusmeetmete kohaldamine' (2026).",
+    "sale_scope": "Every mediated purchase or sale of an immovable, no value threshold: § 2(1) clause 4 'persons that mediate the purchase or sale of an immovable'. Due diligence applies on establishing a business relationship (§ 19(1) clause 1), on occasional transactions of at least EUR 15,000 (§ 19(1) clause 2), and on any ML/TF suspicion regardless of thresholds (§ 19(1) clause 4).",
+    "letting_threshold": "EUR 10,000 per month. § 2(1) clause 4^1: 'persons that mediate transactions of use of an immovable whereby the usage fee agreed in the transaction amounts to no less than 10,000 euros per month'; § 19(2^2): due diligence 'at least every time when the value of the usage fee agreed on in the transaction amounts to no less than 10,000 euros a month'. Lettings below the threshold are outside RahaPTS.",
+    "both_parties": "unclear — The Act requires identification of 'a customer or a person participating in an occasional transaction' (§ 20(1) clause 1); 'customer' means a person with a business relationship with the obliged entity (§ 3 clause 5). There is no explicit duty for a broker to identify the counterparty of its client. FIU guidance (2026) para 4.280.3 nevertheless makes the buyer's high-risk origin or the seller's high-risk bank account an enhanced-due-diligence trigger for brokers, so the counterparty must at least be risk-screened. Product rule: full CDD on own client(s); identify and screen the counterparty where it participates in the transaction the broker mediates.",
+    "retention_years": 5,
+    "retention_trigger": "5 years after termination of the business relationship for identification documents, § 46 records and business-relationship documents (§ 47(1)); 5 years after making the transaction or performing the duty to report for transaction documents and reporting data (§ 47(3)). Authentic Estonian text of § 47(1) says 'viis aastat' (five years); the English translation says 'no less than five years'.",
+    "extension": "§ 47(7): data must be deleted after the periods expire unless sector legislation provides otherwise; on a compliance notice of the competent supervisory authority, data important for ML/TF prevention, detection or investigation may be kept longer, 'but not for more than five years after the expiry of the first time limit' (max 10 years in total).",
+    "id_copy": "Required by default: § 47(1) 'the obliged entity must retain the originals or copies of the documents specified in ... §§ 21, 22 and 46'. Exception § 47(1^1): no copy needed where the person was identified using e-identification and trust services, or the document is available in a state electronic database for the whole retention period (then the reproducible query record suffices, § 47(5)). Acceptable documents: § 21(3) (Estonian ID documents, valid foreign travel document, qualifying driving licence). § 21(4): if the original is unavailable, a notarised or officially certified copy, or other reliable independent information from at least two different sources.",
+    "sources": [
+      "https://www.riigiteataja.ee/en/eli/520072026005/consolide",
+      "https://www.riigiteataja.ee/akt/111072026093",
+      "https://fiu.ee/sites/default/files/documents/2026-10/Rahapesu%20ja%20terrorismi%20rahastamise%20riskide%20juhtimine%20ning%20hoolsusmeetmete%20kohaldamine%20Rahapesu%20Andmeb%C3%BCroo%20j%C3%A4relevalvatavatele%20kohustatud%20isikutele.pdf",
+      "https://fiu.ee/oigusaktid-ja-juhendid/juhendid"
+    ]
+  },
+  "accounting": {
+    "books_years": 7,
+    "annual_accounts_years": 7,
+    "source_documents_years": 7,
+    "trigger": "Source documents: 7 years 'as of the end of the financial year when a business transaction was recorded in the accounting journals and ledgers on the basis of the source document' (RPS § 12(1)). Ledgers, journals, contracts, financial statements, reports and other documents needed to reconstruct transactions: 7 years 'as of the end of the corresponding financial year' (RPS § 12(2)). Documents on long-term liabilities or rights: 7 years after expiry of their validity (§ 12(3)). Accounting rules: 7 years after amendment or replacement (§ 12(4)). Tax: at least 7 years 'as of 1 January of the year following the preparation or receipt of the document' (MKS § 58).",
+    "law": "Accounting Act (Raamatupidamise seadus, RPS) § 12 (EN version in force 20.07.2025–31.12.2026); Taxation Act (Maksukorralduse seadus, MKS) § 58 (current ET text RT I, 16.10.2026, 11).",
+    "sources": [
+      "https://www.riigiteataja.ee/en/eli/510072025005/consolide",
+      "https://www.riigiteataja.ee/en/eli/501072024004/consolide",
+      "https://www.riigiteataja.ee/akt/116102026011"
+    ]
+  },
+  "limitation": {
+    "general_years": 3,
+    "commission_years": 3,
+    "trigger": "General: limitation begins when the claim falls due (TsÜS § 147(1)-(2)). Agreed remuneration (brokerage fee): 'begins from the end of the year during which the claim fell due'; if due on invoice, from the end of the calendar year in which the right to invoice accrued (TsÜS § 147(3)). The fee falls due on entry into the brokered contract (VÕS § 664(1)) or on fulfilment of a suspensive condition (§ 664(4)). 10 years if the obligor breached intentionally (TsÜS § 146(4)); 10 years for claims to transfer or encumber immovable property (§ 146(5)). Parties may shorten the period, or extend it up to 10 years (§ 145(1)-(2)).",
+    "law": "Civil Code General Part Act (Tsiviilseadustiku üldosa seadus, TsÜS) §§ 145, 146(1), 146(4), 147(1)-(3); current ET text RT I, 31.12.2024, 48 (in force from 01.01.2025). § 146(1): 'The limitation period for a claim arising from a transaction is three years.'",
+    "sources": [
+      "https://www.riigiteataja.ee/en/eli/503022023002/consolide",
+      "https://www.riigiteataja.ee/akt/131122024048",
+      "https://www.riigiteataja.ee/akt/120062026018"
+    ]
+  },
+  "id_copies": {
+    "rule": "No Estonian statute specifically restricts private parties from copying identity documents (no equivalent of German PAuswG § 20 found). The Identity Documents Act (ITDS, current text RT I, 30.06.2026, 53) mentions copies only for EU certificates of return handled by the state. Outside AML, copying an ID document is therefore governed by the GDPR (lawful basis, data minimisation) and the Personal Data Protection Act; within AML, RahaPTS § 47(1) requires a copy unless § 47(1^1) applies.",
+    "law": "Identity Documents Act (Isikut tõendavate dokumentide seadus, ITDS) — no copy rule; GDPR Art. 5(1)(c) and 6; RahaPTS § 47(1), (1^1).",
+    "sources": [
+      "https://www.riigiteataja.ee/akt/130062026053",
+      "https://www.riigiteataja.ee/en/eli/505012026002/consolide",
+      "https://www.riigiteataja.ee/en/eli/520072026005/consolide"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Dual agency classification: whether a brokerage contract that is silent on dual activity makes acting for the other side 'contrary to a brokerage contract' (VÕS § 668(1)); no Supreme Court ruling on § 668 was found. 'consent' is a conservative product reading, not a statutory consent formality.",
+    "Whether a broker must identify the counterparty (non-client) as a 'person participating in an occasional transaction' under RahaPTS § 20(1) clause 1; the statute and FIU guidance do not say so explicitly.",
+    "No primary Data Protection Inspectorate (AKI) guidance was found on copying ID documents outside AML; the GDPR-based position is an inference.",
+    "Absence of any other licensing or registration duty for brokers under the General Part of the Economic Activities Code Act (MSÜS) was not checked exhaustively; only RahaPTS § 70 and the Kutsekoda standard were checked.",
+    "Content of 'Eesti kinnisvaramaaklerite head tavad' (industry good-practice code, Annex 4 to the Kutsekoda standard) on dual agency was not retrieved.",
+    "English translations used for quotes are Riigi Teataja informational translations; VÕS and MKS English versions predate the current Estonian consolidated texts, which were checked for the cited sections (VÕS §§ 623, 662, 664, 668; MKS § 58; TsÜS §§ 146-147; RahaPTS § 47) and match.",
+    "Forward change not analysed: EU AML Regulation (EU) 2024/1624 applies from 10.07.2027 and will directly govern estate agents' CDD and retention."
+  ]
+}

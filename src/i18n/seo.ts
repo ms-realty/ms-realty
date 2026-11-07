@@ -1,7 +1,7 @@
-// Public crawl policy from the owner zero-loss launch gate (2026-10-01).
-// Private surfaces retain their own access and index restrictions.
+// R09/AT27: routability preserves URL identity; indexing requires an approved edition.
+// Public noindex pages remain crawlable outside staging so crawlers can read the policy.
 import type { Metadata } from "next";
-import { defaultLocale, type PublicLocale, publicLocales } from "./config";
+import { defaultLocale, localePolicy, type PublicLocale, publicLocales } from "./config";
 
 export function stagingEnabled(env: Record<string, string | undefined> = process.env): boolean {
   if (env.STAGING === undefined || env.STAGING === "false") return false;
@@ -59,10 +59,15 @@ export function localizedMetadata({
   availableIn = publicLocales,
   staging = stagingEnabled(),
 }: LocalizedMetadataInput): Pick<Metadata, "alternates" | "robots"> {
-  const robots = { index: !staging, follow: !staging };
+  const robots = {
+    index: !staging && localePolicy(locale).indexable && availableIn.includes(locale),
+    follow: !staging,
+  };
   if (!origin) return { robots };
   const url = (target: PublicLocale) => new URL(localizedPath(target, path), origin).toString();
-  const siblings = publicLocales.filter((target) => availableIn.includes(target));
+  const siblings = publicLocales.filter(
+    (target) => localePolicy(target).indexable && availableIn.includes(target),
+  );
   const languages = Object.fromEntries(siblings.map((target) => [target, url(target)]));
   if (siblings.includes(defaultLocale)) languages["x-default"] = url(defaultLocale);
   return { alternates: { canonical: url(locale), languages }, robots };
