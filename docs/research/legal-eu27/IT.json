@@ -1,0 +1,75 @@
+{
+  "country": "Italy",
+  "code": "IT",
+  "estate_agency": {
+    "law": "Codice civile artt. 1754-1765 (mediazione); Legge 3 febbraio 1989 n. 39 (agenti di affari in mediazione), artt. 2, 3, 5; D.Lgs. 26 marzo 2010 n. 59 art. 73 (ruolo abolished, replaced by SCIA to the Chamber of Commerce and Registro imprese/REA entry).",
+    "regulated": "Yes. Mediation may be exercised only by persons meeting the L. 39/1989 requirements. D.Lgs. 59/2010 art. 73(1) abolished the ruolo ('È soppresso il ruolo di cui all'articolo 2 della legge 3 febbraio 1989, n. 39'). Since then the activity requires a SCIA to the Chamber of Commerce (art. 73(2)) and entry in the Registro delle imprese/REA. Professional liability insurance is mandatory (L. 39/1989 art. 3(5-bis)). L. 39/1989 art. 5(3) makes mediation incompatible with certain activities 'e comunque in situazioni di conflitto di interessi'.",
+    "dual_agency": "allowed",
+    "rule": "Under the Civil Code the mediatore is by definition independent of both parties and is entitled to commission from each of them. Art. 1754 defines the mediator as one who connects two or more parties for a deal 'senza essere legato ad alcuna di esse da rapporti di collaborazione, di dipendenza o di rappresentanza'. Art. 1759 obliges the mediator to disclose to 'the parties' known circumstances affecting the assessment and safety of the deal. Acting between both parties is therefore the default model, not an exception. L. 39/1989 art. 5(3) bars mediation in situations of conflict of interest, which concerns the mediator's own interests, not the two-sided role. An agent who signs a mandate to represent only one side (mediazione atipica/unilaterale) is outside the art. 1754 model for that relationship.",
+    "quote": "c.c. art. 1754: 'Is a mediator who puts two or more parties in contact for the conclusion of a deal, without being bound to any of them by relationships of collaboration, dependence or representation.' [È mediatore colui che mette in relazione due o più parti ... senza essere legato ad alcuna di esse ...] Art. 1755: 'The mediator is entitled to commission from each of the parties, if the deal is concluded as a result of his intervention.' [ha diritto alla provvigione da ciascuna delle parti]",
+    "commission_both_sides": "Yes, by statute: c.c. art. 1755 gives the right to commission 'da ciascuna delle parti' (from each party) once the deal is concluded through the mediator's intervention. Absent agreement, tariffs or usage, the amount and the split between the parties are set by the judge 'secondo equità' (equitably).",
+    "sources": [
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1754",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1755",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1759",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:1989-02-03;39~art2",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:1989-02-03;39~art3",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:1989-02-03;39~art5",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2010-03-26;59~art73"
+    ]
+  },
+  "aml": {
+    "law": "D.Lgs. 21 novembre 2007 n. 231 (as amended by D.Lgs. 90/2017 and 125/2019): art. 3(5)(e) obliged entities; art. 1(2)(f) 'cliente'; artt. 17-19 adeguata verifica; art. 31 conservation; art. 32 conservation methods.",
+    "sale_scope": "All sale mediation by registered agents, with no value threshold. Art. 3(5)(e): 'gli agenti in affari che svolgono attività in mediazione immobiliare in presenza dell'iscrizione al Registro delle imprese, ai sensi della legge 3 febbraio 1989, n. 39, anche quando agiscono in qualità di intermediari nella locazione di un bene immobile e, in tal caso, limitatamente alle sole operazioni per le quali il canone mensile è pari o superiore a 10.000 euro'.",
+    "letting_threshold": "Lettings are covered only for operations with monthly rent of EUR 10,000 or more (art. 3(5)(e)).",
+    "both_parties": "yes (UNCONFIRMED in primary text): no express statutory rule was found. Art. 1(2)(f) defines 'cliente' as the person who 'richiede o ottiene una prestazione professionale a seguito del conferimento di un incarico'. Under c.c. artt. 1754-1755 the mediator serves, and is paid by, both parties. Sector guidance (FIMAA Milano vademecum; operator guides) treats both seller/landlord and buyer/tenant as clients: seller before the mandate is signed, buyer before the purchase proposal is signed. Product rule: CDD both parties.",
+    "retention_years": 10,
+    "retention_trigger": "Art. 31(3): 'per un periodo di 10 anni dalla cessazione del rapporto continuativo, della prestazione professionale o dall'esecuzione dell'operazione occasionale' (10 years from end of the continuing relationship or professional service, or from execution of the occasional operation).",
+    "extension": "None in art. 31. Art. 32 requires a retention system that complies with data-protection law and acquires data 'tempestively' (within 30 days).",
+    "id_copy": "Required: art. 31(2): obliged entities 'conservano copia dei documenti acquisiti in occasione dell'adeguata verifica della clientela' (keep a copy of documents acquired during customer due diligence). The record must allow reconstruction of the mandate date, the identification data of the client, beneficial owner and executor, and the date, amount, purpose and means of payment.",
+    "sources": [
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2007-11-21;231~art3",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2007-11-21;231~art1",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2007-11-21;231~art31",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2007-11-21;231~art32",
+      "https://www.fimaamilano.it/public/filetiny/antiriciclaggio2021vademecumfimaamilomb.pdf"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 10,
+    "trigger": "c.c. art. 2220: 'Le scritture devono essere conservate per dieci anni dalla data dell'ultima registrazione' (10 years from the date of the last entry). The same period applies to invoices, letters and telegrams received and copies of those sent. Tax extension: art. 22 DPR 600/1973 (text in force until 31.12.2026) requires mandatory records to be kept 'fino a quando non siano definiti gli accertamenti relativi al corrispondente periodo d'imposta anche oltre il termine stabilito dall'articolo 2220' (until tax assessments for the period are final, even beyond the art. 2220 term). Art. 22 is repealed from 1.1.2027 by D.Lgs. 5 agosto 2026 n. 141 (Testo unico adempimenti e accertamento).",
+    "law": "Codice civile art. 2220; DPR 29 settembre 1973 n. 600 art. 22 (until 31.12.2026); from 1.1.2027 the Testo unico adempimenti e accertamento (D.Lgs. 141/2026), reportedly art. 29.",
+    "sources": [
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art2220",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.del.presidente.della.repubblica:1973-09-29;600~art22!vig=2026-11-07"
+    ]
+  },
+  "limitation": {
+    "general_years": 10,
+    "commission_years": 1,
+    "trigger": "c.c. art. 2935: prescription 'comincia a decorrere dal giorno in cui il diritto può essere fatto valere' (runs from the day the right can be enforced). For commission that is the conclusion of the deal (art. 1755: right arises 'se l'affare è concluso'). Art. 2950: 'Si prescrive in un anno il diritto del mediatore al pagamento della provvigione' (the mediator's right to payment of commission prescribes in one year).",
+    "law": "Codice civile art. 2946 (ordinary prescription 10 years: 'i diritti si estinguono per prescrizione con il decorso di dieci anni'); art. 2950 (mediator commission: 1 year); art. 2935 (start). Rents and other lease payments: 5 years (art. 2948 n. 3).",
+    "sources": [
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art2946",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art2950",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art2935",
+      "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art2948"
+    ]
+  },
+  "id_copies": {
+    "rule": "Restricted by Garante practice: making and keeping a copy is lawful only where a legal rule provides for it, or where the controller must be able to prove it identified the person. Showing the document is otherwise enough. Garante general provision of 27 October 2005 ('Quando identificare e fotocopiare i documenti di riconoscimento dei clienti', docweb 1189435): acquiring and keeping a copy 'possono invece ritenersi giustificate solo se: una disposizione normativa prevede espressamente l'acquisizione e la conservazione temporanea di tale copia, oppure se ... deve poter dimostrare di aver identificato' the person. For agents: copy ID only under AML (D.Lgs. 231/2007 art. 31(2)) or another express legal basis. Do not copy ID for below-threshold lettings or casual enquiries.",
+    "law": "Garante per la protezione dei dati personali, provvedimento generale 27.10.2005 [docweb 1189435] (issued under the former Codice art. 11 principles of relevance and non-excess; now GDPR Art. 5(1)(c)).",
+    "sources": [
+      "https://www.garanteprivacy.it/web/guest/home/docweb/-/docweb-display/docweb/1189435"
+    ]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "AML CDD on both seller and buyer: supported by c.c. artt. 1754-1755 and sector guidance (FIMAA), but no explicit statutory sentence or UIF/MEF/GdF circular was found.",
+    "The successor article for the tax retention rule from 1.1.2027 (reportedly art. 29 of the Testo unico adempimenti e accertamento, D.Lgs. 141/2026) was not read in Gazzetta Ufficiale.",
+    "The 10-year retention of the annual financial statement (bilancio) is derived from c.c. art. 2220 because the bilancio is part of the scritture (libro degli inventari); the art. 2217 link was not re-read.",
+    "Whether the 2005 Garante provision (directed at banks and post offices) binds estate agents directly; it is applied here as the Garante's general standard. A 2026 Garante note on hotels reportedly takes the same line (secondary reports only)."
+  ]
+}

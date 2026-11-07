@@ -1,0 +1,66 @@
+{
+  "country": "Romania",
+  "code": "RO",
+  "estate_agency": {
+    "law": "Codul civil (Legea 287/2009, republicată) arts 2096-2102 (contractul de intermediere). No sector-specific estate-agency statute.",
+    "regulated": "Not licensed: no statutory licence or registration for estate agents beyond company registration and AML notification to ONPCSB. A draft regulating access to the profession (authorisation plus a RENII register at ANCPI, training, professional insurance) is reported in Parliament; not confirmed as adopted.",
+    "dual_agency": "allowed",
+    "rule": "The Civil Code does not prohibit one intermediary dealing with both sides. Art 2096(2): the intermediary is not the agent (prepus) of the intermediated parties and is independent of them. Art 2100: it must give the third party all information on the advantages of the deal, provided it does not culpably harm the client's interests. Art 2102: it may represent the parties in concluding the contract only if expressly authorised. Art 2097(1): commission is due from the client only if the contract is concluded as a result of the intermediation.",
+    "quote": "Codul civil art 2096(2): 'Intermediarul nu este prepusul părţilor intermediate şi este independent faţă de acestea în executarea obligaţiilor sale.' (EN: The intermediary is not the agent of the intermediated parties and is independent of them in performing its obligations.) Art 2102: '... numai dacă a fost împuternicit expres în acest sens.' (EN: ... only if expressly empowered to do so.)",
+    "commission_both_sides": "Not prohibited. Each client who signs an intermediation contract owes commission (art 2097). Art 2099: several intermediaries split a global fee equally unless agreed otherwise. Art 2101: a client who fails to notify conclusion within 15 days owes double remuneration unless the contract provides otherwise.",
+    "sources": [
+      "https://legeaz.net/noul-cod-civil/art-2096-notiune-contractul-de-intermediere",
+      "https://legeaz.net/noul-cod-civil/art-2097-remunerarea-intermediarului-contractul-de-intermediere",
+      "https://legeaz.net/noul-cod-civil/art-2102-reprezentarea-partilor-intermediate-contractul-de-intermediere"
+    ]
+  },
+  "aml": {
+    "law": "Legea nr. 129/2019, art 5(1)(h) scope; art 11(10) inserted by Legea 86/2025 (MO 483/23.05.2025); art 21 retention. Supervisor: ONPCSB (Oficiul Național de Prevenire și Combatere a Spălării Banilor).",
+    "sale_scope": "Every transaction of agenții și dezvoltatorii imobiliari (art 5(1)(h)).",
+    "letting_threshold": "Lettings only where monthly rent is the lei equivalent of EUR 10,000 or more (art 5(1)(h)).",
+    "both_parties": "yes. Art 11(10), added by Legea 86/2025: 'În cazul tranzacţiilor imobiliare, agentul imobiliar aplică măsurile de cunoaştere a clientelei atât pentru promitentul vânzător, cât şi pentru promitentul cumpărător al imobilului.' (EN: In real-estate transactions the agent applies KYC measures to both the promissory seller and the promissory buyer.)",
+    "retention_years": 5,
+    "retention_trigger": "Art 21(1)-(2): 5 years from the end of the business relationship with the client or from the date of the occasional transaction.",
+    "extension": "Art 21(3): extended for the period indicated by the competent authorities, by no more than 5 years. Art 21(4): on expiry, personal data must be deleted unless other law requires retention.",
+    "id_copy": "Allowed and expected: art 21(1) lists 'copii ale documentelor de identificare' (EN: copies of identification documents) among the CDD records to keep.",
+    "sources": [
+      "https://onpcsb.ro/uploads/articole/attachments/67c5a39e43ad3329586263.pdf",
+      "https://onpcsb.ro/uploads/articole/attachments/6835bee977493740323487.pdf",
+      "https://onpcsb.ro/uploads/articole/attachments/66976f6eead3b692189279.pdf"
+    ]
+  },
+  "accounting": {
+    "books_years": 5,
+    "annual_accounts_years": 10,
+    "source_documents_years": 5,
+    "trigger": "Legea contabilității 82/1991 art 25(1) as amended: mandatory accounting registers and source documents are kept for 5 years from the close of the financial year in which they were drawn up. Art 23(1): electronically processed accounting data, 5 years from 1 January of the year after that financial year.",
+    "law": "Legea contabilității nr. 82/1991, art 25(1) and art 23(1), as amended by the 2023 law adopted as Senate file L621/2022",
+    "sources": ["https://www.senat.ro/legis/PDF/2022/22L621FG.pdf"]
+  },
+  "limitation": {
+    "general_years": 3,
+    "commission_years": 2,
+    "trigger": "Art 2523: from when the right-holder knew or should have known the right arose. Art 2524(1): for contractual obligations, from when the obligation becomes due.",
+    "law": "Codul civil art 2517 ('Termenul prescripţiei este de 3 ani, dacă legea nu prevede un alt termen'); art 2519(2): 2 years for 'plata remuneraţiei cuvenite intermediarilor pentru serviciile prestate în baza contractului de intermediere' (EN: payment of remuneration owed to intermediaries for services under an intermediation contract); arts 2523-2524",
+    "sources": [
+      "https://legeaz.net/noul-cod-civil/art-2517-termenul-general-de-3-ani-termenul-prescriptiei-extinctive",
+      "https://legeaz.net/noul-cod-civil/art-2519-termenul-de-prescriptie-de-2-ani-termenul-prescriptiei-extinctive"
+    ]
+  },
+  "id_copies": {
+    "rule": "Legea 190/2018 art 4: processing a national identification number (CNP, ID card series and number, passport number), including collecting documents that contain it, needs a GDPR art 6(1) basis. Under legitimate interest (6(1)(f)) the controller must have: technical and organisational measures for minimisation and security, a designated DPO, retention periods set by nature and purpose, and regular staff training. AML copies rest on a legal obligation (Legea 129/2019 art 21).",
+    "law": "Legea nr. 190/2018 arts 2(b), 4",
+    "sources": [
+      "https://dataprotection.ro/servlet/ViewDocument?id=1520",
+      "https://dataprotection.ro/servlet/ViewDocument?id=1685"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "legislatie.just.ro was unreachable. Civil Code articles were read from the legeaz.net mirror, not the official portal.",
+    "Annual financial statements retention of 10 years: secondary sources only (reported as art 28(2^1) or art 25); not verified in the official text.",
+    "Number and date of the law that enacted the 5-year art 25(1) retention (reported as Legea 36/2023): only the Senate adopted text was read.",
+    "Legea 129/2019 consolidated text read from an ONPCSB-hosted Eurolex consolidation up to OUG 123/2022, plus Legea 86/2025 as published. Later amendments after May 2025 not checked.",
+    "Status of the Romanian draft law licensing estate agents (RENII/ANCPI): reported pending; not confirmed."
+  ]
+}

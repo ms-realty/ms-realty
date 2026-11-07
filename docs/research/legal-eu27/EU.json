@@ -1,0 +1,797 @@
+{
+  "meta": {
+    "scope": "EU-level law only. National transpositions (AMLD4, UCPD, CRD) and national licensing are not covered except where marked.",
+    "researched_on": "2026-11-07",
+    "method": "Quotes were checked verbatim against EUR-Lex HTML texts, AMLA and EDPB PDFs and the Commission regulated-professions database API.",
+    "key_dates": {
+      "AMLD4_national_law_applies_until": "2027-07-09 (Directive (EU) 2015/849 repealed with effect from 10 July 2027, AMLD6 Art. 77)",
+      "AMLR_applies_from": "2027-07-10 (AMLR Art. 90)",
+      "AMLD6_transposition": "2027-07-10 (AMLD6 Art. 78(1)); real-estate single access point Art. 18 by 2029-07-10",
+      "CRD_withdrawal_function_Art_11a_applies_from": "2026-06-19 (Directive (EU) 2023/2673, Art. 2(1))"
+    }
+  },
+  "aml_now": {
+    "rules": [
+      {
+        "point": "Obliged entity: estate agents (sales without threshold; lettings only at >= EUR 10 000 monthly rent)",
+        "rule": "Estate agents are obliged entities for sale intermediation regardless of value. For lettings they are obliged only for transactions with a monthly rent of EUR 10 000 or more.",
+        "article": "Directive (EU) 2015/849 Art. 2(1)(3)(d), as amended by Directive (EU) 2018/843",
+        "quote": "estate agents including when acting as intermediaries in the letting of immovable property, but only in relation to transactions for which the monthly rent amounts to EUR 10 000 or more",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Who is the customer",
+        "rule": "AMLD4 contains no definition of 'customer' and no estate-agent-specific rule on whether the counterparty (buyer/tenant) is a customer. Each Member State's transposition decides; see unconfirmed.",
+        "article": "Directive (EU) 2015/849 Art. 3 (definitions; no 'customer' definition)",
+        "quote": "",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Business relationship definition",
+        "rule": "A mandate with an element of duration (e.g. a sale or letting mandate) is a business relationship and triggers CDD.",
+        "article": "Directive (EU) 2015/849 Art. 3(13)",
+        "quote": "which is expected, at the time when the contact is established, to have an element of duration",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "When CDD is required",
+        "rule": "CDD applies when establishing a business relationship, for occasional transactions of EUR 15 000 or more, on suspicion regardless of thresholds, and on doubts about earlier identification data.",
+        "article": "Directive (EU) 2015/849 Art. 11(a), (b)(i), (e), (f)",
+        "quote": "amounts to EUR 15 000 or more",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "CDD measures",
+        "rule": "Identify and verify the customer from reliable independent sources (incl. eID), identify the beneficial owner, understand purpose and nature, monitor; verify authority of anyone acting for the customer.",
+        "article": "Directive (EU) 2015/849 Art. 13(1)",
+        "quote": "identifying the customer and verifying the customer's identity on the basis of documents, data or information obtained from a reliable and independent source",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "CDD timing",
+        "rule": "Verify identity of customer and beneficial owner before the business relationship is established or the transaction is carried out; Member States may allow completion during establishment only where risk is low, then as soon as practicable.",
+        "article": "Directive (EU) 2015/849 Art. 14(1), (2)",
+        "quote": "take place before the establishment of a business relationship or the carrying out of the transaction",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Inability to complete CDD",
+        "rule": "If CDD cannot be completed, do not establish the relationship or carry out the transaction, terminate the relationship, and consider a suspicious transaction report.",
+        "article": "Directive (EU) 2015/849 Art. 14(4)",
+        "quote": "shall terminate the business relationship and consider making a suspicious transaction report to the FIU",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Ongoing CDD on existing customers",
+        "rule": "Apply CDD to existing customers at appropriate times on a risk basis or when circumstances change.",
+        "article": "Directive (EU) 2015/849 Art. 14(5)",
+        "quote": "at appropriate times to existing customers on a risk-sensitive basis",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "ID copies and record keeping: 5 years",
+        "rule": "Retain a copy of the documents and information needed for CDD (incl. eID data) and transaction records for five years after the end of the business relationship or the date of the occasional transaction.",
+        "article": "Directive (EU) 2015/849 Art. 40(1)(a), (b)",
+        "quote": "for a period of five years after the end of the business relationship with their customer or after the date of an occasional transaction",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Deletion duty and extension up to 5 more years",
+        "rule": "On expiry, personal data must be deleted unless national law provides otherwise; Member States may allow or require further retention after a necessity/proportionality assessment, capped at five additional years.",
+        "article": "Directive (EU) 2015/849 Art. 40(1), second subparagraph",
+        "quote": "Member States shall ensure that obliged entities delete personal data, unless otherwise provided for by national law",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Extension cap",
+        "rule": "Any national further retention may not exceed five additional years.",
+        "article": "Directive (EU) 2015/849 Art. 40(1), second subparagraph",
+        "quote": "That further retention period shall not exceed five additional years",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "AML data purpose limitation",
+        "rule": "Personal data processed under AML rules may be used only for AML/CFT; commercial use is prohibited.",
+        "article": "Directive (EU) 2015/849 Art. 41(2)",
+        "quote": "The processing of personal data on the basis of this Directive for any other purposes, such as commercial purposes, shall be prohibited",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "AML privacy notice before onboarding",
+        "rule": "Before establishing a business relationship or occasional transaction, give new clients data-protection information including a notice of AML processing obligations.",
+        "article": "Directive (EU) 2015/849 Art. 41(3)",
+        "quote": "Obliged entities shall provide new clients with the information required pursuant to Article 10 of Directive 95/46/EC before establishing a business relationship",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Restriction of access rights",
+        "rule": "Member States must restrict data-subject access where needed to avoid prejudicing AML tasks or investigations (supports tipping-off ban).",
+        "article": "Directive (EU) 2015/849 Art. 41(4)",
+        "quote": "restricting, in whole or in part, the data subject's right of access",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      },
+      {
+        "point": "Tipping-off prohibition",
+        "rule": "Never disclose to the customer or third parties that a report has been or may be filed or that an AML analysis is under way.",
+        "article": "Directive (EU) 2015/849 Art. 39(1)",
+        "quote": "shall not disclose to the customer concerned or to other third persons the fact that information is being, will be or has been transmitted",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02015L0849-20241230"
+      }
+    ],
+    "unconfirmed": [
+      "UNCONFIRMED: whether each Member State's AMLD4 transposition treats the buyer/tenant (counterparty) of an estate agent as a 'customer'. AMLD4 itself is silent; national rules differ. Recommended product rule: apply both-party CDD now, aligning early with AMLR Art. 19(6)(c).",
+      "UNCONFIRMED: national retention extensions under Art. 40(1) (some Member States may require longer than 5 years); not researched per country.",
+      "UNCONFIRMED: national lowering of the occasional-transaction threshold or extension of AML duties to lettings below EUR 10 000/month.",
+      "UNCONFIRMED: Bulgarian transposition specifics (ZMIP/PPZMIP) — outside this EU-level research."
+    ]
+  },
+  "aml_amlr": {
+    "rules": [
+      {
+        "point": "Date of application",
+        "rule": "AMLR applies from 10 July 2027 (football agents/clubs from 10 July 2029). Until then national AMLD4 transpositions apply.",
+        "article": "Regulation (EU) 2024/1624 Art. 90",
+        "quote": "It shall apply from 10 July 2027",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Obliged entity: estate agents and other real estate professionals",
+        "rule": "Estate agents and other real estate professionals are obliged when intermediating real estate transactions; lettings only where monthly rent is at least EUR 10 000, irrespective of payment method.",
+        "article": "Regulation (EU) 2024/1624 Art. 3(3)(d)",
+        "quote": "including in relation to the letting of immovable property for transactions for which the monthly rent amounts to at least EUR 10 000 or the equivalent in national currency, irrespective of the means of payment",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Both parties are customers",
+        "rule": "For real estate agents, both parties to the transaction (seller and buyer; lessor and lessee for in-scope lettings) are customers for CDD purposes.",
+        "article": "Regulation (EU) 2024/1624 Art. 19(6)(c)",
+        "quote": "in the case of real estate agents, both parties to the transaction",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "CDD triggers",
+        "rule": "CDD applies when establishing a business relationship, for occasional transactions of at least EUR 10 000 (or lower RTS value), on suspicion, on doubts about identity data, and on doubts whether the person is the customer.",
+        "article": "Regulation (EU) 2024/1624 Art. 19(1)(a), (b), (d), (e), (f)",
+        "quote": "when carrying out an occasional transaction of a value of at least EUR 10 000",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "CDD timing for real estate agents",
+        "rule": "Verification of customer and beneficial owner identity for real estate agents is carried out after an offer is accepted by the seller or lessor, and always before any funds or property are transferred.",
+        "article": "Regulation (EU) 2024/1624 Art. 23(1), second subparagraph",
+        "quote": "after an offer is accepted by the seller or lessor, and in all cases before any funds or property are transferred",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Recital: no CDD on mere prospects",
+        "rule": "CDD becomes relevant once parties clearly intend to proceed (e.g. offer made and accepted); not needed for prospects who have not expressed interest in a specific property.",
+        "article": "Regulation (EU) 2024/1624 recital 56",
+        "quote": "Prior to that moment, it would not be necessary to conduct due diligence on any prospective customer",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "CDD measures",
+        "rule": "Identify/verify customer; identify beneficial owners; understand purpose; screen targeted financial sanctions; nature of business/occupation; ongoing monitoring; PEP status; persons on whose behalf; authority of representatives.",
+        "article": "Regulation (EU) 2024/1624 Art. 20(1)(a)-(i)",
+        "quote": "verifying whether the customer or the beneficial owners are subject to targeted financial sanctions",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Minimum identification data (natural persons)",
+        "rule": "Collect all names and surnames; place and full date of birth; nationalities and national ID number where applicable; usual residence (and TIN where available).",
+        "article": "Regulation (EU) 2024/1624 Art. 22(1)(a)",
+        "quote": "place and full date of birth",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "How identity is verified",
+        "rule": "Verify by identity document/passport (plus reliable independent sources where relevant) or by eIDAS electronic identification at assurance level substantial or high.",
+        "article": "Regulation (EU) 2024/1624 Art. 22(6)",
+        "quote": "the submission of an identity document, passport or equivalent",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Inability to comply and record of refusals",
+        "rule": "If CDD cannot be completed, refrain/terminate and consider an STR; keep records of CDD actions and decisions, including refusals and terminations.",
+        "article": "Regulation (EU) 2024/1624 Art. 21(1), (3)",
+        "quote": "shall also apply to situations where obliged entities refuse to enter into a business relationship",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Ongoing monitoring and update intervals",
+        "rule": "Keep customer data up to date; update interval at most 1 year for higher-risk customers and 5 years for all others.",
+        "article": "Regulation (EU) 2024/1624 Art. 26(2)",
+        "quote": "for all other customers, 5 years",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Record retention content (incl. ID copies), unredacted",
+        "rule": "Retain a copy of CDD documents and information (incl. eID data), the Art. 69(2) assessment record and any STR copy, and transaction evidence; records must not be redacted.",
+        "article": "Regulation (EU) 2024/1624 Art. 77(1)",
+        "quote": "a copy of the documents and information obtained in the performance of customer due diligence",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "References instead of copies",
+        "rule": "Copies may be replaced by references if the information can be provided immediately to authorities and cannot be modified; categories must be defined in internal procedures.",
+        "article": "Regulation (EU) 2024/1624 Art. 77(2)",
+        "quote": "replace the retention of copies of the information by a retention of the references to such information",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Retention period, trigger and deletion",
+        "rule": "Retain for 5 years from termination of the business relationship, the date of the occasional transaction, or the date of refusal; then delete personal data, without prejudice to other EU/national retention periods.",
+        "article": "Regulation (EU) 2024/1624 Art. 77(3), first subparagraph",
+        "quote": "obliged entities shall delete personal data upon expiry of the five-year period",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Retention trigger includes refusal",
+        "rule": "The 5-year clock also starts on the date of refusal to enter into a relationship or carry out a transaction.",
+        "article": "Regulation (EU) 2024/1624 Art. 77(3), first subparagraph",
+        "quote": "or on the date of refusal to enter into a business relationship or carry out an occasional transaction",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Extension: case-by-case by competent authority, max 5 years",
+        "rule": "Competent authorities may require further retention case by case where necessary for ML/TF prevention, detection, investigation or prosecution; max 5 further years.",
+        "article": "Regulation (EU) 2024/1624 Art. 77(3), second subparagraph",
+        "quote": "That further retention period shall not exceed 5 years",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Respond to FIU enquiries over 5 years",
+        "rule": "Systems must answer FIU/authority enquiries on relationships with specified persons in the 5 years before the enquiry, securely and confidentially.",
+        "article": "Regulation (EU) 2024/1624 Art. 78",
+        "quote": "during a five-year period prior to that enquiry",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "AML data: no commercial use",
+        "rule": "AML personal data may be processed only for AML/CFT; commercial use is prohibited.",
+        "article": "Regulation (EU) 2024/1624 Art. 76(4)",
+        "quote": "The processing of personal data on the basis of this Regulation for commercial purposes shall be prohibited",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Automated/AI decisions need human intervention",
+        "rule": "Automated or AI-based decisions to accept/refuse a customer or change CDD intensity require meaningful human intervention and a right to explanation and challenge.",
+        "article": "Regulation (EU) 2024/1624 Art. 76(5)(b), (c)",
+        "quote": "is subject to meaningful human intervention to ensure the accuracy and appropriateness of such a decision",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Tipping-off prohibition",
+        "rule": "Do not disclose to the customer or third parties that transactions are being assessed or reported.",
+        "article": "Regulation (EU) 2024/1624 Art. 73(1)",
+        "quote": "shall not disclose to the customer concerned or to other third persons the fact that transactions or activities are being or have been assessed",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "Cash payment limit",
+        "rule": "Traders and service providers may accept or make cash payments only up to EUR 10 000 (Member States may set lower limits).",
+        "article": "Regulation (EU) 2024/1624 Art. 80(1), (2)",
+        "quote": "may accept or make a payment in cash only up to an amount of EUR 10 000",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1624"
+      },
+      {
+        "point": "AMLD6: registration of obliged entities",
+        "rule": "Member States must subject obliged entities such as estate agents to at least minimum registration enabling supervisors to identify them, unless national licensing already does so.",
+        "article": "Directive (EU) 2024/1640 Art. 4(3)",
+        "quote": "are subject to minimum registration requirements which enable supervisors to identify them",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L1640"
+      },
+      {
+        "point": "AMLD6: national extension to other sectors",
+        "rule": "A Member State may apply all or part of AMLR to additional sectors it finds exposed (could reach lettings below the EUR 10 000 threshold).",
+        "article": "Directive (EU) 2024/1640 Art. 3(1)",
+        "quote": "it may decide to apply all or part of Regulation (EU) 2024/1624 to those additional entities",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L1640"
+      },
+      {
+        "point": "AMLD6: real estate single access point for authorities",
+        "rule": "Competent authorities get direct access to real estate ownership and transaction information via a national single access point (transposition of Art. 18 by 10 July 2029).",
+        "article": "Directive (EU) 2024/1640 Art. 18(1); Art. 78(1)",
+        "quote": "Single access point to real estate information",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L1640"
+      },
+      {
+        "point": "AMLD6: sanctions level",
+        "rule": "Maximum pecuniary sanctions for serious, repeated or systematic breaches of AMLR must reach at least twice the benefit or EUR 1 000 000.",
+        "article": "Directive (EU) 2024/1640 Art. 55(2)",
+        "quote": "twice the amount of the benefit derived from the breach where that benefit can be determined, or at least EUR 1 000 000",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L1640"
+      },
+      {
+        "point": "AMLD6: repeal of AMLD4 and transposition date",
+        "rule": "AMLD4 is repealed with effect from 10 July 2027; AMLD6 must be transposed by that date.",
+        "article": "Directive (EU) 2024/1640 Art. 77, Art. 78(1)",
+        "quote": "Directive (EU) 2015/849 is repealed with effect from 10 July 2027",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024L1640"
+      },
+      {
+        "point": "AMLA role for estate agents (indirect)",
+        "rule": "AMLA does not supervise estate agents directly; national non-financial supervisors do. AMLA coordinates them (peer reviews, breach investigations, convergence) and drafts RTS/guidelines that bind obliged entities once adopted.",
+        "article": "Regulation (EU) 2024/1620 Art. 5(4); Regulation applies from 1 July 2025 (Art. 108)",
+        "quote": "The Authority shall perform the following tasks with respect to non-financial supervisors",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1620"
+      },
+      {
+        "point": "AMLA draft RTS (Art. 19(9)): services connected to a transaction; threshold value",
+        "rule": "Draft RTS: real estate agents provide services connected to transactions; for CDD thresholds use the value of the underlying transaction, excluding fees. Not yet adopted.",
+        "article": "AMLA final draft RTS under AMLR Art. 19(9), recital 6 (final report 30/09/2026)",
+        "quote": "should consider the value of the relevant transaction, excluding any transaction or service fees",
+        "source_url": "https://www.amla.europa.eu/document/download/32e5aea0-52dc-4b0c-b93a-b0dd373fcd0f_en?filename=Final%20Report%20-%20draft%20RTS%20under%20Article%2019%289%29%20AMLR.pdf"
+      },
+      {
+        "point": "AMLA draft RTS (Art. 28(1)): verified ID copies and remote verification",
+        "rule": "Draft RTS: identity verified by ID document or a verified copy, or eID; remote alternative solutions must check the presenter is the holder and keep time-stamped, securely stored copies. Not yet adopted.",
+        "article": "AMLA final draft RTS under AMLR Art. 28(1), Art. 6(3) and Art. 7(2)(e) (final report 30/09/2026)",
+        "quote": "copies are retained, time-stamped and stored securely by the obliged entity",
+        "source_url": "https://www.amla.europa.eu/document/download/e15ab2e5-4074-4de8-bb9d-613dd8b7fdd1_en?filename=Final%20Report%20-%20draft%20RTS%2028%281%29%20AMLR.pdf"
+      }
+    ],
+    "unconfirmed": [
+      "UNCONFIRMED: Commission adoption and final content of AMLA RTS under AMLR Art. 28(1) and Art. 19(9). Final drafts dated 30/09/2026 are published; secondary sources say they were sent to the Commission on 1 October 2026. Proposed application: 6 months after entry into force.",
+      "UNCONFIRMED: whether initial identification data may also wait until offer acceptance. Art. 23(1) defers 'verification'; recital 56 says no CDD is needed on prospects before that moment. Conservative reading: collect identification at offer acceptance, finish verification before any funds or property move.",
+      "UNCONFIRMED: whether national supervisors will treat a long-running sale mandate with the seller as a business relationship requiring verification before the offer stage. Art. 23(1) second subparagraph appears to be a real-estate-specific rule that overrides this.",
+      "UNCONFIRMED: AMLA guidelines on risk factors (AMLR Art. 20(3)) — not found as adopted; AMLA's site still points to EBA ML/TF Risk Factors Guidelines for now.",
+      "UNCONFIRMED: Member State lower cash limits under AMLR Art. 80(2)-(3) (several states have lower limits; not verified per country).",
+      "UNCONFIRMED: which Member States will use AMLD6 Art. 3 to extend AMLR to lettings below EUR 10 000/month."
+    ]
+  },
+  "gdpr": {
+    "rules": [
+      {
+        "point": "Storage limitation",
+        "rule": "Keep personal data in identifiable form no longer than necessary for the purpose.",
+        "article": "Regulation (EU) 2016/679 Art. 5(1)(e)",
+        "quote": "kept in a form which permits identification of data subjects for no longer than is necessary for the purposes for which the personal data are processed",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Recital: set erasure time limits",
+        "rule": "Controllers should set time limits for erasure or periodic review.",
+        "article": "Regulation (EU) 2016/679 recital 39",
+        "quote": "time limits should be established by the controller for erasure or for a periodic review",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679"
+      },
+      {
+        "point": "Legal basis for AML processing",
+        "rule": "AML CDD processing rests on legal obligation.",
+        "article": "Regulation (EU) 2016/679 Art. 6(1)(c)",
+        "quote": "processing is necessary for compliance with a legal obligation to which the controller is subject",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Tell people the retention period",
+        "rule": "Privacy notices must state the storage period or the criteria used to determine it.",
+        "article": "Regulation (EU) 2016/679 Art. 13(2)(a), Art. 14(2)(a)",
+        "quote": "the period for which the personal data will be stored, or if that is not possible, the criteria used to determine that period",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Response deadline for data-subject requests",
+        "rule": "Act on requests under Arts. 15-22 without undue delay and within one month; extendable by two months (complexity/number), with notice and reasons within the first month.",
+        "article": "Regulation (EU) 2016/679 Art. 12(3)",
+        "quote": "without undue delay and in any event within one month of receipt of the request",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Refusal must also be answered within one month",
+        "rule": "If not acting on a request, inform the person within one month of the reasons and of the right to complain and seek a judicial remedy.",
+        "article": "Regulation (EU) 2016/679 Art. 12(4)",
+        "quote": "at the latest within one month of receipt of the request of the reasons for not taking action",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Erasure grounds",
+        "rule": "Erase without undue delay when data are no longer necessary, consent is withdrawn, objection succeeds, processing is unlawful, or a legal obligation requires erasure (e.g. AML deletion duty at 5 years).",
+        "article": "Regulation (EU) 2016/679 Art. 17(1)(a)-(e)",
+        "quote": "the personal data have to be erased for compliance with a legal obligation in Union or Member State law to which the controller is subject",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Erasure exception: legal retention duty",
+        "rule": "Erasure does not apply where processing is needed to comply with an EU/national legal obligation (e.g. AML record retention).",
+        "article": "Regulation (EU) 2016/679 Art. 17(3)(b)",
+        "quote": "for compliance with a legal obligation which requires processing by Union or Member State law to which the controller is subject",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Erasure exception: legal claims",
+        "rule": "Erasure does not apply where processing is needed for the establishment, exercise or defence of legal claims.",
+        "article": "Regulation (EU) 2016/679 Art. 17(3)(e)",
+        "quote": "for the establishment, exercise or defence of legal claims",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Recital: lawful further retention",
+        "rule": "Further retention is lawful where needed for a legal obligation or legal claims.",
+        "article": "Regulation (EU) 2016/679 recital 65",
+        "quote": "the further retention of the personal data should be lawful where it is necessary",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679"
+      },
+      {
+        "point": "Record of processing activities: erasure time limits",
+        "rule": "The record of processing must state, where possible, envisaged time limits for erasure per data category.",
+        "article": "Regulation (EU) 2016/679 Art. 30(1)(f)",
+        "quote": "where possible, the envisaged time limits for erasure of the different categories of data",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "Small-company exemption does not help here",
+        "rule": "The under-250-employees exemption does not apply where processing is not occasional or includes criminal-offence data (AML screening).",
+        "article": "Regulation (EU) 2016/679 Art. 30(5)",
+        "quote": "unless the processing it carries out is likely to result in a risk to the rights and freedoms of data subjects, the processing is not occasional",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02016R0679-20160504"
+      },
+      {
+        "point": "EDPB: build deletion into the system",
+        "rule": "EDPB guidance on data protection by design lists storage-limitation design elements: deletion/anonymisation procedures, automation, justified storage criteria, enforced retention policies, backups and logs.",
+        "article": "EDPB Guidelines 4/2019 on Article 25 (v2.0), para. 82",
+        "quote": "Deletion of certain personal data should be automated",
+        "source_url": "https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_201904_dataprotection_by_design_and_by_default_v2.0_en.pdf"
+      },
+      {
+        "point": "EDPB: justify and disclose retention rationale",
+        "rule": "Controller must be able to justify each storage period and disclose its rationale and legal grounds.",
+        "article": "EDPB Guidelines 4/2019 (v2.0), para. 82",
+        "quote": "be able to disclose the rationale behind, and legal grounds for the retention period",
+        "source_url": "https://www.edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_201904_dataprotection_by_design_and_by_default_v2.0_en.pdf"
+      },
+      {
+        "point": "EDPB: retention info must name the trigger",
+        "rule": "Storage information must be precise: state duration, start and triggering event per category; a bare reference to statutory periods is insufficient.",
+        "article": "EDPB Guidelines 01/2022 on the right of access (v2.1), para. 118",
+        "quote": "The mere reference, for example to \"deletion after expiry of the statutory storage periods\" is not",
+        "source_url": "https://www.edpb.europa.eu/system/files/2023-04/edpb_guidelines_202201_data_subject_rights_access_v2_en.pdf"
+      }
+    ],
+    "unconfirmed": [
+      "UNCONFIRMED: no EDPB guideline sets AML-specific retention periods; EDPB statements/letters on the AMLR were not reviewed.",
+      "UNCONFIRMED: national DPA expectations for retention of non-AML real-estate records (contracts, viewing logs, enquiries); national civil limitation periods drive the legal-claims exception and differ by state."
+    ]
+  },
+  "ucpd": {
+    "rules": [
+      {
+        "point": "Scope includes immovable property and agents",
+        "rule": "'Product' includes immovable property; 'trader' includes anyone acting in the name of or on behalf of a trader.",
+        "article": "Directive 2005/29/EC Art. 2(b), (c)",
+        "quote": "‘product’ means any good or service including immovable property",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0029-20260927"
+      },
+      {
+        "point": "Member States may be stricter for immovable property",
+        "rule": "UCPD is only minimum harmonisation for immovable property; national dual-agency/brokerage rules may be stricter.",
+        "article": "Directive 2005/29/EC Art. 3(9)",
+        "quote": "immovable property, Member States may impose requirements which are more restrictive",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0029-20260927"
+      },
+      {
+        "point": "Misleading action: commitments, motives, nature of sales process",
+        "rule": "Deceiving consumers about the extent of the trader's commitments, its motives or the nature of the sales process is misleading if it changes their decision.",
+        "article": "Directive 2005/29/EC Art. 6(1)(c)",
+        "quote": "the extent of the trader's commitments, the motives for the commercial practice and the nature of the sales process",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0029-20260927"
+      },
+      {
+        "point": "Misleading action: status, affiliation, connection",
+        "rule": "Deceiving about the trader's or agent's nature, status, affiliation or connection is misleading.",
+        "article": "Directive 2005/29/EC Art. 6(1)(f)",
+        "quote": "the nature, attributes and rights of the trader or his agent",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0029-20260927"
+      },
+      {
+        "point": "Misleading omission of material information",
+        "rule": "Omitting material information the average consumer needs for an informed decision is misleading.",
+        "article": "Directive 2005/29/EC Art. 7(1)",
+        "quote": "omits material information that the average consumer needs",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0029-20260927"
+      },
+      {
+        "point": "Hidden or untimely information; commercial intent",
+        "rule": "Hiding material information, giving it unclearly or too late, or failing to identify commercial intent is a misleading omission.",
+        "article": "Directive 2005/29/EC Art. 7(2)",
+        "quote": "fails to identify the commercial intent of the commercial practice",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0029-20260927"
+      },
+      {
+        "point": "Invitation to purchase: whose behalf",
+        "rule": "In an invitation to purchase (e.g. a priced listing), the identity and address of the trader on whose behalf the agent acts are material.",
+        "article": "Directive 2005/29/EC Art. 7(4)(b)",
+        "quote": "the geographical address and the identity of the trader on whose behalf he is acting",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0029-20260927"
+      },
+      {
+        "point": "Commission guidance: broker commission is material",
+        "rule": "Commission guidance: the price including VAT and unavoidable charges such as the agent's or broker's commission is material information.",
+        "article": "Commission Notice 2021/C 526/01 (UCPD guidance), section 4.4.2, applying Art. 7(4)(c)",
+        "quote": "such as the selling agent or broker’s commission, would be material information under Article 7(4)(c)",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52021XC1229(05)"
+      },
+      {
+        "point": "Commission guidance: intermediary must be clear it is an intermediary",
+        "rule": "Commission guidance (citing C-149/15 Wathelet): an intermediary may be treated as the seller if the consumer could not tell it acted for a private individual.",
+        "article": "Commission Notice 2021/C 526/01, section on online intermediaries (Wathelet case)",
+        "quote": "whether the consumer could have understood that the intermediary was acting on behalf of",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52021XC1229(05)"
+      },
+      {
+        "point": "Services Directive: conflicts-of-interest information",
+        "rule": "On request, a service provider must give information on measures taken to avoid conflicts of interest, and include it in detailed service descriptions.",
+        "article": "Directive 2006/123/EC Art. 22(3)(c)",
+        "quote": "on the measures taken to avoid conflicts of interest",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32006L0123"
+      }
+    ],
+    "unconfirmed": [
+      "UNCONFIRMED: no EU provision or CJEU judgment specifically on an estate agent acting for both parties (dual agency or double commission) was found. Treating undisclosed dual agency as a misleading action or omission under Arts. 6(1)(c), 6(1)(f), 7(1) and 7(2) is an interpretation: plausible, but untested at the CJEU.",
+      "UNCONFIRMED: national dual-agency rules (some Member States prohibit double commission or require written consent); Art. 3(9) allows stricter national rules for immovable property."
+    ]
+  },
+  "crd": {
+    "rules": [
+      {
+        "point": "Real estate agent service contracts are in scope",
+        "rule": "Contracts for the transfer/acquisition of immovable property and residential rentals are excluded, but contracts for real estate agent services are included.",
+        "article": "Directive 2011/83/EU recital 26 (with Art. 3(3)(e), (f))",
+        "quote": "as well as contracts related to the services of a real estate agent",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32011L0083"
+      },
+      {
+        "point": "Exclusion: the property transaction itself",
+        "rule": "The CRD does not apply to contracts for the creation, acquisition or transfer of immovable property or rights in it.",
+        "article": "Directive 2011/83/EU Art. 3(3)(e)",
+        "quote": "for the creation, acquisition or transfer of immovable property or of rights in immovable property",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Exclusion: residential rental contract itself",
+        "rule": "The residential rental contract is excluded (the agent's service contract is not).",
+        "article": "Directive 2011/83/EU Art. 3(3)(f)",
+        "quote": "for rental of accommodation for residential purposes",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Commission guidance confirms agent services covered; cites C-208/19",
+        "rule": "Commission CRD guidance repeats recital 26 and cites C-208/19 NK: service contracts preceding property transactions are not excluded.",
+        "article": "Commission Notice 2021/C 525/01 (CRD guidance), section 1.3",
+        "quote": "In case C-208/19 NK the Court noted that the exception under Article 3(3)(f) would not apply to a contract between an architect and a consumer",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52021XC1229(04)"
+      },
+      {
+        "point": "CJEU C-208/19 NK (14 May 2020)",
+        "rule": "A consumer contract with an architect for a house design is not a contract for construction of a new building (not excluded). Closest CJEU authority on property-related service contracts; not a brokerage case.",
+        "article": "CJEU C-208/19, operative part 1",
+        "quote": "does not constitute a contract for the construction of a new building within the meaning of that provision",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62019CJ0208"
+      },
+      {
+        "point": "Distance contract definition",
+        "rule": "Contracts concluded under an organised distance scheme with exclusive use of distance communication (website, email, phone) are distance contracts.",
+        "article": "Directive 2011/83/EU Art. 2(7)",
+        "quote": "with the exclusive use of one or more means of distance communication up to and including the time at which the contract is concluded",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Off-premises contract definition",
+        "rule": "Contracts concluded in the simultaneous physical presence of trader and consumer away from the trader's business premises (e.g. at a viewing or the client's home) are off-premises contracts.",
+        "article": "Directive 2011/83/EU Art. 2(8)(a)",
+        "quote": "concluded in the simultaneous physical presence of the trader and the consumer, in a place which is not the business premises of the trader",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Intermediary is also a trader",
+        "rule": "An intermediary acting in the name of or on behalf of a trader is itself a 'trader' under the CRD.",
+        "article": "CJEU C-536/20 Tiketa (24 February 2022), operative part 1, on Art. 2(2)",
+        "quote": "who is acting as an intermediary, in the name of or on behalf of that person, is a ‘trader’",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62020CJ0536"
+      },
+      {
+        "point": "Pre-contractual information duties",
+        "rule": "Before the consumer is bound, give: main characteristics, trader identity and contacts, total price or calculation method, withdrawal conditions plus model form, and liability for reasonable costs if services start during withdrawal.",
+        "article": "Directive 2011/83/EU Art. 6(1)(a), (b), (c), (e), (h), (j)",
+        "quote": "where a right of withdrawal exists, the conditions, time limit and procedures for exercising that right",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Cost-liability information",
+        "rule": "Consumer must be told that withdrawing after requesting early performance makes them liable for reasonable costs.",
+        "article": "Directive 2011/83/EU Art. 6(1)(j)",
+        "quote": "the consumer shall be liable to pay the trader reasonable costs in accordance with Article 14(3)",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Off-premises form: paper or durable medium; signed copy",
+        "rule": "For off-premises contracts, give Art. 6(1) info on paper (or durable medium if agreed) and a copy/confirmation of the signed contract.",
+        "article": "Directive 2011/83/EU Art. 7(1), (2)",
+        "quote": "the trader shall give the information provided for in Article 6(1) to the consumer on paper or, if the consumer agrees, on another durable medium",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Express request to start during withdrawal period (off-premises)",
+        "rule": "To start paid services within the withdrawal period, the consumer must make an express request on a durable medium and acknowledge loss of withdrawal once fully performed.",
+        "article": "Directive 2011/83/EU Art. 7(3)",
+        "quote": "the trader shall require that the consumer make such an express request on a durable medium",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Online payment button",
+        "rule": "For electronic distance contracts with an obligation to pay, the order button must state 'order with obligation to pay' or equivalent; otherwise consumer not bound.",
+        "article": "Directive 2011/83/EU Art. 8(2)",
+        "quote": "‘order with obligation to pay’",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Distance contract confirmation on durable medium",
+        "rule": "Confirm the concluded distance contract on a durable medium, at the latest before service performance begins, including the express consent/acknowledgement.",
+        "article": "Directive 2011/83/EU Art. 8(7)",
+        "quote": "at the latest at the time of the delivery of the goods or before the performance of the service begins",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Express request to start during withdrawal period (distance)",
+        "rule": "For distance contracts, the consumer must expressly request early performance and acknowledge loss of withdrawal once fully performed.",
+        "article": "Directive 2011/83/EU Art. 8(8)",
+        "quote": "the trader shall require that the consumer make an express request and request the consumer to acknowledge",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "14-day withdrawal right",
+        "rule": "Consumers may withdraw from a distance or off-premises contract within 14 days without reason; for service contracts the period runs from conclusion of the contract (30 days possible nationally for unsolicited home visits).",
+        "article": "Directive 2011/83/EU Art. 9(1), 9(1a), 9(2)(a)",
+        "quote": "the consumer shall have a period of 14 days to withdraw from a distance or off-premises contract, without giving any reason",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Not informing extends withdrawal by 12 months",
+        "rule": "If withdrawal information under Art. 6(1)(h) is not given, the withdrawal period expires 12 months after the end of the initial period; giving it later restarts 14 days.",
+        "article": "Directive 2011/83/EU Art. 10(1), (2)",
+        "quote": "the withdrawal period shall expire 12 months from the end of the initial withdrawal period",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Online withdrawal function (from 19 June 2026)",
+        "rule": "For distance contracts concluded via an online interface, provide a continuously available, prominent withdrawal function labelled 'withdraw from contract here', a 'confirm withdrawal' step, and a durable-medium acknowledgement.",
+        "article": "Directive 2011/83/EU Art. 11a, inserted by Directive (EU) 2023/2673 (applies from 19 June 2026)",
+        "quote": "the trader shall ensure that the consumer can also withdraw from the contract by using a withdrawal function",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "Application date of Art. 11a",
+        "rule": "Member States apply the 2023/2673 measures from 19 June 2026.",
+        "article": "Directive (EU) 2023/2673 Art. 2(1)",
+        "quote": "They shall apply those measures from 19 June 2026",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023L2673"
+      },
+      {
+        "point": "Proportionate payment after early start",
+        "rule": "If the consumer withdraws after an express early-performance request, they pay a proportion of the total price for what was provided up to withdrawal.",
+        "article": "Directive 2011/83/EU Art. 14(3)",
+        "quote": "the consumer shall pay to the trader an amount which is in proportion to what has been provided",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "No payment if information or express request missing",
+        "rule": "Consumer bears no cost for services performed during the withdrawal period if Art. 6(1)(h)/(j) information was missing or no express request was obtained.",
+        "article": "Directive 2011/83/EU Art. 14(4)(a)(i), (ii)",
+        "quote": "the trader has failed to provide information in accordance with points (h) or (j) of Article 6(1)",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      },
+      {
+        "point": "CJEU C-97/22 DC v HJ (17 May 2023)",
+        "rule": "Where withdrawal information was not given and the consumer withdraws after full performance of an off-premises service contract, the consumer owes nothing.",
+        "article": "CJEU C-97/22, operative part (on Art. 14(4)(a)(i) and (5))",
+        "quote": "it exempts a consumer from any obligation to pay for performance provided pursuant to an off-premises contract",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62022CJ0097"
+      },
+      {
+        "point": "CJEU C-641/19 PE Digital (8 October 2020)",
+        "rule": "The proportionate amount under Art. 14(3) is in principle calculated pro rata from the contract price.",
+        "article": "CJEU C-641/19, operative part 1",
+        "quote": "to calculate the amount owed pro rata temporis",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:62019CJ0641"
+      },
+      {
+        "point": "Loss of withdrawal right only after full performance with consent",
+        "rule": "Withdrawal right is lost for service contracts only after full performance, and (if paid) only if performance began with prior express consent and acknowledgement.",
+        "article": "Directive 2011/83/EU Art. 16(a)",
+        "quote": "service contracts after the service has been fully performed",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02011L0083-20260927"
+      }
+    ],
+    "unconfirmed": [
+      "UNCONFIRMED: no CJEU judgment applying the CRD to a real-estate brokerage contract was found. C-208/19 (NK v MS and AS, 14 May 2020) concerns an architect's design contract, not brokerage.",
+      "UNCONFIRMED (national, secondary sources only): German BGH I ZR 30/15 and I ZR 68/15 (7 July 2016) held that estate brokerage contracts formed by email or phone are distance contracts with a withdrawal right. A broker who gave no withdrawal information could not claim commission or value compensation. The judgment text was not fetched.",
+      "UNCONFIRMED: national treatment of residential letting-agent service contracts. Recital 26 covers 'services of a real estate agent' without distinguishing sales from lettings; only the residential rental contract itself is excluded.",
+      "UNCONFIRMED: how Art. 14(3) proportionality applies to a success-fee commission when the consumer withdraws after introductions but before completion.",
+      "UNCONFIRMED: which Member States use Art. 9(1a) (30-day period) or Art. 9(3) (ban on collecting payment during the period for off-premises contracts)."
+    ]
+  },
+  "regulated_professions": {
+    "rules": [
+      {
+        "point": "Definition of regulated profession",
+        "rule": "A profession is regulated where access or pursuit requires specific professional qualifications, including protected titles.",
+        "article": "Directive 2005/36/EC Art. 3(1)(a)",
+        "quote": "‘regulated profession’: a professional activity or group of professional activities",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0036-20251029"
+      },
+      {
+        "point": "Real estate agents eligible for the European Professional Card",
+        "rule": "Real estate agents are one of five professions eligible for the EPC procedure.",
+        "article": "Commission Implementing Regulation (EU) 2015/983 Annex I, point 5",
+        "quote": "Real estate agents.",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32015R0983"
+      },
+      {
+        "point": "Temporary cross-border provision: prior declaration may be required",
+        "rule": "When a provider moves to a host Member State to provide services temporarily, the host state may require a prior written declaration (renewed yearly) where the profession is regulated there.",
+        "article": "Directive 2005/36/EC Art. 5(1)-(2), Art. 7(1)",
+        "quote": "he shall inform the competent authority in the host Member State in a written declaration to be made in advance",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0036-20251029"
+      },
+      {
+        "point": "Host-state professional rules apply when moving",
+        "rule": "A provider who moves is subject to host-state professional rules directly linked to qualifications, such as title use, serious malpractice and discipline.",
+        "article": "Directive 2005/36/EC Art. 5(3)",
+        "quote": "such as the definition of the profession, the use of titles and serious professional malpractice",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02005L0036-20251029"
+      },
+      {
+        "point": "Freedom to provide services",
+        "rule": "Host Member States may impose requirements on incoming service providers only if non-discriminatory, necessary and proportionate.",
+        "article": "Directive 2006/123/EC Art. 16(1)",
+        "quote": "Member States shall respect the right of providers to provide services in a Member State other than that in which they are established",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32006L0123"
+      },
+      {
+        "point": "Provider information duties",
+        "rule": "Provide recipients with name, legal form, address, register and number, authorisation authority, VAT number, and for regulated professions the professional body, title and Member State granting it, plus terms, price, main features and insurance.",
+        "article": "Directive 2006/123/EC Art. 22(1)(a)-(k)",
+        "quote": "in the case of the regulated professions, any professional body or similar institution with which the provider is registered",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32006L0123"
+      },
+      {
+        "point": "Regulated professions database: generic profession 'Real Estate agent / Real estate agency manager/administrator/director' (id 5290), 27 national entries",
+        "rule": "EU Member States with a national regulated profession mapped to 'real estate agent': Austria (Immobilientreuhänder), Belgium (Vastgoedmakelaar/Agent immobilier/Immobilienmakler), Croatia (Agent posredovanja u prometu nekretnina), Cyprus (Κτηματομεσίτης), Czech Republic (Realitní zprostředkování), Denmark (Ejendomsmægler), Finland (Åland only: Ansvarig föreståndare för en fastighetsmäklarverksamhet), France (Agent immobilier - syndic de copropriété - administrateur de biens), Hungary (Ingatlanközvetítő; Ingatlanvagyon-értékelő és -közvetítő), Ireland (Estate Agent), Italy (Agente di affari in mediazione/agente immobiliare), Luxembourg (Agent immobilier; Apporteur d'affaire immobilier; Administrateur de biens; Syndic de copropriétés), Malta (Real Estate Agent; Property Broker; Property Consultant; Specific Property Consultant; Branch Manager), Slovakia (Sprostredkovanie predaja, prenájmu a kúpy nehnuteľnosti), Slovenia (Nepremičninski posrednik), Sweden (Fastighetsmäklare). EEA/CH: Iceland (Löggiltur fasteignasali), Norway (Eiendomsmegler), Switzerland (Ticino only). No real-estate-agent entry found for: Bulgaria, Estonia, Germany, Greece, Latvia, Lithuania, Netherlands, Poland, Portugal, Romania, Spain (Finland mainland also none).",
+        "article": "Directive 2005/36/EC Art. 59 transparency database (Commission Regulated Professions Database), queried via its public API",
+        "quote": "Real Estate agent /Real estate agency manager/administrator/director",
+        "source_url": "https://api.tech.ec.europa.eu/regprof20/prodmigration/regprofs?id_profession=5290&maxrows=100"
+      }
+    ],
+    "unconfirmed": [
+      "UNCONFIRMED: absence from the database does not prove there is no national licensing or registration. Examples from general knowledge, not verified from primary sources here: a German trade permit (§34c GewO), a Portuguese mediação imobiliária licence, a Catalan agents register, Greek registration rules.",
+      "UNCONFIRMED: database entries are Member State notifications. Regulation type (reserved activity or protected title), content and currency were not checked per entry.",
+      "UNCONFIRMED: whether remote-only brokerage (provider does not 'move') triggers host-state professional rules. Directive 2005/36/EC Title II applies only where the provider moves (Art. 5(2)); national rules on agency activity may still apply through other legal bases.",
+      "UNCONFIRMED: national minimum registration mechanics under AMLD6 Art. 4(3) for estate agents (from 10 July 2027)."
+    ]
+  },
+  "product_implications": [
+    "AML scope switch: every sale deal is AML-in-scope (no value floor); a letting deal is in scope only when monthly rent >= EUR 10 000 — store rent and flag (AMLD4 Art. 2(1)(3)(d); AMLR Art. 3(3)(d)).",
+    "Both-party CDD: identify and verify seller AND buyer (lessor AND lessee for in-scope lettings), whoever pays the commission — mandatory from 10 July 2027 (AMLR Art. 19(6)(c)); adopt now EU-wide because AMLD4 is silent and states differ.",
+    "CDD gate state: 'offer accepted' starts CDD for both parties; block deposit, completion, key handover and any fund/property transfer until verification is complete (AMLR Art. 23(1)). Until 10 July 2027, also verify the mandating client before signing the mandate (AMLD4 Art. 14(1)).",
+    "CDD record per party: names, place and full date of birth, nationalities and national ID no., residence, TIN; beneficial owners for companies; PEP and targeted-sanctions screening; purpose; representative authority (AMLR Arts. 20(1), 22(1)).",
+    "ID verification: ID document or passport (verified copy), or eIDAS eID at substantial/high level; remote alternatives need holder-match controls and time-stamped stored copies (AMLR Art. 22(6); AMLA draft RTS Arts. 6-7, not yet adopted).",
+    "CDD failure path: refuse or terminate, prompt a human to consider an STR, and keep a record of the refusal (AMLD4 Art. 14(4); AMLR Art. 21(1), (3)).",
+    "Retention clock: keep unredacted ID copies, CDD and transaction records for 5 years from relationship end, occasional transaction date or refusal date, then auto-delete. Support a legal-hold extension of at most +5 years, ordered by national law or a competent authority (AMLD4 Art. 40(1); AMLR Art. 77(1), (3)).",
+    "Separate AML vault: no use of AML data for CRM, marketing or Butler drafting (AMLD4 Art. 41(2); AMLR Art. 76(4)); show an AML privacy notice before onboarding (AMLD4 Art. 41(3)).",
+    "No customer-visible suspicion state: restrict STR and assessment records to the compliance role; access requests exclude them (AMLD4 Arts. 39(1), 41(4); AMLR Art. 73(1)).",
+    "Butler stays out of CDD decisions: accept, refuse or risk-level changes need meaningful human intervention, an explanation and a way to challenge (AMLR Art. 76(5)).",
+    "CDD refresh on long mandates: update at least every 5 years, or every year for higher risk (AMLR Art. 26(2)); record payment method and flag cash above EUR 10 000 or the lower national limit (AMLR Art. 80).",
+    "GDPR retention schedule: for each data category store the period and the trigger event, and repeat both in the privacy notice and the record of processing. 'After statutory periods' is not enough (GDPR Arts. 5(1)(e), 13(2)(a), 30(1)(f); EDPB 01/2022 para. 118).",
+    "Automated deletion that also covers backups and logs, with tested deletion (EDPB 4/2019 para. 82).",
+    "Data-subject requests: answer within 1 month; allow extension by 2 more months with notice within the first month; give a reasoned refusal within 1 month (GDPR Art. 12(3)-(4)).",
+    "Erasure requests: erase non-required data; refuse only for AML-retained records or data needed for legal claims, and cite the exception (GDPR Art. 17(3)(b), (e)).",
+    "Dual-agency disclosure: before any commitment, tell each consumer in writing whom MS Realty acts for, that it may act or be paid on both sides, and the commission amount and payer. Never present MS Realty as neutral when it is paid by the other side (UCPD Arts. 6(1)(c), 6(1)(f), 7(1), 7(2), 7(4)(b); Commission UCPD guidance 4.4.2; Services Directive Art. 22(3)(c)). Check national rules, which may be stricter (UCPD Art. 3(9)).",
+    "Listings show the price with unavoidable charges, including any commission payable by the consumer, and name the principal (UCPD Art. 7(4)(b)-(c); Commission UCPD guidance 4.4.2).",
+    "Consumer brokerage contracts concluded online, by email or phone, or at a viewing or the client's home trigger the CRD (recital 26; Arts. 2(7)-(8)). Required: pre-contract information with commission and withdrawal terms plus the model form (Art. 6(1)); durable-medium confirmation (Arts. 7(1)-(2), 8(7)); the 'order with obligation to pay' button (Art. 8(2)).",
+    "14-day withdrawal from contract conclusion (Art. 9). No viewings or introductions inside the period unless the consumer makes an express early-start request with an acknowledgement on a durable medium (Arts. 7(3), 8(8)); then the consumer pays pro rata on withdrawal (Art. 14(3); C-641/19).",
+    "Missing withdrawal information extends withdrawal to 12 months + 14 days (Art. 10). With no information or express request, the consumer owes nothing even after full performance (Art. 14(4)(a); C-97/22). The contract template and its timestamps are revenue-critical.",
+    "Online withdrawal button 'withdraw from contract here', 'confirm withdrawal' step and durable-medium acknowledgement for contracts concluded online (CRD Art. 11a, from 19 June 2026).",
+    "Country service-mode flag: real estate agency is a regulated profession in AT, BE, HR, CY, CZ, DK, FI (Åland), FR, HU, IE, IT, LU, MT, SK, SI and SE. Before an agent physically operates there, check the host-state prior declaration and professional rules (Directive 2005/36/EC Arts. 5, 7; Regulated Professions Database).",
+    "Provider information page: legal form, address, register and number, VAT number, authorisation authority, professional title or body where relevant, terms and insurance (Services Directive Art. 22(1))."
+  ]
+}

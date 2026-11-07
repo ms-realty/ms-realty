@@ -1,0 +1,60 @@
+{
+  "country": "Denmark",
+  "code": "DK",
+  "checked": "Retsinformation XML of LBK 510/2021, lov 733/2023, LBK 1238/2015, lov 700/2022, lov 651/2017 and lov 553/2019, lov 502/2018. The current consolidated AML Act and Data Protection Act were not retrieved.",
+  "estate_agency": {
+    "law": "Lov om formidling af fast ejendom m.v., LBK nr 510 af 24/02/2021 as amended by lov nr 733 af 13/06/2023 and lov nr 729 af 01/09/2026 (§§ 1-2, 7, 14, 21, 24-26, 32, 48)",
+    "regulated": "Yes. The title 'ejendomsmaegler' may only be used by a person approved as an estate agent (§ 7(1)); approved agents are listed in the public register (§ 5); registered lawyers may also broker (§ 14). The Act covers commercial brokerage of sales of real property directed at consumers (§§ 1-2); letting brokerage is outside this Act.",
+    "dual_agency": "prohibited",
+    "rule": "§ 26(1): no one may represent both seller and buyer in the same transaction; this applies to the owner, employees and persons with a similar connection to the agency (§ 26(2)). The same ban applies to commercial buyer advisers (§ 48(3), inserted by lov 733/2023). The agent advises the seller and safeguards the seller's needs and interests (§ 24(2)), but must give both seller and buyer the information material to the deal (§ 25).",
+    "quote": "§ 26(1): 'No one may be the representative of both seller and buyer in the same transaction.'",
+    "commission_both_sides": "Not available: the agent is entitled to the fee agreed with the seller (§ 32(1)) and may not represent the buyer. Commissions, discounts or other payments received from third parties for referrals (finance, insurance, advertising) must be disclosed (§ 21).",
+    "sources": [
+      "https://www.retsinformation.dk/eli/lta/2021/510",
+      "https://www.retsinformation.dk/eli/lta/2023/733"
+    ]
+  },
+  "aml": {
+    "law": "Hvidvaskloven (lov nr 651 af 08/06/2017, as amended incl. lov nr 553 af 07/05/2019): § 1(1) nr 16 scope, § 30 retention. The current consolidated version was not retrieved.",
+    "sale_scope": "Estate agents and estate-agency firms are obliged entities (§ 1(1) nr 16).",
+    "letting_threshold": "No EUR 10,000 threshold in the wording found: since lov 553/2019 § 1 nr 4, nr 16 covers estate agents 'including when they act as intermediaries in connection with the letting of real property'. Treat all brokered lettings as in scope until checked against the current consolidated text.",
+    "both_parties": "unclear - not established from the texts retrieved.",
+    "retention_years": 5,
+    "retention_trigger": "At least 5 years after the end of the business relationship or completion of the occasional transaction (§ 30(2), 2017 text).",
+    "extension": "None in the 2017 text; personal data must be deleted 5 years after the end of the relationship or transaction unless other legislation provides otherwise (§ 30(2)).",
+    "id_copy": "Must keep information obtained under the CDD chapter, 'including identity and verification information and a copy of presented identity documents' (§ 30(1) nr 1, 2017 text).",
+    "sources": [
+      "https://www.retsinformation.dk/eli/lta/2017/651",
+      "https://www.retsinformation.dk/eli/lta/2019/553"
+    ]
+  },
+  "accounting": {
+    "books_years": 5,
+    "annual_accounts_years": 5,
+    "source_documents_years": 5,
+    "trigger": "From the end of the financial year to which the material relates (§ 12(1)).",
+    "law": "Bogforingsloven, lov nr 700 af 24/05/2022 § 12(1): businesses must securely keep accounting material (§ 4: registrations, vouchers, documentation for the annual report) 'for 5 years from the end of the financial year to which the material relates'.",
+    "sources": ["https://www.retsinformation.dk/eli/lta/2022/700"]
+  },
+  "limitation": {
+    "general_years": 3,
+    "commission_years": 3,
+    "trigger": "From the earliest time the creditor could demand performance (§ 2(1)); suspended while the creditor was unaware of the claim or the debtor (§ 3(2)); long-stop 10 years after the § 2 start date for other claims (§ 3(3) nr 4).",
+    "law": "Foraeldelsesloven, LBK nr 1238 af 09/11/2015 § 3(1): 'The limitation period is 3 years, unless otherwise provided by other provisions.'",
+    "sources": ["https://www.retsinformation.dk/eli/lta/2015/1238"]
+  },
+  "id_copies": {
+    "rule": "No general statutory ban on copying ID documents was found. Private parties may process the CPR (personal identification) number only where required by law, with consent, or in the other listed cases (Data Protection Act § 11(2)), which matters when an ID document shows the CPR number.",
+    "law": "Databeskyttelsesloven § 11 (read in the original lov nr 502 af 23/05/2018; the current consolidation was not checked)",
+    "sources": ["https://www.retsinformation.dk/eli/lta/2018/502"]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Current consolidated Hvidvaskloven: § 30 wording, numbering and letting scope (2017 text plus 2019 amendment used).",
+    "Whether Danish estate agents must apply CDD to the buyer as well as the seller.",
+    "Whether LBK 1238/2015 (Foraeldelsesloven) has been replaced by a newer consolidation (metadata shows an end date in March 2026).",
+    "Current consolidation of Databeskyttelsesloven § 11.",
+    "Which Danish ID documents display the CPR number.",
+    "Which law governs letting brokerage (outside the estate-agency Act)."
+  ]
+}
