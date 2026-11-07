@@ -1,4 +1,4 @@
-import { agency } from "@/config/tenant";
+import { agency } from "../../config/tenant";
 import type { LegacyPage } from "./pages";
 
 export type SourceField = { label: string; value: string };
