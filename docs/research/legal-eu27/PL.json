@@ -1,0 +1,61 @@
+{
+  "country": "Poland",
+  "code": "PL",
+  "estate_agency": {
+    "law": "Ustawa o gospodarce nieruchomościami (UGN), consolidated Dz.U. 2026 poz. 399: arts 179a, 179b, 180(3), 180a, 181(3)-(3b), 181a. Unnamed service contract; Kodeks cywilny art 750 (zlecenie rules apply by analogy).",
+    "regulated": "Not licensed (licences repealed in 2014; art 179 repealed). Conditions: a written or electronic contract on pain of nullity (art 180(3)); mandatory civil-liability insurance, with the policy copy attached to the contract (art 181(3)-(3a)); a no-criminal-record requirement for individuals, managers and beneficial owners (art 180a).",
+    "dual_agency": "unclear",
+    "rule": "Neither UGN nor the Civil Code bans one intermediary contracting with both buyer and seller. Art 108 KC (self-dealing and double representation) binds only a pełnomocnik who concludes the deal for the principal. The draft amendment (Ministry of Development and Technology project, entered in the Council of Ministers work plan 23.06.2026, reported as UD424) would ban taking remuneration from both sides of the same transaction. It is not enacted.",
+    "quote": "UGN art 180(3): 'Zakres czynności pośrednictwa w obrocie nieruchomościami określa umowa pośrednictwa. Umowa wymaga formy pisemnej lub elektronicznej pod rygorem nieważności.' (EN: The scope of brokerage is set by the brokerage contract, which must be in written or electronic form, otherwise void.) Draft: 'wprowadzenie zakazu pobierania wynagrodzenia od obu stron tej samej transakcji' (EN: introducing a ban on taking remuneration from both parties to the same transaction).",
+    "commission_both_sides": "Currently not prohibited by statute; dual commission is common practice. A pending government draft would prohibit it; watch before launch.",
+    "sources": [
+      "https://api.sejm.gov.pl/eli/acts/DU/2026/399/text.pdf",
+      "https://api.sejm.gov.pl/eli/acts/DU/2026/795/text.pdf",
+      "https://www.gov.pl/web/rozwoj-technologia/wiekszy-profesjonalizm-w-obrocie-nieruchomosciami"
+    ]
+  },
+  "aml": {
+    "law": "Ustawa z dnia 1 marca 2018 r. o przeciwdziałaniu praniu pieniędzy oraz finansowaniu terroryzmu (Dz.U. 2025 poz. 644): art 2(1)(18) scope; art 33-34 CDD; art 49 retention. Supervisor: GIIF.",
+    "sale_scope": "Every brokerage activity of a pośrednik w obrocie nieruchomościami (UGN definition), except the letting carve-out (art 2(1)(18)).",
+    "letting_threshold": "Lettings or leases are excluded where the monthly rent is below the equivalent of EUR 10,000 (art 2(1)(18)).",
+    "both_parties": "no (statute): 'klient' is the person to whom the institution provides services (art 2(2)(10)), so CDD covers its own client(s). If the agent signs brokerage contracts with both sides, both are clients. No GIIF guidance found requiring CDD on the non-client counterparty.",
+    "retention_years": 5,
+    "retention_trigger": "Art 49(1): 5 years from the end of the business relationship or from the date of the occasional transaction. Risk-analysis results (art 34(3)): 5 years from the analysis (art 49(2)).",
+    "extension": "None for estate agents. GIIF may order up to 5 more years (art 49(3)), but art 49(4) says para 3 does not apply to obliged institutions in art 2(1)(13)-(18), which include estate agents (pkt 18).",
+    "id_copy": "Allowed: art 34(4) lets obliged institutions process identity-document data of the client and its representative 'oraz sporządzać ich kopie' (EN: and make copies of them) for CDD purposes. Art 49(1)(1): the copies are kept for 5 years.",
+    "sources": ["https://api.sejm.gov.pl/eli/acts/DU/2025/644/text.pdf"]
+  },
+  "accounting": {
+    "books_years": 5,
+    "annual_accounts_years": 5,
+    "source_documents_years": 5,
+    "trigger": "Annual accounts: at least 5 years from the start of the year after the financial year in which they were approved (art 74(1)). Books and other records: 5 years from the start of the year after the financial year they relate to (art 74(2)-(3)). Tax books and documents: until the tax liability is time-barred (Ordynacja podatkowa art 86 §1), normally 5 years from the end of the calendar year in which the payment deadline passed (art 70 §1). In practice, about 6 years after the year concerned.",
+    "law": "Ustawa o rachunkowości (Dz.U. 2026 poz. 522) art 74(1)-(3); Ordynacja podatkowa (Dz.U. 2026 poz. 622) arts 70 §1, 86 §1",
+    "sources": [
+      "https://api.sejm.gov.pl/eli/acts/DU/2026/522/text.pdf",
+      "https://api.sejm.gov.pl/eli/acts/DU/2026/622/text.pdf"
+    ]
+  },
+  "limitation": {
+    "general_years": 6,
+    "commission_years": 3,
+    "trigger": "From the date the claim becomes due (KC art 120 §1). For terms of 2 years or more, the period ends on the last day of the calendar year (art 118). Business-related claims: 3 years. Commission: 3 years under art 118 per one line of case law. Another line applies art 751 pkt 1 (2 years) via art 750; there is no SN ruling. Conservative retention: 3 years plus year-end.",
+    "law": "Kodeks cywilny (Dz.U. 2026 poz. 795) arts 118, 120 §1, 750, 751 pkt 1",
+    "sources": ["https://api.sejm.gov.pl/eli/acts/DU/2026/795/text.pdf"]
+  },
+  "id_copies": {
+    "rule": "No statutory ban on photocopying an ID card. Ustawa o dowodach osobistych art 79 pkt 2 penalises retaining another person's ID card without a legal basis. Outside AML, copying is a GDPR question: data minimisation, and the press-reported UODO position is that noting the data often suffices. The AML act (art 34(4)) gives an express legal basis for copies.",
+    "law": "Ustawa o dowodach osobistych (Dz.U. 2025 poz. 1753) art 79; GDPR art 5(1)(c), 6; AML act art 34(4)",
+    "sources": [
+      "https://api.sejm.gov.pl/eli/acts/DU/2025/1753/text.pdf",
+      "https://api.sejm.gov.pl/eli/acts/DU/2025/644/text.pdf"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Commission limitation: whether art 751 pkt 1 KC (2 years) or art 118 KC (3 years) applies to real-estate brokerage fees; courts are split and no SN ruling was found.",
+    "Commission from both sides: market practice is common, but no primary source on the current position beyond the absence of a ban. Draft ban status (UD424; consultations reported from 4.09.2026; FPPRN opinion 22.09.2026) rests on secondary press, apart from the gov.pl page.",
+    "Whether GIIF expects CDD on the non-client counterparty; no GIIF communication on estate agents found.",
+    "UODO position on ID copies: primary UODO text not fetched; press reports only."
+  ]
+}

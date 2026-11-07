@@ -328,6 +328,7 @@ function FormSession<V extends FormValues>({
     onSnapshot?.({ state: pending ? (submittedState.current ?? state) : state, values, pending });
   }, [onSnapshot, state, values, pending]);
   const outcome = state.outcome;
+  const recoverySubmit = outcome.kind === "rejected" ? outcome.recoverySubmit : undefined;
   const disclosureOpen =
     pending ||
     outcome.kind !== "idle" ||
@@ -444,14 +445,17 @@ function FormSession<V extends FormValues>({
       // Our controlled draft comes from the response; resetting a select loses that draft.
       onReset={(event) => event.preventDefault()}
       onSubmit={(event) => {
-        if (pending || inFlight.current || blocked) {
+        const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+        const recovering = Boolean(
+          recoverySubmit && submitter?.name === formFields.intent && submitter.value === "recover",
+        );
+        if (pending || inFlight.current || (blocked && !recovering)) {
           event.preventDefault();
           return;
         }
         inFlight.current = true;
         // Guard the narrow interval before React paints pending, and retain the effective
         // identity if a reviewed reapply loses its acknowledgment.
-        const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
         if (submitter?.value === "reapply" && conflict?.reapply) {
           snapshot.current.operationId = conflict.reapply.operationId;
           snapshot.current.reconciliation = conflict.reapply.status;
@@ -470,7 +474,7 @@ function FormSession<V extends FormValues>({
           values,
           pending: true,
         });
-        if (pendingReferenceCookie) {
+        if (pendingReferenceCookie && !recovering) {
           // The reference must exist synchronously before React sends the native action.
           // biome-ignore lint/suspicious/noDocumentCookie: Cookie Store is asynchronous and unavailable on supported HTTP test hosts.
           document.cookie = `${pendingReferenceCookie}=${encodeURIComponent(snapshot.current.operationId)}; Path=/; SameSite=Strict${location.protocol === "https:" ? "; Secure" : ""}`;
@@ -493,11 +497,21 @@ function FormSession<V extends FormValues>({
             tone="error"
             title={outcome.message}
             action={
-              outcome.recovery && (
+              recoverySubmit ? (
+                <button
+                  type="submit"
+                  name={formFields.intent}
+                  value="recover"
+                  disabled={pending}
+                  className="min-h-control underline"
+                >
+                  {recoverySubmit.label}
+                </button>
+              ) : outcome.recovery ? (
                 <a href={outcome.recovery.href} className="underline">
                   {outcome.recovery.label}
                 </a>
-              )
+              ) : undefined
             }
           />
         </FocusResult>
@@ -598,7 +612,7 @@ function FormSession<V extends FormValues>({
           id: `${prefix}-${name}`,
           name,
           value: values[name] ?? "",
-          readOnly: pending || blocked,
+          readOnly: pending || (blocked && !recoverySubmit),
           error: fieldErrors[name]?.join(" "),
           onChange: (event) =>
             setDraft({

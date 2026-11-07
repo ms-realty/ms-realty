@@ -10,9 +10,12 @@ import { formatExactMoney, formatMoneyInput } from "@/i18n/money";
 import { moneyCopy } from "@/i18n/money-copy";
 import { readCase } from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
+import { getEnv } from "@/server/config/env";
 import { isAppError } from "@/server/errors";
 import { findOperation } from "@/server/operations";
 import { listProposals, proposalContext, readProposal } from "@/server/proposals/queries";
+import { proposalDraftToken } from "@/server/reauth-drafts/cookies";
+import { readProposalReauthDraft } from "@/server/reauth-drafts/service";
 import { buttonClass } from "@/ui/button-class";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { TechnicalDetails } from "@/ui/technical-details";
@@ -37,6 +40,7 @@ import {
 } from "./contract";
 import { proposalCopy } from "./copy";
 import { counterofferCopy } from "./counteroffer-copy";
+import { proposalReauthCopy } from "./reauth-copy";
 
 function ProposalForm(
   props: ScreenProps & {
@@ -273,6 +277,16 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
     row = view.revision,
     staff = props.session.account.kind === "staff";
   const counter = counterofferCopy(isPublicLocale(props.locale) ? props.locale : "bg");
+  const recoveryCopy = proposalReauthCopy(props.locale);
+  const recovered = staff
+    ? { status: "absent" as const }
+    : await readProposalReauthDraft(
+        getDb(),
+        props.session,
+        getEnv().hosts.client,
+        props.id,
+        await proposalDraftToken(props.id),
+      );
   const path = `/${props.locale}/proposals/${view.proposal.id}`;
   const common = { ...props, id: view.proposal.id, version: view.proposal.version, path };
   const hidden: WorkflowField[] = [{ name: "revisionId", label: "", type: "hidden" }];
@@ -300,6 +314,17 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
   return (
     <WorkflowPage {...props} title={c.detailTitle} reference={view.proposal.reference}>
       <p>{c.boundary}</p>
+      {recovered.status !== "absent" && (recovered.status !== "unavailable" || view.canRespond) ? (
+        <p role="status">{recoveryCopy[recovered.status]}</p>
+      ) : null}
+      {recovered.status === "pending" ? (
+        <a
+          className={workflowLink}
+          href={`/${props.locale}/access/reauth?returnTo=${encodeURIComponent(path)}`}
+        >
+          {c.reverify}
+        </a>
+      ) : null}
       <a
         className={workflowLink}
         href={`/${props.locale}/${staff ? "cases" : "overview"}/${view.proposal.caseId}`}
@@ -406,12 +431,26 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
           ) : null}
         </div>
       ) : null}
-      {view.canRespond ? (
-        <WorkflowSection title={c.response}>
-          <p>{c.responseNote}</p>
+      {view.canRespond || !staff ? (
+        // Keep the native action/state hook after a response makes a new decision unavailable.
+        // Only the restored receipt/error can reveal this form after that transition.
+        <section
+          className={
+            view.canRespond
+              ? "space-y-4 rounded-card border border-border bg-surface p-5"
+              : undefined
+          }
+        >
+          {view.canRespond ? (
+            <>
+              <h2 className="text-subheading font-semibold">{c.response}</h2>
+              <p>{c.responseNote}</p>
+            </>
+          ) : null}
           <ProposalForm
             {...common}
             command="decide"
+            commandAvailable={view.canRespond}
             fields={[
               ...hidden,
               {
@@ -427,10 +466,13 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
               },
               { name: "reason", label: c.reason, type: "textarea", required: true },
             ]}
-            values={revisionValues}
+            values={{
+              ...revisionValues,
+              ...(recovered.status === "restored" ? recovered.values : {}),
+            }}
             label={c.record}
           />
-        </WorkflowSection>
+        </section>
       ) : null}
       {canRevise || !staff ? (
         // Keep the client hook mounted when a committed counteroffer makes the visible

@@ -1,0 +1,60 @@
+{
+  "country": "Czechia",
+  "code": "CZ",
+  "checked": "Consolidated texts on zakonyprolidi.cz as published on the day of research (AML Act version of 1 Nov 2026; Accounting Act version from 1 Jan 2026); FAU sector guidance page.",
+  "estate_agency": {
+    "law": "Zakon c. 39/2020 Sb., o realitnim zprostredkovani (§ 2, 5-7, 12, 19); Obcansky zakonik 89/2012 Sb. § 2445-2454 (esp. § 2447, 2450); Zivnostensky zakon 455/1991 Sb. annex 2 (licensed trade 'Realitni zprostredkovani', inserted by § 24 of Act 39/2020)",
+    "regulated": "Yes. Estate brokerage is a licensed trade (zivnost vazana) requiring a professional qualification (Trade Licensing Act annex 2, as inserted by Act 39/2020 § 24), plus trustworthiness requirements and mandatory liability insurance (Act 39/2020 § 5-7).",
+    "dual_agency": "disclosure",
+    "rule": "No ban on acting for both sides. The broker loses commission and costs only if it was also active for the other side 'contrary to the contract' (Civil Code § 2450). Act 39/2020 § 12(3): the broker must tell the client the amount, or the method of calculating, the commission agreed with a third party for the same property; if not given by signature of the brokerage contract, the client may withdraw (§ 12(4)).",
+    "quote": "Civil Code § 2450: 'The broker has no right to commission or reimbursement of costs if, contrary to the contract, it was also active for the other party to the brokered contract.'",
+    "commission_both_sides": "Allowed unless excluded by contract, with disclosure to each client of the commission agreed with the other side (Act 39/2020 § 12(3)). An advance on commission from a consumer may not exceed two-thirds of the agreed commission (§ 19(3)).",
+    "sources": [
+      "https://www.zakonyprolidi.cz/cs/2020-39",
+      "https://www.zakonyprolidi.cz/cs/2012-89"
+    ]
+  },
+  "aml": {
+    "law": "Zakon c. 253/2008 Sb., o nekterych opatrenich proti legalizaci vynosu z trestne cinnosti: § 2(1)(d)(2) scope, § 7 identification, § 8(11) copies, § 16 retention; FAU (Financial Analytical Office) is FIU and supervisor",
+    "sale_scope": "Every real estate broker is an obliged entity (§ 2(1)(d)(2)). Identification is due once the transaction value will exceed EUR 1,000, and always on establishing a business relationship or for a suspicious transaction (§ 7(1)-(2)).",
+    "letting_threshold": "Leases, subleases and leaseholds only where the monthly payment reaches at least EUR 10,000 (§ 2(1)(d)(2)).",
+    "both_parties": "yes - FAU sector guidance: the client of a real estate broker 'is both the seller and the buyer who take part in the property transaction'; for leases, landlord and tenant.",
+    "retention_years": 10,
+    "retention_trigger": "10 years from the occasional transaction or from the end of the business relationship (§ 16(1)); the period starts on the first day of the calendar month after the month of the last act of the transaction known to the obliged entity (§ 16(5)).",
+    "extension": "No AML extension; after the period the data are erased and documents destroyed (§ 16(5)). Accounting records used for AML purposes are handled per Accounting Act § 32.",
+    "id_copy": "May: the obliged entity 'may make copies or extracts of the submitted documents ... without the client's consent' (§ 8(11)); copies made are kept 10 years (§ 16(1)(b)).",
+    "sources": [
+      "https://www.zakonyprolidi.cz/cs/2008-253",
+      "https://fau.gov.cz/cs/rozcestnik/legislativa-a-metodika/informace-pro-povinne-osoby/povinne-osoby-z-nefinancniho-sektoru/realitni-sektor-591"
+    ]
+  },
+  "accounting": {
+    "books_years": 5,
+    "annual_accounts_years": 10,
+    "source_documents_years": 10,
+    "trigger": "From the end of the accounting period to which the records relate (Accounting Act § 31(2)); VAT tax documents from the end of the tax period in which the supply took place (VAT Act § 35(2)).",
+    "law": "Zakon c. 563/1991 Sb., o ucetnictvi § 31(2): annual financial statements and annual report 10 years; accounting documents, books, inventories and other records 5 years. Zakon c. 235/2004 Sb., o DPH § 35(2): tax documents (invoices) 10 years, which governs invoices in practice.",
+    "sources": [
+      "https://www.zakonyprolidi.cz/cs/1991-563",
+      "https://www.zakonyprolidi.cz/cs/2004-235"
+    ]
+  },
+  "limitation": {
+    "general_years": 3,
+    "commission_years": 3,
+    "trigger": "From the day the right could first be exercised, i.e. when the creditor learned or should have learned of the relevant circumstances (Civil Code § 619); objective long-stop of 10 years from maturity for property rights (§ 629(2)). Commission falls due on conclusion of the brokered contract (§ 2447(1)).",
+    "law": "Obcansky zakonik 89/2012 Sb. § 629(1): 'The limitation period is three years.' Parties may agree 1 to 15 years, but not to the detriment of the weaker party (§ 630).",
+    "sources": ["https://www.zakonyprolidi.cz/cs/2012-89"]
+  },
+  "id_copies": {
+    "rule": "It is prohibited to 'make a copy of an identity card without the holder's consent' and to process the card's data without consent, except for inspecting the card to verify identity where a law requires or permits it. The AML Act lets obliged entities copy ID documents without consent for AML purposes (§ 8(11)).",
+    "law": "Zakon c. 269/2021 Sb., o obcanskych prukazech § 39(c)-(d); offence under the same Act",
+    "sources": ["https://www.zakonyprolidi.cz/cs/2021-269"]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "zakonyprolidi.cz is a consolidation; texts were not cross-checked on e-sbirka.cz.",
+    "Equivalent copy restriction for travel documents (passports) under Act 329/1999 Sb. was not checked.",
+    "The Accounting Act version is marked valid until 9 Jan 2028, which may signal a replacement act; not checked."
+  ]
+}

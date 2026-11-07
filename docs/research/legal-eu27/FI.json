@@ -1,0 +1,74 @@
+{
+  "country": "Finland",
+  "code": "FI",
+  "estate_agency": {
+    "law": "Act on Real Estate Brokerage and Letting Agencies 1075/2000 (laki kiinteistönvälitysliikkeistä ja vuokrahuoneiston välitysliikkeistä; registration, person in charge, logbook, supervision; supervisor changed to Lupa- ja valvontavirasto by Act 719/2025 in force 1 Jan 2026) + Act on Brokerage of Real Estate and Rental Housing 1074/2000 (laki kiinteistöjen ja vuokrahuoneistojen välityksestä; civil-law duties, assignment contract, commission; applies to consumer-type assignments per s.1, mandatory in favour of principal and counterparty per s.4).",
+    "regulated": "Yes. 1075/2000 s.3: brokerage 'may be pursued only by such a private trader or legal person that has been registered as a real estate brokerage agency'. Register kept by Lupa- ja valvontavirasto (Finnish Supervisory Agency) since 1 Jan 2026 (s.7 as amended by 719/2025; previously Regional State Administrative Agencies/AVI). Conditions s.8: fit and proper, liability insurance, a person in charge. s.5(3): person in charge must hold the qualifying examination for real estate agents (LKV); s.5(1): at least half of staff performing agency tasks must hold the qualification. Titles 'LKV'/'real estate agent' protected (s.16). Exemption s.2(6): the Act does not apply to 'traders established in another state in the European Economic Area that pursue agency activities temporarily in Finland'. Assignments logbook s.10; client funds segregated s.11.",
+    "dual_agency": "allowed",
+    "rule": "Both parties to the brokered deal may be principals of the same agency (1074/2000 s.20(2)); the agency then may charge in total only an amount corresponding to one brokerage fee. Even with a single principal, the agency must act 'taking into account the interests of the principal and also of the principal's counterparty' (s.7(1)) and must give the counterparty all information affecting the decision (s.9). It must disclose to the principal if the agency or its employee intends to conclude the deal on its own account or has a special interest of its own in the contract (s.8(2)); no fee on own-account deals (s.20(4)). No statutory written-consent requirement for acting for both sides was found; each principal relationship nevertheless requires a written or electronic assignment contract (s.5). Good agency practice is required by 1075/2000 s.4.",
+    "quote": "1074/2000 s.20(2) (own translation from Finnish): 'The brokerage fee may be charged only from the principal. If the parties to the contract concerning the brokered object are each principals of the agency, the agency may charge only an amount corresponding to one brokerage fee.' s.7(1): the agency must perform the assignment 'taking into account the interests of the principal and also of the principal's counterparty'.",
+    "commission_both_sides": "Commission may be charged only from a principal (1074/2000 s.20(2)); taking a fee from the non-principal counterparty is not permitted. If buyer and seller are both principals, the combined fee may not exceed an amount corresponding to one brokerage fee. Fee due only when the deal is concluded unless agreed otherwise (s.20(1)); must be reasonable (s.20(3)); no fee on deals for the agency's or its employee's own account and no clause giving the agency the excess over the listed price (s.20(4)); post-term fee only if agreed and the deal arises within 6 months after the assignment term (s.21(1)). Assignment contract max 4 months at a time (s.5(3)).",
+    "sources": [
+      "https://www.finlex.fi/en/legislation/translations/2000/eng/1075",
+      "https://www.finlex.fi/fi/lainsaadanto/2000/1074",
+      "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute-consolidated/2000/1074/fin@20110229",
+      "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute-consolidated/2000/1075/fin@20240365",
+      "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute/2025/719/fin@"
+    ]
+  },
+  "aml": {
+    "law": "Act on Preventing Money Laundering and Terrorist Financing 444/2017 (rahanpesulaki): ch.1 s.2(1)(18) scope; ch.3 s.2 identification and verification; ch.3 s.3 CDD data retention; ch.4 s.3 retention of suspicious-transaction information; ch.7 s.1(1)(4) supervisor = Lupa- ja valvontavirasto. Supervisor guidance: Lupa- ja valvontavirasto, 'Rahanpesun ja terrorismin rahoittamisen estäminen – ohje ilmoitusvelvolliselle' (updated 12/2025), section 12.6.",
+    "sale_scope": "Every brokerage by a real estate brokerage agency or housing rental agency registered under 1075/2000 (ch.1 s.2(1)(18)); no value threshold. Concluding a brokerage/assignment contract establishes a permanent customer relationship (LVV guidance 6.1), so identification and verification are required at that point (ch.3 s.2(1)); the EUR 10,000 threshold applies only to occasional transactions (ch.3 s.2(1)(1)(a)). Ancillary legal services (e.g. drafting only a deed) are treated as legal services where only the contracting client is the customer (LVV guidance 12.6).",
+    "letting_threshold": "None in Finnish law: housing rental agencies are obliged entities without a rent threshold (ch.1 s.2(1)(18)); the 5AMLD EUR 10,000/month threshold is not transposed as a scope limit. Simplified CDD is possible only where the agency's risk assessment shows low risk (ch.3 s.8; LVV guidance 6.4).",
+    "both_parties": "yes - per supervisor guidance, not statute text. LVV guidance 12.6: 'real estate agents, whose customers have by established practice been considered to be both the buyer and the seller, irrespective of which of the parties made the brokerage assignment' (own translation); customers of real estate and housing rental agencies are 'not only principals but also the principal's counterparties' taking part in the transaction. Timing: principal identified when the assignment contract is made, counterparty when making the offer and at the latest when the offer is accepted; an offeror paying a deposit (käsiraha) must be identified even if the offer is not accepted. The Act itself does not define 'customer'.",
+    "retention_years": 5,
+    "retention_trigger": "ch.3 s.3(1): 'five years after the end of the permanent customer relationship'; for occasional transactions 'five years from the conclusion of the transaction'. Separately, 1075/2000 s.10(3): logbook, assignment contracts with appendices, offer documents, brochures and other assignment documents retained 'for five years from the ending of assignments'.",
+    "extension": "CDD data (ch.3 s.3): no statutory extension or deletion clause; the supervisor treats five years as a minimum and says a longer period may in some cases have an acceptable ground (LVV guidance 6.10). Suspicious-transaction information (ch.4 s.3): kept 5 years separately from the customer register and removed after 5 years from end of the customer relationship or the transaction 'unless their continued retention is necessary for reasons of criminal investigation, pending judicial proceedings or securing the rights of obliged entities or their employees'; need for continued retention reviewed at least every 3 years and the review recorded.",
+    "id_copy": "Permitted, not mandatory. ch.3 s.3(2)(7): retain the name, number or other identifier and issuer of the document used to verify identity 'or a copy of the document' (or, for remote identification, the procedure/sources used). For customers without a Finnish personal identity code, citizenship and travel-document data must also be retained (ch.3 s.3(3)). Data obtained solely for AML may not be processed for incompatible purposes (ch.3 s.3(5)).",
+    "sources": [
+      "https://www.finlex.fi/en/legislation/translations/2017/eng/444",
+      "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute-consolidated/2017/444/fin@20260427",
+      "https://lvv.fi/documents/242146171/252299622/Rahanpesun+ja+terrorismin+rahoittamisen+est%C3%83%C2%A4minen+-ohje.pdf/02e742b6-9bd0-847d-eec1-b72c837f0d43/Rahanpesun+ja+terrorismin+rahoittamisen+est%C3%83%C2%A4minen+-ohje.pdf?t=1765896565738"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 6,
+    "trigger": "Financial statements, management report, ledgers, chart of accounts and list of ledgers/materials: at least 10 years 'from the end of the financial year'. Vouchers (incl. invoices), correspondence on transactions and other accounting material: at least six years 'after the end of the year during which the financial year ended', unless another law sets a longer period. On cessation of operations the entity or its successor must arrange retention and notify the registration authority who holds the material.",
+    "law": "Accounting Act 1336/1997 (kirjanpitolaki), chapter 2 section 10 (wording per 1620/2015; unchanged in the current consolidated version 555/2026); ch.2 s.9 requires retention so that material can be reviewed in Finland by an authority or auditor without undue delay.",
+    "sources": [
+      "https://www.finlex.fi/en/legislation/translations/1997/eng/1336",
+      "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute-consolidated/1997/1336/fin@20260555"
+    ]
+  },
+  "limitation": {
+    "general_years": 3,
+    "commission_years": 3,
+    "trigger": "s.4: 'A debt becomes time-barred after three years from the date referred to in sections 5-7'. s.5: from the agreed due date. s.6: if no due date was agreed for 'other consideration', from when the creditor 'has fulfilled their performance obligation' (for a commission: when the deal is concluded, 1074/2000 s.20(1)). s.7: contractual damages from when the error was or should have been noticed, with a 10-year long-stop from the breach (s.7(2)). s.8: 10 years where no starting point under ss.5-7. No special limitation rule for brokerage commission was found, so the general 3-year rule applies.",
+    "law": "Act on the Limitation of Debts 728/2003 (laki velan vanhentumisesta), ss.4-8 (s.4 wording confirmed in the Finnish consolidated text as amended up to 324/2016); Act on Brokerage of Real Estate and Rental Housing 1074/2000 s.20(1) for when the commission arises.",
+    "sources": [
+      "https://www.finlex.fi/en/legislation/translations/2003/eng/728",
+      "https://opendata.finlex.fi/finlex/avoindata/v1/akn/fi/act/statute-consolidated/2003/728/fin@20160324"
+    ]
+  },
+  "id_copies": {
+    "rule": "No Finnish statute was found that prohibits or specifically restricts copying identity documents outside AML. General GDPR limits apply (data minimisation, Art. 5(1)(c)). The Data Protection Act restricts the personal identity code: it may be processed with consent, where provided by law, or where unique identification is important for a statutory duty or for the rights and duties of the data subject or controller (s.29(1)); explicitly allowed for unique identification in renting activities (s.29(2)); it 'shall not be unnecessarily entered into documents printed out from or drawn up based on a filing system' (s.29(4)); and it may not be used alone or with the name to establish identity (s.29(5)). Data Protection Ombudsman decision TSV/324/2021 found a routine demand for a certified ID copy to verify an erasure request disproportionate (GDPR Arts 5(1)(c), 12(6)).",
+    "law": "Data Protection Act 1050/2018 (tietosuojalaki) s.29 (as amended 1225/2023); GDPR Art. 5(1)(c).",
+    "sources": [
+      "https://www.finlex.fi/en/legislation/translations/2018/eng/1050",
+      "https://www.edilex.fi/tsv/20260006"
+    ]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "1074/2000 has no official English translation on Finlex; quotes from s.7, s.8, s.20 and s.21 are own translations of the official Finnish text.",
+    "Whether a dual role (both parties as principals) needs any specific disclosure or consent beyond s.8(2) disclosure of a special interest and the general duty to consider both parties' interests: no statutory consent rule found; industry good-agency-practice guidance (kiinteistonvalitysala.fi, not a primary source) was not checked for a specific dual-principal rule.",
+    "The 'both buyer and seller are customers' AML rule comes from supervisor guidance (LVV 12/2025, section 12.6), not from the text of Act 444/2017, which does not define 'customer'.",
+    "Whether an EEA agency acting only temporarily in Finland, exempt from 1075/2000 under s.2(6), is also outside Finnish AML scope (ch.1 s.2(1)(18) refers to agencies 'referred to in' 1075/2000): an interpretation, not confirmed by a primary source.",
+    "Whether a closed brokerage assignment counts as the end of the 'permanent customer relationship' for the AML 5-year clock: inferred from LVV guidance 6.1, which treats concluding a brokerage/assignment contract as a permanent relationship.",
+    "Limitation Act 728/2003: the latest consolidated version found on Finlex open data is 324/2016 (s.4 three-year rule confirmed in Finnish); amendments after 2016, if any, were not found or checked.",
+    "Industry guide (Ohje hyvästä välitystavasta 30.9.2025, not a primary source) recommends keeping assignment files 10 years after the assignment ends because of the 10-year long-stop for damages; this is not a statutory requirement.",
+    "No Data Protection Ombudsman guidance specifically on copying passports or ID cards in real-estate brokerage was found."
+  ]
+}
