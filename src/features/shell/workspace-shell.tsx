@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
+import { agency } from "@/config/tenant";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx } from "@/ui/cx";
@@ -131,7 +132,7 @@ export async function WorkspaceShell({
             )}
           >
             <Image
-              src="/brand/logo-ms-realty.png"
+              src={agency.logoPath}
               alt={common("brand")}
               width={86}
               height={44}
@@ -243,7 +244,7 @@ export async function WorkspaceShell({
                 className="flex min-h-control min-w-0 flex-1 items-center"
               >
                 <Image
-                  src="/brand/logo-ms-realty.png"
+                  src={agency.logoPath}
                   alt={common("brand")}
                   width={86}
                   height={44}

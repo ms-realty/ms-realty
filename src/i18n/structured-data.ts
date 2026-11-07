@@ -1,3 +1,4 @@
+import { agency } from "@/config/tenant";
 import { areaBases } from "@/domain/facts";
 import { currencyMinorDigits } from "@/domain/ids";
 import type { LegacyPage } from "@/server/legacy/pages";
@@ -19,9 +20,9 @@ export function organizationStructuredData(origin: URL) {
     "@context": "https://schema.org",
     "@type": ["Organization", "LocalBusiness", "RealEstateAgent"],
     "@id": new URL("/#organization", origin).toString(),
-    name: "MS Realty",
+    name: agency.name,
     url: origin.toString(),
-    logo: new URL("/brand/logo-ms-realty.png", origin).toString(),
+    logo: new URL(agency.logoPath, origin).toString(),
     telephone: legacyContent.brand_contact.phone,
     email: legacyContent.brand_contact.email,
   };

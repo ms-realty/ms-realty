@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { assistantLabel } from "@/config/tenant";
 import type { AssistanceConfig } from "./config";
 import type { Generation } from "./provider";
 import { providerJson } from "./response";
@@ -60,7 +61,7 @@ export async function routedGeneration(
       Authorization: `Bearer ${config.apiKey}`,
       "Content-Type": "application/json",
       "X-OpenRouter-Metadata": "enabled",
-      "X-OpenRouter-Title": "MS Realty Butler",
+      "X-OpenRouter-Title": assistantLabel,
     },
     body: JSON.stringify({
       ...routingRequest(policy, config.inputCostMicros, config.outputCostMicros),

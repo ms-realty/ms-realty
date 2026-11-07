@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { setRequestLocale } from "next-intl/server";
+import { agency } from "@/config/tenant";
 import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
 import { AnalyticsConsent } from "@/features/tracking/consent";
 import { isRoutableLocale, localeDirection, localePolicy } from "@/i18n/config";
@@ -28,8 +29,8 @@ export async function generateMetadata({
   const config = trackingConfig();
   const staging = stagingEnabled();
   return {
-    title: { template: "%s · MS Realty", default: "MS Realty" },
-    icons: { icon: "/brand/logo-ms-realty.png" },
+    title: { template: `%s · ${agency.name}`, default: agency.name },
+    icons: { icon: agency.logoPath },
     robots: { index: !staging && localePolicy(locale).indexable, follow: !staging },
     ...(config.googleVerification ? { verification: { google: config.googleVerification } } : {}),
   };

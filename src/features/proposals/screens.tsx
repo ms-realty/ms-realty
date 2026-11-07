@@ -2,6 +2,7 @@ import { workflowLabel } from "@/i18n/workflow-labels";
 import "server-only";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { defaultCurrency } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { currencyCodes } from "@/domain/ids";
 import { isPublicLocale } from "@/i18n/config";
@@ -204,7 +205,7 @@ export async function NewProposalScreen(
         values={{
           interestId: props.interestId,
           clientPartyId: context.buyers[0]?.partyId ?? "",
-          currency: "EUR",
+          currency: defaultCurrency,
           period: context.purpose === "sale" ? "total" : "month",
         }}
       />

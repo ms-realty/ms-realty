@@ -1,6 +1,7 @@
 // Resend's fixed API, with no provider-side template fetching or arbitrary message rendering.
 import "server-only";
 import { z } from "zod";
+import { agency } from "@/config/tenant";
 import { formatDateTime } from "@/i18n/format";
 import { caseEmailConfig, renderCaseEmail } from "../cases/email-contract";
 import type { HostOrigins } from "../config/hosts";
@@ -17,22 +18,22 @@ const authTemplates = [
 type AuthTemplate = (typeof authTemplates)[number];
 const subject = {
   bg: {
-    "auth.email_link": "Вход в MS Realty",
-    "auth.staff_enrolment": "Покана за екипа на MS Realty",
-    "auth.staff_recovery": "Възстановяване на достъпа до MS Realty",
-    "auth.client_invitation": "Покана за Вашия кабинет в MS Realty",
+    "auth.email_link": `Вход в ${agency.name}`,
+    "auth.staff_enrolment": `Покана за екипа на ${agency.name}`,
+    "auth.staff_recovery": `Възстановяване на достъпа до ${agency.name}`,
+    "auth.client_invitation": `Покана за Вашия кабинет в ${agency.name}`,
   },
   en: {
-    "auth.email_link": "Sign in to MS Realty",
-    "auth.staff_enrolment": "Your MS Realty staff invitation",
-    "auth.staff_recovery": "Recover your MS Realty access",
-    "auth.client_invitation": "Your MS Realty client invitation",
+    "auth.email_link": `Sign in to ${agency.name}`,
+    "auth.staff_enrolment": `Your ${agency.name} staff invitation`,
+    "auth.staff_recovery": `Recover your ${agency.name} access`,
+    "auth.client_invitation": `Your ${agency.name} client invitation`,
   },
   ru: {
-    "auth.email_link": "Вход в MS Realty",
-    "auth.staff_enrolment": "Приглашение в команду MS Realty",
-    "auth.staff_recovery": "Восстановление доступа к MS Realty",
-    "auth.client_invitation": "Приглашение в личный кабинет MS Realty",
+    "auth.email_link": `Вход в ${agency.name}`,
+    "auth.staff_enrolment": `Приглашение в команду ${agency.name}`,
+    "auth.staff_recovery": `Восстановление доступа к ${agency.name}`,
+    "auth.client_invitation": `Приглашение в личный кабинет ${agency.name}`,
   },
 };
 
@@ -94,7 +95,7 @@ function authEmail(message: OutboundMessage, hosts: HostOrigins, now: Date) {
   // Plain text avoids provider tracking pixels and has no interpolated HTML or customer data.
   return {
     subject: subject[displayLanguage][template],
-    text: `MS Realty\n\n${instructions}\n\n${url.toString()}\n\n${validUntil}: ${formatDateTime(displayLanguage, expiresAt, { zoneLabel: true, now })}`,
+    text: `${agency.name}\n\n${instructions}\n\n${url.toString()}\n\n${validUntil}: ${formatDateTime(displayLanguage, expiresAt, { zoneLabel: true, now })}`,
   };
 }
 

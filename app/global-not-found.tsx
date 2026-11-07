@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { connection } from "next/server";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
+import { agency } from "@/config/tenant";
 import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
 import { JourneyShell } from "@/features/shell/journey-shell";
 import { NotFoundContent } from "@/features/shell/not-found-content";
@@ -43,7 +44,7 @@ export const viewport: Viewport = appViewport;
 export async function generateMetadata(): Promise<Metadata> {
   const { locale } = await notFoundSurface();
   const t = await getTranslations({ locale, namespace: "errors.notFound" });
-  return { title: t("title"), robots: privateRobots, icons: { icon: "/brand/logo-ms-realty.png" } };
+  return { title: t("title"), robots: privateRobots, icons: { icon: agency.logoPath } };
 }
 
 export default async function GlobalNotFound() {
