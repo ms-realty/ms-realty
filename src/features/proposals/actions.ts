@@ -8,6 +8,7 @@ import { formatDateTime } from "@/i18n/format";
 import { moneyCopy } from "@/i18n/money-copy";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
+import { getEnv } from "@/server/config/env";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
@@ -18,7 +19,9 @@ import {
   transitionProposal,
 } from "@/server/proposals/service";
 import { amountToMinor } from "@/server/proposals/terms";
-import type { FormState, FormValues } from "@/ui/form/contract";
+import { proposalDraftToken, setProposalDraftCookie } from "@/server/reauth-drafts/cookies";
+import { deleteProposalReauthDraft, saveProposalReauthDraft } from "@/server/reauth-drafts/service";
+import { type FormState, type FormValues, formFields } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
 import {
@@ -30,6 +33,7 @@ import {
   proposalTypes,
 } from "./contract";
 import { proposalCopy } from "./copy";
+import { proposalReauthCopy } from "./reauth-copy";
 
 const lines = (value: string | undefined) =>
   (value ?? "")
@@ -55,7 +59,8 @@ export async function proposalAction(
     scope = proposalScope(command, id);
   const fields = proposalFields[command],
     values = readTimeFormValues<FormValues>(data, fields),
-    envelope = readFormEnvelope(data, scope);
+    supportsRecovery = context === "client" && command === "decide",
+    envelope = readFormEnvelope(data, scope, supportsRecovery);
   if (command === "create" || command === "revise")
     values.additionalPartyIds = data
       .getAll("additionalPartyIds")
@@ -72,6 +77,53 @@ export async function proposalAction(
     reconciliation: status,
     outcome: { kind: "idle" },
   };
+  const recoveryCopy = proposalReauthCopy(locale);
+  if (data.getAll(formFields.intent).includes("recover")) {
+    // This is a separate explicit save, not an invocation/retry of proposal.decide.
+    const saved = await action(
+      async (ctx) => {
+        await requireAuthHost("client");
+        if (!supportsRecovery || !ctx.session || ctx.session.account.kind !== "client")
+          throw new AppError("not_found");
+        if (!envelope?.expectedRevision || envelope.intent !== "recover")
+          throw new AppError("validation_failed");
+        const allowed = new Set([
+          ...fields,
+          formFields.intent,
+          formFields.operationId,
+          formFields.expectedRevision,
+        ]);
+        for (const [name, value] of data.entries()) {
+          if (name.startsWith("$ACTION_")) continue;
+          if (!allowed.has(name) || typeof value !== "string" || data.getAll(name).length !== 1)
+            throw new AppError("validation_failed");
+        }
+        const draft = await saveProposalReauthDraft(ctx.db, ctx.session, getEnv().hosts.client, {
+          proposalId: id,
+          revisionId: values.revisionId ?? "",
+          expectedVersion: envelope.expectedRevision,
+          state: values.state as "declined",
+          reason: values.reason ?? "",
+        });
+        await setProposalDraftCookie(id, draft.token, draft.expiresAt);
+      },
+      { requireSession: true },
+    );
+    if (saved.ok)
+      redirect(
+        `/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/proposals/${id}`)}`,
+      );
+    return {
+      ...state,
+      outcome: {
+        kind: "rejected",
+        code: saved.error.code,
+        retryable: false,
+        message: recoveryCopy.failed,
+        ...(supportsRecovery ? { recoverySubmit: { label: recoveryCopy.save } } : {}),
+      },
+    };
+  }
   const result = await action(
     async (ctx) => {
       await requireAuthHost(context);
@@ -117,15 +169,28 @@ export async function proposalAction(
             ...terms,
           })
         ).outcome;
-      if (command === "decide")
-        return (
-          await recordProposalDecision(ctx.db, ctx.session, {
-            ...base,
-            revisionId: values.revisionId ?? "",
-            state: values.state as "declined",
-            reason: values.reason ?? "",
-          })
-        ).outcome;
+      if (command === "decide") {
+        const session = ctx.session;
+        const draftToken = context === "client" ? await proposalDraftToken(id) : undefined;
+        const recorded = await recordProposalDecision(ctx.db, session, {
+          ...base,
+          revisionId: values.revisionId ?? "",
+          state: values.state as "declined",
+          reason: values.reason ?? "",
+        });
+        if (context === "client") {
+          try {
+            await deleteProposalReauthDraft(ctx.db, session, id, draftToken);
+          } catch {
+            // Keep the command's own committed success/failure receipts unchanged. A cleanup
+            // outage cannot unsend a response; revision checks deny reuse and maintenance purges.
+            console.error("[proposal-draft] cleanup deferred");
+          }
+        }
+        // Do not clear a cookie here: a delayed response could erase a newer tab's draft
+        // cookie. The old capability is inert once its exact body is deleted and expires.
+        return recorded.outcome;
+      }
       return (
         await transitionProposal(ctx.db, ctx.session, {
           ...base,
@@ -219,7 +284,9 @@ export async function proposalAction(
       retryable: false,
       message:
         error.code === "STEP_UP_REQUIRED"
-          ? p.reverifyNotice
+          ? supportsRecovery
+            ? recoveryCopy.notice
+            : recoveryCopy.localOnly
           : error.fieldErrors?.agreement
             ? p.agreementBlocked
             : error.code === "APPROVAL_STALE"
@@ -227,11 +294,16 @@ export async function proposalAction(
               : c.transition,
       recovery:
         error.code === "STEP_UP_REQUIRED"
-          ? {
-              href: `/${locale}/access/reauth?returnTo=${encodeURIComponent(returnPath)}`,
-              label: p.reverify,
-            }
+          ? supportsRecovery
+            ? undefined
+            : {
+                href: `/${locale}/access/reauth?returnTo=${encodeURIComponent(returnPath)}`,
+                label: p.reverify,
+              }
           : status,
+      ...(error.code === "STEP_UP_REQUIRED" && supportsRecovery
+        ? { recoverySubmit: { label: recoveryCopy.save } }
+        : {}),
     },
   };
 }
