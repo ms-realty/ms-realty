@@ -680,5 +680,14 @@
     "signedInTitle": "U bent ingelogd",
     "switchAccount": "Uitloggen en een ander account gebruiken",
     "unexpected": "We konden het resultaat niet bevestigen. Vernieuw deze pagina om de status te controleren voordat u het opnieuw probeert."
+  },
+  "proposalReauth": {
+    "save": "Antwoordconcept opslaan en toegang bevestigen",
+    "notice": "Uw antwoord staat nog op deze pagina. Sla het maximaal 15 minuten op terwijl u de toegang bevestigt. Controleer en verstuur het daarna zelf.",
+    "failed": "Het antwoordconcept kon niet worden opgeslagen. Uw invoer staat nog op deze pagina. Probeer opnieuw of kopieer deze voordat u vertrekt.",
+    "restored": "Uw opgeslagen antwoord is als concept hersteld. Controleer de huidige voorwaarden en verstuur het zelf. Er is niets verstuurd.",
+    "pending": "Uw opgeslagen antwoord wacht op toegangsbevestiging in deze browser. Er is niets verstuurd.",
+    "unavailable": "Het opgeslagen antwoord kon niet worden hersteld. Controleer de huidige voorwaarden en voer uw antwoord opnieuw in. Bij het herstellen is niets verstuurd.",
+    "localOnly": "Uw invoer blijft op deze pagina. Kopieer deze voordat u de toegang gaat bevestigen; dit formulier bewaart de invoer niet tijdens de bevestiging."
   }
 }
