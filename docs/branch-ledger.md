@@ -21,25 +21,29 @@ Verify a tip with `git bundle list-heads ~/Archive/MS-Realty/pre-prune.bundle | 
 
 ## Remote branches
 
-| Branch | Tip | Ahead / behind `main` | Pull request | Verdict | Evidence | In bundle |
-|---|---|---|---|---|---|---|
-| `main` | 387ad639 | – | – | trunk | – | – |
-| `claude/retention-policy-aml` | 69e0b68e | 2 / 0 | #374 draft | **Claude-live.** Docs-only draft (retention policy v1, ADR 0008) owned by another Claude session. CI green except `Browser / webkit-mobile` still running at the time of writing. Left to its owner session for independent review and the ready decision. | `gh pr view 374` | no (live) |
-| `codex/msr-recovery-journal` | f2da94d7 | 27 / 0 | #373 open | **Codex-live.** Not touched. | – | no (live) |
-| `codex/msr-public-qualification-fixes` | 23218846 | 232 / 19 | #344 draft | **Codex-live.** Not touched. Contains the whole `codex/msr-staging` and `codex/msr-erasure-propagation` lineage. | `git merge-base --is-ancestor b8d5ad74 23218846` | yes (5 refs) |
-| `codex/msr-staging` | b8d5ad74 | 161 / 21 | none | **Landed, keep.** Tree identical to the #340 squash commit `7196bb09` (`4d5a871b`). Kept because it is the staging deployment ref: `staging.yml` and `staging-cloudflare.yml` trigger on it and the protected `staging` environment allows only this branch. Not a work branch. | `git rev-parse 7196bb09^{tree} b8d5ad74^{tree}` | yes (6 refs) |
-| `codex/msr-erasure-propagation` | c2263495 | 146 / 21 | none | **Landed, prune.** Ancestor of `b8d5ad74`, whose tree is the #340 squash. 22 of 392 paths carry intermediate blobs that later commits of the same lineage overwrote before the squash; nothing unique. | `git merge-base --is-ancestor c2263495 b8d5ad74` | yes |
-| `codex/msr-privacy-export` | 22b1e8b8 | 21 / 22 | #339 closed | **Landed, prune.** Last content commit `9fea7fee` is an ancestor of `b8d5ad74` (#340). The tip is a merge of `origin/main` with no content of its own. Codex closed #339 as superseded by #340. | `git merge-base --is-ancestor 9fea7fee b8d5ad74`; `git log b8d5ad74..22b1e8b8` shows the merge only | yes (2 refs) |
-| `codex/msr-cms-editions` | b7a00de1 | 4 / 26 | #333 merged | **Landed, prune.** 35 of 35 paths: 22 match `main`, 13 appear in `main`'s history. | blob check | yes (2 refs) |
-| `codex/msr-staging-http-ci` | e28f86b0 | 6 / 21 | #341 closed draft | **Landed, prune.** 7 of 7 paths: 3 match `main`, 4 appear in `main`'s history. No workflow or script references the branch. | blob check; `git grep codex/msr-staging-http-ci origin/main` empty | yes (3 refs) |
-| `dependabot/npm_and_yarn/patch-and-minor-b48824801f` | 2cdff7a0 | 1 / 2 | #371 open | **Automated, CI red.** Eleven patch and minor bumps across both package files. `make check` fails because Biome 2.6.4 wants formatting changes in three files (template literal, optional chaining); the bump itself is sound. Verdict recorded below under "Dependabot". | `gh run view 42210396443 --log-failed` | no (live) |
+| Branch                                               | Tip      | Ahead / behind `main` | Pull request      | Verdict                                                                                                                                                                                                                                                                                                                                              | Evidence                                                                                            | In bundle    |
+| ---------------------------------------------------- | -------- | --------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------ |
+| `main`                                               | 387ad639 | –                     | –                 | trunk                                                                                                                                                                                                                                                                                                                                                | –                                                                                                   | –            |
+| `claude/retention-policy-aml`                        | 69e0b68e | 2 / 0                 | #374 draft        | **Claude-live.** Docs-only draft (retention policy v1, ADR 0008) owned by another Claude session. Its owner session marked it ready while this lane ran; it merges through `auto-merge.yml` on green CI.                                                                                                                                             | `gh pr view 374`                                                                                    | no (live)    |
+| `codex/msr-recovery-journal`                         | f2da94d7 | 27 / 0                | #373              | **Codex-live, merged while this lane ran.** Squash `784f944a`; GitHub deleted the branch.                                                                                                                                                                                                                                                            | `gh pr view 373`                                                                                    | no (live)    |
+| `codex/msr-public-qualification-fixes`               | 23218846 | 232 / 19              | #344 draft        | **Codex-live.** Not touched. Contains the whole `codex/msr-staging` and `codex/msr-erasure-propagation` lineage.                                                                                                                                                                                                                                     | `git merge-base --is-ancestor b8d5ad74 23218846`                                                    | yes (5 refs) |
+| `codex/msr-staging`                                  | b8d5ad74 | 161 / 21              | none              | **Landed, keep.** Tree identical to the #340 squash commit `7196bb09` (`4d5a871b`). Kept because it is the staging deployment ref: `staging.yml` and `staging-cloudflare.yml` trigger on it and the protected `staging` environment allows only this branch. Not a work branch.                                                                      | `git rev-parse 7196bb09^{tree} b8d5ad74^{tree}`                                                     | yes (6 refs) |
+| `codex/msr-erasure-propagation`                      | c2263495 | 146 / 21              | none              | **Landed, prune.** Ancestor of `b8d5ad74`, whose tree is the #340 squash. 22 of 392 paths carry intermediate blobs that later commits of the same lineage overwrote before the squash; nothing unique.                                                                                                                                               | `git merge-base --is-ancestor c2263495 b8d5ad74`                                                    | yes          |
+| `codex/msr-privacy-export`                           | 22b1e8b8 | 21 / 22               | #339 closed       | **Landed, prune.** Last content commit `9fea7fee` is an ancestor of `b8d5ad74` (#340). The tip is a merge of `origin/main` with no content of its own. Codex closed #339 as superseded by #340.                                                                                                                                                      | `git merge-base --is-ancestor 9fea7fee b8d5ad74`; `git log b8d5ad74..22b1e8b8` shows the merge only | yes (2 refs) |
+| `codex/msr-cms-editions`                             | b7a00de1 | 4 / 26                | #333 merged       | **Landed, prune.** 35 of 35 paths: 22 match `main`, 13 appear in `main`'s history.                                                                                                                                                                                                                                                                   | blob check                                                                                          | yes (2 refs) |
+| `codex/msr-staging-http-ci`                          | e28f86b0 | 6 / 21                | #341 closed draft | **Landed, prune.** 7 of 7 paths: 3 match `main`, 4 appear in `main`'s history. No workflow or script references the branch.                                                                                                                                                                                                                          | blob check; `git grep codex/msr-staging-http-ci origin/main` empty                                  | yes (3 refs) |
+| `codex/msr-reauth-draft-continuity`                  | 12c0e76a | –                     | #376 draft        | **Codex-live.** Opened while this lane ran. Not touched.                                                                                                                                                                                                                                                                                             | `gh pr view 376`                                                                                    | no (live)    |
+| `dependabot/npm_and_yarn/patch-and-minor-b48824801f` | 2cdff7a0 | 1 / 2                 | #371 open         | **Automated, CI red.** Eleven patch and minor bumps across both package files. `make test-release` fails because `scripts/release-ci-scenarios.mjs` pins the digests of `package.json` and `package-lock.json` as reviewed-producer inputs; a bump cannot pass until a person reviews it and moves the pins. Landed through #378 (see "Dependabot"). | `gh run view 42210396443 --log-failed`                                                              | no (live)    |
 
 ### Dependabot
 
-The bump cannot pass CI without a formatting commit. Pushing one onto Dependabot's branch
-would merge and ship it on green without an independent review, so the bump is landed
-through a reviewed draft pull request instead (see "Pull requests from this lane"), after
-which #371 closes as superseded. Until then the branch stays as Dependabot left it.
+The bump cannot pass CI on its own: `scripts/release-ci-scenarios.mjs` records the digests
+of `package.json` and `package-lock.json` as reviewed-producer inputs, so any dependency
+change fails `make test-release` until a person reviews it and moves the pins. That review is
+the point of the pin, and pushing it onto Dependabot's branch would merge and ship on green
+without an independent reviewer. #378 therefore takes Dependabot's four package files byte
+for byte, moves the two pins, and lands after its own review; #371 then closes as
+superseded. Until then the branch stays as Dependabot left it.
 
 ## Local branches in the primary checkout
 
@@ -80,20 +84,38 @@ and wait for the owner's review before they are dropped.
 Filled in as the lane progresses; every pull request stays a draft until CI is green and a
 different model has reviewed it, because a ready pull request merges and ships on green.
 
-| Pull request | Branch | Content | State |
-|---|---|---|---|
-| (this ledger) | `claude/branch-ledger` | this note | draft |
+| Pull request | Branch                    | Content                                                                                                                                                               | State                                               |
+| ------------ | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| #375         | `claude/branch-ledger`    | this note and ADR cross-references                                                                                                                                    | draft until the other two are recorded              |
+| #377         | `claude/tenant-profile`   | `src/config/tenant.ts`: jurisdictions and time zones, locales, currency, review defaults, references, legacy domains and agency identity behind one profile; ADR 0009 | draft, reviewed by a different model, waiting on CI |
+| #378         | `claude/deps-patch-minor` | Dependabot's patch-and-minor group (#371) with the reviewed-producer pins moved                                                                                       | draft, waiting on review and CI                     |
 
 ## Pruned
 
 Branches deleted from the remote by this lane, each proven landed and held by the bundle:
 
-- (filled in once the pull request that records them is open)
+- `codex/msr-erasure-propagation` (c2263495)
+- `codex/msr-privacy-export` (22b1e8b8)
+- `codex/msr-cms-editions` (b7a00de1)
+- `codex/msr-staging-http-ci` (e28f86b0)
+
+Each was deleted with `--force-with-lease` on its recorded tip. `codex/msr-recovery-journal`
+was deleted by GitHub when #373 merged.
 
 ## Waits on the owner or on Codex
 
 - Launch gate: R00–R12 in `docs/architecture.md` §20.3, none passed with exact-release
   evidence; `production/data/launch-readiness.json` remains the authority.
-- #374 (retention policy, ADR 0008): review and ready decision by its owner session.
-- #373 and #344: Codex.
+- #374 (retention policy, ADR 0008): marked ready by its owner session; merges on green CI.
+- #344 and #376: Codex.
+- The property-management pack (`helm-ai-enterprise`, `packs/property-management`) did not ask
+  this side for a lifecycle export. For the record: 17 of its 20 lifecycles match the code's
+  `defineMachine` tables edge for edge (inquiry, demand and supply case stages, disposition,
+  interest, appointment, proposal revision, owner instruction, listing availability, listing
+  editorial, locale copy, publication, client message, task, external action, consent
+  subscription, privacy request); key custody, complaint and import batch have state lists
+  but no single transition table in code; four code machines (service-intake stage, destination
+  delivery, document, approval) have no pack lifecycle. Owners, handoffs and agent verdicts are
+  pack policy and are not derivable from code, so an exporter would cover structure only. Whether
+  to build one is the pack owner's call.
 - The 41 local Codex branches and stashes @7/@8 above.
