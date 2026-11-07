@@ -1,0 +1,71 @@
+{
+  "country": "Croatia",
+  "code": "HR",
+  "checked": "Narodne novine originals (NN 69/2026, NN 151/2022, NN 35/2005, NN 41/2008), Ministry of Finance unofficial consolidation of the AML Act (NN 108/17, 39/19), and the zakon.hr consolidation of the Accounting Act (NN 85/24, 145/24, 151/25, 59/26).",
+  "estate_agency": {
+    "law": "Zakon o posredovanju u prometu nekretnina, NN 69/2026 (in force 7 July 2026; replaces NN 107/07, 144/12, 14/14, 32/19), art. 5, 17, 20, 24, 27, 29, 30; Zakon o obveznim odnosima (ZOO) art. 835-848, esp. art. 847",
+    "regulated": "Yes. 'Only brokers ... who meet the conditions prescribed by this Act may engage in real-estate brokerage for a fee' (art. 5(1)); brokers are entered in the Register kept by the Croatian Chamber of Economy (HGK) and agents must pass the professional exam and be entered in the register of agents (art. 12-14, 31-32). EEA-established brokers may provide temporary services after filing a yearly START PLUS declaration (art. 5(2)-(5)).",
+    "dual_agency": "consent",
+    "rule": "Art. 30 'Brokerage for both parties': the broker may charge both the principal and the third party who becomes a principal only if he has concluded a separate brokerage contract with each (30(1)). If both pay, the combined fee may not exceed the highest fee in the price list valid when the contracts were signed (30(3)); if only one side pays, at most half of that maximum (30(4)). Before signing, the broker must inform the parties in writing of each fee and the total (30(5)). No fee may be charged to a buyer or tenant who did not sign a brokerage contract (29(7)). ZOO art. 847(2): a broker with orders from both sides must care for the interests of both with the diligence of a good businessman.",
+    "quote": "Art. 30(1): 'In connection with brokering the same property, the broker may charge a brokerage fee from the principal and from the third person who becomes a principal, provided that he has concluded a separate brokerage contract with each party.'",
+    "commission_both_sides": "Allowed only with a separate written brokerage contract per side; combined cap = price-list maximum; one-side-pays cap = half the maximum; prior written disclosure of individual and total fees (art. 30(1)-(5)). The fee amount is set in the brokerage contract (art. 28).",
+    "sources": [
+      "https://narodne-novine.nn.hr/clanci/sluzbeni/2026_06_69_829.html",
+      "https://narodne-novine.nn.hr/clanci/sluzbeni/2005_03_35_707.html"
+    ]
+  },
+  "aml": {
+    "law": "Zakon o sprjecavanju pranja novca i financiranja terorizma (NN 108/17, 39/19, 151/22): art. 9(2) point 17(j) (scope), art. 16(7) (buyer and seller), art. 79 (retention)",
+    "sale_scope": "Brokers in the purchase and sale of real estate are obliged entities (art. 9(2) point 17(j)).",
+    "letting_threshold": "Letting brokerage only for transactions with a monthly rent of EUR 10,000 or more (art. 9(2) point 17(j) as amended by NN 151/22).",
+    "both_parties": "yes for sales - art. 16(7): brokers 'when brokering the purchase or sale of real estate are obliged to carry out customer due diligence measures in relation to the buyer and the seller of the real estate'. For lettings above the threshold no counterparty rule was found (client only).",
+    "retention_years": 10,
+    "retention_trigger": "Ten years after the end of the business relationship or after the occasional transaction (art. 79(1)). Records on the compliance officer, risk assessment, training and internal audit: 5 years (art. 79(3)).",
+    "extension": "None. After the period personal data must be deleted and the documentation destroyed under data-protection law (art. 79(4)).",
+    "id_copy": "Must keep: the retained documentation must contain 'documentation on the basis of which the customer's identity was established (copy of the official personal document, copy of the court or other register extract, etc.)' (art. 79(2) point 1).",
+    "sources": [
+      "https://narodne-novine.nn.hr/clanci/sluzbeni/full/2022_12_151_2335.html",
+      "https://mfin.gov.hr/UserDocsImages/dokumenti/ustrojstvo/zakoni/Zakon%20o%20sprje%C4%8Davanju%20pranja%20novca%20i%20financiranja%20terorizma%20-%20pro%C4%8Di%C5%A1%C4%87eni%20tekst.pdf"
+    ]
+  },
+  "accounting": {
+    "books_years": 11,
+    "annual_accounts_years": "permanent",
+    "source_documents_years": 11,
+    "trigger": "From the last day of the business year to which the books relate, or to which the books containing the documents relate (art. 10(8), art. 13(7)).",
+    "law": "Zakon o racunovodstvu NN 85/24 (as amended NN 145/24, 151/25, 59/26): art. 13(2) journal, general ledger and subsidiary books 'at least 11 years'; art. 10(2) documents underlying journal, ledger and subsidiary-book entries at least 11 years (unless the fiscalisation law provides otherwise), payslips at least 6 years, payroll records for mandatory contributions permanently; art. 18(11) annual financial statements 'are kept permanently in the original'.",
+    "sources": [
+      "https://narodne-novine.nn.hr/clanci/sluzbeni/2024_07_85_1474.html",
+      "https://www.zakon.hr/z/118/zakon-o-ra%C4%8Dunovodstvu"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 5,
+    "trigger": "Limitation starts on the first day after the day the creditor was entitled to demand performance (ZOO art. 215(1)). Commission is earned only on conclusion of the brokered contract, unless the contract makes it due on the pre-contract (NN 69/2026 art. 29(1)).",
+    "law": "ZOO art. 225: claims expire in five years unless the law sets another period. ZOO art. 228(1) as amended by NN 41/08: mutual claims from commercial contracts on trade in goods and services between traders expire in three years, so a commission claim against a business client is 3 years; against a consumer the general 5 years applies.",
+    "sources": [
+      "https://narodne-novine.nn.hr/clanci/sluzbeni/2005_03_35_707.html",
+      "https://narodne-novine.nn.hr/clanci/sluzbeni/2008_04_41_1382.html"
+    ]
+  },
+  "id_copies": {
+    "rule": "No statutory ban on copying identity documents outside AML was found in this pass. The Croatian data-protection authority (AZOP) treats keeping ID copies as processing that needs a GDPR Art. 6 basis, and asks that data not needed for the purpose be removed or blacked out (secondary report of an AZOP opinion).",
+    "law": "GDPR; AZOP practice; AML Act art. 79(2) (copy required inside AML)",
+    "sources": [
+      "https://informator.hr/vijesti/azop-prikupljanje-preslike-osobne-iskaznice-radnika-od-strane-poslodavca"
+    ]
+  },
+  "notes": [
+    "The new 2026 Act also bars making a viewing conditional on signing a brokerage contract, bars advertising a property without a prior contract with the owner (secondary reports), and requires the broker to keep records of all brokerage contracts, including ones that did not lead to a deal (art. 27).",
+    "Brokers must keep the principal's personal data confidential (art. 24 point 6)."
+  ],
+  "confidence": "medium",
+  "unconfirmed": [
+    "AML Act amendments after NN 151/2022 (current consolidation not checked against NN).",
+    "Accounting Act articles were read in the zakon.hr consolidation, not in each NN amending act.",
+    "Whether the Identity Card Act (Zakon o osobnoj iskaznici) contains a copying restriction.",
+    "Whether ZOO art. 228 (3 years) or art. 225 (5 years) governs a commission claim against a consumer; read here as 5 years.",
+    "Ministry licensing-decision step for brokers (reported by zakon.hr; not read in the Act text)."
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "country": "France",
+  "code": "FR",
+  "estate_agency": {
+    "law": "Loi n° 70-9 du 2 janvier 1970 (loi Hoguet) arts. 1, 3, 6; Décret n° 72-678 du 20 juillet 1972 arts. 72-73; Code de déontologie annexed to Décret n° 2015-1090 du 28 août 2015 arts. 8-9; Cass. 1re civ., 9 avril 2015, n° 14-13.501",
+    "regulated": "Yes, licensed. Loi 70-9 art. 3: the activities 'may only be exercised by natural or legal persons holding a professional card' (carte professionnelle) issued by the president of the territorial chamber of commerce and industry (CCI), listing the operations they may carry out. Financial guarantee and professional liability insurance are further conditions in art. 3 (2° and 3°). Mandates must be in writing (loi art. 6 I; décret art. 72) and entered in a chronological register of mandates; 'Les mandats et le registre des mandats sont conservés pendant dix ans' (mandates and register kept 10 years, décret art. 72).",
+    "dual_agency": "disclosure",
+    "rule": "No text forbids holding mandates from both seller and buyer. The Cour de cassation (1re civ., 9 April 2015, n° 14-13.501, published) held that nothing in loi art. 6 or décret art. 73 prevents an agent from holding a seller's mandate and a buyer's mandate, and that 'le droit à commission existe pour chacun des mandats' provided each mandate meets those requirements. The deontology code (art. 9) requires agents to avoid conflicts of interest with their principals 'or with the other parties' and (9, 5°) to inform their principals and the other parties of 'the possibility and the reasons of a conflict of interest with them or between them'. Art. 9 5° does not require writing or set a deadline. Art. 8 1°: private deeds drafted by the agent must express the parties' agreement without one party alone taking the advantages. Every negotiation requires a prior written mandate from 'one of the parties' (décret art. 72).",
+    "quote": "Code de déontologie art. 9 5°: 'A informer leurs mandants et les autres parties aux opérations pour lesquelles elles ont été mandatées, ... de la possibilité et des raisons d'un conflit d'intérêts avec eux ou entre eux' = 'To inform their principals and the other parties to the transactions for which they are mandated ... of the possibility and reasons of a conflict of interest with them or between them.' Cass. 1re civ. 9.4.2015: 'aucune disposition de ces textes ne fait obstacle à ce qu'un agent immobilier détienne un mandat d'un vendeur' [et d'un acquéreur] = 'no provision of these texts prevents an estate agent from holding a mandate from a seller' [and from a buyer]; 'le droit à commission existe pour chacun des mandats' = 'the right to commission exists for each of the mandates'.",
+    "commission_both_sides": "Allowed, but only as written in the mandate and repeated in the parties' engagement. Loi art. 6 I: the written convention must state 'the conditions for determining the remuneration, and the indication of the party who will bear it'. Décret art. 73: 'Le mandat doit préciser si cette rémunération est à la charge exclusive de l'une des parties à l'opération' (the mandate must state whether the remuneration is borne exclusively by one party) or shared; if shared, 'les conditions et modalités de ce partage sont indiquées dans le mandat et reprises dans l'engagement des parties'; the amount and the paying party or parties are stated in the parties' engagement. The agent may not take fees 'd'une personne autre que celle mentionnée comme en ayant la charge dans le mandat et dans l'engagement des parties' (from anyone other than the person named as bearing them in the mandate and the parties' engagement). Under a double mandate each mandate can carry its own commission (Cass. 1re civ. 9.4.2015). Nothing is due before the operation is 'effectivement conclue et constatée dans un seul acte écrit contenant l'engagement des parties' (loi art. 6 I). Unlike Germany's §656c, there is no statutory equal-split rule.",
+    "sources": [
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000051898206",
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000032043077",
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000033202014",
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000033261932",
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000038364817",
+      "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031113441",
+      "https://www.legifrance.gouv.fr/juri/id/JURITEXT000030470119"
+    ]
+  },
+  "aml": {
+    "law": "Code monétaire et financier (CMF) art. L561-2 8° (scope), L561-5 I (identify and verify client and beneficial owner), R561-5-1 3° (ID verification and copy), R561-10 (occasional client), L561-12 (retention). Supervisor: DGCCRF; sanctions: Commission nationale des sanctions (CNS).",
+    "sale_scope": "Every sale or purchase intermediated by a carte-holder. L561-2 8° (version in force since 5 Aug 2026, loi n° 2026-725): 'Les personnes exerçant les activités mentionnées au 1°, mais concernant leur activité de location uniquement en exécution d'un mandat de transaction de biens immeubles dont le loyer mensuel est supérieur ou égal à 10 000 euros, ainsi qu'aux 2°, 4°, 5° et 8° de l'article 1er de la loi n° 70-9'. So all loi Hoguet 1° activities (sale, purchase, exchange of buildings) are covered without a threshold; only lettings are thresholded. L561-5 I applies 'before entering a business relationship with their client or assisting it in preparing or carrying out a transaction'.",
+    "letting_threshold": "Lettings are covered only when done under a transaction mandate and the monthly rent is >= EUR 10,000 ('supérieur ou égal à 10 000 euros', CMF L561-2 8°).",
+    "both_parties": "yes (supervisory practice; UNCONFIRMED in primary text). Statute: L561-5 I requires identifying and verifying 'leur client et, le cas échéant, le bénéficiaire effectif'. R561-10 I defines an occasional client as anyone who approaches a covered person 'dans le but exclusif de préparer ou de réaliser une opération ponctuelle'. No CMF article reviewed names the counterparty or 'both parties' of a real-estate deal. Secondary reports of CNS sanction decisions say identification applies to 'tous les clients, qu'ils soient vendeurs ou acquéreurs' (all clients, sellers or buyers). CAA Paris 20.3.2023 n° 21PA04286 records an inspection that looked for ID copies 'des parties au contrat' (of the parties to the contract), but its holding concerns the seller-client only. Product rule: identify and verify both seller and buyer (or landlord and tenant above the threshold).",
+    "retention_years": 5,
+    "retention_trigger": "CMF L561-12: CDD documents and information on clients are kept 'pendant cinq ans à compter de la clôture de leurs comptes ou de la cessation de leurs relations avec eux' (5 years from closing of accounts or end of the relationship). Documents on operations are kept 'pendant cinq ans à compter de leur exécution' (5 years from execution).",
+    "extension": "None found. L561-12 applies 'sous réserve de dispositions plus contraignantes' (subject to stricter provisions); it contains no supervisor-ordered extension. Separately, décret 72-678 art. 72 keeps mandates and the mandate register for 10 years. EU AMLR 2024/1624 will apply directly from 10 July 2027 (UNCONFIRMED how it interacts with L561-12).",
+    "id_copy": "Required for in-person verification. R561-5-1 3° (in force since 5 Apr 2021): a natural person physically present is verified 'par la présentation de l'original d'un document officiel en cours de validité comportant sa photographie et par la prise d'une copie de ce document' (presentation of the original valid official photo ID and taking a copy). Remote options are an ANSSI-certified eID (substantial/high under eIDAS) or an eID presumed reliable under CPCE L102 (R561-5-1 1°-2°).",
+    "sources": [
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054616568",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033517742",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043332956",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000050826098",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000041577784",
+      "https://www.legifrance.gouv.fr/ceta/id/CETATEXT000047334373"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 10,
+    "trigger": "The Code de commerce text sets no start date. The official service-public.gouv.fr guidance gives '10 ans à partir de la clôture de l'exercice' (10 years from the close of the financial year) for books, registers and supporting documents such as orders and invoices. Tax: LPF L102 B keeps books, registers, documents and supporting records 'pendant un délai de six ans à compter de la date de la dernière opération mentionnée sur les livres ou registres ou de la date à laquelle les documents ou pièces ont été établis' (6 years from the last entry, or from the date the document was drawn up). The 10-year commercial period is the binding maximum.",
+    "law": "Code de commerce art. L123-22 (in force since 4 Jan 2003): 'Les documents comptables et les pièces justificatives sont conservés pendant dix ans' (accounting documents and supporting documents are kept for ten years). Art. L123-12: annual accounts are drawn up 'à la clôture de l'exercice'. Livre des procédures fiscales art. L102 B (6 years, in force since 1 Jan 2023). Commercial contracts and correspondence: 5 years (Code de commerce L110-4, per service-public).",
+    "sources": [
+      "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000005634379/LEGISCTA000006178754",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006219327",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000046869194",
+      "https://entreprendre.service-public.gouv.fr/vosdroits/F10029"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 2,
+    "trigger": "General rule (Code civil art. 2224): 5 years 'à compter du jour où le titulaire d'un droit a connu ou aurait dû connaître les faits lui permettant de l'exercer' (from the day the right-holder knew or should have known the facts enabling him to exercise it). The commission becomes due only once the operation is 'effectivement conclue et constatée dans un seul acte écrit' (loi 70-9 art. 6 I), and the agent receives it once the operation is recorded by authentic deed (décret 72-678 art. 73), so time runs from completion. Consumer debtor: Code de la consommation L218-2, 'L'action des professionnels, pour les biens ou les services qu'ils fournissent aux consommateurs, se prescrit par deux ans' (professionals' actions for goods or services supplied to consumers are time-barred after 2 years). Debtor is a merchant or company: 5 years (Code de commerce L110-4 I; Code civil 2224). Product rule: assume 2 years against consumers and 5 years otherwise.",
+    "law": "Code civil art. 2224; Code de commerce art. L110-4 I ('se prescrivent par cinq ans'); Code de la consommation art. L218-2 (in force since 1 Jul 2016). Cass. 1re civ., 9 June 2017, n° 16-21.247 held that the 2-year rule applies only to services 'qu'ils fournissent contractuellement aux consommateurs' and not to a quasi-contract (gestion d'affaires) claim. I found no Cour de cassation ruling applying L218-2 to an estate-agent commission specifically.",
+    "sources": [
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000019017112",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000027725867",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000032226897",
+      "https://www.legifrance.gouv.fr/juri/id/JURITEXT000034907763",
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000032043077",
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000033261932"
+    ]
+  },
+  "id_copies": {
+    "rule": "No general statutory ban on copying identity documents (no PAuswG §20 equivalent found); GDPR minimisation applies. For residential lettings (bare or furnished, private sector), the documents a landlord may require from a tenant candidate or guarantor are a closed list set by decree (loi 89-462 art. 22-2). Décret 2015-1437 Annex I A allows one item: 'Une pièce justificative d'identité en cours de validité, comportant la photographie du titulaire' (one valid identity document bearing the holder's photo; the signature requirement was removed in 2019). Art. 1 III: 'Les pièces produites peuvent être des copies des documents originaux' (copies may be supplied; originals must be shown on the landlord's request). The CNIL says the same limits bind agencies: 'Les agences immobilières comme les propriétaires ne peuvent pas demander' documents outside the list, such as the livret de famille, carte Vitale or bank statements. Breaches carry an administrative fine of up to EUR 3,000 for a natural person or EUR 15,000 for a legal person (art. 22-2). Within AML scope, R561-5-1 3° requires taking an ID copy.",
+    "law": "Loi n° 89-462 du 6 juillet 1989 art. 22-2; Décret n° 2015-1437 du 5 novembre 2015 art. 1 and Annex I (as amended by décret 2019-1019); CNIL guidance (page dated 10 Oct 2025); CMF R561-5-1 (AML).",
+    "sources": [
+      "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000028806691",
+      "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000031444493",
+      "https://cnil.fr/fr/location-dun-bien-immobilier-quels-justificatifs",
+      "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043332956"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "AML both parties: no CMF text reviewed requires identifying the non-mandating counterparty (buyer/tenant). The 'sellers or buyers' rule rests on secondary reports of CNS decisions and DGCCRF/Tracfin guidance. economie.gouv.fr (CNS decisions, the 2018 DGCCRF/Tracfin lignes directrices, the Feb 2026 brochures) sits behind a Cloudflare bot challenge and was not read.",
+    "AML retention extension: no extension mechanism found in L561-12. How EU AMLR 2024/1624 (applies 10 July 2027) changes French retention was not checked.",
+    "Accounting trigger: L123-22 sets no start date. 'From the close of the financial year' comes from service-public.gouv.fr guidance, not the Code text. That annual accounts fall under L123-22's 10 years is inferred from service-public's 'livres et registres comptables'.",
+    "A secondary source claims LPF L102 B moves to 10 years from 1 Jan 2027. The Legifrance page in force on 7 Nov 2026 shows 6 years and no future version.",
+    "Commission limitation: no Cour de cassation decision found applying the 2-year L218-2 rule to an estate-agent commission against a consumer. Whether it binds a buyer who signed no mandate is contested (Cass. 1re civ. 9.6.2017 n° 16-21.247 excluded a quasi-contract claim; CA Toulouse 11.3.2026 RG 25/01374 was seen only via a secondary source).",
+    "Dual agency: the Cass. 2015 ruling says nothing about informing each principal of the other mandate. Whether deontology art. 9 5° requires disclosure of a double mandate specifically (as opposed to any possible conflict) is not settled in any primary text reviewed.",
+    "Whether loi 89-462 art. 22-2 binds agents acting as the landlord's mandataire rests on CNIL guidance; the article itself names only the bailleur."
+  ]
+}
