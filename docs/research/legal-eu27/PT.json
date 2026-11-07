@@ -1,0 +1,66 @@
+{
+  "country": "Portugal",
+  "code": "PT",
+  "estate_agency": {
+    "law": "Lei n.º 15/2013 (regime jurídico da mediação imobiliária), amended by DL 102/2017, which changed arts 16 and 32 only. Arts 4, 16-19.",
+    "regulated": "Licensed: mediação imobiliária by a provider established in Portugal requires an IMPIC (formerly InCI) licence (art 4(1)), the AMI licence.",
+    "dual_agency": "unclear",
+    "rule": "No express ban on dealing with both sides, but art 17(2)(a) expressly forbids receiving remuneration from clients AND destinatários (the other party) in the same deal. Art 17(2)(b): no interest of its own in the property. Art 17(1)(c)-(d): duties of accuracy and immediate disclosure owed to the destinatário. In effect, one side pays and the other side is owed honesty but is not a client.",
+    "quote": "Lei 15/2013 art 17(2): 'Está expressamente vedado à empresa de mediação: a) Receber remuneração de clientes e destinatários no mesmo negócio' (EN: The brokerage firm is expressly forbidden to: a) receive remuneration from clients and recipients in the same deal).",
+    "commission_both_sides": "Prohibited (art 17(2)(a)); breach is an administrative offence (contraordenação). Remuneration falls due on conclusion of the deal, or on the promissory contract if the mediation contract so provides (art 19(1)).",
+    "sources": [
+      "https://files.dre.pt/1s/2013/02/02800/0076000769.pdf",
+      "https://diariodarepublica.pt/dr/detalhe/decreto-lei/102-2017-108041482"
+    ]
+  },
+  "aml": {
+    "law": "Lei n.º 83/2017 (consolidated through Lei 58/2020, DL 9/2021, DL 56/2021): art 2(1)(b) 'atividades imobiliárias'; art 4(1)(d) obliged entities; art 23 CDD triggers; art 25 ID evidence; art 46 IMPIC reporting; art 51 retention. IMPIC Regulamento n.º 603/2021. Supervisor: IMPIC.",
+    "sale_scope": "Any real-estate activity, including mediation, purchase and sale, letting and development (art 2(1)(b), art 4(1)(d)). CDD applies when establishing a business relationship, or for occasional transactions of EUR 15,000 or more, on suspicion, or on doubt about data (art 23(1)). Every sale is reported to IMPIC quarterly (art 46(1)(b)).",
+    "letting_threshold": "No EUR 10,000 carve-out: 'Arrendamento' is itself a real-estate activity in scope (art 2(1)(b)(iii)). Leases with monthly rent of EUR 2,500 or more must be reported to IMPIC (art 46(3)).",
+    "both_parties": "yes. IMPIC FAQ: entities must carry out identification and due diligence 'quer quanto ao seu cliente, quer quanto ao outro interessado ou interveniente no negócio' (EN: both for their client and for the other party involved in the deal).",
+    "retention_years": 7,
+    "retention_trigger": "Art 51(1): 7 years after the client was identified or, for business relationships, after the relationship ends. Art 51(2): transaction evidence for 7 years from execution.",
+    "extension": "No AML-specific extension. Art 51(4): other retention duties (criminal investigations, pending proceedings) apply alongside.",
+    "id_copy": "Allowed and the default evidence: art 25(4)(a) verification by 'Reprodução do original dos documentos de identificação, em suporte físico ou eletrónico' (EN: reproduction of the original ID documents, physical or electronic), or a certified copy, or electronic means (art 25(2)).",
+    "sources": [
+      "https://www.bportugal.pt/sites/default/files/anexos/legislacoes/459446619_2.docx.pdf",
+      "https://www.impic.pt/impic/pt-pt/perguntas-frequentes/combate-ao-branqueamento-de-capitais-e-ao-financiamento-do-terrorismo_4"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 10,
+    "trigger": "CIRC art 123(4) states 10 years without a start event; read as from the end of the tax period concerned (unconfirmed). Código Comercial art 40: 10 years (secondary sources and case law).",
+    "law": "Código do IRC art 123(4) ('Os livros, registos contabilísticos e respectivos documentos de suporte devem ser conservados em boa ordem durante o prazo de 10 anos'); Código Comercial art 40",
+    "sources": [
+      "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/circ_rep/Pages/irc123.aspx"
+    ]
+  },
+  "limitation": {
+    "general_years": 20,
+    "commission_years": 20,
+    "trigger": "Código Civil art 306: from when the right can be exercised. Mediation fee falls due on conclusion of the deal or promissory contract (Lei 15/2013 art 19(1)). Ordinary period: 20 years (art 309). Risk: debtors plead the 2-year presumptive prescription of art 317 (services); it is only a presumption of payment (art 312) and its application to mediation fees is contested.",
+    "law": "Código Civil arts 306, 309, 312, 317",
+    "sources": [
+      "https://jurisprudencia.pt/acordao/338992/",
+      "https://vlex.pt/vid/acordao-n-97151-18-1044276904"
+    ]
+  },
+  "id_copies": {
+    "rule": "Lei 7/2007 (Cartão de Cidadão) art 5(2), as quoted by IMPIC: 'É igualmente interdita a reprodução do cartão do cidadão em fotocópia ou qualquer outro meio sem consentimento do titular, salvo nos casos expressamente previstos na lei ou mediante decisão de autoridade judiciária' (EN: copying the citizen card by photocopy or any other means is prohibited without the holder's consent, except where the law expressly provides or by court order). AML art 25(4)(a) is such a legal basis. Outside AML, only with the holder's consent. If the client refuses a copy, IMPIC advises a manual record of the data plus a note explaining the refusal.",
+    "law": "Lei n.º 7/2007 art 5(2); Lei 83/2017 arts 24-25",
+    "sources": [
+      "https://www.impic.pt/impic/pt-pt/perguntas-frequentes/combate-ao-branqueamento-de-capitais-e-ao-financiamento-do-terrorismo_4"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Current consolidated text of Lei 15/2013: art 17 read from the 2013 original (DRE PDF); DL 102/2017 changed only arts 16 and 32; later amendments not checked (diariodarepublica.pt consolidated page did not render).",
+    "Lei 83/2017 amendments after DL 56/2021 not checked (Banco de Portugal consolidation used).",
+    "Lei 7/2007 art 5(2) quoted via IMPIC FAQ, not read from the DRE text.",
+    "Código Comercial art 40 (10 years) and Código Civil arts 309/317 not read from a primary text (PGDL and DRE unreachable); case law and secondary sources only.",
+    "Commission limitation: whether courts apply art 317 presumptive prescription (2 years) to mediation fees; no ruling located.",
+    "Start event for the 10-year CIRC retention."
+  ]
+}

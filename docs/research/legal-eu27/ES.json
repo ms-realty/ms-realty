@@ -1,0 +1,78 @@
+{
+  "country": "Spain",
+  "code": "ES",
+  "estate_agency": {
+    "law": "No national licensing statute. Real Decreto-ley 4/2000 art. 3 liberalised the activity. Brokerage (contrato de mediacion/corretaje) is an atypical contract under the Codigo Civil general rules. Regional laws add mandatory registers and conduct rules: Catalonia Ley 18/2007 arts. 55-56; Valencia Ley 2/2017 additional provision 6; Andalusia Ley 5/2025 arts. 49-53; Basque Country Ley 3/2015 additional provision 1 (voluntary register per STC 97/2018). Consumer information duties in home sales and lettings: RD 515/1989 arts. 1 and 4.",
+    "regulated": "Not licensed at national level: RDL 4/2000 art. 3 lets anyone practise 'freely without holding any title or belonging to any official College'. Regionally regulated: Catalonia requires premises, professional qualification, a client-money guarantee, liability insurance and a mandatory register (Ley 18/2007 art. 55.3-55.4); Valencia requires the same and a mandatory register (Ley 2/2017 DA 6.3-6.4); Andalusia makes registration 'a necessary requirement for exercising the activity' (Ley 5/2025 art. 50.3; the implementing rules are still to be adopted); in the Basque Country registration is voluntary and not an authorisation (STC 97/2018, FJ 7 c).",
+    "dual_agency": "unclear",
+    "rule": "No national rule on one agent acting for buyer and seller. Catalonia (Ley 18/2007 art. 55.6 i): the agent may not take remuneration from both parties for the same operation unless there is an express agreement, and must act with professional independence (art. 55.5 a); before advertising, a written commission note (nota de encargo) with the owner is mandatory (art. 55.5 b, 55.6). Residential lettings under the LAU: agency and contract-formalisation fees cannot be passed on to the tenant (LAU art. 20.2), so in a home letting only the landlord pays. Product-safe default: written disclosure and express written consent of both parties to any dual role and dual fee.",
+    "quote": "Catalonia Ley 18/2007 art. 55.6 i): 'in no case may remuneration be received from both parties to the transaction for the same operation, unless there is an express agreement to that effect.'",
+    "commission_both_sides": "Nationally not prohibited and a matter of contract. Catalonia: only with express agreement (Ley 18/2007 art. 55.6 i). Residential lettings anywhere in Spain: the tenant may not be charged agency or formalisation fees 'directly or indirectly, under any concept' (LAU art. 20.2, as amended by RDL 29/2026); optional non-essential services only if the tenant asked in writing after being told they are optional and their cost.",
+    "sources": [
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2000-11834",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2008-3657",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2017-2421",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2026-423",
+      "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2018-13995",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-1994-26003",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-1989-11181"
+    ]
+  },
+  "aml": {
+    "law": "Ley 10/2010 de prevencion del blanqueo de capitales y de la financiacion del terrorismo (art. 2.1 l obliged entity; art. 3 formal identification; art. 4 beneficial owner; art. 12 non-face-to-face; art. 25 record keeping; art. 32 bis data protection), implemented by Real Decreto 304/2014 (art. 4 identification, art. 6 reliable documents, arts. 28-29 retention; partly amended by RD 813/2026 with some changes applicable from 8 April 2028).",
+    "sale_scope": "Every sale the agent intermediates: art. 2.1 l) covers those who 'professionally carry out agency, commission or intermediation activities in the purchase and sale of real estate' with no price threshold. SEPBLAC FAQ confirms estate agents are obliged entities.",
+    "letting_threshold": "Lettings only when the transaction involves 'a total annual rent of EUR 120,000 or more or a monthly rent of EUR 10,000 or more' (Ley 10/2010 art. 2.1 l).",
+    "both_parties": "unclear - Ley 10/2010 art. 3.1: obliged entities 'shall identify all natural or legal persons who intend to establish business relationships or to intervene in any operations', and art. 3.2 requires checking the identity of 'the intervening parties' before the operation. The wording reaches anyone intervening in the operation, which arguably includes the other side of the sale, but no official text (law, regulation or SEPBLAC guidance) found states expressly that an agent acting for one side must identify the counterparty.",
+    "retention_years": 10,
+    "retention_trigger": "End of the business relationship or execution of the occasional transaction (Ley 10/2010 art. 25.1 a-b; RD 304/2014 arts. 28.1 and 29.1). Then the records must be deleted ('procediendo tras el mismo a su eliminacion').",
+    "extension": "No extension mechanism in art. 25; fixed 10 years then deletion. After 5 years from the end of the relationship or the occasional transaction, the records 'shall only be accessible to the internal control bodies of the obliged entity, including the technical prevention units, and, where applicable, those in charge of its legal defence' (art. 25.1).",
+    "id_copy": "Mandatory. The agent keeps a copy of the documents required for due diligence (art. 25.1 a) and must store 'the copies of the identification documents referred to in article 3.2' on optical, magnetic or electronic media (art. 25.2); RD 304/2014 art. 28.1 lists 'copies of the reliable identification documents'. Entities under 10 staff and with turnover or balance sheet not over EUR 2 million may keep paper copies (RD 304/2014 art. 28.2). Non-face-to-face clients: a copy of the ID document within one month unless a qualified e-signature is used (Ley 10/2010 art. 12.1 a). Reliable documents: DNI, NIE card, passport, or the EU/EEA official identity card (RD 304/2014 art. 6.1 a). CDD data may not be used for other purposes without consent, except ordinary management of the business relationship (art. 32 bis.2).",
+    "sources": [
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2010-6737",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2014-4742",
+      "https://www.sepblac.es/es/sujetos-obligados/preguntas-frecuentes/"
+    ]
+  },
+  "accounting": {
+    "books_years": 6,
+    "annual_accounts_years": 6,
+    "source_documents_years": 6,
+    "trigger": "Commercial law: six years 'from the last entry made in the books' for books, correspondence, documentation and vouchers (Codigo de Comercio art. 30.1); the duty survives cessation of business and passes to liquidators on dissolution (art. 30.2). Annual accounts are transcribed into the Inventory and Annual Accounts book (art. 28.1), so they follow the same rule. Tax law: invoices and tax records are kept for the tax limitation period (RD 1619/2012 art. 19; LGT art. 70), i.e. 4 years from the day after the filing deadline (LGT arts. 66-67), and 10 years for documents supporting tax losses or deductions carried forward (LGT arts. 66 bis.2 and 70.3). Keep the longer of the two.",
+    "law": "Codigo de Comercio arts. 25, 28, 30; Ley 58/2003 General Tributaria arts. 66, 66 bis, 67, 70; RD 1619/2012 (invoicing regulation) art. 19.",
+    "sources": [
+      "https://www.boe.es/buscar/act.php?id=BOE-A-1885-6627",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2003-23186",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2012-14696"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 3,
+    "trigger": "General (common civil law): 'personal actions without a special period prescribe in five years from when performance of the obligation can be demanded' (Codigo Civil art. 1964.2, as amended by Ley 42/2015); commercial claims without a period follow common law (Codigo de Comercio art. 943). Commission: three years for the obligation to pay '... agents ... their fees and rights', counted 'from when the respective services ceased to be provided' (CC art. 1967.1 and last paragraph); Supreme Court case law applies this to estate-agent commissions (STS 762/2010 of 22 November 2010, per secondary sources). Interruption by court claim, extrajudicial demand or acknowledgement (CC art. 1973). Catalonia has its own regime for contracts under Catalan law: general 10 years (CCCat art. 121-20) and 3 years for 'remuneration of services' (art. 121-21 b), running from when the claim is exercisable and the holder knows or can reasonably know the facts and the debtor (art. 121-23.1).",
+    "law": "Codigo Civil arts. 1964, 1967, 1969, 1973; Codigo de Comercio art. 943; Codi civil de Catalunya (Ley 29/2002) arts. 121-20, 121-21, 121-23.",
+    "sources": [
+      "https://www.boe.es/buscar/act.php?id=BOE-A-1889-4763",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-1885-6627",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2003-2410"
+    ]
+  },
+  "id_copies": {
+    "rule": "No statute found that expressly bans copying identity documents outside AML. The data protection authority (AEPD) treats a copy as excessive unless a rule requires it: 'Requesting a copy of the DNI or the passport infringes the data minimisation principle established in article 5.1.c) GDPR and constitutes excessive processing' (AEPD note on lodging registers under RD 933/2021); visual check of the shown document against the data collected may suffice. Outside an AML-scoped deal, record that the document was seen and checked; do not keep a copy.",
+    "law": "GDPR art. 5(1)(c) as applied by the AEPD; LOPDGDD (Ley Organica 3/2018) has no specific ID-copy rule found. Inside AML scope the copy is required by Ley 10/2010 arts. 25.1 a and 25.2.",
+    "sources": [
+      "https://www.aepd.es/guias/nota-aepd-registro-hospedajes.pdf",
+      "https://www.boe.es/buscar/act.php?id=BOE-A-2010-6737"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "AML both parties: whether an agent acting for one side must run CDD on the counterparty. Ley 10/2010 art. 3.1-3.2 ('intervene in any operations', 'the intervening parties') points that way; no official statement found.",
+    "Commission limitation: application of CC art. 1967.1 (3 years) to estate-agent commissions rests on Supreme Court case law (STS 762/2010 of 22 November 2010) cited by secondary sources and not read in CENDOJ; if it did not apply, CC art. 1964.2 (5 years) would.",
+    "Dual agency: no national statute; whether general mandate and good-faith rules require disclosure or consent when one agent acts for both sides is not confirmed from a primary source. Only Catalonia's rule on remuneration from both parties (Ley 18/2007 art. 55.6 i) is confirmed.",
+    "Regional registers: Catalan implementing decree (Decret 12/2010) and Valencian Decreto 98/2022 numbers not read in DOGC/DOGV; Andalusia's register under Ley 5/2025 arts. 49-50 still needs implementing regulation; Basque Ley 3/2015 additional provision 1 read only through STC 97/2018.",
+    "Other autonomous communities (Madrid, Balearics, Canary Islands, Galicia, Murcia and others) not checked for agent registers or dual-fee rules.",
+    "LAU art. 20.2 wording comes from Real Decreto-ley 29/2026; its convalidation by the Congress was not checked (the earlier RDL 26/2026 was repealed).",
+    "AEPD position on ID copies verified only in its lodging-sector note; AEPD Informe 0048/2023 and sanction decisions on copies in rentals reported by secondary sources only.",
+    "RD 813/2026 amendments to RD 304/2014 (art. 6.1 a, art. 28.1) apply from 8 April 2028; the earlier wording in force until then was not compared."
+  ]
+}

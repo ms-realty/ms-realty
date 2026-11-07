@@ -1,0 +1,63 @@
+{
+  "country": "Bulgaria",
+  "code": "BG",
+  "estate_agency": {
+    "law": "Commerce Act (Търговски закон, ТЗ) arts. 49-51 (commercial intermediary: definition, journal, fee); Obligations and Contracts Act (ЗЗД) general contract rules and art. 38 (representing both sides); ТЗ arts. 286-288 apply commercial rules to both parties when one is a merchant. No special estate-agency act.",
+    "regulated": "No licence, register or qualification requirement. Estate agency is an ordinary commercial activity of a merchant (ТЗ art. 49(1)). The agent must keep a dated, signed daily journal of every concluded contract and give the parties extracts on request (ТЗ art. 50). The agent is an obliged entity under the AML Act (ЗМИП art. 4 item 18). Two estate-agency bills (ИТН, December 2024; ГЕРБ, April 2025, register plus insurance) were reported not adopted as of April 2026 (secondary source).",
+    "dual_agency": "allowed",
+    "rule": "The intermediary brokers the conclusion of transactions as a trade and may be paid by one or both parties; without agreement the customary fee is owed by both (ТЗ art. 51). No statute requires disclosure or consent for acting for both sides. If the agent goes beyond brokerage and contracts in the name of a party (representation), it may not contract for that party with another person it also represents unless the represented party consents (ЗЗД art. 38).",
+    "quote": "ТЗ art. 49(1): \"An intermediary is a merchant who, by way of business, brokers the conclusion of transactions.\" ТЗ art. 51: \"The commercial intermediary is entitled to remuneration owed by one or by both parties according to their agreement. In the absence of agreement, the customary remuneration for this type of activity is owed, as the case may be, by both parties.\" ЗЗД art. 38: \"The representative may not contract on behalf of the represented person either personally with himself or with another person whom he also represents, unless the represented person has given consent.\"",
+    "commission_both_sides": "Yes. ТЗ art. 51 allows a fee from one or both parties by agreement and defaults to the customary fee from both parties.",
+    "sources": [
+      "https://trudipravo.bg/znanie-za-vas/targovski-zakon/",
+      "https://lex.bg/laws/ldoc/2121934337"
+    ]
+  },
+  "aml": {
+    "law": "Measures Against Money Laundering Act (Закон за мерките срещу изпирането на пари, ЗМИП), ДВ бр. 27/2018, last amended ДВ бр. 54/2025: art. 4 item 18 (scope), art. 10-11 (customer due diligence), art. 53 (identification of natural persons), art. 67 (retention), art. 83(4) (deletion); §1 item 9 Supplementary Provisions (definition of customer).",
+    "sale_scope": "Every sale or purchase brokered by way of business; no value threshold. Art. 4 item 18 covers \"persons who by way of business act as intermediaries in transactions with immovable property\". Due diligence applies on establishing a business relationship (art. 11(1) item 1, e.g. the brokerage contract) and on occasional transactions of EUR 15,000 or more, or EUR 5,000 or more in cash (art. 11(1) items 2-3).",
+    "letting_threshold": "Lettings only where the monthly rent is EUR 10,000 or more, or its equivalent in another currency (art. 4 item 18).",
+    "both_parties": "unclear. Due diligence applies to the 'customer', defined as \"any natural or legal person or other legal entity which enters into a business relationship or carries out an occasional operation or transaction with a person under art. 4\" (§1 item 9 Supplementary Provisions). Neither ЗМИП nor its Implementing Regulation (ППЗМИП) names the counterparty for estate agents. Where both buyer and seller sign a brokerage contract (common in Bulgaria under ТЗ art. 51), both are customers.",
+    "retention_years": 5,
+    "retention_trigger": "End of the business relationship (art. 67(2)); date of an occasional transaction (art. 67(3)); for risk-assessment documents (Chapter Seven) and for reports made under Chapter Four, 1 January of the year after they were prepared or made (art. 67(4)-(5)).",
+    "extension": "By written instruction of the Director of the Financial Intelligence Directorate of ДАНС, by no more than 2 years where proportionate and justified (art. 67(6)). After the period the data must be erased or destroyed unless a special law provides otherwise (art. 83(4)).",
+    "id_copy": "Mandatory. Art. 53(1): \"Natural persons are identified by presenting an official identity document and taking a copy of it.\" Copies are also taken of supplementary documents (art. 53(5)). In remote identification a copy may be presented (art. 53(7)). Legal persons: original or notarised copy of the register extract and certified copy of the articles (art. 54(1)).",
+    "sources": [
+      "https://trudipravo.bg/znanie-za-vas/zakon-za-merkite-sreshtu-izpiraneto-na-pari/",
+      "https://www.fsc.bg/wp-content/uploads/2026/02/measures_against_money_laundering_act.pdf",
+      "https://kik-info.com/normativna-baza/pravilnici/ppzmip/"
+    ]
+  },
+  "accounting": {
+    "books_years": 10,
+    "annual_accounts_years": 10,
+    "source_documents_years": 10,
+    "trigger": "Accountancy Act art. 12(1): from 1 January of the reporting period after the one the record relates to. Tax and Social Insurance Procedure Code (ДОПК) art. 38(1) item 3: tax-control documents are kept until 5 years after the limitation period of the related public liability expires; public liabilities prescribe 5 years from 1 January of the year after payment was due (ДОПК art. 171(1); 10 years in the cases of art. 171(2)). Invoices and other tax-control documents therefore need about 10 years from the end of the year they fall due.",
+    "law": "Accountancy Act (Закон за счетоводството) art. 12(1): payroll sheets 50 years; accounting registers and financial statements, \"including documents for tax control, audit and subsequent financial inspections\", 10 years; all other carriers of accounting information 3 years. ДОПК art. 38(1): payroll 50 years; accounting registers and financial statements 10 years; tax-control documents 5 years after the limitation of the related public liability; all other carriers 5 years. The ДОПК 5-year rule for other carriers is longer than the 3 years in the Accountancy Act, so 5 years applies to them.",
+    "sources": [
+      "https://trudipravo.bg/znanie-za-vas/zakon-za-schetovodstvoto/",
+      "https://trudipravo.bg/znanie-za-vas/danachno-osiguritelen-protsesualen-kodeks/"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 5,
+    "trigger": "From the day the claim became due (ЗЗД art. 114(1)); if due on demand, from the day the obligation arose (art. 114(2)). Periods cannot be shortened or extended by agreement (art. 113). Since 2 June 2021, money claims against natural persons are extinguished after 10 years regardless of interruption, with listed exceptions (art. 112).",
+    "law": "ЗЗД art. 110: \"With the expiry of a five-year limitation period all claims are extinguished for which the law does not provide another period.\" ЗЗД art. 111 (3 years) covers (a) remuneration for labour, (b) damages and penalties for breach of contract, (c) rent, interest and other periodic payments. A one-off brokerage commission is not periodic and no special period exists for it in the Commerce Act, so art. 110 (5 years) applies on the text; art. 111(a) is the only arguable alternative.",
+    "sources": ["https://lex.bg/laws/ldoc/2121934337"]
+  },
+  "id_copies": {
+    "rule": "Copying an identity document, driving licence or residence document is allowed only where a law provides for it. ЗМИП art. 53(1) is such a law for AML customer due diligence; outside an AML-scoped relationship the agency may not copy ID documents and should record that the document was seen.",
+    "law": "Personal Data Protection Act (ЗЗЛД) art. 25г (new, ДВ бр. 17/2019): \"A controller or processor of personal data may copy an identity document, a driving licence or a residence document only if this is provided for by law.\"",
+    "sources": ["https://trudipravo.bg/znanie-za-vas/zakon-za-zashtita-na-lichnite-danni/"]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "Commission limitation: art. 110 (5 years) on the statutory text; no Supreme Court of Cassation (ВКС) ruling on estate-agency commission found that settles art. 110 against art. 111(a) (3 years).",
+    "AML both parties: no provision in ЗМИП or ППЗМИП requires an estate agent to check the counterparty it does not represent; it turns on whether that party is a 'customer' (has a brokerage contract or transacts with the agent). No FID-ДАНС guidance found.",
+    "Status of the estate-agency bills (ИТН December 2024, ГЕРБ April 2025): 'not adopted as of April 2026' comes from a secondary source (innovires.com); parliament.bg was not checked.",
+    "Texts were read from consolidated copies: lex.bg (ЗЗД) and trudipravo.bg (ТЗ, ЗМИП, ЗСч, ДОПК, ЗЗЛД), with ЗМИП cross-checked against the Financial Supervision Commission's English translation (amendments to ДВ бр. 54/2025). lex.bg refused the ТЗ page; no text was compared with the State Gazette issues.",
+    "trudipravo.bg's ЗМИП lists amendments only to ДВ бр. 70/2024; the 2025 amendments (ДВ бр. 49, 50, 54/2025) were checked through the English translation, which shows no change to arts. 4 item 18, 53, 67 or 83(4).",
+    "Consumer Protection Act art. 68e (cited in ADR 0008 for dual-mandate disclosure to consumers) was not re-checked in this pass."
+  ]
+}

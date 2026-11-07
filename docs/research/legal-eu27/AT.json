@@ -1,0 +1,67 @@
+{
+  "country": "Austria",
+  "code": "AT",
+  "checked": "Consolidated RIS texts as published on the day of research (MaklerG, GewO 1994, KSchG, UGB, BAO, ABGB).",
+  "estate_agency": {
+    "law": "Maklergesetz (MaklerG), BGBl. 262/1996, §§ 5, 6-7, 16, 17, 17a; Konsumentenschutzgesetz (KSchG) § 30b; Gewerbeordnung 1994 (GewO) § 94 Z 35, § 117 (Immobilientreuhaender)",
+    "regulated": "Yes. Estate agency is part of the regulated trade 'Immobilientreuhaender (Immobilienmakler, Immobilienverwalter, Bautraeger)' (GewO § 94 Z 35, § 117(1)); estate agents must hold professional indemnity insurance of at least EUR 100,000 per claim (GewO § 117(7)). GewO § 69 empowers the minister to set maximum commission rates for estate agents.",
+    "dual_agency": "disclosure",
+    "rule": "MaklerG § 5(1): without the principal's express consent the broker may not also act for the third party or accept a fee from it, unless a different trade usage exists for the line of business. The Supreme Court holds that such a usage exists for estate agents, so dual agency is permitted in principle (OGH 10 Ob 26/07g). Once acting as a dual agent the broker must tell both principals (§ 5(3)); this lapses only if he may assume both already know. Consumer principals must receive, before the brokerage contract, a written overview that states the agent may act as a dual agent by trade usage (KSchG § 30b(1)). If the agent acts for one party only, he must tell the third party (MaklerG § 17). Breach: principal may claim the unlawfully received fee plus damages (§ 5(2)).",
+    "quote": "MaklerG § 5(3): 'As soon as the broker acts as a dual broker, he must notify both principals of this.' OGH 10 Ob 26/07g: 'For estate agents the principle that dual activity is permissible therefore applies.'",
+    "commission_both_sides": "Allowed where dual agency is permitted: § 5(1) covers accepting a fee from the third party, so with consent or under the estate-agency trade usage the agent may take commission from both sides, after notice under § 5(3) and KSchG § 30b. Exception for residential lettings (MaklerG § 17a, 'first principal' rule): if the landlord commissioned the agent first, commission may be agreed only with the landlord; a tenant may be charged only if he was the first principal and none of the § 17a(3) exclusions applies. Statutory caps per side are in the Immobilienmaklerverordnung (not verified in this pass).",
+    "sources": [
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10003415",
+      "https://www.ris.bka.gv.at/Dokumente/Bundesnormen/NOR12038517/NOR12038517.html",
+      "https://www.ris.bka.gv.at/JustizEntscheidung.wxe?Abfrage=Justiz&Dokumentnummer=JJT_20070320_OGH0002_0100OB00026_07G0000_000",
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002462",
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10007517"
+    ]
+  },
+  "aml": {
+    "law": "Gewerbeordnung 1994 (GewO), Part IV section r, §§ 365m-365z1: § 365m1(2) Z 2 (scope), § 365o (triggers), § 365p (CDD), § 365q (timing), § 365y (retention)",
+    "sale_scope": "Every estate agent is an obliged entity 'in particular with regard to both buyers and sellers' (§ 365m1(2) Z 2). CDD is due on establishing a business relationship, on occasional transactions of EUR 15,000 or more, on suspicion and on doubts about identification data (§ 365o), and must be completed before the relationship or transaction (§ 365q(1)).",
+    "letting_threshold": "Lettings only where the monthly rent is EUR 10,000 or more (§ 365m1(2) Z 2), with regard to both tenant and landlord.",
+    "both_parties": "yes - the scope clause names both sides: estate agents 'in particular with regard to both buyers and sellers, or both tenants and landlords' (§ 365m1(2) Z 2). No separate article spelling out counterparty CDD was found; treat buyer and seller (tenant and landlord at >= EUR 10,000/month) as in scope.",
+    "retention_years": 5,
+    "retention_trigger": "End of the business relationship with the customer, or the date of the occasional transaction (§ 365y(1) Z 1 and Z 2).",
+    "extension": "No AML extension. After the period personal data must be deleted unless other provisions require longer storage (§ 365y(2)).",
+    "id_copy": "Must keep: 'a copy of the documents and information obtained' that are needed for CDD, for 5 years (§ 365y(1) Z 1). Identity of natural persons is verified from an official photo ID (§ 365p(1) Z 1 lit. a).",
+    "sources": [
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10007517"
+    ]
+  },
+  "accounting": {
+    "books_years": 7,
+    "annual_accounts_years": 7,
+    "source_documents_years": 7,
+    "trigger": "From the end of the calendar year in which the last entry was made, the inventory drawn up, the annual accounts adopted or the business letter received or sent (UGB § 212(2)); for tax, from the end of the calendar year of the entries or to which the documents relate (BAO § 132(1)). Both extend for as long as the records matter for pending court, authority or tax proceedings.",
+    "law": "Unternehmensgesetzbuch (UGB) § 212(1)-(2): books, inventories, opening balance sheets, annual accounts with management reports, business letters and booking vouchers 'for seven years'; Bundesabgabenordnung (BAO) § 132(1): books, records and related vouchers 'seven years'.",
+    "sources": [
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001702",
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10003940"
+    ]
+  },
+  "limitation": {
+    "general_years": 30,
+    "commission_years": 3,
+    "trigger": "Limitation runs from when the right could first have been exercised (ABGB § 1478). Commission arises when the brokered transaction becomes legally effective (MaklerG § 7(1)).",
+    "law": "ABGB § 1478 (general period of thirty years); ABGB § 1486 Z 1: claims 'for delivery of goods or performance of work or other services in a commercial, mercantile or other business operation' are time-barred in three years - this covers a business's commission claim.",
+    "sources": [
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001622",
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10003415"
+    ]
+  },
+  "id_copies": {
+    "rule": "No national statute restricting the copying of identity documents outside AML was found in this pass. Copies outside AML therefore rest on the GDPR and the Datenschutzgesetz (lawful basis, data minimisation). Inside AML the copy is mandatory (GewO § 365y(1) Z 1).",
+    "law": "GDPR / Datenschutzgesetz (general); GewO § 365y (AML)",
+    "sources": [
+      "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10007517"
+    ]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "Immobilienmaklerverordnung maximum commission rates per side (text not retrieved).",
+    "Absence of any Austrian statute or DSB decision restricting ID copying outside AML (not searched to completion; web-search budget ran out).",
+    "Whether WKO/ministry AML guidance for estate agents requires full CDD on the non-client counterparty beyond the scope wording of § 365m1(2) Z 2."
+  ]
+}
