@@ -396,6 +396,11 @@ async function applied(r: ReturnType<typeof fixture>) {
   return { packet, input: { ...r.f.scope, report: r.productionReport(packet) } };
 }
 
+// Each complete cutover applies eight routes with 40+ fresh packet validations, then tests
+// acceptance/recovery. Its wall-clock guard includes that expanded R10 fixture work;
+// the synthetic product clock and every expiry, authority and recovery assertion stay intact.
+const completeCutoverTimeoutMs = 15_000;
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
@@ -405,6 +410,7 @@ afterEach(() => {
 describe("R00 watchdog installed execution and durable replay", () => {
   it.each(["put", "deleteAlarm", "syncPut"])(
     "rolls back acceptance and alarm deletion on expiry during %s",
+    { timeout: completeCutoverTimeoutMs },
     async (boundary) => {
       const r = fixture();
       const { input } = await applied(r);
@@ -434,6 +440,7 @@ describe("R00 watchdog installed execution and durable replay", () => {
 
   it.each(["put", "deleteAlarm", "syncPut"])(
     "rolls back acceptance and preserves recovery on installation removal during %s",
+    { timeout: completeCutoverTimeoutMs },
     async (boundary) => {
       const r = fixture();
       const { input } = await applied(r);
@@ -461,6 +468,7 @@ describe("R00 watchdog installed execution and durable replay", () => {
 
   it.each(["put", "beforeCommit"])(
     "retains original recovery when acceptance storage fails at %s",
+    { timeout: completeCutoverTimeoutMs },
     async (boundary) => {
       const r = fixture();
       const { input } = await applied(r);
@@ -484,7 +492,9 @@ describe("R00 watchdog installed execution and durable replay", () => {
     },
   );
 
-  it("resolves post-commit ACK loss only from the exact final receipt and preserves terminal acceptance after drift", async () => {
+  it("resolves post-commit ACK loss only from the exact final receipt and preserves terminal acceptance after drift", {
+    timeout: completeCutoverTimeoutMs,
+  }, async () => {
     const r = fixture();
     const { input, packet } = await applied(r);
     r.onStorage((kind, _key, value) => {
@@ -533,7 +543,9 @@ describe("R00 watchdog installed execution and durable replay", () => {
     expect(r.active().status).toBe("accepted");
   });
 
-  it("records the decision instant after the transaction's final await", async () => {
+  it("records the decision instant after the transaction's final await", {
+    timeout: completeCutoverTimeoutMs,
+  }, async () => {
     const r = fixture();
     const { input } = await applied(r);
     r.onStorage((kind) => {
@@ -557,6 +569,7 @@ describe("R00 watchdog installed execution and durable replay", () => {
 
   it.each(["absent", "wrong S", "wrong P", "wrong grant", "wrong lease", "wrong deadline"])(
     "recovers an unverified terminal label with %s receipt on restart",
+    { timeout: completeCutoverTimeoutMs },
     async (damage) => {
       const r = fixture();
       const { input } = await applied(r);
@@ -984,7 +997,9 @@ describe("R00 watchdog installed execution and durable replay", () => {
     expect(r.active().status).toBe("released");
   });
 
-  it("uses one owner envelope through actual Node client, cutover and remote conditional acceptance", async () => {
+  it("uses one owner envelope through actual Node client, cutover and remote conditional acceptance", {
+    timeout: completeCutoverTimeoutMs,
+  }, async () => {
     const r = fixture();
     const packet = await r.reserve();
     for (const [name, value] of Object.entries(r.f.environment)) vi.stubEnv(name, value as string);
@@ -1025,7 +1040,9 @@ describe("R00 watchdog installed execution and durable replay", () => {
     expect(r.commits()).toBe(3); // Reservation, bind and final acceptance are separate atomic transitions.
   });
 
-  it("cannot replace conditional acceptance with R11/R12 or an execution grant", async () => {
+  it("cannot replace conditional acceptance with R11/R12 or an execution grant", {
+    timeout: completeCutoverTimeoutMs,
+  }, async () => {
     const r = fixture();
     const packet = await r.arm();
     for (let i = 0; i < r.plan.routes.length; i++) expect((await r.mutate(i)).status).toBe(200);

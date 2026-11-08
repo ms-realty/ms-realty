@@ -121,3 +121,48 @@ it("announces a concise pending save instead of an unconfirmed-status sentence",
   expect(await screen.findByRole("status")).toHaveTextContent(/^Saving preference…$/);
   expect(screen.queryByText(/change is not confirmed/)).not.toBeInTheDocument();
 });
+
+it.each([
+  ["bg", "Известия за това търсене", "ltr"],
+  ["en", "Alerts for this search", "ltr"],
+  ["ru", "Уведомления по этому поиску", "ltr"],
+  ["de", "Benachrichtigungen für diese Suche", "ltr"],
+  ["nl", "Meldingen voor deze zoekopdracht", "ltr"],
+  ["el", "Ειδοποιήσεις για αυτή την αναζήτηση", "ltr"],
+  ["he", "התראות לחיפוש הזה", "rtl"],
+])(
+  "P10 public alert instructions use %s and its reading direction",
+  async (locale, title, direction) => {
+    const { container } = render(
+      await PublicPage({
+        params: Promise.resolve({ locale }),
+        searchParams: Promise.resolve({ minPrice: "950.03", minArea: "74.51", areaBasis: "built" }),
+      }),
+    );
+    expect(screen.getByRole("heading", { name: title, level: 1 })).toHaveAttribute("lang", locale);
+    for (const region of container.querySelectorAll("[lang]")) {
+      expect(region).toHaveAttribute("lang", locale);
+      expect(region).toHaveAttribute("dir", direction);
+    }
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  },
+);
+
+it("P10 Hebrew search criteria retain RTL labels and exact source measurements", async () => {
+  const { SearchAlertCriteria } =
+    await vi.importActual<typeof import("./search-alert-criteria")>("./search-alert-criteria");
+  const { container } = render(
+    await SearchAlertCriteria({
+      locale: "he",
+      search: alertSearch("bg", { minPrice: "950.03", minArea: "74.51", areaBasis: "built" }),
+    }),
+  );
+  expect(screen.getByRole("heading", { name: "החיפוש לשמירה" })).toHaveAttribute("dir", "rtl");
+  for (const region of container.querySelectorAll("[lang]")) {
+    expect(region).toHaveAttribute("lang", "he");
+    expect(region).toHaveAttribute("dir", "rtl");
+  }
+  expect(screen.getByText(/950\.03/)).toBeVisible();
+  expect(screen.getByText(/74\.51/)).toBeVisible();
+  expect(screen.getByText(/Български/)).toBeVisible();
+});

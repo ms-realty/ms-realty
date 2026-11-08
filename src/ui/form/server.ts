@@ -49,13 +49,14 @@ export function readFormValues<V extends FormValues>(
 }
 
 /** Reject forged identity, duplicate metadata and invalid revisions before calling a command. */
-export function readFormEnvelope(data: FormData, scope: string) {
+export function readFormEnvelope(data: FormData, scope: string, allowRecovery = false) {
   const one = (name: string) => {
     const values = data.getAll(name);
     return values.length === 1 && typeof values[0] === "string" ? values[0] : null;
   };
   const intent = one(formFields.intent);
-  if (intent !== "submit" && intent !== "reapply") return null;
+  if (intent !== "submit" && intent !== "reapply" && !(allowRecovery && intent === "recover"))
+    return null;
   const operationId = one(
     intent === "reapply" ? formFields.reapplyOperationId : formFields.operationId,
   );

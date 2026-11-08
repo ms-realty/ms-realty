@@ -43,6 +43,15 @@ describe("R10 evidence bundle consumer binding", () => {
     expect(() => inspectExecutionCandidate(f.packet, f.admission, new Date(f.at))).toThrow();
   });
 
+  it("rechecks changed raw evidence on each direct evaluation", () => {
+    const f = executionScenario();
+    expect(r10(f)?.status).toBe("pass");
+    const file = f.preparation.candidate.evidence[0];
+    const artifact = JSON.parse(file.content);
+    file.content = `${file.content.slice(0, -1)},"id":${JSON.stringify(artifact.id)}}`;
+    expect(r10(f)?.blockers).toContain("bundle_binding_invalid:duplicate_json_key");
+  });
+
   it.each(["index", "capture", "verification"])(
     "rejects swapped or altered %s controls with otherwise genuine owner assertions",
     (field) => {
@@ -200,6 +209,48 @@ describe("R10 evidence bundle consumer binding", () => {
 });
 
 describe("R10 canonical and bounded JSON controls", () => {
+  it.each(["string", "bytes"])(
+    "preserves raw Unicode, escapes and distinct normalization forms from %s",
+    (input) => {
+      const text = String.raw`{"e\u0301":"combining","é":"precomposed","raw":"Сандански 🌍","escaped":"quote:\" slash:\\ newline:\n","pair":"\ud83c\udf0d"}`;
+      expect(parseBundleJson(input === "string" ? text : Buffer.from(text))).toEqual({
+        "e\u0301": "combining",
+        é: "precomposed",
+        raw: "Сандански 🌍",
+        escaped: 'quote:" slash:\\ newline:\n',
+        pair: "🌍",
+      });
+    },
+  );
+
+  it.each(["string", "bytes"])(
+    "rejects controls, invalid escapes and duplicate decoded keys from %s",
+    (input) => {
+      for (const text of [
+        '"raw\u0000control"',
+        '"raw\tcontrol"',
+        String.raw`"\q"`,
+        String.raw`"\u12xz"`,
+        String.raw`"\ud800"`,
+        String.raw`"\udc00"`,
+        String.raw`"\ud800\u0061"`,
+        String.raw`"\ud83c🌍"`,
+        String.raw`"🌍\udf0d"`,
+        String.raw`{"é":1,"\u00e9":2}`,
+        String.raw`{"e\u0301":1,"é":2}`,
+        '"trailing\\',
+      ])
+        expect(() => parseBundleJson(input === "string" ? text : Buffer.from(text))).toThrow();
+    },
+  );
+
+  it("rejects malformed raw Unicode before decoding any unescaped string", () => {
+    expect(() => parseBundleJson('"\ud800"')).toThrow("invalid_utf8");
+    expect(() => parseBundleJson(Buffer.from([0x22, 0xed, 0xa0, 0x80, 0x22]))).toThrow(
+      "invalid_utf8",
+    );
+  });
+
   it("uses the existing canonical dialect with an independently computed expected digest", () => {
     const expected = '{"a":[{"a":2,"z":1},3],"z":{"a":true,"b":null}}';
     const value = { z: { b: null, a: true }, a: [{ z: 1, a: 2 }, 3] };

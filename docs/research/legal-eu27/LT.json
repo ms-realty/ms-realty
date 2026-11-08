@@ -1,0 +1,58 @@
+{
+  "country": "Lithuania",
+  "code": "LT",
+  "estate_agency": {
+    "law": "No special estate-agency statute was found. General Civil Code (Civilinis kodeksas) contract and representation rules apply; the content of CC art. 2.135 'Interesų konfliktas' (conflict of interest) was not confirmed. Real estate agents are AML obliged entities (AML Law art. 2(10)(9)) supervised by the Financial Crime Investigation Service (FNTT).",
+    "regulated": "Not licensed (UNCONFIRMED): no licensing or registry statute was located. A broker-register provision found on e-seimas appears to be a draft (TAP), not law. AML supervision by FNTT applies.",
+    "dual_agency": "unclear",
+    "rule": "No statutory rule on acting for both buyer and seller was confirmed. The Civil Code representation chapter has an article titled 'Interesų konfliktas' (CC 2.135, title seen only in a search snippet) which likely restricts a representative from concluding a deal on behalf of the principal with another person it also represents without consent. This matters only where the agent signs as representative, not where it merely introduces the parties. Product rule pending verification: disclose any two-sided role in writing and obtain both clients' written consent.",
+    "quote": "",
+    "commission_both_sides": "No statutory rule found; contractual. Commission from both sides appears permissible if agreed in each client's written contract (UNCONFIRMED).",
+    "sources": []
+  },
+  "aml": {
+    "law": "Pinigų plovimo ir teroristų finansavimo prevencijos įstatymas (Law on the Prevention of Money Laundering and Terrorist Financing) No. VIII-275, consolidated version in force from 2026-01-01: art. 2(10)(9) obliged entity; art. 2(11) 'klientas'; art. 9(1) CDD triggers; art. 10(6)(5) and 10(7) ID copies; art. 19 retention.",
+    "sale_scope": "All purchase/sale intermediation, with no value threshold. Art. 2(10)(9): 'real estate agents (brokers), both acting on behalf and for the benefit of the client and assisting the client in carrying out real estate purchase or sale transactions and (or) related transactions, as well as providing intermediation services in letting real estate, but only for transactions where the monthly rent is equal to or exceeds EUR 10 000'. [nekilnojamojo turto agentai (brokeriai), tiek veikiantys kliento vardu ir jo naudai, tiek ir padedantys klientui atlikti nekilnojamojo turto pirkimo ar pardavimo sandorius ... tačiau tik sandoriams, kurių mėnesinis nuomos mokestis yra lygus arba viršija 10 000 eurų]. CDD triggers (art. 9(1)): before starting a business relationship; before occasional transactions of EUR 15,000 or more.",
+    "letting_threshold": "Letting intermediation is covered only where the monthly rent equals or exceeds EUR 10,000 (art. 2(10)(9)).",
+    "both_parties": "unclear: no express buyer-and-seller rule in the Law. Art. 2(11) defines 'client' as a person 'performing monetary operations or concluding transactions with' the obliged entity. FNTT instructions for real estate agents (order No. V-126 of 2025, reportedly amended by V-262) may address the counterparty but were not read.",
+    "retention_years": 8,
+    "retention_trigger": "Art. 19(11): copies of identity documents, beneficial-owner data, video-identification recordings, other CDD data and account/contract documents 'must be stored for 8 years from the date of termination of transactions or business relationship with the client'. Art. 19(13): documents confirming a monetary operation or transaction: 8 years from the date of the operation or transaction. Art. 19(12): business correspondence: 5 years from the end of transactions or relationship. Art. 19(10): registration logs: 8 years.",
+    "extension": "Art. 19(16): retention periods 'may be additionally extended for no longer than 2 years upon a reasoned instruction of a competent institution'.",
+    "id_copy": "Mandatory. Art. 10(6)(5): on in-person identification the responsible employee must 'make a copy of, or scan, the pages of the document ... containing the photograph and other data needed to establish identity'. Art. 10(7): each paper copy must carry a certification mark (tikrumo žyma) by the employee who made it.",
+    "sources": [
+      "https://e-seimas.lrs.lt/portal/legalAct/lt/TAD/TAIS.41300/asr",
+      "https://e-seimas.lrs.lt/rs/actualedition/TAIS.41300/offEqbWYXb/",
+      "https://web.archive.org/web/20260115092741/https://e-seimas.lrs.lt/rs/actualedition/TAIS.41300/offEqbWYXb/format/MSO2010_DOCX/"
+    ]
+  },
+  "accounting": {
+    "books_years": null,
+    "annual_accounts_years": null,
+    "source_documents_years": null,
+    "trigger": "UNCONFIRMED: not read from a primary source (e-tar.lt and e-seimas.lrs.lt block automated access).",
+    "law": "UNCONFIRMED: candidates are the Law on Financial Accounting (Finansinės apskaitos įstatymas), which refers retention to the General Index of Document Retention Periods (Bendrųjų dokumentų saugojimo terminų rodyklė, Chief Archivist order), and the Law on Tax Administration. Article numbers not verified.",
+    "sources": []
+  },
+  "limitation": {
+    "general_years": null,
+    "commission_years": null,
+    "trigger": "UNCONFIRMED: not read from a primary source.",
+    "law": "UNCONFIRMED: candidate Civil Code art. 1.125 (limitation periods; general period believed to be 10 years) with start rules in the following articles; no special broker-commission period is known. Not verified.",
+    "sources": []
+  },
+  "id_copies": {
+    "rule": "UNCONFIRMED: no primary source read on copying ID documents outside AML. Inside AML a copy or scan is mandatory (art. 10(6)(5)).",
+    "law": "AML Law art. 10(6)(5), 10(7) (inside AML only); outside AML: GDPR Art. 5(1)(c); State Data Protection Inspectorate guidance not checked.",
+    "sources": []
+  },
+  "confidence": "low",
+  "unconfirmed": [
+    "All Lithuanian primary portals (e-tar.lt, e-seimas.lrs.lt, lb.lt, fntt.lrv.lt) returned Cloudflare bot challenges. The AML Law text was read from the official e-seimas consolidated edition 'from 2026-01-01' as captured by the Internet Archive in January 2026; amendments after that capture are not checked.",
+    "Estate agency: no licensing statute confirmed; the content of CC art. 2.135 (conflict of interest in representation) is not confirmed; dual_agency left 'unclear'.",
+    "Whether real estate agents must apply CDD to both buyer and seller (FNTT instructions No. V-126/2025 and V-262 not read).",
+    "Accounting retention periods (books, annual statements, source documents) and their legal basis: not confirmed; all null.",
+    "General limitation period (believed 10 years, CC art. 1.125) and any special period for commission: not confirmed; null.",
+    "Any national rule restricting ID copies outside AML: not researched to a primary source.",
+    "The web-search budget for this run was exhausted before these points could be pursued; re-run with access to e-tar.lt in a normal browser session."
+  ]
+}

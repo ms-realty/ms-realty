@@ -1,0 +1,91 @@
+{
+  "country": "Greece",
+  "code": "GR",
+  "estate_agency": {
+    "law": "Law 4072/2012 (ΦΕΚ Α' 86/11.04.2012) Part Four, arts. 197-204 (real estate brokers); Civil Code (ΑΚ) arts. 703-707 apply to anything not regulated there (art. 197(3)).",
+    "regulated": "Yes. Art. 198: conditions to practise (EU/EEA citizenship or permit, clean record, Lyceum diploma); the chamber registers the broker in its register and in ΓΕΜΗ; loss of a condition means removal. Art. 202: practising without the conditions and ΓΕΜΗ registration is punishable (6 months to 2 years' imprisonment and/or EUR 5,000-30,000 fine). EU/EEA brokers providing occasional cross-border services need no ΓΕΜΗ registration. Art. 200(1)-(2): the brokerage contract must be in writing (signed letters, fax or e-mail suffice) and state the parties, tax numbers, the broker's ΓΕΜΗ number, the property and the fee (freely negotiable). A contract without written form is void (ΜΠρΑθ 80/2024).",
+    "dual_agency": "consent",
+    "rule": "Allowed only if the written brokerage contract expressly says the broker may also act for the principal's counterparty (Law 4072/2012 art. 200(7)); if it does not and the broker acts for the other side, the principal may refuse the fee or reclaim it. Before the brokerage contract is signed the broker must inform the principal of any dual mandate or other personal or financial interest beyond the agreed fee (art. 201(1)(b)). Civil Code art. 706: a broker who, contrary to the contract, also acted for the other party loses fee and expenses; the same applies if he accepted a fee promise from the other side in circumstances contrary to good faith.",
+    "quote": "Law 4072/2012 art. 200(7): 'The brokerage contract must state expressly whether the broker may also act for the counterparty of his principal.' Art. 201(1)(b): brokers must 'inform their principals, before the brokerage contract is concluded, of any case of a transaction' involving a dual mandate or other interests beyond the agreed fee. ΑΚ 706: 'The broker has no right to a fee or expenses if, contrary to the content of the contract, he also acted for the other contracting party.'",
+    "commission_both_sides": "Permitted when each written brokerage contract allows the broker to act for both sides and the dual mandate was disclosed beforehand (art. 200(7), 201(1)(b)); otherwise the fee is lost or reclaimable (art. 200(7), ΑΚ 706). Fee is due only when the main contract is concluded as a result of the mediation or introduction (ΑΚ 703; art. 200(5)); under a suspensive condition only when the condition is met (ΑΚ 704). A broker's fee claim in court must be served on the broker's income-tax office or the claim is inadmissible (art. 200(11)).",
+    "sources": [
+      "https://www.taxheaven.gr/law/4072/2012/arthro/200",
+      "https://www.taxheaven.gr/law/4072/2012/arthro/201",
+      "https://www.lawspot.gr/nomothesia/nomos-4072-2012/arthro-200-nomos-4072-2012-symvasi-mesiteias",
+      "https://www.lawspot.gr/nomothesia/nomos-4072-2012/arthro-198-nomos-4072-2012-proypotheseis-askisis-toy/",
+      "https://www.lawspot.gr/nomothesia/n-4072-2012/arthro-197-nomos-4072-2012-ennoia-oron/",
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/703",
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/704",
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/706",
+      "https://dsanet.gr/Epikairothta/Nomologia/ΜΠρΑθ%2080.2024.htm"
+    ]
+  },
+  "aml": {
+    "law": "Law 4557/2018 (ΦΕΚ Α' 139/30.07.2018), as amended (incl. Law 4734/2020; latest amendment Law 5313/2026 arts. 88-89, which changed only arts. 6(1) and 46(7)). Supervisor for real estate agents: ΑΑΔΕ (art. 6). AADE guidance ΠΟΛ.1204/2018; identification documents ΠΟΛ.1200/2018 (ΦΕΚ Β' 4869/31.10.2018).",
+    "sale_scope": "Art. 5(1)(h): real estate agents are obliged persons only 'for transactions whose value is at least ten thousand (10,000) euro, regardless of whether this amount concerns a purchase, a sale or a monthly rent of real estate'. A sale of EUR 10,000 or more is in scope.",
+    "letting_threshold": "Monthly rent of EUR 10,000 or more (art. 5(1)(h)). ΠΟΛ.1204/2018 states amounts are calculated without VAT, but that sentence sits next to the general EUR 15,000 threshold, so its application to the agent threshold is unclear.",
+    "both_parties": "no - CDD applies to the obliged person's own customer (πελάτης), its authorised representative and beneficial owner (art. 13(1)(a)-(b); ΠΟΛ.1204/2018 'with respect to their clients'). Art. 13(5): if two or more obliged persons take part in one transaction, 'each of them must apply the due diligence measures'. No Greek text found requiring an agent to identify the other side when it acts for one side only.",
+    "retention_years": 5,
+    "retention_trigger": "Art. 30(3): 'for a period of five (5) years after the end of the business relationship with the customer or the date of the occasional transaction'.",
+    "extension": "Art. 30(3): at expiry obliged persons delete the personal data 'unless another provision of law or a regulatory decision permits or requires their retention for a longer period, which may not exceed ten years'. No authority-request extension mechanism in art. 30; art. 30(4) only requires records that let the obliged person answer authorities about relationships in the last five years.",
+    "id_copy": "Not expressly required. Art. 30(1)(a) requires keeping 'the documents and information required for compliance with the due diligence requirements' of art. 13, including e-identification data; art. 30(1)(b) 'originals or copies' of transaction documents. Art. 13(1)(a) verification is 'on the basis of documents, data or information from a reliable and independent source'. ΠΟΛ.1200/2018 lists identity data and indicative verification documents (e.g. valid passport) but asks for copies only of company documents. Where a copy of a Greek citizen's ID card is kept, Law 5256/2025 art. 32 (see id_copies) applies.",
+    "sources": [
+      "https://www.taxheaven.gr/law/4557/2018/arthro/5",
+      "https://www.taxheaven.gr/law/4557/2018/arthro/13",
+      "https://www.taxheaven.gr/law/4557/2018/arthro/30",
+      "https://www.taxheaven.gr/law/4557/2018",
+      "https://www.taxheaven.gr/circulars/29733/pol-1204-2018",
+      "https://www.taxheaven.gr/circulars/29729",
+      "https://www.forin.gr/laws/law/4568/n-5313-2026"
+    ]
+  },
+  "accounting": {
+    "books_years": 5,
+    "annual_accounts_years": 5,
+    "source_documents_years": 5,
+    "trigger": "Accounting law: 5 years from the end of the reporting period, or longer if other law requires (Law 4308/2014 art. 7(1)). Tax law: at least 5 years from the end of the tax year in which the return must be filed, OR until the right to assess tax is time-barred under art. 37(2)-(3) (extensible to 10 years from the end of the year of the filing deadline where no return was filed or new information emerges), OR until a tax-audit case is final or the claim fully paid (Law 5104/2024 art. 13(2)). Practical rule: 5 years baseline, keep 10 years where an extended assessment period could apply; never destroy during an open audit or dispute. Art. 7 applies to all accounting records; it does not set a separate period for financial statements.",
+    "law": "Law 4308/2014 (Greek Accounting Standards) art. 7 'Retention of accounting records'; Tax Procedure Code Law 5104/2024 (ΦΕΚ Α' 58/19.04.2024) arts. 13(2) and 37, which repealed Law 4987/2022 (art. 86(1)).",
+    "sources": [
+      "https://www.taxheaven.gr/law/4308/2014/arthro/7",
+      "https://www.taxheaven.gr/law/5104/2024/arthro/13",
+      "https://www.taxheaven.gr/law/5104/2024/arthro/37",
+      "https://www.taxheaven.gr/law/5104/2024/arthro/86",
+      "https://www.taxheaven.gr/law/4987/2022/arthro/13"
+    ]
+  },
+  "limitation": {
+    "general_years": 20,
+    "commission_years": 5,
+    "trigger": "General: limitation starts when the claim arises and can be pursued in court (ΑΚ 251). For art. 250 claims it starts only at the end of the year in which that point falls (ΑΚ 253). The commission claim arises when the main contract is concluded as a result of the mediation (ΑΚ 703; Law 4072/2012 art. 200(5)), or when a suspensive condition is met (ΑΚ 704). So the 5 years run from 31 December of the year the commission fell due.",
+    "law": "Civil Code (π.δ. 456/1984): art. 249 ('Unless otherwise provided, claims are time-barred in twenty years'); art. 250 ('Claims are time-barred in five years': item 1 merchants, industrialists and craftsmen, including 'for handling the affairs of others'; item 5 those who, not falling under item 1, professionally handle others' affairs or provide services, for their fees and expenses); arts. 251 and 253.",
+    "sources": [
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/249",
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/250",
+      "https://www.lawspot.gr/nomothesia/astikos-kodikas/arthro-250-astikos-kodikas-pentaetis-paragrafi/",
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/251",
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/253",
+      "https://www.taxheaven.gr/law/π.δ.456/1984/arthro/703"
+    ]
+  },
+  "id_copies": {
+    "rule": "No general statutory ban found. (1) Law 5256/2025 art. 32 (as replaced by Law 5305/2026 art. 16, ΦΕΚ Α' 85/29.05.2026): for transactions of natural persons with private-sector bodies 'in which there is an obligation to keep a photocopy of a Greek citizen's identity card', a digital copy of the ID card may be issued and submitted; a photocopy may be submitted only if the digital copy cannot be issued and the card does not show the personal number (art. 11A Law 4727/2020). This covers Greek ID cards only, not passports or foreign IDs. (2) The Greek DPA (ΑΠΔΠΧ), in recommendations to tourist accommodation (24 June 2026, ref. Γ/ΕΞ/2885 per press reports), said taking or keeping photocopies or photos of ID cards and passports is not allowed without a specific and clear legal provision requiring it, citing GDPR lawfulness and data minimisation; showing the document normally suffices. Product rule: outside an AML-scoped deal, record that the document was seen and checked; take no copy.",
+    "law": "Law 5256/2025 art. 32 (replaced by Law 5305/2026 art. 16); GDPR art. 5(1)(a),(c); ΑΠΔΠΧ recommendations (June 2026). Law 4624/2019 contains no ID-copy rule that was found.",
+    "sources": [
+      "https://www.taxheaven.gr/law/5256/2025/arthro/32",
+      "https://www.eea.gr/arthra-eea/ti-allazei-gia-ta-fotoantigrafa-ton-neon-taytotiton/",
+      "https://www.dimokratiki.gr/25-06-2026/archi-prostasias-dedomenon-systasis-se-xenodochia-ke-katalymata-na-mi-vgazoun-fotoantigrafa-apo-taftotites-ke-kartes/",
+      "https://www.lawspot.gr/nomika-nea/apdpkh-paranome-e-photographise-tautoteton-kai-pistotikon-karton-pelaton-apo-touristika-katalumata/"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "All article texts were read from consolidated reproductions (taxheaven.gr, lawspot.gr), not from et.gr ΦΕΚ PDFs; aade.gr PDFs (ΦΕΚ Α' 58/2024, ΠΟΛ.1204/2018) returned HTTP 403.",
+    "Whether Law 4072/2012 arts. 200-201 were amended after 2012: lawspot shows no amendment, taxheaven shows no history.",
+    "Which ΑΚ 250 item covers an estate agent's commission: item 1 (merchant, 'handling the affairs of others') or item 5 (professional services). Both give 5 years from year end; no Areios Pagos ruling on brokers was found.",
+    "Law 4557/2018 art. 5(1)(h) as reproduced cites estate agents 'of Law 4093/2012', not Law 4072/2012; the exact cross-reference was not checked in ΦΕΚ.",
+    "Whether the 'without VAT' calculation in ΠΟΛ.1204/2018 applies to the EUR 10,000 estate-agent threshold.",
+    "No Greek rule found requiring an estate agent to identify the counterparty it does not represent; EU AML Regulation 2024/1624 (from 10 July 2027) was not checked for a both-parties rule.",
+    "ΑΠΔΠΧ June 2026 recommendations on ID photocopies known only from press and legal-news reports; the dpa.gr text and reference Γ/ΕΞ/2885 were not read.",
+    "Law 5256/2025 art. 32 text read from taxheaven, which does not show the replacement by Law 5305/2026 art. 16 (that link comes from eea.gr)."
+  ]
+}

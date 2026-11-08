@@ -8,6 +8,13 @@ const config: StorybookConfig = {
   framework: { name: "@storybook/nextjs-vite", options: {} },
   // Self-hosted fonts and brand assets resolve from the same paths as in the app.
   staticDirs: ["../public"],
+  viteFinal(viteConfig) {
+    // staticDirs owns this copy; Vite's parallel public copy can race on mkdir.
+    return {
+      ...viteConfig,
+      build: { ...viteConfig.build, copyPublicDir: false },
+    };
+  },
   core: { disableTelemetry: true },
 };
 

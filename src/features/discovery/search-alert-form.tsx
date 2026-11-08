@@ -1,6 +1,6 @@
 "use client";
 import { privacyCopy } from "@/features/privacy/copy";
-import type { PublicLocale } from "@/i18n/config";
+import { localeDirection, type PublicLocale } from "@/i18n/config";
 import { controlClass, errorClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
@@ -21,10 +21,11 @@ export function SearchAlertForm({
   initialState: FormState<SearchAlertValues>;
   action: FormAction<SearchAlertValues>;
 }) {
+  const copyLocale = searchAlertCopyLocale(locale);
   const c = searchAlertCopy(locale),
     p = privacyCopy(locale);
   return (
-    <div lang={searchAlertCopyLocale(locale)} dir="ltr">
+    <div lang={copyLocale} dir={localeDirection(copyLocale)}>
       <ActionForm
         action={action}
         initialState={initialState}

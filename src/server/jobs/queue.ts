@@ -9,6 +9,7 @@ import type { PublicLocale } from "@/domain/ids";
 import { issueEmailLink } from "../auth/email-link";
 import type { Database, Executor } from "../db";
 import { pruneRateLimits } from "../rate-limit";
+import { pruneReauthDrafts, type ReauthLineage } from "../reauth-drafts/service";
 import { assertRecoveryOpen } from "../recovery/quarantine";
 import { dispatchMessage, dispatchQueued } from "./outbox";
 import type { MessageProvider } from "./provider";
@@ -19,6 +20,7 @@ export interface JobPayloads {
     email: string;
     returnTo: string | null;
     locale: PublicLocale;
+    reauth?: ReauthLineage;
   };
   "outbox.dispatch": { outboxId: string };
   "outbox.sweep": Record<string, never>;
@@ -140,6 +142,7 @@ export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies)
   });
   await queue.work("rate_limit.prune", async () => {
     await pruneRateLimits(deps.db);
+    await pruneReauthDrafts(deps.db);
   });
   await queue.work("files.process", async ({ kind, id }) => {
     const { processFileWorker } = await import("../files/process");

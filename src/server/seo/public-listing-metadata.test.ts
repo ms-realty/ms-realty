@@ -22,7 +22,7 @@ const input = { locale: "bg", reference: "MS-00101", slug: "ms-00101" };
 beforeEach(() => {
   vi.resetAllMocks();
   vi.stubEnv("CANONICAL_ORIGIN", "https://staging.makler-realty.com");
-  vi.stubEnv("STAGING", "true");
+  vi.stubEnv("STAGING", "false");
   mocks.listing.mockResolvedValue({ status: "not_found" });
   mocks.catalogue.mockResolvedValue([]);
 });
@@ -46,7 +46,12 @@ it("rejects malformed and non-listing identities without a lookup or a redirect"
 it("uses only eligible fact locales for a public listing's hreflang", async () => {
   mocks.listing.mockResolvedValue({
     status: "listing",
-    listing: { reference: input.reference, title: "Approved title", description: "Approved copy." },
+    listing: {
+      reference: input.reference,
+      title: "Approved title",
+      description: "Approved copy.",
+      indexable: true,
+    },
   });
   mocks.catalogue.mockResolvedValue(
     ["bg", "en"].map((locale) => ({ reference: input.reference, locale })),
@@ -56,10 +61,10 @@ it("uses only eligible fact locales for a public listing's hreflang", async () =
     canonical: "https://staging.makler-realty.com/bg/properties/MS-00101/ms-00101",
     languages: {
       bg: "https://staging.makler-realty.com/bg/properties/MS-00101/ms-00101",
-      en: "https://staging.makler-realty.com/en/properties/MS-00101/ms-00101",
       "x-default": "https://staging.makler-realty.com/bg/properties/MS-00101/ms-00101",
     },
   });
+  expect(result.robots).toEqual({ index: true, follow: true });
 });
 it.each(["unavailable", "not_found"])(
   "a %s placeholder has no approved fact alternates",
@@ -73,6 +78,7 @@ it.each(["unavailable", "not_found"])(
     const result = await publicListingMetadata(input);
     expect(result.title).toBe(input.reference);
     expect(result.alternates?.languages).toEqual({});
+    expect(result.robots).toEqual({ index: false, follow: true });
     expect(JSON.stringify(result)).not.toContain("Private draft title");
   },
 );
@@ -81,16 +87,34 @@ it("metadata failure preserves the page's recovery path without emitting databas
   const result = await publicListingMetadata(input);
   expect(result.title).toBe(input.reference);
   expect(result.alternates?.languages).toEqual({});
+  expect(result.robots).toEqual({ index: false, follow: true });
   expect(JSON.stringify(result)).not.toContain("private database");
   expect(mocks.catalogue).not.toHaveBeenCalled();
 });
 it("hreflang read failure does not discard independently read approved public copy", async () => {
   mocks.listing.mockResolvedValue({
     status: "listing",
-    listing: { reference: input.reference, title: "Approved title", description: "Approved copy." },
+    listing: {
+      reference: input.reference,
+      title: "Approved title",
+      description: "Approved copy.",
+      indexable: true,
+    },
   });
   mocks.catalogue.mockRejectedValue(new Error("catalogue unavailable"));
   const result = await publicListingMetadata(input);
   expect(result.title).toBe("Approved title");
+  expect(result.alternates?.languages).toEqual({});
+  expect(result.robots).toEqual({ index: false, follow: true });
+});
+it("AT27 does not override an ineligible listing presentation with catalogue availability", async () => {
+  mocks.listing.mockResolvedValue({
+    status: "listing",
+    listing: { reference: input.reference, title: "Retained copy", indexable: false },
+  });
+  mocks.catalogue.mockResolvedValue([{ reference: input.reference, locale: "bg" }]);
+  const result = await publicListingMetadata(input);
+  expect(result.title).toBe("Retained copy");
+  expect(result.robots).toEqual({ index: false, follow: true });
   expect(result.alternates?.languages).toEqual({});
 });

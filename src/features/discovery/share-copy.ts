@@ -388,7 +388,7 @@ const rows = {
     "הקישור הציבורי נוצר",
   ],
   createdBody: [
-    "Вече е в списъка по-долу — там можете да го копирате, да видите кога изтича или да го спрете.",
+    "Вече е в списъка по-долу — там можете да я копирате, да видите кога изтича или да я спрете.",
     "It now appears in the list below, where you can copy it, check when it expires or revoke it.",
     "Она уже в списке ниже: там её можно скопировать, посмотреть срок действия или отозвать.",
     "Er steht jetzt in der Liste unten. Dort können Sie ihn kopieren, das Ablaufdatum prüfen oder ihn widerrufen.",
