@@ -81,6 +81,12 @@ Architecture section 18.2 and AT27/AT57 require a separate
 HTTP report names that outstanding evidence and its expected source SHA and image. That
 reference is a requirement, not an existing receipt or a qualified image observation.
 
+The bounded collector and offline verifier are specified in
+[the R07 parity contract](staging-url-seo-sitemap-parity.md). They retain raw shards and
+separate capture completeness, technical comparison and missing authority. Their receipt
+does not change this HTTP checker's parity flags or complete the R07 gate. The collector
+does not invoke full HTTP mode or prepare runtime actors.
+
 The separate receipt must bind the actual observed deployment to its source SHA, image and
 gateway digests, route/source/data/config digests and policy revision. It must retain the
 observation time, tool identity, assertion results, reviewer where required and redaction

@@ -419,6 +419,28 @@
         "recovery:accepted_writes_preserved",
         "recovery:unknown_history_quarantined"
       ]
+    },
+    {
+      "id": "evidence_bundle_capture",
+      "description": "Machine witness of copied R10 payload bytes; transport only, never counted human or gate proof",
+      "environments": ["release"],
+      "maxAgeMinutes": 60,
+      "signatureRequired": true,
+      "reviewerRequired": false,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": ["bundle:copied_bytes_verified"]
+    },
+    {
+      "id": "evidence_bundle_verification",
+      "description": "Machine witness from a separate R10 payload verification; transport only, never candidate approval",
+      "environments": ["release"],
+      "maxAgeMinutes": 60,
+      "signatureRequired": true,
+      "reviewerRequired": false,
+      "bindsArtifacts": true,
+      "classes": ["live"],
+      "requiredAssertions": ["bundle:reopened_bytes_verified"]
     }
   ],
   "gates": [

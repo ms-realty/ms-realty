@@ -5,6 +5,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+// @ts-expect-error Test-only transport fixture shares existing synthetic signing keys.
+import { syntheticBundle } from "./bundle-fixtures.mjs";
 import { evaluateRelease, manifestGaps, ReleaseInputError } from "./evaluate";
 import {
   type AdmittedReleaseTrust,
@@ -139,7 +141,8 @@ function scenario(changePolicy?: (policy: GatePolicy) => void) {
     );
   const input = { policy, manifest, evidence, trust };
   seal(input);
-  return input;
+  const bundle = syntheticBundle(input, sign);
+  return { ...input, bundle };
 }
 
 function artifactFor(
@@ -224,9 +227,10 @@ function evaluate(input: Scenario, trust: unknown = input.trust) {
     manifest: input.manifest,
     evidence: input.evidence.map((artifact) => ({
       file: `${artifact.id}.json`,
-      content: JSON.stringify(artifact),
+      content: canonicalJson(artifact),
     })),
     now,
+    bundle: input.bundle,
     ...(trust === null ? {} : { admittedTrust: trust }),
   });
 }

@@ -21,6 +21,12 @@ import {
 } from "@/domain/recovery-archive";
 import type { Database, Executor, Transaction } from "../db";
 import {
+  encodeAccessRecoveryRestriction,
+  type GrantRevocationDecision,
+  grantRevocationRestrictions,
+  validateGrantRevocationDecision,
+} from "./access-restrictions";
+import {
   emptyRecoveryCursor,
   lockRecoveryWriteFence,
   type RecoveryAdmission,
@@ -250,6 +256,27 @@ export function operationRecoveryTransaction<T>(
   return db.transaction(fn);
 }
 
+/** C1 cannot inherit receipt-only participation without its explicit producer context. */
+export function requireExplicitRecoveryAdmission(db: Executor, input?: RecoveryAdmission) {
+  try {
+    const scoped = owned.has(db) || callbacks.getStore() !== undefined;
+    if (input === undefined) {
+      if (scoped) throw new Error("C1 requires explicit recovery producer admission.");
+      return undefined;
+    }
+    const admission = recoveryAdmission.parse(input);
+    if (scoped) {
+      const state = requireOwned(db, admission.context);
+      if (state.admission.writer !== admission.writer)
+        throw new Error("Recovery producer writer differs.");
+    } else requireRecoveryPool(db);
+    return admission;
+  } catch (error) {
+    poisonHandleFailure(db);
+    throw error;
+  }
+}
+
 export function encodeRecoveryRestriction(
   context: RecoverySourceContext,
   input: RecoveryRestriction,
@@ -280,35 +307,64 @@ export async function appendRecoveryEvent(
   state.pending += 1;
   try {
     const payload = encodeRecoveryRestriction(expected, input);
-    if (payload.contextDigest !== state.contextDigest)
-      throw new Error("Recovery transaction context differs.");
-    await tx.insert(recoveryPayloads).values(payload).onConflictDoNothing();
-    const [stored] = await tx
-      .select()
-      .from(recoveryPayloads)
-      .where(eq(recoveryPayloads.digest, payload.digest));
-    if (
-      !stored ||
-      stored.canonicalBody !== payload.canonicalBody ||
-      stored.contextDigest !== payload.contextDigest ||
-      stored.subjectDigest !== payload.subjectDigest ||
-      stored.kind !== payload.kind ||
-      stored.byteLength !== payload.byteLength
-    )
-      throw new Error("Recovery payload binding differs.");
-    const effect: Effect = {
-      kind: payload.kind,
-      subjectDigest: payload.subjectDigest,
-      payloadDigest: payload.digest,
-    };
-    state.effects.push(effect);
-    return { ...effect };
+    return await persistRestriction(tx, state, payload);
   } catch (error) {
     state.failed = true;
     throw error;
   } finally {
     state.pending -= 1;
   }
+}
+
+/** The only v2 entry path: validate this command's audit/rows, then await every denial. */
+export async function appendGrantRevocationRecovery(
+  tx: Transaction,
+  expected: RecoverySourceContext,
+  input: GrantRevocationDecision,
+) {
+  const state = requireOwned(tx, expected);
+  state.pending += 1;
+  try {
+    const decision = await validateGrantRevocationDecision(tx, input);
+    for (const restriction of grantRevocationRestrictions(decision))
+      await persistRestriction(tx, state, encodeAccessRecoveryRestriction(expected, restriction));
+  } catch (error) {
+    state.failed = true;
+    throw error;
+  } finally {
+    state.pending -= 1;
+  }
+}
+
+// Private storage seam. No caller can append arbitrary raw payloads.
+async function persistRestriction(
+  tx: Transaction,
+  state: OwnedTransaction,
+  payload: ReturnType<typeof encodeRecoveryRestriction>,
+) {
+  if (payload.contextDigest !== state.contextDigest)
+    throw new Error("Recovery transaction context differs.");
+  await tx.insert(recoveryPayloads).values(payload).onConflictDoNothing();
+  const [stored] = await tx
+    .select()
+    .from(recoveryPayloads)
+    .where(eq(recoveryPayloads.digest, payload.digest));
+  if (
+    !stored ||
+    stored.canonicalBody !== payload.canonicalBody ||
+    stored.contextDigest !== payload.contextDigest ||
+    stored.subjectDigest !== payload.subjectDigest ||
+    stored.kind !== payload.kind ||
+    stored.byteLength !== payload.byteLength
+  )
+    throw new Error("Recovery payload binding differs.");
+  const effect: Effect = {
+    kind: payload.kind,
+    subjectDigest: payload.subjectDigest,
+    payloadDigest: payload.digest,
+  };
+  state.effects.push(effect);
+  return { ...effect };
 }
 
 /** Only a persisted succeeded receipt can become an accepted-operation reference. */

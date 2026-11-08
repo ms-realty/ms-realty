@@ -4,6 +4,7 @@
 // wrong-policy, unsigned-where-required or unreadable evidence does not count, and a gate
 // passes only when every requirement is met by evidence that counts.
 import type { z } from "zod";
+import { bundleWitnessTypes, validateBundleBinding } from "./bundle";
 import {
   type AdmittedReleaseTrust,
   admittedReleaseTrustSchema,
@@ -47,6 +48,8 @@ export interface EvaluationInput {
   readonly now: Date;
   /** Trusted caller configuration, not an evidence/policy field. No CLI loader exists yet. */
   readonly admittedTrust?: unknown;
+  /** Raw canonical R10 transport controls, outside the counted evidence map. */
+  readonly bundle?: unknown;
 }
 
 function parse<S extends z.ZodType>(schema: S, value: unknown, what: string): z.output<S> {
@@ -141,6 +144,7 @@ function singleOperatorArtifactProblems(artifact: EvidenceArtifact, policy: Gate
   };
   const humanPurpose = humanPurposes[artifact.type];
   const reasons: string[] = [];
+  if (bundleWitnessTypes.some((type) => type === artifact.type)) reasons.push("transport_only");
   if (artifact.purpose !== (humanPurpose ?? "machine_observation"))
     reasons.push("wrong_evidence_purpose");
   if (artifact.actor?.kind !== (humanPurpose ? "human" : "machine"))
@@ -299,6 +303,15 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
   const policyDigest = sha256Digest(canonicalJson(policy));
   const gaps = manifestGaps(manifest, policy);
   const evidence = assessEvidence(input.evidence, manifest, policy, now, admission);
+  const bundle = singleOperator
+    ? validateBundleBinding({
+        bundle: input.bundle,
+        manifest,
+        policy,
+        evidence: input.evidence,
+        now,
+      })
+    : { problems: [], expiresAt: undefined };
   const counted = evidence.flatMap((item) =>
     item.artifact && item.reasons.length === 0 ? [item.artifact] : [],
   );
@@ -418,6 +431,7 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
       );
       if (!authority) blockers.push("single_operator_authority_unapproved");
     }
+    if (singleOperator && gate.id === "R10") blockers.push(...bundle.problems);
     // This package has no authenticated predecessor/operation lineage or remote bridge.
     // Even caller-supplied signed acceptance labels must not enable post-cutover acceptance.
     if (singleOperator && ["R11", "R12"].includes(gate.id))
@@ -435,6 +449,7 @@ export function evaluateRelease(input: EvaluationInput): ReadinessReport {
   });
 
   const expiryTimes = [now.getTime() + policy.snapshotMaxAgeMinutes * 60_000];
+  if (bundle.expiresAt !== undefined) expiryTimes.push(bundle.expiresAt);
   for (const artifact of counted) {
     const maxAge = policy.evidenceTypes.find((type) => type.id === artifact.type)?.maxAgeMinutes;
     if (maxAge != null) expiryTimes.push(Date.parse(artifact.observedAt) + maxAge * 60_000);
