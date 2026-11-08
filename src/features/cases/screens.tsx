@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getDb } from "@/db/client";
 import { interestMachine } from "@/domain/interest";
 import { serviceCaseContextSchema } from "@/domain/service-scope";
-import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
+import { agencyTimeZone, defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import type { Session } from "@/server/auth/sessions";
@@ -127,7 +127,7 @@ type TimeProps = {
   /** Names the zone in words for a client, who could be reading from anywhere (M-050). */
   zoneLabel?: boolean;
 };
-const timeLocale = (locale: string) => (isPublicLocale(locale) ? locale : "bg");
+const timeLocale = (locale: string) => (isPublicLocale(locale) ? locale : defaultLocale);
 
 /** One instant in the shared format; staff read agency times without a zone name. */
 export function WorkflowTime({

@@ -3,7 +3,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { caseParticipants, operations, parties, proposalRevisions, proposals } from "@/db/schema";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { can } from "@/server/authz";
 import { caseFor } from "@/server/cases/shared";
@@ -270,7 +270,7 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
     : [];
   const blank = { value: "", label: c.choose };
   const changed = (date: Date) =>
-    `${c.lastChanged}: ${formatDateTime(isPublicLocale(props.locale) ? props.locale : "bg", date)}`;
+    `${c.lastChanged}: ${formatDateTime(isPublicLocale(props.locale) ? props.locale : defaultLocale, date)}`;
   const opts = (values: string[]) => [
     blank,
     ...values.map((value) => ({ value, label: c.values[value as keyof typeof c.values] ?? value })),

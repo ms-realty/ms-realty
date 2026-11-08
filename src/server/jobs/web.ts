@@ -10,12 +10,12 @@ import { JobQueue, registerWorkers } from "./queue";
 
 // Survives dev-server module reloads, like the database pool.
 const cache = globalThis as {
-  __msRealtyQueue?: Promise<JobQueue>;
-  __msRealtyTestOutbox?: TestMessageProvider;
+  __appJobQueue?: Promise<JobQueue>;
+  __appTestOutbox?: TestMessageProvider;
 };
 
 export function getJobQueue(): Promise<JobQueue> {
-  cache.__msRealtyQueue ??= (async () => {
+  cache.__appJobQueue ??= (async () => {
     const env = getEnv();
     if (!env.databaseUrl) throw new Error("DATABASE_URL is required.");
     await assertRecoveryOpen(getDb());
@@ -26,14 +26,14 @@ export function getJobQueue(): Promise<JobQueue> {
     }
     return queue;
   })().catch((error: unknown) => {
-    cache.__msRealtyQueue = undefined;
+    cache.__appJobQueue = undefined;
     throw error;
   });
-  return cache.__msRealtyQueue;
+  return cache.__appJobQueue;
 }
 
 /** Messages the in-process worker delivered; only meaningful when env.testOutbox is on. */
 export function testOutbox(): TestMessageProvider {
-  cache.__msRealtyTestOutbox ??= new TestMessageProvider();
-  return cache.__msRealtyTestOutbox;
+  cache.__appTestOutbox ??= new TestMessageProvider();
+  return cache.__appTestOutbox;
 }

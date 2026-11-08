@@ -1,5 +1,5 @@
 import { type WorkflowField, WorkflowForm } from "@/features/cases/form";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import type { Session } from "@/server/auth/sessions";
 import type { readTaskHandover } from "@/server/work/handover";
@@ -36,7 +36,8 @@ export function TaskHandoverScreen({
   const owner = ownerName ?? "",
     receiver = pendingName ?? "",
     actor = latestDecision?.actorName ?? "";
-  const when = (instant: string) => formatDateTime(isPublicLocale(locale) ? locale : "bg", instant);
+  const when = (instant: string) =>
+    formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, instant);
 
   const stepPath = (name: string) => `${path}?handover=${name}`;
   function form(intent: Intent, label: string) {

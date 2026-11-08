@@ -29,7 +29,7 @@ function seed() {
         encoding: "utf8",
         env: {
           ...process.env,
-          MSR_HOST_SEED_PLANNED: "1",
+          HOST_SEED_PLANNED: "1",
           AUTH_SECRET: process.env.E2E_AUTH_SECRET,
           DATABASE_URL: url,
         },

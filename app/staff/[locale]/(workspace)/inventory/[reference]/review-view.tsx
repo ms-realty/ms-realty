@@ -24,7 +24,7 @@ import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { FrozenPreview } from "@/features/inventory/frozen-preview";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { can } from "@/server/authz";
 import { getEnv } from "@/server/config/env";
@@ -395,7 +395,7 @@ export async function ReviewView({
       reference,
       manifestId: chosen.id,
     }).catch(() => "unavailable" as const);
-    const when = (at: Date) => formatDateTime(isPublicLocale(locale) ? locale : "bg", at);
+    const when = (at: Date) => formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, at);
     const decided = (recorded: PublicationReviewDecision | undefined) => {
       // A failed read is not a missing approval: say which it is.
       if (reviewers === "unavailable") return o16.decisionUnavailable;

@@ -1,6 +1,6 @@
 "use server";
 import { randomUUID } from "node:crypto";
-import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { requestAssistance, reviewAssistance } from "@/server/ai/assistance";
 import { assistanceConfig } from "@/server/ai/config";
@@ -83,7 +83,10 @@ export async function assistanceAction(
           reference: result.data.id,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.data.recordedAt,
+            ),
           },
           nextStep: copy.next,
           destination: {
@@ -184,7 +187,10 @@ export async function localeAssistanceAction(
           reference: result.data.id,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.data.recordedAt,
+            ),
           },
           nextStep: copy.next,
           destination: {
@@ -284,7 +290,10 @@ export async function intakeAssistanceAction(
           reference: result.data.id,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.data.recordedAt,
+            ),
           },
           nextStep: copy.next,
           destination: {

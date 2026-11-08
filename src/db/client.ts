@@ -10,14 +10,14 @@ import { databaseTransport } from "./transport";
 export type Database = PostgresJsDatabase<typeof schema>;
 
 // Survives dev-server module reloads so each reload does not open a new pool.
-const cache = globalThis as { __msRealtyDb?: Database };
+const cache = globalThis as { __appDb?: Database };
 
 export function getDb(): Database {
   const scoped = requestDatabase();
   if (scoped) return scoped;
   if (process.env.DATABASE_RUNTIME === "cloudflare")
     throw new Error("Cloudflare requests require a scoped Hyperdrive connection.");
-  if (cache.__msRealtyDb) return cache.__msRealtyDb;
+  if (cache.__appDb) return cache.__appDb;
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is required.");
   const client = postgres(url, {
@@ -29,6 +29,6 @@ export function getDb(): Database {
     onnotice: () => {},
     ...databaseTransport(url).postgresOptions,
   });
-  cache.__msRealtyDb = drizzle(client, { schema });
-  return cache.__msRealtyDb;
+  cache.__appDb = drizzle(client, { schema });
+  return cache.__appDb;
 }

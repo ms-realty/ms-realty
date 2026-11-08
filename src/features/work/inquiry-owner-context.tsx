@@ -6,7 +6,7 @@ import { InquiryContent } from "@/features/discovery/inquiry-content";
 import { OwnerInquirySummary } from "@/features/discovery/inquiry-owner";
 import { ViewingPreferenceSummary } from "@/features/discovery/inquiry-viewing";
 import { ServiceContext } from "@/features/service-intake/context";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 
 export function InquiryOwnerContext({
   context,
@@ -25,7 +25,7 @@ export function InquiryOwnerContext({
       service: serviceCaseContextSchema.optional(),
     })
     .safeParse(context);
-  const language = isPublicLocale(locale) ? locale : "bg";
+  const language = isPublicLocale(locale) ? locale : defaultLocale;
   return parsed.success ? (
     <>
       {parsed.data.service ? (

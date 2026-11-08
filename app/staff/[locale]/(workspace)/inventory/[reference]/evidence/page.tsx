@@ -3,7 +3,7 @@ import { getDb } from "@/db/client";
 import { evidenceCopy } from "@/features/inventory/evidence-copy";
 import { ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { inventoryDetail, inventoryEvidence } from "@/server/inventory/commands";
@@ -179,14 +179,14 @@ export default async function SellerEvidencePage({
             id="instruction-agreedAt"
             name="agreedAt"
             label={copy.agreedAt}
-            locale={isPublicLocale(locale) ? locale : "bg"}
+            locale={isPublicLocale(locale) ? locale : defaultLocale}
             required
           />
           <DateTimeField
             id="instruction-expiresAt"
             name="expiresAt"
             label={copy.expiresAt}
-            locale={isPublicLocale(locale) ? locale : "bg"}
+            locale={isPublicLocale(locale) ? locale : defaultLocale}
           />
           <label className="flex items-start gap-3">
             <input

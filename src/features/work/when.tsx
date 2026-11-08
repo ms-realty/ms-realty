@@ -1,4 +1,4 @@
-import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
+import { agencyTimeZone, defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { workCopy } from "./copy";
 
@@ -15,7 +15,7 @@ export function When({
 }) {
   return date ? (
     <time dateTime={date.toISOString()} className="tabular-nums">
-      {formatDateTime(isPublicLocale(locale) ? locale : "bg", date, {
+      {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, date, {
         timeZone: zone,
         zoneLabel: zone !== agencyTimeZone,
       })}

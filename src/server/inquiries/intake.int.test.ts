@@ -63,7 +63,7 @@ beforeAll(async () => {
 afterAll(async () => {
   // The route handlers opened the app pool on this test database; dropping it ends those
   // connections, and the next getDb() must not reuse the pool.
-  delete (globalThis as { __msRealtyDb?: unknown }).__msRealtyDb;
+  delete (globalThis as { __appDb?: unknown }).__appDb;
   await t?.drop();
 });
 

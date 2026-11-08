@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { appointmentMachine } from "@/domain/appointment";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { type CalendarData, readCalendar } from "@/server/appointments/calendar";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
@@ -82,7 +82,7 @@ function SecondaryAppointmentTask({
   return folded ? children : <WorkflowSection title={title}>{children}</WorkflowSection>;
 }
 export async function AppointmentScreen(props: ScreenProps & { id: string }) {
-  const locale = isPublicLocale(props.locale) ? props.locale : "bg";
+  const locale = isPublicLocale(props.locale) ? props.locale : defaultLocale;
   const detail = await privateRead(() => readAppointment(getDb(), props.session, props.id, locale));
   const { appointment: row } = detail;
   const c = caseCopy(props.locale);

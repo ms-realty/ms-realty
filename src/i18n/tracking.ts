@@ -1,5 +1,7 @@
 // Runtime IDs are public configuration, never credentials. Source: the recorded live
 // WordPress observation; the independent controller baseline remains launch authority.
+import { publicLocales } from "@/domain/ids";
+
 export const analyticsConsentCookie = "msr_analytics_consent";
 export const analyticsConsentVersion = "v1";
 export type AnalyticsPreference = "granted" | "denied" | "unset";
@@ -34,11 +36,11 @@ export function trackingConfig(env: Record<string, string | undefined> = process
 }
 // Personal service journeys, entered query values and fragments are never sent by this
 // integration. Tag contents still require a separate inspection of the real container.
+/** A public page a visitor may be counted on: a routable locale and one of the public page shapes. */
+const analyticsPagePattern = new RegExp(
+  `^\\/(${publicLocales.join("|")})(\\/(areas|services|help)\\/[^/]+|\\/properties\\/[^/]+\\/[^/]+|\\/legacy\\/[0-9a-f]{24})?$`,
+);
 export function analyticsPagePath(path: string, search: string, hash: string): string | null {
   if (search || hash || /[\\\r\n]/.test(path)) return null;
-  return /^\/(bg|en|ru|de|nl|el|he)(\/(areas|services|help)\/[^/]+|\/properties\/[^/]+\/[^/]+|\/legacy\/[0-9a-f]{24})?$/.test(
-    path,
-  )
-    ? path
-    : null;
+  return analyticsPagePattern.test(path) ? path : null;
 }

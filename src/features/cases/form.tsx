@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import { isCurrencyCode } from "@/domain/ids";
 import { isInstantInput } from "@/domain/time";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formCopy } from "@/i18n/form-copy";
 import { formatDateTime } from "@/i18n/format";
 import { DateTimeField } from "@/ui/date-time-field";
@@ -75,7 +75,9 @@ export function WorkflowForm({
       formatValue={(name, value) => {
         const definition = fields.find((field) => field.name === name);
         if (definition?.type === "datetime-local" && isInstantInput(value))
-          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true });
+          return formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, value, {
+            zoneLabel: true,
+          });
         if (definition?.type === "select" || definition?.type === "checkbox-group") {
           const selected =
             definition.type === "checkbox-group" ? value.split("\n").filter(Boolean) : [value];
@@ -87,7 +89,9 @@ export function WorkflowForm({
         }
         if (definition?.type === "checkbox") {
           if (["true", "false", ""].includes(value))
-            return booleanLabels[isPublicLocale(locale) ? locale : "bg"][value === "true" ? 0 : 1];
+            return booleanLabels[isPublicLocale(locale) ? locale : defaultLocale][
+              value === "true" ? 0 : 1
+            ];
           return <TechnicalDetails locale={locale}>{value}</TechnicalDetails>;
         }
         return value;
@@ -118,7 +122,7 @@ export function WorkflowForm({
                 <MoneyField
                   key={field.name}
                   {...field}
-                  locale={isPublicLocale(locale) ? locale : "bg"}
+                  locale={isPublicLocale(locale) ? locale : defaultLocale}
                   currency={isCurrencyCode(currency) ? currency : undefined}
                   label={definition.label}
                   hint={definition.hint}
@@ -132,7 +136,7 @@ export function WorkflowForm({
                 <DateTimeField
                   key={field.name}
                   {...field}
-                  locale={isPublicLocale(locale) ? locale : "bg"}
+                  locale={isPublicLocale(locale) ? locale : defaultLocale}
                   label={definition.label}
                   hint={definition.hint}
                   required={definition.required}

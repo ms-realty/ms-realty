@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { isStaffLocale } from "@/i18n/config";
+import { defaultStaffLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import {
   appendWorkspaceMessage,
@@ -235,7 +235,10 @@ export async function workspaceAction(
           reference: result.data.reference,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: formatDateTime(isStaffLocale(locale) ? locale : "bg", result.data.recordedAt),
+            label: formatDateTime(
+              isStaffLocale(locale) ? locale : defaultStaffLocale,
+              result.data.recordedAt,
+            ),
           },
           nextStep: result.data.next,
           destination: { href: result.data.href, label: result.data.label },

@@ -1,7 +1,7 @@
 "use server";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
-import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
@@ -73,7 +73,7 @@ function saved<V extends FormValues>(
         reference: result.id,
         recordedAt: {
           dateTime: result.recordedAt,
-          label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.recordedAt),
+          label: formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, result.recordedAt),
         },
         nextStep: copy.next,
         destination: { href: `/${locale}/content/${result.id}`, label: copy.open },
@@ -287,7 +287,7 @@ export async function decideContentAction(
             .map(([field, reasons]) => [
               field,
               [
-                timeReasonMessage(isPublicLocale(locale) ? locale : "bg", reasons[0]) ??
+                timeReasonMessage(isPublicLocale(locale) ? locale : defaultLocale, reasons[0]) ??
                   copy.invalid,
               ],
             ]),

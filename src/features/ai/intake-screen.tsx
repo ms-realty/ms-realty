@@ -4,7 +4,7 @@ import type { z } from "zod";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { optionLabel } from "@/features/inventory/copy";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { factFieldLabel } from "@/i18n/fact-labels";
 import { formatDateTime } from "@/i18n/format";
 import { listIntakeAssistanceRuns, readIntakeAssistanceOperation } from "@/server/ai/assistance";
@@ -199,7 +199,7 @@ export async function IntakeAssistanceScreen({
                 {common.open}
               </a>{" "}
               · {aiLabel("run", run.state, locale)} ·{" "}
-              {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
+              {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, run.createdAt)}
             </li>
           ))}
         </ul>
