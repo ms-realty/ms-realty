@@ -1,0 +1,37 @@
+{
+  "kind": "recovery_archive_offline_admission_v1",
+  "activationAuthorized": false,
+  "evidenceClass": "offline_fixture",
+  "context": {
+    "product": "ms-realty",
+    "environment": "staging",
+    "releaseSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "releaseContextDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "schemaDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "writerRegistryDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "databaseLineage": "synthetic-lineage",
+    "sourceInstance": "synthetic-source",
+    "writerEpoch": "synthetic-epoch",
+    "archiveNamespace": "synthetic-archive",
+    "euR2": "synthetic-eu",
+    "outsideAccount": "synthetic-outside",
+    "encryptionProfileDigest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "authority": {
+    "id": "synthetic-authority",
+    "namespace": "synthetic-namespace",
+    "incarnation": "synthetic-incarnation",
+    "jurisdiction": "eu"
+  },
+  "origin": "https://recovery.example.test",
+  "sourceCodeSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "coordinatorCodeDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "anchor": {
+    "sequence": 0,
+    "digest": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "point": null,
+  "limits": { "maxEntries": 100, "maxObjectBytes": 1048576, "maxRanges": 100 },
+  "custodyReference": "synthetic-custody",
+  "spoolReference": "synthetic-spool"
+}

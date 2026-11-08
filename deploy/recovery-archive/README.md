@@ -36,3 +36,10 @@ For the protected staging drill:
 
 Production policy ratification and launch gates remain separate work. The staging drill
 does not overwrite or delete production backups.
+
+The additive [Phase D offline implementation](./offline-runtime.md) reads committed
+restriction bodies, retains selected ciphertext, measures both destination copies and
+coordinates immutable receipts in a separate SQLite authority. Its public Worker is
+disabled and its CLI only validates an explicitly labeled fixture plan. This source
+package does not qualify provider copies, complete writer coverage, closure, restore,
+or R08. Existing archive inputs and staging approvals retain their own scope.
