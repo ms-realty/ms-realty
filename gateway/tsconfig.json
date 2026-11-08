@@ -5,6 +5,7 @@
     "types": [],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "paths": { "@/*": ["../src/*"] },
     "resolveJsonModule": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,

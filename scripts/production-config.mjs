@@ -5,6 +5,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { productionRuntimeEnvironment } from "../gateway/production-runtime-env.ts";
+import { installedExecution } from "../src/release/execution-node.mjs";
+import { rejectExecutionActivation } from "../src/release/execution-runtime.ts";
 import { promotionGate, signedPayload } from "./launch-gate.mjs";
 import { accountId, sha256 } from "./staging-config.mjs";
 
@@ -47,8 +49,14 @@ export function productionConfig(
   trustedKeys,
   { runtime, now = Date.now() } = {},
 ) {
+  demand(
+    !installedExecution(),
+    "installed execution mode grants canonical cutover only; preparation needs its own phase contract",
+  );
   const input = json(inputBytes),
     inputSha256 = sha256(inputBytes);
+  rejectExecutionActivation(input);
+  rejectExecutionActivation(evidence);
   demand(
     input.schemaVersion === 1 &&
       input.environment === "production" &&

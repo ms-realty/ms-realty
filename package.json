@@ -31,6 +31,8 @@
     "openapi:generate": "tsx --conditions=react-server scripts/openapi.mjs",
     "release:schemas": "tsx scripts/release-schemas.mjs",
     "release:evaluate": "tsx scripts/release-evaluate.mjs",
+    "launch:evidence:capture": "tsx scripts/release-evidence-capture.mjs",
+    "launch:evidence:verify": "tsx scripts/release-evidence-verify.mjs",
     "recovery:rehearse": "tsx --conditions=react-server scripts/recovery-rehearsal.ts",
     "auth:bootstrap": "tsx --conditions=react-server scripts/bootstrap-staff.ts",
     "tokens:check": "node scripts/tokens-build.mjs --check",
@@ -42,7 +44,7 @@
     "privacy:reapply-synthetic-tail": "tsx --conditions=react-server scripts/privacy-reapply-synthetic-tail.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1161.0",
+    "@aws-sdk/client-s3": "3.1162.0",
     "@internationalized/date": "3.12.4",
     "@protomaps/basemaps": "5.7.2",
     "@simplewebauthn/browser": "14.0.0",
@@ -50,7 +52,7 @@
     "drizzle-orm": "0.45.4",
     "jose": "6.2.15",
     "maplibre-gl": "6.16.0",
-    "next": "16.4.4",
+    "next": "16.4.5",
     "next-intl": "4.14.9",
     "pg-boss": "12.38.0",
     "pg-cloudflare": "1.4.1",
@@ -68,7 +70,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
     "@babel/parser": "8.1.0",
-    "@biomejs/biome": "2.6.4",
+    "@biomejs/biome": "2.6.5",
     "@playwright/test": "1.64.1",
     "@storybook/nextjs-vite": "10.6.5",
     "@tailwindcss/postcss": "4.3.4",
@@ -91,7 +93,7 @@
     "typescript": "7.0.2",
     "vite": "8.3.5",
     "vitest": "5.1.0",
-    "wrangler": "4.156.2"
+    "wrangler": "4.157.0"
   },
   "overrides": {
     "@joshwooding/vite-plugin-react-docgen-typescript@0.7.0": {

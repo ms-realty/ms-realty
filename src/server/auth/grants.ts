@@ -35,11 +35,22 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import { runOperation } from "../operations";
+import {
+  appendGrantRevocationRecovery,
+  requireExplicitRecoveryAdmission,
+} from "../recovery/journal";
+import type { RecoveryAdmission } from "../recovery/write-fence";
 import { agencyCoverageQueue } from "../work/coverage-policy";
 import { openAppointmentStates, parseInput } from "../work/shared";
 import { lockOutStaff } from "./invitations";
 import { countActivePasskeys, staffPasskeyMinimum } from "./passkeys";
-import { requireFreshAuth, requireLiveSession, revokeAllSessions, type Session } from "./sessions";
+import {
+  requireFreshAuth,
+  requireLiveSession,
+  revokeAllSessionRows,
+  revokeAllSessions,
+  type Session,
+} from "./sessions";
 
 const scopeSchema = z
   .object({
@@ -225,7 +236,14 @@ export async function grantStaffCapability(db: Executor, session: Session, input
     },
   );
 }
-export async function revokeStaffGrant(db: Executor, session: Session, input: unknown) {
+export async function revokeStaffGrant(
+  db: Executor,
+  session: Session,
+  input: unknown,
+  admission?: RecoveryAdmission,
+) {
+  // Selected by a server caller, never parsed from the submitted command. No route supplies it.
+  const recovery = requireExplicitRecoveryAdmission(db, admission);
   const value = parse(
     z.object({
       operationId: z.string().min(8).max(160),
@@ -250,13 +268,15 @@ export async function revokeStaffGrant(db: Executor, session: Session, input: un
       ? rolePresets[existing.role]
       : [];
   for (const capability of affected) await authority(db, session, scope, capability, false);
+  const requestHash = hashRequest(value);
   return runOperation(
     db,
     {
       actor: session.actor,
       type: "access.capability.revoke",
       idempotencyKey: value.operationId,
-      requestHash: hashRequest(value),
+      requestHash,
+      recovery,
     },
     async ({ tx, operationId }) => {
       await lockStaff(tx);
@@ -268,16 +288,28 @@ export async function revokeStaffGrant(db: Executor, session: Session, input: un
         .for("update");
       if (!grant || grant.revokedAt || grant.version !== value.expectedRevision)
         throw new AppError("version_conflict");
-      await tx
+      // The observation uses locked rows and canonical session identity, not caller labels.
+      const live = recovery ? await liveManager(tx, session) : undefined;
+      const [target] = recovery
+        ? await tx
+            .select({ id: principals.id, kind: principals.kind })
+            .from(principals)
+            .where(eq(principals.id, grant.principalId ?? ""))
+        : [];
+      if (recovery && (!target || !live || live.actor.kind !== "staff"))
+        throw new Error("Recovery grant target or checked actor differs.");
+      const [revokedGrant] = await tx
         .update(grants)
         .set({ revokedAt: new Date(), revokedById: session.actor.id, version: grant.version + 1 })
-        .where(eq(grants.id, grant.id));
+        .where(eq(grants.id, grant.id))
+        .returning({ version: grants.version });
       await ensureUsableManager(tx);
-      const revokedSessions = await revokeAllSessions(tx, {
+      const revokedRows = await revokeAllSessionRows(tx, {
         kind: "staff",
         id: principalId,
       });
-      await recordAudit(tx, {
+      const revokedSessions = revokedRows.length;
+      const decisionId = await recordAudit(tx, {
         actor: session.actor,
         capability: "access.grant",
         action: "access.capability.revoked",
@@ -286,6 +318,47 @@ export async function revokeStaffGrant(db: Executor, session: Session, input: un
         operationId,
         payload: { grantId: grant.id, reason: value.reason, revokedSessions },
       });
+      if (recovery && target && live) {
+        if (!revokedGrant) throw new Error("Recovery grant update returned no version.");
+        await appendGrantRevocationRecovery(tx, recovery.context, {
+          kind: "grant_revocation_server_observation_v2",
+          basis: "observed_server_checks_and_audit_projection",
+          decisionId,
+          operationId,
+          requestHash,
+          action: "access.capability.revoked",
+          capability: "access.grant",
+          reasonCode: "grant_revoked",
+          actor: { kind: "staff", id: live.actor.id },
+          checkedSession: {
+            id: live.id,
+            principalId: live.account.id,
+            principalKind: live.account.kind,
+          },
+          targetPrincipal: target,
+          grant: {
+            kind: "grant",
+            id: grant.id,
+            observedVersion: grant.version,
+            version: revokedGrant.version,
+            role: grant.role,
+            capability: grant.capability,
+            scope: {
+              recordType: grant.recordType,
+              recordId: grant.recordId,
+              locales: grant.locales,
+              expiresAt: grant.expiresAt?.toISOString() ?? null,
+            },
+          },
+          checks: {
+            liveFreshStaffSession: true,
+            activePasskeyMinimum: true,
+            authorityCapabilities: [...affected],
+            usableManagerRemains: true,
+          },
+          revokedSessions: revokedRows,
+        });
+      }
       return { grantId: grant.id, principalId };
     },
   );

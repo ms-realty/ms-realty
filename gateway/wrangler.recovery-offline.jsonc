@@ -1,0 +1,11 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "ms-realty-recovery-offline-unselected",
+  "main": "recovery-coordinator.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [],
+  "vars": { "RECOVERY_OFFLINE_FIXTURE": "disabled" }
+}
