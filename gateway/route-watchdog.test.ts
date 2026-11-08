@@ -251,6 +251,7 @@ function fixture() {
     writes,
     reportPayload,
     envelope,
+    ownerEnvelope: (payload: unknown) => envelope(payload, owner),
     loseAck: () => {
       loseAcknowledgement = true;
     },
@@ -266,6 +267,29 @@ afterEach(() => {
 });
 
 describe("off-runner route custody unit boundaries", () => {
+  it("rejects new execution and acceptance envelopes at direct remote bind without arming or writes", async () => {
+    for (const purpose of [
+      "execution_grant",
+      "candidate_review",
+      "deployment_acceptance",
+      "operational_acceptance",
+    ]) {
+      const f = fixture();
+      expect((await f.call("/reserve", f.scope)).status).toBe(200);
+      const binding = {
+        ...f.binding,
+        approvals: {
+          ...f.binding.approvals,
+          owner: f.ownerEnvelope({ ...JSON.parse(f.binding.approvals.owner.payload), purpose }),
+        },
+      };
+      expect((await f.call("/bind", binding)).status).toBe(409);
+      expect((await f.call("/bind", binding)).status).toBe(409);
+      expect(f.values.get("active")).toMatchObject({ status: "reserved" });
+      expect(f.writes).toEqual([]);
+    }
+  });
+
   it("accepts only native original-host TLS evidence from the pinned source", async () => {
     const f = fixture();
     const proof = {
