@@ -123,12 +123,25 @@ export function parseBundleJson(bytes: Uint8Array | string, canonical = false): 
   const whitespace = () => {
     while (/[\x20\t\r\n]/.test(text[offset] ?? "!")) offset++;
   };
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: JSON forbids raw U+0000 through U+001F.
+  const stringBoundary = /["\\\x00-\x1f]/g;
   const string = (): string => {
     const begin = offset++;
+    let escaped = false;
     while (offset < text.length) {
-      const char = text[offset++];
-      if (char === "\\") offset++;
-      else if (char === '"') {
+      stringBoundary.lastIndex = offset;
+      const boundary = stringBoundary.exec(text);
+      requireBundle(boundary, "invalid_json");
+      offset = stringBoundary.lastIndex;
+      const char = boundary[0];
+      if (char === "\\") {
+        escaped = true;
+        offset++;
+      } else if (char === '"') {
+        if (!escaped) {
+          // The fatal whole-buffer decoder already validated these unescaped UTF-8 bytes.
+          return text.slice(begin + 1, offset - 1);
+        }
         let value: string;
         try {
           value = JSON.parse(text.slice(begin, offset));
@@ -137,7 +150,7 @@ export function parseBundleJson(bytes: Uint8Array | string, canonical = false): 
         }
         requireBundle(Buffer.from(value).toString("utf8") === value, "invalid_unicode");
         return value;
-      }
+      } else throw new BundleError("invalid_json");
     }
     throw new BundleError("invalid_json");
   };
@@ -263,6 +276,22 @@ export function validateBundleIndex(
   policy: GatePolicy,
   files: readonly BundleEvidence[],
 ) {
+  return validateParsedBundleIndex(index, manifest, policy, files, parseBundleArtifact);
+}
+
+function parseBundleArtifact(file: BundleEvidence): EvidenceArtifact {
+  const parsed = evidenceArtifactSchema.safeParse(parseBundleJson(file.content));
+  requireBundle(parsed.success, "evidence_schema");
+  return parsed.data;
+}
+
+function validateParsedBundleIndex(
+  index: BundleIndex,
+  manifest: ReleaseManifest,
+  policy: GatePolicy,
+  files: readonly BundleEvidence[],
+  artifactFor: (file: BundleEvidence) => EvidenceArtifact,
+) {
   requireBundle(manifest.approvals.length === 0, "base_approval_not_empty");
   requireBundle(
     index.releaseSha === manifest.releaseSha &&
@@ -282,9 +311,7 @@ export function validateBundleIndex(
   const seen = new Set<string>();
   const seenPaths = new Set<string>();
   const artifacts = files.map((file) => {
-    const parsed = evidenceArtifactSchema.safeParse(parseBundleJson(file.content));
-    requireBundle(parsed.success, "evidence_schema");
-    const artifact = parsed.data;
+    const artifact = artifactFor(file);
     requireBundle(
       !bundleWitnessTypes.some((type) => type === artifact.type),
       "transport_in_evidence",
@@ -402,7 +429,7 @@ function parseWitness(bytes: string): EvidenceArtifact {
   return parsed.data;
 }
 
-export function validateBundleTransport(input: {
+interface BundleTransportInput {
   index: string;
   capture: string;
   verification?: string;
@@ -410,9 +437,24 @@ export function validateBundleTransport(input: {
   policy: GatePolicy;
   evidence: readonly BundleEvidence[];
   now: Date;
-}) {
+}
+
+export function validateBundleTransport(input: BundleTransportInput) {
+  return validateParsedBundleTransport(input, parseBundleArtifact);
+}
+
+function validateParsedBundleTransport(
+  input: BundleTransportInput,
+  artifactFor: (file: BundleEvidence) => EvidenceArtifact,
+) {
   const index = parseBundleIndex(input.index);
-  const artifacts = validateBundleIndex(index, input.manifest, input.policy, input.evidence);
+  const artifacts = validateParsedBundleIndex(
+    index,
+    input.manifest,
+    input.policy,
+    input.evidence,
+    artifactFor,
+  );
   let expiry = Infinity;
   let previousTime = -Infinity;
   const ids = new Set(input.manifest.evidenceIds);
@@ -527,9 +569,9 @@ export function validateBundleBinding(input: {
     const manifest = bundleBaseManifest(input.manifest);
     const approval = input.manifest.approvals[0];
     requireBundle(approval, "owner_slot");
-    const all = input.evidence.map((file) => ({
-      file,
-      artifact: evidenceArtifactSchema.parse(parseBundleJson(file.content)),
+    const all = input.evidence.map(({ file, content }) => ({
+      file: { file, content },
+      artifact: evidenceArtifactSchema.parse(parseBundleJson(content)),
     }));
     const approvals = all.filter((item) => item.artifact.id === approval.evidenceId);
     requireBundle(approvals.length === 1, "owner_artifact");
@@ -550,15 +592,25 @@ export function validateBundleBinding(input: {
         !owner.supportingFiles?.length,
       "owner_binding",
     );
-    const transport = validateBundleTransport({
-      ...proof.data,
-      manifest,
-      policy: input.policy,
-      evidence: all
-        .filter((item) => item.artifact.id !== approval.evidenceId)
-        .map((item) => item.file),
-      now: input.now,
-    });
+    // Reuse only the exact raw records decoded above, within this invocation. Every call
+    // still parses its bytes and rechecks signatures, hashes, authority and freshness.
+    const decoded = new Map(all.map(({ file, artifact }) => [file, artifact]));
+    const transport = validateParsedBundleTransport(
+      {
+        ...proof.data,
+        manifest,
+        policy: input.policy,
+        evidence: all
+          .filter((item) => item.artifact.id !== approval.evidenceId)
+          .map((item) => item.file),
+        now: input.now,
+      },
+      (file) => {
+        const artifact = decoded.get(file);
+        requireBundle(artifact, "evidence_schema");
+        return artifact;
+      },
+    );
     requireBundle(
       Date.parse(owner.observedAt) >= transport.observedAt,
       "owner_precedes_verification",
