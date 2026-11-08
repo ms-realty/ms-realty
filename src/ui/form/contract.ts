@@ -2,6 +2,8 @@
 export type FormValues = Record<string, string>;
 export type FieldErrors<V extends FormValues> = Partial<Record<keyof V, readonly string[]>>;
 export type RecoveryLink = { href: string; label: string };
+/** Explicit, feature-admitted recovery POST through the same native action/state seam. */
+export type RecoverySubmit = { label: string };
 
 /** Saved subjects of a receipt, already worded; the UI only lays them out. */
 export type ReceiptListings = {
@@ -41,6 +43,7 @@ export type FormOutcome<V extends FormValues> =
       /** True only when the server knows no effect occurred and this same key is retryable. */
       retryable: boolean;
       recovery?: RecoveryLink;
+      recoverySubmit?: RecoverySubmit;
     }
   | {
       kind: "conflict";

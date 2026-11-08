@@ -24,7 +24,7 @@ const sourcePins = {
   "scripts/wait-clamav.ts": "5c647adaf1c27ca920740250c46d7a2ea3340b03058bc311928f1e13c2ce2f9b",
   "scripts/e2e-server.ts": "54faf79b105c8abb80adc7e740e56ee278dfe660626d2786cadf6e1e5c64501a",
   "package-lock.json": "5e4bd53175d665e5f15badec0897e8e2776f044969630ff2cc62f6bd27b448d1",
-  "playwright.config.ts": "ffa8bafab57ae97025294cfac1f14609673c43de6c2f4a108169b747ea573932",
+  "playwright.config.ts": "08c1d272f1559084679fea430e2059cfd1d06f52a297bb18076748338fae3eb0",
   [`e2e/${file}`]: "a37b6fa63c8740fbfb9701d56dfae7e22a52ebd6ffff25ce28897c33c8162672",
 };
 const creatorCard = "locator('article[data-share-state]').first()";

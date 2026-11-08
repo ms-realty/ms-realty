@@ -6,7 +6,7 @@ import { connection } from "next/server";
 import { setRequestLocale } from "next-intl/server";
 import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
 import { AnalyticsConsent } from "@/features/tracking/consent";
-import { isRoutableLocale, localeDirection } from "@/i18n/config";
+import { isRoutableLocale, localeDirection, localePolicy } from "@/i18n/config";
 import { stagingEnabled } from "@/i18n/seo";
 import { organizationStructuredData } from "@/i18n/structured-data";
 import { analyticsPreference, trackingConfig } from "@/i18n/tracking";
@@ -20,12 +20,17 @@ import { appViewport } from "@/ui/viewport";
 // Root layout of the public host (makler-realty.com, §11.1): lang/dir come from the URL.
 export const viewport: Viewport = appViewport;
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: Pick<LayoutProps<"/public/[locale]">, "params">): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isRoutableLocale(locale)) notFound();
   const config = trackingConfig();
+  const staging = stagingEnabled();
   return {
     title: { template: "%s · MS Realty", default: "MS Realty" },
     icons: { icon: "/brand/logo-ms-realty.png" },
-    robots: { index: !stagingEnabled(), follow: !stagingEnabled() },
+    robots: { index: !staging && localePolicy(locale).indexable, follow: !staging },
     ...(config.googleVerification ? { verification: { google: config.googleVerification } } : {}),
   };
 }

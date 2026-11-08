@@ -65,3 +65,69 @@ it.each(["bg", "en", "ru"])(
     expect(screen.getByRole("heading", { level: 3 })).not.toHaveTextContent("7");
   },
 );
+
+it.each(["bg", "en", "ru"])(
+  "O16 / O18 shows a currency-neutral %s price label for each supported stored currency",
+  (locale) => {
+    for (const currency of ["EUR", "BGN", "USD", "GBP"]) {
+      const { container, unmount } = render(
+        <FrozenPreview
+          locale={locale}
+          reference="MS-00001"
+          revision={{
+            ...revision,
+            terms: {
+              facts: {
+                price: { state: "known", value: { amountMinor: 12345, currency, period: "total" } },
+              },
+            },
+          }}
+          facts={facts}
+        />,
+      );
+      expect(container.querySelector("dt")).toHaveTextContent(
+        locale === "en" ? /^Price$/ : /^Цена$/,
+      );
+      expect(container.querySelector("dd")?.textContent).toContain(
+        new Intl.NumberFormat(locale, { style: "currency", currency }).format(123.45),
+      );
+      expect(container.textContent).toContain("Keep_source_prose_exact.");
+      unmount();
+    }
+  },
+);
+
+it.each([
+  ["bg", "98,123456789", "0,000000000123456789"],
+  ["en", "98.123456789", "0.000000000123456789"],
+  ["ru", "98,123456789", "0,000000000123456789"],
+])("O16 / O18 preserves stored scalar, array and area precision in %s", (locale, area, small) => {
+  const preciseFacts = [
+    {
+      ...facts[0],
+      id: "area",
+      fieldKey: "area",
+      value: { value: 98.123456789, unit: "m2", basis: "living" },
+    },
+    { ...facts[0], id: "scalar", fieldKey: "feature.future_scalar", value: 0.000000000123456789 },
+    {
+      ...facts[0],
+      id: "array",
+      fieldKey: "feature.future_array",
+      value: [98.123456789, 0.000000000123456789],
+    },
+  ] as (typeof propertyFacts.$inferSelect)[];
+  const before = JSON.stringify(preciseFacts);
+  const { container } = render(
+    <FrozenPreview
+      locale={locale ?? "en"}
+      reference="MS-00001"
+      revision={revision}
+      facts={preciseFacts}
+    />,
+  );
+  expect(container.textContent).toContain(`${area} m²`);
+  expect(container.textContent).toContain(`${area} / ${small}`);
+  expect(container.textContent).toContain(` · ${small}`);
+  expect(JSON.stringify(preciseFacts)).toBe(before);
+});

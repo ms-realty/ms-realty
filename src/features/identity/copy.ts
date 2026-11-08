@@ -1,10 +1,15 @@
-// Copy for the access pages (F13, C01, C02, O23 access states). English is the reference;
-// Bulgarian (source locale) and Russian (staff locale) are drafts awaiting human review;
-// other client locales fall back to English until the catalogs take these strings over.
+// Copy for the access pages (F13, C01, C02, O23 access states). Bulgarian is the source.
+// AI-reviewed client interface copy grants no language approval, publication or access authority.
 import type { ParticipantRole } from "@/domain/parties";
-import type { PublicLocale } from "@/i18n/config";
+import { isPublicLocale, type PublicLocale } from "@/i18n/config";
+import { workflowCopy } from "@/i18n/workflow-copy";
+import { workflowLabel } from "@/i18n/workflow-labels";
 import commonBg from "../../../messages/bg/common.json" with { type: "json" };
+import commonDe from "../../../messages/de/common.json" with { type: "json" };
+import commonEl from "../../../messages/el/common.json" with { type: "json" };
 import commonEn from "../../../messages/en/common.json" with { type: "json" };
+import commonHe from "../../../messages/he/common.json" with { type: "json" };
+import commonNl from "../../../messages/nl/common.json" with { type: "json" };
 import commonRu from "../../../messages/ru/common.json" with { type: "json" };
 
 const en = {
@@ -348,8 +353,19 @@ const ru: IdentityCopy = {
   invitationDeclined: "Вы отклонили это приглашение. Обратитесь к брокеру, если передумаете.",
 };
 
+// The additional locales override only reachable client copy. Staff-only fields keep the
+// existing BG/RU/EN contract; client passkey errors reuse their existing catalog translations.
+const identityCatalogs: Record<PublicLocale, IdentityCopy> = {
+  bg,
+  en,
+  ru,
+  de: { ...en, ...workflowCopy("de", "clientIdentity"), ...commonDe.passkeys },
+  nl: { ...en, ...workflowCopy("nl", "clientIdentity"), ...commonNl.passkeys },
+  el: { ...en, ...workflowCopy("el", "clientIdentity"), ...commonEl.passkeys },
+  he: { ...en, ...workflowCopy("he", "clientIdentity"), ...commonHe.passkeys },
+};
 export function identityCopy(locale: PublicLocale | string): IdentityCopy {
-  return locale === "bg" ? bg : locale === "ru" ? ru : en;
+  return identityCatalogs[isPublicLocale(locale) ? locale : "en"];
 }
 
 /** Replaces `{name}` placeholders. */
@@ -399,6 +415,8 @@ const roleLabels: Record<"en" | "bg" | "ru", Record<ParticipantRole, string>> = 
 };
 
 export function roleLabel(locale: string, role: ParticipantRole): string {
+  if (isPublicLocale(locale) && locale !== "bg" && locale !== "ru" && locale !== "en")
+    return workflowLabel(role, locale);
   const table = roleLabels[locale === "bg" || locale === "ru" ? locale : "en"];
   return table[role];
 }

@@ -3,6 +3,7 @@ import { nativeAuthRoute } from "@/server/auth/native";
 import { localReturnPath, requestClientIp, sessionTokenOf } from "@/server/auth/pages";
 import { setSessionCookie } from "@/server/http/next";
 import { enforceRateLimit } from "@/server/rate-limit";
+import { proposalDraftTokens } from "@/server/reauth-drafts/cookies";
 export const POST = nativeAuthRoute(
   "client",
   (locale) => `/${locale}/access/confirm`,
@@ -11,6 +12,7 @@ export const POST = nativeAuthRoute(
     const issued = await consumeEmailLink(db, String(form.get("token") ?? ""), {
       currentSessionToken: await sessionTokenOf("client"),
       correlationId,
+      reauthDraftTokens: await proposalDraftTokens(),
     });
     await setSessionCookie("client", issued.token, issued.session.expiresAt);
     return localReturnPath(issued.returnTo, "client", locale) ?? `/${locale}/access`;

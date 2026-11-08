@@ -6,7 +6,7 @@ import { and, eq, isNull, ne } from "drizzle-orm";
 import { principals, sessions, staffMemberships } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
 import { randomToken, sha256Hex } from "../crypto";
-import type { Executor } from "../db";
+import type { Executor, Transaction } from "../db";
 import { AppError } from "../errors";
 import { privacyProcessingRestricted } from "../privacy/restrictions";
 
@@ -252,7 +252,24 @@ export async function revokeAllSessions(
   account: AccountRef,
   options: { exceptSessionId?: string; now?: Date } = {},
 ): Promise<number> {
-  const rows = await db
+  return (await revokeSessionRows(db, account, options)).length;
+}
+
+/** Transaction-local safe row projection for the C1 producer; never returns credentials. */
+export function revokeAllSessionRows(
+  tx: Transaction,
+  account: AccountRef,
+  options: { exceptSessionId?: string; now?: Date } = {},
+) {
+  return revokeSessionRows(tx, account, options);
+}
+
+function revokeSessionRows(
+  db: Executor,
+  account: AccountRef,
+  options: { exceptSessionId?: string; now?: Date },
+) {
+  return db
     .update(sessions)
     .set({ revokedAt: options.now ?? new Date() })
     .where(
@@ -262,8 +279,11 @@ export async function revokeAllSessions(
         ...(options.exceptSessionId ? [ne(sessions.id, options.exceptSessionId)] : []),
       ),
     )
-    .returning({ id: sessions.id });
-  return rows.length;
+    .returning({
+      id: sessions.id,
+      principalKind: sessions.principalKind,
+      principalId: sessions.principalId,
+    });
 }
 
 /** Whether the session's last verification is recent enough for a sensitive action. */

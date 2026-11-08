@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it } from "vitest";
 import { discoveryCopy } from "./copy";
 import { InquiryForm } from "./inquiry-form";
+import { InquiryReview } from "./inquiry-review";
+import { inquiryReviewCopy } from "./inquiry-review-copy";
 import { emptyInquiry, type InquiryState } from "./inquiry-state";
 
 afterEach(cleanup);
@@ -122,3 +124,40 @@ it("keeps unavailable subjects and a native refresh action alongside editable pr
   expect(screen.getByRole("link", { name: "MS-00303" })).toBeVisible();
   expect(screen.getByRole("link", { name: "MS-00101" })).toBeVisible();
 });
+
+it.each([
+  ["phone", "+359879696870"],
+  ["email", "synthetic@example.test"],
+  ["phone", ""],
+])(
+  "P12 Hebrew review isolates the %s value without changing its source text",
+  (contactKind, contactValue) => {
+    const copy = discoveryCopy("he");
+    const { container } = render(
+      <div lang="he" dir="rtl">
+        <InquiryReview
+          locale="he"
+          copy={copy}
+          values={{ ...emptyInquiry, contactKind, contactValue }}
+          review={{ token: "synthetic-review", listings: [] }}
+          pending={false}
+        />
+      </div>,
+    );
+    const label = contactKind === "phone" ? copy.phone : copy.email;
+    const term = Array.from(container.querySelectorAll("dt")).find(
+      (dt) => dt.textContent === label,
+    );
+    const value = term?.nextElementSibling;
+    expect(value).toHaveTextContent(contactValue || inquiryReviewCopy("he").notProvided);
+    if (contactValue) {
+      expect(value).toHaveAttribute("dir", "ltr");
+      expect(value?.querySelector('bdi[dir="ltr"]')?.textContent).toBe(contactValue);
+    } else {
+      expect(value).not.toHaveAttribute("dir");
+      expect(value?.querySelector("bdi")).toBeNull();
+    }
+    expect(term).not.toHaveAttribute("dir", "ltr");
+    expect(container.querySelector('input[name="contactValue"]')).toHaveValue(contactValue);
+  },
+);
