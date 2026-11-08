@@ -53,4 +53,5 @@ System states: X16, X22, X23, X24, X27 are failure branches of buttons that alre
 Natural triggers wired: C08 permission row → C17; C05 candidate price → C10 and C10 «Какво още е нужно» card → C16 (in context, not styled as links); O16 publication card → O17 (same); O03A «Запиши DEMO назначаване» → O03ASSIGNWAIT → «Следваща стъпка» row → O03AR.
 
 Still not reachable by clicks (not journey base screens): W03 task-start frames O02NEW (`602:19725` · `602:20548`), P11FILLED (`602:19244` · `602:20111`), P11FILLEDHE `602:20889` and their downstream P11SENDING/P12COMMITTED/P12COMMITTEDHE; P11INVALID/REJECTED/OFFLINE; O02UNCLAIMED Desktop `66:35305` (Mobile is reachable by tab); X26 variants X26CMS…X26TRANS. The public Butler entry has no prototype target because no public Butler answer screen exists.
+
 - 16:35 version saved: "Phase B3 links and W03 G3" (id 2406864307929384898). Not committed.

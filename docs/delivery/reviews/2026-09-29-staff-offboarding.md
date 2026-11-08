@@ -68,7 +68,6 @@ No production mutation or existing Docker-service recreation occurred. Launch au
 remain unchanged; R00 and live acceptance are open. Prior commit `7a95a8e0` passed all CI jobs
 in run 36551918070; offboarding requires its own current-head CI.
 
-
 ## Follow-up: full-suite mobile containment
 
 CI run 36555638793 on 19613f14 failed both Linux WebKit offboarding profiles at the
@@ -90,7 +89,6 @@ Evidence: `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260929/`, especially
 `browser-qualified.log` and `grants-visual.log`. Browser run `bb89dc3b6af442ea85f238bf67b6008f`.
 Docker Desktop was unavailable, so Linux confirmation is pending the next CI run. No content
 workflow code or test timeout/retry limit was changed; its CI retry is still recorded.
-
 
 ## Follow-up: Linux native select paint and focus
 

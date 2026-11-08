@@ -34,6 +34,7 @@ Inferred values for the brief's unfilled placeholders (confirm or correct):
 ## 1. Brief vs. repository — conflicts to resolve before Phase 3
 
 **Current owner decisions:**
+
 - C2: Butler is draft-only within a selected task under `AGENTS.md` and the approved R00 successor policy. Autonomous routine actions require a separate accepted policy and proof from the exact release.
 - C4: palette B (architecture §11.3: warm canvas, green action, Noto Sans only, Butler violet), applied to the Figma `PxfBJ2` variables and text styles; the code tokens follow in the first slice.
 - C5: this session owns the whole frontend.

@@ -103,12 +103,14 @@ Next.js 16 app on PostgreSQL 18. The legacy app was removed from `main`; tag
 ### State after the CI fix (2026-10-03)
 
 The branch is green locally:
+
 - lint and typecheck pass;
 - 670/670 Vitest tests (unit, jsdom, integration on PostgreSQL 18);
 - the production build passes;
 - 146/146 Playwright.
 
 To get there, the CI fix:
+
 - **Removed the unfinished identity stage from the PR.** It had changed the auth APIs without
   updating their tests. Removed: invitations, access/pages modules, the staff access action,
   `src/features/identity/` and migration `0004_invitations`. `src/server/auth/*` and
@@ -236,6 +238,7 @@ Read the memory notes in
 ## 9. Owner inputs still missing (block release, not development)
 
 Full list in `docs/plan.md` §8. In short:
+
 - legal entity, contacts and coverage;
 - team roles and business hours;
 - a reviewer for each locale;

@@ -127,6 +127,7 @@ the rest become wrappers over static JSON imports (`import bg from ".../bg/cases
 `Record<Locale, typeof bg>`, so key parity is also a compile error. next-intl stays for the shells.
 
 Why this fits the codebase:
+
 1. Governance already lives on catalogs (`_status.json`, `catalogReviews`, `localePolicy`, `messages.test.ts`). TS modules sit
    outside all of it, so keeping them would need a second review mechanism or leave 93 % of the interface ungated.
 2. TS parity is weak and varies: spread fallbacks, arity-only `s()`, positional tuples, untyped ternaries. Four techniques would
@@ -164,6 +165,7 @@ After Phase 3 the baseline is empty: delete it and make the guard absolute. Effo
 ### 3.3 CI guard
 
 `src/i18n/copy-guard.test.ts` (unit project, so it runs inside `make check`; TypeScript is already a devDependency):
+
 - **R1** locale-named object, array or property (`bg|en|ru|de|nl|el|he`) holding strings; **R2** call with 2+ string arguments in
   2+ scripts (`s(bg,ru,en)`); **R3** string tuple of 2, 3 or 7 elements in 2+ scripts; **R4** `locale === "xx"` choosing between
   strings or objects; **R5** JSX text with a letter, or prose in `aria-label`, `title`, `placeholder`, `alt`, `label`, `hint`,
@@ -188,6 +190,7 @@ After Phase 3 the baseline is empty: delete it and make the guard absolute. Effo
 Already good: zero physical Tailwind utilities (`ml-`, `pr-`, `left-`, `text-left`...) against 60 logical ones; `<html lang dir>` per
 locale on public and client; 98 isolation sites (`Ltr`, `Isolate`, `bdi`); `PriceDisplay` isolates money; icons mirror with
 `rtl:-scale-x-100`. To do:
+
 - **Isolation by default.** Add `fillIsolated(template, values)` next to `fill()`: values for `reference|phone|email|url|price|area`
   keys are wrapped in `bdi dir="ltr"` (JSX) or `isolateText` (titles, `aria-label`). Wrap `formatExactArea` in `listing-card.tsx`,
   `search-alert-criteria.tsx`, `inquiry-selection-context.tsx`; phone `+359 ...` and references as LTR runs; names and addresses

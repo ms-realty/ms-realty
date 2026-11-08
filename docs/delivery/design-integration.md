@@ -28,7 +28,6 @@ Design repair does not override launch-readiness files, R00, live provider/DNS a
 manual completion without Hermes, or exact property facts. Full source/runtime parity is
 still open. No current design count is used as a release-gate pass.
 
-
 ## 29 September coordination update
 
 A design coordination message reports that Ivan's renewed quality review has reopened overall
@@ -72,7 +71,6 @@ with separate retained-work counts and a durable receipt. Native-browser verific
 and repaired Manage access mobile overflow and overlapping former-staff links. The new
 functional contract is `contracts/staff-offboarding.md`; this does not close broader Figma
 parity, seven-locale acceptance or the full agency handover workflow.
-
 
 ## Listing workspace simplification
 
