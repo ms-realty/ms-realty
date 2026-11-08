@@ -83,3 +83,31 @@ it("fails closed on missing production origin rather than adopting an incoming h
   vi.stubEnv("PUBLIC_ORIGIN", "");
   expect(() => publicSeoOrigin()).toThrow("valid CANONICAL_ORIGIN");
 });
+it("R09 retains an approved CMS edition without granting locale-wide translation indexability", async () => {
+  vi.stubEnv("STAGING", "false");
+  mocks.content.mockResolvedValueOnce({
+    title: "Synthetic approved edition",
+    paragraphs: ["Exact synthetic CMS text."],
+  });
+  const result = await publicContentMetadata("en", "help", "privacy", "/help/privacy");
+  expect(result.title).toBe("Synthetic approved edition");
+  expect(result.robots).toEqual({ index: false, follow: true });
+  expect(result.alternates).toEqual({
+    canonical: "https://staging.makler-realty.com/en/help/privacy",
+    languages: {},
+  });
+});
+it("R09 keeps the exact external legacy canonical without promoting pending source review", async () => {
+  vi.stubEnv("STAGING", "false");
+  mocks.headers.set("x-msr-rendered-path", "/original-source/?lang=bg");
+  const result = await publicPageMetadata({
+    locale: "bg",
+    path: "/legacy/source",
+    availableIn: [],
+  });
+  expect(result.robots).toEqual({ index: false, follow: true });
+  expect(result.alternates).toEqual({
+    canonical: "https://staging.makler-realty.com/original-source/?lang=bg",
+    languages: {},
+  });
+});

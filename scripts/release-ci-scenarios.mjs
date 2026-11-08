@@ -19,12 +19,12 @@ const file = "shared-shortlist.spec.ts";
 const fileId = "52c3b5d0ca593b879aa5";
 const sourcePins = {
   [WORKFLOW]: "5246aaffc1452db84c149df7544c2e647c447d82b2a9fde3e2a993cf6b14d6a2",
-  "package.json": "be87438dc1fd2cb7e8e7adfa6edeb114203d7d9a67125416f8f9fbe924f6ccdd",
+  "package.json": "23b6ca52f0254f28ffa7c04cc6f8859b8502556cda8398ad448130c89a73d4e2",
   "scripts/ci-clamav.mjs": "f1b4feeec582635c69537f7f2663648c2ec31337ab4308cba82b3071021119aa",
   "scripts/wait-clamav.ts": "5c647adaf1c27ca920740250c46d7a2ea3340b03058bc311928f1e13c2ce2f9b",
   "scripts/e2e-server.ts": "54faf79b105c8abb80adc7e740e56ee278dfe660626d2786cadf6e1e5c64501a",
   "package-lock.json": "5e4bd53175d665e5f15badec0897e8e2776f044969630ff2cc62f6bd27b448d1",
-  "playwright.config.ts": "ffa8bafab57ae97025294cfac1f14609673c43de6c2f4a108169b747ea573932",
+  "playwright.config.ts": "08c1d272f1559084679fea430e2059cfd1d06f52a297bb18076748338fae3eb0",
   [`e2e/${file}`]: "a37b6fa63c8740fbfb9701d56dfae7e22a52ebd6ffff25ce28897c33c8162672",
 };
 const creatorCard = "locator('article[data-share-state]').first()";

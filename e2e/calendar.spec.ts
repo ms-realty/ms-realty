@@ -368,6 +368,7 @@ for (const javaScriptEnabled of [false, true])
         await showCalendarFilters(page, javaScriptEnabled);
         await page.getByRole("combobox", { name: c.views, exact: true }).selectOption("week");
         await page.getByRole("button", { name: c.apply, exact: true }).press("Enter");
+        await expect(page).toHaveURL((url) => url.searchParams.get("view") === "week");
         await showCalendarFilters(page, javaScriptEnabled);
         await expect(page.getByRole("combobox", { name: c.views, exact: true })).toHaveValue(
           "week",
@@ -379,6 +380,7 @@ for (const javaScriptEnabled of [false, true])
         await expect(week).toHaveAttribute("aria-current", "page");
       }
       await page.getByRole("link", { name: c.next, exact: true }).click();
+      await expect(page).toHaveURL((url) => url.searchParams.get("date") === "2030-11-03");
       await showCalendarFilters(page, javaScriptEnabled);
       await expect(page.getByLabel(c.date, { exact: true })).toHaveValue("2030-11-03");
       await expect(
@@ -391,6 +393,7 @@ for (const javaScriptEnabled of [false, true])
       await page.getByLabel(c.date, { exact: true }).fill("2030-10-28");
       await page.getByRole("button", { name: c.apply, exact: true }).focus();
       await page.getByRole("button", { name: c.apply, exact: true }).press("Enter");
+      await expect(page).toHaveURL((url) => url.searchParams.get("scope") === "mine");
       await expect(page.getByLabel(c.scope, { exact: true })).toHaveValue("mine");
       await expect(
         page.getByRole("article", { name: f.teammate.reference, exact: true }),
@@ -403,6 +406,7 @@ for (const javaScriptEnabled of [false, true])
       await showCalendarFilters(page, javaScriptEnabled);
       await page.getByLabel(c.zone, { exact: true }).selectOption("UTC");
       await page.getByRole("button", { name: c.apply, exact: true }).click();
+      await expect(page).toHaveURL((url) => url.searchParams.get("zone") === "UTC");
       await expect(page.getByLabel(c.zone, { exact: true })).toHaveValue("UTC");
       await changed.locator("details summary").click();
       const exactUtc = changed.locator('details time[datetime="2030-10-27T00:30:00.000Z"]').first();

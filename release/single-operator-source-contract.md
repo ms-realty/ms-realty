@@ -11,6 +11,12 @@ A machine key authenticates observations; it never represents another human, ind
 administration, or Ivan's approval. This package supports only candidate evidence/self-review.
 It deliberately blocks R11/R12 in the proposed mode, even if their artifacts are supplied.
 
+The [R10 bundle follow-on](evidence-bundle-contract.md) now inserts the captured byte index and
+separately verified machine witnesses before the current owner attestation. The owner signs
+their exact digests alongside the complete E0 set. Direct evaluators and execution consumers
+require that raw binding; boolean bundle assertions alone cannot qualify R10. This does not
+activate this proposal, replace actual reviews, release R11/R12 or grant execution authority.
+
 ## Library contract and external trust
 
 An omitted `approvalModel`, or explicit `separate_reviewers`, keeps the separate operator/reviewer

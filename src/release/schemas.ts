@@ -246,6 +246,8 @@ export const evidenceArtifactSchema = z
     expiresAt: known(instant),
     /** Tool or source identity that produced the observation, with its version. */
     source: name,
+    /** Signed local-byte requirements. Every declared receipt is retained in the R10 package. */
+    supportingFiles: z.array(reference).max(1024).optional(),
     /** In the new mode the signer kind is explicit; a checker is never a human approver. */
     actor: z
       .discriminatedUnion("kind", [
@@ -273,6 +275,11 @@ export const evidenceArtifactSchema = z
   })
   .strict()
   .superRefine((artifact, ctx) => {
+    if (
+      new Set(artifact.supportingFiles?.map((file) => file.ref)).size !==
+      (artifact.supportingFiles?.length ?? 0)
+    )
+      ctx.addIssue({ code: "custom", path: ["supportingFiles"], message: "duplicate reference" });
     if (
       new Set(artifact.assertions.map((assertion) => assertion.id)).size !==
       artifact.assertions.length

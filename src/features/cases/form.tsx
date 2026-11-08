@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { isCurrencyCode } from "@/domain/ids";
 import { isInstantInput } from "@/domain/time";
 import { isPublicLocale } from "@/i18n/config";
+import { formCopy } from "@/i18n/form-copy";
 import { formatDateTime } from "@/i18n/format";
 import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
@@ -11,7 +12,6 @@ import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import { MoneyField } from "@/ui/money-field";
 import { TechnicalDetails } from "@/ui/technical-details";
-import { workCopy } from "../work/copy";
 
 const booleanLabels = {
   bg: ["Да", "Не"],
@@ -101,7 +101,7 @@ export function WorkflowForm({
       pendingReferenceCookie={pendingReferenceCookie}
       disclosure={disclosure}
       enhancementField={enhancementField}
-      copy={workCopy(locale).form}
+      copy={formCopy(locale)}
       labels={Object.fromEntries(fields.map((field) => [field.name, field.label]))}
       submitLabel={submit}
     >

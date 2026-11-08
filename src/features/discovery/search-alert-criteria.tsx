@@ -1,5 +1,5 @@
 import { getDb } from "@/db/client";
-import { localeEndonyms, type PublicLocale } from "@/i18n/config";
+import { localeDirection, localeEndonyms, type PublicLocale } from "@/i18n/config";
 import { formatExactArea, formatMoney, formatNumber } from "@/i18n/format";
 import { intentPlaces } from "@/server/ai/intent-source";
 import { discoveryCopy } from "./copy";
@@ -14,9 +14,10 @@ export async function SearchAlertCriteria({
 }: {
   locale: PublicLocale;
   search: Pick<AlertSearch, "normalized">;
-  /** A heading in the page locale; the default heading is bg/en-only copy. */
+  /** A heading in the page locale; defaults to the localized search summary title. */
   title?: string;
 }) {
+  const copyLocale = searchAlertCopyLocale(locale);
   const c = discoveryCopy(locale),
     extra = intentCopy(locale),
     copy = searchAlertCopy(locale);
@@ -76,7 +77,11 @@ export async function SearchAlertCriteria({
       {title ? (
         <h2 className="text-heading font-semibold">{title}</h2>
       ) : (
-        <h2 className="text-heading font-semibold" lang={searchAlertCopyLocale(locale)} dir="ltr">
+        <h2
+          className="text-heading font-semibold"
+          lang={copyLocale}
+          dir={localeDirection(copyLocale)}
+        >
           {copy.criteria}
         </h2>
       )}
@@ -88,14 +93,14 @@ export async function SearchAlertCriteria({
           </div>
         ))}
       </dl>
-      <p lang={searchAlertCopyLocale(locale)} dir="ltr">
+      <p lang={copyLocale} dir={localeDirection(copyLocale)}>
         {copy.source}: <bdi>{localeEndonyms[search.normalized.locale]}</bdi>
       </p>
       <p>
         {criteria.includeNeedsConfirmation ? (
           c.includeUnconfirmed
         ) : (
-          <span lang={searchAlertCopyLocale(locale)} dir="ltr">
+          <span lang={copyLocale} dir={localeDirection(copyLocale)}>
             {copy.unknown}
           </span>
         )}

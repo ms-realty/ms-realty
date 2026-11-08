@@ -6,6 +6,19 @@
 import { DurableObject } from "cloudflare:workers";
 import { createHash, createPublicKey, timingSafeEqual, verify } from "node:crypto";
 import { Container } from "@cloudflare/containers";
+import {
+  type InstalledExecutionAdmission,
+  loadExecutionAdmission,
+} from "../src/release/execution-admission";
+import { verifyRuntimeExecution } from "../src/release/execution-bridge";
+import {
+  type RuntimeExecutionPacket,
+  remoteLeaseStateSchema,
+  runtimeExecutionPacketSchema,
+} from "../src/release/execution-contract";
+// @ts-expect-error Shared fixed-provider observer is an existing-style Node/Worker JS module.
+import { observeExecutionRuntime } from "../src/release/execution-observer.mjs";
+import { rejectExecutionActivation } from "../src/release/execution-runtime";
 
 const accountId = "921d0224dcd595c87b7928d2b3c479d1";
 const comZone = "f0ac7af0721419e8129e5d10ff547372";
@@ -85,6 +98,21 @@ interface Intent extends Change {
   id?: string;
   restored?: boolean;
 }
+interface ExecutionAcceptanceReceipt {
+  schemaVersion: 1;
+  purpose: "conditional_cutover_acceptance";
+  operationId: string;
+  leaseId: string;
+  grantRequestDigest: string;
+  admissionDigest: string;
+  planDigest: string;
+  snapshotId: string;
+  planSha256: string;
+  reportSha256: string;
+  requestDigest: string;
+  decisionAt: number;
+  forwardDeadline: number;
+}
 interface State {
   mode?: "rehearsal";
   scope: Scope;
@@ -115,19 +143,52 @@ interface State {
   restoredAt?: number;
   providerFailure?: boolean;
   acceptedReportSha256?: string;
+  acceptance?: ExecutionAcceptanceReceipt;
+  selectedAdmissionDigest?: string;
   lateWriteFaults?: number;
   originIndex?: number;
   originChecks?: { host: string; address: string; strictTls: true; status: number }[];
+  execution?: {
+    recordKey: string;
+    requestDigest: string;
+    admissionDigest: string;
+    forwardExpiresAt: number;
+    originalKeys: { owner: string; controller: string };
+    lastObservation?: unknown;
+  };
+}
+
+interface ExecutionRecord {
+  requestDigest: string;
+  admissionDigest: string;
+  packetDigest: string;
+  packetChunks: number;
+  packetBytes: number;
+  planDigest: string;
+  snapshotId: string;
+  operationId: string;
+  leaseId: string;
+  admittedAt: number;
+  forwardExpiresAt: number;
+  deadline: number;
+  runtimeObservation?: unknown;
 }
 
 // The binding and secret interface is generated from wrangler.watchdog.jsonc.
-type Env = RouteWatchdogEnv;
+type Env = RouteWatchdogEnv & {
+  MS_REALTY_EXECUTION_ADMISSION?: string;
+  WATCHDOG_READ_TOKEN?: string;
+};
 const response = (body: unknown, status = 200) =>
   Response.json(body, {
     status,
     headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow" },
   });
-async function boundedJson(source: Request | Response, maximum = 2 * 1024 * 1024) {
+async function boundedJson(
+  source: Request | Response,
+  maximum = 2 * 1024 * 1024,
+  requireCanonical = false,
+) {
   demand(source.body);
   const reader = source.body.getReader(),
     chunks: Uint8Array[] = [];
@@ -143,7 +204,12 @@ async function boundedJson(source: Request | Response, maximum = 2 * 1024 * 1024
   } finally {
     await reader.cancel().catch(() => {});
   }
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+    Buffer.concat(chunks),
+  );
+  const value = JSON.parse(text);
+  if (requireCanonical) demand(canonical(value) === text);
+  return value;
 }
 function normalizedRoute(x: Route): Route {
   demand(
@@ -155,7 +221,7 @@ function normalizedRoute(x: Route): Route {
   );
   return { id: x.id, pattern: x.pattern, script: x.script ?? null };
 }
-function signed(envelope: Envelope, pem: string) {
+function signed(envelope: Envelope, pem: string, requireCanonical = false) {
   demand(
     typeof envelope?.payload === "string" &&
       envelope.payload.length <= 2 * 1024 * 1024 &&
@@ -166,7 +232,13 @@ function signed(envelope: Envelope, pem: string) {
     key.asymmetricKeyType === "ed25519" &&
       verify(null, Buffer.from(envelope.payload), key, Buffer.from(envelope.signature, "base64")),
   );
-  return JSON.parse(envelope.payload);
+  const value = JSON.parse(envelope.payload);
+  if (requireCanonical)
+    demand(
+      canonical(value) === envelope.payload &&
+        Buffer.from(envelope.signature, "base64").toString("base64") === envelope.signature,
+    );
+  return value;
 }
 function independentKeys(env: Env) {
   const owner = createPublicKey(env.WATCHDOG_OWNER_PUBLIC_KEY),
@@ -227,6 +299,366 @@ export class OriginProbe extends Container<Env> {
 }
 
 export class RouteWatchdog extends DurableObject<Env> {
+  private async completedAcceptance(state: State) {
+    if (state.status !== "accepted") return false;
+    if (!state.execution) return true; // Existing legacy acceptance has no v2 finalization record.
+    const receipt = state.acceptance;
+    if (receipt?.schemaVersion !== 1 || receipt.purpose !== "conditional_cutover_acceptance")
+      return false;
+    const record = await this.ctx.storage.get<ExecutionRecord>(state.execution.recordKey);
+    return (
+      !!record &&
+      receipt.operationId === state.scope.operationId &&
+      receipt.operationId === record.operationId &&
+      receipt.leaseId === state.scope.leaseId &&
+      receipt.leaseId === record.leaseId &&
+      receipt.grantRequestDigest === state.execution.requestDigest &&
+      receipt.grantRequestDigest === record.requestDigest &&
+      receipt.admissionDigest === state.execution.admissionDigest &&
+      receipt.admissionDigest === record.admissionDigest &&
+      receipt.planDigest === record.planDigest &&
+      receipt.snapshotId === record.snapshotId &&
+      receipt.planSha256 === state.planSha256 &&
+      receipt.reportSha256 === state.acceptedReportSha256 &&
+      state.deadline === record.deadline &&
+      state.execution.forwardExpiresAt === record.forwardExpiresAt &&
+      hex(64, receipt.requestDigest) &&
+      hex(64, receipt.reportSha256) &&
+      Number.isSafeInteger(receipt.decisionAt) &&
+      receipt.decisionAt >= record.admittedAt &&
+      receipt.forwardDeadline === Math.min(state.deadline, record.forwardExpiresAt) &&
+      receipt.decisionAt < receipt.forwardDeadline
+    );
+  }
+  private acceptanceResponse(state: State) {
+    return {
+      status: "accepted",
+      reportSha256: state.acceptedReportSha256,
+      acceptance: state.acceptance,
+    };
+  }
+  private async finalizeExecutionAcceptance(
+    state: State,
+    input: Record<string, unknown>,
+    packet: RuntimeExecutionPacket,
+  ) {
+    const execution = required(state.execution);
+    const requestDigest = hash(canonical(input));
+    const reportSha256 = hash((input.report as Envelope).payload);
+    try {
+      return await this.ctx.storage.transaction(async (txn) => {
+        const active = required(await txn.get<State>("active"));
+        demand(
+          active.status === "armed" &&
+            same(active.scope, state.scope) &&
+            active.execution?.requestDigest === execution.requestDigest &&
+            active.planSha256 === state.planSha256 &&
+            same(active.intents, state.intents) &&
+            active.deadline === state.deadline,
+        );
+        const accepted: State = {
+          ...state,
+          status: "accepted",
+          acceptedReportSha256: reportSha256,
+          acceptance: undefined,
+        };
+        // This label alone is never terminal. Both awaited operations roll back together.
+        await txn.put("active", accepted);
+        await txn.deleteAlarm();
+        // SQLite's synchronous KV participates in this enclosing transaction. No await follows
+        // this decision instant inside the callback; a throw rolls back the receipt and alarm.
+        const installed = required(
+          loadExecutionAdmission(this.env as unknown as Record<string, unknown>, "watchdog"),
+        );
+        const decisionAt = Date.now();
+        demand(installed.digest === execution.admissionDigest && decisionAt < state.deadline);
+        const verified = verifyRuntimeExecution(
+          packet,
+          installed,
+          this.leaseState(state),
+          new Date(decisionAt),
+          true,
+        );
+        accepted.acceptance = {
+          schemaVersion: 1,
+          purpose: "conditional_cutover_acceptance",
+          operationId: state.scope.operationId,
+          leaseId: state.scope.leaseId,
+          grantRequestDigest: execution.requestDigest,
+          admissionDigest: installed.digest,
+          planDigest: verified.receipt.planDigest,
+          snapshotId: verified.plan.snapshotId,
+          planSha256: required(state.planSha256),
+          reportSha256,
+          requestDigest,
+          decisionAt,
+          forwardDeadline: Math.min(state.deadline, verified.forwardExpiresAt),
+        };
+        this.ctx.storage.kv.put("active", accepted);
+        demand(
+          loadExecutionAdmission(this.env as unknown as Record<string, unknown>, "watchdog")
+            ?.digest === installed.digest && Date.now() < accepted.acceptance.forwardDeadline,
+        );
+        return this.acceptanceResponse(accepted);
+      });
+    } catch {
+      // A failed acknowledgement is not evidence of an aborted transaction. Read the exact
+      // terminal receipt before deciding; a valid commit survives later expiry/config drift.
+      const retained = await this.ctx.storage.get<State>("active");
+      if (retained && same(retained.scope, state.scope)) {
+        if (await this.completedAcceptance(retained)) {
+          demand(retained.acceptance?.requestDigest === requestDigest);
+          return this.acceptanceResponse(retained);
+        }
+        if (["armed", "accepted"].includes(retained.status)) await this.startRestore(retained);
+      }
+      throw new Error("Acceptance finalization requires original-operation recovery");
+    }
+  }
+  private async executionPacket(
+    recordKey: string,
+    record: ExecutionRecord,
+  ): Promise<RuntimeExecutionPacket> {
+    demand(
+      Number.isSafeInteger(record.packetBytes) &&
+        record.packetBytes > 0 &&
+        record.packetBytes <= 2 * 1024 * 1024 &&
+        record.packetChunks === Math.ceil(record.packetBytes / 49_152) &&
+        record.packetChunks <= 43,
+    );
+    const parts: Buffer[] = [];
+    for (let i = 0; i < record.packetChunks; i++) {
+      const value = required(await this.ctx.storage.get<string>(`${recordKey}:packet:${i}`));
+      demand(typeof value === "string" && value.length <= 65_536);
+      const bytes = Buffer.from(value, "base64");
+      demand(
+        bytes.toString("base64") === value &&
+          bytes.length === Math.min(49_152, record.packetBytes - i * 49_152),
+      );
+      parts.push(bytes);
+    }
+    const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+      Buffer.concat(parts),
+    );
+    demand(Buffer.byteLength(text) === record.packetBytes && hash(text) === record.packetDigest);
+    return runtimeExecutionPacketSchema.parse(JSON.parse(text));
+  }
+  private async executionMode() {
+    const installed = loadExecutionAdmission(
+      this.env as unknown as Record<string, unknown>,
+      "watchdog",
+    );
+    demand(!(await this.ctx.storage.get("execution-mode")) || installed);
+    return installed;
+  }
+  private leaseState(state: State) {
+    return remoteLeaseStateSchema.parse({
+      scope: state.scope,
+      reservedAt: state.reservedAt,
+      expiresAt: state.expiresAt,
+      status: state.status,
+      receipt: state.receipt,
+    });
+  }
+  private expectedState(state: State) {
+    const expected = structuredClone(required(state.fullBaseline));
+    for (const intent of state.intents) {
+      const zone = required(expected.zones.find((item) => item.id === intent.zoneId));
+      const route = {
+        id: required(intent.id),
+        pattern: intent.pattern,
+        script: required(state.plan).workerName,
+      };
+      const index = zone.routes.findIndex((item) => item.id === intent.before?.id);
+      if (index >= 0) zone.routes[index] = route;
+      else zone.routes.push(route);
+    }
+    return expected;
+  }
+  private async verifyForward(state: State, observe: boolean) {
+    const installed = await this.executionMode();
+    if (!state.execution) {
+      demand(!installed); // Installing v2 never promotes a pre-existing legacy operation.
+      return;
+    }
+    demand(
+      installed &&
+        installed.digest === state.execution.admissionDigest &&
+        Date.now() < state.deadline,
+    );
+    const record = required(await this.ctx.storage.get<ExecutionRecord>(state.execution.recordKey));
+    demand(
+      record.requestDigest === state.execution.requestDigest &&
+        record.admissionDigest === installed.digest &&
+        record.operationId === state.scope.operationId &&
+        record.leaseId === state.scope.leaseId,
+    );
+    const packet = await this.executionPacket(state.execution.recordKey, record);
+    const checked = verifyRuntimeExecution(
+      packet,
+      installed,
+      this.leaseState(state),
+      new Date(Date.now()),
+      true,
+    );
+    demand(
+      checked.receipt.planDigest === record.planDigest && Date.now() < record.forwardExpiresAt,
+    );
+    if (observe) {
+      state.execution.lastObservation = await observeExecutionRuntime(
+        checked.context.plan,
+        checked.context.runtime,
+        this.env.WATCHDOG_READ_TOKEN,
+        { maximumMs: 8_000, expectedBaseline: this.expectedState(state) },
+      );
+      demand(Buffer.byteLength(canonical(state.execution.lastObservation)) <= 16_384);
+      await this.verifyForward(state, false);
+    }
+  }
+  private async bindExecution(
+    state: State | undefined,
+    input: Record<string, unknown>,
+    installed: InstalledExecutionAdmission,
+  ) {
+    demand(same(Object.keys(input).sort(), ["leaseId", "operationId", "packet"]));
+    const packet = runtimeExecutionPacketSchema.parse(input.packet);
+    demand(input.operationId === packet.plan.operationId && input.leaseId === packet.plan.leaseId);
+    const requestDigest = hash(canonical(input));
+    const recordKey = `execution:${packet.plan.operationId}`;
+    const prior = await this.ctx.storage.get<ExecutionRecord>(recordKey);
+    if (prior) {
+      demand(prior.requestDigest === requestDigest && prior.leaseId === input.leaseId);
+      demand(same(await this.executionPacket(recordKey, prior), packet));
+      return {
+        status: state?.scope.operationId === prior.operationId ? state.status : "consumed",
+        deadline: prior.deadline,
+        planSha256: packet.plan.cutoverPlanDigest.slice(7),
+        requestDigest,
+        idempotent: true,
+      };
+    }
+    demand(
+      state &&
+        state.mode !== "rehearsal" &&
+        state.status === "reserved" &&
+        (!state.selectedAdmissionDigest || state.selectedAdmissionDigest === installed.digest) &&
+        state.scope.operationId === input.operationId &&
+        state.scope.leaseId === input.leaseId,
+    );
+    const checked = verifyRuntimeExecution(
+      packet,
+      installed,
+      this.leaseState(state),
+      new Date(Date.now()),
+    );
+    const report = signed(packet.production.report, installed.keys.controller);
+    const deadline = Math.min(Date.now() + 600_000, checked.forwardExpiresAt);
+    demand(deadline > Date.now() && deadline + 120_000 < state.expiresAt);
+    const armed: State = {
+      ...state,
+      status: "armed",
+      deadline,
+      plan: checked.context.plan,
+      planSha256: checked.context.planSha256,
+      baseline: checked.context.baseline.zones.map((zone: Zone) => ({
+        id: zone.id,
+        name: zone.name,
+        routes: zone.routes.map(normalizedRoute),
+      })),
+      fullBaseline: checked.context.baseline,
+      checkerBaselineSha256: report.checker.baselineSha256,
+      baselineSourceRows: report.coverage.baselineSourceRows,
+      execution: {
+        recordKey,
+        requestDigest,
+        admissionDigest: installed.digest,
+        forwardExpiresAt: checked.forwardExpiresAt,
+        originalKeys: installed.keys,
+      },
+    };
+    const packetBytes = Buffer.from(canonical(packet));
+    const completeIntents = checked.context.plan.routes.map((change: Change) => ({
+      ...change,
+      before:
+        armed.baseline
+          ?.find((zone) => zone.id === change.zoneId)
+          ?.routes.find((route) => route.id === change.baselineRouteId) ?? null,
+      id: change.baselineRouteId ?? "0".repeat(32),
+      restored: true,
+    }));
+    demand(
+      packetBytes.length <= 2 * 1024 * 1024 &&
+        Buffer.byteLength(canonical(armed)) +
+          Buffer.byteLength(canonical(completeIntents)) +
+          2 * 16_384 +
+          2048 <=
+          100 * 1024,
+    );
+    const chunks: Record<string, string> = {};
+    for (let offset = 0, i = 0; offset < packetBytes.length; offset += 49_152, i++)
+      chunks[`${recordKey}:packet:${i}`] = packetBytes
+        .subarray(offset, offset + 49_152)
+        .toString("base64");
+    const record: ExecutionRecord = {
+      requestDigest,
+      admissionDigest: installed.digest,
+      packetDigest: hash(packetBytes.toString()),
+      packetChunks: Object.keys(chunks).length,
+      packetBytes: packetBytes.length,
+      planDigest: checked.receipt.planDigest,
+      snapshotId: packet.plan.snapshotId,
+      operationId: packet.plan.operationId,
+      leaseId: packet.plan.leaseId,
+      admittedAt: Date.now(),
+      forwardExpiresAt: checked.forwardExpiresAt,
+      deadline,
+    };
+    record.runtimeObservation = await observeExecutionRuntime(
+      checked.context.plan,
+      checked.context.runtime,
+      this.env.WATCHDOG_READ_TOKEN,
+      { maximumMs: 8_000, expectedBaseline: checked.context.baseline },
+    );
+    demand(Buffer.byteLength(canonical(record.runtimeObservation)) <= 16_384);
+    demand((await this.executionMode())?.digest === installed.digest);
+    verifyRuntimeExecution(packet, installed, this.leaseState(state), new Date(Date.now()));
+    record.admittedAt = Date.now();
+    await this.ctx.storage.transaction(async (txn) => {
+      const active = required(await txn.get<State>("active"));
+      demand(
+        active.status === "reserved" &&
+          same(active.scope, state.scope) &&
+          !(await txn.get(recordKey)) &&
+          !(await txn.get(`execution-lease:${state.scope.leaseId}`)),
+      );
+      demand(Date.now() < deadline);
+      await txn.put({
+        ...chunks,
+        active: armed,
+        "execution-mode": (await txn.get("execution-mode")) ?? {
+          schemaVersion: 2,
+          mode: "single_operator_owner_review",
+        },
+        [recordKey]: record,
+        [`execution-lease:${state.scope.leaseId}`]: state.scope.operationId,
+      });
+      await txn.setAlarm(deadline);
+      demand(Date.now() < deadline);
+    });
+    try {
+      demand((await this.executionMode())?.digest === installed.digest && Date.now() < deadline);
+    } catch {
+      await this.startRestore(armed);
+      throw new Error("Committed execution requires original-operation restoration");
+    }
+    return {
+      status: "armed",
+      deadline,
+      planSha256: armed.planSha256,
+      requestDigest,
+      idempotent: false,
+    };
+  }
   private async originalOrigin(host: string) {
     demand(["makler-realty.com", "makler-realty.ru"].includes(host));
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -281,7 +713,43 @@ export class RouteWatchdog extends DurableObject<Env> {
   private async save(state: State) {
     await this.ctx.storage.put("active", state);
   }
+  private async selectReservationMode(
+    state: State,
+    installed: InstalledExecutionAdmission,
+    prior?: State,
+  ) {
+    await this.ctx.storage.transaction(async (txn) => {
+      demand(same(await txn.get<State>("active"), prior));
+      const retained = structuredClone(state);
+      if (retained.status === "reserved") {
+        demand(
+          !retained.selectedAdmissionDigest ||
+            retained.selectedAdmissionDigest === installed.digest,
+        );
+        retained.selectedAdmissionDigest = installed.digest;
+      }
+      if (prior && prior.scope.operationId !== state.scope.operationId)
+        await txn.put(`history:${prior.scope.operationId}`, prior);
+      const latch = (await txn.get("execution-mode")) ?? {
+        schemaVersion: 2,
+        mode: "single_operator_owner_review",
+        selectedBy: "reservation",
+        admissionDigest: installed.digest,
+      };
+      await txn.put({ active: retained, "execution-mode": latch });
+      if (!prior || prior.scope.operationId !== state.scope.operationId)
+        await txn.setAlarm(state.deadline);
+      demand(
+        loadExecutionAdmission(this.env as unknown as Record<string, unknown>, "watchdog")
+          ?.digest === installed.digest,
+      );
+    });
+  }
   private async reserve(scope: Scope) {
+    const installed = await this.executionMode();
+    if (installed) {
+      remoteLeaseStateSchema.shape.scope.parse(scope);
+    } else rejectExecutionActivation(scope);
     demand(
       hex(40, this.env.WATCHDOG_PROBE_SOURCE_COMMIT) &&
         hex(64, this.env.WATCHDOG_PROBE_IMAGE_DIGEST) &&
@@ -302,14 +770,20 @@ export class RouteWatchdog extends DurableObject<Env> {
         scope.zoneIds.includes(comZone),
     );
     const prior = await this.ctx.storage.get<State>("active");
-    if (prior && same(prior.scope, scope))
+    if (prior && same(prior.scope, scope)) {
+      if (installed) await this.selectReservationMode(prior, installed, prior);
       return { ...prior.receipt, evidenceSha256: hash(canonical(prior.receipt)) };
+    }
+    if (installed)
+      demand(
+        !(await this.ctx.storage.get(`execution-lease:${scope.leaseId}`)) &&
+          !(await this.ctx.storage.get(`execution:${scope.operationId}`)),
+      );
     demand(!prior || ["accepted", "released"].includes(prior.status));
     demand(
       prior?.scope.operationId !== scope.operationId &&
         !(await this.ctx.storage.get(`history:${scope.operationId}`)),
     );
-    if (prior) await this.ctx.storage.put(`history:${prior.scope.operationId}`, prior);
     const now = Date.now(),
       expiresAt = now + 1_800_000;
     const receipt = {
@@ -333,7 +807,7 @@ export class RouteWatchdog extends DurableObject<Env> {
         runtime: "isolated-native-node-container",
       },
     };
-    await this.save({
+    const reserved: State = {
       scope,
       reservedAt: now,
       expiresAt,
@@ -342,8 +816,13 @@ export class RouteWatchdog extends DurableObject<Env> {
       receipt,
       intents: [],
       cleanReads: 0,
-    });
-    await this.ctx.storage.setAlarm(now + 600_000);
+    };
+    if (installed) await this.selectReservationMode(reserved, installed, prior);
+    else {
+      if (prior) await this.ctx.storage.put(`history:${prior.scope.operationId}`, prior);
+      await this.save(reserved);
+      await this.ctx.storage.setAlarm(now + 600_000);
+    }
     return { ...receipt, evidenceSha256: hash(canonical(receipt)) };
   }
   private async bind(
@@ -355,6 +834,7 @@ export class RouteWatchdog extends DurableObject<Env> {
       report: Envelope;
     },
   ) {
+    rejectExecutionActivation(input);
     demand(state.status === "reserved" && Date.now() - state.reservedAt < 300_000);
     demand(
       typeof input.plan === "string" &&
@@ -543,6 +1023,14 @@ export class RouteWatchdog extends DurableObject<Env> {
     };
   }
   private async mutate(state: State, input: { zoneId: string; pattern: string }) {
+    try {
+      if (state.execution)
+        demand(same(Object.keys(input).sort(), ["leaseId", "operationId", "pattern", "zoneId"]));
+      await this.verifyForward(state, true);
+    } catch {
+      if (state.plan && state.status === "armed") await this.startRestore(state);
+      throw new Error("Forward operation is unavailable; original restoration remains fenced");
+    }
     demand(state.status === "armed" && Date.now() < state.deadline && state.plan && state.baseline);
     const change = state.plan.routes.find(
       (r) => r.zoneId === input.zoneId && r.pattern === input.pattern,
@@ -580,6 +1068,7 @@ export class RouteWatchdog extends DurableObject<Env> {
     state.intents.push(intent);
     await this.save(state); // Output gate: provider mutation follows durable intent.
     try {
+      await this.verifyForward(state, false);
       const packet = await this.provider(
         change.zoneId,
         previous ? `/${previous.id}` : "",
@@ -593,7 +1082,9 @@ export class RouteWatchdog extends DurableObject<Env> {
           (!previous || route.id === previous.id),
       );
       intent.id = route.id;
+      await this.verifyForward(state, false);
       await this.save(state);
+      await this.verifyForward(state, false);
       return route;
     } catch {
       state.status = "restoring";
@@ -699,9 +1190,17 @@ export class RouteWatchdog extends DurableObject<Env> {
   async alarm() {
     await this.ctx.blockConcurrencyWhile(async () => {
       const state = await this.ctx.storage.get<State>("active");
-      if (!state || ["accepted", "released"].includes(state.status)) return;
+      if (!state || state.status === "released" || (await this.completedAcceptance(state))) return;
       // Persist the next wake before external I/O: retry exhaustion must not silently disarm it.
       await this.ctx.storage.setAlarm(Date.now() + 30_000);
+      if (state.execution && state.status === "armed") {
+        try {
+          demand((await this.executionMode())?.digest === state.execution.admissionDigest);
+        } catch {
+          await this.startRestore(state);
+          return;
+        }
+      }
       if (["reserved", "armed"].includes(state.status) && Date.now() < state.deadline) {
         await this.ctx.storage.setAlarm(state.deadline);
         return;
@@ -715,6 +1214,16 @@ export class RouteWatchdog extends DurableObject<Env> {
       try {
         const path = new URL(request.url).pathname,
           state = await this.ctx.storage.get<State>("active");
+        if (
+          state?.execution &&
+          state.status === "accepted" &&
+          !(await this.completedAcceptance(state))
+        ) {
+          // Old v2 labels have no proof that the final authority/storage boundary completed.
+          // Establish a wake before migration so an interrupted repair remains recoverable.
+          await this.ctx.storage.setAlarm(Date.now() + 100);
+          await this.startRestore(state);
+        }
         if (request.method === "GET" && path === "/status")
           return response(state ? { ...state, journal: undefined } : { status: "empty" });
         if (request.method === "GET" && path === "/origin") {
@@ -727,9 +1236,36 @@ export class RouteWatchdog extends DurableObject<Env> {
           }
         }
         demand(request.method === "POST");
-        const input = await boundedJson(request);
+        const forward = [
+          "/reserve",
+          "/bind",
+          "/mutate",
+          "/rehearsal",
+          "/rehearsal/late-write",
+        ].includes(path);
+        let installed: InstalledExecutionAdmission | null = null;
+        if (forward) {
+          try {
+            installed = await this.executionMode();
+          } catch {
+            if (path === "/mutate" && state?.plan && state.status === "armed")
+              await this.startRestore(state);
+            throw new Error("Forward operation is unavailable");
+          }
+        }
+        const input = await boundedJson(
+          request,
+          2 * 1024 * 1024,
+          !!installed || (path === "/accept" && !!state?.execution),
+        );
         if (path === "/reserve") return response(await this.reserve(input));
-        if (path === "/rehearsal") return response(await this.rehearsal(input.operationId));
+        if (path === "/rehearsal") {
+          demand(!installed);
+          return response(await this.rehearsal(input.operationId));
+        }
+        if (path === "/bind") {
+          if (installed) return response(await this.bindExecution(state, input, installed));
+        }
         demand(
           state &&
             input.operationId === state.scope.operationId &&
@@ -743,6 +1279,7 @@ export class RouteWatchdog extends DurableObject<Env> {
               input.journal?.baselineSha256 === state.scope.baselineSha256 &&
               input.journal?.planSha256 === state.planSha256,
           );
+          if (state.execution) demand(Buffer.byteLength(canonical(input.journal)) <= 16_384);
           state.journal = input.journal;
           await this.save(state);
           return response({ retained: true });
@@ -752,6 +1289,7 @@ export class RouteWatchdog extends DurableObject<Env> {
           return response({ status: state.status, cleanReads: state.cleanReads });
         }
         if (path === "/rehearsal/late-write") {
+          demand(!installed);
           demand(
             state.mode === "rehearsal" &&
               state.status === "restored" &&
@@ -802,6 +1340,13 @@ export class RouteWatchdog extends DurableObject<Env> {
           });
         }
         if (path === "/accept") {
+          if (state.status === "accepted" && state.execution) {
+            demand(
+              (await this.completedAcceptance(state)) &&
+                state.acceptance?.requestDigest === hash(canonical(input)),
+            );
+            return response(this.acceptanceResponse(state));
+          }
           if (
             state.status === "accepted" &&
             state.acceptedReportSha256 === hash(input.report?.payload ?? "")
@@ -810,12 +1355,36 @@ export class RouteWatchdog extends DurableObject<Env> {
           demand(
             state.status === "armed" &&
               state.mode !== "rehearsal" &&
-              Date.now() <= state.deadline &&
+              Date.now() < state.deadline &&
               state.plan &&
               state.baseline &&
               state.fullBaseline,
           );
-          const report = signed(input.report, this.env.WATCHDOG_CONTROLLER_PUBLIC_KEY);
+          if (state.execution) await this.verifyForward(state, true);
+          const report = signed(
+            input.report,
+            state.execution?.originalKeys.controller ?? this.env.WATCHDOG_CONTROLLER_PUBLIC_KEY,
+            !!state.execution,
+          );
+          let acceptedNotBefore = state.deadline - 600_000;
+          let executionPacket: RuntimeExecutionPacket | undefined;
+          if (state.execution) {
+            const record = required(
+              await this.ctx.storage.get<ExecutionRecord>(state.execution.recordKey),
+            );
+            acceptedNotBefore = record.admittedAt;
+            const packet = await this.executionPacket(state.execution.recordKey, record);
+            executionPacket = packet;
+            const verifier = JSON.parse(packet.verification.payload);
+            demand(
+              report.purpose === "conditional_cutover_acceptance" &&
+                same(report.actor, verifier.actor) &&
+                report.keyId === verifier.keyId &&
+                report.admissionDigest === record.admissionDigest &&
+                report.planDigest === record.planDigest &&
+                report.snapshotId === record.snapshotId,
+            );
+          }
           const applied = structuredClone(state.fullBaseline);
           demand(applied);
           for (const intent of state.intents) {
@@ -866,7 +1435,7 @@ export class RouteWatchdog extends DurableObject<Env> {
                   "www.makler-realty.ru",
                 ]),
               ) &&
-              Date.parse(report.checkedAt) >= state.deadline - 600_000 &&
+              Date.parse(report.checkedAt) >= acceptedNotBefore &&
               Date.parse(report.checkedAt) <= Date.now() &&
               report.coverage?.completeCurrentDelta === true &&
               report.coverage.productionAllowed === true &&
@@ -909,7 +1478,10 @@ export class RouteWatchdog extends DurableObject<Env> {
             }
             demand(same(sorted(await this.routes(zone.id)), sorted(expected)));
           }
-          demand(Date.now() <= state.deadline);
+          if (state.execution) await this.verifyForward(state, false);
+          demand(Date.now() < state.deadline);
+          if (executionPacket)
+            return response(await this.finalizeExecutionAcceptance(state, input, executionPacket));
           state.status = "accepted";
           state.acceptedReportSha256 = hash(input.report.payload);
           await this.save(state);
@@ -923,14 +1495,24 @@ export class RouteWatchdog extends DurableObject<Env> {
               state.restoredAt &&
               Date.now() - state.restoredAt >= 60_000,
           );
-          independentKeys(this.env);
+          const releaseKeys = state.execution?.originalKeys ?? {
+            owner: this.env.WATCHDOG_OWNER_PUBLIC_KEY,
+            controller: this.env.WATCHDOG_CONTROLLER_PUBLIC_KEY,
+          };
+          demand(
+            hash(
+              createPublicKey(releaseKeys.owner)
+                .export({ type: "spki", format: "der" })
+                .toString("base64"),
+            ) !==
+              hash(
+                createPublicKey(releaseKeys.controller)
+                  .export({ type: "spki", format: "der" })
+                  .toString("base64"),
+              ),
+          );
           for (const role of ["owner", "controller"] as const) {
-            const permit = signed(
-              input.approvals[role],
-              this.env[
-                role === "owner" ? "WATCHDOG_OWNER_PUBLIC_KEY" : "WATCHDOG_CONTROLLER_PUBLIC_KEY"
-              ],
-            );
+            const permit = signed(input.approvals[role], releaseKeys[role], !!state.execution);
             const issued = Date.parse(permit.issuedAt);
             demand(
               permit.purpose === "release-restored-route-lease" &&

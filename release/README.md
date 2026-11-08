@@ -16,6 +16,13 @@ The separate [single-operator source foundation](single-operator-source-contract
 `policy.single-operator.proposed.json` prepare an unratified, disabled candidate-review mode.
 They do not replace this active policy, install trust or enable CLI/runtime acceptance.
 
+The [R10 local bundle contract](evidence-bundle-contract.md) supplies the retained
+`launch:evidence:capture` and `launch:evidence:verify` commands for that proposed mode. Their
+byte checks and scoped machine witnesses require installed admission; the current zero-key
+policy produces blocked diagnostics. Direct evaluation and the execution bridge require the
+same raw proof and Ivan's later signed binding. Command success is separate from R00–R10
+qualification. R11/R12 and overall release remain held.
+
 Search Console, Yandex Webmaster and backlink exports are optional historical analytics at
 **every** lifecycle stage. Exact crawl/URL parity for both legacy domains remains required.
 This does not waive the required monitoring `analytics_export`. Provisioning and Payload

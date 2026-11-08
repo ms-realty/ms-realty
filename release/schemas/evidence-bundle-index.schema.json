@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "format": {
+      "type": "string",
+      "const": "ms-realty-evidence-bundle"
+    },
+    "releaseSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["production", "staging"]
+    },
+    "policyDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "trustedKeysDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "contextDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "baseManifestDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "evidenceSetDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "entries": {
+      "minItems": 2,
+      "maxItems": 1024,
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16777216
+              },
+              "role": {
+                "type": "string",
+                "const": "manifest"
+              }
+            },
+            "required": ["path", "digest", "bytes", "role"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16777216
+              },
+              "role": {
+                "type": "string",
+                "const": "policy"
+              }
+            },
+            "required": ["path", "digest", "bytes", "role"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16777216
+              },
+              "role": {
+                "type": "string",
+                "const": "evidence"
+              },
+              "evidenceId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+              },
+              "artifactDigest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              }
+            },
+            "required": ["path", "digest", "bytes", "role", "evidenceId", "artifactDigest"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16777216
+              },
+              "role": {
+                "type": "string",
+                "const": "supporting"
+              },
+              "references": {
+                "minItems": 1,
+                "maxItems": 1024,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            },
+            "required": ["path", "digest", "bytes", "role", "references"],
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "format",
+    "releaseSha",
+    "environment",
+    "policyDigest",
+    "trustedKeysDigest",
+    "contextDigest",
+    "baseManifestDigest",
+    "evidenceSetDigest",
+    "entries"
+  ],
+  "additionalProperties": false,
+  "$id": "evidence-bundle-index.schema.json",
+  "title": "EvidenceBundleIndex"
+}
