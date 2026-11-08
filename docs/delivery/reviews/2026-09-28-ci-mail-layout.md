@@ -24,7 +24,6 @@ inbound triage and identity across desktop/mobile Chromium and mobile WebKit.
 Server/component subset: 60 passed. This is macOS evidence, not Linux WebKit CI proof;
 the next pushed revision must complete CI before this regression is closed remotely.
 
-
 ## 2026-09-29 Linux reproduction and correction
 
 Run 36491387582 on 9cf10d6e still failed the two Case-email overflow assertions (331 passed,
@@ -43,7 +42,6 @@ Chromium desktop/mobile and WebKit mobile. Includes both formerly failing tests,
 preference withdrawal and exact calendar review/queueing. WebKit mobile screenshot was
 visually inspected. Logs are in the calendar-email evidence directory. Remote CI on the
 new pushed revision is still required for full CI closure.
-
 
 Remote closure: all jobs in GitHub Actions run 36501444665 passed for commit
 912729f8e394aefafcea38fc789fd03dafb6452c. This closes the observed CI regression;

@@ -86,6 +86,7 @@ Outputs matched exactly. Median wave duration was 23.95 ms before and 12.95 ms a
 HTTP rendering nor the full catalogue workload and cannot explain or erase the failing load run.
 
 Additional evidence:
+
 - `today-context-red.log`: retained 24-versus-nine query-count failure.
 - `today-context-regressions.log`: 17 PostgreSQL regressions passed.
 - `today-context-browser.log`: fresh Linux build, 24 Today/task-handover scenarios passed across
@@ -169,7 +170,6 @@ typing error was also repaired and the final type check passed.
 These single service observations justify a full workload rerun, not R08 acceptance. The new
 source still needs its own CI and fresh-build HTTP/concurrency qualification.
 
-
 ## Fresh load profile and formatter repair
 
 A fresh Linux build of `ebebf03156e9f816dc2e70e2585a07584033e9ac` (build ID
@@ -216,7 +216,6 @@ load, source benchmark and failed CI artifacts. The deployment template specifie
 instances; the measurement above used one. A separately labelled local two-process experiment
 can assess that topology without relaxing budgets or claiming live high availability.
 
-
 ## Explicit local replica harness
 
 `LOAD_REPLICAS=2 npm run test:load` starts two local Next processes from one build behind a
@@ -241,7 +240,6 @@ The first replica workload stopped before seeding: Playwright also discovered th
 Vitest transport tests. The load config now explicitly selects `agency-load.spec.ts`; the
 failed discovery log is retained separately, and is not load evidence.
 
-
 The corrected two-process workload completed 2,253 public and 226 staff cycles with no
 operation failures. Every budget still failed: p95 search 1109.59, detail 689.63, Today 805.80,
 task 1101.43 and command POST 2018.10 ms. Media p95 was 301.62 ms. Source/build binding and
@@ -256,7 +254,6 @@ so that path still constructs a formatter per area. `replica-cpu-summary.json` r
 profiles' source-mapped self-time breakdown, with approximate last-65-second alignment.
 The previous default-number/rounded-area microbenchmark does not qualify this exact-area
 path. No further identical full-load repeat is justified before a measured source repair.
-
 
 ## Exact-area rendering repair
 

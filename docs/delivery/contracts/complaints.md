@@ -17,7 +17,6 @@ Acceptance: real PostgreSQL authorization/revocation, idempotent create, stale d
 resolution/reopen history and immutable events; native browser receipt/detail/review workflow,
 role denial and mobile containment. No live complaint or customer response is part of tests.
 
-
 Implemented and locally verified on 2026-09-29. Migration 0014 adds the capability and register;
 triggers protect the original received report and append-only review history. Queue and history
 have bounded pagination. Historical staff names remain visible after access is removed. Receipt

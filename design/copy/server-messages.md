@@ -13,6 +13,7 @@ Wording for every person-facing string the server produces: errors, authenticati
 **Shape.** `message` says in one sentence what happened. `next` says in one sentence what the person can do now. Wire codes, state names and ids never appear as visible text.
 
 **Address forms.**
+
 - bg: polite «Вие» with capitals (Вие, Вас, Ви, Ваш), verb + object («Поискайте нова връзка»).
 - ru: «вы» in lower case, matching the existing catalogs.
 - de: «Sie».
@@ -46,6 +47,7 @@ The UI renders by the response's `outcome`, not only by its code: any response w
 Surfaces: P C S unless noted. Parameters: none unless noted. Source: `src/server/errors.ts` (26 definitions). The English fallback in `errors.ts` stays as the machine fallback until the catalogs are bound.
 
 **Must stay technically true.**
+
 - Each pair matches the code's `outcome`. A `not_applied` code may say nothing was changed. `operation_pending`, `outcome_unknown` and `internal_error` never say failed, done or saved. They never invite a resend, even though `operation_pending` and `internal_error` are `retryable: true`.
 - `not_found` also answers unauthorized reads of private records. Its copy must never confirm that the item exists.
 - Sign-in links, passkeys and invitations: clients sign in by email link or passkey; staff never sign in by email. Staff override rows remove the email-link route.
@@ -411,6 +413,7 @@ Parameter on every `expiry`: `{expiresAt}`, the link's expiry instant formatted 
 | `staffRecovery`    | `auth.staff_recovery`    | S       | bg en ru |
 
 **Must stay technically true.**
+
 - **Seven-locale gap.** Today `authEmail` collapses de, nl, el and he to English. These keys close that gap only once the renderer reads them.
 - **Client sign-in link.** Single use, valid for 15 minutes (`emailLinkTtlMs`), and bound to the client host. Opening it only shows a confirm page; the explicit confirm signs in. The copy therefore says "confirm on the page", never "click to sign in".
 - **Forwarding.** The sign-in and staff links travel as secret parameters, so their copy says not to forward. The client invitation link is not secret: it works only inside the invited person's own signed-in session. Its copy asks them to sign in with this address and does not warn about forwarding.
@@ -483,6 +486,7 @@ No reauthentication email exists in code: step-up today is a passkey assertion (
 Surface: P C (saved-search email to a person who opted in). Locales: 7. Source: `src/server/subscriptions/template.ts` (`alertTemplateCopy`, `renderSearchAlert`).
 
 Body order:
+
 1. `currentFacts`
 2. `scanIncomplete`, only when `digest.scanIncomplete` is true
 3. One block per listing: `{reference} — {title}`, then `needsConfirmation` when `match` is `needs_confirmation`, then the listing URL
@@ -501,6 +505,7 @@ Item lines are data, not catalog text. The reference, title and URL come from th
 | `scanIncomplete`    | none                                   | new, proposed (see note) |
 
 **Must stay technically true.**
+
 - **Existing strings.** The seven-language strings move into the catalogs intact (coordination rule). A later reviewer may change en «withdraw alerts» to «stop alerts»; this deck does not.
 - **Listing titles.** A title appears exactly as approved for that locale, or as the stored source title when no translation is approved. It is never machine-translated in the email, and listing facts are never restated.
 - **Managing alerts.** Manage, pause and unsubscribe stay reachable through the preferences URL on the client host.
@@ -542,6 +547,7 @@ Surface: S (email to the team inbox). Locales: bg, en, ru. Source: `src/server/i
 | `stagingNote`    | Last line of every staging notice.                                          |
 
 **Must stay technically true.**
+
 - **Content.** The notice shows only the RQ reference and the team's incoming-list link. The inquiry id, event id and queue name stay in the hidden payload (today they are printed in the body). The worker never reads the person's contact details or message, so the copy never summarises them.
 - **Staging.** Sends happen only on staging, only with the three enablement flags, and only to the reviewed test inbox from the approved sender. The staging subject and note say so plainly, without the word "staging".
 - **Ownership.** "Waits until someone takes it" is true at intake. The inquiry stays with the shared incoming list until a named broker accepts it.
@@ -559,11 +565,13 @@ Surface: S (email to the team inbox). Locales: bg, en, ru. Source: `src/server/i
 Sources: `src/server/cases/email.ts`, `email-contract.ts`, `email-dispatch.ts`, `email-files-contract.ts`, `src/server/appointments/email-calendar.ts`, `src/server/jobs/outbox.ts`, `src/server/jobs/resend-inbox.ts`, `src/domain/message.ts`.
 
 The staff member writes the subject and body of a case email, and that text is reviewed content. This family covers only:
+
 - the wrapper lines the server adds below that text, for the recipient;
 - the status lines staff see for each email;
 - the viewing lines added when a calendar file is attached.
 
 **Must stay technically true.**
+
 - **Authored text.** The authored subject and body are never translated, rewritten or replaced. Wrapper lines are appended in the recipient's locale (the locale of their email consent) after the authored text and before the attachments.
 - **Sending is human-approved.** A staff member approves the exact reviewed content. A change to recipient, consent or attached files after approval stops the send (`case_email_eligibility_changed`, `version_conflict`).
 - **No "sent" before the provider confirms.**
@@ -577,6 +585,7 @@ The staff member writes the subject and body of a case email, and that text is r
 ### 5a. Recipient wrapper lines · `server.email.case.wrapper.*` (C, 7 locales)
 
 Parameters:
+
 - `attachments` takes `{count}`, the number of attached documents. It excludes the calendar file and is shown only when `count` is at least 1.
 
 |     | replyHint                                                                                | attachments                                                                                                                            | why                                                                                                                                          |
@@ -677,6 +686,7 @@ A receipt is what the person sees after a command, read back from what was actua
 | `publicationActivate` | `activateManifest` (`publication/commands.ts`)                                                               | W08                | S       | bg en ru |
 
 **Must stay technically true (all receipts).**
+
 - **Readback, not acceptance.** A receipt renders only from the persisted readback: the operation's saved status and the saved record. A query string or an accepted request never establishes success (`files/receipts.ts`).
 - **No raw ids.** Operation, idempotency and principal ids are never shown. Only human references (`RQ-…`), file names, listing titles, person names and formatted times are parameters.
 - **Replays.** A replay of the same request returns the same saved receipt; the `already…` states say so instead of implying a second effect.
@@ -880,6 +890,7 @@ Parameter: `{when}`, the slot start formatted in the property's time zone with t
 ### 6e. `handover` (S: bg, en, ru)
 
 Parameters:
+
 - `{taskTitle}`: the task's own title.
 - `{receiverName}`: the colleague asked to take it.
 - `{ownerName}`: the person who keeps it.
@@ -911,11 +922,13 @@ Names are inserted as given. The Russian rows avoid inflecting them.
 ### 6f. `publicationActivate` (S: bg, en, ru)
 
 Parameters:
+
 - `{listingTitle}`: the listing's title.
 - `{localeName}`: the language name in the reader's locale, for example «английски».
 - `{destinationName}`: the destination's display name, for example a property portal.
 
 W08 saved result, three distinct outcomes:
+
 - live on the website (`liveOnSite`);
 - destination queued (`destinationQueued`, or `portalPending` for a manual portal);
 - external delivery unknown (`deliveryUnknown`).
@@ -952,6 +965,7 @@ W08 saved result, three distinct outcomes:
 Sources: `src/domain/butler.ts` (`butlerEligibility`, `butlerReceipt`), `src/server/operations.ts` (Butler denial and unknown paths), `src/server/butler/authority.ts`, `src/server/butler/receipts.ts`, `docs/butler-authorization.md`.
 
 **Must stay technically true.**
+
 - **Verdicts.** Every settled Butler receipt shows its verdict, a reason line and «Do it myself». New intents are `awaitingApproval` or `blocked`, with `outcome: "not_applied"`.
   - «Done automatically» appears only for a historical receipt whose `outcome` is `applied`, including confirmed reconciliation of a historical unknown effect.
   - `blocked` with `outcome: "unknown"` uses `outcome_unknown` and never says failed or done.

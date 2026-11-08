@@ -21,6 +21,7 @@ attendance or appointment state automatically. Live Gmail/Outlook/iOS/provider b
 still a separate release qualification requirement.
 
 Primary sources checked for implementation:
+
 - https://www.rfc-editor.org/rfc/rfc5546.html (iTIP REQUEST/CANCEL)
 - https://resend.com/docs/api-reference/emails/send-email (base64 attachment payload)
 
