@@ -1,5 +1,6 @@
 // Read-only source inspection. Success deliberately returns no runtime capability.
 import { createPublicKey, verify } from "node:crypto";
+import { bundleLimits } from "./bundle";
 import { evaluateRelease } from "./evaluate";
 import { type InstalledExecutionAdmission, runtimeAdmissionSchema } from "./execution-admission";
 import {
@@ -45,6 +46,10 @@ type RuntimeContext = {
   forward: boolean;
 };
 function prepare(input: unknown, installedAdmission: unknown, now: Date, runtime?: RuntimeContext) {
+  demand(
+    Buffer.byteLength(canonicalJson(input)) <= bundleLimits.jsonBytes,
+    "complete packet within 2 MiB",
+  );
   const packet = runtime
     ? runtimePreparationSchema.parse(input)
     : executionPreparationSchema.parse(input);
@@ -53,7 +58,7 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date, runtime
     : executionAdmissionSchema.parse(installedAdmission);
   if (runtime)
     demand(hash(admission) === runtime.installed.digest, "exact independently installed admission");
-  const { policy, manifest, snapshot, evidence } = packet.candidate;
+  const { policy, manifest, snapshot, evidence, bundle } = packet.candidate;
   const model = policy.approvalModel;
   demand(model?.mode === "single_operator_owner_review", "explicit admitted candidate mode");
   if (model?.mode !== "single_operator_owner_review") throw new Error("Candidate mode");
@@ -64,7 +69,14 @@ function prepare(input: unknown, installedAdmission: unknown, now: Date, runtime
     "original snapshot freshness; no future evaluation or extended expiry",
   );
   const evaluate = (at: Date) =>
-    evaluateRelease({ policy, manifest, evidence, admittedTrust: admission.release, now: at });
+    evaluateRelease({
+      policy,
+      manifest,
+      evidence,
+      bundle,
+      admittedTrust: admission.release,
+      now: at,
+    });
   demand(same(snapshot, evaluate(new Date(snapshot.evaluatedAt))), "recomputed complete snapshot");
   const current = evaluate(now);
   for (const id of gateIds.slice(0, 11))
@@ -319,6 +331,10 @@ export function prepareExecutionPlan(input: unknown, installedAdmission: unknown
 
 /** Verifies the conjunction without admitting, reserving, consuming or executing anything. */
 function inspect(input: unknown, installedAdmission: unknown, now: Date, runtime?: RuntimeContext) {
+  demand(
+    Buffer.byteLength(canonicalJson(input)) <= bundleLimits.jsonBytes,
+    "complete packet within 2 MiB",
+  );
   const supplied = runtime
     ? runtimeExecutionPacketSchema.parse(input)
     : executionPacketSchema.parse(input);

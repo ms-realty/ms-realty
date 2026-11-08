@@ -332,6 +332,7 @@ export function productionFixture(owner, controller, at) {
 
 import { generateKeyPairSync } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { syntheticBundle } from "./bundle-fixtures.mjs";
 import { evaluateRelease } from "./evaluate.ts";
 import { prepareExecutionPlan } from "./execution-bridge.ts";
 import { gatePolicySchema } from "./schemas.ts";
@@ -355,6 +356,14 @@ const machine = generateKeyPairSync("ed25519");
 const watchdog = generateKeyPairSync("ed25519");
 const ownerKeyId = "fixture-owner-key";
 const machineKeyId = "fixture-machine-key";
+// Test-only custody for isolated local CLI subprocess fixtures. Never a production key.
+export const bundleSigningFixture = () => ({
+  owner,
+  machine,
+  ownerKeyId,
+  machineKeyId,
+  signArtifact,
+});
 const required = (value) => {
   if (value === undefined) throw new Error("Missing fixture value");
   return value;
@@ -635,6 +644,11 @@ export function executionScenario() {
   const admission = { release: candidate.trust, keys };
   const refreshCandidate = () => {
     seal(candidate);
+    const bundle = syntheticBundle(candidate, signArtifact, {
+      "fixture/cutover": preparation.procedures.cutover,
+      "fixture/rollback": preparation.procedures.rollback,
+      "fixture/phasePermissions": preparation.phasePermissions,
+    });
     const evidence = candidate.evidence.map((artifact) => ({
       file: `${artifact.id}.json`,
       content: canonicalJson(artifact),
@@ -643,10 +657,12 @@ export function executionScenario() {
       policy: candidate.policy,
       manifest: candidate.manifest,
       evidence,
+      bundle,
       snapshot: evaluateRelease({
         policy: candidate.policy,
         manifest: candidate.manifest,
         evidence,
+        bundle,
         admittedTrust: candidate.trust,
         now,
       }),
