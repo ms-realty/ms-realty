@@ -52,7 +52,7 @@ export class RecoveryCoordinator {
         content.set(c, at);
         at += c.length;
       }
-      const raw = new TextDecoder("utf-8", { fatal: true }).decode(content);
+      const raw = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(content);
       const key = JSON.parse(this.env.RECOVERY_FIXTURE_SIGNER ?? "null") as {
         keyId: string;
         privateKey: JWK;

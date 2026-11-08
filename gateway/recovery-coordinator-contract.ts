@@ -208,7 +208,7 @@ export async function verifyEvidence<T>(
   const verified = await compactVerify(raw, await importJWK(root.publicKey, "EdDSA"), {
     algorithms: ["EdDSA"],
   });
-  const text = new TextDecoder("utf-8", { fatal: true }).decode(verified.payload);
+  const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(verified.payload);
   const envelope = z
     .strictObject({ purpose: z.literal(purpose), subject: z.literal(subject), payload: schema })
     .parse(JSON.parse(text));
