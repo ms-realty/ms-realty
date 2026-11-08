@@ -17,6 +17,7 @@ import { readApprovedContent } from "@/server/content/public";
 import { getPublicListing } from "@/server/listings/detail";
 import { listingSlug } from "@/server/publication/presentation";
 import { publicServiceOfferings } from "../service-intake/scope";
+import { publicNativeContentPath } from "./public-content-paths";
 import { publicCataloguePages } from "./public-pages";
 
 export function publicSeoOrigin(): URL {
@@ -99,7 +100,7 @@ export async function publicContentMetadata(
   path: string,
 ): Promise<Metadata> {
   if (!isRoutableLocale(locale)) notFound();
-  const bounded = kind === "service" && slug !== "sell" && slug !== "let";
+  const bounded = kind === "service" && path !== publicNativeContentPath(kind, slug);
   const available =
     !bounded || (await publicServiceOfferings(getDb(), slug, locale).catch(() => [])).length > 0;
   const content = available
@@ -146,7 +147,7 @@ export async function publicListingMetadata(input: {
   const result = await readPublicSeoListing(route.reference, route.locale).catch(() => null);
   const copy = discoveryCopy(route.locale);
   const availableIn =
-    result?.status === "listing"
+    result?.status === "listing" && result.listing.indexable
       ? (await publicCataloguePages(route.reference).catch(() => []))
           .filter((page) => page.reference === route.reference)
           .map((page) => page.locale)

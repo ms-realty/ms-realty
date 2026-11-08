@@ -9,7 +9,7 @@ import type { Session } from "@/server/auth/sessions";
 import type { FormState } from "@/ui/form/contract";
 import { initialFormState } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
-import { proposalEnhancementField, proposalStatus } from "./contract";
+import { proposalEnhancementField, proposalScope, proposalStatus } from "./contract";
 import { proposalCopy } from "./copy";
 import { counterofferCopy } from "./counteroffer-copy";
 import { ProposalScreen } from "./screens";
@@ -22,6 +22,10 @@ vi.mock("@/server/proposals/queries", () => ({
   listProposals: vi.fn(),
 }));
 vi.mock("./actions", () => ({ proposalAction: async () => {} }));
+vi.mock("@/server/reauth-drafts/cookies", () => ({ proposalDraftToken: async () => undefined }));
+vi.mock("@/server/reauth-drafts/service", () => ({
+  readProposalReauthDraft: async () => ({ status: "absent" }),
+}));
 vi.mock("@/ui/form/server", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/ui/form/server")>();
   return { ...actual, initialFormState: vi.fn(actual.initialFormState) };
@@ -194,8 +198,14 @@ it.each(["unknown", "confirmed"] as const)(
     };
     // The form hook restores this state from the native POST; the page's fresh read has
     // already lost revise eligibility. This isolates whether that hook is still mounted.
-    vi.mocked(initialFormState).mockReturnValueOnce(returned);
+    const original = vi.mocked(initialFormState).getMockImplementation();
+    if (!original) throw new Error("Missing original form factory");
+    vi.mocked(initialFormState).mockImplementation(((scope, values, revision) =>
+      scope === proposalScope("revise", "proposal-one")
+        ? returned
+        : original(scope, values, revision)) as typeof initialFormState);
     render(await ProposalScreen({ locale: "en", session: session("client"), id: "proposal-one" }));
+    vi.mocked(initialFormState).mockImplementation(original);
     if (kind === "unknown") {
       expect(screen.getByLabelText("Amount (GBP)")).toHaveValue("119,000.03");
       expect(screen.getByLabelText("Amount (GBP)")).toHaveAttribute("readonly");

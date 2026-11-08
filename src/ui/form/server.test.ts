@@ -38,6 +38,23 @@ describe("UI07 / architecture §5.1 server form envelope", () => {
     expect(readFormEnvelope(data, "draft.save")).toBeNull();
   });
 
+  it("UX S08 admits a recovery POST only when its feature opts in, with the signed original scope", () => {
+    const data = new FormData();
+    const operationId = issueFormOperation("proposal.decide.synthetic");
+    data.set(formFields.intent, "recover");
+    data.set(formFields.operationId, operationId);
+    data.set(formFields.expectedRevision, "3");
+    expect(readFormEnvelope(data, "proposal.decide.synthetic")).toBeNull();
+    expect(readFormEnvelope(data, "proposal.decide.synthetic", true)).toEqual({
+      operationId,
+      expectedRevision: 3,
+      intent: "recover",
+    });
+    expect(readFormEnvelope(data, "proposal.revise.synthetic", true)).toBeNull();
+    data.append(formFields.intent, "submit");
+    expect(readFormEnvelope(data, "proposal.decide.synthetic", true)).toBeNull();
+  });
+
   it("requires explicit reapply and a server-issued identity for the reviewed command", () => {
     const data = new FormData();
     const operationId = issueFormOperation("draft.save");

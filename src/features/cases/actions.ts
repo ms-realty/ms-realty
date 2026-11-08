@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { offsetInputValue } from "@/domain/time";
 import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import { workflowAuthCopy } from "@/i18n/form-copy";
 import { formatDateTime } from "@/i18n/format";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { acceptAppointmentHost } from "@/server/appointments/host-handover";
@@ -349,11 +350,11 @@ export async function workflowAction(
       outcome: {
         kind: "rejected",
         code: error.code,
-        message: "Confirm your identity again. Your draft is retained.",
+        message: workflowAuthCopy(locale).notice,
         retryable: false,
         recovery: {
           href: `/${locale}/access/reauth?returnTo=${encodeURIComponent(`/${locale}/${["appointmentHost", "appointmentHostHandover"].includes(command) ? "calendar" : context === "staff" ? "cases" : "overview"}/${id}`)}`,
-          label: "Confirm your identity",
+          label: workflowAuthCopy(locale).recovery,
         },
       },
     };

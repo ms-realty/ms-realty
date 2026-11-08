@@ -18,6 +18,12 @@ import {
 } from "./butler/authority";
 import type { Executor, Transaction } from "./db";
 import { AppError, type ErrorCode, isAppError } from "./errors";
+import {
+  appendAcceptedRecoveryOperation,
+  hasRecoveryTransaction,
+  operationRecoveryTransaction as recoveryTransaction,
+} from "./recovery/journal";
+import type { RecoveryAdmission } from "./recovery/write-fence";
 
 export interface OperationInput {
   readonly actor: Actor;
@@ -31,6 +37,8 @@ export interface OperationInput {
   readonly subject?: { readonly type: string; readonly id: string };
   /** Opaque authority issued by a fixed, server-only Butler action adapter. */
   readonly butlerAuthorization?: ButlerAuthorization;
+  /** Internal, explicit source admission. No runtime/configuration adapter supplies this yet. */
+  readonly recovery?: RecoveryAdmission;
 }
 
 export interface OperationContext {
@@ -102,7 +110,7 @@ export async function runOperation<T>(
 ): Promise<OperationSuccess<T>> {
   const { actor, type, idempotencyKey, requestHash } = input;
   const automated = isButlerOperation(input);
-  const settled = await db.transaction(async (tx): Promise<Settled<T>> => {
+  const settled = await recoveryTransaction(db, input.recovery, async (tx): Promise<Settled<T>> => {
     // Serializes calls for one key; a concurrent holder means the first call is in flight.
     const lockKey = JSON.stringify([actor.kind, actor.id, type, idempotencyKey]);
     const [lock] = await tx.execute<{ locked: boolean }>(
@@ -200,7 +208,7 @@ export async function runOperation<T>(
 
     try {
       const result = toJson(
-        await tx.transaction(async (sp) => {
+        await recoveryTransaction(tx, undefined, async (sp) => {
           const context: OperationContext = {
             tx: sp,
             operationId,
@@ -223,6 +231,7 @@ export async function runOperation<T>(
         }),
       );
       await settle("succeeded", result);
+      if (hasRecoveryTransaction(tx)) await appendAcceptedRecoveryOperation(tx, operationId);
       return {
         kind: "success",
         value: {
@@ -250,7 +259,10 @@ export async function runOperation<T>(
           { code: known.code, ...(current ? { current } : {}) },
           verdict,
         );
-        return { kind: "error", error: new AppError("outcome_unknown", { cause: error, current }) };
+        return {
+          kind: "error",
+          error: new AppError("outcome_unknown", { cause: error, current }),
+        };
       }
       if (known.retryable && !automated) throw error;
       const verdict = automated

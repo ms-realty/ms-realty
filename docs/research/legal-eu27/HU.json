@@ -1,0 +1,77 @@
+{
+  "country": "Hungary",
+  "code": "HU",
+  "estate_agency": {
+    "law": "Act LXXVIII of 1993 on housing (Lakástv.) §§64/A-64/D (business real-estate agency: notification, qualification, register); Government Decree 499/2017 (XII. 29.) on conditions and registration of real-estate agents (§§1-6); contract law: Civil Code Act V of 2013 (Ptk.) - no named brokerage contract; mandate rules §§6:272-6:280 and representation conflict rule §6:13. Texts read in the consolidated version on njt.jog.gov.hu (state 2026.10.01 for Lakástv.; decree state 2023.03.01).",
+    "regulated": "Yes - regulated, not licensed. Business agency may be carried on only after notification to the real-estate business supervisory authority (Lakástv. §64/A(1)); the natural person needs the prescribed professional qualification and a clean criminal record (§64/C(1)-(2)); a firm needs at least one registered personally-acting member/employee, settled public debts and business good repute of officers, members and AML beneficial owners (§64/C(4)). Authority: notary of the county-seat city, in Pest county the county chief notary, in Budapest the Chief Notary of the Capital (Decree 499/2017 §2 b)); public register in the national commercial register system (Lakástv. §64/D(1)). Lawyers may broker without the qualification (§64/C(5)). The FIU can ask for a ban for AML breaches (Decree 499/2017 §6(2) c)).",
+    "dual_agency": "unclear",
+    "rule": "No Hungarian statute expressly allows, conditions or prohibits one agent acting for both buyer and seller: Lakástv. §§64/A-64/D and Decree 499/2017 are silent, and the Ptk. has no brokerage chapter. Where the agent acts as a representative (a mandate includes authority to make declarations, Ptk. §6:274), Ptk. §6:13 applies: a conflict of interest is presumed if the representative also represents the opposing party, and the principal may challenge the declaration unless it knew of the conflict when granting authority. Product rule implied: disclose dual roles in writing to both clients before acting and never sign for both sides.",
+    "quote": "Ptk. §6:13(2): \"A conflict of interest is presumed if the representative is the opposing party or its representative.\" §6:13(3): \"The principal may not challenge the legal declaration if it knew of the conflict of interest when the authority to represent was established.\" Lakástv. §64/C(1): business agency may be carried on by a person who \"holds the professional qualification\" prescribed and has notified the real-estate business supervisory authority.",
+    "commission_both_sides": "No statutory rule found: no cap, split rule or ban on charging both seller and buyer (contrast DE §656c). Commission is a contractual success fee under freedom of contract; standard terms are subject to the general unfair-terms control of the Ptk. Charging both sides is not prohibited by any provision found.",
+    "sources": [
+      "https://njt.jog.gov.hu/jogszabaly/1993-78-00-00",
+      "https://njt.jog.gov.hu/jogszabaly/2017-499-20-22",
+      "https://njt.jog.gov.hu/jogszabaly/2013-5-00-00",
+      "https://net.jogtar.hu/jogszabaly?docid=a1300005.tv"
+    ]
+  },
+  "aml": {
+    "law": "Act LIII of 2017 on the prevention and combating of money laundering and terrorist financing (Pmt.): §1(1) f) scope; §3 point 17 (real-estate activity), point 41 b) (client of a real-estate provider), point 45 c) (business relationship); §6(1) a) CDD trigger; §7 identification and §7(8) document copy; §§56-58 retention. Supervisor of real-estate providers: the financial intelligence unit, an organisational unit of the National Tax and Customs Administration (NAV) (Pmt. §5 f), §3 point 27) - not SZTFH. FIU model internal policy for real-estate providers (pei.nav.gov.hu). Consolidated Pmt. text read on njt.jog.gov.hu, state 2026.10.01.",
+    "sale_scope": "Every brokered transfer of ownership of real estate, with no value threshold, plus business dealing in own real estate (Pmt. §3 point 17). For real-estate providers the 'business relationship' is any relationship for use of the provider's service (§3 point 45 c)), and CDD is due when it is established (§6(1) a)). Scope covers providers with a seat, branch or establishment in Hungary, or serving Hungarian clients through a permanent business unit in Hungary (§1(1), (1a)).",
+    "letting_threshold": "Stricter than the EU EUR 10,000: letting brokerage is in scope if the monthly rent reaches or exceeds HUF 500,000 per transaction (Pmt. §3 point 17). Quote: \"brokerage of the lease of real estate, if the monthly rent per transaction reaches or exceeds five hundred thousand forints\".",
+    "both_parties": "yes - Pmt. §3 point 41 b): for a real-estate provider the client is anyone \"who requests or makes an offer for the purpose of selling and buying, or letting and renting, the real estate\", so both the seller/landlord and the buyer/tenant must be put through CDD. The FIU model policy says a viewing or the release of the address alone is not an offer; a person who states an intention to buy or rent after a viewing makes an offer and becomes a client.",
+    "retention_years": 8,
+    "retention_trigger": "From the end of the business relationship or the execution of the transaction order (Pmt. §56(2) personal data; §57(1)-(2) other data, documents and copies). Quote §56(2): the provider \"is entitled to process and obliged to retain\" the personal data \"for eight years from the termination of the business relationship or the execution of the transaction order\".",
+    "extension": "On request of the supervisor, the FIU, an investigating authority, the prosecution, the National Asset Recovery and Management Office or a court, for the period stated in the request but at most 10 years from the end of the relationship or the execution of the order (§58(1)), only if the data are needed for a pending or future proceeding (§58(2)); delete when that proceeding closes or is abandoned (§58(3)). After the period, data, documents and copies must be deleted or destroyed without delay (§57(4)).",
+    "id_copy": "Mandatory: to verify identity the provider either makes a copy of the presented ID document, including all personal data on it, except the side of the official address card that shows the personal identification number (§7(8) a)), or records the result of a query in an authentic public register (§7(8) b)). Required data: §7(2); documents: §7(3) (Hungarian: ID document plus address card if resident in HU; foreigner: travel document or ID card plus residence document). Validity and authenticity of the document must be checked (§7(5)). Copies are kept under §57(2).",
+    "sources": [
+      "https://njt.jog.gov.hu/jogszabaly/2017-53-00-00",
+      "https://net.jogtar.hu/jogszabaly?docid=a1700053.tv",
+      "https://api-pei.nav.gov.hu/file/shared/files/2537",
+      "https://pei.nav.gov.hu/tipusszabalyzatok/tipusszabalyzatok"
+    ]
+  },
+  "accounting": {
+    "books_years": 8,
+    "annual_accounts_years": 8,
+    "source_documents_years": 8,
+    "trigger": "Accounting Act §169 says \"at least 8 years\" without an explicit start point (see unconfirmed). Tax: records must be kept until the right to assess tax lapses (Art. §78(3)), which is 5 years from the last day of the calendar year in which the return was due (Art. §202(1)), extended in the cases of §§202-203; the 8-year accounting period is the binding outer limit for a company.",
+    "law": "Act C of 2000 on Accounting (Szt.) §169(1): annual report, business report and the supporting inventory, valuation, general-ledger extract and journal or other ledgers to be kept \"in legible form for at least 8 years\"; §169(2): accounting source documents (including ledger accounts and analytical records) kept for at least 8 years, retrievable via the bookkeeping references; §169(4)-(6): duty survives reorganisation or dissolution without successor; electronic originals kept electronically; certified electronic copies of paper documents allowed. Act CL of 2017 on the rules of taxation (Art.) §78(3), §202(1). Act C of 2000 is still in force (consolidated state 2026.02.28); no replacing accounting act found.",
+    "sources": [
+      "https://njt.jog.gov.hu/jogszabaly/2000-100-00-00",
+      "https://net.jogtar.hu/jogszabaly?docid=a0000100.tv",
+      "https://njt.jog.gov.hu/jogszabaly/2017-150-00-00"
+    ]
+  },
+  "limitation": {
+    "general_years": 5,
+    "commission_years": 5,
+    "trigger": "Limitation starts when the claim falls due (Ptk. §6:22(2)). No special period for brokerage commission, so the general 5 years applies to the commission claim from its due date. A change of the period must be agreed in writing (§6:22(3)); an agreement excluding limitation is void (§6:22(4)). Suspension §6:24, interruption (e.g. acknowledgement of the debt) §6:25.",
+    "law": "Civil Code Act V of 2013 (Ptk.) §6:22(1): \"Unless this Act provides otherwise, claims become time-barred in five years.\"",
+    "sources": [
+      "https://njt.jog.gov.hu/jogszabaly/2013-5-00-00",
+      "https://net.jogtar.hu/jogszabaly?docid=a1300005.tv"
+    ]
+  },
+  "id_copies": {
+    "rule": "No statute bans copying ID documents outright, but outside a legal duty such as Pmt. §7(8) copying is treated as unlawful. The data protection authority (NAIH) says the data in a valid presented ID must be accepted without copying; a copy has no evidential value and fails purpose limitation and data minimisation; convenience or faster processing does not justify a copy; a note or a signed declaration naming the document shown is the proportionate alternative; documents may be required only where a law authorises it. The personal identification number (back of the address card) may be handled only by the bodies listed in Act XX of 1996 §32, or by a controller with the citizen's prior written consent (§35); NAIH holds that even consent does not allow processing it for identification. Rule for MS Realty: in Hungary copy IDs only for AML CDD under Pmt. §7(8), never copy the back of the address card, and record 'document type and number seen' in other flows.",
+    "law": "GDPR Art. 5(1)(b)-(c) as applied by NAIH opinion NAIH/2018/3654/2/V on document copies; Act XX of 1996 on identification methods replacing the personal identification number (Szaz.tv.) §§32, 35; Pmt. §7(8) a) (the AML exception, excluding the personal-number side of the address card).",
+    "sources": [
+      "https://www.naih.hu/adatvedelmi-allasfoglalasok?download=50%3Aallasfoglalas-az-okmanymasolatok-kesziteserol",
+      "https://njt.jog.gov.hu/jogszabaly/1996-20-00-00",
+      "https://njt.jog.gov.hu/jogszabaly/2017-53-00-00"
+    ]
+  },
+  "confidence": "medium",
+  "unconfirmed": [
+    "Dual agency: no Hungarian statute found that addresses one agent acting for both buyer and seller or charging both sides (searched Lakástv. §§64/A-64/D, Decree 499/2017, Ptk. mandate chapter §§6:272-6:280). Consumer-protection case law and industry codes of ethics were not searched, so the absence of a rule is not exhaustively confirmed.",
+    "Whether Ptk. §6:13 (conflict of interest of a representative) applies to an agent who only introduces the parties and does not sign for either is an interpretation, not confirmed by case law.",
+    "Kúria practice that the commission falls due when the brokered sale contract is signed is known only from secondary sources (law-firm articles), not from a court decision read in full.",
+    "Start point of the 8-year retention in Accounting Act §169 is not stated in the statute; counting from the end of the business year (or approval of the annual report) is UNCONFIRMED.",
+    "Ptk. and Accounting Act §169 body text were read from the net.jogtar.hu consolidated copy because njt.jog.gov.hu renders these long acts only partly; njt footnotes confirm the sections and their amendment history. Pmt., Lakástv., Decree 499/2017, Art. and Act XX of 1996 were read on njt.jog.gov.hu directly.",
+    "NAIH opinion NAIH/2018/3654/2/V was addressed to local government offices; applying it to a private estate agency is by analogy (later NAIH decisions summarised by search, e.g. NAIH-1249/2022 and NAIH-3883-9/2023, were not read in full).",
+    "Cross-border scope: whether an agency with no seat, branch or establishment in Hungary that brokers Hungarian property falls under the Pmt. (§1(1), (1a)) or must notify under Lakástv. §64/A or use temporary cross-border provision under the services act (Act LXXVI of 2009) was not researched.",
+    "Pending amendments (e.g. a tax package amending the Accounting Act) and the future direct application of EU AML Regulation (EU) 2024/1624, which will replace parts of the Pmt. CDD and retention rules, were not checked.",
+    "HUF 500,000 is roughly EUR 1,200-1,300 at recent exchange rates; the conversion is approximate and not from a legal source."
+  ]
+}

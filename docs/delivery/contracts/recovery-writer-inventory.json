@@ -1,7 +1,7 @@
 {
   "kind": "r08_candidate_writer_inventory_v1",
   "sourceBase": "97f2698ae50aff5cd0bf9c9c28462919b1411e92",
-  "status": "all_identified_sites_uninstrumented",
+  "status": "candidate_incomplete_with_one_dormant_c1_command",
   "method": "Tracked application, import, gateway and script source. Collect direct insert/update/delete calls whose first argument names a Drizzle pgTable export. Enclosing named functions identify inner helpers. Test, fixture, rehearsal and seed modules excluded. This detects write sites and cannot establish writer coverage.",
   "unresolved": [
     "Raw SQL, dynamic tables/aliases, delegated calls, stored procedures/triggers, pg-boss internal writes and SQL outside scanned paths",
@@ -377,5 +377,37 @@
     "src/server/work/handover.ts": {
       "handoverTask": "update:tasks"
     }
+  },
+  "boundedSourceCoverage": {
+    "sourceBase": "1a83445d604ff0c04a4799b87a70cb3fbb758732",
+    "slice": "R08 C1",
+    "command": "src/server/auth/grants.ts:revokeStaffGrant",
+    "receiptSeam": "run_operation",
+    "effects": [
+      "actual versioned grant revocation",
+      "exact newly revoked session identities without invented versions",
+      "actual succeeded operation reference"
+    ],
+    "admission": "explicit server-only argument; no runtime caller or activation adapter",
+    "default": "unchanged outcome and no recovery rows",
+    "proof": "local disposable-Postgres source checks only; independent review and hosted qualification remain separate",
+    "evidence": [
+      "src/server/auth/grants-recovery.int.test.ts",
+      "src/server/recovery/access-restrictions.test.ts",
+      "src/server/recovery/journal.test.ts",
+      "src/server/recovery/journal.int.test.ts"
+    ],
+    "coverage": "incomplete",
+    "currentness": "unknown",
+    "archiveAcknowledgment": "unconfigured",
+    "unresolvedSiblings": [
+      "grantStaffCapability",
+      "offboardStaff and lockOutStaff",
+      "direct invitations and credential recovery",
+      "general session issue, logout and rotation",
+      "Case participation and access-request commands",
+      "document-request cancellation and disclosure changes",
+      "all remaining candidate modules and scopes"
+    ]
   }
 }

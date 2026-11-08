@@ -1,0 +1,69 @@
+{
+  "country": "Sweden",
+  "code": "SE",
+  "estate_agency": {
+    "law": "Fastighetsmäklarlag (2021:516) (Real Estate Agents Act), in force 1 July 2021; Fastighetsmäklarförordning (2021:518); supervisor Fastighetsmäklarinspektionen (FMI).",
+    "regulated": "Yes. Registration with FMI is mandatory: 2 kap. 1 § 'Real estate agents and real estate agency firms shall be registered with Fastighetsmäklarinspektionen.' Exemptions: 2 kap. 2 § (brokerage only of rental rights with monthly rent below EUR 10,000 in five listed categories: municipal, free student, leisure, premises, rooms let up to two weeks; advocates) and 2 kap. 3 § (EEA firms operating temporarily in Sweden). FMI supervises registered agents and firms (4 kap. 1 §). The assignment contract is with the individual registered agent: 3 kap. 2 § 'The real estate agency firm may not be party to an assignment agreement for the brokerage of property.' The assignment agreement must be in writing and signed by the parties (3 kap. 3 §).",
+    "dual_agency": "allowed",
+    "rule": "Statutory model: the registered agent is an impartial intermediary who must look after both seller's and buyer's interest (3 kap. 1 §), while giving particular regard to the client's financial interests within good estate-agency practice. Acting for one party against the other as its representative (ombud) is prohibited, except for limited tasks (3 kap. 11 §; the limited-tasks exception applies only to the individual agent, not to the firm, per prop. 2020/21:119 commentary). Related bans: agent may not buy the property (3 kap. 6 §), may not broker to or from colleagues in the same or a closely linked firm, spouse, cohabitant, relatives or other close persons (3 kap. 7 §), may not trade in property (3 kap. 8 §), and must disclose any side activity that could undermine trust to prospective sellers and buyers, to the client before the assignment agreement (3 kap. 9 §). The agent must give advice and information to prospective buyers and sellers (3 kap. 12 §), keep a journal and bid list and hand them to the client, and to buyer and seller when a contract is concluded (3 kap. 18 §).",
+    "quote": "3 kap. 1 §: 'The real estate agent shall perform the assignment with care and in all respects observe good real estate agency practice. The real estate agent shall look after both the seller's and the buyer's interest. Within the framework of the requirements of good real estate agency practice, the agent shall pay particular regard to the client's financial interests.' 3 kap. 11 §: 'A real estate agent or a real estate agency firm may not, as representative, act for the seller against the buyer or for the buyer against the seller. The agent may, however, undertake limited tasks.' Prop. 2020/21:119: 'A central principle of the act is that the real estate agent shall be an impartial intermediary and, when performing the assignment, look after the interests of both the seller and the buyer.'",
+    "commission_both_sides": "Not regulated expressly. Fee is a percentage of the purchase price (provision) unless otherwise agreed (3 kap. 22 §) and is due only if the transfer agreement was concluded through the agent's brokerage (or within an exclusive period) (3 kap. 23 §); fee may be reduced if the agent neglected duties to buyer or seller (3 kap. 24 §). The act does not say who pays; the payer is the client (uppdragsgivare) under the written assignment agreement, normally the seller. No provision names commission from the buyer; any additional paid activity is tested under 3 kap. 9 § (activity that may undermine trust, judged by its nature, scope and the size of the compensation, with clear disclosure to prospective sellers and buyers). Whether taking commission from both sides is lawful is UNCONFIRMED.",
+    "sources": [
+      "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/fastighetsmaklarlag-2021516_sfs-2021-516/",
+      "https://data.riksdagen.se/dokument/sfs-2021-516.text",
+      "https://lagen.nu/2021:516",
+      "https://lagen.nu/2021:518",
+      "https://lagen.nu/prop/2020/21:119"
+    ]
+  },
+  "aml": {
+    "law": "Lag (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism, 1 kap. 2 § första stycket 14 (scope), 3 kap. (customer due diligence), 5 kap. 3–4 §§ (retention); FMI regulations and general advice KAMFS 2021:3 (decided 2 July 2021). Fastighetsmäklarlag 1 kap. 6 § cross-refers to 2017:630.",
+    "sale_scope": "All activity of real estate agents and firms with full registration or special registration for letting brokerage under 2021:516 (1 kap. 2 § p. 14: 'activity as a real estate agent or real estate agency firm with special registration for letting brokerage or full registration under the Real Estate Agents Act (2021:516)'). CDD is required at establishment of a business relationship (3 kap. 4 § first paragraph), i.e. every brokerage assignment, and for occasional transactions of EUR 15,000 or more, including linked transactions (3 kap. 4 § second paragraph). No business relationship may be established or occasional transaction performed without sufficient customer knowledge (3 kap. 1 §).",
+    "letting_threshold": "No monthly-rent threshold in the AML Act. Coverage follows FMI registration: an agent registered for letting brokerage is covered whatever the rent. The EUR 10,000 monthly-rent figure appears only in Fastighetsmäklarlag 2 kap. 2 §, which exempts from registration (and so from AML scope) brokerage of rental rights below EUR 10,000 monthly rent in five categories (municipal, free student, leisure, premises, rooms let up to two weeks).",
+    "both_parties": "yes — by regulator guidance, not by statute. The Act defines 'kund' as a person who has entered or is about to enter a contractual relationship with the obliged entity (1 kap. 8 § p. 4) and does not name the buyer. FMI states: the agent must check the customer's identity (usually the seller) before the assignment agreement is signed, and for occasional transactions over EUR 15,000 must check the buyer's identity before the purchase contract is signed; 'The agent may not take part in the contract signing if customer due diligence on the buyer has not been achieved.' FMI decision 20-0451 (17 Nov 2021, warning) assessed the customer risk profile for both seller and buyer.",
+    "retention_years": 5,
+    "retention_trigger": "5 kap. 3 §: documents and data on CDD measures and on transactions are kept 'for five years'; time runs from when the measures or transactions were carried out or, where a business relationship was established, from when the business relationship ended; for an occasional transaction not carried out because of suspicion, from the refusal.",
+    "extension": "5 kap. 4 §: if necessary to prevent, detect or investigate money laundering or terrorist financing, documents may be kept longer than five years, 'The total time may, however, not exceed ten years.' KAMFS 2021:3 27 §: kept five years, but up to ten years if the matter was reported to the Police or Security Service under 4 kap. 3 and 6 §§ and the Police or another competent authority has told the agent the records must be kept longer. FMI: documents may never be kept longer than ten years.",
+    "id_copy": "Required by FMI regulation, not by the Act. The Act (3 kap. 7 §) requires identification and verification through identity documents, register extracts or other reliable independent sources, including electronic identification. KAMFS 2021:3 16 §: 'The identity documents used to verify the customer's identity shall be documented by copies.' 17 § (remote): verify via reliable e-ID (keep a copy of the e-ID confirmation) or via register checks plus a certified (vidimerad) copy of the ID document.",
+    "sources": [
+      "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-2017630-om-atgarder-mot-penningtvatt-och_sfs-2017-630/",
+      "https://data.riksdagen.se/dokument/sfs-2017-630.text",
+      "https://lagen.nu/2017:630",
+      "https://fmi.se/media/vi2je03d/kamfs-2021-3.pdf",
+      "https://fmi.se/vad-galler-vid-formedling/penningtvatt/kundkannedom/",
+      "https://fmi.se/soktjanster/sok-beslut/beslut/?id=20-0451"
+    ]
+  },
+  "accounting": {
+    "books_years": 7,
+    "annual_accounts_years": 7,
+    "source_documents_years": 7,
+    "trigger": "Until and including the seventh year after the end of the calendar year in which the financial year ended (7 kap. 2 §: 'They shall be kept until and including the seventh year after the end of the calendar year in which the financial year ended (retention period).'). Must be kept in Sweden in orderly, secure form (7 kap. 2 §); electronic storage in another EU state allowed after notifying Skatteverket (7 kap. 3 a §).",
+    "law": "Bokföringslag (1999:1078) 7 kap. 2 § (as amended by Lag 2024:342). The period covers all 'räkenskapsinformation' as defined in 1 kap. 2 § p. 9: balance sheet, journal and general ledger, vouchers (verifikationer) and documents they refer to, system documentation, annual report (årsredovisning), annual accounts (årsbokslut), and contracts and other documents of special importance to the business's financial position.",
+    "sources": ["https://data.riksdagen.se/dokument/sfs-1999-1078.text"]
+  },
+  "limitation": {
+    "general_years": 10,
+    "commission_years": 3,
+    "trigger": "From the claim's coming into existence ('tio år efter tillkomsten'); interrupted by acknowledgement, written demand or reminder, or legal action (5 §), after which a new period runs (6–7 §§). Commission: 3 years when the client is a consumer who used the service mainly for private purposes; 10 years when the client is a business. No special commission limitation rule: Fastighetsmäklarlag 3 kap. 27 § applies the Preskriptionslag. Separately, a buyer or seller claiming damages from the agent must notify the agent within a reasonable time after noticing the grounds, or the right lapses unless the agent acted grossly negligently or dishonestly (3 kap. 26 §).",
+    "law": "Preskriptionslag (1981:130) 2 §: 'A claim becomes time-barred ten years after it arose' and 'The limitation period is, however, three years for a claim against a consumer, if the claim concerns goods, a service or another utility that a trader in his professional activity provided to the consumer for mainly private use.' Fastighetsmäklarlag (2021:516) 3 kap. 27 §: 'As regards limitation, the Limitation Act (1981:130) applies.'",
+    "sources": [
+      "https://data.riksdagen.se/dokument/sfs-1981-130.text",
+      "https://data.riksdagen.se/dokument/sfs-2021-516.text"
+    ]
+  },
+  "id_copies": {
+    "rule": "No specific Swedish statutory rule found that restricts copying identity documents outside AML; GDPR (data minimisation, art. 5(1)(c)) applies. Swedish ID documents carry the personnummer, which the GDPR supplementary act restricts: 3 kap. 10 § 'Personal identity numbers and coordination numbers may be processed without consent only when clearly justified having regard to the purpose of the processing, the importance of secure identification or another considerable reason.' Inside AML scope, copies are required (KAMFS 2021:3 16–17 §§).",
+    "law": "Lag (2018:218) med kompletterande bestämmelser till EU:s dataskyddsförordning, 3 kap. 10 §; GDPR art. 5(1)(c).",
+    "sources": ["https://data.riksdagen.se/dokument/sfs-2018-218.text"]
+  },
+  "confidence": "high",
+  "unconfirmed": [
+    "Whether an agent may take commission from both seller and buyer: no express statutory rule; would be tested under Fastighetsmäklarlag 3 kap. 9 § (activity that may undermine trust) with disclosure.",
+    "Buyer CDD rests on FMI guidance and supervisory practice (fmi.se kundkännedom page, decision 20-0451), not on an express statutory provision naming the buyer.",
+    "That KAMFS 2021:3 is still the current FMI AML regulation (FMI's site still cites it; no replacement found).",
+    "Retention period for the agent's journal, bid list and file copies under Fastighetsmäklarlag 3 kap. 18–19 §§: the act and ordinance 2021:518 set none.",
+    "Exact start of the commission limitation period (date the transfer agreement was concluded vs. invoice date) as applied by courts.",
+    "That no IMY guidance or other national rule specifically restricts copying identity documents outside AML."
+  ]
+}

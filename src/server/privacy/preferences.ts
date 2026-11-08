@@ -6,6 +6,7 @@ import { consentEvents, contactMethods, parties, subscriptions } from "@/db/sche
 import { listingPurposes } from "@/domain/facts";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { alertFrequencies, checkSendEligibility, subscriptionMachine } from "@/domain/subscription";
+import { searchSummary } from "@/features/privacy/search-summary";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import { getEnv } from "../config/env";
@@ -48,23 +49,6 @@ export const consentTerms = (
 ) => readApprovedContent(db, "help", consentSlug[purpose], locale, { lock });
 export const consentPolicyKey = (terms: NonNullable<Awaited<ReturnType<typeof consentTerms>>>) =>
   `${terms.version.id}:${terms.version.number}:${terms.version.contentHash}:${terms.locale}`;
-const searchSummary = (search: NormalizedSearch) =>
-  [
-    search.criteria.purpose === "sale"
-      ? search.locale === "bg"
-        ? "Покупка"
-        : "Buy"
-      : search.locale === "bg"
-        ? "Наем"
-        : "Rent",
-    search.q,
-    search.criteria.price
-      ? `${search.criteria.price.currency} ${search.criteria.price.min === undefined ? "0" : search.criteria.price.min / 100} – ${search.criteria.price.max === undefined ? "∞" : search.criteria.price.max / 100}`
-      : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
 export async function getPreferences(db: Executor, session: Session, locale: PublicLocale) {
   const { person } = await privacyClient(db, session);
   const [party] = await db.select().from(parties).where(eq(parties.id, person.partyId));

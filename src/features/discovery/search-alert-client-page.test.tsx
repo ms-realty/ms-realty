@@ -261,7 +261,7 @@ it.each(["active", "withdrawn"])(
   },
 );
 
-it("states recorded-request copy in the page locale inside the bg/en alert island", async () => {
+it("P10 states the Hebrew recorded request and surrounding alert instructions in RTL", async () => {
   const id = "45000000-0000-4000-8000-000000000002";
   mocks.findOperation.mockResolvedValue({ status: "succeeded", outcome: { id } });
   mocks.preferences.mockResolvedValue({
@@ -286,6 +286,9 @@ it("states recorded-request copy in the page locale inside the bg/en alert islan
       }),
     }),
   );
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("בדיקת הבקשה להעדפות החיפוש");
+  expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute("dir", "rtl");
+  expect(document.querySelector('[lang="en"]')).toBeNull();
   const recorded = screen.getByText("הבקשה להתראות על החיפוש נרשמה.");
   expect(recorded.closest("[lang]")).toHaveAttribute("lang", "he");
   expect(recorded.closest("[dir]")).toHaveAttribute("dir", "rtl");
@@ -326,3 +329,19 @@ it.each(["marketing", "missing"])(
     ).not.toBeInTheDocument();
   },
 );
+
+it("P10 Hebrew opt-in keeps local instructions and separate unchecked consent", async () => {
+  render(
+    await ClientPage({
+      params: Promise.resolve({ locale: "he" }),
+      searchParams: Promise.resolve(criteria),
+    }),
+  );
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("התראות לחיפוש הזה");
+  const consent = screen.getByRole("checkbox");
+  expect(consent).not.toBeChecked();
+  expect(consent.closest("[lang]")).toHaveAttribute("lang", "he");
+  expect(consent.closest("[dir]")).toHaveAttribute("dir", "rtl");
+  expect(screen.getByRole("radio", { name: "synthetic@example.test" })).not.toBeChecked();
+  expect(screen.queryByRole("radio", { name: "unverified@example.test" })).not.toBeInTheDocument();
+});
