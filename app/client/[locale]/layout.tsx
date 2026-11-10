@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { setRequestLocale } from "next-intl/server";
+import { agency } from "@/config/tenant";
 import { DisclosureBehavior } from "@/features/shell/disclosure-behavior";
 import { isRoutableLocale, localeDirection } from "@/i18n/config";
 import { privateRobots } from "@/i18n/seo";
@@ -16,8 +17,8 @@ import { appViewport } from "@/ui/viewport";
 export const viewport: Viewport = appViewport;
 
 export const metadata: Metadata = {
-  title: { template: "%s · MS Realty", default: "MS Realty" },
-  icons: { icon: "/brand/logo-ms-realty.png" },
+  title: { template: `%s · ${agency.name}`, default: agency.name },
+  icons: { icon: agency.logoPath },
   robots: privateRobots,
 };
 

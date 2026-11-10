@@ -1,6 +1,7 @@
 import "server-only";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
+import { agencyTimeZone } from "@/config/tenant";
 import { approvals, proposalResponses, proposalRevisions, proposals } from "@/db/schema";
 import { guardProposalTransition, proposalMachine } from "@/domain/proposal";
 import { sofiaInstant } from "../appointments/time";
@@ -113,7 +114,7 @@ function terms(
     inclusions: input.inclusions,
     parties: context.snapshot,
     deadlineAt,
-    deadlineTimezone: "Europe/Sofia",
+    deadlineTimezone: agencyTimeZone,
     sourceListingRevisionId: context.published.listingRevisionId,
   };
   return { ...data, termsHash: termsDigest(data) };

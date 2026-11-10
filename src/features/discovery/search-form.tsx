@@ -1,3 +1,4 @@
+import { defaultCurrency } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { propertyTypes } from "@/domain/facts";
 import { currencyCodes } from "@/domain/ids";
@@ -58,7 +59,7 @@ export async function SearchForm({
   if (values.minPrice || values.maxPrice)
     rules.push({
       label: extra.amount,
-      value: `${range(values.minPrice, values.maxPrice)} ${values.currency || "EUR"}`,
+      value: `${range(values.minPrice, values.maxPrice)} ${values.currency || defaultCurrency}`,
     });
   if (values.minBeds || values.maxBeds)
     rules.push({ label: copy.bedrooms, value: range(values.minBeds, values.maxBeds) });
@@ -196,7 +197,7 @@ export async function SearchForm({
               <span className={labelClass}>{extra.currency}</span>
               <select
                 name="currency"
-                defaultValue={values.currency || "EUR"}
+                defaultValue={values.currency || defaultCurrency}
                 className={controlClass}
               >
                 {values.currency && !currencyCodes.some((value) => value === values.currency) ? (

@@ -1,16 +1,17 @@
 import { z } from "zod";
+import { jurisdictionCodes, publicLocales } from "@/config/tenant";
 import { areaBases, listingPurposes, propertyTypes } from "@/domain/facts";
 import type { ColumnMapping, ImportField, PreviewRow } from "./csv";
 
 /** Explicit interpretation, displayed before review. No source currency/location is inferred. */
 export const importContextSchema = z
   .object({
-    country: z.enum(["BG", "GR"]),
+    country: z.enum(jurisdictionCodes),
     region: z.string().trim().min(1).max(150),
     propertyType: z.enum(propertyTypes),
     purpose: z.enum(listingPurposes),
     areaBasis: z.enum(areaBases),
-    sourceLanguage: z.enum(["bg", "en", "ru", "de", "nl", "el", "he"]),
+    sourceLanguage: z.enum(publicLocales),
   })
   .strict();
 export type ImportContext = z.infer<typeof importContextSchema>;

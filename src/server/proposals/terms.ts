@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { agencyTimeZone, defaultCurrency } from "@/config/tenant";
 import { type CurrencyCode, currencyCodes, type PublicLocale } from "@/domain/ids";
 import { decimalToMinor } from "@/domain/money";
 import { parseMoneyInput } from "@/i18n/money";
@@ -26,7 +27,7 @@ export const termInputSchema = z.object({
 export function amountToMinor(
   value: string,
   locale?: PublicLocale,
-  currency: CurrencyCode = "EUR",
+  currency: CurrencyCode = defaultCurrency,
 ) {
   return locale
     ? parseMoneyInput(locale, value, currency)
@@ -34,7 +35,7 @@ export function amountToMinor(
 }
 export function deadlineInput(value: Date) {
   const parts = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "Europe/Sofia",
+    timeZone: agencyTimeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

@@ -35,6 +35,8 @@ const outOfScope = [
   /^src\/ui\/form\/specimen/,
   /\/\(dev\)\//,
   /^src\/i18n\/(seo|structured-data|config)\.ts$/,
+  // The tenant profile holds locale tags and country names as configuration, not interface text.
+  /^src\/config\/tenant\.ts$/,
 ];
 export const isCopyScope = (path: string): boolean =>
   /\.tsx?$/.test(path) && !outOfScope.some((pattern) => pattern.test(path));

@@ -1,5 +1,7 @@
+import { agencyTimeZone } from "@/config/tenant";
+
 export const calendarZones = [
-  "Europe/Sofia",
+  agencyTimeZone,
   "Europe/London",
   "Europe/Berlin",
   "Europe/Moscow",
@@ -87,7 +89,7 @@ export function parseCalendarQuery(raw: CalendarSearch = {}, now = new Date()) {
     adjusted = true;
     return fallback;
   };
-  const zone = pick("zone", calendarZones, "Europe/Sofia");
+  const zone = pick("zone", calendarZones, agencyTimeZone);
   const page = (name: string) => {
     const value = raw[name];
     if (value === undefined) return 1;

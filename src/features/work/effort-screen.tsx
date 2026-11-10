@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { agencyTimeZone } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { StaffPage, StaffPanel, staffUi } from "@/features/shell/staff-ui";
 import type { Session } from "@/server/auth/sessions";
@@ -46,7 +47,7 @@ export async function EffortScreen({
   const mayEnter = operation.state === "absent";
   const clock = new Intl.DateTimeFormat(
     locale === "ru" ? "ru-RU" : locale === "en" ? "en-GB" : "bg-BG",
-    { timeZone: "Europe/Sofia", dateStyle: "short", timeStyle: "short" },
+    { timeZone: agencyTimeZone, dateStyle: "short", timeStyle: "short" },
   );
   const retry = new URLSearchParams();
   for (const k of ["category", "minutes", "reason"] as const)

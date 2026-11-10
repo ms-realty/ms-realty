@@ -1,4 +1,30 @@
-// Identifiers, human references, locales and currencies (architecture §4, §4.2, §3.2).
+// Identifiers, human references, locales and currencies (architecture §4, §4.2, §3.2). The
+// tenant-specific values (prefixes, locales, currencies) live in src/config/tenant.ts and are
+// re-exported here so the schema, the gateway and the application keep one import path.
+import {
+  type CurrencyCode,
+  currencyCodes,
+  currencyMinorDigits,
+  listingReferenceMinDigits,
+  type PublicLocale,
+  publicLocales,
+  referencePrefixes,
+  type StaffLocale,
+  sourceLocale,
+  staffLocales,
+} from "../config/tenant";
+
+export {
+  type CurrencyCode,
+  currencyCodes,
+  currencyMinorDigits,
+  type PublicLocale,
+  publicLocales,
+  referencePrefixes,
+  type StaffLocale,
+  sourceLocale,
+  staffLocales,
+};
 
 declare const brand: unique symbol;
 type Brand<T, B extends string> = T & { readonly [brand]: B };
@@ -11,31 +37,20 @@ export function isUuid(value: string): boolean {
 
 // Human references. Listings keep the legacy lot-number format (MS-00100) so every
 // reference already in circulation stays valid; other records get a yearly sequence.
-export const referencePrefixes = {
-  listing: "MS",
-  property: "PR",
-  inquiry: "RQ",
-  case: "CS",
-  appointment: "AP",
-  proposal: "PP",
-  document: "DC",
-  seller_instruction: "SI",
-  privacy_request: "PQ",
-  complaint: "CM",
-  key_set: "KY",
-  import_batch: "IM",
-} as const;
 export type ReferenceKind = keyof typeof referencePrefixes;
 export type HumanReference = Brand<string, "HumanReference">;
 
-const listingReferencePattern = /^MS-\d{5,}$/;
+const listingReferencePattern = new RegExp(
+  `^${referencePrefixes.listing}-\\d{${listingReferenceMinDigits},}$`,
+);
 const yearlyReferencePattern = /^([A-Z]{2})-(\d{4})-(\d{6,})$/;
 
 export function formatListingReference(lotNumber: number): HumanReference {
   if (!Number.isSafeInteger(lotNumber) || lotNumber < 1) {
     throw new Error(`Invalid lot number: ${lotNumber}`);
   }
-  return `MS-${String(lotNumber).padStart(5, "0")}` as HumanReference;
+  const digits = String(lotNumber).padStart(listingReferenceMinDigits, "0");
+  return `${referencePrefixes.listing}-${digits}` as HumanReference;
 }
 
 export function formatReference(
@@ -65,21 +80,11 @@ export function parseReference(
 }
 
 // Locales (AD9). Bulgarian is the editorial source; Hebrew is right-to-left.
-export const publicLocales = ["bg", "en", "ru", "de", "nl", "el", "he"] as const;
-export type PublicLocale = (typeof publicLocales)[number];
-export const staffLocales = ["bg", "ru", "en"] as const;
-export type StaffLocale = (typeof staffLocales)[number];
-export const sourceLocale = "bg" satisfies PublicLocale;
-
 export function isPublicLocale(value: string): value is PublicLocale {
   return (publicLocales as readonly string[]).includes(value);
 }
 
 // ISO 4217. Bulgaria adopted the euro on 2026-01-01; BGN stays for historical amounts.
-export const currencyCodes = ["EUR", "BGN", "USD", "GBP"] as const;
-export type CurrencyCode = (typeof currencyCodes)[number];
-export const currencyMinorDigits: Record<CurrencyCode, number> = { EUR: 2, BGN: 2, USD: 2, GBP: 2 };
-
 export function isCurrencyCode(value: string): value is CurrencyCode {
   return (currencyCodes as readonly string[]).includes(value);
 }

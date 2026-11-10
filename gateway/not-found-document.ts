@@ -5,6 +5,7 @@ import en from "../messages/en/errors.json" with { type: "json" };
 import he from "../messages/he/errors.json" with { type: "json" };
 import nl from "../messages/nl/errors.json" with { type: "json" };
 import ru from "../messages/ru/errors.json" with { type: "json" };
+import { agency, isRtlLocale } from "../src/config/tenant";
 import { isPublicLocale, sourceLocale, staffLocales } from "../src/domain/ids";
 
 const copy = { bg, de, el, en, he, nl, ru };
@@ -49,7 +50,7 @@ function recoveryDocument(path: string, surface: Surface, csp: string | null): s
     nonce || !csp
       ? `<style${nonce ? ` nonce="${nonce}"` : ""}>body{margin:0;background:#fff;color:#192e27;font:1rem/1.6 system-ui,sans-serif}header,main{max-width:42rem;margin-inline:auto;padding:1.5rem;overflow-wrap:anywhere}header{border-bottom:1px solid #d6dfd9}img{display:block;width:8rem;height:auto}h1{font-size:2rem;line-height:1.25}a{display:inline-flex;align-items:center;min-height:2.75rem;color:#214f3c;font-weight:600}a:focus-visible{outline:3px solid #214f3c;outline-offset:4px}</style>`
       : "";
-  return `<!DOCTYPE html><html lang="${locale}" dir="${locale === "he" ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>${escapeHtml(text.title)}</title><link rel="icon" href="/brand/logo-ms-realty.png">${style}</head><body><header><a href="${home}"><img src="/brand/logo-ms-realty.png" width="128" alt="MS Realty"></a></header><main id="main-content"><h1>${escapeHtml(text.title)}</h1><p>${escapeHtml(text.body)}</p><a href="${home}">${escapeHtml(text.home)}</a></main></body></html>`;
+  return `<!DOCTYPE html><html lang="${locale}" dir="${isRtlLocale(locale) ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>${escapeHtml(text.title)}</title><link rel="icon" href="${agency.logoPath}">${style}</head><body><header><a href="${home}"><img src="${agency.logoPath}" width="128" alt="${agency.name}"></a></header><main id="main-content"><h1>${escapeHtml(text.title)}</h1><p>${escapeHtml(text.body)}</p><a href="${home}">${escapeHtml(text.home)}</a></main></body></html>`;
 }
 
 /**

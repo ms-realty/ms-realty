@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { jurisdictionCodes } from "@/config/tenant";
 import {
   areaBases,
   factStates,
@@ -57,7 +58,7 @@ export const emptyDraft: ListingDraft = {
 export const createListingSchema = z.object({
   propertyType: z.enum(propertyTypes),
   purpose: z.enum(listingPurposes),
-  country: z.enum(["BG", "GR"]),
+  country: z.enum(jurisdictionCodes),
   region: z.string().trim().min(1).max(150),
   settlement: z.string().trim().min(1).max(150),
   exactAddress: z.string().trim().max(500),

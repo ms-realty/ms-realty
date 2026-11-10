@@ -1,6 +1,7 @@
 // A Listing's independent lifecycle dimensions (architecture §7.1): commercial availability,
 // editorial review and freshness. Locale, publication and destination delivery live in
 // localized-revision.ts and publication.ts. Publication never establishes availability.
+import { availabilityReviewIntervalDays as tenantReviewIntervalDays } from "../config/tenant";
 import type { Actor } from "./capabilities";
 import type { ListingPurpose } from "./facts";
 import { allowed, type Decision, defineMachine, firstDenial, need } from "./state-machine";
@@ -174,10 +175,8 @@ export type FreshnessState = (typeof freshnessStates)[number];
  * Default availability-review intervals (architecture §7.1): conservative operational
  * defaults, not market facts. The agency may shorten them in its service policy.
  */
-export const availabilityReviewIntervalDays: Readonly<Record<ListingPurpose, number>> = {
-  sale: 14,
-  long_term_rent: 7,
-};
+export const availabilityReviewIntervalDays: Readonly<Record<ListingPurpose, number>> =
+  tenantReviewIntervalDays;
 
 const dayMs = 86_400_000;
 

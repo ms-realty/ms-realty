@@ -1,5 +1,6 @@
 "use client";
 
+import { defaultCurrency } from "@/config/tenant";
 import type { CurrencyCode, PublicLocale } from "@/domain/ids";
 import { formatMoneyInput, parseMoneyInput } from "@/i18n/money";
 import { moneyCopy } from "@/i18n/money-copy";
@@ -31,7 +32,7 @@ export function MoneyField({
   required?: boolean;
   readOnly?: boolean;
 }) {
-  const example = [formatMoneyInput(locale, 123456, currency ?? "EUR"), currency]
+  const example = [formatMoneyInput(locale, 123456, currency ?? defaultCurrency), currency]
     .filter(Boolean)
     .join(" ");
   const guidance = moneyCopy(locale).hint.replace("{example}", example);

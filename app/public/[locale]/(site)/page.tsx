@@ -1,5 +1,6 @@
 // P01: intent entry using the same approved inventory projection as P02.
 import { notFound } from "next/navigation";
+import { agency } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { ListingGrid } from "@/features/discovery/listing-card";
@@ -32,7 +33,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <DiscoveryPage>
       <header className="max-w-reading space-y-4">
-        <p className="text-compact font-semibold">MS Realty</p>
+        <p className="text-compact font-semibold">{agency.name}</p>
         <h1 className="text-title font-semibold">{copy.properties}</h1>
         <p className="text-body text-text-muted">{copy.intro}</p>
       </header>

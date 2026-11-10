@@ -2,6 +2,7 @@
 // tests get safe local defaults so nothing needs configuring to run the suite.
 import "server-only";
 import { z } from "zod";
+import { agency } from "@/config/tenant";
 import { type HostOrigins, parseHostOrigins } from "./hosts";
 
 // An empty variable (as copied from .env.example) counts as unset.
@@ -151,7 +152,7 @@ export function parseEnv(source: Record<string, string | undefined>): ServerEnv 
     canonicalOrigin: env.CANONICAL_ORIGIN ?? appOrigin,
     hosts,
     authSecret: env.AUTH_SECRET ?? devSecret,
-    webauthn: { rpName: env.WEBAUTHN_RP_NAME ?? "MS Realty" },
+    webauthn: { rpName: env.WEBAUTHN_RP_NAME ?? agency.name },
     testOutbox:
       env.ENABLE_TEST_OUTBOX === "1" && Object.values(hosts).every((o) => isLoopbackOrigin(o)),
     email: { from: env.EMAIL_FROM, provider: env.EMAIL_PROVIDER },

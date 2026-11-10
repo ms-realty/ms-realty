@@ -1,6 +1,7 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { defaultCurrency } from "@/config/tenant";
 import { auditEvents, operations, sessions } from "@/db/schema";
 import type { PublicLocale } from "@/domain/ids";
 import { nativeAuthRoute } from "../auth/native";
@@ -245,7 +246,7 @@ export function privacyFormRoute(area: "privacy" | "preferences" | "operations/p
               ...(text(form, "maxPrice")
                 ? {
                     price: {
-                      currency: "EUR",
+                      currency: defaultCurrency,
                       max: Math.round(Number(text(form, "maxPrice")) * 100),
                     },
                   }

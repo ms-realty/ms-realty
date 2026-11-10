@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { defaultCurrency } from "@/config/tenant";
 import { consentEvents, contactMethods, parties, subscriptions } from "@/db/schema";
 import { listingPurposes } from "@/domain/facts";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
@@ -402,7 +403,7 @@ export async function editSearchSubscription(db: Executor, session: Session, inp
       const current = row.criteria as NormalizedSearch | null;
       if (
         !current?.criteria ||
-        (current.criteria.price && current.criteria.price.currency !== "EUR")
+        (current.criteria.price && current.criteria.price.currency !== defaultCurrency)
       )
         throw new AppError("validation_failed");
       const { includeNeedsConfirmation, ...criteria } = current.criteria;
@@ -417,7 +418,7 @@ export async function editSearchSubscription(db: Executor, session: Session, inp
           value.maxPrice === null && current.criteria.price?.min === undefined
             ? undefined
             : {
-                currency: "EUR",
+                currency: defaultCurrency,
                 min: current.criteria.price?.min,
                 ...(value.maxPrice === null ? {} : { max: value.maxPrice }),
               },

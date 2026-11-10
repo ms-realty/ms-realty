@@ -1,6 +1,12 @@
 "use server";
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
+import {
+  agencyTimeZone,
+  isJurisdictionCode,
+  type JurisdictionCode,
+  jurisdictionTimeZone,
+} from "@/config/tenant";
 import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
@@ -78,10 +84,11 @@ export async function processAction(
                 professionalRequired: true,
                 allowNotApplicable: false,
               }));
+          const country = value("country");
           return approveProcessPolicy(db, session, {
             operationId,
             title: value("title"),
-            country: value("country") as "BG",
+            country: country as JurisdictionCode,
             transaction: value("transaction") as "sale",
             participantCategory: value("participantCategory") as "unknown",
             documentVersionId: value("documentVersionId"),
@@ -90,7 +97,7 @@ export async function processAction(
               ...items("partyItems", "due_diligence"),
             ],
             withdrawalDays: value("withdrawalDays") ? Number(value("withdrawalDays")) : Number.NaN,
-            timezone: value("country") === "BG" ? "Europe/Sofia" : "Europe/Athens",
+            timezone: isJurisdictionCode(country) ? jurisdictionTimeZone(country) : agencyTimeZone,
             expressStartRequired: value("expressStartRequired") === "true",
             retentionDays: value("retentionDays") ? Number(value("retentionDays")) : Number.NaN,
             professionalName: value("professionalName"),
