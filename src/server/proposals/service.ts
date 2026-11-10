@@ -14,6 +14,7 @@ import { assertCaseAgreementReady } from "../compliance/agreement-gate";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { notifyProposalChange } from "../notifications/proposals";
 import { type OperationContext, runOperation } from "../operations";
 import { nextReference } from "../references";
 import { allow, commandEnvelope, parseInput, version } from "../work/shared";
@@ -341,6 +342,8 @@ export async function reviseProposal(
         client ? "portal.proposal.respond" : "proposal.manage",
         { priorRevisionId: revision.id, revisionNumber: nextRevision, responseId },
       );
+      if (client)
+        await notifyProposalChange(ctx.tx, "countered", proposal, revision, live.actor, responseId);
       return result(proposal);
     },
   );
@@ -458,6 +461,14 @@ export async function transitionProposal(
         termsHash: revision.termsHash,
         availability: input.action === "submit" ? "in_app" : undefined,
       });
+      // Clients hear about a proposal they can answer, and about one they could answer ending.
+      if (state === "awaiting_response")
+        await notifyProposalChange(ctx.tx, "ready", proposal, revision, live.actor);
+      else if (
+        (state === "withdrawn" || state === "expired") &&
+        revision.state === "awaiting_response"
+      )
+        await notifyProposalChange(ctx.tx, state, proposal, revision, live.actor);
       return result(proposal);
     },
   );
@@ -595,6 +606,14 @@ export async function recordProposalDecision(
             : "proposal.party_agreed",
         "portal.proposal.respond",
         { revisionId: revision.id, responseId: response.id },
+      );
+      await notifyProposalChange(
+        ctx.tx,
+        input.state === "declined" ? "declined" : "accepted",
+        proposal,
+        revision,
+        live.actor,
+        response.id,
       );
       return result(proposal);
     },

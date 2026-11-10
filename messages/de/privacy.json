@@ -31,6 +31,8 @@
     "timezone": "Zeitzone",
     "channel": "Bevorzugter Servicekanal",
     "window": "Bevorzugte Kontaktzeiten",
+    "dealNotices": "Mich per E-Mail informieren, wenn sich in meinen Immobiliengeschäften etwas ändert",
+    "dealNoticesHint": "Besichtigungstermine, Angebote, Dokumentanfragen und Nachrichten. Entfernen Sie das Häkchen, um diese E-Mails zu beenden; im Kundenbereich sehen Sie weiterhin alles.",
     "save": "Serviceeinstellungen speichern",
     "email": "E-Mail",
     "phone": "Telefon",

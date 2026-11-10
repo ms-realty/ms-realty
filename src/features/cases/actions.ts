@@ -16,6 +16,7 @@ import { acceptAppointmentHost } from "@/server/appointments/host-handover";
 import { offerAppointmentHost } from "@/server/appointments/host-offer";
 import {
   arrangeAppointment,
+  confirmAppointmentTime,
   requestAppointment,
   respondToAppointment,
 } from "@/server/appointments/service";
@@ -41,6 +42,7 @@ import { completeDealFromPath, recordPathStep } from "@/server/cases/path";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
+import { kickDealNotices } from "@/server/jobs/web";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { hostHandoverCopy } from "../appointments/host-copy";
@@ -343,16 +345,22 @@ export async function workflowAction(
               reason: values.reason ?? "",
             })
           ).outcome;
+        case "appointmentConfirm":
+          return (await confirmAppointmentTime(db, s, base)).outcome;
       }
     },
     { requireSession: true },
   );
   if (result.ok) {
+    // Service notices this change queued go out now rather than on the next sweep.
+    await kickDealNotices();
     // Acceptance/cancellation removes the submitted form. Keep the recorded outcome
     // visible after a native POST by opening its actor-bound receipt instead.
     if (["handover", "appointmentHost", "appointmentHostHandover"].includes(command))
       redirect(status.href);
-    const appointment = ["request", "arrange", "appointment"].includes(command);
+    const appointment = ["request", "arrange", "appointment", "appointmentConfirm"].includes(
+      command,
+    );
     const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
     return {
       ...state,

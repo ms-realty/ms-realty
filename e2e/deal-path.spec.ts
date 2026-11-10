@@ -27,7 +27,13 @@ test("staff record Path steps, the client sees progress, staff complete the deal
         encoding: "utf8",
       },
     ),
-  ) as { caseId: string; staffToken: string; clientToken: string; steps: string[] };
+  ) as {
+    caseId: string;
+    staffToken: string;
+    clientToken: string;
+    clientEmail: string;
+    steps: string[];
+  };
   expect(f.steps.slice(-2)).toEqual(["registration", "keys_handed_over"]);
   await context.addCookies([
     {
@@ -132,6 +138,33 @@ test("staff record Path steps, the client sees progress, staff complete the deal
     // Staff read the structured outcome in words, never the stored code.
     await page.goto(staffDeal);
     await expect(page.getByText("Completed through the deal path")).toBeVisible();
+    // ADR 0014: each step marked done and the completion reached the client once by e-mail.
+    await expect
+      .poll(
+        async () => {
+          const response = await page.request.get(hostUrl("public", "/api/test-outbox"), {
+            headers: { host: new URL(origins.client).host },
+          });
+          const { messages } = (await response.json()) as {
+            messages: {
+              recipient: string;
+              params: { event?: string };
+              rendered?: { subject: string };
+            }[];
+          };
+          return messages
+            .filter((m) => m.recipient === f.clientEmail)
+            .map((m) => `${m.params.event}: ${m.rendered?.subject.replace(/ \(.*\)$/, "")}`)
+            .sort();
+        },
+        { timeout: 60_000 },
+      )
+      .toEqual([
+        // In the client's own language (Bulgarian here), not the page language.
+        "deal.completed: Сделката Ви е приключена",
+        "deal.step_done: Завършено: Вписване",
+        "deal.step_done: Завършено: Предадени ключове",
+      ]);
   } finally {
     await clientContext.close();
   }

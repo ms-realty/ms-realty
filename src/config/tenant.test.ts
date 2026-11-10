@@ -24,6 +24,9 @@ import {
   publicLocales,
   referencePrefixes,
   rtlLocales,
+  serviceNotificationEnabled,
+  serviceNotificationEvents,
+  serviceNotifications,
   sourceLocale,
   staffLocales,
   strictPublicationPolicy,
@@ -171,5 +174,38 @@ describe("tenant profile", () => {
       signIn: "recent",
       attestationOutlivesAuthor: false,
     });
+  });
+
+  it("sends every service notification for this brand", () => {
+    expect(serviceNotifications.enabled).toBe(true);
+    expect(serviceNotificationEvents).toEqual([
+      "viewing.proposed",
+      "viewing.confirmed",
+      "viewing.moved",
+      "viewing.cancelled",
+      "proposal.ready",
+      "proposal.withdrawn",
+      "proposal.expired",
+      "document.requested",
+      "message.from_broker",
+      "deal.step_done",
+      "deal.completed",
+      "client.viewing_confirmed",
+      "client.viewing_cancelled",
+      "client.viewing_new_time",
+      "client.proposal_accepted",
+      "client.proposal_declined",
+      "client.proposal_countered",
+      "client.document_uploaded",
+      "client.message",
+      "inquiry.acknowledged",
+    ]);
+    expect(Object.keys(serviceNotifications.events).sort()).toEqual(
+      [...serviceNotificationEvents].sort(),
+    );
+    for (const event of serviceNotificationEvents) {
+      expect(serviceNotifications.events[event]).toBe(true);
+      expect(serviceNotificationEnabled(event)).toBe(true);
+    }
   });
 });

@@ -268,3 +268,50 @@ export const agency = {
 
 /** How the assistant introduces itself to providers and OAuth consent screens. */
 export const assistantLabel = `${agency.name} ${agency.assistantName}`;
+
+// Service notifications (ADR 0014). Automatic e-mail notices about a person's own Deal, sent from
+// pre-approved templates without a person pressing send. Not marketing; the client area stays
+// the source of truth. `enabled: false` switches the whole family off for the brand; each event
+// can also be switched off on its own. Delivery still needs a configured email provider.
+
+export const serviceNotificationEvents = [
+  // To the client.
+  "viewing.proposed",
+  "viewing.confirmed",
+  "viewing.moved",
+  "viewing.cancelled",
+  "proposal.ready",
+  "proposal.withdrawn",
+  "proposal.expired",
+  "document.requested",
+  "message.from_broker",
+  "deal.step_done",
+  "deal.completed",
+  // To the accountable broker.
+  "client.viewing_confirmed",
+  "client.viewing_cancelled",
+  "client.viewing_new_time",
+  "client.proposal_accepted",
+  "client.proposal_declined",
+  "client.proposal_countered",
+  "client.document_uploaded",
+  "client.message",
+  // To a website visitor who left an e-mail address with an inquiry.
+  "inquiry.acknowledged",
+] as const;
+export type ServiceNotificationEvent = (typeof serviceNotificationEvents)[number];
+
+export const serviceNotifications: {
+  readonly enabled: boolean;
+  readonly events: Readonly<Record<ServiceNotificationEvent, boolean>>;
+} = {
+  enabled: true,
+  events: Object.fromEntries(serviceNotificationEvents.map((event) => [event, true])) as Record<
+    ServiceNotificationEvent,
+    boolean
+  >,
+};
+
+export function serviceNotificationEnabled(event: ServiceNotificationEvent): boolean {
+  return serviceNotifications.enabled && serviceNotifications.events[event] === true;
+}

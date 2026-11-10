@@ -50,6 +50,7 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
 import { documentAccess } from "../files/access";
+import { notifyDealCompleted, notifyPathStepDone } from "../notifications/deal-path";
 import { runOperation } from "../operations";
 import { termsDigest } from "../proposals/shared";
 import { allow, commandEnvelope, liveStaff, parseInput, version } from "../work/shared";
@@ -451,6 +452,18 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
         },
         step.clientVisible && input.action !== "expect" ? "participants" : "internal",
       );
+      // Only a client-visible step marked done tells the clients; reopen and skip send nothing.
+      if (input.action === "done" && step.clientVisible)
+        await notifyPathStepDone(
+          ctx.tx,
+          {
+            caseId: row.id,
+            caseReference: row.reference,
+            stepKey: step.stepKey,
+            version: step.version + 1,
+          },
+          live.actor,
+        );
       return { ...result(row), stepKey: step.stepKey, state: to };
     },
   );
@@ -591,6 +604,11 @@ export async function completeDealFromPath(db: Executor, session: Session, raw: 
         "case.transition",
         { completionId: completion.id, completedOn: input.completedOn, template },
         "participants",
+      );
+      await notifyDealCompleted(
+        ctx.tx,
+        { caseId: row.id, caseReference: row.reference, completionId: completion.id },
+        live.actor,
       );
       return { ...result(row), completionId: completion.id };
     },
