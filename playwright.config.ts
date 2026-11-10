@@ -12,6 +12,8 @@ const database = new URL(process.env.TEST_DATABASE_URL);
 database.pathname = `/msr_e2e_${process.env.E2E_RUN_ID}`;
 process.env.E2E_DATABASE_URL = database.toString();
 process.env.E2E_FILE_STORAGE_ROOT = join(tmpdir(), `msr-e2e-files-${process.env.E2E_RUN_ID}`);
+// A synthetic stand-in for the old website's media bucket (ADR 0016), filled by the seeds.
+process.env.E2E_LEGACY_MEDIA_DIR = join(tmpdir(), `msr-e2e-legacy-${process.env.E2E_RUN_ID}`);
 process.env.E2E_AUTH_SECRET ??= randomBytes(32).toString("hex");
 
 export default defineConfig({
@@ -58,6 +60,8 @@ export default defineConfig({
       ENABLE_TEST_OUTBOX: "1",
       FILE_STORAGE: "local",
       FILE_STORAGE_ROOT: process.env.E2E_FILE_STORAGE_ROOT,
+      LEGACY_MEDIA_SOURCE: "directory",
+      LEGACY_MEDIA_DIR: process.env.E2E_LEGACY_MEDIA_DIR,
       E2E_PORT: String(port),
       // Synthetic browser runs use the explicit launch-gate staging policy. Hostname
       // differences alone must never suppress production crawling or SEO metadata.

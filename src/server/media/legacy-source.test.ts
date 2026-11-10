@@ -35,7 +35,7 @@ describe("legacy media manifest mapping", () => {
 
   it("keeps the import's asset key as the source key, so the carry-over finds each photo", async () => {
     const sources = await loadLegacySources();
-    const listings = new Map(sources.listings.listings.map((l) => [l.reference, l]));
+    const listings = new Map(sources.listings.listings.map((l) => [l.reference.id, l]));
     const items = buildMediaItems(sources, listings);
     expect(items).toHaveLength(manifest.objects.length);
     for (const item of items) {
@@ -45,6 +45,10 @@ describe("legacy media manifest mapping", () => {
     // Gallery order is the legacy order: each listing's positions are its manifest order.
     const shown = items.flatMap((item) =>
       item.shownIn.map((s) => ({ ...s, key: item.asset.r2Key })),
+    );
+    // Every listing-referenced object is placed somewhere (1,712 objects, often on several).
+    expect(new Set(shown.map((s) => s.key)).size).toBe(
+      manifest.objects.filter((o) => o.listing_references.length > 0).length,
     );
     for (const [reference, listing] of listings) {
       const keys = [...new Set(listing.media.flatMap((m) => m.r2_key ?? []))];

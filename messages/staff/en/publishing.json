@@ -83,7 +83,7 @@
   },
   "carryOver": {
     "title": "Photos from the old website",
-    "lead": "Photos from the old website that are not in the new system yet: {n}. Copy them before you publish so buyers can see them.",
+    "lead": "Not copied to the new system yet: {n}. Copy them before you publish so buyers can see them.",
     "action": "Copy photos from the old website",
     "unconfigured": "Copying is not set up on this server yet. Ask the person who runs the system to copy the photos from the old website.",
     "done": "Photos copied: {n}.",

@@ -184,6 +184,34 @@ export default async function PublishPage({
               {content.pendingDraft ? (
                 <p className="text-dense text-text-muted">{copy.pendingDraft}</p>
               ) : null}
+              {notCopied ? (
+                // ADR 0016: the one thing to do before publishing photos from the old website.
+                <div data-carry-over>
+                  <Notice
+                    tone="warning"
+                    title={copy.carryOver.title}
+                    action={
+                      copyConfigured && mayCopy ? (
+                        <form action={copyLegacyPhotosAction.bind(null, locale, ref)}>
+                          <SubmitButton className={buttonClass("secondary", "w-full sm:w-auto")}>
+                            {copy.carryOver.action}
+                          </SubmitButton>
+                        </form>
+                      ) : null
+                    }
+                  >
+                    <p>{fillCopy(copy.carryOver.lead, { n: notCopied })}</p>
+                    {query.photos === "retry" ? (
+                      <p role="status" className="mt-2">
+                        {copy.carryOver.retry}
+                      </p>
+                    ) : null}
+                    {copyConfigured && mayCopy ? null : (
+                      <p className="mt-2">{copy.carryOver.unconfigured}</p>
+                    )}
+                  </Notice>
+                </div>
+              ) : null}
               <article className="grid gap-4 rounded-panel border border-divider bg-surface p-5">
                 <h3 lang="bg" className="text-heading font-semibold">
                   {content.title || notKnown}
@@ -198,33 +226,6 @@ export default async function PublishPage({
                 </dl>
                 <div className="grid gap-2">
                   <h4 className="text-dense text-text-muted">{copy.photos}</h4>
-                  {notCopied ? (
-                    <div data-carry-over>
-                      <Notice
-                        tone="warning"
-                        title={copy.carryOver.title}
-                        action={
-                          copyConfigured && mayCopy ? (
-                            <form action={copyLegacyPhotosAction.bind(null, locale, ref)}>
-                              <SubmitButton className={buttonClass("secondary")}>
-                                {copy.carryOver.action}
-                              </SubmitButton>
-                            </form>
-                          ) : null
-                        }
-                      >
-                        <p>{fillCopy(copy.carryOver.lead, { n: notCopied })}</p>
-                        {query.photos === "retry" ? (
-                          <p role="status" className="mt-2">
-                            {copy.carryOver.retry}
-                          </p>
-                        ) : null}
-                        {copyConfigured && mayCopy ? null : (
-                          <p className="mt-2">{copy.carryOver.unconfigured}</p>
-                        )}
-                      </Notice>
-                    </div>
-                  ) : null}
                   {leftOut ? (
                     <p className="text-dense text-text-muted" data-carry-over-left-out>
                       {fillCopy(copy.carryOver.leftOut, { n: leftOut })}

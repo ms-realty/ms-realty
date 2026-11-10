@@ -845,10 +845,13 @@ function PhotoEditor({
     modification: asset.modification,
     modificationDisclosure: asset.modificationDisclosure ?? "",
   };
+  // A photo from the old website that is not stored here is explained by LegacyOrigin instead:
+  // it is not waiting for a scan.
+  const legacyWithoutBytes = isLegacyPhotoAwaitingCarryOver(asset) || isLegacyPhotoLeftOut(asset);
   if (!ready && !review)
     return (
       <div className="space-y-4">
-        <Notice tone="warning">{copy.noPreview}</Notice>
+        {legacyWithoutBytes ? null : <Notice tone="warning">{copy.noPreview}</Notice>}
         {upload && !upload.completedAt ? (
           upload.expiresAt > new Date() ? (
             <NativeForm

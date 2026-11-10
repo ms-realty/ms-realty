@@ -392,7 +392,7 @@ describe("legacy photo carry-over (ADR 0016)", () => {
     if (!asset) throw new Error("missing asset");
     // As the upload pipeline leaves a sealed photo before processing.
     const sealedKey = `sealed/${asset.id}/${digestOf(bytes)}`;
-    await publicationFixtureStorage.writeImmutable(sealedKey, bytes, "image/jpeg");
+    await publicationFixtureStorage.writeImmutable(sealedKey, bytes);
     await t.db
       .update(mediaAssets)
       .set({ sealedKey, sha256: digestOf(bytes), byteSize: bytes.length, legacyReference: null })
