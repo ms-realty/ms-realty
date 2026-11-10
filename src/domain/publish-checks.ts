@@ -9,6 +9,7 @@ export const publishBlockers = [
   "title_missing",
   "description_missing",
   "price_undecided",
+  "rent_period_unconfirmed",
   "location_missing",
   "not_available",
 ] as const;
@@ -32,6 +33,12 @@ export interface PublishCheckInput {
   readonly description: string;
   /** The recorded price state; null when no price is recorded at all. */
   readonly priceState: FactState | null;
+  /**
+   * A rent amount was recorded without its period (legacy import). A person confirms the period
+   * on the publish screen; until then it blocks, never guessed.
+   */
+  readonly rentAmountWithoutPeriod?: boolean;
+  readonly rentPeriodConfirmed?: boolean;
   readonly locationKnown: boolean;
   /** Null when no bedroom count is recorded. */
   readonly bedroomsState: FactState | null;
@@ -84,8 +91,10 @@ export function publishChecks(input: PublishCheckInput): PublishChecks {
   if (!input.title.trim()) blockers.push("title_missing");
   if (!input.description.trim()) blockers.push("description_missing");
   // A price is either stated or deliberately withheld ("price on request").
-  if (input.priceState !== "known" && input.priceState !== "withheld")
-    blockers.push("price_undecided");
+  if (input.priceState !== "known" && input.priceState !== "withheld") {
+    if (!input.rentAmountWithoutPeriod) blockers.push("price_undecided");
+    else if (!input.rentPeriodConfirmed) blockers.push("rent_period_unconfirmed");
+  }
   if (!input.locationKnown) blockers.push("location_missing");
   if (!advertisableStates.includes(input.commercialState)) blockers.push("not_available");
 

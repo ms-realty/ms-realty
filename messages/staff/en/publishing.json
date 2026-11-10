@@ -22,7 +22,8 @@
     "description_missing": "There is no Bulgarian description. Add one in the listing text.",
     "price_undecided": "There is no price. Enter the price, or choose “price on request”.",
     "location_missing": "The location is missing. Add the settlement in the listing facts.",
-    "not_available": "The property is sold, let or off the market, so it cannot be advertised. If it is on offer again, record that in Detailed review first."
+    "not_available": "The property is sold, let or off the market, so it cannot be advertised. If it is on offer again, record that in Detailed review first.",
+    "rent_period_unconfirmed": "The rent has no period. Choose “per month” in the Rent period field."
   },
   "warnings": {
     "no_photos": "There are no photos to show. The listing will go online without photos.",
@@ -75,18 +76,22 @@
     "results": "Results",
     "published": "Published",
     "needsAttention": "Needs attention",
-    "summary": "Published: {n}. Needs attention: {total}."
+    "summary": "Published: {n}. Needs attention: {total}.",
+    "listing": "Listing",
+    "photo": "Photo"
   },
   "today": {
     "title": "Check and publish {reference}",
     "next": "nothing to fix first"
   },
+  "rentPeriod": "Rent period",
+  "perMonth": "per month",
+  "rentHint": "The old site recorded this rent without a period. Publishing records it as the monthly rent.",
   "carryOver": {
     "title": "Photos from the old website",
     "lead": "Not copied to the new system yet: {n}. Copy them before you publish so buyers can see them.",
     "action": "Copy photos from the old website",
     "unconfigured": "Copying is not set up on this server yet. Ask the person who runs the system to copy the photos from the old website.",
-    "done": "Photos copied: {n}.",
     "leftOut": "Photos that cannot be used (damaged or missing on the old website): {n}. They are left out.",
     "retry": "Some photos could not be reached. Try again in a few minutes.",
     "fromOldSite": "From the agency's old website.",

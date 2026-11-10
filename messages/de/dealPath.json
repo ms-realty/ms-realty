@@ -1,6 +1,6 @@
 {
   "title": "Der Weg Ihres Immobiliengeschäfts",
-  "lead": "Alle Schritte der Reihe nach, von der ersten Anfrage bis zur Schlüsselübergabe. Ihr Makler hält jeden Schritt fest, sobald er erledigt ist.",
+  "lead": "Von der ersten Anfrage bis zur Schlüsselübergabe. Ihr Makler hält jeden Schritt fest, sobald er erledigt ist.",
   "preview": "Die späteren Schritte sind die üblichen für ein solches Geschäft. Ihr Makler bestätigt sie, sobald die Bedingungen vereinbart sind.",
   "whoActs": "Wer handelt",
   "expectedBy": "Erwartet bis",
@@ -11,8 +11,7 @@
     "current": "Sie sind hier",
     "next": "Als Nächstes",
     "upcoming": "Später",
-    "skipped": "Nicht nötig",
-    "not_recorded": "Hier nicht erfasst"
+    "skipped": "Nicht nötig"
   },
   "actors": {
     "you": "Sie",
@@ -100,5 +99,53 @@
     "reference": "Eintragungs- oder Urkundennummer",
     "boundary": "Diese Seite zeigt, was die Beteiligten wann getan haben. Sie ist keine rechtliche Bescheinigung.",
     "outcome": "Über den Geschäftsweg abgeschlossen"
+  },
+  "progress": "{count} von {total} Schritten erledigt",
+  "doneGroup": "{count, plural, one {# Schritt erledigt} other {# Schritte erledigt}}",
+  "position": "Schritt {n} von {total}",
+  "toCome": "Noch offen",
+  "you": {
+    "common": {
+      "request_received": "Die Agentur erhält Ihre Anfrage und benennt einen Makler, der sich darum kümmert.",
+      "identity_checks": "Die Agentur prüft Ihre Ausweisdokumente und die aller anderen Beteiligten."
+    },
+    "buyer": {
+      "needs_agreed": "Ihr Makler schreibt auf, was Sie suchen, und Sie bestätigen es.",
+      "homes_shortlisted": "Sie wählen aus den Vorschlägen Ihres Maklers die Objekte, die Sie sich näher ansehen möchten.",
+      "viewings": "Ihr Makler vereinbart Besichtigungen der gewählten Objekte und begleitet Sie.",
+      "terms_agreed": "Sie und der Verkäufer nehmen denselben Preis und dieselben Bedingungen des Angebots an.",
+      "deposit_preliminary_contract": "Sie und der Verkäufer unterzeichnen einen Vorvertrag, und Sie zahlen die vereinbarte Anzahlung.",
+      "funds_ready": "Sie stellen das Geld für den Kauf bereit, aus Ersparnissen oder mit einem Bankkredit.",
+      "notary_deed": "Ein Notar bereitet den Vertrag vor und liest ihn mit Ihnen und dem Verkäufer durch, bevor Sie unterschreiben.",
+      "registration": "Der unterzeichnete Vertrag wird auf Ihren Namen in das Grundbuch eingetragen.",
+      "tax_number": "Sie erhalten eine griechische Steuernummer (AFM), auf die sich die Kaufunterlagen beziehen.",
+      "lawyer_property_checks": "Ihr Anwalt prüft, wem die Immobilie gehört und ob Schulden darauf lasten.",
+      "contract_signed": "Sie und der Verkäufer unterzeichnen den Vertrag zu den vereinbarten Bedingungen.",
+      "keys_handed_over": "Der Eigentümer übergibt Ihnen die Schlüssel am vereinbarten Tag."
+    },
+    "tenant": {
+      "needs_agreed": "Ihr Makler schreibt auf, was Sie suchen, und Sie bestätigen es.",
+      "homes_shortlisted": "Sie wählen aus den Vorschlägen Ihres Maklers die Objekte, die Sie sich näher ansehen möchten.",
+      "viewings": "Ihr Makler vereinbart Besichtigungen der gewählten Objekte und begleitet Sie.",
+      "terms_agreed": "Sie und der Vermieter nehmen dieselbe Miete und dieselben Bedingungen des Angebots an.",
+      "lease_signed": "Sie und der Vermieter unterzeichnen den Mietvertrag zu den vereinbarten Bedingungen.",
+      "deposit_first_rent": "Sie zahlen Kaution und erste Miete, und beide Seiten bestätigen den Eingang.",
+      "contract_signed": "Sie und der Vermieter unterzeichnen den Vertrag zu den vereinbarten Bedingungen.",
+      "keys_handed_over": "Der Vermieter übergibt Ihnen die Schlüssel am vereinbarten Tag."
+    },
+    "seller": {
+      "terms_agreed": "Sie und der Käufer nehmen denselben Preis und dieselben Bedingungen des Angebots an.",
+      "deposit_preliminary_contract": "Sie und der Käufer unterzeichnen einen Vorvertrag, und der Käufer zahlt die vereinbarte Anzahlung.",
+      "notary_deed": "Ein Notar bereitet den Vertrag vor und liest ihn mit Ihnen und dem Käufer durch, bevor Sie unterschreiben.",
+      "contract_signed": "Sie und der Käufer unterzeichnen den Vertrag zu den vereinbarten Bedingungen.",
+      "keys_handed_over": "Sie übergeben dem Käufer die Schlüssel am vereinbarten Tag."
+    },
+    "landlord": {
+      "terms_agreed": "Sie und der Mieter nehmen dieselbe Miete und dieselben Bedingungen des Angebots an.",
+      "lease_signed": "Sie und der Mieter unterzeichnen den Mietvertrag zu den vereinbarten Bedingungen.",
+      "deposit_first_rent": "Der Mieter zahlt Kaution und erste Miete, und Sie beide bestätigen den Eingang.",
+      "contract_signed": "Sie und der Mieter unterzeichnen den Vertrag zu den vereinbarten Bedingungen.",
+      "keys_handed_over": "Sie übergeben dem Mieter die Schlüssel am vereinbarten Tag."
+    }
   }
 }

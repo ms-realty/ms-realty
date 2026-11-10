@@ -3,6 +3,7 @@
 // publish a selection. Each call rechecks session, authority and input; the commands record.
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
+import { publicationPolicy } from "@/config/tenant";
 import { isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
@@ -23,7 +24,7 @@ import { formFields } from "@/ui/form/contract";
 import { inventoryCopy } from "./copy";
 import { blockReason, fillCopy, publishCopy } from "./publish-copy";
 
-export type PublishValues = { attested: string; note: string };
+export type PublishValues = { attested: string; note: string; rentPeriod: string };
 export type UnpublishValues = { confirmed: string };
 export type BulkPublishValues = { attested: string };
 
@@ -105,6 +106,7 @@ export async function publishListingAction(
   const values: PublishValues = {
     attested: form.get("attested") === "yes" ? "yes" : "",
     note: String(form.get("note") ?? "").slice(0, 1000),
+    rentPeriod: form.get("rentPeriod") === "month" ? "month" : "",
   };
   const { operationId, expectedRevision } = envelope(form);
   const status = {
@@ -149,12 +151,27 @@ export async function publishListingAction(
         attested: true,
         note: values.note,
         locale,
+        ...(values.rentPeriod === "month" ? { rentPeriod: "month" as const } : {}),
       });
     },
     { requireSession: true },
   );
   if (result.ok && result.data.status === "published")
     redirect(`${path}?done=${encodeURIComponent(operationId)}`);
+  if (
+    result.ok &&
+    result.data.status === "blocked" &&
+    result.data.reason === "rent_period_unconfirmed"
+  )
+    return {
+      ...state,
+      outcome: {
+        kind: "validation",
+        code: "VALIDATION_FAILED",
+        message: inventoryCopy(locale).form.errorSummary,
+        fieldErrors: { rentPeriod: [copy.blockers.rent_period_unconfirmed] },
+      },
+    };
   if (result.ok && result.data.status === "blocked") {
     const reason = result.data.reason;
     return {
@@ -211,7 +228,8 @@ export async function unpublishListingAction(
   const result = await action(
     async ({ db }) => {
       const session = await staffSession(db);
-      requireFreshAuth(session);
+      // ADR 0012: this brand's policy decides whether an active session is enough to unpublish.
+      if (publicationPolicy.signIn === "recent") requireFreshAuth(session);
       return withdrawPublication(db, {
         actor: session.actor,
         operationId,

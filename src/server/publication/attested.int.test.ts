@@ -14,6 +14,7 @@ import {
   propertyFacts,
   publicationManifests,
   sellerInstructions,
+  staffMemberships,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { publishCopy } from "@/features/inventory/publish-copy";
@@ -23,7 +24,7 @@ import { staffFixture } from "../cases/testing";
 import { searchListings } from "../search/search";
 import { createStaff } from "../testing";
 import { publishListingByAttestation, publishView, readyToPublish } from "./attested";
-import { withdrawPublication } from "./commands";
+import { currentEligibility, withdrawPublication } from "./commands";
 import { loadPublishedListings } from "./presentation";
 import {
   createListingFixture,
@@ -360,5 +361,148 @@ describe("one-decision publishing (ADR 0012)", () => {
     expect((await readyToPublish(t.db, broker.actor)).map((row) => row.reference)).not.toContain(
       ready.reference,
     );
+  });
+
+  it("keeps a listing public after the attesting broker leaves; a lapsing policy fails closed", async () => {
+    const leaver = await staffFixture(t.db);
+    const f = await imported();
+    expect((await publish(f.reference, {}, leaver.session)).status).toBe("published");
+    await t.db
+      .update(staffMemberships)
+      .set({ state: "ended" })
+      .where(eq(staffMemberships.principalId, leaver.id));
+    expect(await searchFor(f.reference)).toEqual([f.reference]);
+    const [listing] = await t.db.select().from(listings).where(eq(listings.id, f.listingId));
+    if (!listing) throw new Error("listing missing");
+    const at = (policy: typeof publicationPolicy) =>
+      currentEligibility(
+        t.db,
+        listing,
+        "bg",
+        listing.publicationGeneration,
+        new Date(),
+        false,
+        policy,
+      );
+    expect((await at(publicationPolicy)).input.sellerInstructionValid).toBe(true);
+    expect(
+      (await at({ ...publicationPolicy, attestationOutlivesAuthor: false })).input
+        .sellerInstructionValid,
+    ).toBe(false);
+  });
+
+  it("accepts an active staff session without a recent sign-in", async () => {
+    const f = await imported();
+    const { session } = await createSession(
+      t.db,
+      { kind: "staff", id: broker.id },
+      new Date(Date.now() - 20 * 60_000),
+    );
+    expect((await publish(f.reference, {}, session)).status).toBe("published");
+  });
+
+  it("publishes an imported rent once the broker confirms the period, keeping the amount", async () => {
+    const f = await imported({
+      purpose: "long_term_rent",
+      price: { state: "unknown" },
+      rentWithoutPeriod: { amountMinor: 45_000, currency: "EUR" },
+    });
+    expect((await publishView(t.db, broker.actor, f.reference)).checks.blockers).toEqual([
+      "rent_period_unconfirmed",
+    ]);
+    expect(await publish(f.reference)).toMatchObject({ reason: "rent_period_unconfirmed" });
+    expect(await publish(f.reference, { rentPeriod: "month" })).toMatchObject({
+      status: "published",
+    });
+    const [shown] = await loadPublishedListings(t.db, { references: [f.reference] }, "bg");
+    const [revision] = await t.db
+      .select()
+      .from(listingRevisions)
+      .where(eq(listingRevisions.id, shown?.listingRevisionId ?? ""));
+    expect(revision?.terms).toMatchObject({
+      facts: {
+        price: {
+          state: "known",
+          value: { amountMinor: 45_000, currency: "EUR", period: "month", basis: "asking" },
+        },
+      },
+    });
+    expect(
+      (await searchListings(t.db, { locale: "bg", purpose: "long_term_rent", q: f.reference }))
+        .items.length,
+    ).toBe(1);
+  });
+
+  it("keeps a region-level location precision, also when a saved draft is published", async () => {
+    const f = await imported({ precision: "region" });
+    await t.db
+      .update(listings)
+      .set({
+        draft: {
+          title: "Двустаен апартамент, ново заглавие",
+          description:
+            "Светъл двустаен апартамент близо до парка и минералните извори. Южно изложение, обзаведен, с тераса и изглед към планината.",
+          brokerNote: "",
+          priceState: "known",
+          price: "95000",
+          areaState: "known",
+          area: "68",
+          areaBasis: "living",
+          bedroomsState: "known",
+          bedrooms: "2",
+          sourceReference: "synthetic-source-record",
+          sourceClass: "agency_observed",
+          sourceLanguage: "bg",
+        },
+      })
+      .where(eq(listings.id, f.listingId));
+    expect((await publishView(t.db, broker.actor, f.reference)).content.pendingDraft).toBe(true);
+    expect((await publish(f.reference)).status).toBe("published");
+    const [shown] = await loadPublishedListings(t.db, { references: [f.reference] }, "bg");
+    expect(shown?.title).toBe("Двустаен апартамент, ново заглавие");
+    expect(shown?.disclosure.precision).toBe("region");
+    const [revision] = await t.db
+      .select()
+      .from(listingRevisions)
+      .where(eq(listingRevisions.id, shown?.listingRevisionId ?? ""));
+    expect(revision?.disclosure).toMatchObject({ publicPrecision: "region" });
+  });
+
+  it("publishes a second listing of the same property on the facts already reviewed", async () => {
+    // As the import leaves two active adverts of one property: both bind its fact revision 1.
+    const first = await imported();
+    const [source] = await t.db
+      .select()
+      .from(listingRevisions)
+      .where(eq(listingRevisions.id, first.revisionId));
+    if (!source) throw new Error("revision missing");
+    const reference = `MS-${String(Date.now()).slice(-9)}`;
+    const [sibling] = await t.db
+      .insert(listings)
+      .values({
+        reference,
+        propertyId: first.propertyId,
+        purpose: "sale",
+        commercialState: "confirmation_required",
+        editorialState: "needs_facts",
+        latestRevisionNumber: 1,
+      })
+      .returning();
+    if (!sibling) throw new Error("sibling missing");
+    await t.db.insert(listingRevisions).values({
+      listingId: sibling.id,
+      revisionNumber: 1,
+      factRevisionId: source.factRevisionId,
+      terms: source.terms,
+      sourceCopy: source.sourceCopy,
+      disclosure: source.disclosure,
+      contentDigest: `${source.contentDigest}-sibling`,
+      createdByKind: "staff",
+      createdById: author.id,
+    });
+    expect((await publish(first.reference)).status).toBe("published");
+    expect(await publish(reference)).toMatchObject({ status: "published" });
+    expect(await searchFor(first.reference)).toEqual([first.reference]);
+    expect(await searchFor(reference)).toEqual([reference]);
   });
 });

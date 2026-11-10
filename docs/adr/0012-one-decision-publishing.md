@@ -35,11 +35,13 @@ path is unchanged.
 
 The tenant profile carries the policy (`src/config/tenant.ts`):
 
-|                     | this agency                             | strict (`strictPublicationPolicy`)  |
-| ------------------- | --------------------------------------- | ----------------------------------- |
-| `sellerEvidence`    | `staff_attestation`                     | `reviewed_documents`                |
-| `independentReview` | `false`                                 | `true` (the author may not publish) |
-| `photosRequired`    | `false` (only cleared photos are shown) | `true` (every placed photo cleared) |
+|                             | this agency                              | strict (`strictPublicationPolicy`)            |
+| --------------------------- | ---------------------------------------- | --------------------------------------------- |
+| `sellerEvidence`            | `staff_attestation`                      | `reviewed_documents`                          |
+| `independentReview`         | `false`                                  | `true` (the author may not publish)           |
+| `photosRequired`            | `false` (only cleared photos are shown)  | `true` (every placed photo cleared)           |
+| `signIn`                    | `active_session` (publish and unpublish) | `recent` (the 5-minute step-up)               |
+| `attestationOutlivesAuthor` | `true`                                   | `false` (lapses with the author's membership) |
 
 What stays a person's, under either policy:
 
@@ -51,11 +53,18 @@ What stays a person's, under either policy:
 - Legal, tax and process claims. Copy that declares regulated claims still needs its own
   professional review; the attestation never covers it.
 - Property facts are preserved exactly: price, area, bedrooms, location, reference and source URL
-  are copied, never recomputed.
+  are copied, never recomputed. Publishing keeps the location precision the listing already has,
+  including region-level imports, also when a saved draft is published.
+- A rent the legacy import recorded without its period is never guessed: the Publish screen shows
+  the amount with a "Rent period" field ("per month" preselected), and the person's confirmation
+  is recorded with the same decision. The amount is kept exactly.
+- Two listings of one property (a sale and a rental, or two adverts) share its reviewed facts: the
+  second binds the fact revision the first already had reviewed instead of creating a competing
+  one that would take the first off the site.
 
 "Checked for you" (`src/domain/publish-checks.ts`) is a pure function. Blockers: no Bulgarian
 title or description; a price neither stated nor deliberately withheld; no location; a listing
-that is sold, let or withdrawn. Warnings: no photos, photos not processed yet, a very short
+that is sold, let or withdrawn; a rent without its confirmed period (fixed in place). Warnings: no photos, photos not processed yet, a very short
 description, unknown bedrooms for a dwelling, copy that frames inland Sandanski as a sea, beach or
 coast place. No model call.
 
@@ -63,9 +72,9 @@ coast place. No model call.
 
 The attestation basis lives in existing JSON: `seller_instructions.commercial_terms.basis =
 "staff_attestation"` with the attestation operation id and text. The seller-consent predicate
-accepts that basis while the tenant policy allows it and while its author is an active staff
-member; the reviewed-documents basis stays valid. One migration
-(`0039_seller_attestation_evidence`) relaxes the `seller_instructions_agreed_evidence` CHECK so an
+accepts that basis while the tenant policy allows it; the command only records it for an active
+staff member, and under `attestationOutlivesAuthor` it keeps counting after that person leaves.
+The reviewed-documents basis stays valid. One migration (`0040_seller_attestation_evidence`) relaxes the `seller_instructions_agreed_evidence` CHECK so an
 agreed instruction may name the attestation instead of document ids. Uploading documents remains
 possible and becomes supporting evidence, not a gate.
 
@@ -74,9 +83,10 @@ possible and becomes supporting evidence, not a gate.
 - The agency can carry its active imported listings over in one sitting ("Ready to publish" in
   the inventory) and publish a new listing in one screen. The detailed review stays reachable as a
   secondary entry for anyone who wants each check separately.
-- An attested seller instruction stops counting when its author leaves the agency (the same
-  fail-closed rule as a revoked authority): their listings drop from the public site until a
-  colleague publishes them again.
+- A listing does not drop off the site when the broker who published it leaves. A brand that
+  wants the fail-closed rule sets `attestationOutlivesAuthor: false`.
+- Publishing and unpublishing need an active staff session for this brand; every other sensitive
+  action keeps its own step-up rule.
 - Under `photosRequired: false` a photo whose details are being edited, or that is not processed
   yet, is left out of a new publication instead of blocking it.
 - The strict policy is tested alongside the agency's (`attested-strict.int.test.ts`).

@@ -372,7 +372,15 @@ export async function saveMediaDetails(
 
 export async function reviewMedia(
   db: Executor,
-  command: FileCommand & { id: string; input: unknown },
+  command: FileCommand & {
+    id: string;
+    input: unknown;
+    /**
+     * A recent sign-in is required unless a caller's own policy already decided it is not: the
+     * attested publishing command under a policy that accepts an active session (ADR 0012).
+     */
+    recentSignIn?: boolean;
+  },
 ) {
   parseFileInput(envelope, command);
   const input = parseFileInput(
@@ -401,7 +409,7 @@ export async function reviewMedia(
       ),
     command.input,
   );
-  await fileSession(db, command.session, true);
+  await fileSession(db, command.session, command.recentSignIn !== false);
   await mediaAccess(db, command.session, command.id);
   return runOperation(
     db,
@@ -417,7 +425,7 @@ export async function reviewMedia(
       }),
     },
     async ({ tx, operationId }) => {
-      await fileSession(tx, command.session, true);
+      await fileSession(tx, command.session, command.recentSignIn !== false);
       const [asset] = await tx
         .select()
         .from(mediaAssets)

@@ -164,6 +164,27 @@ export interface PublishContent {
   readonly locationKnown: boolean;
   /** The saved working draft differs from the latest version and is published first. */
   readonly pendingDraft: boolean;
+  /** A rent recorded without its period: the person confirms "per month" when publishing. */
+  readonly rentAmount: { readonly amountMinor: number; readonly currency: string } | null;
+}
+
+/** The rent amount the legacy import kept without a period, for a long-term rental only. */
+export function rentWithoutPeriod(
+  purpose: ListingRow["purpose"],
+  terms: unknown,
+): { amountMinor: number; currency: string } | null {
+  if (purpose !== "long_term_rent") return null;
+  const facts = termsFacts(terms);
+  if (facts.price?.state === "known" || facts.price?.state === "withheld") return null;
+  const amount = facts["price.amount_without_period"];
+  const value = record(amount?.value);
+  return amount?.state === "known" &&
+    typeof value.amountMinor === "number" &&
+    Number.isSafeInteger(value.amountMinor) &&
+    value.amountMinor > 0 &&
+    typeof value.currency === "string"
+    ? { amountMinor: value.amountMinor, currency: value.currency }
+    : null;
 }
 
 const draftKeys = [
@@ -235,6 +256,7 @@ export function publishContent(
       // Freezing a draft records the property's settlement as the known location.
       locationKnown: Boolean(property.settlement?.trim()),
       pendingDraft: true,
+      rentAmount: null,
     };
   }
   const copy = record(record(revision?.sourceCopy).text);
@@ -247,6 +269,7 @@ export function publishContent(
     bedrooms: factOf(facts, "bedrooms"),
     locationKnown: factOf(facts, "location").state === "known",
     pendingDraft: false,
+    rentAmount: rentWithoutPeriod(listing.purpose, revision?.terms),
   };
 }
 
@@ -255,8 +278,11 @@ export function checkInput(
   property: PropertyRow,
   content: PublishContent,
   photos: readonly PhotoReadiness[],
+  rentPeriodConfirmed = false,
 ): PublishCheckInput {
   return {
+    rentAmountWithoutPeriod: content.rentAmount !== null,
+    rentPeriodConfirmed,
     propertyType: property.propertyType,
     commercialState: listing.commercialState,
     title: content.title,
@@ -423,6 +449,8 @@ export interface AttestedPublishInput {
   readonly note?: string;
   /** The staff language the attestation was shown in; its exact text is recorded. */
   readonly locale: StaffLocale;
+  /** The person confirmed a rent recorded without its period is per month. */
+  readonly rentPeriod?: "month";
   readonly now?: Date;
 }
 
@@ -525,6 +553,12 @@ async function confirmImportedFacts(
   listingId: string,
   attestationId: string,
   scope: string,
+  changes: {
+    /** The person confirmed that a rent recorded without its period is per month. */
+    readonly rentPeriod?: "month";
+    /** Keep this disclosure (location precision) rather than the latest version's. */
+    readonly disclosure?: unknown;
+  } = {},
 ) {
   return runOperation(
     db,
@@ -532,7 +566,7 @@ async function confirmImportedFacts(
       actor,
       type: "listing.facts.confirm",
       idempotencyKey: opId(),
-      requestHash: hashRequest({ listingId, attestationId }),
+      requestHash: hashRequest({ listingId, attestationId, ...changes }),
     },
     async ({ tx, operationId }) => {
       const [listing] = await tx
@@ -566,8 +600,46 @@ async function confirmImportedFacts(
         }),
       );
       const absent = absentRequired(property, facts);
-      if (unreviewed.length === 0 && absent.length === 0) return { revisionId: revision.id };
+      const rent =
+        changes.rentPeriod === "month" ? rentWithoutPeriod(listing.purpose, revision.terms) : null;
+      const precision = (value: unknown) => record(value).publicPrecision;
+      const disclosure =
+        changes.disclosure !== undefined &&
+        precision(changes.disclosure) !== precision(revision.disclosure)
+          ? changes.disclosure
+          : revision.disclosure;
+      const factsChange = unreviewed.length > 0 || absent.length > 0;
+      if (!factsChange && !rent && disclosure === revision.disclosure)
+        return { revisionId: revision.id };
       const now = new Date();
+      // The amount stays exactly as recorded; only the period the person confirmed is added.
+      const terms = rent
+        ? (() => {
+            const recorded = record(revision.terms);
+            const { "price.amount_without_period": withoutPeriod, ...facts } = record(
+              recorded.facts,
+            );
+            return {
+              ...recorded,
+              facts: {
+                ...facts,
+                price: {
+                  state: "known",
+                  value: {
+                    amountMinor: rent.amountMinor,
+                    currency: rent.currency,
+                    period: "month",
+                    basis: "asking",
+                  },
+                  unit: null,
+                  basis: null,
+                  sourceClass: record(withoutPeriod).sourceClass ?? "source_supplied",
+                  note: `Rent period confirmed per month: ${scope}`,
+                },
+              },
+            };
+          })()
+        : revision.terms;
       const [latestFacts] = await tx
         .select()
         .from(propertyFactRevisions)
@@ -603,23 +675,68 @@ async function confirmImportedFacts(
         unit: f.unit ?? null,
         basis: f.basis ?? null,
       }));
-      const [factRevision] = await tx
-        .insert(propertyFactRevisions)
-        .values({
-          propertyId: property.id,
-          revisionNumber: (latestFacts?.revisionNumber ?? 0) + 1,
-          basedOnRevisionId: revision.factRevisionId,
-          contentDigest: sha256Hex(canonicalJson({ facts: comparable, reviewedBy: attestationId })),
-          materialChange: absent.length ? "non_material" : "none",
-          note: scope,
-          createdByKind: actor.kind,
-          createdById: actor.id,
-        })
-        .returning();
+      // A sibling listing of the same property (sale and rental, or two adverts) may already
+      // have had these exact values reviewed: bind that approved revision instead of creating a
+      // competing one, which would have to take the sibling's publication down.
+      const key = (f: (typeof comparable)[number]) => canonicalJson(f);
+      const wanted = new Set(comparable.map(key));
+      const approvedRows =
+        factsChange && property.approvedFactRevisionId
+          ? await tx
+              .select()
+              .from(propertyFacts)
+              .where(eq(propertyFacts.factRevisionId, property.approvedFactRevisionId))
+          : [];
+      const shared =
+        approvedRows.length === wanted.size &&
+        approvedRows.every(
+          (f) =>
+            f.reviewedAt !== null ||
+            !needsHumanReview({
+              fieldKey: f.fieldKey,
+              state: f.state,
+              sourceClass: f.sourceClass,
+              reviewedAt: null,
+            }),
+        ) &&
+        approvedRows.every((f) =>
+          wanted.has(
+            key({
+              fieldKey: f.fieldKey,
+              state: f.state,
+              value: f.value ?? null,
+              unit: f.unit ?? null,
+              basis: f.basis ?? null,
+            }),
+          ),
+        )
+          ? property.approvedFactRevisionId
+          : null;
+      const newFacts = factsChange && !shared;
+      const [factRevision] = !factsChange
+        ? [{ id: revision.factRevisionId }]
+        : shared
+          ? [{ id: shared }]
+          : await tx
+              .insert(propertyFactRevisions)
+              .values({
+                propertyId: property.id,
+                revisionNumber: (latestFacts?.revisionNumber ?? 0) + 1,
+                basedOnRevisionId: revision.factRevisionId,
+                contentDigest: sha256Hex(
+                  canonicalJson({ facts: comparable, reviewedBy: attestationId }),
+                ),
+                materialChange: absent.length ? "non_material" : "none",
+                note: scope,
+                createdByKind: actor.kind,
+                createdById: actor.id,
+              })
+              .returning();
       if (!factRevision) throw new Error("Fact revision insert failed");
-      await tx
-        .insert(propertyFacts)
-        .values(rows.map((f) => ({ ...f, factRevisionId: factRevision.id })));
+      if (newFacts)
+        await tx
+          .insert(propertyFacts)
+          .values(rows.map((f) => ({ ...f, factRevisionId: factRevision.id })));
       const placements = await tx
         .select()
         .from(listingRevisionMedia)
@@ -627,9 +744,9 @@ async function confirmImportedFacts(
         .orderBy(asc(listingRevisionMedia.position));
       const content = {
         factRevisionId: factRevision.id,
-        terms: revision.terms,
+        terms,
         sourceCopy: revision.sourceCopy,
-        disclosure: revision.disclosure,
+        disclosure,
         media: placements.map((m) => ({
           id: m.mediaRelationId,
           assetId: m.mediaAssetId,
@@ -642,9 +759,9 @@ async function confirmImportedFacts(
           listingId: listing.id,
           revisionNumber: listing.latestRevisionNumber + 1,
           factRevisionId: factRevision.id,
-          terms: revision.terms,
+          terms,
           sourceCopy: revision.sourceCopy,
-          disclosure: revision.disclosure,
+          disclosure,
           contentDigest: sha256Hex(canonicalJson(content)),
           createdByKind: actor.kind,
           createdById: actor.id,
@@ -675,6 +792,10 @@ async function confirmImportedFacts(
         factRevisionId: factRevision.id,
         confirmedFacts: unreviewed.map((f) => f.fieldKey),
         recordedUnknown: absent,
+        ...(rent ? { rentPeriodConfirmed: "month", rentAmount: rent } : {}),
+        ...(disclosure !== revision.disclosure
+          ? { keptPublicPrecision: precision(disclosure) }
+          : {}),
       };
       await recordAudit(tx, {
         action: "listing.facts.confirmed",
@@ -879,14 +1000,28 @@ export async function publishListingByAttestation(
   });
   if (session.actor.kind !== "staff") throw new AppError("forbidden");
   const live = await requireLiveSession(db, session);
-  // Publishing is a release decision: the same recent sign-in the detailed review asks for.
-  requireFreshAuth(live);
+  // A release decision. The tenant policy says whether an active staff session is enough or a
+  // recent sign-in is needed (the detailed review's step-up window).
+  if (policy.signIn === "recent") requireFreshAuth(live);
   const actor = live.actor;
   if (!input.attested) return blocked("not_attested");
 
   const view = await publishView(db, actor, reference, policy);
   if (!view.mayPublish) return blocked("no_permission");
-  const [blocker] = view.checks.blockers;
+  // The rent period, when the import left it open, is confirmed as part of this decision.
+  const rentPeriod = input.rentPeriod === "month" && view.content.rentAmount ? "month" : undefined;
+  const checks = rentPeriod
+    ? publishChecks(
+        checkInput(
+          view.listing,
+          view.property,
+          view.content,
+          view.photos.map((p) => p.readiness),
+          true,
+        ),
+      )
+    : view.checks;
+  const [blocker] = checks.blockers;
   if (blocker) return blocked(blocker);
   if (!view.revision && !view.content.pendingDraft) return blocked("title_missing", "no_revision");
   const text = publishCopy(input.locale).attestation;
@@ -919,6 +1054,8 @@ export async function publishListingByAttestation(
       if (error instanceof Blocked && view.content.pendingDraft) return null;
       throw error;
     });
+    // Location precision the listing already has (a region-level import stays region-level).
+    const keptDisclosure = state?.revision.disclosure;
     if (!state || hasPendingDraft(state.listing, state.revision, state.facts)) {
       const listing = state?.listing ?? view.listing;
       await freezeListingDraft(db, {
@@ -936,9 +1073,23 @@ export async function publishListingByAttestation(
       throw new Blocked("professional_review_required");
 
     // 3. Imported values no one confirmed: the attesting person confirms them.
+    // The confirmed rent period and the kept precision are recorded in the same new version.
     const facts = recordedFacts(state.facts, state.revision);
-    if (facts.some(needsHumanReview) || absentRequired(state.property, state.facts).length) {
-      await confirmImportedFacts(db, actor, listingId, attestation.attestationId, scope);
+    const precisionOf = (value: unknown) => record(value).publicPrecision;
+    const precisionChanged =
+      keptDisclosure !== undefined &&
+      precisionOf(keptDisclosure) !== precisionOf(state.revision.disclosure);
+    const rentOpen = rentPeriod && rentWithoutPeriod(state.listing.purpose, state.revision.terms);
+    if (
+      facts.some(needsHumanReview) ||
+      absentRequired(state.property, state.facts).length ||
+      rentOpen ||
+      precisionChanged
+    ) {
+      await confirmImportedFacts(db, actor, listingId, attestation.attestationId, scope, {
+        ...(rentOpen ? { rentPeriod: "month" as const } : {}),
+        ...(precisionChanged ? { disclosure: keptDisclosure } : {}),
+      });
       unchanged = false;
       state = await reload(db, listingId);
     }
@@ -1042,6 +1193,7 @@ export async function publishListingByAttestation(
       if (photoReadiness(asset) !== "clearable") continue;
       await reviewMedia(db, {
         session: live,
+        recentSignIn: policy.signIn === "recent",
         operationId: opId(),
         expectedRevision: asset.version,
         id: asset.id,
@@ -1123,7 +1275,7 @@ export async function publishListingByAttestation(
       locales: published,
       unchanged,
       attestationId: attestation.attestationId,
-      warnings: view.checks.warnings,
+      warnings: checks.warnings,
     };
   } catch (error) {
     const reason = blockedFrom(error);
@@ -1170,6 +1322,10 @@ export interface ReadyListing {
   readonly version: number;
   readonly title: string;
   readonly settlement: string;
+  readonly price: PublishContent["price"];
+  readonly area: PublishContent["area"];
+  /** First placed photo with a safe preview, for recognising the listing at a glance. */
+  readonly thumbnailId: string | null;
   readonly warnings: PublishChecks["warnings"];
 }
 
@@ -1208,6 +1364,11 @@ export async function readyToPublish(
       version: view.listing.version,
       title: view.content.title,
       settlement: view.property.settlement,
+      price: view.content.price,
+      area: view.content.area,
+      thumbnailId:
+        view.photos.find((p) => p.readiness === "shown" || p.readiness === "clearable")?.asset.id ??
+        null,
       warnings: view.checks.warnings,
     });
   }

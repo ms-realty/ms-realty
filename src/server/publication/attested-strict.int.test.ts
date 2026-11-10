@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { publicationPolicy } from "@/config/tenant";
 import { listings, sellerInstructions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
+import { createSession } from "../auth/sessions";
 import { staffFixture } from "../cases/testing";
 import { searchListings } from "../search/search";
 import { publishListingByAttestation } from "./attested";
@@ -65,6 +66,8 @@ describe("strict publication policy (reviewed documents, independent review)", (
       sellerEvidence: "reviewed_documents",
       independentReview: true,
       photosRequired: true,
+      signIn: "recent",
+      attestationOutlivesAuthor: false,
     });
   });
 
@@ -141,6 +144,22 @@ describe("strict publication policy (reviewed documents, independent review)", (
       photoState: "unprocessed",
     });
     expect(await publish(f.reference, colleague)).toMatchObject({ reason: "photos_required" });
+    expect(await searchFor(f.reference)).toEqual([]);
+  });
+
+  it("asks for a recent sign-in to publish", async () => {
+    const f = await createListingFixture(t.db, {
+      reviewerId: author.id,
+      placeId: places.settlementId,
+    });
+    const { session } = await createSession(
+      t.db,
+      { kind: "staff", id: colleague.id },
+      new Date(Date.now() - 20 * 60_000),
+    );
+    await expect(publish(f.reference, { ...colleague, session })).rejects.toMatchObject({
+      code: "step_up_required",
+    });
     expect(await searchFor(f.reference)).toEqual([]);
   });
 });

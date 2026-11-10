@@ -11,6 +11,23 @@ import { workflowCopy } from "@/i18n/workflow-copy";
 import { readyToPublish } from "@/server/publication/attested";
 import { cx } from "@/ui/cx";
 
+function money(locale: string, value: unknown) {
+  const amount = value as { amountMinor?: unknown; currency?: unknown; period?: unknown } | null;
+  if (typeof amount?.amountMinor !== "number" || typeof amount.currency !== "string") return null;
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: amount.currency,
+    maximumFractionDigits: 0,
+  }).format(amount.amountMinor / 100);
+}
+
+function area(locale: string, value: unknown) {
+  const measured = value as { value?: unknown } | null;
+  return typeof measured?.value === "number"
+    ? `${new Intl.NumberFormat(locale).format(measured.value)} m²`
+    : null;
+}
+
 export async function ReadyToPublish({ locale, actor }: { locale: string; actor: Actor }) {
   const inventory = inventoryCopy(locale);
   const o10 = inventory.o10;
@@ -70,6 +87,14 @@ export async function ReadyToPublish({ locale, actor }: { locale: string; actor:
             version: row.version,
             title: row.title,
             detail: row.settlement,
+            price:
+              row.price.state === "withheld"
+                ? copy.priceOnRequest
+                : (money(locale, row.price.value) ?? copy.notKnown),
+            area: area(locale, row.area.value) ?? copy.notKnown,
+            ...(row.thumbnailId
+              ? { thumbnail: `/api/files/private/media/${row.thumbnailId}?preview=1` }
+              : {}),
             warnings: row.warnings.map((code) => copy.warnings[code]),
             href: `/${locale}/inventory/${encodeURIComponent(row.reference)}/publish`,
             selectLabel: fillCopy(copy.ready.select, { reference: row.reference }),
@@ -79,6 +104,11 @@ export async function ReadyToPublish({ locale, actor }: { locale: string; actor:
             submit: copy.ready.publish,
             list: copy.ready.view,
             selectAll: copy.ready.selectAll,
+            listing: copy.ready.listing,
+            photo: copy.ready.photo,
+            price: copy.price,
+            area: copy.area,
+            noPhoto: copy.noPhotos,
           }}
         />
       )}
