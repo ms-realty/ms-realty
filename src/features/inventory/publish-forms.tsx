@@ -7,7 +7,12 @@ import { controlClass, errorClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormCopy, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
-import type { BulkPublishValues, PublishValues, UnpublishValues } from "./publish-actions";
+import type {
+  BulkPublishValues,
+  LanguagesValues,
+  PublishValues,
+  UnpublishValues,
+} from "./publish-actions";
 import { InventoryThumbnail } from "./thumbnail";
 
 function Confirm({
@@ -63,6 +68,8 @@ export function PublishForm({
   formCopy,
   labels,
   rent,
+  cleanTitle,
+  formId,
 }: {
   action: FormAction<PublishValues>;
   initialState: FormState<PublishValues>;
@@ -72,6 +79,10 @@ export function PublishForm({
   labels: { attested: string; note: string; submit: string };
   /** A rent the import recorded without a period: confirmed here, in the same decision. */
   rent?: { label: string; month: string; hint: string };
+  /** The title has the old site's ending: removing it is offered, pre-ticked. */
+  cleanTitle?: { label: string; hint: string };
+  /** Language ticks outside the form belong to it through this id. */
+  formId?: string;
 }) {
   return (
     <ActionForm
@@ -84,12 +95,32 @@ export function PublishForm({
       labels={{ attested: labels.attested, note: labels.note, rentPeriod: rent?.label ?? "" }}
       submitLabel={labels.submit}
       layout="full"
+      {...(formId ? { formId } : {})}
     >
       {(form) => {
         const attested = form.field("attested");
         const period = form.field("rentPeriod");
         return (
           <>
+            {cleanTitle ? (
+              <label className="flex min-h-control items-start gap-3 py-2 text-body">
+                <input
+                  type="checkbox"
+                  name="cleanTitle"
+                  value="yes"
+                  defaultChecked
+                  disabled={attested.readOnly}
+                  className="mt-1 size-5 shrink-0 accent-action"
+                  aria-describedby="clean-title-hint"
+                />
+                <span className="grid gap-1">
+                  {cleanTitle.label}
+                  <span id="clean-title-hint" className="text-caption text-text-muted">
+                    {cleanTitle.hint}
+                  </span>
+                </span>
+              </label>
+            ) : null}
             {rent ? (
               <div className="grid gap-2" data-invalid={period.error ? "true" : undefined}>
                 <label htmlFor={period.id} className={labelClass}>
@@ -222,6 +253,8 @@ export function BulkPublishForm({
     price: string;
     area: string;
     noPhoto: string;
+    /** Shown when some titles carry the old site's ending; pre-ticked. */
+    cleanTitles?: string;
   };
 }) {
   const hydrated = useSyncExternalStore(
@@ -329,6 +362,167 @@ export function BulkPublishForm({
                     <span className="hidden pt-1 text-end tabular-nums lg:block">
                       <span className="sr-only">{labels.area} </span>
                       {row.area}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </fieldset>
+            {labels.cleanTitles ? (
+              <label className="flex min-h-control items-start gap-3 py-2 text-body">
+                <input
+                  type="checkbox"
+                  name="cleanTitles"
+                  value="yes"
+                  defaultChecked
+                  disabled={attested.readOnly}
+                  className="mt-1 size-5 shrink-0 accent-action"
+                />
+                <span>{labels.cleanTitles}</span>
+              </label>
+            ) : null}
+            <Confirm
+              id={attested.id}
+              name="attested"
+              label={labels.attested}
+              checked={form.values.attested === "yes"}
+              readOnly={attested.readOnly}
+              error={attested.error}
+              onChange={(checked) => form.setValue("attested", checked ? "yes" : "")}
+            />
+          </>
+        );
+      }}
+    </ActionForm>
+  );
+}
+
+/** Languages of a listing already online: the ticks sit next to each text, outside this form. */
+export function LanguagesForm({
+  action,
+  initialState,
+  permalink,
+  reconciliation,
+  formCopy,
+  labels,
+  formId,
+}: {
+  action: FormAction<LanguagesValues>;
+  initialState: FormState<LanguagesValues>;
+  permalink: string;
+  reconciliation: { href: string; label: string };
+  formCopy: FormCopy;
+  labels: { attested: string; submit: string };
+  formId: string;
+}) {
+  return (
+    <ActionForm
+      action={action}
+      initialState={initialState}
+      permalink={permalink}
+      nativeIdentity="listing-languages"
+      reconciliation={reconciliation}
+      copy={formCopy}
+      labels={{ attested: labels.attested }}
+      submitLabel={labels.submit}
+      formId={formId}
+    >
+      {(form) => {
+        const attested = form.field("attested");
+        return attested.error ? (
+          <p className={errorClass} id={`${attested.id}-error`}>
+            {attested.error}
+          </p>
+        ) : null;
+      }}
+    </ActionForm>
+  );
+}
+
+export type LanguageRow = {
+  reference: string;
+  title: string;
+  excerpt: string;
+  sourceTitle: string;
+  lang: string;
+  warnings: readonly string[];
+  href: string;
+  selectLabel: string;
+};
+
+/** One language for many listings: read each text, tick it, one attestation for the batch. */
+export function BulkLanguageForm({
+  action,
+  initialState,
+  permalink,
+  reconciliation,
+  formCopy,
+  rows,
+  labels,
+}: {
+  action: FormAction<BulkPublishValues>;
+  initialState: FormState<BulkPublishValues>;
+  permalink: string;
+  reconciliation: { href: string; label: string };
+  formCopy: FormCopy;
+  rows: readonly LanguageRow[];
+  labels: { attested: string; submit: string; list: string; source: string };
+}) {
+  return (
+    <ActionForm
+      action={action}
+      initialState={initialState}
+      permalink={permalink}
+      nativeIdentity="inventory-bulk-language"
+      reconciliation={reconciliation}
+      copy={formCopy}
+      labels={{ attested: labels.attested }}
+      submitLabel={labels.submit}
+      layout="full"
+    >
+      {(form) => {
+        const attested = form.field("attested");
+        return (
+          <>
+            <fieldset className="grid gap-3">
+              <legend className="sr-only">{labels.list}</legend>
+              <ul className="divide-y divide-divider border-y border-divider">
+                {rows.map((row) => (
+                  <li
+                    key={row.reference}
+                    className="grid grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-x-4 py-3"
+                  >
+                    <label className="flex size-11 items-center justify-center rounded-control hover:bg-subtle">
+                      <input
+                        type="checkbox"
+                        name="reference"
+                        value={row.reference}
+                        aria-label={row.selectLabel}
+                        disabled={attested.readOnly}
+                        className="size-5 accent-action"
+                      />
+                    </label>
+                    <span className="grid min-w-0 gap-2 py-2">
+                      <a
+                        href={row.href}
+                        lang={row.lang}
+                        className="font-semibold text-action underline"
+                      >
+                        {row.title}
+                      </a>
+                      <span lang={row.lang} className="max-w-reading text-dense">
+                        {row.excerpt}
+                      </span>
+                      <span className="flex flex-wrap gap-x-4 text-dense text-text-muted">
+                        <bdi>{row.reference}</bdi>
+                        <span>
+                          {labels.source}: <span lang="bg">{row.sourceTitle}</span>
+                        </span>
+                      </span>
+                      {row.warnings.map((warning) => (
+                        <span key={warning} className="text-caption text-warning">
+                          {warning}
+                        </span>
+                      ))}
                     </span>
                   </li>
                 ))}

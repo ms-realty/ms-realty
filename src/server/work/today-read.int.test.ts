@@ -125,6 +125,7 @@ async function narrow(staffId: string, values: GrantSpec[]) {
 async function listing(
   ownerId: string,
   editorialState: "draft" | "needs_facts" | "changes_requested" | "in_review" = "draft",
+  commercialState: "negotiating" | "withdrawn" = "negotiating",
 ) {
   const propertyId = await createProperty(t.db);
   const [row] = await t.db
@@ -133,7 +134,7 @@ async function listing(
       reference: `MS-O01-${randomUUID()}`.toUpperCase(),
       propertyId,
       purpose: "sale",
-      commercialState: "withdrawn",
+      commercialState,
       responsibleBrokerId: ownerId,
       editorialState,
       draft: { title: "Synthetic unpublished copy must stay out of Today" },
@@ -340,6 +341,24 @@ it("O01 Continue includes owned Case work and editable listing drafts only withi
   const revoked = await readToday(t.db, staff.session);
   expect(revoked.caseContinue.total).toBe(0);
   expect(revoked.draftContinue.total).toBe(0);
+});
+
+it("O01 leaves withdrawn and archived listings out of the action queue (ADR 0012)", async () => {
+  const staff = await staffFixture(t.db);
+  const archived = await listing(staff.id, "needs_facts", "withdrawn");
+  const active = await listing(staff.id, "needs_facts");
+  await narrow(
+    staff.id,
+    [archived, active].flatMap((row) =>
+      (["listing.read", "listing.edit"] as const).map((capability) => ({
+        capability,
+        recordType: "listing",
+        recordId: row.id,
+      })),
+    ),
+  );
+  const today = await readToday(t.db, staff.session);
+  expect(today.listingReviews.rows.map((row) => row.id)).toEqual([active.id]);
 });
 
 it("O01 counts one listing action once: corrections are review work, a draft keeps its own check", async () => {

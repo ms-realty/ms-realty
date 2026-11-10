@@ -1,6 +1,6 @@
 // O01 projections: scoped before count/order/limit; no unpublished copy, facts or provider payloads.
 import "server-only";
-import { and, asc, desc, eq, inArray, lte, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, lte, notInArray, or, type SQL, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import {
@@ -21,7 +21,7 @@ import { caseGrantVisibility } from "../cases/grant-visibility";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
-import { readyListingIds } from "../publication/attested";
+import { listingPublishStatus } from "../publication/attested";
 import { appointmentCoverageAt, ownerNeedsCoverage } from "./coverage-policy";
 import { openAppointmentStates, visibleWhere } from "./shared";
 
@@ -267,6 +267,8 @@ export async function listingReviewQuery(db: Executor, context: Context, now: Da
     .where(
       and(
         listingScope(context.grants),
+        // Withdrawn, sold and let listings need no action (archived imports are withdrawn).
+        notInArray(listings.commercialState, ["withdrawn", "sold", "let"]),
         or(
           and(canEdit, inArray(listings.editorialState, ["changes_requested", "needs_facts"])),
           and(or(canReviewFacts, canRelease), eq(listings.editorialState, "in_review")),
@@ -281,30 +283,49 @@ export async function listingReviewQuery(db: Executor, context: Context, now: Da
         ),
       ),
     )
-    .orderBy(asc(listings.reviewDueAt), asc(listings.updatedAt), asc(listings.id))
-    .limit(limit + 1);
-  const page = firstPage(rows);
-  // ADR 0012: a listing with nothing to fix is not "facts needed" for someone who may publish
-  // it; it is ready to check and publish on one decision.
-  const candidates = page.rows.filter(
+    .orderBy(asc(listings.reviewDueAt), asc(listings.updatedAt), asc(listings.id));
+  // ADR 0012: for someone who may publish, a listing with nothing to fix is not "facts needed":
+  // all such listings are one line that opens "Ready to publish"; a listing with something to
+  // fix keeps its own line, saying what.
+  const candidates = rows.filter(
     (row) =>
       row.canRelease &&
       row.editorialState !== "in_review" &&
       row.editorialState !== "changes_requested" &&
       ["available", "confirmation_required"].includes(row.commercialState),
   );
-  const ready = await readyListingIds(
+  const status = await listingPublishStatus(
     db,
     context.live.actor,
     candidates.map((row) => row.id),
   );
-  return {
-    ...page,
-    rows: page.rows.map((row): (typeof page.rows)[number] & { readyToPublish?: boolean } => ({
-      ...row,
-      readyToPublish: ready.has(row.id),
-    })),
+  type Row = Omit<(typeof rows)[number], "total"> & {
+    /** The summary line: how many listings are ready to check and publish. */
+    readyCount?: number;
+    /** What stops publishing this listing, for its own line. */
+    fix?: string;
   };
+  const ready = rows.filter((row) => status.get(row.id)?.ready);
+  const rest: Row[] = rows
+    .filter((row) => !status.get(row.id)?.ready)
+    .map(({ total: _total, ...row }) => {
+      const fix = status.get(row.id)?.blocker;
+      return fix ? { ...row, fix } : row;
+    });
+  const first = ready[0];
+  const summary: Row[] = first
+    ? [
+        {
+          ...first,
+          total: undefined,
+          id: "ready-to-publish",
+          reference: "",
+          readyCount: ready.length,
+        },
+      ].map(({ total: _total, ...row }) => row)
+    : [];
+  const all = [...summary, ...rest];
+  return { rows: all.slice(0, limit), total: all.length, hasMore: all.length > limit };
 }
 
 /** A cursor never grants access: every request rechecks live listing and locale review grants. */

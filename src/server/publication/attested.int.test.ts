@@ -23,6 +23,7 @@ import { createSession } from "../auth/sessions";
 import { staffFixture } from "../cases/testing";
 import { searchListings } from "../search/search";
 import { createStaff } from "../testing";
+import { readToday } from "../work/queries";
 import { publishListingByAttestation, publishView, readyToPublish } from "./attested";
 import { currentEligibility, withdrawPublication } from "./commands";
 import { loadPublishedListings } from "./presentation";
@@ -294,7 +295,8 @@ describe("one-decision publishing (ADR 0012)", () => {
     const f = await imported({ photoState: "unprocessed" });
     const view = await publishView(t.db, broker.actor, f.reference);
     expect(view.checks.warnings).toContain("photos_not_ready");
-    expect(view.checks.warnings).toContain("no_photos");
+    // One photo line: photos exist but are not ready, which is not the same as having none.
+    expect(view.checks.warnings).not.toContain("no_photos");
     const result = await publish(f.reference);
     expect(result).toMatchObject({ status: "published" });
     const [shown] = await loadPublishedListings(t.db, { references: [f.reference] }, "bg");
@@ -504,5 +506,22 @@ describe("one-decision publishing (ADR 0012)", () => {
     expect(await publish(reference)).toMatchObject({ status: "published" });
     expect(await searchFor(first.reference)).toEqual([first.reference]);
     expect(await searchFor(reference)).toEqual([reference]);
+  });
+
+  it("shows ready listings as one Today line and a listing to fix as its own line", async () => {
+    const ready = await imported();
+    const rent = await imported({
+      purpose: "long_term_rent",
+      price: { state: "unknown" },
+      rentWithoutPeriod: { amountMinor: 45_000, currency: "EUR" },
+    });
+    const archived = await imported({ commercialState: "withdrawn" });
+    const today = await readToday(t.db, broker.session);
+    const rows = today.listingReviews.rows;
+    const summary = rows.find((row) => row.readyCount);
+    expect(summary?.readyCount).toBeGreaterThan(0);
+    expect(rows.map((row) => row.id)).not.toContain(ready.listingId);
+    expect(rows.map((row) => row.id)).not.toContain(archived.listingId);
+    expect(rows.find((row) => row.id === rent.listingId)?.fix).toBe("rent_period_unconfirmed");
   });
 });

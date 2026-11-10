@@ -4,11 +4,13 @@ import { randomUUID } from "node:crypto";
 import { getDb } from "@/db/client";
 import type { Actor } from "@/domain/capabilities";
 import { inventoryCopy } from "@/features/inventory/copy";
-import { bulkPublishAction } from "@/features/inventory/publish-actions";
-import { fillCopy, publishCopy } from "@/features/inventory/publish-copy";
-import { BulkPublishForm } from "@/features/inventory/publish-forms";
+import { bulkLanguageAction, bulkPublishAction } from "@/features/inventory/publish-actions";
+import { fillCopy, languageName, publishCopy } from "@/features/inventory/publish-copy";
+import { BulkLanguageForm, BulkPublishForm } from "@/features/inventory/publish-forms";
+import { isPublicLocale, publicLocales } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { readyToPublish } from "@/server/publication/attested";
+import { readyLanguages } from "@/server/publication/languages";
 import { cx } from "@/ui/cx";
 
 function money(locale: string, value: unknown) {
@@ -28,13 +30,41 @@ function area(locale: string, value: unknown) {
     : null;
 }
 
-export async function ReadyToPublish({ locale, actor }: { locale: string; actor: Actor }) {
+export async function ReadyToPublish({
+  locale,
+  actor,
+  language,
+}: {
+  locale: string;
+  actor: Actor;
+  /** A public language other than Bulgarian: the per-language decision for that language. */
+  language?: string;
+}) {
   const inventory = inventoryCopy(locale);
   const o10 = inventory.o10;
   const copy = publishCopy(locale);
   const workspace = workflowCopy(locale, "listingWorkspace");
-  const rows = await readyToPublish(getDb(), actor);
+  const chosen = language && isPublicLocale(language) && language !== "bg" ? language : null;
+  const db = getDb();
+  const [rows, languages] = await Promise.all([
+    chosen ? Promise.resolve([]) : readyToPublish(db, actor),
+    readyLanguages(db, actor),
+  ]);
   const operationId = randomUUID();
+  const picker: [string, string, string, number | null][] = [
+    ["bg", copy.ready.sourceView, `/${locale}/inventory?view=ready`, rows.length || null],
+    ...publicLocales
+      .filter((code) => code !== "bg")
+      .map((code): [string, string, string, number | null] => [
+        code,
+        languageName(locale, code),
+        `/${locale}/inventory?view=ready&language=${code}`,
+        languages.get(code)?.length ?? 0,
+      ]),
+  ];
+  const current = chosen ?? "bg";
+  const chosenName = chosen ? languageName(locale, chosen) : "";
+  const languageRows = chosen ? (languages.get(chosen) ?? []) : [];
   const tabs = [
     ["all", o10.all, `/${locale}/inventory`],
     ["needs", o10.needs, `/${locale}/inventory?view=needs`],
@@ -66,8 +96,81 @@ export async function ReadyToPublish({ locale, actor }: { locale: string; actor:
           ))}
         </ul>
       </nav>
-      <p className="max-w-reading">{copy.ready.lead}</p>
-      {rows.length === 0 ? (
+      {/* Which language this decision is about: Bulgarian first, then each translation. */}
+      <nav aria-label={copy.ready.languagesLabel}>
+        <ul className="flex flex-wrap gap-2">
+          {picker.map(([code, label, href, count]) => (
+            <li key={code}>
+              <a
+                href={href}
+                lang={code === "bg" ? undefined : locale}
+                aria-current={code === current ? "page" : undefined}
+                className={cx(
+                  "inline-flex min-h-control items-center gap-2 rounded-control border px-3 text-dense font-semibold no-underline",
+                  code === current
+                    ? "border-action bg-selected text-action"
+                    : "border-border text-text hover:bg-subtle",
+                )}
+              >
+                {label}
+                {count !== null ? (
+                  <span className="font-normal text-text-muted tabular-nums">{count}</span>
+                ) : null}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      {chosen ? (
+        <>
+          <p className="max-w-reading">
+            {fillCopy(copy.ready.languageLead, { language: chosenName })}
+          </p>
+          {languageRows.length === 0 ? (
+            <p className="rounded-panel bg-subtle p-6">
+              {fillCopy(copy.ready.languageNone, { language: chosenName })}
+            </p>
+          ) : (
+            <BulkLanguageForm
+              action={bulkLanguageAction.bind(null, locale, chosen)}
+              initialState={{
+                values: { attested: "" },
+                operationId,
+                expectedRevision: null,
+                responseId: randomUUID(),
+                outcome: { kind: "idle" },
+              }}
+              permalink={`/${locale}/inventory?view=ready&language=${chosen}`}
+              reconciliation={{
+                href: `/${locale}/inventory?view=ready&language=${chosen}`,
+                label: copy.ready.view,
+              }}
+              formCopy={inventory.form}
+              rows={languageRows.map((row) => ({
+                reference: row.reference,
+                title: row.title,
+                excerpt:
+                  row.description.length > 280
+                    ? `${row.description.slice(0, 280).trimEnd()}…`
+                    : row.description,
+                sourceTitle: row.sourceTitle,
+                lang: row.locale,
+                warnings: row.checks.warnings.map((code) => copy.languages.checks[code]),
+                href: `/${locale}/inventory/${encodeURIComponent(row.reference)}/publish#languages`,
+                selectLabel: fillCopy(copy.ready.select, { reference: row.reference }),
+              }))}
+              labels={{
+                attested: fillCopy(copy.ready.languageAttest, { language: chosenName }),
+                submit: fillCopy(copy.ready.publishLanguage, { language: chosenName }),
+                list: chosenName,
+                source: copy.languages.source,
+              }}
+            />
+          )}
+        </>
+      ) : null}
+      {chosen ? null : <p className="max-w-reading">{copy.ready.lead}</p>}
+      {chosen ? null : rows.length === 0 ? (
         <p className="rounded-panel bg-subtle p-6">{copy.ready.none}</p>
       ) : (
         <BulkPublishForm
@@ -85,7 +188,7 @@ export async function ReadyToPublish({ locale, actor }: { locale: string; actor:
           rows={rows.map((row) => ({
             reference: row.reference,
             version: row.version,
-            title: row.title,
+            title: row.cleanedTitle ?? row.title,
             detail: row.settlement,
             price:
               row.price.state === "withheld"
@@ -95,7 +198,10 @@ export async function ReadyToPublish({ locale, actor }: { locale: string; actor:
             ...(row.thumbnailId
               ? { thumbnail: `/api/files/private/media/${row.thumbnailId}?preview=1` }
               : {}),
-            warnings: row.warnings.map((code) => copy.warnings[code]),
+            // The cleaned title is shown in the row; the tick below confirms it.
+            warnings: row.warnings
+              .filter((code) => code !== "title_site_suffix")
+              .map((code) => copy.warnings[code]),
             href: `/${locale}/inventory/${encodeURIComponent(row.reference)}/publish`,
             selectLabel: fillCopy(copy.ready.select, { reference: row.reference }),
           }))}
@@ -109,6 +215,7 @@ export async function ReadyToPublish({ locale, actor }: { locale: string; actor:
             price: copy.price,
             area: copy.area,
             noPhoto: copy.noPhotos,
+            ...(rows.some((row) => row.cleanedTitle) ? { cleanTitles: copy.cleanTitles } : {}),
           }}
         />
       )}

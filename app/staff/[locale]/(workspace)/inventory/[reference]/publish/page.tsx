@@ -5,9 +5,13 @@ import { randomUUID } from "node:crypto";
 import { sourceLocale } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { bedroomCount, inventoryCopy } from "@/features/inventory/copy";
-import { publishListingAction, unpublishListingAction } from "@/features/inventory/publish-actions";
-import { fillCopy, publishCopy } from "@/features/inventory/publish-copy";
-import { PublishForm, UnpublishForm } from "@/features/inventory/publish-forms";
+import {
+  publishLanguagesAction,
+  publishListingAction,
+  unpublishListingAction,
+} from "@/features/inventory/publish-actions";
+import { fillCopy, languageName, publishCopy } from "@/features/inventory/publish-copy";
+import { LanguagesForm, PublishForm, UnpublishForm } from "@/features/inventory/publish-forms";
 import { PrivateMediaPreview } from "@/features/inventory/thumbnail";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
@@ -15,6 +19,7 @@ import { localeEndonyms } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { getEnv } from "@/server/config/env";
 import { publishView } from "@/server/publication/attested";
+import { languageView } from "@/server/publication/languages";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
 
@@ -46,6 +51,7 @@ export default async function PublishPage({
   const query = await searchParams;
   const session = await requireStaffPage(locale);
   const view = await privateRead(() => publishView(getDb(), session.actor, reference));
+  const languages = await privateRead(() => languageView(getDb(), session.actor, reference));
   const copy = publishCopy(locale);
   const inventory = inventoryCopy(locale);
   const ref = view.listing.reference;
@@ -90,10 +96,18 @@ export default async function PublishPage({
   });
   const publishOperation = randomUUID();
   const unpublishOperation = randomUUID();
+  const languagesOperation = randomUUID();
+  const title = content.cleanedTitle ?? content.title;
+  // Language ticks join the Publish decision before the listing is online, and their own
+  // decision once it is (a language never goes online before the Bulgarian text).
+  const languageForm = showForm ? "listing-publish-form" : live ? "listing-languages-form" : null;
+  const tickable = languages.languages.filter(
+    (language) => !language.live && language.mayApprove && language.checks.blockers.length === 0,
+  );
 
   return (
     <div className="flex flex-col gap-6 px-gutter py-5 sm:px-gutter-wide sm:py-6">
-      <ListingIdentity locale={locale} reference={ref} title={content.title} heading />
+      <ListingIdentity locale={locale} reference={ref} title={title} heading />
       <ListingNavigation locale={locale} reference={ref} current="publish" />
 
       {query.unpublished && !live ? (
@@ -163,7 +177,7 @@ export default async function PublishPage({
               ) : null}
               <article className="grid gap-4 rounded-panel border border-divider bg-surface p-5">
                 <h3 lang="bg" className="text-heading font-semibold">
-                  {content.title || notKnown}
+                  {title || notKnown}
                 </h3>
                 <dl className="grid gap-3 sm:grid-cols-2">
                   {preview.map(([label, value]) => (
@@ -265,7 +279,18 @@ export default async function PublishPage({
                   permalink={permalink}
                   reconciliation={status(publishOperation)}
                   formCopy={inventory.form}
+                  formId="listing-publish-form"
                   labels={{ attested: copy.attestation, note: copy.note, submit: copy.publish }}
+                  {...(content.cleanedTitle
+                    ? {
+                        cleanTitle: {
+                          label: copy.cleanTitle,
+                          hint: fillCopy(copy.cleanTitleHint, {
+                            title: content.title.slice(content.cleanedTitle.length).trim(),
+                          }),
+                        },
+                      }
+                    : {})}
                   {...(content.rentAmount
                     ? {
                         rent: { label: copy.rentPeriod, month: copy.perMonth, hint: copy.rentHint },
@@ -276,6 +301,119 @@ export default async function PublishPage({
             </section>
           </div>
         </>
+      ) : null}
+
+      {languages.languages.length ? (
+        <section
+          id="languages"
+          aria-labelledby="publish-languages"
+          className="grid gap-4 border-t border-divider pt-6"
+        >
+          <h2 id="publish-languages" className="text-section font-semibold">
+            {copy.languages.heading}
+          </h2>
+          <p className="max-w-reading">{copy.languages.lead}</p>
+          <ul className="grid gap-6">
+            {languages.languages.map((language) => {
+              const name = languageName(locale, language.locale);
+              const blocked = language.checks.blockers.length > 0;
+              return (
+                <li
+                  key={language.locale}
+                  className="grid gap-3 border-b border-divider pb-6"
+                  data-language={language.locale}
+                >
+                  <h3 className="font-semibold">{name}</h3>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <div lang={language.locale} className="grid content-start gap-2">
+                      <p className="font-semibold">{language.title}</p>
+                      <p className="whitespace-pre-wrap text-dense">{language.description}</p>
+                    </div>
+                    <div lang="bg" className="grid content-start gap-2 text-text-muted">
+                      <p className="font-semibold">{languages.source?.title}</p>
+                      <p className="whitespace-pre-wrap text-dense">
+                        {languages.source?.description}
+                      </p>
+                    </div>
+                  </div>
+                  {blocked ? (
+                    <Notice tone="error" title={copy.languages.fixFirst}>
+                      <ul className="list-disc ps-5">
+                        {language.checks.blockers.map((code) => (
+                          <li key={code} data-language-blocker={code}>
+                            {fillCopy(copy.languages.checks[code], {
+                              code: language.checks.unexpectedNumbers.join(", "),
+                            })}
+                          </li>
+                        ))}
+                      </ul>
+                    </Notice>
+                  ) : null}
+                  {language.checks.warnings.length ? (
+                    <ul className="grid gap-1 text-dense text-warning">
+                      {language.checks.warnings.map((code) => (
+                        <li key={code}>{copy.languages.checks[code]}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {language.live ? (
+                    <p className="font-semibold text-success">{copy.languages.live}</p>
+                  ) : !language.mayApprove ? (
+                    <p className="text-dense text-text-muted">{copy.languages.cannot}</p>
+                  ) : languageForm && !blocked ? (
+                    <label className="flex min-h-control items-start gap-3 py-2">
+                      <input
+                        type="checkbox"
+                        name="language"
+                        value={language.locale}
+                        form={languageForm}
+                        defaultChecked={language.legacyApproved}
+                        className="mt-1 size-5 shrink-0 accent-action"
+                        aria-describedby={
+                          language.legacyApproved ? `legacy-${language.locale}` : undefined
+                        }
+                      />
+                      <span className="grid gap-1">
+                        {fillCopy(copy.languages.attest, { language: name })}
+                        {language.legacyApproved ? (
+                          <span
+                            id={`legacy-${language.locale}`}
+                            className="text-caption text-text-muted"
+                          >
+                            {copy.languages.legacy}
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ) : null}
+                  <a
+                    href={`${path}/translations/${language.locale}`}
+                    className="justify-self-start text-dense text-action underline"
+                  >
+                    {copy.languages.detailed}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+          {live && !showForm && view.mayPublish && tickable.length ? (
+            <LanguagesForm
+              action={publishLanguagesAction.bind(null, locale, ref)}
+              initialState={{
+                values: { attested: "" },
+                operationId: languagesOperation,
+                expectedRevision: null,
+                responseId: randomUUID(),
+                outcome: { kind: "idle" },
+              }}
+              permalink={permalink}
+              reconciliation={{ href: permalink, label: copy.languages.heading }}
+              formCopy={inventory.form}
+              formId="listing-languages-form"
+              labels={{ attested: copy.languages.heading, submit: copy.languages.submit }}
+            />
+          ) : null}
+        </section>
       ) : null}
 
       <p className="grid gap-1 border-t border-divider pt-4 text-dense">

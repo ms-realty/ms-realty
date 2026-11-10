@@ -39,6 +39,7 @@ import {
   type PublishChecks,
   publishChecks,
 } from "@/domain/publish-checks";
+import { withoutLegacySuffix } from "@/domain/translation-checks";
 import { publishCopy } from "@/features/inventory/publish-copy";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
@@ -148,6 +149,8 @@ export interface PublishContent {
   readonly pendingDraft: boolean;
   /** A rent recorded without its period: the person confirms "per month" when publishing. */
   readonly rentAmount: { readonly amountMinor: number; readonly currency: string } | null;
+  /** The title without the old site's brand ending, offered for the person to confirm. */
+  readonly cleanedTitle: string | null;
 }
 
 /** The rent amount the legacy import kept without a period, for a long-term rental only. */
@@ -239,6 +242,7 @@ export function publishContent(
       locationKnown: Boolean(property.settlement?.trim()),
       pendingDraft: true,
       rentAmount: null,
+      cleanedTitle: null,
     };
   }
   const copy = record(record(revision?.sourceCopy).text);
@@ -252,6 +256,8 @@ export function publishContent(
     locationKnown: factOf(facts, "location").state === "known",
     pendingDraft: false,
     rentAmount: rentWithoutPeriod(listing.purpose, revision?.terms),
+    cleanedTitle:
+      typeof copy.title === "string" ? withoutLegacySuffix(copy.title, sourceLocale) : null,
   };
 }
 
@@ -265,6 +271,7 @@ export function checkInput(
   return {
     rentAmountWithoutPeriod: content.rentAmount !== null,
     rentPeriodConfirmed,
+    titleSiteSuffix: content.cleanedTitle !== null,
     propertyType: property.propertyType,
     commercialState: listing.commercialState,
     title: content.title,
@@ -432,6 +439,8 @@ export interface AttestedPublishInput {
   readonly locale: StaffLocale;
   /** The person confirmed a rent recorded without its period is per month. */
   readonly rentPeriod?: "month";
+  /** The person confirmed the title without the old site's brand ending. */
+  readonly cleanTitle?: boolean;
   readonly now?: Date;
 }
 
@@ -539,6 +548,8 @@ async function confirmImportedFacts(
     readonly rentPeriod?: "month";
     /** Keep this disclosure (location precision) rather than the latest version's. */
     readonly disclosure?: unknown;
+    /** The title without the old site's ending, as the person confirmed it. */
+    readonly title?: string;
   } = {},
 ) {
   return runOperation(
@@ -590,7 +601,15 @@ async function confirmImportedFacts(
           ? changes.disclosure
           : revision.disclosure;
       const factsChange = unreviewed.length > 0 || absent.length > 0;
-      if (!factsChange && !rent && disclosure === revision.disclosure)
+      const copyText = record(record(revision.sourceCopy).text);
+      const retitle = changes.title && changes.title !== copyText.title ? changes.title : undefined;
+      const sourceCopy = retitle
+        ? {
+            ...record(revision.sourceCopy),
+            text: { ...copyText, title: retitle, legacyTitle: copyText.title },
+          }
+        : revision.sourceCopy;
+      if (!factsChange && !rent && !retitle && disclosure === revision.disclosure)
         return { revisionId: revision.id };
       const now = new Date();
       // The amount stays exactly as recorded; only the period the person confirmed is added.
@@ -726,7 +745,7 @@ async function confirmImportedFacts(
       const content = {
         factRevisionId: factRevision.id,
         terms,
-        sourceCopy: revision.sourceCopy,
+        sourceCopy,
         disclosure,
         media: placements.map((m) => ({
           id: m.mediaRelationId,
@@ -741,7 +760,7 @@ async function confirmImportedFacts(
           revisionNumber: listing.latestRevisionNumber + 1,
           factRevisionId: factRevision.id,
           terms,
-          sourceCopy: revision.sourceCopy,
+          sourceCopy,
           disclosure,
           contentDigest: sha256Hex(canonicalJson(content)),
           createdByKind: actor.kind,
@@ -774,6 +793,7 @@ async function confirmImportedFacts(
         confirmedFacts: unreviewed.map((f) => f.fieldKey),
         recordedUnknown: absent,
         ...(rent ? { rentPeriodConfirmed: "month", rentAmount: rent } : {}),
+        ...(retitle ? { titleWithoutSiteEnding: retitle, previousTitle: copyText.title } : {}),
         ...(disclosure !== revision.disclosure
           ? { keptPublicPrecision: precision(disclosure) }
           : {}),
@@ -1058,7 +1078,13 @@ export async function publishListingByAttestation(
       keptDisclosure !== undefined &&
       precisionOf(keptDisclosure) !== precisionOf(state.revision.disclosure);
     const rentOpen = rentPeriod && rentWithoutPeriod(state.listing.purpose, state.revision.terms);
+    const currentTitle = record(record(state.revision.sourceCopy).text).title;
+    const cleaned =
+      input.cleanTitle && typeof currentTitle === "string"
+        ? withoutLegacySuffix(currentTitle, sourceLocale)
+        : null;
     if (
+      cleaned ||
       facts.some(needsHumanReview) ||
       absentRequired(state.property, state.facts).length ||
       rentOpen ||
@@ -1067,6 +1093,7 @@ export async function publishListingByAttestation(
       await confirmImportedFacts(db, actor, listingId, attestation.attestationId, scope, {
         ...(rentOpen ? { rentPeriod: "month" as const } : {}),
         ...(precisionChanged ? { disclosure: keptDisclosure } : {}),
+        ...(cleaned ? { title: cleaned } : {}),
       });
       unchanged = false;
       state = await reload(db, listingId);
@@ -1206,45 +1233,9 @@ export async function publishListingByAttestation(
     ];
     const published: PublicLocale[] = [];
     for (const locale of locales) {
-      const listing = (await reload(db, listingId)).listing;
-      const eligibility = await currentEligibility(
-        db,
-        listing,
-        locale,
-        listing.publicationGeneration,
-        new Date(),
-        false,
-        policy,
-      );
-      // A translation without a valid human approval for this version stays unpublished.
-      if (locale !== sourceLocale && !eligibility.input.localeApprovedForSource) continue;
-      if (
-        eligibility.content &&
-        (await sameContentLive(db, listing, locale, eligibility.content))
-      ) {
-        published.push(locale);
-        continue;
-      }
-      const prepared = await prepareManifest(
-        db,
-        {
-          ...envelope(),
-          expectedRevision: listing.publicationGeneration,
-          reference,
-          locale,
-        },
-        storage,
-      );
-      await activateManifest(
-        db,
-        {
-          ...envelope(),
-          expectedRevision: listing.publicationGeneration,
-          manifestId: prepared.outcome.manifestId,
-        },
-        storage,
-      );
-      unchanged = false;
+      const outcome = await publishOneLocale(db, actor, listingId, locale, policy, storage);
+      if (outcome === "not_approved") continue;
+      if (outcome === "published") unchanged = false;
       published.push(locale);
     }
     return {
@@ -1260,6 +1251,55 @@ export async function publishListingByAttestation(
     if (reason) return blocked(reason.reason, reason.detail);
     throw error;
   }
+}
+
+/**
+ * Publishes one locale of the listing's approved version, unless the same content is already
+ * live. A translation without a valid human approval for this version stays unpublished.
+ */
+export async function publishOneLocale(
+  db: Executor,
+  actor: Actor,
+  listingId: string,
+  locale: PublicLocale,
+  policy: PublicationPolicy,
+  storage: { storage?: FileStorage },
+): Promise<"live" | "published" | "not_approved"> {
+  const listing = (await reload(db, listingId)).listing;
+  const eligibility = await currentEligibility(
+    db,
+    listing,
+    locale,
+    listing.publicationGeneration,
+    new Date(),
+    false,
+    policy,
+  );
+  if (locale !== sourceLocale && !eligibility.input.localeApprovedForSource) return "not_approved";
+  if (eligibility.content && (await sameContentLive(db, listing, locale, eligibility.content)))
+    return "live";
+  const prepared = await prepareManifest(
+    db,
+    {
+      actor,
+      operationId: opId(),
+      expectedRevision: listing.publicationGeneration,
+      reference: listing.reference,
+      locale,
+    },
+    storage,
+  );
+  await activateManifest(
+    db,
+    {
+      actor,
+      operationId: opId(),
+      expectedRevision: listing.publicationGeneration,
+      manifestId: prepared.outcome.manifestId,
+    },
+    storage,
+  );
+  return "published";
 }
 
 async function activePointers(db: Executor, listingId: string) {
@@ -1299,6 +1339,8 @@ export interface ReadyListing {
   readonly reference: string;
   readonly version: number;
   readonly title: string;
+  /** The title without the old site's ending, when it has one. */
+  readonly cleanedTitle: string | null;
   readonly settlement: string;
   readonly price: PublishContent["price"];
   readonly area: PublishContent["area"];
@@ -1341,6 +1383,7 @@ export async function readyToPublish(
       reference: view.listing.reference,
       version: view.listing.version,
       title: view.content.title,
+      cleanedTitle: view.content.cleanedTitle,
       settlement: view.property.settlement,
       price: view.content.price,
       area: view.content.area,
@@ -1351,6 +1394,36 @@ export async function readyToPublish(
     });
   }
   return ready;
+}
+
+/**
+ * For each listing id this person may publish and that is not online yet: ready (nothing to fix)
+ * or the first thing to fix. Listings outside that are left out.
+ */
+export async function listingPublishStatus(
+  db: Executor,
+  actor: Actor,
+  ids: readonly string[],
+  policy: PublicationPolicy = publicationPolicy,
+): Promise<Map<string, { ready: boolean; blocker?: PublishBlockReason }>> {
+  const status = new Map<string, { ready: boolean; blocker?: PublishBlockReason }>();
+  if (ids.length === 0) return status;
+  const rows = await db
+    .select({ id: listings.id, reference: listings.reference })
+    .from(listings)
+    .where(inArray(listings.id, [...ids]));
+  for (const row of rows) {
+    const view = await publishView(db, actor, row.reference, policy).catch(() => null);
+    if (
+      !view?.mayPublish ||
+      view.live.length > 0 ||
+      !["available", "confirmation_required"].includes(view.listing.commercialState)
+    )
+      continue;
+    const [blocker] = view.checks.blockers;
+    status.set(row.id, blocker ? { ready: false, blocker } : { ready: true });
+  }
+  return status;
 }
 
 /** Of these listing ids, the ones a person could publish now without fixing anything first. */

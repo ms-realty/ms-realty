@@ -20,6 +20,8 @@ import {
   jurisdictionTimeZones,
   legacyCurrency,
   legacyDomains,
+  legacyTitleSuffixes,
+  privatePageRecheckAfterMs,
   publicationPolicy,
   publicLocales,
   referencePrefixes,
@@ -171,5 +173,11 @@ describe("tenant profile", () => {
       signIn: "recent",
       attestationOutlivesAuthor: false,
     });
+  });
+
+  it("names the old site's title endings for every public locale and the private-page threshold", () => {
+    for (const locale of publicLocales)
+      expect(legacyTitleSuffixes[locale]?.length).toBeGreaterThan(0);
+    expect(privatePageRecheckAfterMs).toBe(15 * 60_000);
   });
 });

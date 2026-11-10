@@ -3,124 +3,148 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PrivatePageGuard } from "./private-page-guard";
 
 const refresh = vi.hoisted(() => vi.fn());
+const access = vi.hoisted(() => vi.fn());
+const reload = vi.hoisted(() => vi.fn());
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
+vi.mock("./private-access-action", () => ({ privateAccessState: access }));
+vi.mock("./reload", () => ({ reloadPage: reload }));
+
+let now = 1_000_000;
+let visibility: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  vi.spyOn(Date, "now").mockImplementation(() => now);
+  visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
 });
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   refresh.mockReset();
+  access.mockReset();
+  reload.mockReset();
 });
+
+const minute = 60_000;
+/** Hide the tab, let `away` pass, show it again. */
+async function leaveFor(away: number) {
+  visibility.mockReturnValue("hidden");
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  now += away;
+  visibility.mockReturnValue("visible");
+  await act(async () => {
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
+function deferred() {
+  let resolve: (value: "active" | "signed_out") => void = () => {};
+  const promise = new Promise<"active" | "signed_out">((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
+const page = () => (
+  <PrivatePageGuard locale="en" recheckAfterMs={15 * minute}>
+    <h1>Private case</h1>
+    <label>
+      Draft
+      <input defaultValue="" />
+    </label>
+  </PrivatePageGuard>
+);
+
 describe("AT39 private page restoration", () => {
-  it("conceals stale private content until refresh completes and preserves an unsaved input", async () => {
-    let finish: () => void = () => {};
-    refresh.mockImplementation(
-      () =>
-        new Promise<void>((resolve) => {
-          finish = resolve;
-        }),
-    );
-    const visibility = vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
-    const page = (verification: string) => (
-      <PrivatePageGuard locale="en" verification={verification}>
-        <h1>Private case</h1>
-        <label>
-          Draft
-          <input defaultValue="" />
-        </label>
-      </PrivatePageGuard>
-    );
-    const { rerender } = render(page("initial"));
+  it("keeps the page through a short absence and rechecks the session in the background", async () => {
+    access.mockResolvedValue("active");
+    render(page());
+    const draft = screen.getByRole("textbox", { name: "Draft" });
+    fireEvent.change(draft, { target: { value: "Unsaved note" } });
+    await leaveFor(2 * minute);
+    expect(access).toHaveBeenCalledOnce();
+    expect(screen.getByText("Private case")).toBeVisible();
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(draft).toHaveValue("Unsaved note");
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("conceals after a short absence only when the session is gone, and goes to sign-in", async () => {
+    access.mockResolvedValue("signed_out");
+    render(page());
+    await leaveFor(2 * minute);
+    expect(screen.getByText("Private case")).not.toBeVisible();
+    expect(reload).toHaveBeenCalledOnce();
+  });
+
+  it("keeps the page through a short absence when the check itself fails", async () => {
+    access.mockRejectedValue(new Error("offline"));
+    render(page());
+    await leaveFor(2 * minute);
+    expect(screen.getByText("Private case")).toBeVisible();
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("conceals a long absence until the server confirms the session, keeping the draft", async () => {
+    const answer = deferred();
+    access.mockReturnValue(answer.promise);
+    render(page());
     const draft = screen.getByRole("textbox", { name: "Draft" });
     draft.focus();
     fireEvent.change(draft, { target: { value: "Unsaved note" } });
-    visibility.mockReturnValue("hidden");
-    act(() => {
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
-    expect(screen.getByText("Private case")).not.toBeVisible();
-    expect(refresh).not.toHaveBeenCalled();
-    visibility.mockReturnValue("visible");
-    act(() => {
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
+    await leaveFor(16 * minute);
     expect(screen.getByRole("status")).toHaveTextContent("Checking access…");
     expect(screen.getByText("Private case")).not.toBeVisible();
     await act(async () => {
-      rerender(page("authorized-response"));
-      finish();
+      answer.resolve("active");
     });
     expect(screen.getByText("Private case")).toBeVisible();
     expect(screen.getByRole("textbox", { name: "Draft" })).toBe(draft);
     expect(draft).toHaveValue("Unsaved note");
     expect(draft).toHaveFocus();
-    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+    expect(refresh).toHaveBeenCalledOnce();
   });
+
   it("a back-forward cache restoration also reauthorizes before showing private content", async () => {
-    let finish: () => void = () => {};
-    refresh.mockImplementation(
-      () =>
-        new Promise<void>((resolve) => {
-          finish = resolve;
-        }),
-    );
-    vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
-    const page = (verification: string) => (
-      <PrivatePageGuard locale="en" verification={verification}>
-        <h1>Protected work</h1>
-      </PrivatePageGuard>
-    );
-    const { rerender } = render(page("initial"));
+    const answer = deferred();
+    access.mockReturnValue(answer.promise);
+    render(page());
     const restored = new Event("pageshow");
     Object.defineProperty(restored, "persisted", { value: true });
-    act(() => {
+    await act(async () => {
       window.dispatchEvent(restored);
     });
-    expect(refresh).toHaveBeenCalledOnce();
-    expect(screen.getByText("Protected work")).not.toBeVisible();
+    expect(access).toHaveBeenCalledOnce();
+    expect(screen.getByText("Private case")).not.toBeVisible();
     await act(async () => {
-      rerender(page("authorized-response"));
-      finish();
+      answer.resolve("active");
     });
-    expect(screen.getByText("Protected work")).toBeVisible();
+    expect(screen.getByText("Private case")).toBeVisible();
   });
-  it("keeps private content concealed when a refresh ends without a fresh server render", async () => {
-    refresh.mockResolvedValue(undefined);
-    vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
-    const page = (verification: string) => (
-      <PrivatePageGuard locale="en" verification={verification}>
-        <h1>Protected work</h1>
-      </PrivatePageGuard>
-    );
-    const { rerender } = render(page("initial"));
-    await act(async () => {
-      const restored = new Event("pageshow");
-      Object.defineProperty(restored, "persisted", { value: true });
-      window.dispatchEvent(restored);
-    });
-    expect(screen.getByText("Protected work")).not.toBeVisible();
-    expect(screen.getByRole("button", { name: "Check access again" })).toBeVisible();
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Check access again" }));
-    });
-    expect(refresh).toHaveBeenCalledTimes(2);
-    expect(screen.getByText("Protected work")).not.toBeVisible();
-    rerender(page("authorized-response"));
-    expect(screen.getByText("Protected work")).toBeVisible();
+
+  it("never dead-ends: a failed check stays concealed and its retry reloads the page", async () => {
+    access.mockRejectedValue(new Error("offline"));
+    render(page());
+    await leaveFor(16 * minute);
+    expect(screen.getByText("Private case")).not.toBeVisible();
+    const retry = screen.getByRole("button", { name: "Check access again" });
+    fireEvent.click(retry);
+    expect(reload).toHaveBeenCalledOnce();
+  });
+
+  it("a long absence with a lost session goes to sign-in", async () => {
+    access.mockResolvedValue("signed_out");
+    render(page());
+    await leaveFor(16 * minute);
+    expect(screen.getByText("Private case")).not.toBeVisible();
+    expect(reload).toHaveBeenCalledOnce();
   });
 });
 
 it("ignores duplicate visible notifications that did not follow a hidden page", () => {
-  vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
-  render(
-    <PrivatePageGuard locale="en" verification="initial">
-      <p>Private content</p>
-    </PrivatePageGuard>,
-  );
+  render(page());
   act(() => {
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  expect(refresh).not.toHaveBeenCalled();
-  expect(screen.getByText("Private content")).toBeVisible();
+  expect(access).not.toHaveBeenCalled();
+  expect(screen.getByText("Private case")).toBeVisible();
 });

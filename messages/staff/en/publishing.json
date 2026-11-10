@@ -30,7 +30,8 @@
     "photos_not_ready": "Some photos are still being prepared. They will appear once they are ready and you approve them.",
     "short_description": "The description is very short. Buyers usually need more detail.",
     "bedrooms_unknown": "The number of bedrooms is not known.",
-    "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Please check the wording."
+    "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Please check the wording.",
+    "title_site_suffix": "The title ends with the old site's name. It is shown without it below."
   },
   "attestation": "I checked this listing. The facts are right, the owner asked us to advertise it on these terms, we may use these photos, and it is available.",
   "attestationRequired": "Tick the box to confirm that you checked the listing.",
@@ -77,13 +78,56 @@
     "needsAttention": "Needs attention",
     "summary": "Published: {n}. Needs attention: {total}.",
     "listing": "Listing",
-    "photo": "Photo"
+    "photo": "Photo",
+    "sourceView": "Bulgarian",
+    "languagesLabel": "Language",
+    "languageLead": "These listings are online in Bulgarian and their {language} text passed every check. Read each text, tick the box and publish them in {language}.",
+    "languageNone": "No {language} texts are ready. A text appears here when the listing is online in Bulgarian and the text passes every check.",
+    "publishLanguage": "Publish in {language}",
+    "languageAttest": "I read these texts in {language} and each says the same as the Bulgarian."
   },
   "today": {
     "title": "Check and publish {reference}",
-    "next": "nothing to fix first"
+    "next": "nothing to fix first",
+    "readySummary": "Ready to check and publish: {n}",
+    "readyNext": "open the list, check and publish",
+    "fixTitle": "Fix before publishing {reference}"
   },
   "rentPeriod": "Rent period",
   "perMonth": "per month",
-  "rentHint": "The old site recorded this rent without a period. Publishing records it as the monthly rent."
+  "rentHint": "The old site recorded this rent without a period. Publishing records it as the monthly rent.",
+  "cleanTitle": "Remove the old site's ending from the title",
+  "cleanTitleHint": "Removed ending: {title}",
+  "cleanTitles": "Remove the old site's endings from the titles shown",
+  "languages": {
+    "heading": "Languages",
+    "lead": "Each language goes online only when you tick it. Tick only the languages you can read.",
+    "source": "Bulgarian",
+    "attest": "I read the {language} text and it says the same as the Bulgarian.",
+    "legacy": "The old site recorded this text as approved and published by the agency. Your tick confirms it.",
+    "live": "Published",
+    "fixFirst": "Fix before approving",
+    "worthChecking": "Worth checking",
+    "cannot": "Your role cannot approve translations in this language.",
+    "submit": "Publish languages",
+    "none": "There are no translations of this listing yet.",
+    "detailed": "Edit a translation in detail",
+    "result": "{language}: {reason}",
+    "checks": {
+      "empty": "The translation is empty. Add the text in Edit a translation in detail.",
+      "same_as_source": "The text is the same as the Bulgarian, so it is not translated yet.",
+      "numbers_differ": "These numbers are not in the listing: {code}. Correct them in Edit a translation in detail.",
+      "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Correct the wording.",
+      "length_implausible": "The text is much shorter or longer than the Bulgarian, so part may be missing.",
+      "length_unusual": "The text is noticeably shorter or longer than the Bulgarian.",
+      "place_name_missing": "The place named in the Bulgarian text does not appear."
+    },
+    "reasons": {
+      "source_not_published": "Publish the listing first; its languages follow it.",
+      "checks_failed": "The check found a problem in this text.",
+      "no_permission": "Your role cannot approve translations in this language.",
+      "no_draft": "There is no translation in this language.",
+      "other": "This language could not be published. Open Detailed review."
+    }
+  }
 }

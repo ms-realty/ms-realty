@@ -252,6 +252,48 @@ export const listingReferenceMinDigits = 5;
 
 export const legacyDomains = ["makler-realty.com", "makler-realty.ru"] as const;
 
+/**
+ * The old site's brand endings on listing titles, per locale ("<title> - Real estate in
+ * Bulgaria. Agency in Sandanski"). Publishing offers the title without the ending; a person's
+ * decision confirms it (ADR 0012). Matched case-insensitively after " - ", " – " or " | ".
+ */
+export const legacyTitleSuffixes: Readonly<Partial<Record<PublicLocale, readonly string[]>>> = {
+  bg: [
+    "Недвижими имоти в България. Агенция за недвижими имоти в Сандански",
+    "Недвижими имоти в България. Агенция в Сандански",
+    "Имоти в България. Агенция за недвижими имоти в Сандански",
+  ],
+  en: [
+    "Real estate in Bulgaria. Real estate agency in Sandanski",
+    "Real estate in Bulgaria. Agency in Sandanski",
+    "Property in Bulgaria. Real estate agency in Sandanski",
+    "Real estate in Sandanski",
+  ],
+  ru: ["Недвижимость в Сандански"],
+  de: [
+    "Immobilien in Bulgarien. Immobilienagentur in Sandanski",
+    "Immobilien in Bulgarien. Agentur in Sandanski",
+    "Immobilien in Sandanski",
+  ],
+  nl: [
+    "Vastgoed in Bulgarije. Makelaarskantoor in Sandanski",
+    "Vastgoed in Bulgarije. Makelaardij in Sandanski",
+    "Vastgoed in Bulgarije. Makelaar in Sandanski",
+    "Vastgoed in Sandanski",
+  ],
+  el: ["Ακίνητα στη Βουλγαρία. Μεσιτικό γραφείο στο Σαντάνσκι", "Ακίνητα στο Σαντάνσκι"],
+  he: [
+    "נדל״ן בבולגריה. סוכנות נדל״ן בסנדנסקי",
+    "נדל״ן בבולגריה. סוכנות בסנדנסקי",
+    "נדל״ן בסנדנסקי",
+  ],
+};
+
+// Private pages (AT39). A private tab hidden for longer than this, or restored from the browser's
+// back/forward cache, stays concealed until the server confirms the session; a shorter absence
+// is rechecked in the background and concealed only if the session is gone.
+export const privatePageRecheckAfterMs = 15 * 60_000;
+
 // Agency identity. Public copy keeps the brand in its message files; shared modules read it here.
 
 export const agency = {

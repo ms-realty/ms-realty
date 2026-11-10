@@ -57,8 +57,11 @@ describe("publish checks (ADR 0012)", () => {
   it("warns about missing or unprocessed photos without blocking", () => {
     const none = publishChecks({ ...ready, photos: { ready: 0, notReady: 0 } });
     expect(none).toEqual({ blockers: [], warnings: ["no_photos"] });
+    // One photo line, the true one: photos exist but are not ready yet.
     const pending = publishChecks({ ...ready, photos: { ready: 0, notReady: 4 } });
-    expect(pending.warnings).toEqual(["no_photos", "photos_not_ready"]);
+    expect(pending.warnings).toEqual(["photos_not_ready"]);
+    const some = publishChecks({ ...ready, photos: { ready: 2, notReady: 1 } });
+    expect(some.warnings).toEqual(["photos_not_ready"]);
   });
 
   it("warns about a very short description", () => {

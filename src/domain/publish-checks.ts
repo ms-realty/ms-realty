@@ -21,6 +21,7 @@ export const publishWarnings = [
   "short_description",
   "bedrooms_unknown",
   "inland_framed_as_coast",
+  "title_site_suffix",
 ] as const;
 export type PublishWarning = (typeof publishWarnings)[number];
 
@@ -47,6 +48,8 @@ export interface PublishCheckInput {
   readonly placeNames: readonly string[];
   /** Every public text that would be shown: the source copy and approved translations. */
   readonly texts: readonly string[];
+  /** The title ends with the old site's brand ending (offered without it on the screen). */
+  readonly titleSiteSuffix?: boolean;
 }
 
 export interface PublishChecks {
@@ -90,13 +93,16 @@ export function publishChecks(input: PublishCheckInput): PublishChecks {
   if (!input.locationKnown) blockers.push("location_missing");
   if (!advertisableStates.includes(input.commercialState)) blockers.push("not_available");
 
-  if (input.photos.ready === 0) warnings.push("no_photos");
+  // One photo line at most, and the one that is true: photos exist but are not ready yet, or
+  // there are none at all.
   if (input.photos.notReady > 0) warnings.push("photos_not_ready");
+  else if (input.photos.ready === 0) warnings.push("no_photos");
   const description = input.description.trim();
   if (description && description.length < shortDescriptionLength)
     warnings.push("short_description");
   if (dwellings.includes(input.propertyType) && input.bedroomsState !== "known")
     warnings.push("bedrooms_unknown");
   if (framesInlandAsCoast(input.placeNames, input.texts)) warnings.push("inland_framed_as_coast");
+  if (input.titleSiteSuffix) warnings.push("title_site_suffix");
   return { blockers, warnings };
 }

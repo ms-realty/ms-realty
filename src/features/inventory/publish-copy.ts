@@ -9,6 +9,22 @@ export type PublishCopy = typeof bg;
 export const publishCopy = (locale: string): PublishCopy =>
   ({ bg, en, ru })[locale as "bg" | "en" | "ru"] ?? en;
 
+/** A language's name in the staff language ("English", "английски", "английский"). */
+export function languageName(staffLocale: string, code: string): string {
+  try {
+    return new Intl.DisplayNames([staffLocale], { type: "language" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+/** The per-language attestation, exactly as the person saw it. */
+export function languageAttestation(staffLocale: string, code: string): string {
+  return fillCopy(publishCopy(staffLocale).languages.attest, {
+    language: languageName(staffLocale, code),
+  });
+}
+
 /** A publishing blocker or stop reason in the person's words. */
 export function blockReason(locale: string, reason: string): string {
   const copy = publishCopy(locale);

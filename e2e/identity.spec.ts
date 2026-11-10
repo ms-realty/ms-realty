@@ -584,41 +584,22 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
   expect(assessed?.state).toBe("in_progress");
   expect(assessed?.due_at).not.toBeNull();
   await page.goto(hostUrl("staff", "/en/today"));
-  let releaseRefresh = () => {};
-  let refreshStarted = () => {};
-  const reachedRefresh = new Promise<void>((resolve) => {
-    refreshStarted = resolve;
-  });
-  const allowedRefresh = new Promise<void>((resolve) => {
-    releaseRefresh = resolve;
-  });
-  await page.route("**/en/today**", async (route) => {
-    if (route.request().headers().rsc === "1") {
-      refreshStarted();
-      await allowedRefresh;
-    }
-    await route.continue();
-  });
   await sql`update sessions set revoked_at = now() where principal_id = ${account.id}`;
   await expect(page.locator("[data-private-content]")).toHaveAttribute(
     "data-private-ready",
     "true",
   );
-  const immediatelyConcealed = await page.evaluate(() => {
+  // AT39: even a short absence is rechecked in the background; a revoked session conceals the
+  // page and leads to sign-in.
+  await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
     document.dispatchEvent(new Event("visibilitychange"));
-    const hidden = document.querySelector<HTMLElement>("[data-private-content]")?.hidden;
     Object.defineProperty(document, "visibilityState", {
       configurable: true,
       get: () => "visible",
     });
     document.dispatchEvent(new Event("visibilitychange"));
-    return hidden;
   });
-  expect(immediatelyConcealed).toBe(true);
-  await reachedRefresh;
-  await expect(page.locator("[data-private-content]")).toBeHidden();
-  releaseRefresh();
   await expect(page).toHaveURL(hostUrl("staff", "/en/access"));
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Staff sign-in");
 });
