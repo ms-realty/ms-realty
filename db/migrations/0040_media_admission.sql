@@ -1,4 +1,0 @@
-CREATE TYPE "public"."media_admission" AS ENUM('virus_scan', 'reencode');--> statement-breakpoint
-ALTER TABLE "seller_instructions" DROP CONSTRAINT "seller_instructions_agreed_evidence";--> statement-breakpoint
-ALTER TABLE "media_assets" ADD COLUMN "admission" "media_admission" DEFAULT 'virus_scan' NOT NULL;--> statement-breakpoint
-ALTER TABLE "seller_instructions" ADD CONSTRAINT "seller_instructions_agreed_evidence" CHECK ("seller_instructions"."state" <> 'agreed' or ("seller_instructions"."agreed_at" is not null and "seller_instructions"."recorded_by_id" is not null and "seller_instructions"."commission_terms" is not null and (jsonb_array_length("seller_instructions"."evidence_document_ids") > 0 or ("seller_instructions"."commercial_terms"->>'basis' = 'staff_attestation' and "seller_instructions"."commercial_terms"->>'attestationOperationId' is not null))));
