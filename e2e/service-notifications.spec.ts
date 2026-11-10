@@ -3,8 +3,14 @@
 // broker. Synthetic fixture and the loopback-only test outbox; no real provider is involved.
 import { execFileSync } from "node:child_process";
 import { randomInt } from "node:crypto";
-import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { type APIRequestContext, expect, type Page } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
+// Confirming a viewing is a booking consumer: it reads the shared operating policy, so it takes
+// the same lease as the other booking specs instead of racing the spec that edits the policy.
+import { withPolicyFixtureTimeout } from "./support/policy-test";
+
+// The journey's own budget also covers the wait for the lease.
+const test = withPolicyFixtureTimeout(240_000);
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
