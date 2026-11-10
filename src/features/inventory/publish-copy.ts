@@ -1,5 +1,6 @@
 // One-decision publishing copy (ADR 0012), from the staff catalogs. Placeholders are filled by
 // fillCopy; values are already display text.
+import { sourceLocale } from "@/config/tenant";
 import bg from "../../../messages/staff/bg/publishing.json" with { type: "json" };
 import en from "../../../messages/staff/en/publishing.json" with { type: "json" };
 import ru from "../../../messages/staff/ru/publishing.json" with { type: "json" };
@@ -28,10 +29,12 @@ export function languageAttestation(staffLocale: string, code: string): string {
 /** A publishing blocker or stop reason in the person's words. */
 export function blockReason(locale: string, reason: string): string {
   const copy = publishCopy(locale);
-  return (
+  return fillCopy(
     (copy.blockers as Record<string, string>)[reason] ??
-    (copy.reasons as Record<string, string>)[reason] ??
-    copy.reasons.other
+      (copy.reasons as Record<string, string>)[reason] ??
+      copy.reasons.other,
+    // The brand's source language, named in the staff language.
+    { language: languageName(locale, sourceLocale) },
   );
 }
 

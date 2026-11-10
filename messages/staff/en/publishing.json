@@ -18,8 +18,8 @@
   "mustFix": "Fix before publishing",
   "worthALook": "Worth checking",
   "blockers": {
-    "title_missing": "There is no Bulgarian title. Add one in the listing text.",
-    "description_missing": "There is no Bulgarian description. Add one in the listing text.",
+    "title_missing": "There is no title in {language}. Add one in the listing text.",
+    "description_missing": "There is no description in {language}. Add one in the listing text.",
     "price_undecided": "There is no price. Enter the price, or choose “price on request”.",
     "location_missing": "The location is missing. Add the settlement in the listing facts.",
     "not_available": "The property is sold, let or off the market, so it cannot be advertised. If it is on offer again, record that in Detailed review first.",
@@ -81,7 +81,6 @@
     "summary": "Published: {n}. Needs attention: {total}.",
     "listing": "Listing",
     "photo": "Photo",
-    "sourceView": "Bulgarian",
     "languagesLabel": "Language",
     "languageLead": "These listings are online in Bulgarian and their {language} text passed every check. Read each text, tick the box and publish them in {language}.",
     "languageNone": "No {language} texts are ready. A text appears here when the listing is online in Bulgarian and the text passes every check.",
@@ -118,7 +117,6 @@
   "languages": {
     "heading": "Languages",
     "lead": "Each language goes online only when you tick it. Tick only the languages you can read.",
-    "source": "Bulgarian",
     "attest": "I read the {language} text and it says the same as the Bulgarian.",
     "legacy": "The old site recorded this text as approved and published by the agency. Your tick confirms it.",
     "live": "Published",

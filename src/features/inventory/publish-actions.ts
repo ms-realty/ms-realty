@@ -3,7 +3,7 @@
 // publish a selection. Each call rechecks session, authority and input; the commands record.
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
-import { publicationPolicy } from "@/config/tenant";
+import { publicationPolicy, sourceLocale } from "@/config/tenant";
 import { isPublicLocale, isStaffLocale, type PublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
@@ -41,7 +41,7 @@ function tickedLanguages(form: FormData): PublicLocale[] {
       form
         .getAll("language")
         .map(String)
-        .filter((value): value is PublicLocale => isPublicLocale(value) && value !== "bg"),
+        .filter((value): value is PublicLocale => isPublicLocale(value) && value !== sourceLocale),
     ),
   ];
 }
@@ -316,7 +316,7 @@ function resultLine(locale: string, item: BulkPublishItem) {
     reference: item.reference,
     referenceLabel: item.reference,
     name: item.title || item.reference,
-    nameLang: "bg",
+    nameLang: sourceLocale,
   };
   const open = fillCopy(copy.ready.open, { reference: item.reference });
   if (item.status === "published") {
@@ -511,7 +511,7 @@ export async function bulkLanguageAction(
   _previous: FormState<BulkPublishValues>,
   form: FormData,
 ): Promise<FormState<BulkPublishValues>> {
-  if (!isStaffLocale(locale) || !isPublicLocale(language) || language === "bg")
+  if (!isStaffLocale(locale) || !isPublicLocale(language) || language === sourceLocale)
     throw new AppError("not_found");
   const copy = publishCopy(locale);
   const path = `/${locale}/inventory?view=ready&language=${language}`;

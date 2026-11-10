@@ -264,6 +264,8 @@ export function BulkPublishForm({
     price: string;
     area: string;
     noPhoto: string;
+    /** The tenant's source language, for the lang attribute of the shown titles. */
+    sourceLang: string;
     /** Shown when some titles carry the old site's ending; pre-ticked. */
     cleanTitles?: string;
   };
@@ -362,7 +364,11 @@ export function BulkPublishForm({
                     <input type="hidden" name={`version:${row.reference}`} value={row.version} />
                     <InventoryThumbnail source={row.thumbnail} label={labels.noPhoto} />
                     <span className="grid min-w-0 gap-1">
-                      <a href={row.href} lang="bg" className="font-semibold text-action underline">
+                      <a
+                        href={row.href}
+                        lang={labels.sourceLang}
+                        className="font-semibold text-action underline"
+                      >
                         {row.title}
                       </a>
                       <span className="flex flex-wrap gap-x-4 text-dense text-text-muted">
@@ -438,7 +444,10 @@ export function LanguagesForm({
   formCopy,
   labels,
   formId,
+  commandAvailable = true,
 }: {
+  /** False once nothing is left to tick: the form then shows only the confirmation it earned. */
+  commandAvailable?: boolean;
   action: FormAction<LanguagesValues>;
   initialState: FormState<LanguagesValues>;
   permalink: string;
@@ -458,6 +467,7 @@ export function LanguagesForm({
       labels={{ attested: labels.attested }}
       submitLabel={labels.submit}
       formId={formId}
+      commandAvailable={commandAvailable}
     >
       {(form) => {
         const attested = form.field("attested");
@@ -498,7 +508,13 @@ export function BulkLanguageForm({
   reconciliation: { href: string; label: string };
   formCopy: FormCopy;
   rows: readonly LanguageRow[];
-  labels: { attested: string; submit: string; list: string; source: string };
+  labels: {
+    attested: string;
+    submit: string;
+    list: string;
+    source: string;
+    sourceLang: string;
+  };
 }) {
   return (
     <ActionForm
@@ -567,7 +583,7 @@ export function BulkLanguageForm({
                       <span className="flex flex-wrap gap-x-4 text-dense text-text-muted">
                         <bdi>{row.reference}</bdi>
                         <span>
-                          {labels.source}: <span lang="bg">{row.sourceTitle}</span>
+                          {labels.source}: <span lang={labels.sourceLang}>{row.sourceTitle}</span>
                         </span>
                       </span>
                       {row.warnings.map((warning) => (

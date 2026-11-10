@@ -1,6 +1,6 @@
 {
   "title": "Deal path",
-  "lead": "The client sees the same steps, except the hidden ones. Record each step when it happens.",
+  "lead": "The client sees the steps in their own wording, without the hidden steps and without steps passed with no record. Record each step when it happens.",
   "preview": "Nothing recorded yet. These steps are created from the template when the terms are agreed, or with your first action here.",
   "currentStep": "Current step",
   "hidden": "Hidden from the client",

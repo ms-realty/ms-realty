@@ -467,10 +467,15 @@ export function StaffDealPath({
   ];
   const actions = (step: Step) => {
     if (!path.canRecord || step.source !== "recorded") return null;
+    // Each disclosure names its step, so a list of identical "Record this step" is not ambiguous.
+    const stepName = stepCopy(locale, step.key).label;
     if (step.settled)
       return (
         <details>
-          <summary className={summaryClass}>{s.reopen}</summary>
+          <summary className={summaryClass}>
+            {s.reopen}
+            <span className="sr-only"> {stepName}</span>
+          </summary>
           <PathForm
             {...common}
             command="pathStep"
@@ -486,7 +491,10 @@ export function StaffDealPath({
       );
     return (
       <details open={step.status === "current"}>
-        <summary className={summaryClass}>{s.record}</summary>
+        <summary className={summaryClass}>
+          {s.record}
+          <span className="sr-only"> {stepName}</span>
+        </summary>
         <div className="space-y-2 pt-2">
           <PathForm
             {...common}
@@ -503,7 +511,10 @@ export function StaffDealPath({
             submit={s.markDone}
           />
           <details>
-            <summary className={summaryClass}>{s.notNeeded}</summary>
+            <summary className={summaryClass}>
+              {s.notNeeded}
+              <span className="sr-only"> {stepName}</span>
+            </summary>
             <PathForm
               {...common}
               command="pathStep"
@@ -518,7 +529,10 @@ export function StaffDealPath({
             />
           </details>
           <details>
-            <summary className={summaryClass}>{s.setExpected}</summary>
+            <summary className={summaryClass}>
+              {s.setExpected}
+              <span className="sr-only"> {stepName}</span>
+            </summary>
             <PathForm
               {...common}
               command="pathStep"

@@ -10,7 +10,12 @@ import {
   publishListingAction,
   unpublishListingAction,
 } from "@/features/inventory/publish-actions";
-import { fillCopy, languageName, publishCopy } from "@/features/inventory/publish-copy";
+import {
+  blockReason,
+  fillCopy,
+  languageName,
+  publishCopy,
+} from "@/features/inventory/publish-copy";
 import { LanguagesForm, PublishForm, UnpublishForm } from "@/features/inventory/publish-forms";
 import { PrivateMediaPreview } from "@/features/inventory/thumbnail";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
@@ -18,7 +23,7 @@ import { privateRead } from "@/features/work/screens";
 import { localeEndonyms } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
 import { getEnv } from "@/server/config/env";
-import { publishView } from "@/server/publication/attested";
+import { publishView, reviewBlockers } from "@/server/publication/attested";
 import { languageView } from "@/server/publication/languages";
 import { buttonClass } from "@/ui/button-class";
 import { Notice } from "@/ui/notice";
@@ -64,6 +69,8 @@ export default async function PublishPage({
     content.pendingDraft || view.listing.approvedRevisionId !== (view.revision?.id ?? null);
   // A rent period the import left open is fixed in place by the decision itself.
   const blockers = checks.blockers.filter((code) => code !== "rent_period_unconfirmed");
+  const fixedInReview =
+    blockers.length > 0 && blockers.every((code) => reviewBlockers.includes(code));
   const showForm = view.mayPublish && blockers.length === 0 && (!live || newerVersion);
   const notKnown = copy.notKnown;
   const shownPhotos = view.photos.filter(
@@ -130,6 +137,7 @@ export default async function PublishPage({
           <p role={query.done ? "status" : undefined}>
             {fillCopy(copy.liveLead, { reference: ref })}
           </p>
+          {newerVersion ? <p className="font-semibold">{copy.liveOutdated}</p> : null}
           <a href={publicUrl} className={buttonClass("secondary", "justify-self-start")}>
             {copy.liveAt}
           </a>
@@ -176,7 +184,7 @@ export default async function PublishPage({
                 <p className="text-dense text-text-muted">{copy.pendingDraft}</p>
               ) : null}
               <article className="grid gap-4 rounded-panel border border-divider bg-surface p-5">
-                <h3 lang="bg" className="text-heading font-semibold">
+                <h3 lang={sourceLocale} className="text-heading font-semibold">
                   {title || notKnown}
                 </h3>
                 <dl className="grid gap-3 sm:grid-cols-2">
@@ -203,17 +211,35 @@ export default async function PublishPage({
                           </li>
                         ))}
                       </ul>
+                      <p className="text-dense">
+                        {fillCopy(copy.photoCount, { n: shownPhotos.length })}
+                      </p>
+                      {/* The tick covers every photo it will show: all of them are one click away. */}
                       {shownPhotos.length > 8 ? (
-                        <p className="text-dense">
-                          {fillCopy(copy.photoCount, { n: shownPhotos.length })}
-                        </p>
+                        <details className="rounded-control border border-divider p-3">
+                          <summary className="min-h-control cursor-pointer font-semibold">
+                            {fillCopy(copy.photosAll, { n: shownPhotos.length })}
+                          </summary>
+                          <ul className="grid grid-cols-2 gap-2 pt-3 sm:grid-cols-4">
+                            {shownPhotos.map(({ asset }) => (
+                              <li key={asset.id}>
+                                <PrivateMediaPreview
+                                  source={`/api/files/private/media/${asset.id}?preview=1`}
+                                  alt={asset.altText || content.title}
+                                  unavailable={copy.noPhotos}
+                                  className="aspect-4/3 object-cover"
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
                       ) : null}
                     </>
                   ) : (
                     <p className="text-dense">{copy.noPhotos}</p>
                   )}
                 </div>
-                <p lang="bg" className="whitespace-pre-wrap">
+                <p lang={sourceLocale} className="whitespace-pre-wrap">
                   {content.description || notKnown}
                 </p>
               </article>
@@ -235,7 +261,7 @@ export default async function PublishPage({
                   <ul className="list-disc ps-5">
                     {blockers.map((code) => (
                       <li key={code} data-blocker={code}>
-                        {copy.blockers[code]}
+                        {blockReason(locale, code)}
                       </li>
                     ))}
                   </ul>
@@ -256,9 +282,16 @@ export default async function PublishPage({
               {blockers.length ? (
                 <div className="grid gap-3">
                   <p>{copy.fixFirst}</p>
-                  <a href={path} className={buttonClass("primary", "self-start")}>
-                    {copy.editListing}
-                  </a>
+                  {/* Blockers that are recorded in the detailed review are fixed there. */}
+                  {fixedInReview ? (
+                    <a href={`${path}?tab=review`} className={buttonClass("primary", "self-start")}>
+                      {copy.detailedReview}
+                    </a>
+                  ) : (
+                    <a href={path} className={buttonClass("primary", "self-start")}>
+                      {copy.editListing}
+                    </a>
+                  )}
                 </div>
               ) : !view.mayPublish ? (
                 <p>{copy.cannotPublish}</p>
@@ -338,7 +371,7 @@ export default async function PublishPage({
                       <p className="font-semibold">{language.title}</p>
                       <p className="whitespace-pre-wrap text-dense">{language.description}</p>
                     </div>
-                    <div lang="bg" className="grid content-start gap-2 text-text-muted">
+                    <div lang={sourceLocale} className="grid content-start gap-2 text-text-muted">
                       <p className="font-semibold">{languages.source?.title}</p>
                       <p className="whitespace-pre-wrap text-dense">
                         {languages.source?.description}
@@ -405,8 +438,11 @@ export default async function PublishPage({
               );
             })}
           </ul>
-          {live && !showForm && view.mayPublish && tickable.length ? (
+          {/* Mounted whenever the listing is live, even when nothing is left to tick, so the
+              confirmation of a plain form post (no JavaScript) is still on the page. */}
+          {live && !showForm && view.mayPublish ? (
             <LanguagesForm
+              commandAvailable={tickable.length > 0}
               action={publishLanguagesAction.bind(null, locale, ref)}
               initialState={{
                 values: { attested: "" },

@@ -1,6 +1,7 @@
 // ADR 0012 bulk carry-over: listings that pass every check and are still on the market, ready
 // for one person to check, select and publish on one attestation. One result per listing.
 import { randomUUID } from "node:crypto";
+import { sourceLocale } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import type { Actor } from "@/domain/capabilities";
 import { inventoryCopy } from "@/features/inventory/copy";
@@ -53,7 +54,8 @@ export async function ReadyToPublish({
   const o10 = inventory.o10;
   const copy = publishCopy(locale);
   const workspace = workflowCopy(locale, "listingWorkspace");
-  const chosen = language && isPublicLocale(language) && language !== "bg" ? language : null;
+  const chosen =
+    language && isPublicLocale(language) && language !== sourceLocale ? language : null;
   const db = getDb();
   const typed = (query ?? "").trim().slice(0, 200);
   // One page of candidates per request: the cost never grows with the number of listings.
@@ -73,9 +75,9 @@ export async function ReadyToPublish({
     return `/${locale}/inventory?${search.toString()}`;
   };
   const picker: [string, string, string][] = [
-    ["bg", copy.ready.sourceView, withQuery("view=ready")],
+    [sourceLocale, languageName(locale, sourceLocale), withQuery("view=ready")],
     ...publicLocales
-      .filter((code) => code !== "bg")
+      .filter((code) => code !== sourceLocale)
       .map((code): [string, string, string] => [
         code,
         languageName(locale, code),
@@ -87,7 +89,7 @@ export async function ReadyToPublish({
     ? withQuery("view=ready", `${chosen ? `language=${chosen}&` : ""}cursor=${nextCursor}`)
     : null;
   const sameView = withQuery("view=ready", chosen ? `language=${chosen}` : "");
-  const current = chosen ?? "bg";
+  const current = chosen ?? sourceLocale;
   const chosenName = chosen ? languageName(locale, chosen) : "";
   const languageRows = chosen ? (languages.get(chosen) ?? []) : [];
   const tabs = [
@@ -128,7 +130,7 @@ export async function ReadyToPublish({
             <li key={code}>
               <a
                 href={href}
-                lang={code === "bg" ? undefined : locale}
+                lang={code === sourceLocale ? undefined : locale}
                 aria-current={code === current ? "page" : undefined}
                 className={cx(
                   "inline-flex min-h-control items-center gap-2 rounded-control border px-3 text-dense font-semibold no-underline",
@@ -210,7 +212,8 @@ export async function ReadyToPublish({
                 attested: fillCopy(copy.ready.languageAttest, { language: chosenName }),
                 submit: fillCopy(copy.ready.publishLanguage, { language: chosenName }),
                 list: chosenName,
-                source: copy.languages.source,
+                source: languageName(locale, sourceLocale),
+                sourceLang: sourceLocale,
               }}
             />
           )}
@@ -268,6 +271,7 @@ export async function ReadyToPublish({
             price: copy.price,
             area: copy.area,
             noPhoto: copy.noPhotos,
+            sourceLang: sourceLocale,
             ...(rows.some((row) => row.cleanedTitle) ? { cleanTitles: copy.cleanTitles } : {}),
           }}
         />
