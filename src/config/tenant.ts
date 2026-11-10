@@ -134,6 +134,11 @@ export interface PublicationPolicy {
    * recorded by active staff). When false, it lapses with the author's membership (fail closed).
    */
   readonly attestationOutlivesAuthor: boolean;
+  /**
+   * A person who may publish may also approve a language they tick on the Publish screen. When
+   * false, only the separate translation-reviewer role approves languages.
+   */
+  readonly publisherApprovesLanguages: boolean;
 }
 
 /** The strict policy another brand may adopt; kept tested alongside the agency's own. */
@@ -143,6 +148,7 @@ export const strictPublicationPolicy: PublicationPolicy = {
   photosRequired: true,
   signIn: "recent",
   attestationOutlivesAuthor: false,
+  publisherApprovesLanguages: false,
 };
 
 export const publicationPolicy: PublicationPolicy = {
@@ -151,6 +157,7 @@ export const publicationPolicy: PublicationPolicy = {
   photosRequired: false,
   signIn: "active_session",
   attestationOutlivesAuthor: true,
+  publisherApprovesLanguages: true,
 };
 
 // Deal path (ADR 0013). The steps a person records after terms are agreed, from the first

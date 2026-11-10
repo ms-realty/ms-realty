@@ -28,7 +28,7 @@ import {
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
 import { requireFreshAuth, requireLiveSession, type Session } from "../auth/sessions";
-import { assertCan, can } from "../authz";
+import { can } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
@@ -168,11 +168,31 @@ async function draftFor(
   return older ?? null;
 }
 
+/**
+ * The capability this person approves a language with: translation review for that language, or,
+ * where the tenant policy lets whoever publishes also approve a ticked language, the right to
+ * publish this listing. Null when neither holds.
+ */
+async function languageCapability(
+  db: Executor,
+  actor: Actor,
+  resource: { type: string; id: string; propertyId: string },
+  locale: PublicLocale,
+  policy: PublicationPolicy,
+): Promise<"translation.review" | "publication.release" | null> {
+  if (await can(db, actor, "translation.review", { ...resource, locale }))
+    return "translation.review";
+  if (policy.publisherApprovesLanguages && (await can(db, actor, "publication.release", resource)))
+    return "publication.release";
+  return null;
+}
+
 /** Read-only: every draft language of the listing with its checks, for one decision. */
 export async function languageView(
   db: Executor,
   actor: Actor,
   reference: string,
+  policy: PublicationPolicy = publicationPolicy,
 ): Promise<LanguageView> {
   if (actor.kind !== "staff") throw new AppError("forbidden");
   const [listing] = await db
@@ -230,7 +250,7 @@ export async function languageView(
       }),
       legacyApproved: legacy.humanApproved === true && legacy.recordedState === "published",
       live: live.has(locale),
-      mayApprove: await can(db, actor, "translation.review", { ...resource, locale }),
+      mayApprove: (await languageCapability(db, actor, resource, locale, policy)) !== null,
     });
   }
   return { listing, source, sourceLive: live.has(sourceLocale), languages };
@@ -275,7 +295,7 @@ export async function approveListingLanguages(
   const results: LanguageResult[] = [];
   for (const locale of [...new Set(input.locales)]) {
     if (locale === sourceLocale) continue;
-    const view = await languageView(db, actor, input.reference);
+    const view = await languageView(db, actor, input.reference, policy);
     const draft = view.languages.find((language) => language.locale === locale);
     if (!view.sourceLive) {
       results.push({ locale, status: "blocked", reason: "source_not_published" });
@@ -298,6 +318,7 @@ export async function approveListingLanguages(
         operationId: `${input.operationId}:${locale}`,
         attestation: input.attestation(locale),
         staffLocale: input.locale,
+        policy,
       });
       const outcome = await publishOneLocale(
         db,
@@ -329,7 +350,12 @@ async function recordLanguageApproval(
   actor: Actor,
   listingId: string,
   draft: LanguageDraft,
-  context: { operationId: string; attestation: string; staffLocale: StaffLocale },
+  context: {
+    operationId: string;
+    attestation: string;
+    staffLocale: StaffLocale;
+    policy: PublicationPolicy;
+  },
 ) {
   return runOperation(
     db,
@@ -346,12 +372,14 @@ async function recordLanguageApproval(
         .where(eq(listings.id, listingId))
         .for("update");
       if (!listing?.approvedRevisionId) throw new AppError("transition_denied");
-      await assertCan(tx, actor, "translation.review", {
-        type: "listing",
-        id: listing.id,
-        propertyId: listing.propertyId,
-        locale: draft.locale,
-      });
+      const capability = await languageCapability(
+        tx,
+        actor,
+        { type: "listing", id: listing.id, propertyId: listing.propertyId },
+        draft.locale,
+        context.policy,
+      );
+      if (!capability) throw new AppError("forbidden");
       const [revision] = await tx
         .select()
         .from(listingRevisions)
@@ -433,7 +461,7 @@ async function recordLanguageApproval(
           requestedById: actor.id,
           decidedByKind: "staff",
           decidedById: actor.id,
-          decidedWithCapability: "translation.review",
+          decidedWithCapability: capability,
           decidedAt: now,
           decisionNote: context.attestation,
         })
@@ -454,7 +482,7 @@ async function recordLanguageApproval(
       await recordAudit(tx, {
         action: "translation.approve",
         actor,
-        capability: "translation.review",
+        capability,
         recordType: "localized_revision",
         recordId: row.id,
         operationId,
@@ -497,7 +525,11 @@ export interface ReadyLanguagePage {
 export async function readyLanguages(
   db: Executor,
   actor: Actor,
-  options: { readonly cursor?: string | null; readonly query?: string } = {},
+  options: {
+    readonly cursor?: string | null;
+    readonly query?: string;
+    readonly policy?: PublicationPolicy;
+  } = {},
 ): Promise<ReadyLanguagePage> {
   const byLanguage = new Map<PublicLocale, ReadyLanguageRow[]>();
   if (actor.kind !== "staff") return { byLanguage, nextCursor: null };
@@ -520,7 +552,7 @@ export async function readyLanguages(
     .limit(languageExamineCap + 1);
   const page = liveSource.slice(0, languageExamineCap);
   for (const { reference } of page) {
-    const view = await languageView(db, actor, reference).catch(() => null);
+    const view = await languageView(db, actor, reference, options.policy).catch(() => null);
     for (const draft of view?.languages ?? []) {
       if (draft.live || !draft.mayApprove || draft.checks.blockers.length) continue;
       const rows = byLanguage.get(draft.locale) ?? [];
