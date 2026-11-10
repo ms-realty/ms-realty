@@ -1,0 +1,104 @@
+{
+  "title": "Your deal path",
+  "lead": "Every step in order, from the first request to the keys. Your broker records each step when it happens.",
+  "preview": "The later steps are the usual ones for this kind of deal. Your broker confirms them once the terms are agreed.",
+  "whoActs": "Who acts",
+  "expectedBy": "Expected by",
+  "doneOn": "Done on",
+  "brokerNote": "Note from your broker",
+  "status": {
+    "done": "Done",
+    "current": "You are here",
+    "next": "Next",
+    "upcoming": "Later",
+    "skipped": "Not needed",
+    "not_recorded": "No record here"
+  },
+  "actors": {
+    "you": "You",
+    "buyer": "The buyer",
+    "tenant": "The tenant",
+    "owner": "The owner",
+    "agency": "The agency",
+    "notary": "The notary",
+    "lawyer": "The lawyer"
+  },
+  "steps": {
+    "request_received": {
+      "label": "Request received",
+      "about": "The agency receives the request and names a broker to look after it."
+    },
+    "needs_agreed": {
+      "label": "Needs agreed",
+      "about": "The broker writes down what the client is looking for and the client confirms it."
+    },
+    "homes_shortlisted": {
+      "label": "Homes shortlisted",
+      "about": "The client picks the homes worth a closer look from the broker's suggestions."
+    },
+    "viewings": {
+      "label": "Viewings",
+      "about": "The broker arranges visits to the chosen homes and goes with the client."
+    },
+    "terms_agreed": {
+      "label": "Terms agreed",
+      "about": "Both sides accept the same price and conditions on the proposal."
+    },
+    "identity_checks": {
+      "label": "Identity checks",
+      "about": "The agency checks the identity documents of each person taking part."
+    },
+    "deposit_preliminary_contract": {
+      "label": "Deposit and preliminary contract",
+      "about": "The buyer and the seller sign a preliminary contract and the buyer pays the agreed deposit."
+    },
+    "property_checks": {
+      "label": "Property checks",
+      "about": "The agency gathers the documents on the property's ownership and debts so they can be reviewed before the deed."
+    },
+    "funds_ready": {
+      "label": "Funds ready",
+      "about": "The buyer arranges the money for the purchase, from savings or a bank loan."
+    },
+    "notary_deed": {
+      "label": "Notary deed",
+      "about": "A notary prepares the deed and reads it with the buyer and the seller before they sign."
+    },
+    "registration": {
+      "label": "Registration",
+      "about": "The signed deed is entered in the property register in the buyer's name."
+    },
+    "keys_handed_over": {
+      "label": "Keys handed over",
+      "about": "The owner hands over the keys on the agreed day."
+    },
+    "lease_signed": {
+      "label": "Lease signed",
+      "about": "The tenant and the landlord sign the lease on the agreed terms."
+    },
+    "deposit_first_rent": {
+      "label": "Deposit and first rent",
+      "about": "The tenant pays the deposit and the first rent, and both sides confirm the money arrived."
+    },
+    "tax_number": {
+      "label": "Greek tax number",
+      "about": "The buyer gets a Greek tax number (AFM), which the purchase documents refer to."
+    },
+    "lawyer_property_checks": {
+      "label": "Lawyer's property checks",
+      "about": "The buyer's lawyer looks into who owns the property and whether any debts are attached to it."
+    },
+    "contract_signed": {
+      "label": "Contract signed",
+      "about": "The buyer and the seller sign the contract on the agreed terms."
+    }
+  },
+  "completed": {
+    "title": "Deal completed",
+    "lead": "Every step on this path is done and your broker confirmed the completion.",
+    "completedOn": "Deed or lease date",
+    "reference": "Registry or deed reference",
+    "boundary": "This page shows what the people involved did and when. It is not a legal certificate.",
+    "outcome": "Completed through the deal path"
+  }
+}

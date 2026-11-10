@@ -42,6 +42,8 @@ vi.mock("@/server/cases/queries", () => ({
 }));
 vi.mock("@/server/appointments/service", () => ({ listAppointments: async () => [] }));
 vi.mock("../work/screens", () => ({ privateRead: (read: () => Promise<unknown>) => read() }));
+// The Deal path has its own tests (deal-path-screen.test.tsx, path.int.test.ts).
+vi.mock("@/server/cases/path", () => ({ casePath: async () => null }));
 vi.mock("./actions", () => ({ workflowAction: vi.fn() }));
 vi.mock("@/ui/form/server", () => ({
   initialFormState: (

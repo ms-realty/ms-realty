@@ -420,7 +420,8 @@ export async function handoverCase(
   );
 }
 
-async function assertResolved(db: Executor, id: string) {
+/** Locks and checks that no task, appointment or open proposal is left on the Case. */
+export async function assertResolved(db: Executor, id: string) {
   await db.select({ id: tasks.id }).from(tasks).where(eq(tasks.caseId, id)).for("update");
   await db
     .select({ id: appointments.id })

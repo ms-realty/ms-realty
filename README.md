@@ -3,16 +3,14 @@
 The MS Realty real-estate agency platform: a public site, a client space and an agency
 workspace in one Next.js application backed by PostgreSQL.
 
-This is the rebuild described in [`docs/plan.md`](docs/plan.md), implementing the
-[architecture](docs/architecture.md), [ADR 0002](docs/adr/0002-implementation-deviations.md)
-and [UX specification](docs/ux-spec.md). Current recovery work and outstanding acceptance
-are recorded in [the delivery ledger](docs/delivery/2026-09-27-recovery.md). The previous application is
-preserved at git tag `legacy-app-final`; the facts it held that are imported once live in
+The first brand of an AI-native brokerage platform by Mindburn Labs. The goal: a client gets
+from a first question to a completed, verified deal, and a small agency runs that path without
+training. Direction and launch authority are in
+[ADR 0011](docs/adr/0011-platform-direction.md); the order of work is in
+[`docs/plan.md`](docs/plan.md). The [architecture](docs/architecture.md) and
+[UX specification](docs/ux-spec.md) describe the existing system. The previous application is
+preserved at git tag `legacy-app-final`; the facts it held live in
 [`data/legacy/`](data/legacy/README.md).
-
-Phase 1 completes the O04 case directory and O08 calendar source workflows.
-Their behavior and remaining release boundaries are recorded in the
-[completion note](docs/delivery/phase-one-completion.md).
 
 ## Local setup
 

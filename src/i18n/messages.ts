@@ -7,6 +7,7 @@
 import type a11y from "../../messages/bg/a11y.json";
 import type caseReview from "../../messages/bg/caseReview.json";
 import type common from "../../messages/bg/common.json";
+import type dealPath from "../../messages/bg/dealPath.json";
 import type discovery from "../../messages/bg/discovery.json";
 import type errors from "../../messages/bg/errors.json";
 import type footer from "../../messages/bg/footer.json";
@@ -26,6 +27,7 @@ import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
+import type dealPathStaff from "../../messages/staff/bg/dealPathStaff.json";
 import type duplicateMerge from "../../messages/staff/bg/duplicateMerge.json";
 import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
 import type operations from "../../messages/staff/bg/operations.json";
@@ -44,6 +46,7 @@ export const publicNamespaces = [
   "caseReview",
   "a11y",
   "common",
+  "dealPath",
   "discovery",
   "errors",
   "footer",
@@ -78,12 +81,14 @@ export const staffNamespaces = [
   "settingsScopes",
   "privacyGovernance",
   "publishing",
+  "dealPathStaff",
 ] as const;
 
 export interface PublicMessages {
   caseReview: typeof caseReview;
   a11y: typeof a11y;
   common: typeof common;
+  dealPath: typeof dealPath;
   discovery: typeof discovery;
   errors: typeof errors;
   footer: typeof footer;
@@ -113,6 +118,7 @@ export interface StaffMessages {
   privacyExport: typeof privacyExportStaff;
   privacyErasure: typeof privacyErasure;
   dataReview: typeof dataReview;
+  dealPathStaff: typeof dealPathStaff;
   serverStaff: typeof serverStaff;
   tools: typeof tools;
   workspace: typeof workspace;

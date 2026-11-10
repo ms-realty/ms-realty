@@ -138,6 +138,81 @@ export const publicationPolicy: PublicationPolicy = {
   photosRequired: false,
 };
 
+// Deal path (ADR 0013). The steps a person records after terms are agreed, from the first
+// check to keys in hand, per jurisdiction and transaction. Labels and explanations live in the
+// `dealPath` message catalogs under the same keys; this profile holds no wording. A Deal keeps
+// the steps it was given when its path was first recorded, so editing a template changes new
+// Deals only. Templates describe who usually acts, never a legal requirement.
+
+/** Who acts on a step: the buyer or tenant side, the agency, the owner, a notary or a lawyer. */
+export const dealPathActors = ["client", "agency", "owner", "notary", "lawyer"] as const;
+export type DealPathActor = (typeof dealPathActors)[number];
+export const dealPathTransactions = ["sale", "long_term_rent"] as const;
+export type DealPathTransaction = (typeof dealPathTransactions)[number];
+
+export interface DealPathStepTemplate {
+  /** Stable key: stored on the recorded step and used as the message key. */
+  readonly key: string;
+  readonly actor: DealPathActor;
+  /** A document is usually kept as evidence of this step (never required to record it). */
+  readonly evidence: boolean;
+  /** Whether the client sees the step on their Deal path. */
+  readonly clientVisible: boolean;
+}
+
+const step = (
+  key: string,
+  actor: DealPathActor,
+  evidence = false,
+  clientVisible = true,
+): DealPathStepTemplate => ({ key, actor, evidence, clientVisible });
+
+/** Recorded steps keyed `${jurisdiction}.${transaction}`; the last step completes the Deal. */
+export const dealPathTemplates: Readonly<
+  Partial<Record<`${JurisdictionCode}.${DealPathTransaction}`, readonly DealPathStepTemplate[]>>
+> = {
+  "BG.sale": [
+    step("identity_checks", "agency", true),
+    step("deposit_preliminary_contract", "client", true),
+    step("property_checks", "agency", true),
+    step("funds_ready", "client"),
+    step("notary_deed", "notary", true),
+    step("registration", "notary", true),
+    step("keys_handed_over", "owner"),
+  ],
+  "BG.long_term_rent": [
+    step("identity_checks", "agency", true),
+    step("lease_signed", "client", true),
+    step("deposit_first_rent", "client"),
+    step("keys_handed_over", "owner"),
+  ],
+  "GR.sale": [
+    step("identity_checks", "agency", true),
+    step("tax_number", "client", true),
+    step("lawyer_property_checks", "lawyer", true),
+    step("deposit_preliminary_contract", "client", true),
+    step("notary_deed", "notary", true),
+    step("registration", "lawyer", true),
+    step("keys_handed_over", "owner"),
+  ],
+};
+
+/** For a jurisdiction and transaction without a template. */
+export const genericDealPath: Readonly<
+  Record<DealPathTransaction, readonly DealPathStepTemplate[]>
+> = {
+  sale: [
+    step("identity_checks", "agency", true),
+    step("contract_signed", "client", true),
+    step("keys_handed_over", "owner"),
+  ],
+  long_term_rent: [
+    step("identity_checks", "agency", true),
+    step("lease_signed", "client", true),
+    step("keys_handed_over", "owner"),
+  ],
+};
+
 // Human references. Listings keep the legacy lot-number format (MS-00100) so every reference
 // already in circulation stays valid; other records get a yearly sequence.
 
