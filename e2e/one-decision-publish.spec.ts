@@ -19,8 +19,10 @@ type Seed = {
   single: { reference: string; listingId: string; title: string; englishTitle: string };
   bulk: { reference: string; listingId: string }[];
   rent: { reference: string; listingId: string; title: string };
+  pager: { reference: string }[];
+  pagerWord: string;
 };
-function seed(): Seed {
+function seed(options: { pager?: boolean } = {}): Seed {
   return JSON.parse(
     execFileSync(
       process.execPath,
@@ -29,6 +31,7 @@ function seed(): Seed {
         encoding: "utf8",
         env: {
           ...process.env,
+          ...(options.pager ? { SEED_PAGER: "1" } : {}),
           AUTH_SECRET: process.env.E2E_AUTH_SECRET,
           DATABASE_URL: process.env.E2E_DATABASE_URL,
         },
@@ -201,6 +204,53 @@ test("publishes a selection of ready listings on one attestation", async ({ page
   });
   // The single listing seeded alongside was not selected and stays unpublished.
   expect(await live(f.single.listingId)).toEqual([]);
+});
+
+test("keeps the ticked listings ticked when the attestation is missing", async ({ page }) => {
+  test.setTimeout(90_000);
+  const f = seed();
+  await signIn(page, f.token);
+  await page.goto(hostUrl("staff", "/en/inventory?view=ready"));
+  await page
+    .getByRole("searchbox", { name: "Find listings" })
+    .fill(f.bulk.map((listing) => listing.reference).join(", "));
+  await page.getByRole("button", { name: "Search" }).click();
+  for (const listing of f.bulk)
+    await page.getByRole("checkbox", { name: `Select ${listing.reference}` }).check();
+  // The attestation box stays empty: the decision is refused, the choice is not lost.
+  await page.getByRole("button", { name: "Publish selected" }).click();
+  await expect(
+    page.getByText("Tick the box to confirm that you checked", { exact: false }).first(),
+  ).toBeVisible();
+  for (const listing of f.bulk)
+    await expect(page.getByRole("checkbox", { name: `Select ${listing.reference}` })).toBeChecked();
+  await expect(
+    page.getByRole("checkbox", { name: /I checked each selected listing/ }),
+  ).not.toBeChecked();
+  expect(await live(f.bulk[0]?.listingId ?? "")).toEqual([]);
+});
+
+test("Show more carries the cursor and keeps the search", async ({ page }) => {
+  test.setTimeout(120_000);
+  const f = seed({ pager: true });
+  await signIn(page, f.token);
+  await page.goto(hostUrl("staff", "/en/inventory?view=ready"));
+  await page.getByRole("searchbox", { name: "Find listings" }).fill(f.pagerWord);
+  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page.getByText("Listings shown: 20.")).toBeVisible();
+  const more = page.getByRole("link", { name: "Show more" });
+  const href = (await more.getAttribute("href")) ?? "";
+  const target = new URL(href, "http://staff.test");
+  expect(target.searchParams.get("view")).toBe("ready");
+  expect(target.searchParams.get("q")).toBe(f.pagerWord);
+  expect(target.searchParams.get("cursor")).toMatch(/^MS-/);
+  await more.click();
+  await expect(page).toHaveURL(/cursor=MS-/);
+  await expect(page).toHaveURL(new RegExp(`q=${encodeURIComponent(f.pagerWord)}`));
+  // The search box still holds the typed word, and the next page holds the last listing.
+  await expect(page.getByRole("searchbox", { name: "Find listings" })).toHaveValue(f.pagerWord);
+  await expect(page.getByText("Listings shown: 1.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Show more" })).toHaveCount(0);
 });
 
 test("confirms the period of an imported rent as part of the same decision", async ({ page }) => {

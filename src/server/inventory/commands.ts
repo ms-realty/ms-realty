@@ -399,6 +399,8 @@ export async function freezeListingDraft(
     reference: string;
     /** Keep this disclosure (public location precision) instead of the editor's default. */
     disclosure?: unknown;
+    /** The publication attestation whose decision creates this version (ADR 0012). */
+    attestationId?: string;
   },
 ) {
   parse(envelope, command);
@@ -527,6 +529,7 @@ export async function freezeListingDraft(
       await history(tx, command.actor, operationId, listing, "listing.revision.created", {
         revisionId: revision.id,
         factRevisionId: factRevision.id,
+        ...(command.attestationId ? { attestationId: command.attestationId } : {}),
       });
       return {
         reference: listing.reference,

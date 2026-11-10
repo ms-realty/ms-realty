@@ -97,7 +97,15 @@ try {
   const second = await listing("Синтетично студио за масово публикуване");
   // A rent the legacy import recorded without its period.
   const rent = await listing("Синтетичен апартамент под наем", true);
-  console.log(JSON.stringify({ token: broker.token, single, bulk: [first, second], rent }));
+  // More ready listings than one page holds, all found by one typed word (SEED_PAGER=1).
+  const pager: { reference: string }[] = [];
+  const pagerWord = `Страница${randomBytes(3).toString("hex")}`;
+  if (process.env.SEED_PAGER === "1")
+    for (let index = 0; index < 21; index += 1)
+      pager.push(await listing(`Синтетичен имот ${pagerWord}`));
+  console.log(
+    JSON.stringify({ token: broker.token, single, bulk: [first, second], rent, pager, pagerWord }),
+  );
 } finally {
   await connection.end();
 }

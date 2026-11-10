@@ -4,7 +4,7 @@
 // person cannot finish. One listing per test; the database is disposable.
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   type PublicationPolicy,
   publicationPolicy,
@@ -258,6 +258,37 @@ describe("the decision is bound to what the person saw (A)", () => {
     });
   });
 
+  it("refuses a replay after the same person wrote a version, but not after its own steps", async () => {
+    const f = await imported();
+    await saveDraft(f.listingId, draftOf());
+    const operationId = newOperationId();
+    const expectedVersion = await versionOf(f.reference);
+    expect(await publish(f.reference, { operationId, expectedVersion })).toMatchObject({
+      status: "published",
+    });
+    // The decision's own steps wrote versions; replaying it is not a change.
+    expect(await publish(f.reference, { operationId, expectedVersion })).toMatchObject({
+      status: "published",
+      unchanged: true,
+    });
+    // The same person writes another version after the decision.
+    await t.db.insert(listingRevisions).values({
+      listingId: f.listingId,
+      revisionNumber: 99,
+      factRevisionId: f.factRevisionId,
+      terms: {},
+      sourceCopy: {},
+      disclosure: { publicPrecision: "settlement" },
+      contentDigest: "own-later-edit",
+      createdByKind: "staff",
+      createdById: broker.actor.id,
+    });
+    expect(await publish(f.reference, { operationId, expectedVersion })).toMatchObject({
+      status: "blocked",
+      reason: "changed_since_opened",
+    });
+  });
+
   it("passes the version the person saw to the first freeze: an edit since is a conflict", async () => {
     const f = await imported();
     await saveDraft(f.listingId, draftOf());
@@ -469,6 +500,68 @@ describe("Sandanski is never framed as a sea place (H)", () => {
   });
 });
 
+describe("the coast check runs before anything is touched (H2)", () => {
+  it("is a blocker in the view and stops the decision before any version is written", async () => {
+    // As the import leaves it, the facts would be confirmed into a new version first.
+    const f = await imported({
+      translations: {
+        de: { title: "Wohnung in Sandanski", description: "Helle Wohnung nahe am Strand." },
+      },
+    });
+    const view = await publishView(t.db, broker.actor, f.reference);
+    expect(view.coastFramedLocale).toBe("de");
+    expect(view.checks.blockers).toContain("inland_framed_as_coast");
+    const result = await publish(f.reference);
+    expect(result).toMatchObject({
+      status: "blocked",
+      reason: "inland_framed_as_coast",
+      detail: "de",
+    });
+    expect(result).not.toHaveProperty("previousVersionOffline");
+    // No confirmation step ran: still the one imported version, nothing approved.
+    const versions = await t.db
+      .select({ id: listingRevisions.id })
+      .from(listingRevisions)
+      .where(eq(listingRevisions.listingId, f.listingId));
+    expect(versions).toHaveLength(1);
+    const confirmed = await t.db
+      .select({ id: auditEvents.id })
+      .from(auditEvents)
+      .where(
+        and(
+          eq(auditEvents.recordId, f.listingId),
+          eq(auditEvents.action, "listing.facts.confirmed"),
+        ),
+      );
+    expect(confirmed).toEqual([]);
+  });
+
+  it("stops each listing of a bulk run the same way", async () => {
+    const f = await imported({
+      translations: {
+        de: { title: "Wohnung in Sandanski", description: "Helle Wohnung nahe am Strand." },
+      },
+    });
+    const [item] = await publishSelection(
+      t.db,
+      broker.session,
+      {
+        selection: [{ reference: f.reference, expectedVersion: await versionOf(f.reference) }],
+        operationId: randomUUID(),
+        locale: "en",
+        cleanTitle: false,
+        attestationText: "Shown text.",
+      },
+      { storage: publicationFixtureStorage },
+    );
+    expect(item).toMatchObject({
+      status: "blocked",
+      reason: "inland_framed_as_coast",
+      previousVersionOffline: false,
+    });
+  });
+});
+
 describe("order of effects when a live listing is updated (I)", () => {
   it("checks every permission before taking anything offline", async () => {
     const f = await imported();
@@ -627,6 +720,38 @@ describe("a selection of listings on one attestation (G)", () => {
     expect(attested?.payload).toMatchObject({ attestation: shown });
     expect(await searchFor(good.reference)).toEqual([good.reference]);
     expect(await searchFor(later.reference)).toEqual([later.reference]);
+  });
+
+  it("logs an unexpected failure with the operation id and the reference, no message text", async () => {
+    const f = await imported();
+    const operationId = randomUUID();
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const [item] = await publishSelection(
+        t.db,
+        broker.session,
+        {
+          selection: await select(f.reference),
+          operationId,
+          locale: "en",
+          cleanTitle: false,
+          attestationText: "Shown text.",
+        },
+        {
+          get policy(): PublicationPolicy {
+            throw new Error("secret detail with a@example.test");
+          },
+        },
+      );
+      expect(item).toMatchObject({ status: "blocked", reason: "other" });
+      const lines = spy.mock.calls.map((call) => String(call[0]));
+      expect(lines).toEqual([
+        `[publish-bulk] operation=${operationId} listing=${f.reference} unexpected Error`,
+      ]);
+      expect(lines.join("\n")).not.toContain("a@example.test");
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("stops on a session error and marks every listing it did not reach as not attempted", async () => {

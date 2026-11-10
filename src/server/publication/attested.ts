@@ -338,6 +338,8 @@ export interface PublishView {
   readonly live: readonly PublicLocale[];
   /** Translations a person approved for the approved version; they publish with it. */
   readonly approvedTranslations: readonly PublicLocale[];
+  /** The first approved translation that frames the inland place as a sea, beach or coast one. */
+  readonly coastFramedLocale: PublicLocale | null;
   readonly mayPublish: boolean;
   /** The latest agreed seller instruction says the owner does not permit publication. */
   readonly ownerRefused: boolean;
@@ -383,6 +385,42 @@ export async function latestRevision(db: Executor, listingId: string) {
   return revision ?? null;
 }
 
+/**
+ * Every approved translation of the version is read for the inland-as-coast rule before any
+ * step touches the listing: a text that frames Sandanski as a sea, beach or coast place is a
+ * blocker the person sees up front, never a stop after the live version went offline.
+ */
+async function coastFramedTranslation(
+  db: Executor,
+  property: PropertyRow,
+  revision: RevisionRow | null,
+): Promise<PublicLocale | null> {
+  if (!revision) return null;
+  const approved = await db
+    .select({
+      locale: localizedRevisions.locale,
+      title: localizedRevisions.title,
+      body: localizedRevisions.body,
+    })
+    .from(localizedRevisions)
+    .where(
+      and(
+        eq(localizedRevisions.sourceRevisionId, revision.id),
+        eq(localizedRevisions.state, "approved_for_source"),
+      ),
+    );
+  for (const row of approved)
+    if (
+      framesInlandAsCoast(
+        [row.locale],
+        [property.settlement, property.region, property.neighborhood ?? ""],
+        [row.title ?? "", String(record(row.body).description ?? "")],
+      )
+    )
+      return row.locale;
+  return null;
+}
+
 /** Read-only: what one decision would publish for this staff member, and what blocks it. */
 export async function publishView(
   db: Executor,
@@ -418,7 +456,7 @@ export async function publishView(
     }),
   );
   const refused = await ownerRefused(db, listing);
-  const checks = publishChecks(
+  const ownChecks = publishChecks(
     checkInput(
       listing,
       property,
@@ -451,6 +489,11 @@ export async function publishView(
         )
     : [];
   const live = pointers.map((p) => p.locale);
+  const coastFramedLocale = await coastFramedTranslation(db, property, revision);
+  const checks: PublishChecks =
+    coastFramedLocale && !ownChecks.blockers.includes("inland_framed_as_coast")
+      ? { ...ownChecks, blockers: [...ownChecks.blockers, "inland_framed_as_coast"] }
+      : ownChecks;
   return {
     listing,
     property,
@@ -461,6 +504,7 @@ export async function publishView(
     checks,
     live: [...live].sort((a, b) => Number(b === sourceLocale) - Number(a === sourceLocale)),
     approvedTranslations: translations.map((t) => t.locale),
+    coastFramedLocale,
     mayPublish: await can(db, actor, "publication.release", resource),
     ownerRefused: refused,
     policy,
@@ -1076,8 +1120,14 @@ export async function publishListingByAttestation(
         ),
       )
     : view.checks;
-  const [blocker] = checks.blockers;
-  if (blocker) return blocked(blocker);
+  const [blocker] = view.coastFramedLocale
+    ? [...checks.blockers, "inland_framed_as_coast" as const]
+    : checks.blockers;
+  if (blocker)
+    return blocked(
+      blocker,
+      blocker === "inland_framed_as_coast" ? (view.coastFramedLocale ?? undefined) : undefined,
+    );
   if (!view.revision && !view.content.pendingDraft) return blocked("title_missing", "no_revision");
   const text = input.attestationText?.trim() || publishCopy(input.locale).attestation;
   // Under a second-person policy, the author of the content may not publish it alone.
@@ -1105,7 +1155,7 @@ export async function publishListingByAttestation(
   // Set once this call has taken the previous version offline; a later stop must say so.
   let tookOffline = false;
   // A replayed or resumed decision publishes only what the person saw (ADR 0012).
-  if (await changedSince(db, listingId, actor, attestation)) return blocked("changed_since_opened");
+  if (await changedSince(db, listingId, attestation)) return blocked("changed_since_opened");
   // Every permission a later step needs is checked before any step changes anything, so a
   // live version is never taken offline for a step this person cannot finish.
   const needed: Capability[] = ["publication.release", "listing.review_facts"];
@@ -1136,6 +1186,7 @@ export async function publishListingByAttestation(
         // The version the person saw: an edit since then is a conflict, never published.
         expectedRevision: state ? input.expectedVersion : listing.version,
         reference,
+        attestationId: attestation.attestationId,
         ...(keptDisclosure ? { disclosure: keptDisclosure } : {}),
       });
       unchanged = false;
@@ -1452,11 +1503,14 @@ async function staleLive(db: Executor, listingId: string, revisionId: string): P
 async function changedSince(
   db: Executor,
   listingId: string,
-  actor: Actor,
   attestation: {
     attestationId: string;
     attestedAt: string;
-    shown?: { draftDigest: string; revisionId: string | null } | null;
+    shown?: {
+      draftDigest: string;
+      revisionId: string | null;
+      revisionDigest?: string | null;
+    } | null;
   },
 ): Promise<boolean> {
   const shown = attestation.shown;
@@ -1465,18 +1519,42 @@ async function changedSince(
   if (!listing) return true;
   if (sha256Hex(canonicalJson(listing.draft ?? null)) !== shown.draftDigest) return true;
   const since = new Date(attestation.attestedAt);
-  const [foreign] = await db
+  // The versions written since the one the person saw must all be this decision's own steps
+  // (the draft freeze and the fact confirmation, both recorded with the attestation id), and
+  // the version they saw must still carry the content digest they saw. An edit by the same
+  // person after the decision is a change like anyone else's.
+  const [seen] = shown.revisionId
+    ? await db.select().from(listingRevisions).where(eq(listingRevisions.id, shown.revisionId))
+    : [];
+  if (shown.revisionId && !seen) return true;
+  if (seen && shown.revisionDigest && seen.contentDigest !== shown.revisionDigest) return true;
+  const later = await db
     .select({ id: listingRevisions.id })
     .from(listingRevisions)
     .where(
       and(
         eq(listingRevisions.listingId, listingId),
-        gt(listingRevisions.createdAt, since),
-        ne(listingRevisions.createdById, actor.id),
+        seen ? gt(listingRevisions.revisionNumber, seen.revisionNumber) : undefined,
       ),
-    )
-    .limit(1);
-  if (foreign) return true;
+    );
+  if (later.length > 0) {
+    const own = await db
+      .select({ payload: auditEvents.payload })
+      .from(auditEvents)
+      .where(
+        and(
+          eq(auditEvents.recordId, listingId),
+          inArray(auditEvents.action, ["listing.revision.created", "listing.facts.confirmed"]),
+        ),
+      );
+    const ownIds = new Set(
+      own
+        .map((row) => record(row.payload))
+        .filter((payload) => payload.attestationId === attestation.attestationId)
+        .map((payload) => payload.revisionId),
+    );
+    if (later.some((row) => !ownIds.has(row.id))) return true;
+  }
   const removals = await db
     .select({ action: auditEvents.action, payload: auditEvents.payload })
     .from(auditEvents)
@@ -1858,7 +1936,14 @@ export async function publishSelection(
       ) {
         stopped = true;
         out.push({ status: "not_attempted", reference, title });
-      } else
+      } else {
+        // An unexpected failure is that listing's result, never a silent one: the operation id
+        // and listing reference say where to look; no message text, which may carry data.
+        console.error(
+          `[publish-bulk] operation=${input.operationId} listing=${reference} unexpected ${
+            error instanceof Error ? error.name : typeof error
+          }${isAppError(error) ? ` code=${error.code}` : ""}`,
+        );
         out.push({
           status: "blocked",
           reference,
@@ -1866,6 +1951,7 @@ export async function publishSelection(
           reason: "other",
           previousVersionOffline: false,
         });
+      }
     }
   }
   return out;
