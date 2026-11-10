@@ -24,7 +24,7 @@ try {
     reason: "Synthetic one-decision broker who reads English",
   });
   // Same lock and unique reference rewrite as the other listing fixtures.
-  const listing = (name: string, rent = false) =>
+  const listing = (name: string, rent = false, photos = 1) =>
     db.transaction(async (tx) => {
       // A distinct title per run: other seeded listings may share the base name on the site.
       const tag = randomBytes(3).toString("hex");
@@ -41,7 +41,7 @@ try {
         commercialState: "confirmation_required",
         availabilityConfirmedAt: null,
         sellerInstruction: false,
-        photos: 1,
+        photos,
         photoState: "pending",
         ...(rent
           ? {
@@ -91,7 +91,8 @@ try {
         englishTitle: `Synthetic listing ${tag}`,
       };
     });
-  const single = await listing("Синтетичен апартамент за публикуване");
+  // Ten photos: more than the preview shows at once, so the full set sits behind a disclosure.
+  const single = await listing("Синтетичен апартамент за публикуване", false, 10);
   const first = await listing("Синтетична къща за масово публикуване");
   const second = await listing("Синтетично студио за масово публикуване");
   // A rent the legacy import recorded without its period.

@@ -70,6 +70,15 @@ test.describe("without JavaScript", () => {
     await expect(page.getByRole("heading", { name: "What the public will see" })).toBeVisible();
     await expect(page.getByText(f.single.title).first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Checked for you" })).toBeVisible();
+    // The tick covers every photo it will show: the count is stated and all ten are one
+    // click away, behind a closed disclosure (a plain details element, no script).
+    await expect(page.getByText("Photos that will be shown: 10.")).toBeVisible();
+    const allPhotos = page.locator("details", {
+      has: page.locator("summary", { hasText: "All 10 photos" }),
+    });
+    await expect(allPhotos).toHaveJSProperty("open", false);
+    await allPhotos.locator("summary").click();
+    await expect(allPhotos.locator("li")).toHaveCount(10);
     await expect(page.getByRole("link", { name: "Detailed review" }).last()).toHaveAttribute(
       "href",
       `/en/inventory/${f.single.reference}?tab=review`,
@@ -115,6 +124,8 @@ test.describe("without JavaScript", () => {
       })
       .check();
     await page.getByRole("button", { name: "Publish languages", exact: true }).click();
+    // A plain form post shows its confirmation, like every other action.
+    await expect(page.getByText("English: Published", { exact: true })).toBeVisible();
     await expect(english.getByText("Published", { exact: true })).toBeVisible();
     expect((await live(f.single.listingId)).sort()).toEqual(["bg", "en"]);
     const englishDetail = await request.get(
@@ -146,17 +157,48 @@ test("publishes a selection of ready listings on one attestation", async ({ page
   await page.goto(hostUrl("staff", "/en/inventory"));
   await page.getByRole("link", { name: "Ready to publish" }).click();
   await expect(page).toHaveURL(/view=ready/);
+  // The view is one page of listings per request and narrows by pasted numbers, separated by
+  // spaces or commas, through the search field.
+  await page
+    .getByRole("searchbox", { name: "Find listings" })
+    .fill(f.bulk.map((listing) => listing.reference).join(", "));
+  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/q=/);
+  await expect(page.getByText("Listings shown: 2.")).toBeVisible();
+  for (const listing of f.bulk)
+    await expect(page.getByRole("checkbox", { name: `Select ${listing.reference}` })).toBeVisible();
+  await expect(page.getByRole("checkbox", { name: `Select ${f.single.reference}` })).toHaveCount(0);
+  // Each row states how many photos the tick will show.
+  await expect(page.getByText("Photos that will be shown: 1.").first()).toBeVisible();
+
+  // Nothing selected: the error is on the list, not on the attestation box.
+  const attestation = page.getByRole("checkbox", { name: /I checked each selected listing/ });
+  await attestation.check();
+  await page.getByRole("button", { name: "Publish selected" }).click();
+  await expect(page.locator("fieldset", { hasText: "Select at least one listing." })).toBeVisible();
+  await expect(attestation).not.toHaveAttribute("aria-invalid", "true");
+
   for (const listing of f.bulk)
     await page.getByRole("checkbox", { name: `Select ${listing.reference}` }).check();
-  await page.getByRole("checkbox", { name: /I checked each selected listing/ }).check();
   await page.getByRole("button", { name: "Publish selected" }).click();
   const results = page.getByRole("heading", { name: "Results" }).first();
   await expect(results).toBeVisible();
   for (const listing of f.bulk) {
-    await expect(page.getByText(listing.reference).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: `Open ${listing.reference}` })).toHaveAttribute(
+      "href",
+      `/en/inventory/${listing.reference}`,
+    );
     expect(await live(listing.listingId)).toEqual(["bg"]);
   }
   await expect(page.getByText("Published: 2. Needs attention: 0.")).toBeVisible();
+  // The synthetic descriptions are short: the result says so beside the published listing.
+  await expect(page.getByText("Published with a warning").first()).toBeVisible();
+  // The attestation recorded is the sentence shown for the whole selection.
+  const [attested] = await connection`select payload from audit_events
+    where action = 'listing.publication.attested' and record_id = ${f.bulk[0]?.listingId ?? ''}`;
+  expect(attested?.payload).toMatchObject({
+    attestation: expect.stringContaining("I checked each selected listing."),
+  });
   // The single listing seeded alongside was not selected and stays unpublished.
   expect(await live(f.single.listingId)).toEqual([]);
 });
