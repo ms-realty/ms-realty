@@ -274,13 +274,6 @@
       "when": 1793754317064,
       "tag": "0038_reauth_drafts",
       "breakpoints": true
-    },
-    {
-      "idx": 39,
-      "version": "7",
-      "when": 1794311859258,
-      "tag": "0039_seller_attestation_evidence",
-      "breakpoints": true
     }
   ]
 }
