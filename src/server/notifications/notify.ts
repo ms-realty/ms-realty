@@ -10,7 +10,6 @@ import { z } from "zod";
 import {
   type PublicLocale,
   publicLocales,
-  type ServiceNotificationEvent,
   serviceNotificationEnabled,
   sourceLocale,
   staffLocales,
@@ -36,6 +35,7 @@ import { enqueueMessage } from "../jobs/outbox";
 import { privacyProcessingRestricted } from "../privacy/restrictions";
 import {
   type ClientNoticeEvent,
+  type DealNoticeEvent,
   dealNoticeSubject,
   dealNoticeTemplate,
   eventSubject,
@@ -62,7 +62,7 @@ export type NoticeSkipReason = (typeof noticeSkipReasons)[number];
 
 export interface DealUpdate {
   readonly caseId: string;
-  readonly event: ServiceNotificationEvent;
+  readonly event: DealNoticeEvent;
   /**
    * Stable identity of this business event (for example `appointment:<id>:v<version>`). A retry
    * of the same event must pass the same key; a new event needs a new key.
@@ -98,11 +98,7 @@ export interface NoticeOutcome {
   readonly created: boolean;
 }
 
-export function dealNoticeKey(
-  event: ServiceNotificationEvent,
-  eventKey: string,
-  recipientId: string,
-) {
+export function dealNoticeKey(event: DealNoticeEvent, eventKey: string, recipientId: string) {
   return `${dealNoticeTemplate}:${event}:${eventKey}:${recipientId}`;
 }
 

@@ -34,8 +34,11 @@ export const staffNoticeEvents = [
 ] as const satisfies readonly ServiceNotificationEvent[];
 export type StaffNoticeEvent = (typeof staffNoticeEvents)[number];
 
-export type DealNoticeEvent = ServiceNotificationEvent;
-export const dealNoticeEvents = serviceNotificationEvents;
+/** Events about a Deal; the inquiry acknowledgement has its own template and recipient. */
+export type DealNoticeEvent = Exclude<ServiceNotificationEvent, "inquiry.acknowledged">;
+export const dealNoticeEvents = serviceNotificationEvents.filter(
+  (event): event is DealNoticeEvent => event !== "inquiry.acknowledged",
+) as [DealNoticeEvent, ...DealNoticeEvent[]];
 
 export function isClientNoticeEvent(event: DealNoticeEvent): event is ClientNoticeEvent {
   return (clientNoticeEvents as readonly string[]).includes(event);

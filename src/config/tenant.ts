@@ -254,6 +254,8 @@ export const serviceNotificationEvents = [
   "client.proposal_countered",
   "client.document_uploaded",
   "client.message",
+  // To a website visitor who left an e-mail address with an inquiry.
+  "inquiry.acknowledged",
 ] as const;
 export type ServiceNotificationEvent = (typeof serviceNotificationEvents)[number];
 

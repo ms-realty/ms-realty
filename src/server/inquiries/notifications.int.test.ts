@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, isNull, ne, or } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { externalActions, inquiries, outboxEvents, recoveryControl } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -15,6 +15,18 @@ import {
 } from "./notifications";
 
 let t: TestDatabase;
+
+/** External effects other than the visitor's acknowledgement (ADR 0014), which every e-mail inquiry owes. */
+const otherEffects = () =>
+  t.db
+    .select()
+    .from(externalActions)
+    .where(
+      or(
+        isNull(externalActions.subjectType),
+        ne(externalActions.subjectType, "inquiry_acknowledgement"),
+      ),
+    );
 let queue: JobQueue;
 beforeAll(async () => {
   t = await createTestDatabase();
@@ -86,7 +98,7 @@ describe("staging inquiry coverage notices", () => {
     vi.stubEnv(key, value);
     expect(await sweepInquiryCoverageNotices(t.db, queue)).toBe(0);
     expect(await event(input.eventId)).toMatchObject({ state: "pending", dispatchJobId: null });
-    expect(await t.db.select().from(externalActions)).toEqual([]);
+    expect(await otherEffects()).toEqual([]);
   });
 
   it("concurrent sweeps bind one identifiers-only effect and one real pg-boss job", async () => {
@@ -128,7 +140,7 @@ describe("staging inquiry coverage notices", () => {
       await t.sql`select id, name, data from pgboss.job where id = ${bound.dispatchJobId}`;
     expect(jobs).toHaveLength(1);
     expect(jobs[0]).toMatchObject({ name: "outbox.dispatch", data: { outboxId: effect?.id } });
-    expect(await t.db.select().from(externalActions)).toHaveLength(1);
+    expect(await otherEffects()).toHaveLength(1);
   });
 
   it("outer rollback removes the effect and pg-boss job and leaves the event pending", async () => {

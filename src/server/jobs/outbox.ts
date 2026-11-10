@@ -217,7 +217,14 @@ export async function dispatchMessage(
       inquiryNotice && !(await inquiryCoverageNoticeActionIsValid(tx, row));
     // Deal notices recheck recipient eligibility, access and currency before any provider call.
     const { dealNoticeBlocker, isDealNotice } = await import("../notifications/guard");
-    const dealNoticeBlocked = isDealNotice(row) ? await dealNoticeBlocker(tx, row) : null;
+    const { acknowledgementBlocker, isInquiryAcknowledgement } = await import(
+      "../notifications/inquiry"
+    );
+    const dealNoticeBlocked = isDealNotice(row)
+      ? await dealNoticeBlocker(tx, row)
+      : isInquiryAcknowledgement(row)
+        ? await acknowledgementBlocker(tx, row)
+        : null;
     const secretChanged =
       payload?.secretDigest !== undefined &&
       (!row.secretPayload ||

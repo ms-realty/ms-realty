@@ -2,7 +2,7 @@
 // still eligible, still entitled to the Deal and the notice still describes the current record;
 // otherwise it is cancelled with a reason and no provider call happens.
 import "server-only";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, or, sql } from "drizzle-orm";
 import { serviceNotificationEnabled } from "@/config/tenant";
 import { appointments, cases, externalActions } from "@/db/schema";
 import { getEnv } from "../config/env";
@@ -10,6 +10,7 @@ import type { HostOrigins } from "../config/hosts";
 import type { Database, Executor } from "../db";
 import type { MessageProvider } from "../jobs/provider";
 import { dealNoticeSubject, dealNoticeTemplate } from "./events";
+import { inquiryAcknowledgementSubject, inquiryAcknowledgementTemplate } from "./inquiry";
 import { resolveClientRecipient, resolveStaffRecipient } from "./notify";
 import { dealNoticePayload, validDealNoticeParams } from "./template";
 
@@ -90,8 +91,16 @@ export async function dispatchDealNotices(
       and(
         eq(externalActions.kind, "email_send"),
         eq(externalActions.state, "queued"),
-        eq(externalActions.subjectType, dealNoticeSubject),
-        sql`${externalActions.payload}->>'template' = ${dealNoticeTemplate}`,
+        or(
+          and(
+            eq(externalActions.subjectType, dealNoticeSubject),
+            sql`${externalActions.payload}->>'template' = ${dealNoticeTemplate}`,
+          ),
+          and(
+            eq(externalActions.subjectType, inquiryAcknowledgementSubject),
+            sql`${externalActions.payload}->>'template' = ${inquiryAcknowledgementTemplate}`,
+          ),
+        ),
       ),
     )
     .orderBy(asc(externalActions.createdAt), asc(externalActions.id))

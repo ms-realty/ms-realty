@@ -179,6 +179,7 @@ describe("tenant profile", () => {
       "client.proposal_countered",
       "client.document_uploaded",
       "client.message",
+      "inquiry.acknowledged",
     ]);
     expect(Object.keys(serviceNotifications.events).sort()).toEqual(
       [...serviceNotificationEvents].sort(),

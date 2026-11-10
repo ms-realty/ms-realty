@@ -45,14 +45,33 @@ own Deal, not marketing.
 - **Idempotent per event.** The logical send id is
   `deal.notice.v1:<event>:<eventKey>:<recipient>`; it is also the provider idempotency key. A
   retried event finds its row and sends nothing new.
-- **Eligibility reused, not invented.** A client receives notices at the address of an active,
-  verified `service_updates` choice whose consent terms are current (`eligibleCaseRecipient`,
-  the rule reviewed Deal e-mail already follows), while their participation in the Deal is live
-  and their client account active. The language is the party's preferred language, then the
-  account's, then the consent locale. The broker receives them at their staff sign-in address in
-  their staff language while the staff account and membership are active. Otherwise the ledger
-  records a cancelled row with the reason (`no_verified_email`, `no_service_email_choice`,
-  `access_revoked`, `staff_inactive`) and no address.
+- **On by default for Deal participants.** Nothing in the normal journey creates the explicit
+  "emails about my deals" choice (`service_updates`): invitation acceptance records only the
+  participation, and e-mail link sign-in only verifies the address. So service notices about a
+  client's own Deal are on once the client's sign-in e-mail is verified and they take part in the
+  Deal; invitation acceptance records that basis (`deal_notices.basis_recorded`), not a consent.
+  An active, current choice (`eligibleCaseRecipient`: terms current) decides the address when
+  one exists; otherwise the verified sign-in address is used. Participation must be live and the
+  account active. The client switches notices off in preferences (`dealNotices: false` on the
+  party's contact preferences, recorded as `preferences.deal_notices.off`); a withdrawn or paused
+  choice with no active one also stops them. The language is the party's preferred language,
+  then the account's, then the consent locale. The broker receives them at their staff sign-in
+  address in their staff language while the staff account and membership are active. Otherwise
+  the ledger records a cancelled row with the reason (`no_verified_email`,
+  `notices_switched_off`, `access_revoked`, `staff_inactive`) and no address.
+- **Deal path.** A client-visible path step marked done sends `deal.step_done` with the step's
+  dealPath catalog label in the recipient's language; `completeDealFromPath` sends
+  `deal.completed`. Skipping, reopening or re-dating a step sends nothing; doing a reopened step
+  again is a new event.
+- **Inquiry acknowledgement.** A website inquiry with an e-mail contact is acknowledged at once
+  (`inquiry.acknowledgement.v1`, its own switch `inquiry.acknowledged`), in the site language:
+  the reference, the listing reference and title when it is about a published listing, that a
+  broker will reply, and a link to the receipt page. The basis is the visitor's own request, so
+  the recipient is its own kind (`inquirer`) with its own send-time rule: the inquiry and its
+  typed contact are unchanged, it is not held as suspected automation and the party is not
+  restricted. No reply-time promise (the operating policy records `publicPromise: null`), no
+  price, address or free text, nothing for a phone-only contact, one send per inquiry. The
+  staging coverage notice goes to a reviewed staff inbox and is not duplicated.
 - **Rechecked at send time.** Before any provider call the worker re-resolves the recipient, the
   broker's ownership of the Deal and, for calendar notices, that the appointment's SEQUENCE is
   unchanged; a stale or ineligible notice is cancelled with a `deal_notice_*` reason. A later

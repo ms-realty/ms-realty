@@ -205,7 +205,7 @@ describe("viewing notices", () => {
     });
     expect((broker.payload as { recipient: string }).recipient).toBe(f.staff.email);
     expect(params(broker).url).toBe(`${getEnv().hosts.staff}/bg/calendar/${f.request.id}`);
-    expect(rendered(broker)?.text).toContain("Клиентът потвърди часа за оглед");
+    expect(rendered(broker)?.text).toContain("Потвърденият час е");
     expectNoRestrictedDetail(broker);
   });
 
@@ -578,7 +578,7 @@ describe("messages, proposals, document requests and deal steps", () => {
     ]);
     const [row] = await notices(f.record.id);
     expect(rendered(row as NonNullable<typeof row>)?.text).toContain(
-      "Этап вашей сделки выполнен: Нотариус назначен.",
+      "Выполнено: Нотариус назначен",
     );
     await expect(
       notifyDealStepDone(t.db, { ...step, stepKey: "other", label: { en: "Only English" } }),

@@ -6,10 +6,8 @@
 import "server-only";
 import { z } from "zod";
 import {
-  agency,
   agencyTimeZone,
   displayLocales,
-  isRtlLocale,
   type PublicLocale,
   publicLocales,
   type StaffLocale,
@@ -32,6 +30,7 @@ import {
   type StaffNoticeEvent,
   timedEvents,
 } from "./events";
+import { type NoticeLayout, noticeHtml, noticeText } from "./layout";
 
 const reference = z.string().regex(/^[A-Za-z0-9-]{1,80}$/);
 const singleLine = z
@@ -185,14 +184,6 @@ function copyFor(params: DealNoticeParams): NoticeCopy {
   return staffNoticeCopy[params.locale as StaffLocale][params.event as StaffNoticeEvent];
 }
 
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-
 /** Weekday and date of a viewing for subjects and headlines, in the agency's zone. */
 export function noticeDay(locale: PublicLocale, instant: string, now = new Date()) {
   const date = new Date(instant);
@@ -257,77 +248,28 @@ export function renderDealNotice(
         : (frame?.calendarAttached ?? null)
       : null;
   const calendarLink = p.calendar && !attach && p.calendarUrl ? p.calendarUrl : null;
-  const footer = frame?.footer ?? staffFrame?.footer ?? "";
-  const referenceLabel = frame?.reference ?? staffFrame?.reference ?? "";
-  const reference = `${referenceLabel}: ${p.subject.reference}`;
-  // The subject is the change itself; the reference stays for search and threading.
-  const subject = `${headline} (${p.subject.reference})`;
-  // The plain-text part carries everything the HTML part does, in the same order.
-  const text = [
+  const layout: NoticeLayout = {
+    locale: p.locale,
+    // The subject is the change itself; the reference stays for search and threading.
+    subject: `${headline} (${p.subject.reference})`,
     headline,
-    "",
-    lead,
-    ...(calendarLine ? [calendarLine] : []),
-    ...(calendarLink ? [`${frame?.calendarLink ?? ""} ${calendarLink}`] : []),
-    "",
-    `${copy.action}: ${p.url}`,
-    "",
-    reference,
-    "",
-    "--",
-    footer,
-    ...(client && frame && p.preferencesUrl ? [`${frame.preferences}: ${p.preferencesUrl}`] : []),
-    agency.name,
-  ].join("\n");
-  const html = config.html === false ? undefined : noticeHtml();
-  function noticeHtml() {
-    const rtl = isRtlLocale(p.locale);
-    const dir = rtl ? "rtl" : "ltr";
-    const start = rtl ? "right" : "left";
-    const ltr = (value: string) => `<bdi dir="ltr">${escapeHtml(value)}</bdi>`;
-    // Brand tokens (design/tokens.json): canvas, surface, text, muted text, divider, action.
-    const font = "'Noto Sans','Noto Sans Hebrew',Arial,Helvetica,sans-serif";
-    const para = `margin:0 0 16px;font-size:16px;line-height:24px;color:#192e27`;
-    const small = `margin:0 0 8px;font-size:14px;line-height:20px;color:#52625a`;
-    const link = `color:#214f3c;text-decoration:underline`;
-    return [
-      "<!doctype html>",
-      `<html lang="${p.locale}" dir="${dir}">`,
-      "<head>",
-      '<meta charset="utf-8">',
-      '<meta name="viewport" content="width=device-width, initial-scale=1">',
-      '<meta name="color-scheme" content="light">',
-      `<title>${escapeHtml(subject)}</title>`,
-      "</head>",
-      `<body dir="${dir}" style="margin:0;padding:0;background:#f8f7f3;font-family:${font};text-align:${start}">`,
-      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f7f3"><tr><td align="center" style="padding:24px 12px">`,
-      `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #d9dfd8;border-radius:8px"><tr><td dir="${dir}" style="padding:28px 24px;text-align:${start}">`,
-      `<p style="margin:0 0 20px;font-size:15px;line-height:20px;font-weight:700;color:#214f3c">${escapeHtml(agency.name)}</p>`,
-      `<h1 style="margin:0 0 16px;font-size:22px;line-height:30px;font-weight:600;color:#192e27">${escapeHtml(headline)}</h1>`,
-      `<p style="${para}">${escapeHtml(lead)}</p>`,
-      ...(calendarLine ? [`<p style="${para}">${escapeHtml(calendarLine)}</p>`] : []),
-      ...(calendarLink
-        ? [
-            `<p style="${para}"><a href="${escapeHtml(calendarLink)}" style="${link}">${escapeHtml((frame?.calendarLink ?? "").replace(/:$/, ""))}</a></p>`,
-          ]
-        : []),
-      // The one accent: a 44 px touch target that names the page it opens.
-      `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#214f3c;border-radius:6px">`,
-      `<a href="${escapeHtml(p.url)}" style="display:inline-block;min-height:44px;box-sizing:border-box;padding:12px 22px;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:6px">${escapeHtml(copy.action)}</a>`,
-      "</td></tr></table>",
-      `<p style="${small}">${escapeHtml(referenceLabel)}: ${ltr(p.subject.reference)}</p>`,
-      `<hr style="border:0;border-top:1px solid #d9dfd8;margin:20px 0">`,
-      `<p style="${small}">${escapeHtml(footer)}</p>`,
-      ...(client && frame && p.preferencesUrl
-        ? [
-            `<p style="${small}"><a href="${escapeHtml(p.preferencesUrl)}" style="${link};color:#52625a">${escapeHtml(frame.preferences)}</a></p>`,
-          ]
-        : []),
-      "</td></tr></table>",
-      "</td></tr></table>",
-      "</body></html>",
-    ].join("\n");
-  }
+    paragraphs: [lead, ...(calendarLine ? [calendarLine] : [])],
+    ...(calendarLink
+      ? { link: { label: (frame?.calendarLink ?? "").replace(/:$/, ""), url: calendarLink } }
+      : {}),
+    action: { label: copy.action, url: p.url },
+    reference: {
+      label: frame?.reference ?? staffFrame?.reference ?? "",
+      value: p.subject.reference,
+    },
+    footer: frame?.footer ?? staffFrame?.footer ?? "",
+    ...(client && frame && p.preferencesUrl
+      ? { footerLink: { label: frame.preferences, url: p.preferencesUrl } }
+      : {}),
+  };
+  const subject = layout.subject;
+  const text = noticeText(layout);
+  const html = config.html === false ? undefined : noticeHtml(layout);
   const attachments =
     attach && p.calendar && p.time
       ? [

@@ -3,6 +3,10 @@ import { getEnv, isLoopbackOrigin } from "@/server/config/env";
 import { hostContextOf } from "@/server/http/request";
 import { testOutbox } from "@/server/jobs/web";
 import { dealNoticeTemplate } from "@/server/notifications/events";
+import {
+  inquiryAcknowledgementTemplate,
+  renderInquiryAcknowledgement,
+} from "@/server/notifications/inquiry";
 import { renderDealNotice } from "@/server/notifications/template";
 
 export async function GET(request: Request) {
@@ -23,7 +27,8 @@ export async function GET(request: Request) {
       (message) =>
         templates.includes(message.template) ||
         (message.template === dealNoticeTemplate &&
-          (message.params.recipient as { kind?: unknown } | undefined)?.kind === context),
+          (message.params.recipient as { kind?: unknown } | undefined)?.kind === context) ||
+        (message.template === inquiryAcknowledgementTemplate && context === "client"),
     )
     .map((message) =>
       message.template === dealNoticeTemplate
@@ -35,7 +40,9 @@ export async function GET(request: Request) {
               from: env.email.from ?? "Test outbox <outbox@example.test>",
             }),
           }
-        : message,
+        : message.template === inquiryAcknowledgementTemplate
+          ? { ...message, rendered: renderInquiryAcknowledgement(message, { hosts: env.hosts }) }
+          : message,
     );
   return Response.json(
     { messages },

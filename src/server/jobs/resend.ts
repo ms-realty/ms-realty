@@ -7,6 +7,7 @@ import { formatDateTime } from "@/i18n/format";
 import { caseEmailConfig, renderCaseEmail } from "../cases/email-contract";
 import type { HostOrigins } from "../config/hosts";
 import { renderInquiryCoverageNotice } from "../inquiries/notifications";
+import { renderInquiryAcknowledgement } from "../notifications/inquiry";
 import { renderDealNotice } from "../notifications/template";
 import { renderSearchAlert } from "../subscriptions/template";
 import type { MessageProvider, OutboundMessage, ProviderResult } from "./provider";
@@ -115,6 +116,7 @@ export function renderReviewedEmail(
     authEmail(message, config.hosts, now) ??
     renderSearchAlert(message, config.hosts) ??
     renderInquiryCoverageNotice(message, config.hosts) ??
+    renderInquiryAcknowledgement(message, { hosts: config.hosts, html: !transport.plainText }) ??
     renderDealNotice(
       message,
       {

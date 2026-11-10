@@ -40,6 +40,7 @@ import { AppError, isAppError } from "../errors";
 import { recordOutboxEvent } from "../jobs/outbox";
 import { getPublicListing } from "../listings/detail";
 import type { PublicListingDetail } from "../listings/view-models";
+import { acknowledgeInquiry } from "../notifications/inquiry";
 import { captureOperatingPolicy } from "../operating-policy/service";
 import { findOperation, runOperation } from "../operations";
 import { listingSlug, loadPublishedListings, presentationOf } from "../publication/presentation";
@@ -673,6 +674,12 @@ export async function submitInquiry(
             payload: { reference, purpose: input.purpose, coverageQueue: inquiryCoverageQueue },
             operationId,
           });
+          // ADR 0014: the visitor hears at once that we received it (e-mail contacts only).
+          await acknowledgeInquiry(
+            tx,
+            row,
+            listing ? { reference: listing.reference, title: listing.title ?? null } : null,
+          );
           const about = selection.length
             ? ` about ${selection.map((item) => item.reference).join(", ")}`
             : listing
