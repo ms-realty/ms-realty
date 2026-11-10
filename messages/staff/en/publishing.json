@@ -28,6 +28,7 @@
   "warnings": {
     "no_photos": "There are no photos to show. The listing will go online without photos.",
     "photos_not_ready": "Some photos are still being prepared. They will appear once they are ready and you approve them.",
+    "photos_not_copied": "Photos from the old website are not copied yet, so they will not be shown.",
     "short_description": "The description is very short. Buyers usually need more detail.",
     "bedrooms_unknown": "The number of bedrooms is not known.",
     "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Please check the wording."
@@ -85,5 +86,18 @@
   },
   "rentPeriod": "Rent period",
   "perMonth": "per month",
-  "rentHint": "The old site recorded this rent without a period. Publishing records it as the monthly rent."
+  "rentHint": "The old site recorded this rent without a period. Publishing records it as the monthly rent.",
+  "carryOver": {
+    "title": "Photos from the old website",
+    "lead": "Not copied to the new system yet: {n}. Copy them before you publish so buyers can see them.",
+    "action": "Copy photos from the old website",
+    "unconfigured": "Copying is not set up on this server yet. Ask the person who runs the system to copy the photos from the old website.",
+    "leftOut": "Photos that cannot be used (damaged or missing on the old website): {n}. They are left out.",
+    "retry": "Some photos could not be reached. Try again in a few minutes.",
+    "fromOldSite": "From the agency's old website.",
+    "notCopied": "Not copied from the old website yet.",
+    "unusable": "This photo could not be copied from the old website: the file is damaged or missing. Hide it from the gallery.",
+    "imageCheck": "Image check",
+    "imageCheckPassed": "Passed: saved again as a clean image"
+  }
 }

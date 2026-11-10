@@ -16,6 +16,7 @@ import {
   defaultStaffLocale,
   displayLocales,
   genericDealPath,
+  imageAdmissionRules,
   isJurisdictionCode,
   isRtlLocale,
   jurisdictionCodes,
@@ -24,6 +25,7 @@ import {
   jurisdictionTimeZones,
   legacyCurrency,
   legacyDomains,
+  mediaPolicy,
   publicationPolicy,
   publicLocales,
   referencePrefixes,
@@ -31,6 +33,7 @@ import {
   serviceNotificationEnabled,
   serviceNotificationEvents,
   serviceNotifications,
+  scanFirstMediaPolicy,
   sourceLocale,
   staffLocales,
   strictDealPolicy,
@@ -248,5 +251,11 @@ describe("tenant profile", () => {
       expect(serviceNotifications.events[event]).toBe(true);
       expect(serviceNotificationEnabled(event)).toBe(true);
     }
+  });
+
+  it("admits this brand's images by re-encoding them, and keeps the scanner-first rule", () => {
+    expect(imageAdmissionRules).toEqual(["reencode", "virus_scan"]);
+    expect(mediaPolicy).toEqual({ imageAdmission: "reencode" });
+    expect(scanFirstMediaPolicy).toEqual({ imageAdmission: "virus_scan" });
   });
 });

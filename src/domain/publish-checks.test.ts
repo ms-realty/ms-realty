@@ -59,6 +59,9 @@ describe("publish checks (ADR 0012)", () => {
     expect(none).toEqual({ blockers: [], warnings: ["no_photos"] });
     const pending = publishChecks({ ...ready, photos: { ready: 0, notReady: 4 } });
     expect(pending.warnings).toEqual(["no_photos", "photos_not_ready"]);
+    const legacy = publishChecks({ ...ready, photos: { ready: 0, notReady: 0, notCopied: 12 } });
+    expect(legacy.blockers).toEqual([]);
+    expect(legacy.warnings).toEqual(["no_photos", "photos_not_copied"]);
   });
 
   it("warns about a very short description", () => {

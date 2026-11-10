@@ -153,6 +153,23 @@ export const publicationPolicy: PublicationPolicy = {
   attestationOutlivesAuthor: true,
 };
 
+// Media admission (ADR 0016). How a stored image becomes usable: decoded and re-encoded into
+// fresh renditions ("reencode": only pixels survive, nothing else in the file is ever served)
+// or checked by the malware scanner first ("virus_scan"). Documents, PDFs and anything that is
+// not a decodable image always go through the scanner, whatever this says.
+
+export const imageAdmissionRules = ["reencode", "virus_scan"] as const;
+export type ImageAdmissionRule = (typeof imageAdmissionRules)[number];
+
+export interface MediaPolicy {
+  readonly imageAdmission: ImageAdmissionRule;
+}
+
+/** The scanner-first policy another brand may adopt; kept tested alongside the agency's own. */
+export const scanFirstMediaPolicy: MediaPolicy = { imageAdmission: "virus_scan" };
+
+export const mediaPolicy: MediaPolicy = { imageAdmission: "reencode" };
+
 // Deal path (ADR 0013). The steps a person records after terms are agreed, from the first
 // check to keys in hand, per jurisdiction and transaction. Labels and explanations live in the
 // `dealPath` message catalogs under the same keys; this profile holds no wording. A Deal keeps

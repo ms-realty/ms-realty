@@ -12,7 +12,7 @@ import {
   operations,
   properties,
 } from "@/db/schema";
-import { mediaModifications, moveRelation } from "@/domain/media";
+import { admissionAccepted, mediaModifications, moveRelation } from "@/domain/media";
 import { parseMediaRenditions } from "@/domain/media-rendition";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
@@ -447,6 +447,7 @@ export async function reviewMedia(
         input.decision === "approve" &&
         (!asset.sealedKey ||
           !asset.sha256 ||
+          !admissionAccepted(asset) ||
           asset.scan !== "clean" ||
           asset.scannedSha256 !== asset.sha256 ||
           !asset.scannedAt ||
