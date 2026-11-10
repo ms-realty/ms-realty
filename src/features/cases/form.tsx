@@ -29,6 +29,7 @@ export type WorkflowField = {
     | "textarea"
     | "text"
     | "datetime-local"
+    | "date"
     | "number"
     | "money"
     | "checkbox"

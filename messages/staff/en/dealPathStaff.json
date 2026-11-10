@@ -1,0 +1,41 @@
+{
+  "title": "Deal path",
+  "lead": "The client sees the same steps, except the hidden ones. Record each step when it happens.",
+  "preview": "Nothing recorded yet. These steps are created from the template when the terms are agreed, or with your first action here.",
+  "template": "Template",
+  "currentStep": "Current step",
+  "hidden": "Hidden from the client",
+  "evidenceUsual": "A document is usually kept",
+  "internalNote": "Internal note",
+  "skipReason": "Why it is not needed",
+  "evidence": "Document",
+  "record": "Record this step",
+  "markDone": "Mark done",
+  "doneDate": "Date it happened",
+  "clientNote": "Note for the client",
+  "internalNoteField": "Internal note (team only)",
+  "evidenceField": "Deal document",
+  "noDocument": "No document",
+  "notNeeded": "Not needed",
+  "notNeededSubmit": "Record as not needed",
+  "setExpected": "Set expected date",
+  "expectedDate": "Expected by",
+  "reopen": "Reopen",
+  "reopenReason": "Why it is reopened",
+  "outcome": "Completed through the deal path",
+  "complete": {
+    "title": "Complete the deal",
+    "lead": "Every step is done or not needed. Confirm the deed or lease date to close the deal as completed.",
+    "completedOn": "Deed or lease date",
+    "reference": "Registry or deed reference",
+    "evidence": "Deed or lease document",
+    "reviewed": "I checked every step on this path and the date above.",
+    "submit": "Complete the deal",
+    "boundary": "Completing closes the deal with a recorded outcome the client sees. It does not certify a legal transfer, and the listing's status is changed separately."
+  },
+  "blocked": {
+    "terms_not_agreed": "The terms are not agreed yet.",
+    "steps_open": "Some steps are still open.",
+    "final_step_open": "The last step must be done, not marked as not needed."
+  }
+}
