@@ -20,6 +20,9 @@ import {
   publicLocales,
   referencePrefixes,
   rtlLocales,
+  serviceNotificationEnabled,
+  serviceNotificationEvents,
+  serviceNotifications,
   sourceLocale,
   staffLocales,
 } from "./tenant";
@@ -97,5 +100,36 @@ describe("tenant profile", () => {
     expect(agency.phone.e164).toBe("+359879696870");
     expect(agency.phone.display.replaceAll(" ", "")).toBe(agency.phone.e164);
     expect(assistantLabel).toBe("MS Realty Butler");
+  });
+
+  it("sends every service notification for this brand", () => {
+    expect(serviceNotifications.enabled).toBe(true);
+    expect(serviceNotificationEvents).toEqual([
+      "viewing.proposed",
+      "viewing.confirmed",
+      "viewing.moved",
+      "viewing.cancelled",
+      "proposal.ready",
+      "proposal.withdrawn",
+      "proposal.expired",
+      "document.requested",
+      "message.from_broker",
+      "deal.step_done",
+      "client.viewing_confirmed",
+      "client.viewing_cancelled",
+      "client.viewing_new_time",
+      "client.proposal_accepted",
+      "client.proposal_declined",
+      "client.proposal_countered",
+      "client.document_uploaded",
+      "client.message",
+    ]);
+    expect(Object.keys(serviceNotifications.events).sort()).toEqual(
+      [...serviceNotificationEvents].sort(),
+    );
+    for (const event of serviceNotificationEvents) {
+      expect(serviceNotifications.events[event]).toBe(true);
+      expect(serviceNotificationEnabled(event)).toBe(true);
+    }
   });
 });

@@ -30,6 +30,7 @@ import { documentContentTypes } from "../files/inspect";
 import { MAX_DOCUMENT_BYTES } from "../files/storage";
 import { reserveUpload } from "../files/uploads";
 import { expectVersion, type FileCommand, parseFileInput } from "../media/commands";
+import { notifyDealUpdate } from "../notifications/notify";
 import { runOperation } from "../operations";
 import { nextReference } from "../references";
 import { reviewDocument, uploadInput } from "./commands";
@@ -247,6 +248,15 @@ export async function createDocumentRequest(
           documentId: document.id,
           policyHash: policy.policyHash,
         },
+      });
+      // The notice names neither the document nor its purpose; the request page does.
+      await notifyDealUpdate(tx, {
+        caseId: record.id,
+        event: "document.requested",
+        eventKey: `document-request:${request.id}`,
+        subject: { type: "document_request", id: request.id, reference: record.reference },
+        actor: session.actor,
+        partyIds: [recipient.participant.partyId],
       });
       return { id: request.id, documentId: document.id, version: request.version };
     },

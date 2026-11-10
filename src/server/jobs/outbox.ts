@@ -215,6 +215,9 @@ export async function dispatchMessage(
     if (inquiryNotice && !inquiryCoverageNoticeConfig()) return { row, claimed: false as const };
     const invalidInquiryNotice =
       inquiryNotice && !(await inquiryCoverageNoticeActionIsValid(tx, row));
+    // Deal notices recheck recipient eligibility, access and currency before any provider call.
+    const { dealNoticeBlocker, isDealNotice } = await import("../notifications/guard");
+    const dealNoticeBlocked = isDealNotice(row) ? await dealNoticeBlocker(tx, row) : null;
     const secretChanged =
       payload?.secretDigest !== undefined &&
       (!row.secretPayload ||
@@ -226,6 +229,7 @@ export async function dispatchMessage(
       template === alertTemplate ||
       template === caseEmailTemplate ||
       invalidInquiryNotice ||
+      dealNoticeBlocked ||
       invalidCredentialMail ||
       secretChanged ||
       row.payloadDigest !== createHash("sha256").update(canonicalJson(row.payload)).digest("hex")
@@ -234,11 +238,13 @@ export async function dispatchMessage(
         ? "auth_email_link_ineligible"
         : invalidInquiryNotice
           ? "inquiry_notice_guard_failed"
-          : template === alertTemplate || template === caseEmailTemplate
-            ? "guarded_template_subject_mismatch"
-            : secretChanged
-              ? "secret_digest_mismatch"
-              : "payload_digest_mismatch";
+          : dealNoticeBlocked
+            ? dealNoticeBlocked
+            : template === alertTemplate || template === caseEmailTemplate
+              ? "guarded_template_subject_mismatch"
+              : secretChanged
+                ? "secret_digest_mismatch"
+                : "payload_digest_mismatch";
       await tx
         .update(externalActions)
         .set({
