@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
+import { agencyTimeZone } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
@@ -338,7 +339,7 @@ export async function PreferencesScreen({
         <TextField
           name="timezone"
           label={c.timezone}
-          value={preferences.timezone ?? "Europe/Sofia"}
+          value={preferences.timezone ?? agencyTimeZone}
           required
         />
         <label className="grid gap-2">
@@ -399,7 +400,7 @@ export async function PreferencesScreen({
                 <TextField
                   name="timezone"
                   label={c.timezone}
-                  value={preferences.timezone ?? "Europe/Sofia"}
+                  value={preferences.timezone ?? agencyTimeZone}
                   required
                 />
                 {purpose === "search_alerts" ? (

@@ -2,6 +2,7 @@ import "server-only";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { createRemoteJWKSet, type JWTVerifyGetKey, jwtVerify } from "jose";
 import { z } from "zod";
+import { assistantLabel } from "@/config/tenant";
 import {
   type ChatGptCredential,
   type ChatGptCredentialStore,
@@ -42,7 +43,7 @@ export function beginAuthorization({
   redirectUri,
   hostId,
   selected = null,
-  label = "MS Realty Butler",
+  label = assistantLabel,
   now = Date.now(),
   includeHints = false,
   issuedClientId,
@@ -74,7 +75,7 @@ export function beginAuthorization({
     redirectUri: callback.href,
     hostId,
     selected,
-    label: label.trim().slice(0, 160) || "MS Realty Butler",
+    label: label.trim().slice(0, 160) || assistantLabel,
     expiresAt: now + 600_000,
     consumed: false,
   };
@@ -92,7 +93,7 @@ export function beginAuthorization({
     code_challenge: createHash("sha256").update(attempt.verifier).digest("base64url"),
   }).toString();
   if (attempt.clientId === "dynamic_agent_client")
-    url.searchParams.set("agent_name_hint", "MS Realty Butler");
+    url.searchParams.set("agent_name_hint", assistantLabel);
   if (includeHints && selected?.tokens) {
     url.searchParams.set("id_token_hint", selected.tokens.idToken);
     if (selected.email) url.searchParams.set("login_hint", selected.email);

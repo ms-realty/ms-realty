@@ -1,3 +1,4 @@
+import { agency } from "@/config/tenant";
 import { publicLocales } from "@/i18n/config";
 import { localizedPath, stagingEnabled } from "@/i18n/seo";
 import { legacySnapshotPages } from "@/server/legacy/pages";
@@ -10,7 +11,7 @@ export async function GET() {
   const origin = publicSeoOrigin();
   const url = (path: string) => new URL(path, origin).toString();
   const rows = [
-    "# MS Realty",
+    `# ${agency.name}`,
     "",
     "> Property listings and agency information. Bulgarian is the source locale. Property facts and availability must be checked on the linked page; unknown facts are not assertions.",
     "",

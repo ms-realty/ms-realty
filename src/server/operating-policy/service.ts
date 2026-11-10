@@ -2,6 +2,7 @@
 import "server-only";
 import { and, asc, desc, eq, ilike, inArray, lte, sql } from "drizzle-orm";
 import { z } from "zod";
+import { agencyTimeZone } from "@/config/tenant";
 import {
   operatingPolicyDrafts,
   operatingPolicyVersions,
@@ -352,7 +353,7 @@ export async function approveOperatingPolicy(
         .insert(servicePolicies)
         .values({
           effectiveFrom: now,
-          timezone: "Europe/Sofia",
+          timezone: agencyTimeZone,
           serviceHours: draft.document.serviceCalendar ?? { kind: "unknown_calendar_v1" },
           coverage: { statement: draft.document.coverage },
           responsePolicy: {

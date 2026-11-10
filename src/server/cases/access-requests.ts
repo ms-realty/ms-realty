@@ -2,6 +2,7 @@
 import "server-only";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { agencyTimeZone } from "@/config/tenant";
 import { caseAccessRequests, caseParticipants, cases, principals, tasks } from "@/db/schema";
 import { issueClientInvitation } from "../auth/invitations";
 import { requireFreshAuth, type Session } from "../auth/sessions";
@@ -92,7 +93,7 @@ export async function requestCaseAccess(
           title: "Review requested access to the deal",
           purpose: "Client access request",
           dueAt: new Date(Date.now() + 86400000),
-          dueTimezone: "Europe/Sofia",
+          dueTimezone: agencyTimeZone,
         })
         .returning();
       if (!task) throw new Error("Missing access request task");

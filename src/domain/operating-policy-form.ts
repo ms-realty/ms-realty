@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { agencyTimeZone } from "../config/tenant";
 import { type OperatingPolicy, operatingPolicySchema, policyWeekdays } from "./operating-policy";
 
 const basePolicyFormFields = [
@@ -38,7 +39,7 @@ export function policyFromValues(values: PolicyFormValues): OperatingPolicy {
     values.calendarState === "reviewed"
       ? {
           kind: "reviewed_calendar_v1",
-          timezone: "Europe/Sofia",
+          timezone: agencyTimeZone,
           validFrom: values.validFrom,
           validUntil: values.validUntil,
           sourceReference: values.calendarSource,

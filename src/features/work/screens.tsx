@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
+import { agencyTimeZone } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { inquiryMachine } from "@/domain/inquiry";
 import { highImpactTaskTypes, type TaskState, taskMachine } from "@/domain/task";
@@ -700,7 +701,7 @@ export async function TaskScreen({
           <div>
             <dt className="font-semibold">{copy.nextReview}</dt>
             <dd>
-              <When date={task.followUpAt} locale={locale} zone="Europe/Sofia" />
+              <When date={task.followUpAt} locale={locale} zone={agencyTimeZone} />
             </dd>
           </div>
         ) : null}

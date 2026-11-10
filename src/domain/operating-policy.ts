@@ -1,5 +1,6 @@
 // O24/AT14: reviewed local calendars and immutable policy context, never inferred staffing.
 import { z } from "zod";
+import { agencyTimeZone, availabilityReviewIntervalDays } from "../config/tenant";
 import { settingsResources } from "./settings-resources";
 
 export const operatingPolicyId = settingsResources.operatingPolicy;
@@ -23,7 +24,7 @@ const optionalOwner = z.uuid().nullable();
 export const serviceCalendarSchema = z
   .object({
     kind: z.literal("reviewed_calendar_v1"),
-    timezone: z.literal("Europe/Sofia"),
+    timezone: z.literal(agencyTimeZone),
     validFrom: day,
     validUntil: day,
     // [] is explicitly closed; null is unknown. Every weekday must be stated.
@@ -85,8 +86,13 @@ export const operatingPolicySchema = z.object({
   processReference: optionalReference,
   alertReference: optionalReference,
   availabilityReviewDays: z.object({
-    sale: z.number().int().min(1).max(14).nullable(),
-    long_term_rent: z.number().int().min(1).max(7).nullable(),
+    sale: z.number().int().min(1).max(availabilityReviewIntervalDays.sale).nullable(),
+    long_term_rent: z
+      .number()
+      .int()
+      .min(1)
+      .max(availabilityReviewIntervalDays.long_term_rent)
+      .nullable(),
   }),
 });
 export type OperatingPolicy = z.infer<typeof operatingPolicySchema>;
@@ -126,7 +132,7 @@ export function readOperatingPolicySnapshot(
 
 const hourMs = 3600000;
 const formatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: "Europe/Sofia",
+  timeZone: agencyTimeZone,
   year: "numeric",
   month: "2-digit",
   day: "2-digit",

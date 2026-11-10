@@ -1,3 +1,4 @@
+import { agencyTimeZone } from "@/config/tenant";
 import type { HistoryDetail, HistoryEntry, HistoryList } from "@/server/audit-history/queries";
 import { buttonClass } from "@/ui/button-class";
 import { EmptyState } from "@/ui/empty-state";
@@ -19,7 +20,7 @@ function RecordTime({ locale, at }: { locale: string; at: Date }) {
       {new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
-        timeZone: "Europe/Sofia",
+        timeZone: agencyTimeZone,
       }).format(at)}
     </time>
   );

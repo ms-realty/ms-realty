@@ -1,6 +1,7 @@
 // Explicit local offset disambiguates the autumn fold; round-trip rejects the spring gap.
+import { agency, agencyTimeZone } from "@/config/tenant";
 import { calendarStaffedDuration } from "@/domain/operating-policy";
-export const appointmentTimezone = "Europe/Sofia";
+export const appointmentTimezone = agencyTimeZone;
 export function localParts(instant: Date) {
   return Object.fromEntries(
     new Intl.DateTimeFormat("en-CA", {
@@ -79,7 +80,7 @@ export function calendarFile(input: {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//MS Realty//Agency appointments//EN",
+    `PRODID:-//${agency.name}//Agency appointments//EN`,
     `METHOD:${input.cancelled ? "CANCEL" : input.invitation ? "REQUEST" : "PUBLISH"}`,
     "BEGIN:VEVENT",
     `UID:${escapeText(input.uid)}`,
@@ -87,7 +88,7 @@ export function calendarFile(input: {
     `DTSTAMP:${stamp(input.updatedAt)}`,
     `DTSTART:${stamp(input.start)}`,
     `DTEND:${stamp(input.end)}`,
-    `SUMMARY:${escapeText(`MS Realty · ${input.purpose === "photography" ? "Photography · " : ""}${input.reference}`)}`,
+    `SUMMARY:${escapeText(`${agency.name} · ${input.purpose === "photography" ? "Photography · " : ""}${input.reference}`)}`,
     `STATUS:${input.cancelled ? "CANCELLED" : "CONFIRMED"}`,
   ];
   if (input.invitation) {

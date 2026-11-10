@@ -3,6 +3,7 @@
 import "server-only";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { defaultCurrency } from "@/config/tenant";
 import { sha256Json } from "@/db/import/mapping";
 import {
   importBatches,
@@ -158,7 +159,7 @@ async function planRow(
   }
   if (
     supplied(row.values.price) &&
-    (row.values.currency !== "EUR" || Number(amount(row.values.price)) <= 0)
+    (row.values.currency !== defaultCurrency || Number(amount(row.values.price)) <= 0)
   )
     issues.push("price_eur_positive");
   if (supplied(row.values.area) && Number(amount(row.values.area)) <= 0)
@@ -199,7 +200,7 @@ async function planRow(
           ? (property?.settlement ?? null)
           : field === "currency"
             ? original
-              ? "EUR"
+              ? defaultCurrency
               : null
             : display(original, field);
     const proposed =

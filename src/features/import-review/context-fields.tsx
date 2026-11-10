@@ -1,3 +1,4 @@
+import { jurisdictionCodes } from "@/config/tenant";
 import { areaBases, listingPurposes, propertyTypes } from "@/domain/facts";
 import { inventoryCopy, optionLabel } from "@/features/inventory/copy";
 import { localeEndonyms, publicLocales } from "@/i18n/config";
@@ -9,7 +10,7 @@ export function ImportContextFields({ locale, pending }: { locale: string; pendi
   const labels = inventoryCopy(locale).labels,
     copy = importExecutionCopy(locale);
   const choices = {
-    country: ["BG", "GR"],
+    country: jurisdictionCodes,
     propertyType: propertyTypes,
     purpose: listingPurposes,
     areaBasis: areaBases,

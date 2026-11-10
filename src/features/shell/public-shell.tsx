@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
+import { agency } from "@/config/tenant";
 import { isolateText, Ltr } from "@/i18n/bidi";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { agencyYear } from "@/i18n/format";
@@ -72,7 +73,7 @@ export async function PublicShell({
             aria-label={t("home")}
             className="me-auto inline-flex min-h-control items-center rounded-control lg:me-0"
           >
-            <Image src="/brand/logo-ms-realty.png" alt="" width={86} height={44} />
+            <Image src={agency.logoPath} alt="" width={86} height={44} />
           </Link>
           {primary.length > 0 ? (
             <nav aria-label={t("primaryLabel")} className="hidden flex-1 lg:block">
@@ -127,12 +128,7 @@ export async function PublicShell({
       <footer className="border-t border-divider bg-surface">
         <div className="mx-auto grid max-w-page gap-10 px-gutter pt-14 pb-10 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:px-gutter-wide">
           <div className="flex max-w-sm flex-col gap-3">
-            <Image
-              src="/brand/logo-ms-realty.png"
-              alt={footer("agencyName")}
-              width={86}
-              height={44}
-            />
+            <Image src={agency.logoPath} alt={footer("agencyName")} width={86} height={44} />
             <p className="text-compact text-text-muted">{footer("agencyKind")}</p>
             <a
               href={`tel:${brandPhone.e164}`}

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { agency } from "@/config/tenant";
 import { type StaffLocale, staffLocales } from "@/i18n/config";
 import { cx } from "@/ui/cx";
 import { CloseIcon } from "@/ui/icons";
@@ -57,7 +58,7 @@ export async function AgencyTools({
       <div className="sticky top-0 z-10 flex shrink-0 items-center gap-4 bg-canvas">
         {closeHref ? (
           <Image
-            src="/brand/logo-ms-realty.png"
+            src={agency.logoPath}
             alt={common("brand")}
             width={86}
             height={44}

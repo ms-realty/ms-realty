@@ -12,6 +12,7 @@ import "server-only";
 import { unstable_rethrow } from "next/navigation";
 import { type ComponentType, Fragment, type ReactNode } from "react";
 import { z } from "zod";
+import { agencyTimeZone } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { aiCopy } from "@/features/ai/copy";
 import { caseCopy } from "@/features/cases/copy";
@@ -83,7 +84,6 @@ type Group = {
 };
 type Worklist = { attention: Group[]; continued: Group[] };
 
-const agencyZone = "Europe/Sofia";
 // Today starts the day: the oldest few of each queue stay in view together, so a long queue
 // cannot push a later group's overdue work out of sight. The count covers the whole queue.
 const rowsPerGroup = 5;
@@ -758,7 +758,7 @@ function KeyRow({ locale, item }: { locale: string; item: KeyItem }) {
         ["holder", t.holder.replace("{name}", () => holder)],
         [
           "time",
-          place(t.overdueSince, <When locale={locale} date={item.dueAt} zone={agencyZone} />),
+          place(t.overdueSince, <When locale={locale} date={item.dueAt} zone={agencyTimeZone} />),
         ],
         next(locale, t.actions.keyReturn),
       ]}
@@ -1132,7 +1132,7 @@ function greeting(locale: string, now: Date) {
     new Intl.DateTimeFormat("en-GB", {
       hour: "numeric",
       hourCycle: "h23",
-      timeZone: agencyZone,
+      timeZone: agencyTimeZone,
     }).format(now),
   );
   return hour >= 5 && hour < 12 ? t.morning : hour >= 12 && hour < 18 ? t.afternoon : t.evening;

@@ -2,6 +2,7 @@
 // and whether they manage access. One grant resolution serves every navigation check.
 import "server-only";
 import { eq } from "drizzle-orm";
+import { agency } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { principals } from "@/db/schema";
 import type { StaffLocale } from "@/i18n/config";
@@ -31,7 +32,7 @@ export async function workspaceViewer(locale: StaffLocale, session: Session) {
   );
   const services = await publicServiceOfferings(db).catch(() => []);
   return {
-    account: { name: principal?.name ?? "MS Realty", detail: principal?.email },
+    account: { name: principal?.name ?? agency.name, detail: principal?.email },
     primary: permittedWorkspaceNav(navigable),
     tools: permittedTools(locale, held, navigable)
       .map((group) => ({

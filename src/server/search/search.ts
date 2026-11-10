@@ -11,6 +11,7 @@ import "server-only";
 import { and, arrayOverlaps, eq, inArray, type SQL, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
+import { defaultCurrency } from "@/config/tenant";
 import { listingSearchDocuments as doc, listings } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
 import { listingPurposes, propertyTypes } from "@/domain/facts";
@@ -269,7 +270,7 @@ const areaColumns = {
 } as const;
 
 function comparablePrice(criteria: SearchCriteria): SQL {
-  const currency = criteria.price?.currency ?? "EUR";
+  const currency = criteria.price?.currency ?? defaultCurrency;
   return sql`(${doc.priceState} = 'known' and ${doc.priceAmountMinor} is not null
     and ${doc.pricePeriod} = ${searchPricePeriod[criteria.purpose]}
     and ${doc.priceCurrency} = ${currency})`;
