@@ -16,7 +16,7 @@ test.afterAll(async () => connection.end());
 
 type Seed = {
   token: string;
-  single: { reference: string; listingId: string; title: string };
+  single: { reference: string; listingId: string; title: string; englishTitle: string };
   bulk: { reference: string; listingId: string }[];
   rent: { reference: string; listingId: string; title: string };
 };
@@ -105,6 +105,23 @@ test.describe("without JavaScript", () => {
         where action = 'listing.publication.attested' and record_id = ${f.single.listingId}`;
     expect(attested?.actor_kind).toBe("staff");
     expect(attested?.payload).toMatchObject({ basis: "staff_attestation" });
+
+    // Languages: the English draft passed the checks; the broker reads it and ticks it.
+    const english = page.locator('[data-language="en"]');
+    await expect(english.getByText(f.single.englishTitle, { exact: true })).toBeVisible();
+    await english
+      .getByRole("checkbox", {
+        name: "I read the English text and it says the same as the Bulgarian.",
+      })
+      .check();
+    await page.getByRole("button", { name: "Publish languages", exact: true }).click();
+    await expect(english.getByText("Published", { exact: true })).toBeVisible();
+    expect((await live(f.single.listingId)).sort()).toEqual(["bg", "en"]);
+    const englishDetail = await request.get(
+      hostUrl("public", `/en/properties/${f.single.reference}/${f.single.reference.toLowerCase()}`),
+    );
+    expect(await englishDetail.text()).toContain(f.single.englishTitle);
+    await page.goto(hostUrl("staff", `/en/inventory/${f.single.reference}/publish`));
 
     // Publish is the screen's one filled action; Unpublish waits behind a deliberate disclosure.
     await expect(page.locator('button[type="submit"]', { hasText: "Unpublish" })).toBeHidden();

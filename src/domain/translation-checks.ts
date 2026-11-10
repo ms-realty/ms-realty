@@ -48,8 +48,21 @@ export function numbersIn(text: string): Set<number> {
 
 // Sandanski is inland (AGENTS.md); a translation may not move it to the sea in any language.
 const inlandPlace = /sandanski|сандански|σαντάνσκι|סנדנסקי/iu;
-const coastWords =
-  /\b(?:sea|seaside|beach(?:es)?|coast(?:al|line)?|meer|strand|küste|zee|kust)\b|(?:^|[^\p{L}])(?:мор[еяю]|морск|плаж|крайбрежи|пляж|побережь|θάλασσ|παραλί|ακτή)|(?:^|[^\p{L}])[הלבו]?(?:ים|חוף)(?![\p{L}])/iu;
+// Per language: a word is only a coast word in its own language (Dutch "meer" means "more").
+const coastWords: Readonly<Record<PublicLocale, RegExp>> = {
+  bg: /(?<!\p{L})(?:море|морск|плаж|крайбреж)/iu,
+  ru: /(?<!\p{L})(?:мор[еяю]|морск|пляж|побережь)/iu,
+  en: /(?<!\p{L})(?:sea(?:side|front)?(?!\p{L})|beach|coast)/iu,
+  de: /(?<!\p{L})(?:meer|strand|küste)/iu,
+  nl: /(?<!\p{L})(?:zee(?!r)|strand|kust)/iu,
+  el: /(?<!\p{L})(?:θάλασσ|παραλί|ακτ[ήέ])/iu,
+  he: /(?<!\p{L})[הלבו]?(?:ים|חוף)(?!\p{L})/u,
+};
+
+const localeScripts: Partial<Record<PublicLocale, RegExp>> = {
+  el: /\p{Script=Greek}/u,
+  he: /\p{Script=Hebrew}/u,
+};
 
 export function translationChecks(input: TranslationCheckInput): TranslationChecks {
   const blockers: TranslationBlocker[] = [];
@@ -71,7 +84,7 @@ export function translationChecks(input: TranslationCheckInput): TranslationChec
   const text = `${title} ${description}`;
   if (
     (inlandPlace.test(text) || input.placeNames.some((name) => inlandPlace.test(name))) &&
-    coastWords.test(text)
+    coastWords[input.locale].test(text)
   )
     blockers.push("inland_framed_as_coast");
   const sourceLength = input.source.description.trim().length;
@@ -83,8 +96,15 @@ export function translationChecks(input: TranslationCheckInput): TranslationChec
   const sourceNamesPlace = input.placeNames.some((name) =>
     `${input.source.title} ${input.source.description}`.toLowerCase().includes(name.toLowerCase()),
   );
+  // Only where the place is known in the translation's own script: Greek and Hebrew texts write
+  // the name in a script the place register may not hold, and silence beats a false warning.
+  const script = localeScripts[input.locale];
+  const namesInScript = script
+    ? input.placeNames.filter((name) => script.test(name))
+    : input.placeNames;
   if (
     sourceNamesPlace &&
+    namesInScript.length > 0 &&
     !input.placeNames.some((name) => text.toLowerCase().includes(name.toLowerCase()))
   )
     warnings.push("place_name_missing");

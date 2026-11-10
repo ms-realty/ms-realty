@@ -844,10 +844,8 @@ function ListingReviewRow({
           .flatMap((part, index) =>
             index === 0 ? [part] : [<bdi key={item.reference}>{item.reference}</bdi>, part],
           )}
-        details={[
-          owner(locale, item.ownerName, item.needsCoverage),
-          next(locale, blockReason(locale, item.fix)),
-        ]}
+        // One detail: what to fix (no joined labels).
+        details={[next(locale, blockReason(locale, item.fix))]}
       />
     );
   }

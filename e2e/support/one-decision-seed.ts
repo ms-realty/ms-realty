@@ -17,11 +17,18 @@ const connection = postgres(url, { max: 1, onnotice: () => {} }),
 const unreviewed = { reviewed: false, sourceClass: "legacy_import" as const };
 try {
   const broker = await staffFixture(db);
+  // The broker reads English: they may approve translations (ADR 0012, languages).
+  await db.insert(schema.grants).values({
+    principalId: broker.id,
+    role: "translation_reviewer",
+    reason: "Synthetic one-decision broker who reads English",
+  });
   // Same lock and unique reference rewrite as the other listing fixtures.
   const listing = (name: string, rent = false) =>
     db.transaction(async (tx) => {
       // A distinct title per run: other seeded listings may share the base name on the site.
-      const title = `${name} ${randomBytes(3).toString("hex")}`;
+      const tag = randomBytes(3).toString("hex");
+      const title = `${name} ${tag}`;
       await tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))`,
       );
@@ -64,7 +71,25 @@ try {
         .update(schema.properties)
         .set({ reference: `PR-2026-${number}` })
         .where(eq(schema.properties.id, item.propertyId));
-      return { reference, listingId: item.listingId, title };
+      // A draft English translation as the import leaves it: bound to the first version.
+      await tx.insert(schema.localizedRevisions).values({
+        listingId: item.listingId,
+        sourceRevisionId: item.revisionId,
+        locale: "en",
+        state: "draft",
+        title: `Synthetic listing ${tag} - Real estate in Sandanski`,
+        body: {
+          description:
+            "Synthetic test property in Sandanski, near the park and the mineral springs. Not a real offer. The listing exists only for an automated publishing test.",
+          legacy: { humanApproved: false, recordedState: "human_edited" },
+        },
+      });
+      return {
+        reference,
+        listingId: item.listingId,
+        title,
+        englishTitle: `Synthetic listing ${tag}`,
+      };
     });
   const single = await listing("Синтетичен апартамент за публикуване");
   const first = await listing("Синтетична къща за масово публикуване");

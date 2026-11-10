@@ -128,6 +128,7 @@
       "no_permission": "Your role cannot approve translations in this language.",
       "no_draft": "There is no translation in this language.",
       "other": "This language could not be published. Open Detailed review."
-    }
+    },
+    "withPublish": "Languages you tick under Languages below go online with it."
   }
 }

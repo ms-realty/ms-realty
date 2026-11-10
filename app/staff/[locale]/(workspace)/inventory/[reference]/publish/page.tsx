@@ -263,40 +263,49 @@ export default async function PublishPage({
               ) : !view.mayPublish ? (
                 <p>{copy.cannotPublish}</p>
               ) : showForm ? (
-                <PublishForm
-                  action={publishListingAction.bind(null, locale, ref)}
-                  initialState={{
-                    values: {
-                      attested: "",
-                      note: "",
-                      rentPeriod: content.rentAmount ? "month" : "",
-                    },
-                    operationId: publishOperation,
-                    expectedRevision: view.listing.version,
-                    responseId: randomUUID(),
-                    outcome: { kind: "idle" },
-                  }}
-                  permalink={permalink}
-                  reconciliation={status(publishOperation)}
-                  formCopy={inventory.form}
-                  formId="listing-publish-form"
-                  labels={{ attested: copy.attestation, note: copy.note, submit: copy.publish }}
-                  {...(content.cleanedTitle
-                    ? {
-                        cleanTitle: {
-                          label: copy.cleanTitle,
-                          hint: fillCopy(copy.cleanTitleHint, {
-                            title: content.title.slice(content.cleanedTitle.length).trim(),
-                          }),
-                        },
-                      }
-                    : {})}
-                  {...(content.rentAmount
-                    ? {
-                        rent: { label: copy.rentPeriod, month: copy.perMonth, hint: copy.rentHint },
-                      }
-                    : {})}
-                />
+                <>
+                  {tickable.length ? (
+                    <p className="text-dense text-text-muted">{copy.languages.withPublish}</p>
+                  ) : null}
+                  <PublishForm
+                    action={publishListingAction.bind(null, locale, ref)}
+                    initialState={{
+                      values: {
+                        attested: "",
+                        note: "",
+                        rentPeriod: content.rentAmount ? "month" : "",
+                      },
+                      operationId: publishOperation,
+                      expectedRevision: view.listing.version,
+                      responseId: randomUUID(),
+                      outcome: { kind: "idle" },
+                    }}
+                    permalink={permalink}
+                    reconciliation={status(publishOperation)}
+                    formCopy={inventory.form}
+                    formId="listing-publish-form"
+                    labels={{ attested: copy.attestation, note: copy.note, submit: copy.publish }}
+                    {...(content.cleanedTitle
+                      ? {
+                          cleanTitle: {
+                            label: copy.cleanTitle,
+                            hint: fillCopy(copy.cleanTitleHint, {
+                              title: content.title.slice(content.cleanedTitle.length).trim(),
+                            }),
+                          },
+                        }
+                      : {})}
+                    {...(content.rentAmount
+                      ? {
+                          rent: {
+                            label: copy.rentPeriod,
+                            month: copy.perMonth,
+                            hint: copy.rentHint,
+                          },
+                        }
+                      : {})}
+                  />
+                </>
               ) : null}
             </section>
           </div>

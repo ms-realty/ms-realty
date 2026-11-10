@@ -54,6 +54,22 @@ describe("translation checks (ADR 0012)", () => {
       ).toContain("inland_framed_as_coast");
   });
 
+  it("reads coast words only in their own language", () => {
+    // Dutch "meer" means "more"; it is the German word for sea.
+    const dutch = {
+      ...english,
+      locale: "nl" as const,
+      title: "Appartement in Sandanski",
+      description:
+        "Een licht appartement van 68 m2 in Sandanski, op de 2e verdieping. Neem voor meer informatie contact op. Prijs 95.000 euro.",
+    };
+    expect(translationChecks(dutch).blockers).toEqual([]);
+    expect(
+      translationChecks({ ...dutch, description: `${dutch.description} Dicht bij de zee.` })
+        .blockers,
+    ).toEqual(["inland_framed_as_coast"]);
+  });
+
   it("blocks an implausible length and warns about an unusual one", () => {
     expect(translationChecks({ ...english, description: "Flat 68." }).blockers).toEqual([
       "length_implausible",
