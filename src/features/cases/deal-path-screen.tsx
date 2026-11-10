@@ -1,18 +1,20 @@
-// C/O Deal overview · the Deal path (ADR 0013). One ordered list the client and the broker both
-// read: done, where the Deal stands now, what comes next, who acts and by when. Server-rendered
-// with native forms, so it works without JavaScript.
+// C/O Deal overview · the Deal path (ADR 0013). The client and the broker read the same path,
+// ordered by what matters now: how far the Deal is, the step it is on, the steps still to come,
+// and the finished steps folded into a native disclosure. Server-rendered with native forms, so
+// it works without JavaScript.
 import "server-only";
+import { createTranslator } from "next-intl";
 import type { ReactNode } from "react";
 import { agencyTimeZone, type DealPathActor, type DealPathTransaction } from "@/config/tenant";
 import type { CaseKind } from "@/domain/case";
-import { calendarDate, ownerSide, type PathStepStatus } from "@/domain/deal-path";
+import { calendarDate, ownerSide } from "@/domain/deal-path";
 import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDate } from "@/i18n/format";
 import type { Session } from "@/server/auth/sessions";
 import type { casePath } from "@/server/cases/path";
 import { cx } from "@/ui/cx";
 import { initialFormState } from "@/ui/form/server";
-import { LockIcon, NeutralIcon, PendingIcon, SuccessIcon } from "@/ui/icons";
+import { LockIcon, NeutralIcon, SuccessIcon } from "@/ui/icons";
 import { workflowAction } from "./actions";
 import { type WorkflowCommand, workflowFields, workflowScope, workflowStatus } from "./contract";
 import { caseCopy } from "./copy";
@@ -21,8 +23,20 @@ import { type WorkflowField, WorkflowForm } from "./form";
 
 export type DealPathView = NonNullable<Awaited<ReturnType<typeof casePath>>>;
 type Step = DealPathView["steps"][number];
+type Audience = "client" | "staff";
 
 const formatLocale = (locale: string) => (isPublicLocale(locale) ? locale : defaultLocale);
+
+/** ICU messages (counts, plurals) from the dealPath catalog. */
+function translator(locale: string) {
+  const t = createTranslator({
+    locale: formatLocale(locale),
+    messages: { dealPath: dealPathCopy(locale) },
+    namespace: "dealPath",
+  });
+  return (key: "progress" | "doneGroup" | "position", values: Record<string, number>) =>
+    t(key, values);
+}
 
 /** A calendar date (YYYY-MM-DD) or an instant, as one day in the agency's zone. */
 function PathDate({ value, locale }: { value: Date | string; locale: string }) {
@@ -41,7 +55,7 @@ function actorLabel(
   actor: DealPathActor,
   kind: CaseKind,
   transaction: DealPathTransaction,
-  audience: "client" | "staff",
+  audience: Audience,
 ) {
   const a = dealPathCopy(locale).actors;
   const owner = ownerSide(kind);
@@ -53,136 +67,240 @@ function actorLabel(
   return a[actor];
 }
 
-const markerClass: Record<PathStepStatus, string> = {
-  done: "text-success",
-  skipped: "text-text-muted",
-  not_recorded: "text-text-muted",
-  current: "text-action",
-  next: "text-text-muted",
-  upcoming: "text-text-muted",
-};
-
-function Marker({ status }: { status: PathStepStatus }) {
-  const className = cx("size-6", markerClass[status]);
-  if (status === "done") return <SuccessIcon className={className} />;
-  if (status === "current") return <NeutralIcon className={cx(className, "fill-current")} />;
-  if (status === "next") return <PendingIcon className={className} />;
-  return <NeutralIcon className={className} />;
+/** The step's sentence: addressed to the client on their side of the Deal, neutral for staff. */
+function stepSentence(locale: string, key: string, kind: CaseKind, audience: Audience) {
+  const fallback = stepCopy(locale, key).about;
+  if (audience === "staff" || kind === "service_intake") return fallback;
+  const you = dealPathCopy(locale).you;
+  const side: Record<string, string | undefined> = you[kind];
+  const common: Record<string, string | undefined> = you.common;
+  return side[key] ?? common[key] ?? fallback;
 }
 
-/** The ordered steps. `actions` renders a step's staff forms, if any. */
-export function DealPathList({
-  locale,
-  path,
-  audience,
-  actions,
-}: {
+const settled = (step: Step) =>
+  step.status === "done" || step.status === "skipped" || step.status === "not_recorded";
+
+type Groups = {
+  total: number;
+  position: (step: Step) => number;
+  done: Step[];
+  current: Step | undefined;
+  toCome: Step[];
+};
+
+function groupSteps(path: DealPathView): Groups {
+  const positions = new Map(path.steps.map((step, index) => [step, index + 1]));
+  return {
+    total: path.steps.length,
+    position: (step) => positions.get(step) ?? 0,
+    done: path.steps.filter(settled),
+    current: path.steps.find((step) => step.status === "current"),
+    toCome: path.steps.filter((step) => step.status === "next" || step.status === "upcoming"),
+  };
+}
+
+type ListProps = {
   locale: string;
   path: DealPathView;
-  audience: "client" | "staff";
+  audience: Audience;
   actions?: (step: Step) => ReactNode;
-}) {
+};
+
+/** "Who acts" and the expected date, as one quiet line of plain sentences. */
+function StepMeta({ locale, path, audience, step }: ListProps & { step: Step }) {
   const c = dealPathCopy(locale);
-  const staffCopy = audience === "staff" ? dealPathStaffCopy(locale) : null;
-  const status = (value: PathStepStatus) =>
-    value === "current" && staffCopy ? staffCopy.currentStep : c.status[value];
   return (
-    <ol className="min-w-0 [overflow-wrap:anywhere]" data-deal-path={path.template}>
-      {path.steps.map((step) => {
-        const words = stepCopy(locale, step.key);
-        const current = step.status === "current";
-        return (
+    <p className="text-dense text-text-muted">
+      {c.whoActs}: {actorLabel(locale, step.actor, path.kind, path.transaction, audience)}
+      {step.expectedAt ? (
+        <>
+          {". "}
+          {c.expectedBy}: <PathDate value={step.expectedAt} locale={locale} />
+        </>
+      ) : null}
+    </p>
+  );
+}
+
+function BrokerNote({ locale, note }: { locale: string; note: string | null }) {
+  if (!note) return null;
+  return (
+    <p className="text-dense">
+      <strong>{dealPathCopy(locale).brokerNote}:</strong> <bdi>{note}</bdi>
+    </p>
+  );
+}
+
+/** Staff-only facts about a step: hidden from the client, reason, internal note, document. */
+function StaffFacts({ locale, step }: { locale: string; step: Step }) {
+  const s = dealPathStaffCopy(locale);
+  return (
+    <>
+      {!step.clientVisible ? (
+        <p className="flex items-center gap-1 text-dense text-text-muted">
+          <LockIcon className="size-4" /> {s.hidden}
+        </p>
+      ) : null}
+      {step.evidenceExpected && !step.settled ? (
+        <p className="text-dense text-text-muted">{s.evidenceUsual}</p>
+      ) : null}
+      {step.skipReason ? (
+        <p className="text-dense">
+          <strong>{s.skipReason}:</strong> <bdi>{step.skipReason}</bdi>
+        </p>
+      ) : null}
+      {step.internalNote ? (
+        <p className="rounded-control border border-dashed border-border bg-subtle p-2 text-dense">
+          <LockIcon className="me-1 inline size-4 align-text-bottom" />
+          <strong>{s.internalNote}:</strong> <bdi>{step.internalNote}</bdi>
+        </p>
+      ) : null}
+      {step.evidence ? (
+        <p className="text-dense">
+          <strong>{s.evidence}:</strong> <bdi>{step.evidence.fileName}</bdi>
+        </p>
+      ) : null}
+    </>
+  );
+}
+
+/** The step the Deal is on: the one prominent, tinted element of the path. */
+function CurrentStep(props: ListProps & { step: Step; groups: Groups }) {
+  const { locale, audience, step, groups } = props;
+  const t = translator(locale);
+  const label =
+    audience === "staff"
+      ? dealPathStaffCopy(locale).currentStep
+      : dealPathCopy(locale).status.current;
+  return (
+    <ol start={groups.position(step)} className="min-w-0 [overflow-wrap:anywhere]">
+      <li
+        data-step={step.key}
+        data-status={step.status}
+        aria-current="step"
+        className="min-w-0 space-y-2 rounded-control bg-brand-tint p-4"
+      >
+        <p className="flex flex-wrap items-baseline gap-x-3 text-dense">
+          <span className="font-semibold text-action">{label}</span>
+          <span className="text-text-muted">
+            {t("position", { n: groups.position(step), total: groups.total })}
+          </span>
+        </p>
+        <h3 className="text-subheading font-semibold text-text">
+          {stepCopy(locale, step.key).label}
+        </h3>
+        <p className="text-text">{stepSentence(locale, step.key, props.path.kind, audience)}</p>
+        <StepMeta {...props} />
+        <BrokerNote locale={locale} note={step.clientNote} />
+        {audience === "staff" ? <StaffFacts locale={locale} step={step} /> : null}
+        {props.actions?.(step)}
+      </li>
+    </ol>
+  );
+}
+
+/** The steps after the current one, in order and compact. */
+function StepsToCome(props: ListProps & { groups: Groups }) {
+  const { locale, audience, groups } = props;
+  const first = groups.toCome[0];
+  if (!first) return null;
+  const t = translator(locale);
+  return (
+    <div className="space-y-3">
+      <h3 id="case-path-to-come" className="font-semibold text-text">
+        {dealPathCopy(locale).toCome}
+      </h3>
+      <ol
+        start={groups.position(first)}
+        aria-labelledby="case-path-to-come"
+        className="min-w-0 divide-y divide-divider [overflow-wrap:anywhere]"
+      >
+        {groups.toCome.map((step) => (
           <li
-            key={`${step.source}-${step.key}`}
+            key={step.key}
             data-step={step.key}
             data-status={step.status}
-            aria-current={current ? "step" : undefined}
-            className="relative flex gap-3 pb-6 last:pb-0"
+            className="min-w-0 space-y-1 py-3 first:pt-0 last:pb-0"
           >
-            <span
-              aria-hidden="true"
-              className="absolute start-3 top-8 bottom-0 w-px bg-divider [li:last-child>&]:hidden"
-            />
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface">
-              <Marker status={step.status} />
-            </span>
-            <div
-              className={cx(
-                "min-w-0 flex-1 space-y-1",
-                current && "-mt-2 rounded-control bg-brand-tint p-3",
-              )}
-            >
-              <p
-                className={cx(
-                  "text-dense font-semibold",
-                  current ? "text-action" : markerClass[step.status],
-                )}
-              >
-                {status(step.status)}
-              </p>
-              <h3
-                className={cx(
-                  "font-semibold",
-                  step.status === "skipped" || step.status === "not_recorded"
-                    ? "text-text-muted"
-                    : "text-text",
-                )}
-              >
-                {words.label}
-              </h3>
-              {words.about ? <p className="text-text">{words.about}</p> : null}
-              <p className="text-dense text-text-muted">
-                {c.whoActs}: {actorLabel(locale, step.actor, path.kind, path.transaction, audience)}
-              </p>
-              {step.status === "done" && step.doneAt ? (
-                <p className="text-dense text-text-muted">
-                  {c.doneOn}: <PathDate value={step.doneAt} locale={locale} />
-                </p>
-              ) : null}
-              {!step.settled && step.expectedAt ? (
-                <p className="text-dense font-semibold">
-                  {c.expectedBy}: <PathDate value={step.expectedAt} locale={locale} />
-                </p>
-              ) : null}
-              {step.clientNote ? (
-                <p className="text-dense">
-                  <strong>{c.brokerNote}:</strong> <bdi>{step.clientNote}</bdi>
-                </p>
-              ) : null}
-              {staffCopy ? (
-                <>
-                  {!step.clientVisible ? (
-                    <p className="flex items-center gap-1 text-dense text-text-muted">
-                      <LockIcon className="size-4" /> {staffCopy.hidden}
-                    </p>
-                  ) : null}
-                  {step.evidenceExpected && !step.settled ? (
-                    <p className="text-dense text-text-muted">{staffCopy.evidenceUsual}</p>
-                  ) : null}
-                  {step.skipReason ? (
-                    <p className="text-dense">
-                      <strong>{staffCopy.skipReason}:</strong> <bdi>{step.skipReason}</bdi>
-                    </p>
-                  ) : null}
-                  {step.internalNote ? (
-                    <p className="rounded-control border border-dashed border-border bg-subtle p-2 text-dense">
-                      <LockIcon className="me-1 inline size-4 align-text-bottom" />
-                      <strong>{staffCopy.internalNote}:</strong> <bdi>{step.internalNote}</bdi>
-                    </p>
-                  ) : null}
-                  {step.evidence ? (
-                    <p className="text-dense">
-                      <strong>{staffCopy.evidence}:</strong> <bdi>{step.evidence.fileName}</bdi>
-                    </p>
-                  ) : null}
-                </>
-              ) : null}
-              {actions?.(step)}
-            </div>
+            <p className="font-semibold text-text">
+              <span className="sr-only">
+                {t("position", { n: groups.position(step), total: groups.total })}:{" "}
+              </span>
+              {stepCopy(locale, step.key).label}
+            </p>
+            <p className="text-dense text-text">
+              {stepSentence(locale, step.key, props.path.kind, audience)}
+            </p>
+            <StepMeta {...props} step={step} />
+            <BrokerNote locale={locale} note={step.clientNote} />
+            {audience === "staff" ? <StaffFacts locale={locale} step={step} /> : null}
+            {props.actions?.(step)}
           </li>
-        );
-      })}
-    </ol>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+const summaryClass =
+  "min-h-control cursor-pointer py-3 font-semibold text-action underline underline-offset-4";
+
+/** Finished steps, one line each, folded away until someone opens them. */
+function DoneSteps(props: ListProps & { groups: Groups }) {
+  const { locale, audience, groups } = props;
+  const first = groups.done[0];
+  if (!first) return null;
+  const c = dealPathCopy(locale);
+  const t = translator(locale);
+  return (
+    <details className="border-t border-divider pt-1">
+      <summary className={summaryClass}>{t("doneGroup", { count: groups.done.length })}</summary>
+      <ol className="min-w-0 space-y-3 pt-2 [overflow-wrap:anywhere]">
+        {groups.done.map((step) => {
+          const muted = step.status !== "done";
+          return (
+            <li
+              key={`${step.source}-${step.key}`}
+              value={groups.position(step)}
+              data-step={step.key}
+              data-status={step.status}
+              className="flex min-w-0 gap-2"
+            >
+              {step.status === "done" ? (
+                <SuccessIcon className="mt-0.5 size-5 text-success" />
+              ) : (
+                <NeutralIcon className="mt-0.5 size-5 text-text-muted" />
+              )}
+              <div className="min-w-0 flex-1 space-y-1">
+                <p
+                  className={cx("flex flex-wrap gap-x-3", muted ? "text-text-muted" : "text-text")}
+                >
+                  <span className="sr-only">
+                    {t("position", { n: groups.position(step), total: groups.total })}:{" "}
+                  </span>
+                  <span className="font-semibold">{stepCopy(locale, step.key).label}</span>
+                  {step.status === "done" ? (
+                    <span className="text-dense text-text-muted">
+                      <span className="sr-only">{c.status.done}: </span>
+                      {step.doneAt ? <PathDate value={step.doneAt} locale={locale} /> : null}
+                    </span>
+                  ) : (
+                    <span className="text-dense">
+                      {step.status === "skipped"
+                        ? c.status.skipped
+                        : dealPathStaffCopy(locale).passed}
+                    </span>
+                  )}
+                </p>
+                <BrokerNote locale={locale} note={step.clientNote} />
+                {audience === "staff" ? <StaffFacts locale={locale} step={step} /> : null}
+                {props.actions?.(step)}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </details>
   );
 }
 
@@ -194,7 +312,7 @@ function CompletedSummary({ locale, path }: { locale: string; path: DealPathView
       className="space-y-2 rounded-control border border-success bg-success-soft p-4"
       role="status"
     >
-      <p className="flex items-center gap-2 font-semibold text-text">
+      <p className="flex items-center gap-2 text-subheading font-semibold text-text">
         <SuccessIcon className="size-6 text-success" />
         {c.title}
       </p>
@@ -212,6 +330,23 @@ function CompletedSummary({ locale, path }: { locale: string; path: DealPathView
   );
 }
 
+/** Progress in words, the current step, the steps to come, then the finished ones. */
+function PathBody(props: ListProps) {
+  const groups = groupSteps(props.path);
+  const t = translator(props.locale);
+  return (
+    <>
+      <CompletedSummary locale={props.locale} path={props.path} />
+      <p className="font-semibold text-text">
+        {t("progress", { count: groups.done.length, total: groups.total })}
+      </p>
+      {groups.current ? <CurrentStep {...props} step={groups.current} groups={groups} /> : null}
+      <StepsToCome {...props} groups={groups} />
+      <DoneSteps {...props} groups={groups} />
+    </>
+  );
+}
+
 /** The client's Deal path: the first section of the Deal overview. */
 export function ClientDealPath({ locale, path }: { locale: string; path: DealPathView }) {
   const c = dealPathCopy(locale);
@@ -219,9 +354,9 @@ export function ClientDealPath({ locale, path }: { locale: string; path: DealPat
     <section
       id="case-path"
       aria-labelledby="case-path-heading"
-      className="min-w-0 space-y-5 rounded-[1rem] border border-border bg-surface p-5 lg:p-6"
+      className="min-w-0 space-y-4 rounded-[1rem] border border-border bg-surface p-5 lg:p-6"
     >
-      <div className="space-y-2">
+      <div className="space-y-1">
         <h2
           id="case-path-heading"
           className="font-display text-[1.5rem] leading-[2.125rem] font-semibold tracking-[-0.02em]"
@@ -230,8 +365,7 @@ export function ClientDealPath({ locale, path }: { locale: string; path: DealPat
         </h2>
         <p className="text-text-muted">{c.lead}</p>
       </div>
-      <CompletedSummary locale={locale} path={path} />
-      <DealPathList locale={locale} path={path} audience="client" />
+      <PathBody locale={locale} path={path} audience="client" />
       {!path.recorded ? <p className="text-dense text-text-muted">{c.preview}</p> : null}
     </section>
   );
@@ -289,10 +423,13 @@ function PathForm({
   );
 }
 
-const disclosure =
-  "min-h-control cursor-pointer py-2 font-semibold text-action underline underline-offset-4";
+/** The kind of Deal in words, from the template it follows. */
+function dealKind(locale: string, template: string) {
+  const kinds: Record<string, string | undefined> = dealPathStaffCopy(locale).kinds;
+  return kinds[template.replace(".", "_")] ?? null;
+}
 
-/** The broker's Path panel on the Deal page: the same list, with one-step actions. */
+/** The broker's Path panel on the Deal page: the same order, with one-step actions. */
 export function StaffDealPath({
   locale,
   session,
@@ -316,7 +453,7 @@ export function StaffDealPath({
             { value: "", label: s.noDocument },
             ...path.evidenceOptions.map((file) => ({
               value: file.id,
-              label: `${file.fileName} · ${file.reference}`,
+              label: `${file.fileName} (${file.reference})`,
             })),
           ],
         },
@@ -332,8 +469,8 @@ export function StaffDealPath({
     if (!path.canRecord || step.source !== "recorded") return null;
     if (step.settled)
       return (
-        <details className="pt-1">
-          <summary className={disclosure}>{s.reopen}</summary>
+        <details>
+          <summary className={summaryClass}>{s.reopen}</summary>
           <PathForm
             {...common}
             command="pathStep"
@@ -348,9 +485,9 @@ export function StaffDealPath({
         </details>
       );
     return (
-      <details className="pt-1" open={step.status === "current"}>
-        <summary className={disclosure}>{s.record}</summary>
-        <div className="space-y-6 pt-2">
+      <details open={step.status === "current"}>
+        <summary className={summaryClass}>{s.record}</summary>
+        <div className="space-y-2 pt-2">
           <PathForm
             {...common}
             command="pathStep"
@@ -366,7 +503,7 @@ export function StaffDealPath({
             submit={s.markDone}
           />
           <details>
-            <summary className={disclosure}>{s.notNeeded}</summary>
+            <summary className={summaryClass}>{s.notNeeded}</summary>
             <PathForm
               {...common}
               command="pathStep"
@@ -381,7 +518,7 @@ export function StaffDealPath({
             />
           </details>
           <details>
-            <summary className={disclosure}>{s.setExpected}</summary>
+            <summary className={summaryClass}>{s.setExpected}</summary>
             <PathForm
               {...common}
               command="pathStep"
@@ -401,6 +538,7 @@ export function StaffDealPath({
       </details>
     );
   };
+  const kind = dealKind(locale, path.template);
   return (
     <section
       id="case-path"
@@ -408,15 +546,14 @@ export function StaffDealPath({
       tabIndex={-1}
       className="scroll-mt-6 space-y-4 rounded-card border border-border bg-surface p-5"
     >
-      <h2 id="case-path-heading" className="text-subheading font-semibold">
-        {s.title}
-      </h2>
-      <p className="text-text-muted">{s.lead}</p>
-      <p className="text-dense text-text-muted">
-        {s.template}: <bdi>{path.template}</bdi>
-      </p>
-      <CompletedSummary locale={locale} path={path} />
-      <DealPathList locale={locale} path={path} audience="staff" actions={actions} />
+      <div className="space-y-1">
+        <h2 id="case-path-heading" className="text-subheading font-semibold">
+          {s.title}
+        </h2>
+        {kind ? <p className="text-text">{kind}</p> : null}
+        <p className="text-text-muted">{s.lead}</p>
+      </div>
+      <PathBody locale={locale} path={path} audience="staff" actions={actions} />
       {!path.recorded ? <p className="text-dense text-text-muted">{s.preview}</p> : null}
       {path.canComplete ? (
         <div className="space-y-3 border-t border-divider pt-4" id="case-path-complete">

@@ -61,6 +61,9 @@ describe("Deal path templates", () => {
       expect(copy?.about.split(/[.!?](\s|$)/).filter((s) => s.trim()).length, key).toBe(1);
     }
     expect(Object.keys(bg.steps).sort()).toEqual([...keys].sort());
+    // Client-perspective sentences only exist for real steps.
+    for (const [side, sentences] of Object.entries(bg.you))
+      for (const key of Object.keys(sentences)) expect(keys.has(key), `${side}.${key}`).toBe(true);
   });
 });
 
@@ -83,7 +86,7 @@ describe("Deal path derivation", () => {
 
   it("gives an owner-side Deal only the steps its records can show", () => {
     expect(derivedSteps("landlord", none).map((s) => [s.key, s.actor])).toEqual([
-      ["request_received", "owner"],
+      ["request_received", "agency"],
       ["terms_agreed", "client"],
     ]);
   });
@@ -97,7 +100,7 @@ describe("Deal path derivation", () => {
       ...derivedSteps("buyer", { ...none, termsAgreedAt: at("2026-01-20T10:00:00Z") }),
       ...recordedSteps(rows),
     ];
-    const path = composePath(steps, "client");
+    const path = composePath(steps, "staff");
     const status = Object.fromEntries(path.steps.map((s) => [s.key, s.status]));
     expect(status).toMatchObject({
       request_received: "done",
@@ -113,6 +116,15 @@ describe("Deal path derivation", () => {
     expect(path.current).toBe("deposit_preliminary_contract");
     expect(path.next).toBe("property_checks");
     expect(path.steps.find((s) => s.key === "identity_checks")?.doneAt).toBe("2026-02-01");
+    // A client never reads "no record": passed early steps are left out of their path.
+    const client = composePath(steps, "client");
+    expect(client.steps.map((s) => s.key)).toEqual([
+      "request_received",
+      "terms_agreed",
+      ...template.map((s) => s.key),
+    ]);
+    expect(client.steps.some((s) => s.status === "not_recorded")).toBe(false);
+    expect(client.current).toBe("deposit_preliminary_contract");
   });
 
   it("drops hidden steps before choosing where a client is", () => {

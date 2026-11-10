@@ -1,6 +1,6 @@
 {
   "title": "Het verloop van uw vastgoedzaak",
-  "lead": "Alle stappen op volgorde, van de eerste aanvraag tot de sleutels. Uw makelaar legt elke stap vast zodra die is gebeurd.",
+  "lead": "Van de eerste aanvraag tot de sleutels. Uw makelaar legt elke stap vast zodra die is gebeurd.",
   "preview": "De latere stappen zijn de gebruikelijke voor dit soort zaak. Uw makelaar bevestigt ze zodra de voorwaarden zijn afgesproken.",
   "whoActs": "Wie handelt",
   "expectedBy": "Verwacht op",
@@ -11,8 +11,7 @@
     "current": "U bent hier",
     "next": "Volgende stap",
     "upcoming": "Daarna",
-    "skipped": "Niet nodig",
-    "not_recorded": "Hier niet vastgelegd"
+    "skipped": "Niet nodig"
   },
   "actors": {
     "you": "U",
@@ -100,5 +99,53 @@
     "reference": "Inschrijvings- of aktenummer",
     "boundary": "Deze pagina toont wat de betrokkenen hebben gedaan en wanneer. Het is geen juridisch bewijsstuk.",
     "outcome": "Afgerond via het verloop van de zaak"
+  },
+  "progress": "{count} van {total} stappen gedaan",
+  "doneGroup": "{count, plural, one {# stap gedaan} other {# stappen gedaan}}",
+  "position": "Stap {n} van {total}",
+  "toCome": "Nog te doen",
+  "you": {
+    "common": {
+      "request_received": "Het kantoor ontvangt uw aanvraag en wijst een makelaar aan die deze behandelt.",
+      "identity_checks": "Het kantoor controleert uw identiteitsbewijs en dat van iedereen die meedoet."
+    },
+    "buyer": {
+      "needs_agreed": "Uw makelaar schrijft op wat u zoekt en u bevestigt dat.",
+      "homes_shortlisted": "U kiest uit de voorstellen van uw makelaar de woningen die een nadere blik waard zijn.",
+      "viewings": "Uw makelaar plant bezichtigingen van de gekozen woningen en gaat met u mee.",
+      "terms_agreed": "U en de verkoper accepteren dezelfde prijs en voorwaarden in het voorstel.",
+      "deposit_preliminary_contract": "U en de verkoper tekenen een voorlopig koopcontract en u betaalt de afgesproken aanbetaling.",
+      "funds_ready": "U regelt het geld voor de aankoop, uit spaargeld of met een banklening.",
+      "notary_deed": "Een notaris maakt de akte op en leest die met u en de verkoper door voordat u tekent.",
+      "registration": "De getekende akte wordt op uw naam ingeschreven in het kadaster.",
+      "tax_number": "U krijgt een Grieks fiscaal nummer (AFM), waarnaar de aankoopstukken verwijzen.",
+      "lawyer_property_checks": "Uw advocaat zoekt uit wie de eigenaar is en of er schulden op de woning rusten.",
+      "contract_signed": "U en de verkoper tekenen het contract volgens de afgesproken voorwaarden.",
+      "keys_handed_over": "De eigenaar geeft u de sleutels op de afgesproken dag."
+    },
+    "tenant": {
+      "needs_agreed": "Uw makelaar schrijft op wat u zoekt en u bevestigt dat.",
+      "homes_shortlisted": "U kiest uit de voorstellen van uw makelaar de woningen die een nadere blik waard zijn.",
+      "viewings": "Uw makelaar plant bezichtigingen van de gekozen woningen en gaat met u mee.",
+      "terms_agreed": "U en de verhuurder accepteren dezelfde huur en voorwaarden in het voorstel.",
+      "lease_signed": "U en de verhuurder tekenen het huurcontract volgens de afgesproken voorwaarden.",
+      "deposit_first_rent": "U betaalt de borg en de eerste huur, en beide partijen bevestigen dat het geld is ontvangen.",
+      "contract_signed": "U en de verhuurder tekenen het contract volgens de afgesproken voorwaarden.",
+      "keys_handed_over": "De verhuurder geeft u de sleutels op de afgesproken dag."
+    },
+    "seller": {
+      "terms_agreed": "U en de koper accepteren dezelfde prijs en voorwaarden in het voorstel.",
+      "deposit_preliminary_contract": "U en de koper tekenen een voorlopig koopcontract en de koper betaalt de afgesproken aanbetaling.",
+      "notary_deed": "Een notaris maakt de akte op en leest die met u en de koper door voordat u tekent.",
+      "contract_signed": "U en de koper tekenen het contract volgens de afgesproken voorwaarden.",
+      "keys_handed_over": "U geeft de sleutels aan de koper op de afgesproken dag."
+    },
+    "landlord": {
+      "terms_agreed": "U en de huurder accepteren dezelfde huur en voorwaarden in het voorstel.",
+      "lease_signed": "U en de huurder tekenen het huurcontract volgens de afgesproken voorwaarden.",
+      "deposit_first_rent": "De huurder betaalt de borg en de eerste huur, en u bevestigt samen dat het geld is ontvangen.",
+      "contract_signed": "U en de huurder tekenen het contract volgens de afgesproken voorwaarden.",
+      "keys_handed_over": "U geeft de sleutels aan de huurder op de afgesproken dag."
+    }
   }
 }

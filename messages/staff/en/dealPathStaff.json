@@ -2,7 +2,6 @@
   "title": "Deal path",
   "lead": "The client sees the same steps, except the hidden ones. Record each step when it happens.",
   "preview": "Nothing recorded yet. These steps are created from the template when the terms are agreed, or with your first action here.",
-  "template": "Template",
   "currentStep": "Current step",
   "hidden": "Hidden from the client",
   "evidenceUsual": "A document is usually kept",
@@ -37,5 +36,13 @@
     "terms_not_agreed": "The terms are not agreed yet.",
     "steps_open": "Some steps are still open.",
     "final_step_open": "The last step must be done, not marked as not needed."
+  },
+  "passed": "Passed without a record in the app",
+  "kinds": {
+    "BG_sale": "Sale in Bulgaria",
+    "BG_long_term_rent": "Long-term rent in Bulgaria",
+    "GR_sale": "Sale in Greece",
+    "generic_sale": "Sale",
+    "generic_long_term_rent": "Long-term rent"
   }
 }
