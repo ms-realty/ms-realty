@@ -3,6 +3,8 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { PublicLocale } from "@/i18n/config";
 import { buttonClass } from "@/ui/button-class";
+import { cx } from "@/ui/cx";
+import { CompareIcon, SaveIcon } from "@/ui/icons";
 import type { DiscoveryCopy } from "./copy";
 
 type Kind = "saved" | "compare";
@@ -121,6 +123,99 @@ export function LocalActions({ reference, copy }: { reference: string; copy: Dis
     </div>
   );
 }
+/** One browser-local toggle; the notice explains a full list or unavailable storage. */
+function useToggle(kind: Kind, reference: string, copy: DiscoveryCopy) {
+  const selection = useSelection(kind);
+  const [notice, setNotice] = useState("");
+  const on = selection.refs.includes(reference);
+  const toggle = () => {
+    const refs = selectedReferences(read(kind), kind);
+    const exists = refs.includes(reference);
+    if (!exists && refs.length >= (kind === "compare" ? 3 : 50)) {
+      setNotice(copy.compareLimit);
+      return;
+    }
+    setNotice(
+      writeSelection(kind, exists ? refs.filter((r) => r !== reference) : [...refs, reference])
+        ? ""
+        : copy.storageFailed,
+    );
+  };
+  return { hydrated: selection.hydrated, on, toggle, notice };
+}
+
+/**
+ * Save as a small icon button with a constant accessible name and a pressed state. Rendered
+ * only once JavaScript runs: saving lives in this browser's storage.
+ */
+export function SaveToggle({
+  reference,
+  copy,
+  className,
+}: {
+  reference: string;
+  copy: DiscoveryCopy;
+  className?: string;
+}) {
+  const { hydrated, on, toggle, notice } = useToggle("saved", reference, copy);
+  if (!hydrated) return null;
+  return (
+    <>
+      <button
+        type="button"
+        aria-pressed={on}
+        aria-label={copy.saveProperty}
+        title={copy.saveProperty}
+        onClick={toggle}
+        className={cx(
+          "inline-flex size-control items-center justify-center rounded-full border border-border bg-surface text-action shadow-sm",
+          "hover:border-action",
+          className,
+        )}
+      >
+        <SaveIcon className={cx("size-5", on && "fill-current")} />
+      </button>
+      {notice ? (
+        <span role="status" className="sr-only">
+          {notice}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
+/** Compare as a quiet text toggle, after the listing's own actions. */
+export function CompareToggle({
+  reference,
+  copy,
+  className,
+}: {
+  reference: string;
+  copy: DiscoveryCopy;
+  className?: string;
+}) {
+  const { hydrated, on, toggle, notice } = useToggle("compare", reference, copy);
+  if (!hydrated) return null;
+  return (
+    <span className={cx("inline-flex flex-col items-start", className)}>
+      <button
+        type="button"
+        aria-pressed={on}
+        onClick={toggle}
+        className="inline-flex min-h-control items-center gap-2 text-caption text-text-muted underline-offset-4 hover:text-action hover:underline aria-pressed:font-semibold aria-pressed:text-action"
+      >
+        <CompareIcon className="size-4" />
+        {copy.compare}
+      </button>
+      {notice ? (
+        <span role="status" className="text-caption text-text-muted">
+          {notice}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 export function LocalSelection({
   kind,
   locale,

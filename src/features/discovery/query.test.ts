@@ -41,10 +41,13 @@ describe("P02 committed search and exact public facts", () => {
     expect(ambiguousFilters({ includeUnconfirmed: "yes" })).toBe(true);
     expect(ambiguousFilters({ includeUnconfirmed: "1" })).toBe(false);
   });
-  it("does not turn unknown or withheld prices into zero or price-on-request", () => {
+  it("reads an unknown or withheld price as price on request, never zero or a record state", () => {
     const copy = discoveryCopy("en");
-    expect(priceText({ state: "unknown" }, "en", copy)).toBe(copy.unknown);
-    expect(priceText({ state: "withheld" }, "en", copy)).toBe(copy.withheld);
+    for (const state of ["unknown", "withheld", "conflicting", "not_supplied"] as const) {
+      const text = priceText({ state } as Parameters<typeof priceText>[0], "en", copy);
+      expect(text).toBe("Price on request");
+      expect(text).not.toMatch(/0|unknown|withheld|not published/i);
+    }
     expect(
       priceText(
         {
@@ -55,6 +58,6 @@ describe("P02 committed search and exact public facts", () => {
         "en",
         copy,
       ),
-    ).toContain("1,250.35");
+    ).toBe("€1,250.35 per month");
   });
 });

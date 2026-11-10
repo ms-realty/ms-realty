@@ -61,6 +61,28 @@ const originalPurpose = {
   he: "מטרה",
 } as const;
 
+const storefrontKeys = new Set([
+  "priceOnRequest",
+  "allPhotos",
+  "photos",
+  "photoPosition",
+  "previousPhoto",
+  "nextPhoto",
+  "closePhotos",
+  "askQuestion",
+  "saveProperty",
+  "similar",
+  "location",
+  "about",
+  "referenceLine",
+  "referenceOnly",
+  "noLocaleListings",
+  "showBulgarian",
+  ...["bedroomCount", "propertyCount"].flatMap((name) =>
+    ["one", "two", "few", "many", "other"].map((form) => `${name}_${form}`),
+  ),
+]);
+
 function hash(copy: Readonly<Record<string, string>>): string {
   return createHash("sha256")
     .update(
@@ -73,8 +95,12 @@ function hash(copy: Readonly<Record<string, string>>): string {
 
 describe.each([...publicLocales])("%s accessors preserve the catalog migration", (locale) => {
   it("preserves discovery except the revised intent question, and every intent key and value", () => {
-    const { morePhotos, ...discovery } = discoveryCopy(locale);
+    const { morePhotos, ...all } = discoveryCopy(locale);
     expect(morePhotos).toContain("{count}");
+    // Storefront wording added after the migration is not part of the frozen catalog.
+    const discovery = Object.fromEntries(
+      Object.entries(all).filter(([key]) => !storefrontKeys.has(key)),
+    ) as Readonly<Record<string, string>>;
     expect(Object.hasOwn(discovery, "purpose")).toBe(true);
     expect(hash({ ...discovery, purpose: originalPurpose[locale] })).toBe(golden.discovery[locale]);
     expect(hash(intentCopy(locale))).toBe(golden.intent[locale]);

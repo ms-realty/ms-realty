@@ -105,6 +105,11 @@ export function Comparison({
             {listing.price.state === "known" && listing.price.value.period === "total" ? (
               <span className="block font-normal text-text-muted">{labels.total}</span>
             ) : null}
+            {listing.price.state === "known" ? (
+              <span className="block font-normal text-text-muted">
+                {copy[listing.price.value.basis]}
+              </span>
+            ) : null}
           </>
         ),
       },
@@ -126,9 +131,7 @@ export function Comparison({
                 {copy[listing.area.value.basis]}
               </span>
             </>
-          ) : (
-            copy[listing.area.state]
-          ),
+          ) : null,
       },
       {
         key: "bedrooms",
@@ -141,15 +144,14 @@ export function Comparison({
         label: labels.lift,
         value: (listing) => {
           const fact = listing.facts.find((item) => item.key === "feature.lift")?.fact;
-          return !fact
-            ? copy.unknown
-            : fact.state !== "known"
-              ? copy[fact.state]
-              : fact.value === true
-                ? labels.yes
-                : fact.value === false
-                  ? labels.no
-                  : copy.unknown;
+          // An unknown fact is left blank, never printed as "unknown" (public surfaces).
+          return fact?.state !== "known"
+            ? null
+            : fact.value === true
+              ? labels.yes
+              : fact.value === false
+                ? labels.no
+                : null;
         },
       },
       {
