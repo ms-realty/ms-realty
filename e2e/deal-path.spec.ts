@@ -160,9 +160,10 @@ test("staff record Path steps, the client sees progress, staff complete the deal
         { timeout: 60_000 },
       )
       .toEqual([
-        "deal.completed: Your deal is complete",
-        "deal.step_done: Done: Keys handed over",
-        "deal.step_done: Done: Registration",
+        // In the client's own language (Bulgarian here), not the page language.
+        "deal.completed: Сделката Ви е приключена",
+        "deal.step_done: Завършено: Вписване",
+        "deal.step_done: Завършено: Предадени ключове",
       ]);
   } finally {
     await clientContext.close();
