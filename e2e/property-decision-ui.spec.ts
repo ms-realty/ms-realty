@@ -1,7 +1,7 @@
 // P05 / F03–F06 / AT05, AT27: contact remains part of the property decision on every screen.
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { expect, type Locator, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -97,40 +97,51 @@ async function bounds(locator: Locator) {
   return box;
 }
 
+/** The contact actions: beside the content on desktop, a bottom bar on phones. */
+const contactArea = (page: Page, width: number) =>
+  width < 1024
+    ? page.locator("[data-contact-bar]")
+    : page.getByRole("main").getByRole("complementary");
+
 for (const width of [320, 390, 1440]) {
-  test(`P05: ${width}px contact follows gallery/facts and precedes long description and absent-map fallback`, async ({
+  test(`P05: ${width}px photos lead, then price and facts, the description, the reserved ask region and a visible contact area`, async ({
     page,
   }, testInfo) => {
     await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
     await page.goto(propertyHref());
     const main = page.getByRole("main");
     const heading = main.getByRole("heading", { level: 1, name: listing.title, exact: true });
-    // The cover leads; the remaining photos are disclosed on demand. A failed image
-    // still has a visible figure and must not make the geometry assertion wait for an img.
-    const gallery = main.locator("figure").first();
-    const facts = main.locator("dl").first();
-    const price = main.locator("header > p").last();
-    const panel = main.getByRole("complementary");
-    const description = main.getByText(longDescription, { exact: true });
-    const mapFallback = main.getByText("No published map locations on this page.", { exact: true });
+    const gallery = main.locator("#listing-photos");
+    const facts = main.locator("[data-listing-facts]").first();
+    const price = main.locator("[data-price]").first();
+    const about = main.locator("#about-heading");
+    const paragraphs = main.locator("section[aria-labelledby='about-heading'] p");
+    const askRegion = main.locator("#ask-about-this-home");
+    const contact = contactArea(page, width);
     await expect(heading).toBeVisible();
     await expect(main.getByRole("heading", { level: 1 })).toHaveCount(1);
-    await expect(description).toHaveText(longDescription);
-    await expect(mapFallback).toBeVisible();
-    await expect(main.getByRole("button", { name: "Show map", exact: true })).toHaveCount(0);
+    // The description reads as paragraphs, not one block.
+    await expect(paragraphs).toHaveCount(18);
+    await expect(paragraphs.first()).toContainText("Paragraph 1 ");
     await expect(price).toContainText(/€|EUR/);
+    // Facts are shown only when known: the seeded fact set has no unknown or blank cell.
     await expect(facts).toContainText("Bedrooms");
+    await expect(main).not.toContainText(/Not published|Unknown|Not applicable/);
+    // No map where there is no public point; no apology line either.
+    await expect(main.getByText("No published map locations on this page.")).toHaveCount(0);
     await expect(
-      panel.getByRole("button", { name: "Save in this browser", exact: true }),
+      main
+        .getByRole("button", { name: "Save this property", exact: true })
+        .locator("visible=true")
+        .first(),
     ).toBeVisible();
-    await expect(panel.getByRole("button", { name: "Compare", exact: true })).toBeVisible();
     for (const [name, purpose] of [
-      ["Send an inquiry", "question"],
+      ["Ask a question", "question"],
       ["Request a viewing", "viewing_request"],
     ] as const) {
-      const action = panel.getByRole("link", { name, exact: true });
-      const href = await action.getAttribute("href");
-      const target = new URL(href ?? "", page.url());
+      const action = contact.getByRole("link", { name, exact: true });
+      await expect(action).toBeVisible();
+      const target = new URL((await action.getAttribute("href")) ?? "", page.url());
       expect(target.pathname).toBe("/en/inquire");
       expect(Object.fromEntries(target.searchParams)).toEqual({
         purpose,
@@ -139,31 +150,47 @@ for (const width of [320, 390, 1440]) {
       });
       expect((await bounds(action)).height).toBeGreaterThanOrEqual(44);
     }
-    const [titleBox, galleryBox, factsBox, priceBox, panelBox, descriptionBox, mapBox] =
+    const [galleryBox, priceBox, factsBox, aboutBox, askBox, contactBox, headingBox] =
       await Promise.all([
-        bounds(heading),
         bounds(gallery),
-        bounds(facts),
         bounds(price),
-        bounds(panel),
-        bounds(description),
-        bounds(mapFallback),
+        bounds(facts),
+        bounds(about),
+        bounds(askRegion.or(about).first()),
+        bounds(contact),
+        bounds(heading),
       ]);
+    expect(priceBox.y).toBeGreaterThanOrEqual(galleryBox.y + galleryBox.height);
+    expect(headingBox.y).toBeGreaterThan(priceBox.y);
+    expect(factsBox.y).toBeGreaterThanOrEqual(headingBox.y + headingBox.height);
+    expect(aboutBox.y).toBeGreaterThanOrEqual(factsBox.y + factsBox.height);
+    expect(askBox.y).toBeGreaterThanOrEqual(aboutBox.y);
+    // The reserved region sits after the description and before the location.
+    expect(await askRegion.count()).toBe(1);
+    const inOrder = await page.evaluate(() => {
+      const follows = (before: string, after: string) => {
+        const first = document.querySelector(before);
+        const second = document.querySelector(after);
+        return !!first && !!second && !!(first.compareDocumentPosition(second) & 4);
+      };
+      return (
+        follows("#about-heading", "#ask-about-this-home") &&
+        follows("#ask-about-this-home", "#location-heading")
+      );
+    });
+    expect(inOrder).toBe(true);
     if (width < 1024) {
-      expect(panelBox.y).toBeGreaterThanOrEqual(galleryBox.y + galleryBox.height);
-      expect(panelBox.y).toBeGreaterThanOrEqual(factsBox.y + factsBox.height);
-      expect(panelBox.y).toBeGreaterThanOrEqual(priceBox.y + priceBox.height);
-      expect(descriptionBox.y).toBeGreaterThanOrEqual(panelBox.y + panelBox.height);
-      expect(mapBox.y).toBeGreaterThanOrEqual(descriptionBox.y + descriptionBox.height);
-      expect(panelBox.x).toBeGreaterThanOrEqual(0);
-      expect(panelBox.x + panelBox.width).toBeLessThanOrEqual(width);
+      // The bar is fixed to the bottom of the viewport and spans it.
+      expect(contactBox.y + contactBox.height).toBeGreaterThanOrEqual(
+        page.viewportSize()?.height ?? 0 - 1,
+      );
+      expect(contactBox.x).toBeGreaterThanOrEqual(0);
+      expect(contactBox.x + contactBox.width).toBeLessThanOrEqual(width);
     } else {
-      expect(panelBox.x).toBeGreaterThanOrEqual(galleryBox.x + galleryBox.width);
-      expect(panelBox.y).toBeLessThanOrEqual(titleBox.y);
-      expect(descriptionBox.x + descriptionBox.width).toBeLessThanOrEqual(panelBox.x);
-      expect(descriptionBox.y).toBeGreaterThanOrEqual(factsBox.y + factsBox.height);
+      expect(contactBox.x).toBeGreaterThanOrEqual(galleryBox.x);
+      expect(contactBox.x).toBeGreaterThan(aboutBox.x + 200);
+      expect(contactBox.y).toBeLessThan(aboutBox.y);
     }
-    expect(descriptionBox.height).toBeGreaterThan(500);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
@@ -187,11 +214,10 @@ test("P05/F06/AT27: phone contact works without JavaScript and records the exact
   try {
     const page = await context.newPage();
     await page.goto(propertyHref());
-    const panel = page.getByRole("main").getByRole("complementary");
-    const description = page.getByText(longDescription, { exact: true });
-    const panelBox = await bounds(panel);
-    expect((await bounds(description)).y).toBeGreaterThanOrEqual(panelBox.y + panelBox.height);
-    await panel.getByRole("link", { name: "Request a viewing", exact: true }).click();
+    // Phones: the contact bar stays in reach, and its link works without JavaScript.
+    const bar = page.locator("[data-contact-bar]");
+    await expect(bar).toBeVisible();
+    await bar.getByRole("link", { name: "Request a viewing", exact: true }).click();
     await expect(page.locator('[name="listingReference"]')).toHaveValue(listing.reference);
     await expect(page.locator('[name="observedManifestId"]')).toHaveValue(listing.manifestId);
     await expect(page.getByLabel("What would you like to do?", { exact: true })).toHaveValue(

@@ -55,7 +55,7 @@ it("M-019 gives responsive card photos the one/two/three-column grid's fallback 
   expect(photo).toHaveAttribute("loading", "lazy");
   expect(photo).toHaveAttribute(
     "sizes",
-    "auto, (min-width: 90rem) 25rem, (min-width: 40rem) calc(50vw - 4.5rem), calc(100vw - 5rem)",
+    "(min-width: 64rem) 28rem, (min-width: 40rem) 46vw, calc(100vw - 2.5rem)",
   );
   expect(photo.getAttribute("srcset")).toContain("480w");
   expect(photo.getAttribute("srcset")).toContain("960w");

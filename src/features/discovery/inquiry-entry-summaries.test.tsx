@@ -109,7 +109,7 @@ it("shows each already-read approved photo/fact summary in chosen order before t
       within(node as HTMLElement).getByRole("heading", { level: 2, name: card.title ?? "" }),
     ).toBeVisible();
     expect(node.compareDocumentPosition(purpose) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(within(node as HTMLElement).getByText(copy.unknown)).toBeVisible();
+    expect(node).not.toHaveTextContent(copy.unknown);
     expect(within(node as HTMLElement).getByText("Built area")).toBeVisible();
     const photo = within(node as HTMLElement).getByRole("img");
     expect(new URL(photo.getAttribute("src") ?? "", "http://localhost:3000").pathname).toBe(

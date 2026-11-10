@@ -7,7 +7,7 @@ import "server-only";
 import { and, eq } from "drizzle-orm";
 import { agency } from "@/config/tenant";
 import { currentPublications, listings } from "@/db/schema";
-import type { Fact, FactState, ListingPurpose } from "@/domain/facts";
+import type { Fact, FactState } from "@/domain/facts";
 import { type PublicLocale, parseReference } from "@/domain/ids";
 import { decisionFactKeys } from "@/domain/listing-readiness";
 import { derivePublicPresentation } from "@/domain/publication";
@@ -74,25 +74,57 @@ function toConfirm(listing: PublishedListing): ToConfirmItem[] {
   return items;
 }
 
-/** Newest offered public listings of the purpose, other than the one shown. */
+/**
+ * Up to three similar public listings: the same purpose in the same place first, then the same
+ * purpose at a nearby price (within a third either way), newest first, never the one shown.
+ * Built only from the public search, so every card is an eligible publication in this locale.
+ */
 async function alternatives(
   db: Executor,
-  input: { locale: PublicLocale; purpose: ListingPurpose; exclude: string; now: Date },
+  input: {
+    locale: PublicLocale;
+    now: Date;
+    /** The listing shown; only its reference and purpose when it is not public. */
+    card: Pick<ListingCard, "reference" | "purpose"> &
+      Partial<Pick<ListingCard, "place" | "price">>;
+  },
 ): Promise<ListingCard[]> {
-  const result = await searchListings(
-    db,
-    {
-      locale: input.locale,
-      purpose: input.purpose,
-      sort: "newest",
-      pageSize: maxAlternatives + 1,
-    },
-    { now: input.now },
-  );
-  return result.items
-    .filter((item) => item.reference !== input.exclude)
-    .slice(0, maxAlternatives)
-    .map(({ match: _match, unconfirmed: _unconfirmed, ...card }) => card);
+  const { card, locale, now } = input;
+  const found = new Map<string, ListingCard>();
+  const add = (items: readonly (ListingCard & { match?: unknown; unconfirmed?: unknown })[]) => {
+    for (const { match: _match, unconfirmed: _unconfirmed, ...item } of items)
+      if (item.reference !== card.reference && found.size < maxAlternatives)
+        found.set(item.reference, item);
+  };
+  const base = {
+    locale,
+    purpose: card.purpose,
+    sort: "newest" as const,
+    pageSize: maxAlternatives + 1,
+  };
+  const place = card.place?.settlement?.id ?? card.place?.municipality?.id;
+  if (place) add((await searchListings(db, { ...base, placeIds: [place] }, { now })).items);
+  if (found.size < maxAlternatives && card.price?.state === "known") {
+    const { amountMinor, currency } = card.price.value;
+    add(
+      (
+        await searchListings(
+          db,
+          {
+            ...base,
+            price: {
+              currency,
+              min: Math.floor((amountMinor * 2) / 3),
+              max: Math.ceil((amountMinor * 4) / 3),
+            },
+          },
+          { now },
+        )
+      ).items,
+    );
+  }
+  if (found.size < maxAlternatives) add((await searchListings(db, base, { now })).items);
+  return [...found.values()];
 }
 
 export async function getPublicListing(
@@ -120,15 +152,7 @@ export async function getPublicListing(
     return {
       status: "listing",
       listing: detail,
-      alternatives:
-        shown.primaryAction === "view_similar"
-          ? await alternatives(db, {
-              locale,
-              purpose: listing.purpose,
-              exclude: listing.reference,
-              now,
-            })
-          : [],
+      alternatives: await alternatives(db, { locale, card: detail, now }).catch(() => []),
     };
   }
 
@@ -163,8 +187,7 @@ export async function getPublicListing(
     purpose: pointer.purpose,
     alternatives: await alternatives(db, {
       locale,
-      purpose: pointer.purpose,
-      exclude: parsed.reference,
+      card: { reference: parsed.reference, purpose: pointer.purpose },
       now,
     }),
   };

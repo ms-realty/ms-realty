@@ -75,7 +75,7 @@ describe("P09 recipient list", () => {
     const scope = within(first as HTMLElement);
     expect(scope.getByText(/123,456\.78/)).toBeVisible();
     expect(scope.getByText("Synthetic place")).toBeVisible();
-    expect(scope.getByText("2")).toBeVisible();
+    expect(scope.getByText("2 bedrooms")).toBeVisible();
     expect(scope.getByRole("link", { name: "Synthetic property MS-00001" })).toHaveAttribute(
       "href",
       "/en/properties/MS-00001/ms-00001",

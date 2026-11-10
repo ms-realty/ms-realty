@@ -147,7 +147,7 @@ test("AT01/AT05/AT27: published search, local save/compare and withdrawal rechec
     path: testInfo.outputPath("synthetic-property-detail.png"),
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Save in this browser", exact: true }).click();
+  await page.getByRole("button", { name: "Save this property", exact: true }).click();
   await page.getByRole("button", { name: "Compare", exact: true }).click();
   await page.goto("/en/saved");
   await expect(
