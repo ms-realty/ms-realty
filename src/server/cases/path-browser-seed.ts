@@ -88,6 +88,8 @@ try {
       internalNote: "",
       reason: "",
       evidenceVersionId: "",
+      // The brokerage contract step records where it was signed (ADR 0015).
+      away: "no",
     });
   }
   console.log(

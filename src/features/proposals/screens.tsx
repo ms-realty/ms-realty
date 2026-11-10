@@ -1,13 +1,17 @@
 import { workflowLabel } from "@/i18n/workflow-labels";
 import "server-only";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { z } from "zod";
-import { defaultCurrency } from "@/config/tenant";
+import { agencyTimeZone, dealPolicy, defaultCurrency } from "@/config/tenant";
 import { getDb } from "@/db/client";
+import { calendarDate } from "@/domain/deal-path";
 import { currencyCodes } from "@/domain/ids";
+import { acceptanceChannels } from "@/domain/proposal";
 import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatExactMoney, formatMoneyInput } from "@/i18n/money";
 import { moneyCopy } from "@/i18n/money-copy";
+import { evidenceOptions } from "@/server/cases/path";
 import { readCase } from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
 import { getEnv } from "@/server/config/env";
@@ -20,6 +24,7 @@ import { buttonClass } from "@/ui/button-class";
 import { initialFormState, isIssuedFormOperation } from "@/ui/form/server";
 import { TechnicalDetails } from "@/ui/technical-details";
 import { caseCopy } from "../cases/copy";
+import { dealAgreementCopy } from "../cases/deal-path-copy";
 import { type WorkflowField, WorkflowForm } from "../cases/form";
 import {
   type ScreenProps,
@@ -175,21 +180,48 @@ export async function NewProposalScreen(
     throw error;
   }
   const path = `/${props.locale}/proposals/new?case=${props.caseId}&interest=${props.interestId}`;
+  const a = dealAgreementCopy(props.locale).proposal;
+  const sale = context.purpose === "sale";
+  // ADR 0015: the other side may be a seller the agency knows for this property, or one the
+  // broker names here. A strict brand keeps the reviewed seller instruction as the only source.
+  const sellerFields: WorkflowField[] = dealPolicy.proposalsNeedPublishedListing
+    ? []
+    : [
+        ...(context.sellerOptions.length
+          ? [
+              {
+                name: "sellerPartyId",
+                label: sale ? a.sellerChoice : a.landlordChoice,
+                type: "select" as const,
+                options: context.sellerOptions.map((o) => ({ value: o.id, label: o.name })),
+              },
+            ]
+          : []),
+        {
+          name: "sellerName",
+          label: sale ? a.sellerName : a.landlordName,
+          // The missing seller is explained where it is entered, not above the form.
+          hint: context.sellerOptions.length ? a.nameHint : a.noOwner,
+          required: context.sellerOptions.length === 0,
+        },
+      ];
   return (
-    <WorkflowPage {...props} title={`${c.create} · ${context.listingReference}`}>
-      <p>{c.boundary}</p>
-      <p>
-        {c.seller}: {context.seller.name}
-      </p>
+    <WorkflowPage {...props} title={a.make} reference={context.listingReference}>
+      {dealPolicy.proposalsNeedPublishedListing && context.seller ? (
+        <p>
+          {c.seller}: {context.seller.name}
+        </p>
+      ) : null}
       <ProposalForm
         {...props}
         command="create"
         id={props.caseId}
         version={view.record.version}
         path={path}
-        label={c.prepare}
+        label={a.make}
         fields={[
           { name: "interestId", label: "", type: "hidden" },
+          ...sellerFields,
           {
             name: "clientPartyId",
             label: c.buyer,
@@ -208,6 +240,7 @@ export async function NewProposalScreen(
         ]}
         values={{
           interestId: props.interestId,
+          sellerPartyId: context.sellerOptions[0]?.id ?? "",
           clientPartyId: context.buyers[0]?.partyId ?? "",
           currency: defaultCurrency,
           period: context.purpose === "sale" ? "total" : "month",
@@ -274,6 +307,139 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
     </div>
   );
 }
+type Response = Awaited<ReturnType<typeof readProposal>>["responses"][number];
+const buyerRoles = ["buyer", "co_buyer", "tenant"];
+
+/** Secondary staff actions; folded away when the one decision leads the page. */
+function OtherWays({ label, children }: { label: string | null; children: ReactNode }) {
+  if (!label) return <div className="space-y-6">{children}</div>;
+  return (
+    <details className="border-t border-divider pt-3">
+      <summary className="min-h-control cursor-pointer py-3 font-semibold text-action underline underline-offset-4">
+        {label}
+      </summary>
+      <div className="space-y-6 pt-3">{children}</div>
+    </details>
+  );
+}
+
+/**
+ * ADR 0015 · the one decision on a proposal: "Record that both sides agreed". The exact terms
+ * the broker attests to come first, then one row per side that has not accepted in the client
+ * area: how they said yes and when.
+ */
+function AgreeSection(
+  props: ScreenProps & {
+    id: string;
+    version: number;
+    path: string;
+    row: Revision;
+    responses: readonly Response[];
+    evidence: readonly { id: string; fileName: string; reference: string }[];
+    fields: WorkflowField[];
+    values: Record<string, string>;
+  },
+) {
+  const a = dealAgreementCopy(props.locale).agree;
+  const c = proposalCopy(props.locale);
+  const { row } = props;
+  const sale = row.period === "total";
+  const agreed = (partyId: string) =>
+    props.responses.find((r) => r.partyId === partyId && r.decision === "agree");
+  const buyers = row.parties.filter((p) => buyerRoles.includes(p.role));
+  const sellers = row.parties.filter((p) => !buyerRoles.includes(p.role));
+  const today = calendarDate(new Date(), agencyTimeZone);
+  const sideFields = (side: "buyer" | "seller", parties: typeof row.parties): WorkflowField[] => {
+    if (parties.every((p) => agreed(p.partyId))) return [];
+    if (side === "seller" && dealPolicy.counterpartyAccountRequired) return [];
+    const who = side === "buyer" ? (sale ? "buyer" : "tenant") : sale ? "seller" : "landlord";
+    return [
+      {
+        name: `${side}Channel`,
+        label: a.how[who],
+        type: "select",
+        required: true,
+        options: [
+          { value: "", label: a.choose },
+          ...acceptanceChannels.map((value) => ({ value, label: a.channels[value] })),
+        ],
+      },
+      { name: `${side}On`, label: a.when[who], type: "date", required: true },
+    ];
+  };
+  const fields: WorkflowField[] = [
+    ...props.fields,
+    ...sideFields("buyer", buyers),
+    ...sideFields("seller", sellers),
+    { name: "note", label: a.note, type: "textarea" },
+    ...(props.evidence.length
+      ? [
+          {
+            name: "evidenceVersionId",
+            label: a.document,
+            type: "select" as const,
+            options: [
+              { value: "", label: a.noDocument },
+              ...props.evidence.map((file) => ({
+                value: file.id,
+                label: `${file.fileName} (${file.reference})`,
+              })),
+            ],
+          },
+        ]
+      : []),
+  ];
+  return (
+    <section
+      aria-labelledby="proposal-agree-heading"
+      className="space-y-4 rounded-card border border-border bg-surface p-5"
+      data-proposal-agree
+    >
+      <h2 id="proposal-agree-heading" className="text-subheading font-semibold">
+        {a.title}
+      </h2>
+      <p>{sale ? a.lead : a.tenantLead}</p>
+      <p className="text-subheading font-semibold">
+        <bdi>
+          {formatExactMoney(
+            isPublicLocale(props.locale) ? props.locale : defaultLocale,
+            row.amountMinor,
+            row.currency,
+          )}
+        </bdi>{" "}
+        {row.period === "month" ? c.month : c.total}
+      </p>
+      <ul className="space-y-1">
+        {row.parties.map((party) => {
+          const answer = agreed(party.partyId);
+          return (
+            <li key={party.partyId}>
+              <bdi className="font-semibold">{party.name}</bdi>,{" "}
+              {workflowLabel(party.role, props.locale)}
+              {answer ? (
+                <span className="text-text-muted">
+                  {". "}
+                  {answer.byBroker ? a.answeredByBroker : a.answeredOnline}
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+      {dealPolicy.counterpartyAccountRequired && sellers.some((p) => !agreed(p.partyId)) ? (
+        <p>{a.ownAnswer}</p>
+      ) : null}
+      <ProposalForm
+        {...props}
+        command="agree"
+        fields={fields}
+        values={{ ...props.values, buyerOn: today, sellerOn: today }}
+        label={a.submit}
+      />
+    </section>
+  );
+}
+
 export async function ProposalScreen(props: ScreenProps & { id: string }) {
   const view = await privateRead(() => readProposal(getDb(), props.session, props.id));
   const c = proposalCopy(props.locale),
@@ -315,8 +481,44 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
       if (!isAppError(error)) throw error;
     }
   }
+  const a = dealAgreementCopy(props.locale);
+  const openForAgreement =
+    staff &&
+    view.current &&
+    view.intact &&
+    !view.expired &&
+    !view.source?.changed &&
+    ["draft", "reviewed", "submitted", "awaiting_response"].includes(row.state);
+  const evidence = openForAgreement
+    ? await evidenceOptions(getDb(), props.session, view.proposal.caseId)
+    : [];
+  const agreement = openForAgreement ? (
+    <AgreeSection
+      {...common}
+      row={row}
+      responses={view.responses}
+      evidence={evidence}
+      fields={hidden}
+      values={revisionValues}
+    />
+  ) : null;
+  // Keep the native action/state hook mounted once the agreement removed the decision, so a
+  // form post without JavaScript still shows its receipt ("Both sides agreed to these terms.").
+  const agreementHook =
+    staff && view.current && !openForAgreement ? (
+      <ProposalForm
+        {...common}
+        command="agree"
+        commandAvailable={false}
+        fields={hidden}
+        values={revisionValues}
+        label={a.agree.submit}
+      />
+    ) : null;
   return (
     <WorkflowPage {...props} title={c.detailTitle} reference={view.proposal.reference}>
+      {agreement}
+      {agreementHook}
       <p>{c.boundary}</p>
       {recovered.status !== "absent" && (recovered.status !== "unavailable" || view.canRespond) ? (
         <p role="status">{recoveryCopy[recovered.status]}</p>
@@ -354,15 +556,34 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
           <ul className="space-y-4">
             {view.responses.map((response) => (
               <li key={response.partyId}>
-                <p>
-                  {row.parties.find((p) => p.partyId === response.partyId)?.name} ·{" "}
-                  {response.decision === "agree"
-                    ? c.agree
-                    : response.decision === "decline"
-                      ? c.declined
-                      : c.countered}
-                </p>
-                <p>{response.reason}</p>
+                {staff ? (
+                  // Staff read who accepted and how, in words; never the client's button label.
+                  <p>
+                    <bdi className="font-semibold">
+                      {row.parties.find((p) => p.partyId === response.partyId)?.name}
+                    </bdi>
+                    {": "}
+                    {response.decision === "agree"
+                      ? a.agree.accepted
+                      : response.decision === "decline"
+                        ? c.declined
+                        : c.countered}
+                    {". "}
+                    {response.byBroker && response.channel
+                      ? `${a.agree.answeredByBroker}: ${a.agree.channels[response.channel]}`
+                      : a.agree.answeredOnline}
+                  </p>
+                ) : (
+                  <p>
+                    {row.parties.find((p) => p.partyId === response.partyId)?.name} ·{" "}
+                    {response.decision === "agree"
+                      ? c.agree
+                      : response.decision === "decline"
+                        ? c.declined
+                        : c.countered}
+                  </p>
+                )}
+                {response.reason ? <p>{response.reason}</p> : null}
                 <WorkflowTime
                   value={response.at}
                   locale={props.locale}
@@ -379,7 +600,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
         ) : null}
       </WorkflowSection>
       {staff && view.current && view.intact ? (
-        <div className="space-y-6">
+        <OtherWays label={agreement ? a.other : null}>
           {row.state === "draft" && !view.expired ? (
             <WorkflowSection title={c.review}>
               <ProposalForm
@@ -433,7 +654,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
               label={c.expire}
             />
           ) : null}
-        </div>
+        </OtherWays>
       ) : null}
       {view.canRespond || !staff ? (
         // Keep the native action/state hook after a response makes a new decision unavailable.

@@ -9,6 +9,7 @@ import {
   casePathSteps,
   caseStageHistory,
   cases,
+  listings,
   tasks,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -46,6 +47,8 @@ const step = (
     internalNote: string;
     reason: string;
     evidenceVersionId: string;
+    away: "" | "yes" | "no";
+    earlyStart: "" | "yes" | "no";
   }> = {},
 ) => ({
   id,
@@ -102,6 +105,7 @@ describe("Deal path (ADR 0013)", () => {
       .where(eq(casePathSteps.caseId, f.record.id));
     expect(rows.map((r) => [r.template, r.position, r.stepKey, r.state])).toEqual(
       [
+        "brokerage_agreement",
         "identity_checks",
         "deposit_preliminary_contract",
         "property_checks",
@@ -119,8 +123,9 @@ describe("Deal path (ADR 0013)", () => {
       ["homes_shortlisted", "done"],
       ["viewings", "not_recorded"],
       ["terms_agreed", "done"],
-      ["identity_checks", "current"],
-      ["deposit_preliminary_contract", "next"],
+      ["brokerage_agreement", "current"],
+      ["identity_checks", "next"],
+      ["deposit_preliminary_contract", "upcoming"],
       ["property_checks", "upcoming"],
       ["funds_ready", "upcoming"],
       ["notary_deed", "upcoming"],
@@ -149,7 +154,7 @@ describe("Deal path (ADR 0013)", () => {
     });
     expect(checked).not.toHaveProperty("internalNote");
     expect(JSON.stringify(seen)).not.toContain("restricted folder");
-    expect(seen?.current).toBe("deposit_preliminary_contract");
+    expect(seen?.current).toBe("brokerage_agreement");
     const staff = await casePath(t.db, f.staff.session, f.record.id);
     expect(staff?.steps.find((s) => s.key === "identity_checks")?.internalNote).toBe(
       "Copies in the restricted folder.",
@@ -176,6 +181,7 @@ describe("Deal path (ADR 0013)", () => {
       .from(casePathSteps)
       .where(eq(casePathSteps.caseId, f.record.id));
     expect(stored.map((s) => s.stepKey)).toEqual([
+      "brokerage_agreement",
       "identity_checks",
       "contract_signed",
       "keys_handed_over",
@@ -213,32 +219,45 @@ describe("Deal path (ADR 0013)", () => {
         step(f.record.id, current, "not_a_step", "done", { date: today() }),
       ),
     ).rejects.toMatchObject({ code: "not_found" });
+    // ADR 0015: identity checks on a sale are a duty, never "not needed".
+    await expect(
+      recordPathStep(
+        t.db,
+        f.staff.session,
+        step(f.record.id, current, "identity_checks", "skip", {
+          reason: "Checked on the previous deal with the same people",
+        }),
+      ),
+    ).rejects.toMatchObject({
+      code: "transition_denied",
+      fieldErrors: { form: ["duty_in_scope"] },
+    });
     await recordPathStep(
       t.db,
       f.staff.session,
-      step(f.record.id, current, "identity_checks", "skip", {
-        reason: "Checked on the previous deal with the same people",
+      step(f.record.id, current, "contract_signed", "skip", {
+        reason: "Signed directly between the parties",
       }),
     );
     await expect(
       recordPathStep(
         t.db,
         f.staff.session,
-        step(f.record.id, current + 1, "identity_checks", "done", { date: today() }),
+        step(f.record.id, current + 1, "contract_signed", "done", { date: today() }),
       ),
     ).rejects.toMatchObject({ code: "transition_denied" });
     await recordPathStep(
       t.db,
       f.staff.session,
-      step(f.record.id, current + 1, "identity_checks", "reopen", {
-        reason: "The client asked for a fresh check",
+      step(f.record.id, current + 1, "contract_signed", "reopen", {
+        reason: "The client asked us to prepare it after all",
       }),
     );
     const [reopened] = await t.db
       .select()
       .from(casePathSteps)
       .where(
-        and(eq(casePathSteps.caseId, f.record.id), eq(casePathSteps.stepKey, "identity_checks")),
+        and(eq(casePathSteps.caseId, f.record.id), eq(casePathSteps.stepKey, "contract_signed")),
       );
     expect(reopened).toMatchObject({ state: "pending", skipReason: null, doneOn: null });
     const audit = await t.db
@@ -306,6 +325,7 @@ describe("Deal path (ADR 0013)", () => {
       code: "transition_denied",
     });
     const keys = [
+      "brokerage_agreement",
       "identity_checks",
       "deposit_preliminary_contract",
       "property_checks",
@@ -322,7 +342,10 @@ describe("Deal path (ADR 0013)", () => {
           ? step(f.record.id, await caseVersion(f.record.id), key, "skip", {
               reason: "Cash buyer; funds shown at the preliminary contract",
             })
-          : step(f.record.id, await caseVersion(f.record.id), key, "done", { date: today() }),
+          : step(f.record.id, await caseVersion(f.record.id), key, "done", {
+              date: today(),
+              ...(key === "brokerage_agreement" ? { away: "no" as const } : {}),
+            }),
       );
     expect((await casePath(t.db, f.staff.session, f.record.id))?.canComplete).toBe(true);
     // An open commitment blocks completion exactly as it blocks the existing close flow.
@@ -331,6 +354,13 @@ describe("Deal path (ADR 0013)", () => {
     });
     await closeIntakeTasks(f.record.id);
     const done = await complete(await caseVersion(f.record.id));
+    // ADR 0015: completing a buyer's Deal marks the agreed home sold.
+    expect(done.outcome.listingOutcome).toBe("changed");
+    const [home] = await t.db
+      .select({ state: listings.commercialState })
+      .from(listings)
+      .where(eq(listings.id, f.listing.listingId));
+    expect(home?.state).toBe("sold");
     const [row] = await t.db.select().from(cases).where(eq(cases.id, f.record.id));
     expect(row).toMatchObject({
       disposition: "closed",
@@ -383,13 +413,20 @@ describe("Deal path (ADR 0013)", () => {
       .select()
       .from(casePathSteps)
       .where(eq(casePathSteps.caseId, f.record.id));
+    // The duties are done (they cannot be skipped); every other step, the last one included,
+    // is marked not needed.
     for (const s of steps.sort((a, b) => a.position - b.position))
       await recordPathStep(
         t.db,
         f.staff.session,
-        step(f.record.id, await caseVersion(f.record.id), s.stepKey, "skip", {
-          reason: "Synthetic skip",
-        }),
+        ["brokerage_agreement", "identity_checks"].includes(s.stepKey)
+          ? step(f.record.id, await caseVersion(f.record.id), s.stepKey, "done", {
+              date: today(),
+              away: "no",
+            })
+          : step(f.record.id, await caseVersion(f.record.id), s.stepKey, "skip", {
+              reason: "Synthetic skip",
+            }),
       );
     const path = await casePath(t.db, f.staff.session, f.record.id);
     expect(path).toMatchObject({ canComplete: false, completionBlocked: "final_step_open" });

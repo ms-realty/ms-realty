@@ -5,7 +5,7 @@
 import "server-only";
 import { and, asc, desc, eq, inArray, isNotNull, min, sql } from "drizzle-orm";
 import { z } from "zod";
-import type { DealPathActor } from "@/config/tenant";
+import type { DealPathActor, DealPathDuty, DealPathTransaction } from "@/config/tenant";
 import { agencyTimeZone } from "@/config/tenant";
 import {
   appointments,
@@ -25,6 +25,8 @@ import {
 } from "@/db/schema";
 import { type CaseStage, caseStageTransitions, dispositionTransitions } from "@/domain/case";
 import {
+  type AgreedTerms,
+  type BrokerageDetails,
   calendarDate,
   completionReadiness,
   composePath,
@@ -32,8 +34,10 @@ import {
   dealCompletedOutcome,
   dealTransaction,
   derivedSteps,
+  dutyInScope,
   isCalendarDate,
   nextRecordedState,
+  type PathStepAction,
   type PathStepBase,
   pathStepActions,
   previewSteps,
@@ -41,8 +45,11 @@ import {
   type RecordedStepState,
   recordedSteps,
   resolveTemplate,
+  stepDutyBlock,
   stepKeyPattern,
+  templateStep,
   templateSteps,
+  withdrawalEndsOn,
 } from "@/domain/deal-path";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { can } from "../authz";
@@ -50,6 +57,7 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
 import { documentAccess } from "../files/access";
+import { recordListingOutcome } from "../listings/commercial";
 import { runOperation } from "../operations";
 import { termsDigest } from "../proposals/shared";
 import { allow, commandEnvelope, liveStaff, parseInput, version } from "../work/shared";
@@ -105,7 +113,11 @@ async function pathFacts(db: Executor, row: CaseRow) {
     .map((v) => v.startsAt as Date)
     .sort((a, b) => a.getTime() - b.getTime());
   const offers = await db
-    .select({ revision: proposalRevisions, country: properties.country })
+    .select({
+      revision: proposalRevisions,
+      country: properties.country,
+      listingId: proposals.listingId,
+    })
     .from(proposals)
     .innerJoin(
       proposalRevisions,
@@ -143,7 +155,49 @@ async function pathFacts(db: Executor, row: CaseRow) {
     termsAgreedAt: agreed ? (agreed.revision.respondedAt ?? agreed.revision.updatedAt) : null,
   };
   const country = agreed?.country ?? offers[0]?.country ?? interestCountry?.country ?? null;
-  return { facts, country, agreedRevisionId: agreed?.revision.id ?? null };
+  return {
+    facts,
+    country,
+    agreedRevisionId: agreed?.revision.id ?? null,
+    agreedListingId: agreed?.listingId ?? null,
+    agreedTerms: agreed
+      ? {
+          amountMinor: agreed.revision.amountMinor,
+          currency: agreed.revision.currency,
+          period: agreed.revision.period,
+        }
+      : null,
+  };
+}
+
+const brokerageDetailsSchema = z.object({
+  away: z.boolean(),
+  earlyStart: z.boolean().nullable(),
+});
+
+/** The duty state of a stored path (ADR 0015): what is blocked and whether a duty is open. */
+function pathDuties(
+  stored: readonly StepRow[],
+  transaction: DealPathTransaction,
+  terms: AgreedTerms | null,
+) {
+  const identity = stored.find(
+    (s) => templateStep(s.template, s.stepKey)?.duty === "customer_due_diligence",
+  );
+  const identityChecks = (identity?.state as RecordedStepState | undefined) ?? null;
+  const dutyOpen = stored.some((s) => {
+    const duty = templateStep(s.template, s.stepKey)?.duty;
+    return duty && dutyInScope(duty, transaction, terms) && s.state !== "done";
+  });
+  const block = (row: StepRow, action: PathStepAction) =>
+    stepDutyBlock({
+      step: templateStep(row.template, row.stepKey),
+      action,
+      transaction,
+      terms,
+      identityChecks,
+    });
+  return { identityChecks, dutyOpen, block };
 }
 
 const stepInput = (row: StepRow): RecordedStepInput => ({
@@ -202,6 +256,14 @@ export type CasePathStep = PathStepBase & {
   readonly internalNote?: string | null;
   readonly skipReason?: string | null;
   readonly evidence?: { readonly versionId: string; readonly fileName: string } | null;
+  /** The agency duty this step records (ADR 0015), if any. */
+  readonly duty?: DealPathDuty;
+  /** Staff: the step may be marked not needed (false for an in-scope duty). */
+  readonly canSkip?: boolean;
+  /** Staff: the step moves money, a signature or the property and waits for identity checks. */
+  readonly waitsForIdentityChecks?: boolean;
+  /** Staff: what was recorded with a done brokerage contract step. */
+  readonly brokerage?: (BrokerageDetails & { readonly withdrawalEndsOn: string | null }) | null;
 };
 
 /**
@@ -216,9 +278,10 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
   const staff = live.account.kind === "staff";
   const internal = staff && (await can(db, live.actor, "case.read_internal", resource));
   const canTransition = staff && (await can(db, live.actor, "case.transition", resource));
-  const { facts, country } = await pathFacts(db, row);
+  const { facts, country, agreedTerms } = await pathFacts(db, row);
   const stored = await storedSteps(db, row.id);
   const template = stored[0]?.template ?? resolveTemplate(country, transaction).key;
+  const duties = pathDuties(stored, transaction, agreedTerms);
   const rows = stored.length ? stored.map(stepInput) : previewSteps(templateSteps(template) ?? []);
   const evidenceIds = stored.flatMap((s) => (s.evidenceVersionId ? [s.evidenceVersionId] : []));
   const files =
@@ -229,19 +292,40 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
           .where(inArray(documentVersions.id, evidenceIds))
       : [];
   const byKey = new Map(stored.map((s) => [s.stepKey, s]));
+  // A preview (nothing stored yet) reads its template's identity checks as still to do.
+  const identityState =
+    rows.find((r) => templateStep(template, r.key)?.duty === "customer_due_diligence")?.state ??
+    null;
   const base = [...derivedSteps(row.kind, facts), ...recordedSteps(rows)].map((step) => {
     const record = step.source === "recorded" ? byKey.get(step.key) : undefined;
     const evidence = record?.evidenceVersionId
       ? (files.find((f) => f.id === record.evidenceVersionId) ?? null)
       : null;
+    const definition = step.source === "recorded" ? templateStep(template, step.key) : undefined;
+    const brokerage =
+      definition?.duty === "brokerage_contract" && record?.state === "done"
+        ? brokerageDetailsSchema.safeParse(record.details)
+        : null;
     return {
       ...step,
       clientNote: record?.clientNote ?? null,
+      ...(definition?.duty ? { duty: definition.duty } : {}),
       ...(internal
         ? {
             internalNote: record?.internalNote ?? null,
             skipReason: record?.skipReason ?? null,
             evidence: evidence ? { versionId: evidence.id, fileName: evidence.fileName } : null,
+            canSkip: !(definition?.duty && dutyInScope(definition.duty, transaction, agreedTerms)),
+            waitsForIdentityChecks: Boolean(
+              definition?.afterIdentityChecks && identityState === "pending",
+            ),
+            brokerage:
+              brokerage?.success && record?.doneOn
+                ? {
+                    ...brokerage.data,
+                    withdrawalEndsOn: brokerage.data.away ? withdrawalEndsOn(record.doneOn) : null,
+                  }
+                : null,
           }
         : {}),
     };
@@ -261,7 +345,7 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
         .orderBy(desc(caseCompletions.createdAt))
         .limit(1)
     : [];
-  const readiness = completionReadiness(facts, stored.map(stepInput));
+  const readiness = completionReadiness(facts, stored.map(stepInput), duties.dutyOpen);
   const canRecord = canTransition && internal && row.disposition === "active";
   return {
     caseId: row.id,
@@ -288,7 +372,7 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
 }
 
 /** Current document versions on this Case that the reader may open. */
-async function evidenceOptions(db: Executor, session: Session, caseId: string) {
+export async function evidenceOptions(db: Executor, session: Session, caseId: string) {
   const candidates = await db
     .select({
       id: documentVersions.id,
@@ -319,7 +403,12 @@ async function evidenceOptions(db: Executor, session: Session, caseId: string) {
 }
 
 /** An evidence document must be a current file of this Case that the actor may open. */
-async function caseEvidence(db: Executor, session: Session, caseId: string, versionId: string) {
+export async function caseEvidence(
+  db: Executor,
+  session: Session,
+  caseId: string,
+  versionId: string,
+) {
   const [file] = await db
     .select({ caseId: documents.caseId, version: documentVersions })
     .from(documentVersions)
@@ -349,6 +438,10 @@ const stepSchema = z.object({
   internalNote: optionalText(2000),
   reason: optionalText(2000),
   evidenceVersionId: evidenceInput,
+  /** Brokerage contract step: signed online or away from the office (yes/no). */
+  away: z.enum(["", "yes", "no"]).default(""),
+  /** Brokerage contract step: the client asked in writing for an early start (yes/no). */
+  earlyStart: z.enum(["", "yes", "no"]).default(""),
 });
 export type RecordPathStepInput = z.input<typeof stepSchema>;
 
@@ -396,6 +489,25 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
       if (!step) throw new AppError("not_found");
       const to = nextRecordedState(step.state as RecordedStepState, input.action);
       if (!to) throw new AppError("transition_denied");
+      const transaction = dealTransaction(row.kind);
+      if (!transaction) throw new AppError("not_found");
+      const { agreedTerms } = await pathFacts(ctx.tx, row);
+      // ADR 0015: the agency's duties are steps that cannot be skipped while in scope, and the
+      // steps that move money, a signature or the property wait for the identity checks.
+      const blocked = pathDuties(steps, transaction, agreedTerms).block(step, input.action);
+      if (blocked) throw new AppError("transition_denied", { fieldErrors: { form: [blocked] } });
+      let details: BrokerageDetails | Record<string, never> = {};
+      if (
+        input.action === "done" &&
+        templateStep(step.template, step.stepKey)?.duty === "brokerage_contract"
+      ) {
+        if (!input.away) throw invalid("away", "required");
+        if (input.away === "yes" && !input.earlyStart) throw invalid("earlyStart", "required");
+        details = {
+          away: input.away === "yes",
+          earlyStart: input.away === "yes" ? input.earlyStart === "yes" : null,
+        };
+      }
       if (input.evidenceVersionId)
         await caseEvidence(ctx.tx, session, row.id, input.evidenceVersionId);
       const now = new Date();
@@ -409,6 +521,7 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
               clientNote: input.clientNote || null,
               internalNote: input.internalNote || null,
               evidenceVersionId: input.evidenceVersionId || null,
+              details,
             }
           : input.action === "skip"
             ? {
@@ -425,6 +538,7 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
                   skipReason: null,
                   evidenceVersionId: null,
                   clientNote: null,
+                  details: {},
                   recordedAt: now,
                   recordedById: live.account.id,
                 }
@@ -448,6 +562,7 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
           ...(input.date ? { date: input.date } : {}),
           ...(input.action === "reopen" ? { reason: input.reason } : {}),
           ...(input.evidenceVersionId ? { evidenceVersionId: input.evidenceVersionId } : {}),
+          ...("away" in details ? { details } : {}),
         },
         step.clientVisible && input.action !== "expect" ? "participants" : "internal",
       );
@@ -471,7 +586,8 @@ export type CompleteDealInput = z.input<typeof completeSchema>;
  * pipeline's terminal stage and closes it with the structured `deal_completed` outcome, after
  * the same open-work check and step-up as the existing close flow. The path's recorded steps are
  * the completion evidence, so this route does not need the separate `case_completion` document
- * the stage form asks for. No command sets a Listing to sold or let, so this changes no Listing.
+ * the stage form asks for. A buyer's or tenant's completion also marks the agreed listing sold or
+ * let (ADR 0015), and an in-scope duty step must be done, never merely not needed.
  */
 export async function completeDealFromPath(db: Executor, session: Session, raw: CompleteDealInput) {
   const input = parseInput(completeSchema, raw);
@@ -496,8 +612,15 @@ export async function completeDealFromPath(db: Executor, session: Session, raw: 
       if (row.disposition !== "active" || row.pendingOwnerId || !stage || !row.ownerId)
         throw new AppError("transition_denied");
       const steps = await storedSteps(ctx.tx, row.id, true);
-      const { facts } = await pathFacts(ctx.tx, row);
-      const readiness = completionReadiness(facts, steps.map(stepInput));
+      const { facts, agreedTerms, agreedListingId } = await pathFacts(ctx.tx, row);
+      const transaction = dealTransaction(row.kind);
+      if (!transaction) throw new AppError("transition_denied");
+      // A sale never completes with its identity checks or brokerage contract open (ADR 0015).
+      const readiness = completionReadiness(
+        facts,
+        steps.map(stepInput),
+        pathDuties(steps, transaction, agreedTerms).dutyOpen,
+      );
       if (!readiness.ready)
         throw new AppError("transition_denied", {
           fieldErrors: { form: [readiness.reason ?? "steps_open"] },
@@ -583,16 +706,40 @@ export async function completeDealFromPath(db: Executor, session: Session, raw: 
         actorId: ctx.actor.id,
         operationId: ctx.operationId,
       });
+      // The agreed home is sold or let: it stops being offered as available. Only a buyer's or
+      // tenant's Deal holds the agreed proposal; the listing entry names no party.
+      const outcome = row.kind === "buyer" ? "sold" : row.kind === "tenant" ? "let" : null;
+      const listing =
+        outcome && agreedListingId
+          ? await recordListingOutcome(ctx.tx, live.actor, {
+              listingId: agreedListingId,
+              outcome,
+              reason: "Deal completed",
+              evidenceIds: [completion.id],
+              operationId: ctx.operationId,
+            })
+          : null;
       await caseEvent(
         ctx,
         "case",
         row.id,
         "case.deal_completed",
         "case.transition",
-        { completionId: completion.id, completedOn: input.completedOn, template },
+        {
+          completionId: completion.id,
+          completedOn: input.completedOn,
+          template,
+          ...(listing
+            ? { listingOutcome: listing.status, listingReference: listing.reference }
+            : {}),
+        },
         "participants",
       );
-      return { ...result(row), completionId: completion.id };
+      return {
+        ...result(row),
+        completionId: completion.id,
+        listingOutcome: listing?.status ?? null,
+      };
     },
   );
 }

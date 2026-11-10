@@ -55,9 +55,11 @@ for (const locale of ["bg", "en", "ru", "de", "nl", "el", "he"] as const)
       ]);
       const staffCopy = proposalCopy("en");
       await page.goto(hostUrl("staff", `/en/proposals/${fixture.proposalId}`));
+      await page.getByText("Other ways to continue", { exact: true }).click();
       await page.getByLabel(staffCopy.reviewCheck, { exact: true }).check();
       await page.getByRole("button", { name: staffCopy.review, exact: true }).click();
       await recorded(page);
+      await page.getByText("Other ways to continue", { exact: true }).click();
       await page.getByLabel(staffCopy.submitCheck, { exact: true }).check();
       await page.getByRole("button", { name: staffCopy.submit, exact: true }).click();
       await recorded(page);
@@ -198,9 +200,11 @@ test("C08 native lost acknowledgement retains the exact draft after the committe
   ]);
   const staffCopy = proposalCopy("en");
   await page.goto(hostUrl("staff", `/en/proposals/${fixture.proposalId}`));
+  await page.getByText("Other ways to continue", { exact: true }).click();
   await page.getByLabel(staffCopy.reviewCheck, { exact: true }).check();
   await page.getByRole("button", { name: staffCopy.review, exact: true }).click();
   await recorded(page);
+  await page.getByText("Other ways to continue", { exact: true }).click();
   await page.getByLabel(staffCopy.submitCheck, { exact: true }).check();
   await page.getByRole("button", { name: staffCopy.submit, exact: true }).click();
   await recorded(page);

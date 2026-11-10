@@ -24,6 +24,10 @@
     "lawyer": "De advocaat"
   },
   "steps": {
+    "brokerage_agreement": {
+      "label": "Bemiddelingsovereenkomst",
+      "about": "De klant en het kantoor tekenen een schriftelijke overeenkomst over de dienst van het kantoor en de vergoeding."
+    },
     "request_received": {
       "label": "Aanvraag ontvangen",
       "about": "Het kantoor ontvangt de aanvraag en wijst een makelaar aan die deze behandelt."

@@ -281,6 +281,13 @@
       "when": 1794311882427,
       "tag": "0039_deal_path",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1794314816187,
+      "tag": "0040_agree_in_one_decision",
+      "breakpoints": true
     }
   ]
 }

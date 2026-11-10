@@ -4,6 +4,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
+import { dealPolicy } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { dealCompletedOutcome } from "@/domain/deal-path";
 import { interestMachine } from "@/domain/interest";
@@ -13,7 +14,13 @@ import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import type { Session } from "@/server/auth/sessions";
 import { casePath } from "@/server/cases/path";
-import { listCases, readCase, readCaseMessages, readInterestContext } from "@/server/cases/queries";
+import {
+  heldListingOptions,
+  listCases,
+  readCase,
+  readCaseMessages,
+  readInterestContext,
+} from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
 import { getEnv } from "@/server/config/env";
 import { findOperation } from "@/server/operations";
@@ -40,7 +47,7 @@ import {
   workflowTypes,
 } from "./contract";
 import { caseCopy } from "./copy";
-import { dealPathCopy, dealPathStaffCopy } from "./deal-path-copy";
+import { dealAgreementCopy, dealPathCopy, dealPathStaffCopy } from "./deal-path-copy";
 import { ClientDealPath, StaffDealPath } from "./deal-path-screen";
 import { caseEmailCopy } from "./email-copy";
 import { type WorkflowField, WorkflowForm } from "./form";
@@ -607,6 +614,12 @@ export async function CaseScreen(
       : null;
   const showOverview = staff || !props.pane || props.pane === "overview";
   const showProperties = !service && (staff || props.pane === "properties" || showOverview);
+  // ADR 0015: a broker adds any home the agency holds, with a one-line reason.
+  const pick =
+    matching && !dealPolicy.shortlistNeedsStructuredBrief && row.disposition === "active"
+      ? await heldListingOptions(getDb(), props.session, row.id)
+      : null;
+  const agreeCopy = dealAgreementCopy(props.locale);
   const showMessages = staff || props.pane === "messages" || showOverview;
   return (
     <WorkflowPage
@@ -955,6 +968,53 @@ export async function CaseScreen(
       ) : null}
       {showProperties ? (
         <WorkflowSection title={c.interests} id="case-properties">
+          {pick ? (
+            // Open while the Deal has no home; afterwards "Make a proposal" is the next step and
+            // adding another home folds away, so the section keeps one primary action.
+            <details
+              className="space-y-3 rounded-card border border-border bg-surface p-5"
+              open={view.interests.length === 0}
+              data-broker-pick
+            >
+              <summary className="min-h-control cursor-pointer py-2 font-semibold">
+                {agreeCopy.home.title}
+              </summary>
+              {pick.length ? (
+                <BoundWorkflowForm
+                  {...props}
+                  command="interest"
+                  id={row.id}
+                  revision={row.version}
+                  path={path}
+                  intro={<p>{agreeCopy.home.lead}</p>}
+                  fields={[
+                    {
+                      name: "reference",
+                      label: agreeCopy.home.field,
+                      type: "select",
+                      required: true,
+                      options: [
+                        { value: "", label: agreeCopy.home.choose },
+                        ...pick.map((home) => ({
+                          value: home.reference,
+                          label: home.title ? `${home.reference}, ${home.title}` : home.reference,
+                        })),
+                      ],
+                    },
+                    {
+                      name: "explanation",
+                      label: agreeCopy.home.reason,
+                      hint: agreeCopy.home.reasonHint,
+                      required: true,
+                    },
+                  ]}
+                  submit={agreeCopy.home.submit}
+                />
+              ) : (
+                <p>{agreeCopy.home.none}</p>
+              )}
+            </details>
+          ) : null}
           {view.interests.length ? (
             <ul className="space-y-7">
               {view.interests.map((interest) => (
@@ -964,8 +1024,13 @@ export async function CaseScreen(
                   className="scroll-mt-6 space-y-3 border-b border-border pb-5"
                 >
                   <a
-                    className={workflowLink}
-                    href={`${getEnv().hosts.public}/bg/properties/${interest.reference}/${interest.reference.toLowerCase()}`}
+                    className={`${workflowLink} inline-flex min-h-control items-center`}
+                    href={
+                      // Staff open the agency's own record: a broker's pick may not be public.
+                      staff
+                        ? `/${props.locale}/inventory/${interest.reference}`
+                        : `${getEnv().hosts.public}/bg/properties/${interest.reference}/${interest.reference.toLowerCase()}`
+                    }
                   >
                     {interest.reference}
                   </a>
@@ -998,10 +1063,10 @@ export async function CaseScreen(
                     interest.state,
                   ) ? (
                     <a
-                      className={workflowLink}
+                      className={buttonClass("primary", "max-w-full text-center")}
                       href={`/${props.locale}/proposals/new?case=${row.id}&interest=${interest.id}`}
                     >
-                      {c.prepareProposal}
+                      {agreeCopy.proposal.make}
                     </a>
                   ) : null}
                   {Array.isArray(interest.explanation) ? (

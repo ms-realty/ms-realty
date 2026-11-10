@@ -107,6 +107,10 @@ export async function readProposal(db: Executor, session: Session, id: string) {
       decision: proposalResponses.decision,
       reason: proposalResponses.reason,
       at: proposalResponses.createdAt,
+      termsHash: proposalResponses.termsHash,
+      byBroker: sql<boolean>`${proposalResponses.actorKind} = 'staff'`,
+      channel: proposalResponses.channel,
+      givenOn: proposalResponses.givenOn,
     })
     .from(proposalResponses)
     .where(eq(proposalResponses.revisionId, current.id))
@@ -178,7 +182,10 @@ export async function proposalContext(
   return {
     listingReference: context.listing.reference,
     purpose: context.listing.purpose,
+    published: Boolean(context.published),
     buyers: context.buyers,
     seller: context.seller,
+    /** Sellers or landlords the agency knows for this property, recorded instruction first. */
+    sellerOptions: context.sellerOptions,
   };
 }

@@ -52,6 +52,7 @@ import {
   workflowTypes,
 } from "./contract";
 import { caseCopy } from "./copy";
+import { dealAgreementCopy } from "./deal-path-copy";
 import { matchReviewFromForm } from "./matching-review";
 
 export async function workflowAction(
@@ -227,6 +228,8 @@ export async function workflowAction(
               internalNote: values.internalNote ?? "",
               reason: values.reason ?? "",
               evidenceVersionId: values.evidenceVersionId ?? "",
+              away: (values.away ?? "") as "yes",
+              earlyStart: (values.earlyStart ?? "") as "yes",
             })
           ).outcome;
         case "pathComplete":
@@ -430,13 +433,22 @@ export async function workflowAction(
         ),
       },
     };
-  const explanation = error.fieldErrors?.form?.includes("appointment_conflict")
+  const agreement = dealAgreementCopy(locale).errors;
+  const form = error.fieldErrors?.form ?? [];
+  const pathBlock = (["identity_checks_first", "duty_in_scope"] as const).find((code) =>
+    form.includes(code),
+  );
+  const explanation = form.includes("appointment_conflict")
     ? command === "appointmentHost"
       ? hostHandoverCopy(locale).busy
       : copy.calendarConflict
-    : ["NOT_FOUND", "NOT_AUTHORIZED", "UNAUTHENTICATED"].includes(error.code)
-      ? copy.denied
-      : copy.transition;
+    : pathBlock
+      ? agreement[pathBlock]
+      : error.code === "LISTING_UNAVAILABLE"
+        ? agreement.listing_unavailable
+        : ["NOT_FOUND", "NOT_AUTHORIZED", "UNAUTHENTICATED"].includes(error.code)
+          ? copy.denied
+          : copy.transition;
   return {
     ...(command === "appointmentHost" ? fresh : state),
     outcome: {

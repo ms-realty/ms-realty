@@ -159,6 +159,31 @@ export function DealPathList({
                   {step.evidenceExpected && !step.settled ? (
                     <p className="text-dense text-text-muted">{staffCopy.evidenceUsual}</p>
                   ) : null}
+                  {step.canSkip === false && !step.settled ? (
+                    <p className="text-dense font-semibold">{staffCopy.required}</p>
+                  ) : null}
+                  {step.brokerage ? (
+                    <div className="space-y-1 text-dense">
+                      <p>
+                        {step.brokerage.away
+                          ? staffCopy.brokerage.signedAway
+                          : staffCopy.brokerage.signedOffice}
+                      </p>
+                      {step.brokerage.away ? (
+                        <p>
+                          {step.brokerage.earlyStart
+                            ? staffCopy.brokerage.earlyStartYes
+                            : staffCopy.brokerage.earlyStartNo}
+                        </p>
+                      ) : null}
+                      {step.brokerage.withdrawalEndsOn ? (
+                        <p className="font-semibold">
+                          {staffCopy.brokerage.withdrawalEnds}:{" "}
+                          <PathDate value={step.brokerage.withdrawalEndsOn} locale={locale} />
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {step.skipReason ? (
                     <p className="text-dense">
                       <strong>{staffCopy.skipReason}:</strong> <bdi>{step.skipReason}</bdi>
@@ -347,39 +372,75 @@ export function StaffDealPath({
           />
         </details>
       );
+    const brokerage = step.duty === "brokerage_contract";
+    const yesNo = [
+      { value: "", label: s.brokerage.choose },
+      { value: "yes", label: s.brokerage.yes },
+      { value: "no", label: s.brokerage.no },
+    ];
     return (
       <details className="pt-1" open={step.status === "current"}>
         <summary className={disclosure}>{s.record}</summary>
         <div className="space-y-6 pt-2">
-          <PathForm
-            {...common}
-            command="pathStep"
-            identity={`${step.key}:done`}
-            fields={[
-              ...hiddenFields,
-              { name: "date", label: s.doneDate, type: "date", required: true },
-              { name: "clientNote", label: s.clientNote, type: "textarea" },
-              { name: "internalNote", label: s.internalNoteField, type: "textarea" },
-              ...documentField,
-            ]}
-            values={{ ...hidden(step, "done"), date: today }}
-            submit={s.markDone}
-          />
-          <details>
-            <summary className={disclosure}>{s.notNeeded}</summary>
+          {step.waitsForIdentityChecks ? (
+            // ADR 0015: money, signatures and the property move only after identity checks.
+            <p className="text-dense">{s.waitsForIdentity}</p>
+          ) : (
             <PathForm
               {...common}
               command="pathStep"
-              identity={`${step.key}:skip`}
+              identity={`${step.key}:done`}
               fields={[
                 ...hiddenFields,
-                { name: "reason", label: s.skipReason, type: "textarea", required: true },
+                {
+                  name: "date",
+                  label: brokerage ? s.brokerage.signedOn : s.doneDate,
+                  type: "date",
+                  required: true,
+                },
+                ...(brokerage
+                  ? ([
+                      {
+                        name: "away",
+                        label: s.brokerage.away,
+                        type: "select",
+                        required: true,
+                        options: yesNo,
+                      },
+                      {
+                        name: "earlyStart",
+                        label: s.brokerage.earlyStart,
+                        hint: s.brokerage.earlyStartHint,
+                        type: "select",
+                        options: yesNo,
+                      },
+                    ] satisfies WorkflowField[])
+                  : []),
                 { name: "clientNote", label: s.clientNote, type: "textarea" },
+                { name: "internalNote", label: s.internalNoteField, type: "textarea" },
+                ...documentField,
               ]}
-              values={hidden(step, "skip")}
-              submit={s.notNeededSubmit}
+              values={{ ...hidden(step, "done"), date: today }}
+              submit={s.markDone}
             />
-          </details>
+          )}
+          {step.canSkip !== false ? (
+            <details>
+              <summary className={disclosure}>{s.notNeeded}</summary>
+              <PathForm
+                {...common}
+                command="pathStep"
+                identity={`${step.key}:skip`}
+                fields={[
+                  ...hiddenFields,
+                  { name: "reason", label: s.skipReason, type: "textarea", required: true },
+                  { name: "clientNote", label: s.clientNote, type: "textarea" },
+                ]}
+                values={hidden(step, "skip")}
+                submit={s.notNeededSubmit}
+              />
+            </details>
+          ) : null}
           <details>
             <summary className={disclosure}>{s.setExpected}</summary>
             <PathForm

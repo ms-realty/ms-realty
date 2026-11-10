@@ -6,6 +6,7 @@ import {
   bigint,
   boolean,
   check,
+  date,
   index,
   integer,
   jsonb,
@@ -14,8 +15,9 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { acceptanceChannels } from "../../domain/proposal";
 import { approvals } from "./approvals";
-import { createdAt, id, instant, mutable, reference, tstzrange } from "./columns";
+import { createdAt, id, instant, mutable, reference, sqlList, tstzrange } from "./columns";
 import {
   actorKindEnum,
   appointmentFormatEnum,
@@ -257,6 +259,12 @@ export const proposalResponses = pgTable(
     evidenceDocumentVersionId: uuid("evidence_document_version_id").references(
       (): AnyPgColumn => documentVersions.id,
     ),
+    /**
+     * A broker's record of a party's answer (ADR 0015): how the party gave it and on which
+     * calendar day. Null for a party's own answer in the client area.
+     */
+    channel: text("channel").$type<(typeof acceptanceChannels)[number]>(),
+    givenOn: date("given_on", { mode: "string" }),
   },
   (t) => [
     uniqueIndex("proposal_responses_party_revision_idx").on(t.revisionId, t.partyId),
@@ -264,8 +272,12 @@ export const proposalResponses = pgTable(
     check("proposal_responses_decision", sql`${t.decision} in ('agree', 'decline', 'counter')`),
     check("proposal_responses_exact_terms", sql`${t.termsHash} ~ '^[a-f0-9]{64}$'`),
     check(
-      "proposal_responses_staff_evidence",
-      sql`${t.actorKind} <> 'staff' or ${t.evidenceDocumentVersionId} is not null`,
+      "proposal_responses_staff_basis",
+      sql`${t.actorKind} <> 'staff' or ${t.evidenceDocumentVersionId} is not null or (${t.channel} is not null and ${t.givenOn} is not null)`,
+    ),
+    check(
+      "proposal_responses_channel",
+      sql`${t.channel} is null or (${t.actorKind} = 'staff' and ${t.channel} in (${sqlList(acceptanceChannels)}))`,
     ),
   ],
 );

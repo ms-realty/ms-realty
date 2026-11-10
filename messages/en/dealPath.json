@@ -24,6 +24,10 @@
     "lawyer": "The lawyer"
   },
   "steps": {
+    "brokerage_agreement": {
+      "label": "Brokerage contract",
+      "about": "The client and the agency sign a written contract for the agency's service and its fee."
+    },
     "request_received": {
       "label": "Request received",
       "about": "The agency receives the request and names a broker to look after it."

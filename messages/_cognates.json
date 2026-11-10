@@ -73,7 +73,9 @@
     "discovery.serviceIntake.location": "Местоположение",
     "operations.serviceIntake.topic": "Тема",
     "operations.serviceIntake.reason": "Причина",
-    "operations.serviceIntake.version": "Версия"
+    "operations.serviceIntake.version": "Версия",
+    "dealAgreement.agree.channels.in_person": "Лично",
+    "dealPathStaff.brokerage.yes": "Да"
   },
   "de": {
     "workflow.clientIdentity.optional": "(optional)",

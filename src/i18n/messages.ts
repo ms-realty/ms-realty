@@ -27,6 +27,7 @@ import type auditHistory from "../../messages/staff/bg/auditHistory.json";
 import type calendar from "../../messages/staff/bg/calendar.json";
 import type caseDirectory from "../../messages/staff/bg/caseDirectory.json";
 import type dataReview from "../../messages/staff/bg/dataReview.json";
+import type dealAgreement from "../../messages/staff/bg/dealAgreement.json";
 import type dealPathStaff from "../../messages/staff/bg/dealPathStaff.json";
 import type duplicateMerge from "../../messages/staff/bg/duplicateMerge.json";
 import type operatingPolicy from "../../messages/staff/bg/operatingPolicy.json";
@@ -80,6 +81,7 @@ export const staffNamespaces = [
   "settingsScopes",
   "privacyGovernance",
   "dealPathStaff",
+  "dealAgreement",
 ] as const;
 
 export interface PublicMessages {
@@ -116,6 +118,7 @@ export interface StaffMessages {
   privacyErasure: typeof privacyErasure;
   dataReview: typeof dataReview;
   dealPathStaff: typeof dealPathStaff;
+  dealAgreement: typeof dealAgreement;
   serverStaff: typeof serverStaff;
   tools: typeof tools;
   workspace: typeof workspace;

@@ -24,6 +24,10 @@
     "lawyer": "Der Anwalt"
   },
   "steps": {
+    "brokerage_agreement": {
+      "label": "Maklervertrag",
+      "about": "Der Kunde und die Agentur unterschreiben einen schriftlichen Vertrag über die Leistung der Agentur und ihre Provision."
+    },
     "request_received": {
       "label": "Anfrage erhalten",
       "about": "Die Agentur erhält die Anfrage und benennt einen Makler, der sich darum kümmert."

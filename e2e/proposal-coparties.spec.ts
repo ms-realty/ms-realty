@@ -61,6 +61,12 @@ test("additional proposal parties survive native validation and require review o
   await expect(page.getByRole("button", { name: "Show to these people", exact: true })).toHaveCount(
     0,
   );
+  // ADR 0015: the new revision leads with "Record that both sides agreed"; its separate review
+  // is the other way to continue.
+  await expect(
+    page.getByRole("button", { name: "Record that both sides agreed", exact: true }),
+  ).toBeVisible();
+  await page.getByText("Other ways to continue", { exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Record exact-terms review", exact: true }),
   ).toBeVisible();

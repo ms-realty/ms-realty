@@ -123,6 +123,15 @@ export type DealPathActor = (typeof dealPathActors)[number];
 export const dealPathTransactions = ["sale", "long_term_rent"] as const;
 export type DealPathTransaction = (typeof dealPathTransactions)[number];
 
+/**
+ * A duty the agency itself carries on a Deal (ADR 0015), held as a path step rather than as a
+ * wall before terms are agreed: `brokerage_contract` is the written brokerage contract with the
+ * agency's own client (ADR 0009); `customer_due_diligence` is identifying both parties
+ * (ADR 0008).
+ */
+export const dealPathDuties = ["brokerage_contract", "customer_due_diligence"] as const;
+export type DealPathDuty = (typeof dealPathDuties)[number];
+
 export interface DealPathStepTemplate {
   /** Stable key: stored on the recorded step and used as the message key. */
   readonly key: string;
@@ -131,42 +140,59 @@ export interface DealPathStepTemplate {
   readonly evidence: boolean;
   /** Whether the client sees the step on their Deal path. */
   readonly clientVisible: boolean;
+  /** The agency duty this step records; such a step cannot be marked not needed when in scope. */
+  readonly duty?: DealPathDuty;
+  /**
+   * The step hands over money, a signature or the property (deposit, preliminary contract,
+   * deed, registration, lease, keys): it can be marked done only after the identity checks.
+   */
+  readonly afterIdentityChecks?: boolean;
 }
 
 const step = (
   key: string,
   actor: DealPathActor,
   evidence = false,
-  clientVisible = true,
-): DealPathStepTemplate => ({ key, actor, evidence, clientVisible });
+  options: Partial<
+    Pick<DealPathStepTemplate, "clientVisible" | "duty" | "afterIdentityChecks">
+  > = {},
+): DealPathStepTemplate => ({ key, actor, evidence, clientVisible: true, ...options });
+const brokerage = step("brokerage_agreement", "agency", true, { duty: "brokerage_contract" });
+const identity = step("identity_checks", "agency", true, { duty: "customer_due_diligence" });
+/** A step that moves money, a signature or the property. */
+const handover = (key: string, actor: DealPathActor, evidence = false) =>
+  step(key, actor, evidence, { afterIdentityChecks: true });
 
 /** Recorded steps keyed `${jurisdiction}.${transaction}`; the last step completes the Deal. */
 export const dealPathTemplates: Readonly<
   Partial<Record<`${JurisdictionCode}.${DealPathTransaction}`, readonly DealPathStepTemplate[]>>
 > = {
   "BG.sale": [
-    step("identity_checks", "agency", true),
-    step("deposit_preliminary_contract", "client", true),
+    brokerage,
+    identity,
+    handover("deposit_preliminary_contract", "client", true),
     step("property_checks", "agency", true),
     step("funds_ready", "client"),
-    step("notary_deed", "notary", true),
-    step("registration", "notary", true),
-    step("keys_handed_over", "owner"),
+    handover("notary_deed", "notary", true),
+    handover("registration", "notary", true),
+    handover("keys_handed_over", "owner"),
   ],
   "BG.long_term_rent": [
-    step("identity_checks", "agency", true),
-    step("lease_signed", "client", true),
-    step("deposit_first_rent", "client"),
-    step("keys_handed_over", "owner"),
+    brokerage,
+    identity,
+    handover("lease_signed", "client", true),
+    handover("deposit_first_rent", "client"),
+    handover("keys_handed_over", "owner"),
   ],
   "GR.sale": [
-    step("identity_checks", "agency", true),
+    brokerage,
+    identity,
     step("tax_number", "client", true),
     step("lawyer_property_checks", "lawyer", true),
-    step("deposit_preliminary_contract", "client", true),
-    step("notary_deed", "notary", true),
-    step("registration", "lawyer", true),
-    step("keys_handed_over", "owner"),
+    handover("deposit_preliminary_contract", "client", true),
+    handover("notary_deed", "notary", true),
+    handover("registration", "lawyer", true),
+    handover("keys_handed_over", "owner"),
   ],
 };
 
@@ -175,15 +201,69 @@ export const genericDealPath: Readonly<
   Record<DealPathTransaction, readonly DealPathStepTemplate[]>
 > = {
   sale: [
-    step("identity_checks", "agency", true),
-    step("contract_signed", "client", true),
-    step("keys_handed_over", "owner"),
+    brokerage,
+    identity,
+    handover("contract_signed", "client", true),
+    handover("keys_handed_over", "owner"),
   ],
   long_term_rent: [
-    step("identity_checks", "agency", true),
-    step("lease_signed", "client", true),
-    step("keys_handed_over", "owner"),
+    brokerage,
+    identity,
+    handover("lease_signed", "client", true),
+    handover("keys_handed_over", "owner"),
   ],
+};
+
+/**
+ * Where the customer due diligence duty applies (ADR 0008 §1, for this brand's jurisdictions
+ * BG and GR): every sale, and a letting from this monthly rent. A letting in another currency
+ * is treated as in scope, because no rate is assumed.
+ */
+export const customerDueDiligenceScope = {
+  sale: true,
+  monthlyRentFrom: { amountMinor: 1_000_000, currency: "EUR" satisfies CurrencyCode },
+} as const;
+
+/**
+ * The withdrawal period of a brokerage contract concluded online or away from the office
+ * (ADR 0009 §4), in calendar days from signing. Shown on the path; never enforced as a wall.
+ */
+export const brokerageWithdrawalDays = 14;
+
+// Deal policy (ADR 0015). How a Deal reaches "terms agreed" and what a broker may record. A
+// brand that wants independent review, documents before agreement or client accounts for
+// every party turns the strict values on; the system checks and records either way.
+
+export interface DealPolicy {
+  /**
+   * `staff_attestation`: the broker's recorded word that each party accepted the exact terms is
+   * the basis; documents are optional evidence. `reviewed_process`: terms are agreed only after
+   * the reviewed process policy, per-party due diligence and signed service agreements
+   * (`assertCaseAgreementReady`).
+   */
+  readonly agreementBasis: "staff_attestation" | "reviewed_process";
+  /** The other side (seller or landlord on a buyer's Deal) must answer in the client area. */
+  readonly counterpartyAccountRequired: boolean;
+  /** A home joins a buyer's or tenant's Deal only through a structured Brief and match review. */
+  readonly shortlistNeedsStructuredBrief: boolean;
+  /** A proposal needs a published listing and a current agreed seller instruction. */
+  readonly proposalsNeedPublishedListing: boolean;
+}
+
+/** The behaviour the system shipped with before ADR 0015; kept for brands that want it. */
+export const strictDealPolicy: DealPolicy = {
+  agreementBasis: "reviewed_process",
+  counterpartyAccountRequired: true,
+  shortlistNeedsStructuredBrief: true,
+  proposalsNeedPublishedListing: true,
+};
+
+/** This brand: the broker's recorded decision is the basis (ADR 0015). */
+export const dealPolicy: DealPolicy = {
+  agreementBasis: "staff_attestation",
+  counterpartyAccountRequired: false,
+  shortlistNeedsStructuredBrief: false,
+  proposalsNeedPublishedListing: false,
 };
 
 // Human references. Listings keep the legacy lot-number format (MS-00100) so every reference
