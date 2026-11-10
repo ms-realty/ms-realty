@@ -109,6 +109,9 @@ test("staff propose and confirm a viewing, the client gets each notice and the c
     }).format(new Date(`${year}-01-15T08:00:00Z`));
     const arrange = async (action: "propose" | "confirm") => {
       await staff.goto(hostUrl("staff", `/en/calendar/${f.appointmentId}`));
+      // Before hydration the form posts natively and lands on the record without a receipt;
+      // under a loaded server that is what an early click gets.
+      await expect(staff.locator('[data-private-ready="true"]')).toHaveCount(1);
       const form = staff
         .locator("section")
         .filter({ has: staff.getByRole("heading", { name: "Arrange appointment", exact: true }) });
