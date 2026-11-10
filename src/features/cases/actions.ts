@@ -2,7 +2,13 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { offsetInputValue } from "@/domain/time";
-import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import {
+  agencyTimeZone,
+  defaultLocale,
+  isPublicLocale,
+  isRoutableLocale,
+  isStaffLocale,
+} from "@/i18n/config";
 import { workflowAuthCopy } from "@/i18n/form-copy";
 import { formatDateTime } from "@/i18n/format";
 import { timeReasonMessage } from "@/i18n/time-copy";
@@ -31,6 +37,7 @@ import {
   transitionCaseStage,
 } from "@/server/cases/lifecycle";
 import { acknowledgeOwnerPreview, bindSellerCase } from "@/server/cases/owner-preview";
+import { completeDealFromPath, recordPathStep } from "@/server/cases/path";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
@@ -209,6 +216,29 @@ export async function workflowAction(
               dueAt: formInstant(values, "dueAt"),
             })
           ).outcome;
+        case "pathStep":
+          return (
+            await recordPathStep(db, s, {
+              ...base,
+              stepKey: values.stepKey ?? "",
+              action: values.action as "done",
+              date: values.date ?? "",
+              clientNote: values.clientNote ?? "",
+              internalNote: values.internalNote ?? "",
+              reason: values.reason ?? "",
+              evidenceVersionId: values.evidenceVersionId ?? "",
+            })
+          ).outcome;
+        case "pathComplete":
+          return (
+            await completeDealFromPath(db, s, {
+              ...base,
+              completedOn: values.completedOn ?? "",
+              registryReference: values.registryReference ?? "",
+              evidenceVersionId: values.evidenceVersionId ?? "",
+              reviewed: values.reviewed === "true",
+            })
+          ).outcome;
         case "handover":
           return (
             await handoverCase(db, s, {
@@ -333,9 +363,13 @@ export async function workflowAction(
           reference: result.data.reference,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt, {
-              zoneLabel: context === "client",
-            }),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.data.recordedAt,
+              {
+                zoneLabel: context === "client",
+              },
+            ),
           },
           nextStep: copy.nextStep,
           destination: { href: destination, label: copy.back },
@@ -388,7 +422,7 @@ export async function workflowAction(
               field,
               [
                 timeReasonMessage(
-                  isPublicLocale(locale) ? locale : "bg",
+                  isPublicLocale(locale) ? locale : defaultLocale,
                   error.fieldErrors?.[field]?.[0],
                 ) ?? copy.invalid,
               ],

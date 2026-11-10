@@ -3,6 +3,7 @@
 import "server-only";
 import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { agency } from "@/config/tenant";
 import { type externalActions, inquiries, outboxEvents } from "@/db/schema";
 import { sourceLocale } from "@/domain/ids";
 import { inquiryPurposes } from "@/domain/inquiry";
@@ -91,8 +92,8 @@ export function renderInquiryCoverageNotice(message: OutboundMessage, hosts: Hos
   )
     return null;
   return {
-    subject: `MS Realty staging: ${p.params.reference}`,
-    text: `MS Realty staging\n\n${p.params.reference}\n${p.params.inquiryId}\n${p.params.eventId}\n${p.params.coverageQueue}\n\n${p.params.queueUrl}`,
+    subject: `${agency.name} staging: ${p.params.reference}`,
+    text: `${agency.name} staging\n\n${p.params.reference}\n${p.params.inquiryId}\n${p.params.eventId}\n${p.params.coverageQueue}\n\n${p.params.queueUrl}`,
   };
 }
 

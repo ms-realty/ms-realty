@@ -2,7 +2,7 @@ import { NativeForm } from "@/ui/form/native-form";
 import "server-only";
 import { getDb } from "@/db/client";
 import { readDateTimeEntry } from "@/domain/time";
-import { agencyTimeZone, isPublicLocale } from "@/i18n/config";
+import { agencyTimeZone, defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import type { Session } from "@/server/auth/sessions";
@@ -35,7 +35,7 @@ export async function AlertRuleScreen({
   const entered = draft?.expiresAt ? readDateTimeEntry(draft.expiresAt, agencyTimeZone) : null;
   const timeError =
     query.error && entered && !entered.ok
-      ? timeReasonMessage(isPublicLocale(locale) ? locale : "bg", entered.reason)
+      ? timeReasonMessage(isPublicLocale(locale) ? locale : defaultLocale, entered.reason)
       : undefined;
   return (
     <div className="mx-auto grid max-w-4xl gap-6 px-gutter py-8">
@@ -66,7 +66,10 @@ export async function AlertRuleScreen({
           <p>
             {copy.expires}:{" "}
             <time dateTime={current.approval.expiresAt.toISOString()}>
-              {formatDateTime(isPublicLocale(locale) ? locale : "bg", current.approval.expiresAt)}
+              {formatDateTime(
+                isPublicLocale(locale) ? locale : defaultLocale,
+                current.approval.expiresAt,
+              )}
             </time>
           </p>
         ) : null}
@@ -135,7 +138,7 @@ export async function AlertRuleScreen({
           id="alert-rule-expiry"
           name="expiresAt"
           label={copy.expiry}
-          locale={isPublicLocale(locale) ? locale : "bg"}
+          locale={isPublicLocale(locale) ? locale : defaultLocale}
           defaultValue={draft?.expiresAt ?? ""}
         />
         <label className="flex items-start gap-3">

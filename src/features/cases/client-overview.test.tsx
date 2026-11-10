@@ -21,6 +21,8 @@ vi.mock("@/server/appointments/service", () => ({
   readAppointment: vi.fn(),
 }));
 vi.mock("../work/screens", () => ({ privateRead: (read: () => Promise<unknown>) => read() }));
+// The Deal path has its own tests (deal-path-screen.test.tsx, path.int.test.ts).
+vi.mock("@/server/cases/path", () => ({ casePath: async () => null }));
 
 const session = { account: { kind: "client", id: "current-client" } } as Session;
 const row = {

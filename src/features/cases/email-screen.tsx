@@ -1,6 +1,6 @@
 import "server-only";
 import { getDb } from "@/db/client";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { calendarEmailFile } from "@/server/appointments/calendar-contract";
 import { caseEmailWorkbench } from "@/server/cases/email";
@@ -62,7 +62,7 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                   { value: "", label: c.noCalendar },
                   ...view.calendarOptions.map((a) => ({
                     value: a.id,
-                    label: `${a.reference} · ${a.state === "cancelled" ? "CANCEL" : "REQUEST"} · ${formatDateTime(isPublicLocale(props.locale) ? props.locale : "bg", a.confirmedStartsAt ?? new Date())}`,
+                    label: `${a.reference} · ${a.state === "cancelled" ? "CANCEL" : "REQUEST"} · ${formatDateTime(isPublicLocale(props.locale) ? props.locale : defaultLocale, a.confirmedStartsAt ?? new Date())}`,
                   })),
                 ],
               },
@@ -148,7 +148,7 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                     <p>
                       {content.calendar.cancelled ? "CANCEL" : "REQUEST"} ·{" "}
                       {formatDateTimeRange(
-                        isPublicLocale(props.locale) ? props.locale : "bg",
+                        isPublicLocale(props.locale) ? props.locale : defaultLocale,
                         content.calendar.startsAt,
                         content.calendar.endsAt,
                       )}
@@ -211,7 +211,7 @@ export async function CaseEmailScreen(props: ScreenProps & { id: string }) {
                                 recordedAt: {
                                   dateTime: approvedAt.toISOString(),
                                   label: formatDateTime(
-                                    isPublicLocale(props.locale) ? props.locale : "bg",
+                                    isPublicLocale(props.locale) ? props.locale : defaultLocale,
                                     approvedAt,
                                   ),
                                 },

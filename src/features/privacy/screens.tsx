@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { ReactNode } from "react";
+import { agencyTimeZone } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { type PublicLocale, publicLocales } from "@/domain/ids";
 import { privacyRequestKinds, privacyRequestMachine } from "@/domain/privacy";
-import { isPublicLocale, localeEndonyms } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, localeEndonyms } from "@/i18n/config";
 import { formatDate } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
 import type { Session } from "@/server/auth/sessions";
@@ -260,7 +261,7 @@ export async function ClientPrivacyScreen({
           </p>
           <p>
             {request.dueAt
-              ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : "bg", request.dueAt)}`
+              ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : defaultLocale, request.dueAt)}`
               : c.awaiting}
           </p>
         </article>
@@ -338,7 +339,7 @@ export async function PreferencesScreen({
         <TextField
           name="timezone"
           label={c.timezone}
-          value={preferences.timezone ?? "Europe/Sofia"}
+          value={preferences.timezone ?? agencyTimeZone}
           required
         />
         <label className="grid gap-2">
@@ -399,7 +400,7 @@ export async function PreferencesScreen({
                 <TextField
                   name="timezone"
                   label={c.timezone}
-                  value={preferences.timezone ?? "Europe/Sofia"}
+                  value={preferences.timezone ?? agencyTimeZone}
                   required
                 />
                 {purpose === "search_alerts" ? (
@@ -572,7 +573,7 @@ export async function StaffPrivacyScreen({
             </p>
             <p>
               {record.dueAt
-                ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : "bg", record.dueAt)}`
+                ? `${c.due}: ${formatDate(isPublicLocale(locale) ? locale : defaultLocale, record.dueAt)}`
                 : c.awaiting}
             </p>
             {next.length ? (

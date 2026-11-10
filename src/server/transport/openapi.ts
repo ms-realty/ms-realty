@@ -3,6 +3,7 @@
 // the OpenAPI 3.1 dialect). Written to docs/api/openapi.json by scripts/openapi.mjs.
 import "server-only";
 import { z } from "zod";
+import { agency } from "@/config/tenant";
 import { AppError, toErrorBody, wireCode } from "../errors";
 import {
   authorizationClasses,
@@ -164,7 +165,7 @@ export function buildOpenApiDocument() {
   return {
     openapi: "3.1.0",
     info: {
-      title: "MS Realty application transport",
+      title: `${agency.name} application transport`,
       version: transportVersion,
       description:
         "Generated from src/server/transport/registry.ts by scripts/openapi.mjs; do not edit. " +

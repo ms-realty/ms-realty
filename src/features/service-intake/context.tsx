@@ -1,6 +1,6 @@
 import type { ServiceRequest } from "@/domain/service-scope";
 import { inquiryReviewCopy } from "@/features/discovery/inquiry-review-copy";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { serviceCopy, serviceStaffCopy } from "./copy";
 export function ServiceContext({
   locale,
@@ -27,7 +27,7 @@ export function ServiceContext({
       {current === false ? <p role="status">{staff ? s.held : c.held}</p> : null}
       {sourceUrl ? (
         <a className="inline-flex min-h-control items-center underline" href={sourceUrl}>
-          {inquiryReviewCopy(isPublicLocale(locale) ? locale : "bg").sourceContext}
+          {inquiryReviewCopy(isPublicLocale(locale) ? locale : defaultLocale).sourceContext}
         </a>
       ) : null}
       {request ? (

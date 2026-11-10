@@ -3,7 +3,7 @@ import { areaBases, factStates, priceBases, pricePeriods } from "@/domain/facts"
 import type { WorkspaceSource } from "@/domain/generative";
 import { currencyCodes } from "@/domain/ids";
 import { discoveryCopy } from "@/features/discovery/copy";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatExactArea, formatNumber } from "@/i18n/format";
 import { FactList, FactRow } from "@/ui/fact-row";
 import { PriceDisplay } from "@/ui/price-display";
@@ -63,7 +63,7 @@ export function WorkspaceListingFacts({
   source: WorkspaceSource;
 }) {
   if (source.type !== "listing" || source.audience !== "approved_public") return null;
-  const language = isPublicLocale(locale) ? locale : "bg",
+  const language = isPublicLocale(locale) ? locale : defaultLocale,
     copy = workspaceCopy(locale),
     facts = copy.listingFacts,
     labels = discoveryCopy(language);

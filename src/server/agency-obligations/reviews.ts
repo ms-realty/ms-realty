@@ -1,6 +1,7 @@
 import "server-only";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
+import { agency } from "@/config/tenant";
 import {
   agencyCaseReviews,
   approvals,
@@ -130,7 +131,7 @@ async function currentWording(db: Executor, versionId: string, lock = false) {
     body.paragraphs.length !== 2 ||
     body.placeId ||
     /[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:\+?\d[\s().-]*){7,}/i.test(
-      [body.title, ...body.paragraphs].join("\n").replaceAll("+359879696870", ""),
+      [body.title, ...body.paragraphs].join("\n").replaceAll(agency.phone.e164, ""),
     )
   )
     throw new AppError("validation_failed");

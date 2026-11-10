@@ -17,7 +17,7 @@ import type { InventoryValues } from "@/features/inventory/editor";
 import { selects } from "@/features/inventory/fields";
 import { safeNext } from "@/features/inventory/next";
 import { savedAckField, savedOperationCookie } from "@/features/inventory/saved-operation";
-import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
 import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
@@ -176,7 +176,10 @@ export async function saveInventory(
           reference: ref,
           recordedAt: {
             dateTime: result.data.completedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.completedAt),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.data.completedAt,
+            ),
           },
           nextStep: copy.next,
           destination: { href: `/${locale}/inventory/${ref}`, label: copy.open },

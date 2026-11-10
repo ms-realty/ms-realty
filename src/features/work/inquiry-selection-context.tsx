@@ -4,6 +4,7 @@ import { currencyCodes, isPublicLocale, type PublicLocale } from "@/domain/ids";
 import { compareCopy } from "@/features/discovery/compare-copy";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { optionLabel } from "@/features/inventory/copy";
+import { defaultLocale } from "@/i18n/config";
 import { formatMoney, formatNumber } from "@/i18n/format";
 import { workCopy } from "./copy";
 
@@ -99,7 +100,7 @@ function summaryValue(
 export function InquirySelectionContext({ context, locale }: { context: unknown; locale: string }) {
   const parsed = snapshotSchema.safeParse(context);
   if (!parsed.success || !parsed.data.selection.length) return null;
-  const publicLocale = isPublicLocale(locale) ? locale : "bg";
+  const publicLocale = isPublicLocale(locale) ? locale : defaultLocale;
   const copy = discoveryCopy(publicLocale);
   const label =
     locale === "bg"

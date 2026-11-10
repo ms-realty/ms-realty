@@ -1,0 +1,104 @@
+{
+  "title": "Der Weg Ihres Immobiliengeschäfts",
+  "lead": "Alle Schritte der Reihe nach, von der ersten Anfrage bis zur Schlüsselübergabe. Ihr Makler hält jeden Schritt fest, sobald er erledigt ist.",
+  "preview": "Die späteren Schritte sind die üblichen für ein solches Geschäft. Ihr Makler bestätigt sie, sobald die Bedingungen vereinbart sind.",
+  "whoActs": "Wer handelt",
+  "expectedBy": "Erwartet bis",
+  "doneOn": "Erledigt am",
+  "brokerNote": "Hinweis Ihres Maklers",
+  "status": {
+    "done": "Erledigt",
+    "current": "Sie sind hier",
+    "next": "Als Nächstes",
+    "upcoming": "Später",
+    "skipped": "Nicht nötig",
+    "not_recorded": "Hier nicht erfasst"
+  },
+  "actors": {
+    "you": "Sie",
+    "buyer": "Der Käufer",
+    "tenant": "Der Mieter",
+    "owner": "Der Eigentümer",
+    "agency": "Die Agentur",
+    "notary": "Der Notar",
+    "lawyer": "Der Anwalt"
+  },
+  "steps": {
+    "request_received": {
+      "label": "Anfrage erhalten",
+      "about": "Die Agentur erhält die Anfrage und benennt einen Makler, der sich darum kümmert."
+    },
+    "needs_agreed": {
+      "label": "Wünsche abgestimmt",
+      "about": "Der Makler schreibt auf, was der Kunde sucht, und der Kunde bestätigt es."
+    },
+    "homes_shortlisted": {
+      "label": "Objekte ausgewählt",
+      "about": "Der Kunde wählt aus den Vorschlägen des Maklers die Objekte, die er sich näher ansehen möchte."
+    },
+    "viewings": {
+      "label": "Besichtigungen",
+      "about": "Der Makler vereinbart Besichtigungen der gewählten Objekte und begleitet den Kunden."
+    },
+    "terms_agreed": {
+      "label": "Bedingungen vereinbart",
+      "about": "Beide Seiten nehmen denselben Preis und dieselben Bedingungen des Angebots an."
+    },
+    "identity_checks": {
+      "label": "Identitätsprüfung",
+      "about": "Die Agentur prüft die Ausweisdokumente aller Beteiligten."
+    },
+    "deposit_preliminary_contract": {
+      "label": "Anzahlung und Vorvertrag",
+      "about": "Käufer und Verkäufer unterzeichnen einen Vorvertrag, und der Käufer zahlt die vereinbarte Anzahlung."
+    },
+    "property_checks": {
+      "label": "Prüfung der Immobilie",
+      "about": "Die Agentur sammelt die Unterlagen zu Eigentum und Belastungen der Immobilie, damit sie vor dem Notartermin geprüft werden können."
+    },
+    "funds_ready": {
+      "label": "Finanzierung steht",
+      "about": "Der Käufer stellt das Geld für den Kauf bereit, aus Ersparnissen oder mit einem Bankkredit."
+    },
+    "notary_deed": {
+      "label": "Notarieller Kaufvertrag",
+      "about": "Ein Notar bereitet den Vertrag vor und liest ihn mit Käufer und Verkäufer durch, bevor sie unterschreiben."
+    },
+    "registration": {
+      "label": "Eintragung",
+      "about": "Der unterzeichnete Vertrag wird auf den Namen des Käufers in das Grundbuch eingetragen."
+    },
+    "keys_handed_over": {
+      "label": "Schlüssel übergeben",
+      "about": "Der Eigentümer übergibt die Schlüssel am vereinbarten Tag."
+    },
+    "lease_signed": {
+      "label": "Mietvertrag unterzeichnet",
+      "about": "Mieter und Vermieter unterzeichnen den Mietvertrag zu den vereinbarten Bedingungen."
+    },
+    "deposit_first_rent": {
+      "label": "Kaution und erste Miete",
+      "about": "Der Mieter zahlt Kaution und erste Miete, und beide Seiten bestätigen den Eingang."
+    },
+    "tax_number": {
+      "label": "Griechische Steuernummer",
+      "about": "Der Käufer erhält eine griechische Steuernummer (AFM), auf die sich die Kaufunterlagen beziehen."
+    },
+    "lawyer_property_checks": {
+      "label": "Prüfung durch den Anwalt",
+      "about": "Der Anwalt des Käufers prüft, wem die Immobilie gehört und ob Schulden darauf lasten."
+    },
+    "contract_signed": {
+      "label": "Vertrag unterzeichnet",
+      "about": "Käufer und Verkäufer unterzeichnen den Vertrag zu den vereinbarten Bedingungen."
+    }
+  },
+  "completed": {
+    "title": "Immobiliengeschäft abgeschlossen",
+    "lead": "Alle Schritte auf diesem Weg sind erledigt, und Ihr Makler hat den Abschluss bestätigt.",
+    "completedOn": "Datum des Vertrags",
+    "reference": "Eintragungs- oder Urkundennummer",
+    "boundary": "Diese Seite zeigt, was die Beteiligten wann getan haben. Sie ist keine rechtliche Bescheinigung.",
+    "outcome": "Über den Geschäftsweg abgeschlossen"
+  }
+}

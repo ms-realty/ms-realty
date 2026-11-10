@@ -1,4 +1,4 @@
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import bg from "../../../messages/bg/caseReview.json" with { type: "json" };
 import de from "../../../messages/de/caseReview.json" with { type: "json" };
 import el from "../../../messages/el/caseReview.json" with { type: "json" };
@@ -13,4 +13,4 @@ import agencyRu from "../../../messages/staff/ru/agency.json" with { type: "json
 export const agencyCopy = (locale: string): typeof agencyBg =>
   ({ bg: agencyBg, en: agencyEn, ru: agencyRu })[locale] ?? agencyEn;
 export const caseReviewCopy = (locale: string): typeof bg =>
-  ({ bg, en, ru, de, nl, el, he })[isPublicLocale(locale) ? locale : "bg"];
+  ({ bg, en, ru, de, nl, el, he })[isPublicLocale(locale) ? locale : defaultLocale];

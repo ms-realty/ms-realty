@@ -5,7 +5,7 @@ import { operations } from "@/db/schema";
 import { inventoryCopy } from "@/features/inventory/copy";
 import { FocusedRows, FocusedState } from "@/features/inventory/focused-state";
 import { translationCopy } from "@/features/inventory/translation-copy";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { requireStaffPage } from "@/server/auth/pages";
 import { inventoryDetail } from "@/server/inventory/commands";
@@ -142,7 +142,7 @@ export default async function InventoryReceiptPage({
         <p>
           {copy.recorded}:{" "}
           <time dateTime={operation.completedAt.toISOString()}>
-            {formatDateTime(isPublicLocale(locale) ? locale : "bg", operation.completedAt)}
+            {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, operation.completedAt)}
           </time>
         </p>
       ) : null}

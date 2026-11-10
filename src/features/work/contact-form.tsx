@@ -2,7 +2,7 @@
 
 import { contactMethodKinds } from "@/domain/parties";
 import { isInstantInput } from "@/domain/time";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { DateTimeField } from "@/ui/date-time-field";
 import { controlClass, errorClass, fieldClass, labelClass } from "@/ui/field-class";
@@ -141,7 +141,7 @@ export function ContactForm({
       }}
       formatValue={(name, value, state) => {
         if (["contactedAt", "dueAt"].includes(name) && isInstantInput(value))
-          return formatDateTime(isPublicLocale(locale) ? locale : "bg", value, {
+          return formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, value, {
             zoneLabel: true,
             seconds: name === "contactedAt",
           });
@@ -211,7 +211,7 @@ export function ContactForm({
               step={1}
               label={copy.contactedAt}
               hint={copy.timeHint}
-              locale={isPublicLocale(locale) ? locale : "bg"}
+              locale={isPublicLocale(locale) ? locale : defaultLocale}
               onValueChange={(value) => form.setValue("contactedAt", value)}
               required
             />
@@ -234,7 +234,7 @@ export function ContactForm({
               {...form.field("dueAt")}
               label={copy.dueAt}
               hint={work.utcHint}
-              locale={isPublicLocale(locale) ? locale : "bg"}
+              locale={isPublicLocale(locale) ? locale : defaultLocale}
               onValueChange={(value) => form.setValue("dueAt", value)}
               required
             />

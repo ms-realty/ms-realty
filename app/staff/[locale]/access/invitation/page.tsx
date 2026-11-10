@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { AccessFrame, SignOutForm } from "@/features/identity/access-frame";
 import { accessErrorMessage, fill, identityCopy } from "@/features/identity/copy";
-import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { inspectStaffInvitation } from "@/server/auth/invitations";
 import { currentStaffAccess, requireAuthHost } from "@/server/auth/pages";
@@ -59,9 +59,13 @@ export default async function InvitationPage({
           <p>
             {fill(c.invitationValidUntil, {
               time: invitation.expiresAt
-                ? formatDateTime(isPublicLocale(locale) ? locale : "bg", invitation.expiresAt, {
-                    zoneLabel: true,
-                  })
+                ? formatDateTime(
+                    isPublicLocale(locale) ? locale : defaultLocale,
+                    invitation.expiresAt,
+                    {
+                      zoneLabel: true,
+                    },
+                  )
                 : "",
             })}
           </p>

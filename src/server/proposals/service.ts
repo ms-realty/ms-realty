@@ -1,12 +1,14 @@
 import "server-only";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
+import { agencyTimeZone } from "@/config/tenant";
 import { approvals, proposalResponses, proposalRevisions, proposals } from "@/db/schema";
 import { guardProposalTransition, proposalMachine } from "@/domain/proposal";
 import { sofiaInstant } from "../appointments/time";
 import { recordAudit } from "../audit";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { assertCan } from "../authz";
+import { ensureCasePath } from "../cases/path";
 import { bumpCase, caseEvent, caseFor } from "../cases/shared";
 import { assertCaseAgreementReady } from "../compliance/agreement-gate";
 import { hashRequest } from "../crypto";
@@ -113,7 +115,7 @@ function terms(
     inclusions: input.inclusions,
     parties: context.snapshot,
     deadlineAt,
-    deadlineTimezone: "Europe/Sofia",
+    deadlineTimezone: agencyTimeZone,
     sourceListingRevisionId: context.published.listingRevisionId,
   };
   return { ...data, termsHash: termsDigest(data) };
@@ -580,6 +582,8 @@ export async function recordProposalDecision(
         },
       });
       await bumpProposal(ctx, proposal);
+      // Terms agreed: the Deal's later steps come into existence from its template (ADR 0013).
+      if (allAgreed) await ensureCasePath(ctx.tx, proposal.caseId);
       await caseEvent(
         ctx,
         "proposal",

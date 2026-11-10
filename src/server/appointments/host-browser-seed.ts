@@ -44,7 +44,7 @@ try {
     { appointmentId: appointment.id, kind: "broker", resourceId: owner.id, during },
     { appointmentId: appointment.id, kind: "property_access", resourceId: propertyId, during },
   ]);
-  if (process.env.MSR_HOST_SEED_PLANNED !== "1")
+  if (process.env.HOST_SEED_PLANNED !== "1")
     await db
       .update(schema.staffMemberships)
       .set({

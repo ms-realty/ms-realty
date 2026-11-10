@@ -10,6 +10,7 @@ import {
 } from "@/db/schema";
 import { type ApprovalKind, approvalCapability } from "@/domain/approval";
 import type { Capability } from "@/domain/capabilities";
+import { sourceLocale } from "@/domain/ids";
 import { type PublicLocale, publicLocales } from "@/i18n/config";
 import type { Session } from "../auth/sessions";
 import { can } from "../authz";
@@ -32,10 +33,9 @@ import {
   readApprovedContent,
 } from "./public";
 
-export const contentTargetLocales = publicLocales.filter((locale) => locale !== "bg") as Exclude<
-  PublicLocale,
-  "bg"
->[];
+export const contentTargetLocales = publicLocales.filter(
+  (locale) => locale !== sourceLocale,
+) as Exclude<PublicLocale, typeof sourceLocale>[];
 const localeSchema = z.enum(["en", "ru", "de", "nl", "el", "he"]);
 const binding = {
   id: z.uuid(),
@@ -102,7 +102,7 @@ export async function readContentLocaleWorkbench(
           ),
         )
     : [];
-  const source = await readApprovedContent(db, page.kind, page.slug, "bg");
+  const source = await readApprovedContent(db, page.kind, page.slug, sourceLocale);
   const sourceReady = Boolean(source && page.currentVersionNumber === page.publishedVersionNumber);
   const sourceCurrent = Boolean(
     sourceReady &&
@@ -155,7 +155,7 @@ export async function readContentLocaleWorkbench(
     sourceReady,
     sourceCurrent,
     boundSource:
-      boundSource?.sourceLocale === "bg" &&
+      boundSource?.sourceLocale === sourceLocale &&
       boundSource.contentHash === current?.sourceVersionHash &&
       hashRequest(boundSource.body) === boundSource.contentHash
         ? boundSource
@@ -173,7 +173,7 @@ async function checkedSource(
 ) {
   if (page.kind === "review") throw new AppError("approval_stale");
   version(page, input.sourceExpectedVersion);
-  const source = await readApprovedContent(db, page.kind, page.slug, "bg");
+  const source = await readApprovedContent(db, page.kind, page.slug, sourceLocale);
   if (
     !source ||
     page.currentVersionNumber !== page.publishedVersionNumber ||

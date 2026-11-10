@@ -1,3 +1,4 @@
+import { agency } from "../../config/tenant";
 import type { LegacyPage } from "./pages";
 
 export type SourceField = { label: string; value: string };
@@ -131,7 +132,7 @@ function cleanSourceLinks(page: LegacyPage) {
       !["https:", "http:", "mailto:", "tel:"].includes(url.protocol) ||
       url.username ||
       url.password ||
-      (url.protocol === "tel:" && url.pathname.replace(/[\s()-]/gu, "") !== "+359879696870") ||
+      (url.protocol === "tel:" && url.pathname.replace(/[\s()-]/gu, "") !== agency.phone.e164) ||
       (/^(?:www\.)?(?:twitter\.com|x\.com|facebook\.com)$/iu.test(url.hostname) &&
         /^\/(?:intent|share|sharer)(?:\/|\.|$)/iu.test(url.pathname)) ||
       /\/cdn-cgi\/l\/email-protection(?:#|$)/u.test(link.url)

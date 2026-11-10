@@ -2,7 +2,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { isInstantInput } from "@/domain/time";
 import { workCopy } from "@/features/work/copy";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import type { ContentPlaceOption } from "@/server/content/commands";
 import { DateTimeField } from "@/ui/date-time-field";
@@ -231,7 +231,9 @@ export function ContentReviewForm({
     <ActionForm
       formatValue={(name, value) =>
         name === "expiresAt" && isInstantInput(value)
-          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
+          ? formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, value, {
+              zoneLabel: true,
+            })
           : value
       }
       initialState={initialState}
@@ -253,7 +255,7 @@ export function ContentReviewForm({
             <DateTimeField
               {...form.field("expiresAt")}
               label={copy.expiry}
-              locale={isPublicLocale(locale) ? locale : "bg"}
+              locale={isPublicLocale(locale) ? locale : defaultLocale}
               onValueChange={(value) => form.setValue("expiresAt", value)}
               required
             />

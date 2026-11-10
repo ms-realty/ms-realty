@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
+import { agencyTimeZone } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import type { QueryParams } from "@/features/discovery/query";
 import {
@@ -158,7 +159,7 @@ export default async function Page({
                   search,
                   terms.version.id,
                   (data.party.contactPreferences as { timezone?: string })?.timezone ??
-                    "Europe/Sofia",
+                    agencyTimeZone,
                 )}
                 action={saveSearchAlert.bind(null, {
                   locale,

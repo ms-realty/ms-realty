@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { workCopy } from "@/features/work/copy";
-import { isPublicLocale, isStaffLocale, localeEndonyms } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale, localeEndonyms } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import {
   listAssistanceRuns,
@@ -149,7 +149,7 @@ export async function AssistanceScreen({
                 </a>{" "}
                 · {aiLabel("run", run.state, locale)} · {aiLabel("task", run.task, locale)} ·{" "}
                 <time dateTime={run.createdAt.toISOString()}>
-                  {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
+                  {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, run.createdAt)}
                 </time>
               </li>
             ))}
@@ -365,7 +365,7 @@ export async function AssistanceRunScreen({
             [
               copy.generated,
               run.generatedAt
-                ? formatDateTime(isPublicLocale(locale) ? locale : "bg", run.generatedAt)
+                ? formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, run.generatedAt)
                 : "—",
             ],
             [copy.costs, run.actualCostMicros ?? copy.unknown],
@@ -421,7 +421,7 @@ export async function JobsScreen({
       <p>
         {copy.checked}:{" "}
         <time dateTime={status.checkedAt}>
-          {formatDateTime(isPublicLocale(locale) ? locale : "bg", status.checkedAt)}
+          {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, status.checkedAt)}
         </time>
       </p>
       <Notice
@@ -438,7 +438,10 @@ export async function JobsScreen({
         <p>
           {aiLabel("reason", status.worker.reason, locale)} ·{" "}
           {status.worker.completedAt
-            ? formatDateTime(isPublicLocale(locale) ? locale : "bg", status.worker.completedAt)
+            ? formatDateTime(
+                isPublicLocale(locale) ? locale : defaultLocale,
+                status.worker.completedAt,
+              )
             : "—"}
         </p>
       </Notice>
@@ -496,7 +499,7 @@ export async function JobsScreen({
                   <td className="p-3">{aiLabel("job", job.state, locale)}</td>
                   <td className="p-3">{job.count}</td>
                   <td className="p-3">
-                    {formatDateTime(isPublicLocale(locale) ? locale : "bg", job.oldest)}
+                    {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, job.oldest)}
                   </td>
                 </tr>
               ))}
@@ -524,7 +527,7 @@ export async function JobsScreen({
               </p>
               {event.code ? <p>{aiLabel("code", event.code, locale)}</p> : null}
               <time dateTime={event.receivedAt.toISOString()}>
-                {formatDateTime(isPublicLocale(locale) ? locale : "bg", event.receivedAt)}
+                {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, event.receivedAt)}
               </time>
               <TechnicalDetails locale={locale}>
                 <bdi>{event.id}</bdi>
@@ -582,7 +585,9 @@ export async function JobsScreen({
               </p>
               {event.code ? <p>{aiLabel("code", event.code, locale)}</p> : null}
               <p>
-                {event.at ? formatDateTime(isPublicLocale(locale) ? locale : "bg", event.at) : "—"}{" "}
+                {event.at
+                  ? formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, event.at)
+                  : "—"}{" "}
                 · {copy.attempts}: {event.attempts}
               </p>
               <TechnicalDetails locale={locale}>

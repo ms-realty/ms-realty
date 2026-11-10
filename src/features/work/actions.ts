@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { requireAuthHost } from "@/server/auth/pages";
@@ -171,7 +171,10 @@ async function perform<V extends FormValues>(
           reference: result.data.reference ?? id,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.data.recordedAt,
+            ),
           },
           nextStep: copy.nextStep,
           destination: { href: path, label: copy.openRecord },
@@ -285,7 +288,7 @@ async function perform<V extends FormValues>(
                     ? decisionCopy.declineReasonRequired
                     : decisionCopy.withdrawReasonRequired
                   : reason
-                    ? (timeReasonMessage(isPublicLocale(locale) ? locale : "bg", reason) ??
+                    ? (timeReasonMessage(isPublicLocale(locale) ? locale : defaultLocale, reason) ??
                       copy.reasons[reason] ??
                       copy.invalid)
                     : copy.invalid;

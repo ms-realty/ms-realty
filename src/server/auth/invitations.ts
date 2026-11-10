@@ -15,6 +15,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
+import { agency } from "@/config/tenant";
 import {
   caseParticipants,
   cases,
@@ -1001,7 +1002,7 @@ export async function viewClientInvitation(
   return {
     status: state,
     details: {
-      inviterName: inviter?.name ?? "MS Realty",
+      inviterName: inviter?.name ?? agency.name,
       caseReference: target.reference,
       caseTitle: target.title,
       role: scope.role,

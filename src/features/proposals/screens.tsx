@@ -2,9 +2,10 @@ import { workflowLabel } from "@/i18n/workflow-labels";
 import "server-only";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { defaultCurrency } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { currencyCodes } from "@/domain/ids";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatExactMoney, formatMoneyInput } from "@/i18n/money";
 import { moneyCopy } from "@/i18n/money-copy";
 import { readCase } from "@/server/cases/queries";
@@ -92,7 +93,7 @@ function ProposalForm(
 }
 function termFields(locale: string): WorkflowField[] {
   const c = proposalCopy(locale);
-  const money = moneyCopy(isPublicLocale(locale) ? locale : "bg");
+  const money = moneyCopy(isPublicLocale(locale) ? locale : defaultLocale);
   return [
     {
       name: "amount",
@@ -208,7 +209,7 @@ export async function NewProposalScreen(
         values={{
           interestId: props.interestId,
           clientPartyId: context.buyers[0]?.partyId ?? "",
-          currency: "EUR",
+          currency: defaultCurrency,
           period: context.purpose === "sale" ? "total" : "month",
         }}
       />
@@ -228,7 +229,11 @@ function Terms({ row, locale }: { row: Revision; locale: string }) {
       </TechnicalDetails>
       <p className="text-subheading font-semibold">
         <bdi>
-          {formatExactMoney(isPublicLocale(locale) ? locale : "bg", row.amountMinor, row.currency)}
+          {formatExactMoney(
+            isPublicLocale(locale) ? locale : defaultLocale,
+            row.amountMinor,
+            row.currency,
+          )}
         </bdi>{" "}
         · {row.period === "month" ? c.month : c.total}
       </p>
@@ -275,7 +280,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
     copy = caseCopy(props.locale),
     row = view.revision,
     staff = props.session.account.kind === "staff";
-  const counter = counterofferCopy(isPublicLocale(props.locale) ? props.locale : "bg");
+  const counter = counterofferCopy(isPublicLocale(props.locale) ? props.locale : defaultLocale);
   const recoveryCopy = proposalReauthCopy(props.locale);
   const recovered = staff
     ? { status: "absent" as const }
@@ -525,7 +530,7 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
                 .map((p) => p.partyId)
                 .join("\n"),
               amount: formatMoneyInput(
-                isPublicLocale(props.locale) ? props.locale : "bg",
+                isPublicLocale(props.locale) ? props.locale : defaultLocale,
                 row.amountMinor,
                 row.currency,
               ),

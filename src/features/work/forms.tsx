@@ -1,7 +1,7 @@
 "use client";
 
 import { isInstantInput } from "@/domain/time";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { workflowLabel } from "@/i18n/workflow-labels";
 import { DateTimeField } from "@/ui/date-time-field";
@@ -86,7 +86,9 @@ export function AcceptForm({
       kind="accept"
       formatValue={(name, value) =>
         name === "dueAt" && isInstantInput(value)
-          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
+          ? formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, value, {
+              zoneLabel: true,
+            })
           : value
       }
       draftCopy={copy.draft}
@@ -110,7 +112,7 @@ export function AcceptForm({
           <DateTimeField
             {...form.field("dueAt")}
             label={copy.dueAt}
-            locale={isPublicLocale(locale) ? locale : "bg"}
+            locale={isPublicLocale(locale) ? locale : defaultLocale}
             onValueChange={(value) => form.setValue("dueAt", value)}
             hint={copy.utcHint}
             required
@@ -300,7 +302,9 @@ export function TaskForm({
         if (name === "state")
           return copy.states[value as keyof typeof copy.states] ?? workflowLabel(value, locale);
         return name === "followUpAt" && isInstantInput(value)
-          ? formatDateTime(isPublicLocale(locale) ? locale : "bg", value, { zoneLabel: true })
+          ? formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, value, {
+              zoneLabel: true,
+            })
           : value;
       }}
       action={action}
@@ -330,7 +334,7 @@ export function TaskForm({
             {...form.field("followUpAt")}
             label={copy.followUpAt}
             hint={copy.utcHint}
-            locale={isPublicLocale(locale) ? locale : "bg"}
+            locale={isPublicLocale(locale) ? locale : defaultLocale}
             onValueChange={(value) => form.setValue("followUpAt", value)}
             required={form.values.state === "waiting"}
           />

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { workCopy } from "@/features/work/copy";
-import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import type { Session } from "@/server/auth/sessions";
 import { getEnv } from "@/server/config/env";
@@ -258,7 +258,7 @@ export async function ContentWorkbenchScreen({
         ))}
         <p className="text-caption">
           {current.reviewedAt
-            ? `${copy.reviewDate}: ${formatDateTime(isPublicLocale(locale) ? locale : "bg", current.reviewedAt)}`
+            ? `${copy.reviewDate}: ${formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, current.reviewedAt)}`
             : copy.missingReview}
         </p>
       </section>
@@ -296,11 +296,17 @@ export async function ContentWorkbenchScreen({
                 {contentLabel("review", decision.kind, locale)} ·{" "}
                 {contentLabel("state", decision.state, locale)} ·{" "}
                 {decision.decidedAt
-                  ? formatDateTime(isPublicLocale(locale) ? locale : "bg", decision.decidedAt)
+                  ? formatDateTime(
+                      isPublicLocale(locale) ? locale : defaultLocale,
+                      decision.decidedAt,
+                    )
                   : copy.none}{" "}
                 · {copy.until}:{" "}
                 {decision.expiresAt
-                  ? formatDateTime(isPublicLocale(locale) ? locale : "bg", decision.expiresAt)
+                  ? formatDateTime(
+                      isPublicLocale(locale) ? locale : defaultLocale,
+                      decision.expiresAt,
+                    )
                   : copy.none}
                 <p className="text-caption">{decision.decisionNote}</p>
                 <TechnicalDetails locale={locale}>
@@ -367,7 +373,10 @@ export async function ContentOperationScreen({
           referenceLabel={formCopy.reference}
           recordedAt={{
             dateTime: result.recordedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.recordedAt),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.recordedAt,
+            ),
           }}
           recordedAtLabel={formCopy.recordedAt}
         >

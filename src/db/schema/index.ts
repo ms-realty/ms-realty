@@ -9,6 +9,7 @@ export * from "./collaboration";
 export * from "./complaints";
 export * from "./compliance";
 export * from "./coordination";
+export * from "./deal-path";
 export * from "./enums";
 export * from "./files";
 export * from "./generative";

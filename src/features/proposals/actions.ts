@@ -3,7 +3,13 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { isCurrencyCode } from "@/domain/ids";
 import { offsetInputValue } from "@/domain/time";
-import { agencyTimeZone, isPublicLocale, isRoutableLocale, isStaffLocale } from "@/i18n/config";
+import {
+  agencyTimeZone,
+  defaultLocale,
+  isPublicLocale,
+  isRoutableLocale,
+  isStaffLocale,
+} from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { moneyCopy } from "@/i18n/money-copy";
 import { timeReasonMessage } from "@/i18n/time-copy";
@@ -140,7 +146,11 @@ export async function proposalAction(
         clientPartyId: values.clientPartyId ?? "",
         additionalPartyIds: (values.additionalPartyIds ?? "").split("\n").filter(Boolean),
         amountMinor: isCurrencyCode(currency)
-          ? amountToMinor(values.amount ?? "", isPublicLocale(locale) ? locale : "bg", currency)
+          ? amountToMinor(
+              values.amount ?? "",
+              isPublicLocale(locale) ? locale : defaultLocale,
+              currency,
+            )
           : Number.NaN,
         currency: values.currency as "EUR",
         period: values.period as "total",
@@ -222,9 +232,13 @@ export async function proposalAction(
           reference: result.data.reference,
           recordedAt: {
             dateTime: result.data.recordedAt,
-            label: formatDateTime(isPublicLocale(locale) ? locale : "bg", result.data.recordedAt, {
-              zoneLabel: context === "client",
-            }),
+            label: formatDateTime(
+              isPublicLocale(locale) ? locale : defaultLocale,
+              result.data.recordedAt,
+              {
+                zoneLabel: context === "client",
+              },
+            ),
           },
           nextStep: c.nextStep,
           destination: { href: `/${locale}/proposals/${result.data.id}`, label: c.back },
@@ -255,9 +269,9 @@ export async function proposalAction(
           field,
           [
             field === "amount"
-              ? moneyCopy(isPublicLocale(locale) ? locale : "bg").invalid
+              ? moneyCopy(isPublicLocale(locale) ? locale : defaultLocale).invalid
               : (timeReasonMessage(
-                  isPublicLocale(locale) ? locale : "bg",
+                  isPublicLocale(locale) ? locale : defaultLocale,
                   error.fieldErrors?.[field]?.[0],
                 ) ?? c.invalid),
           ],

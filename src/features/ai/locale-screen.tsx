@@ -2,7 +2,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { getDb } from "@/db/client";
 import { DiscoveryPage } from "@/features/discovery/page";
-import { isPublicLocale, localeEndonyms, publicLocales } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, localeEndonyms, publicLocales } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { listLocaleAssistanceRuns, readLocaleAssistanceOperation } from "@/server/ai/assistance";
 import { assistanceAvailability } from "@/server/ai/config";
@@ -152,7 +152,7 @@ export async function LocaleAssistanceScreen({
                   {common.open}
                 </a>{" "}
                 · {aiLabel("run", run.state, locale)} ·{" "}
-                {formatDateTime(isPublicLocale(locale) ? locale : "bg", run.createdAt)}
+                {formatDateTime(isPublicLocale(locale) ? locale : defaultLocale, run.createdAt)}
               </li>
             ))}
           </ul>

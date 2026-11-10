@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { publicLocales } from "@/domain/ids";
+import { defaultLocale } from "@/i18n/config";
 
 export const legacyHosts = ["makler-realty.com", "makler-realty.ru"] as const;
 export const primaryScopes = [
@@ -76,7 +78,7 @@ export function sourceIdentity(raw: string) {
 }
 
 export function sourceLocale(raw: string, recorded?: string): string | null {
-  const supported = ["bg", "en", "ru", "de", "nl", "el", "he"];
+  const supported: readonly string[] = publicLocales;
   if (recorded)
     return supported.includes(recorded.split(/[-_]/)[0] ?? "")
       ? (recorded.split(/[-_]/)[0] ?? null)
@@ -87,7 +89,7 @@ export function sourceLocale(raw: string, recorded?: string): string | null {
     ? prefix
     : identity.host.endsWith(".ru")
       ? "ru"
-      : "bg";
+      : defaultLocale;
 }
 
 // Exact COM taxonomy identities whose retained responses have the same empty results column.

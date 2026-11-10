@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { agency } from "@/config/tenant";
 import { LocaleSwitcher } from "@/features/shell/language-switcher";
 import { isStaffLocale, staffLocales } from "@/i18n/config";
 import { NativeForm } from "@/ui/form/native-form";
@@ -27,7 +28,7 @@ export async function AccessFrame({
     <Root className="mx-auto flex w-full max-w-prose flex-col gap-6 px-gutter py-12 lg:px-gutter-wide">
       {standalone ? (
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <Image src="/brand/logo-ms-realty.png" alt="MS Realty" width={86} height={44} priority />
+          <Image src={agency.logoPath} alt={agency.name} width={86} height={44} priority />
           {locale && isStaffLocale(locale) && workspace ? (
             <LocaleSwitcher
               locale={locale}

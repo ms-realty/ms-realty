@@ -2,6 +2,8 @@
 // worded only where the server returned it (`confirmedCriteria[]`, `unconfirmed[]`, `violated[]`).
 // Listing values come from the public card; what the client wants is labelled as such and is
 // never presented as a listing fact. Nothing here derives a fit.
+
+import { defaultCurrency } from "@/config/tenant";
 import type { Money } from "@/domain/facts";
 import { isPublicLocale, type PublicLocale } from "@/i18n/config";
 import { factFieldLabel } from "@/i18n/fact-labels";
@@ -49,7 +51,7 @@ export function matchingPhrases(
   const pl: PublicLocale = isPublicLocale(locale) ? locale : "en";
   const f = c.fact;
   const money = (amountMinor: number) =>
-    formatMoney(pl, amountMinor, criteria.price?.currency ?? "EUR");
+    formatMoney(pl, amountMinor, criteria.price?.currency ?? defaultCurrency);
   /** «до 130 000 €» · «от 80 000 € до 130 000 €» · «от 80 000 €». */
   const span = (r: Range, word: (value: number) => string) =>
     r.min !== undefined && r.max !== undefined

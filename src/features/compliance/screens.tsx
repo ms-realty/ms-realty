@@ -1,9 +1,10 @@
 import "server-only";
 import { and, eq, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { jurisdictionCodes, jurisdictionProfiles } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { caseParticipants, operations, parties, proposalRevisions, proposals } from "@/db/schema";
-import { isPublicLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime } from "@/i18n/format";
 import { can } from "@/server/authz";
 import { caseFor } from "@/server/cases/shared";
@@ -270,7 +271,7 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
     : [];
   const blank = { value: "", label: c.choose };
   const changed = (date: Date) =>
-    `${c.lastChanged}: ${formatDateTime(isPublicLocale(props.locale) ? props.locale : "bg", date)}`;
+    `${c.lastChanged}: ${formatDateTime(isPublicLocale(props.locale) ? props.locale : defaultLocale, date)}`;
   const opts = (values: string[]) => [
     blank,
     ...values.map((value) => ({ value, label: c.values[value as keyof typeof c.values] ?? value })),
@@ -379,8 +380,10 @@ export async function ProcessScreen(props: ScreenProps & { id: string }) {
               field("documentVersionId", "select", documents("process_policy")),
               field("country", "select", [
                 blank,
-                { value: "BG", label: "България" },
-                { value: "GR", label: "Ελλάδα" },
+                ...jurisdictionCodes.map((code) => ({
+                  value: code,
+                  label: jurisdictionProfiles[code].nativeName,
+                })),
               ]),
               field("transaction", "select", opts(["sale", "rent"])),
               field("participantCategory", "select", opts(["eu", "non_eu", "mixed", "unknown"])),

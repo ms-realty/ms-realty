@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { isPublicLocale, isStaffLocale } from "@/i18n/config";
+import { defaultLocale, isPublicLocale, isStaffLocale } from "@/i18n/config";
 import { timeReasonMessage } from "@/i18n/time-copy";
 import { changeStaffAbsence, readStaffAbsence } from "@/server/auth/absence";
 import { requireAuthHost } from "@/server/auth/pages";
@@ -148,7 +148,7 @@ export async function absenceAction(
               f,
               [
                 timeReasonMessage(
-                  isPublicLocale(locale) ? locale : "bg",
+                  isPublicLocale(locale) ? locale : defaultLocale,
                   error.fieldErrors?.[f]?.[0],
                 ) ?? c.invalid,
               ],

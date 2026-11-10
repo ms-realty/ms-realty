@@ -2,6 +2,7 @@ import "server-only";
 import { parseAbsolute } from "@internationalized/date";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
+import { jurisdictionCodes, jurisdictionTimeZones } from "@/config/tenant";
 import {
   caseParticipants,
   caseProcessItems,
@@ -39,13 +40,13 @@ const envelope = { operationId: commandEnvelope.operationId };
 const policySchema = z.object({
   ...envelope,
   title: text.max(200),
-  country: z.enum(["BG", "GR"]),
+  country: z.enum(jurisdictionCodes),
   transaction: z.enum(["sale", "rent"]),
   participantCategory: z.enum(["eu", "non_eu", "mixed", "unknown"]),
   documentVersionId: z.uuid(),
   items: processItemsSchema,
   withdrawalDays: z.int().min(0).max(365),
-  timezone: z.enum(["Europe/Sofia", "Europe/Athens"]),
+  timezone: z.enum(jurisdictionTimeZones),
   expressStartRequired: z.boolean(),
   retentionDays: z.int().min(1).max(36500),
   professionalName: text.max(200),

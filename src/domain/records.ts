@@ -22,7 +22,7 @@ export const contentPageKinds = [
 ] as const;
 
 /** Legacy URL decisions recorded in data/legacy/url-decisions.json (architecture §18.1). */
-export const legacyDomains = ["makler-realty.com", "makler-realty.ru"] as const;
+export { legacyDomains } from "../config/tenant";
 export const legacyUrlDecisions = ["retain_200", "redirect_301", "approved_410"] as const;
 
 /** Staged imports (architecture §13, AT55). */

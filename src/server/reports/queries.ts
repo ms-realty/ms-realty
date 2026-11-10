@@ -2,6 +2,7 @@
 import "server-only";
 import { and, asc, eq, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { agencyTimeZone } from "@/config/tenant";
 import {
   appointments,
   caseStageHistory,
@@ -435,7 +436,7 @@ export async function readReports(
         filter,
         from,
         asOf: now,
-        timezone: "Europe/Sofia",
+        timezone: agencyTimeZone,
         metrics,
         response: response
           ? {
