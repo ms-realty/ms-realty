@@ -148,5 +148,5 @@ writes no evidence file.
   human approves each before it is relied on for indexing or claims.
 - The route is `POST /{locale}/butler/answer`. Without JavaScript it redirects back to the
   listing page with `?butler=<receipt>#ask-butler`; with JavaScript the same post returns JSON.
-- Migration `0041_butler_answers` creates `butler_answers`; the number is renumbered at
+- Migration `0043_butler_answers` creates `butler_answers`; the number is renumbered at
   integration with the other branches.

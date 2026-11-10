@@ -108,8 +108,9 @@ it("acknowledges an e-mail inquiry once, in the site language, with the listing 
   const all = JSON.stringify(row) + JSON.stringify(rendered);
   for (const secret of ["Private synthetic message", "Test Visitor", "lift"])
     expect(all).not.toContain(secret);
-  // No promise of a reply time: the operating policy records none.
-  expect(rendered?.text).not.toMatch(/\d+\s*(h|hours|часа|ч\.)/i);
+  // No promise of a reply time: the operating policy records none. The receipt link carries a
+  // random token, so it is left out of the prose being checked.
+  expect(rendered?.text?.replace(/https?:\/\/\S+/g, "")).not.toMatch(/\d+\s*(h|hours|часа|ч\.)/i);
 
   // A retry of the same submission is a replay: still one acknowledgement.
   const replay = await submitInquiry(t.db, input, { ip: ip(), receiptSession: session });
