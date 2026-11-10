@@ -1,7 +1,7 @@
 # ADR 0015 — Terms agreed by one recorded decision; legal duties are steps on the Deal path
 
 Status: accepted (owner decision). Implemented on `claude/agree-in-one-decision` with migration
-`0040_agree_in_one_decision`. Builds on ADR 0011 §4 (one decision per outcome) and ADR 0013 (the
+`0042_agree_in_one_decision` (regenerated after the publication and media merges). Builds on ADR 0011 §4 (one decision per outcome) and ADR 0013 (the
 Deal path). Where this ADR and ADR 0008 §5 or ADR 0013 disagree for a brand on the
 `staff_attestation` policy, this ADR wins.
 
@@ -136,6 +136,35 @@ review and show-to-parties steps fold under "Other ways to continue"; "Add a hom
 is open on a Deal without homes and folds away once there is one; each shortlisted home has
 "Make a proposal". Native forms that work without JavaScript.
 
+### 7. Recorded agreement reaches the clients
+
+`recordAgreement` sends one client notice, `proposal.agreed`, through `notifyProposalChange` in
+the same transaction. It has its own switch in `serviceNotifications` and copy in the seven public
+locales. It names no price or terms: it says the broker recorded that both sides agreed and links
+to the proposal. The event key is the revision, so a retry or a second record on the same revision
+sends nothing more; the broker who made the change gets no "client accepted" notice.
+
+### 8. A private page for a home on the client's own Deal
+
+A participant reads a home on their own Deal at `/properties/{deal}/homes/{reference}` in the
+client area (`src/server/cases/deal-home.ts`): the same title, text, facts and photos the broker
+sees as what the public will see, only while the participation is live. It shows no internal notes
+and no seller, no address finer than the property's approved public precision, and only photos a
+person has already cleared for the public. A link to a home inside the client's Deal goes to this
+page, and to the public page only when the home is published in the client's language.
+
+### 9. One recorded fact for both sides of an agreement
+
+The agreed proposal lives on the buyer's or tenant's Deal. The seller's or landlord's Deal reads
+"terms agreed" and the later shared steps from it (`src/server/cases/deal-link.ts`): the broker
+records each fact once, on either Deal page, and both Deals complete together with one completion
+date. Only the brokerage contract step stays per Deal, because each side is the agency's own
+client with its own contract. Chosen over copying the steps to the seller's Deal (double entry, and
+two records that can disagree) and over a seller-side proposal (a second negotiation). Neither side
+sees the other's identity, messages, notes or documents: the owner side reads only the agreed
+proposal's step state and dates. A shared step takes no client note or document, so nothing one
+side wrote can reach the other.
+
 ## Consequences
 
 - A small agency reaches "terms agreed" with one recorded decision and completes a Deal with
@@ -144,5 +173,5 @@ is open on a Deal without homes and folds away once there is one; each shortlist
   the reviewed process was removed.
 - Existing Deals whose path was recorded before this ADR keep their steps without the brokerage
   contract step; their identity checks follow the same skip and completion rules.
-- A broker's pick of a home that is not published still links the client to the public page,
-  which does not show it; the client link needs a private listing view (follow-up).
+- A broker's pick of a home that is not published is read by its participant on a private page
+  (section 8), not on the public page, which does not show it.
