@@ -6,6 +6,7 @@ import en from "../messages/en/errors.json" with { type: "json" };
 import he from "../messages/he/errors.json" with { type: "json" };
 import nl from "../messages/nl/errors.json" with { type: "json" };
 import ru from "../messages/ru/errors.json" with { type: "json" };
+import { agency, isRtlLocale } from "../src/config/tenant";
 import { isPublicLocale, sourceLocale } from "../src/domain/ids";
 
 const copy = { bg, de, el, en, he, nl, ru };
@@ -71,6 +72,6 @@ export async function withUnavailableDocument(
   );
   // An empty href reloads this document, preserving its path/query without reflecting a token
   // into HTML. It is always GET: a previous save/send can only be retried from its receipt.
-  const html = `<!DOCTYPE html><html lang="${locale}" dir="${locale === "he" ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>${escapeHtml(text.unavailable.title)} · MS Realty</title><style>${style}</style></head><body><header><bdi>MS Realty</bdi></header><main id="main-content"><h1>${escapeHtml(text.unavailable.title)}</h1><p>${escapeHtml(text.unavailable.body)}</p><a href="">${escapeHtml(text.unavailable.retry)}</a><p class="receipt">${escapeHtml(text.recovery.actionOutcome)}</p></main></body></html>`;
+  const html = `<!DOCTYPE html><html lang="${locale}" dir="${isRtlLocale(locale) ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>${escapeHtml(text.unavailable.title)} · ${agency.name}</title><style>${style}</style></head><body><header><bdi>${agency.name}</bdi></header><main id="main-content"><h1>${escapeHtml(text.unavailable.title)}</h1><p>${escapeHtml(text.unavailable.body)}</p><a href="">${escapeHtml(text.unavailable.retry)}</a><p class="receipt">${escapeHtml(text.recovery.actionOutcome)}</p></main></body></html>`;
   return new Response(html, { status: 503, headers });
 }

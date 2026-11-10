@@ -2,6 +2,8 @@
 // A public locale is routable when enabled. It is indexable only when it is the editorial
 // source locale, or when a recorded human approval exists AND its catalog was human-reviewed.
 // `indexable` is never a configurable field: it is derived from approvals below.
+
+import { agencyTimeZone, defaultStaffLocale, displayLocales, isRtlLocale } from "@/config/tenant";
 import type { Approval } from "@/domain/approval";
 import {
   isPublicLocale,
@@ -14,37 +16,24 @@ import {
 import catalogStatus from "../../messages/_status.json" with { type: "json" };
 
 export type { PublicLocale, StaffLocale };
-export { isPublicLocale, publicLocales, staffLocales };
+export {
+  agencyTimeZone,
+  defaultStaffLocale,
+  displayLocales,
+  isPublicLocale,
+  publicLocales,
+  staffLocales,
+};
 
 export const defaultLocale = sourceLocale;
-export const defaultStaffLocale: StaffLocale = "bg";
-
-/** The agency's time zone; every date shown to people is formatted in an explicit zone. */
-export const agencyTimeZone = "Europe/Sofia";
 
 export function isStaffLocale(value: string): value is StaffLocale {
   return (staffLocales as readonly string[]).includes(value);
 }
 
 export function localeDirection(locale: PublicLocale): "ltr" | "rtl" {
-  return locale === "he" ? "rtl" : "ltr";
+  return isRtlLocale(locale) ? "rtl" : "ltr";
 }
-
-/**
- * The regional tag each route locale formats with: dates, numbers and money in
- * src/i18n/format.ts and React Aria's built-in strings (src/ui/locale-provider.tsx). A bare
- * language would leave the region to the runtime (en means US dates, he may lack Israeli
- * conventions); the agency's audience is European and Israeli.
- */
-export const displayLocales: Record<PublicLocale, string> = {
-  bg: "bg-BG",
-  en: "en-GB",
-  ru: "ru-RU",
-  de: "de-DE",
-  nl: "nl-NL",
-  el: "el-GR",
-  he: "he-IL",
-};
 
 export function displayLocale(locale: PublicLocale): string {
   return displayLocales[locale];

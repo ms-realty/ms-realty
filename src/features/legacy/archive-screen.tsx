@@ -1,4 +1,5 @@
 import { discoveryCopy } from "@/features/discovery/copy";
+import { brandPhone } from "@/features/shell/agency";
 import { legacyMediaPath } from "@/server/legacy/media";
 import type { LegacyPage } from "@/server/legacy/pages";
 import { presentLegacyPage } from "@/server/legacy/presentation";
@@ -48,8 +49,8 @@ export function ArchiveScreen({ page }: { page: LegacyPage }) {
               <bdi>{page.listing.reference}</bdi>
             </p>
           ) : null}
-          <a href="tel:+359879696870" className={buttonClass("primary", "w-full flex-wrap")}>
-            <span>{copy.call}</span> <bdi>+359879696870</bdi>
+          <a href={`tel:${brandPhone.e164}`} className={buttonClass("primary", "w-full flex-wrap")}>
+            <span>{copy.call}</span> <bdi>{brandPhone.e164}</bdi>
           </a>
           <a
             href={`/${page.locale}/properties`}

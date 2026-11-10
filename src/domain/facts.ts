@@ -1,4 +1,5 @@
 // Facts with explicit states and provenance, money, area and location (architecture §4.2).
+import { defaultCurrency, legacyCurrency } from "../config/tenant";
 import type { CurrencyCode } from "./ids";
 import { isCurrencyCode } from "./ids";
 
@@ -118,8 +119,8 @@ export function money(
   return { amountMinor, currency, period, basis };
 }
 
-/** Council fixed conversion rate: 1 EUR = 1.95583 BGN (Bulgaria adopted the euro 2026-01-01). */
-export const bgnPerEur = { numerator: 195_583n, denominator: 100_000n } as const;
+/** The fixed legal rate of the former national currency into the default one (src/config/tenant.ts). */
+export const bgnPerEur = legacyCurrency.perDefaultUnit;
 
 export interface PresentedMoney {
   readonly amountMinor: number;
@@ -134,11 +135,11 @@ export interface PresentedMoney {
  */
 export function presentInEuro(amount: Pick<Money, "amountMinor" | "currency">): PresentedMoney {
   const original = { amountMinor: amount.amountMinor, currency: amount.currency };
-  if (amount.currency !== "BGN") return { ...original, original };
+  if (amount.currency !== legacyCurrency.code) return { ...original, original };
   const { numerator, denominator } = bgnPerEur;
   const scaled = BigInt(amount.amountMinor) * denominator * 2n;
   const eurMinor = (scaled / numerator + 1n) / 2n;
-  return { amountMinor: Number(eurMinor), currency: "EUR", original };
+  return { amountMinor: Number(eurMinor), currency: defaultCurrency, original };
 }
 
 // Area. Bases are never compared or substituted for each other.

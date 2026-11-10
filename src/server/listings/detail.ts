@@ -5,6 +5,7 @@
 // with offered alternatives, instead of being dressed up as an offer.
 import "server-only";
 import { and, eq } from "drizzle-orm";
+import { agency } from "@/config/tenant";
 import { currentPublications, listings } from "@/db/schema";
 import type { Fact, FactState, ListingPurpose } from "@/domain/facts";
 import { type PublicLocale, parseReference } from "@/domain/ids";
@@ -30,7 +31,7 @@ import type {
 } from "./view-models";
 
 /** The agency's truthful identity until a responsible person is assigned and approved. */
-export const agencyTeamLabel = "MS Realty";
+export const agencyTeamLabel = agency.name;
 
 const maxAlternatives = 3;
 

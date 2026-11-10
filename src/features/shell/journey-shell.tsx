@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
+import { agency } from "@/config/tenant";
 import { PrivatePageGuard } from "@/features/identity/private-page-guard";
 import { type PublicLocale, routableLocales } from "@/i18n/config";
 import { homePaths } from "@/server/config/hosts";
@@ -38,7 +39,7 @@ export async function JourneyShell({
       className="inline-flex min-h-control shrink-0 items-center rounded-control"
     >
       <Image
-        src="/brand/logo-ms-realty.png"
+        src={agency.logoPath}
         alt=""
         width={86}
         height={44}

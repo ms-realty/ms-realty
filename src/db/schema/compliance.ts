@@ -13,6 +13,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { defaultCurrency } from "../../config/tenant";
 import { createdAt, id, instant, mutable } from "./columns";
 import { documentVersions, proposalRevisions } from "./coordination";
 import { principals } from "./identity";
@@ -252,7 +253,7 @@ export const commissionRecords = pgTable(
       .notNull()
       .references(() => serviceAgreements.id),
     amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
-    currency: text("currency").notNull().default("EUR"),
+    currency: text("currency").notNull().default(defaultCurrency),
     invoiceReference: text("invoice_reference").notNull(),
     recordedById: uuid("recorded_by_id")
       .notNull()

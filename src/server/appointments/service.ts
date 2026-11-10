@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, lte, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
+import { appointmentsConfiguredIn } from "@/config/tenant";
 import {
   appointmentParticipants,
   appointmentResources,
@@ -169,7 +170,8 @@ export async function requestPhotography(db: Executor, session: Session, raw: un
       listingId: listing.id,
       propertyId: listing.propertyId,
     });
-    if (context.property.country !== "BG") throw new AppError("transition_denied");
+    if (!appointmentsConfiguredIn(context.property.country))
+      throw new AppError("transition_denied");
     await requireAvailableStaff(tx, live.account.id, lock);
     return { live, listing };
   };
@@ -272,10 +274,10 @@ export async function requestAppointment(
         .select()
         .from(properties)
         .where(eq(properties.id, listing.propertyId));
-      if (property?.country !== "BG")
+      if (!property || !appointmentsConfiguredIn(property.country))
         throw new AppError("validation_failed", {
           fieldErrors: {
-            preferredWindow: ["This scheduling workflow is configured for Bulgaria only."],
+            preferredWindow: ["This scheduling workflow is not configured for this country."],
           },
         });
       const [principal] = await ctx.tx
@@ -520,7 +522,8 @@ export async function arrangeAppointment(
                 row.photographyScope && row.photographyScope.length >= 10,
               ),
               propertyWorkContextConfirmed: Boolean(
-                propertyWork?.property.country === "BG" &&
+                propertyWork &&
+                  appointmentsConfiguredIn(propertyWork.property.country) &&
                   propertyWork.listing.propertyId === row.propertyId,
               ),
               hostAvailable,

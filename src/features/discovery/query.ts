@@ -1,3 +1,4 @@
+import { defaultCurrency } from "@/config/tenant";
 import type { PublicLocale } from "@/i18n/config";
 
 export type QueryParams = Record<string, string | string[] | undefined>;
@@ -51,7 +52,7 @@ export function searchInput(locale: PublicLocale, filters: Filters, cursor?: str
     ...(filters.minPrice || filters.maxPrice
       ? {
           price: {
-            currency: filters.currency || "EUR",
+            currency: filters.currency || defaultCurrency,
             min: number(filters.minPrice, 100),
             max: number(filters.maxPrice, 100),
           },
