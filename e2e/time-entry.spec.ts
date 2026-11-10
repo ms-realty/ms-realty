@@ -194,11 +194,14 @@ for (const javaScriptEnabled of [true, false]) {
       // The enhanced receipt is asserted below. Before hydration, the same valid command
       // follows the native redirect directly to its current record instead.
       await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
+      // ADR 0015: the separate review and submit steps sit behind the one decision.
+      await page.getByText("Other ways to continue", { exact: true }).click();
       await page.getByLabel(proposal.reviewCheck, { exact: true }).check();
       await page.getByRole("button", { name: proposal.review, exact: true }).click();
       await recorded(page);
       await page.getByRole("link", { name: "Open current record", exact: true }).click();
       await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
+      await page.getByText("Other ways to continue", { exact: true }).click();
       await page.getByLabel(proposal.submitCheck, { exact: true }).check();
       await page.getByRole("button", { name: proposal.submit, exact: true }).click();
       await recorded(page);

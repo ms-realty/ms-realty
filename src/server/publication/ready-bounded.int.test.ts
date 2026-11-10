@@ -1,6 +1,7 @@
 // The "Ready to publish" view and its counts are bounded: a few hundred unpublished listings
 // cost one page of work per request, not one full view for every listing (ADR 0012).
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import * as schema from "@/db/schema";
@@ -114,6 +115,38 @@ describe("Ready to publish stays bounded however many listings wait", () => {
     });
     const page = await readyToPublish(t.db, broker.actor, { query: f.reference });
     expect(page.rows[0]?.photoCount).toBe(3);
+  });
+
+  it("leaves out a listing whose view cannot be opened instead of failing the whole page", async () => {
+    // A reference the view cannot look up (it reads references in upper case) stands for any
+    // candidate that turns out to be unreadable: the others must still be listed.
+    const odd = await createListingFixture(t.db, {
+      reviewerId: author.id,
+      placeId: places.settlementId,
+      editorialState: "needs_facts",
+      commercialState: "confirmation_required",
+      availabilityConfirmedAt: null,
+      sellerInstruction: false,
+      photos: 1,
+      photoState: "pending",
+    });
+    const lowercase = `ms-odd-${randomUUID().slice(0, 8)}`;
+    await t.db.update(listings).set({ reference: lowercase }).where(eq(listings.id, odd.listingId));
+    const good = await createListingFixture(t.db, {
+      reviewerId: author.id,
+      placeId: places.settlementId,
+      editorialState: "needs_facts",
+      commercialState: "confirmation_required",
+      availabilityConfirmedAt: null,
+      sellerInstruction: false,
+      photos: 1,
+      photoState: "pending",
+    });
+    const page = await readyToPublish(t.db, broker.actor, { query: good.reference });
+    expect(page.rows.map((row) => row.reference)).toEqual([good.reference]);
+    await expect(readyToPublish(t.db, broker.actor, { query: lowercase })).resolves.toMatchObject({
+      rows: [],
+    });
   });
 
   it("caps the Today count and says so instead of reading every listing", async () => {

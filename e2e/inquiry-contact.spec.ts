@@ -6,7 +6,6 @@ import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../src/db/schema";
-import { discoveryCopy } from "../src/features/discovery/copy";
 import { contactCopy } from "../src/features/work/contact-copy";
 import { workCopy } from "../src/features/work/copy";
 import { inquiryReferenceCookie } from "../src/features/work/inquiry-reference";
@@ -1369,7 +1368,15 @@ for (const javaScriptEnabled of [true, false]) {
       });
       await page.goto(hostUrl("public", `/en/properties?q=${listing.reference}`));
       await page.getByRole("link", { name: listing.title, exact: true }).click();
-      await page.getByRole("link", { name: discoveryCopy("en").ask, exact: true }).click();
+      // On a phone, with Butler's answers on, "Ask a question" scrolls to Butler's block and
+      // the form is one step further. The desktop contact card opens the form directly with the
+      // listing's context, so that link is followed there and the phone width resumes after it.
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page
+        .getByRole("complementary")
+        .getByRole("link", { name: "Ask a question", exact: true })
+        .click();
+      await page.setViewportSize({ width: 320, height: 844 });
       await page.getByLabel("Your inquiry", { exact: true }).fill(marker);
       await page.getByLabel("Email", { exact: true }).fill(email);
       await page.getByRole("checkbox").check();

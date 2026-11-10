@@ -337,7 +337,8 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
           expect(asset.sha256).toBe(createHash("sha256").update(bytes).digest("hex"));
           if (realScan) {
             expect(asset.scanned_sha256).toBe(asset.sha256);
-            expect(asset.scanner_version).toMatch(/^ClamAV /);
+            // ADR 0016: this brand admits a decodable image by re-encode, not by scanner.
+            expect(asset.scanner_version).toMatch(/^reencode sharp\/\S+ libvips\/\S+$/);
           }
         }
         return { scan: asset?.scan, processing: asset?.processing };
@@ -348,13 +349,17 @@ test("AT36/AT39: staff invitation, one passkey, optional backup, workspace and p
   await page.reload();
   await showPhotoChecks(page);
   if (realScan) {
-    await expect(page.getByText("Clean", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Passed: saved again as a clean image", { exact: true }),
+    ).toBeVisible();
     await page.getByLabel("Image description", { exact: true }).fill("Synthetic blue rectangle");
     await page.getByRole("button", { name: "Save photo details", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "Photo draft saved" })).toBeVisible();
     await page.getByRole("link", { name: "Review this photo", exact: true }).click();
     await showPhotoChecks(page);
-    await expect(page.getByText("Clean", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Passed: saved again as a clean image", { exact: true }),
+    ).toBeVisible();
     await page.getByLabel("Rights holder", { exact: true }).fill("Synthetic image creator");
     await page
       .getByLabel("Rights evidence / permission reference", { exact: true })

@@ -1756,8 +1756,13 @@ export async function readyToPublish(
       examined += 1;
       const resource = { type: "listing", id: candidate.id, propertyId: candidate.propertyId };
       if (!(await can(db, actor, "publication.release", resource))) continue;
-      const view = await publishView(db, actor, candidate.reference, policy);
-      if (view.checks.blockers.length) continue;
+      // A person may release a listing yet not read it (a restricted listing among the others):
+      // that listing is left out of the list instead of failing the page for everyone.
+      const view = await publishView(db, actor, candidate.reference, policy).catch((error) => {
+        if (error instanceof AppError && error.code === "not_found") return null;
+        throw error;
+      });
+      if (!view || view.checks.blockers.length) continue;
       rows.push({
         reference: view.listing.reference,
         version: view.listing.version,

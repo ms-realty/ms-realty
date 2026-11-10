@@ -314,7 +314,8 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
     review: "pending",
     sha256: digest(source),
     scanned_sha256: digest(source),
-    scanner_version: expect.stringMatching(/^ClamAV /),
+    // ADR 0016: a decodable image is admitted by re-encode; documents (above) still use ClamAV.
+    scanner_version: expect.stringMatching(/^reencode sharp\/\S+ libvips\/\S+$/),
   });
   expect(await storedObject(asset?.sealed_key)).toEqual(source);
   const derivative = await storedObject(asset?.derivative_key);
@@ -473,7 +474,9 @@ test("native S2: uploaded and reviewed BG listing publishes its actual approved 
   await expect(
     publicPage.getByText("SYNTHETIC PRIVATE ADDRESS NEVER PUBLIC", { exact: false }),
   ).toHaveCount(0);
-  const publicImage = publicPage.locator(`img[src="${mediaPath}"]`);
+  // The storefront shows the same approved image as the lead photo, in the in-page gallery and in
+  // its viewer; the lead photo carries the responsive sources this test checks.
+  const publicImage = publicPage.locator(`img[src="${mediaPath}"]`).first();
   await expect(publicImage).toBeVisible();
   await expect(publicImage).toHaveAttribute("width", "1600");
   await expect(publicImage).toHaveAttribute("height", "1000");
