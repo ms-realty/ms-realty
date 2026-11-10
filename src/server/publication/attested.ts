@@ -318,7 +318,7 @@ export interface PublishView {
   readonly policy: PublicationPolicy;
 }
 
-async function placedPhotos(
+export async function placedPhotos(
   db: Executor,
   listing: ListingRow,
   revision: RevisionRow | null,
@@ -347,7 +347,7 @@ async function placedPhotos(
     .where(eq(listingRevisionMedia.listingRevisionId, revision.id))
     .orderBy(asc(listingRevisionMedia.position));
 }
-async function latestRevision(db: Executor, listingId: string) {
+export async function latestRevision(db: Executor, listingId: string) {
   const [revision] = await db
     .select()
     .from(listingRevisions)

@@ -75,7 +75,8 @@
     "operations.serviceIntake.reason": "Причина",
     "operations.serviceIntake.version": "Версия",
     "dealAgreement.agree.channels.in_person": "Лично",
-    "dealPathStaff.brokerage.yes": "Да"
+    "dealPathStaff.brokerage.yes": "Да",
+    "workflow.dealHome.price": "Цена"
   },
   "de": {
     "workflow.clientIdentity.optional": "(optional)",

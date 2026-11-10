@@ -62,5 +62,7 @@
     "earlyStartHint": "Only when it was signed online or away from your office."
   },
   "waitsForIdentity": "Record the identity checks before this step.",
-  "required": "Required for this deal"
+  "required": "Required for this deal",
+  "sharedWith": "These steps are recorded once for both sides, on the other side's deal",
+  "shared": "Recorded once for both sides"
 }

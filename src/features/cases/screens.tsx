@@ -22,7 +22,6 @@ import {
   readInterestContext,
 } from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
-import { getEnv } from "@/server/config/env";
 import { findOperation } from "@/server/operations";
 import { serviceCaseCoverage } from "@/server/service-intake/scope";
 import { listTasks, readInquiry } from "@/server/work/queries";
@@ -1026,10 +1025,12 @@ export async function CaseScreen(
                   <a
                     className={`${workflowLink} inline-flex min-h-control items-center`}
                     href={
-                      // Staff open the agency's own record: a broker's pick may not be public.
+                      // Staff open the agency's own record; a client opens the private page of a
+                      // home on their Deal, which links on to the public page when it is live in
+                      // their language (ADR 0015). A broker's pick may not be public at all.
                       staff
                         ? `/${props.locale}/inventory/${interest.reference}`
-                        : `${getEnv().hosts.public}/bg/properties/${interest.reference}/${interest.reference.toLowerCase()}`
+                        : `/${props.locale}/properties/${row.id}/homes/${encodeURIComponent(interest.reference)}`
                     }
                   >
                     {interest.reference}

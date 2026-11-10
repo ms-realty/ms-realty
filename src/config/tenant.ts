@@ -380,6 +380,7 @@ export const serviceNotificationEvents = [
   "proposal.ready",
   "proposal.withdrawn",
   "proposal.expired",
+  "proposal.agreed",
   "document.requested",
   "message.from_broker",
   "deal.step_done",

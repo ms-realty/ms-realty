@@ -11,6 +11,7 @@ export type ProposalChange =
   | "ready"
   | "withdrawn"
   | "expired"
+  | "agreed"
   | "accepted"
   | "declined"
   | "countered";
@@ -19,6 +20,7 @@ const events = {
   ready: "proposal.ready",
   withdrawn: "proposal.withdrawn",
   expired: "proposal.expired",
+  agreed: "proposal.agreed",
   accepted: "client.proposal_accepted",
   declined: "client.proposal_declined",
   countered: "client.proposal_countered",

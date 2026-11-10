@@ -10,6 +10,7 @@ import {
   auditEvents,
   casePathSteps,
   cases,
+  externalActions,
   interests,
   listings,
   propertyRelationships,
@@ -249,11 +250,12 @@ describe("ADR 0015: one recorded decision agrees the terms", () => {
       away: true,
       earlyStart: true,
     });
-    // The client's view carries no internal answers.
+    // The client sees where their contract was signed and the withdrawal date, never the
+    // internal note.
     const client = await casePath(t.db, f.client.session, f.record.id);
-    expect(client?.steps.find((s) => s.key === "brokerage_agreement")).not.toHaveProperty(
-      "brokerage",
-    );
+    const own = client?.steps.find((s) => s.key === "brokerage_agreement");
+    expect(own?.brokerage).toMatchObject({ away: true, earlyStart: true });
+    expect(own).not.toHaveProperty("internalNote");
     await step(f.record.id, "identity_checks", "done");
     for (const key of [
       "deposit_preliminary_contract",
@@ -307,6 +309,23 @@ describe("ADR 0015: one recorded decision agrees the terms", () => {
     const replay = await recordAgreement(t.db, f.staff.session, input);
     expect(replay.replayed).toBe(true);
     expect(replay.outcome).toEqual(first.outcome);
+    // The client hears once that both sides agreed; the broker gets no "client accepted"
+    // notice for their own record. The e-mail carries no price or terms.
+    const notices = (
+      await t.db
+        .select({ payload: externalActions.payload })
+        .from(externalActions)
+        .where(
+          and(
+            eq(externalActions.subjectType, "deal_notice"),
+            eq(externalActions.subjectId, f.record.id),
+          ),
+        )
+    ).map((n) => n.payload as { params?: { event?: string } });
+    const events = notices.map((n) => n.params?.event);
+    expect(events.filter((e) => e === "proposal.agreed")).toHaveLength(1);
+    expect(events).not.toContain("client.proposal_accepted");
+    expect(JSON.stringify(notices)).not.toMatch(/9500000|95[ ,.]?000/);
     const responses = await t.db
       .select()
       .from(proposalResponses)

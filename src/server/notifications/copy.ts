@@ -79,6 +79,11 @@ export const clientNoticeCopy: Readonly<
       lead: "Вече не е нужно да отговаряте.",
       action: "Отворете условията на предложението",
     },
+    "proposal.agreed": {
+      subject: "Двете страни приеха предложението",
+      lead: "Брокерът Ви го записа. Следващите стъпки по сделката са в кабинета Ви.",
+      action: "Отворете условията на предложението",
+    },
     "document.requested": {
       subject: "Брокерът поиска документ от Вас",
       lead: "В кабинета си ще видите какво е нужно и ще можете да го качите сигурно.",
@@ -145,6 +150,11 @@ export const clientNoticeCopy: Readonly<
     "proposal.expired": {
       subject: "A proposal's deadline has passed",
       lead: "You no longer need to answer it.",
+      action: "Open proposal terms",
+    },
+    "proposal.agreed": {
+      subject: "Both sides agreed to the proposal",
+      lead: "Your broker recorded it. The next steps of your deal are in your client area.",
       action: "Open proposal terms",
     },
     "document.requested": {
@@ -215,6 +225,11 @@ export const clientNoticeCopy: Readonly<
       lead: "Отвечать на него больше не нужно.",
       action: "Открыть условия предложения",
     },
+    "proposal.agreed": {
+      subject: "Обе стороны приняли предложение",
+      lead: "Ваш брокер это записал. Следующие шаги по сделке — в вашем личном кабинете.",
+      action: "Открыть условия предложения",
+    },
     "document.requested": {
       subject: "Брокер запросил у вас документ",
       lead: "В личном кабинете указано, что нужно, и там же его можно безопасно загрузить.",
@@ -281,6 +296,11 @@ export const clientNoticeCopy: Readonly<
     "proposal.expired": {
       subject: "Die Frist eines Angebots ist abgelaufen",
       lead: "Sie müssen nicht mehr darauf antworten.",
+      action: "Angebotsbedingungen öffnen",
+    },
+    "proposal.agreed": {
+      subject: "Beide Seiten haben dem Angebot zugestimmt",
+      lead: "Ihr Makler hat es festgehalten. Die nächsten Schritte Ihres Geschäfts finden Sie in Ihrem Kundenbereich.",
       action: "Angebotsbedingungen öffnen",
     },
     "document.requested": {
@@ -351,6 +371,11 @@ export const clientNoticeCopy: Readonly<
       lead: "U hoeft er niet meer op te antwoorden.",
       action: "Voorstelvoorwaarden openen",
     },
+    "proposal.agreed": {
+      subject: "Beide partijen gingen akkoord met het voorstel",
+      lead: "Uw makelaar heeft dit vastgelegd. De volgende stappen van uw deal staan in uw persoonlijke omgeving.",
+      action: "Voorstelvoorwaarden openen",
+    },
     "document.requested": {
       subject: "Uw makelaar vraagt u om een document",
       lead: "In uw persoonlijke omgeving ziet u wat er nodig is en kunt u het veilig uploaden.",
@@ -419,6 +444,11 @@ export const clientNoticeCopy: Readonly<
       lead: "Δεν χρειάζεται πια να απαντήσετε.",
       action: "Άνοιγμα όρων πρότασης",
     },
+    "proposal.agreed": {
+      subject: "Και οι δύο πλευρές αποδέχτηκαν την πρόταση",
+      lead: "Ο μεσίτης σας το κατέγραψε. Τα επόμενα βήματα της συμφωνίας σας βρίσκονται στον λογαριασμό σας.",
+      action: "Άνοιγμα όρων πρότασης",
+    },
     "document.requested": {
       subject: "Ο μεσίτης σας ζήτησε ένα έγγραφο",
       lead: "Στον λογαριασμό σας βλέπετε τι χρειάζεται και μπορείτε να το ανεβάσετε με ασφάλεια.",
@@ -485,6 +515,11 @@ export const clientNoticeCopy: Readonly<
     "proposal.expired": {
       subject: "המועד האחרון של הצעה עבר",
       lead: "אין צורך להשיב עליה עוד.",
+      action: "פתיחת תנאי ההצעה",
+    },
+    "proposal.agreed": {
+      subject: "שני הצדדים הסכימו להצעה",
+      lead: "המתווך שלכם רשם זאת. השלבים הבאים בעסקה נמצאים באזור הלקוח שלכם.",
       action: "פתיחת תנאי ההצעה",
     },
     "document.requested": {

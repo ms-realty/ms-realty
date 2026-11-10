@@ -51,6 +51,8 @@ const step = (
   internalNote: "Synthetic internal note",
   reason: action === "done" ? "" : "Synthetic reason",
   evidenceVersionId: "",
+  // The brokerage contract step records where it was signed (ADR 0015).
+  away: "no" as const,
 });
 async function notices(caseId: string) {
   return t.db
@@ -122,7 +124,9 @@ it("tells the client about done steps in their language, never about skips or re
     .orderBy(casePathSteps.position);
   const visible = rows.filter((row) => row.clientVisible).map((row) => row.stepKey);
   const hidden = rows.filter((row) => !row.clientVisible).map((row) => row.stepKey);
-  const [first, second] = visible;
+  // ADR 0015: the brokerage contract and identity checks cannot be skipped; skip another step.
+  const first = visible[0];
+  const second = visible.find((key) => !["brokerage_agreement", "identity_checks"].includes(key));
   if (!first || !second) throw new Error("Fixture has too few client-visible steps");
 
   const run = (key: string, action: "done" | "skip" | "reopen") =>

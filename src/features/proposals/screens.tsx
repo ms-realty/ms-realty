@@ -229,13 +229,20 @@ export async function NewProposalScreen(
             required: true,
             options: context.buyers.map((p) => ({ value: p.partyId, label: p.name })),
           },
-          {
-            name: "additionalPartyIds",
-            label: c.additionalParties,
-            hint: c.additionalHint,
-            type: "checkbox-group",
-            options: context.buyers.map((p) => ({ value: p.partyId, label: p.name })),
-          },
+          // The main buyer or tenant is never offered again as an additional one.
+          ...(context.buyers.length > 1
+            ? [
+                {
+                  name: "additionalPartyIds",
+                  label: c.additionalParties,
+                  hint: c.additionalHint,
+                  type: "checkbox-group" as const,
+                  options: context.buyers
+                    .slice(1)
+                    .map((p) => ({ value: p.partyId, label: p.name })),
+                },
+              ]
+            : []),
           ...termFields(props.locale),
         ]}
         values={{
@@ -733,7 +740,9 @@ export async function ProposalScreen(props: ScreenProps & { id: string }) {
                     label: c.additionalParties,
                     hint: c.additionalHint,
                     type: "checkbox-group",
-                    options: buyers.map((p) => ({ value: p.partyId, label: p.name })),
+                    options: buyers
+                      .filter((p) => p.partyId !== buyer?.partyId)
+                      .map((p) => ({ value: p.partyId, label: p.name })),
                   }
                 : { name: "additionalPartyIds", label: "", type: "hidden" },
               ...termFields(props.locale),

@@ -131,11 +131,53 @@ function BrokerNote({ locale, note }: { locale: string; note: string | null }) {
   );
 }
 
+/**
+ * What was recorded with the Deal's own brokerage contract (ADR 0015): where it was signed and,
+ * when away from the office, the last day of the withdrawal period. Both audiences, own words.
+ */
+function BrokerageFacts({
+  locale,
+  step,
+  audience,
+}: {
+  locale: string;
+  step: Step;
+  audience: Audience;
+}) {
+  const facts = step.brokerage;
+  if (!facts) return null;
+  const s = dealPathStaffCopy(locale).brokerage;
+  const c = dealPathCopy(locale).brokerage;
+  const staff = audience === "staff";
+  return (
+    <div className="space-y-1 text-dense" data-brokerage-facts>
+      <p>
+        {facts.away
+          ? staff
+            ? s.signedAway
+            : c.signedAway
+          : staff
+            ? s.signedOffice
+            : c.signedOffice}
+      </p>
+      {facts.away && facts.earlyStart ? <p>{staff ? s.earlyStartYes : c.earlyStart}</p> : null}
+      {facts.away && staff && !facts.earlyStart ? <p>{s.earlyStartNo}</p> : null}
+      {facts.withdrawalEndsOn ? (
+        <p className="font-semibold">
+          {staff ? s.withdrawalEnds : c.withdrawalEnds}:{" "}
+          <PathDate value={facts.withdrawalEndsOn} locale={locale} />
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 /** Staff-only facts about a step: hidden from the client, reason, internal note, document. */
 function StaffFacts({ locale, step }: { locale: string; step: Step }) {
   const s = dealPathStaffCopy(locale);
   return (
     <>
+      {step.shared ? <p className="text-dense text-text-muted">{s.shared}</p> : null}
       {!step.clientVisible ? (
         <p className="flex items-center gap-1 text-dense text-text-muted">
           <LockIcon className="size-4" /> {s.hidden}
@@ -146,22 +188,6 @@ function StaffFacts({ locale, step }: { locale: string; step: Step }) {
       ) : null}
       {step.canSkip === false && !step.settled ? (
         <p className="text-dense font-semibold">{s.required}</p>
-      ) : null}
-      {step.brokerage ? (
-        <div className="space-y-1 text-dense">
-          <p>{step.brokerage.away ? s.brokerage.signedAway : s.brokerage.signedOffice}</p>
-          {step.brokerage.away ? (
-            <p>
-              {step.brokerage.earlyStart ? s.brokerage.earlyStartYes : s.brokerage.earlyStartNo}
-            </p>
-          ) : null}
-          {step.brokerage.withdrawalEndsOn ? (
-            <p className="font-semibold">
-              {s.brokerage.withdrawalEnds}:{" "}
-              <PathDate value={step.brokerage.withdrawalEndsOn} locale={locale} />
-            </p>
-          ) : null}
-        </div>
       ) : null}
       {step.skipReason ? (
         <p className="text-dense">
@@ -312,6 +338,7 @@ function DoneSteps(props: ListProps & { groups: Groups }) {
                   )}
                 </p>
                 <BrokerNote locale={locale} note={step.clientNote} />
+                <BrokerageFacts locale={locale} step={step} audience={audience} />
                 {audience === "staff" ? <StaffFacts locale={locale} step={step} /> : null}
                 {props.actions?.(step)}
               </div>
@@ -484,6 +511,11 @@ export function StaffDealPath({
     { name: "stepKey", label: "stepKey", type: "hidden" },
     { name: "action", label: "action", type: "hidden" },
   ];
+  const clientNoteField: WorkflowField = {
+    name: "clientNote",
+    label: s.clientNote,
+    type: "textarea",
+  };
   const actions = (step: Step) => {
     if (!path.canRecord || step.source !== "recorded") return null;
     if (step.settled)
@@ -547,9 +579,10 @@ export function StaffDealPath({
                       },
                     ] satisfies WorkflowField[])
                   : []),
-                { name: "clientNote", label: s.clientNote, type: "textarea" },
+                // A shared step shows on the other side's Deal: no note or document from this side.
+                ...(step.shared ? [] : [clientNoteField]),
                 { name: "internalNote", label: s.internalNoteField, type: "textarea" },
-                ...documentField,
+                ...(step.shared ? [] : documentField),
               ]}
               values={{ ...hidden(step, "done"), date: today }}
               submit={s.markDone}
@@ -565,7 +598,7 @@ export function StaffDealPath({
                 fields={[
                   ...hiddenFields,
                   { name: "reason", label: s.skipReason, type: "textarea", required: true },
-                  { name: "clientNote", label: s.clientNote, type: "textarea" },
+                  ...(step.shared ? [] : [clientNoteField]),
                 ]}
                 values={hidden(step, "skip")}
                 submit={s.notNeededSubmit}
@@ -606,6 +639,17 @@ export function StaffDealPath({
           {s.title}
         </h2>
         {kind ? <p className="text-text">{kind}</p> : null}
+        {path.sharedWith ? (
+          <p className="text-dense">
+            {s.sharedWith}:{" "}
+            <a
+              className="font-semibold text-accent underline underline-offset-4"
+              href={`/${locale}/cases/${path.sharedWith.id}#case-path`}
+            >
+              <bdi>{path.sharedWith.reference}</bdi>
+            </a>
+          </p>
+        ) : null}
         <p className="text-text-muted">{s.lead}</p>
       </div>
       <PathBody locale={locale} path={path} audience="staff" actions={actions} />

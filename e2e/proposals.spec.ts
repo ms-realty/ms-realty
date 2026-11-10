@@ -105,7 +105,7 @@ test("reviewed exact revision needs both named parties; client document access r
     await recorded(client);
     await expect(
       client.getByText(
-        "Your response is recorded. Overall agreement still waits for the other people whose agreement is required and for the required checks for this deal.",
+        "Your response is recorded. The terms are agreed once everyone named on the proposal accepts them.",
         { exact: true },
       ),
     ).toBeVisible();

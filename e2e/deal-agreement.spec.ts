@@ -43,7 +43,13 @@ test("a broker takes a held home from the shortlist to agreed terms, the path an
         encoding: "utf8",
       },
     ),
-  ) as { caseId: string; staffToken: string; listingId: string; reference: string };
+  ) as {
+    caseId: string;
+    staffToken: string;
+    clientToken: string;
+    listingId: string;
+    reference: string;
+  };
   const cookie = {
     name: "msr_staff_session",
     value: f.staffToken,
@@ -65,6 +71,36 @@ test("a broker takes a held home from the shortlist to agreed terms, the path an
     .fill("Two bedrooms near the school");
   await pick.getByRole("button", { name: "Add a home to this deal", exact: true }).click();
   await recorded(page);
+
+  // The client opens the home from their Deal: a private page, since it is not public.
+  const clients = await browser.newContext({ ...testInfo.project.use });
+  try {
+    await clients.addCookies([
+      {
+        name: "msr_client_session",
+        value: f.clientToken,
+        url: origins.client,
+        httpOnly: true,
+        sameSite: "Lax",
+      },
+    ]);
+    const client = await clients.newPage();
+    await client.goto(hostUrl("client", `/en/properties/${f.caseId}`));
+    await client.getByRole("link", { name: f.reference, exact: true }).click();
+    await expect(client).toHaveURL(new RegExp(`/en/properties/${f.caseId}/homes/${f.reference}$`));
+    await expect(
+      client.getByRole("heading", { level: 1, name: "Двустаен апартамент до училището" }),
+    ).toBeVisible();
+    await expect(
+      client.getByText("Only the people on your deal can see this page.", { exact: false }),
+    ).toBeVisible();
+    // Not live in English: no link to a public page that would not show it.
+    await expect(
+      client.getByRole("link", { name: "See this home on the public website" }),
+    ).toHaveCount(0);
+  } finally {
+    await clients.close();
+  }
 
   // Make a proposal on it, naming the seller the agency had not recorded yet.
   await page.getByRole("link", { name: "Make a proposal", exact: true }).click();

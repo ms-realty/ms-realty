@@ -114,6 +114,7 @@
       "identity_checks": "Het kantoor controleert uw identiteitsbewijs en dat van iedereen die meedoet."
     },
     "buyer": {
+      "brokerage_agreement": "U en het kantoor tekenen een schriftelijke overeenkomst over de hulp van het kantoor bij uw aankoop en de vergoeding.",
       "needs_agreed": "Uw makelaar schrijft op wat u zoekt en u bevestigt dat.",
       "homes_shortlisted": "U kiest uit de voorstellen van uw makelaar de woningen die een nadere blik waard zijn.",
       "viewings": "Uw makelaar plant bezichtigingen van de gekozen woningen en gaat met u mee.",
@@ -128,6 +129,7 @@
       "keys_handed_over": "De eigenaar geeft u de sleutels op de afgesproken dag."
     },
     "tenant": {
+      "brokerage_agreement": "U en het kantoor tekenen een schriftelijke overeenkomst over de hulp van het kantoor bij uw huur en de vergoeding.",
       "needs_agreed": "Uw makelaar schrijft op wat u zoekt en u bevestigt dat.",
       "homes_shortlisted": "U kiest uit de voorstellen van uw makelaar de woningen die een nadere blik waard zijn.",
       "viewings": "Uw makelaar plant bezichtigingen van de gekozen woningen en gaat met u mee.",
@@ -138,6 +140,7 @@
       "keys_handed_over": "De verhuurder geeft u de sleutels op de afgesproken dag."
     },
     "seller": {
+      "brokerage_agreement": "U en het kantoor tekenen een schriftelijke overeenkomst over de hulp van het kantoor bij de verkoop van uw woning en de vergoeding.",
       "terms_agreed": "U en de koper accepteren dezelfde prijs en voorwaarden in het voorstel.",
       "deposit_preliminary_contract": "U en de koper tekenen een voorlopig koopcontract en de koper betaalt de afgesproken aanbetaling.",
       "notary_deed": "Een notaris maakt de akte op en leest die met u en de koper door voordat u tekent.",
@@ -145,11 +148,18 @@
       "keys_handed_over": "U geeft de sleutels aan de koper op de afgesproken dag."
     },
     "landlord": {
+      "brokerage_agreement": "U en het kantoor tekenen een schriftelijke overeenkomst over de hulp van het kantoor bij de verhuur van uw woning en de vergoeding.",
       "terms_agreed": "U en de huurder accepteren dezelfde huur en voorwaarden in het voorstel.",
       "lease_signed": "U en de huurder tekenen het huurcontract volgens de afgesproken voorwaarden.",
       "deposit_first_rent": "De huurder betaalt de borg en de eerste huur, en u bevestigt samen dat het geld is ontvangen.",
       "contract_signed": "U en de huurder tekenen het contract volgens de afgesproken voorwaarden.",
       "keys_handed_over": "U geeft de sleutels aan de huurder op de afgesproken dag."
     }
+  },
+  "brokerage": {
+    "signedAway": "U hebt deze online of buiten het kantoor getekend.",
+    "signedOffice": "U hebt deze op het kantoor getekend.",
+    "withdrawalEnds": "De bedenktijd eindigt op",
+    "earlyStart": "U hebt schriftelijk gevraagd dat het kantoor eerder begint."
   }
 }

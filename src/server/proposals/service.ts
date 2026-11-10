@@ -906,6 +906,10 @@ export async function recordAgreement(db: Executor, session: Session, raw: Recor
         { revisionId: revision.id, basis: "recorded_agreement" },
         "participants",
       );
+      // The clients learn that the terms are agreed (no price or terms in the e-mail). The
+      // broker made this change, so no "client accepted" notice goes back to the broker, and
+      // the event key is the revision: a retry or a second record cannot send it twice.
+      await notifyProposalChange(ctx.tx, "agreed", proposal, revision, live.actor);
       return result(proposal);
     },
   );
