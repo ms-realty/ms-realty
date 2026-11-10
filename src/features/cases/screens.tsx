@@ -5,12 +5,14 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { z } from "zod";
 import { getDb } from "@/db/client";
+import { dealCompletedOutcome } from "@/domain/deal-path";
 import { interestMachine } from "@/domain/interest";
 import { serviceCaseContextSchema } from "@/domain/service-scope";
 import { agencyTimeZone, defaultLocale, isPublicLocale } from "@/i18n/config";
 import { formatDateTime, formatDateTimeRange } from "@/i18n/format";
 import { listAppointments, readAppointment } from "@/server/appointments/service";
 import type { Session } from "@/server/auth/sessions";
+import { casePath } from "@/server/cases/path";
 import { listCases, readCase, readCaseMessages, readInterestContext } from "@/server/cases/queries";
 import { caseFor } from "@/server/cases/shared";
 import { getEnv } from "@/server/config/env";
@@ -38,6 +40,8 @@ import {
   workflowTypes,
 } from "./contract";
 import { caseCopy } from "./copy";
+import { dealPathCopy, dealPathStaffCopy } from "./deal-path-copy";
+import { ClientDealPath, StaffDealPath } from "./deal-path-screen";
 import { caseEmailCopy } from "./email-copy";
 import { type WorkflowField, WorkflowForm } from "./form";
 import { lifecycleCopy } from "./lifecycle-copy";
@@ -448,7 +452,10 @@ export function ClientCaseOverview({
                 ) : null}
                 {row.closureOutcome ? (
                   <p>
-                    <strong>{c.closureOutcome}:</strong> {row.closureOutcome}
+                    <strong>{c.closureOutcome}:</strong>{" "}
+                    {row.closureOutcome === dealCompletedOutcome
+                      ? dealPathCopy(locale).completed.outcome
+                      : row.closureOutcome}
                   </p>
                 ) : null}
                 {row.waitingOn ? (
@@ -510,6 +517,10 @@ export async function CaseScreen(
   const row = view.record;
   const path = `/${props.locale}/${staff ? "cases" : (props.pane ?? "overview")}/${row.id}`;
   const service = row.kind === "service_intake";
+  const showPath = !service && (staff || !props.pane || props.pane === "overview");
+  const dealPath = showPath
+    ? await privateRead(() => casePath(getDb(), props.session, row.id))
+    : null;
   if (!service && !staff && props.compactClientOverview && props.pane === "overview") {
     // The compact entry still uses readCase's current authorization and client projection.
     // Its links need no conversation history or signed manual-action forms.
@@ -546,6 +557,7 @@ export async function CaseScreen(
     ];
     return (
       <WorkflowPage {...props} title={row.title} reference={row.reference} clientOverview>
+        {dealPath ? <ClientDealPath locale={props.locale} path={dealPath} /> : null}
         <ClientCaseOverview
           locale={props.locale}
           view={view}
@@ -612,6 +624,9 @@ export async function CaseScreen(
           staff={staff}
         />
       ) : null}
+      {!staff && showOverview && dealPath ? (
+        <ClientDealPath locale={props.locale} path={dealPath} />
+      ) : null}
       {!staff && showOverview ? <ClientCaseOverview locale={props.locale} view={view} /> : null}
       <div className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
         {staff || !showOverview ? (
@@ -669,7 +684,10 @@ export async function CaseScreen(
                 ) : null}
                 {row.closureOutcome ? (
                   <p>
-                    <strong>{c.closureOutcome}:</strong> {row.closureOutcome}
+                    <strong>{c.closureOutcome}:</strong>{" "}
+                    {row.closureOutcome === dealCompletedOutcome
+                      ? dealPathCopy(props.locale).completed.outcome
+                      : row.closureOutcome}
                   </p>
                 ) : null}
                 {row.waitingOn ? (
@@ -694,7 +712,11 @@ export async function CaseScreen(
       </div>
       {!focusedConversation ? (
         <nav aria-label={c.sections} className="flex flex-wrap gap-x-5">
-          {(commitments ? [{ href: "#case-tasks", label: c.tasks }] : [])
+          {(staff && dealPath
+            ? [{ href: "#case-path", label: dealPathStaffCopy(props.locale).title }]
+            : []
+          )
+            .concat(commitments ? [{ href: "#case-tasks", label: c.tasks }] : [])
             .concat(showOverview ? [{ href: "#case-brief", label: c.brief }] : [])
             .concat(view.canManageNext ? [{ href: "#case-next", label: c.next }] : [])
             .concat(showProperties ? [{ href: "#case-properties", label: c.interests }] : [])
@@ -796,6 +818,14 @@ export async function CaseScreen(
           {ownerPreviewCopy(props.locale).ownerLink} · {reference}
         </a>
       ))}
+      {staff && dealPath ? (
+        <StaffDealPath
+          locale={props.locale}
+          session={props.session}
+          path={dealPath}
+          pagePath={path}
+        />
+      ) : null}
       {commitments ? (
         <WorkflowSection title={c.tasks} id="case-tasks">
           {commitments.rows.length ? (

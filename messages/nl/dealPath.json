@@ -1,0 +1,104 @@
+{
+  "title": "Het verloop van uw vastgoedzaak",
+  "lead": "Alle stappen op volgorde, van de eerste aanvraag tot de sleutels. Uw makelaar legt elke stap vast zodra die is gebeurd.",
+  "preview": "De latere stappen zijn de gebruikelijke voor dit soort zaak. Uw makelaar bevestigt ze zodra de voorwaarden zijn afgesproken.",
+  "whoActs": "Wie handelt",
+  "expectedBy": "Verwacht op",
+  "doneOn": "Gedaan op",
+  "brokerNote": "Notitie van uw makelaar",
+  "status": {
+    "done": "Gedaan",
+    "current": "U bent hier",
+    "next": "Volgende stap",
+    "upcoming": "Daarna",
+    "skipped": "Niet nodig",
+    "not_recorded": "Hier niet vastgelegd"
+  },
+  "actors": {
+    "you": "U",
+    "buyer": "De koper",
+    "tenant": "De huurder",
+    "owner": "De eigenaar",
+    "agency": "Het kantoor",
+    "notary": "De notaris",
+    "lawyer": "De advocaat"
+  },
+  "steps": {
+    "request_received": {
+      "label": "Aanvraag ontvangen",
+      "about": "Het kantoor ontvangt de aanvraag en wijst een makelaar aan die deze behandelt."
+    },
+    "needs_agreed": {
+      "label": "Wensen afgestemd",
+      "about": "De makelaar schrijft op wat de klant zoekt en de klant bevestigt dat."
+    },
+    "homes_shortlisted": {
+      "label": "Woningen geselecteerd",
+      "about": "De klant kiest uit de voorstellen van de makelaar de woningen die een nadere blik waard zijn."
+    },
+    "viewings": {
+      "label": "Bezichtigingen",
+      "about": "De makelaar plant bezichtigingen van de gekozen woningen en gaat met de klant mee."
+    },
+    "terms_agreed": {
+      "label": "Voorwaarden afgesproken",
+      "about": "Beide partijen accepteren dezelfde prijs en voorwaarden in het voorstel."
+    },
+    "identity_checks": {
+      "label": "Identiteitscontrole",
+      "about": "Het kantoor controleert de identiteitsbewijzen van iedereen die meedoet."
+    },
+    "deposit_preliminary_contract": {
+      "label": "Aanbetaling en voorlopig koopcontract",
+      "about": "De koper en de verkoper tekenen een voorlopig koopcontract en de koper betaalt de afgesproken aanbetaling."
+    },
+    "property_checks": {
+      "label": "Controle van de woning",
+      "about": "Het kantoor verzamelt de stukken over eigendom en schulden van de woning, zodat ze vóór de akte kunnen worden bekeken."
+    },
+    "funds_ready": {
+      "label": "Financiering rond",
+      "about": "De koper regelt het geld voor de aankoop, uit spaargeld of met een banklening."
+    },
+    "notary_deed": {
+      "label": "Notariële akte",
+      "about": "Een notaris maakt de akte op en leest die met de koper en de verkoper door voordat zij tekenen."
+    },
+    "registration": {
+      "label": "Inschrijving",
+      "about": "De getekende akte wordt op naam van de koper ingeschreven in het kadaster."
+    },
+    "keys_handed_over": {
+      "label": "Sleutels overgedragen",
+      "about": "De eigenaar draagt de sleutels over op de afgesproken dag."
+    },
+    "lease_signed": {
+      "label": "Huurcontract getekend",
+      "about": "De huurder en de verhuurder tekenen het huurcontract volgens de afgesproken voorwaarden."
+    },
+    "deposit_first_rent": {
+      "label": "Borg en eerste huur",
+      "about": "De huurder betaalt de borg en de eerste huur, en beide partijen bevestigen dat het geld is ontvangen."
+    },
+    "tax_number": {
+      "label": "Grieks fiscaal nummer",
+      "about": "De koper krijgt een Grieks fiscaal nummer (AFM), waarnaar de aankoopstukken verwijzen."
+    },
+    "lawyer_property_checks": {
+      "label": "Controle door de advocaat",
+      "about": "De advocaat van de koper zoekt uit wie de eigenaar is en of er schulden op de woning rusten."
+    },
+    "contract_signed": {
+      "label": "Contract getekend",
+      "about": "De koper en de verkoper tekenen het contract volgens de afgesproken voorwaarden."
+    }
+  },
+  "completed": {
+    "title": "Vastgoedzaak afgerond",
+    "lead": "Alle stappen zijn gedaan en uw makelaar heeft de afronding bevestigd.",
+    "completedOn": "Datum van akte of huurcontract",
+    "reference": "Inschrijvings- of aktenummer",
+    "boundary": "Deze pagina toont wat de betrokkenen hebben gedaan en wanneer. Het is geen juridisch bewijsstuk.",
+    "outcome": "Afgerond via het verloop van de zaak"
+  }
+}

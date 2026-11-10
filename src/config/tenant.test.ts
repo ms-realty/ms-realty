@@ -6,9 +6,12 @@ import {
   assistantLabel,
   availabilityReviewIntervalDays,
   currencyCodes,
+  dealPathActors,
+  dealPathTemplates,
   defaultCurrency,
   defaultStaffLocale,
   displayLocales,
+  genericDealPath,
   isJurisdictionCode,
   isRtlLocale,
   jurisdictionCodes,
@@ -88,6 +91,58 @@ describe("tenant profile", () => {
     expect(new Set(prefixes).size).toBe(prefixes.length);
     for (const prefix of prefixes) expect(prefix).toMatch(/^[A-Z]{2}$/);
     expect(referencePrefixes.listing).toBe("MS");
+  });
+
+  it("keeps the shipped Deal path templates (ADR 0013)", () => {
+    // `case_path_steps_actor` CHECKs this list; recorded steps keep their template's keys.
+    expect(dealPathActors).toEqual(["client", "agency", "owner", "notary", "lawyer"]);
+    const shape = (steps: readonly { key: string; actor: string; evidence: boolean }[] = []) =>
+      steps.map((step) => `${step.key}:${step.actor}${step.evidence ? ":evidence" : ""}`);
+    expect(Object.keys(dealPathTemplates)).toEqual(["BG.sale", "BG.long_term_rent", "GR.sale"]);
+    expect(shape(dealPathTemplates["BG.sale"])).toEqual([
+      "identity_checks:agency:evidence",
+      "deposit_preliminary_contract:client:evidence",
+      "property_checks:agency:evidence",
+      "funds_ready:client",
+      "notary_deed:notary:evidence",
+      "registration:notary:evidence",
+      "keys_handed_over:owner",
+    ]);
+    expect(shape(dealPathTemplates["BG.long_term_rent"])).toEqual([
+      "identity_checks:agency:evidence",
+      "lease_signed:client:evidence",
+      "deposit_first_rent:client",
+      "keys_handed_over:owner",
+    ]);
+    expect(shape(dealPathTemplates["GR.sale"])).toEqual([
+      "identity_checks:agency:evidence",
+      "tax_number:client:evidence",
+      "lawyer_property_checks:lawyer:evidence",
+      "deposit_preliminary_contract:client:evidence",
+      "notary_deed:notary:evidence",
+      "registration:lawyer:evidence",
+      "keys_handed_over:owner",
+    ]);
+    expect(shape(genericDealPath.sale)).toEqual([
+      "identity_checks:agency:evidence",
+      "contract_signed:client:evidence",
+      "keys_handed_over:owner",
+    ]);
+    expect(shape(genericDealPath.long_term_rent)).toEqual([
+      "identity_checks:agency:evidence",
+      "lease_signed:client:evidence",
+      "keys_handed_over:owner",
+    ]);
+    for (const steps of [...Object.values(dealPathTemplates), ...Object.values(genericDealPath)]) {
+      const keys = (steps ?? []).map((step) => step.key);
+      expect(new Set(keys).size).toBe(keys.length);
+      // The last step is what completes a Deal: keys in hand.
+      expect(keys.at(-1)).toBe("keys_handed_over");
+      for (const step of steps ?? []) {
+        expect(step.key).toMatch(/^[a-z][a-z0-9_]{1,60}$/);
+        expect(step.clientVisible).toBe(true);
+      }
+    }
   });
 
   it("keeps the recorded legacy domains and the public identity", () => {

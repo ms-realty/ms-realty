@@ -37,6 +37,7 @@ import {
   transitionCaseStage,
 } from "@/server/cases/lifecycle";
 import { acknowledgeOwnerPreview, bindSellerCase } from "@/server/cases/owner-preview";
+import { completeDealFromPath, recordPathStep } from "@/server/cases/path";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
@@ -213,6 +214,29 @@ export async function workflowAction(
               aftercare: values.aftercare ?? "",
               nextAction: values.nextAction ?? "",
               dueAt: formInstant(values, "dueAt"),
+            })
+          ).outcome;
+        case "pathStep":
+          return (
+            await recordPathStep(db, s, {
+              ...base,
+              stepKey: values.stepKey ?? "",
+              action: values.action as "done",
+              date: values.date ?? "",
+              clientNote: values.clientNote ?? "",
+              internalNote: values.internalNote ?? "",
+              reason: values.reason ?? "",
+              evidenceVersionId: values.evidenceVersionId ?? "",
+            })
+          ).outcome;
+        case "pathComplete":
+          return (
+            await completeDealFromPath(db, s, {
+              ...base,
+              completedOn: values.completedOn ?? "",
+              registryReference: values.registryReference ?? "",
+              evidenceVersionId: values.evidenceVersionId ?? "",
+              reviewed: values.reviewed === "true",
             })
           ).outcome;
         case "handover":
