@@ -18,6 +18,7 @@ export const clientNoticeEvents = [
   "document.requested",
   "message.from_broker",
   "deal.step_done",
+  "deal.completed",
 ] as const satisfies readonly ServiceNotificationEvent[];
 export type ClientNoticeEvent = (typeof clientNoticeEvents)[number];
 
@@ -55,6 +56,7 @@ export const eventSubject: Readonly<Record<DealNoticeEvent, NoticeSubjectType>> 
   "document.requested": "document_request",
   "message.from_broker": "case",
   "deal.step_done": "case",
+  "deal.completed": "case",
   "client.viewing_confirmed": "appointment",
   "client.viewing_cancelled": "appointment",
   "client.viewing_new_time": "appointment",

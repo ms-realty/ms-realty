@@ -87,6 +87,30 @@ const from = "MS Realty <service@example.test>";
 const now = new Date("2026-11-10T10:00:00Z");
 
 describe("deal notice copy", () => {
+  it("never repeats the headline in the first sentence", () => {
+    const words = (text: string) =>
+      text
+        .toLowerCase()
+        .replace(/\{[a-z]+\}/g, "")
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter(Boolean);
+    const all = [
+      ...publicLocales.flatMap((l) =>
+        clientNoticeEvents.map((e) => [`${l} ${e}`, clientNoticeCopy[l][e]] as const),
+      ),
+      ...staffLocales.flatMap((l) =>
+        staffNoticeEvents.map((e) => [`${l} ${e}`, staffNoticeCopy[l][e]] as const),
+      ),
+    ];
+    for (const [name, copy] of all) {
+      const head = words(copy.subject);
+      const first = words(copy.lead.split(/[.:](\s|$)/)[0] ?? "");
+      // At most two shared content words (e.g. "viewing", "time") between headline and opener.
+      const shared = new Set(first.filter((w) => w.length > 3 && head.includes(w)));
+      expect(shared.size, `${name}: ${[...shared].join(", ")}`).toBeLessThanOrEqual(2);
+    }
+  });
+
   it("has one or two sentences, a subject and a link label for every event and locale", () => {
     for (const locale of publicLocales)
       for (const event of clientNoticeEvents) {
@@ -98,7 +122,8 @@ describe("deal notice copy", () => {
         );
         if (timedEvents.includes(event)) expect(copy.lead).toContain("{time}");
         else expect(copy.lead).not.toContain("{time}");
-        expect(copy.lead.includes("{step}")).toBe(event === "deal.step_done");
+        expect(copy.lead).not.toContain("{step}");
+        expect(copy.subject.includes("{step}")).toBe(event === "deal.step_done");
       }
     for (const locale of staffLocales)
       for (const event of staffNoticeEvents) {

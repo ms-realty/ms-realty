@@ -90,9 +90,20 @@ try {
       evidenceVersionId: "",
     });
   }
+  // The client's sign-in address, verified as e-mail link sign-in does: the default basis for
+  // deal notices (ADR 0014). Added after the seeded steps, so only the browser's steps notify.
+  await db.insert(schema.contactMethods).values({
+    partyId: f.client.partyId,
+    kind: "email",
+    value: f.client.email,
+    normalizedValue: f.client.email.toLowerCase(),
+    verification: "verified",
+    verifiedAt: new Date(),
+  });
   console.log(
     JSON.stringify({
       caseId: f.record.id,
+      clientEmail: f.client.email,
       staffToken: f.staff.token,
       clientToken: f.client.token,
       steps: steps.map((s) => s.stepKey),

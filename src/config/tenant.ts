@@ -244,6 +244,7 @@ export const serviceNotificationEvents = [
   "document.requested",
   "message.from_broker",
   "deal.step_done",
+  "deal.completed",
   // To the accountable broker.
   "client.viewing_confirmed",
   "client.viewing_cancelled",

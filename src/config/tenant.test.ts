@@ -170,6 +170,7 @@ describe("tenant profile", () => {
       "document.requested",
       "message.from_broker",
       "deal.step_done",
+      "deal.completed",
       "client.viewing_confirmed",
       "client.viewing_cancelled",
       "client.viewing_new_time",
