@@ -27,7 +27,13 @@ test("staff record Path steps, the client sees progress, staff complete the deal
         encoding: "utf8",
       },
     ),
-  ) as { caseId: string; staffToken: string; clientToken: string; steps: string[] };
+  ) as {
+    caseId: string;
+    staffToken: string;
+    clientToken: string;
+    clientEmail: string;
+    steps: string[];
+  };
   expect(f.steps.slice(-2)).toEqual(["registration", "keys_handed_over"]);
   await context.addCookies([
     {
@@ -75,16 +81,37 @@ test("staff record Path steps, the client sees progress, staff complete the deal
       clientStep("registration").getByText("You are here", { exact: true }),
     ).toBeVisible();
 
+    // The current step comes before the finished ones, which are folded away.
+    await expect(
+      client.locator("#case-path").getByText("Still to come", { exact: true }),
+    ).toBeVisible();
+    const total = await client.locator("#case-path li[data-step]").count();
+    await expect(
+      client
+        .locator("#case-path")
+        .getByText(`${total - 2} of ${total} steps done`, { exact: true }),
+    ).toBeVisible();
+    await expect(clientStep("terms_agreed")).toHaveAttribute("data-status", "done");
+    await expect(clientStep("terms_agreed")).toBeHidden();
+
     await markDone("registration", "The deed is entered in the register in your name.");
     await client.reload();
+    await expect(clientStep("keys_handed_over")).toHaveAttribute("aria-current", "step");
+    await expect(
+      clientStep("keys_handed_over").getByText("The owner hands you the keys on the agreed day."),
+    ).toBeVisible();
+    await expect(
+      client
+        .locator("#case-path")
+        .getByText(`${total - 1} of ${total} steps done`, { exact: true }),
+    ).toBeVisible();
     await expect(clientStep("registration")).toHaveAttribute("data-status", "done");
+    // Opening the done group needs no JavaScript: it is a native disclosure.
+    await client.locator("#case-path summary", { hasText: `${total - 1} steps done` }).click();
     await expect(
       clientStep("registration").getByText("The deed is entered in the register in your name."),
     ).toBeVisible();
-    await expect(clientStep("keys_handed_over")).toHaveAttribute("aria-current", "step");
-    await expect(
-      clientStep("keys_handed_over").getByText("The owner hands over the keys on the agreed day."),
-    ).toBeVisible();
+    await expect(client.getByText("No record here")).toHaveCount(0);
 
     await markDone("keys_handed_over");
     await page.goto(staffDeal);
@@ -111,6 +138,33 @@ test("staff record Path steps, the client sees progress, staff complete the deal
     // Staff read the structured outcome in words, never the stored code.
     await page.goto(staffDeal);
     await expect(page.getByText("Completed through the deal path")).toBeVisible();
+    // ADR 0014: each step marked done and the completion reached the client once by e-mail.
+    await expect
+      .poll(
+        async () => {
+          const response = await page.request.get(hostUrl("public", "/api/test-outbox"), {
+            headers: { host: new URL(origins.client).host },
+          });
+          const { messages } = (await response.json()) as {
+            messages: {
+              recipient: string;
+              params: { event?: string };
+              rendered?: { subject: string };
+            }[];
+          };
+          return messages
+            .filter((m) => m.recipient === f.clientEmail)
+            .map((m) => `${m.params.event}: ${m.rendered?.subject.replace(/ \(.*\)$/, "")}`)
+            .sort();
+        },
+        { timeout: 60_000 },
+      )
+      .toEqual([
+        // In the client's own language (Bulgarian here), not the page language.
+        "deal.completed: Сделката Ви е приключена",
+        "deal.step_done: Завършено: Вписване",
+        "deal.step_done: Завършено: Предадени ключове",
+      ]);
   } finally {
     await clientContext.close();
   }

@@ -2,7 +2,6 @@
   "title": "Deal path",
   "lead": "The client sees the same steps, except the hidden ones. Record each step when it happens.",
   "preview": "Nothing recorded yet. These steps are created from the template when the terms are agreed, or with your first action here.",
-  "template": "Template",
   "currentStep": "Current step",
   "hidden": "Hidden from the client",
   "evidenceUsual": "A document is usually kept",
@@ -39,6 +38,15 @@
     "final_step_open": "The last step must be done, not marked as not needed.",
     "duty_open": "The brokerage contract and the identity checks must be done, not marked as not needed."
   },
+  "passed": "Passed without a record in the app",
+  "kinds": {
+    "BG_sale": "Sale in Bulgaria",
+    "BG_long_term_rent": "Long-term rent in Bulgaria",
+    "GR_sale": "Sale in Greece",
+    "generic_sale": "Sale",
+    "generic_long_term_rent": "Long-term rent"
+  },
+  "template": "Template",
   "brokerage": {
     "away": "Signed online or away from your office?",
     "earlyStart": "Did the client ask in writing for your work to start within the withdrawal period?",

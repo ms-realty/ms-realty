@@ -200,11 +200,11 @@ export function derivedSteps(kind: CaseKind, facts: DerivedFacts): PathStepBase[
   // Sellers and landlords reach terms through the agency's marketing, not a client's search.
   if (owner)
     return [
-      derived("request_received", "owner", facts.requestReceivedAt),
+      derived("request_received", "agency", facts.requestReceivedAt),
       derived("terms_agreed", "client", facts.termsAgreedAt),
     ];
   return [
-    derived("request_received", "client", facts.requestReceivedAt),
+    derived("request_received", "agency", facts.requestReceivedAt),
     derived("needs_agreed", "agency", facts.briefAgreedAt),
     derived("homes_shortlisted", "client", null, facts.shortlisted),
     derived("viewings", "agency", facts.viewingDoneAt, undefined, facts.viewingExpectedAt),
@@ -269,7 +269,9 @@ export function composePath<T extends PathStepBase>(
     }
     return { ...step, status: "upcoming" };
   });
-  return { steps: out, current, next };
+  // A client never reads that a step "has no record": passed early steps are left out for them.
+  const shown = audience === "client" ? out.filter((s) => s.status !== "not_recorded") : out;
+  return { steps: shown, current, next };
 }
 
 /**

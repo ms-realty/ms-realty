@@ -20,6 +20,7 @@ export const workflowTypes = {
   request: "appointment.request",
   arrange: "appointment.arrange",
   appointment: "appointment.respond",
+  appointmentConfirm: "appointment.client_confirm",
   appointmentHost: "appointment.host.accept",
   appointmentHostHandover: "appointment.host.handover",
 } as const;
@@ -84,6 +85,7 @@ export const workflowFields: Record<WorkflowCommand, readonly string[]> = {
     "accessNotes",
   ],
   appointment: ["state", "reason"],
+  appointmentConfirm: [],
   appointmentHost: ["reason", "reviewed", "externalBusyChecked", "propertyAccessConfirmed"],
   appointmentHostHandover: ["action", "receiverId", "reason", "reviewed"],
 };

@@ -18,6 +18,7 @@ import { getEnv } from "@/server/config/env";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
+import { kickDealNotices } from "@/server/jobs/web";
 import {
   createProposal,
   recordAgreement,
@@ -235,6 +236,7 @@ export async function proposalAction(
     { requireSession: true },
   );
   if (result.ok) {
+    await kickDealNotices();
     const enhancement = data.getAll(proposalEnhancementField);
     if (
       context === "client" &&

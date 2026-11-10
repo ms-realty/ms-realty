@@ -16,6 +16,7 @@ import { type InventoryField, missingInput } from "@/features/inventory/fields";
 import { FocusedState } from "@/features/inventory/focused-state";
 import { LeaveControl } from "@/features/inventory/leave-control";
 import { safeNext } from "@/features/inventory/next";
+import { publishCopy } from "@/features/inventory/publish-copy";
 import { describePriceEvidence } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
@@ -263,7 +264,21 @@ export default async function InventoryDetailPage({
         heading
         meta={optionLabel(listing.editorialState, locale)}
         summary={[property.settlement, ...summary].join(" · ")}
-      />
+      >
+        {/* ADR 0012: the primary way to publish is one decision on its own screen. */}
+        {mayPublish ? (
+          <a
+            href={`${path}/publish`}
+            className={buttonClass(
+              data.publications.some((p) => p.state === "active") ? "secondary" : "primary",
+            )}
+          >
+            {data.publications.some((p) => p.state === "active")
+              ? publishCopy(locale).live
+              : publishCopy(locale).publish}
+          </a>
+        ) : null}
+      </ListingIdentity>
       {error}
       <DuplicateIdentityLink
         locale={locale}

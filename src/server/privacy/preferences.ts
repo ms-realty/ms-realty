@@ -103,6 +103,8 @@ export async function saveContactPreferences(db: Executor, session: Session, inp
       timezone,
       channel: z.enum(["email", "phone"]),
       contactWindow: z.string().trim().max(160),
+      /** E-mails about changes in the client's own Deals (ADR 0014); on unless switched off. */
+      dealNotices: z.boolean().default(true),
     }),
     input,
   );
@@ -131,6 +133,7 @@ export async function saveContactPreferences(db: Executor, session: Session, inp
             timezone: value.timezone,
             channel: value.channel,
             contactWindow: value.contactWindow,
+            dealNotices: value.dealNotices,
           },
           version: party.version + 1,
           updatedAt: new Date(),
@@ -143,6 +146,20 @@ export async function saveContactPreferences(db: Executor, session: Session, inp
         recordId: party.id,
         operationId,
       });
+      const before =
+        (party.contactPreferences as { dealNotices?: unknown } | null)?.dealNotices !== false;
+      // The deal-notice choice is recorded as its own event when it changes.
+      if (before !== value.dealNotices)
+        await recordAudit(tx, {
+          actor: session.actor,
+          action: value.dealNotices
+            ? "preferences.deal_notices.on"
+            : "preferences.deal_notices.off",
+          recordType: "party",
+          recordId: party.id,
+          operationId,
+          payload: { dealNotices: value.dealNotices },
+        });
       return { partyId: party.id };
     },
   );

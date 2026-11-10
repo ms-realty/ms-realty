@@ -119,9 +119,7 @@ describe("Deal path (ADR 0013)", () => {
     expect(client?.recorded).toBe(true);
     expect(client?.steps.map((s) => [s.key, s.status])).toEqual([
       ["request_received", "done"],
-      ["needs_agreed", "not_recorded"],
       ["homes_shortlisted", "done"],
-      ["viewings", "not_recorded"],
       ["terms_agreed", "done"],
       ["brokerage_agreement", "current"],
       ["identity_checks", "next"],
@@ -134,6 +132,12 @@ describe("Deal path (ADR 0013)", () => {
     ]);
     expect(client?.canRecord).toBe(false);
     expect(client?.evidenceOptions).toEqual([]);
+    // Staff keep the early steps that were passed without a record, as a neutral fact.
+    const passed = await casePath(t.db, f.staff.session, f.record.id);
+    expect(passed?.steps.filter((s) => s.status === "not_recorded").map((s) => s.key)).toEqual([
+      "needs_agreed",
+      "viewings",
+    ]);
 
     const version = await caseVersion(f.record.id);
     await recordPathStep(

@@ -37,3 +37,16 @@ export function testOutbox(): TestMessageProvider {
   cache.__appTestOutbox ??= new TestMessageProvider();
   return cache.__appTestOutbox;
 }
+
+/**
+ * Asks the worker to send queued deal notices now. Best effort by design: the notices are
+ * already committed on the ledger, and the worker's minute sweep sends them if this hint is lost.
+ */
+export async function kickDealNotices(): Promise<void> {
+  try {
+    const queue = await getJobQueue();
+    await queue.send("deal_notices.dispatch", {}, { singletonKey: "deal-notices" });
+  } catch {
+    /* The outbox sweep is the backstop. */
+  }
+}

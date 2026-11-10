@@ -28,6 +28,7 @@ import { assertCan, assertCanRead } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { notifyDealUpdate } from "../notifications/notify";
 import { runOperation } from "../operations";
 import { heldListingClosed } from "../proposals/shared";
 import { loadPublishedListings, presentationOf } from "../publication/presentation";
@@ -780,6 +781,15 @@ export async function postCaseMessage(
         input.audience === "internal" ? "case.note_recorded" : "case.message_posted",
         capability,
       );
+      // A notice that a message is waiting; the message itself stays in the private area.
+      if (input.audience === "case_participants")
+        await notifyDealUpdate(ctx.tx, {
+          caseId: row.id,
+          event: staff ? "message.from_broker" : "client.message",
+          eventKey: `message:${id}`,
+          subject: { type: "case", id: row.id, reference: row.reference },
+          actor: live.actor,
+        });
       return {
         id: row.id,
         reference: row.reference,

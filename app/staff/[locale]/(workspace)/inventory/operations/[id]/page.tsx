@@ -48,6 +48,7 @@ export default async function InventoryReceiptPage({
           "publication.activate",
           "publication.restrict",
           "publication.withdraw",
+          "listing.publication.attest",
         ]),
       ),
     )

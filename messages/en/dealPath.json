@@ -1,6 +1,6 @@
 {
   "title": "Your deal path",
-  "lead": "Every step in order, from the first request to the keys. Your broker records each step when it happens.",
+  "lead": "From your first request to the keys. Your broker records each step when it happens.",
   "preview": "The later steps are the usual ones for this kind of deal. Your broker confirms them once the terms are agreed.",
   "whoActs": "Who acts",
   "expectedBy": "Expected by",
@@ -11,8 +11,7 @@
     "current": "You are here",
     "next": "Next",
     "upcoming": "Later",
-    "skipped": "Not needed",
-    "not_recorded": "No record here"
+    "skipped": "Not needed"
   },
   "actors": {
     "you": "You",
@@ -104,5 +103,53 @@
     "reference": "Registry or deed reference",
     "boundary": "This page shows what the people involved did and when. It is not a legal certificate.",
     "outcome": "Completed through the deal path"
+  },
+  "progress": "{count} of {total} steps done",
+  "doneGroup": "{count, plural, one {# step done} other {# steps done}}",
+  "position": "Step {n} of {total}",
+  "toCome": "Still to come",
+  "you": {
+    "common": {
+      "request_received": "The agency receives your request and names a broker to look after it.",
+      "identity_checks": "The agency checks your identity documents and those of everyone else taking part."
+    },
+    "buyer": {
+      "needs_agreed": "Your broker writes down what you are looking for and you confirm it.",
+      "homes_shortlisted": "You pick the homes worth a closer look from your broker's suggestions.",
+      "viewings": "Your broker arranges visits to the homes you chose and goes with you.",
+      "terms_agreed": "You and the seller accept the same price and conditions on the proposal.",
+      "deposit_preliminary_contract": "You and the seller sign a preliminary contract and you pay the agreed deposit.",
+      "funds_ready": "You arrange the money for the purchase, from savings or a bank loan.",
+      "notary_deed": "A notary prepares the deed and reads it with you and the seller before you sign.",
+      "registration": "The signed deed is entered in the property register in your name.",
+      "tax_number": "You get a Greek tax number (AFM), which the purchase documents refer to.",
+      "lawyer_property_checks": "Your lawyer looks into who owns the property and whether any debts are attached to it.",
+      "contract_signed": "You and the seller sign the contract on the agreed terms.",
+      "keys_handed_over": "The owner hands you the keys on the agreed day."
+    },
+    "tenant": {
+      "needs_agreed": "Your broker writes down what you are looking for and you confirm it.",
+      "homes_shortlisted": "You pick the homes worth a closer look from your broker's suggestions.",
+      "viewings": "Your broker arranges visits to the homes you chose and goes with you.",
+      "terms_agreed": "You and the landlord accept the same rent and conditions on the proposal.",
+      "lease_signed": "You and the landlord sign the lease on the agreed terms.",
+      "deposit_first_rent": "You pay the deposit and the first rent, and both sides confirm the money arrived.",
+      "contract_signed": "You and the landlord sign the contract on the agreed terms.",
+      "keys_handed_over": "The landlord hands you the keys on the agreed day."
+    },
+    "seller": {
+      "terms_agreed": "You and the buyer accept the same price and conditions on the proposal.",
+      "deposit_preliminary_contract": "You and the buyer sign a preliminary contract and the buyer pays the agreed deposit.",
+      "notary_deed": "A notary prepares the deed and reads it with you and the buyer before you sign.",
+      "contract_signed": "You and the buyer sign the contract on the agreed terms.",
+      "keys_handed_over": "You hand the keys to the buyer on the agreed day."
+    },
+    "landlord": {
+      "terms_agreed": "You and the tenant accept the same rent and conditions on the proposal.",
+      "lease_signed": "You and the tenant sign the lease on the agreed terms.",
+      "deposit_first_rent": "The tenant pays the deposit and the first rent, and you both confirm the money arrived.",
+      "contract_signed": "You and the tenant sign the contract on the agreed terms.",
+      "keys_handed_over": "You hand the keys to the tenant on the agreed day."
+    }
   }
 }

@@ -111,6 +111,48 @@ export const legacyCurrency = {
 
 export const availabilityReviewIntervalDays = { sale: 14, long_term_rent: 7 } as const;
 
+// Publication policy (ADR 0012). How a listing earns its place on the public site: one recorded
+// human decision ("staff_attestation") or the strict evidence path ("reviewed_documents": an
+// uploaded, scanned and reviewed seller authority and brokerage agreement). A person publishes
+// under either; a non-source translation still needs its own human approval.
+
+export interface PublicationPolicy {
+  /** What counts as the seller's permission to advertise. */
+  readonly sellerEvidence: "staff_attestation" | "reviewed_documents";
+  /** The person who wrote the listing may not be the one who publishes it. */
+  readonly independentReview: boolean;
+  /** Publishing waits until every placed photo is processed and cleared. */
+  readonly photosRequired: boolean;
+  /**
+   * How recent the publisher's sign-in must be to publish or unpublish: an active staff session,
+   * or a sign-in within the staff step-up window (5 minutes). Other sensitive actions keep their
+   * own step-up rule.
+   */
+  readonly signIn: "active_session" | "recent";
+  /**
+   * An attestation keeps counting after its author leaves the agency (it was valid when it was
+   * recorded by active staff). When false, it lapses with the author's membership (fail closed).
+   */
+  readonly attestationOutlivesAuthor: boolean;
+}
+
+/** The strict policy another brand may adopt; kept tested alongside the agency's own. */
+export const strictPublicationPolicy: PublicationPolicy = {
+  sellerEvidence: "reviewed_documents",
+  independentReview: true,
+  photosRequired: true,
+  signIn: "recent",
+  attestationOutlivesAuthor: false,
+};
+
+export const publicationPolicy: PublicationPolicy = {
+  sellerEvidence: "staff_attestation",
+  independentReview: false,
+  photosRequired: false,
+  signIn: "active_session",
+  attestationOutlivesAuthor: true,
+};
+
 // Deal path (ADR 0013). The steps a person records after terms are agreed, from the first
 // check to keys in hand, per jurisdiction and transaction. Labels and explanations live in the
 // `dealPath` message catalogs under the same keys; this profile holds no wording. A Deal keeps
@@ -306,3 +348,50 @@ export const agency = {
 
 /** How the assistant introduces itself to providers and OAuth consent screens. */
 export const assistantLabel = `${agency.name} ${agency.assistantName}`;
+
+// Service notifications (ADR 0014). Automatic e-mail notices about a person's own Deal, sent from
+// pre-approved templates without a person pressing send. Not marketing; the client area stays
+// the source of truth. `enabled: false` switches the whole family off for the brand; each event
+// can also be switched off on its own. Delivery still needs a configured email provider.
+
+export const serviceNotificationEvents = [
+  // To the client.
+  "viewing.proposed",
+  "viewing.confirmed",
+  "viewing.moved",
+  "viewing.cancelled",
+  "proposal.ready",
+  "proposal.withdrawn",
+  "proposal.expired",
+  "document.requested",
+  "message.from_broker",
+  "deal.step_done",
+  "deal.completed",
+  // To the accountable broker.
+  "client.viewing_confirmed",
+  "client.viewing_cancelled",
+  "client.viewing_new_time",
+  "client.proposal_accepted",
+  "client.proposal_declined",
+  "client.proposal_countered",
+  "client.document_uploaded",
+  "client.message",
+  // To a website visitor who left an e-mail address with an inquiry.
+  "inquiry.acknowledged",
+] as const;
+export type ServiceNotificationEvent = (typeof serviceNotificationEvents)[number];
+
+export const serviceNotifications: {
+  readonly enabled: boolean;
+  readonly events: Readonly<Record<ServiceNotificationEvent, boolean>>;
+} = {
+  enabled: true,
+  events: Object.fromEntries(serviceNotificationEvents.map((event) => [event, true])) as Record<
+    ServiceNotificationEvent,
+    boolean
+  >,
+};
+
+export function serviceNotificationEnabled(event: ServiceNotificationEvent): boolean {
+  return serviceNotifications.enabled && serviceNotifications.events[event] === true;
+}

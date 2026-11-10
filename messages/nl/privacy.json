@@ -31,6 +31,8 @@
     "timezone": "Tijdzone",
     "channel": "Gewenst servicekanaal",
     "window": "Gewenste contacttijden",
+    "dealNotices": "Mij mailen als er iets verandert in mijn vastgoedzaken",
+    "dealNoticesHint": "Bezichtigingstijden, voorstellen, documentverzoeken en berichten. Vink dit uit om deze e-mails te stoppen; in uw persoonlijke omgeving blijft alles zichtbaar.",
     "save": "Servicevoorkeuren opslaan",
     "email": "E-mailadres",
     "phone": "Telefoon",
