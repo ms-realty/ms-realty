@@ -656,25 +656,65 @@ async function confirmImportedFacts(
         unit: f.unit ?? null,
         basis: f.basis ?? null,
       }));
+      // A sibling listing of the same property (sale and rental, or two adverts) may already
+      // have had these exact values reviewed: bind that approved revision instead of creating a
+      // competing one, which would have to take the sibling's publication down.
+      const key = (f: (typeof comparable)[number]) => canonicalJson(f);
+      const wanted = new Set(comparable.map(key));
+      const approvedRows =
+        factsChange && property.approvedFactRevisionId
+          ? await tx
+              .select()
+              .from(propertyFacts)
+              .where(eq(propertyFacts.factRevisionId, property.approvedFactRevisionId))
+          : [];
+      const shared =
+        approvedRows.length === wanted.size &&
+        approvedRows.every(
+          (f) =>
+            f.reviewedAt !== null ||
+            !needsHumanReview({
+              fieldKey: f.fieldKey,
+              state: f.state,
+              sourceClass: f.sourceClass,
+              reviewedAt: null,
+            }),
+        ) &&
+        approvedRows.every((f) =>
+          wanted.has(
+            key({
+              fieldKey: f.fieldKey,
+              state: f.state,
+              value: f.value ?? null,
+              unit: f.unit ?? null,
+              basis: f.basis ?? null,
+            }),
+          ),
+        )
+          ? property.approvedFactRevisionId
+          : null;
+      const newFacts = factsChange && !shared;
       const [factRevision] = !factsChange
         ? [{ id: revision.factRevisionId }]
-        : await tx
-            .insert(propertyFactRevisions)
-            .values({
-              propertyId: property.id,
-              revisionNumber: (latestFacts?.revisionNumber ?? 0) + 1,
-              basedOnRevisionId: revision.factRevisionId,
-              contentDigest: sha256Hex(
-                canonicalJson({ facts: comparable, reviewedBy: attestationId }),
-              ),
-              materialChange: absent.length ? "non_material" : "none",
-              note: scope,
-              createdByKind: actor.kind,
-              createdById: actor.id,
-            })
-            .returning();
+        : shared
+          ? [{ id: shared }]
+          : await tx
+              .insert(propertyFactRevisions)
+              .values({
+                propertyId: property.id,
+                revisionNumber: (latestFacts?.revisionNumber ?? 0) + 1,
+                basedOnRevisionId: revision.factRevisionId,
+                contentDigest: sha256Hex(
+                  canonicalJson({ facts: comparable, reviewedBy: attestationId }),
+                ),
+                materialChange: absent.length ? "non_material" : "none",
+                note: scope,
+                createdByKind: actor.kind,
+                createdById: actor.id,
+              })
+              .returning();
       if (!factRevision) throw new Error("Fact revision insert failed");
-      if (factsChange)
+      if (newFacts)
         await tx
           .insert(propertyFacts)
           .values(rows.map((f) => ({ ...f, factRevisionId: factRevision.id })));

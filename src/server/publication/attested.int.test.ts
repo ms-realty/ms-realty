@@ -467,4 +467,42 @@ describe("one-decision publishing (ADR 0012)", () => {
       .where(eq(listingRevisions.id, shown?.listingRevisionId ?? ""));
     expect(revision?.disclosure).toMatchObject({ publicPrecision: "region" });
   });
+
+  it("publishes a second listing of the same property on the facts already reviewed", async () => {
+    // As the import leaves two active adverts of one property: both bind its fact revision 1.
+    const first = await imported();
+    const [source] = await t.db
+      .select()
+      .from(listingRevisions)
+      .where(eq(listingRevisions.id, first.revisionId));
+    if (!source) throw new Error("revision missing");
+    const reference = `MS-${String(Date.now()).slice(-9)}`;
+    const [sibling] = await t.db
+      .insert(listings)
+      .values({
+        reference,
+        propertyId: first.propertyId,
+        purpose: "sale",
+        commercialState: "confirmation_required",
+        editorialState: "needs_facts",
+        latestRevisionNumber: 1,
+      })
+      .returning();
+    if (!sibling) throw new Error("sibling missing");
+    await t.db.insert(listingRevisions).values({
+      listingId: sibling.id,
+      revisionNumber: 1,
+      factRevisionId: source.factRevisionId,
+      terms: source.terms,
+      sourceCopy: source.sourceCopy,
+      disclosure: source.disclosure,
+      contentDigest: `${source.contentDigest}-sibling`,
+      createdByKind: "staff",
+      createdById: author.id,
+    });
+    expect((await publish(first.reference)).status).toBe("published");
+    expect(await publish(reference)).toMatchObject({ status: "published" });
+    expect(await searchFor(first.reference)).toEqual([first.reference]);
+    expect(await searchFor(reference)).toEqual([reference]);
+  });
 });
